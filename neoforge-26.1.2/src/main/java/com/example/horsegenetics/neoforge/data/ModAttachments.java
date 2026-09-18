@@ -75,6 +75,23 @@ public final class ModAttachments {
                     .serialize(ReproCodecs.MAP_CODEC)
                     .build());
 
+    // How far this horse has hauled a cart, in metres, for its whole life.
+    // SYNCED, because the horse information screen shows it and the screen is
+    // client-side; serialized, because a working life that resets on a chunk
+    // unload is not a working life. Upstream's carts kept this as a *player*
+    // statistic - cm pulled, on the F3 stats screen. It is kept there too, but
+    // the number that matters to this mod belongs to the animal: a horse is
+    // bought, sold, bred from and inherited, and "how far has this one worked"
+    // is a fact about the horse, not about whoever happens to be holding it.
+    // See HorseDraft.addHauled.
+    public static final Supplier<AttachmentType<Double>> CART_METRES =
+            ATTACHMENT_TYPES.register("cart_metres", () -> AttachmentType
+                    .<Double>builder(() -> 0.0D)
+                    .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("cart_metres"))
+                    .sync(net.minecraft.network.codec.ByteBufCodecs.DOUBLE)
+                    .copyOnDeath()
+                    .build());
+
     // Whether this mare is pregnant, and nothing else. SYNCED, so the client can
     // refuse a breeding food with the server instead of predicting a feed it then
     // takes back (known gap 226). HORSE_REPRO stays the truth; ReproHandler.set

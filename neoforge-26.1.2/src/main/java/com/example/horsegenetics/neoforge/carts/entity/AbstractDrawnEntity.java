@@ -1,0 +1,799 @@
+/*
+ * Derived from UsefulCarts (https://github.com/Andrewwwwwwwwwwwwwww/usefulcarts-mc26.1.2),
+ * itself a port of NiftyCarts by jmb19905, originally AstikorCarts by MennoMax.
+ * Copyright (c) 2019 MennoMax
+ * Copyright (c) 2023 jmb19905
+ * Licensed under the MIT License. See LICENSES/UsefulCarts-MIT.txt.
+ * Modified for Horse Genetics (NeoForge 26.1.2).
+ */
+package com.example.horsegenetics.neoforge.carts.entity;
+
+import net.neoforged.neoforge.network.PacketDistributor;
+import com.example.horsegenetics.common.cart.CartDraft;
+import com.example.horsegenetics.common.cart.CartKind;
+import com.example.horsegenetics.neoforge.carts.HorseCarts;
+import com.example.horsegenetics.neoforge.carts.CartWood;
+import com.example.horsegenetics.neoforge.carts.CartsConfig;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseDraft;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
+import com.example.horsegenetics.neoforge.carts.network.clientbound.UpdateDrawnPayload;
+import com.example.horsegenetics.neoforge.carts.util.CartWorld;
+import com.example.horsegenetics.neoforge.carts.util.CartWheel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+
+public abstract class AbstractDrawnEntity extends Entity {
+    private static final EntityDataAccessor<@NotNull Integer> TIME_SINCE_HIT = SynchedEntityData.defineId(AbstractDrawnEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<@NotNull Integer> FORWARD_DIRECTION = SynchedEntityData.defineId(AbstractDrawnEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<@NotNull Float> DAMAGE_TAKEN = SynchedEntityData.defineId(AbstractDrawnEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<@NotNull ItemStack> BANNER = SynchedEntityData.defineId(AbstractDrawnEntity.class, EntityDataSerializers.ITEM_STACK);
+    private static final EntityDataAccessor<@NotNull String> WOOD_TYPE = SynchedEntityData.defineId(AbstractDrawnEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<@NotNull Boolean> LOCKED = SynchedEntityData.defineId(AbstractDrawnEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final Identifier PULL_MODIFIER_ID = HorseCarts.resLoc("pull");
+    private final CartInterpolationHandler interpolation = new CartInterpolationHandler(this);
+    protected List<CartWheel> wheels;
+    private int pullingId = -1;
+    private UUID pullingUUID = null;
+    public Entity pulling;
+    protected AbstractDrawnEntity drawn;
+
+    public AbstractDrawnEntity(final EntityType<? extends @NotNull Entity> entityTypeIn, final Level worldIn) {
+        super(entityTypeIn, worldIn);
+        this.blocksBuilding = true;
+        this.initWheels();
+    }
+
+    protected double getSpacing() {
+        return 1.7;
+    }
+
+    public boolean shouldPitch() {
+        return true;
+    }
+
+    public float getDisconnectedAngle() {
+        return 25f;
+    }
+
+    public boolean isLocked() {
+        return this.entityData.get(LOCKED);
+    }
+
+    @Override
+    public float maxUpStep() {
+        return 1.2f;
+    }
+
+    @Override
+    public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand, @NotNull Vec3 vec) {
+        if (isLocked()) return InteractionResult.FAIL;
+        return super.interact(player, hand, vec);
+    }
+
+    @Override
+    public void tick() {
+        if (this.getTimeSinceHit() > 0) {
+            this.setTimeSinceHit(this.getTimeSinceHit() - 1);
+        }
+        if (!this.isNoGravity()) {
+            this.setDeltaMovement(0.0D, this.getDeltaMovement().y - 0.08D, 0.0D);
+        }
+        if (this.getDamageTaken() > 0.0F) {
+            this.setDamageTaken(this.getDamageTaken() - 1.0F);
+        }
+        super.tick();
+        this.interpolation.interpolate();
+        if (this.pulling == null) {
+            if (shouldPitch()) this.setXRot(getDisconnectedAngle());
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.attemptReattach();
+        }
+        for (final Entity entity : this.level().getEntities(this, this.getBoundingBox(), EntitySelector.pushableBy(this))) {
+            this.push(entity);
+        }
+    }
+
+    /**
+     * This method is called for every cart that is being pulled by another entity
+     * after all other
+     * entities have been ticked to ensure that the cart always behaves the same
+     * when being pulled. (unless this cart is being pulled by another cart)
+     */
+    public void pulledTick() {
+        if (this.pulling == null) {
+            return;
+        }
+        if (!canPull(this.pulling)) {
+            setPulling(null);
+            return;
+        }
+        Vec3 targetVec = this.getRelativeTargetVec(1.0F);
+        this.handleRotation(targetVec);
+        while (this.getYRot() - this.yRotO < -180.0F) {
+            this.yRotO -= 360.0F;
+        }
+        while (this.getYRot() - this.yRotO >= 180.0F) {
+            this.yRotO += 360.0F;
+        }
+        if (this.pulling.onGround()) {
+            targetVec = new Vec3(targetVec.x, 0.0D, targetVec.z);
+        }
+        final double targetVecLength = targetVec.length();
+        final double r = 0.2D;
+        final double relativeSpacing = Math.max(this.getSpacing() + 0.5D * this.pulling.getBbWidth(), 1.0D);
+        final double diff = targetVecLength - relativeSpacing;
+        final Vec3 move;
+        if (Math.abs(diff) < r) {
+            move = this.getDeltaMovement();
+        } else {
+            move = this.getDeltaMovement().add(targetVec.subtract(targetVec.normalize().scale(relativeSpacing + r * Math.signum(diff))));
+        }
+        this.setOnGround(true);
+        final double startX = this.getX();
+        final double startY = this.getY();
+        final double startZ = this.getZ();
+        this.move(MoverType.SELF, move);
+        if (!this.isAlive()) {
+            return;
+        }
+        this.addStats(this.getX() - startX, this.getY() - startY, this.getZ() - startZ);
+        if (this.level().isClientSide()) {
+            for (final CartWheel wheel : this.wheels) {
+                wheel.tick();
+            }
+        } else {
+            targetVec = this.getRelativeTargetVec(1.0F);
+            if (targetVec.length() > relativeSpacing + 1.0D) {
+                this.setPulling(null);
+            }
+        }
+        this.updatePassengers();
+        if (this.drawn != null) {
+            this.drawn.pulledTick();
+        }
+    }
+
+    protected Optional<Player> getControllingPlayer() {
+        if (this.getPulling() instanceof Player pl) {
+            return Optional.of(pl);
+        } else if (this.getPulling() != null && this.getPulling().getControllingPassenger() instanceof Player pl) {
+            return Optional.of(pl);
+        }
+        return Optional.empty();
+    }
+
+    private void addStats(final double x, final double y, final double z) {
+        if (!this.level().isClientSide()) {
+            final int cm = Math.round(Mth.sqrt((float) (x * x + y * y + z * z)) * 100.0F);
+            if (cm > 0) {
+                Entity pulling = getPulling();
+                // The horse's own tally, not the player's. A horse is bought and
+                // sold and inherited; how far it has hauled belongs to it, and
+                // it is the number the info screen shows.
+                HorseDraft.addHauled(pulling, cm / 100.0D);
+                if (pulling.getControllingPassenger() instanceof PostilionEntity
+                        && this.getControllingPassenger() instanceof ServerPlayer player) {
+                    if (this instanceof AnimalCartEntity) {
+                        player.awardStat(HorseCarts.STEER_ANIMAL_CART_CM, cm);
+                    } else if (this instanceof ReaperCartEntity) {
+                        player.awardStat(HorseCarts.STEER_REAPER_CM, cm);
+                    }
+                }
+                Optional<Player> playerOptional = getControllingPlayer();
+                playerOptional.ifPresent(player -> {
+                    var stat = HorseCarts.CART_PULL_CM.get(this.getType());
+                    player.awardStat(stat, cm);
+                    // "Build one and drive it" - this method only runs when the
+                    // cart has actually moved, so reaching here IS driving it.
+                    HorseProgress.complete(player, this.getCartKind().driveTask());
+                });
+                for (final Entity passenger : this.getPassengers()) {
+                    if (passenger instanceof Player player) {
+                        player.awardStat(HorseCarts.RIDE_CART_CM, cm);
+                    }
+                }
+            }
+        }
+    }
+
+    public void initWheels() {
+        this.wheels = Arrays.asList(new CartWheel(this, 0.9F), new CartWheel(this, -0.9F));
+    }
+
+    /**
+     * @return Whether the currently pulling entity should stop pulling this cart.
+     */
+    public boolean shouldRemovePulling() {
+        if (this.horizontalCollision) {
+            final Vec3 start = new Vec3(this.getX(), this.getY() + this.getBbHeight(), this.getZ());
+            final Vec3 end = new Vec3(this.pulling.getX(), this.pulling.getY() + this.pulling.getBbHeight() / 2, this.pulling.getZ());
+            final BlockHitResult result = this.level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+            return result.getType() == HitResult.Type.BLOCK;
+        }
+        return false;
+    }
+
+    public void updatePassengers() {
+        for (final Entity passenger : this.getPassengers()) {
+            this.positionRider(passenger);
+        }
+    }
+
+    public Entity getPulling() {
+        return this.pulling;
+    }
+
+    /**
+     * Attaches the cart to an entity so that the cart follows it.
+     *
+     * @param entityIn new pulling entity
+     */
+    public void setPulling(final Entity entityIn) {
+        if (!this.level().isClientSide()) {
+            if (this.canBePulledBy(entityIn)) {
+                if (entityIn == null) {
+                    if (this.pulling instanceof LivingEntity) {
+                        final AttributeInstance attr = ((LivingEntity) this.pulling).getAttribute(Attributes.MOVEMENT_SPEED);
+                        if (attr != null) {
+                            attr.removeModifier(PULL_MODIFIER_ID);
+                        }
+                    } else if (this.pulling instanceof AbstractDrawnEntity) {
+                        ((AbstractDrawnEntity) this.pulling).drawn = null;
+                    }
+                    PacketDistributor.sendToPlayersTrackingEntity(this, new UpdateDrawnPayload(-1, this.getId()));
+                    this.pullingUUID = null;
+                    if (this.tickCount > 20) {
+                        this.playDetachSound();
+                    }
+                } else {
+                    if (entityIn instanceof LivingEntity living) {
+                        applyDraught(living);
+                    }
+                    getControllingPlayer().ifPresent(player ->
+                            HorseProgress.complete(player, ProgressTask.HITCH_CART));
+                    if (entityIn instanceof PathfinderMob pathfinder) {
+                        pathfinder.getNavigation().stop();
+                    }
+                    PacketDistributor.sendToPlayersTrackingEntity(this, new UpdateDrawnPayload(entityIn.getId(), this.getId()));
+                    this.pullingUUID = entityIn.getUUID();
+                    if (this.tickCount > 20) {
+                        this.playAttachSound();
+                    }
+                }
+                if (entityIn instanceof AbstractDrawnEntity) {
+                    ((AbstractDrawnEntity) entityIn).drawn = this;
+                }
+                this.pulling = entityIn;
+                CartWorld.get(this.level()).addPulling(this);
+
+            }
+        } else {
+            if (entityIn == null) {
+                this.pullingId = -1;
+                for (final CartWheel wheel : this.wheels) {
+                    wheel.clearIncrement();
+                }
+                if (this.pulling instanceof AbstractDrawnEntity) {
+                    ((AbstractDrawnEntity) this.pulling).drawn = null;
+                }
+            } else {
+                this.pullingId = entityIn.getId();
+                if (entityIn instanceof AbstractDrawnEntity) {
+                    ((AbstractDrawnEntity) entityIn).drawn = this;
+                }
+            }
+            this.pulling = entityIn;
+            CartWorld.get(this.level()).addPulling(this);
+        }
+    }
+
+    private void playAttachSound() {
+        this.playSound(HorseCarts.ATTACH_SOUND, 0.2F, 1.0F);
+    }
+
+    private void playDetachSound() {
+        this.playSound(HorseCarts.DETACH_SOUND, 0.2F, 1.0F);
+    }
+
+    /**
+     * Attempts to reattach the cart to the last pulling entity.
+     */
+    private void attemptReattach() {
+        if (this.level().isClientSide()) {
+            if (this.pullingId != -1) {
+                final Entity entity = this.level().getEntity(this.pullingId);
+                if (entity != null && entity.isAlive()) {
+                    this.setPulling(entity);
+                }
+            }
+        } else {
+            if (this.pullingUUID != null) {
+                final Entity entity = this.level().getEntity(this.pullingUUID);
+                if (entity != null && entity.isAlive()) {
+                    this.setPulling(entity);
+                }
+            }
+        }
+    }
+
+    public boolean shouldStopPulledTick() {
+        if (!this.isAlive() || this.getPulling() == null || !this.getPulling().isAlive() || this.getPulling().isPassenger()) {
+            if (this.pulling != null && this.pulling instanceof Player) {
+                this.setPulling(null);
+            } else {
+                this.pulling = null;
+            }
+            return true;
+        } else if (!this.level().isClientSide() && this.shouldRemovePulling()) {
+            this.setPulling(null);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return The position this cart should always face and travel towards.
+     * Relative to the cart position.
+     */
+    public Vec3 getRelativeTargetVec(final float delta) {
+        final double x;
+        final double y;
+        final double z;
+        if (delta == 1.0F) {
+            x = this.pulling.getX() - this.getX();
+            y = this.pulling.getY() - this.getY();
+            z = this.pulling.getZ() - this.getZ();
+        } else {
+            x = Mth.lerp(delta, this.pulling.xOld, this.pulling.getX()) - Mth.lerp(delta, this.xOld, this.getX());
+            y = Mth.lerp(delta, this.pulling.yOld, this.pulling.getY()) - Mth.lerp(delta, this.yOld, this.getY());
+            z = Mth.lerp(delta, this.pulling.zOld, this.pulling.getZ()) - Mth.lerp(delta, this.zOld, this.getZ());
+        }
+        final float yaw = (float) Math.toRadians(this.pulling.getYRot());
+        final float nx = -Mth.sin(yaw);
+        final float nz = Mth.cos(yaw);
+        final double r = 0.2D;
+        return new Vec3(x + nx * r, y, z + nz * r);
+    }
+
+    /**
+     * Handles the rotation of this cart and its components.
+     *
+     */
+    public void handleRotation(final Vec3 target) {
+        this.setYRot(getYaw(target));
+        if (shouldPitch()) this.setXRot(getPitch(target));
+    }
+
+    public static float getYaw(final Vec3 vec) {
+        return Mth.wrapDegrees((float) Math.toDegrees(-Mth.atan2(vec.x, vec.z)));
+    }
+
+    public static float getPitch(final Vec3 vec) {
+        return Mth.wrapDegrees((float) Math.toDegrees(-Mth.atan2(vec.y, Mth.sqrt((float) (vec.x * vec.x + vec.z * vec.z)))));
+    }
+
+    public double getWheelRotation(final int wheel) {
+        return this.wheels.get(wheel).getRotation();
+    }
+
+    public double getWheelRotationIncrement(final int wheel) {
+        return this.wheels.get(wheel).getRotationIncrement();
+    }
+
+    public abstract Item getCartItem();
+
+    /**
+     * Returns true if the passed in entity is allowed to pull this cart.
+     *
+     */
+    protected boolean canBePulledBy(final Entity entityIn) {
+        if (this.isLocked()) return false;
+        if (this.level().isClientSide()) {
+            return true;
+        }
+        if (entityIn == null) {
+            return true;
+        }
+        return (this.pulling == null || !this.pulling.isAlive()) && !this.hasPassenger(entityIn) && this.canPull(entityIn);
+    }
+
+    private boolean canPull(final Entity entity) {
+        final ArrayList<String> allowed = this.getConfig().pullEntities.get();
+        if (allowed.isEmpty()) {
+            if (entity instanceof Player player) return !player.isSpectator();
+            else return entity instanceof PlayerRideable && !(entity instanceof ItemSteerable);
+        } else return allowed.contains(EntityType.getKey(entity.getType()).toString());
+    }
+
+    public abstract CartsConfig.CartConfig getConfig();
+
+    /** Which vehicle this is, for {@link CartDraft}. */
+    public CartKind getCartKind() {
+        final CartKind kind = HorseCarts.kindOf(this.getType());
+        return kind == null ? CartKind.SUPPLY_CART : kind;
+    }
+
+    /**
+     * <b>Hitch this animal and slow it down by what its genetics say.</b>
+     *
+     * <p>Upstream put one flat number here, out of the config, the same for
+     * every animal alive. The whole point of the port is that this number is a
+     * horse's own: {@link CartDraft} turns its pulling ability and its speed
+     * into the fraction of itself it keeps while hauling this particular load.
+     *
+     * <p>The modifier is transient and multiplicative, so it stacks correctly
+     * with everything else on the attribute and vanishes if the entity is
+     * reloaded while hitched - {@code attemptReattach} puts it back. It is read
+     * off {@link AttributeInstance#getBaseValue()} rather than the current
+     * value, because the current value already has this modifier in it and
+     * feeding that back in would compound every time the cart re-attached.
+     *
+     * <p>An animal that is not one of this mod's horses gets the baseline
+     * pulling score. A donkey is not weaker than a horse for want of a genome.
+     */
+    protected void applyDraught(final LivingEntity puller) {
+        final AttributeInstance attr = puller.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (attr == null) {
+            return;
+        }
+        attr.removeModifier(PULL_MODIFIER_ID);
+        final double pull = HorseDraft.pullOf(puller);
+        final double modifier = CartDraft.speedModifier(pull, attr.getBaseValue(), this.getCartKind().load());
+        if (modifier < 0.0) {
+            attr.addTransientModifier(new AttributeModifier(
+                    PULL_MODIFIER_ID,
+                    modifier,
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+            ));
+        }
+    }
+
+    @Override
+    public boolean hurtServer(@NotNull ServerLevel serverLevel, final @NotNull DamageSource source, final float amount) {
+        if (isLocked()) return false;
+        if (this.isInvulnerableToBase(source)) {
+            return false;
+        } else if (!this.level().isClientSide() && this.isAlive()) {
+            if (source.is(DamageTypes.CACTUS)) {
+                return false;
+            }
+            if (source.getEntity() != null && this.hasPassenger(source.getEntity())) {
+                return false;
+            }
+            this.setForwardDirection(-this.getForwardDirection());
+            this.setTimeSinceHit(10);
+            this.setDamageTaken(this.getDamageTaken() + amount * 10.0F);
+            final boolean flag = source.getEntity() instanceof Player player && player.getAbilities().instabuild;
+            final boolean adventureFlag = source.getEntity() instanceof Player player && player.gameMode() == GameType.ADVENTURE && !this.getConfig().adventureModeInteract.get();
+            if (adventureFlag) return false;
+            if (flag || this.getDamageTaken() > 40.0F) {
+                this.onDestroyed(source, flag);
+                this.setPulling(null);
+                this.discard();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    protected InteractionResult useBanner(final Player player, final InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (stack.is(ItemTags.BANNERS)) {
+            ItemStack oldBanner = this.getBanner();
+            if (!this.level().isClientSide()) {
+                ItemStack banner = stack.split(1);
+                if (!oldBanner.isEmpty()) {
+                    if (stack.isEmpty()) {
+                        player.setItemInHand(hand, oldBanner);
+                    } else if (!player.getInventory().add(oldBanner)) {
+                        player.drop(oldBanner, false);
+                    }
+                }
+                this.playSound(SoundEvents.WOOD_PLACE, 1.0F, 0.8F);
+                this.setBanner(banner);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.PASS;
+    }
+
+    /**
+     * Called when the cart has been destroyed by a creative player or the carts
+     * health hit 0.
+     *
+     */
+    public void onDestroyed(final DamageSource source, final boolean byCreativePlayer) {
+        if (!(this.level() instanceof ServerLevel serverLevel)) return;
+        if (serverLevel.getGameRules().get(GameRules.ENTITY_DROPS)) {
+            if (!byCreativePlayer) {
+                this.spawnAtLocation(serverLevel, this.getCartItem());
+                this.spawnAtLocation(serverLevel, this.getBanner());
+            }
+            this.onDestroyedAndDoDrops(source);
+        }
+    }
+
+    /**
+     * This method is called from {@link #onDestroyed(DamageSource, boolean)} if the
+     * GameRules allow entities to drop items.
+     *
+     */
+    public void onDestroyedAndDoDrops(final DamageSource source) {
+    }
+
+    @Override
+    public boolean isPushedByFluid() {
+        return false;
+    }
+
+    @Override
+    public boolean canBeCollidedWith(Entity entity) {
+        return this.isAlive();
+    }
+
+    @Override
+    public @Nullable InterpolationHandler getInterpolation() {
+        return interpolation;
+    }
+
+    @Override
+    @Nullable
+    public LivingEntity getControllingPassenger() {
+        final List<Entity> passengers = this.getPassengers();
+        if (passengers.isEmpty()) {
+            return null;
+        }
+        final Entity first = passengers.getFirst();
+        // Only a player may steer a cart. Returning any other living entity (villager, monster,
+        // iron golem, ...) as the controlling passenger makes vanilla try to drive the vehicle
+        // through that mob, which crashes the game when the cart is pulled/ticked.
+        if (!(first instanceof Player player)) {
+            return null;
+        }
+        return player;
+    }
+
+    @Override
+    protected boolean isLocalClientAuthoritative() {
+        return false;
+    }
+
+    @Override
+    public @NotNull Vec3 getDismountLocationForPassenger(final LivingEntity rider) {
+        for (final float angle : rider.getMainArm() == HumanoidArm.RIGHT ? new float[] { 90.0F, -90.0F } : new float[] { -90.0F, 90.0F }) {
+            final Vec3 pos = this.dismount(getCollisionHorizontalEscapeVector(this.getBbWidth(), rider.getBbWidth(), this.getYRot() + angle), rider);
+            if (pos != null) return pos;
+        }
+        return this.position();
+    }
+
+    private Vec3 dismount(final Vec3 dir, LivingEntity rider) {
+        final double x = this.getX() + dir.x;
+        final double y = this.getBoundingBox().minY;
+        final double z = this.getZ() + dir.z;
+        final double limit = this.getBoundingBox().maxY + 0.75D;
+        final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+        for (final Pose pose : rider.getDismountPoses()) {
+            blockPos.set(x, y, z);
+            while (blockPos.getY() < limit) {
+                final double ground = this.level().getBlockFloorHeight(blockPos);
+                if (blockPos.getY() + ground > limit) break;
+                if (DismountHelper.isBlockFloorValid(ground)) {
+                    final Vec3 pos = new Vec3(x, blockPos.getY() + ground, z);
+                    if (DismountHelper.canDismountTo(this.level(), rider, rider.getLocalBoundsForPose(pose).move(pos))) {
+                        rider.setPose(pose);
+                        return pos;
+                    }
+                }
+                blockPos.move(Direction.UP);
+            }
+        }
+        return null;
+    }
+
+    public void setDamageTaken(final float damageTaken) {
+        this.entityData.set(DAMAGE_TAKEN, damageTaken);
+    }
+
+    public float getDamageTaken() {
+        return this.entityData.get(DAMAGE_TAKEN);
+    }
+
+    public void setTimeSinceHit(final int timeSinceHit) {
+        this.entityData.set(TIME_SINCE_HIT, timeSinceHit);
+    }
+
+    public int getTimeSinceHit() {
+        return this.entityData.get(TIME_SINCE_HIT);
+    }
+
+    public void setForwardDirection(final int forwardDirection) {
+        this.entityData.set(FORWARD_DIRECTION, forwardDirection);
+    }
+
+    public int getForwardDirection() {
+        return this.entityData.get(FORWARD_DIRECTION);
+    }
+
+    public void setBanner(final ItemStack banner) {
+        this.entityData.set(BANNER, banner);
+    }
+
+    public ItemStack getBanner() {
+        return this.entityData.get(BANNER);
+    }
+
+    public DyeColor getBannerColor() {
+        final ItemStack banner = this.getBanner();
+        if (banner.getItem() instanceof BannerItem bannerItem) {
+            return bannerItem.getColor();
+        }
+        return null;
+    }
+
+    public BannerPatternLayers getBannerPattern() {
+        final ItemStack banner = this.getBanner();
+        if (banner.getItem() instanceof BannerItem) {
+            BannerPatternLayers bannerPatternLayers = banner.get(DataComponents.BANNER_PATTERNS);
+            if (bannerPatternLayers != null) {
+                return bannerPatternLayers;
+            }
+        }
+        return BannerPatternLayers.EMPTY;
+    }
+
+    @Override
+    public ItemStack getPickResult() {
+        return new ItemStack(this.getCartItem());
+    }
+
+    @Override
+    public boolean isPickable() {
+        return true;
+    }
+
+    public void setWoodType(CartWood wood) {
+        this.entityData.set(WOOD_TYPE, wood.id());
+    }
+
+    /**
+     * The wood this cart is built from. Falls back to oak rather than null when
+     * the id names a wood whose mod has since been removed - a cart that turns
+     * into an oak one is recoverable, an NPE on every render tick is not.
+     */
+    public CartWood getWoodType() {
+        final CartWood wood = CartWood.byId(this.entityData.get(WOOD_TYPE));
+        return wood == null ? CartWood.fallback() : wood;
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(TIME_SINCE_HIT, 0);
+        builder.define(FORWARD_DIRECTION, 1);
+        builder.define(DAMAGE_TAKEN, 0.0F);
+        builder.define(BANNER, ItemStack.EMPTY);
+        builder.define(WOOD_TYPE, "oak");
+        builder.define(LOCKED, false);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(ValueInput input) {
+        Optional<UUID> optId = input.read("PullingUUID", UUIDUtil.CODEC);
+        optId.ifPresent(value -> this.pullingUUID = value);
+        Optional<ItemStack> optItem = input.read("BannerItem", ItemStack.OPTIONAL_CODEC);
+        optItem.ifPresent(this::setBanner);
+        final Optional<String> woodTypeString = input.getString("WoodType");
+        final CartWood woodType = woodTypeString.map(CartWood::byId).orElse(null);
+        setWoodType(woodType == null ? CartWood.fallback() : woodType);
+        boolean locked = input.getBooleanOr("Locked", false);
+        this.entityData.set(LOCKED, locked);
+    }
+
+    @Override
+    protected void addAdditionalSaveData(@NotNull ValueOutput output) {
+        if (this.pullingUUID != null) {
+            output.store("PullingUUID", UUIDUtil.CODEC, this.pullingUUID);
+        }
+        final ItemStack banner = this.getBanner();
+        if (!banner.isEmpty()) {
+            output.store("BannerItem", ItemStack.OPTIONAL_CODEC, banner);
+        }
+        output.putString("WoodType", getWoodType().id());
+        output.putBoolean("Locked", isLocked());
+    }
+
+    public RenderInfo getInfo(final float delta) {
+        return new RenderInfo(delta);
+    }
+
+    public class RenderInfo {
+        final float delta;
+        Vec3 target;
+        float yaw = Float.NaN;
+        float pitch = Float.NaN;
+
+        public RenderInfo(final float delta) {
+            this.delta = delta;
+        }
+
+        public Vec3 getTarget() {
+            if (this.target == null) {
+                if (AbstractDrawnEntity.this.pulling == null) {
+                    this.target = AbstractDrawnEntity.this.getViewVector(this.delta);
+                } else {
+                    this.target = AbstractDrawnEntity.this.getRelativeTargetVec(this.delta);
+                }
+            }
+            return this.target;
+        }
+
+        public float getYaw() {
+            if (Float.isNaN(this.yaw)) {
+                if (AbstractDrawnEntity.this.pulling == null) {
+                    this.yaw = Mth.lerp(this.delta, AbstractDrawnEntity.this.yRotO, AbstractDrawnEntity.this.getYRot());
+                } else {
+                    this.yaw = AbstractDrawnEntity.getYaw(this.getTarget());
+                }
+            }
+            return this.yaw;
+        }
+
+        public float getPitch() {
+            if (Float.isNaN(this.pitch)) {
+                if (AbstractDrawnEntity.this.pulling == null) {
+                    if (!shouldPitch()) {
+                        this.pitch = getDisconnectedAngle();
+                    } else {
+                        this.pitch = Mth.lerp(this.delta, AbstractDrawnEntity.this.xRotO, AbstractDrawnEntity.this.getXRot());
+                    }
+                } else {
+                    this.pitch = AbstractDrawnEntity.getPitch(this.getTarget());
+                }
+            }
+            return this.pitch;
+        }
+    }
+}

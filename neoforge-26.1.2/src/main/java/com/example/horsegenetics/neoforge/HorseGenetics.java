@@ -85,6 +85,19 @@ public final class HorseGenetics {
         // Server-side: how much of the health genetics this world plays with.
         // Whether a foal dies has to be one answer for everyone on a server.
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, ModBreedSpecs.configFile("server.toml"));
+        // The cart system (horse-drawn wagons, plows and field implements),
+        // derived from UsefulCarts under the MIT licence - see
+        // THIRD_PARTY_NOTICES.md. It registers through RegisterEvent rather than
+        // DeferredRegister, and deliberately: that event fires after the
+        // ModdedMaterials.scan() above, so a cart in every modded wood needs no
+        // class-load trickery the way DoubleGates and ModdedArmour do.
+        // Position in this constructor therefore does not matter; it is here at
+        // the end because it registers nothing on the buses attached above.
+        // The client half is CartsClient, which picks itself up.
+        com.example.horsegenetics.neoforge.carts.HorseCarts.init(modEventBus, modContainer);
+        // One log line if an animal-labour mod is installed, saying how to make
+        // it respect horse genetics. Reads nothing, patches nothing.
+        com.example.horsegenetics.neoforge.compat.HorsePoweredCompat.announce();
         // HorseGeneticsEventHandler, ModNetworking, ClientSetup, DebugKeyBindings,
         // DebugKeyHandler, and DebugPenTickHandler are all @EventBusSubscriber-
         // annotated and pick themselves up automatically - nothing else to wire

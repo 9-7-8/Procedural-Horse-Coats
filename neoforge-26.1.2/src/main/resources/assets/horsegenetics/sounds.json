@@ -1,0 +1,20 @@
+{
+  "entity.cart.attach": {
+    "sounds": [
+      "horsegenetics:entity/cart/attach"
+    ],
+    "subtitle": "subtitles.horsegenetics.cart.attached"
+  },
+  "entity.cart.detach": {
+    "sounds": [
+      "horsegenetics:entity/cart/detach"
+    ],
+    "subtitle": "subtitles.horsegenetics.cart.detached"
+  },
+  "entity.cart.place": {
+    "sounds": [
+      "horsegenetics:entity/cart/place"
+    ],
+    "subtitle": "subtitles.horsegenetics.cart.placed"
+  }
+}

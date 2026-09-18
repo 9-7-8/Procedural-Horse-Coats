@@ -157,6 +157,41 @@
     anyone having seen how bad it looks with two wood mods installed. If it does need fixing,
     the cheap version is to disambiguate only on a clash rather than always.</li>
 
+<li id="gap-279"><strong>Open, found 2026-09-18: a modded wood&rsquo;s carts wear the oak icon in the inventory.</strong>
+    Seventy-two painted cart icons ship in the jar, one per vanilla wood per vehicle, and there
+    is nothing to paint a thirteenth wood&rsquo;s from. <code>GeneratedCarts</code> therefore
+    points every modded cart&rsquo;s item model at <code>oak_&lt;cart&gt;</code>. The cart itself is
+    correct the moment it is placed &mdash; entity textures are stitched from the wood&rsquo;s own
+    block sprites at load time and never shipped at all &mdash; so this is the inventory slot only.
+    The fix is the one <code>MetalTintSource</code> already demonstrates for generated armour: a
+    tint source keyed on the item id, colouring the oak icon by that wood&rsquo;s average plank
+    colour. It needs a colour on <code>ModdedMaterials.Wood</code>, which that record does not
+    carry &mdash; adding one moves the compat fingerprint format and
+    <code>MaterialScanTest</code> with it, which is why it was not done in the same sitting as
+    the port.</li>
+
+<li id="gap-280"><strong>Open, found 2026-09-18: the cart system&rsquo;s &ldquo;is this sprite real&rdquo; check is an assumption about the atlas, and every modded cart depends on it.</strong>
+    <code>CartModelManagerMixin.hasSprite</code> decides whether a modded wood has a usable log
+    texture by resolving the sprite and comparing its own name against the id asked for &mdash;
+    which only works if <code>AtlasManager.get</code> answers an unknown id with the
+    missing-texture sprite rather than throwing. That is vanilla&rsquo;s long-standing behaviour
+    and it is wrapped in a <code>catch (RuntimeException)</code> as a belt, but <strong>it has
+    never been run with a wood-adding mod installed</strong>, which is the only case that
+    exercises it. If the assumption is wrong <em>and</em> the throw is not a
+    <code>RuntimeException</code>, the symptom is a crash at every resource reload rather than a
+    plain-looking cart. The <a href="compatibility.html">synthetic test mod</a> is the way to
+    settle it without shipping a dependency.</li>
+
+<li id="gap-281"><strong>Open, found 2026-09-18: the Horse Powered patch is only half a patch, and the half that is missing is theirs.</strong>
+    Every horse now carries <code>horsegenetics:draft_power</code>, a work-rate multiplier built
+    from pulling ability and speed, and <strong>nothing in the game reads it</strong>. That is the
+    honest state: this mod has never been built against Horse Powered&rsquo;s jar, its
+    block-entity and field names are not known here, and a reflective patch against guessed names
+    would fail silently the first time they renamed anything. What would close this is either
+    their mod multiplying by the attribute, or a small addon written against their real API with
+    the jar in hand. The mod ids <code>HorsePoweredCompat</code> watches for are also guesses
+    &mdash; see <a href="compatibility.html#draft-power">compatibility</a>.</li>
+
 <li id="gap-275"><strong>Open, found 2026-09-18: a generated armour's strength reads a <code>&lt;material&gt;_chestplate</code> by name, which is a convention and not a contract.</strong>
     <code>ModdedArmour.fromTheirChestplate</code> asks the item registry for
     <code>&lt;their namespace&gt;:&lt;material&gt;_chestplate</code> and, if it finds one, gives

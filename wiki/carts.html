@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carts &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
+<h1>Carts: wagons, plows and what a horse is worth in harness</h1>
+<p class="lede">
+    Six horse-drawn vehicles &mdash; a covered <strong>wagon</strong> you can
+    drive from the box seat, a <strong>plow</strong>, a <strong>seed
+    drill</strong>, a <strong>reaper</strong>, a <strong>supply cart</strong>
+    and an <strong>animal cart</strong> &mdash; in <strong>every wood your
+    modpack has</strong>, vanilla's twelve and anyone else's. How fast a horse
+    pulls one is the first thing that ever read
+    <a href="gene-magic-pull.html">pulling ability</a>, and it reads the
+    horse's <em>speed</em> at the same time, on purpose.
+    <strong>Derived from AstikorCarts / NiftyCarts / UsefulCarts, MIT</strong>
+    &mdash; full lineage <a href="#licence">below</a>.
+    Built 2026-09-18, <strong>not play-tested</strong>; checklist in
+    <a href="verification.html">verification</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="vehicles">1. The six vehicles</h2>
+<p>
+    Every one of them is pulled by a horse. Craft the <strong>cart wheel</strong>
+    first &mdash; eight sticks around a plank &mdash; because every vehicle
+    spends two or four of them.
+</p>
+<p>
+    Place a cart, sit on a saddled horse, stand near the cart and press
+    <strong>R</strong> to hitch it. Press R again to unhitch. That is the whole
+    interface.
+</p>
+
+<table>
+    <caption>What each one does, heaviest first</caption>
+    <tr><th>Vehicle</th><th>What it is for</th><th>Load</th></tr>
+    <tr>
+        <td><strong>Wagon</strong></td>
+        <td>The carriage. Seats four. Feed it chests and its storage grows from
+            9&times;4 to 9&times;8 to 12&times;9; right-click five wool carpets
+            onto it for a coloured roof. A passenger on the box seat
+            <strong>drives the horse</strong>.</td>
+        <td>0.55</td>
+    </tr>
+    <tr>
+        <td><strong>Plow</strong></td>
+        <td>Put a <strong>hoe</strong> in it and it tills grass into farmland as
+            the horse walks; a <strong>shovel</strong> makes dirt paths; an
+            <strong>axe</strong> strips logs. Right-click to toggle it on and
+            off.</td>
+        <td>0.45</td>
+    </tr>
+    <tr>
+        <td><strong>Reaper</strong></td>
+        <td>Harvests mature crops it is drawn over. Only works while a player
+            is sitting on it.</td>
+        <td>0.40</td>
+    </tr>
+    <tr>
+        <td><strong>Seed drill</strong></td>
+        <td>Plants seeds on farmland it is drawn over. Nine stacks of seeds.</td>
+        <td>0.35</td>
+    </tr>
+    <tr>
+        <td><strong>Supply cart</strong></td>
+        <td>54 stacks, one seat, and it <strong>shows what is in it</strong> &mdash;
+            tools, flowers and paintings are drawn sitting in the bed.</td>
+        <td>0.30</td>
+    </tr>
+    <tr>
+        <td><strong>Animal cart</strong></td>
+        <td>Two seats. Small animals climb in by themselves.</td>
+        <td>0.25</td>
+    </tr>
+</table>
+
+<p>
+    The <strong>load</strong> column is the only thing that separates them as
+    far as your horse is concerned, and the item tooltip shows what it costs:
+    hold Shift on any cart and it tells you what fraction of its speed an
+    ordinary horse keeps pulling that one.
+</p>
+<p>
+    Supply carts, animal carts and wagons will fly a <strong>banner</strong>
+    &mdash; right-click one onto the back.
+</p>
+
+<h2 id="speed">2. Why your horse matters</h2>
+<p>
+    <strong>Pulling ability sets a ceiling; speed decides how close you get to
+    it.</strong> That is the whole rule, and both halves are real.
+</p>
+<p>
+    A horse with a low pulling score is <em>capped</em> on a heavy cart. You can
+    breed it faster and faster and it will not go faster, because it cannot get
+    the wagon moving any harder than its shoulders allow. A horse with a huge
+    pulling score and no speed never reaches the ceiling its shoulders could
+    carry &mdash; it is simply a slow horse.
+</p>
+<p>
+    So the fastest carthorse is <strong>neither specialist</strong>:
+</p>
+<table>
+    <caption>Pulling a wagon</caption>
+    <tr><th>Horse</th><th>Speed</th><th>Pull</th><th>Keeps</th><th>Actual haul speed</th></tr>
+    <tr><td>fast and weak</td><td>0.30</td><td>3</td><td>43%</td><td>0.129</td></tr>
+    <tr><td>slow and strong</td><td>0.13</td><td>9</td><td>81%</td><td>0.105</td></tr>
+    <tr><td><strong>balanced</strong></td><td>0.22</td><td>7</td><td>67%</td><td><strong>0.147</strong></td></tr>
+</table>
+<p>
+    The balanced horse beats both. This is deliberate and it is the reason the
+    model is shaped the way it is &mdash; a draft breed that dumped speed
+    entirely would be the obvious and boring answer, so the model does not allow
+    it. The numbers in that table are a
+    <a href="#test">unit test</a>, not a claim.
+</p>
+
+<h2 id="screen">3. Reading it on the horse</h2>
+<p>
+    Open a horse's information screen (the <strong>i</strong> button on its
+    inventory). On the <strong>Overview</strong> tab:
+</p>
+<ul>
+    <li><strong>Pull</strong> sits with Health, Speed, Jump and Size, because it
+        is the fifth body stat and not a cart footnote. It shows the 1&ndash;10
+        score and a word for it &mdash; <em>feeble, light, ordinary, strong,
+        powerful, a true draft horse</em>.</li>
+    <li>A <strong>Draught</strong> block below says what the score buys:
+        how much of its speed this horse would keep hauling a wagon, whether it
+        carries a second rider, and <strong>how far it has hauled in its
+        life</strong>.</li>
+</ul>
+<p>
+    That last figure belongs to the <em>horse</em>, not to you. It survives
+    being sold, given away or inherited, and it is how you tell a working animal
+    from a fresh one at a glance. (Per-player "distance pulled" statistics exist
+    too, on the vanilla statistics screen, one per vehicle.)
+</p>
+
+<h2 id="two-riders">4. Two riders</h2>
+<p>
+    A horse whose pulling score is <strong>6 or better</strong> carries
+    <strong>two riders</strong>. Six is one point above ordinary: a modestly
+    bred horse gets there, a wild-caught one usually will not, and you do not
+    need a draft breed for it.
+</p>
+<p>
+    Carrying and hauling are the same claim about an animal, which is why there
+    is no separate carrying gene to breed for.
+</p>
+<p>
+    This also matters for the wagon. The box seat drives the horse through a
+    hidden rider, which occupies a seat &mdash; so on a strong horse you can have
+    a driver on the wagon <em>and</em> somebody riding the horse, which is what
+    makes a carriage read as a carriage.
+</p>
+
+<h2 id="woods">5. Every wood, including modded ones</h2>
+<p>
+    Carts exist in vanilla's twelve woods and in <strong>every wood any other
+    mod you have installed adds</strong>, discovered the same way the
+    <a href="items.html">double fence gates</a> discover theirs. A modded cart
+    crafts from that mod's own planks and is textured from that mod's own
+    blocks &mdash; no cart texture is shipped at all, they are assembled at load
+    time out of the wood you built it from.
+</p>
+<p>
+    One rough edge: a modded wood's carts wear the <strong>oak icon</strong> in
+    the inventory, because there are 72 painted icons in the jar and nothing to
+    paint a thirteenth wood's from. The cart itself is the right wood the moment
+    you place it. See <a href="known-gaps.html">known gaps</a>.
+</p>
+
+<h2 id="machines">6. Horse-powered machinery</h2>
+<p>
+    If you have a mod that makes a horse turn a mill or a treadmill, a good
+    horse can drive it harder than a bad one. See
+    <a href="compatibility.html#horse-powered">compatibility</a> for what is
+    wired up and what still needs the other mod's cooperation.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="split">7. Where the code is</h2>
+<p>
+    The split follows the mod's usual rule &mdash; as much as possible in
+    <code>common/</code>, and the NeoForge module translates.
+</p>
+<ul>
+    <li><code>common/cart/CartDraft.java</code> &mdash; <strong>the model</strong>.
+        Pure: two doubles and a load in, a retention fraction out. No Minecraft,
+        no RNG, no entity. This is the file to read.</li>
+    <li><code>common/cart/CartKind.java</code> &mdash; the six vehicles and their
+        loads, and <code>MACHINE_LOAD</code> for a treadmill.</li>
+    <li><code>neoforge/server/HorseDraft.java</code> &mdash; the bridge. Finds a
+        live animal's pull and speed, keeps the haulage tally, and is the
+        <strong>public surface other mods integrate against</strong>.</li>
+    <li><code>neoforge/carts/</code> &mdash; the ported cart system itself, 68
+        files. <code>HorseCarts</code> registers it.</li>
+    <li><code>neoforge/carts/CartWood.java</code> &mdash; what replaced vanilla's
+        <code>WoodType</code> as the key.</li>
+    <li><code>neoforge/compat/GeneratedCarts.java</code> and
+        <code>tools/bake-carts.mjs</code> &mdash; models, item definitions,
+        recipes and lang, for modded woods and vanilla's respectively.</li>
+</ul>
+
+<h2 id="hook">8. The one hook</h2>
+<p>
+    Upstream applied a flat <code>pull_speed</code> from the config in
+    <code>AbstractDrawnEntity.setPulling</code> &mdash; one number, identical for
+    every animal alive. That is now <code>applyDraught</code>, which reads the
+    horse's genotype instead. The config option is <strong>gone</strong> rather
+    than defaulted: an override would make the genetics decorative.
+</p>
+<p>
+    The modifier is transient, multiplicative
+    (<code>ADD_MULTIPLIED_TOTAL</code>), and computed from the attribute's
+    <strong>base</strong> value &mdash; not its current value, which already has
+    the modifier in it and would compound on every re-attach.
+</p>
+<p>
+    An animal that is not one of this mod's horses gets
+    <code>HorseTraits.BASE_PULL</code>. A donkey is not feeble for want of a
+    genome.
+</p>
+
+<h2 id="registration">9. Why the carts use <code>RegisterEvent</code></h2>
+<p>
+    Everything else in this mod registers through <code>DeferredRegister</code>,
+    and <code>DoubleGates</code> and <code>ModdedArmour</code> both go to real
+    trouble to create their per-material entries <em>during class load</em>,
+    because a <code>DeferredRegister</code> will not take an entry once it has
+    attached to the bus.
+</p>
+<p>
+    The carts have the same problem and skip the trouble:
+    <code>RegisterEvent</code> fires <strong>after</strong> mod construction, so
+    <code>ModdedMaterials.scan()</code> has already run and
+    <code>CartWood.all()</code> is simply available. It is also the smaller diff
+    against the MIT source we now maintain. The cost is that the carts do not
+    appear in <code>ModItems</code> / <code>ModEntities</code>; the class javadoc
+    on <code>HorseCarts</code> says so.
+</p>
+
+<h2 id="two-sources">10. The contract that lives twice</h2>
+<p>
+    <strong><code>tools/bake-carts.mjs</code> covers vanilla's twelve at author
+    time; <code>compat/GeneratedCarts.java</code> covers modded woods at run
+    time.</strong> Exactly the arrangement the double gates use, and carrying
+    exactly the same warning: change one, change the other. A drift shows as a
+    modded cart that cannot be crafted while every vanilla one can, and logs
+    nothing.
+</p>
+<p>
+    Re-run the bake after touching any cart recipe, model or lang key:
+</p>
+<pre><code class="language-bash">node neoforge-26.1.2/tools/bake-carts.mjs
+node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
+
+<h2 id="textures">11. No cart texture is shipped</h2>
+<p>
+    Upstream's cleverest idea, and the reason a cart can exist in a wood nobody
+    drew art for. <code>mixin/CartModelManagerMixin</code> stitches every cart's
+    entity texture at resource-reload time out of that wood's
+    <code>_planks</code>, <code>_log</code> and <code>stripped__log</code>
+    sprites as they sit on the block atlas. A resource pack that retextures oak
+    planks retextures oak carts for free, and no Mojang art is redistributed.
+</p>
+<p>
+    For a modded wood only the plank sprite is <em>known</em> &mdash;
+    <code>ModdedMaterials</code> read it out of that mod's files. The log
+    sprites are guessed from vanilla's naming and then
+    <strong>checked against the atlas</strong>; a mod that names its logs
+    unusually gets planks in those places instead of a purple cart.
+    <span class="flag">Unverified</span>: the "is this sprite real" check
+    assumes the atlas answers an unknown id with the missing-texture sprite
+    rather than throwing. Vanilla's long-standing behaviour, not confirmed on
+    26.1.2 with a mod installed.
+</p>
+
+<h2 id="mixins">12. Mixins, and the horse ones in particular</h2>
+<p>
+    Six cart mixins joined the mod's own, in
+    <code>horsegenetics.mixins.json</code> &mdash; which now has a
+    <code>"client"</code> block for the first time, for the four that touch
+    client-only classes.
+</p>
+<ul>
+    <li><code>CartHorseMixin</code> (AbstractHorse) &mdash; overrides
+        <code>travel</code> and <code>maxUpStep</code> and injects at
+        <code>getControllingPassenger</code>, all for the wagon's box seat. Its
+        <code>travel</code> override calls <code>super.travel</code> on both
+        branches, so <code>HorseFlightMixin</code>'s inject on
+        <code>LivingEntity.travel</code> still fires and flight is unaffected.
+        <span class="flag">Unverified</span> &mdash; the interaction is argued,
+        not observed.</li>
+    <li><code>HorseTwoRidersMixin</code> (AbstractHorse) &mdash; ours, not
+        upstream's. <code>canAddPassenger</code> and
+        <code>getPassengerAttachmentPoint</code>. The pillion offset is a number
+        picked to look right, not measured.</li>
+</ul>
+
+<h2 id="test">13. The test</h2>
+<p>
+    <code>common/src/test/java/.../cart/CartDraftTest.java</code>, ten cases.
+    Three of them are the design:
+</p>
+<ul>
+    <li><strong>a balanced horse out-hauls both specialists</strong>;</li>
+    <li><strong>pull sets a ceiling raw speed cannot pass</strong>, checked at
+        speeds up to a million;</li>
+    <li><strong>neither stat is a dump stat</strong> &mdash; raising either one,
+        on every vehicle, always hauls faster.</li>
+</ul>
+<pre><code class="language-bash">./gradlew :common:test --tests '*CartDraftTest'</code></pre>
+<p>
+    It earned its keep on the first run. The model originally had a flat floor
+    on retention &mdash; "never below a quarter speed", so a hopeless horse still
+    visibly moved &mdash; and the ceiling test failed, because past the speed
+    where that floor engages haul becomes <code>speed &times; 0.25</code> and
+    climbs without limit. A fast enough weak horse out-pulled its own capacity,
+    which is the exact failure the model exists to prevent. The floor was
+    replaced by clamping the <em>score</em> at
+    <code>HorseTraits.MIN_PULL</code> before the curve.
+</p>
+
+<h2 id="licence">14. Licence and provenance</h2>
+<div class="callout">
+    <p>
+        <strong>The cart system is MIT-licensed third-party code</strong>, and
+        stays MIT inside this CC BY-NC mod. Every file derived from it carries a
+        provenance header; the licence text and the notices ship inside the jar
+        under <code>META-INF/</code>.
+    </p>
+</div>
+<ol>
+    <li><strong>AstikorCarts</strong> &mdash; the original, by
+        <strong>MennoMax</strong> (credited authors: MennoMax, paul101). Forge,
+        1.12.2&ndash;1.19.2.</li>
+    <li><strong>NiftyCarts</strong> &mdash; Fabric port by
+        <strong>jmb19905</strong> (jmb05).
+        <a href="https://github.com/jmb05/nifty-carts">github.com/jmb05/nifty-carts</a>,
+        <a href="https://modrinth.com/mod/niftycarts">modrinth.com/mod/niftycarts</a>.</li>
+    <li><strong>UsefulCarts</strong> &mdash; unofficial 26.1.2 / 26.2 port.
+        <a href="https://github.com/Andrewwwwwwwwwwwwwww/usefulcarts-mc26.1.2">github.com/Andrewwwwwwwwwwwwwww/usefulcarts-mc26.1.2</a>,
+        <a href="https://modrinth.com/mod/useful-carts">modrinth.com/mod/useful-carts</a>.
+        Source commit <code>1b66a257a6f867092ab44f7269bd4ff6b850c198</code>.</li>
+    <li><strong>NeoForge 26.1.2 port</strong> &mdash; prepared for this mod, then
+        integrated and maintained here.</li>
+</ol>
+<p>
+    Copyright (c) 2019 MennoMax &middot; Copyright (c) 2023 jmb19905.
+    Full text: <code>LICENSES/UsefulCarts-MIT.txt</code>. Lineage, links and the
+    complete list of changes: <code>THIRD_PARTY_NOTICES.md</code>.
+</p>
+<p>
+    <strong>AstikorCarts Redux</strong> and <strong>AstikorCarts Deluxe</strong>
+    are separate continuations and are <em>not</em> in this lineage. Nothing was
+    taken from either; do not credit them as sources, and do not copy anything
+    from them without adding their own notices.
+</p>
+
+<h2 id="dropped">15. What was not ported</h2>
+<p>
+    Owner's call, 2026-09-18, and recorded here so nobody re-adds it by
+    accident:
+</p>
+<ul>
+    <li><strong>The hand cart.</strong> Player-pulled on foot; the one vehicle a
+        horse never touches.</li>
+    <li><strong>All 11 advancements</strong> and their 7 criterion triggers.</li>
+    <li><strong>The slow-speed toggle</strong> &mdash; keybind, payload, config
+        value, and the <code>ClientPacketListener</code> mixin that existed only
+        to add a line to the mount overlay.</li>
+    <li><strong>Per-cart <code>pull_speed</code></strong>, for the reason in
+        &sect;8.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-pull.html">Pulling ability</a>
+        <a href="horse-body.html">The horse's body</a>
+        <a href="compatibility.html#horse-powered">Compatibility &mdash; horse-powered machinery</a>
+        <a href="verification.html">To be verified</a>
+    </div>
+    Source: <code>common/cart/</code>, <code>neoforge-26.1.2/{carts,compat,server}/</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

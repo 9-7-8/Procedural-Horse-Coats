@@ -31,12 +31,22 @@
 </p>
 
 <div class="note">
-    <span class="label">Nothing reads it yet</span>
+    <span class="label">What reads it</span>
     <p>
-        The score is resolved, inherited and drifted like every other epigenetic
-        number, and no system consumes it. That is deliberate: what a pull score
-        is worth in cart loads is a decision for whatever ends up hitching a
-        horse to something, and is not a fact about the horse&rsquo;s genetics.
+        Three things, all added 2026-09-18. <strong>Carts</strong> &mdash; the
+        score sets a ceiling on how fast this horse can drag a given load, and
+        the horse&rsquo;s own speed decides how close to that ceiling it gets
+        (<a href="carts.html#speed">carts &sect;2</a>). <strong>A second
+        rider</strong> &mdash; a score of 6 or better and the horse carries two.
+        <strong>Machinery</strong> &mdash; the score and speed blend into the
+        <code>horsegenetics:draft_power</code> attribute that animal-labour mods
+        can read (<a href="compatibility.html#draft-power">compatibility</a>).
+    </p>
+    <p>
+        The conversion is <code>common/cart/CartDraft</code> and lives there
+        rather than here on purpose: what a score is worth in cart loads is a
+        decision for whatever hitches the horse to something, not a fact about
+        the horse&rsquo;s genetics.
     </p>
 </div>
 
@@ -116,9 +126,11 @@
 <div class="note warn">
     <span class="label">Never play-tested</span>
     <p>
-        No screen shows pull and no system reads it, so there is nothing to look
-        at in game yet. What is pinned is pinned by
-        <code>MagicPullGeneTest</code>. Checklist on
+        The score now shows on the horse information screen, beside Jump, with a
+        word for what it means, and a <strong>Draught</strong> block below
+        saying what it buys. None of that has been looked at in game. What is
+        pinned is pinned by <code>MagicPullGeneTest</code> and
+        <code>CartDraftTest</code>. Checklist on
         <a href="verification.html">To be verified</a>.
     </p>
 </div>

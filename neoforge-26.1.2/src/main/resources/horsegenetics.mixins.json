@@ -10,7 +10,16 @@
     "HorseRearFightMixin",
     "HorseSwimMixin",
     "HorseFlightMixin",
-    "HorseFlightRiddenMixin"
+    "HorseFlightRiddenMixin",
+    "HorseTwoRidersMixin",
+    "CartHorseMixin",
+    "CartEntityInvoker"
+  ],
+  "client": [
+    "CartClientLevelMixin",
+    "CartLocalPlayerMixin",
+    "CartModelManagerMixin",
+    "CartModelPartMixin"
   ],
   "injectors": {
     "defaultRequire": 1

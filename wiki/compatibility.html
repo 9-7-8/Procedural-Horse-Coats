@@ -895,8 +895,53 @@
     Beyond that there is no overlap: it adds blocks and consumes labour, we add genetics
     and coats. It is a good pairing conceptually &mdash; a mod that makes a horse&rsquo;s
     strength matter is a mod that makes our <code>MSTN</code> / <code>LCORL</code> stat
-    genes matter &mdash; and a patch that read our resolved speed or size to set work rate
-    would be a genuinely small piece of code and the most rewarding one on this page.
+    genes matter.
+</p>
+
+<h3 id="draft-power">Our half of the patch is built</h3>
+<p>
+    As of 2026-09-18, <strong>every horse carries a
+    <code>horsegenetics:draft_power</code> entity attribute</strong>.
+    <code>1.0</code> is an ordinary horse; a well-bred draft horse is around
+    <code>1.6</code>. A machine that multiplies its work rate by that attribute
+    respects horse genetics and is done.
+</p>
+<p>
+    It is an <strong>attribute</strong> rather than an API call deliberately:
+    attributes are the one channel every mod already knows how to read, they are
+    synced, they survive whatever container the other mod stores the animal in,
+    and neither mod ends up depending on the other&rsquo;s jar. For a caller who
+    would rather ask in Java, <code>HorseDraft.workRate(LivingEntity)</code> is
+    the same number.
+</p>
+<p>
+    The value is <strong>not pulling ability alone</strong>. It is a weighted
+    geometric blend &mdash; 60% pull, 40% speed &mdash; so torque is what a mill
+    mostly wants but a quick draft horse still beats a ponderous one. Reading
+    pull alone would have made speed a dump stat on any horse destined for
+    machinery. See <a href="carts.html#speed">carts</a> for the same rule applied
+    to wheeled loads, and <code>common/cart/CartDraft.workRate</code>.
+</p>
+<p>
+    <strong>What is still missing is their half.</strong> Nothing here reaches
+    into Horse Powered&rsquo;s classes: this mod has never been built against
+    that jar, its block-entity and field names are not known here, and a
+    reflective patch against guessed names would fail silently the first time
+    they renamed anything. The attribute is real and useful on its own; the code
+    that <em>reads</em> it has to be written against their actual API.
+</p>
+<p>
+    <code>HorsePoweredCompat.announce()</code> writes one line to the log if an
+    animal-labour mod is installed, saying what to multiply by.
+    <span class="flag">Unverified</span>: the mod ids it looks for are guesses
+    &mdash; Horse Powered has never been installed alongside this mod, so no id
+    has been seen to match. A wrong id costs one absent log line and nothing
+    else.
+</p>
+<p>
+    The two risks above &mdash; whether their capture preserves our attachments,
+    and whether their ghost render goes through our renderer &mdash; are
+    untouched by any of this and still need a real install to settle.
 </p>
 
 <h2 id="combat-controls">Horse Combat Controls</h2>

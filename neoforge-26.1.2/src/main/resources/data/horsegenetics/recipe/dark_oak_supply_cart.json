@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "c": "minecraft:chest",
+    "p": "minecraft:dark_oak_planks",
+    "w": "horsegenetics:cart_wheel"
+  },
+  "pattern": [
+    "pcp",
+    "pcp",
+    "wpw"
+  ],
+  "result": {
+    "count": 1,
+    "id": "horsegenetics:dark_oak_supply_cart"
+  }
+}

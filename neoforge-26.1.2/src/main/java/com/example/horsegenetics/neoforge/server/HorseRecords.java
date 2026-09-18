@@ -217,6 +217,14 @@ public final class HorseRecords {
                 horse.setHealth((float) traits.health());
             }
         }
+
+        // Pulling ability has no attribute of its own - nothing in the engine
+        // wants one, and carts read the score straight off the genotype. But
+        // the *derived* work rate does need to be readable by mods that have
+        // never heard of us, which is what horsegenetics:draft_power is for.
+        // Here, because here is where every other body number is written, so
+        // the two cannot drift.
+        com.example.horsegenetics.neoforge.compat.HorsePoweredCompat.apply(horse);
     }
 
     /** Convenience: resolve and apply in one step. */

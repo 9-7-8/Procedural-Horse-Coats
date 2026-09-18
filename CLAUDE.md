@@ -40,7 +40,9 @@ by hand (`wiki/known-gaps.html#gap-13`). Name the accessor
 
 ---
 ## Where everything is written
-The only two markdown files in the repo are `README.md` and this one.
+The only markdown files in the repo are `README.md`, this one, and
+`THIRD_PARTY_NOTICES.md` - which is a licence artefact that ships inside the
+jar, not documentation, and must stay plain text. Everything else is the wiki.
 **Everything else is the wiki**: `index.html` (the hub) + `wiki/*.html`.
 Each page below is the **single source of truth** for its subject - update it in
 the same change as the code, and never copy it back into here.
@@ -169,6 +171,7 @@ node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS ag
 node wiki/tools/check-links.mjs                # every href, #fragment and id in the wiki
 node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
 node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
+node neoforge-26.1.2/tools/check-progress-tasks.mjs # no checklist task nothing can complete
 ```
 Requires JDK 25 (auto-provisioned). Crash reports: `neoforge-26.1.2/run/crash-reports/`.
 **Never run the full `:common:test` unless the owner asks.** It is ten minutes and
@@ -196,6 +199,7 @@ and fails *silently* when stale:
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | any AI goal added, removed or re-prioritised | `node wiki/tools/bake-behaviour-hierarchy.mjs` | `wiki/behaviour-hierarchy.html` |
 | a wood, or any geometry, of the **double gates** | `node neoforge-26.1.2/tools/bake-double-gates.mjs` - then the recipe row below, since it writes recipes too. **It only writes**: removing a wood means deleting that wood's files and lang keys by hand | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, both `data/minecraft/tags/block/` files **and** the merged `lang/en_us.json` |
+| a cart recipe, model or lang key, **or `CartKind`** | `node neoforge-26.1.2/tools/bake-carts.mjs` - vanilla's twelve woods only. Modded woods are `compat/GeneratedCarts` at run time and **the two must agree**; a drift is a modded cart that will not craft, and logs nothing | the regenerated `models/item/`, `items/`, `recipe/` and the merged `lang/en_us.json` |
 | any file in `data/horsegenetics/recipe/` | `node neoforge-26.1.2/tools/bake-recipe-reference.mjs` | `assets/horsegenetics/recipe_reference.json` |
 | a **breed egg texture** in `assets/horsegenetics/textures/item/breed_egg/` | `node neoforge-26.1.2/tools/bake-breed-eggs.mjs` - it hard-fails on a filename that is not a breed id, since a case on a value no horse carries never draws | the regenerated `models/item/breed_egg/` **and** `items/breed_spawn_egg.json` |
 | `tools/villagers/equestrian.source.png`, the one piece of villager art | `tools/villagers/bake-profession-hats.ps1` - it writes **five** files: a hat colour per equestrian and the cowboy's own uncoloured copy. The hat is **two** rectangles on the sheet, crown and brim; recolouring only the crown gives a villager a teal hat with a brown underside | the five PNGs under `assets/.../textures/entity/villager/` |

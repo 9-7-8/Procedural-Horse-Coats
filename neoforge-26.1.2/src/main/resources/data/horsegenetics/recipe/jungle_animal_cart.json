@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "p": "minecraft:jungle_planks",
+    "w": "horsegenetics:cart_wheel"
+  },
+  "pattern": [
+    "ppp",
+    "ppp",
+    "wpw"
+  ],
+  "result": {
+    "count": 1,
+    "id": "horsegenetics:jungle_animal_cart"
+  }
+}

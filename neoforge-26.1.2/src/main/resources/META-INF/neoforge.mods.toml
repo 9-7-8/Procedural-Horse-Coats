@@ -7,6 +7,11 @@ modId = "horsegenetics"
 version = "${mod_version}"
 displayName = "Horse Genetics"
 description = "Genetics-based coat generation for horses, starting with extension/agouti and bay leg patterning."
+credits = '''
+Cart system derived from UsefulCarts / NiftyCarts / AstikorCarts (MIT).
+AstikorCarts by MennoMax (with paul101); NiftyCarts by jmb19905;
+UsefulCarts 26.1 port by the UsefulCarts porter. See THIRD_PARTY_NOTICES.md.
+'''
 
 [[dependencies.horsegenetics]]
     modId = "neoforge"

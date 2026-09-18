@@ -1,0 +1,88 @@
+/*
+ * Derived from UsefulCarts (https://github.com/Andrewwwwwwwwwwwwwww/usefulcarts-mc26.1.2),
+ * itself a port of NiftyCarts by jmb19905, originally AstikorCarts by MennoMax.
+ * Copyright (c) 2019 MennoMax
+ * Copyright (c) 2023 jmb19905
+ * Licensed under the MIT License. See LICENSES/UsefulCarts-MIT.txt.
+ * Modified for Horse Genetics (NeoForge 26.1.2).
+ */
+package com.example.horsegenetics.neoforge.carts.client.renderer.entity;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import com.example.horsegenetics.neoforge.carts.HorseCarts;
+import com.example.horsegenetics.neoforge.carts.client.renderer.CartsModelLayers;
+import com.example.horsegenetics.neoforge.carts.client.renderer.entity.model.CartBannerFlagModel;
+import com.example.horsegenetics.neoforge.carts.client.renderer.entity.model.PlowModel;
+import com.example.horsegenetics.neoforge.carts.entity.PlowEntity;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.object.banner.BannerModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+public final class PlowRenderer extends DrawnRenderer<PlowEntity, PlowRenderState, PlowModel> {
+    private final ItemModelResolver itemRenderer;
+
+    public PlowRenderer(final EntityRendererProvider.Context ctx) {
+        super(ctx, new PlowModel(ctx.bakeLayer(CartsModelLayers.PLOW),
+                new BannerModel(ctx.bakeLayer(ModelLayers.STANDING_BANNER)),
+                new CartBannerFlagModel(ctx.bakeLayer(ModelLayers.STANDING_BANNER_FLAG))));
+        this.shadowRadius = 1.0F;
+        this.itemRenderer = ctx.getItemModelResolver();
+    }
+
+    @Override
+    public void extractRenderState(PlowEntity entity, PlowRenderState state, float delta) {
+        super.extractRenderState(entity, state, delta);
+        state.plowing = entity.getPlowing();
+        state.level = entity.level();
+        state.items = NonNullList.create();
+        state.itemStates = NonNullList.create();
+        for (int i = 0; i < entity.getItemStacks().size(); i++) {
+            state.items.add(i, entity.getStackInSlot(i));
+            ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
+            this.itemRenderer.updateForNonLiving(itemStackRenderState, entity.getStackInSlot(i), ItemDisplayContext.FIXED, entity);
+            state.itemStates.add(i, itemStackRenderState);
+        }
+    }
+
+    @Override
+    public @NotNull PlowRenderState createRenderState() {
+        return new PlowRenderState();
+    }
+
+    @Override
+    public @NotNull Identifier getTextureLocation(PlowRenderState state) {
+        return HorseCarts.resLoc("textures/entity/" + state.woodType.id() + "_plow.png");
+    }
+
+    @Override
+    protected void submitContents(PlowRenderState state, final PoseStack stack, final SubmitNodeCollector collector) {
+        for (int i = 0; i < state.items.size(); i++) {
+            final ItemStack itemStack = state.items.get(i);
+            if (itemStack.isEmpty()) {
+                continue;
+            }
+            int finalI = i;
+            this.attach(this.model.getBody(), this.model.getShaft(i), s -> {
+                s.mulPose(Axis.XP.rotationDegrees(-90.0F));
+                s.mulPose(Axis.YP.rotationDegrees(90.0F));
+                s.translate(-4.0D / 16.0D, 1.0D / 16.0D, 0.0D);
+                if (itemStack.getItem() instanceof BlockItem) {
+                    s.translate(0.0D, -0.1D, 0.0D);
+                    s.mulPose(Axis.ZP.rotationDegrees(180.0F));
+                }
+                state.itemStates.get(finalI).submit(stack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+            }, stack);
+        }
+    }
+}

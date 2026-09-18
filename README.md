@@ -191,9 +191,28 @@ the project is small enough that that's still the right amount of process.
 
 ---
 
+## Credits
+
+The **cart system** - the wagons, plows, seed drills, reapers, supply carts and
+animal carts your horses pull - is derived from **AstikorCarts** by MennoMax
+(with paul101), by way of **NiftyCarts** by jmb19905 and the **UsefulCarts**
+port. It is used under the MIT License, and it is maintained here now: the
+horses that pull it, how fast they pull it, and the carts existing in every
+wood your modpack has are this mod's additions.
+
+Full lineage, links and the list of changes: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Licence text: [LICENSES/UsefulCarts-MIT.txt](LICENSES/UsefulCarts-MIT.txt).
+Both ship inside the jar, under `META-INF/`.
+
+---
+
 ## License
 
 **[CC BY-NC 4.0](LICENSE)** - Attribution-NonCommercial.
+
+The cart system is the exception: it is MIT-licensed third-party code, and
+stays MIT. MIT code is free to live inside a differently licensed mod, and the
+licence above covers everything else.
 
 In short:
 

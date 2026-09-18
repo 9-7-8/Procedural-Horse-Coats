@@ -15,8 +15,11 @@ import com.example.horsegenetics.common.trait.GeneCategory;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBreakdown;
+import com.example.horsegenetics.common.cart.CartDraft;
+import com.example.horsegenetics.common.cart.CartKind;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.InspectHorsePayload;
 import com.example.horsegenetics.neoforge.network.OffspringDataPayload;
 import com.example.horsegenetics.neoforge.network.OffspringRequestPayload;
@@ -620,6 +623,12 @@ public final class HorseInfoScreen extends Screen {
                     cur < max * 0.4 ? BAD : cur >= max ? GOOD : VALUE);
             c.pair("Speed", String.format("%.3f", horse.getAttributeValue(Attributes.MOVEMENT_SPEED)));
             c.pair("Jump", String.format("%.2f", horse.getAttributeValue(Attributes.JUMP_STRENGTH)));
+            // Pull sits with the other four body numbers because it is one of
+            // them - the fifth body stat, not a cart footnote. It reads off the
+            // genotype rather than an attribute because there is no pull
+            // attribute: nothing in the game engine needs one. The Draught
+            // block further down says what the score is worth.
+            c.pair("Pull", String.format("%.1f / 10  (%s)", traits().pull(), pullWord(traits().pull())));
             double scale = horse.getAttributeValue(Attributes.SCALE);
             c.pair("Size", sizeWord(scale) + "  " + heightText(scale, horse.isBaby())
                     + String.format("  (%.2f)", scale));
@@ -634,8 +643,11 @@ public final class HorseInfoScreen extends Screen {
             c.pair("Health", String.format("%.1f", t.health()) + "  (from the genotype)");
             c.pair("Speed", String.format("%.3f", t.speed()));
             c.pair("Jump", String.format("%.2f", t.jump()));
+            c.pair("Pull", String.format("%.1f / 10  (%s)", t.pull(), pullWord(t.pull())));
             c.pair("Size", sizeWord(t.scale()) + "  " + heightText(t.scale(), false));
         }
+
+        drawDraught(c);
 
         ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
         if (care != null) {
@@ -677,6 +689,65 @@ public final class HorseInfoScreen extends Screen {
         if (owner != null && !owner.equals(record.tamedBy().orElse(null))) {
             c.pair("Owner now", owner);
         }
+    }
+
+    /**
+     * <b>What this horse is worth in harness</b>, on the overview page.
+     *
+     * <p>Pulling ability is a 1-10 score and, on its own, means nothing to a
+     * player: five is "ordinary" only if you already know that. So the score is
+     * shown with the two things it actually decides - how much of its speed
+     * this horse would keep pulling the heaviest vehicle in the game, and
+     * whether its back takes a second rider - and then with the one number that
+     * is about this animal's history rather than its genotype: how far it has
+     * hauled.
+     *
+     * <p>The wagon is the yardstick because it is the extreme. A figure for the
+     * animal cart would flatter every horse alive and separate none of them.
+     *
+     * <p>Haulage comes off the synced {@code CART_METRES} attachment rather
+     * than any player statistic: it is a fact about the horse, and it is the
+     * line that makes a working animal's screen different from a fresh one's.
+     */
+    private void drawDraught(Cursor c) {
+        Traits t = traits();
+        c.rule();
+        c.label("Draught");
+
+        // The live entity's speed if we have one, so tack and effects count;
+        // the genotype's otherwise.
+        double speed = horse != null ? horse.getAttributeValue(Attributes.MOVEMENT_SPEED) : t.speed();
+        int keptPercent = (int) Math.round(100.0
+                * CartDraft.retention(t.pull(), speed, CartKind.WAGON.load()));
+        c.pair("Hauling a wagon", keptPercent + "% of its speed",
+                keptPercent >= 70 ? GOOD : keptPercent < 45 ? BAD : VALUE);
+        c.pair("Carries", CartDraft.carriesTwoRiders(t.pull()) ? "two riders" : "one rider");
+
+        if (horse != null) {
+            double metres = horse.getData(ModAttachments.CART_METRES.get());
+            c.pair("Hauled", metres < 1.0
+                    ? "never been in harness"
+                    : metres < 1000.0
+                        ? String.format("%.0f m", metres)
+                        : String.format("%.2f km", metres / 1000.0));
+        }
+    }
+
+    /** The 1-10 pull score in words, so the number means something on sight. */
+    private static String pullWord(double pull) {
+        if (pull < 2.0) {
+            return "feeble";
+        }
+        if (pull < 4.0) {
+            return "light";
+        }
+        if (pull < 6.0) {
+            return "ordinary";
+        }
+        if (pull < 7.5) {
+            return "strong";
+        }
+        return pull < 9.0 ? "powerful" : "a true draft horse";
     }
 
     private String fullName() {

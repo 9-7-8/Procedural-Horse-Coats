@@ -60,6 +60,34 @@ public final class ModAttributes {
                     "attribute.name.horsegenetics.lava_movement",
                     VANILLA_LAVA_SPEED, 0.0, 1.0).setSyncable(true));
 
+    /**
+     * <b>How hard this animal works</b>, as a multiple of an ordinary horse -
+     * {@code 1.0} is the baseline, {@code 1.6} is a very good draft horse.
+     *
+     * <h2>Why an attribute and not just an API call</h2>
+     * Nothing in <i>this</i> mod reads it. It exists so that another mod which
+     * makes a horse turn something - a treadmill, a mill, a winch - can scale
+     * its work rate by this horse's genetics <b>without depending on our jar at
+     * all</b>. An attribute is the one channel every mod already knows how to
+     * read, it is synced, and it survives whatever container the other mod
+     * stores the animal in.
+     *
+     * <p>The value is written by {@code HorsePoweredCompat} whenever a horse's
+     * traits are applied, from
+     * {@link com.example.horsegenetics.common.cart.CartDraft#workRate} - a
+     * blend of pulling ability and speed, so that breeding a draft horse does
+     * not make speed a dump stat. {@code HorseDraft.workRate} is the same
+     * number for callers who would rather ask in Java.
+     *
+     * <p>Default {@code 1.0}, so a mob that never gets a value behaves exactly
+     * as it would with no genetics at all - the same property that makes
+     * {@link #LAVA_MOVEMENT} safe to put on things.
+     */
+    public static final DeferredHolder<Attribute, Attribute> DRAFT_POWER =
+            ATTRIBUTES.register("draft_power", () -> new RangedAttribute(
+                    "attribute.name.horsegenetics.draft_power",
+                    1.0, 0.0, 16.0).setSyncable(true));
+
     private ModAttributes() {
     }
 
@@ -110,6 +138,7 @@ public final class ModAttributes {
         for (var type : event.getTypes()) {
             if (HORSE_TYPES.contains(type)) {
                 event.add(type, LAVA_MOVEMENT);
+                event.add(type, DRAFT_POWER);
                 added++;
             }
         }

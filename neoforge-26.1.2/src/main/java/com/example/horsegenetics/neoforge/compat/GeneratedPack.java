@@ -117,6 +117,7 @@ public final class GeneratedPack {
         com.google.gson.JsonObject lang = new com.google.gson.JsonObject();
         GeneratedGates.emit(files, lang);
         GeneratedArmour.emit(files, lang);
+        GeneratedCarts.emit(files, lang);
         if (!lang.isEmpty()) {
             GeneratedGates.put(files,
                     "assets/" + HorseGenetics.MOD_ID + "/lang/en_us.json", lang);

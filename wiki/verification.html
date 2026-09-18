@@ -78,6 +78,74 @@
     </p>
 </div>
 
+<h2 id="carts-0918">&sect;0-FO &mdash; Horse-drawn carts (2026-09-18, NOT played, nothing here has been seen)</h2>
+
+<p>
+    Six vehicles, 68 ported classes, seven new mixins and a new draught model, and
+    <strong>not one of it has been run in a game</strong>. The upstream port it came from had
+    never been compiled against the game jars either, so the whole thing is
+    build-green-only. <a href="carts.html">Carts</a> is the page.
+    Start at the top &mdash; if the first two fail nothing below them is testable.
+</p>
+
+<ul>
+    <li><strong>The game starts.</strong> Seven mixins were added to
+        <code>horsegenetics.mixins.json</code>, and it grew a <code>"client"</code> block
+        for the first time. A mixin apply failure or a client class on the server is a hard
+        crash at mod load, so <strong><code>runServer</code> to <q>Done (</q> before
+        anything else</strong>.</li>
+    <li><strong>85 items in a Horse Carts creative tab.</strong> Twelve woods &times; six
+        vehicles, plus the cart wheel. Any purple icon is a missing model.</li>
+    <li><strong>A placed cart is the right wood.</strong> No cart texture ships &mdash; each
+        is stitched from that wood&rsquo;s block sprites at resource-reload time. A
+        purple-black cart means the assembler did not run; a cart that is the wrong wood
+        means the sprite table is wrong. Check a nether one (crimson is a <em>stem</em>) and
+        bamboo (a <em>block</em>), which are the irregular rows.</li>
+    <li><strong>Hitch and unhitch.</strong> Place a supply cart, ride a saddled horse near
+        it, press <strong>R</strong>: attach sound, and the horse pulls it. R again to
+        detach.</li>
+    <li><strong>A strong horse is visibly faster than a weak one on the same cart.</strong>
+        This is the whole feature. Two horses with clearly different pull scores, the same
+        wagon, the same stretch of ground. If they look the same, <code>applyDraught</code>
+        is not firing &mdash; check the horse&rsquo;s movement-speed modifiers.</li>
+    <li><strong>A fast weak horse and a slow strong one are close, and a balanced one beats
+        both.</strong> The design claim, and the one worth measuring rather than eyeballing.
+        The unit test pins the arithmetic; this checks the arithmetic was wired to the
+        right numbers.</li>
+    <li><strong>Detaching gives the speed back.</strong> The modifier is transient and
+        removed on unhitch. A horse that stays slow after unhitching is a leak, and it
+        compounds every re-attach.</li>
+    <li><strong>Two riders on a pull-6 horse, and only one below it.</strong> Both the
+        threshold and the seating &mdash; the pillion offset is a number picked to look
+        right on vanilla&rsquo;s model, never measured, so the second rider may well be
+        inside the first.</li>
+    <li><strong>The wagon&rsquo;s box seat drives the horse.</strong> The postilion path, and
+        the one most likely to fight this mod&rsquo;s own six <code>AbstractHorse</code>
+        mixins. While you are there: <strong>does a horse still fly, swim and cross
+        lava?</strong> <code>CartHorseMixin</code> overrides <code>travel</code>, and the
+        argument that it does not break <code>HorseFlightMixin</code> is an argument, not an
+        observation.</li>
+    <li><strong>The plow tills, the seed drill plants, the reaper harvests.</strong> Tools
+        go inside the plow; the reaper needs a player sitting on it.</li>
+    <li><strong>Wagon storage grows with chests, and five carpets make a roof.</strong>
+        9&times;4 &rarr; 9&times;8 &rarr; 12&times;9. Contents must survive a relog.</li>
+    <li><strong>The supply cart shows its cargo</strong>, and a banner flies from a supply
+        cart, animal cart or wagon.</li>
+    <li><strong>&ldquo;Hauled&rdquo; climbs on the info screen</strong> and is still there
+        after a relog. It is a synced attachment, so a figure that reads zero on the client
+        while the horse has clearly worked is a sync fault rather than a counting one.</li>
+    <li><strong>Recipes appear in the recipe book</strong>, and the cart wheel is
+        <code>cart_wheel</code>, not <code>wheel</code>.</li>
+    <li><strong>A dedicated server plus a client.</strong> Carts sync, and no client-only
+        class on the server.</li>
+</ul>
+
+<p>
+    <strong>Modded woods are a separate session and need another mod installed</strong>
+    &mdash; see <a href="known-gaps.html">gap 277</a>, which is the one that could crash
+    rather than merely look wrong, and gap 276 for the oak inventory icon that is expected.
+</p>
+
 <h2 id="cloudtouched-0918">&sect;0-FN &mdash; Cloudtouched, a flying breed (2026-09-18, NOT played)</h2>
 
 <p>
@@ -140,34 +208,36 @@
         unloaded ground.</li>
 </ul>
 
-<h2 id="pull-0918">&sect;0-FM &mdash; Pulling ability (2026-09-18, and there is nothing to look at)</h2>
+<h2 id="pull-0918">&sect;0-FM &mdash; Pulling ability, now that something reads it (2026-09-18, NOT played)</h2>
 
 <p>
-    <a href="gene-magic-pull.html">Magic pull</a> is built, registered and on every breed
-    sheet, and it is <strong>deliberately unobservable in game</strong>. It moves no vanilla
-    attribute, no screen prints it, and nothing consumes it. So unlike every other entry on
-    this page there is <em>no</em> in-world check to run, and it got no debug-yard pen: the
-    stat pens work by reading a named attribute&rsquo;s range across a pen, and a pen that
-    cannot answer its own question is worse than no pen at all.
+    This section used to say there was nothing to look at. As of the cart port there is:
+    <a href="gene-magic-pull.html">magic pull</a> now sets how fast a horse drags a load,
+    whether it carries a second rider, and its <code>draft_power</code> work rate.
+    <strong>The questions that were parked here are now askable.</strong>
 </p>
 
-<p>
-    <strong>What stands in for a play session</strong> is <code>MagicPullGeneTest</code> &mdash;
-    the arithmetic, that the locus paints nothing, that a breed&rsquo;s score reaches its
-    founders on the same scale the sheet writes it in, and that the dhampir&rsquo;s two
-    strains land apart. That is a real substitute for the parts a player could not see
-    anyway, and no substitute at all for the part nobody can yet: <strong>whether the 1&ndash;10
-    scale is the right shape</strong> once something reads it.
-</p>
+<ul>
+    <li><strong>Does a 10 feel like a draught horse and a 1 like a miniature?</strong> The
+        scale&rsquo;s shape was never testable before. Hitch both to a wagon and see whether
+        the difference reads as a different animal or as a slightly different number.</li>
+    <li><strong>Is the gap between 4 and 6 worth breeding for?</strong> 6 is also the second-rider
+        threshold, so that one step should feel like a real gain. If it does not, the
+        threshold and the curve disagree.</li>
+    <li><strong>Does a bred line running past 10 break anything?</strong>
+        <code>Traits.pull()</code> has a floor and <strong>no ceiling</strong>.
+        <code>CartDraft</code> handles arbitrary values by construction &mdash; the test
+        checks up to a million &mdash; but nothing has watched a real line climb.</li>
+    <li><strong>Pull on the info screen.</strong> It now sits beside Jump with a word for it
+        (<em>feeble</em> &hellip; <em>a true draft horse</em>), and a <strong>Draught</strong>
+        block below. Read it on a horse and check the word matches the feeling.</li>
+</ul>
 
 <p>
-    <strong>The check to run is the one that cannot be run yet.</strong> When a consumer
-    exists &mdash; the carts in <code>intake/</code> being the reason this was built &mdash;
-    the questions are: does a score of 10 feel like a draught horse and a 1 like a
-    miniature; is the gap between 4 and 6 large enough to be worth breeding for; and does a
-    bred line running past 10 break anything, since <code>Traits.pull()</code> has a floor
-    and <strong>no ceiling</strong>. Until then this section is a placeholder that should
-    not be deleted.
+    <strong>A debug-yard pen is still not possible</strong>, for the original reason: the stat
+    pens read a named attribute&rsquo;s range across a pen, and pull is not an attribute.
+    <code>draft_power</code> is, though, and a pen on that would answer the shape question
+    indirectly &mdash; worth considering if the above proves hard to eyeball.
 </p>
 
 <h2 id="phone-0918">&sect;0-FL &mdash; The wiki on an actual phone (2026-09-18, checked in emulation only)</h2>

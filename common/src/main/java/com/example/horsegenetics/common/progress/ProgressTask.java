@@ -34,7 +34,7 @@ import java.util.Map;
  * title, or an unticked box reads as something the player failed to find.
  *
  * <h2>The group is a chapter of the book</h2>
- * {@link Group} is the seven chapters of the Getting Started tab, not a filing
+ * {@link Group} is the eight chapters of the Getting Started tab, not a filing
  * system of its own. Every task belongs to the chapter that teaches it, and
  * every <i>sub-chapter</i> of that tab ends in at least one of them - which is
  * what lets a sub-chapter be <i>finished</i> and say so in the contents list.
@@ -219,7 +219,40 @@ public enum ProgressTask {
     MILK_MARE(Group.HUSBANDRY, "Milk a mare",
             "Right-click a tamed adult mare with an empty bucket. Stallions decline, at some length."),
 
-    // ---- 3. Basic breeding --------------------------------------------
+    // ---- 3. Farming and haulage ---------------------------------------
+    // Every one of these is completed from the cart system in
+    // neoforge/carts/ - PLACE_CART from CartItem.use, HITCH_CART from
+    // AbstractDrawnEntity.setPulling, and the six DRIVE_ ones from addStats,
+    // which only runs when the cart has actually moved. So "build it and
+    // drive it" is literally what each of the six asks.
+    PLACE_CART(Group.FARMING, "Build a cart and set it down",
+            "Craft a cart wheel first - eight sticks around a plank - then any cart from planks and "
+                    + "wheels. Right-click the ground with it. Carts come in every wood you have, "
+                    + "including any a mod added."),
+    HITCH_CART(Group.FARMING, "Hitch a cart to a horse",
+            "Sit on a saddled horse, get close to a cart you have placed, and press R. Press it again "
+                    + "to unhitch. How much the cart slows the horse down is the horse's own business - "
+                    + "see its pulling ability on its information screen."),
+    DRIVE_WAGON(Group.FARMING, "Drive a wagon",
+            "The carriage, and the heaviest thing a horse pulls. Build one from stripped logs, planks "
+                    + "and four wheels, hitch it, and get it moving. Feed it chests for more storage and "
+                    + "five wool carpets for a roof - and a passenger on the box seat drives the horse."),
+    DRIVE_PLOW(Group.FARMING, "Drive a plow",
+            "Put a hoe inside it and till a field without touching a block yourself. A shovel makes dirt "
+                    + "paths instead and an axe strips logs. Right-click to toggle it on and off."),
+    DRIVE_REAPER(Group.FARMING, "Drive a reaper",
+            "It harvests mature crops it is drawn over - but only while a player is sitting on it, so "
+                    + "this one you really do have to ride."),
+    DRIVE_SEED_DRILL(Group.FARMING, "Drive a seed drill",
+            "Nine stacks of seeds, planted on any farmland it is drawn across. The other half of the plow."),
+    DRIVE_SUPPLY_CART(Group.FARMING, "Drive a supply cart",
+            "Fifty-four stacks on two wheels, and it shows what is in it - tools, flowers and paintings "
+                    + "are drawn sitting in the bed."),
+    DRIVE_ANIMAL_CART(Group.FARMING, "Drive an animal cart",
+            "Two seats, and small animals will climb in by themselves. The lightest thing to pull, so "
+                    + "the one even a weak horse can move at a decent pace."),
+
+    // ---- 4. Basic breeding --------------------------------------------
     NATURAL_COVER(Group.BASIC_BREEDING, "Let a stallion cover a mare",
             "Leave an entire stallion with a mare while she is in heat, both above nine-tenths health, "
                     + "neither ridden nor on a lead, and fewer than eight horses crowding her. He courts "
@@ -378,10 +411,11 @@ public enum ProgressTask {
     TRANSFER_PAPER(Group.PEOPLE, "Sign a transfer paper",
             "How a horse changes hands: sign it against one you own and whoever holds it can claim the horse.");
 
-    /** The headings the checklist is grouped under, in order - the book's seven chapters. */
+    /** The headings the checklist is grouped under, in order - the book's eight chapters. */
     public enum Group {
         WILD("Horses in the wild"),
         HUSBANDRY("Husbandry"),
+        FARMING("Farming and haulage"),
         BASIC_BREEDING("Basic breeding"),
         GENETICS("Genetics"),
         MAGIC("Magical horses"),

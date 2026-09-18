@@ -1,6 +1,9 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.cart.CartKind;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.carts.CartWood;
+import com.example.horsegenetics.neoforge.carts.HorseCarts;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -102,7 +105,7 @@ public final class TutorialPage {
     private TutorialPage() {
     }
 
-    /** The seven chapters, in page order. Built once per session; item stacks need the registry. */
+    /** The eight chapters, in page order. Built once per session; item stacks need the registry. */
     public static List<Chapter> chapters() {
         if (chapters == null) {
             chapters = build();
@@ -573,6 +576,106 @@ public final class TutorialPage {
                 List.of(ProgressTask.MILK_MARE)));
 
         out.add(new Chapter("Husbandry", List.copyOf(husbandry)));
+
+        // ------------------------------------------------------------------
+        // 3. Farming and haulage - the carts, and the first chapter that
+        // teaches a *stat* rather than a procedure. It sits here, straight
+        // after Husbandry, because everything in it needs a tamed saddled
+        // horse and nothing in it needs genetics: pulling ability is
+        // introduced from scratch below, as a thing you can see on a screen
+        // and feel on a road, long before Genetics explains where it came
+        // from. One sub-chapter per vehicle, each finished by actually
+        // driving that vehicle - the owner's call, 2026-09-18.
+        // ------------------------------------------------------------------
+        List<Step> farming = new ArrayList<>();
+
+        farming.add(new Step("Carts, and the wheel they all start with",
+                List.of("A cart wheel is eight sticks around a plank. Every cart in the game spends two "
+                                + "or four of them, so make several.",
+                        "After that a cart is planks, wheels, and whatever that particular cart needs - a "
+                                + "chest, a hopper, an iron ingot. They come in every wood you have, and "
+                                + "that includes woods added by other mods: if your pack has maple, it has "
+                                + "maple wagons.",
+                        "Right-click the ground to put one down. It sits there until a horse is put to it."),
+                List.of(new ItemStack(HorseCarts.WHEEL)), Art.NONE,
+                List.of(ProgressTask.PLACE_CART)));
+
+        farming.add(new Step("Pulling ability: why one horse is better in harness",
+                List.of("Sit on a saddled horse, stand near a cart, and press R. That is the whole thing - "
+                                + "press R again to unhitch.",
+                        "What happens next is the horse's business, not the cart's. Every horse has a "
+                                + "pulling ability scored from 1 to 10 - it is on its information screen, "
+                                + "beside Jump, with a word for what the number means. Five is ordinary. It "
+                                + "is inherited like everything else, so it is something you can breed for.",
+                        "The rule is worth learning properly, because it decides which horses you keep: "
+                                + "pulling ability sets a ceiling, and speed decides how close you get to "
+                                + "it. A weak horse is capped on a heavy cart no matter how fast you breed "
+                                + "it - it simply cannot get the thing moving any harder. A very strong "
+                                + "horse with no speed never reaches the ceiling its shoulders could carry.",
+                        "So the best carthorse is neither specialist. A horse that is good at both beats "
+                                + "the strongest horse you own and the fastest horse you own, on the same "
+                                + "wagon, on the same road. Hold Shift on any cart to see what an ordinary "
+                                + "horse keeps pulling it, and look at the Draught block on a horse's own "
+                                + "screen to see what that horse would keep.",
+                        "One more thing the score buys: a horse at 6 or better carries two riders."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.SUPPLY_CART, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.HITCH_CART)));
+
+        farming.add(new Step("The wagon",
+                List.of("The carriage, and the heaviest thing a horse pulls - which makes it the honest "
+                                + "test of a horse. Stripped logs, planks and four wheels.",
+                        "It seats four. Feed it chests and its storage grows from thirty-six slots to "
+                                + "seventy-two to a hundred and eight; right-click five wool carpets onto "
+                                + "it for a roof in that colour.",
+                        "A passenger on the box seat drives the horse. On a horse strong enough for two "
+                                + "riders, that means a driver up front and somebody riding the horse "
+                                + "itself - which is the point at which it stops being a cart and starts "
+                                + "being a carriage."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.WAGON, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.DRIVE_WAGON)));
+
+        farming.add(new Step("The plow",
+                List.of("Put a hoe inside it and till a whole field without touching a single block "
+                                + "yourself - the horse walks, the ground turns over behind it.",
+                        "A shovel instead of a hoe makes dirt paths. An axe strips logs. Right-click the "
+                                + "plow to toggle it on and off, so you can drive it home without "
+                                + "ploughing up the road."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.PLOW, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.DRIVE_PLOW)));
+
+        farming.add(new Step("The seed drill",
+                List.of("The other half of the plow: it plants seeds on any farmland it is drawn across, "
+                                + "and holds nine stacks of them.",
+                        "Plow a field, drive the drill over it, and you have sown an acre in the time it "
+                                + "takes to walk across it."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.SEED_DRILL, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.DRIVE_SEED_DRILL)));
+
+        farming.add(new Step("The reaper",
+                List.of("Harvests mature crops it is drawn over, and drops them on the ground behind it.",
+                        "It only works while a player is sitting on it - so this is the one cart you "
+                                + "genuinely have to ride rather than merely pull."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.REAPER, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.DRIVE_REAPER)));
+
+        farming.add(new Step("The supply cart",
+                List.of("Fifty-four stacks on two wheels, one seat, and unlike a chest it shows what is "
+                                + "in it - tools, flowers and paintings are drawn sitting in the bed.",
+                        "It will fly a banner, as will the animal cart and the wagon. Right-click one "
+                                + "onto the back."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.SUPPLY_CART, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.DRIVE_SUPPLY_CART)));
+
+        farming.add(new Step("The animal cart",
+                List.of("Two seats for players or animals, and small animals will climb in by themselves "
+                                + "if you leave it standing among them.",
+                        "It is the lightest thing there is to pull, which makes it the one a horse with a "
+                                + "poor pulling score can still move at a respectable pace. Every cart has "
+                                + "a weight, and the tooltip tells you what that one costs."),
+                List.of(new ItemStack(HorseCarts.item(CartKind.ANIMAL_CART, CartWood.fallback()))), Art.NONE,
+                List.of(ProgressTask.DRIVE_ANIMAL_CART)));
+
+        out.add(new Chapter("Farming and haulage", List.copyOf(farming)));
 
         // ------------------------------------------------------------------
         // 3. Basic breeding - heats, covering and jars. No golden carrots:

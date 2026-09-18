@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "i": "minecraft:iron_ingot",
+    "l": "minecraft:crimson_slab",
+    "p": "minecraft:crimson_planks",
+    "s": "minecraft:stick",
+    "w": "horsegenetics:cart_wheel"
+  },
+  "pattern": [
+    "sl",
+    "spp",
+    "iww"
+  ],
+  "result": {
+    "count": 1,
+    "id": "horsegenetics:crimson_reaper"
+  }
+}
