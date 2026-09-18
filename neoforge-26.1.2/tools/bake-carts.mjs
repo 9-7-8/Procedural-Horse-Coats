@@ -64,7 +64,14 @@ export function recipe(cart, wood, suffix) {
     case 'seed_drill':
       return { key: { c: 'minecraft:chest', h: 'minecraft:hopper', p: planks, w: WHEEL }, pattern: ['pcp', 'php', 'wpw'] };
     case 'reaper':
-      return { key: { i: 'minecraft:iron_ingot', l: slab, p: planks, s: 'minecraft:stick', w: WHEEL }, pattern: ['sl', 'spp', 'iww'] };
+      // 'sl ' and not 'sl': a shaped recipe's rows must all be the same width,
+      // and a short one does not fail the row - it fails the whole file, at
+      // datapack load, with "Invalid pattern: each row must be the same width".
+      // Twelve woods' reapers were uncraftable for a release because of the
+      // missing space, and the only place it was ever said out loud was a red
+      // line in the server log that nothing was reading. GeneratedCarts has the
+      // same three rows for modded woods - change both.
+      return { key: { i: 'minecraft:iron_ingot', l: slab, p: planks, s: 'minecraft:stick', w: WHEEL }, pattern: ['sl ', 'spp', 'iww'] };
     case 'animal_cart':
       return { key: { p: planks, w: WHEEL }, pattern: ['ppp', 'ppp', 'wpw'] };
     case 'wagon':

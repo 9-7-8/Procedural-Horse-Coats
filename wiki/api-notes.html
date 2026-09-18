@@ -316,11 +316,32 @@
         Consumer&lt;DataComponentPatch.Builder&gt;)</code> is <code>@Deprecated(forRemoval)</code> in 26.1.2
         itself.</strong> Not "deprecated upstream and fine here" - the annotation is on the method in this SDK's
         own sources, and it is the overload every example uses. The live one is the three-argument
-        <code>Initializer</code>: <code>event.modify(item, (components, context, item) -&gt; ...)</code>. Worth
-        knowing what the event is <em>for</em>, which is the only reason this mod touches it: it fires once every
-        mod's items exist, so it is where you write a number that could not be known while your own items were
-        being registered. <code>ModdedArmour</code> registers a generated horse armour with iron's defence and
-        replaces it here with a value read off <em>another mod's</em> chestplate.</li>
+        <code>Initializer</code>: <code>event.modify(item, (components, context, item) -&gt; ...)</code>. The mod
+        no longer uses the event at all, for the reason directly below.</li>
+    <li id="components-not-bound"><strong><code>Item.components()</code> throws
+        <code>NullPointerException: Components not bound yet</code> for the whole of mod loading, and there is no
+        moment at which you can both read another item's components and still change your own.</strong> This cost
+        a release. <code>Item.components()</code> delegates to <code>Holder.Reference.components()</code>, which
+        is <code>Objects.requireNonNull</code> on a field bound during the <em>first datapack load</em>. So:
+        <ul>
+            <li><code>ModifyDefaultComponentsEvent</code> does not help, tempting as it looks &mdash; it is the
+                mechanism by which components are built, so nothing is bound while it is being dispatched. A read
+                in the handler body takes mod loading down with
+                <code>Failed to wait for future Registration events</code>.</li>
+            <li>Deferring the read into the three-argument <code>Initializer</code> does not help either, and
+                this is the part worth writing down because it looks like it should.
+                <code>DataComponentInitializers.build</code> runs <em>every</em> initializer into builders and
+                only then walks the results calling <code>bindComponents</code>, so during that pass no item is
+                bound &mdash; not the one you are initialising and not the one you wanted to read.</li>
+            <li><code>AddPackFindersEvent</code> is earlier still, so anything generating data from another mod's
+                items has the same problem one step sooner.</li>
+        </ul>
+        <code>Holder.areComponentsBound()</code> exists and <code>DefaultDataComponentsBoundEvent</code> fires
+        when it flips, but that is after defaults are frozen &mdash; a notification, not a hook. <strong>The
+        practical rule: anything you need about another mod's item at load time must come from its registry id,
+        or from its jar, or not at all.</strong> <code>MaterialScan</code> reads jars for exactly this reason.
+        Verified 2026-09-18 by reading <code>DataComponentInitializers</code> and <code>Holder</code> in the
+        26.1.2 sources, and on a dedicated server with a synthetic modded-metal mod installed.</li>
     <li id="armor-material"><strong><code>ArmorMaterial</code> is a plain record you can just construct, and
         <code>Item.Properties.horseArmor(material)</code> does the rest.</strong> The record is
         <code>(durability, Map&lt;ArmorType, Integer&gt; defense, enchantmentValue, equipSound, toughness,

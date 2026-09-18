@@ -135,7 +135,11 @@ final class GeneratedCarts {
                 key.addProperty("i", "minecraft:iron_ingot");
                 key.addProperty("l", slab);
                 key.addProperty("s", "minecraft:stick");
-                pattern.add("sl");
+                // "sl " and not "sl" - every row of a shaped recipe must be the
+                // same width, and a short one throws out the whole recipe file
+                // at datapack load. See the note in tools/bake-carts.mjs, which
+                // writes this same shape for vanilla's woods.
+                pattern.add("sl ");
                 pattern.add("spp");
                 pattern.add("iww");
             }

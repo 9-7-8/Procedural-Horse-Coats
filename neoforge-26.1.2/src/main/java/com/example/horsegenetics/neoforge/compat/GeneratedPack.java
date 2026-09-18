@@ -90,9 +90,15 @@ public final class GeneratedPack {
      * <p>Called from {@link #addPackFinders} rather than from the mod
      * constructor, and the difference matters: by the time a pack repository is
      * being assembled <b>every mod's items exist</b>, which is what lets
-     * {@code ModdedArmour.protectionFor} read another mod's chestplate and put
-     * the armour in the right one of the metalsmith's tiers. In the constructor
-     * it could only have guessed.
+     * {@link ModdedMaterials#itemExists} throw out the recipe ingredients that
+     * were only ever a declaration in somebody's tag file.
+     *
+     * <p><b>Items existing is not the same as items being readable</b>, and the
+     * difference is a crash. Every item's data components - its armour value,
+     * its rarity, its stack size - are bound during the first datapack load,
+     * which is after this. Anything here that asks another mod's item a question
+     * about itself gets {@code Components not bound yet} and takes mod loading
+     * down with it; see the note on {@code ModdedArmour}.
      *
      * <p>Fires once. The event comes round twice - once per pack type - and a
      * resource reload brings it round again.

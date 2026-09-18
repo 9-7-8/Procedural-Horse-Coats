@@ -536,40 +536,69 @@
         The <em>scan</em> happens in the mod constructor because it must. The
         <em>writing</em> happens later, when the pack repository is assembled, and the
         difference is load-bearing: by then every mod&rsquo;s items exist, which is what lets
-        the armour read another mod&rsquo;s chestplate to decide how strong it should be, and
-        what lets a recipe check that the item it names is actually registered.
+        a recipe check that the item it names is actually registered.
+    </p>
+    <p>
+        <strong>Existing is not the same as being readable</strong>, and the difference is a
+        crash. See <a href="#components-not-bound">below</a>.
     </p>
 </div>
 
 <h3 id="generated-strength">How strong a generated armour is</h3>
 
 <p>
-    Owner&rsquo;s call, in three tries, and <code>ModdedArmour.protectionFor</code> asks them
-    in this order:
+    A gem sits where diamond sits and an ingot sits where iron does, and that is the whole of
+    it. <code>ModdedArmour.protectionFor</code> is a pure function of the metal. Stated
+    plainly rather than dressed up: <strong>where an ore generates is not readable from a
+    jar</strong> &mdash; there is no depth to measure and no declaration to read &mdash; so
+    this is a guess about balance from the one signal there is, and it will sometimes be
+    wrong.
 </p>
-
-<ol>
-    <li><strong>What does their own chestplate give?</strong> Then this armour gets the
-        horse-body value of whichever <em>vanilla</em> material has the closest chestplate.
-        That is the honest translation of &ldquo;their tier&rdquo;: it says nothing about
-        horse armour, which their mod almost certainly has no opinion about, and everything
-        about where they put the metal.</li>
-    <li><strong>Otherwise a ladder</strong> &mdash; a gem where diamond sits, an ingot where
-        iron does, nudged a rung by the item&rsquo;s <code>Rarity</code>, and never above
-        netherite&rsquo;s. This is stated plainly rather than dressed up: <strong>where an ore
-        generates is not readable from a jar</strong>, so this is a guess about balance from
-        the two weakest signals there are and it will sometimes be wrong.</li>
-    <li><strong>Otherwise iron</strong>, the middle of the ladder and the thing a player is
-        least surprised by.</li>
-</ol>
 
 <p>
     Every vanilla rung is read out of <code>ArmorMaterials</code> at runtime rather than
-    written down, so a vanilla rebalance carries rather than silently diverging. The number
-    is written in <code>ModifyDefaultComponentsEvent</code>, which is the only moment both
-    halves of step 1 are answerable at once. The metalsmith&rsquo;s tier is the same ladder
-    &mdash; a stronger armour is a later trade &mdash; so a player who levels him up for the
-    good stuff finds that the good stuff is good.
+    written down, so a vanilla rebalance carries rather than silently diverging. The
+    metalsmith&rsquo;s tier is the same ladder &mdash; a stronger armour is a later trade
+    &mdash; so a player who levels him up for the good stuff finds that the good stuff is
+    good.
+</p>
+
+<h3 id="components-not-bound">Why it is not cleverer than that &mdash; and cannot be</h3>
+
+<p>
+    It used to be. Through <code>0.5.013</code>, <code>protectionFor</code> asked their own
+    chestplate what it was worth first and gave this armour the horse-body value of whichever
+    vanilla material came closest; the ladder was only the fallback, nudged a rung by the
+    ingot&rsquo;s <code>Rarity</code>. It was a better answer and it <em>does not work</em>,
+    for a reason worth writing down because it will come up again for anything that wants to
+    read another mod&rsquo;s item.
+</p>
+
+<p>
+    <strong>An item&rsquo;s armour value, its rarity and everything else about it is a data
+    component, and default components are bound exactly once &mdash; during the first datapack
+    load, long after every moment at which this mod can still say what its own items are
+    worth.</strong> <code>Item.components()</code> delegates to
+    <code>Holder.Reference.components()</code>, which until then throws
+    <code>NullPointerException: Components not bound yet</code>.
+</p>
+
+<ul>
+    <li><code>ModifyDefaultComponentsEvent</code> is <em>not</em> an exception. It is the
+        mechanism by which components are built, so nothing is bound while it is being
+        dispatched &mdash; which is where <code>0.5.013</code> died on a 319-jar pack.</li>
+    <li>Nor is deferring the read into the <code>Initializer</code> lambda it hands out.
+        <code>DataComponentInitializers.build</code> runs every initializer into builders and
+        only then binds them all, so during that pass no item is bound either.</li>
+    <li>Nor is pack-finder time, which is earlier still &mdash; the second place the old
+        version would have crashed, had the first not got there first.</li>
+</ul>
+
+<p>
+    So the ladder is the only thing askable at a moment we can still answer, and it is now
+    asked directly, at registration. The same constraint is why the metalsmith&rsquo;s tier
+    and the armour&rsquo;s value cannot disagree: they are one pure function, called from
+    three places with three different amounts of game in existence.
 </p>
 
 <h3 id="generated-trades">The metalsmith&rsquo;s trades are rewritten, not appended to</h3>
@@ -1375,11 +1404,12 @@
         because &ldquo;Biomes You&rsquo;ll Go Maple Double Fence Gate&rdquo; is worse to read
         for the far commoner case where there is only one maple &mdash; but the clash has not
         been seen and nobody has judged how bad it looks.</li>
-    <li><strong>The armour tier reads a <code>&lt;material&gt;_chestplate</code> by
-        name</strong>, which is a convention and not a contract. Nothing makes a mod name its
-        armour after its ingot; almost every mod does. When one does not, the ladder answers
-        instead &mdash; which is the right failure, but it has not been seen happening either
-        way.</li>
+    <li><strong>Every modded ingot is worth exactly iron and every modded gem exactly
+        diamond</strong>, with nothing in between and no way to tell a mod&rsquo;s endgame
+        alloy from its tier-one one. That is a real flattening and it is not an oversight
+        &mdash; <a href="#components-not-bound">nothing better is readable in time</a> &mdash;
+        but 167 metals at two values is a lot of sameness, and nobody has played with it to
+        say whether it reads as boring or as unobtrusive.</li>
 </ul>
 
 </article>

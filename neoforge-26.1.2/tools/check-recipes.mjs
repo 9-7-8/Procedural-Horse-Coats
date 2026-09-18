@@ -81,6 +81,39 @@ for (const name of readdirSync(RECIPES)) {
     problems.push(`${name}: no result id - this recipe produces nothing`);
   }
 
+  // A SHAPED pattern the game will refuse. All three of these throw out the
+  // whole recipe file at datapack load with one red line on a server nobody is
+  // reading, and the only symptom a player has is that the thing cannot be
+  // crafted - which is indistinguishable from not having found the recipe yet.
+  // Twelve reapers shipped uncraftable that way; this is here so the thirteenth
+  // does not.
+  if (Array.isArray(recipe.pattern)) {
+    const rows = recipe.pattern;
+    const widths = new Set(rows.map((r) => r.length));
+    if (widths.size > 1) {
+      problems.push(
+        `${name}: ragged pattern ${JSON.stringify(rows)} - every row must be the ` +
+          `same width, so pad the short ones with spaces`
+      );
+    }
+    if (rows.length > 3 || rows.some((r) => r.length > 3)) {
+      problems.push(`${name}: pattern ${JSON.stringify(rows)} does not fit a 3x3 grid`);
+    }
+    const keys = recipe.key || {};
+    for (const row of rows) {
+      for (const ch of row) {
+        if (ch !== " " && !(ch in keys)) {
+          problems.push(`${name}: pattern uses '${ch}', which the key does not define`);
+        }
+      }
+    }
+    for (const ch of Object.keys(keys)) {
+      if (!rows.join("").includes(ch)) {
+        problems.push(`${name}: key defines '${ch}', which the pattern never uses`);
+      }
+    }
+  }
+
   const key = slot(recipe);
   if (key === null) continue;
   if (!bySlot.has(key)) bySlot.set(key, []);
