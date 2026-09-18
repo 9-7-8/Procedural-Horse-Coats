@@ -136,6 +136,10 @@ Two rules about the backlog page, both learned the hard way:
 or five files each, and the game and the tools drift silently if you miss one.**
 The four lists are on `wiki/making-a-gene.html#contracts` - read it before you
 start, not after.
+**A double gate's asset shape is written twice**: `tools/bake-double-gates.mjs`
+for vanilla's woods at author time, `compat/GeneratedGates` for other mods'
+woods at run time. Change one, change the other - a drift shows as a modded
+gate that is a purple cube while every vanilla one is fine, and logs nothing.
 - **A gene or item page is three tabs** - `<section class="tab-panel"
   data-tab="gameplay|coding|science">` inside `article.doc`, per
   `wiki/tabs.js`. Gameplay is the default, is written for a player who does not
@@ -194,6 +198,7 @@ and fails *silently* when stale:
 | a wood, or any geometry, of the **double gates** | `node neoforge-26.1.2/tools/bake-double-gates.mjs` - then the recipe row below, since it writes recipes too. **It only writes**: removing a wood means deleting that wood's files and lang keys by hand | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, both `data/minecraft/tags/block/` files **and** the merged `lang/en_us.json` |
 | any file in `data/horsegenetics/recipe/` | `node neoforge-26.1.2/tools/bake-recipe-reference.mjs` | `assets/horsegenetics/recipe_reference.json` |
 | a **breed egg texture** in `assets/horsegenetics/textures/item/breed_egg/` | `node neoforge-26.1.2/tools/bake-breed-eggs.mjs` - it hard-fails on a filename that is not a breed id, since a case on a value no horse carries never draws | the regenerated `models/item/breed_egg/` **and** `items/breed_spawn_egg.json` |
+| `tools/villagers/equestrian.source.png`, the one piece of villager art | `tools/villagers/bake-profession-hats.ps1` - it writes **five** files: a hat colour per equestrian and the cowboy's own uncoloured copy. The hat is **two** rectangles on the sheet, crown and brim; recolouring only the crown gives a villager a teal hat with a brown underside | the five PNGs under `assets/.../textures/entity/villager/` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 | any `tools/stables/*.source.nbt`, **or `bake-stables.py` itself** | `python neoforge-26.1.2/tools/stables/bake-stables.py` | the regenerated `data/horsegenetics/structure/*.nbt` |
 

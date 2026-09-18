@@ -108,37 +108,35 @@ public final class DoubleGates {
     }
 
     private static void register(WoodType wood, String name, java.util.function.Supplier<Item> sourceGate) {
-        {
-            DeferredBlock<DoubleFenceGateBlock> block = ModBlocks.BLOCKS.registerBlock(
-                    name,
-                    properties -> new DoubleFenceGateBlock(wood, properties),
-                    // Vanilla's own fence gate properties. The sound is NOT set
-                    // here: FenceGateBlock's (WoodType, Properties) constructor
-                    // applies the wood's own soundType itself, so setting one
-                    // would only be a chance to set the wrong one.
-                    () -> BlockBehaviour.Properties.of()
-                            .mapColor(MapColor.WOOD)
-                            .strength(2.0F, 3.0F)
-                            .sound(SoundType.WOOD)
-                            .ignitedByLava()
-                            .forceSolidOn());
+        DeferredBlock<DoubleFenceGateBlock> block = ModBlocks.BLOCKS.registerBlock(
+                name,
+                properties -> new DoubleFenceGateBlock(wood, properties),
+                // Vanilla's own fence gate properties. The sound is NOT set
+                // here: FenceGateBlock's (WoodType, Properties) constructor
+                // applies the wood's own soundType itself, so setting one
+                // would only be a chance to set the wrong one.
+                () -> BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.WOOD)
+                        .strength(2.0F, 3.0F)
+                        .sound(SoundType.WOOD)
+                        .ignitedByLava()
+                        .forceSolidOn());
 
-            // useBlockDescriptionPrefix() or every one of these is named from an
-            // `item.horsegenetics.*` key that does not exist. Item.Properties
-            // defaults its descriptionId to the ITEM prefix, and BlockItem in
-            // 26.1.2 does NOT override getDescriptionId() to defer to its block -
-            // so a block.* lang key is simply never consulted. The mod's other
-            // block items paper over this by shipping the name under both
-            // prefixes; one line here beats twelve duplicate keys.
-            // DoubleGateItem rather than a plain BlockItem: it exists to say why
-            // a gate refused to go down when neither side had room, which used to
-            // be silent. See that class.
-            DeferredItem<BlockItem> item = ModItems.ITEMS.registerItem(name,
-                    p -> new com.example.horsegenetics.neoforge.item.DoubleGateItem(
-                            block.get(), p.useBlockDescriptionPrefix()));
+        // useBlockDescriptionPrefix() or every one of these is named from an
+        // `item.horsegenetics.*` key that does not exist. Item.Properties
+        // defaults its descriptionId to the ITEM prefix, and BlockItem in
+        // 26.1.2 does NOT override getDescriptionId() to defer to its block -
+        // so a block.* lang key is simply never consulted. The mod's other
+        // block items paper over this by shipping the name under both
+        // prefixes; one line here beats a duplicate key per gate.
+        // DoubleGateItem rather than a plain BlockItem: it exists to say why
+        // a gate refused to go down when neither side had room, which used to
+        // be silent. See that class.
+        DeferredItem<BlockItem> item = ModItems.ITEMS.registerItem(name,
+                p -> new com.example.horsegenetics.neoforge.item.DoubleGateItem(
+                        block.get(), p.useBlockDescriptionPrefix()));
 
-            GATES.add(new Gate(wood, sourceGate, block, item));
-        }
+        GATES.add(new Gate(wood, sourceGate, block, item));
     }
 
     /** Every gate: vanilla's twelve in vanilla's wood order, then the modded ones by id. */
