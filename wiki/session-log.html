@@ -27,6 +27,128 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-release-008">2026-09-17, late &mdash; A long run of small things, and 0.5.008 out the door</h2>
+
+<p>
+    Nine commits and a release, mostly of things that change what an <em>ordinary</em> horse
+    or an ordinary village is like rather than adding anything new to find. The through-line
+    was not planned: four separate items turned out to be a case of the mod contradicting
+    something it had already written down about itself.
+</p>
+
+<h3>Breed spawn eggs get art, without becoming forty-five items</h3>
+
+<p>
+    Forty-five drawn eggs came in. The item cannot be one per breed &mdash; a breed dropped
+    into <code>.minecraft/phc/breeds/</code> after the jar was built has no registry entry
+    and must still get an egg &mdash; so the art is chosen by a
+    <code>minecraft:select</code> on the breed component's <em>value</em>, with the old
+    vanilla-egg model as the fallback every other breed takes.
+    <code>tools/bake-breed-eggs.mjs</code> derives the cases and the per-breed models from
+    the textures on disk, and <strong>hard-fails on a filename that is not a real breed
+    id</strong> &mdash; two arrived spelled &ldquo;gypsey vanner&rdquo; and
+    &ldquo;halfinger&rdquo;, and a case on a value no horse carries never matches and never
+    draws, which is the kind of failure that ships.
+</p>
+
+<h3>Brindle was contradicting its own explanation</h3>
+
+<p>
+    The owner's note said brindle was &ldquo;backwards and inconsistent&rdquo; and should
+    need two copies. Making it so turned up <em>why</em> it read as inconsistent: the gene's
+    stated cause is <strong>X-inactivation mosaicism</strong> &mdash; the pattern is a record
+    of which X each patch of skin silenced, which is the whole reason the two sides of the
+    horse never match &mdash; and a stallion has one X, nothing to silence, and cannot be a
+    mosaic at all. Yet under the old one-copy rule he was the <em>common</em> case: 2% of
+    wild stallions against 0.04% of mares.
+</p>
+
+<p>
+    So <code>expressionOf</code> now counts to two instead of asking &ldquo;is every real
+    copy Brn&rdquo;, and the difference is the gene. Segregation is untouched; only which
+    genotypes paint moved, and the crosses invert accordingly &mdash; a carrier mare's sons
+    go from 50% brindle to none, a <code>Brn/Brn</code> mare's from 100% to none, and the
+    only road to a brindle filly now needs the allele from both sides. The frequency went
+    from 2% to 10% per X because p&sup2; of one sex is a far smaller number than the old
+    one-copy rate: at 2% the only horses that could show it were one mare in twenty-five
+    hundred. <strong>The pipeline golden moved exactly six rows, all of them
+    <code>brindle=Brn/Y</code>, and the new hash is byte-identical to the carrier's</strong>
+    &mdash; which is the proof that the stallion form now paints nothing.
+</p>
+
+<h3>The horseman needed no mixin, and that was the thing worth finding out</h3>
+
+<p>
+    Breed eggs on his counter were drawn from every breed in the game, so a Scandinavian
+    village sold Marwaris. The fix wanted to know <em>which</em> horseman was offering, and
+    the trades are fully data-driven &mdash; no <code>ItemListing</code>, no event to hook.
+    Reading 26.1.2's own sources settled it: <code>AbstractVillager</code> builds the trade
+    loot context with <code>THIS_ENTITY</code> set to the villager and
+    <code>LootContextParamSets.VILLAGER_TRADE</code> declares it required, so the loot
+    function can simply ask. It reuses the nearest-cowboy scan that already decides his
+    surname, so nothing new is stored and a cowboy who moves in changes the counter.
+</p>
+
+<p>
+    Where a region has no breed in a price band the trade is <strong>dropped</strong> rather
+    than widened or filled from the world pool &mdash; owner's call, taken against a measured
+    number: three of the ten regions have nothing in the commonest band. Both alternatives
+    lie, one about the price and one about the place.
+</p>
+
+<h3>Twins, appetite, mutation</h3>
+
+<ul>
+    <li><strong>Identical twins.</strong> Every twin pregnancy was two independent draws, so
+        every pair was fraternal. One pair in ten is now identical, and the owner's call was
+        <em>true clones</em> &mdash; the second embryo is not drawn at all, it IS the first,
+        epigenome included. Two things then fall out rather than being coded: an identical
+        pair can never be a colt and a filly, and it shares its lethal draw.</li>
+    <li><strong>Hunger follows the body.</strong> Linear in the scale, and the javadoc says
+        why it is not the metabolic exponent: real intake goes as mass<sup>0.75</sup> against
+        a body that cubes with scale, which would put the smallest ponies past a week between
+        meals. The honest reason is that the hunger pool is a fixed 100 for every horse, so
+        what the number says is how fast a stomach-ful goes.</li>
+    <li><strong>Mutation.</strong> One bred foal in a thousand takes a magical allele from
+        nothing; one in a million takes two. Foals only, which keeps
+        <code>MagicalVariant</code>'s rule intact. The roll sits at the end of the foal draw
+        so it shifts no other gene's inheritance, and before the eyes are forced so a mutated
+        gene that asks for an eye colour is honoured. Detection for the checklist compares
+        against both parents rather than storing a flag: it under-reports and never
+        over-reports, because every other allele a foal owns came from a parent.</li>
+</ul>
+
+<h3>Blight, four markings, and an empty intake folder</h3>
+
+<p>
+    <a href="gene-blight.html">Blight</a> is verdant's opposite and reuses its machinery
+    entirely &mdash; the same <code>spread</code> verb, one new vocabulary word, and the
+    judgement about which blocks may be eaten staying on the game side where it belongs. It
+    will not touch a crop or a planted sapling, the same line <code>melt</code> draws around
+    packed ice.
+</p>
+
+<p>
+    Four markings intaken. Two had to move priority: they were written at 263 and 264, both
+    taken, and 250&ndash;298 is solid, so they sit at 248/249 and paint about fifteen places
+    earlier than intended. <strong>Every coat in the golden is byte-identical</strong>; the
+    1,092 rewritten lines are genotype code strings that grew a locus, and not one hash
+    moved. The design documents that were sitting in intake are roadmap 24.10&ndash;24.13,
+    the two tool gaps filed with the markings joined the mask-parameter list, and
+    <code>Drag.md</code> turned out to be already covered &mdash; better &mdash; by 24.4.
+</p>
+
+<h3>The parity check had been red since flying shipped</h3>
+
+<p>
+    Running it for the first time in a while found the creator's schema mirror missing
+    <code>flight_true</code>, <code>flight_glide</code> and <code>cloud_walk</code> as well
+    as the new cover. Nothing had caught it because nothing runs the check but a person.
+    That is <a href="known-gaps.html#gap-269">gap 269</a>, and it is a different shape from
+    the stale-fixture problem: the oracle was current and correct, and simply was not
+    consulted.
+</p>
+
 <h2 id="d2026-09-17-flying">2026-09-17, night &mdash; Flying, and the effects bug that was hiding under it</h2>
 
 <p>

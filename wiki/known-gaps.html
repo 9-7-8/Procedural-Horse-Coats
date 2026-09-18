@@ -57,6 +57,23 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-269"><strong>Open, found 2026-09-17: the parity check only catches drift on the day somebody runs it.</strong>
+    <code>check-parity.mjs</code> was red and had been since <a href="gene-flying.html">flying</a>
+    shipped: the creator&rsquo;s <code>schema.js</code> mirror never gained
+    <code>flight_true</code>, <code>flight_glide</code> or <code>cloud_walk</code>, so the
+    creator offered a shorter list of traversal flags than the game accepts. It went unnoticed
+    for a full release because nothing runs the check but a person deciding to, and the
+    session that added the flags did not.
+    <strong>This is a different shape from <a href="#gap-13">gap 13</a>&rsquo;s stale
+    fixture</strong>, and worth keeping separate: there the oracle had gone out of date and
+    reported green while comparing against a record of the past. Here the oracle was current
+    and correct and would have failed immediately &mdash; it simply was not consulted. A
+    stale snapshot fails silently green; an unrun check does not fail at all.
+    <strong>The cheap fix</strong> is to make it not a decision: run <code>check-parity</code>
+    from the same place the goldens run, so adding a choice to an <code>AbilityType</code>
+    breaks a test rather than waiting for somebody to think of it. Until then the discipline
+    is the session-end routine, which is exactly what caught it this time &mdash; one release late.
+    Both lists are back in step and parity is green at 7,163 checks.</li>
 <li id="gap-268"><strong>Open, found 2026-09-17: an aggressive horse under a rider will not go to its target &mdash; only the buck half of the rule works.</strong>
     The owner's call when the aggression locus was built was that a saddle is no
     protection: a horse aggressive toward <em>riders</em> throws them off and comes for
