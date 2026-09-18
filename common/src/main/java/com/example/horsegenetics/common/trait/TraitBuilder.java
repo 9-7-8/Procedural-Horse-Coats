@@ -41,6 +41,7 @@ public final class TraitBuilder {
     private double health = HorseTraits.BASE_HEALTH;
     private double jump = HorseTraits.BASE_JUMP;
     private double scale = HorseTraits.BASE_SCALE;
+    private double pull = HorseTraits.BASE_PULL;
     private double scaleFactor = 1.0;
     private double magicalScaleFactor = 1.0;
     private double magicalSpeedFactor = 1.0;
@@ -72,6 +73,24 @@ public final class TraitBuilder {
     /** Body scale, added before any {@link #multiplyScale} - the height loci use this. */
     public TraitBuilder addScale(double delta) {
         scale += delta;
+        return this;
+    }
+
+    /**
+     * <b>Pulling ability</b>, in score points off a baseline of
+     * {@link HorseTraits#BASE_PULL}. Additive and never multiplied - there is no
+     * {@code multiplyPullUnclamped} and there should not be one.
+     *
+     * <p>The magical body stats multiply because they have to scale whatever the
+     * <i>natural</i> loci settled on, so a magically fast pony stays slower than
+     * a magically fast racehorse. Pull has no natural loci to compose with -
+     * {@code MagicPullGene} is the only thing that moves it - so multiplying
+     * would buy nothing and cost the one property that makes the number worth
+     * having, which is that a copy worth "+2.5" is worth two and a half points
+     * on every horse that inherits it.
+     */
+    public TraitBuilder addPull(double delta) {
+        pull += delta;
         return this;
     }
 
@@ -151,6 +170,7 @@ public final class TraitBuilder {
                 Math.max(HorseTraits.MIN_HEALTH, health * magicFactor(magicalHealthFactor)),
                 Math.max(HorseTraits.MIN_JUMP, jump * magicFactor(magicalJumpFactor)),
                 magical,
+                Math.max(HorseTraits.MIN_PULL, pull),
                 conditions);
     }
 
@@ -176,6 +196,10 @@ public final class TraitBuilder {
 
     double rawScale() {
         return scale;
+    }
+
+    double rawPull() {
+        return pull;
     }
 
     double rawSpeedFactor() {

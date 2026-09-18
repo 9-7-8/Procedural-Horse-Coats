@@ -5,8 +5,14 @@ import java.util.Optional;
 
 /**
  * <b>Everything a horse's genotype says about its body</b>, as plain data:
- * the three attribute values the game reads, the body scale, and the list of
- * {@link Condition}s it expresses.
+ * the three attribute values the game reads, the body scale, its pulling
+ * ability, and the list of {@link Condition}s it expresses.
+ *
+ * <p>{@link #pull()} is the odd one out and is meant to be: the other four are
+ * game units, while pull is a <b>1-10 score</b> on the scale a breed sheet is
+ * written in ({@link HorseTraits#BASE_PULL} is the ordinary horse). Nothing in
+ * {@code common/} converts it into anything; what a score is worth in cart
+ * loads belongs to whatever ends up reading it.
  *
  * <p>Produced by {@link HorseTraits#resolve}. It is a <b>pure function of the
  * genotype</b> - no RNG, no epigenetics, no entity state - which is the whole
@@ -21,7 +27,7 @@ import java.util.Optional;
  * That is one fact in one place, and it means a change to a gene's weights
  * takes effect on horses that already exist.
  */
-public record Traits(double speed, double health, double jump, double scale,
+public record Traits(double speed, double health, double jump, double scale, double pull,
                      List<Condition> conditions) {
 
     public Traits {

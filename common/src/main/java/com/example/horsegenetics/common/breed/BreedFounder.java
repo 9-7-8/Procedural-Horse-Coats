@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.trait.BreedStatTargets;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TargetBand;
@@ -67,14 +68,15 @@ import java.util.Set;
  */
 public final class BreedFounder {
 
-    /** The four magical body-stat gene keys, handled from the breed's stat bands. */
-    // Public because Mutation (common.genetics) excludes the same four loci for the
+    /** The five magical body-stat gene keys, handled from the breed's stat bands. */
+    // Public because Mutation (common.genetics) excludes the same five loci for the
     // same reason MagicalVariant does, and one list of them is better than two.
     public static final Set<String> BODY_STAT_KEYS = Set.of(
             "horsegenetics.body_size",
             "horsegenetics.magic_speed",
             "horsegenetics.magic_health",
-            "horsegenetics.magic_jump");
+            "horsegenetics.magic_jump",
+            "horsegenetics.magic_pull");
 
     private BreedFounder() {
     }
@@ -123,15 +125,20 @@ public final class BreedFounder {
             return Genome.of(stamp(base, forced), rng);
         }
 
-        // Size is drawn before the genotype pass because it decides the
-        // genotype: one copy of the size allele inside 0.7x-1.3x, two outside.
-        TargetBand sizeBand = breed.statTargets().band(StatAxis.SCALE);
-        double size = sizeBand == null ? Double.NaN : sizeBand.lerp(rng.nextFloat());
-
         // One strain for the whole founder, before any locus is drawn - that is
         // what makes "white with everything OR brown with half" a single choice
         // rather than a coin per gene. Null for a breed that has no strains.
+        //
+        // It is picked *first* because a strain may override the breed's stat
+        // scores (the dhampir's two pull at 9 and at 6), so there is no band to
+        // read until the strain is known.
         Breed.Strain strain = breed.pickStrain(rng);
+        BreedStatTargets targets = breed.statTargets(strain);
+
+        // Size is drawn before the genotype pass because it decides the
+        // genotype: one copy of the size allele inside 0.7x-1.3x, two outside.
+        TargetBand sizeBand = targets.band(StatAxis.SCALE);
+        double size = sizeBand == null ? Double.NaN : sizeBand.lerp(rng.nextFloat());
 
         Genotype g = base;
         for (Gene gene : Genes.codeOrder()) {
@@ -147,7 +154,7 @@ public final class BreedFounder {
                 continue;
             }
             if (BODY_STAT_KEYS.contains(key)) {
-                g = g.with(bodyStatPair(breed, gene, size));
+                g = g.with(bodyStatPair(targets, gene, size));
                 continue;
             }
             if (gene.feralOnly()) {
@@ -173,7 +180,8 @@ public final class BreedFounder {
         // Before the epigenome exists, so the magical copies get their numbers like any other allele.
         g = stamp(g, forced);
 
-        return stampBands(breed, stampStatTargets(breed, strain, Genome.of(g, rng), rng, size), rng);
+        return stampBands(breed,
+                stampStatTargets(breed, strain, targets, Genome.of(g, rng), rng, size), rng);
     }
 
     /** The forced pairs, in the order given; a later pair on the same locus wins. */
@@ -205,8 +213,8 @@ public final class BreedFounder {
      * gametes interchangeable, and half the interest in breeding one is that its
      * foals differ depending on which copy they drew.
      */
-    private static Genome stampStatTargets(Breed breed, Breed.Strain strain, Genome genome, Rng rng,
-                                           double size) {
+    private static Genome stampStatTargets(Breed breed, Breed.Strain strain, BreedStatTargets targets,
+                                           Genome genome, Rng rng, double size) {
         Epigenome epi = genome.epigenome();
         for (Gene gene : Genes.codeOrder()) {
             if (!BODY_STAT_KEYS.contains(gene.key())) {
@@ -215,7 +223,8 @@ public final class BreedFounder {
             if (breed.constrains(gene.key(), strain)) {
                 continue;   // the sheet named this locus's pairs outright - see roll()
             }
-            TargetBand band = breed.statTargets().band(axisOf(gene));
+            StatAxis axis = axisOf(gene);
+            TargetBand band = targets.band(axis);
             if (band == null) {
                 continue;
             }
@@ -223,12 +232,13 @@ public final class BreedFounder {
             if (pair.count(gene.defaultAllele()) == 2) {
                 continue;   // the breed pins this axis but the horse lost the allele
             }
-            // The gene sums its copies' deltas, so the total distance from 1.0 is
-            // what has to land in the band. The sign is the allele's job, so the
-            // stored numbers are always positive. Size's target was drawn before
-            // the genotype, because it chose how many copies there are.
-            boolean isSize = axisOf(gene) == StatAxis.SCALE;
-            double total = Math.abs((isSize ? size : band.lerp(rng.nextFloat())) - 1.0);
+            // The gene sums its copies' deltas, so the total distance from the
+            // axis's baseline is what has to land in the band - 1.0 for the four
+            // multiplier axes, 5.0 for the pull score. The sign is the allele's
+            // job, so the stored numbers are always positive. Size's target was
+            // drawn before the genotype, because it chose how many copies there are.
+            double target = axis == StatAxis.SCALE ? size : band.lerp(rng.nextFloat());
+            double total = Math.abs(target - axis.baseline());
             Epigenome.Copies c = epi.copies(gene);
             if (pair.count(gene.defaultAllele()) == 1) {
                 // One pushing copy: it carries the whole distance, and the wild
@@ -357,20 +367,21 @@ public final class BreedFounder {
             case "horsegenetics.magic_speed" -> StatAxis.SPEED;
             case "horsegenetics.magic_health" -> StatAxis.HEALTH;
             case "horsegenetics.magic_jump" -> StatAxis.JUMP;
+            case "horsegenetics.magic_pull" -> StatAxis.PULL;
             default -> throw new IllegalStateException(gene.key());
         };
     }
 
     // ------------------------------------------------------------------
 
-    private static AllelePair bodyStatPair(Breed breed, Gene gene, double size) {
+    private static AllelePair bodyStatPair(BreedStatTargets targets, Gene gene, double size) {
         StatAxis axis = axisOf(gene);
-        TargetBand band = breed.statTargets().band(axis);
+        TargetBand band = targets.band(axis);
         if (band == null) {
             return wild(gene);
         }
         // alleles(): index 0 is the "up" allele, 1 is "down", 2 is the wild type
-        Allele push = band.pushesUp() ? gene.alleles().get(0) : gene.alleles().get(1);
+        Allele push = band.pushesUp(axis.baseline()) ? gene.alleles().get(0) : gene.alleles().get(1);
         if (axis == StatAxis.SCALE && BreedStatCurve.heterozygousSize(size)) {
             return new AllelePair(push, gene.defaultAllele());
         }

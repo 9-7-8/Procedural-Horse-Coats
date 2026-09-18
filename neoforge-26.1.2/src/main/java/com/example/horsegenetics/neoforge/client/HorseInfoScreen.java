@@ -899,11 +899,13 @@ public final class HorseInfoScreen extends Screen {
             case HEALTH -> signed(term.health(), 1) + factor(term.healthFactor());
             case JUMP -> signed(term.jump(), 2) + factor(term.jumpFactor());
             case SCALE -> signed(term.scale(), 2) + factor(term.scaleFactor());
+            case PULL -> signed(term.pull(), 1);   // a score, and nothing multiplies it
         };
         boolean helps = switch (axis) {
             case SPEED -> term.speed() > 0 || term.speedFactor() > 1.0;
             case HEALTH -> term.health() > 0 || term.healthFactor() > 1.0;
             case JUMP -> term.jump() > 0 || term.jumpFactor() > 1.0;
+            case PULL -> term.pull() > 0;
             case SCALE -> true; // bigger is not better; size is just size
         };
         c.row(term.gene().name(), term.pair().toTokens(), delta.strip(),
@@ -928,6 +930,7 @@ public final class HorseInfoScreen extends Screen {
             case HEALTH -> "Max health";
             case JUMP -> "Jump strength";
             case SCALE -> "Size";
+            case PULL -> "Pulling ability";
         };
     }
 

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic pull &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic pull</h1>
+
+<p class="lede">
+    <strong>How much the horse can shift.</strong> The fifth magical body-stat
+    locus, beside <a href="gene-body-size.html">size</a>,
+    <a href="gene-magic-speed.html">speed</a>,
+    <a href="gene-magic-health.html">health</a> and
+    <a href="gene-magic-jump.html">jump</a> &mdash; and the one whose number is a
+    <strong>score out of ten rather than a multiplier</strong>. A horse carrying
+    nothing here pulls at <strong>5</strong>; a Shire pulls at 10 and a Falabella
+    at 1. Both copies count and they add, one allele positive and one negative.
+</p>
+
+<div class="note">
+    <span class="label">Nothing reads it yet</span>
+    <p>
+        The score is resolved, inherited and drifted like every other epigenetic
+        number, and no system consumes it. That is deliberate: what a pull score
+        is worth in cart loads is a decision for whatever ends up hitching a
+        horse to something, and is not a fact about the horse&rsquo;s genetics.
+    </p>
+</div>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_pull"></div>
+
+<h2 id="scale">The scale</h2>
+
+<p>
+    Pull is written and read on the same <strong>1&ndash;10 scale</strong> a
+    breed sheet scores its stats with, and nothing converts it in between. Five
+    is an ordinary horse. The draught breeds are the top of it &mdash;
+    <a href="breed-book.html">Shire, Percheron, Belgian Draft, Clydesdale and
+    Suffolk Punch all score 10</a> &mdash; and the miniatures the bottom, with
+    the Falabella and the American Miniature at 1.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Pull</th><th>Typical</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>unchanged</td><td>5.0</td></tr>
+        <tr><td><code>Strong/n</code></td><td><code>more</code></td><td>one copy&rsquo;s points</td><td>~5.5</td></tr>
+        <tr><td><code>Strong/Strong</code></td><td><code>double-more</code></td><td><strong>both</strong> copies&rsquo; points, added</td><td>~6.0</td></tr>
+        <tr><td><code>Weak/n</code></td><td><code>less</code></td><td>one copy&rsquo;s points off</td><td>~4.5</td></tr>
+        <tr><td><code>Weak/Weak</code></td><td><code>double-less</code></td><td>both copies&rsquo; points off</td><td>~4.0</td></tr>
+        <tr><td><code>Strong/Weak</code></td><td><code>balanced</code></td><td>the two cancel as far as they go</td><td>~5.0</td></tr>
+    </tbody>
+</table>
+
+<p>
+    The typicals are what an <em>unbred</em> horse carries. A breed&rsquo;s
+    founders are written to its score instead, so a wild-caught Shire is a 10
+    rather than a 6 &mdash; see <a href="#breeds">below</a>.
+</p>
+
+<h2 id="wild">Only heterozygotes are born wild</h2>
+
+<div class="codebox">
+<pre><code class="language-java">FounderTable.builder()
+        .weight(Strong, n, 40.0)
+        .weight(Weak,   n, 40.0)
+        .weight(n,      n, 20.0)
+        .build();</code></pre>
+</div>
+
+<p>
+    The same bargain the three additive stats make, and for the same reason:
+    <strong>80%</strong> of unbred horses carry one copy and <strong>no</strong>
+    unbred horse carries two of anything, so every doubled horse in the world is
+    something somebody bred.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_pull"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.magic_pull</dd></div>
+    <div><dt>Priority</dt><dd>149 (magical body band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Strong</span> <span class="allele dom">Weak</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; <strong>6 outcomes</strong>, one each</dd></div>
+    <div><dt>Inheritance</dt><dd><strong>codominant</strong> &mdash; both copies contribute and the points add</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Strong/n</code>, 40% <code>Weak/n</code>, 20% <code>n/n</code></dd></div>
+    <div><dt>Per copy</dt><dd>normal, mean <strong>0.5 points</strong>, &sigma; <strong>0.35</strong>, floor 0.05</dd></div>
+    <div><dt>Baseline</dt><dd><code>HorseTraits.BASE_PULL</code> = <strong>5.0</strong>; floor <code>MIN_PULL</code> = 0.5, no ceiling</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Never play-tested</span>
+    <p>
+        No screen shows pull and no system reads it, so there is nothing to look
+        at in game yet. What is pinned is pinned by
+        <code>MagicPullGeneTest</code>. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="why-not-abstract">Why it is not an <code>AbstractMagicStatGene</code></h2>
+
+<p>
+    It is that class&rsquo;s shape &mdash; a codominant locus, one allele up, one
+    down, a per-copy number written on the copy and inherited with it, both
+    copies added &mdash; and it differs in the two ways that matter.
+</p>
+
+<p>
+    <strong>The sum is added, not multiplied.</strong> Speed, health, jump and
+    scale multiply because they have to scale whatever the <em>natural</em> loci
+    settled on, so a magically fast pony stays slower than a magically fast
+    racehorse. Pull has no natural loci to compose with &mdash; this gene is the
+    only thing that moves it &mdash; so multiplying would buy nothing and cost
+    the one property that makes the number worth having, which is that a copy
+    worth <code>+2.5</code> is worth two and a half points on every horse that
+    inherits it. There is deliberately no <code>multiplyPullUnclamped</code>.
+</p>
+
+<p>
+    <strong>There is no vampiric allele.</strong> The other three carry one
+    because the Dhampir&rsquo;s strength had to travel with the horse. Pull
+    instead gives the Dhampir a <em>per-strain score</em> on its breed sheet
+    &mdash; see <a href="#dhampir">below</a>.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MagicPullGene.java</div>
+<pre><code class="language-java">@Override
+public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics,
+                       TraitBuilder out) {
+    double sum = signedDelta(pair.first(),  epigenetics.copy(0))
+               + signedDelta(pair.second(), epigenetics.copy(1));
+    if (sum != 0.0) {
+        out.addPull(sum);
+    }
+}</code></pre>
+</div>
+
+<p>
+    The contribution is signed &mdash; <code>Strong</code> positive,
+    <code>Weak</code> negative &mdash; so the whole combination table falls out
+    of one line and <code>Strong/Weak</code> cancels because a positive and a
+    negative are added, not because anything checks for it. Like every
+    codominant locus it asks its <code>GeneEpigenetics</code> for
+    <code>copy(0)</code> and <code>copy(1)</code> rather than for the expressed
+    copy, which would count one allele twice and the other not at all.
+</p>
+
+<h2 id="breeds">A breed&rsquo;s score reaches its founders</h2>
+
+<p>
+    <code>"pull": 10</code> in a breed file&rsquo;s <code>stats</code> block is
+    the number its horses resolve to. It is the one scored axis with <strong>no
+    curve in between</strong>: <code>BreedStatCurve.pullBand</code> is the score
+    padded out, where the three additive axes run their score through a
+    multiplier ceiling first. <code>BreedFounder</code> then makes the founder
+    homozygous for the pushing allele and splits the distance from 5.0 across its
+    two copies, unevenly, exactly as it does for the other four.
+</p>
+
+<p>
+    A breed scored within <strong>0.4</strong> of the baseline carries no pull
+    alleles at all rather than being forced homozygous for an allele worth
+    nothing &mdash; the same near-baseline rule the other axes follow. So a
+    breed written <code>"pull": 5</code> and a breed that omits pull entirely
+    produce the same horse; the difference is only whether the sheet says the 5
+    was a decision.
+</p>
+
+<h2 id="dhampir">The Dhampir, and why strains can score stats</h2>
+
+<p>
+    A <a href="breed-book.html#dhampir">white Dhampir</a> pulls at 9 and a seal
+    brown at 6. <strong>Copy count cannot say that.</strong> The other three stat
+    loci give the Dhampir its strength through the <code>Vmp</code> allele, where
+    one copy is worth half of two &mdash; but 9 is four times as far above the
+    baseline as 6 is, and two copies of anything are only ever worth twice one.
+</p>
+
+<p>
+    So a <code>Strain</code> carries its own optional <code>stats</code> block,
+    laid over the breed&rsquo;s axis by axis
+    (<code>Breed.StatScores.overlaidWith</code>), and the founder roll picks the
+    strain <em>before</em> it reads any band. The Dhampir is the only breed that
+    uses it today; any strain may.
+</p>
+
+<div class="codebox">
+<div class="filename">common/resources/horsegenetics/breeds/dhampir.json</div>
+<pre><code class="language-json">"strains": [
+  { "name": "White",      "weight": 1, "stats": { "pull": 9 }, "genes": { ... } },
+  { "name": "Seal brown", "weight": 9, "stats": { "pull": 6 }, "genes": { ... } }
+]</code></pre>
+</div>
+
+<h2 id="calibration">Where the numbers come from</h2>
+
+<p>
+    A copy is worth a bounded normal draw of mean <strong>0.5</strong> points,
+    &sigma; <strong>0.35</strong>, floored at 0.05 so a <code>Strong</code> copy
+    can never come out subtracting. That is the three additive stats&rsquo;
+    &ldquo;a tenth either way&rdquo; (mean 0.10 against a baseline of 1.0)
+    translated into score points against a baseline of 5.
+</p>
+
+<table class="data">
+    <thead><tr><th>Draw</th><th>One copy</th><th>Two copies</th></tr></thead>
+    <tbody>
+        <tr><td>&minus;6&sigma; (the floor)</td><td>5.05</td><td>5.1</td></tr>
+        <tr><td>mean</td><td>5.5</td><td>6.0</td></tr>
+        <tr><td>+1&sigma;</td><td>5.85</td><td>6.7</td></tr>
+        <tr><td>+6&sigma; (the bound)</td><td>7.6</td><td><strong>10.2</strong></td></tr>
+    </tbody>
+</table>
+
+<p>
+    The design range therefore tops out just past a score of ten at two maximal
+    copies &mdash; which is exactly where the breed sheets put a Shire. The two
+    agreeing is the calibration, not a coincidence: it means a breed&rsquo;s
+    stamped founders sit inside what the gene can produce on its own rather than
+    out on a tail it could never reach. Drift is clamped eight design-spans wide
+    rather than to the design range, so a line bred for pull can leave 10 behind
+    &mdash; there is no ceiling on <code>Traits.pull()</code>, only the 0.5 floor.
+</p>
+
+<h2 id="only">Deliberately pull only</h2>
+
+<p>
+    It moves no other number. A strong puller is not thereby fast, healthy, big
+    or springy &mdash; the five axes are bred independently, which is the whole
+    reason there are five loci rather than one.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-body.html">The horse&rsquo;s body</a>
+        <a href="gene-magic-jump.html">Magic jump</a>
+        <a href="breed-format.html">The breed file format</a>
+        <a href="breeds.html">Breeds</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicPullGene.java</code>,
+    <code>common/breed/BreedStatCurve.java</code>,
+    <code>common/trait/StatAxis.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

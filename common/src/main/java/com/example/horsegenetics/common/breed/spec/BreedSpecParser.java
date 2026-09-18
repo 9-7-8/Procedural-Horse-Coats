@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -226,12 +227,14 @@ public final class BreedSpecParser {
         Breed.StatScores s = breed.scores();
         String[][] axes = {
                 {"horsegenetics.magic_speed", "speed"}, {"horsegenetics.magic_jump", "jump"},
-                {"horsegenetics.magic_health", "health"}, {"horsegenetics.body_size", "size"}};
+                {"horsegenetics.magic_health", "health"}, {"horsegenetics.body_size", "size"},
+                {"horsegenetics.magic_pull", "pull"}};
         for (String[] axis : axes) {
             boolean scored = switch (axis[1]) {
                 case "speed" -> s.speed().isPresent();
                 case "jump" -> s.jump().isPresent();
                 case "health" -> s.health().isPresent();
+                case "pull" -> s.pull().isPresent();
                 default -> s.size().isPresent();
             };
             if (scored && breed.constrains(axis[0])) {
@@ -242,11 +245,15 @@ public final class BreedSpecParser {
     }
 
     /**
-     * {@code "strains": [{"name": "White", "weight": 1, "genes": {...}}, ...]}
+     * {@code "strains": [{"name": "White", "weight": 1, "stats": {...}, "genes": {...}}, ...]}
      *
      * <p>Each strain's {@code genes} is read exactly as the top-level block is,
      * and forgiven the same way. A strain with no genes is legal - it is "the
      * breed as written" at that weight.
+     *
+     * <p>Its optional {@code stats} block is laid <b>over</b> the breed's, axis
+     * by axis, rather than replacing it - so a strain says only what it differs
+     * on. See {@code Breed.StatScores.overlaidWith}.
      */
     private static void readStrains(Map<String, Object> root, Breed.Builder b,
                                     String source, Consumer<String> warn) {
@@ -257,7 +264,7 @@ public final class BreedSpecParser {
         for (int i = 0; i < list.size(); i++) {
             String at = "strains[" + i + "]";
             Map<String, Object> strain = asObject(list.get(i), at);
-            expectKeys(strain, Set.of("name", "weight", "genes"));
+            expectKeys(strain, Set.of("name", "weight", "genes", "stats"));
             String name = requireString(strain, "name");
             double weight = strain.containsKey("weight") ? asNumber(strain.get("weight"), at + ".weight") : 1.0;
             if (weight <= 0.0) {
@@ -267,24 +274,27 @@ public final class BreedSpecParser {
             Map<String, List<Breed.Combo>> pools = strain.containsKey("genes")
                     ? readPools(strain.get("genes"), at + ".genes", source, warn)
                     : new java.util.LinkedHashMap<>();
-            b.strain(name, weight, pools);
+            b.strain(name, weight, pools, readStrainStats(strain, at));
         }
     }
 
     /**
-     * {@code "stats": {"speed": 9, "jump": [4, 6], "health": 8, "size": [0.9, 1.1]}}
+     * {@code "stats": {"speed": 9, "jump": [4, 6], "health": 8, "size": [0.9, 1.1], "pull": 10}}
      *
-     * <p>Each of the three axes is a 1-10 score, written as a number or as a
-     * {@code [lo, hi]} range; {@code size} is a multiple of the baseline horse,
+     * <p>Each of the four scored axes is a 1-10 score, written as a number or as
+     * a {@code [lo, hi]} range; {@code size} is a multiple of the baseline horse,
      * written the same way. An absent axis is left wild, which is not the same
      * as a score of 5 - see {@code BreedStatCurve}'s near-baseline rule.
+     *
+     * <p>{@code pull} is the one score that is not run through a curve: it is
+     * the number the horse resolves to, on the same scale it is written in.
      */
     private static void readStats(Map<String, Object> root, Breed.Builder b) {
         if (!root.containsKey("stats")) {
             return;
         }
         Map<String, Object> stats = asObject(root.get("stats"), "stats");
-        expectKeys(stats, Set.of("speed", "jump", "health", "size"));
+        expectKeys(stats, Set.of("speed", "jump", "health", "size", "pull"));
         if (stats.containsKey("speed")) {
             double[] r = range(stats.get("speed"), "stats.speed");
             b.speed(r[0], r[1]);
@@ -303,6 +313,38 @@ public final class BreedSpecParser {
             }
             b.size(r[0], r[1]);
         }
+        if (stats.containsKey("pull")) {
+            double[] r = range(stats.get("pull"), "stats.pull");
+            b.pull(r[0], r[1]);
+        }
+    }
+
+    /**
+     * A strain's own {@code stats} block - the same shape as the breed's, and
+     * read into a bare {@link Breed.StatScores} rather than onto the builder
+     * because it is laid over the breed's rather than replacing it.
+     */
+    private static Breed.StatScores readStrainStats(Map<String, Object> strain, String at) {
+        if (!strain.containsKey("stats")) {
+            return Breed.StatScores.NONE;
+        }
+        String where = at + ".stats";
+        Map<String, Object> stats = asObject(strain.get("stats"), where);
+        expectKeys(stats, Set.of("speed", "jump", "health", "size", "pull"));
+        return new Breed.StatScores(
+                optRange(stats, "speed", where),
+                optRange(stats, "jump", where),
+                optRange(stats, "health", where),
+                optRange(stats, "size", where),
+                optRange(stats, "pull", where));
+    }
+
+    private static Optional<Breed.Range> optRange(Map<String, Object> stats, String key, String where) {
+        if (!stats.containsKey(key)) {
+            return Optional.empty();
+        }
+        double[] r = range(stats.get(key), where + "." + key);
+        return Optional.of(new Breed.Range(r[0], r[1]));
     }
 
     /**
@@ -491,7 +533,8 @@ public final class BreedSpecParser {
             "horsegenetics.body_size",
             "horsegenetics.magic_speed",
             "horsegenetics.magic_health",
-            "horsegenetics.magic_jump");
+            "horsegenetics.magic_jump",
+            "horsegenetics.magic_pull");
 
     // ------------------------------------------------------------------
     // small readers

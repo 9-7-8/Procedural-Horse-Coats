@@ -12,7 +12,8 @@
     "speed": 6,
     "jump": 6,
     "health": 8,
-    "size": [1.048, 1.143]
+    "size": [1.048, 1.143],
+    "pull": 7
   },
   "genes": {
     "horsegenetics.extension": [

@@ -18,8 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class BreedPlateTest {
 
-    private static final Set<String> BODY_STATS = Set.of("horsegenetics.body_size",
-            "horsegenetics.magic_speed", "horsegenetics.magic_health", "horsegenetics.magic_jump");
+    /**
+     * The stat-driven loci, which a founder carries because its breed's
+     * {@code stats} block said so rather than because magic leaked. Taken from
+     * {@code BreedFounder} rather than spelled out again: the last time this was
+     * its own copy of the list, adding a fifth body stat failed the test on a
+     * breed that was behaving perfectly.
+     */
+    private static final Set<String> BODY_STATS = BreedFounder.BODY_STAT_KEYS;
 
     /**
      * A breed is exactly its breed sheet: no founder of any breed carries a

@@ -312,6 +312,7 @@ public final class BreedingPreview {
             case HEALTH -> "Max health";
             case JUMP -> "Jump strength";
             case SCALE -> "Size";
+            case PULL -> "Pulling ability";
         };
     }
 
@@ -321,6 +322,8 @@ public final class BreedingPreview {
             case HEALTH -> "Several loci add into one number, and a disorder can take it back.";
             case JUMP -> "Several loci add into one number.";
             case SCALE -> "Height loci add; dwarfism multiplies, so it shrinks a draught horse too.";
+            case PULL -> "One locus, scored out of ten. Both copies count, so the two parents' "
+                    + "copies are what the foal has to choose between.";
         };
     }
 

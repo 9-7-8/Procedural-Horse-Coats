@@ -32,8 +32,12 @@ import java.util.List;
 public final class TraitBreakdown {
 
     /**
-     * One gene's contribution to the body, as the gene itself pushed it: four
-     * additive terms in attribute units and four multipliers.
+     * One gene's contribution to the body, as the gene itself pushed it: five
+     * additive terms and four multipliers.
+     *
+     * <p>Four of the additive terms are in attribute units; {@link #pull()} is
+     * in score points, and has no multiplier beside it because nothing
+     * multiplies pull - see {@link TraitBuilder#addPull}.
      *
      * <p>A multiplier of {@code 1.0} means the gene did not multiply that axis;
      * an additive term of {@code 0.0} means it added nothing. A gene that did
@@ -41,7 +45,7 @@ public final class TraitBreakdown {
      * list this class returns.
      */
     public record Term(Gene gene, AllelePair pair,
-                       double speed, double health, double jump, double scale,
+                       double speed, double health, double jump, double scale, double pull,
                        double speedFactor, double healthFactor, double jumpFactor, double scaleFactor,
                        List<Condition> conditions) {
 
@@ -50,7 +54,7 @@ public final class TraitBreakdown {
         }
 
         public boolean silent() {
-            return speed == 0.0 && health == 0.0 && jump == 0.0 && scale == 0.0
+            return speed == 0.0 && health == 0.0 && jump == 0.0 && scale == 0.0 && pull == 0.0
                     && speedFactor == 1.0 && healthFactor == 1.0 && jumpFactor == 1.0 && scaleFactor == 1.0
                     && conditions.isEmpty();
         }
@@ -62,6 +66,7 @@ public final class TraitBreakdown {
                 case HEALTH -> health != 0.0 || healthFactor != 1.0;
                 case JUMP -> jump != 0.0 || jumpFactor != 1.0;
                 case SCALE -> scale != 0.0 || scaleFactor != 1.0;
+                case PULL -> pull != 0.0;
             };
         }
     }
@@ -104,6 +109,7 @@ public final class TraitBreakdown {
                     solo.rawHealth() - HorseTraits.BASE_HEALTH,
                     solo.rawJump() - HorseTraits.BASE_JUMP,
                     solo.rawScale() - HorseTraits.BASE_SCALE,
+                    solo.rawPull() - HorseTraits.BASE_PULL,
                     solo.rawSpeedFactor(), solo.rawHealthFactor(), solo.rawJumpFactor(),
                     solo.rawScaleFactor() * solo.rawMagicalScaleFactor(),
                     solo.rawConditions());

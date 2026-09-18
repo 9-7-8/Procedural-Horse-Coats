@@ -214,6 +214,22 @@ class ArcaneStockTest {
      * would hide - a forced pair that {@link ArcaneStock#showingTokens} failed to
      * report would let the next horse take it again, and the string would
      * quietly fill with duplicates that no other test here would see.
+     *
+     * <h2>What "distinct" can and cannot mean here</h2>
+     * The no-two-alike rule is about what the dealer <b>chose</b>: a token
+     * another horse already shows is never forced onto the next one. It is not
+     * and cannot be a promise about everything a horse <i>shows</i>, because the
+     * horse underneath is {@link Breeds#FERAL_MIXED} - an independent roll that
+     * may land on a showing magical pair nobody asked for, and may land on the
+     * same one twice in a string of ten. {@code CowboyHandler.takenCombos} says
+     * as much in its own comment.
+     *
+     * <p>This used to assert the stronger thing, and passed on the luck of one
+     * seed: across 400 seeds it holds for 44% of them, and <b>none</b> of the
+     * failures are a forced pair - they are all the feral roll coinciding. So
+     * the distinctness check below is on the forced tokens, which is the rule
+     * that exists; the read-back it is checked through is unchanged, so the bug
+     * the test was written for is still caught.
      */
     @Test
     void aWholeStringComesOutDistinctAndFullyMagical() {
@@ -231,16 +247,17 @@ class ArcaneStockTest {
                 assertTrue(covered.contains(family), "horse " + horse + " has no " + family.name() + " gene");
             }
 
+            // Read back off the finished genotype, not off the list asked for -
+            // that join is the point of this test.
             Set<String> showing = ArcaneStock.showingTokens(genome.genotype());
             for (AllelePair pair : forced) {
-                assertTrue(showing.contains(ArcaneStock.token(pair)),
-                        "horse " + horse + " lost " + ArcaneStock.token(pair) + " on the way through the founder");
-            }
-            for (String token : showing) {
+                String token = ArcaneStock.token(pair);
+                assertTrue(showing.contains(token),
+                        "horse " + horse + " lost " + token + " on the way through the founder");
                 assertFalse(herd.contains(token),
-                        "horse " + horse + " shares " + token + " with one already in the string");
+                        "horse " + horse + " was dealt " + token + ", which is already in the string");
+                herd.add(token);
             }
-            herd.addAll(showing);
         }
     }
 

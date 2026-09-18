@@ -61,6 +61,9 @@
     {
       "name": "White",
       "weight": 1,
+      "stats": {
+        "pull": 9
+      },
       "genes": {
         "horsegenetics.magic_white": [
           { "pair": "Wm/Wm", "weight": 100 }
@@ -85,6 +88,9 @@
     {
       "name": "Seal brown",
       "weight": 9,
+      "stats": {
+        "pull": 6
+      },
       "genes": {
         "horsegenetics.magic_white": [
           { "pair": "Wm/n", "weight": 100 }
@@ -110,6 +116,7 @@
   "notes": [
     "Two strains, never a mix: white with two copies of magic white, sun sensitivity, blood diet and the vampiric stat allele; or seal brown carrying one silent copy of each.",
     "Every founder has red irises with glowing scleras.",
-    "Two seal browns throw a magic white foal one time in four, but the whole animal - white, sun-sensitive, blood-drinking and doubled on all three stats - only one time in 4096."
+    "Two seal browns throw a magic white foal one time in four, but the whole animal - white, sun-sensitive, blood-drinking and doubled on all three stats - only one time in 4096.",
+    "Pull is the one stat the two strains carry as a score rather than as the vampiric allele: whites found at 9, seal browns at 6. Copy count cannot say that - two copies of anything are only ever worth twice one - so it is written on each strain instead."
   ]
 }

@@ -109,15 +109,21 @@ public final class BreedSpecWriter {
     // ------------------------------------------------------------------
 
     private static String stats(Breed.StatScores scores) {
+        return stats(scores, 2);
+    }
+
+    /** The {@code stats} block, or {@code null} when nothing is scored. */
+    private static String stats(Breed.StatScores scores, int indent) {
         if (scores.isEmpty()) {
             return null;
         }
         List<String> parts = new ArrayList<>();
-        scores.speed().ifPresent(r -> parts.add(field("speed", range(r), 4)));
-        scores.jump().ifPresent(r -> parts.add(field("jump", range(r), 4)));
-        scores.health().ifPresent(r -> parts.add(field("health", range(r), 4)));
-        scores.size().ifPresent(r -> parts.add(field("size", range(r), 4)));
-        return "{\n" + String.join(",\n", parts) + "\n  }";
+        scores.speed().ifPresent(r -> parts.add(field("speed", range(r), indent + 2)));
+        scores.jump().ifPresent(r -> parts.add(field("jump", range(r), indent + 2)));
+        scores.health().ifPresent(r -> parts.add(field("health", range(r), indent + 2)));
+        scores.size().ifPresent(r -> parts.add(field("size", range(r), indent + 2)));
+        scores.pull().ifPresent(r -> parts.add(field("pull", range(r), indent + 2)));
+        return "{\n" + String.join(",\n", parts) + "\n" + " ".repeat(indent) + "}";
     }
 
     /** The {@code herd} block, or {@code null} when the breed founds herds the ordinary way. */
@@ -172,6 +178,10 @@ public final class BreedSpecWriter {
             List<String> parts = new ArrayList<>();
             parts.add(field("name", quote(s.name()), 6));
             parts.add(field("weight", number(s.weight()), 6));
+            String strainStats = stats(s.scores(), 6);
+            if (strainStats != null) {
+                parts.add(field("stats", strainStats, 6));
+            }
             if (!s.genePools().isEmpty()) {
                 parts.add(field("genes", genes(s.genePools(), 6), 6));
             }

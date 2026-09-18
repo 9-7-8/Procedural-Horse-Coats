@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
@@ -34,12 +35,13 @@ import java.util.Set;
  */
 public final class BreedFounderLog {
 
-    /** Set from the breed's stat scores, not its gene list - see {@code BreedFounder}. */
-    private static final Set<String> BODY_STAT_KEYS = Set.of(
-            "horsegenetics.body_size",
-            "horsegenetics.magic_speed",
-            "horsegenetics.magic_health",
-            "horsegenetics.magic_jump");
+    /**
+     * Set from the breed's stat scores, not its gene list - see
+     * {@code BreedFounder}, which is also where the list comes from. It used to
+     * be a fifth hand-written copy, and the copy is what made adding pull log
+     * every breed founder in the world as carrying stray magic.
+     */
+    private static final Set<String> BODY_STAT_KEYS = BreedFounder.BODY_STAT_KEYS;
 
     private BreedFounderLog() {
     }

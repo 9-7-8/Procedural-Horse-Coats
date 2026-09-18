@@ -99,10 +99,28 @@ public record Breed(
      * everything, or seal brown with the eyes and one copy of each - never a mix
      * of the two. Owner's call, 2026-09-13.
      */
-    public record Strain(String name, double weight, Map<String, List<Combo>> genePools) {
+    /**
+     * A whole-founder variant of a breed - one choice made before any locus is
+     * drawn, so "white with everything, or brown with half of it" is a single
+     * decision rather than a coin per gene. See {@code BreedFounder.roll}.
+     *
+     * <p>{@link #scores()} overlays the breed's own {@code stats} block, axis by
+     * axis: an axis the strain names is the strain's, and every axis it is
+     * silent about stays the breed's. It exists because the dhampir's two
+     * strains pull at <b>9</b> and <b>6</b>, and a four-to-one split like that
+     * cannot come out of copy count - two copies of an allele are only ever
+     * worth twice one. Most strains name nothing here and are pure gene pools.
+     */
+    public record Strain(String name, double weight, Map<String, List<Combo>> genePools,
+                         StatScores scores) {
         public Strain {
             name = name == null ? "" : name;
             genePools = ordered(genePools);
+            scores = scores == null ? StatScores.NONE : scores;
+        }
+
+        public Strain(String name, double weight, Map<String, List<Combo>> genePools) {
+            this(name, weight, genePools, StatScores.NONE);
         }
     }
 
@@ -127,7 +145,7 @@ public record Breed(
     }
 
     /**
-     * The breed sheet's <b>declared</b> numbers - three 1-10 scores and a size
+     * The breed sheet's <b>declared</b> numbers - four 1-10 scores and a size
      * range in multiples of the baseline horse - kept as written rather than only as the
      * {@link TargetBand}s {@link BreedStatCurve} turns them into.
      *
@@ -139,20 +157,41 @@ public record Breed(
      * ({@link Breed#statTargets()}).
      */
     public record StatScores(Optional<Range> speed, Optional<Range> jump,
-                             Optional<Range> health, Optional<Range> size) {
+                             Optional<Range> health, Optional<Range> size,
+                             Optional<Range> pull) {
 
-        public static final StatScores NONE =
-                new StatScores(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        public static final StatScores NONE = new StatScores(Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty());
 
         public StatScores {
             speed = speed == null ? Optional.empty() : speed;
             jump = jump == null ? Optional.empty() : jump;
             health = health == null ? Optional.empty() : health;
             size = size == null ? Optional.empty() : size;
+            pull = pull == null ? Optional.empty() : pull;
         }
 
         public boolean isEmpty() {
-            return speed.isEmpty() && jump.isEmpty() && health.isEmpty() && size.isEmpty();
+            return speed.isEmpty() && jump.isEmpty() && health.isEmpty() && size.isEmpty()
+                    && pull.isEmpty();
+        }
+
+        /**
+         * {@code other}'s axes laid over this one's, axis by axis - what a
+         * {@link Strain} does to its breed's block. An axis {@code other} is
+         * silent about keeps this one's value, which is what makes a strain able
+         * to say "pull 9, everything else as written".
+         */
+        public StatScores overlaidWith(StatScores other) {
+            if (other == null || other.isEmpty()) {
+                return this;
+            }
+            return new StatScores(
+                    other.speed().isPresent() ? other.speed() : speed,
+                    other.jump().isPresent() ? other.jump() : jump,
+                    other.health().isPresent() ? other.health() : health,
+                    other.size().isPresent() ? other.size() : size,
+                    other.pull().isPresent() ? other.pull() : pull);
         }
     }
 
@@ -262,14 +301,26 @@ public record Breed(
      * declared score and the resolved band from being able to disagree.
      */
     public BreedStatTargets statTargets() {
-        if (scores.isEmpty()) {
+        return statTargets(null);
+    }
+
+    /**
+     * The bands a founder of {@code strain} is pinned to - the breed's scores
+     * with that strain's laid over them, axis by axis ({@link
+     * StatScores#overlaidWith}). {@code strain} may be {@code null}, for a breed
+     * that has none or a caller asking about the breed rather than a founder.
+     */
+    public BreedStatTargets statTargets(Strain strain) {
+        StatScores s = strain == null ? scores : scores.overlaidWith(strain.scores());
+        if (s.isEmpty()) {
             return BreedStatTargets.NONE;
         }
         BreedStatTargets.Builder b = BreedStatTargets.builder();
-        scores.speed().ifPresent(r -> b.band(StatAxis.SPEED, BreedStatCurve.bandFor(StatAxis.SPEED, r.lo(), r.hi())));
-        scores.jump().ifPresent(r -> b.band(StatAxis.JUMP, BreedStatCurve.bandFor(StatAxis.JUMP, r.lo(), r.hi())));
-        scores.health().ifPresent(r -> b.band(StatAxis.HEALTH, BreedStatCurve.bandFor(StatAxis.HEALTH, r.lo(), r.hi())));
-        scores.size().ifPresent(r -> b.band(StatAxis.SCALE, BreedStatCurve.sizeBand(r.lo(), r.hi())));
+        s.speed().ifPresent(r -> b.band(StatAxis.SPEED, BreedStatCurve.bandFor(StatAxis.SPEED, r.lo(), r.hi())));
+        s.jump().ifPresent(r -> b.band(StatAxis.JUMP, BreedStatCurve.bandFor(StatAxis.JUMP, r.lo(), r.hi())));
+        s.health().ifPresent(r -> b.band(StatAxis.HEALTH, BreedStatCurve.bandFor(StatAxis.HEALTH, r.lo(), r.hi())));
+        s.size().ifPresent(r -> b.band(StatAxis.SCALE, BreedStatCurve.sizeBand(r.lo(), r.hi())));
+        s.pull().ifPresent(r -> b.band(StatAxis.PULL, BreedStatCurve.pullBand(r.lo(), r.hi())));
         return b.build();
     }
 
@@ -350,6 +401,7 @@ public record Breed(
         private Optional<Range> jump = Optional.empty();
         private Optional<Range> health = Optional.empty();
         private Optional<Range> size = Optional.empty();
+        private Optional<Range> pull = Optional.empty();
         private final BreedBands.Builder bands = BreedBands.builder();
         private final List<String> notes = new ArrayList<>();
         private Optional<PriceRange> price = Optional.empty();
@@ -521,6 +573,20 @@ public record Breed(
         }
 
         /**
+         * How much the breed's horses can shift, 1-10. Unlike the three axes
+         * above this is <b>not</b> run through a curve - the score is the number
+         * the horse resolves to. See {@code MagicPullGene}.
+         */
+        public Builder pull(double score) {
+            return pull(score, score);
+        }
+
+        public Builder pull(double lo, double hi) {
+            this.pull = Optional.of(new Range(lo, hi));
+            return this;
+        }
+
+        /**
          * Where in the real world the breed comes from, as a lower-case token
          * ({@code "mexico"}, {@code "united_states"}). Spelled like an
          * {@code id} rather than as a display name because it is meant to be
@@ -554,7 +620,13 @@ public record Breed(
 
         /** Add a whole-founder variant - see {@link Strain}. */
         public Builder strain(String name, double weight, Map<String, List<Combo>> pools) {
-            strains.add(new Strain(name, weight, pools));
+            return strain(name, weight, pools, StatScores.NONE);
+        }
+
+        /** A strain that also overrides some of the breed's stat scores - see {@link Strain}. */
+        public Builder strain(String name, double weight, Map<String, List<Combo>> pools,
+                              StatScores scores) {
+            strains.add(new Strain(name, weight, pools, scores));
             return this;
         }
 
@@ -577,7 +649,7 @@ public record Breed(
         public Breed build() {
             return new Breed(id, name, country, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
-                    new StatScores(speed, jump, health, size), bands.build(),
+                    new StatScores(speed, jump, health, size, pull), bands.build(),
                     notes, price,
                     description, spawnTime, strains, magicalVariant, herd);
         }

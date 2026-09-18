@@ -1,11 +1,12 @@
 package com.example.horsegenetics.common.breed;
 
+import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TargetBand;
 
 /**
  * Turns a breed's <b>1&ndash;10 stat scores</b> and its <b>size range</b> into
- * {@link TargetBand}s for the four magical body-stat genes.
+ * {@link TargetBand}s for the five magical body-stat genes.
  *
  * <h2>The anchors</h2>
  * A score of <b>5</b> is the value the vanilla-calibrated baseline already
@@ -21,6 +22,13 @@ import com.example.horsegenetics.common.trait.TargetBand;
  * common floor for all three (a score-1 horse is a very slow, very fragile,
  * barely-hopping animal, but still a functioning one - the
  * {@code MAGICAL_MIN_FACTOR} guard is well clear).
+ *
+ * <h2>Pull is the score, uncurved</h2>
+ * Pulling ability is scored 1&ndash;10 like the three above, and is the one axis
+ * where the score <i>is</i> the resolved number: a breed scored {@code 10} wants
+ * its horses at a pull of {@code 10}, and {@link #pullBand} is that score padded
+ * out rather than run through a curve. Nothing converts it, because nothing in
+ * {@code common/} knows what a pull score buys - see {@code MagicPullGene}.
  *
  * <h2>Size</h2>
  * Body scale is not scored 1&ndash;10. A breed writes it directly, as a
@@ -69,13 +77,23 @@ public final class BreedStatCurve {
     private BreedStatCurve() {
     }
 
+    /**
+     * How far either side of {@link HorseTraits#BASE_PULL} a pull band has to
+     * sit before it counts as a target at all. Tight, because {@code 4} and
+     * {@code 6} are ordinary scores on the breed sheets and both have to
+     * survive; only a breed that wrote {@code 5} is saying "nothing special".
+     */
+    public static final double PULL_NEUTRAL = 0.4;
+
     /** The multiplier a single score maps to, for one of the three additive axes. */
     public static double factor(StatAxis axis, double score) {
         double ceil = switch (axis) {
             case SPEED -> SPEED_CEIL;
             case HEALTH -> HEALTH_CEIL;
             case JUMP -> JUMP_CEIL;
-            case SCALE -> throw new IllegalArgumentException("scale is not scored 1-10; use scaleBand");
+            case SCALE -> throw new IllegalArgumentException("scale is not scored 1-10; use sizeBand");
+            case PULL -> throw new IllegalArgumentException(
+                    "pull is a raw 1-10 score, not a multiplier; use pullBand");
         };
         if (score >= 5.0) {
             return 1.0 + (score - 5.0) / 5.0 * (ceil - 1.0);
@@ -160,23 +178,56 @@ public final class BreedStatCurve {
         return finish(Math.min(lo, hi), Math.max(lo, hi));
     }
 
+    /**
+     * <b>The pull band</b>, which is the score itself. Unlike the three additive
+     * axes there is no curve to apply: pull is stored and resolved on the same
+     * 1-10 scale the breed sheet writes, so a breed scored {@code 10} wants its
+     * horses at {@code 10} and the band is that number padded out.
+     *
+     * <p>Returns {@code null} for a breed sitting within {@link #PULL_NEUTRAL}
+     * of {@link HorseTraits#BASE_PULL}, which leaves the locus wild - the same
+     * near-baseline rule the other four axes follow, on the same reasoning: a
+     * breed that pulls like any other horse should carry no pull alleles rather
+     * than be forced homozygous for one worth nothing.
+     */
+    public static TargetBand pullBand(double loScore, double hiScore) {
+        return finish(Math.min(loScore, hiScore), Math.max(loScore, hiScore),
+                HorseTraits.BASE_PULL,
+                HorseTraits.BASE_PULL - PULL_NEUTRAL, HorseTraits.BASE_PULL + PULL_NEUTRAL);
+    }
+
+    public static TargetBand pullBand(double score) {
+        return pullBand(score, score);
+    }
+
     private static TargetBand finish(double lo, double hi) {
+        return finish(lo, hi, 1.0, NEUTRAL_LO, NEUTRAL_HI);
+    }
+
+    /**
+     * Pad, drop if near-baseline, and keep the result on one side of the
+     * baseline. Shared by all five axes; {@code baseline} is {@code 1.0} for the
+     * four multiplier ones and {@link HorseTraits#BASE_PULL} for the score - see
+     * {@link StatAxis#baseline()}.
+     */
+    private static TargetBand finish(double lo, double hi,
+                                     double baseline, double neutralLo, double neutralHi) {
         // pad a zero-width band so members of the breed still vary a little
-        if (hi - lo < 0.03) {
+        if (hi - lo < 0.03 * baseline) {
             double mid = (lo + hi) / 2.0;
-            double pad = Math.max(0.015, mid * 0.04);
+            double pad = Math.max(0.015 * baseline, mid * 0.04);
             lo = mid - pad;
             hi = mid + pad;
         }
-        if (lo >= NEUTRAL_LO && hi <= NEUTRAL_HI) {
+        if (lo >= neutralLo && hi <= neutralHi) {
             return null; // near baseline - leave the locus wild
         }
-        // keep the band on one side of 1.0 so the pushing allele stays consistent
-        if (lo < 1.0 && hi > 1.0) {
-            if ((lo + hi) / 2.0 >= 1.0) {
-                lo = Math.max(lo, 1.0);
+        // keep the band on one side of the baseline so the pushing allele stays consistent
+        if (lo < baseline && hi > baseline) {
+            if ((lo + hi) / 2.0 >= baseline) {
+                lo = Math.max(lo, baseline);
             } else {
-                hi = Math.min(hi, 1.0);
+                hi = Math.min(hi, baseline);
             }
         }
         return TargetBand.of(lo, hi);

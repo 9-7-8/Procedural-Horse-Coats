@@ -13,6 +13,7 @@ import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
+import com.example.horsegenetics.common.genetics.genes.MagicPullGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.ShadeGene;
@@ -164,7 +165,7 @@ public final class GeneCensusTool {
             Arrays.asList(AgoutiGene.KEY, ExtensionGene.KEY, ShadeGene.KEY);
 
     /**
-     * The four magical body-stat loci. A breed never names these in a pool -
+     * The five magical body-stat loci. A breed never names these in a pool -
      * {@code BreedFounder.bodyStatPair} derives the pair from the breed's
      * {@code stats} block - so the breeds column prints
      * {@link #MARKER_STATS} rather than the blank that pool-reading produces.
@@ -172,7 +173,8 @@ public final class GeneCensusTool {
      * the string list that {@code BreedFounder} and {@code BreedSpecParser} keep.
      */
     private static final List<String> BODY_STAT_KEYS = Arrays.asList(
-            MagicSizeGene.KEY, MagicSpeedGene.KEY, MagicHealthGene.KEY, MagicJumpGene.KEY);
+            MagicSizeGene.KEY, MagicSpeedGene.KEY, MagicHealthGene.KEY, MagicJumpGene.KEY,
+            MagicPullGene.KEY);
 
     /** What the breeds column says for a locus driven by the breed's stat scores. */
     private static final String MARKER_STATS = "set by stat scores";

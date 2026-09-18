@@ -39,6 +39,7 @@ import com.example.horsegenetics.common.genetics.genes.LutGene;
 import com.example.horsegenetics.common.genetics.genes.LycanGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
+import com.example.horsegenetics.common.genetics.genes.MagicPullGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSectoralHeterochromiaGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
@@ -386,6 +387,14 @@ public final class Genes {
     public static final MagicHealthGene MAGIC_HEALTH = new MagicHealthGene();
     public static final MagicJumpGene MAGIC_JUMP = new MagicJumpGene();
     /**
+     * The fifth body-stat locus, and the only one whose number is a <b>score</b>
+     * rather than a multiplier - see {@link MagicPullGene}. It sits apart from
+     * the four above because nothing in the game reads it yet: it is resolved,
+     * inherited and drifted like any other, and what a pull score is worth in
+     * cart loads belongs to whatever ends up hitching a horse to something.
+     */
+    public static final MagicPullGene MAGIC_PULL = new MagicPullGene();
+    /**
      * The <b>mechanical magical loci</b> - eight genes that paint nothing and
      * exist so that a breed can be described by what its horses <i>do</i> and
      * not only by what they look like.
@@ -648,7 +657,7 @@ public final class Genes {
             THIRD_EYE,
             NATURAL_ZEBRA, MARKINGS, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
-            MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
+            MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP, MAGIC_PULL,
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
             AGGRESSION, SKITTISH, MAGIC_NIGHT_WATCH, MAGIC_DAY_WATCH, SUN_SENSITIVITY,

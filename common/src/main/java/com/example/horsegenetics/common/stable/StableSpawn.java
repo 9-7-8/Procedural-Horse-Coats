@@ -85,9 +85,9 @@ public record StableSpawn(
     }
 
     /**
-     * The four magical loci that are <b>not</b> "magic" in the sense a stable
+     * The five magical loci that are <b>not</b> "magic" in the sense a stable
      * means it. They are how {@code BreedFounder} hits a breed's speed / health
-     * / jump / height bands, so clearing them would quietly delete the breed's
+     * / jump / height / pull bands, so clearing them would quietly delete the breed's
      * character, and forcing one homozygous would be a stat roll dressed up as a
      * glowing horse. Mirrors {@code BreedFounder.BODY_STAT_KEYS}, deliberately -
      * the two lists are the same list for two different reasons, and neither
@@ -97,7 +97,8 @@ public record StableSpawn(
             "horsegenetics.body_size",
             "horsegenetics.magic_speed",
             "horsegenetics.magic_health",
-            "horsegenetics.magic_jump");
+            "horsegenetics.magic_jump",
+            "horsegenetics.magic_pull");
 
     private static boolean isBodyStat(Gene gene) {
         return BODY_STAT_KEYS.contains(gene.key());

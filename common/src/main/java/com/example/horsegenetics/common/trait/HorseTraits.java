@@ -56,6 +56,19 @@ public final class HorseTraits {
     public static final double BASE_SCALE = 1.0;
 
     /**
+     * <b>Pulling ability</b> of an all-wild-type horse, on the same 1-10 scale a
+     * breed sheet scores its stats with. Five, because five is what "an ordinary
+     * horse" means everywhere else that scale is used.
+     *
+     * <p>Alone among the five numbers here it is <b>not</b> a game unit and
+     * nothing multiplies it: {@code MagicPullGene}'s copies each carry a value in
+     * <i>score points</i> and they add, so a horse's pull is readable as a score
+     * without a conversion. What a score is worth in cart loads is the cart
+     * layer's decision, not the genetics'.
+     */
+    public static final double BASE_PULL = 5.0;
+
+    /**
      * The floor on max health - half a heart. A genetic health value must never
      * resolve to zero: the attribute would be degenerate, and killing a horse
      * is the damage path's job. See {@code wiki/roadmap.html} §6.4.
@@ -69,6 +82,15 @@ public final class HorseTraits {
     /** Scale bounds. A dwarf bottoms out well inside these; they are a guard, not a design. */
     public static final double MIN_SCALE = 0.45;
     public static final double MAX_SCALE = 1.75;
+
+    /**
+     * The floor on pulling ability. A horse that pulls nothing at all is a cart
+     * that cannot be hitched rather than a weak horse, so the scale bottoms out
+     * just above zero and leaves "it will not move this load" to the cart layer.
+     * There is deliberately <b>no ceiling</b>: a line bred for pull is meant to
+     * keep going up, which is the whole reason the numbers live on the copies.
+     */
+    public static final double MIN_PULL = 0.5;
 
     /**
      * Scale bounds for a <b>magical</b> size gene, applied after the natural

@@ -294,6 +294,7 @@ window.HG.pages = {
                 { href: "gene-magic-fighter.html", text: "Magic fighter", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-health.html", text: "Magic health", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-magic-jump.html", text: "Magic jump", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-magic-pull.html", text: "Magic pull", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-magic-speed.html", text: "Magic speed", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-magic-swim-speed.html", text: "Magic swim speed", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-water-breathing.html", text: "Magic water breathing", kind: "magical", views: ["gameplay","coding","science"] },
