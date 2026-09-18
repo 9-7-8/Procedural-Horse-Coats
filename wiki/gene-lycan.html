@@ -68,6 +68,28 @@
     two different lines at once.
 </p>
 
+<h2 id="verified-flying-revert">A flying form comes back without falling</h2>
+
+<p>
+    <strong>Verified 2026-09-18, unattended.</strong> For as long as the test yard has had
+    lycans, every shifter in it was a wolf or a cow &mdash; so the branch that has to put a horse
+    back on the ground <em>from the air</em> had never run once, and the entry asking about it
+    could only say that nothing had died. A bat now stands in the LYCAN ROUND TRIP pen, and
+    across one dusk and dawn it was the only one of six shifters that needed the branch at all:
+</p>
+
+<pre><code>"LYCAN BAT" came back from a minecraft:bat inside blocks - moved -1, 0, 1 to 17, 129, 456
+"LYCAN BAT" back from a minecraft:bat at dawn | ... | round trip SAME</code></pre>
+
+<p>
+    So the revert detects an unsafe position and displaces the horse to a free one, and the
+    identity round trip is unaffected by it. Nothing died of <code>outOfWorld</code>; the single
+    death that night was LYCAN DOOMED's wolf, which is that pen's whole purpose. What is
+    <em>still</em> unexercised is the case the code calls <code>set down at</code> &mdash;
+    reverting over genuinely open air rather than inside a pen's blocks. The bat never leaves a
+    floored pen, so seeding one over the corridor is what would reach it.
+</p>
+
 <h2 id="identity">Identity survives the night</h2>
 
 <p>
