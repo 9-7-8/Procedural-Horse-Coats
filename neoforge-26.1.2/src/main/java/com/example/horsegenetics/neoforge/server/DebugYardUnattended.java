@@ -282,11 +282,19 @@ final class DebugYardUnattended {
     // ------------------------------------------------------------------
 
     private static final String WOLF = "horsegenetics.lycan=Wlf/Wlf";
+    /**
+     * A <b>flying</b> form, which no pen had. Gap 243 is half-answered because of
+     * it: six unattended hours killed nothing with {@code outOfWorld}, but every
+     * shifter in the yard was a wolf or a cow, so a revert that has to put a
+     * horse back on the ground from mid-air has never run once. A bat shifts,
+     * leaves the floor, and at dawn has to be set down somewhere.
+     */
+    private static final String BAT = "horsegenetics.lycan=Bat/Bat";
 
     /** A night as a wolf gives back the same horse: record, genome, epigenome, bond, age class. */
     private static void lycanRoundTrip(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 9, ROW_Z_D, "LYCAN ROUND TRIP", Blocks.GRASS_BLOCK.defaultBlockState(),
-                List.of("LYCAN ROUND TRIP", "two wolf lycans and", "a foal: the same", "horses at dawn"));
+                List.of("LYCAN ROUND TRIP", "wolf lycans and a", "BAT: the same", "horses at dawn"));
         water(level, gy, x0 + 3, z0 + 3);    // two clear of the walls: a cauldron against one is a step over it (gap 247)
         bond(horse(level, gy, x0 + 2.5, z0 + 4.5, Sex.MALE, WOLF, true, "LYCAN WOLF STALLION"), 70);
         bond(horse(level, gy, x0 + 6.5, z0 + 4.5, Sex.FEMALE, WOLF, true, "LYCAN WOLF MARE"), 35);
@@ -295,9 +303,15 @@ final class DebugYardUnattended {
             foal.setAge(-72_000);    // still a foal through the first night, so the dawn line tests baby=true
         }
         bond(foal, 90);
+        // Inside the existing footprint on purpose: the row is full (WERE-COW is
+        // seventeen wide beside it) and a pen that overlaps its neighbour would
+        // cost a whole unattended run to find.
+        bond(horse(level, gy, x0 + 4.5, z0 + 2.5, Sex.MALE, BAT, true, "LYCAN BAT"), 60);
         ActionTrace.log("test yard", "LYCAN ROUND TRIP: expect, per horse, '[trace] lycan | ... shifted into a"
                 + " minecraft:wolf at dusk' and then '... back from a minecraft:wolf at dawn | ... | round trip SAME';"
-                + " CHANGED on any of them is a FAIL");
+                + " CHANGED on any of them is a FAIL. LYCAN BAT is the flying half of gap 243: it must come back"
+                + " from a minecraft:bat at dawn with a '[trace] lycan | ... set down at' line, and must never die"
+                + " of outOfWorld");
     }
 
     /** A lycan killed in animal form dies as the horse: a death line, its armour on the ground, nothing left alive. */
