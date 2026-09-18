@@ -18,7 +18,8 @@
 <p class="eyebrow natural">Core <span class="sep">/</span> traits, size &amp; health</p>
 <h1>The horse&rsquo;s body</h1>
 <p class="lede">
-    Speed, max health, jump strength, body size, and the disorders a horse
+    Speed, max health, jump strength, body size, pulling ability, and the
+    disorders a horse
     expresses &mdash; all of it a <strong>pure function of the genotype</strong>.
     This page owns the machinery: the resolver, the baselines, how a gene
     contributes, the two kinds of lethal, and the server setting that governs
@@ -49,7 +50,7 @@
 
 <div class="codebox">
 <div class="filename">common/trait/Traits.java</div>
-<pre><code class="language-java">public record Traits(double speed, double health, double jump, double scale,
+<pre><code class="language-java">public record Traits(double speed, double health, double jump, double scale, double pull,
                      List&lt;Condition&gt; conditions) {
 
     Viability viability();              // derived: the worst severity in the list
@@ -192,6 +193,54 @@
     </p>
 </div>
 
+<h2 id="pull">Pulling ability, the one that is a score</h2>
+
+<p>
+    The fifth body number is <strong>pull</strong>, and it is not a game unit at
+    all. Speed, health, jump and scale are values the engine reads; pull is a raw
+    <strong>1&ndash;10 score</strong> on the same scale a
+    <a href="breeds.html#stats">breed sheet</a> is written in.
+    <code>HorseTraits.BASE_PULL</code> is <strong>5.0</strong> &mdash; an ordinary
+    horse &mdash; while a Shire is a 10 and a Falabella a 1.
+</p>
+
+<p>
+    <strong>It adds rather than multiplies.</strong> The one gene that moves it,
+    <a href="gene-magic-pull.html">magic pull</a>, hands
+    <code>TraitBuilder.addPull</code> the signed sum of its two allele copies, so
+    a copy worth <code>+2.5</code> is worth two and a half points on every horse
+    that inherits it. There is deliberately no
+    <code>multiplyPullUnclamped</code>: the other four axes multiply because they
+    have to scale whatever the natural loci settled on, and pull has no natural
+    loci to compose with. It is floored at <code>MIN_PULL</code> &mdash; a horse
+    that pulls nothing at all is a cart problem, not a horse &mdash; and has
+    <strong>no ceiling</strong>, so a line bred for it can leave 10 behind.
+</p>
+
+<p>
+    <strong>And nothing curves it.</strong> A breed writing
+    <code>"pull": 10</code> wants its horses at a pull of 10, and
+    <code>BreedStatCurve.pullBand</code> is that score padded out, where the three
+    additive axes run theirs through a multiplier ceiling first. It is the only
+    axis where the number on the sheet and the number on the horse are the same
+    number &mdash; which is why <code>StatAxis.baseline()</code> exists at all: a
+    band on pull is measured against 5.0 and a band on the other four against 1.0,
+    and everything that asks a band which way it pushes has to ask the axis what
+    ordinary <em>is</em>.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing reads it yet</span>
+    <p>
+        Pull is resolved, inherited and drifted exactly like every other
+        epigenetic number, and <strong>no system consumes it</strong>: it is
+        written to no attribute, shown on no screen, and asked about by nothing in
+        the game. That is deliberate rather than unfinished &mdash; what a pull
+        score is worth in cart loads is a decision for whatever ends up hitching a
+        horse to something, and is not a fact about the horse&rsquo;s genetics.
+    </p>
+</div>
+
 <h2 id="contributing">How a gene contributes</h2>
 
 <div class="codebox">
@@ -235,7 +284,8 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
 
 <p>
     A contribution is either <strong>additive</strong> (<code>addSpeed</code>,
-    <code>addHealth</code>, <code>addJump</code>, <code>addScale</code>) or a
+    <code>addHealth</code>, <code>addJump</code>, <code>addScale</code>,
+    <code>addPull</code>) or a
     <strong>scale multiplier</strong> (<code>multiplyScale</code>).
     <code>build()</code> applies every addition before every multiplication, and both
     operations are associative, so the result does not depend on the order genes are
@@ -256,8 +306,9 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
 </p>
 
 <p>
-    The four <a href="gene-body-size.html">magical body-stat genes</a> &mdash; size,
-    speed, health and jump &mdash; are the deliberate exception. Each carries a
+    Four of the five <a href="gene-body-size.html">magical body-stat genes</a>
+    &mdash; size, speed, health and jump &mdash; are the deliberate exception. Each
+    carries a
     per-copy percentage that has to <em>scale</em> whatever the natural loci
     settled on, so a magically fast pony is still slower than a magically fast
     racehorse. They go through <code>multiplyScaleUnclamped</code> and the three
@@ -265,6 +316,12 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
     <code>multiplyHealthUnclamped</code>, <code>multiplyJumpUnclamped</code>), every
     one applied after all additions and bounded only by the <code>MAGICAL_*</code>
     guards.
+</p>
+
+<p>
+    The fifth, <a href="gene-magic-pull.html">magic pull</a>, goes back to adding:
+    <a href="#pull">pull</a> is a score rather than a multiple of a game unit, and
+    there is no <code>multiplyPullUnclamped</code> for it to reach for.
 </p>
 
 <h3 id="epigenetic">The per-horse twin <span class="allele magical">2026-09-04</span></h3>
@@ -285,10 +342,11 @@ public interface GeneEpigenetics {
 <p>
     The plain interface is a pure function of the genotype, and for every natural gene
     that is exactly right: <code>p/p</code> is one particular pony and always the same
-    one. It cannot express the four
+    one. It cannot express the five
     <a href="gene-body-size.html">magical body-stat genes</a> at all, because the
     <em>point</em> of them is that two horses can both be &ldquo;big&rdquo; (or fast,
-    or hardy, or springy) and one of them be twice the other &mdash; which needs a
+    or hardy, or springy, or strong in the traces) and one of them be twice the
+    other &mdash; which needs a
     number that varies between horses carrying identical alleles.
 </p>
 
@@ -310,10 +368,10 @@ public interface GeneEpigenetics {
 <p>
     <strong>Two accessors, because a codominant gene needs both copies.</strong>
     <code>expressed()</code> answers "what does this horse show at this locus",
-    which is right wherever one locus produces one result. The four magical
-    body-stat genes cannot use it: their two alleles each contribute a percentage
-    and they <em>add</em>, so asking for the expressed copy would count one allele
-    twice and the other not at all. That is the same split
+    which is right wherever one locus produces one result. The five magical
+    body-stat genes cannot use it: their two alleles each contribute a number of
+    their own and those <em>add</em>, so asking for the expressed copy would count
+    one allele twice and the other not at all. That is the same split
     <a href="gene-mane-color.html">mane colour</a> needed on the coat side.
 </p>
 
@@ -361,9 +419,10 @@ public interface GeneEpigenetics {
 <h2 id="invisible">The non-coat genes cost the coat nothing</h2>
 
 <p>
-    All thirteen of them paint nothing &mdash; as do seven magical genes
-    (<a href="gene-milk.html">milk</a>, <a href="gene-verdant.html">verdant</a>,
-    <a href="gene-particle.html">particle</a> and the four
+    All thirteen of them paint nothing &mdash; as do the magical genes that never
+    paint either (<a href="gene-milk.html">milk</a>,
+    <a href="gene-verdant.html">verdant</a>,
+    <a href="gene-particle.html">particle</a> and the five
     <a href="gene-body-size.html">body-stat genes</a>), on the same terms: every
     combination is an
     <a href="genetics-model.html">expression</a> marked <code>wildType</code>. That is
@@ -674,6 +733,7 @@ public interface GeneEpigenetics {
 <tr><td>health</td><td><code>MAX_HEALTH</code></td><td>current HP clamped down, never healed for free on a reload</td></tr>
 <tr><td>jump</td><td><code>JUMP_STRENGTH</code></td><td>tracked for the first time</td></tr>
 <tr><td>scale</td><td><code>SCALE</code></td><td>vanilla scales the <b>model and the hitbox</b> from it &mdash; the one trait with a switch, <a href="#body-size"><code>body.size</code></a></td></tr>
+<tr><td><a href="#pull">pull</a></td><td>&mdash;</td><td><b>reaches the game nowhere.</b> There is no pulling attribute to write it to, and nothing else asks</td></tr>
 </tbody>
 </table>
 </div>
@@ -698,6 +758,9 @@ public interface GeneEpigenetics {
         with the same genotype are the same horse, full stop. Epigenetic variation
         (which would be inherited with the allele and still deterministic) is the
         obvious place to reopen this if the numbers ever feel too tidy.</li>
+    <li><strong>Nothing to pull.</strong> <a href="#pull">Pulling ability</a> is
+        resolved, inherited and drifted, and no cart, plough or sled reads it &mdash;
+        the score is built and its consumer is not.</li>
     <li><strong>No per-part scaling.</strong> Friesian dwarfism should shorten the
         limbs and leave the head; <code>SCALE</code> is one number for the whole
         entity. See <a href="roadmap.html#health-genes">the roadmap</a>.</li>

@@ -21,7 +21,12 @@
 
 <p class="lede">
     The magical version of <a href="gene-lcorl.html">LCORL</a> and
-    <a href="gene-hmga2.html">HMGA2</a>. <strong>Most horses in the world carry
+    <a href="gene-hmga2.html">HMGA2</a>, and the first of the <strong>five
+    magical body-stat genes</strong> &mdash; size,
+    <a href="gene-magic-speed.html">speed</a>,
+    <a href="gene-magic-health.html">health</a>,
+    <a href="gene-magic-jump.html">jump</a> and
+    <a href="gene-magic-pull.html">pull</a>. <strong>Most horses in the world carry
     it</strong>, with one copy, worth about a tenth either way &mdash; enough
     that a paddock has a visible range of sizes and no single horse looks odd.
     Two copies of the same kind <strong>add</strong>, and no wild horse is ever
@@ -127,6 +132,21 @@
     model &mdash; most genes collapse several combinations onto one row &mdash;
     and it is exactly what codominance is: every combination genuinely differs,
     so sharing any two rows would be a lie about the gene.
+</p>
+
+<p>
+    This gene is the pattern the other four body axes were built from.
+    <a href="gene-magic-speed.html">Magic speed</a>,
+    <a href="gene-magic-health.html">health</a> and
+    <a href="gene-magic-jump.html">jump</a> generalise it as
+    <code>AbstractMagicStatGene</code> and add a vampiric <code>Vmp</code> allele;
+    this one kept its own class, because <em>scale</em> carries a two-stage
+    natural clamp the others have no equivalent of.
+    <a href="gene-magic-pull.html">Magic pull</a> is the fifth and is the furthest
+    from all of them: it has this gene&rsquo;s three alleles and this gene&rsquo;s
+    founder table, but its two copies are <strong>added to a 1&ndash;10 score</strong>
+    rather than multiplied into a game unit, so nothing on this page below about
+    multiplying, clamping or the &times; tables carries over to it.
 </p>
 
 <h2 id="codominant">The percentages add</h2>
@@ -281,7 +301,8 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <h2 id="only-size">Deliberately size only</h2>
 
 <p>
-    It moves no other number &mdash; not speed, not health, not jump. A large
+    It moves no other number &mdash; not speed, not health, not jump, not
+    <a href="gene-magic-pull.html">pull</a>. A large
     horse is a spectacle and a stable problem, not a better horse, and the
     natural loci already own the trade between size and everything else.
 </p>

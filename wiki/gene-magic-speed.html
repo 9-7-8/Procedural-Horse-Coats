@@ -20,14 +20,16 @@
 <h1>Magic speed</h1>
 
 <p class="lede">
-    The magical version of the three natural speed loci &mdash; <a href="gene-mstn.html">MSTN</a>, <a href="gene-pdk4.html">PDK4</a> and <a href="gene-ckm.html">CKM</a>. One of the <strong>four magical
+    The magical version of the three natural speed loci &mdash; <a href="gene-mstn.html">MSTN</a>, <a href="gene-pdk4.html">PDK4</a> and <a href="gene-ckm.html">CKM</a>. One of the <strong>five magical
     body-stat genes</strong> &mdash; <a href="gene-body-size.html">size</a>,
     <a href="gene-magic-speed.html">speed</a>,
-    <a href="gene-magic-health.html">health</a> and
-    <a href="gene-magic-jump.html">jump</a> &mdash; and like the other three,
-    <strong>most wild horses carry a copy</strong>, worth about a tenth either
-    way. Two copies of the same kind <strong>add</strong>, and no wild horse is
-    ever born with two.
+    <a href="gene-magic-health.html">health</a>,
+    <a href="gene-magic-jump.html">jump</a> and
+    <a href="gene-magic-pull.html">pull</a> &mdash; and like the other three
+    multipliers, <strong>most wild horses carry a copy</strong>, worth about a
+    tenth either way. Two copies of the same kind <strong>add</strong>, and no
+    wild horse is ever born with two. (Pull is the odd one out: an additive
+    <em>score</em> rather than a multiplier, and with no vampiric allele.)
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -101,7 +103,7 @@
     </p>
 </div>
 
-<h2 id="family">One of a family of four</h2>
+<h2 id="family">One of a family of five</h2>
 
 <p>
     This gene is a thin subclass of <code>AbstractMagicStatGene</code>, which is
@@ -116,7 +118,19 @@
 </p>
 
 <p>
-    Because most wild horses carry a copy of all four, a wild-caught horse has a
+    <a href="gene-magic-pull.html">Magic pull</a> is the fifth axis, and it is
+    not this class either. The locus has the same shape &mdash; codominant, one
+    allele up, one down, a per-copy number inherited with the copy, both copies
+    added &mdash; but its sum is <strong>added to a 1&ndash;10 score</strong>
+    rather than multiplied into a game unit, and it has <strong>no
+    <code>Vmp</code> allele</strong> (the Dhampir gets its pull from a per-strain
+    score on the breed sheet instead). So the multiplier arithmetic, the vampiric
+    allele and the &times; tables below are this gene&rsquo;s and its two
+    <code>AbstractMagicStatGene</code> siblings&rsquo;, not pull&rsquo;s.
+</p>
+
+<p>
+    Because most wild horses carry a copy of all five, a wild-caught horse has a
     quiet, independent wobble on every axis at once, and a horse that is
     <em>remarkable</em> on any one of them is a breeding result rather than a
     catch.
@@ -225,9 +239,11 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <h2 id="only">Deliberately speed only</h2>
 
 <p>
-    It moves no other number. Not health, not jump, not size &mdash; a fast horse is just a fast horse. The natural loci already own the
+    It moves no other number. Not health, not jump, not size, not
+    <a href="gene-magic-pull.html">pull</a> &mdash; a fast horse is just a fast
+    horse. The natural loci already own the
     trade-offs between the stats; this gene is a clean multiplier on one axis so
-    that the four can be bred independently.
+    that the five can be bred independently.
 </p>
 
 <h3 id="verified">Verified</h3>

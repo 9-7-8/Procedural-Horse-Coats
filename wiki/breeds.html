@@ -162,8 +162,8 @@
     <td>Forced to <strong>wild type</strong>. A breed is visually unified &mdash; a Friesian is jet black because nothing switches a pattern or dilution on. A breed that <em>should</em> have a pattern lists it with a rate.</td></tr>
 <tr><td><strong>Disorder genes</strong> (ACAN, PLOD1, MET&hellip;)</td>
     <td>Forced <strong>clear</strong>. A breed carries exactly the disorders its sheet lists &mdash; the Quarter Horse names HYPP, PSSM1 and HERDA at their carrier rates, the Arabian SCID, CA and LFS &mdash; and nothing else ever turns up on a founder. There is no background rate. A foal can still inherit one from a parent of another line.</td></tr>
-<tr><td><strong>The four magical body-stat genes</strong> (size, speed, health, jump)</td>
-    <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder carry that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies - two copies for speed, health and jump; for size one copy between 0.7x and 1.3x and two outside it; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
+<tr><td><strong>The five magical body-stat genes</strong> (size, speed, health, jump, <a href="gene-magic-pull.html">pull</a>)</td>
+    <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder carry that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies - two copies for speed, health, jump and pull; for size one copy between 0.7x and 1.3x and two outside it; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
 <tr><td><strong>Other magical genes</strong> (mane/tail colour, healer, zebra, milk, light, particle, verdant&hellip;)</td>
     <td>Forced <strong>wild</strong>. A breed has the magic it names and no other &mdash; see <a href="#magic">where magic comes from</a>.</td></tr>
 <tr><td><strong>Any gene&rsquo;s epigenetic numbers</strong> (how far a splash covers, how wide a dorsal stripe is)</td>
@@ -175,13 +175,13 @@
 <p>
     A pool says <em>which allele</em>; a band says <em>how much</em>. Each gene declares
     named numbers on every allele copy, and a breed may pin any of them to a closed range
-    &mdash; the general form of what the stat bands already did for the four body axes.
+    &mdash; the general form of what the stat bands already did for the five body axes.
     Each founder gets a point inside the band on <strong>both</strong> copies, drawn
     separately so its two gametes are not interchangeable.
 </p>
 <p>
     Three things a band will not do, each warned about at load rather than silently
-    ignored: it cannot touch the four body-stat genes (those belong to the breed&rsquo;s
+    ignored: it cannot touch the five body-stat genes (those belong to the breed&rsquo;s
     stat scores), it cannot band a seed or a category (neither has a &ldquo;slightly
     more&rdquo;), and a value the gene does not declare is dropped the way an unknown gene
     is. See <a href="breed-format.html">the format page</a>.
@@ -202,6 +202,19 @@
 <tr><td>Jump</td><td>2.5 m</td><td>8.57 m</td><td>&times;3.43</td><td>&times;0.20</td></tr>
 </tbody>
 </table>
+<p>
+    <strong>Pull</strong> is scored 1&ndash;10 on the same sheet, and is the one score
+    that goes through <strong>no curve at all</strong>.
+    <code>BreedStatCurve.pullBand</code> is the number itself, padded out: a breed
+    written <code>"pull": 10</code> wants its horses at a
+    <a href="horse-body.html#pull">pull</a> of 10, because pulling ability is stored on
+    the very scale the sheet is written in and there is nothing to convert. The draught
+    breeds sit at the top of it and the miniatures at the bottom. Its near-baseline
+    window is tighter than the others&rsquo; &mdash; <code>PULL_NEUTRAL</code>, 0.4
+    either side of an ordinary horse&rsquo;s 5 &mdash; because 4 and 6 are ordinary
+    scores here and both have to survive; only a breed that wrote 5 is saying
+    &ldquo;nothing special&rdquo;, and its pull locus is left wild.
+</p>
 <p>
     <strong>Size</strong> is not scored; a breed writes it as a <strong>multiple of an
     ordinary horse</strong>, <code>"size": [lo, hi]</code>, and the range <em>is</em> the
@@ -228,9 +241,12 @@
     <strong>writes it onto that founder&rsquo;s two allele copies</strong> as
     ordinary epigenetic numbers. So a Thoroughbred reliably resolves near
     &times;2 speed even though two <code>Swift</code> copies on the ordinary
-    Gaussian would only reach &times;1.2. A band that would straddle 1.0 (a
-    near-baseline breed) is dropped and the locus is left wild, so the horse sits
-    exactly on the baseline.
+    Gaussian would only reach &times;1.2. A band that would straddle the axis&rsquo;s
+    baseline (a near-baseline breed) is dropped and the locus is left wild, so the
+    horse sits exactly on it. What &ldquo;baseline&rdquo; means is the axis&rsquo;s own
+    business &mdash; <code>StatAxis.baseline()</code> is 1.0 for the four multipliers
+    and <code>HorseTraits.BASE_PULL</code> for the pull score, so a Shire&rsquo;s pull
+    band is literally 9.6&ndash;10.4 rather than a multiple of anything.
 </p>
 <p>
     The two copies split the target <strong>unevenly</strong>, on purpose. Two
@@ -298,7 +314,7 @@
     which a breed sheet never has (<a href="#magic">above</a>).
 </p>
 <p>
-    The gene and the pair are drawn evenly from what is left once these are ruled out: the four body-stat loci (the
+    The gene and the pair are drawn evenly from what is left once these are ruled out: the five body-stat loci (the
     breed&rsquo;s stat scores own those), anything the breed&rsquo;s sheet or strains already name, feral-only
     curiosities, sex-linked genes (one pair has to fit mares and stallions alike), and anything that is a health
     condition. The pair always <em>shows</em>: never a wild type or a silent carrier. Every member of a herd, founding
@@ -447,6 +463,18 @@
     One consequence worth knowing: <strong>a pool on a body-stat locus wins over the
     breed&rsquo;s stat score</strong> for that axis, so a breed can pin the vampiric allele
     outright. The parser warns if a file does both.
+</p>
+<p>
+    <strong>A strain may also score its own stats.</strong> It carries an optional
+    <code>stats</code> block in the shape of the breed&rsquo;s, laid over it axis by axis
+    (<code>Breed.StatScores.overlaidWith</code>) so the strain names only what it differs
+    on, and the founder roll picks the strain <em>before</em> it reads any band. The
+    Dhampir is the only breed using it: its white strain
+    <a href="gene-magic-pull.html">pulls</a> at 9 and its seal brown at 6, and copy count
+    cannot say that &mdash; two copies of an allele are only ever worth twice one, and 9
+    sits four times as far above the baseline as 6 does. That is exactly why magic pull
+    has no vampiric allele where magic speed, health and jump do. See
+    <a href="breed-format.html#strain-stats">the format page</a>.
 </p>
 
 <h2 id="sources">Where a breed may come from</h2>
@@ -856,7 +884,7 @@
     <li><code>common/breed/BreedFounder</code> &mdash; rolls a founder <code>Genome</code> for a breed (start from <code>Genotype.random</code>, override the constrained / coat / body-stat / magical genes).</li>
     <li><code>common/breed/BreedLineage</code> &mdash; the label value object: pure / cross / <a href="#spliced">spliced</a> / mixed / feral, <code>combine</code>, <code>displayName</code>, token round-trip.</li>
     <li><code>common/genetics/SpliceOutcome</code> &mdash; did the splice carrot&rsquo;s allele actually reach the foal.</li>
-    <li><code>common/trait/{StatAxis,TargetBand,BreedStatTargets}</code> &mdash; the band types; <code>HorseTraits.resolve</code> takes a <code>BreedStatTargets</code>, and the four magical body-stat genes read it through <code>TraitBuilder.breedBand</code>.</li>
+    <li><code>common/trait/{StatAxis,TargetBand,BreedStatTargets}</code> &mdash; the band types, one <code>StatAxis</code> per magical body-stat gene. <code>StatAxis.baseline()</code> is what a band is measured against (1.0 for the four multipliers, <code>HorseTraits.BASE_PULL</code> for the pull score), which is why <code>TargetBand.pushesUp</code> takes it as an argument. Read by <code>BreedFounder</code> and <a href="#founder-only">nowhere else</a>.</li>
     <li><code>neoforge/server/BreedSpawnHandler</code> &mdash; a one-line <code>FinalizeSpawnEvent</code> hook that flags natural spawns.</li>
     <li><code>neoforge/server/HerdManager</code> &mdash; the deferred genome / record / <b>proximity</b> herd formation.</li>
     <li><code>neoforge/server/DebugHighlightHandler</code> &mdash; the F8 glow toggle.</li>

@@ -27,6 +27,113 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-pull">2026-09-18, after the full suite &mdash; A fifth body stat, and the split that copy count cannot say</h2>
+
+<p>
+    <strong>Pulling ability</strong>, ahead of the cart mod sitting in
+    <code>intake/</code>. A new locus, <code>horsegenetics.magic_pull</code> &mdash;
+    <code>Strong</code>, <code>Weak</code>, wild type &mdash; codominant, with a signed
+    number of points on each variant copy that add. See
+    <a href="gene-magic-pull.html">Magic pull</a>; the numbers live in the gene.
+</p>
+
+<p>
+    <strong>Two design calls, both the owner&rsquo;s.</strong> The first: pull is a raw
+    <strong>1&ndash;10 score</strong>, not a multiplier like the other four body stats
+    &mdash; <q>because it&rsquo;s going to be used by a different part of the mod</q>. That
+    turned out to be the load-bearing decision. The other four multiply because they have
+    to scale whatever the <em>natural</em> loci settled on, so a magically fast pony stays
+    slower than a magically fast racehorse. Pull has no natural loci to compose with, so
+    multiplying would have bought nothing and cost the one property worth having: that a
+    copy worth <code>+2.5</code> is worth two and a half points on every horse that
+    inherits it, readable off the copy without a conversion. <code>TraitBuilder</code>
+    gets <code>addPull</code> and deliberately no <code>multiplyPullUnclamped</code>.
+</p>
+
+<p>
+    <strong>The second call was forced by an arithmetic fact worth writing down.</strong>
+    The dhampir was to pull at <strong>9</strong> for the white strain and <strong>6</strong>
+    for the seal brown. The other three stat loci give the dhampir its strength through the
+    <code>Vmp</code> allele, where one copy is worth half of two &mdash; so the obvious move
+    was a fourth allele here too. It cannot work, and the reason is not a limitation of the
+    code: <strong>9 is four times as far above the baseline as 6 is, and two copies of
+    anything are only ever worth twice one.</strong> No fixed per-copy amount can produce a
+    4:1 split from a 2:1 mechanism. That is why pull has three alleles rather than four, and
+    why a <code>Strain</code> now carries its own optional <code>stats</code> block, laid
+    over the breed&rsquo;s axis by axis, with the founder roll picking the strain
+    <em>before</em> it reads any band. The dhampir is the only breed using it; any strain
+    may. Format on <a href="breed-format.html">the breed file format</a>.
+</p>
+
+<p>
+    <strong>Every breed on the roster is scored</strong>, from the owner&rsquo;s list.
+    Eleven breeds were not on it &mdash; the warmbloods, the trotters, Quarter Horse,
+    Pony of the Americas, Walkaloosa &mdash; and were scored by analogy with ones that
+    were, at the owner&rsquo;s direction rather than by guess. Worth noting that a breed
+    written <code>"pull": 5</code> and a breed that omits pull produce the same horse,
+    because the near-baseline rule drops a band that close to ordinary; the difference is
+    only whether the sheet records that the 5 was a decision.
+</p>
+
+<p>
+    <strong>Nothing reads <code>Traits.pull()</code>, on purpose.</strong> What a pull
+    score is worth in cart loads belongs to whatever ends up hitching a horse to
+    something, not to the genetics. That makes the gene <em>unobservable in game</em> &mdash;
+    there is no attribute to watch and no screen showing it, so it got no debug-yard pen:
+    the stat pens work by reading a named vanilla attribute&rsquo;s range across a pen, and
+    a pen that cannot answer its own question is worse than no pen. <code>MagicPullGeneTest</code>
+    is what holds it down instead &mdash; the arithmetic, the invisibility, a breed&rsquo;s
+    score reaching its founders, and the dhampir&rsquo;s two strains landing apart.
+</p>
+
+<p>
+    <strong>The interesting part was the wreckage, and none of it was the gene.</strong>
+    A new locus costs one extra draw per horse, which moves every seeded roll downstream of
+    it &mdash; and that shook out two tests that had been passing on luck.
+    <code>ArcaneStockTest</code> asserted that nothing a dealer&rsquo;s horse
+    <em>shows</em> repeats across the string. <code>ArcaneStock</code> never promised that:
+    it promises not to <em>force</em> a token another horse already has, and the horse
+    underneath is Feral Mixed, which may coincidentally roll one. Rather than reseed until
+    it passed, the rate got measured &mdash; a throwaway probe over 400 seeds said the old
+    assertion holds for <strong>44%</strong> of them, and <strong>none</strong> of the
+    failures involved a forced pair. So the assertion was the thing that was wrong, and it
+    now checks the rule that exists. <code>CowboyHandler.takenCombos</code> had conceded
+    exactly this in its own comment the whole time.
+</p>
+
+<p>
+    <strong>And the body-stat key list turned out to exist five times.</strong>
+    Four were findable by their own comments, which say they agree by test rather than by
+    import; the fifth, in <code>BreedFounderLog</code>, said nothing and was the expensive one &mdash; left alone it would
+    have logged <em>every breed founder in the world</em> as carrying stray magic, a false
+    positive in the one diagnostic you would go to when hunting stray magic. It and
+    <code>BreedPlateTest</code> now read <code>BreedFounder.BODY_STAT_KEYS</code> instead of
+    keeping their own. Two copies remain, and both say in a comment that they agree by test
+    rather than by import; those two have a reason (neither module should depend on the
+    other), which the two that were changed did not.
+</p>
+
+<p>
+    <strong>The re-bake also caught a stale artefact nobody was looking for.</strong>
+    <code>unverified-genes.txt</code> &mdash; the horse dimension&rsquo;s coat-check column
+    &mdash; gained <em>six</em> lines, and only one of them was pull. Blight, smoke scroll,
+    endless knot, paisley spill and stormvein all carry no <em>Verified</em> block and had
+    simply never been baked in, so the dimension was hiding five pens it should have been
+    showing. Exactly the failure mode the regenerate-what-you-invalidate table exists for,
+    found by regenerating for an unrelated reason. Pull itself lands in that file and
+    correctly produces no pen: <code>CoatCheckPlan</code> skips anything that paints
+    nothing, so the list can name a gene the column has nothing to show for.
+</p>
+
+<p>
+    <strong>Both coat goldens moved on the key only.</strong> A new locus lands in every
+    genotype code, so both files rewrite wholesale &mdash; which is exactly the shape a real
+    regression would also take. Checked before copying back rather than after: all
+    <strong>1&nbsp;086</strong> coats compose byte-identically once the new locus is stripped
+    from the key, and no existing bake row&rsquo;s hash changed, with the only new rows being
+    one per allele.
+</p>
+
 <h2 id="d2026-09-18-full-suite">2026-09-18, after the phone session &mdash; Everything run at once, and four red checks that were all the checks being wrong</h2>
 
 <p>

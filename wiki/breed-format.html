@@ -56,7 +56,7 @@
   "spawn_time": "any",
   "biomes": ["minecraft:forest", "minecraft:plains"],
   "price": [8, 14],
-  "stats": { "speed": 5, "jump": 5, "health": 7, "size": [0.95, 1.24] },
+  "stats": { "speed": 5, "jump": 5, "health": 7, "size": [0.95, 1.24], "pull": 7 },
   "genes": {
     "horsegenetics.extension": [
       { "pair": "E/E", "weight": 62 },
@@ -179,9 +179,11 @@
 </tr>
 <tr>
     <td><code>stats</code></td>
-    <td><code>speed</code>, <code>jump</code>, <code>health</code> as 1&ndash;10 scores
+    <td><code>speed</code>, <code>jump</code>, <code>health</code> and
+        <code>pull</code> as 1&ndash;10 scores
         (a number or <code>[lo, hi]</code>); <code>size</code> as a multiple of an ordinary
-        horse, a number or <code>[lo, hi]</code> &mdash; see <a href="#size">size</a></td>
+        horse, a number or <code>[lo, hi]</code> &mdash; see <a href="#size">size</a> and
+        <a href="#pull">pull</a></td>
     <td>every axis <strong>wild</strong>, which is not the same as a score of 5 &mdash;
         see <code>BreedStatCurve</code>&rsquo;s near-baseline rule.</td>
 </tr>
@@ -189,13 +191,16 @@
     <td><code>genes</code></td>
     <td>gene key &rarr; weighted <code>{ "pair": "E/e", "weight": 44 }</code> entries</td>
     <td>the locus is rolled <strong>wild</strong> if it paints, and left at its global
-        founder rate if it does not. A pool on one of the four body-stat genes
+        founder rate if it does not. A pool on one of the five body-stat genes
         <strong>wins over <code>stats</code></strong> for that axis.</td>
 </tr>
 <tr id="strains">
     <td><code>strains</code></td>
-    <td>an array of <code>{ "name": "White", "weight": 1, "genes": { &hellip; } }</code>;
-        each <code>genes</code> is read exactly as the top-level one</td>
+    <td>an array of <code>{ "name": "White", "weight": 1, "stats": { &hellip; },
+        "genes": { &hellip; } }</code>;
+        each <code>genes</code> is read exactly as the top-level one, and each
+        <code>stats</code> exactly as the top-level <code>stats</code> &mdash; see
+        <a href="#strain-stats">a strain that scores its own stats</a></td>
     <td>none. Each founder picks one strain by weight, and every gene the strain names
         is drawn from its pool instead of the breed&rsquo;s &mdash; so a whole founder is
         <em>this</em> or <em>that</em>, never half of each. A gene named only by another
@@ -295,9 +300,60 @@
     gene and every <strong>disorder</strong> (<code>HealthContribution</code>): a breed is
     exactly its sheet, with no stray magic and no background disorder rate. A breed that
     should sometimes carry a disorder names it, with the clear pair at the larger weight.
-    The four body-stat genes come from <code>stats</code>; the natural performance genes
+    The five body-stat genes come from <code>stats</code>; the natural performance genes
     keep their wild roll. Only <strong>Feral Mixed</strong>, the unbred population, rolls
     everything at random.
+</p>
+
+<h2 id="pull">Pull</h2>
+
+<p>
+    <code>stats.pull</code> is how much the breed&rsquo;s horses can shift, scored
+    <strong>1&ndash;10</strong> like speed, jump and health &mdash; a draught breed
+    writes <code>"pull": 10</code>, a miniature <code>"pull": 1</code>. It is the
+    <strong>one score with no curve between the sheet and the horse</strong>: where
+    the other three scores are run through a multiplier ceiling
+    (<code>BreedStatCurve.factor</code>), <code>pullBand</code> is the number itself,
+    padded out, and a founder resolves to it.
+    <a href="horse-body.html#pull">Pulling ability</a> is stored on the same 1&ndash;10
+    scale the sheet is written in, so there is nothing to convert.
+</p>
+
+<p>
+    The near-baseline rule is tighter here, and has to be:
+    <code>BreedStatCurve.PULL_NEUTRAL</code> drops a score within
+    <strong>0.4</strong> of an ordinary horse&rsquo;s 5, because <code>4</code> and
+    <code>6</code> are ordinary scores on these sheets and both have to survive. A
+    breed that wrote <code>"pull": 5</code> and a breed that left pull out produce
+    the same horse, with the locus left wild; the difference is only whether the
+    sheet says the 5 was a decision.
+</p>
+
+<h2 id="strain-stats">A strain that scores its own stats</h2>
+
+<p>
+    A <a href="#strains"><code>strains[]</code></a> entry may carry its own
+    <code>stats</code> block, in exactly the shape of the breed&rsquo;s. It is laid
+    <strong>over</strong> the breed&rsquo;s axis by axis rather than replacing it
+    (<code>Breed.StatScores.overlaidWith</code>), so a strain writes only what it
+    differs on and stays silent about the rest; the founder roll picks the strain
+    <em>before</em> it reads any band. Most strains name nothing here and are pure
+    gene pools.
+</p>
+
+<pre><code class="language-json">"strains": [
+  { "name": "White",      "weight": 1, "stats": { "pull": 9 }, "genes": { ... } },
+  { "name": "Seal brown", "weight": 9, "stats": { "pull": 6 }, "genes": { ... } }
+]</code></pre>
+
+<p>
+    That is the <a href="breed-book.html#dhampir">Dhampir</a>, and it is why the block
+    exists. Its other magical stats travel as a <code>Vmp</code> allele, where one
+    copy is worth half of two &mdash; but 9 is four times as far above the baseline as
+    6 is, and <strong>two copies of anything are only ever worth twice one</strong>.
+    Copy count cannot say &ldquo;nine and six&rdquo;, a per-strain score can, and that
+    is the reason <a href="gene-magic-pull.html">magic pull</a> has no vampiric allele
+    of its own.
 </p>
 
 <h2>Epigenetic bands</h2>
@@ -330,7 +386,7 @@
 
 <p class="note">
     Two things a band will not do, each warned about rather than silently ignored.
-    <strong>The four body-stat genes</strong> are owned by <code>stats</code>, which knows
+    <strong>The five body-stat genes</strong> are owned by <code>stats</code>, which knows
     about scores, sizes and which allele is the pushing one, so a band naming one of them
     is refused. And <strong>a value the gene does not declare</strong> is dropped the same
     way an unknown gene is.

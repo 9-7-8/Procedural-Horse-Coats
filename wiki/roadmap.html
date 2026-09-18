@@ -1698,6 +1698,36 @@
     now, which is what 23.2 was costed against not having.
 </p>
 
+<h3 id="pull-consumer">23.0 &mdash; Something has to read pulling ability</h3>
+
+<p>
+    <a href="gene-magic-pull.html">Magic pull</a> shipped on 2026-09-18 and
+    <strong>nothing consumes it</strong>. The genetics half is done and is not what is left
+    here: every horse resolves a pull score on a 1&ndash;10 scale, every breed is scored, and
+    the number inherits and drifts on the allele copies. What is unbuilt is the other end.
+</p>
+
+<ul>
+    <li><strong>The intended consumer is the cart mod</strong> sitting in <code>intake/</code>
+        as <code>usefulcarts-neoforge-26.1.2.zip</code> with an integration brief beside it.
+        That integration is its own piece of work and is not costed here; this item is only
+        the seam between the two.</li>
+    <li><strong>Whatever reads it first inherits two decisions the genetics deliberately did
+        not make.</strong> What a score is worth in load &mdash; the scale is calibrated so
+        that 5 is an ordinary horse and 10 is a draught breed, and nothing further.
+        And <strong>what happens above 10</strong>: <code>Traits.pull()</code> has a floor and
+        no ceiling on purpose, because drift is clamped far wider than the design range so a
+        line bred for pull is meant to keep climbing. A consumer that assumes a 1&ndash;10
+        bound will meet a 15 eventually.</li>
+    <li><strong>It needs somewhere to be seen.</strong> Until a screen prints it the number
+        cannot be checked by playing &mdash;
+        <a href="known-gaps.html#gap-277">gap 277</a>, and
+        <a href="verification.html#pull-0918">verification &sect;0-FM</a>, which is a
+        placeholder for a check nobody can run yet. The horse information screen's Health tab
+        already breaks the body down per gene and would take a pull row without new
+        machinery.</li>
+</ul>
+
 <h3 id="native-tack">23.1 Native tack &mdash; cheap in code, expensive in art</h3>
 
 <p>

@@ -58,6 +58,24 @@
 
 <ol>
 
+<li id="gap-277"><strong>Open, built 2026-09-18: pulling ability is a number nothing reads, shows, or can be checked against.</strong>
+    <a href="gene-magic-pull.html">Magic pull</a> resolves, inherits and drifts on every horse in the
+    world, and <strong>no system consumes it and no screen prints it</strong>. That is the intended
+    state &mdash; it was built ahead of the cart mod in <code>intake/</code>, and what a pull score is
+    worth in cart loads is the cart layer&rsquo;s decision &mdash; but it leaves a real gap rather than
+    a tidy one. <strong>An unread number cannot be wrong in any way anybody would notice</strong>, so
+    the 1&ndash;10 calibration, the per-copy spread and the breed scores are all unfalsifiable until
+    something reads them; <code>MagicPullGeneTest</code> pins that the code does what the code says,
+    which is a different claim. It also means the locus has <em>no debug-yard pen</em>: the stat pens
+    read a named vanilla attribute&rsquo;s range, pull is not an attribute, and a pen that cannot
+    answer its own question is worse than none.
+    <strong>The second half is the ceiling.</strong> <code>Traits.pull()</code> has a floor
+    (<code>MIN_PULL</code>) and deliberately none above &mdash; epigenetic drift is clamped eight
+    design-spans wide, so a line bred for pull is meant to run past 10 and will. Nothing downstream
+    exists yet to say what a 15 does, and whatever reads this number first inherits the job of
+    deciding. See <a href="verification.html#pull-0918">verification &sect;0-FM</a>, which is a
+    placeholder for a check that cannot be run yet rather than one nobody got to.</li>
+
 <li id="gap-276"><strong>Open, found 2026-09-18: the &times; on the AI draft dialog was reported as not closing it on a phone, and the cause was never found.</strong>
     Reported alongside the search panel that genuinely would not close
     (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/commit/8f60b638">fixed</a>: a
@@ -300,13 +318,22 @@
     The fix for the first is to ask Java which categories are viewable rather than naming two that are not; the other two
     are a line each. Nothing is <em>wrong</em> on screen today - which is why it is written down rather than fixed in the
     same pass.</li>
-<li id="gap-256"><strong>Open, found 2026-09-15: a strain can override gene pools but not stats, and a shipped breed already wants it to.</strong>
-    <code>Breed.Strain</code> carries a name, a weight and gene pools, and nothing else. The
+<li id="gap-256"><strong>Open, found 2026-09-15: three breeds whose strains differ by size still carry one size band spanning both types.</strong>
+    <strong>The mechanism this gap asked for now exists</strong> (2026-09-18): a <code>Strain</code>
+    carries its own optional <code>stats</code> block, overlaid on the breed&rsquo;s axis by axis, and
+    the founder roll picks the strain before it reads any band &mdash; including the size band, which is
+    drawn first because it decides how many copies of the size allele the founder gets. Format on
+    <a href="breed-format.html">the breed file format</a>. It was built for
+    <a href="gene-magic-pull.html#dhampir">the dhampir&rsquo;s pull scores</a>, not for this, which is
+    why <strong>what remains is the three breed files, and a caveat</strong>: the overlay is exercised
+    end to end for <code>pull</code> only, so the <em>size</em> path is the same code with nothing
+    using it. A breed adopting it is also the test of it.
+    <p>The three, and what each is still losing:</p>
+    <code>Breed.Strain</code> used to carry a name, a weight and gene pools, and nothing else. The
     <a href="breed-book.html">Chincoteague Pony</a>'s two strains are the stocky island type and the taller
     privately-bred sport type &mdash; and the height is half of what makes them different, so the file can only
     say the <em>white</em> differs and both come out the same size. The breed's notes say so rather than leaving
-    it to be noticed. It would be a small change to <code>BreedSpecParser</code>, <code>BreedSpecWriter</code>
-    and <code>BreedFounder</code>, and it should wait until a second breed wants it.
+    it to be noticed.
     <strong>A second breed now wants it (2026-09-15).</strong> The <a href="breed-book.html#plains">Budyonny</a>'s
     three historical types &mdash; Massive, Eastern and Middle &mdash; differ in size and substance and in
     essentially nothing else, so they are not strains here either: the file carries one size band spanning all
