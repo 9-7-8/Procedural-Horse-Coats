@@ -25,7 +25,7 @@
       {"id": "primitive-marks", "name": "Primitive markings", "pairs": ["d1/d1", "d1/d2"], "stage": "chestnut", "coverageMin": 13.4, "coverageMax": 14.5, "parts": ["head", "neck", "body", "mane", "tail"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": true, "sexes": ["male", "female"], "effects": false}
     ]},
     "horsegenetics.brindle": {"natural": true, "family": "NATURAL_COAT", "sexLinked": true, "outcomes": [
-      {"id": "brindle", "name": "Brindle", "pairs": ["Brn/Brn", "Brn/Y"], "stage": "bay", "coverageMin": 9.5, "coverageMax": 13.0, "parts": ["neck", "body", "front_legs", "back_legs"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": false, "onColour": true, "sexes": ["male", "female"], "effects": false}
+      {"id": "brindle", "name": "Brindle", "pairs": ["Brn/Brn"], "stage": "bay", "coverageMin": 9.5, "coverageMax": 13.0, "parts": ["neck", "body", "front_legs", "back_legs"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": false, "onColour": true, "sexes": ["female"], "effects": false}
     ]},
     "horsegenetics.sooty": {"natural": true, "family": "NATURAL_COAT", "sexLinked": false, "outcomes": [
       {"id": "extreme-sooty", "name": "Extreme sooty", "pairs": ["S2/S2"], "stage": "bay", "coverageMin": 27.5, "coverageMax": 31.0, "parts": ["head", "neck", "body"], "colorful": false, "blackOnly": true, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": true, "sexes": ["male", "female"], "effects": false},

@@ -22,10 +22,11 @@
 <p class="lede">
     Irregular <strong>white streaks</strong>, soft-edged and broken, running down from the
     topline and <strong>not matching from one side of the horse to the other</strong>. It
-    is the mod's <strong>only sex-linked gene</strong>, and that is the point of it: a
-    stallion has one <code>X</code>, so he carries one copy and can never be a carrier,
-    while a mare needs two. The trait runs visibly down one side of a pedigree in a way no
-    autosomal gene can.
+    is the mod's <strong>only sex-linked gene</strong>, and that is the point of it: it
+    takes <strong>two</strong> copies to show, and a stallion has one <code>X</code> and
+    so one copy &mdash; so <strong>every brindle horse is a mare</strong>, and every
+    stallion who has it at all is a carrier. The trait runs visibly down one side of a
+    pedigree in a way no autosomal gene can.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -37,10 +38,11 @@
     down from the back, and <strong>not matching on the two sides of the horse</strong>.
     That mismatch is the giveaway &mdash; no other pattern here does it.</p>
 <p><strong>It is inherited differently from everything else.</strong> It rides on the X
-    chromosome, so a stallion has only one copy: he either shows it or does not, and can
-    never carry it hidden. A mare needs two copies to show it and can carry one silently.
-    In practice that means it appears far more often in colts, and a mare can pass it to
-    sons who show it when she does not.</p>
+    chromosome, and it takes two copies to show. A mare has two X chromosomes and can
+    have both; a stallion has one, so he can never get there &mdash; <strong>only mares
+    are ever brindle</strong>, and any stallion carrying it hides it completely. That
+    makes him worth keeping: he gives his X to <em>every</em> daughter, so every filly he
+    ever throws carries it.</p>
 </div>
 
 <div class="gene-preview" data-gene="horsegenetics.brindle"></div>
@@ -73,7 +75,7 @@
     <div><dt>Combinations</dt><dd>6, of which 5 can occur (<code>Y/Y</code> cannot &mdash; every horse has an X) &mdash; 3 outcomes</dd></div>
     <div><dt>Outcomes</dt><dd>wild, <code>brindle-carrier</code> (a wild type), <code>brindle</code></dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>2% per <code>X</code> &mdash; so <strong>2% of wild stallions</strong> and <strong>0.04% of wild mares</strong></dd></div>
+    <div><dt>Wild frequency</dt><dd><code>BrindleGene.WILD_BRN_FREQUENCY</code> per <code>X</code> &mdash; so <strong>no wild stallions</strong> (showing takes two copies) and <code>p&sup2;</code> of wild mares</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat() (from a sex-aware table)</dd></div>
     <div><dt>Coat effect</dt><dd>white streaks over barrel, quarters, neck and upper legs &mdash; non-deterministic</dd></div>
     <div><dt>Field</dt><dd>coat.pattern.BlaschkoStripes</dd></div>
@@ -98,10 +100,10 @@
     <thead><tr><th>Combination</th><th>Who</th><th>Outcome</th><th>Effect</th></tr></thead>
     <tbody>
         <tr><td><code>n/n</code></td><td>mare</td><td>wild</td><td>Nothing</td></tr>
-        <tr><td><code>Brn/n</code></td><td>mare</td><td><code>brindle-carrier</code></td><td>Nothing shows &mdash; but half her sons are brindle</td></tr>
-        <tr><td><code>Brn/Brn</code></td><td>mare</td><td><code>brindle</code></td><td>The stripes</td></tr>
+        <tr><td><code>Brn/n</code></td><td>mare</td><td><code>brindle-carrier</code></td><td>Nothing shows &mdash; one copy is not two</td></tr>
+        <tr><td><code>Brn/Brn</code></td><td>mare</td><td><code>brindle</code></td><td>The stripes &mdash; the only horse that has them</td></tr>
         <tr><td><code>n/Y</code></td><td>stallion</td><td>wild</td><td>Nothing</td></tr>
-        <tr><td><code>Brn/Y</code></td><td>stallion</td><td><code>brindle</code></td><td>The stripes &mdash; one copy is all he has</td></tr>
+        <tr><td><code>Brn/Y</code></td><td>stallion</td><td><code>brindle-carrier</code></td><td>Nothing shows &mdash; one copy is all he can ever have</td></tr>
         <tr><td><code>Y/Y</code></td><td>&mdash;</td><td colspan="2">Cannot occur. Every horse takes an <code>X</code> from its dam.</td></tr>
     </tbody>
 </table>
@@ -110,36 +112,49 @@
 
 <p>
     A stallion gives his <code>X</code> to every daughter and his <code>Y</code> to every
-    son. So brindle does something no other gene in the mod does: it <strong>skips the
-    male line entirely for one generation</strong> and comes back through the mares.
+    son. So brindle does something no other gene in the mod does: it <strong>travels
+    entirely unseen through the male line</strong> and can only ever surface in a filly,
+    who needs a copy from each parent.
 </p>
 
 <table class="data">
     <thead><tr><th>Pairing</th><th>Colts</th><th>Fillies</th></tr></thead>
     <tbody>
-        <tr><td>brindle stallion &times; plain mare</td><td><strong>0% brindle</strong></td><td>0% brindle, <strong>100% carriers</strong></td></tr>
-        <tr><td>plain stallion &times; carrier mare</td><td><strong>50% brindle</strong></td><td>0% brindle, 50% carriers</td></tr>
-        <tr><td>plain stallion &times; brindle mare</td><td><strong>100% brindle</strong></td><td>0% brindle, 100% carriers</td></tr>
-        <tr><td>brindle stallion &times; carrier mare</td><td>50% brindle</td><td><strong>50% brindle</strong>, 50% carriers</td></tr>
+        <tr><td>carrier stallion &times; plain mare</td><td>0% brindle</td><td>0% brindle, <strong>100% carriers</strong></td></tr>
+        <tr><td>plain stallion &times; carrier mare</td><td>0% brindle</td><td>0% brindle, 50% carriers</td></tr>
+        <tr><td>plain stallion &times; brindle mare</td><td>0% brindle</td><td>0% brindle, 100% carriers</td></tr>
+        <tr><td>carrier stallion &times; carrier mare</td><td>0% brindle</td><td><strong>50% brindle</strong>, 50% carriers</td></tr>
+        <tr><td>carrier stallion &times; brindle mare</td><td>0% brindle</td><td><strong>100% brindle</strong></td></tr>
     </tbody>
 </table>
 
 <p>
-    Read down that table and the breeding project writes itself: a brindle
-    <strong>mare</strong> is the prize, she needs a brindle sire <em>and</em> a dam
-    carrying it, and once you have her every son she throws is brindle for ever after.
-    Measured over 4,000 foals per pairing in <code>BrindleGeneTest</code>.
+    Read down that table and the breeding project writes itself. <strong>No colt is ever
+    brindle</strong>, so the column is a row of zeroes and the work is all on the filly
+    side: you need a carrier sire <em>and</em> a dam who at least carries it, and the pay-off
+    is the last row &mdash; once you have a brindle mare, a carrier sire gives you a brindle
+    filly every single time. Measured over 4,000 foals per pairing in
+    <code>BrindleGeneTest</code>.
 </p>
 
-<h2 id="population">In the wild: fifty stallions to one mare</h2>
+<h2 id="population">In the wild: mares only</h2>
 
 <p>
-    A stallion needs one copy and a mare needs two, so at an allele frequency of
-    <code>p</code> the rates are <code>p</code> and <code>p&sup2;</code> &mdash; a factor
-    of <code>1/p</code> apart. At 2% that is <strong>2% of stallions against 0.04% of
-    mares</strong>, measured at 40:1 over 200,000 founder draws. A player will meet
-    several brindle stallions before they ever meet a brindle mare, and will notice the
-    asymmetry a long time before they know the reason for it.
+    The asymmetry is total rather than a ratio. Showing takes two copies, so at an allele
+    frequency of <code>p</code> a wild mare is brindle at <code>p&sup2;</code> and a wild
+    stallion is brindle at <strong>nothing at all</strong>, however common the allele
+    gets. A player will meet carrier stallions constantly without ever seeing one wear it,
+    and every brindle horse they ever find is a mare &mdash; which is the thing they
+    notice a long time before they know the reason for it.
+</p>
+
+<p>
+    The frequency was raised when the two-copy rule came in, because <code>p&sup2;</code>
+    of one sex is a much smaller number than the old one-copy stallion rate: at the
+    previous setting the only horses that could show brindle were about one mare in
+    twenty-five hundred, which is not a gene anybody meets. It is
+    <code>BrindleGene.WILD_BRN_FREQUENCY</code>, and the population test pins both halves
+    &mdash; no brindle stallions at all, and mares at the square.
 </p>
 
 <h2 id="storage">How a hemizygous horse is stored</h2>

@@ -123,7 +123,7 @@ final class DebugYardLong {
                     List.of("RATIO: OVERO", "O/N x O/N all day:", "1 in 4 O/O, and", "every O/O dies"),
                     "about 1 in 4 O/O, 1 in 2 O/N; every O/O dies at birth");
             ratio(level, gy, east, mouthZ + ROW_U, "RATIO BRINDLE", "horsegenetics.brindle", "n/n", "Brn/Y", true,
-                    List.of("RATIO: BRINDLE", "Brn stallion x n", "mare: every filly", "Brn/n, no colt Brn"),
+                    List.of("RATIO: BRINDLE", "Brn/Y carrier x", "n/n mare: every", "filly Brn/n, no Brn colt"),
                     "every filly Brn/n, every colt n/Y - a brindle colt is a FAIL");
             ratio(level, gy, east + 9, mouthZ + ROW_U, "RATIO SIZE", "horsegenetics.body_size", "Big/n", "Big/n", false,
                     List.of("RATIO: SIZE", "Big/n x Big/n all", "day: 1 Big/Big to", "2 Big/n to 1 n/n"),

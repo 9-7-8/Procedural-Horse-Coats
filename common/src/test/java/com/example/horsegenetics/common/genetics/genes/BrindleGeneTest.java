@@ -19,6 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * assertions that matter are the crosses: an {@code X}-linked gene segregates
  * differently from every other gene in the mod, and the difference is a set of
  * ratios a horseman would recognise.
+ *
+ * <p>Brindle takes <b>two</b> copies to show, and a stallion has one {@code X}
+ * and so one copy - so no stallion is ever brindle, and every cross below is
+ * really asking the same question: did the allele reach a filly from
+ * <i>both</i> sides. The segregation is unchanged from the textbook
+ * {@code X}-linked case; only which genotypes paint has moved.
  */
 class BrindleGeneTest {
 
@@ -57,16 +63,18 @@ class BrindleGeneTest {
     }
 
     /**
-     * A stallion is never a carrier - one copy is all he has, so if he has the
-     * allele he wears it. A mare with one copy shows nothing.
+     * It takes two copies. A stallion has one {@code X} and therefore one copy,
+     * which can never reach two - so every stallion carrying the allele is a
+     * carrier, and the only horse that shows brindle is a {@code Brn/Brn} mare.
      */
     @Test
-    void aStallionCannotCarryBrindleWithoutShowingIt() {
+    void onlyAHomozygousMareShowsBrindle() {
         assertEquals("wild", outcome(horse("X/X", "n/n")));
         assertEquals("brindle-carrier", outcome(horse("X/X", "Brn/n")));
         assertEquals("brindle", outcome(horse("X/X", "Brn/Brn")));
         assertEquals("wild", outcome(horse("X/Y", "n/Y")));
-        assertEquals("brindle", outcome(horse("X/Y", "Brn/Y")));
+        assertEquals("brindle-carrier", outcome(horse("X/Y", "Brn/Y")),
+                "a stallion's single copy is one, not two - he carries brindle and never shows it");
     }
 
     /** No horse has two Y chromosomes, so the catalogue must not enumerate {@code Y/Y}. */
@@ -120,43 +128,68 @@ class BrindleGeneTest {
     }
 
     /**
-     * <b>The signature cross.</b> A brindle stallion gives his one brindle
-     * {@code X} to every daughter and his {@code Y} to every son - so he throws
-     * no brindle colts at all and every filly is a carrier. This is the
-     * generation-skipping that makes the gene worth having.
+     * <b>The signature cross.</b> A carrier stallion gives his one brindle
+     * {@code X} to every daughter and his {@code Y} to every son - so out of a
+     * plain mare he throws no brindle at all, and <i>every</i> filly is a
+     * carrier. One generation of the allele travelling completely unseen, which
+     * is the pedigree read that makes the gene worth having.
      */
     @Test
-    void aBrindleStallionThrowsNoBrindleSonsAndAllCarrierDaughters() {
+    void aCarrierStallionThrowsNoBrindleAndAllCarrierDaughters() {
         Ratios r = cross(horse("X/X", "n/n"), horse("X/Y", "Brn/Y"));
         near(0.0, r.coltBrindle(), "brindle colts");
         near(0.0, r.fillyBrindle(), "brindle fillies");
         near(1.0, r.fillyCarrier(), "carrier fillies");
     }
 
-    /** And a generation later it comes back through those daughters, in half their sons. */
+    /**
+     * A carrier mare to a plain stallion throws nothing visible either. Half her
+     * sons take her {@code Brn}, but one copy is not two, so they are carriers
+     * rather than the brindle colts the old one-copy rule produced.
+     */
     @Test
-    void aCarrierMareThrowsHalfHerSonsBrindle() {
+    void aCarrierMareThrowsNoBrindleToAPlainStallion() {
         Ratios r = cross(horse("X/X", "Brn/n"), horse("X/Y", "n/Y"));
-        near(0.5, r.coltBrindle(), "brindle colts");
+        near(0.0, r.coltBrindle(), "brindle colts");
         near(0.0, r.fillyBrindle(), "brindle fillies");
         near(0.5, r.fillyCarrier(), "carrier fillies");
     }
 
-    /** A brindle mare throws brindle colts every time - she has nothing else to give. */
+    /**
+     * Even a <i>brindle</i> mare throws no brindle to a plain stallion: every
+     * son gets one copy from her and is a carrier, and every daughter gets his
+     * {@code n} alongside her {@code Brn} and is one too.
+     */
     @Test
-    void aBrindleMareThrowsOnlyBrindleSons() {
+    void aBrindleMareThrowsNoBrindleToAPlainStallion() {
         Ratios r = cross(horse("X/X", "Brn/Brn"), horse("X/Y", "n/Y"));
-        near(1.0, r.coltBrindle(), "brindle colts");
+        near(0.0, r.coltBrindle(), "brindle colts");
         near(0.0, r.fillyBrindle(), "brindle fillies");
         near(1.0, r.fillyCarrier(), "carrier fillies");
     }
 
-    /** The only pairing that produces a brindle filly needs a brindle sire. */
+    /**
+     * A brindle filly needs the allele from <b>both</b> sides - a carrier sire
+     * and a dam who at least carries it. Her brothers still cannot be brindle,
+     * whatever the pairing.
+     */
     @Test
-    void aBrindleFillyNeedsABrindleSire() {
+    void aBrindleFillyNeedsTheAlleleFromBothSides() {
         Ratios r = cross(horse("X/X", "Brn/n"), horse("X/Y", "Brn/Y"));
-        near(0.5, r.coltBrindle(), "brindle colts");
+        near(0.0, r.coltBrindle(), "brindle colts");
         near(0.5, r.fillyBrindle(), "brindle fillies");
+    }
+
+    /**
+     * And the end of the breeding project: a brindle mare to a carrier sire
+     * throws a brindle filly <b>every time</b>, because she has only {@code Brn}
+     * to give and so has he. Still not one brindle colt.
+     */
+    @Test
+    void aBrindleMareToACarrierSireThrowsNothingButBrindleFillies() {
+        Ratios r = cross(horse("X/X", "Brn/Brn"), horse("X/Y", "Brn/Y"));
+        near(0.0, r.coltBrindle(), "brindle colts");
+        near(1.0, r.fillyBrindle(), "brindle fillies");
     }
 
     /**
@@ -218,13 +251,13 @@ class BrindleGeneTest {
     // ------------------------------------------------------------------
 
     /**
-     * The asymmetry, in the wild. A stallion needs one copy and a mare two, so
-     * brindle stallions outnumber brindle mares by about {@code 1/p} - fifty to
-     * one at this frequency. That is the thing a player notices before they know
-     * why.
+     * The asymmetry, in the wild, and it is total: brindle is a <b>mare-only</b>
+     * gene. Showing takes two copies and a stallion has one, so no stallion
+     * shows it at any frequency, while a mare needs both of hers and so appears
+     * at {@code p}&sup2;.
      */
     @Test
-    void brindleStallionsHugelyOutnumberBrindleMaresInTheWild() {
+    void noWildStallionIsBrindleAndMaresAppearAtTheSquareOfTheFrequency() {
         int mares = 0;
         int mareBrindle = 0;
         int stallions = 0;
@@ -244,13 +277,13 @@ class BrindleGeneTest {
                 }
             }
         }
-        double stallionRate = stallionBrindle / (double) stallions;
         double mareRate = mareBrindle / (double) mares;
-        assertTrue(Math.abs(stallionRate - BrindleGene.WILD_BRN_FREQUENCY) < 0.005,
-                "a stallion's rate is the allele frequency itself, got " + stallionRate);
-        assertTrue(mareRate < stallionRate / 10.0,
-                "brindle mares should be far rarer than brindle stallions: "
-                        + mareRate + " vs " + stallionRate);
+        double expectedMareRate = BrindleGene.WILD_BRN_FREQUENCY * BrindleGene.WILD_BRN_FREQUENCY;
+        assertEquals(0, stallionBrindle,
+                "brindle takes two copies and a stallion has one, so none of the "
+                        + stallions + " drawn should show it");
+        assertTrue(Math.abs(mareRate - expectedMareRate) < 0.005,
+                "wild brindle mares should sit at p^2 = " + expectedMareRate + ", got " + mareRate);
     }
 
     /** No founder is ever handed a combination its sex cannot have. */

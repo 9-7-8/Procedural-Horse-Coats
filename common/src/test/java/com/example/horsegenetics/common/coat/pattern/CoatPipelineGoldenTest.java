@@ -233,8 +233,9 @@ class CoatPipelineGoldenTest {
             // PATN with no LP paints nothing - must hash identical to plain
             override("agouti=A/a", "patn1=PATN1/PATN1", "patn2=PATN2/n"),
 
-            // brindle - the X-linked locus. Both the hemizygous stallion form
-            // and the homozygous mare form, and the carrier mare that must be
+            // brindle - the X-linked locus, which takes two copies to paint. Only
+            // the homozygous mare draws anything; BOTH carrier forms - the
+            // hemizygous stallion and the heterozygous mare - must come out
             // byte-identical to a plain horse.
             override("agouti=A/a", "brindle=Brn/Y", "sex=X/Y"),
             override("agouti=A/a", "brindle=Brn/Brn"),

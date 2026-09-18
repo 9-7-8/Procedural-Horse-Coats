@@ -34,26 +34,31 @@ import java.util.List;
  *   <tr><td>{@code Brn/n}</td><td>mare</td><td>{@code brindle-carrier} - a wild type; nothing shows</td></tr>
  *   <tr><td>{@code Brn/Brn}</td><td>mare</td><td>{@code brindle}</td></tr>
  *   <tr><td>{@code n/Y}</td><td>stallion</td><td>wild type</td></tr>
- *   <tr><td>{@code Brn/Y}</td><td>stallion</td><td>{@code brindle} - shown as {@code X-Brn}</td></tr>
+ *   <tr><td>{@code Brn/Y}</td><td>stallion</td><td>{@code brindle-carrier} - shown as {@code X-Brn}; nothing shows</td></tr>
  * </table>
  *
- * <h2>Why this gene is worth the scaffolding</h2>
- * A stallion has one {@code X}, so he has one copy of this locus and <b>can
- * never be a carrier</b>: if he has the allele, he wears it. A mare has two, so
- * she needs both to show it and is a carrier the rest of the time. That
- * asymmetry has consequences a player can watch happen and cannot get from any
- * autosomal gene:
+ * <h2>It takes two copies, so only a mare can ever show it</h2>
+ * Brindle needs <b>two</b> {@code Brn} copies to paint. A mare has two slots and
+ * can meet that; a stallion has one {@code X} and therefore one copy, so he can
+ * <b>never</b> qualify - <b>every</b> stallion carrying the allele is a carrier,
+ * and no stallion in the world is brindle. That is the gene's own cause made
+ * consistent: the pattern is a record of <b>{@code X}-inactivation mosaicism</b>
+ * (see the painter below), and a horse with a single {@code X} has no second one
+ * to silence and cannot be a mosaic at all.
+ *
+ * <p>The consequences are still a set of ratios a horseman would recognise, and
+ * still unlike any autosomal gene:
  * <ul>
- *   <li>a brindle stallion throws <b>no brindle sons at all</b> - he gives every
- *       son his {@code Y} - and <b>every daughter a carrier copy</b>;</li>
- *   <li>so brindle skips a generation on the male line and reappears through the
- *       mares, which is the classic pedigree read;</li>
- *   <li>a brindle <b>mare</b> is the breeding project: she needs a brindle sire
- *       and a dam carrying it, and once you have her every son of hers is
- *       brindle;</li>
+ *   <li>a carrier stallion throws <b>no brindle foals of either sex</b> from a
+ *       plain mare - but <b>every daughter</b> takes his {@code X} and is a
+ *       carrier;</li>
+ *   <li>a carrier mare throws <b>half her sons carriers</b> and no brindle at
+ *       all, so the allele travels invisibly for a generation either way;</li>
+ *   <li>a brindle <b>filly</b> is the whole breeding project, and she needs the
+ *       allele from <i>both</i> sides: a carrier sire, and a dam carrying or
+ *       showing it. Her brothers, having one copy, are only ever carriers;</li>
  *   <li>and at the wild frequency ({@value #WILD_BRN_FREQUENCY} per {@code X})
- *       that is {@code 2%} of wild stallions against {@code 0.04%} of wild mares
- *       - a fifty-fold difference that is visible in a herd.</li>
+ *       no wild stallion shows it while {@code p}&sup2; of wild mares do.</li>
  * </ul>
  *
  * <h2>What it paints</h2>
@@ -81,11 +86,17 @@ public final class BrindleGene implements Gene {
     public static final int PRIORITY = 36; // with the other dilutions: silver 30, mushroom 32, dun 34
 
     /**
-     * Per {@code X}. Because a stallion has one {@code X} this <i>is</i> the
-     * share of wild stallions that are brindle; a wild mare needs two and is
-     * therefore {@code p}&sup2; = 0.04%.
+     * Per {@code X}. Because a stallion has one {@code X} this is the share of
+     * wild stallions that <b>carry</b> it - none of whom show it, since showing
+     * takes two copies. A brindle mare needs both of hers, so wild brindle mares
+     * are {@code p}&sup2; = 1%, and they are the only brindle horses there are.
+     *
+     * <p>Raised from {@code 0.02} when the two-copy rule came in (owner's call).
+     * At {@code 0.02} the only horses that could show it were {@code 0.04%} of
+     * mares - one in twenty-five hundred - which is not a gene a player ever
+     * meets.
      */
-    public static final double WILD_BRN_FREQUENCY = 0.02;
+    public static final double WILD_BRN_FREQUENCY = 0.10;
 
     // Declaration order is slot order (AllelePair canonicalises on it), so the
     // reserved Y goes LAST - a stallion reads Brn/Y with his real allele first.
@@ -99,16 +110,15 @@ public final class BrindleGene implements Gene {
     private final Expression WILD = Expression.wildType("No brindle striping.");
 
     private final Expression CARRIER = Expression.wildType("brindle-carrier", "Brindle carrier",
-            "A mare with one brindle copy on one of her two X chromosomes. Nothing shows, but half "
-                    + "her sons are brindle - which is how the pattern reappears a generation after "
-                    + "a brindle stallion.");
+            "One brindle copy and nothing showing - a mare with it on one of her two X "
+                    + "chromosomes, or any stallion who has it at all, since his single X is one "
+                    + "copy and it takes two. He passes it to every daughter he ever gets.");
 
     private final Expression BRINDLE = Expression.of("brindle", "Brindle")
             .describe("Irregular white streaks, soft-edged and broken, running down from the topline "
                     + "over the barrel, quarters and neck and turning crosswise on the upper legs. "
                     + "They are white on any base colour, and they do not match from one side of the "
-                    + "horse to the other. Every stallion carrying the allele shows it; a mare needs "
-                    + "two copies.")
+                    + "horse to the other. It takes two copies, so every brindle horse is a mare.")
             .varies()
             .restrict(this::paint);
 
@@ -154,26 +164,23 @@ public final class BrindleGene implements Gene {
     }
 
     /**
-     * A horse shows brindle when <b>every</b> real copy it has is {@code Brn} -
-     * which is two for a mare and one for a stallion, so the same sentence
-     * covers "recessive in mares" and "always shows in stallions" with no
-     * special case. A pair with no real copy at all cannot occur
+     * A horse shows brindle on <b>two</b> {@code Brn} copies and not on one. It
+     * counts copies rather than asking "are all of them {@code Brn}", and the
+     * difference is the whole gene: a stallion's single {@code X} gives him one
+     * real allele, which can never reach two, so {@code Brn/Y} is a carrier and
+     * no stallion is ever brindle. A pair with no real copy at all cannot occur
      * ({@link #sexConsistent}) but is answered anyway, because parsing is
      * tolerant and a hand-written code can name one.
      */
     @Override
     public Expression expressionOf(AllelePair pair) {
-        List<Allele> real = realAlleles(pair);
-        if (real.isEmpty()) {
-            return WILD;
-        }
         int brindle = 0;
-        for (Allele a : real) {
+        for (Allele a : realAlleles(pair)) {
             if (a.equals(Brn)) {
                 brindle++;
             }
         }
-        if (brindle == real.size()) {
+        if (brindle >= 2) {
             return BRINDLE;
         }
         return brindle > 0 ? CARRIER : WILD;

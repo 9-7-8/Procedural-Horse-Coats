@@ -135,9 +135,10 @@ public final class GeneDescriptions {
                             + "topline over the barrel, quarters and neck, turning crosswise on "
                             + "the upper legs, and deliberately not matching from one side of the "
                             + "horse to the other - they are a record of which X chromosome each "
-                            + "patch of skin silenced. A stallion has one copy and can never be a "
-                            + "carrier; a mare needs two, so brindle skips the male line for a "
-                            + "generation and comes back through the mares."),
+                            + "patch of skin silenced. It takes two copies, and a stallion's "
+                            + "single X is one, so every brindle horse is a mare and every "
+                            + "stallion who has it is a carrier who gives it to all his "
+                            + "daughters."),
             Map.entry("horsegenetics.natural_zebra",
                     "Real zebra striping, done the way a zebra does it: the dark bands are the "
                             + "horse's own colour and the gaps have the pigment taken out of them, "

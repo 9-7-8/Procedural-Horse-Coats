@@ -108,8 +108,9 @@ public final class CoatSampleTool {
             {"lp_semi_leopard_bay", "agouti=A/a leopard=LP/lp patn1=PATN1/n patn2=PATN2/n"},
             {"lp_leopard_black", "leopard=LP/lp patn1=PATN1/n"},
 
-            // brindle - the X-linked locus, both the stallion and the mare form
-            {"brindle_stallion_bay", "sex=X/Y agouti=A/a brindle=Brn/Y"},
+            // brindle - it takes two copies, so every brindle horse is a mare. There is
+            // no stallion sample because there is no such horse: his single X is one
+            // copy, which makes Brn/Y a carrier that paints nothing.
             {"brindle_mare_bay", "agouti=A/a brindle=Brn/Brn"},
             {"brindle_chestnut", "extension=e/e brindle=Brn/Brn"},
             {"brindle_black", "brindle=Brn/Brn"},

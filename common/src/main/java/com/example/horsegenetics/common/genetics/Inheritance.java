@@ -49,9 +49,14 @@ public enum Inheritance {
     AUTOSOMAL(null),
 
     /**
-     * On the {@code X}. A mare carries two copies and a stallion one, so a
-     * recessive allele shows in <b>every</b> stallion that carries it and only
-     * in a homozygous mare.
+     * On the {@code X}. A mare carries two copies and a stallion one.
+     *
+     * <p>That is a statement about <b>how many copies</b> a horse has, not about
+     * what they do: whether one copy is enough to show is the gene's own call in
+     * {@code expressionOf}. The textbook reading - a recessive shows in every
+     * stallion carrying it - is one choice, and
+     * {@link com.example.horsegenetics.common.genetics.genes.BrindleGene} makes
+     * the other, requiring two copies so that only a mare can ever show it.
      */
     X_LINKED("Y"),
 
