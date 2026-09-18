@@ -27,6 +27,75 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-census">2026-09-18, after the compat pass &mdash; The homestead was never rare, and now there is a number</h2>
+
+<p>
+    Asked to fix the equestrians not appearing in villages, with a hunch attached: the house
+    might need rotating, it might be too wide. The hunch was half right and the premise was
+    wrong, and finding out which was which turned out to be the whole session.
+</p>
+
+<p>
+    <strong>The half that was right.</strong> The piece carried <em>one</em> street connector,
+    and a jigsaw pair fixes a candidate's rotation completely &mdash; exactly one of the four
+    rotations turns that connector back at the road. So the 16&times;18 homestead could only
+    ever lie one way against a street: sixteen blocks straight out, two of its width on one
+    side of the road's line and fifteen on the other, every time. A village house standing in
+    those fifteen threw the piece out with no second arrangement to try. It now carries
+    <a href="villagers.html#three-connectors">three</a>, all in the walk column so the road
+    always meets the path rather than a wall &mdash; head-on at the barn doors as before, and
+    one at each end of the walk. Three of the four rotations attach and the generator keeps
+    whichever fits.
+</p>
+
+<p>
+    <strong>The premise that was wrong.</strong>
+    <a href="villagers.html#measured">Gap 270 said the homestead might have stopped generating
+    altogether</a> when the house was deepened for the four equestrians, and three separate
+    entries said no automated thing could ever answer that &mdash; fresh world, walk, count by
+    eye. All of that was false, in both directions. <code>Structure.generate</code>
+    <em>is</em> the village generator: it runs the whole jigsaw placement, every bounding-box
+    test included, and hands back the finished piece list <strong>without touching a
+    world</strong>. So <code>worldgen/HomesteadCensus</code> builds the overworld generator for
+    a seed, asks the structure spread which chunks are village chunks, and reads the piece
+    lists. Two hundred and sixty-five villages is about a minute.
+</p>
+
+<table>
+    <thead><tr><th>the piece</th><th>homesteads</th><th>rate</th><th>connector used</th></tr></thead>
+    <tbody>
+        <tr><td>one connector</td><td>247 of 265</td><td>93.2%</td><td>west 247</td></tr>
+        <tr><td>three connectors</td><td>262 of 265</td><td>98.9%</td><td>north 88, south 102, west 72</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Same forty seeds, same 265 villages, so the difference is the piece. <strong>It was in
+    ninety-three per cent of plains villages the whole time.</strong> The fear was reasoning
+    &mdash; a big piece in a small slot must usually fail &mdash; and the reasoning left out
+    that a village has several terminator slots and only needs one of them to take it. The
+    connectors are worth having; they closed fifteen of the eighteen villages that had none.
+    They are an improvement and not a rescue, and the page now says so in those words.
+</p>
+
+<p>
+    <strong>What this owes.</strong> The census only knows whether the piece won its slot. Two
+    things it cannot see are newly worth a look: whether a homestead the road meets
+    <em>end-on</em> reads properly &mdash; that arrangement did not exist before today &mdash;
+    and whether the ground it lands on is somewhere you would live. The rate itself needs
+    nobody's time: <code>./gradlew :neoforge-26.1.2:runGameTest</code> recounts it, and
+    <code>homestead_still_generates</code> holds a loose 75% floor so a future collapse is
+    caught rather than discovered.
+</p>
+
+<p>
+    <strong>The lesson worth keeping</strong> is not about villages. Three sessions wrote
+    "nothing automated can answer this" about a question the game's own code answers in a
+    method call, and the cost was a gap that sat open scaring people off a piece that was
+    fine. It is worth asking, before writing that sentence again, whether the thing in doubt
+    is genuinely about play or is just about a function nobody had tried calling directly.
+</p>
+
 <h2 id="d2026-09-18-compat">2026-09-18, after the equestrians &mdash; Gates and horse armour for other mods' woods and metals</h2>
 
 <p>
@@ -198,7 +267,7 @@
     <strong>What this bought and what it owes.</strong> It bought four shops that can each get
     better at one thing, and a checklist item that names which POI is broken rather than
     reporting that nothing happened. It owes a
-    <a href="known-gaps.html#gap-270">confirmed homestead</a>: the piece grew on the axis the
+    <a href="villagers.html#measured">confirmed homestead</a>: the piece grew on the axis the
     jigsaw bounding-box check is tightest on, the pool weight behind it is arithmetic against
     the <em>old</em> footprint, and nothing downstream &mdash; four jobs, one surname across
     five, five beds slept in &mdash; can be tested until a homestead is found in a world. The

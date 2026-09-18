@@ -789,37 +789,86 @@
     <code>DirtPathBlock</code> does not survive a solid block overhead.
 </p>
 
+<h3 id="measured">How often it actually appears &mdash; counted</h3>
+
 <p>
     It goes in at weight <strong>3</strong> against the four vanilla terminators of
-    weight 1 each, so roughly three terminator slots in seven. That is not how often it
-    appears. A village has a handful of terminator slots, and the piece is a stable and
-    a house side by side where a terminator is two blocks by three &mdash; so most of the
-    draws that pick it then fail the bounding-box check and fall through to a small
-    terminator instead. The weight is set high to compensate for exactly that: it was 1
-    while the piece carried the barn alone, and
-    <a href="#house">taking the house in</a> doubled the depth, and so doubled
-    the ground it has to find. The effect aimed at is &ldquo;most plains villages, where
-    there was room&rdquo;.
+    weight 1 each, so roughly three terminator slots in seven, and a village has
+    several slots.
 </p>
 
-<div class="note warn">
-    <span class="label">And it has grown again since that 3 was chosen</span>
+<div class="note">
+    <span class="label">Measured 2026-09-18: 265 plains villages, 40 seeds</span>
+    <table>
+        <thead><tr><th>the piece</th><th>villages with a homestead</th><th>rate</th></tr></thead>
+        <tbody>
+            <tr><td>one connector, as it stood that morning</td><td>247 of 265</td><td>93.2%</td></tr>
+            <tr><td><a href="#three-connectors">three connectors</a></td><td>262 of 265</td><td><strong>98.9%</strong></td></tr>
+        </tbody>
+    </table>
     <p>
-        Fitting the four equestrians meant <a href="#house">deepening the house</a> three
-        rows on the piece's long axis, which is the axis the bounding-box check is
-        tightest on. <code>bake-barn.py</code> prints the finished size on every run, and
-        it is larger than the size the weight was tuned against.
-        <strong>Nobody has confirmed the homestead still generates at all</strong> since
-        then &mdash; see <a href="known-gaps.html#gap-270">gap 270</a>.
+        The same 265 villages both times &mdash; seeds 1&ndash;40 &mdash; so the
+        difference is the piece and not the sample.
+    </p>
+</div>
+
+<p>
+    <strong>Both numbers are a surprise, and the first one is the important one.</strong>
+    Everything written here before said the opposite: that a piece the better part of a
+    chunk square, squeezed into a slot vanilla sizes for a two-by-three stub, must fail
+    the bounding-box check on most of the draws that picked it &mdash; and therefore that
+    the homestead was in danger of having become rare, or of having stopped generating at
+    all when the house was deepened for the four equestrians. <strong>It never
+    was.</strong> Several slots at three-sevenths each is simply a great many chances, and
+    a slot lost to a neighbouring house costs the village nothing as long as another slot
+    takes the piece.
+</p>
+
+<p>
+    So the extra connectors are worth having &mdash; they closed fifteen of the eighteen
+    villages that had none &mdash; but they are an improvement and not a rescue, and
+    <strong>the weight was never doing the work it was raised to do.</strong> It is also
+    not free to raise: the pool is shared with vanilla's four terminators, and crowding
+    them out changes the look of every plains village rather than just ours. Reach for the
+    bake before the number, and for the census before either.
+</p>
+
+<p>
+    The connector split on that run was <code>north=88 south=102 west=72</code>. That is
+    <em>not</em> a measure of which connectors were needed:
+    <code>JigsawPlacement</code> shuffles the rotations, so the three are drawn evenly and
+    whichever is tried first and fits wins. What it does show is that all three are live
+    &mdash; two thirds of homesteads now stand a way round the piece could not manage that
+    morning.
+</p>
+
+<div class="note">
+    <span class="label">How it is counted, and how to count it again</span>
+    <p>
+        <code>worldgen/HomesteadCensus</code>, run from the headless test
+        <code>homestead_still_generates</code>:
+        <code>./gradlew :neoforge-26.1.2:runGameTest</code>. It <strong>generates no
+        chunks.</strong> <code>Structure.generate</code> <em>is</em> the village generator
+        &mdash; it runs the whole jigsaw placement, every bounding-box test included, and
+        hands back the finished piece list without touching a world &mdash; so a few
+        hundred villages is seconds, and the answer is exact rather than an impression
+        formed while walking. Seeds are <code>1..n</code> rather than random so that two
+        runs can be compared, which is what makes a before-and-after possible at all.
     </p>
     <p>
-        The lever taken was <a href="#three-connectors">the two extra connectors</a>, and
-        not the weight. The two are not equivalent and the difference is worth keeping
-        straight: <strong>weight buys more draws of a piece that may not fit, orientation
-        buys more ways for the same draw to fit.</strong> Raising the weight further would
-        also crowd out the vanilla terminators it shares the pool with, which is a change
-        to the look of every plains village and not just to ours. So reach for the bake
-        first; <code>BarnPoolInjector</code>'s 3 is the lever of last resort.
+        The sample is small by default to keep the suite quick.
+        <code>PHC_CENSUS_SEEDS</code> and <code>PHC_CENSUS_VILLAGES</code> are read from
+        the environment, so the numbers above are one run with two variables in front of
+        it. The test asserts a <strong>floor</strong> of 75% rather than a rate: it is
+        there to catch the thing collapsing, and a worldgen number pinned exactly gets
+        edited rather than read.
+    </p>
+    <p>
+        <strong>What it does not answer:</strong> only whether the piece wins its slot.
+        Whether the homestead then looks right where it landed, whether the villagers
+        claim their posts, and whether the ground under it is somewhere you would want to
+        live are all still a walk &mdash; see
+        <a href="verification.html">verification</a>.
     </p>
 </div>
 
