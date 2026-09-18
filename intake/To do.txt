@@ -13,4 +13,6 @@ Brindle is backwards and inconsistent right now: we need to edit it so it only s
 
 add this mod as something strongly recommended to be run with this mod: https://www.curseforge.com/minecraft/mc-mods/customfence
 
+the horseman should sell breed spawn eggs that are from the same countries that their connected cowboy can sell horses from. 
+
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
