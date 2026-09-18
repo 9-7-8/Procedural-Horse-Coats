@@ -27,6 +27,84 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-arcane">2026-09-18 &mdash; The horse wizard, and the three things he needed that did not exist</h2>
+
+<p>
+    One request: a cowboy who stocks no breeds, only Mixed horses carrying a showing gene
+    from every magical family, no two alike, priced up. The interesting part was that it
+    was not really a request for a villager. Magical genes sit near a 0.1% founder weight,
+    so most of the registry has been unobtainable in practice since it was written, and the
+    dealer is the answer to that &mdash; which is why three quite separate features had to
+    be built before <em>buying from him</em> was a thing a player could do at all.
+</p>
+
+<h3>The pools are generated, which was the whole brief</h3>
+
+<p>
+    <code>ArcaneStock</code> builds every family's pool by walking
+    <code>Genes.magicalOrder()</code> and asking <code>GeneFamily.of</code>, so a gene from
+    a data pack is in his string the moment it registers. The only hard-coded thing is
+    which <em>families</em> a horse must cover. The first version of the draw order was
+    hand-written, smallest family first, with a test asserting the order was right &mdash;
+    and the test failed on one swap. That was the useful signal: <strong>a hand-written
+    order that needs re-sorting whenever somebody adds a mane gene is the same maintenance
+    burden the generated pools exist to avoid</strong>. It is computed per horse now,
+    scarcest first, and re-sorts itself.
+</p>
+
+<p>
+    Before committing to per-gene-and-pair uniqueness across a herd of ten, the question
+    was whether the registry could even supply it. A scratch census said the tightest
+    family holds nineteen showing pairs against a maximum herd of ten &mdash; comfortable,
+    and now asserted by a test rather than remembered.
+</p>
+
+<h3>Three things discovered by building it</h3>
+
+<ul>
+    <li><strong>You could not read a horse you did not own.</strong> The info screen was
+        reachable only through the vanilla horse inventory, which only opens on a tamed
+        horse &mdash; so a player was being asked for up to twenty-eight emeralds for an
+        animal whose genes are the entire product, sight unseen. Sneak-and-use now opens it
+        on any untamed horse. Which immediately raised a second thing: <strong>renaming had
+        never been gated on ownership</strong>, because nothing could reach a stranger's
+        horse before.</li>
+    <li><strong>A name tells you nothing about a horse.</strong> Fine for six horses of one
+        breed; useless for ten horses carrying a hundred loci between them. Hence the filter
+        box &mdash; and the reason it filters <em>server-side</em> is the sharp edge of the
+        day: a trade is an index into the merchant's offer list, so a client drawing fewer
+        rows would sell you a different horse from the one you clicked, silently.</li>
+    <li><strong>The owner's premise that monsters ignore cowboys was wrong.</strong>
+        <code>Cowboy</code> extends <code>AbstractVillager</code>, which zombies target by
+        class &mdash; his two hundred health exists precisely because of it. Survivable in a
+        village with golems and walls; not on a hillside. Checked rather than taken on
+        trust, and now made true rather than assumed.</li>
+</ul>
+
+<h3>What the yard was for</h3>
+
+<p>
+    One in twelve barns is the right rate for a world and a miserable one for looking at
+    him, so row AL-west of the debug yard founds one on the spot. It calls the <em>real</em>
+    founding path with only the paddock walk disabled, because a fixture that assembled its
+    own herd would go on passing after the real one broke. The owner confirmed the string in
+    game within minutes &mdash; no geldings, eleven or twelve genes each, no repeats, prices
+    right &mdash; which is a soft verification: the yard cannot show the one-in-twelve roll
+    firing at a real barn, and it cannot show restock keeping the string distinct over time.
+</p>
+
+<h3>Also</h3>
+
+<p>
+    A stale-documentation sweep fell out of it: <code>villagers.html</code> still described
+    a mount deleted weeks ago, in five places and in the present tense, and the founding
+    announcement was still subtracting that mount from the herd count. And
+    <code>BreedHerdTest</code> turns out to fail on a clean tree &mdash; confirmed by
+    stashing the whole day's work and running it on <code>HEAD</code>. Nobody knows since
+    when, which is <a href="known-gaps.html#gap-269">its own gap</a>: with no full-suite run
+    and no CI, a class nobody edits can sit red indefinitely.
+</p>
+
 <h2 id="d2026-09-18-unattended">2026-09-18, overnight &mdash; Tests that could not fail, and a run that was not running</h2>
 
 <p>
