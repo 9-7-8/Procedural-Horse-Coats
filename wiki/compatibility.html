@@ -655,76 +655,37 @@
     feature.
 </p>
 
-<h2 id="companions">Datapacks worth running beside this mod</h2>
+<h2 id="companions">Worth running beside this mod</h2>
 
 <p>
-    Everything else on this page is about conflict. This section is the opposite: three
-    datapacks that add what this mod deliberately does not, touch nothing we own, and are
-    current on 26.1.2. All three are <em>data</em> &mdash; no code, so no seam to fight
-    over. Investigated 2026-09-15; none has been run beside this mod in a real game.
+    Everything else on this page is about conflict. This section is the opposite: things
+    that add what this mod deliberately does not, and touch nothing we own. Investigated
+    2026-09-15 and 2026-09-17; neither has been run beside this mod in a real game.
 </p>
 
-<h2 id="saturated-saddles">Saturated Saddles</h2>
+<h2 id="customfence">Custom Fences and Walls</h2>
 
 <p>
-    Lets you dye saddles and happy-ghast harnesses the way leather armour is dyed. Ships a
-    datapack of recipes plus a resource pack of tinted textures.
+    Nine styles of fence, fence gate and wall &mdash; classic, wildlife, decoration, plank,
+    garden, bollard, stick, crisscross and spire &mdash; each in many wood and colour
+    combinations, and each able to mix <em>two</em> woods in one block, which vanilla&rsquo;s
+    cannot. <strong>Strongly recommended beside this mod</strong> (owner&rsquo;s call): a mod
+    whose whole loop is horses standing in paddocks wants more than one kind of fence, and
+    vanilla gives you one per wood.
 </p>
 <p>
-    <strong>No conflict, and nothing to depend on.</strong> It adds <em>no items at all</em>
-    &mdash; the saddle recipe is <code>minecraft:crafting_dye</code> onto
-    <code>minecraft:saddle</code>, so the output is the vanilla saddle carrying the vanilla
-    <code>minecraft:dyed_color</code> component. There is no <code>saturated_saddles</code>
-    namespace. That is why <a href="villagers.html#trade-table">the horseman&rsquo;s dyed
-    saddle</a> needs no mod detection and no optional dependency: a dyed saddle is a vanilla
-    item in a vanilla state, and <code>SetRandomDyeFunction</code> produces one whether or
-    not the player has this installed.
+    <strong>No conflict to expect.</strong> It registers blocks in its own namespace and
+    touches no entity, renderer, attribute or recipe this mod owns. The only overlap is in
+    subject rather than in code: this mod ships
+    <a href="items.html">double-wide fence gates</a> of its own, for leading a horse
+    through without a gap a foal can slip out of.
 </p>
 <p>
-    <strong>Their resource pack is the load-bearing half, and that is easy to miss.</strong>
-    Vanilla does <em>not</em> tint the saddle: <code>EquipmentAssetProvider</code> builds the
-    leather asset with <code>Layer.leatherDyeable(&hellip;)</code> and the saddle asset with
-    the plain single-argument <code>Layer</code>, dyeable empty. So the datapack alone gives
-    you a saddle whose <code>dyed_color</code> is set and invisible; the colour you actually
-    see comes from their resource pack supplying a dyeable saddle asset. This mod
-    <a href="villagers.html#random-trades">withdrew a dyed-saddle trade</a> over it.
-    Leather horse armour is tinted by vanilla and is not in doubt.
-</p>
-<p>
-    <strong>This mod now ships its own dyeable saddle, so the two collide.</strong> As of
-    2026-09-16 we replace <code>assets/minecraft/equipment/saddle.json</code> and the
-    horse-family saddle textures ourselves &mdash; see
-    <a href="items.html#tack">the item roster</a> &mdash; which is the same vanilla file
-    their resource pack replaces. Whichever loads last wins. <strong>Nothing breaks either
-    way</strong>, because both do the same job in the same pattern: a dyeable base plus an
-    untinted overlay for the hardware. Running both is simply redundant, and ours needs no
-    resource pack to render, where theirs does. The choice was forced rather than taken: the
-    requirement was that <em>other</em> mobs go on looking untouched, and only replacing the
-    vanilla asset can reach the saddle a donkey or a skeleton horse is already wearing.
-</p>
-<p>
-    <strong>What is actually in the pack</strong>, from downloading and measuring it on
-    2026-09-15: 18 equipment assets, 18 item models and 61 textures. Its
-    <code>equipment/saddle.json</code> is vanilla's leather pattern &mdash; a
-    <code>dyeable</code> base plus an untinted overlay &mdash; applied to all ten saddle
-    types, and its textures split vanilla's saddle into a greyscale base that takes the tint
-    and an overlay holding the buckles. It also overrides vanilla's
-    <code>equipment/leather.json</code> to add a <code>horse_body</code> overlay layer that
-    vanilla does not have. Note it overrides <code>minecraft:</code>-namespace files
-    throughout, so it conflicts with any other pack touching saddles, and it loads on 26.1 by
-    declaring <code>"max_format": 999</code> rather than by having been rebuilt for it.
-</p>
-<p>
-    <strong>Licence: CC-BY-4.0</strong>, confirmed from the Modrinth API; the only credit
-    marker shipped is <code>"by SageAxolotl"</code> in <code>pack.mcmeta</code>, and there is
-    no LICENSE file in either zip, no source repository and no issue tracker. A bundle is
-    permitted with attribution &mdash; but CC-BY carries a no-downstream-restrictions clause,
-    so their files would stay CC-BY inside this CC BY-NC project and would have to be marked
-    as separately licensed. We wrote our own instead, and it was never a licence objection:
-    the artwork is a couple of hundred grey pixels and is <em>generated</em> from vanilla at
-    bake time by dividing out the leather tint, which reproduces the undyed saddle more
-    faithfully than hand-picked greys can &mdash; exactly, as it turned out.
-    <a href="items.html#tack">The result is on the item roster.</a>
+    <strong>Versions, read off its listing on 2026-09-17:</strong> Forge since 1.12.2,
+    Fabric since 1.18, NeoForge since 1.21.4, published up to 1.21.10 &mdash; so
+    <strong>confirm it loads on 26.1.2 before relying on it</strong>, and note its own
+    warning that block remapping does not work on 1.21.x. GPLv3, client and server, and the
+    author explicitly permits modpack use.
 </p>
 
 <h2 id="bhar">BHAR &mdash; Balanced Horse Armor Recipes</h2>
@@ -746,30 +707,6 @@
     redistribution of any part, modified or not, and reusing &ldquo;parts or the whole
     project&rdquo; needs explicit prior permission. So we may ship a collision
     <em>check</em>; we may not ship a copied recipe file.
-</p>
-
-<h2 id="universal-dyeing">Universal Dyeing</h2>
-
-<p>
-    Shapeless recipes to re-colour already-dyed vanilla blocks and items. Listed here
-    because its store page reads as though it is relevant to horses, and it is not.
-</p>
-<p>
-    <strong>Nothing to patch &mdash; verified, not assumed.</strong> The page advertises
-    &ldquo;Leather Horse Armor&rdquo;, wolf armour, shulker boxes, bundles and bleaching.
-    Both published artefacts (the datapack zip and the loader-wrapped jar) were downloaded
-    and enumerated in full on 2026-09-15: both contain exactly 176 recipes &mdash; 16
-    colours across banner, bed, candle, carpet, concrete, concrete powder, glazed
-    terracotta, stained glass, stained glass pane, terracotta and wool &mdash; plus 11 item
-    tags. Searching the extracted contents for <code>horse</code>, <code>saddle</code>,
-    <code>leather</code> and <code>dyed_color</code> returns nothing, in either artefact.
-    There are no bleaching recipes either.
-</p>
-<p>
-    Recorded at this length so the next person does not re-investigate on the strength of
-    the description. Note also that a <em>different</em> project shares the display name
-    &mdash; cite the slug <code>universal-dyeing-datapack</code>, not the name. All Rights
-    Reserved, which is moot given there is nothing to patch.
 </p>
 
 <h2 id="bridle">Bridle</h2>
@@ -930,15 +867,12 @@
     <td>Replaces the horse mesh and textures from a resource pack</td>
     <td class="ok">Pack-side</td>
     <td class="bad">Ignored today; both halves have a plan and neither is built</td></tr>
-<tr><td><a href="#saturated-saddles">Saturated Saddles</a></td><td>Replaces the same vanilla saddle asset this mod now replaces</td>
-    <td class="ok">26.1.2 (datapack)</td>
-    <td class="warn">Redundant rather than broken &mdash; last to load wins; ours needs no resource pack</td></tr>
+<tr><td><a href="#customfence">Custom Fences and Walls</a></td><td>Nine fence, gate and wall styles, in its own namespace</td>
+    <td class="warn">Forge / Fabric / NeoForge, listed to 1.21.10</td>
+    <td class="ok">Strongly recommended; confirm it loads on 26.1.2</td></tr>
 <tr><td><a href="#bhar">BHAR</a></td><td>Crafting recipes for vanilla saddle and horse armour</td>
     <td class="ok">26.1.2 (datapack)</td>
     <td class="ok">Recommended; only watch for a recipe collision</td></tr>
-<tr><td><a href="#universal-dyeing">Universal Dyeing</a></td><td>None &mdash; verified to contain no horse, saddle or leather recipe</td>
-    <td class="ok">26.1.2 (datapack)</td>
-    <td class="ok">No patch needed; the store page overstates its contents</td></tr>
 <tr><td><a href="#bridle">Bridle</a></td><td>Gear drawn on the mount; gates riding control</td>
     <td class="bad">Fabric, 26.2 only</td>
     <td class="warn">Cannot co-install; ARR with no source, so unassessable</td></tr>
