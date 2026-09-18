@@ -1950,6 +1950,141 @@
   ]
 },
 {
+  "id": "cloudtouched",
+  "name": "Cloudtouched",
+  "description": "A horse out of the high wind country that does not entirely belong to the ground. Most of them glide - ride one off a ledge and it trades height for speed and speed back for height until the ground comes up. Rather more of them show nothing at all, and are carrying the rarer thing quietly; two of those bred together throw a foal that simply goes where it is pointed, with nothing about its body to explain it. Pale, light-boned, quick, and no use whatever in harness.",
+  "kind": "magical",
+  "commonness": "very_rare",
+  "spawn_time": "day",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:stony_peaks",
+    "minecraft:meadow",
+    "minecraft:cherry_grove"
+  ],
+  "price": [40, 64],
+  "stats": {
+    "speed": 8,
+    "jump": 9,
+    "health": 4,
+    "size": [0.8, 1.02],
+    "pull": 2
+  },
+  "genes": {
+    "horsegenetics.flying": [
+      { "pair": "El/n", "weight": 44 },
+      { "pair": "El/Tf", "weight": 20 },
+      { "pair": "Tf/n", "weight": 36 }
+    ],
+    "horsegenetics.bird_boned": [
+      { "pair": "Brd/n", "weight": 60 },
+      { "pair": "n/n", "weight": 30 },
+      { "pair": "Brd/Brd", "weight": 10 }
+    ],
+    "horsegenetics.barred_wing": [
+      { "pair": "Bw/n", "weight": 34 },
+      { "pair": "Bw/Bw", "weight": 10 },
+      { "pair": "Bw/Bwc", "weight": 10 },
+      { "pair": "Bw/Bwb", "weight": 8 },
+      { "pair": "Bwb/n", "weight": 10 },
+      { "pair": "Bwb/Bwc", "weight": 5 },
+      { "pair": "Bwc/Bwc", "weight": 13 },
+      { "pair": "Bwc/n", "weight": 10 }
+    ],
+    "horsegenetics.weather_speed": [
+      { "pair": "T+/n", "weight": 34 },
+      { "pair": "R+/n", "weight": 24 },
+      { "pair": "T+/T+", "weight": 8 },
+      { "pair": "R+/T+", "weight": 8 },
+      { "pair": "S+/n", "weight": 8 },
+      { "pair": "n/n", "weight": 18 }
+    ],
+    "horsegenetics.weather_jump": [
+      { "pair": "T+/n", "weight": 28 },
+      { "pair": "R+/n", "weight": 22 },
+      { "pair": "R+/T+", "weight": 7 },
+      { "pair": "S+/n", "weight": 8 },
+      { "pair": "n/n", "weight": 35 }
+    ],
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 38.8 },
+      { "pair": "E/e", "weight": 38.8 },
+      { "pair": "e/e", "weight": 22.4 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 28.1 },
+      { "pair": "A/a", "weight": 28.1 },
+      { "pair": "a/a", "weight": 43.8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 46 },
+      { "pair": "G3/G3", "weight": 30 },
+      { "pair": "N/N", "weight": 24 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "LBl/LBl", "weight": 30 },
+      { "pair": "MBl/MBl", "weight": 24 },
+      { "pair": "Wht/Wht", "weight": 20 },
+      { "pair": "DBl/DBl", "weight": 16 },
+      { "pair": "Gld/Gld", "weight": 10 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "LBl/LBl", "weight": 30 },
+      { "pair": "MBl/MBl", "weight": 24 },
+      { "pair": "Wht/Wht", "weight": 20 },
+      { "pair": "DBl/DBl", "weight": 16 },
+      { "pair": "Gld/Gld", "weight": 10 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Wht/Wht", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Wht/Wht", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_right": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_left": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.mane_color": [
+      { "pair": "Mnsld/Mnsld", "weight": 30 },
+      { "pair": "Mnsld/Mnstrp", "weight": 20 },
+      { "pair": "Mnsld/n", "weight": 18 },
+      { "pair": "Mnstrp/Mnstrp", "weight": 20 },
+      { "pair": "Mnstrp/n", "weight": 12 }
+    ],
+    "horsegenetics.tail_color": [
+      { "pair": "Tlsld/Tlsld", "weight": 30 },
+      { "pair": "Tlsld/Tlstrp", "weight": 20 },
+      { "pair": "Tlsld/n", "weight": 18 },
+      { "pair": "Tlstrp/Tlstrp", "weight": 20 },
+      { "pair": "Tlstrp/n", "weight": 12 }
+    ]
+  },
+  "notes": [
+    "NO FOUNDER IS A TRUE FLIER. The pool seeds El/n, El/Tf and Tf/n only - never Tf/Tf - so the breed is a reservoir of the true-flight allele rather than a source of finished ones. 64 in 100 glide; the other 36 show nothing and are carrying Tf silently. Tf sits at 28% allele frequency here, so two Cloudtouched bred at random throw a true flier about one foal in thirteen, and two known El/Tf gliders throw one in four. This is the flying gene's own owner's call honoured at the breed level - true flight is bred for, not found - and it is why catching one of these is the start of a project rather than the end of one.",
+    "Every Cloudtouched carries at least one flight allele. n/n is not in the pool at all, so there is no such thing as a wholly ordinary one; the quiet ones are Tf/n, which expresses nothing because Tf is recessive to both El and n's absence of competition.",
+    "BIRD-BONED IS DELIBERATELY NOT UNIVERSAL. The gene's own founder table is CARRIERS_ONLY at 7%, meaning no wild horse anywhere expresses it. This breed is the exception that makes it findable - 10 in 100 are Brd/Brd - but the other 90 are a coin-flip carrier or nothing. Flight plus bird-boned is unconditional fall immunity covering the rider at zero stat cost, so handing it to every founder would have retired the combination the two genes were built to reward.",
+    "The statline pays for the flight. Speed 8 and jump 9 are real, but health 4 ties the Thoroughbred for the most fragile horse in the book and pull 2 puts it below every pony - a hollow-boned animal that cannot take a hit and cannot draw a load. Airspeed is a function of MOVEMENT_SPEED (HorseFlightMixin cruises at 1.1x to 2.5x ground), so speed 8 flies at roughly 30 blocks a second at full ramp. Speed 9 or 10 would have outrun a rocket-boosted elytra.",
+    "Weather affinity is storm-leaning on purpose: T+ and R+ dominate both weather loci, so a Cloudtouched comes alive in the weather that would ground anything else. Homozygous and double-positive pairs are held to single figures, because both copies emit their own multiply_total and a stacked pair is about +36% on a horse that already flies.",
+    "Grey at 76% is what makes them pale. It is the one coat locus pinned for identity rather than inherited from the original design; extension, agouti and shade are kept as the breed's author wrote them.",
+    "The two iris loci are rolled independently, so a horse with two different eye colours is normal here and not a bug. The pool is restricted to the cool end - light blue, mid blue, white, dark blue, with gold as the odd one - so a mismatch reads as a variation rather than an accident. Glowing irises on every founder are the magical tell, the way the Dhampir's glowing sclera are.",
+    "Price tops out at 64 because vanilla's merchant screen cannot render a cost above one stack.",
+    "The breed is named for something not in the game. The flying gene shipped with a cloud-treading allele (Ec) that was removed on the owner's call to get the glide working first; the name is a nod to it and the description is careful not to promise it. Restoring Ec would give this breed an obvious home."
+  ]
+},
+{
   "id": "clydesdale",
   "name": "Clydesdale",
   "country": "united_kingdom",
