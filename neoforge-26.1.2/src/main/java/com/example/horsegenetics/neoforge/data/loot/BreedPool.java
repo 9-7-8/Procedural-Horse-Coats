@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.breed.Commonness;
+import com.example.horsegenetics.common.breed.Region;
 import net.minecraft.util.RandomSource;
 import org.jspecify.annotations.Nullable;
 
@@ -41,6 +42,28 @@ public final class BreedPool {
      * <i>low</i> bound.
      */
     public static @Nullable Breed draw(RandomSource rng, Commonness commonest, Commonness rarest) {
+        return draw(rng, commonest, rarest, null);
+    }
+
+    /**
+     * The same draw, narrowed to <b>one region's countries</b> - what the
+     * horseman's breed egg trades use, so that the eggs on his counter come from
+     * the same part of the world as the horses his
+     * <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/breeds.html#regions">cowboy</a>
+     * sells. A {@code null} region draws from everywhere, which is what a
+     * dungeon chest does: a chest has no cowboy standing next to it.
+     *
+     * <p><b>An empty window is a real outcome here, not a bug.</b> Three of the
+     * ten regions have no breed at all in the commonest tier band, so a horseman
+     * there returns {@code null}, the trade produces an empty stack, and vanilla
+     * drops the offer - he simply has no common breed egg to sell. That is the
+     * owner's call, taken over widening the band or falling back to the world
+     * pool: the alternative to a missing trade is a horseman selling a breed
+     * from the other side of the world, which is the one case a player would
+     * notice the rule being broken.
+     */
+    public static @Nullable Breed draw(RandomSource rng, Commonness commonest, Commonness rarest,
+                                       @Nullable Region region) {
         int lo = Math.min(commonest.ordinal(), rarest.ordinal());
         int hi = Math.max(commonest.ordinal(), rarest.ordinal());
 
@@ -49,6 +72,9 @@ public final class BreedPool {
         for (Breed breed : Breeds.from(BreedSource.SPAWN_EGG)) {
             int tier = Commonness.forWeight(breed.spawnWeight()).ordinal();
             if (tier < lo || tier > hi) {
+                continue;
+            }
+            if (region != null && !region.countries().contains(breed.country())) {
                 continue;
             }
             pool.add(breed);

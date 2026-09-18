@@ -18,6 +18,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Optional;
+
 
 /**
  * Names the <b>horseman</b> when a villager takes the job at a Horseman's Table:
@@ -139,7 +141,22 @@ public final class HorsemanHandler {
      * simply rolled. That is not a fallback so much as the other half of the
      * premise: somebody arrived here first, and they came from somewhere.
      */
-    private static String regionIdNear(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng) {
+    /**
+     * <b>The region of the nearest cowboy in town</b>, or empty when there is no
+     * cowboy to take one from.
+     *
+     * <p>This is the whole of "their connected cowboy": nearest wins, inside
+     * {@link #TOWN} blocks, skipping any cowboy with no breed of their own to
+     * read a region off. It is deliberately <i>not</i> stored on the horseman -
+     * he has no region of his own, and a cowboy who moves in or dies changes the
+     * answer, which is the behaviour a village ought to have.
+     *
+     * <p>Two callers want different things when it comes back empty, which is
+     * why the fallback lives with them rather than here: naming rolls a region
+     * (somebody arrived first, and they came from somewhere), while the breed
+     * egg trades simply stop filtering.
+     */
+    public static Optional<Region> nearestCowboyRegion(ServerLevel level, BlockPos at, @Nullable Entity except) {
         AABB town = new AABB(at).inflate(TOWN);
         Region nearest = null;
         double best = Double.MAX_VALUE;
@@ -158,9 +175,13 @@ public final class HorsemanHandler {
                 nearest = region;
             }
         }
-        return nearest != null
-                ? nearest.id()
-                : Region.values()[rng.nextInt(Region.values().length)].id();
+        return Optional.ofNullable(nearest);
+    }
+
+    private static String regionIdNear(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng) {
+        return nearestCowboyRegion(level, at, except)
+                .map(Region::id)
+                .orElseGet(() -> Region.values()[rng.nextInt(Region.values().length)].id());
     }
 
     /** The family half of "Wade Hargreave". */

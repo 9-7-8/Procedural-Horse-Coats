@@ -2,13 +2,18 @@ package com.example.horsegenetics.neoforge.data.loot;
 
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.Commonness;
+import com.example.horsegenetics.common.breed.Region;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
+import com.example.horsegenetics.neoforge.server.HorsemanHandler;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -60,12 +65,36 @@ public class SetRandomBreedFunction extends LootItemConditionalFunction {
 
     @Override
     protected ItemStack run(ItemStack stack, LootContext context) {
-        Breed breed = BreedPool.draw(context.getRandom(), commonest, rarest);
+        Breed breed = BreedPool.draw(context.getRandom(), commonest, rarest, regionOfTrader(context));
         if (breed == null) {
             return ItemStack.EMPTY;
         }
         stack.set(ModDataComponents.BREED_ID.get(), breed.id());
         return stack;
+    }
+
+    /**
+     * <b>Which part of the world the villager offering this trade deals in</b>,
+     * or {@code null} to draw from everywhere.
+     *
+     * <p>Vanilla builds a trade's loot context in
+     * {@code AbstractVillager.updateTrades} with {@code ORIGIN} and
+     * {@code THIS_ENTITY} both set - the latter being the villager himself - and
+     * {@code LootContextParamSets.VILLAGER_TRADE} declares both required. That
+     * is what makes this possible without a mixin: the function can ask who is
+     * selling. (Read off the 26.1.2 sources rather than assumed; the behaviour
+     * itself is <b>unplayed</b>.)
+     *
+     * <p>A chest has no villager, so a chest egg gets {@code null} here and
+     * keeps drawing from the whole world - which is the behaviour it always had.
+     */
+    private static @Nullable Region regionOfTrader(LootContext context) {
+        Entity trader = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
+        if (trader == null) {
+            return null;
+        }
+        return HorsemanHandler.nearestCowboyRegion(context.getLevel(), trader.blockPosition(), trader)
+                .orElse(null);
     }
 
     @Override

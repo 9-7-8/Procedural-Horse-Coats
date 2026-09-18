@@ -78,6 +78,78 @@
     </p>
 </div>
 
+<h2 id="horseman-region-0917">&sect;0-FD &mdash; The horseman stocks his own part of the world (2026-09-17, NOT played)</h2>
+
+<p>
+    Breed spawn eggs on the <a href="villagers.html#trade-table">horseman&rsquo;s</a> counter
+    are now drawn only from the region of the nearest cowboy in town, instead of from every
+    breed in the game. <strong>None of this has been seen in a game.</strong> It rests on
+    vanilla putting the villager into a trade&rsquo;s loot context, which was read off the
+    26.1.2 sources and not observed &mdash; so the first check is really &ldquo;does the
+    filter happen at all&rdquo;.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>The eggs match the cowboy outside.</strong> Find a village with both a cowboy
+        and a horseman, and look at the cowboy&rsquo;s own breed to see which region he is.
+        Trade to journeyman and read the breed egg&rsquo;s tooltip.
+        <strong>Pass:</strong> the breed named is from that region&rsquo;s countries &mdash; a
+        Britain-and-Ireland cowboy gets Dales, Fell, Highland, Irish Draught and so on, never
+        a Marwari. Check across a restock or two, since it is one breed per offer.</li>
+    <li><strong>A horseman with no cowboy in town sells anything.</strong> Find or build a
+        village with a horseman and no cowboy within 128 blocks.
+        <strong>Pass:</strong> breeds from anywhere turn up over several restocks. No cowboy
+        is no connection, so there is deliberately no filter.</li>
+    <li><strong>A missing band is a missing trade, not a blank egg.</strong> Three of the ten
+        regions have no breed in the commonest band, so a horseman there should have
+        <em>no</em> 22-emerald breed egg at journeyman at all.
+        <strong>Pass:</strong> the trade is simply absent from the list. <strong>Fail:</strong>
+        an egg with no breed on it, named just &ldquo;Breed Spawn Egg&rdquo; and tooltipped
+        &ldquo;Blank&rdquo; &mdash; that would mean the empty window is reaching the counter
+        instead of dropping the offer.</li>
+    <li><strong>Chest eggs are unaffected.</strong> Open dungeon chests until a breed egg
+        drops. <strong>Pass:</strong> breeds from anywhere, unrelated to any nearby cowboy.</li>
+</ul>
+
+<h2 id="brindle-two-copies-0917">&sect;0-FC &mdash; Brindle takes two copies, so only mares wear it (2026-09-17, NOT played)</h2>
+
+<p>
+    <a href="gene-brindle.html">Brindle</a> used to show on any stallion carrying it, because
+    his single <code>X</code> was his only copy. It now needs two, which a stallion can never
+    have. The painter did not move, so a brindle mare should look exactly as she did &mdash;
+    everything below is about <em>who</em> is brindle, not what brindle looks like.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>A <code>Brn/Y</code> stallion is a carrier and shows nothing.</strong> Spawn one
+        with the custom horse spawn egg. <strong>Pass:</strong> no stripes anywhere, and his
+        gene row reads <code>brindle-carrier</code>. This is the whole change; if he has
+        stripes, nothing else here is worth checking.</li>
+    <li><strong>A <code>Brn/Brn</code> mare still shows.</strong> Spawn one.
+        <strong>Pass:</strong> the stripes, exactly as before.</li>
+    <li><strong>The ratio pen agrees.</strong> The yard&rsquo;s <em>RATIO BRINDLE</em> pen runs a
+        <code>Brn/Y</code> sire over an <code>n/n</code> dam and its sign has been reworded.
+        <strong>Pass:</strong> every filly <code>Brn/n</code>, every colt <code>n/Y</code>, and
+        no foal of either sex with stripes.</li>
+    <li><strong>The pay-off cross.</strong> Breed a <code>Brn/Brn</code> mare to a
+        <code>Brn/Y</code> stallion. <strong>Pass:</strong> every filly is brindle, and not one
+        colt ever is.</li>
+</ul>
+
+<h3>In the game, with your hands</h3>
+
+<ul>
+    <li><strong>No brindle stallion exists in the wild, and mares are findable.</strong> The
+        allele frequency went up specifically because only one sex can show it now.
+        <strong>Pass:</strong> over a lot of wild horses you meet brindle mares occasionally
+        and brindle stallions <em>never</em>. A single brindle stallion anywhere is a failure,
+        not bad luck.</li>
+</ul>
+
 <h2 id="double-gates-0917">&sect;0-DG &mdash; What the double gates still need looking at (2026-09-17, NOT played)</h2>
 
 <p>

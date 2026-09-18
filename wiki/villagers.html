@@ -938,6 +938,26 @@
     a datapack ought to be able to retune one without the other.
 </p>
 
+<p>
+    <strong>The window is then narrowed to the horseman&rsquo;s own part of the world.</strong>
+    He has no region of his own, so he takes one from the nearest cowboy in town &mdash; the
+    same nearest-wins scan his surname uses &mdash; and stocks only breeds from that
+    <a href="breeds.html#regions">region&rsquo;s countries</a>. With no cowboy in town there
+    is no connection and so no filter, and he sells the world; a dungeon chest is unfiltered
+    for the same reason, having no villager to ask. Nothing is stored on him, so a cowboy
+    who moves in or dies changes what is on the counter at the next restock.
+</p>
+
+<p>
+    <strong>A region with nothing in a window costs him that trade.</strong> Three of the ten
+    regions have no breed at all in the commonest band, so their horseman has no common breed
+    egg to sell: the function returns an empty stack and vanilla drops the offer, which is the
+    same path a player switching most breeds off already takes. That is the owner&rsquo;s call
+    over the two alternatives, and the reason is that both of them lie &mdash; widening the
+    band sells an uncommon breed at the common price, and falling back to the world pool puts
+    a Marwari on a Scandinavian counter, which is exactly the case a player would notice.
+</p>
+
 <h3 id="not-built">What the roadmap asked for and this does not do</h3>
 
 <ul>
