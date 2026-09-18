@@ -113,8 +113,8 @@ public class StallSignItem extends Item {
             // a good area, it should just pop off and refuse to place." A sign
             // that binds to a made-up box reports a stall the player does not
             // have, and they find out when a horse is standing in a wall.
-            message(ctx, "That is not an enclosed stall - close it in on every side, with a gate "
-                    + "or a door where you walk in, then try again.");
+            message(ctx, "That is not an enclosed stall - close it in on every side. A gate, a door, "
+                    + "or a plain doorway with wall above it all count as the way in.");
             return InteractionResult.FAIL;
         }
 

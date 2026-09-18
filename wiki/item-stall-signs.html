@@ -50,7 +50,18 @@
     the building the stall is in. It walks the <strong>floor</strong>, so a fence across
     the front of a stall is a wall even though you can see over it, and a slab, a carpet
     or a one-block step is still the same room. <strong>A gate or a doorway is the edge
-    of the stall whether it is open or shut.</strong> If <em>nothing</em> encloses &mdash; a
+    of the stall whether it is open or shut.</strong>
+</p>
+
+<p>
+    <strong>You do not have to hang anything in the gap you walk through.</strong> If the
+    floor runs out of the stall through an open doorway, the sign looks <strong>up to
+    three blocks above and below itself</strong> for a height where the wall makes an
+    unbroken ring &mdash; the lintel over a doorway is one &mdash; and measures the floor
+    inside that ring instead. The doorway&rsquo;s own square is part of the ring, so the
+    stall ends there, exactly as it would if you had hung a gate in it. A gap that is open
+    all the way up is still not a stall: there is no ring at any height, and nothing is
+    holding your horse in either. If <em>nothing</em> encloses &mdash; a
     sign on a fence post in an open field &mdash; <strong>the sign refuses to go up and
     stays in your hand</strong>, with a line asking you to close the room in first. There
     is no fallback box, and there deliberately is not one: a sign that bound to a made-up
@@ -163,6 +174,18 @@
         <em>room</em>, not where a horse may be <em>put</em> &mdash; landing still tests
         the horse&rsquo;s real bounding box, so a room too low to hold one is refused at
         the moment something tries to stand there.</li>
+    <li><strong>A ring of wall above the floor closes a room the floor does not</strong>
+        (2026-09-17). An open doorway is a hole in the floor&rsquo;s own boundary, so the
+        fill walked out through it into the yard and every stall had to be gated or bricked
+        up &mdash; owner: <em>&ldquo;if you put the sign on the y=2 level, you&rsquo;re
+        forced to brick over the entrance.&rdquo;</em> So when the floor runs away, each
+        height within three blocks of the sign is flood-filled for a ring of wall that
+        <em>does</em> close, lowest first, and the floor is then walked inside that ring
+        (<code>StallFill.fillWithin</code>). Lowest first because a doorway&rsquo;s lintel
+        is the first height at which the gap is sealed, and every ring above it is a larger
+        room containing this one &mdash; the barn, or nothing at all. The doorway&rsquo;s
+        own square belongs to the ring, so the stall ends there: the same answer hanging a
+        gate in the gap gives.</li>
     <li><strong>A door, trapdoor or gate is the edge, in every state.</strong> By block
         identity, deliberately, not by whether a horse could squeeze past &mdash; a rule
         based on collision measures a different stall depending on which way the gate
@@ -200,6 +223,25 @@
 </ul>
 
 <h3 id="verified">Verified</h3>
+
+<p id="verified-doorway-ring">
+    <strong>The sign's height no longer changes what is measured</strong> (owner-confirmed in play,
+    2026-09-17: <em>&ldquo;making stalls works perfectly&rdquo;</em>). Hung at <code>20, 129, 98</code>,
+    level with the floor, and again one block up at <code>20, 130, 98</code> &mdash; the head-height
+    placement that used to force the entrance to be bricked over &mdash; the same wall measured the
+    <strong>same room both times</strong>: <code>room 17, 129, 100 to 20, 136, 104 (20 tiles)</code>, a
+    complete 4&times;5 floor, the ticket landing dead centre at <code>19.00, 129.00, 102.50</code> with the
+    1.39&times;1.60 box fitting first try. Three bind-and-ticket cycles, no refusal and no
+    <code>inWall</code> anywhere in the log.
+</p>
+
+<p>
+    <strong>What that does not settle:</strong> a gated entrance and an open doorway produce an identical
+    success line, so the log cannot say whether the new wall-ring search or the ordinary floor fill
+    approved those three. The discriminating test &mdash; break the block above the doorway so the gap
+    runs open to the sky, and expect a refusal &mdash; was not run
+    (<a href="known-gaps.html#gap-153">gap 153</a>).
+</p>
 
 <p id="verified-detector-rewrite">
     <strong>Why the detector was rewritten</strong> (0.3.7 to 0.3.8, 2026-09-09; binding confirmed above). It killed

@@ -77,8 +77,9 @@ public class HoldingPenSignItem extends Item {
             // that binds to a made-up box reports a stall the player does not
             // have, and they find out when a horse is standing in a wall.
             player.sendSystemMessage(Component.literal(
-                    "That is not an enclosed pen - close it in on every side, with a gate or a "
-                            + "door where you walk in, then try again.").withStyle(ChatFormatting.RED));
+                    "That is not an enclosed pen - close it in on every side. A gate, a door, or a "
+                            + "plain doorway with wall above it all count as the way in.")
+                    .withStyle(ChatFormatting.RED));
             return InteractionResult.FAIL;
         }
 

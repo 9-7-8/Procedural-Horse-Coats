@@ -177,6 +177,66 @@ class StallFillTest {
         assertFalse(StallFill.contains(jump, 3, 1), "and everything beyond it is unreachable");
     }
 
+    /**
+     * <b>A doorway is a hole, and a hole leaks.</b> Owner, 2026-09-17: hang the
+     * sign at head height on a stall you walk into through a plain gap and you
+     * were "forced to brick over the entrance", because the floor of that stall
+     * is continuous with the floor of the yard outside it.
+     *
+     * <p>The wall <b>above</b> the gap is not. A doorway has a lintel, and at
+     * that level the ring is unbroken - so the room is found there and the floor
+     * is walked inside it. The doorway's own tile belongs to the ring, so it is
+     * not part of the stall, which is the same answer a gate hung in the gap
+     * gives.
+     */
+    @Test
+    void aDoorwayIsClosedByTheWallAboveIt() {
+        String[] atTheFloor = {
+                "#####",
+                "#...#",
+                "#...#",
+                "##.##",   // the way in: a gap, with nothing hung in it
+                ".....",   // the yard, which the stall's floor runs straight into
+                ".....",
+        };
+        String[] atTheLintel = {
+                "#####",
+                "#...#",
+                "#...#",
+                "#####",   // the wall over the doorway: unbroken
+                ".....",
+                ".....",
+        };
+
+        StallFill.Region loose = fill(atTheFloor, 2, 1);
+        assertNotNull(loose);
+        assertTrue(StallFill.contains(loose, 0, 4), "the floor alone must leak into the yard - that is the bug");
+
+        StallFill.Region ring = fill(atTheLintel, 2, 1);
+        assertNotNull(ring, "the lintel level closes where the floor does not");
+
+        StallFill.Region room = StallFill.fillWithin(new Picture(atTheFloor), ring, 2, 1, BASE, BUDGET);
+        assertNotNull(room);
+        assertEquals(6, room.size(), "3x2 of stall floor, and none of the yard");
+        assertFalse(StallFill.contains(room, 2, 3), "the doorway tile is the ring, not the room");
+        assertFalse(StallFill.contains(room, 0, 4), "the fill leaked out through the doorway");
+    }
+
+    /** A gap open all the way up has no ring at any level, so it is not a room at any level. */
+    @Test
+    void aGapOpenAllTheWayUpNeverCloses() {
+        String[] openToTheSky = {
+                "#####",
+                "#...#",
+                "#...#",
+                "##.##",
+                ".....",
+                ".....",
+        };
+        assertNull(StallFill.fill(new Picture(openToTheSky), 2, 1, BASE, 8),
+                "a stall you can walk out of at every height is not enclosed");
+    }
+
     @Test
     void anOpenFieldNeverCloses() {
         String[] field = new String[64];

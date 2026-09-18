@@ -204,6 +204,35 @@ public final class StallFill {
         return new Region(found, minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    /**
+     * The floor reached from the seed, <b>bounded by a ring of wall found at
+     * some other level</b> rather than by the edges of the floor itself.
+     *
+     * <h2>Why a room needs more than one level to be closed</h2>
+     * A doorway is a hole. Walk the floor of a stall whose way in is a plain
+     * two-block gap and the search strolls straight out of it into the yard,
+     * runs past its budget and reports "not a room" - so the only way to get a
+     * stall recognised was to hang a gate in the gap or brick it up, and a
+     * player who hung their sign high and left an open doorway was told their
+     * stall was not one (owner, 2026-09-17).
+     *
+     * <p>But the wall <b>above</b> that gap is unbroken: the lintel over a
+     * doorway closes a ring that the floor does not. So the caller finds a ring
+     * at a level where one closes, and this walks the floor <b>inside it</b> -
+     * the ring is the boundary, the floor is still what the room is made of. A
+     * column the ring calls wall (the doorway's own tile, under its lintel) is
+     * not part of the room, exactly as a gate's tile is not.
+     *
+     * @param ring the closed region found at the wall level, whose columns are
+     *             the only ones this fill may enter
+     */
+    public static Region fillWithin(Columns columns, Region ring,
+                                    int seedX, int seedZ, int seedY, int maxColumns) {
+        final Set<Long> inside = keysOf(ring);
+        return fill((x, z, nearY) -> inside.contains(key(x, z)) ? columns.floorY(x, z, nearY) : NONE,
+                seedX, seedZ, seedY, maxColumns);
+    }
+
     /** The two coordinates that identify a column, packed so they can key a map. */
     private static long key(int x, int z) {
         return ((long) x << 32) ^ (z & 0xFFFFFFFFL);

@@ -67,6 +67,22 @@ import net.minecraft.world.level.block.state.BlockState;
  *       see {@link #HEADROOM}.</li>
  * </ol>
  *
+ * <h2>A doorway is a hole, and a hole leaks</h2>
+ * The floor of a stall you walk into through a plain gap is continuous with the
+ * floor of the yard outside it, so the fill strolls out through the gap, runs
+ * past {@link #MAX_COLUMNS} and calls it "not a room". Every stall therefore had
+ * to be shut with a gate or bricked up - owner, 2026-09-17: <i>"if you put the
+ * sign on the y=2 level, you're forced to brick over the entrance."</i>
+ *
+ * <p>The wall <b>above</b> the gap is not a hole. A doorway has a lintel, and at
+ * that height the ring is unbroken. So when the floor runs away, the levels
+ * within {@link #RING_REACH} of the sign are searched for a ring that does
+ * close, and the floor is then walked <b>inside</b> it
+ * ({@link StallFill#fillWithin}) - the ring is the boundary, the floor is still
+ * what the room is made of. The doorway's own tile is part of the ring, so it is
+ * not part of the stall, which is exactly the answer a gate hung in the gap
+ * gives.
+ *
  * <p>Everything else a stall really contains is still passable: a torch, a
  * carpet, a lantern, a flower, a water trough, snow. Requiring bare air is most
  * of why the first version never worked at all.
@@ -194,16 +210,37 @@ public final class StallDetector {
         return a.blockCount() <= b.blockCount() ? a : b;
     }
 
-    /** Walk the floor from the cell {@code seed}, or {@code null} if it is not a room. */
+    /**
+     * How far above and below the sign a <b>wall ring</b> is looked for when the
+     * floor itself does not close. Three each way, which is the owner's number
+     * (2026-09-17) and covers the shapes people build: a lintel over a two-block
+     * doorway, a sign hung level with one, and a sign hung under a low roof.
+     */
+    private static final int RING_REACH = 3;
+
+    /**
+     * Walk the floor from the cell {@code seed}, or {@code null} if it is not a
+     * room <b>at any level within {@link #RING_REACH} of the sign</b>.
+     *
+     * <p>The floor gets first refusal, because when a stall is shut by a gate or
+     * a fence the floor is the truest answer and the cheapest one. When the
+     * floor runs away, the lowest ring that closes decides instead - lowest
+     * because a doorway's lintel is the first level at which the gap is sealed,
+     * and every ring above it is a bigger room enclosing this one (the barn, or
+     * the sky). See {@link StallFill#fillWithin}.
+     */
     private static Result fill(LevelReader level, BlockPos seed) {
         int signY = seed.getY();
         int seedFloor = seedFloorY(level, seed.getX(), seed.getZ(), signY);
         if (seedFloor == StallFill.NONE) {
             return null;
         }
-        StallFill.Region region = StallFill.fill(
-                (x, z, nearY) -> floorY(level, x, z, nearY, signY),
-                seed.getX(), seed.getZ(), seedFloor, MAX_COLUMNS);
+        StallFill.Columns floor = (x, z, nearY) -> floorY(level, x, z, nearY, signY);
+        StallFill.Region region =
+                StallFill.fill(floor, seed.getX(), seed.getZ(), seedFloor, MAX_COLUMNS);
+        if (region == null) {
+            region = withinLowestRing(level, floor, seed, seedFloor, signY);
+        }
         if (region == null) {
             return null;
         }
@@ -215,6 +252,73 @@ public final class StallDetector {
                 // (owner-reported 2026-09-10).
                 new BlockPos(region.maxX(), region.maxY() + ceilingHeight(level, region) - 1, region.maxZ()),
                 region.size());
+    }
+
+    /**
+     * <b>The floor inside the lowest wall ring that closes</b>, or {@code null}
+     * if none of them does.
+     *
+     * <p>Tried from the floor upwards. The lower bound is the floor and not
+     * {@code signY - RING_REACH}: a ring below the floor is the ground the stall
+     * stands on, which closes round every column and would hand back the seed
+     * tile on its own. The upper bound is three above the sign, which is far
+     * enough for the lintel over a doorway you hang a sign beside.
+     *
+     * <p>First match wins rather than smallest. A doorway's lintel is the
+     * <i>first</i> level at which the gap is sealed, and any ring found above it
+     * is a room that contains this one - the barn the stall is in, or, once the
+     * walls run out, nothing at all.
+     */
+    private static StallFill.@Nullable Region withinLowestRing(LevelReader level, StallFill.Columns floor,
+                                                               BlockPos seed, int seedFloor, int signY) {
+        for (int y = Math.max(seedFloor, signY - RING_REACH); y <= signY + RING_REACH; y++) {
+            StallFill.Region ring = ringAt(level, seed.getX(), seed.getZ(), y);
+            if (ring == null) {
+                continue;  // this level runs away too - the wall is not closed here
+            }
+            StallFill.Region inside =
+                    StallFill.fillWithin(floor, ring, seed.getX(), seed.getZ(), seedFloor, MAX_COLUMNS);
+            if (inside != null) {
+                return inside;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The air enclosed at height {@code y}, seeded from the column in front of
+     * the sign - or {@code null} if the wall at that height does not close.
+     *
+     * <p>This is the same flood fill the floor gets, asking a different
+     * question: not "could a horse stand here" but "is this cell inside the
+     * wall". Nothing needs to be underfoot, so it sees the ring over a doorway
+     * that the floor walks straight through.
+     */
+    private static StallFill.@Nullable Region ringAt(LevelReader level, int x, int z, int y) {
+        return StallFill.fill((cx, cz, nearY) -> open(level, cx, y, cz) ? y : StallFill.NONE,
+                x, z, y, MAX_COLUMNS);
+    }
+
+    /**
+     * Is this cell the room's own air, rather than the wall around it?
+     *
+     * <p>A door, a trapdoor and a gate are wall here for the same reason they
+     * are an edge on the floor ({@link #isDoorway}) - the upper half of a door
+     * is where a doorway's ring closes. A <b>sign</b> is not, for the same
+     * reason it is never floor: vanilla signs are force-solid, and a stall with
+     * a sign hung inside it would otherwise have a phantom block of wall
+     * standing in the middle of the room.
+     */
+    private static boolean open(LevelReader level, int x, int y, int z) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
+        if (level.isOutsideBuildHeight(p)) {
+            return false;
+        }
+        BlockState state = level.getBlockState(p);
+        if (state.getBlock() instanceof SignBlock) {
+            return true;
+        }
+        return !state.blocksMotion() && !isDoorway(state);
     }
 
     /** How far up a room is measured before it is called open-topped. */
