@@ -330,7 +330,7 @@ final class DebugYardUnattended {
 
     private static void killWhenShifted(ServerLevel level, AABB box) {
         DebugYardHerd.after(level, 100, () -> {
-            List<Mob> shifted = shiftedIn(level, box);
+            List<Mob> shifted = shiftedIn(level, box, "LYCAN DOOMED");
             if (shifted.isEmpty()) {
                 killWhenShifted(level, box);
                 return;
@@ -408,7 +408,7 @@ final class DebugYardUnattended {
 
     private static void breedWhenShifted(ServerLevel level, AABB box) {
         DebugYardHerd.after(level, 100, () -> {
-            List<Mob> shifted = shiftedIn(level, box);
+            List<Mob> shifted = shiftedIn(level, box, "WERE-COW");
             if (shifted.isEmpty() || !(shifted.get(0) instanceof Animal were)) {
                 breedWhenShifted(level, box);
                 return;
@@ -528,9 +528,24 @@ final class DebugYardUnattended {
                 + " reading; any increase is a FAIL");
     }
 
-    private static List<Mob> shiftedIn(ServerLevel level, AABB box) {
+    /**
+     * The shifted animals in {@code box} that came from the pen's <b>own</b> horse,
+     * matched on the label the shift carries over from it.
+     *
+     * <p>It used to return any shifted mob in the box and the callers took the
+     * first, which was safe only for as long as no shifter could leave its pen. A
+     * bat can: added to LYCAN ROUND TRIP on 2026-09-18, it flew next door within
+     * two seconds of dusk, was picked up as LYCAN DOOMED's victim and killed in
+     * place of the armoured wolf - so the doomed pen reported
+     * "iron armour on the ground 0, live horses 0 - FAIL" about an animal that was
+     * never its own. A pen must not be able to kill its neighbour's stock.
+     */
+    private static List<Mob> shiftedIn(ServerLevel level, AABB box, String label) {
         return level.getEntitiesOfClass(Mob.class, box.inflate(0.0, 2.0, 0.0),
-                m -> !(m instanceof Horse) && m.isAlive() && m.getData(ModAttachments.LYCAN_SHIFT.get()).active());
+                m -> !(m instanceof Horse) && m.isAlive()
+                        && m.getData(ModAttachments.LYCAN_SHIFT.get()).active()
+                        && m.getCustomName() != null
+                        && label.equals(m.getCustomName().getString()));
     }
 
     private static void bond(@Nullable Horse h, int bond) {
