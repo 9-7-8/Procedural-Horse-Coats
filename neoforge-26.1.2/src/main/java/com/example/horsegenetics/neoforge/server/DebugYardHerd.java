@@ -162,27 +162,35 @@ final class DebugYardHerd {
     // ------------------------------------------------------------------
 
     /**
-     * The filly is due to leave at once and the colt three minutes later, <b>on
-     * purpose</b>: a filly takes the nearest bachelor over the nearest band, and a
-     * brother who left first is the nearest bachelor there is (gap 234). The two mover
-     * mares know the host band's mares already (their side only), so either may move
-     * over. Two pens, one {@link YardPens} group.
+     * Brother and sister are both due to leave at once, which is the <b>only</b>
+     * arrangement that asks {@code BandLife} the question gap 234 exists for: a
+     * dispersing filly takes the nearest bachelor over the nearest band, and a
+     * brother who left at the same moment is the nearest bachelor there is, so
+     * {@code closeKin} has to refuse him.
+     *
+     * <p>This pen used to stagger the colt three minutes behind the filly, and the
+     * comment here called that deliberate. It was not: the stagger meant the colt
+     * had not yet left when she chose, so he was never a candidate and the check was
+     * never exercised - both horses dispersed cleanly in the 16:11 run of 2026-09-15
+     * and proved nothing. Dropping it is what gap 234's Pass line always asked for.
+     *
+     * <p>The two mover mares know the host band's mares already (their side only), so
+     * either may move over. Two pens, one {@link YardPens} group.
      */
     private static void leavingHome(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 10, ROW_Q_D, "LEAVING HOME", "LEAVING HOME",
-                List.of("LEAVING HOME", "filly leaves now,", "colt in 3 min;", "mares may move E"));
+                List.of("LEAVING HOME", "both leave now:", "she must NOT take", "her brother"));
         Horse sire = horse(level, gy, x0 + 2.5, z0 + 3, Sex.MALE, false, "NATAL STALLION", 9.0);
         Horse m1 = horse(level, gy, x0 + 5.5, z0 + 3, Sex.FEMALE, false, "MOVER MARE 1", 8.5);
         Horse m2 = horse(level, gy, x0 + 8.0, z0 + 3, Sex.FEMALE, false, "MOVER MARE 2", 8.0);
         Horse filly = horse(level, gy, x0 + 3.5, z0 + 6.5, Sex.FEMALE, false, "FILLY: LEAVES NOW", 0.0);
-        Horse colt = horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.MALE, false, "COLT: LEAVES AT 3M", 0.0);
+        Horse colt = horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.MALE, false, "COLT: LEAVES NOW", 0.0);
         band(sire, BandType.TRADITIONAL, sire, m1, m2, filly, colt);
         if (sire != null) {
             Optional<UUID> natal = Optional.of(sire.getUUID());
-            // Adult days lived = the day she is due to leave, so the first scan sends her.
+            // Adult days lived past the day each is due, so the first scan sends both.
             born(filly, 3.05, natal, 3.0);
-            // ...and him three minutes short of his.
-            born(colt, 1.0 - 3.0 * 1200.0 / HerdRules.DAY_TICKS, natal, 1.0);
+            born(colt, 1.05, natal, 1.0);
         }
 
         int hx = x0 + 10;

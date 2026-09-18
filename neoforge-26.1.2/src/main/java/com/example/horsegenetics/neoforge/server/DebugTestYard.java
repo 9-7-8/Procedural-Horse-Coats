@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -449,16 +450,31 @@ final class DebugTestYard {
     private static void verify(ServerLevel level, int gy, int cx, int mouthZ) {
         int noFloor = 0;
         int blocked = 0;
+        // Name the first offender of each kind. "around x={cx}" was the plot
+        // centre, not the offending spot, so the standing "1 blocked at head
+        // height" was unactionable and was set aside as noise in four separate
+        // sessions - which is how a real obstruction survives. Gaps 260/262: a
+        // check that always complains and never says what is worse than none.
+        BlockPos firstNoFloor = null;
+        BlockPos firstBlocked = null;
+        BlockState firstBlockedState = null;
         for (int z = ROAD_EDGE_Z; z < mouthZ + YARD_DEPTH_Z; z++) {
             boolean inYard = z >= mouthZ;
             int halfX = inYard ? YARD_HALF_X - 1 : PATH_HALF_X;
             for (int x = cx - halfX; x <= cx + halfX; x += inYard ? 4 : 1) {
                 if (level.getBlockState(new BlockPos(x, gy, z)).isAir()) {
                     noFloor++;
+                    if (firstNoFloor == null) {
+                        firstNoFloor = new BlockPos(x, gy, z);
+                    }
                 }
-                if (!level.getBlockState(new BlockPos(x, gy + 1, z)).isAir()
-                        && !isFurniture(level, x, gy + 1, z)) {
+                BlockState head = level.getBlockState(new BlockPos(x, gy + 1, z));
+                if (!head.isAir() && !isFurniture(level, x, gy + 1, z)) {
                     blocked++;
+                    if (firstBlocked == null) {
+                        firstBlocked = new BlockPos(x, gy + 1, z);
+                        firstBlockedState = head;
+                    }
                 }
             }
             if (inYard) {
@@ -469,8 +485,15 @@ final class DebugTestYard {
             HorseGenetics.LOGGER.info("[Debug] test yard built and walkable at x={}, z={}..{}",
                     cx, ROAD_EDGE_Z, mouthZ + YARD_DEPTH_Z);
         } else {
-            HorseGenetics.LOGGER.warn("[Debug] test yard is NOT sound: {} spot(s) with no floor, "
-                    + "{} blocked at head height, around x={}", noFloor, blocked, cx);
+            HorseGenetics.LOGGER.warn("[Debug] test yard is NOT sound: {} spot(s) with no floor"
+                    + "{}, {} blocked at head height{}. Plot centre x={}.",
+                    noFloor,
+                    firstNoFloor == null ? "" : " (first at " + firstNoFloor.toShortString() + ")",
+                    blocked,
+                    firstBlocked == null ? "" : " (first at " + firstBlocked.toShortString()
+                            + ", which is " + BuiltInRegistries.BLOCK.getKey(
+                                    firstBlockedState.getBlock()) + ")",
+                    cx);
         }
     }
 
@@ -525,6 +548,13 @@ final class DebugTestYard {
                 // nobody can act on is worse than no warning - it is the one
                 // that gets ignored the next time it is real.
                 || state.is(Blocks.LIGHT) || state.is(Blocks.WATER)
+                // The fertility rows give every pen a flush water cauldron, and it
+                // was the whole of the standing "1 blocked at head height" warning -
+                // named at last by the position this check now logs (-16, 129, 414).
+                // Deliberate furniture, so the check was crying wolf, which is the
+                // third of the possibilities gap 262 listed. Gaps 260/262.
+                || state.is(Blocks.CAULDRON) || state.is(Blocks.WATER_CAULDRON)
+                || state.is(Blocks.LAVA_CAULDRON) || state.is(Blocks.POWDER_SNOW_CAULDRON)
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH.get());

@@ -54,7 +54,18 @@ class CoatTextureComposerTest {
      * keeps the assertion about the mane rather than about the chart.
      */
     private static final String BLOOD_BAY = override("agouti=A/a", "shade=ShL/ShL");
-    private static final String WHITE = override("kit=W22/N");
+    /**
+     * {@code W2}, not {@code W22}. One {@code W2} copy is in {@code KitGene}'s
+     * allWhite list, where a single copy removes every pigment and masks the coat -
+     * which is what {@link #whiteHorseIsExactlyTheTemplate} is about. {@code W22}
+     * stopped being that on 2026-09-15 (owner, following the 2024 McFadden review):
+     * one copy is sabino-like and is all white only beside a booster, so this test
+     * had been asserting an all-white horse against a genotype that paints a whole
+     * coat, and had been red ever since. {@code CoatCheckPlan.WHITE} was corrected
+     * to {@code W2/N} at the time and carries the same note; this constant was
+     * missed.
+     */
+    private static final String WHITE = override("kit=W2/N");
     private static final String CHAMPAGNE_BLACK = override("champagne=Ch/c");
     private static final String CHAMPAGNE_BAY = override("agouti=A/a", "champagne=Ch/c");
     private static final String SPLASH = override("agouti=A/a", "mitf=SW1/N");
@@ -125,28 +136,53 @@ class CoatTextureComposerTest {
         int[] tB = template(Skin.BABY);
         GradientLut lut = lut();
 
-        java.util.List<Long> masks = new java.util.ArrayList<>();
-        masks.add(0L);
-        masks.add((1L << n) - 1);
+        // A BitSet, not a long: Java masks a shift distance to the low six bits, so
+        // (1L << n) - 1 with n past 64 silently becomes (1L << (n & 63)) - 1. At 291
+        // genes that is a 35-bit mask, and every locus from the 36th onward stayed
+        // pinned to its last allele while the test went on passing - it only asserts
+        // that a bake returns a full sheet, so narrower coverage was invisible. Gap 177.
+        java.util.List<java.util.BitSet> masks = new java.util.ArrayList<>();
+        masks.add(new java.util.BitSet(n));
+        java.util.BitSet allOn = new java.util.BitSet(n);
+        allOn.set(0, n);
+        masks.add(allOn);
         for (int i = 0; i < n; i++) {
-            masks.add(1L << i);
+            java.util.BitSet one = new java.util.BitSet(n);
+            one.set(i);
+            masks.add(one);
         }
+        // Sparse masks, drawn from the whole width. The old coin-flip-per-locus
+        // shape was cheap only because the mask was accidentally 35 bits wide; over
+        // all 291 loci it turns on about 145 genes at once, and a compose that paints
+        // 145 genes costs about a second - 3000 of those ran thirteen minutes without
+        // finishing, and even 300 did not finish in ten. Two things were wrong with
+        // it: the cost, and that half-mutant horses are not what this is guarding.
+        // A real genotype is mostly wild with a handful of variants, so ONSET_LOCI
+        // random loci out of the full range finds "gene A throws when gene B is also
+        // on" at a realistic density and a hundredth of the price. The two corners
+        // above (nothing on, everything on) still cover the extremes exactly.
+        final int onsetLoci = 8;
         java.util.Random rng = new java.util.Random(20260902L);
-        for (int k = 0; k < 3000; k++) {
-            masks.add(rng.nextLong() & ((1L << n) - 1));
+        for (int k = 0; k < 400; k++) {
+            java.util.BitSet bits = new java.util.BitSet(n);
+            for (int j = 0; j < onsetLoci; j++) {
+                bits.set(rng.nextInt(n));
+            }
+            masks.add(bits);
         }
 
-        for (long mask : masks) {
+        for (java.util.BitSet mask : masks) {
             StringBuilder code = new StringBuilder();
             for (int i = 0; i < n; i++) {
                 var alleles = genes.get(i).alleles();
-                var al = ((mask >> i) & 1) == 1 ? alleles.get(0) : alleles.get(alleles.size() - 1);
+                var al = mask.get(i) ? alleles.get(0) : alleles.get(alleles.size() - 1);
                 if (code.length() > 0) code.append('-');
                 code.append(genes.get(i).key()).append('=')
                         .append(al.token()).append('/').append(al.token());
             }
             Genotype gt = Genotype.parse(code.toString());
-            Epigenome epi = Epigenome.fromSeed(mask);
+            long[] words = mask.toLongArray();
+            Epigenome epi = Epigenome.fromSeed(words.length == 0 ? 0L : words[0]);
             assertEquals(N * N, CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, tA, lut).length);
             assertEquals(N * N, CoatTextureComposer.compose(gt, epi, Skin.BABY, false, tB, lut).length);
         }
@@ -439,20 +475,33 @@ class CoatTextureComposerTest {
                 Skin.ADULT, true, shaded, lut());
 
         int darkest = 255;
+        for (int i = 0; i < img.length; i++) {
+            if ((img[i] >>> 24) == 0) {
+                continue;
+            }
+            darkest = Math.min(darkest, img[i] & 0xFF);
+        }
+        // The darkest BAND, not a fixed cutoff. This counted levels below 0x20,
+        // which stopped meaning "the stripes" once the floor that keeps the
+        // multiply non-zero put the darkest stripe texel at 37: the set came back
+        // empty and the test had been red on main ever since, saying "got []" as
+        // though the stripes had vanished when they are all present. What it is
+        // really asserting is that the dark end of a stripe is not one flat slab,
+        // and that holds whatever the floor is calibrated to.
         var levels = new java.util.HashSet<Integer>();
         for (int i = 0; i < img.length; i++) {
             if ((img[i] >>> 24) == 0) {
                 continue;
             }
             int v = img[i] & 0xFF;
-            darkest = Math.min(darkest, v);
-            if (v < 0x20) {
+            if (v < darkest + 16) {
                 levels.add(v);
             }
         }
         assertTrue(darkest > 0, "no texel may composite to pure black, darkest was " + darkest);
         assertTrue(levels.size() > 1,
-                "the stripes should still carry the template's shading, got " + levels);
+                "the stripes should still carry the template's shading, got " + levels
+                        + " in the darkest band from " + darkest);
     }
 
     @Test

@@ -143,6 +143,11 @@
           "radius": 2
         },
         {
+          "type": "day_watch",
+          "mode": "stare",
+          "radius": 6
+        },
+        {
           "type": "sound",
           "sound": "minecraft:entity.cat.ambient",
           "trigger": { "interval": 200 },
