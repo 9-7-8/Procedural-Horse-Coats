@@ -124,10 +124,14 @@
     <li><strong>Redstone moves the pair, not a half.</strong> Run a lever to one end of a double
         gate. <strong>Pass:</strong> both leaves open. Vanilla's own rule asks only about its own
         block, which on a pair would swing one and leave the other shut.</li>
-    <li><strong>Placement refuses cleanly with no room.</strong> Try to place one into a
-        one-block gap. <strong>Pass:</strong> nothing is placed and the item stays in your hand
-        &mdash; never a single half left standing. It refuses <em>silently</em>, which is
-        <a href="known-gaps.html#gap-270">gap 270</a>.</li>
+    <li><strong>Placement refuses cleanly with no room, and says why.</strong> Try to place one
+        into a one-block gap. <strong>Pass:</strong> nothing is placed, the item stays in your
+        hand &mdash; never a single half left standing &mdash; and you are told
+        &ldquo;No room for a gate two blocks wide&hellip;&rdquo;. <strong>Also check it stays
+        quiet when it should:</strong> clicking the <em>face</em> of a solid block, or
+        somewhere out of reach, must produce no message at all. The refusal is told apart from
+        every ordinary placement failure by asking whether the clicked position itself could
+        have been replaced, and a message on all of them would be noise.</li>
 </ul>
 
 <h3>Visual, and therefore last</h3>
