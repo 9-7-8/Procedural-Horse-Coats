@@ -92,6 +92,10 @@ public final class ModdedArmour {
             String id = metal.armourId();
             DeferredItem<Item> item = ModItems.ITEMS.registerItem(id,
                     properties -> new Item(properties.horseArmor(provisional(metal))));
+            // Into the mod's own creative tab as well as the registry. Without
+            // this they exist but cannot be got at in creative at all - only
+            // crafted or bought - which reads as the feature not working.
+            ModItems.TAB_ITEMS.add(item);
             ARMOURS.add(new Armour(metal, item));
         }
     }
