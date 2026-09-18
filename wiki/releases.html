@@ -58,6 +58,106 @@
     </p>
 </div>
 
+<h2 id="v0-5-011">0.5.011</h2>
+
+<p class="lede">
+    <strong>Four villagers, and other people's materials.</strong> One horseman had been
+    selling tack, carrots, armour, papers, eggs and tickets across five tiers, which made
+    him a shop rather than a tradesman and left nothing to get better as he did. He is four
+    people now. Separately and underneath: install a mod that adds a wood or a metal, and
+    this mod now makes content for it &mdash; read off that mod's own files, with nobody
+    editing a list.
+</p>
+
+<h3>The four equestrians</h3>
+
+<ul>
+    <li><strong>The Leatherworker</strong> sells the saddle and the leather horse armour,
+        dyed by a ladder you can see: bone meal and flower colours at Novice, lapis with
+        diamond fittings at Master. The dyed <em>saddle</em> is back after being withdrawn
+        once for being invisible &mdash; a saddle takes three colours now, so the trade
+        sells something you can look at.</li>
+    <li><strong>The Scientist</strong> deals in breeding carrots, the vet's kit and breed
+        spawn eggs, and buys filled seed jars. His Master carrots name <em>both</em> alleles,
+        so the foal is certain to carry the gene rather than getting a coin flip &mdash; and
+        he will not sell one for a gene whose homozygote cannot occur, because that carrot
+        would do nothing and say nothing.</li>
+    <li><strong>The Supplier</strong> is the general store &mdash; carrots, leads, whistles,
+        tickets, papers, the empty seed jar &mdash; and the one who buys horse hair from his
+        first day, which is still the easiest early trade in the mod.</li>
+    <li><strong>The Metalsmith</strong> sells horse armour in metal and crystal and nothing
+        else.</li>
+    <li><strong>The horseman is retired outright.</strong> No alias and no transitional
+        profession: a villager who held that job in an existing world comes back unemployed.</li>
+    <li><strong>A post each, because a job site hands out exactly one profession.</strong>
+        Five posts down the homestead's frontage now &mdash; the cowboy's hitch, the front
+        door, the four trades, and the bench at the end.</li>
+    <li><strong>The house is three rows deeper, with five beds</strong>, one per sleeper. A
+        villager who claims a job and has nowhere to sleep never restocks, so the bed count
+        is the other half of the post count rather than decoration.</li>
+    <li><strong>Four hat colours, none of them purple.</strong> Purple is the arcane dealer's
+        and he has to stay recognisable in a crowd.</li>
+    <li>All four take the same family name as the cowboy, the way the horseman did: whoever
+        is hired first founds it and everyone after joins.</li>
+</ul>
+
+<h3>Gates and armour for other mods' materials</h3>
+
+<ul>
+    <li><strong>A double fence gate for every wood another mod adds</strong>, crafted from
+        two of that mod's own gates and a braided rope, wearing that mod's own plank texture.
+        No new art was needed for any of it &mdash; a double gate has never had a texture of
+        its own, only a pointer at one.</li>
+    <li><strong>A horse armour for every modded ingot or gem</strong>, coloured from that
+        item's own picture, because nothing in a mod's files states what colour tin is except
+        the art. How much it protects is read from that mod's own chestplate where there is
+        one to read, and guessed from a ladder where there is not &mdash; the guess is
+        labelled as one in the code.</li>
+    <li><strong>The Equestrian Bench takes them too:</strong> modded ingots and gems as
+        fittings beside the hand-picked fifteen, and modded dyes whose colour vanilla has no
+        name for. A dye carrying vanilla's own component always worked and is untouched.</li>
+    <li><strong>The Metalsmith stocks the new armours</strong>, filed by how much each one
+        protects, so his tiers are no longer three items long.</li>
+    <li>It is all written to <code>.minecraft/phc/generated/</code> and handed back to the
+        game as a pack. The folder records which mods it was built for: change nothing and
+        nothing is rewritten, add or remove a mod and it is wiped and built again. The files
+        stay on disk on purpose &mdash; a generated model that fails is otherwise a purple
+        cube with nothing logged anywhere.</li>
+</ul>
+
+<h3>Smaller</h3>
+
+<ul>
+    <li><strong>A cowboy hitch dropped nothing when you broke it.</strong> It had shipped
+        with no loot table at all, which is not a default &mdash; it is a warning in the log
+        and a block you cannot get back.</li>
+    <li>A test had been red on a clean tree for a day, asserting the uncapped harem size that
+        a fix had already replaced. It now pins the cap from the inside and reads the constant
+        rather than the number, so moving the cap moves the test with it.</li>
+</ul>
+
+<h3>Verification</h3>
+
+<p>
+    A dedicated server boots clean on all of it. The compatibility layer was exercised with a
+    <em>synthetic</em> mod written to be found: the scan finds its wood and its metals, the
+    pack generates, an unchanged mod list is left alone, and removing the mod wipes the
+    folder. Twenty unit tests cover the scan itself, including both texture fallbacks and the
+    four kinds of thing that must not be picked up, and they were checked by mutation rather
+    than trusted.
+</p>
+<p>
+    <strong>What that does not cover, and it is a lot.</strong> Nothing has been run against a
+    real third-party mod. <strong>No generated recipe has ever successfully parsed</strong>
+    &mdash; the test mod declares items it never registers, so what was proven is that we skip
+    the recipe rather than that we write a good one. And <strong>nothing generated has been
+    seen rendering at all</strong>: not a gate, not a tinted armour, not an icon, not a hat.
+    Nor has the deepened homestead been confirmed to still generate in a village, which is the
+    thing that gates every other villager check. See
+    <a href="verification.html">verification</a> &sect;0-FJ and &sect;0-FK, and
+    <a href="known-gaps.html">gaps 270-275</a>.
+</p>
+
 <h2 id="v0-5-010">0.5.010</h2>
 
 <p class="lede">
