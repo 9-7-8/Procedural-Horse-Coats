@@ -107,8 +107,12 @@ public final class DoubleGates {
             // so a block.* lang key is simply never consulted. The mod's other
             // block items paper over this by shipping the name under both
             // prefixes; one line here beats twelve duplicate keys.
+            // DoubleGateItem rather than a plain BlockItem: it exists to say why
+            // a gate refused to go down when neither side had room, which used to
+            // be silent. See that class.
             DeferredItem<BlockItem> item = ModItems.ITEMS.registerItem(name,
-                    p -> new BlockItem(block.get(), p.useBlockDescriptionPrefix()));
+                    p -> new com.example.horsegenetics.neoforge.item.DoubleGateItem(
+                            block.get(), p.useBlockDescriptionPrefix()));
 
             GATES.add(new Gate(wood, vanillaGate, block, item));
         }
