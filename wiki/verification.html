@@ -1854,9 +1854,13 @@
     <code>BreedHerd</code>). <strong>This changes how every wild herd in the world is put together</strong>, so it is
     first below. Green on the bench: <code>:neoforge-26.1.2:build</code>, creator parity (7169 checks),
     <code>check-links</code>, the designer boot check, <code>check-ai.mjs</code> (35 checks, including that the breed
-    designer boots with a clean console), and the breed test classes &mdash; <code>BreedHerdTest</code> 12 of 12,
+    designer boots with a clean console), and the breed test classes &mdash; <code>BreedHerdTest</code>,
     <code>BreedSpecParserTest</code>, <code>BreedFilesTest</code>, <code>BreedSpawnSettingsTest</code>. None of that is
     a game.
+    <strong>The <code>BreedHerdTest</code> half of that claim did not survive the next day:</strong> the 2026-09-17
+    harem cap made one of its cases red, and it stayed red until 2026-09-18 because nothing runs the suite
+    (<a href="known-gaps.html#gap-269">gap 269</a>). Green again, and the cases below are the ones that were never a
+    bench check anyway.
 </p>
 <ul>
     <li><strong>Wild herds still form at all.</strong> The first thing to lose if this is wrong, and it fails
@@ -1864,7 +1868,8 @@
         lead's seed, so a disagreement between members would show as <em>two herds where there should be one</em>, or
         horses with no herd. Ride into plains and read <code>latest.log</code>: every member of a pack should share one
         <code>[Breeds]</code> founder line's breed, and the inspect panel should show the same herd for all of them.
-        <strong>Pass:</strong> packs of 2&ndash;6, one herd each, one stallion in a family band.</li>
+        <strong>Pass:</strong> packs of 2&ndash;6, one herd each, and one stallion in a family band up to five adults
+        &mdash; at six, the adult over the four-mare cap is a second stallion, not a mare.</li>
     <li><strong>A harem fills to four mares and then stops, and the wild is not all mares.</strong> Joining an
         existing traditional band made a horse a mare unconditionally until 2026-09-17, so this needs a count in a
         world rather than a look at one band. Count grown horses across several separate groups in fresh land, then

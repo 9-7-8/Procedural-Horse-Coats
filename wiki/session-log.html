@@ -27,6 +27,46 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-herd-test">2026-09-18, after the wizard &mdash; The red test was asserting the bug it was written before</h2>
+
+<p>
+    <code>BreedHerdTest</code> had been red on a clean tree since the previous afternoon, found
+    by accident and <a href="#d2026-09-18-arcane">parked as gap 269</a> without anyone deciding
+    which half was wrong. It was the test.
+</p>
+
+<p>
+    <code>aDefaultFamilyBandIsOneStallionAndTheRestMares</code> asserted one stallion for a band
+    of four <em>and</em> of six. The day before, <a href="#d2026-09-17-tester-fixes">the tester
+    fixes</a> had capped the default harem at <code>BreedHerd.MAX_HAREM_MARES</code> &mdash;
+    because a traditional band took exactly one stallion however many horses turned up, so every
+    adult past the first was a mare and the wild came out overwhelmingly female. With six adults
+    one stallion now leaves five mares, one over the cap, so the surplus turns stallion and the
+    answer is two. <strong>The test was pinning the ratio bug that the cap was written to
+    remove</strong>, and it was the only thing in the repo still claiming the old behaviour was
+    correct.
+</p>
+
+<p>
+    Worth naming because the failure had the shape of a regression and was not one. The commit
+    that made it red was a deliberate behaviour change with its reasoning written down in three
+    places &mdash; the constant's javadoc, <a href="breed-format.html#herd-shape">the breed
+    format page</a>, and its own commit message &mdash; and a test asserting the opposite outlived
+    all three because nothing ran it. The replacement reads <code>MAX_HAREM_MARES</code> rather
+    than the number four, so the next move of the cap moves the test with it, and a second case
+    walks four sizes past the cap to check each surplus adult turns stallion rather than just the
+    first.
+</p>
+
+<p>
+    <strong>Gap 269 is rewritten, not deleted.</strong> The specific failure is closed, but the
+    reason it sat unseen for a day is the part that was always the real entry: no CI, no periodic
+    full-suite run, and a standing rule against running <code>:common:test</code> unasked because
+    it takes ten minutes. &ldquo;The suite is green&rdquo; means &ldquo;someone ran it once&rdquo;.
+    The gap now says that and names what would close it &mdash; a nightly run, or a pre-tag gate
+    beside the <code>runServer</code> boot check.
+</p>
+
 <h2 id="d2026-09-18-arcane">2026-09-18 &mdash; The horse wizard, and the three things he needed that did not exist</h2>
 
 <p>
@@ -103,6 +143,8 @@
     stashing the whole day's work and running it on <code>HEAD</code>. Nobody knows since
     when, which is <a href="known-gaps.html#gap-269">its own gap</a>: with no full-suite run
     and no CI, a class nobody edits can sit red indefinitely.
+    (<a href="#d2026-09-18-herd-test">Fixed later the same day</a> &mdash; the test was the stale
+    half.)
 </p>
 
 <h2 id="d2026-09-18-unattended">2026-09-18, overnight &mdash; Tests that could not fail, and a run that was not running</h2>
