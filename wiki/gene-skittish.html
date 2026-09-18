@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skittishness &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Skittishness</h1>
+
+<p class="lede">
+    What a horse runs from, and when. The mirror of
+    <a href="gene-aggression.html">aggression</a>, allele for allele &mdash; and
+    being ridden makes no difference to it at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Built, and not yet seen in game</span>
+    <p>
+        The locus was split out of the two temper genes on 2026-09-17. The record
+        below was earned by the allele it replaces, on the same flee machinery.
+        What to look at is on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="what">The grid</h2>
+
+<p>
+    The same three times crossed with the same five targets as aggression, on
+    <code>F</code>-prefixed tokens so the two loci read alike: <code>Fd</code> by
+    day, <code>Fn</code> after dark, <code>Fa</code> always.
+</p>
+
+<table class="data">
+    <thead><tr><th></th><th><code>c</code> herds</th><th><code>h</code> monsters</th><th><code>p</code> riders</th><th><code>e</code> horses</th><th><code>a</code> everything</th></tr></thead>
+    <tbody>
+        <tr><td><strong>by day</strong></td><td><code>Fdc</code></td><td><code>Fdh</code></td><td><code>Fdp</code></td><td><code>Fde</code></td><td><code>Fda</code></td></tr>
+        <tr><td><strong>after dark</strong></td><td><code>Fnc</code></td><td><code>Fnh</code></td><td><code>Fnp</code></td><td><code>Fne</code></td><td><code>Fna</code></td></tr>
+        <tr><td><strong>always</strong></td><td><code>Fac</code></td><td><code>Fah</code></td><td><code>Fap</code></td><td><code>Fae</code></td><td><code>Faa</code></td></tr>
+    </tbody>
+</table>
+
+<p>
+    Two copies of the <em>same</em> allele, exactly as on the aggression locus.
+    Two different shy alleles show neither.
+</p>
+
+<h2 id="riding">It does not stop when you get on</h2>
+
+<p>
+    Aggression pauses nothing for a rider and neither does this, but the
+    consequence is different and worse to own: a mount that bolts when a creeper
+    comes round the corner is a horse you cannot take anywhere. That is the
+    version of this gene a rider actually meets, and it is deliberately not gated
+    away.
+</p>
+
+<h2 id="worst">The one that is genuinely hard to keep</h2>
+
+<p>
+    <code>Fnp</code> &mdash; flees riders after dark &mdash; is the difficult one.
+    By day it is a perfectly ordinary horse that can be caught, tamed and ridden.
+    After dark it will not let you near it. Nothing is wrong with the animal; you
+    simply own a horse that is only yours for half of each day.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    Running is the safest thing on either temperament locus, and a shy horse
+    generally outlives a brave one. The cost is where it ends up: a fleeing horse
+    paths twelve blocks away from whatever frightened it and does not consider
+    what is in that direction.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.skittish</code></dd></div>
+    <div><dt>Alleles</dt><dd>the same grid as <a href="gene-aggression.html">aggression</a>, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive, and recessive to the other variants</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>temper</code> effect with <code>"mood": "flee"</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Fleeing was once implemented somewhere else entirely</span>
+    <p>
+        Until 2026-09-17 the <code>temper</code> verb <strong>returned early on any mood that was not <code>aggressive</code></strong>, and fleeing was implemented in <code>NightBehaviourHandler</code> against the night verb instead. When this locus moved onto the shared verb the flee path had to move with it, into <code>GeneAbilityHandler.flee</code>. Had it not, this gene would have loaded, registered, baked, appeared in the census and done <em>nothing whatsoever</em> &mdash; which is the failure mode this codebase keeps paying for. If you add a mood, follow it all the way into the translator.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">&ldquo;Herds&rdquo; must not include the horse's own band</span>
+    <p>
+        <code>passive</code> excludes every equine in <code>MobGroups</code>. It is the whole of <a href="#verified-night-shy">gap 241</a> below, and the exclusion moved from the night handler's private matcher into the shared group resolver when this locus was built &mdash; where every caller gets it rather than one.
+    </p>
+</div>
+
+<h2 id="path">There is no vanilla avoid-goal to borrow</h2>
+
+<p>
+    Fleeing is a navigation call rather than a goal: the horse paths to a point
+    <code>FLEE_DISTANCE</code> directly away from the nearest match and drops any
+    target it had. <strong>Log whether the path was accepted.</strong> From
+    outside, a flee that never fired and a flee that fired into a fence four
+    blocks away look exactly alike, and <code>Navigation.moveTo</code>'s return is
+    the only thing that tells them apart.
+</p>
+
+<h3 id="verified">Verified</h3>
+
+<p id="verified-night-shy">
+    <strong>A night-shy horse leaves its own herd alone</strong> (2026-09-15, formerly gap 241). The bug: a
+    <code>Flc/Flc</code> foal born into a wild band logged 1,578 <code>night flee | ... from minecraft:horse</code>
+    lines in eight hours, because <code>NightBehaviourHandler.matches</code> never left equines out of
+    &ldquo;passive&rdquo; despite a comment saying it must. The fix excludes equines and has the flee trace
+    compare UUIDs with <code>equals</code>. <em>Evidence:</em> the yard's NIGHT SHY pen (row X) put a
+    <code>Flc/Flc</code> mare in with a stallion, two mares and two cows for the 06:49 run's whole first night:
+    96 <code>night flee | ... "NIGHT SHY" from minecraft:cow - path accepted</code> lines and none from anything
+    else. <em>The allele is <code>Fnc</code> now</em>, and the exclusion it tests lives in <code>MobGroups</code>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="split">Fear is not negative aggression</h2>
+
+<p>
+    It would have been cheaper to keep one locus with a mood axis, and it would
+    have been wrong. Temperament is not a line with hunting at one end and
+    bolting at the other: a great many real animals are aggressive toward one
+    thing and frightened of another, and the same animal is often both at once.
+    Two loci say that. One could not.
+</p>
+
+<h2 id="common">Shy is commoner than dangerous</h2>
+
+<p>
+    A frightened horse costs its owner a fence and an afternoon; an aggressive one
+    costs them the horse. So the expressing combinations here are several times
+    commoner in the wild than aggression's, and a wild herd that scatters when you
+    approach is meant to be an ordinary thing to meet rather than a find.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-aggression.html">Aggression</a>
+        <a href="gene-passification.html">Passification</a>
+        <a href="gene-magic-night-watch.html">Magic night watch</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/SkittishGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

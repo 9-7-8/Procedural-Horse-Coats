@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passification &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Passification</h1>
+
+<p class="lede">
+    The way in to a horse that would otherwise kill you. It adds no aggression of
+    its own &mdash; it says what you can <em>offer</em> the animal to make it
+    stop, and while the bargain holds it will not target you for any reason.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Built, and not yet seen in game</span>
+    <p>
+        New on 2026-09-17, and nothing here has been watched happening to a
+        horse. The feeding interaction and the veto were written against the
+        26.1.2 sources and are flagged unverified in their own comments. What to
+        look at is on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="why">What it is for</h2>
+
+<p>
+    <a href="gene-aggression.html">Aggression</a> can produce a wild horse that
+    attacks players on sight, and a horse like that is not a difficult horse, it
+    is an <strong>enemy</strong>: you cannot get near it, so you cannot feed it,
+    so you cannot tame it. Wherever that allele lands it is a dead end. This locus
+    is the answer to it.
+</p>
+
+<h2 id="what">The six ways in</h2>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>What feeding it buys</th></tr></thead>
+    <tbody>
+        <tr><td><code>Prm</code></td><td>the horse never targets you again</td></tr>
+        <tr><td><code>Tmp</code></td><td>it leaves you alone for a while, then wants asking again</td></tr>
+        <tr><td><code>FPr</code></td><td>permanent, but only while it is a foal</td></tr>
+        <tr><td><code>APr</code></td><td>permanent, but only once it is grown</td></tr>
+        <tr><td><code>FTm</code></td><td>temporary, foal only</td></tr>
+        <tr><td><code>ATm</code></td><td>temporary, adult only</td></tr>
+        <tr><td><code>n</code></td><td>no way in at all</td></tr>
+    </tbody>
+</table>
+
+<p>
+    The two <strong>foal-only</strong> alleles are the cruel ones: miss the window
+    while the animal is small and the adult is beyond reach for good.
+</p>
+
+<h2 id="dominance">One copy is enough, and two different ones stack</h2>
+
+<p>
+    Unlike almost everything else in the behaviour family this is not a recessive.
+    A single copy expresses, and a horse carrying two <em>different</em>
+    passification alleles offers <strong>both</strong> routes independently
+    &mdash; feed it either thing, either way. A mixed horse is therefore worth
+    more than either of its parents, which is the point: there should be many ways
+    to passify a horse, not a precedence ladder that wastes half of them.
+</p>
+
+<h2 id="offering">What it wants is written on the horse</h2>
+
+<p>
+    Which item, and how many of it &mdash; and for the temporary routes, how long
+    the calm lasts and how long before you can buy it again &mdash; are all
+    <a href="genetics-model.html#epigenetics">epigenetic</a>. They are rolled once
+    for a wild horse, written on the allele copy, inherited with it, and drift
+    slightly each generation. Two <code>Prm/n</code> horses are not the same
+    horse: one may want four apples and the other a single golden carrot, and a
+    line can be bred toward an offering you can actually afford.
+</p>
+
+<h2 id="limits">What it does not do</h2>
+
+<p>
+    Passification is about <strong>targeting</strong>, and nothing else. A horse
+    with a damaging aura goes on damaging what stands near it; a player who walks
+    into one has not been betrayed by this gene. It is also
+    <strong>per player</strong>: a horse you have calmed is still perfectly
+    willing to kill your friend.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.passification</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Prm</code>, <code>Tmp</code>, <code>FPr</code>, <code>APr</code>, <code>FTm</code>, <code>ATm</code>, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>incomplete dominant &mdash; one copy expresses, and a compound heterozygote expresses both</dd></div>
+    <div><dt>Epigenetics</dt><dd><code>offering</code> (a category index), <code>amount</code>, <code>duration</code>, <code>cooldown</code></dd></div>
+    <div><dt>Reaches the game as</dt><dd><strong>no effect verb</strong> &mdash; see below</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">The veto has to be asked at every chokepoint, not unpicked afterwards</span>
+    <p>
+        &ldquo;Will not select the player as a target <em>for any reason</em>&rdquo; only means something if each reason asks. <code>Passification.suppresses</code> is consulted in four places: the <code>temper</code> verb, <code>HorseAggroHandler.aggro</code> (hit-it-and-its-herd), <code>HerdGoals</code> (a dam defending her foal) and <code>GeneReactionHandler</code> (guardian's retaliation). <strong>A gene added later that targets a player and does not ask here is a bug in that gene.</strong>
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">The item is an index, so the table may only grow at the end</span>
+    <p>
+        The epigenome stores numbers, so &ldquo;the item this horse wants&rdquo; can only ever be a position in a list the gene owns (<code>PassificationGene.OFFERINGS</code>). Appending is free. <strong>Re-ordering it silently changes what every existing horse in every save is asking for</strong>, and nothing will tell you.
+    </p>
+</div>
+
+<h2 id="split">Why it is not an effect verb</h2>
+
+<p>
+    It would have been a verb with exactly one user, which is the same test
+    <a href="gene-lycan.html">lycanthropy</a> and
+    <a href="gene-sun-sensitivity.html">sun sensitivity</a> failed. So the gene
+    owns the genetics and the numbers and exposes one pure function,
+    <code>routesOf</code>; the NeoForge module owns the feeding, the clock and the
+    veto. It is also not a standing effect but a <em>veto</em> on somebody else's,
+    which no verb in the set can express.
+</p>
+
+<h2 id="priority">&ldquo;Extremely high priority&rdquo; is not the priority number</h2>
+
+<p>
+    The locus is required to override every other aggression effect. A gene's
+    <code>priority()</code> could not do that: for a gene that paints nothing the
+    number is only a slot in the genotype code's layout. The override is enforced
+    by <em>where the check lives</em> &mdash; at the moment a target is acquired,
+    after whatever decided to acquire it. The number here is merely high enough
+    that a reader sorting the registry finds it after the loci it talks over.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="bargain">A bargain, not a switch</h2>
+
+<p>
+    The interesting thing about this locus is that it makes a dangerous horse into
+    a <em>negotiation</em> rather than a wall. The animal is not tamed, not
+    broken, and not fixed; it has been paid, and for the temporary routes it will
+    want paying again. That is a different relationship from the one every other
+    horse in the mod offers, and it only exists because aggression is allowed to
+    be genuinely unmanageable.
+</p>
+
+<h2 id="perplayer">Why the calm is per player</h2>
+
+<p>
+    A horse that one person could defuse for everybody would make an
+    aggressive line a single afternoon's problem on any shared world. Keeping the
+    bargain between the animal and the person who fed it means an aggressive
+    bloodline stays dangerous to everyone who has not done the work &mdash; which
+    is what makes breeding one a decision rather than a novelty.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-aggression.html">Aggression</a>
+        <a href="gene-skittish.html">Skittishness</a>
+        <a href="genetics-model.html#epigenetics">Epigenetics</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/PassificationGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

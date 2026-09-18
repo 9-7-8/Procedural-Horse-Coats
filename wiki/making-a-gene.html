@@ -2301,9 +2301,10 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 
 <p>
     <strong>Keep this list closed.</strong> It is the main lever on long-term
-    maintainability &mdash; everything else composes these. Fourteen exist; the rest
-    are the spec&rsquo;s vocabulary, recorded here so a new verb is checked against
-    them before it is written.
+    maintainability &mdash; everything else composes these. The registered set is
+    whatever <code>AbilityType.all()</code> returns; the rest are the spec&rsquo;s
+    vocabulary, recorded here so a new verb is checked against them before it is
+    written.
 </p>
 
 <h2 id="verbs-live">The ones that exist</h2>
@@ -2882,32 +2883,48 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     Built for <a href="gene-magic-mob-aura.html">magic mob aura</a>.
 </p>
 
-<h3 id="night-temper"><code>night_temper</code></h3>
-<p>How the horse feels about other creatures <strong>after dark</strong>.</p>
+<h3 id="temper"><code>temper</code></h3>
+<p>
+    <strong>How the horse feels about other creatures.</strong> The whole of
+    temperament: what it attacks, or what it runs from, and under what conditions.
+</p>
 <table>
 <thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
 <tbody>
 <tr><td><code>mood</code></td><td><em>required</em></td><td><code>aggressive</code> &mdash; it goes for them; <code>flee</code> &mdash; it runs from them.</td></tr>
-<tr><td><code>towards</code></td><td><em>required</em></td><td>Who it feels that about: <code>players</code>, <code>passive</code> (animals), <code>hostile</code> (monsters), or <code>all</code> &mdash; both plus players.</td></tr>
+<tr><td><code>towards</code></td><td><code>hostile</code></td><td>Who it feels that about &mdash; any of the shared mob groups, including <code>horses</code> for its own kind.</td></tr>
 <tr><td><code>radius</code></td><td><code>16</code></td><td>How far it notices, in blocks, 1&ndash;48.</td></tr>
 <tr><td><code>interval</code></td><td><code>20</code></td><td>Ticks between scans, at least 1.</td></tr>
 <tr><td><code>max_targets</code></td><td><code>8</code></td><td>Most entities one scan may consider, 1&ndash;64 &mdash; the target cap every radius effect carries.</td></tr>
+<tr><td><code>hold</code></td><td><code>true</code></td><td>Hold a radius and return rather than pursuing. Turning this off is a gameplay decision, not a tuning one.</td></tr>
+<tr><td><code>trigger</code></td><td><code>continuous</code></td><td>What fires it. <code>on_owner_hurt</code> makes it retaliation rather than temperament.</td></tr>
 </tbody>
 </table>
-<pre><code class="language-json">{ "type": "night_temper", "mood": "aggressive", "towards": "hostile", "radius": 20 }</code></pre>
+<pre><code class="language-json">{ "type": "temper", "mood": "aggressive", "towards": "hostile",
+  "when": { "flag": "night" } }</code></pre>
 <p>
-    <strong>The night is in the verb, not in a <code>when</code>.</strong> A temperament
-    that merely happened to be gated on darkness would need that gate written onto every
-    allele of every gene using it, and the point of the locus this was built for is that
-    the animal is one thing by day and another after sunset &mdash; so the verb says so
-    once. Its daylight twin is a second verb, <a href="#day-temper"><code>day_temper</code></a>,
-    rather than a flag on this one.
+    <strong>The time of day is a <code>when</code>, not a verb.</strong> There were
+    once four temperament verbs &mdash; <code>night_temper</code> and
+    <code>day_temper</code> alongside this one &mdash; on the argument that a gate
+    written onto every allele by hand would be wrong the first time somebody forgot
+    it. That argument is about a <em>gene file</em>. The aggression locus generates
+    its alleles from a table in Java, so the gate is written once and cannot drift
+    between them, and the two time-of-day verbs were folded back into this one.
 </p>
 <p>
-    The translator carries it but does not act on it in the ability pass:
-    <code>NightBehaviourHandler</code> reads it after dark and installs the goals, which
-    is why <code>GeneAbilityHandler</code>'s branch for it is deliberately empty.
-    Built for <a href="gene-magic-night-temper.html">magic night temper</a>.
+    <strong>Both moods run in the ability pass</strong>, in
+    <code>GeneAbilityHandler.temper</code>. That is worth stating because it was once
+    only half true: the method returned early on any mood that was not
+    <code>aggressive</code>, and fleeing was implemented over in the night handler
+    instead. A gene using <code>"mood": "flee"</code> on this verb therefore loaded,
+    registered, baked and did nothing whatsoever. If you add a mood, follow it all
+    the way into the translator.
+</p>
+<p>
+    Built for <a href="gene-aggression.html">aggression</a> and
+    <a href="gene-skittish.html">skittishness</a>; also carries
+    <a href="gene-guardian.html">guardian</a>, on an <code>on_owner_hurt</code>
+    trigger.
 </p>
 
 <h3 id="night-watch"><code>night_watch</code></h3>
@@ -2930,25 +2947,13 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     back.
 </p>
 <p>
-    Like <code>night_temper</code> it is installed by
-    <code>NightBehaviourHandler</code> rather than executed in the ability pass, and it
-    runs as a goal (<code>NightWatchGoal</code>) so it competes with the horse's other
-    behaviour properly instead of teleporting it about.
+    It is installed by <code>NightBehaviourHandler</code> rather than executed in the
+    ability pass, and it runs as a goal (<code>NightWatchGoal</code>) so it competes
+    with the horse's other behaviour properly instead of teleporting it about. The
+    <a href="#temper"><code>temper</code></a> verb supersedes it whenever it has
+    something to act on &mdash; a horse that both stalks you and flees from you is not
+    two behaviours, it is a bug.
     Built for <a href="gene-magic-night-watch.html">magic night watch</a>.
-</p>
-
-<h3 id="day-temper"><code>day_temper</code></h3>
-<p>
-    <a href="#night-temper"><code>night_temper</code></a> with the clock turned over: the
-    same fields, the same bounds and the same meaning, active only <strong>while it is
-    light</strong> (<code>isBrightOutside</code>) and silent after dark.
-</p>
-<pre><code class="language-json">{ "type": "day_temper", "mood": "flee", "towards": "players" }</code></pre>
-<p>
-    <code>NightBehaviourHandler</code> runs both pairs, and the supersede rule is the same:
-    a <code>day_temper</code> with a target in range withholds the
-    <code>day_watch</code>. Built for <a href="gene-magic-day-temper.html">magic day
-    temper</a>.
 </p>
 
 <h3 id="day-watch"><code>day_watch</code></h3>

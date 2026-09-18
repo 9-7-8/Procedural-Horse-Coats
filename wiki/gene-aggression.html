@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aggression &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Aggression</h1>
+
+<p class="lede">
+    What a horse attacks, and when. One locus, one grid: a <strong>time of
+    day</strong> crossed with <strong>what it goes for</strong>. Being in the
+    saddle is not protection &mdash; a horse that hunts riders throws you off
+    first.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Built, and not yet seen in game</span>
+    <p>
+        The locus replaced three older ones on 2026-09-17 and nothing on this
+        page has been watched happening since. Two of the records below were
+        earned by the genes it absorbed and are kept because the machinery they
+        tested is the same machinery. What to look at is on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="what">The grid</h2>
+
+<p>
+    Every allele is a <strong>when</strong> and a <strong>who</strong>. The
+    prefix is the time &mdash; <code>Ad</code> by day, <code>An</code> after
+    dark, <code>Aa</code> always &mdash; and the last letter is what it goes for.
+</p>
+
+<table class="data">
+    <thead><tr><th></th><th><code>c</code> herds</th><th><code>h</code> monsters</th><th><code>p</code> riders</th><th><code>e</code> horses</th><th><code>a</code> everything</th></tr></thead>
+    <tbody>
+        <tr><td><strong>by day</strong></td><td><code>Adc</code></td><td><code>Adh</code></td><td><code>Adp</code></td><td><code>Ade</code></td><td><code>Ada</code></td></tr>
+        <tr><td><strong>after dark</strong></td><td><code>Anc</code></td><td><code>Anh</code></td><td><code>Anp</code></td><td><code>Ane</code></td><td><code>Ana</code></td></tr>
+        <tr><td><strong>always</strong></td><td><code>Aac</code></td><td><code>Aah</code></td><td><code>Aap</code></td><td><code>Aae</code></td><td><code>Aaa</code></td></tr>
+    </tbody>
+</table>
+
+<h2 id="inheritance">Two copies of the same allele, or nothing</h2>
+
+<p>
+    Every allele here is recessive, and recessive to the others as well as to the
+    wild type. <code>Adh/n</code> is a calm horse. <code>Adh/Anh</code> is
+    <strong>also</strong> a calm horse &mdash; &ldquo;hunts monsters by day&rdquo;
+    and &ldquo;hunts monsters after dark&rdquo; are two instructions and the
+    animal settles on neither.
+</p>
+
+<p>
+    That is what makes a locus this wide a search rather than a lottery: you must
+    find the <em>same</em> allele twice. Two aggressive horses caught in different
+    places will usually throw perfectly pleasant foals, and the disappointment is
+    the game.
+</p>
+
+<h2 id="ridden">What happens if you are on it</h2>
+
+<p>
+    Nothing about being ridden calms an aggressive horse. Which of two things
+    happens depends on what it wants:
+</p>
+
+<ul>
+    <li>if it is aggressive toward <strong>riders</strong> (or everything), it
+        <strong>bucks you out of the saddle</strong> and comes for you;</li>
+    <li>if it is aggressive toward anything else, it <strong>ignores you</strong>
+        and deals with the target.</li>
+</ul>
+
+<p>
+    The horse that absorbed this locus used to stop dead the moment anybody
+    mounted it. That was a deliberate design and it is deliberately gone: a horse
+    that hunts people is not a horse you can simply sit on.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    It picks fights, so it takes damage. This locus only makes the horse
+    <em>willing</em>; how hard it hits is
+    <a href="gene-magic-fighter.html">magic fighter</a>, and how much it can
+    survive is <a href="gene-magic-health.html">magic health</a>. An aggressive
+    horse with neither bravely inconveniences a zombie and then dies of it.
+</p>
+
+<h2 id="taming">If it hunts riders, you may not be able to keep it</h2>
+
+<p>
+    A wild horse that attacks players on sight cannot be approached, so it cannot
+    be fed, so it cannot be tamed. The way in is
+    <a href="gene-passification.html">passification</a> &mdash; a separate locus
+    that says what you can offer the animal to make it stop. A horse with an
+    <code>Aap</code> pair and no passification allele is, in practice, a monster
+    that looks like a horse.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.aggression</code></dd></div>
+    <div><dt>Alleles</dt><dd>three times &times; five targets, plus <code>n</code> &mdash; see <code>AggressionGene.TIMES</code> and <code>TARGETS</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive, and recessive to the other variants</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>temper</code> effect with a <code>when</code> carrying the clock</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<h2 id="verb">The time of day is a condition, not a verb</h2>
+
+<p>
+    There were once two temperament verbs for this, <code>night_temper</code> and
+    <code>day_temper</code>, on the argument that a gate written onto every
+    allele by hand would be wrong the first time somebody forgot it. That
+    argument is about a <em>gene file</em>. This locus generates its alleles from
+    a table in Java, so the gate is written once and cannot drift between them
+    &mdash; and the general <a href="making-a-gene.html#temper"><code>temper</code></a>
+    verb already carried a <code>when</code>. Both time verbs were deleted.
+</p>
+
+<div class="note danger">
+    <span class="label">It holds a radius. It must never chase</span>
+    <p>
+        A horse that pursues is a horse that dies forty blocks from its owner, and the owner blames the gene &mdash; correctly. <strong>Attack what comes within reach and return.</strong> Full pursuit and owner-leashed pursuit were both specified and both rejected in design; if a later session wants either, it is reopening a settled call.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">&ldquo;Everything&rdquo; includes other horses, and &ldquo;herds&rdquo; does not</span>
+    <p>
+        <code>passive</code> deliberately <strong>excludes every equine</strong> in <code>MobGroups</code>, because a horse is an <code>Animal</code> and a foal that flees or fights &ldquo;herds&rdquo; would otherwise turn on its own band &mdash; which is exactly what <a href="gene-skittish.html#verified-night-shy">gap 241</a> was. That exclusion used to live in the night handler's private matcher and was nearly lost when fleeing moved onto the shared verb. A gene that really means other horses says <code>horses</code>.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Half-built: a ridden horse will not pursue</span>
+    <p>
+        The buck works &mdash; <code>GeneAbilityHandler.buckIfItIsTheRider</code> ejects the passenger the moment the horse targets them. <strong>&ldquo;Ignores its rider and goes for the target&rdquo; does not.</strong> A ridden horse's movement is driven by its passenger rather than by its navigation, so the melee goal cannot walk it anywhere while somebody is aboard: it will turn and swing at whatever comes to it, and no more. Making it genuinely ignore the reins needs rider control suppressed while it has a target, in the shape of <code>mixin.HorseRearFightMixin</code>. See <a href="known-gaps.html#gap-268">gap 268</a>.
+    </p>
+</div>
+
+<h2 id="wild">Some of it can be caught</h2>
+
+<p>
+    Unlike the night locus it replaced &mdash; whose founder table was entirely
+    heterozygous, so no wild horse ever expressed one &mdash; this one puts
+    expressing combinations in the wild, and the nastier the target the rarer they
+    are. A horse that hunts monsters is something to find; a horse that hunts
+    everything is something somebody bred. That is not only flavour: passification
+    exists to rescue a wild horse that is aggressive to players, and there has to
+    <em>be</em> one. (Owner's call.)
+</p>
+
+<h3 id="verified">Verified</h3>
+
+<p id="verified-hunting">
+    <strong>All eight forms of the locus this replaced were confirmed</strong> (2026-09-13, as
+    <code>magic_night_temper</code>). They were never broken, only unwatchable, for three reasons that each
+    looked like &ldquo;the gene does nothing&rdquo;: the horse dimension had no night (a
+    <code>dimension_type</code> needs <code>timelines</code> as well as a <code>default_clock</code>); the
+    biome was <code>the_void</code>, so the monster-targeted forms had nothing to be about; and the fleeing
+    forms were in 4&nbsp;&times;&nbsp;7 stalls, which confirmed the hunting forms at once and hid the flee
+    forms completely. Moved to 19&nbsp;&times;&nbsp;30 paddocks, the log filled with 48 lines, every one
+    <code>path accepted</code>. The flee half of that record now belongs to
+    <a href="gene-skittish.html#verified-night-shy">skittishness</a>.
+</p>
+
+<p id="verified-swing-rate">
+    <strong>A horse swings every ten ticks once a rear no longer freezes it</strong> (2026-09-15, formerly gap 222).
+    <code>HorseMeleeGoal</code> keeps its own ten-tick cooldown, because vanilla's reset hard-codes twenty
+    (<a href="api-notes.html#verified-melee-cooldown">API notes</a>). The yard's kick pen puts an aggressive
+    horse in with two husks. Its first run (07:10) swung at ticks 84 and 143. The cause was the
+    rear after each blow: a standing horse is immobile, and an immobile mob runs no goals
+    (<a href="api-notes.html#standing-horse-immobile">API notes</a>). With <code>HorseRearFightMixin</code> (the
+    owner's call: rear, and keep fighting), the 07:33 run swung at ticks 56, 70 and 80, killing the first husk in four
+    blows. The control horse, which has no temper, never swung at its husks. What that run also showed, the horse
+    not turning on the second husk, is <a href="#verified-retarget">the next record</a>.
+    <em>Earned while this was the gladiator locus</em>, on the same <code>temper</code> machinery this locus now uses.
+</p>
+
+<p id="verified-retarget">
+    <strong>A horse that kills one attacker turns on the next</strong> (2026-09-15, formerly gap 248). In the 07:33
+    run it killed the first husk at tick 130 and then never struck again. The second husk hit it four times in 3.6 seconds
+    and killed it. <code>GeneAbilityHandler.temper</code> took the <em>first</em> matching entity in its box each
+    beat: dead or alive, near or far, seen or not, while the neighbouring pen's husks sat inside that radius behind a
+    wall. The fix keeps a live target it can see. Otherwise it takes whatever last hurt the horse, if that is alive,
+    in range and in sight, and failing that the nearest live, visible match. A dead target is dropped.
+    <a href="gene-guardian.html">Guardian</a> is untouched, because its owner-hurt trigger fires from
+    <code>GeneReactionHandler</code>. <em>Evidence, 07:44 run:</em> the first husk died at tick 135. The next
+    <code>horse hurt</code> line read <code>no target</code>, and the horse struck the second husk at tick 162, 27 ticks
+    later. It killed that husk at tick 213 and lived, on 1 of 22 health.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why">Why a grid, and not a switch</h2>
+
+<p>
+    Naming the <em>target</em> is what makes this a breeding problem rather than a
+    toggle. A horse that hunts monsters and a horse that hunts you are the same
+    gene one allele apart, and they look identical in daylight. Nothing about the
+    animal tells you which you have until the conditions are right, and by then
+    you are either delighted or on foot.
+</p>
+
+<h2 id="total">Why the change is total rather than gradual</h2>
+
+<p>
+    A horse does not become <em>slightly</em> aggressive at dusk. A ramp would
+    read as a mood &mdash; something the animal is working through &mdash; and the
+    point is the discovery that the animal you ride all week is not the animal in
+    your yard at night. A threshold is a fact about the creature; a gradient is
+    weather.
+</p>
+
+<h2 id="split">Why aggression and fear are two loci</h2>
+
+<p>
+    They were one locus once, and it could not say the interesting thing. With
+    hunting and fleeing sharing a set of alleles, a horse could be a
+    monster-hunter or shy of people but never both. Splitting them means
+    &ldquo;goes for monsters, runs from riders&rdquo; is a single animal &mdash; a
+    herd-guard nobody can catch &mdash; and that horse is worth breeding for. See
+    <a href="gene-skittish.html">skittishness</a>.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-skittish.html">Skittishness</a>
+        <a href="gene-passification.html">Passification</a>
+        <a href="gene-guardian.html">Guardian</a>
+        <a href="gene-magic-fighter.html">Magic fighter</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/AggressionGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

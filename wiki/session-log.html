@@ -27,6 +27,101 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-aggression">2026-09-17 &mdash; Aggression onto one locus, fear onto another, and a way in</h2>
+
+<p>
+    Four loci decided whether a horse was dangerous, and between them they could not
+    answer the question. <code>magic_night_temper</code> and <code>magic_day_temper</code>
+    each named a target but welded half the day into the verb;
+    <code>gladiator</code> named a gate but only ever one target. A breeder had to know
+    three of them to read one animal. They are gone, replaced by
+    <a href="gene-aggression.html">aggression</a> &mdash; a grid of three times crossed
+    with five targets, every allele recessive and recessive to the others &mdash; and by
+    <a href="gene-skittish.html">skittishness</a>, the same grid for what a horse runs
+    from. <a href="gene-passification.html">Passification</a> is new beside them.
+</p>
+
+<h3>Splitting the mood out is the change that buys something</h3>
+
+<p>
+    The old loci carried four hunting alleles and four fleeing ones, so a horse could be a
+    monster-hunter <em>or</em> shy of people and never both. Two loci say what one could
+    not: &ldquo;goes for monsters, runs from riders&rdquo; is a single animal, a herd-guard
+    nobody can catch, and it is worth breeding for. The owner's other three calls:
+    gladiator folds in as an always-hostile allele while
+    <a href="gene-guardian.html">guardian</a> stays its own locus (it is reactive, not a
+    temperament); some aggression <em>expresses</em> in the wild, rarer the nastier the
+    target, because passification needs a horse to rescue; and passification's alleles
+    stack, so a compound heterozygote offers both ways in rather than the better one.
+</p>
+
+<h3>A saddle stopped being a gate, and only half of that works</h3>
+
+<p>
+    Gladiator stopped dead whenever anybody mounted it, on the argument that a horse
+    fighting while you steer is a horse fighting your steering. The owner reopened that
+    deliberately: a horse aggressive toward riders now <strong>bucks them off</strong> and
+    comes for them, and one aggressive toward anything else <strong>ignores its
+    rider</strong>. The buck shipped, at the moment a target is acquired rather than on one
+    gene, so every route to targeting a rider gets it. The second half did not and could
+    not from there &mdash; a ridden horse's movement belongs to its passenger, not to its
+    navigation, so the melee goal cannot walk it anywhere. Written down as
+    <a href="known-gaps.html#gap-268">gap 268</a> rather than left to be discovered,
+    because from outside it reads as the gene half-working.
+</p>
+
+<h3>The two time-of-day verbs were deleted, and the flee path nearly died with them</h3>
+
+<p>
+    <code>night_temper</code> and <code>day_temper</code> existed because a gate written
+    onto every allele by hand would be wrong the first time somebody forgot it &mdash; an
+    argument about <em>gene files</em>. These loci generate their alleles from a table in
+    Java, so the gate is written once, and the general <code>temper</code> verb already
+    carried a <code>when</code>. Both verbs went, from Java and from the creator's mirror;
+    parity stayed green.
+</p>
+
+<p>
+    <strong>The trap was underneath.</strong> <code>GeneAbilityHandler.temper</code>
+    returned early on any mood that was not <code>aggressive</code>: fleeing was implemented
+    over in the night handler, against the verb that was being deleted. Moving skittishness
+    onto the shared verb without moving the flee path with it would have produced a locus
+    that loads, registers, bakes, appears in the census and does <em>nothing whatsoever</em>.
+    The same shape reappeared one layer down: <code>passive</code> excluded equines only in
+    the night handler's private matcher, so routing flee through <code>MobGroups</code>
+    would have re-opened gap 241 &mdash; the foal that fled its own band 1,578 times. The
+    exclusion lives in the shared resolver now, where every caller gets it, and
+    <code>horses</code> is a group in its own right because the aggression locus names its
+    own kind.
+</p>
+
+<h3>Passification is a veto, and vetoes have to be asked at every door</h3>
+
+<p>
+    It grants no ability and is not an effect verb &mdash; it would have been one with
+    exactly one user, the test lycanthropy already failed. The gene owns the alleles and
+    the epigenetic offering (which item, how many, how long, how soon again, all written on
+    the allele copy and inherited with it); the NeoForge side owns the feeding and the veto.
+    &ldquo;Will not target the player for any reason&rdquo; only means something if each
+    reason asks, so <code>Passification.suppresses</code> is consulted at all four: the
+    temper verb, the wild aggro-and-alert path, the dam defending her foal, and guardian's
+    retaliation.
+</p>
+
+<h3>What was rescued on the way out</h3>
+
+<p>
+    Deleting the three gene pages would have destroyed four verified records with them
+    &mdash; the ten-tick swing rate, the re-target fix, the night-temper confirmation and
+    the night-shy record. They were recovered from git and carried onto the new pages under
+    the anchors the rest of the wiki already points at. <strong>Nothing about the new loci
+    has been played</strong>; what to look at is on
+    <a href="verification.html">To be verified</a>, including the one thing most likely to
+    be quietly wrong, which is whether the supersede rule still holds now that temperament
+    and watching live in different handlers and talk through
+    <code>NightBehaviourHandler.noteActing</code>.
+</p>
+
 <h2 id="d2026-09-17-census-chapters">2026-09-17, last of the day &mdash; A census of every allele, and the wild put first</h2>
 
 <p>
@@ -3320,7 +3415,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         wider. The <code>tree grew</code> line now means a tree
         (<a href="gene-dryad.html#verified">gap 240</a>).</li>
     <li><strong>A night-shy foal fled its own herd</strong> 1,578 times, because "passive animals"
-        included horses despite a comment saying it must not (<a href="gene-magic-night-temper.html#verified-night-shy">gap 241, since verified</a>).</li>
+        included horses despite a comment saying it must not (<a href="gene-skittish.html#verified-night-shy">gap 241, since verified</a>).</li>
     <li><strong>Log lines name the pen label</strong>, so the displacement pen can finally be read.</li>
     <li><strong><code>runClientTestWorld</code></strong> sets <code>horsegenetics.autoTestWorld</code>. The
         first title screen then presses "Spawn Test Horse World" itself, and three seconds after login the
@@ -3760,7 +3855,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     <li><strong>The horse attack interval.</strong> <code>HorseMeleeGoal</code> overrode
         <code>getAttackInterval()</code> to 12 ticks; vanilla's <code>resetAttackCooldown</code>
         writes a hard-coded 20 and never asks. Found in bytecode after a guardian died one
-        second before its zombie. The goal owns its cooldown now, at 10 (<a href="gene-gladiator.html#verified-swing-rate">gap 222, since verified</a>).</li>
+        second before its zombie. The goal owns its cooldown now, at 10 (<a href="gene-aggression.html#verified-swing-rate">gap 222, since verified</a>).</li>
     <li><strong>The stall detector's fallback box.</strong> Built to "never refuse", it
         turned every failed search into a plausible stall &mdash; which hid that the yard's
         stalls had a hole for a doorway instead of a gate. It refuses now.</li>
@@ -6091,7 +6186,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     A twenty-nine-gene proposal was walked one gene at a time, in batches of four or five,
     with the owner ruling on each genuine fork. <strong>Two were cut.</strong>
     <em>Moon-sick</em> turned out to be already shipped as the <code>Aga/Aga</code> allele
-    on <a href="gene-magic-night-temper.html">night temper</a>. <em>Electric</em> cannot be
+    on <a href="gene-aggression.html">night temper</a>. <em>Electric</em> cannot be
     built as described at all, because redstone power comes from blocks and never from
     entities - the achievable version is pressure plates, which already respond to every
     horse in vanilla.
@@ -8897,7 +8992,7 @@ fixture, compare. That is what closed the composer.</p>
 
 <p>Two new mechanical genes, and between them they are the mod&rsquo;s first deliberate
 attempt at <em>unsettling</em> rather than pretty.
-<a href="gene-magic-night-temper.html">Night temper</a> has eight variants in two families
+<a href="gene-aggression.html">Night temper</a> has eight variants in two families
 &mdash; four that hunt and four that flee, each naming who it feels that about.
 <a href="gene-magic-night-watch.html">Night watch</a> has five, and they are a ladder
 rather than a list: stares from anywhere through walls, closes to ten blocks first, watches

@@ -49,11 +49,12 @@ window.HG = window.HG || {};
   // What the breed does by time of day - hunting, fleeing, stalking, shifting,
   // burning - and what it does in a fight. Two steps, owner's call (2026-09-13):
   // the dispositions were buried among the combat genes.
-  bd.HABIT_KEYS = ["horsegenetics.magic_night_temper", "horsegenetics.magic_night_watch",
-    "horsegenetics.magic_day_temper", "horsegenetics.magic_day_watch",
+  bd.HABIT_KEYS = ["horsegenetics.skittish", "horsegenetics.magic_night_watch",
+    "horsegenetics.magic_day_watch",
     "horsegenetics.lycan", "horsegenetics.sun_sensitivity"];
-  bd.FIGHT_KEYS = ["horsegenetics.magic_mob_aura", "horsegenetics.intimidating",
-    "horsegenetics.gladiator", "horsegenetics.guardian", "horsegenetics.pack_leader",
+  bd.FIGHT_KEYS = ["horsegenetics.aggression", "horsegenetics.passification",
+    "horsegenetics.magic_mob_aura", "horsegenetics.intimidating",
+    "horsegenetics.guardian", "horsegenetics.pack_leader",
     "horsegenetics.magic_fighter", "horsegenetics.holy_ward"];
   /** Both, for the "everything else" step to leave out. */
   bd.AGGRO_KEYS = bd.HABIT_KEYS.concat(bd.FIGHT_KEYS);
