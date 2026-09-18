@@ -58,6 +58,24 @@
 
 <ol>
 
+<li id="gap-276"><strong>Open, found 2026-09-18: the &times; on the AI draft dialog was reported as not closing it on a phone, and the cause was never found.</strong>
+    Reported alongside the search panel that genuinely would not close
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/commit/8f60b638">fixed</a>: a
+    <code>display: flex</code> outranking the browser&rsquo;s <code>[hidden]</code>), so the two
+    looked like one bug &mdash; but they are not. The draft dialog&rsquo;s <code>close()</code>
+    does <code>overlay.remove()</code>, which cannot half-work, and under Chrome touch emulation
+    at 390&times;844 it closes cleanly by the &times; <em>and</em> by a backdrop tap, both before
+    and after that fix. So the report stands and the mechanism does not.
+    <strong>The leading theory is the tap target</strong>: <code>.phc-ai-icon</code> was a
+    22&times;22 box against the ~44 a fingertip lands on, and a miss hits the dialog behind it
+    and does nothing. It is 44 on a touch screen now &mdash; but that is a plausible fix, not a
+    diagnosis, and nobody has confirmed it on the phone that saw the problem.
+    <strong>The other candidate is iOS</strong>, where the first tap after a focused text field
+    is eaten dismissing the keyboard; the dialog has a textarea directly above the &times;.
+    What would settle it: whether the dialog <em>flickers</em> or does nothing at all, and
+    whether the keyboard was up. Emulation cannot answer either.
+</li>
+
 <li id="gap-271"><strong>Open, found 2026-09-18: the mod now reads other mods' jars and generates content for them, and it has never met a real third-party mod.</strong>
     The <a href="compatibility.html#generated">whole compat layer</a> &mdash; the scan, the pack,
     the gates, the armours, the bench fittings &mdash; was built and exercised against a

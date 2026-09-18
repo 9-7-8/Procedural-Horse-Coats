@@ -368,6 +368,35 @@
     <code>DesignerApi</code>, not a sixth mirror.
 </p>
 
+<h2 id="hidden-attribute">The <code>hidden</code> attribute loses to any <code>display:</code> you write</h2>
+
+<p>
+    <code>[hidden] { display: none }</code> lives in the browser&rsquo;s own stylesheet, and
+    a <strong>user-agent</strong> rule is outranked by <em>any</em> author rule on the same
+    element &mdash; specificity never enters into it. So <code>el.hidden = true</code> on
+    something styled <code>display: flex</code> sets the attribute and changes nothing on
+    screen. Every overlay here is a flex box, which makes this a trap with a queue.
+</p>
+
+<p>
+    It has been found and patched locally <strong>three</strong> times before it was fixed
+    once: <code>.section-body[hidden]</code> for the landing page&rsquo;s collapsible
+    sections, <code>.phc-ai[hidden]</code> for the AI panel (which
+    &ldquo;showed open on every load&rdquo;), and finally the search overlay, which for some
+    weeks could be opened on a phone and <strong>never closed</strong> &mdash; and was
+    reported not as a stuck panel but as a search that ran forever, because a panel you
+    cannot dismiss on a phone is the whole screen. Each patch fixed its own component and
+    left the next one to rediscover it.
+</p>
+
+<p>
+    There is now one rule at the top of <code>wiki/styles.css</code>, ahead of every layout
+    rule, and <code>wiki/ai/ai.css</code> carries its own copy because the two designers do
+    not load the wiki stylesheet. <strong>A new stylesheet needs that rule on day one.</strong>
+    The symptom to recognise: toggling something works in one direction and not the other,
+    the attribute is provably correct in the inspector, and the element is still on screen.
+</p>
+
 <h2 id="headless">Drive the browser tools; do not read them</h2>
 
 <p>

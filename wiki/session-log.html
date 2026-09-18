@@ -27,6 +27,108 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-mobile">2026-09-18, after the homestead &mdash; The wiki on a phone: a search that would not close, and a boot that would not speak</h2>
+
+<p>
+    Three reports, all from a phone, all of them about the wiki rather than the mod:
+    the search &ldquo;infinitely searches&rdquo;, the close buttons on the search panel and
+    the <em>Draft a breed with AI</em> dialog do nothing, and the breed designer
+    &ldquo;appears to be loading forever&rdquo;. Two turned out to be one bug and the third
+    turned out not to be a bug at all.
+</p>
+
+<p>
+    <strong>The search was never searching; it was never closing.</strong>
+    <code>close()</code> sets <code>overlay.hidden = true</code>, and that is normally
+    enough because the browser&rsquo;s own sheet carries <code>[hidden] { display: none }</code>.
+    But that is a <em>user-agent</em> rule, and any author <code>display:</code> on the same
+    element outranks it &mdash; and <code>.search-overlay</code> is
+    <code>display: flex</code>. So the attribute flipped, the panel stayed exactly where it
+    was, and <code>body.search-open</code> kept the page behind it scroll-locked. At a desk
+    you can ignore a panel you cannot dismiss. On a phone the panel <em>is</em> the viewport,
+    and a search box you cannot get out of reads as a search that never finishes. Confirmed
+    before the fix at 390&times;844:
+    <code>{"hidden":true, "display":"flex", "visible":true}</code>.
+</p>
+
+<p>
+    The interesting part is that this had been found before and fixed in one place only.
+    <code>wiki/ai/ai.css</code> already carried
+    <code>.phc-ai[hidden] { display: none !important; }</code> with a comment recording that
+    the AI panel &ldquo;showed open on every load&rdquo; &mdash; the same trap, scoped to the
+    one component that had hit it. It is one rule at the top of
+    <code>wiki/styles.css</code> now, ahead of every layout rule, and
+    <code>.section-body[hidden]</code> &mdash; a <em>third</em> local patch on the same
+    problem, on the landing page&rsquo;s collapsible sections &mdash; folded into it.
+</p>
+
+<p>
+    <strong>Two touch-only faults found while checking the fix.</strong> Moving the
+    backdrop-tap handler from <code>mousedown</code> to <code>pointerdown</code> made the tap
+    close the panel and then hand the click that <em>followed</em> to whatever was underneath
+    the finger &mdash; on the landing page a nav link, so the tap that meant &ldquo;go
+    away&rdquo; navigated instead. The shape that works is: judge the target on the press,
+    close on the click. And both close buttons were far too small to hit &mdash; search&rsquo;s
+    <em>Esc</em> is 36&times;27, the AI dialog&rsquo;s &times; is 22&times;22, against the
+    ~44 a fingertip actually lands on. That is the best remaining explanation for the AI
+    dialog&rsquo;s &times;, which could <em>not</em> be reproduced: under touch emulation it
+    closes cleanly by button and by backdrop, and its <code>close()</code> genuinely removes
+    the node rather than hiding it. Both targets are 44px on a touch screen now; the glyphs
+    are unchanged. Whether that was the cause is still unconfirmed &mdash;
+    <a href="known-gaps.html#gap-276">gap 276</a>.
+</p>
+
+<p>
+    <strong>The breed designer was slow, not frozen, and had no way to say so.</strong>
+    Bringing <code>common/</code> up in a browser downloads the 2&nbsp;MB wasm, the gene
+    bundle, the breeds, two name tables and five PNGs, and then compiles the wasm. At a desk
+    that is over before the boot screen finishes fading in; on a phone it is long enough that
+    a screen reading &ldquo;Loading the mod&hellip;&rdquo; and nothing else is
+    indistinguishable from one that has hung. So <code>java.js</code> announces every stage
+    now, and a new <code>wiki/horse-designer/js/boot-progress.js</code> renders them: the
+    whole ordered list with ticks, the bytes arriving on the stage that is running, and
+    &mdash; past twelve seconds on one stage &mdash; a line saying in as many words that it
+    is downloading rather than stuck. Both designers attach it; the loader is shared, so the
+    gene pages&rsquo; preview windows get the API whether or not they use it.
+    <a href="architecture.html#boot-progress">architecture.html#boot-progress</a>.
+</p>
+
+<p>
+    Real byte counts meant fetching the wasm here rather than handing TeaVM a URL. Its
+    <code>load()</code> compiles a non-string argument directly, so the
+    <code>ArrayBuffer</code> goes straight in and nothing about the runtime changes.
+</p>
+
+<p>
+    <strong>Two things a local server hides and a gzipping one does not.</strong> The
+    published wiki is served gzipped, so <code>Content-Length</code> describes the
+    <em>compressed</em> stream while the reader hands back decoded bytes: believing it
+    counted &ldquo;2.1&nbsp;MB of 607&nbsp;KB&rdquo; and filled the bar to three hundred per
+    cent. <code>Content-Encoding</code> is readable from JS and says when that is happening,
+    so a compressed response now reports its bytes with no denominator, with an overshoot
+    check behind it for a proxy that strips the header. Then losing the denominator
+    mid-download slid the bar <em>backwards</em>, which is the one thing a progress bar must
+    never do. The bar measures <strong>stages</strong> now &mdash; always countable, always
+    forwards &mdash; refined by the within-stage fraction only where it is trustworthy, and
+    clamped to a floor so it cannot retreat. Both faults were invisible against a plain local
+    server and obvious against one that gzips; the check now does both.
+</p>
+
+<p>
+    <strong>And a browser with no WebAssembly GC cannot run these pages at all</strong>, but
+    said so with an error about a byte at an offset. There is a probe for it now that puts it
+    in words &mdash; deliberately only to <em>explain</em> a failure that has already
+    happened, never to gate the boot, so a probe that is wrong about a browser that would in
+    fact have worked cannot cost anybody the page.
+</p>
+
+<p>
+    Verified against the published site on a 200&nbsp;kbit/s throttled phone: it boots, the
+    stages appear in order, the counts climb, the bar is monotonic and never exceeds 100%,
+    and the stall line appears when a stage is made slow. Which is the answer to the original
+    report &mdash; it was loading, just slowly, and now it says so.
+</p>
+
 <h2 id="d2026-09-18-census">2026-09-18, after the compat pass &mdash; The homestead was never rare, and now there is a number</h2>
 
 <p>

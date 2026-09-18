@@ -149,6 +149,49 @@ possible at all.</p>
 
 <p>The handler, on <code>EntityTickEvent.Post</code> for a tamed, player-ridden <code>AbstractHorse</code> that <code>isInWater()</code> and <code>isLocalInstanceAuthoritative()</code> (so it runs on the controlling client, where movement is simulated, and on the server for non-player control): adds a small upward <code>deltaMovement</code> when the horse is submerged (keeps the rider's head out), and blends horizontal <code>deltaMovement</code> toward a capped <code>WATER_RIDE_SPEED</code> (0.09 b/t) in the direction the rider steers (<code>rider.zza</code>/<code>xxa</code>, rotated the way vanilla's <code>moveRelative</code> does). <strong>Feel is a first guess - unverified in-game.</strong></p>
 
+<h2 id="boot-progress">What happens when a browser loads the mod</h2>
+
+<p>Every page that runs <code>common/</code> &mdash; both designers, the LUT lab, each gene
+page&rsquo;s preview window and gene-carrot card &mdash; goes through
+<code>HG.java.load()</code> in <code>wiki/horse-designer/js/java.js</code>, which is
+<strong>memoised</strong>, so a page with three of those loads one copy. It runs seven
+stages: probe the browser, pull the TeaVM runtime, download <code>web.wasm</code>, compile
+and instantiate it, download the gene bundle / breeds / name tables / five PNGs together,
+register genes then breeds (<em>in that order</em> &mdash; registering a gene moves every
+gene after it in the code order, and a breed names its loci by key), and hand the textures
+to the pipeline.</p>
+
+<p>The wasm is fetched <strong>here</strong> rather than by handing TeaVM a URL, because the
+runtime&rsquo;s <code>load()</code> compiles a non-string argument directly &mdash; so the
+download can be read a chunk at a time and counted. That is the whole reason it is not a
+one-line call.</p>
+
+<p><code>HG.java.progress(fn)</code> reports all of it: the ordered stage list, which one is
+running, bytes within it, and when it started. A subscriber is called immediately with the
+state as it stands, because on a gene page the preview window may subscribe long after the
+carrot card beside it started the load. <code>wiki/horse-designer/js/boot-progress.js</code>
+is the renderer &mdash; a tick list, a bar and, past twelve seconds on one stage, a line
+saying it is downloading rather than stuck. It carries its own styles, because the two
+designers and the wiki pages do not share a stylesheet.</p>
+
+<p><strong>Two traps, both of which a local static server hides.</strong> The published wiki
+is <strong>gzipped</strong>, so <code>Content-Length</code> describes the compressed stream
+while the stream reader hands back decoded bytes &mdash; believing it reads
+&ldquo;2.1&nbsp;MB of 607&nbsp;KB&rdquo; and overfills the bar. <code>Content-Encoding</code>
+is readable from JS and says when that is happening, so a compressed response reports bytes
+with no denominator (with an overshoot check behind it, for a proxy that strips the header).
+And because a stage can <em>lose</em> its denominator mid-download, the bar measures
+<strong>stages</strong>, not bytes: always countable, always forwards, and clamped to a floor
+so it can never retreat. <strong>Test any change to this against a server that gzips</strong>
+&mdash; neither fault is visible otherwise.</p>
+
+<p>A browser without <strong>WebAssembly GC</strong> cannot run any of these pages, and the
+error it raises is about a byte at an offset. <code>HG.java.hasWasmGC()</code> probes it with
+the smallest module that needs GC (a type section holding one empty struct). It is used
+<em>only</em> to explain a failure that has already happened &mdash; never to gate the boot,
+so a probe that is wrong about a browser that would have worked cannot cost anyone the
+page.</p>
+
 <h2 id="build">Build &amp; test, in full</h2>
 <div class="codebox">
 <pre><code class="language-bash">./gradlew :common:test               # pure-Java logic, no Minecraft - fastest loop

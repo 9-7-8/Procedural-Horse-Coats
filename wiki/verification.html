@@ -78,6 +78,37 @@
     </p>
 </div>
 
+<h2 id="phone-0918">&sect;0-FL &mdash; The wiki on an actual phone (2026-09-18, checked in emulation only)</h2>
+
+<p>
+    Three phone reports were fixed or explained this session, and every one of them was
+    verified in <strong>headless Chrome at 390&times;844 with touch emulation</strong>, which
+    is not a phone. What emulation cannot see: a real fingertip, iOS&rsquo;s keyboard
+    behaviour, and a real mobile connection. Four things to try on the device that saw the
+    problem, in a couple of minutes:
+</p>
+
+<ol>
+    <li><strong>The search panel closes.</strong> Open it from the sidebar button, then tap
+        <em>Esc</em>. It should go, and the page behind it should scroll again. Then reopen it
+        and tap the dimmed area outside the panel &mdash; that should close it too, and
+        <strong>must not navigate anywhere</strong>.</li>
+    <li><strong>The search returns results.</strong> Type a gene name. It was never actually
+        searching forever &mdash; it was never closing &mdash; but confirm the results arrive
+        rather than sitting on &ldquo;Searching&hellip;&rdquo;, which would be a separate and
+        genuinely new problem.</li>
+    <li><strong>The &times; on <em>Draft a breed with AI</em>.</strong> This is the one that
+        could not be reproduced at all &mdash; <a href="known-gaps.html#gap-276">gap 276</a>.
+        Its target is 44px now instead of 22, which is a guess at the cause. If it still does
+        nothing, the two useful details are whether the dialog <strong>flickers</strong> or
+        does nothing at all, and whether the <strong>keyboard was up</strong> when you tapped.</li>
+    <li><strong>The breed designer boots, and says what it is doing.</strong> It should show a
+        list of seven stages with ticks, a bar, and a byte count climbing on the stage it is
+        on. It was never frozen &mdash; on a 200&nbsp;kbit/s throttled connection against the
+        published site it boots and the counts climb the whole way &mdash; so what is being
+        checked here is that the <em>reassurance</em> works, not the load.</li>
+</ol>
+
 <h2 id="compat-0918">&sect;0-FK &mdash; Gates and armour for other mods' materials (2026-09-18, never met a real mod)</h2>
 
 <p>
