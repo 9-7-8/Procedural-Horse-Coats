@@ -9,9 +9,7 @@ may need to overhaul the aggression genes.
 
 Add a roll to determine if twins are identical or fraternal.
 
-Brindle is backwards and inconsistent right now: we need to edit it so it only shows up on females cause it requires two copies. 
 
-add this mod as something strongly recommended to be run with this mod: https://www.curseforge.com/minecraft/mc-mods/customfence
 
 the horseman should sell breed spawn eggs that are from the same countries that their connected cowboy can sell horses from. 
 

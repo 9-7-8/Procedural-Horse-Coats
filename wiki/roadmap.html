@@ -1807,18 +1807,24 @@
     pool.
 </p>
 
-<h2 id="asked-0915">24. Asked for on 2026-09-15, and not built</h2>
+<h2 id="asked-0915">24. Asked for, and not built</h2>
 
 <p>
-    A batch of thirteen was asked for in one go. The
+    A batch of thirteen was asked for in one go on <strong>2026-09-15</strong>. The
     <a href="breeds.html#regions">cowboy&rsquo;s regions</a> and the
     <a href="villagers.html#trade-table">horseman&rsquo;s tack trades</a> shipped, the six
     third-party projects are written up on
     <a href="compatibility.html">Mod compatibility</a> and in
-    &sect;<a href="#mod-patches">23</a>, and these five are the remainder. Each was
+    &sect;<a href="#mod-patches">23</a>, and 24.1&ndash;24.5 are the remainder. Each was
     researched before being deferred, so what follows is the research rather than a
     restatement of the request &mdash; the point is that the next session does not pay for
     it twice.
+</p>
+
+<p>
+    <strong>24.6&ndash;24.9 were asked for on 2026-09-17</strong> and follow the same rule:
+    what is written down is what was found out about each, not the sentence it arrived as.
+    All four are gameplay-layer features rather than genetics, and none of them is started.
 </p>
 
 <h3 id="weather-spawning">24.1 Breeds that only spawn in certain weather</h3>
@@ -1957,6 +1963,115 @@
     live on purpose so nothing goes stale when a texture changes. Putting item art on the wiki
     therefore means deciding to export it for the first time, and owning the staleness that
     the in-game page was built to avoid. Asked 2026-09-15.
+</p>
+
+<h3 id="two-up-riding">24.6 Two players on one horse</h3>
+
+<p>
+    One rider drives, the second is carried &mdash; no controls, no second set of reins,
+    just along for the ride. Asked 2026-09-17.
+</p>
+<p>
+    <strong>Vanilla allows one passenger and decides the driver by position.</strong>
+    <code>AbstractHorse.getControllingPassenger()</code> hands control to the
+    <em>first</em> passenger, which is the half that makes this cheap: seat a second player
+    after the first and they are inert by construction, with no need to take anything away
+    from them. What has to move is the seat count, which vanilla caps at one, and the
+    second seat&rsquo;s position, which otherwise puts both riders in the same place.
+</p>
+<p>
+    <strong>A mixin is the established path here</strong> &mdash; this mod already owns six
+    on the horse, including two for flight. The relevant prior art is
+    <code>server/BarebackSteeringHandler</code>, which exists because
+    <code>getControllingPassenger</code> is gated on <code>isSaddled()</code> with no hook
+    on it; anything done here has to keep working with the phantom saddle that handler
+    equips. <strong>The questions worth settling before building</strong>: whether a pillion
+    rider is thrown when the horse rears
+    (<code>HorseRearFightMixin</code>), whether <a href="gene-flying.html">flight</a> carries
+    two (<code>HorseFlightRiddenMixin</code> reads the controlling passenger only), and
+    whether a carried player can be dismounted by the driver rather than only by themselves.
+</p>
+
+<h3 id="horse-chests">24.7 Horse chests</h3>
+
+<p>
+    Give a horse saddlebags &mdash; storage that travels with the animal. Asked 2026-09-17.
+</p>
+<p>
+    <strong>A horse is deliberately not a chested horse in vanilla.</strong> The chest flag,
+    the extra slots and the screen that shows them all live on
+    <code>AbstractChestedHorse</code> (donkey, mule, llama), and <code>Horse</code> does not
+    extend it &mdash; so there is nothing to switch on, and this is a container of our own
+    or it is nothing.
+</p>
+<p>
+    <strong>That part is well-trodden ground here.</strong> The mod already registers menus
+    (<code>menu/ModMenus</code>, with <code>EquestrianBenchMenu</code> and
+    <code>ResearchShelfMenu</code> as working examples) and already stores per-horse state
+    in a data attachment, which is where a container would live. <strong>The decisions are
+    the design ones</strong>: whether the chest is a vanilla chest right-clicked onto the
+    horse or an item of our own; whether it survives a
+    <a href="item-transfer-papers.html">transfer of ownership</a> and what happens to the
+    contents if it does not; whether it appears beside the saddle in the horse screen or in
+    a screen of its own; and whether capacity should read the horse&rsquo;s
+    <strong>size</strong>, which is already an attribute the body genes write &mdash; a
+    draught carrying more than a Falabella is the kind of thing this mod is for.
+</p>
+
+<h3 id="horse-shoes">24.8 Horse shoes &mdash; craftable, enchantable, equippable</h3>
+
+<p>
+    Shoes as real equipment: crafted from a metal, enchantable like armour, worn on the
+    hooves. Asked 2026-09-17.
+</p>
+<p>
+    <strong>There is no third slot to put them in.</strong> The horse family has two
+    equipment slots, the saddle and the body, and both are spoken for &mdash; this mod
+    already writes to them (<code>BarebackSteeringHandler</code>&rsquo;s phantom saddle) and
+    already replaces their assets (<code>assets/minecraft/equipment/saddle.json</code>). So
+    shoes are a data attachment plus a render layer of our own, not an
+    <code>EquipmentSlot</code>, and the enchantable half means a genuine <code>Item</code>
+    carrying enchantments rather than a flag on the horse.
+</p>
+<p>
+    <strong>What they could do</strong> is the part worth deciding first, because it decides
+    whether they are tack or a gimmick: grip on ice, speed or quiet on particular blocks,
+    fall-damage reduction, protection from hot ground &mdash; and, if wear is wanted, a
+    durability that is the first thing in the mod to consume itself. Note the overlap with
+    <a href="#native-tack">&sect;23.1 native tack</a> and with the
+    <a href="#equestrian-bench">Equestrian Bench</a>: three separate pieces of tack work
+    that should share one answer about how tack is made, decorated and rendered, rather than
+    three.
+</p>
+
+<h3 id="undead-horses">24.9 Zombie and skeleton horses</h3>
+
+<p>
+    Bring the two undead horses into the mod instead of leaving them as vanilla mobs
+    standing beside it. Asked 2026-09-17.
+</p>
+<p>
+    <strong>They are already half in, which is easy to miss.</strong>
+    <code>entity/ModAttributes</code> registers this mod&rsquo;s attributes for
+    <code>SKELETON_HORSE</code> and <code>ZOMBIE_HORSE</code> alongside the horse and the
+    donkey, and the dyeable saddle covers them by name &mdash;
+    <code>skeleton_horse_saddle</code> and <code>zombie_horse_saddle</code> both have
+    entries in the replaced equipment asset. So tack and attributes reach them today.
+</p>
+<p>
+    <strong>What does not reach them is all of the genetics</strong>, and on purpose: the
+    genome attachment, the coat pipeline, the renderer, breeding and the horse records are
+    scoped to <code>Horse</code>, which <code>HorseRegenMixin</code> says outright. That
+    makes this a decision rather than a task, and the decision is how much of the mod an
+    undead horse gets. <strong>The specific questions</strong>: do they carry a genotype at
+    all, given neither breeds in vanilla and a gene pool needs a way to mix; does the
+    <a href="pipeline.html">coat pipeline</a> paint a skeleton, whose texture is not a coat
+    and whose whole look is the absence of one; or do they take only the parts that make
+    sense without a coat &mdash; the body stats, <a href="horse-care.html">bond and care</a>,
+    names and pedigree &mdash; and stay visually vanilla. A fourth option worth naming
+    because it is cheaper than it sounds: leave them alone and let
+    <a href="breed-book.html#dhampir">the magical breeds</a> be this mod&rsquo;s undead horses,
+    since they already are.
 </p>
 
 <h2 id="equestrian-bench">25. The Equestrian Bench</h2>
