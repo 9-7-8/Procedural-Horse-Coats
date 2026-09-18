@@ -27,6 +27,107 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-unattended">2026-09-18, overnight &mdash; Tests that could not fail, and a run that was not running</h2>
+
+<p>
+    An unattended night, chosen off <a href="verification.html">verification</a> and
+    <a href="known-gaps.html">known gaps</a> with one rule: only work whose evidence lands in a
+    log, a file or an exit code, because nobody was awake to look at anything. The theme
+    turned out to be narrower than that and more uncomfortable &mdash; nearly everything
+    found was <em>a check that could not fail</em>, and one of them was mine.
+</p>
+
+<h3>Four tests that were not testing</h3>
+
+<p>
+    The suite was not green, and had not been. <code>CoatTextureComposerTest</code>'s
+    combination sweep built its gene mask in a <code>long</code>: Java masks a shift distance
+    to the low six bits, so <code>(1L &lt;&lt; 291)</code> silently meant
+    <code>(1L &lt;&lt; 35)</code> and every locus from the 36th onward had been pinned to its
+    last allele for months. Nothing went red, because the test only asserts that a bake
+    returns a full sheet. It is a <code>BitSet</code> now. Widening it revealed the second
+    half of the problem: a coin flip per locus turns on about 145 genes at once and costs
+    roughly a second a compose, so the original 3000 samples ran thirteen minutes without
+    finishing. The masks are sparse now and drawn from the whole width, which is both cheaper
+    and closer to what a real genotype looks like.
+</p>
+
+<p>
+    Two more were red on <code>main</code> and unrecorded.
+    <code>whiteHorseIsExactlyTheTemplate</code> asserted an all-white horse from
+    <code>kit=W22/N</code>, which stopped being one on 2026-09-15 when <code>W22</code> became
+    sabino-alone; <code>CoatCheckPlan</code> was corrected to <code>W2/N</code> at the time and
+    this constant was missed. <code>magicZebraStripes&hellip;</code> counted levels below a
+    fixed <code>0x20</code>, and the floor that keeps the multiply non-zero puts the darkest
+    stripe texel at 37 &mdash; so the set came back empty and the failure read
+    <code>got []</code>, as though the stripes had vanished when all 11,902 of them were
+    present. It measures the darkest band now, which is what it always meant.
+</p>
+
+<p>
+    The fourth was the creator round-trip, failing 23 declared verbs against 22 emitted. The
+    creator's <code>schema.js</code> had <code>day_watch</code> all along; the
+    <em>fixture</em> was stale. And the frightening half of that entry &mdash; that an
+    epigenetic splice might be rerolling a foal's alleles &mdash; is green today.
+</p>
+
+<h3>The yard's warning that never said anything</h3>
+
+<p>
+    Every boot logged <code>test yard is NOT sound: 1 blocked at head height, around x=3</code>
+    and had been set aside as noise in four separate sessions. It was unactionable because
+    <code>around x=3</code> was the <em>plot centre</em>, not the offending spot. Made to name
+    the position and the block, it answered itself on the first boot:
+    <code>minecraft:water_cauldron</code> at <code>-16, 129, 414</code> &mdash; the fertility
+    rows' own flush cauldron, missing from the furniture allowlist. The check had been crying
+    wolf since it was written. The yard reports <em>built and walkable</em> now.
+</p>
+
+<h3>closeKin, asked a question for the first time</h3>
+
+<p>
+    Written up on <a href="horse-care.html#verified-closekin">horse care</a>, because the
+    interesting part is not that it passed. Dropping the LEAVING HOME stagger was necessary
+    and not sufficient: the pen's horses are spawned rather than bred, so their records carry
+    no parents, and <em>unknown parents never match</em>. The first run after the stagger came
+    out had the filly join her brother's band as his lead mare &mdash; indistinguishable from
+    the original defect, and not it.
+</p>
+
+<h3>The first in-game tests</h3>
+
+<p>
+    26.1.2 has no <code>@GameTest</code> annotation at all &mdash; the whole annotation API is
+    gone, replaced by a datapack registry of test instances, so every tutorial about it
+    describes a different game. Details are in <a href="api-notes.html#gametest">API notes</a>,
+    along with the discovery that the three
+    <code>neoforge.enabledGameTestNamespaces</code> lines this build had been carrying set a
+    property <strong>nothing in this version reads</strong>. Two tests exist now, run headless
+    by <code>./gradlew :neoforge-26.1.2:runGameTest</code> in about sixteen seconds: a smoke
+    test, and the double gates' redstone rule, which is a real answer to
+    &sect;0-DG's first item. Both were mutation-checked rather than trusted &mdash; asserting
+    the wrong block fails one, moving the redstone out of range fails the other at tick 102.
+</p>
+
+<h3>And the check that could not fail was mine</h3>
+
+<p>
+    The overnight run was launched detached and hidden at 00:55, confirmed into the yard, and
+    watched by a monitor armed for crash reports, exceptions and <code>Stopping server</code>.
+    At 06:21 it had produced seven minutes of data. The client had not crashed: it
+    <strong>paused</strong>. <code>run/options.txt</code> ships
+    <code>pauseOnLostFocus:true</code>, a hidden window never holds focus, and at 01:02 the
+    integrated server logged <code>Saving and pausing game&hellip;</code> and stopped ticking.
+    A pause writes nothing afterwards, so a watch looking for failure strings stayed silent
+    through five and a half hours of nothing &mdash; silence read exactly like health.
+</p>
+
+<p>
+    Fixed by turning the option off and watching the log's <em>line count</em> rather than its
+    contents. But it is the same defect as everything else found tonight, committed by the
+    thing that was finding them, which is worth recording plainly rather than tidying away.
+</p>
+
 <h2 id="d2026-09-17-release-008">2026-09-17, late &mdash; A long run of small things, and 0.5.008 out the door</h2>
 
 <p>
@@ -144,7 +245,7 @@
     Running it for the first time in a while found the creator's schema mirror missing
     <code>flight_true</code>, <code>flight_glide</code> and <code>cloud_walk</code> as well
     as the new cover. Nothing had caught it because nothing runs the check but a person.
-    That is <a href="known-gaps.html#gap-269">gap 269</a>, and it is a different shape from
+    That is gap 269, and it is a different shape from
     the stale-fixture problem: the oracle was current and correct, and simply was not
     consulted.
 </p>
@@ -2859,7 +2960,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         mare.</strong> SPLICE WHITE carried SPLICE DILUTION's mare through 278 censuses and CROSS SAME
         carried BOND's through 643, each counted in both pens at once. A reporting fault, not a gameplay
         one, but it double-counts exactly where the yard is packed tightest.</li>
-    <li><strong><a href="known-gaps.html#gap-260">260</a>: the yard's soundness check reports a blocked
+    <li><strong>260: the yard's soundness check reports a blocked
         spot and nothing acts on it.</strong> Every build logs <code>1 blocked at head height, around
         x=3</code> and carries on. A warning that is always there teaches the next reader to skip it.</li>
 </ul>
@@ -2867,7 +2968,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <h3>Two things that looked like findings and were not</h3>
 
 <ul>
-    <li><strong>The filly and her brother.</strong> <a href="known-gaps.html#gap-234">Gap 234</a> nearly
+    <li><strong>The filly and her brother.</strong> <a href="horse-care.html#verified-closekin">Gap 234</a> nearly
         got closed on this run: both horses dispersed, no kin pair formed, and the colt ended as a lone
         bachelor lead. But LEAVING HOME <em>staggers its colt three minutes behind its filly</em>, so he
         had not left when she chose and was never the nearest bachelor. <code>closeKin</code> was never
@@ -4023,7 +4124,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         <a href="horse-care.html#verified-bands">gap 232</a>, where a bachelor who took a band kept his
         bachelors as band-mates; and <a href="horse-care.html#verified-bands">gap 233</a>, where a tamed
         dam kept a dead target for good, which vanilla does not clear. One design gap is left for
-        the owner: <a href="known-gaps.html#gap-234">gap 234</a>, a filly recruited by her own
+        the owner: <a href="horse-care.html#verified-closekin">gap 234</a>, a filly recruited by her own
         brother.</li>
     <li>The fertility rows were read against the new rows' reaches. The herd rows start 24 blocks
         past row T, so no herd horse counts toward a fertility pen's cap. Test kit batch 2 now keeps
@@ -6372,8 +6473,8 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     <li><strong>Two tests are red on <code>main</code> and were red before this
         session</strong> &mdash; <code>GameteBiasTest</code>'s splice check and
         <code>CreatorMetadataRoundTripTest</code>'s verb count. Both were confirmed on a
-        clean worktree at <code>1cf48a8</code> (<a href="known-gaps.html#gap-186">gap
-        186</a>). The full <code>:common:test</code> suite was not run; the classes a new
+        clean worktree at <code>1cf48a8</code> (gap
+        186). The full <code>:common:test</code> suite was not run; the classes a new
         gene can move were.</li>
 </ul>
 

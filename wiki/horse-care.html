@@ -497,6 +497,25 @@
         build's censuses read 54.1 ms (while the yard built), then 50.0 and 50.0.</li>
 </ul>
 
+<p id="verified-closekin">
+    <strong>A dispersing filly refuses her own brother</strong> (2026-09-18, LEAVING HOME, unattended). The
+    <code>closeKin</code> rule shipped on 2026-09-15 and could not be exercised for three days, because the pen
+    was built in a way that never asked it the question: the colt was staggered three minutes behind his sister,
+    so he had not yet left when she chose and was never a candidate. Dropping the stagger was necessary and
+    <em>not sufficient</em> &mdash; the first run with both leaving together had the filly join her brother's band
+    as his lead mare, which looks exactly like the original defect. It was not. <code>closeKin</code> reads
+    <code>motherId</code> and <code>fatherId</code> off the record, the pen's horses are spawned rather than bred
+    so both are empty, and <em>unknown parents never match</em>; the natal band id that <code>born()</code> carries
+    is not kinship. With the two recorded as full siblings of NATAL STALLION and MOVER MARE 1, the same pen reads:
+</p>
+<pre><code>COLT:  LEAVES NOW: Bachelor lead of 48d67ec1
+FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
+<p>
+    Her natal band was <code>0c0f5fae</code> and her brother's own band is <code>48d67ec1</code>; she joined
+    neither and he was left a bachelor. The lesson worth keeping is the shape of it &mdash; a pen that answers the
+    easy half reads exactly like one that answers the whole thing.
+</p>
+
 <p id="verified-bands">
     <strong>Band life</strong> (2026-09-14 to 15, rows Q and R, four runs, nobody touching the pens).
 </p>
@@ -1035,7 +1054,7 @@
 <tr><td>Stallions defend mares, not territory; herding a straying mare; guarding against outside males</td><td><strong>Yes.</strong> <code>HerdGoals.StallionGuard</code> herds a mare back and stands between the band and an approaching stallion, then chases (<a href="#what-they-do">what you will see</a>). Nothing defends ground.</td></tr>
 <tr><td>Closer guarding of a mare in heat; flehmen, urine marking and stud piles</td><td><strong>No.</strong> <code>HerdGoals.HeatAttraction</code> draws a mare in heat and the nearest idle stallion together, whichever band he belongs to; the band stallion does not tend her more closely than any other mare. There is no scent marking.</td></tr>
 <tr><td>Colts disperse at about one to three years, depending on the stallion&rsquo;s tolerance, maturity, peers and a new foal</td><td><strong>Partly.</strong> A colt leaves one to three adult days after growing up and a filly three to five (<code>HerdRules.disperseAfterDays</code>), rolled once at birth. The timing ignores the stallion, peers and new foals; it is never forced by aggression.</td></tr>
-<tr><td>Fillies disperse nearer maturity, into another band or with a bachelor, occasionally staying home; female dispersal avoids inbreeding</td><td><strong>Partly.</strong> A filly goes to the nearest family band or the nearest bachelor within reach (<code>BandLife.disperse</code>) and never stays. Nothing stops the nearest bachelor being her own brother, who left the same band days earlier, which defeats the inbreeding avoidance dispersal exists for (<a href="known-gaps.html#gap-234">gap 234</a>).</td></tr>
+<tr><td>Fillies disperse nearer maturity, into another band or with a bachelor, occasionally staying home; female dispersal avoids inbreeding</td><td><strong>Partly.</strong> A filly goes to the nearest family band or the nearest bachelor within reach (<code>BandLife.disperse</code>) and never stays. Nothing stops the nearest bachelor being her own brother, who left the same band days earlier, which defeats the inbreeding avoidance dispersal exists for (<a href="#verified-closekin">gap 234</a>).</td></tr>
 <tr><td>Bachelors form fluid groups, spar, keep a loose order, and leave to recruit mares or challenge band stallions</td><td><strong>Yes.</strong> Bachelor bands follow one of their own; a bachelor near a band challenges its stallion about <code>CHALLENGES_PER_BAND_PER_DAY</code>; a vacant band is claimed without a fight. Sneak matings are possible in effect: any entire stallion within three blocks of a mare in heat can cover her, band or not (<a href="fertility.html#natural">fertility</a>), so only the guard keeps paternity in the band.</td></tr>
 <tr><td>Routes to a band: recruit a dispersing filly, attract a mare away, replace a stallion, build gradually, succeed in a multi-male band</td><td><strong>Four of five.</strong> Recruiting a filly, mare transfers to a band where she knows the mares (<code>TRANSFERS_PER_MARE_PER_DAY</code>), takeovers and vacant bands are built, and a band grows as fillies arrive. Succession inside a multi-male band is not, because there are none.</td></tr>
 <tr><td>Rank as pairwise &ldquo;A yields to B&rdquo; relationships, not one alpha</td><td><strong>Yes.</strong> Each horse keeps a <code>Relationship</code> per band-mate with a rank from &minus;1 to 1; displacements, spars and fights move it by <code>STAKES_DISPLACEMENT</code>, <code>STAKES_SPAR</code> and <code>STAKES_FIGHT</code>. Contest odds weigh current health, size, age and that rank (<code>HerdRules.winChance</code>).</td></tr>

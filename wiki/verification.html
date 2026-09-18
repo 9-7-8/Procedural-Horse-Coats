@@ -275,6 +275,41 @@
         not bad luck.</li>
 </ul>
 
+<h2 id="unattended-0918">&sect;0-UN &mdash; What the overnight run of 2026-09-18 left unplayed</h2>
+
+<p>
+    An unattended night settled several things by log rather than by eye &mdash; those are gone
+    from here and from <a href="known-gaps.html">known gaps</a>, and live on the pages that own
+    them (<a href="horse-care.html#verified-closekin">closeKin</a>,
+    <a href="item-double-gates.html#verified-redstone">the gates' redstone rule</a>). What is
+    below is what the night <em>added</em> and could not finish.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>The bat lycan lands, and lands somewhere real.</strong> A
+        <code>LYCAN BAT</code> now stands in the LYCAN ROUND TRIP pen, because every shifter in
+        the yard had been a wolf or a cow and the flying half of the revert had therefore never
+        run once. <strong>Pass:</strong> at dawn it logs
+        <code>[trace] lycan | &hellip; back from a minecraft:bat</code> with a
+        <code>set down at</code> line, its round trip reads <code>SAME</code>, and nothing
+        anywhere dies of <code>outOfWorld</code>. The first unattended run after it was added
+        did not reach dusk before being stopped, so this is still unobserved.</li>
+    <li><strong>The yard's soundness line means something again.</strong> It named its own
+        obstruction on the first boot (a flush water cauldron, now in the furniture allowlist)
+        and has read <code>test yard built and walkable</code> since. <strong>Pass:</strong> it
+        keeps saying that. A <code>NOT sound</code> line now carries a position and a block id,
+        so the next one is worth believing &mdash; which it was not for the four sessions it
+        spent crying wolf.</li>
+    <li><strong>The gametest run is real but nearly empty.</strong>
+        <code>./gradlew :neoforge-26.1.2:runGameTest</code> runs two tests headless in about
+        sixteen seconds. Everything in this file whose evidence is a block state rather than a
+        picture is a candidate to move into it &mdash; the stall-detector geometry, the
+        suntouched light cleanup, blight eating grass but not crops. None of that is written
+        yet.</li>
+</ul>
+
 <h2 id="double-gates-0917">&sect;0-DG &mdash; What the double gates still need looking at (2026-09-17, NOT played)</h2>
 
 <p>
@@ -318,9 +353,7 @@
         <em>Hang a stall on a double gate</em> ticked. The gate is the stall's
         <em>boundary</em> rather than its floor, so the check looks at the cells around each floor
         column &mdash; a stall whose gate is set back oddly is the case that would miss.</li>
-    <li><strong>Redstone moves the pair, not a half.</strong> Run a lever to one end of a double
-        gate. <strong>Pass:</strong> both leaves open. Vanilla's own rule asks only about its own
-        block, which on a pair would swing one and leave the other shut.</li>
+    
     <li><strong>Placement refuses cleanly with no room, and says why.</strong> Try to place one
         into a one-block gap. <strong>Pass:</strong> nothing is placed, the item stays in your
         hand &mdash; never a single half left standing &mdash; and you are told
@@ -1801,7 +1834,7 @@
         <code>kit=W22/N</code>, <code>kit=W22/W20</code>, <code>kit=W26/N</code> and <code>kit=W21/N</code>. <strong>Pass:</strong> a broad
         sabino, a pure white, an extensive white, and a horse flecked white through the coat with a white face and a coloured
         mane. Whether the speckle reads as <em>&yacute;rusk&jacute;&oacute;ttur</em> rather than roan is a look for you.</li>
-    <li><strong>A filly is not recruited by her brother</strong> (<a href="known-gaps.html#gap-234">gap 234</a>).
+    <li><strong>A filly is not recruited by her brother</strong> (<a href="horse-care.html#verified-closekin">gap 234</a>).
         <strong>The 16:11 run did not test this</strong>, and the pen is why: LEAVING HOME staggers its colt three
         minutes behind its filly, so he had not left when she chose and was never the nearest bachelor. Both
         dispersed cleanly and no kin pair formed, but <code>closeKin</code> was never asked the question.

@@ -218,6 +218,18 @@
 
 <h2 id="verified">Verified</h2>
 
+<p id="verified-redstone">
+    <strong>Redstone moves the pair, not a half</strong> (2026-09-18, by test rather than by hand).
+    <code>horsegenetics:double_gate_redstone</code> places both halves, powers a redstone block
+    beside the <strong>left</strong> one only, and asserts that the <em>right</em> half reports
+    <code>open</code> and <code>powered</code>. Vanilla's rule asks only about its own block, so a
+    pair inheriting it unchanged would swing the powered half and leave the other shut &mdash;
+    which is why the assertion is on the far half. Run it with
+    <code>./gradlew :neoforge-26.1.2:runGameTest</code>; it is headless and takes about sixteen
+    seconds. Checked by mutation, not trusted: moving the redstone out of range fails it at tick
+    102 while the other test goes on passing.
+</p>
+
 <p>
     <strong>Played 2026-09-17, and the pair renders correctly.</strong> Confirmed in a world by
     the owner across several woods: once both halves are down they look, in her words,
