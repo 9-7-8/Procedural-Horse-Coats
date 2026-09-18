@@ -251,11 +251,20 @@ public final class ModItems {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             for (com.example.horsegenetics.neoforge.block.DoubleGates.Gate gate
                     : com.example.horsegenetics.neoforge.block.DoubleGates.gates()) {
+                // Resolved here rather than held on the record, because a gate
+                // for a modded wood is filed after an item from a mod that had
+                // not registered it yet when ours was built. By now everything
+                // has, and a mod that declared a gate in its assets and then did
+                // not register one comes back as AIR rather than throwing.
+                net.minecraft.world.item.Item anchor = gate.sourceGate().get();
+                if (anchor == null || anchor == net.minecraft.world.item.Items.AIR) {
+                    continue;
+                }
                 boolean anchorPresent = event.getParentEntries().stream()
-                        .anyMatch(stack -> stack.is(gate.vanillaGate()));
+                        .anyMatch(stack -> stack.is(anchor));
                 if (anchorPresent) {
                     event.insertAfter(
-                            new net.minecraft.world.item.ItemStack(gate.vanillaGate()),
+                            new net.minecraft.world.item.ItemStack(anchor),
                             new net.minecraft.world.item.ItemStack(gate.item().get()),
                             net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                 }

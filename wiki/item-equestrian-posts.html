@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The four posts &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Blocks <span class="sep">/</span> villagers</p>
+<h1>The four posts</h1>
+<p class="lede">
+    The <a href="villagers.html#equestrians">four equestrians</a>&rsquo; workstations. Put
+    one down near an unemployed villager and you get that trade, and only that trade &mdash;
+    which is why there are four of them and not one.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">What they are for</h2>
+
+<div class="plain">
+    <p>
+        <strong>All four are shapeless, and all four start the same:</strong> 2 hair cloth
+        + 2 fences of any kind. The last three slots say which post it is.
+    </p>
+    <ul>
+        <li><strong>Leatherworker&rsquo;s Post</strong> &mdash; + 3 leather</li>
+        <li><strong>Scientist&rsquo;s Post</strong> &mdash; + 2 glass bottles + 1 paper</li>
+        <li><strong>Supplier&rsquo;s Post</strong> &mdash; + 2 braided rope + 1 carrot</li>
+        <li><strong>Metalsmith&rsquo;s Post</strong> &mdash; + 3 iron ingots</li>
+    </ul>
+    <p>
+        Place one near an unemployed villager and they take up that trade. <strong>One
+        villager per post</strong>, so a second scientist needs a second Scientist&rsquo;s
+        Post.
+    </p>
+</div>
+
+<p>
+    That is the whole of how an equestrian comes to exist &mdash; no house, no bed and no
+    special structure needed. The blocks do nothing else; they are the job sites and that is
+    the point of them.
+</p>
+
+<p>
+    <strong>Which post you put down decides which shop you get</strong>, and there is no way
+    to change a villager&rsquo;s mind afterwards short of breaking the post while they are
+    still Novice, the way vanilla works for every other profession. The leatherworker sells
+    tack, the scientist carrots and breed eggs, the metalsmith armour, and the supplier
+    everything else &mdash; and the supplier is the only one who buys horse hair, which
+    makes him the one most players will want first. The
+    <a href="villagers.html#trade-table">trade tables</a> are on the villagers page.
+</p>
+
+<p>
+    You will meet all four without crafting any, if you find a
+    <a href="villagers.html#barn">cowboy&rsquo;s homestead</a>: the four posts stand in a
+    row along the house&rsquo;s frontage with the <strong>Cowboy Hitch</strong> on the other
+    side of the doorstep and the <a href="item-equestrian-bench.html">bench</a> at the end,
+    with a villager waiting at each one.
+</p>
+
+<p>
+    <strong>Break one and you get it back.</strong> Worth saying because for a while the
+    hitch did not: it shipped with no loot table at all, so breaking one destroyed it. All
+    five drop themselves now.
+</p>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="poi">They are POIs and nothing else</h2>
+
+<p>
+    Plain blocks with no behaviour of their own &mdash; everything happens because each one
+    backs a POI of its own name (<code>horsegenetics:leatherworkers_post</code> and the
+    other three), registered in <code>village/ModPoiTypes</code> with
+    <code>maxTickets 1</code> the way every vanilla job site is. The professions that claim
+    them are in <code>village/ModVillagerProfessions</code>; the blocks themselves are four
+    <code>registerSimpleBlock</code> calls in <code>block/ModBlocks</code>.
+</p>
+
+<p>
+    A POI is only half the wiring. It has to be in the
+    <code>minecraft:acquirable_job_site</code> tag before an unemployed villager will take
+    the job, and that half is a tag file under
+    <code>data/minecraft/tags/point_of_interest_type/</code>. Tags <em>merge</em> across
+    datapacks, so adding to vanilla&rsquo;s is additive and safe where overriding a worldgen
+    file would not be. The <strong>Cowboy Hitch must never appear in one</strong>: it is
+    deliberately not a POI, and a tag naming a missing entry fails to load <em>as a
+    whole</em>, taking vanilla&rsquo;s own village POIs down with it &mdash; which it did,
+    for four days (<a href="villagers.html#verified-village-tag">the record</a>).
+</p>
+
+<h2 id="four">Why four blocks and not one</h2>
+
+<p>
+    <strong>A POI hands out exactly one profession.</strong> Vanilla decides the job from
+    the job site claimed, not the other way round, so a single shared post could only ever
+    hand out a single job &mdash; and the version that tried to alternate could not undo the
+    job-site ticket it had already granted. Four jobs therefore need four blocks, and the
+    <a href="villagers.html#workstation">hitch</a> is a fifth for the separate reason that a
+    cowboy is an entity rather than a profession.
+</p>
+
+<p>
+    They are identical in every respect but their name and their recipe, down to a shared
+    <code>cube_bottom_top</code> model and one three-face texture set.
+    <strong>Making each look like the trade it belongs to is open work.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">The texture files are named after a block that never existed</span>
+    <p>
+        All five posts draw <code>horse_traders_post_{top,side,bottom}.png</code>. There has
+        never been a block called a <em>Horse Trader&rsquo;s Post</em> &mdash; the old block
+        was <code>horsemans_table</code>, the &ldquo;Horseman&rsquo;s Table&rdquo;, and the
+        wiki called it a Horse Trader&rsquo;s Post in prose for a while without either of
+        them ever matching the art. That was odd when the name was one block out of date;
+        it is doubly odd now that the block those files were drawn for is retired and four
+        differently-named ones share them.
+    </p>
+    <p>
+        Left alone deliberately rather than missed: renaming a texture means touching every
+        model that references it and re-checking the atlas, for no change a player can see,
+        and the right moment to do it is when the four stop sharing one set. Written down
+        here so the next person to open those files knows the name is a fossil and not a
+        clue.
+    </p>
+</div>
+
+<h2 id="loot">Loot tables</h2>
+
+<p>
+    One per post, all of them the ordinary <code>survives_explosion</code> single-item drop,
+    at <code>data/horsegenetics/loot_table/blocks/</code>. The four were written at the same
+    time the hitch finally got one &mdash; the hitch had shipped with none, which in this
+    version means the block drops nothing rather than defaulting to itself. A block
+    registered without <code>noLootTable()</code> and without a file is silently
+    unrecoverable, and nothing in the build says so.
+</p>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="villagers.html">Villagers &amp; transfer papers</a>
+        <a href="item-horse-hair.html">Horse hair</a>
+        <a href="item-equestrian-bench.html">Equestrian Bench</a>
+        <a href="items.html">All items</a>
+    </div>
+    Block and POI registration in the NeoForge module's
+    <code>block/</code> and <code>village/</code> packages.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

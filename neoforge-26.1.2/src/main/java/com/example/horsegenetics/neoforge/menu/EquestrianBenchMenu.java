@@ -151,7 +151,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         addSlot(new Slot(input, SLOT_METAL, ZONE_X, METAL_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return METALS.containsKey(stack.getItem());
+                return metalColour(stack) != null;
             }
         });
         addSlot(new Slot(output, 0, RESULT_X, RESULT_Y) {
@@ -178,7 +178,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         return new Slot(input, index, ZONE_X, y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.has(DataComponents.DYE);
+                return dyeColour(stack) != null;
             }
         };
     }
@@ -212,7 +212,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
 
         Integer seat = dyeColour(input.getItem(SLOT_SEAT));
         Integer bridle = dyeColour(input.getItem(SLOT_BRIDLE));
-        Integer metal = METALS.get(input.getItem(SLOT_METAL).getItem());
+        Integer metal = metalColour(input.getItem(SLOT_METAL));
 
         // A material only counts if it would actually CHANGE that zone, so the
         // bench never charges a dye for a colour the saddle already wears.
@@ -271,9 +271,41 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         return dyed;
     }
 
+    /**
+     * <b>The fitting colour this stack gives</b>, or null if it is not a metal.
+     *
+     * <p>{@link #METALS} first - those fifteen are hand-picked, and several were
+     * deliberately pulled away from their material's true average so that two
+     * fittings a player cannot tell apart are not both offered. Then anything
+     * another mod filed under {@code c:ingots/*} or {@code c:gems/*}, coloured
+     * from its own art. The hand-picked fifteen win where both would answer, so
+     * a mod adding a second copper does not quietly redefine copper.
+     */
+    public static @Nullable Integer metalColour(ItemStack stack) {
+        Integer known = METALS.get(stack.getItem());
+        if (known != null) {
+            return known;
+        }
+        return com.example.horsegenetics.neoforge.compat.ModdedMaterials.metalColour(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+    }
+
+    /**
+     * <b>The leather colour this stack gives</b>, or null if it is not a dye.
+     *
+     * <p>Vanilla's component first, which is most modded dyes as well as all
+     * sixteen of vanilla's - a mod adding "a red dye" gives it
+     * {@code minecraft:dye} and has always worked here. The fallback is the one
+     * case that did not: a dye whose colour vanilla has no name for, which
+     * carries no component and can only be read off its own art.
+     */
     private static @Nullable Integer dyeColour(ItemStack stack) {
         DyeColor dye = stack.get(DataComponents.DYE);
-        return dye == null ? null : dye.getTextureDiffuseColor() & 0xFFFFFF;
+        if (dye != null) {
+            return dye.getTextureDiffuseColor() & 0xFFFFFF;
+        }
+        return com.example.horsegenetics.neoforge.compat.ModdedMaterials.dyes().get(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
 
     private static String nameOf(ItemStack stack) {
@@ -304,7 +336,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, SLOT_SADDLE, SLOT_SADDLE + 1, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (METALS.containsKey(stack.getItem())) {
+        } else if (metalColour(stack) != null) {
             if (!moveItemStackTo(stack, SLOT_METAL, SLOT_METAL + 1, false)) {
                 return ItemStack.EMPTY;
             }

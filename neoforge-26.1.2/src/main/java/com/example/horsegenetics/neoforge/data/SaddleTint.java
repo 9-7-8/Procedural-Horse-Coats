@@ -123,6 +123,15 @@ public record SaddleTint(int seat, int bridle, int metal)
                 return metal.getKey();
             }
         }
+        // ...then anything another mod brought. Named from the material rather
+        // than from the item - "tin", not "Tin Ingot" - so a modded fitting
+        // reads in the tooltip the way the fifteen above do.
+        for (com.example.horsegenetics.neoforge.compat.ModdedMaterials.Metal metal
+                : com.example.horsegenetics.neoforge.compat.ModdedMaterials.metals()) {
+            if ((metal.colour() & 0xFFFFFF) == key) {
+                return metal.material().replace('_', ' ');
+            }
+        }
         return null;
     }
 

@@ -57,7 +57,7 @@ public final class DoubleGates {
      * entries.
      */
     public record Gate(WoodType wood,
-                       Item vanillaGate,
+                       java.util.function.Supplier<Item> sourceGate,
                        DeferredBlock<DoubleFenceGateBlock> block,
                        DeferredItem<BlockItem> item) {
     }
@@ -84,8 +84,31 @@ public final class DoubleGates {
         for (Object[] row : WOODS) {
             WoodType wood = (WoodType) row[0];
             Item vanillaGate = (Item) row[1];
-            String name = wood.name() + "_" + STYLE;
+            register(wood, wood.name() + "_" + STYLE, () -> vanillaGate);
+        }
+        // ...and one for every wood another mod brought with it. The list is
+        // read out of those mods' own jars before anything registers - see
+        // compat/ModdedMaterials for why it cannot be read off the registry -
+        // and it is sorted, so two players with the same mods register the same
+        // gates in the same order whatever order FML loaded them in.
+        for (var wood : com.example.horsegenetics.neoforge.compat.ModdedMaterials.woods()) {
+            net.minecraft.resources.Identifier source =
+                    net.minecraft.resources.Identifier.parse(wood.gateId());
+            register(
+                    // WoodType is only a sound here, and a modded one may not be
+                    // registered yet when this block is built. Oak's is the
+                    // plain wood sound every wooden gate in vanilla but the two
+                    // nether ones uses, so it is the right guess rather than
+                    // merely a safe one - and guessing beats depending on
+                    // another mod's static initialiser having run.
+                    WoodType.OAK,
+                    wood.doubleGateId(),
+                    () -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(source));
+        }
+    }
 
+    private static void register(WoodType wood, String name, java.util.function.Supplier<Item> sourceGate) {
+        {
             DeferredBlock<DoubleFenceGateBlock> block = ModBlocks.BLOCKS.registerBlock(
                     name,
                     properties -> new DoubleFenceGateBlock(wood, properties),
@@ -114,11 +137,11 @@ public final class DoubleGates {
                     p -> new com.example.horsegenetics.neoforge.item.DoubleGateItem(
                             block.get(), p.useBlockDescriptionPrefix()));
 
-            GATES.add(new Gate(wood, vanillaGate, block, item));
+            GATES.add(new Gate(wood, sourceGate, block, item));
         }
     }
 
-    /** Every gate, in vanilla's wood order. */
+    /** Every gate: vanilla's twelve in vanilla's wood order, then the modded ones by id. */
     public static List<Gate> gates() {
         return List.copyOf(GATES);
     }

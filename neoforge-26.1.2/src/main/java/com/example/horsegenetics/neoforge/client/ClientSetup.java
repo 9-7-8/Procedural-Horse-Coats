@@ -98,6 +98,11 @@ public final class ClientSetup {
         event.register(
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "tack_tint"),
                 TackTintSource.MAP_CODEC);
+        // The icon half of a generated horse armour's colour - the worn half is
+        // the equipment asset's own dyeable layer. See MetalTintSource.
+        event.register(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "metal_tint"),
+                MetalTintSource.MAP_CODEC);
     }
 
     @SubscribeEvent

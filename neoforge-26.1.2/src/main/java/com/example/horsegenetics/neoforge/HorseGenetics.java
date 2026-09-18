@@ -45,9 +45,21 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.server.DietFoods.verify();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModDataComponents.register(modEventBus);
-        // The two dozen double gates register themselves into ModBlocks.BLOCKS
-        // and ModItems.ITEMS as this class loads, so it has to be touched before
-        // either register is attached to the bus below.
+        // What the OTHER mods in this pack brought - the woods we can make a
+        // double gate for, the ingots we can make horse armour out of. Read out
+        // of their jars, because at this moment no registry is populated and no
+        // tag exists; and necessarily HERE, because a DeferredRegister cannot be
+        // handed an entry once the bus has it. See compat/ModdedMaterials.
+        com.example.horsegenetics.neoforge.compat.ModdedMaterials.scan();
+        // A horse armour per modded ingot. Same rule as the gates below: the
+        // class registers as it loads, so it has to be touched before ModItems
+        // is attached to the bus. The models, recipes and trades all of this
+        // needs are written later, by compat/GeneratedPack.
+        com.example.horsegenetics.neoforge.compat.ModdedArmour.init();
+        // The double gates register themselves into ModBlocks.BLOCKS and
+        // ModItems.ITEMS as this class loads, so it has to be touched before
+        // either register is attached to the bus below - and after the scan
+        // above, which is where its modded woods come from.
         com.example.horsegenetics.neoforge.block.DoubleGates.init();
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
