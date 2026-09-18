@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.entity;
 
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.common.horse.HorseSearch;
 import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
@@ -151,6 +152,15 @@ public class Cowboy extends AbstractVillager {
 
     private long wanderExpiry;
     private int restockCooldown;
+
+    /**
+     * The filter the player at the counter has typed, if any. Not saved and not
+     * synched: it belongs to one open window, and vanilla only lets one player
+     * trade with a merchant at a time ({@code getTradingPlayer}), so a single
+     * field is the whole of it. Cleared when the window closes, so the next
+     * customer starts on the full string.
+     */
+    private String offerFilter = "";
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
@@ -369,10 +379,37 @@ public class Cowboy extends AbstractVillager {
     // --- trading --------------------------------------------------------
 
     /**
-     * One offer per herd horse that is still their to sell: alive, still untamed,
-     * and not already papered. Rebuilt from scratch every time
-     * the list is asked for, because the herd is a live thing - a horse can be
-     * killed by a wolf between one player looking and the next.
+     * The filter typed at the counter. Setting it rebuilds and resends the offer
+     * list, so the player sees the shortened string and the server is holding the
+     * same one.
+     *
+     * @return whether the filter actually changed
+     */
+    public boolean setOfferFilter(String query) {
+        String cleaned = query == null ? "" : query.strip();
+        if (cleaned.equals(offerFilter)) {
+            return false;
+        }
+        this.offerFilter = cleaned;
+        return true;
+    }
+
+    public String offerFilter() {
+        return offerFilter;
+    }
+
+    /** Throw the offer list away and build it again - {@link #updateTrades} is protected. */
+    public void rebuildOffers(ServerLevel level) {
+        getOffers().clear();
+        updateTrades(level);
+    }
+
+    /**
+     * One offer per herd horse that is still theirs to sell: alive, still untamed,
+     * not already papered, and matching whatever the player has typed in the
+     * filter box. Rebuilt from scratch every time the list is asked for, because
+     * the herd is a live thing - a horse can be killed by a wolf between one
+     * player looking and the next.
      */
     @Override
     protected void updateTrades(ServerLevel level) {
@@ -388,6 +425,13 @@ public class Cowboy extends AbstractVillager {
             HorseRecord record = HorseRecords.of(horse);
             if (!record.hasName()) {
                 continue; // not founded yet - it will be offered next time
+            }
+            // The filter is applied HERE, building the one authoritative list,
+            // rather than by the screen drawing fewer rows: a trade comes back as
+            // an index into this list, so a client that hid rows would be buying
+            // by numbers the server does not share. See CowboyFilterPayload.
+            if (!HorseSearch.matches(record, offerFilter)) {
+                continue;
             }
             merchantOffers.add(new MerchantOffer(
                     new ItemCost(Items.EMERALD, HorsePrices.emeraldsFor(record, isArcane())),
@@ -444,6 +488,9 @@ public class Cowboy extends AbstractVillager {
                 }
                 return InteractionResult.CONSUME;
             }
+            // A new customer starts on the whole string, never on whatever the
+            // last one was looking for.
+            setOfferFilter("");
             setTradingPlayer(player);
             com.example.horsegenetics.neoforge.server.HorseProgress.complete(player,
                     com.example.horsegenetics.common.progress.ProgressTask.MEET_COWBOY);

@@ -110,6 +110,42 @@
 </p>
 
 <p>
+    <strong>Everything below landed after the yard was looked at, so none of it has been
+    played at all.</strong>
+</p>
+
+<ul>
+    <li><strong>The filter box</strong> above a cowboy's offers. Type a breed, a gene, an
+        allele; several words should mean all of them. <strong>The one to check hard is
+        that you buy the horse you clicked</strong> &mdash; filter to two horses, buy the
+        second, and confirm the paper names the horse on that row. The whole design exists
+        to stop the indices drifting, so that is the test that matters; it applies to
+        ordinary cowboys too, since they got the box as well. Also press <kbd>E</kbd> while
+        typing: it must type an e, not shut the shop.</li>
+    <li><strong>Sneak and use with an empty hand on an untamed horse</strong> opens the
+        info screen &mdash; wild, stable stock, and the cowboy's branded string, which
+        normally refuses every interaction. On a <em>tamed</em> horse it must still open
+        the saddle inventory, not the info screen; that is the regression to watch
+        for.</li>
+    <li><strong>Naming is owner-only now.</strong> The barn-name box should be absent on a
+        horse you do not own, and a name tag on one should say so rather than opening the
+        rename window. Check your own horse still renames both ways.</li>
+    <li><strong>A purple hat</strong> on the arcane dealer, and only on him. The tint is a
+        multiply over the ordinary hat texture, so the risk is it reads as muddy brown or
+        near-black rather than purple &mdash; it is one constant
+        (<code>CowboyOverlayLayer.ARCANE_HAT</code>) if it needs moving. Nobody has seen
+        it.</li>
+    <li><strong>The wandering dealer</strong> out in the world, and the fact that hostile
+        mobs now ignore every cowboy. Both are slow to confirm: he is roughly one per two
+        or three hours, and "a zombie did not attack" is an absence. The
+        <code>[Cowboy] wandering arcane dealer</code> log line is the cheap check that he
+        spawned at all, and <code>moved on, taking N horses</code> that he left
+        again.</li>
+    <li><strong>The checklist entry</strong> for buying from him ticks on buying the paper,
+        not on redeeming it.</li>
+</ul>
+
+<p>
     <strong>Two smaller things the yard did not answer.</strong> Every horse should read
     <strong>Mixed</strong> in the info panel rather than a breed &mdash; plausible from the
     code and not actually looked at. And a village that already has a horse family should

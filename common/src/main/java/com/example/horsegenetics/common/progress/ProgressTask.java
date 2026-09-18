@@ -330,7 +330,14 @@ public enum ProgressTask {
                     + "road now and then as well. His horses are Mixed, never gelded, and every one "
                     + "carries eleven or twelve magical genes it actually shows - no two of his horses "
                     + "alike. He charges for it. This is the reliable way to collect the loci the wild "
-                    + "hardly ever offers."),
+                    + "hardly ever offers. Sneak and use on any of them to read the genes before you "
+                    + "pay. But he breeds willy-nilly, and what you are buying is a gene bomb: a "
+                    + "dozen unrelated magical loci on one animal, and almost never the one thing you "
+                    + "went there for on its own. Isolating it is the work. Cross him out to a plain "
+                    + "horse and half the bomb goes each generation; keep the foals that still show "
+                    + "what you wanted and breed those back together until it runs true. No two of "
+                    + "his horses are alike, so a second purchase is a second set of genes rather "
+                    + "than a spare copy of the first."),
     SUN_SENSITIVE_SEEN(Group.MAGIC, "Watch a horse run from the sun",
             "A sun-sensitive horse catches fire in daylight and loses half a heart every couple of "
                     + "seconds. Watch one break for the deepest shade it can reach and hold there until "

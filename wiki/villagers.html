@@ -370,6 +370,68 @@
         below.</li>
 </ul>
 
+<div class="note rule">
+    <span class="label">What you are buying is a gene bomb</span>
+    He breeds willy-nilly, and it shows. A dozen unrelated magical loci on one animal is
+    almost never the single thing a player went there for, and <strong>isolating it is the
+    work</strong>: cross out to a plain horse and half the bomb goes each generation, keep
+    the foals that still show what you were after, and breed those back together until it
+    runs true. No two of his horses are alike, so a second purchase is a second set of
+    genes rather than a spare copy of the first. That is the intended shape of the
+    feature &mdash; he sells raw material, not finished horses &mdash; and both the
+    <a href="#trade-filter">filter box</a> and
+    <a href="#reading-a-horse">sneak-and-use</a> exist so a player can tell what they are
+    getting into before they pay.
+</div>
+
+<h4 id="reading-a-horse">Reading a horse you do not own</h4>
+
+<p>
+    <strong>Sneak and use, with an empty hand, on any horse you have not tamed</strong>
+    &mdash; wild, a stable's stock, or one of his &mdash; and the horse information screen
+    opens on it. Without this the cowboy does not work: a player was being asked to pay
+    twelve to twenty-eight emeralds for an animal whose genes are the entire product, with
+    no way to see them. Buying blind is a raffle, not a purchase.
+</p>
+
+<p>
+    It stops short of &ldquo;any horse&rdquo; in one place, deliberately: a <em>tamed</em>
+    horse keeps vanilla's behaviour, because sneak-and-use is how the saddle and armour
+    slots open and taking that over would cost a player the ability to tack up. A tamed
+    horse already reaches the same screen through the <code>i</code> button on that
+    inventory. <strong>Reading is not owning</strong>: the barn-name box is hidden on a
+    horse you do not own and a name tag refuses with a message, both on the screen and
+    again on the server, so a crafted packet cannot rename a stranger's horse either.
+</p>
+
+<h4 id="trade-filter">The filter box, on every cowboy's window</h4>
+
+<p>
+    A cowboy's window is a column of names and prices, and a name says nothing about the
+    animal. Liveable when a cowboy sold six horses of one breed; not liveable for a dealer
+    whose ten horses carry a hundred-odd magical loci between them and whose entire product
+    <em>is</em> the genes. So there is a box above the list: type a <strong>breed, gene or
+    allele</strong> and the string narrows to what answers it. Several words mean all of
+    them, the way every search box a player has used behaves. <code>HorseSearch</code>
+    matches breed label, the horse's own name, gene name and registry key, allele token and
+    label, and the name of the expression the pair produces &mdash; so
+    <code>dapple</code> finds every horse showing one, whatever gene put it there. Loci the
+    horse is wild type for are not matched, or every horse would answer every query.
+</p>
+
+<div class="note rule">
+    <span class="label">Why the server does the filtering</span>
+    A trade is sent back to the server as an <strong>index into the merchant's offer
+    list</strong>. A client that quietly drew fewer rows would make row three mean one
+    horse on screen and a different one on the server, and the player would buy the wrong
+    animal &mdash; at twelve to twenty-eight emeralds, silently, with nothing anywhere
+    reporting an error. So the box only ever <em>sends what was typed</em>
+    (<code>CowboyFilterPayload</code>); the server rebuilds its own list in
+    <code>Cowboy.updateTrades</code> and sends it back. One list, so the indices cannot
+    drift apart. The filter is not saved and not synched: it belongs to one open window,
+    and a new customer starts on the whole string.
+</div>
+
 <h4 id="arcane-wandering">He is also out on the road</h4>
 
 <p>

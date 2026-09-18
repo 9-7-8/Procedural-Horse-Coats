@@ -50,6 +50,17 @@ public final class HorseInteractionHandler {
         // tag is consumed only when the player confirms (see RenameHorsePayload).
         if (stack.is(Items.NAME_TAG)) {
             if (HorseRecords.hasRealRecord(horse)) {
+                // Not a horse you own: the rename window never opens, rather than
+                // opening and having the server drop what you typed. Reading a
+                // stranger's horse is fine (sneak and use); naming it is not.
+                if (!HorseOwnership.isOwner(horse, player.getUUID())) {
+                    if (!client && player instanceof net.minecraft.server.level.ServerPlayer owner) {
+                        owner.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                                "message.horsegenetics.rename.not_yours"), true);
+                    }
+                    consume(event, InteractionResult.SUCCESS);
+                    return;
+                }
                 if (!client && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                     net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
                             new com.example.horsegenetics.neoforge.network.OpenHorseRenamePayload(horse.getId()));

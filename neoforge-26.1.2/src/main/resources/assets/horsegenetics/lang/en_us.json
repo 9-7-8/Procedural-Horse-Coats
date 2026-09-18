@@ -92,6 +92,7 @@
   "message.horsegenetics.transfer.wrong_horse": "These papers are for %s, not this horse.",
   "message.horsegenetics.transfer.already_yours": "This horse is already yours.",
   "message.horsegenetics.transfer.redeemed": "%s is yours now.",
+  "message.horsegenetics.rename.not_yours": "You can look this one over, but naming it is the owner's business.",
   "message.horsegenetics.transfer.not_yours": "This is %s's horse. You'll need his papers.",
   "message.horsegenetics.cowboy.sold_out": "He has nothing left to sell.",
   "message.horsegenetics.preset_egg.unreadable": "[Preset Horse] this egg was made with a different set of genes: %1$s",

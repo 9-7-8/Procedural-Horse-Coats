@@ -316,7 +316,12 @@ public final class HorseInfoScreen extends Screen {
     }
 
     private void applyTabWidgets() {
-        boolean overview = tab == Tab.OVERVIEW;
+        // Naming is for horses you own. The screen opens on anything now (sneak
+        // and use - HorseInfoInteraction), so a stranger's horse and the cowboy's
+        // stock both reach this, and a box you can type in but not submit is
+        // worse than no box. The server refuses it as well; this is the half that
+        // stops a player being told "no" only after they have typed a name.
+        boolean overview = tab == Tab.OVERVIEW && ownsHorse();
         if (barnBox != null) {
             barnBox.visible = overview;
             barnBox.active = overview;
@@ -338,6 +343,23 @@ public final class HorseInfoScreen extends Screen {
             offspringRefreshButton.visible = offspring;
             offspringRefreshButton.active = offspring;
         }
+    }
+
+    /**
+     * Whether the viewing player owns this horse - vanilla tame plus owner UUID,
+     * matching {@code HorseOwnership.isOwner} on the server.
+     *
+     * <p>Read off {@code getOwnerReference()} rather than {@code getOwner()}: the
+     * latter only resolves while the owner entity is loaded, so it reports "not
+     * yours" about your own horse whenever you are not standing next to it.
+     */
+    private boolean ownsHorse() {
+        if (horse == null || !horse.isTamed()) {
+            return false;
+        }
+        var owner = horse.getOwnerReference();
+        var viewer = Minecraft.getInstance().player;
+        return owner != null && viewer != null && viewer.getUUID().equals(owner.getUUID());
     }
 
     private void submitBarnName() {

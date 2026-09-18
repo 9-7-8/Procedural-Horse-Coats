@@ -103,6 +103,12 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                CowboyFilterPayload.TYPE,
+                CowboyFilterPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleCowboyFilter(payload, context.player()))
+        );
+
+        registrar.playToServer(
                 RenameHorsePayload.TYPE,
                 RenameHorsePayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleRenameHorse(payload, context.player()))
@@ -435,7 +441,14 @@ public final class ModNetworking {
             return;
         }
         Entity target = serverPlayer.level().getEntity(payload.entityId());
-        if (target instanceof Horse horse && horse.closerThan(serverPlayer, 8.0)) {
+        // Ownership, and not just range: the info screen opens on any horse now
+        // (sneak and use - HorseInfoInteraction), so "close enough to read" and
+        // "yours to name" have stopped being the same thing. The screen hides the
+        // box on a horse you do not own; this is the half that a crafted packet
+        // cannot talk its way past.
+        if (target instanceof Horse horse && horse.closerThan(serverPlayer, 8.0)
+                && com.example.horsegenetics.neoforge.server.HorseOwnership.isOwner(
+                        horse, serverPlayer.getUUID())) {
             HorseRecords.setBarnName(horse, payload.barnName());
             // Clearing the box sends a blank through here too, and unnaming a
             // horse is not the task - so tick on a name, not on the packet.
@@ -451,6 +464,43 @@ public final class ModNetworking {
      * Re-checks range, that a real record exists, that a name tag is still in
      * hand, and that the two parts are not both blank.
      */
+    /**
+     * Filter the cowboy's offers to what the player typed, and resend them.
+     *
+     * <p>Rebuilt on the server and pushed back rather than hidden by the screen,
+     * because a trade is an index into this very list - see
+     * {@link CowboyFilterPayload}. The player must already have the window open,
+     * which is what keeps this from being a way to poke at a merchant across the
+     * map.
+     */
+    private static void handleCowboyFilter(CowboyFilterPayload payload,
+                                           net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        if (!(serverPlayer.containerMenu instanceof net.minecraft.world.inventory.MerchantMenu menu)
+                || !(serverPlayer.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return;
+        }
+        // Found through the cowboy rather than through the menu: the merchant a
+        // MerchantMenu holds is not exposed, and a cowboy already knows who is at
+        // his counter. Only the man this player actually opened is touched.
+        com.example.horsegenetics.neoforge.entity.Cowboy cowboy = null;
+        for (com.example.horsegenetics.neoforge.entity.Cowboy candidate : level.getEntitiesOfClass(
+                com.example.horsegenetics.neoforge.entity.Cowboy.class,
+                serverPlayer.getBoundingBox().inflate(16.0))) {
+            if (candidate.getTradingPlayer() == serverPlayer) {
+                cowboy = candidate;
+                break;
+            }
+        }
+        if (cowboy == null || !cowboy.setOfferFilter(payload.query())) {
+            return; // not at a counter, or a keystroke that did not alter the text
+        }
+        cowboy.rebuildOffers(level);
+        serverPlayer.sendMerchantOffers(menu.containerId, cowboy.getOffers(), 1, 0, false, false);
+    }
+
     private static void handleRenameHorse(RenameHorsePayload payload, net.minecraft.world.entity.player.Player player) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return;
@@ -458,6 +508,11 @@ public final class ModNetworking {
         Entity target = serverPlayer.level().getEntity(payload.entityId());
         if (!(target instanceof Horse horse) || !horse.closerThan(serverPlayer, 8.0)
                 || !HorseRecords.hasRealRecord(horse)) {
+            return;
+        }
+        // You may read a stranger's horse; you may not rename it. See
+        // handleSetBarnName for why this became a live question.
+        if (!com.example.horsegenetics.neoforge.server.HorseOwnership.isOwner(horse, serverPlayer.getUUID())) {
             return;
         }
         String first = payload.firstName().strip();

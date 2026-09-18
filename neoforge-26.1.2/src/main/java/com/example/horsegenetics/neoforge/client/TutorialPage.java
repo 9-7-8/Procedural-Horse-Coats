@@ -863,7 +863,14 @@ public final class TutorialPage {
                                 + "shows eleven or twelve magical genes with no two of his animals "
                                 + "carrying the same pair. He is dear, and he is the reliable way to "
                                 + "collect what the wild almost never offers. Sometimes one is out on "
-                                + "the road rather than at a barn."),
+                                + "the road rather than at a barn.",
+                        "He breeds willy-nilly, though, so what you buy is a gene bomb - a dozen "
+                                + "unrelated loci on one animal, and almost never the single thing "
+                                + "you wanted on its own. Isolating it is a breeding project: cross "
+                                + "out to a plain horse and half the bomb goes each generation, keep "
+                                + "the foals that still show what you are after, and breed those back "
+                                + "together until it runs true. Sneak and use on any horse, his "
+                                + "included, to read its genes before you pay for it."),
                 List.of(), Art.NONE,
                 List.of(ProgressTask.MEET_MAGICAL_HERD, ProgressTask.TAME_MAGICAL_HORSE,
                         ProgressTask.BUY_ARCANE_HORSE)));
