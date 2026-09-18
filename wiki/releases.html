@@ -58,6 +58,68 @@
     </p>
 </div>
 
+<h2 id="v0-5-009">0.5.009</h2>
+
+<p class="lede">
+    <strong>Nothing in this one changes a horse.</strong> It is a release of tests, and of the
+    machinery that runs them: four checks that could not fail, a yard warning that never said
+    what was wrong, the first in-game tests this mod has ever had, and a reader for an
+    unattended run. If you are playing rather than building, 0.5.008 and 0.5.009 are the same
+    game &mdash; no gene, coat, item, breed or behaviour differs between them.
+</p>
+
+<h3>Four tests that were not testing</h3>
+
+<ul>
+    <li><strong>The broadest coat test had been checking 35 of 291 loci for months.</strong>
+        Its gene mask was a <code>long</code>, and Java masks a shift distance to the low six
+        bits, so <code>1L &lt;&lt; 291</code> silently meant <code>1L &lt;&lt; 35</code>. Every
+        locus past the 36th sat pinned to one allele and nothing went red, because the test only
+        asserts that a bake returns a full sheet.</li>
+    <li><strong>Two more were red on <code>main</code> and unrecorded</strong>: one asserted an
+        all-white horse from a genotype that stopped being one three days earlier, and one
+        reported that the magic zebra's stripes had vanished when all 11,902 of them were
+        present &mdash; it was counting against a threshold the stripes no longer cross.</li>
+    <li><strong>The creator round-trip fixture was stale</strong>, missing a verb the creator
+        itself has always had. The alarming half of that entry &mdash; whether a paid epigenetic
+        splice was rerolling a foal's alleles &mdash; turns out to be fine.</li>
+</ul>
+
+<h3>The first in-game tests</h3>
+
+<ul>
+    <li><strong><code>runGameTest</code> runs the mod inside a headless Minecraft</strong> in
+        about sixteen seconds and exits non-zero on a failure. Two tests so far, one of them a
+        real answer to whether redstone opens <em>both</em> halves of a double gate.</li>
+    <li>26.1.2 has no <code>@GameTest</code> annotation at all &mdash; the whole annotation API
+        is gone &mdash; and the property this build had been setting to enable them is read by
+        nothing in this version. Both are written up in the API notes.</li>
+    <li><strong>The creator parity check is a test now</strong>, and one that cannot be skipped:
+        it re-bakes the fixture and fails if the committed one was stale, then runs the
+        comparison. It had been red for a whole release because nothing ran it but a person
+        deciding to.</li>
+</ul>
+
+<h3>The test yard tells the truth again</h3>
+
+<ul>
+    <li><strong>Its soundness warning named the plot centre rather than the obstruction</strong>,
+        which is why it was set aside as noise four sessions running. Made to name the block, it
+        answered itself on the first boot &mdash; a water cauldron that was always meant to be
+        there.</li>
+    <li><strong>A pen could kill its neighbour's animals.</strong> Harmless while no shifter
+        could leave its pen; a bat can, and did, within two seconds of dusk.</li>
+    <li><strong>Two long-standing questions finally got asked</strong> &mdash; whether a
+        dispersing filly refuses her own brother, and whether a flying lycanthrope lands rather
+        than falling out of the world. Both pass. Neither pen had been able to ask before.</li>
+</ul>
+
+<p>
+    <strong>Unproven:</strong> the in-game tests register into a vanilla registry this mod had
+    never touched. A dev server boots clean and a production one skips the registration
+    entirely, but no production instance has run this jar yet.
+</p>
+
 <h2 id="v0-5-008">0.5.008</h2>
 
 <p class="lede">

@@ -303,6 +303,15 @@
         keeps saying that. A <code>NOT sound</code> line now carries a position and a block id,
         so the next one is worth believing &mdash; which it was not for the four sessions it
         spent crying wolf.</li>
+    <li><strong>The in-game tests have never run in a production jar.</strong> They register a
+        function into <code>minecraft:test_function</code>, a vanilla registry this mod had not
+        touched before. A dev <code>runServer</code> boots clean to <code>Done (0.357s)</code>
+        with the registry at its usual 332 segments, and in production
+        <code>GameTestHooks.isGametestEnabled()</code> is false so the test <em>instances</em>
+        are never registered at all &mdash; but the <code>DeferredRegister</code> still attaches.
+        <strong>Pass:</strong> a real (non-dev) server or client loads 0.5.009 and reaches the
+        main menu with no registry complaint. Cheap, and worth doing before the jar goes to
+        anyone outside.</li>
     <li><strong>The gametest run is real but nearly empty.</strong>
         <code>./gradlew :neoforge-26.1.2:runGameTest</code> runs two tests headless in about
         sixteen seconds. Everything in this file whose evidence is a block state rather than a
