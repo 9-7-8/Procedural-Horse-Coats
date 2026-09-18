@@ -212,6 +212,39 @@
         ten-tick swing into one blow every 59 ticks (<a href="gene-aggression.html#verified-swing-rate">formerly gap 222</a>).
         <code>mixin/HorseRearFightMixin</code> returns false from <code>isImmobile</code> for a standing
         <code>Horse</code> with a live target; eating and a saddled rider still hold it still.</li>
+    <li id="gametest"><strong>There is no <code>@GameTest</code> annotation in 26.1.2.</strong> No
+        <code>@GameTestHolder</code>, no <code>@PrefixGameTestTemplate</code>, no
+        <code>net.minecraft.gametest.framework.GameTest</code> - verified absent from both the patched Minecraft
+        sources jar and the NeoForge sources jar. Every tutorial written about GameTest describes a version this is
+        not. A test here is an object in the <code>minecraft:test_instance</code> <em>datapack</em> registry whose
+        body is a <code>Consumer&lt;GameTestHelper&gt;</code> in <code>minecraft:test_function</code>, so it is
+        registered in two halves - see <code>ModGameTests</code>. Four things that cost time:
+        <ul>
+            <li><code>neoforge.enabledGameTestNamespaces</code> <strong>does not exist</strong> in this version -
+                nothing reads it. This build set it on all three runs for months. The live property is
+                <code>neoforge.enableGameTest</code>, which the <code>client</code> and <code>gameTestServer</code>
+                run types set for themselves.</li>
+            <li><code>RegisterGameTestsEvent.registerEnvironment</code> is a registry <em>put</em>, not a
+                get-or-create. Calling it once per test throws <code>Adding duplicate key</code> out of
+                <code>RegistryDataLoader</code> and ends the run with exit <code>-1</code> before a single test
+                executes. Register one environment and share it - it is also the batch key.</li>
+            <li><code>ResourceKey</code>'s accessor is <code>identifier()</code>, not <code>location()</code>, since
+                <code>ResourceLocation</code> is <code>Identifier</code> here.</li>
+            <li><code>minecraft:empty</code> is a real shipped 1&times;1&times;1 template of one air block, so a test
+                needs no <code>.nbt</code> of its own. But the area really is 1&times;1&times;1: the assertion
+                overloads that take no position measure against the structure bounds, so use the ones that take a
+                <code>BlockPos</code> and a distance. <code>setBlock</code> does no bounds check and may reach
+                outside freely.</li>
+        </ul>
+    </li>
+    <li id="rungame-directory"><strong>Every ModDevGradle run defaults to the same <code>run/</code>
+        directory.</strong> <code>RunModel</code>'s constructor sets <code>gameDirectory</code>'s convention to
+        <code>projectDirectory.dir("run")</code> for every run whatever it is named (ModDevGradle 2.0.144, read off
+        the plugin) - so <code>runClientTestWorld</code> does share <code>run/</code> with <code>runClient</code>,
+        which was an open question in <code>build.gradle</code> for days. Anything that must run beside a live client
+        needs its own <code>gameDirectory</code> or it takes the world lock: that is why <code>runGameTest</code>
+        sets <code>run-gametest/</code>. There is no <code>gameTestServer()</code> helper method either - the run
+        type is a plain string, and <code>'gameTestServer'</code> is a real key in the userdev config.</li>
 </ul>
 
 <h2 id="verified">Verified</h2>
