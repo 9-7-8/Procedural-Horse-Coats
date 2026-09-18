@@ -846,14 +846,16 @@
         Open-ended; the owner wants a visible batch of these for the 1.0 look.</li>
 </ul>
 
-<h3 id="intake-tool-gaps">Two mask parameters the 2026-09-10 evening intake asked for</h3>
+<h3 id="intake-tool-gaps">Mask parameters the intakes asked for</h3>
 
 <p>
-    Both arrived as <a href="making-a-gene.html#prompt">tool gaps</a> in the authoring
-    notes, both were read after the approximations had been seen on a horse, and both
-    describe a shortfall that is really there. Each is one new parameter on an existing
-    mask, defaulting to today's behaviour, so <strong>no shipped gene moves</strong> - but
-    each is still <a href="making-a-gene.html#contract-mask">the mask contract</a>: the
+    All four arrived as <a href="making-a-gene.html#prompt">tool gaps</a> in the authoring
+    notes &mdash; the first two from the 2026-09-10 evening intake, the last two from the
+    markings intaken on 2026-09-17 &mdash; each read after the approximation had been seen
+    on a horse, and each describing a shortfall that is really there. All but one are a new
+    parameter on an existing mask, defaulting to today's behaviour, so <strong>no shipped
+    gene moves</strong> - but each is still
+    <a href="making-a-gene.html#contract-mask">the mask contract</a>: the
     painter, <code>SpecSchema</code>, the creator's twin, both tables, a
     <code>prismatic</code> case, fixtures and parity.
 </p>
@@ -880,6 +882,31 @@
         <a href="known-gaps.html#gap-182">gap 182</a> before building it: a per-cell pivot on
         a 3D lattice will mostly sit off the skin, so this probably wants the same
         snap-to-surface option as the centre marks.</li>
+    <li><strong><code>SVG</code> / <code>PATH</code> <code>plane: "wrap"</code></strong>
+        (with <code>wrapAxis</code>, default X, and <code>from</code>, the part whose
+        cross-section is walked): <code>u</code> is the body X as <code>top</code> already
+        gives it, and <code>v</code> is <b>signed arc length</b> in body units around the
+        part's box perimeter in the YZ cross-section, measured from the top-face centreline.
+        This is the one entry that is a new <code>plane</code> value rather than a
+        parameter. What it buys: a drawing that lies over the back and continues down both
+        flanks as one unbroken picture. Every plane today is a straight projection, so a
+        face parallel to the projection axis takes one line of the drawing smeared down it
+        &mdash; <a href="gene-endless-knot.html">the endless knot</a> ships that way, with
+        vertical bars under whichever arms cross the barrel's edge and its outer unit each
+        side never drawn at all. Swapping planes cannot fix it: what is missing is a
+        measurement, distance travelled <em>around</em> the cross-section, and neither
+        <code>NORMAL</code> nor <code>EDGE</code> reports it.</li>
+    <li><strong><code>FRACTAL</code> <code>stretch</code> / <code>axis</code> /
+        <code>tilt</code></strong> (default 1, X, 0 &mdash; today's behaviour): divide the
+        sample point along the tilted axis before the octave sum, so a continuous noise
+        field gets a <b>grain</b>. What it buys: veins, currents and weather that all run
+        one way. <code>FRACTAL</code> samples isotropic noise, so no threshold, warp or
+        octave count gives it a direction &mdash;
+        <a href="gene-stormvein.html">stormvein</a>'s veins fork and wander correctly but
+        run every way at once, where the drawing they came from streams diagonally.
+        <code>SPOTS</code> has exactly this pair already and gets ovals from it; the reason
+        it cannot stand in is that it elongates countable marks and cannot draw a web whose
+        ridges also bound the pools.</li>
 </ul>
 
 <h3>12.2 Behavioural, diet and shapeshifting genes</h3>
@@ -1822,9 +1849,11 @@
 </p>
 
 <p>
-    <strong>24.6&ndash;24.9 were asked for on 2026-09-17</strong> and follow the same rule:
-    what is written down is what was found out about each, not the sentence it arrived as.
-    All four are gameplay-layer features rather than genetics, and none of them is started.
+    <strong>24.6&ndash;24.13 came in on 2026-09-17</strong> and follow the same rule: what is
+    written down is what was found out about each, not the sentence it arrived as.
+    24.6&ndash;24.9 were asked for directly; 24.10&ndash;24.13 are the design documents that
+    had been sitting in <code>intake/</code>, read and condensed on their way out of it
+    rather than left to be read again. None of them is started.
 </p>
 
 <h3 id="weather-spawning">24.1 Breeds that only spawn in certain weather</h3>
@@ -2072,6 +2101,87 @@
     because it is cheaper than it sounds: leave them alone and let
     <a href="breed-book.html#dhampir">the magical breeds</a> be this mod&rsquo;s undead horses,
     since they already are.
+</p>
+
+<h3 id="storm-fed">24.10 Storm fed &mdash; a gene that stores power and spends none</h3>
+
+<p>
+    Out of intake, 2026-09-17. A locus that <strong>builds an internal reservoir</strong>
+    while some condition holds, and does nothing whatever with it. Known as stormfed only
+    because storms were the first allele found: the shipped set would be Storm, Rain, Snow,
+    Lightning (a burst on being struck, and no lightning damage), Water and Lava. All
+    alleles homozygous recessive. The rates of accrual and decay live in the epigenetics of
+    each copy, so two horses with the same allele fill at different speeds.
+</p>
+<p>
+    <strong>The point is that it is half a gene on purpose.</strong> It is designed to be
+    <em>consumed</em>: other genes read the reservoir and spend it, which is the mod's first
+    deliberately polygenic pair. That makes the ordering awkward and worth naming now &mdash;
+    a gene that only stores is untestable by looking at a horse, and a gene that only spends
+    has nothing to spend until this exists. Build them together or build the spender first
+    against a stubbed reservoir.
+</p>
+<p>
+    <strong>What it needs that does not exist:</strong> per-horse mutable state that is not
+    a genotype and not an epigenetic constant &mdash; a number that changes every tick. The
+    epigenome is the wrong home (it is inherited and drifts, not a running total) and so is
+    the genotype. This is an attachment, and the first gene to want one.
+</p>
+
+<h3 id="block-preference">24.11 Block preference &mdash; a horse that wants to be somewhere</h3>
+
+<p>
+    Out of intake, 2026-09-17. A recessive locus pulling a horse toward a kind of block, with
+    the allele's author choosing how hard &mdash; <strong>up to taking damage when it cannot
+    get there</strong>. Ships with Water (stand in it, but never push fences or jump for it),
+    Lava, Underwater (submerge, and drown unless the horse also has water breathing &mdash;
+    intended, and for aquatic breeds only), and Tree (climb the nearest tree, which does
+    almost nothing unless the horse can fly).
+</p>
+<p>
+    <strong>It is an AI goal, not an effect</strong>, which is what makes it different from
+    everything in the <code>effects</code> vocabulary: those apply a state per tick, and this
+    has to compete for the horse's attention against grazing, herding, fleeing and being
+    ridden. That means a priority in the goal selector, so
+    <code>wiki/behaviour-hierarchy.html</code> and its bake are part of the contract.
+    Underwater is the one to think hardest about: a gene whose correct behaviour is drowning
+    the horse needs to be unmistakably opt-in at the breed sheet.
+</p>
+
+<h3 id="forced-riding">24.12 Forced riding &mdash; the kelpie</h3>
+
+<p>
+    Out of intake, 2026-09-17. A wild horse that lets you mount and then will not let you
+    off, carrying you to deep water. Researched as a <strong>temporary ride-lock state</strong>
+    rather than an attempt to cancel the dismount key: the horse stays an ordinary rideable
+    entity, and while the state is active the server re-mounts the rider the moment they
+    dismount and drives the horse toward its destination. That is the version that survives a
+    version port, because it leans on normal passenger mechanics plus server enforcement
+    instead of intercepting a client keybind.
+</p>
+<p>
+    Held on the horse as a small state machine &mdash; idle, a warning beat, then the forced
+    ride &mdash; rather than as scattered booleans. <strong>The warning beat is the design
+    question</strong>: without it this is a mount that kills you with no tell, which is a
+    different and worse thing than a monster you can recognise. Note the overlap with
+    <a href="#two-up-riding">24.6</a>: both touch who is aboard and who is steering, and they
+    should agree about it rather than each solving it.
+</p>
+
+<h3 id="momentum-sprint">24.13 Momentum sprint</h3>
+
+<p>
+    Out of intake, 2026-09-17. For a Chollima-, Arion- or Sleipnir-style ground mount: speed
+    that <strong>builds while you hold a line</strong> and drains when you brake, turn hard,
+    collide, leave the ground or stop, with a short cooldown after an impact.
+</p>
+<p>
+    <strong>Why it is not just a Speed modifier</strong>, which is the whole of the research:
+    a permanent modifier makes a horse that is simply faster, and this makes a loop the rider
+    can feel and play badly &mdash; run straight, watch the top speed climb, lose it on a
+    corner, build it again. It wants the same per-tick mutable state
+    <a href="#storm-fed">24.10</a> wants, and for the same reason, so whichever is built
+    first should put that attachment somewhere the other can use.
 </p>
 
 <h2 id="equestrian-bench">25. The Equestrian Bench</h2>

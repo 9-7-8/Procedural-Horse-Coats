@@ -3,10 +3,11 @@
   "key": "horsegenetics.endless_knot",
   "name": "Endless Knot",
   "phase": "magical",
-  "priority": 263,
+  "priority": 248,
   "rarity": "RARE",
   "blurb": "A large interlaced knot laid over the croup, spilling a little way down each side of the barrel.",
   "notes": [
+    "PRIORITY MOVED ON INTAKE, 2026-09-17: written as 263, which iuari already holds. Data-driven genes must have distinct priorities (GeneFilesTest) because equal ones fall back to alphabetical paint order, and 250-298 is solid. It sits at 248 with paisley_spill at 249, which keeps the two in the order they were written in and moves both about fifteen places earlier - so a few more markings now paint over them than the author intended.",
     "The knot is the user's traced drawing, pasted as an SVG mask on the TOP plane so it straddles the spine. The d string came from the trace's dark path, the one that is the knot itself; the trace's pale path was the background with the knot cut out of it and was dropped. evenodd is the trace's own fill rule and is what keeps the knot's enclosed squares open.",
     "transform rotate(-90) turns the drawing so its long axis runs along the spine; the viewBox is the knot's own bounding box in those rotated coordinates, so sizeU/sizeV place the knot itself rather than the trace's page margin. fit is none: 16 units along the back (x 5-21, centred on x 13, over the hindquarters) by 12 across (z -6..6), slightly wider than the 10-unit barrel.",
     "'Centred over the butt end' was read as centred over the croup rather than on the barrel's rear face at x 7.5. Centring it at x 7.5 would put half the knot off the back of the barrel. As placed, the rearmost diamond tip overhangs the rump by about 2.5 units and shows as a short run down the top of the rump face.",

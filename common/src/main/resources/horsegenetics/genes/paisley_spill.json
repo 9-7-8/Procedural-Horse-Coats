@@ -3,10 +3,11 @@
   "key": "horsegenetics.paisley_spill",
   "name": "Paisley Spill",
   "phase": "magical",
-  "priority": 264,
+  "priority": 249,
   "rarity": "RARE",
   "blurb": "A splash of paisley teardrops that breaks over the top of the rump, spills forward along the barrel and runs down the hind legs.",
   "notes": [
+    "PRIORITY MOVED ON INTAKE, 2026-09-17: written as 264, which emitola already holds. See endless_knot's first note - the pair moved together to 248/249 to keep their written order.",
     "Traced from a drawing (image_2_.svg, 630x900 viewBox) and carried as an SVG mask rather than re-typed as PATH points. Only the drawing's black path is used; the file's second path was its white background with the shapes cut out of it.",
     "The one drawing is placed TWICE, once per region, because no single affine placement reaches both the barrel and a 4-unit-wide leg column. The BODY layer maps the whole viewBox at about 39 x 48 source px per body unit, top edge at y 21.2 so the tallest teardrop just tips over the croup, left edge at x 6.5 so the cluster starts at the rump and reaches forward to about x 19.5 - the back half of the barrel. Everything below y 11 in that placement falls off BODY and is discarded by parts. The HIND_LEGS layer crops the viewBox to the drawing's narrow lower tail (150 470 260 430) and stretches it with fit=none onto x 7.5-11.5, y 0.3-11, so those drops run long and vertical down the leg, like drips. The two placements do not line up across the stifle seam; the box seam hides most of that.",
     "Horizontal stretch on the BODY placement is about 1.2x on purpose: at 1:1 the smaller drops were two texels across and read as noise. Softness is 0.15 rather than 0.25 for the same reason - the drops are small enough that the default fade ate their shapes.",

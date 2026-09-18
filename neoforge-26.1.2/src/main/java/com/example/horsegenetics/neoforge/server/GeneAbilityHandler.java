@@ -1608,6 +1608,26 @@ public final class GeneAbilityHandler {
                 }
                 yield null;
             }
+            case "blight" -> {
+                // The mirror of the three covers above, and the only word here
+                // that takes life OUT of the ground. Everything living goes back
+                // to plain dirt; anything growing on top of it withers to air.
+                if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.MYCELIUM)
+                        || state.is(Blocks.MOSS_BLOCK) || state.is(Blocks.PODZOL)) {
+                    yield Blocks.DIRT.defaultBlockState();
+                }
+                // WILD GROWTH ONLY, and this is the line that matters. The two
+                // tags are things that seed themselves - grass, ferns, flowers -
+                // so a crop, a sapling somebody planted, a potted plant and every
+                // block a player placed are all untouched. Same reasoning as
+                // 'melt' leaving packed ice alone: a gene that eats a wheat field
+                // is griefing with extra steps, and the roll that reaches here is
+                // not something its owner can aim.
+                if (state.is(BlockTags.REPLACEABLE_BY_TREES) || state.is(BlockTags.FLOWERS)) {
+                    yield Blocks.AIR.defaultBlockState();
+                }
+                yield null;
+            }
             // THE PLANTING WORDS. These build ABOVE the ground rather than
             // converting it, so they are the ones that have to look down - and
             // the caller then asks canSurvive, which is what stops a mushroom

@@ -59,6 +59,7 @@ starburst
 bargello
 wingmargin
 light
+stormvein
 lut
 qular
 fracture
@@ -85,6 +86,9 @@ iridescent_jewel
 moth_mantle
 opal_wing_veins
 carapace_sheen
+smoke_scroll
+endless_knot
+paisley_spill
 cosmic
 goth
 masked

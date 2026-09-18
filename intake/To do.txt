@@ -1,8 +1,6 @@
-GEt the release process actually working-- right now, it's still not consistently pushing a new github release
 
 The goal is to make a bunch more genes which breed designers can use flavorfully to alter the behavior and abilities of their breeds. We also neeed a gene which detects whether a horse is wearing a saddle or armor, and which kind, and then interacts with that. So maybe we have an allele where the horse slows down like crazy while saddled, or another that supresses all auras while saddled, and so on. 
 
-We need another gene that is the opposite of verdant/dryad: we need a gene which kills plants and destroys grass. 
 
 may need to overhaul the aggression genes. 
 

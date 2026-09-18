@@ -658,7 +658,8 @@ window.HG = window.HG || {};
       doc: "Grant a movement or survival flag while the condition holds.",
       params: [
         eChoice("flag", ["walk_on_water", "walk_on_lava", "lava_swim", "fire_immune",
-          "fall_immune", "underwater_breathing", "water_averse"], null, "the flag to grant"),
+          "fall_immune", "underwater_breathing", "water_averse",
+          "flight_true", "flight_glide", "cloud_walk"], null, "the flag to grant"),
         eChoice("target", ["self", "rider", "both"], "self",
           "who the flag protects. 'rider' and 'both' reach the PLAYER - the game grants those "
           + "per tick and stores nothing, so nothing is left on a player who dismounts")
@@ -762,10 +763,12 @@ window.HG = window.HG || {};
     spread: {
       doc: "Change the ground under the hooves - convert it, plant on it, or fertilise it.",
       params: [
-        eChoice("cover", ["mycelium", "moss", "grass", "melt",
+        eChoice("cover", ["mycelium", "moss", "grass", "melt", "blight",
           "sapling_oak", "sapling_birch", "sapling_spruce", "sapling_jungle",
           "sapling_acacia", "sapling_dark_oak", "mushroom", "flower", "bonemeal"], null,
-          "what it spreads. The first four CONVERT a block; the saplings, 'mushroom' and "
+          "what it spreads. The first five CONVERT a block - and 'blight' is the one that "
+          + "takes life out of the ground, grass and moss back to dirt and wild growth to "
+          + "nothing; the saplings, 'mushroom' and "
           + "'flower' PLANT one above it (and are refused where it could not survive); "
           + "'bonemeal' plants nothing and hurries what is already there, never a crop"),
         eNum("radius", 2, "reach in blocks", { min: 1, max: 8, step: 1 }),

@@ -508,11 +508,14 @@ public final class AbilityType {
     public static final AbilityType SPREAD = register(new AbilityType("spread",
             List.of(
                     Param.requiredChoice("cover", List.of("mycelium", "moss", "grass", "melt",
+                                    "blight",
                                     "sapling_oak", "sapling_birch", "sapling_spruce",
                                     "sapling_jungle", "sapling_acacia", "sapling_dark_oak",
                                     "mushroom", "flower", "bonemeal"),
-                            "what spreads from the horse. The three ground covers and 'melt' "
-                                    + "convert a block; the sapling words, 'mushroom' and 'flower' "
+                            "what spreads from the horse. The three ground covers, 'melt' and "
+                                    + "'blight' convert a block - and 'blight' is the only one that "
+                                    + "takes life out of the ground rather than putting it in; the "
+                                    + "sapling words, 'mushroom' and 'flower' "
                                     + "PLANT one above the ground; 'bonemeal' plants nothing and "
                                     + "hurries what is already there. All of them are vocabulary "
                                     + "words, not block ids - which blocks may be converted stays "

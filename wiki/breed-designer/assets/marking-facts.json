@@ -348,6 +348,10 @@
       {"id": "mane-eyes", "name": "Glowing mane and eyes", "pairs": ["Ltmn/Lteye"], "stage": "bay", "coverageMin": 4.7, "coverageMax": 4.7, "parts": ["head", "mane"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": true},
       {"id": "eyes", "name": "Glowing eyes", "pairs": ["Lteye/Lteye", "Lteye/n"], "stage": "bay", "coverageMin": 0.1, "coverageMax": 0.1, "parts": ["head"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": true}
     ]},
+    "horsegenetics.stormvein": {"natural": false, "family": "MAGIC_CORE", "sexLinked": false, "outcomes": [
+      {"id": "storm", "name": "Stormvein", "pairs": ["Svn/Svn", "Svn/Svc", "Svn/n"], "stage": "bay", "coverageMin": 66.3, "coverageMax": 79.6, "parts": ["head", "neck", "body", "front_legs", "back_legs", "mane", "tail"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "coloured", "name": "Coloured Stormvein", "pairs": ["Svc/Svc"], "stage": "bay", "coverageMin": 66.1, "coverageMax": 73.9, "parts": ["head", "neck", "body", "front_legs", "back_legs", "mane", "tail"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
+    ]},
     "horsegenetics.flying": {"natural": false, "family": "MAGIC_BEHAVIOUR", "sexLinked": false, "outcomes": [
       {"id": "glide", "name": "Gliding flight", "pairs": ["El/El", "El/Tf", "El/n"], "stage": "bay", "coverageMin": 0.0, "coverageMax": 0.0, "parts": [], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": true},
       {"id": "true_flight", "name": "True flight", "pairs": ["Tf/Tf"], "stage": "bay", "coverageMin": 0.0, "coverageMax": 0.0, "parts": [], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": true}
@@ -368,6 +372,9 @@
       {"id": "sectoral-hazel-gold", "name": "Hazel & gold", "pairs": ["hazel/gold"], "stage": "bay", "coverageMin": 0.1, "coverageMax": 0.1, "parts": ["head"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": false},
       {"id": "sectoral-hazel-chaos", "name": "Hazel & chaos", "pairs": ["hazel/chaos"], "stage": "bay", "coverageMin": 0.1, "coverageMax": 0.1, "parts": ["head"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": false},
       {"id": "sectoral-gold-chaos", "name": "Gold & chaos", "pairs": ["gold/chaos"], "stage": "bay", "coverageMin": 0.1, "coverageMax": 0.1, "parts": ["head"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": false}
+    ]},
+    "horsegenetics.blight": {"natural": false, "family": "MAGIC_CORE", "sexLinked": false, "outcomes": [
+      {"id": "blight", "name": "Blight", "pairs": ["Bli/Bli"], "stage": "bay", "coverageMin": 0.0, "coverageMax": 0.0, "parts": [], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": false, "sexes": ["male", "female"], "effects": true}
     ]},
     "horsegenetics.lut": {"natural": false, "family": "MAGIC_CORE", "sexLinked": false, "outcomes": [
       {"id": "bluepink", "name": "Blue-pink palette", "pairs": ["Blupnk/Blupnk"], "stage": "bay", "coverageMin": 69.6, "coverageMax": 70.6, "parts": ["head", "neck", "body", "front_legs", "back_legs"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": false, "onWhite": false, "onColour": true, "sexes": ["male", "female"], "effects": false},
@@ -481,6 +488,20 @@
     ]},
     "horsegenetics.carapace_sheen": {"natural": false, "family": "MAGIC_GROUND", "sexLinked": false, "outcomes": [
       {"id": "sheen", "name": "Carapace Sheen", "pairs": ["Csh/Csh", "Csh/n"], "stage": "bay", "coverageMin": 68.1, "coverageMax": 75.1, "parts": ["head", "neck", "body", "front_legs", "back_legs", "mane", "tail"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
+    ]},
+    "horsegenetics.smoke_scroll": {"natural": false, "family": "MAGIC_GROUND", "sexLinked": false, "outcomes": [
+      {"id": "white", "name": "White smoke", "pairs": ["Ssw/Ssw", "Ssw/Ssk", "Ssw/n"], "stage": "bay", "coverageMin": 41.4, "coverageMax": 44.5, "parts": ["body", "front_legs", "back_legs"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "ink", "name": "Ink smoke", "pairs": ["Ssk/Ssk", "Ssk/n"], "stage": "bay", "coverageMin": 44.1, "coverageMax": 48.5, "parts": ["body", "front_legs", "back_legs"], "colorful": false, "blackOnly": true, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
+    ]},
+    "horsegenetics.endless_knot": {"natural": false, "family": "MAGIC_GROUND", "sexLinked": false, "outcomes": [
+      {"id": "white", "name": "Endless Knot", "pairs": ["Ekn/Ekn", "Ekn/Ekk", "Ekn/Ekc", "Ekn/n"], "stage": "bay", "coverageMin": 4.2, "coverageMax": 4.7, "parts": ["body"], "colorful": false, "blackOnly": false, "whiteOnly": true, "onBlack": true, "onWhite": false, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "black", "name": "Black Endless Knot", "pairs": ["Ekk/Ekk", "Ekk/Ekc", "Ekk/n"], "stage": "bay", "coverageMin": 3.9, "coverageMax": 4.5, "parts": ["body"], "colorful": false, "blackOnly": true, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "coloured", "name": "Coloured Endless Knot", "pairs": ["Ekc/Ekc"], "stage": "bay", "coverageMin": 4.0, "coverageMax": 4.7, "parts": ["body"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
+    ]},
+    "horsegenetics.paisley_spill": {"natural": false, "family": "MAGIC_GROUND", "sexLinked": false, "outcomes": [
+      {"id": "white", "name": "Paisley Spill", "pairs": ["Pls/Pls", "Pls/Plk", "Pls/Plc", "Pls/n"], "stage": "bay", "coverageMin": 15.6, "coverageMax": 15.7, "parts": ["body", "back_legs"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": false, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "black", "name": "Black Paisley Spill", "pairs": ["Plk/Plk", "Plk/Plc", "Plk/n"], "stage": "bay", "coverageMin": 12.7, "coverageMax": 13.3, "parts": ["body", "back_legs"], "colorful": false, "blackOnly": true, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "coloured", "name": "Coloured Paisley Spill", "pairs": ["Plc/Plc"], "stage": "bay", "coverageMin": 15.2, "coverageMax": 15.3, "parts": ["body", "back_legs"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
     ]},
     "horsegenetics.cosmic": {"natural": false, "family": "MAGIC_FIELDS", "sexLinked": false, "outcomes": [
       {"id": "cosmic", "name": "Cosmic", "pairs": ["Cs/Cs", "Cs/n"], "stage": "bay", "coverageMin": 64.6, "coverageMax": 68.2, "parts": ["neck", "body", "front_legs", "back_legs", "mane", "tail"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
