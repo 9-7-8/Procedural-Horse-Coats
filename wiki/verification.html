@@ -78,6 +78,236 @@
     </p>
 </div>
 
+<h2 id="compat-0918">&sect;0-FK &mdash; Gates and armour for other mods' materials (2026-09-18, never met a real mod)</h2>
+
+<p>
+    The mod now reads every other mod's jar at startup and generates a
+    <a href="item-double-gates.html#modded-woods">double gate</a> per wood they added and a
+    horse armour per ingot or gem, into a pack at <code>.minecraft/phc/generated/</code>. All
+    of it works &mdash; against a <strong>synthetic</strong> test mod, on a
+    <strong>dedicated server</strong>, where nothing draws.
+    <a href="known-gaps.html#gap-271">Gap 271</a> to
+    <a href="known-gaps.html#gap-275">275</a> are what that leaves open. The mechanism is on
+    <a href="compatibility.html#generated">the compatibility page</a>.
+</p>
+
+<div class="note">
+    <span class="label">This section needs something the test kit cannot make: another mod</span>
+    <p>
+        <strong>Pick a mod that builds for 26.1.2 and adds a wood, an ingot or a gem</strong>
+        &mdash; the kind of thing this is for is a biome or a tech mod, not a horse mod, and
+        the compatibility page's own recommendations are a fine place to start.
+        <a href="compatibility.html#customfence">Custom Fences and Walls</a> is the obvious
+        first try for the gate half <em>if</em> it turns out to ship its own woods rather than
+        restyling vanilla's; anything at all with an ingot in it does the armour half. Drop the
+        jar in <code>neoforge-26.1.2/run/mods/</code>. <strong>Two</strong> wood-adding mods, if
+        two can be found, is what answers the duplicate-name question below.
+    </p>
+    <p>
+        The whole run can be read out of <code>run/logs/latest.log</code> by grepping
+        <code>compat:</code> &mdash; every line this layer writes carries that prefix, and the
+        counts, the fingerprint, the file count and every skipped recipe are all on one of
+        them.
+    </p>
+</div>
+
+<h3>Do these first &mdash; they cost nothing and can be wrong invisibly</h3>
+
+<ul>
+    <li><strong>With no extra mods at all, nothing changed.</strong> Launch the dev run as it
+        stands. <strong>Pass:</strong> one line reading <code>compat: 0 modded woods, 0 modded
+        metals...</code> and <code>compat: nothing to generate</code>, and
+        <strong>no <code>run/phc/generated/</code> folder on disk</strong> &mdash; an empty
+        folder nobody can explain is the thing that was specifically avoided.
+        <strong>Fail:</strong> a folder, or any file in it. This is the one check that says the
+        common case &mdash; almost every player &mdash; is untouched, so do it before anything
+        else.</li>
+    <li><strong>The scan finds what the mod actually ships.</strong> Add the mod, launch, read
+        the <code>compat:</code> count line. <strong>Pass:</strong> the wood and metal counts
+        match what that mod's own item list says it adds. <strong>Fail, and it is the silent
+        one:</strong> zero woods from a mod that plainly has ten. That means the file layout
+        assumption missed &mdash; a blockstate somewhere unexpected, or a plank texture not at
+        <code>textures/block/&lt;name&gt;_planks.png</code> and no readable texture id in the
+        gate model either, which drops the wood entirely rather than logging.
+        <a href="known-gaps.html#gap-271">Gap 271</a>.</li>
+    <li><strong>The pack is written, and is readable.</strong> Open
+        <code>run/phc/generated/</code>. <strong>Pass:</strong> a <code>README.txt</code>, a
+        <code>.fingerprint</code>, and under <code>assets/</code> and <code>data/</code> the
+        models, blockstate, item definition, loot table, recipe, tags and lang for each wood.
+        Open one model and check the <code>textures.texture</code> value is that mod's real
+        plank texture id. <strong>This is the point of the folder</strong> &mdash; being able
+        to read the file that failed is the whole reason it is on disk and not in memory.</li>
+    <li><strong>The fingerprint short-circuits.</strong> Relaunch without changing the mod list.
+        <strong>Pass:</strong> <code>compat: generated pack is current (&lt;hash&gt;)</code> and
+        no file in the folder has a new timestamp. <strong>Then remove the mod and relaunch:</strong>
+        the folder is wiped, and with nothing else installed it does not come back.
+        <em>All three of these states were confirmed on a server against the synthetic mod;
+        the point of redoing them is that the fingerprint is taken over the real mod's real
+        colours.</em></li>
+    <li><strong>A generated recipe actually parses</strong> &mdash;
+        <a href="known-gaps.html#gap-272">gap 272</a>, and the single most likely thing to be
+        broken, because <em>it has never once happened</em>. Every run so far skipped every
+        recipe. <strong>Pass:</strong> no recipe error in the log at world load, and two of that
+        mod's fence gates plus a braided rope gives you the double gate in a crafting grid;
+        six of their ingot plus a hair cloth gives you the armour.
+        <strong>Fail:</strong> a wall of red naming <em>their</em> mod id at datapack load. If
+        instead the log says <code>declares ... but never registers it</code>, that is the skip
+        working as designed and the recipe is still untested &mdash; try a different mod.</li>
+    <li><strong>The metalsmith still sells the shipped three.</strong> Level one to Journeyman
+        or Expert with the debug clock. <strong>Pass:</strong> the generated armours are
+        <em>beside</em> iron, gold and diamond, not instead of them.
+        <strong>Fail:</strong> a tier that offers only modded armours means the generated
+        <code>trade_set</code> file replaced the shipped one without carrying it &mdash; which
+        is exactly what a datapack registry file does by default, and what the classpath read
+        exists to prevent. <a href="villagers.html#metalsmith-modded">The metalsmith</a>.</li>
+    <li><strong>A generated armour is worth roughly what their metal is worth.</strong> Read the
+        armour value in the tooltip and compare it to where that mod puts the metal.
+        <strong>Pass:</strong> a starter metal is around iron and an endgame one is up near
+        diamond or netherite, and nothing exceeds netherite. <strong>Fail is a judgement, not
+        an error:</strong> say which metal and what it gave, because
+        <a href="known-gaps.html#gap-275">gap 275</a> is explicit that the ladder is a guess
+        from two weak signals and the only way it improves is somebody reporting a case.</li>
+    <li><strong>The bench takes their ingot.</strong> Put a modded ingot or gem in the fittings
+        slot. <strong>Pass:</strong> it is accepted, the saddle's hardware comes out in that
+        metal's colour, and the tooltip names the <em>material</em> (&ldquo;tin&rdquo;) rather
+        than the item. <strong>Also worth a look:</strong> whether two of that pack's metals
+        come out looking the same on a horse &mdash; the
+        <a href="item-equestrian-bench.html#modded-fittings">fifteen were pulled apart by hand
+        and a generated one is just the average of its own picture</a>.</li>
+</ul>
+
+<h3>And then the looking, which has never been done at all</h3>
+
+<ul>
+    <li><strong>A modded gate draws.</strong> Place one. <strong>Pass:</strong> it looks like
+        the vanilla twelve do, in that mod's wood, both halves, open and shut and in a wall.
+        <strong>Fail:</strong> a purple-and-black chequerboard &mdash;
+        <a href="item-double-gates.html#generated-drift">the signature silent failure of this
+        layer</a>, which logs nothing whatever, and which means
+        <code>bake-double-gates.mjs</code> and <code>compat/GeneratedGates</code> have drifted
+        apart. If it happens, say <em>which</em> is purple: the block, the held item, or the
+        inventory icon, because those are three different files.</li>
+    <li><strong>Its inventory icon draws, and its name is right.</strong>
+        <strong>Pass:</strong> the left half's model in the slot, and &ldquo;&lt;Wood&gt; Double
+        Fence Gate&rdquo; with the wood capitalised properly (a <code>blue_oak</code> reads
+        &ldquo;Blue Oak&rdquo;). <strong>Fail:</strong> a raw translation key
+        <code>block.horsegenetics....</code> means the merged lang file did not land.</li>
+    <li><strong>A generated horse armour draws, worn and in the slot</strong> &mdash; and in
+        <em>its metal's colour both times</em>. This is the check that matters, because the
+        colour reaches the two places by two entirely different mechanisms (the equipment
+        asset's dyeable layer for the worn armour, <code>MetalTintSource</code> for the icon).
+        <strong>Fail:</strong> one of the two plain grey or plain white means only one of the
+        two routes is working, and which one tells you immediately which file to open. Nobody
+        has ever seen the plate art at all &mdash; it was measured, not looked at &mdash; so
+        also just say whether it reads as horse armour.</li>
+    <li><strong>Two wood mods, and the names collide.</strong> Only if two can be found. Both
+        &ldquo;Maple Double Fence Gate&rdquo;, distinct items.
+        <a href="known-gaps.html#gap-274">Gap 274</a> is a decision waiting on somebody seeing
+        how bad it actually looks in a creative search.</li>
+</ul>
+
+<h2 id="equestrians-0918">&sect;0-FJ &mdash; The horseman is four people now (2026-09-18, NOT played)</h2>
+
+<p>
+    One villager profession was deleted outright and four took its place, each with a block,
+    a POI, a hat and five tiers of its own; the homestead was rebuilt around them. <strong>None
+    of it has been seen in a world.</strong> It compiles and registers, which says nothing at
+    all about the two halves that only a running village can answer &mdash; whether the piece
+    still <em>generates</em>, and whether four POIs hand out four different jobs. The whole of
+    this section is on <a href="villagers.html#equestrians">the villagers page</a>.
+</p>
+
+<h3>Do these first &mdash; nothing below them can be reached until they pass</h3>
+
+<ul>
+    <li><strong>The homestead generates at all</strong>
+        (<a href="known-gaps.html#gap-270">gap 270</a>). The piece was deepened three rows on
+        its long axis to fit the frontage, and it is placed at a terminator slot sized for a
+        two-by-three stub, so the bounding-box check is the thing most likely to have quietly
+        stopped passing. Walk three or four plains villages.
+        <strong>Pass:</strong> a barn and a house side by side at the end of a street, at
+        about the rate they appeared before. <strong>Fail, and it is a silent one:</strong> no
+        homestead anywhere, which looks exactly like an unlucky seed &mdash; so count
+        villages rather than trusting an impression, and say how many you walked. If it has
+        got rare, the lever is the weight in <code>BarnPoolInjector</code>.</li>
+    <li><strong>The west wall has one door, not four.</strong> The deepening duplicates the
+        door&rsquo;s own cross-section &mdash; it is the only row a hip roof tiles &mdash; so
+        the bake lifts the door out and puts it back. <strong>Pass:</strong> a single front
+        door. <strong>Fail:</strong> a row of oak doors down the wall, or a doorway with a
+        wall in it.</li>
+    <li><strong>Four villagers take four different jobs.</strong> Five profession-less
+        villagers stand on the walk, one per post. Wait for them to claim.
+        <strong>Pass:</strong> a cowboy, a leatherworker, a scientist, a supplier and a
+        metalsmith, each announced by name in chat or the log, and each standing at its own
+        post. <strong>Fail:</strong> any post that never hands out its job names <em>which</em>
+        POI did not register or whose entry in <code>acquirable_job_site</code> did not merge
+        &mdash; that is the whole reason they are left as nitwits rather than pre-assigned.
+        Two villagers with the same profession is the other failure: it would mean two posts
+        are backing one POI.</li>
+</ul>
+
+<h3>Then the things that can be wrong without looking wrong</h3>
+
+<ul>
+    <li><strong>All five share one surname.</strong> <strong>Pass:</strong> the cowboy and all
+        four equestrians carry the same family name, and the first names suit the
+        cowboy&rsquo;s <a href="breeds.html#regions">region</a>. This has been seen with two
+        hires (<a href="villagers.html#verified-family-name">the record</a>) and never with
+        five, and the order they claim in is not controllable &mdash; so it is a real test of
+        whether any of them can coin a second family by being hired in an awkward order.</li>
+    <li><strong>Five beds, and someone in them.</strong> The bed count is the post count, so a
+        villager with no bed never sleeps and never restocks.
+        <strong>Pass:</strong> five beds inside, heads to the wall opposite the door, and at
+        night the four equestrians are in four of them. <strong>Fail:</strong> a villager
+        standing outside at night is a claimed job site with no home, which shows up later as
+        a shop that never restocks.</li>
+    <li><strong>Each profession&rsquo;s five tiers.</strong> Right-click one with the debug
+        clock (<code>DebugEquestrianLevelUp</code>): they go up a tier and the trade screen
+        does not open on that click. Five clicks reach Master. Do all four.
+        <strong>Pass:</strong> every tier of every profession offers a full window of trades,
+        and what it offers matches
+        <a href="villagers.html#trade-table">the trade table</a> &mdash; the leatherworker
+        never sells a carrot, the metalsmith never sells anything but armour, and only the
+        supplier buys hair. <strong>Fail:</strong> a Master still offering Novice trades means
+        the access-transformed <code>increaseMerchantCareer</code> call is not doing the
+        second half of its job; an empty or short window means a
+        <code>trade_set</code> named a trade file that does not parse.</li>
+    <li><strong>The homozygous carrot actually breeds true.</strong> Buy a Master scientist&rsquo;s
+        rare or epic carrot, read which gene it names, and feed it to a parent.
+        <strong>Pass:</strong> the foal carries that gene <em>every time</em>, over several
+        breedings &mdash; the point of the carrot is that it is not a coin flip.
+        <strong>Fail:</strong> roughly half the foals, which would mean the
+        <code>homozygous</code> flag is being parsed but not used. Also watch what is
+        <em>offered</em>: a gene whose homozygote cannot occur is meant to be skipped at the
+        draw, so no such carrot should ever appear for sale.</li>
+</ul>
+
+<h3>And last, the looking</h3>
+
+<ul>
+    <li><strong>Four hats, four colours, none of them purple.</strong> Stand the four together.
+        <strong>Pass:</strong> russet, teal, olive and steel blue-grey, each plainly a
+        different hat, with the same brown belt on all four jackets so they read as one
+        outfit. <strong>Fail:</strong> a hat with a brown underside &mdash; the brim is a
+        separate rectangle a long way from the crown on the sheet, and recolouring only the
+        crown is the failure the bake guards against. Then stand the
+        <a href="villagers.html#arcane">arcane dealer</a> beside them and confirm he is still
+        the only purple hat in the game.</li>
+    <li><strong>The cowboy&rsquo;s own hat.</strong> He now reads a generated copy rather than
+        the retired horseman&rsquo;s file. <strong>Pass:</strong> he wears the unrecoloured
+        brown hat and nothing about him changed. <strong>Fail:</strong> a missing texture, or
+        one of the four colours on him.</li>
+    <li><strong>The dye palettes are five different things.</strong> Buy tack from the
+        leatherworker at every tier. <strong>Pass:</strong> the colours get plainly more
+        expensive-looking as he rises, the fittings change material with them, and the seat
+        and bridle differ from each other on a single piece. <strong>Fail:</strong> any tier
+        indistinguishable from the one below, which is what got the dyed saddle withdrawn the
+        first time.</li>
+    <li><strong>The frontage reads as a shop front.</strong> Hitch, doorstep, four posts,
+        bench, in that order along the walk, all of them flush with the path and none hanging
+        over it.</li>
+</ul>
+
 <h2 id="arcane-dealer-0918">&sect;0-FI &mdash; The cowboy who deals in magic (2026-09-18, soft-verified in the yard; not met in a world)</h2>
 
 <p>
@@ -150,8 +380,8 @@
     <strong>Mixed</strong> in the info panel rather than a breed &mdash; plausible from the
     code and not actually looked at. And a village that already has a horse family should
     <em>not</em> lend him its surname: his name came out right in the yard, but the yard
-    has no horseman in it, so the <code>isArcane</code> skip in
-    <code>HorsemanHandler.familySurname</code> has never been exercised against a real one.
+    has no equestrian in it, so the <code>isArcane</code> skip in
+    <code>EquestrianHandler.familySurname</code> has never been exercised against a real one.
 </p>
 
 <h2 id="blight-markings-0917">&sect;0-FH &mdash; Blight, and four markings out of intake (2026-09-17, NOT played)</h2>
@@ -279,10 +509,10 @@
         plainly different coats.</li>
 </ul>
 
-<h2 id="horseman-region-0917">&sect;0-FD &mdash; The horseman stocks his own part of the world (2026-09-17, NOT played)</h2>
+<h2 id="scientist-region-0917">&sect;0-FD &mdash; The scientist stocks his own part of the world (2026-09-17, NOT played)</h2>
 
 <p>
-    Breed spawn eggs on the <a href="villagers.html#trade-table">horseman&rsquo;s</a> counter
+    Breed spawn eggs on the <a href="villagers.html#breed-eggs">scientist&rsquo;s</a> counter
     are now drawn only from the region of the nearest cowboy in town, instead of from every
     breed in the game. <strong>None of this has been seen in a game.</strong> It rests on
     vanilla putting the villager into a trade&rsquo;s loot context, which was read off the
@@ -294,18 +524,18 @@
 
 <ul>
     <li><strong>The eggs match the cowboy outside.</strong> Find a village with both a cowboy
-        and a horseman, and look at the cowboy&rsquo;s own breed to see which region he is.
+        and a scientist, and look at the cowboy&rsquo;s own breed to see which region he is.
         Trade to journeyman and read the breed egg&rsquo;s tooltip.
         <strong>Pass:</strong> the breed named is from that region&rsquo;s countries &mdash; a
         Britain-and-Ireland cowboy gets Dales, Fell, Highland, Irish Draught and so on, never
         a Marwari. Check across a restock or two, since it is one breed per offer.</li>
-    <li><strong>A horseman with no cowboy in town sells anything.</strong> Find or build a
-        village with a horseman and no cowboy within 128 blocks.
+    <li><strong>A scientist with no cowboy in town sells anything.</strong> Find or build a
+        village with a scientist and no cowboy within 128 blocks.
         <strong>Pass:</strong> breeds from anywhere turn up over several restocks. No cowboy
         is no connection, so there is deliberately no filter.</li>
     <li><strong>A missing band is a missing trade, not a blank egg.</strong> Three of the ten
-        regions have no breed in the commonest band, so a horseman there should have
-        <em>no</em> 22-emerald breed egg at journeyman at all.
+        regions have no breed in the commonest band, so a scientist there should have
+        <em>no</em> common breed egg at journeyman at all.
         <strong>Pass:</strong> the trade is simply absent from the list. <strong>Fail:</strong>
         an egg with no breed on it, named just &ldquo;Breed Spawn Egg&rdquo; and tooltipped
         &ldquo;Blank&rdquo; &mdash; that would mean the empty window is reaching the counter
@@ -1375,7 +1605,8 @@
 <p>
     <strong>There is a crafting route now, and it is the whole point:</strong> the
     <a href="item-equestrian-bench.html">Equestrian Bench</a>. Craft one, or find the one
-    standing at a cowboy&rsquo;s homestead past the horseman&rsquo;s table &mdash; the
+    standing at a cowboy&rsquo;s homestead past the <a href="item-equestrian-posts.html">four
+    posts</a> &mdash; the
     generated one has never been seen, so confirm it is actually there and not buried in a
     wall or floating. Then dye a saddle&rsquo;s seat, bridle and fittings in turn and check
     all three survive on the horse independently.
@@ -1402,11 +1633,13 @@
 </p>
 
 <p>
-    <strong>And the horseman&rsquo;s withdrawn dyed-saddle trade is now unblocked.</strong>
+    <strong>The withdrawn dyed-saddle trade is back, and wants looking at here.</strong>
     It was pulled because vanilla did not tint saddles, so it sold a fourteen-emerald item
-    identical to the eight-emerald one. That is no longer true. Reinstating it is a decision
-    rather than a check, so it is not listed as something to look at &mdash; but the reason
-    it was withdrawn has expired.
+    identical to the eight-emerald one. The
+    <a href="villagers.html#tack-tint">leatherworker</a> sells dyed saddles again, on the
+    mod&rsquo;s own three-zone component &mdash; so the thing to confirm is the half the old
+    trade failed at: that a bought saddle is <em>visibly</em> not a plain one, on the horse
+    and in the window.
 </p>
 
 <h2 id="regional-cowboys-0915">&sect;0-EL &mdash; Cowboys with a country, and four tack trades (2026-09-15, NOT played)</h2>
@@ -1429,27 +1662,21 @@
 </p>
 
 <p>
-    <strong>The horseman should share the cowboy's region, not just his surname.</strong>
-    Put a Horseman's Table near an existing barn and check his first name suits the
-    cowboy&rsquo;s region as well as matching his family. Then the harder path: a table in a
-    village with <em>no</em> cowboy at all, where he is the founder and his region is rolled.
-    Both go through <code>HorsemanHandler.regionIdNear</code>.
+    <strong>An equestrian should share the cowboy's region, not just his surname.</strong>
+    Put any of the four posts near an existing barn and check the first name suits the
+    cowboy&rsquo;s region as well as matching his family. Then the harder path: a post in a
+    village with <em>no</em> cowboy at all, where the taker is the founder and the region is
+    rolled. Both go through <code>EquestrianHandler.regionIdNear</code>.
 </p>
 
 <p>
-    <strong>Three new trades</strong> &mdash; leather horse armour at tier 1, a
-    <strong>dyed</strong> leather horse armour at 2, golden horse armour at 4. Each tier
-    still draws three of its pool, so they will not all show at once; level a horseman and
-    watch the pools rather than expecting a fixed shop. <strong>The dyed armour is the one
-    worth looking at</strong>: sixteen possible colours, rolled once per restock, so it
-    should hold its colour in the window rather than shimmering under the cursor.
-</p>
-
-<p class="muted">
-    A fourth trade, a dyed saddle, was written and withdrawn the same day &mdash; vanilla
-    does not tint saddles, so it sold an invisible upgrade. That is settled from the
-    equipment-asset source rather than pending a look;
-    <a href="villagers.html#random-trades">the reasoning is on the villagers page</a>.
+    <strong>The tack trades have since moved to the leatherworker and grown a
+    ladder</strong> &mdash; every tier above Novice sells dyed tack now, from a palette that
+    climbs with his rank. Each tier still draws three of its pool, so they will not all show
+    at once; level him and watch the pools rather than expecting a fixed shop. <strong>The
+    dyed pieces are the ones worth looking at</strong>: the colour is rolled once per
+    restock, so it should hold in the window rather than shimmering under the cursor. Tested
+    properly in <a href="#equestrians-0918">&sect;0-FJ</a>.
 </p>
 
 <p>
@@ -2378,7 +2605,7 @@
     <li><strong>Stables sit on the ground in a new world</strong> (<a href="known-gaps.html#gap-147">gap 147</a>). Needs a fresh world. If one is still buried, try dropping <code>meadow</code> and <code>savanna_plateau</code> from the biome tag.</li>
     <li><strong>A stable gets its horses</strong> (<a href="known-gaps.html#gap-136">gap 136</a>; the rotation fix is <a href="stables.html#verified-rotated-starts">recorded</a>, not seen). Find a generated stable, reload its chunk if empty, walk back. The log's <code>[Stables] queued</code> and <code>[Stables] filled … with N horse(s)</code> lines say which half broke.</li>
     <li><strong>Where a stable's horses stand</strong> (<a href="known-gaps.html#gap-82">gap 82</a>): not in a corridor, a tack room or a wall.</li>
-    <li><strong>A normal install is quiet in chat.</strong> In a jar install (not a dev run) no <code>[Cowboy]</code> or <code>[Horseman]</code> lines reach chat, the log says <code>[Debug] chat+log diagnostics enabled=false</code>, and <code>debug.announce = true</code> brings them back. (The dev half is seen in every yard log.)</li>
+    <li><strong>A normal install is quiet in chat.</strong> In a jar install (not a dev run) no <code>[Cowboy]</code> or <code>[Equestrian]</code> lines reach chat, the log says <code>[Debug] chat+log diagnostics enabled=false</code>, and <code>debug.announce = true</code> brings them back. (The dev half is seen in every yard log.)</li>
     <li><strong>Typing in the H browser's gene search</strong> never closes the window (the <kbd>e</kbd> key), and backspace, the arrows and ctrl+A/C/V still work in the box. (The spawn egg's box is <a href="item-spawn-eggs.html#verified-gene-search">verified</a>; this is the browser's.)</li>
     <li><strong>Breeding carrots on a same-sex pair</strong> court, spend the carrots, make no foal, and say so in one line to the player who fed them (<code>HorseBreedingHandler.sameSexAttempt</code>).</li>
     <li><strong>Hay portals tear down and relight.</strong> Break one hay bale out of a lit portal: the whole interior vanishes. Then light a fresh overworld portal and the horse dimension's return portal, since a portal block now deletes itself when not enclosed and is briefly unenclosed while filling in.</li>
@@ -2387,7 +2614,7 @@
     <li><strong>The <code>scale</code> effect verb obeys <code>body.size</code>.</strong> With a drop-in gene carrying an <a href="making-a-gene.html#attribute"><code>attribute</code></a> effect on <code>scale</code>: inert with <code>body.size = false</code>, and a modifier already on the horse comes <em>off</em> on the next reconcile. The toggle itself is the tester guide's <a href="for-testers.html">body size test</a>.</li>
     <li><strong>A night watcher's footsteps are silent.</strong> Stand near a <a href="gene-magic-night-watch.html">night watch</a> horse at night while it moves. <strong>Pass:</strong> no hoof sounds. <code>NightBehaviourHandler</code> handles both <code>PlayLevelSoundEvent</code> shapes because which one a horse step fires was never determined.</li>
     <li><strong>F3+T recolours every horse.</strong> Edit <code>redblackgradient.png</code> (or switch a resource pack) with horses on screen and press F3+T. <strong>Pass:</strong> every horse recolours, nothing stutters or crashes, and leaving the world logs how many coat textures and glow masks were released and recycled (<a href="pipeline.html#verified-texture-cache">pipeline</a>).</li>
-    <li><strong>Breed spawn eggs, by hand.</strong> A filled egg per <code>spawn_egg</code> breed in both the mod's creative tab and vanilla's Spawn Eggs tab, a blank one in neither; used on the ground it makes a foundation horse of that breed and is consumed outside creative, and its tooltip names breed, natural/magical and commonness. Also say whether a breed egg (~7% of a dungeon chest; horseman at Journeyman, Expert, Master) feels like a find or clutter.</li>
+    <li><strong>Breed spawn eggs, by hand.</strong> A filled egg per <code>spawn_egg</code> breed in both the mod's creative tab and vanilla's Spawn Eggs tab, a blank one in neither; used on the ground it makes a foundation horse of that breed and is consumed outside creative, and its tooltip names breed, natural/magical and commonness. Also say whether a breed egg (~7% of a dungeon chest; the scientist at Journeyman, Expert, Master) feels like a find or clutter.</li>
     <li><strong>A spliced line reads "Spliced (Breed)".</strong> Feed a gene splice carrot, breed, and read the foal's info panel; breed that foal back to a purebred of the same breed; offer it to the cowboy. <strong>Pass:</strong> the label appears when the allele lands, the backcross stays Spliced, and the cowboy prices it as its base breed without counting it in his purebred string (<a href="known-gaps.html#gap-85">gap 85</a>).</li>
     <li><strong>Each stable's horses carry what it promises.</strong> Open <kbd>i</kbd> on every horse in each of the three (<a href="stables.html">stables</a>). <strong>Pass:</strong> Horse Stable has seven (four outside, three in stalls), each with two rare-or-better natural genes and nothing magical; Stables is all Friesian, each with at least one homozygous magical trait (most exactly one); TM U Stable is all white-marking breeds with no painting magical gene.</li>
     <li><strong>Arriving from the far side of TM U Stable</strong> (86 blocks across). <strong>Pass:</strong> the horses are there when you walk in, not appearing around you as its start chunk loads (<a href="known-gaps.html#gap-81">gap 81</a>).</li>
@@ -2416,14 +2643,14 @@
     <li><strong>Drift shows in the numbers, not the horse.</strong> Compare one epigenetic value on a parent and its foal: they differ around the fourth decimal (<a href="known-gaps.html#gap-64">gap 64</a>).</li>
     <li><strong>A floored horse outruns a zombie.</strong> Ride a horse whose panel reads <code>0.113</code> on flat ground with a zombie behind: it pulls away. If not, raise the floor in <code>HorseSpeedFloor.floor()</code>. Ordinary horses should still feel different from each other.</li>
     <li><strong>The test world's village link.</strong> On login the grey <code>[Test world]</code> line names a plains village, and its aqua <code>/tp</code> fills the chat box rather than running, aimed at y=100. A yellow <code>[Cowboy]</code> line, or none, says whether that village has a cowboy.</li>
-    <li><strong>The baked homestead generates</strong> (<a href="villagers.html#verified-barn">the barn itself is verified</a>). In three or four plains villages, a barn and a house stand side by side at the end of a street and at one height. They have a <code>dirt_path</code> walk flush with the road (no curb and no plain dirt), both posts either side of the house step, and beds with their heads to the back wall. Several villages in a row with no barn means raising the weight in <code>template_pool/cowboy_barn.json</code>. Two barns in one village have only one cowboy.</li>
-    <li><strong>Inside the house.</strong> No jigsaw block anywhere, a four-wide interior, and barked corner posts. The two chests draw <code>chests/cowboy_house</code>: feed every time, a lead or saddle fairly often, and never empty. The horseman sleeps in one of the beds, or elsewhere.</li>
+    <li><strong>The baked homestead generates</strong> (<a href="villagers.html#verified-barn">the barn itself is verified</a>). In three or four plains villages, a barn and a house stand side by side at the end of a street and at one height. They have a <code>dirt_path</code> walk flush with the road (no curb and no plain dirt), the hitch, the doorstep, the four posts and the bench in a row down the frontage, and beds with their heads to the wall opposite the door. Several villages in a row with no barn means raising the weight in <code>template_pool/cowboy_barn.json</code>. Two barns in one village have only one cowboy.</li>
+    <li><strong>Inside the house.</strong> No jigsaw block anywhere, <strong>exactly one front door</strong> (the deepening duplicates the door's own row, so a wall of them is the failure), a four-wide interior with five beds down it, and barked corner posts. The two chests draw <code>chests/cowboy_house</code>: feed every time, a lead or saddle fairly often, and never empty. The equestrians sleep in the beds, or elsewhere.</li>
     <li><strong>The cowboy works a door</strong> (<a href="known-gaps.html#gap-63">gap 63</a>). Shut all four barn doors on him in the morning. He opens both leaves of a door and his horses follow him through, which is checked on a horse under about 1.43 scale. After dark he leaves shut doors shut. He never closes one.</li>
     <li><strong>The cowboy's outfit.</strong> He founds in a field 12 to 24 blocks beyond the barn from the bell, not on a roof or clipped into a wall. His four to ten horses are named, have a real breed (never <em>Feral Mixed</em>), read <em>Bred by</em> him, and about half are his preferred breed. He restocks one horse per look, and you never see a horse vanish within 48 blocks.</li>
     <li><strong>The cowboy as a villager.</strong> His horses follow him loosely by day and tightly at night, and the browser shows one herd led by him. His whole string is for sale. He strolls, looks at you and panics when hurt. A zombie walks past him even after you hit him, but a wolf can still take one of his horses.</li>
-    <li><strong>A hitch and a table, placed by hand.</strong> A second hitch 40 blocks from a cowboy takes on a villager, and one 10 blocks away does not. A table on bare ground near an unemployed villager is claimed within a minute. A hitch-first and a table-first outfit both share one surname, and a second outfit across town is a different family.</li>
+    <li><strong>A hitch and a post, placed by hand.</strong> A second hitch 40 blocks from a cowboy takes on a villager, and one 10 blocks away does not. A post on bare ground near an unemployed villager is claimed within a minute. A hitch-first and a post-first outfit both share one surname, and a second outfit across town is a different family.</li>
     <li><strong>A cowboy's horse, papers and taming.</strong> A crafted blank says <em>Bound to &lt;you&gt;</em>, and a <code>/give</code> blank refuses to sign. Climbing on a cowboy's horse refuses with his name and no rubber-banding. After you buy a paper he no longer offers that horse, even if it is never redeemed. The paper round trip itself is <a href="villagers.html#verified-barn">verified</a>.</li>
-    <li><strong>The horseman's tiers.</strong> Right-click him with the debug clock: he goes up a tier, gains the new trades, and the trade screen does not open. Five clicks reach Master. Tier 1 sells a saddle and a lead, and a tier-4 gene carrot names a real gene and works when fed.</li>
+    <li><strong>An equestrian's tiers.</strong> Right-click one with the debug clock (<code>DebugEquestrianLevelUp</code>): they go up a tier, gain the new trades, and the trade screen does not open. Five clicks reach Master. Done properly for all four in <a href="#equestrians-0918">&sect;0-FJ</a>.</li>
     <li><strong>A white Dhampir cannot be fed.</strong> Any food is turned away with &ldquo;Nothing you can hold out will feed it.&rdquo; Hurt one after dark with no animal near and you in survival: it bites you. With a tamed wolf and you in creative, it bites the wolf only once nothing else is in reach. The cow-first order is <a href="gene-diet.html#verified-blood-hunt">verified</a>.</li>
     <li><strong>Dhampir in the overworld.</strong> A band spawns only at night on open grassland: seal brown with red eyes, about one in ten white. A wild-spawned white one runs for shade at sunrise without a chunk reload, and a seal brown does not burn and eats hay.</li>
     <li><strong>A narrow diet, by hand.</strong> A plain horse fed wheat, an apple and a golden carrot heals, loves and bonds as before. A special-diet horse refuses an apple with smoke and a line naming its food, and eats the right thing. A lava bucket leaves an empty bucket and a potion a bottle, with nothing consumed in creative. One bar fully heals a hurt metal-eater, where hunger allows (<a href="horse-care.html#hunger">hunger</a>). It still saddles, rides and breeds.</li>
@@ -2481,7 +2708,7 @@
     <li><strong>The particle locus draws only on agreement</strong> (unit test). Every wild particle founder expresses, with no <code>Rflm/n</code> carriers, and a cross-family pair like <code>Dst/Soul</code> trails nothing while listing both alleles. See <a href="gene-particle.html#wild">the founder table</a>.</li>
     <li><strong>Disorders off really is off</strong> (unit test or yard). With health genetics switched off in the server config, no founder carries HYPP or PSSM1, the two dominants that affect founders.</li>
     <li><strong>The floor is on the attribute only</strong> (unit test plus a yard log line). A very slow genotype resolves under <code>0.1125</code> in <code>common/</code>, and the family tree and designer show that true number. The live attribute and the info panel never read below <code>0.113</code>.</li>
-    <li><strong>Every horseman tier has three trades</strong> (log or data test). No <code>trade_set</code> or <code>villager_trade</code> file fails to parse, and no random gene trade ever offers a legendary or mythic gene.</li>
+    <li><strong>Every equestrian tier fills its slots</strong> (log or data test). No <code>trade_set</code> or <code>villager_trade</code> file fails to parse across all four professions, and no random gene trade ever offers a legendary or mythic gene.</li>
     <li><strong>Two different KIT boosters count as two</strong> (<code>*CoatBakeGoldenTest</code> or a unit test). <code>kit=W32/W34</code> resolves the same as <code>W35/W35</code>, and <code>W15/W15</code> is a listed, viable near-white.</li>
     <li><strong><code>d1</code> paints nothing on a black</strong> (bake golden). A <code>d1</code> horse's mane has no pale edges.</li>
     <li><strong>The MATP look-alikes breed apart</strong> (unit test or yard RATIO pen). <code>Cr/Cr</code> passes cream to every foal and <code>Cr/sun</code> to half. <code>sun/N</code> and <code>sno/N</code> bake identical to <code>N/N</code>.</li>
@@ -2547,7 +2774,7 @@
     <li><strong><a href="gene-molten-hooves.html">Molten hooves</a>' prints as objects.</strong> A walk leaves an even track, a gallop wider spacing, standing still nothing (<code>HALF_SIZE</code>, <code>STRIDE</code>, <code>LIFETIME</code>). On stairs, slabs, snow layers and a drop's edge each print sits on the surface, and none appears over air or water. A colour horse can burn blue; decide whether that is wanted.</li>
     <li><strong>The custom spawn screen at GUI scale 4</strong> (<a href="known-gaps.html#gap-139">gap 139</a>). Nothing overlaps, the 22-longer gene list scrolls, Spawn under the preview reads as the action, its greyed &ldquo;Spawn (creative only)&rdquo; label fits out of creative, and the 128px right column fits the breed label.</li>
     <li><strong>The gene hover panel on the spawn screen.</strong> A long blurb near the bottom of the list rides up rather than being cut; it does not flicker or lag the list; a few of the newer blurbs (tiger eye, leopard, PATN1/2, shadowcreature, the magic utility loci) read well at panel size.</li>
-    <li><strong>Getting started's pictures</strong> (<a href="known-gaps.html#gap-146">gap 146</a>). The horseman portrait must show his profession, not plain villager clothes (else swap it for the Horseman's Table block), and the scroll bar matches the page length.</li>
+    <li><strong>Getting started's pictures</strong> (<a href="known-gaps.html#gap-146">gap 146</a>). The equestrian portrait must show its profession, not plain villager clothes (else swap it for one of the <a href="item-equestrian-posts.html">post</a> blocks), and the scroll bar matches the page length.</li>
     <li><strong>The Breeds tab entry</strong>: the plate horse, the biome list and body scores, and whether &ldquo;known to carry&rdquo; naming only discovered genes reads as informative or broken.</li>
     <li><strong>The Alleles tab</strong> counts every allele at extension, agouti and shade, and drops the wild-type baseline everywhere else (gene previews are <a href="carrots.html#verified-gene-previews">verified</a>).</li>
     <li><strong>Two item models.</strong> The research shelf is a bookshelf in hand and in the inventory, and an unattached signed transfer paper (creative) looks like a blank transfer paper, not nothing.</li>
@@ -2580,7 +2807,7 @@
     <li><strong>The Health tab and the breeding preview read as explanations.</strong> Each gene's own <code>+0.020</code> or <code>&times;1.42</code> reads as why the horse is fast; an <a href="gene-hmga2.html">HMGA2</a> horse appears under all four headings. Sixteen health loci on a carrier-heavy horse do not overflow. The preview's trait blocks, with <code>PATN</code> indented under LP, read as grouped, and All loci turns a readable page into a long one.</li>
     <li><strong>Epigenetics on screen.</strong> The Coat tab's value rows fit, including ednrb's nine values with four per-leg numbers on one line, and the <code>&rsaquo;</code> expressed-copy mark means something. A foal's marking matches the parent it took the allele from. Any blank ancestor portrait in the family tree is a record with no genome, and worth naming.</li>
     <li><strong>Lycan and rainbow looks.</strong> A shifted animal's walking dust cloud reads, even on a tadpole or a happy ghast. Two were-wolves are different colours. Rainbow dust reads as a rainbow at the slow end of its cycle, several horses are on different hues at once, and the spawn egg's mote preview cycles too.</li>
-    <li><strong>The cowboy and horseman match.</strong> Stood side by side, the cowboy's <code>CowboyOverlayLayer</code> hat and the horseman's profession layer both show <code>horseman.png</code>. The blank transfer paper reuses <code>research_paper.png</code>.</li>
+    <li><strong>The cowboy and the four equestrians match.</strong> Stood side by side they wear one outfit in five hats: the cowboy's <code>CowboyOverlayLayer</code> draws his own <code>villager/cowboy.png</code> and each equestrian its own profession PNG, all five baked from one source by <code>tools/villagers/bake-profession-hats.ps1</code>, and the belt across the jacket is the same brown on all of them. The blank transfer paper reuses <code>research_paper.png</code>.</li>
     <li><strong>KIT boosters in a herd.</strong> A big mixed herd has more stars and socks but no more sabinos or near-whites. The ladder <code>W35/N</code> &rarr; <code>W35/W35</code> &rarr; <code>SB1/N</code> &rarr; <code>SB1/W35</code> &rarr; <code>W13/N</code> &rarr; <code>SB1/SB1</code> &rarr; <code>W22/N</code> whitens at every step. Thoroughbreds are the most-marked common breed, and Quarter Horses and Paints show the stacking.</li>
     <li><strong>Splash in a herd.</strong> Most horses have modest white and a minority none. Several <code>mitf=SW1/N</code> horses range from a snip to a proper splash. <code>SW1/N</code> &rarr; <code>SW5/N</code> &rarr; <code>SW1/SW1</code> &rarr; <code>SW3/N</code> &rarr; <code>SW3/SW1</code> whitens at every step, and <code>SW1/N pax3=SW2/N</code> is whiter than either alone. Appaloosas sometimes carry SW4, and a Cleveland Bay stays nearly unmarked.</li>
     <li><strong>Grey's four dosages.</strong> Bays at <code>G2/N</code>, <code>G3/N</code>, <code>G2/G3</code> and <code>G3/G3</code> read as steel, dapple, light and near white. The face greys first, and slow greys keep dark lower legs. Manes differ from the body and are paler at the root. A chubari is a big rounded white patch on light greys, and a bloody shoulder a soft base-colour stain. Lipizzan and Camargue herds show no repeating dapple grid, and a grey foal is its base colour until it grows. The melanoma line reads &ldquo;highest&rdquo; on a black <code>G3/G3</code> and &ldquo;raised&rdquo; on a chestnut <code>G2/N</code>, and docks no hearts.</li>

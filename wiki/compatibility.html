@@ -24,6 +24,13 @@
     one decision is the single biggest thing determining how it gets along with other
     mods, and this page is about what it buys and what it costs.
 </p>
+<p class="lede">
+    <strong>Most of the page is about accidents</strong> &mdash; what happens when this mod
+    and another are installed together and neither knows the other exists. One section is
+    the opposite, and it is the newest thing here: this mod now
+    <a href="#generated">reads the other mods in your pack on purpose</a> and generates
+    content for the woods and metals they brought.
+</p>
 
 <h2 id="decision">The decision: attachments, not a custom entity</h2>
 <p>
@@ -127,6 +134,24 @@
             tables.</td>
         <td class="ok">None &mdash; GLMs compose</td>
     </tr>
+    <tr>
+        <td>Other mods&rsquo; jar files</td>
+        <td><strong>We read them.</strong> In the mod constructor,
+            <code>compat/ModdedMaterials</code> walks every loaded mod&rsquo;s
+            <code>JarContents</code> looking for fence-gate blockstates, the
+            <code>c:ingots/*</code> / <code>c:gems/*</code> / <code>c:dyes*</code> tag files
+            and the item textures those name. Read-only, and nothing is written back.
+            <a href="#generated">See below</a>.</td>
+        <td class="ok">None &mdash; a read, not a hook</td>
+    </tr>
+    <tr>
+        <td>A generated pack</td>
+        <td>Writes <code>.minecraft/phc/generated/</code> and offers it to both pack
+            repositories through <code>AddPackFindersEvent</code>. Everything in it is in
+            our own namespace, except two vanilla block <em>tags</em> it adds to.</td>
+        <td class="warn">Low &mdash; it is a pack at <code>Position.TOP</code>, so it wins a
+            same-path fight</td>
+    </tr>
     </tbody>
 </table>
 
@@ -229,10 +254,309 @@
     not parse. Adding a gene mod mid-world is therefore a fresh-world operation for now.
 </p>
 
+<h2 id="generated">The other direction: we read your other mods and build for them</h2>
+
+<p>
+    Everything above this line is about <em>tolerating</em> other mods. This section is the
+    reverse, and it is the one place the mod goes looking. <strong>Install a mod that adds a
+    wood and you get a <a href="item-double-gates.html">double gate</a> in it. Install a mod
+    that adds a metal and you get a horse armour made of it, and a
+    <a href="item-equestrian-bench.html">bench fitting</a> in its colour.</strong> You do not
+    install anything else, run anything, or switch anything on.
+</p>
+
+<p>
+    Before this, the twelve double gates came off a hardcoded table of vanilla&rsquo;s woods,
+    and a modded ingot was not a fitting and had no armour. Now both lists are read off the
+    other mods themselves. The whole of it lives in
+    <code>neoforge-26.1.2/.../neoforge/compat/</code>, and the class headers there are the
+    long form of what follows.
+</p>
+
+<h3 id="generated-seam">The seam is <em>files</em>, not registries &mdash; and it has to be</h3>
+
+<p>
+    The natural way to ask &ldquo;what ingots exist&rdquo; is to read the item registry, or
+    the <code>c:ingots</code> tag. Neither is available at the moment the question has to be
+    answered. Everything here must be known <strong>in the mod constructor</strong>, because
+    that is the last moment a <code>DeferredRegister</code> can still be handed an entry
+    &mdash; and at that moment:
+</p>
+
+<ul>
+    <li><strong>no registry is populated.</strong> Every mod&rsquo;s
+        <code>RegisterEvent</code> is still to come, and which mod&rsquo;s runs first is not
+        ours to decide;</li>
+    <li><strong>no tag exists at all.</strong> Tags are datapack content and are not loaded
+        until a world is.</li>
+</ul>
+
+<p>
+    What <em>is</em> available is every mod&rsquo;s jar, through <code>ModList</code>. So
+    <code>compat/ModdedMaterials</code> reads the files a mod ships rather than the objects
+    it will later register &mdash; and that turns out to be the better source anyway, because
+    a file is something the mod author wrote down on purpose rather than a heuristic over a
+    registry. The API for it is on
+    <a href="api-notes.html#jar-contents">the 26.1.2 notes</a>.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>What we look for</th><th>What counts</th><th>Why that and not something else</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>A wood</strong></td>
+    <td>A mod shipping <code>assets/&lt;ns&gt;/blockstates/&lt;name&gt;_fence_gate.json</code>.</td>
+    <td>The narrowest declaration that means what we need: something the player can already
+        place a gate of, which is exactly what the recipe takes two of. Vanilla&rsquo;s own
+        namespace and ours are both skipped &mdash; the twelve are hand-listed and ours are
+        where the generated ones land, so taking either would make a double gate of a double
+        gate.</td>
+</tr>
+<tr>
+    <td><strong>A metal or crystal</strong></td>
+    <td>An item named in a <code>data/c/tags/item/ingots/*.json</code> or
+        <code>.../gems/*.json</code> file.</td>
+    <td>The NeoForge common tags are where a mod says &ldquo;this is an ingot&rdquo; in the
+        one place every other mod reads. Only the per-material child tags are read, never the
+        <code>c:ingots</code> parent &mdash; the parent is a list of tag <em>references</em>,
+        so reading it finds names rather than items and reading both finds everything
+        twice.</td>
+</tr>
+<tr>
+    <td><strong>A dye</strong></td>
+    <td>An item in the <code>c:dyes</code> tag files that carries no vanilla
+        <code>minecraft:dye</code> component.</td>
+    <td>Most modded dyes are one of vanilla&rsquo;s sixteen, carry the component, and have
+        always worked at the bench. This is only the ones whose colour vanilla has no name
+        for.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="generated-colour">An ingot&rsquo;s colour is the average of its own picture</h3>
+
+<p>
+    <strong>There is no other source for it.</strong> Nothing in a mod&rsquo;s files states
+    that tin is silver-grey; the only place that fact exists anywhere is the art somebody
+    drew. So the fitting colour and the armour tint are both the mean of the opaque texels of
+    that item&rsquo;s own texture &mdash; which is the same thing a player&rsquo;s eye does
+    when it decides two ingots look different.
+</p>
+
+<p>
+    Averaged in <strong>linear light</strong>, not in sRGB: averaging gamma-encoded bytes
+    darkens and desaturates, and an ingot is mostly highlight and shadow of one hue, which is
+    the case that gets most wrong. Half-transparent texels are skipped as edge antialiasing
+    rather than material. A metal whose art cannot be found or decoded falls back to a mid
+    grey rather than being dropped, so it stays usable.
+</p>
+
+<div class="note">
+    <span class="label">This works on a dedicated server, and that is not an accident</span>
+    <p>
+        Mod jars are universal &mdash; they carry their <code>assets/</code> whether or not
+        the process will ever draw anything &mdash; so the PNG a colour is averaged from is
+        readable on a server with no resource manager and no client at all. It is also why
+        the generated armour is <em>one</em> shipped greyscale plate tinted per material
+        rather than a recoloured PNG per metal: there is no image code at runtime at all, so
+        there is nothing for a server to behave differently about.
+    </p>
+</div>
+
+<h3 id="generated-order">Load order can never matter</h3>
+
+<p>
+    <a href="philosophy.html">Philosophy &sect;7</a> is explicit that nothing may depend on
+    which mod loaded first, and a scan over the list FML hands us in its own order would break
+    that quietly: two players with the same mods would get the same content in a different
+    order, and anything derived from the order would disagree. Every result therefore leaves
+    <code>ModdedMaterials</code> <strong>sorted by id</strong>, and the fingerprint below is
+    taken over the sorted form.
+</p>
+
+<h3 id="generated-what">What gets generated</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>Per modded wood</th><th>Per modded ingot or gem</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Registered</strong></td>
+    <td>A <code>DoubleFenceGateBlock</code> and its item, beside vanilla&rsquo;s twelve in
+        <code>block/DoubleGates</code>.</td>
+    <td>One <code>Item</code> with <code>Properties.horseArmor(...)</code>, in
+        <code>compat/ModdedArmour</code>.</td>
+</tr>
+<tr>
+    <td><strong>Written into the pack</strong></td>
+    <td>Eight re-parented models, a 32-variant blockstate, an item definition, a block loot
+        table, a shapeless recipe, two vanilla tag entries and a language key.</td>
+    <td>An equipment asset, an item model, an item definition carrying our tint source, a
+        shapeless recipe, a language key and a metalsmith trade.</td>
+</tr>
+<tr>
+    <td><strong>Textures</strong></td>
+    <td><strong>None at all.</strong> A double gate has never had art of its own &mdash; the
+        eight shapes are shipped template models and a wood&rsquo;s models are each a parent
+        plus a texture id &mdash; so a modded wood needs a pointer at
+        <em>that mod&rsquo;s</em> plank texture and nothing else.</td>
+    <td><strong>None at all.</strong> One shipped greyscale plate, tinted per material
+        through the equipment asset&rsquo;s <code>dyeable.color_when_undyed</code>.</td>
+</tr>
+<tr>
+    <td><strong>The recipe</strong></td>
+    <td>Two of that mod&rsquo;s own fence gates plus our
+        <a href="item-horse-hair.html">braided rope</a>.</td>
+    <td>Six of that ingot plus our <a href="item-horse-hair.html">hair cloth</a>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Both recipes keep <a href="items.html#rules">the house rule</a>: every recipe carries at
+    least one modded ingredient and every output is a modded item in our namespace, so none
+    of them can collide with a vanilla or third-party recipe &mdash;
+    <a href="#bhar">BHAR</a> included. It also means the gate recipe is unreachable until the
+    player actually has the wood, without anything having to check that they do.
+</p>
+
+<p>
+    <strong>The two block tags are additive, and that is a property of tags rather than a
+    choice.</strong> Datapack tag files merge across packs unless one sets
+    <code>replace</code>, so the generated <code>mineable/axe</code> and
+    <code>fence_gates</code> files contribute the modded gates <em>beside</em> the shipped
+    twelve. The generated file therefore lists only the modded ones: copying the shipped file
+    and adding to it would work today and would start asserting things about woods that are
+    no longer installed the moment it went stale.
+</p>
+
+<h3 id="generated-pack">Where it lands: a pack on disk, served to both repositories</h3>
+
+<p>
+    <code>compat/GeneratedPack</code> writes <code>.minecraft/phc/generated/</code> &mdash;
+    beside the breeds, the genes and the config files &mdash; and offers it back to the game
+    through <code>AddPackFindersEvent</code> as <strong>both a resource pack and a
+    datapack</strong>. It is <code>alwaysActive</code>, because the player never chose to
+    install it and must not have to go and switch it on, and hidden, because it is machinery
+    rather than a pack anybody picked.
+</p>
+
+<p>Three reasons it is a folder on disk rather than resources held in memory:</p>
+
+<ul>
+    <li><strong>Silent failure is the enemy.</strong> A generated model that does not draw is
+        a purple-and-black cube with <em>no error anywhere</em>. With the pack on disk the
+        file that failed can be opened and read, which is the difference between a five-minute
+        fix and an afternoon.</li>
+    <li><strong>It has to be a datapack too.</strong> Recipes, loot tables and villager trades
+        are server data; a client-side-only answer would have given the gates no recipe and
+        the armour no trade.</li>
+    <li><strong>It is the owner&rsquo;s own suggestion, made honest.</strong> The fallback
+        offered was a one-time tool you run in the Minecraft directory that builds patches.
+        This is that, minus the running it &mdash; same folder, same inspectable files,
+        generated by the mod at the moment it knows what to generate.</li>
+</ul>
+
+<p>
+    The folder carries a <strong>fingerprint</strong> of exactly what it was built from: the
+    woods, the metals, and each metal&rsquo;s colour, so a mod that only repaints its ingot
+    still gets a redrawn armour. On every launch the fingerprint is recomputed from the mods
+    actually present. Same answer, nothing is written. Different answer, the folder is
+    <em>wiped</em> and rebuilt from scratch &mdash; not written over, because a stale file for
+    a mod that is gone is precisely the thing that then loads and fails for a reason nobody
+    can find. No modded materials at all, which is the overwhelmingly common case, and no
+    folder is left behind either. A <code>README.txt</code> in it says all of that to whoever
+    opens it.
+</p>
+
+<div class="note">
+    <span class="label">It is built at pack-finder time, not in the constructor</span>
+    <p>
+        The <em>scan</em> happens in the mod constructor because it must. The
+        <em>writing</em> happens later, when the pack repository is assembled, and the
+        difference is load-bearing: by then every mod&rsquo;s items exist, which is what lets
+        the armour read another mod&rsquo;s chestplate to decide how strong it should be, and
+        what lets a recipe check that the item it names is actually registered.
+    </p>
+</div>
+
+<h3 id="generated-strength">How strong a generated armour is</h3>
+
+<p>
+    Owner&rsquo;s call, in three tries, and <code>ModdedArmour.protectionFor</code> asks them
+    in this order:
+</p>
+
+<ol>
+    <li><strong>What does their own chestplate give?</strong> Then this armour gets the
+        horse-body value of whichever <em>vanilla</em> material has the closest chestplate.
+        That is the honest translation of &ldquo;their tier&rdquo;: it says nothing about
+        horse armour, which their mod almost certainly has no opinion about, and everything
+        about where they put the metal.</li>
+    <li><strong>Otherwise a ladder</strong> &mdash; a gem where diamond sits, an ingot where
+        iron does, nudged a rung by the item&rsquo;s <code>Rarity</code>, and never above
+        netherite&rsquo;s. This is stated plainly rather than dressed up: <strong>where an ore
+        generates is not readable from a jar</strong>, so this is a guess about balance from
+        the two weakest signals there are and it will sometimes be wrong.</li>
+    <li><strong>Otherwise iron</strong>, the middle of the ladder and the thing a player is
+        least surprised by.</li>
+</ol>
+
+<p>
+    Every vanilla rung is read out of <code>ArmorMaterials</code> at runtime rather than
+    written down, so a vanilla rebalance carries rather than silently diverging. The number
+    is written in <code>ModifyDefaultComponentsEvent</code>, which is the only moment both
+    halves of step 1 are answerable at once. The metalsmith&rsquo;s tier is the same ladder
+    &mdash; a stronger armour is a later trade &mdash; so a player who levels him up for the
+    good stuff finds that the good stuff is good.
+</p>
+
+<h3 id="generated-trades">The metalsmith&rsquo;s trades are rewritten, not appended to</h3>
+
+<p>
+    <strong>Datapack <em>tags</em> merge; datapack <em>registries</em> do not.</strong>
+    <code>minecraft:trade_set</code> is a registry, so two packs declaring the same tier do
+    not combine &mdash; the higher pack wins outright, and the generated pack sits at
+    <code>Position.TOP</code>. The generated tier file therefore has to carry the
+    <em>shipped</em> trades as well as the new ones, and it gets them by reading the shipped
+    file off our own classpath rather than keeping a second copy of the list. Edit
+    <a href="villagers.html#trade-table">the metalsmith&rsquo;s tiers</a> and the generated
+    file follows; it cannot go stale.
+</p>
+
+<h3 id="generated-declared">A tag entry is a declaration, not a promise</h3>
+
+<p>
+    A mod can ship a tag naming an item it only registers behind a config flag, or name
+    another mod&rsquo;s item in a common tag whether or not that mod is installed. Both are
+    legitimate and both leave us holding an id nothing answers to. It cost three walls of red
+    text to find that out, from a generated recipe whose ingredient did not exist: the recipe
+    simply fails to parse, loudly, and the player is shown a page of somebody else&rsquo;s mod
+    id. So anything naming a third-party item in a way the game will later resolve &mdash;
+    which is recipes, and only recipes &mdash; asks
+    <code>ModdedMaterials.itemExists</code> first, and logs which mod and which id when the
+    answer is no. The gate or armour still exists and still draws; it just cannot be crafted
+    from something that is not there.
+</p>
+
+<h3 id="generated-bench">And the bench takes the new materials</h3>
+
+<p>
+    The <a href="item-equestrian-bench.html#fittings">fittings row</a> is no longer a closed
+    list: modded ingots and gems join the hand-picked fifteen, coloured from their own art.
+    The <strong>fifteen win on a clash</strong>, so a mod adding a second copper does not
+    quietly redefine copper. The dye rows gained the narrower case &mdash; a modded dye whose
+    colour vanilla has no name for. A dye carrying vanilla&rsquo;s own component always
+    worked and is untouched.
+</p>
+
 <h2 id="patches">Supporting another mod deliberately</h2>
 
 <p>
-    Everything above is about accidents &mdash; what happens when this mod and another are
+    Most of this page is about accidents &mdash; what happens when this mod and another are
     installed together and neither knows about the other. This section is the other
     question: <strong>what would it take to make a specific mod work with this one on
     purpose?</strong> The answer is different for each, but it decomposes the same way
@@ -820,7 +1144,8 @@
     <thead><tr><th>Kind of mod</th><th>Verdict</th></tr></thead>
     <tbody>
     <tr><td>Resource packs retexturing horses</td><td class="ok">Fine &mdash; ignored, we generate our own texture</td></tr>
-    <tr><td>Mods adding tack, saddles, armour, storage</td><td class="ok">Fine &mdash; we touch none of it</td></tr>
+    <tr><td>Mods adding tack, saddles, armour, storage</td><td class="ok">Fine &mdash; we touch none of it. We add horse armours of our own for their <em>metals</em>, in our namespace; theirs are left alone</td></tr>
+    <tr><td>Mods adding a wood, an ingot, a gem or a dye</td><td class="ok">Better than fine &mdash; <a href="#generated">we read them and build for them</a></td></tr>
     <tr><td>Mods adding horse-adjacent items or food</td><td class="ok">Fine</td></tr>
     <tr><td>Mods adding <em>new</em> equine entity types (donkeys, unicorns, their own mob)</td><td class="ok">Fine &mdash; we only claim <code>minecraft:horse</code></td></tr>
     <tr><td>Performance / rendering mods (Sodium and friends)</td><td class="warn">Should be fine; the coat is a <code>DynamicTexture</code> upload, nothing exotic</td></tr>
@@ -887,18 +1212,72 @@
 </div>
 
 <h2 id="unverified">Unverified</h2>
+
 <p>
-    <strong>None of this has been tested against another mod.</strong> Every claim above
-    is read off this mod's own source and off how NeoForge's registries and events work,
-    not off a play session with a modpack. The rows marked "fine" are predictions, and
-    the renderer row is the only one that is a certainty. <strong>The named mods are
-    described from their own public listings, not from their source</strong> &mdash; so
-    every claim about what they do or do not touch is their description of themselves, and
-    the two failure modes that matter most (whether Horse Powered's capture preserves data
-    attachments, and whether Icy's Better Horses replaces the renderer for its breed coats)
-    are exactly the ones a listing does not answer. Treat this page as the map of
-    where to look when something breaks, not as a compatibility report.
+    <strong>Nothing on this page has ever been run against a real third-party mod.</strong>
+    That is the single sentence to carry away from it. The conflict analysis above is read
+    off this mod's own source and off how NeoForge's registries and events work, not off a
+    play session with a modpack; the rows marked "fine" are predictions, and the renderer row
+    is the only one that is a certainty. <strong>The named mods are described from their own
+    public listings, not from their source</strong> &mdash; so every claim about what they do
+    or do not touch is their description of themselves, and the two failure modes that matter
+    most (whether Horse Powered's capture preserves data attachments, and whether Icy's Better
+    Horses replaces the renderer for its breed coats) are exactly the ones a listing does not
+    answer. Treat this page as the map of where to look when something breaks, not as a
+    compatibility report.
 </p>
+
+<h3 id="unverified-generated">What the generated content has and has not been shown to do</h3>
+
+<p>
+    <a href="#generated">The section above</a> is the newest thing here and needs its own
+    honesty, because &ldquo;it generated a pack&rdquo; and &ldquo;it works&rdquo; are very far
+    apart. It was exercised on a <strong>dedicated server</strong> against a
+    <strong>synthetic</strong> test mod &mdash; <code>tools/compat/build-test-mod.mjs</code>
+    builds a fake mod with one wood and two metals, because doing nothing correctly is
+    indistinguishable from being broken and there was no other way to tell them apart.
+</p>
+
+<p><strong>Confirmed by that run:</strong></p>
+
+<ul>
+    <li>The scan finds the wood and the metals out of the jar, and the pack is written.</li>
+    <li>All three fingerprint states behave: it generates, it short-circuits and writes
+        nothing on an unchanged mod list, and it wipes the folder when the mod is removed.</li>
+    <li>Zero datapack parse errors, and <code>Done()</code> on every one of those launches.</li>
+    <li>The test mod found a real bug on its first run &mdash; a mod can declare an item in a
+        tag and never register it, and the generated recipe then failed to parse in three
+        walls of red. <a href="#generated-declared">The existence check</a> is what was added,
+        and what was then verified.</li>
+</ul>
+
+<p><strong>Not shown, and not to be written up as working:</strong></p>
+
+<ul>
+    <li><strong>No real third-party mod has ever been installed beside this one.</strong> A
+        synthetic jar is a jar somebody wrote to be found. The first real mod will be the
+        first test of every assumption about how mods actually lay their files out.</li>
+    <li><strong>No generated recipe has ever successfully parsed</strong>, because the test
+        mod declares items it never registers &mdash; so what was verified is the skip, not
+        the recipe. The recipe <em>shape</em> is the same as the twelve shipped gate recipes,
+        which do work, which is the only reason to expect it to.</li>
+    <li><strong>Nothing has been seen rendering.</strong> Not a modded gate in a world, not a
+        tinted armour on a horse, not its inventory icon. The greyscale plate was
+        <em>measured</em> and never looked at, and
+        <a href="item-double-gates.html#generated-drift">a gate model that points somewhere
+        wrong is a purple chequerboard that logs nothing</a>.</li>
+    <li><strong>Two mods that both add &ldquo;maple&rdquo; produce two items both called
+        &ldquo;Maple Double Fence Gate&rdquo;.</strong> The ids differ, so nothing is ambiguous
+        to the game, only to the eye. The mod&rsquo;s name is deliberately not in the label,
+        because &ldquo;Biomes You&rsquo;ll Go Maple Double Fence Gate&rdquo; is worse to read
+        for the far commoner case where there is only one maple &mdash; but the clash has not
+        been seen and nobody has judged how bad it looks.</li>
+    <li><strong>The armour tier reads a <code>&lt;material&gt;_chestplate</code> by
+        name</strong>, which is a convention and not a contract. Nothing makes a mod name its
+        armour after its ingot; almost every mod does. When one does not, the ladder answers
+        instead &mdash; which is the right failure, but it has not been seen happening either
+        way.</li>
+</ul>
 
 </article>
 </main>

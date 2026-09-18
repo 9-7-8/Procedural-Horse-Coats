@@ -960,7 +960,7 @@ window.HG = window.HG || {};
   BIOME_GROUPS.forEach(function (g) { g[1].forEach(function (b) { VANILLA.push("minecraft:" + b); }); });
 
   var SOURCES = [["wild", "Wild herds in its biomes"], ["cowboy", "The cowboy can sell one"],
-    ["spawn_egg", "A breed spawn egg (loot, the horseman)"], ["stable", "Pre-placed in generated stables"]];
+    ["spawn_egg", "A breed spawn egg (loot, the scientist)"], ["stable", "Pre-placed in generated stables"]];
   var COMMONNESS = ["extremely_common", "very_common", "common", "moderate", "uncommon", "rare", "very_rare"];
 
   function biomeName(id) {

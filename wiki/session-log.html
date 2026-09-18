@@ -27,6 +27,184 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-compat">2026-09-18, after the equestrians &mdash; Gates and horse armour for other mods' woods and metals</h2>
+
+<p>
+    Install a wood-adding mod and you got nothing: the twelve
+    <a href="item-double-gates.html">double gates</a> came off a hardcoded table. Install a
+    metal-adding mod and its ingot was not a
+    <a href="item-equestrian-bench.html#fittings">tack fitting</a> and had no horse armour.
+    Both lists are now read off the other mods themselves, and the content is generated for
+    them. The whole of it is written up on
+    <a href="compatibility.html#generated">Mod compatibility</a>, which had until now been a
+    page entirely about accidents.
+</p>
+
+<p>
+    <strong>The list comes out of the jars, and it has to.</strong> Not the registries and not
+    the tags. Everything here must be known in the mod constructor &mdash; the last moment a
+    <code>DeferredRegister</code> can be handed an entry &mdash; and at that moment no registry
+    is populated and no tag exists at all. What <em>does</em> exist is every mod's jar, so
+    <code>compat/ModdedMaterials</code> reads the files they ship: a wood is a mod with a
+    <code>&lt;name&gt;_fence_gate</code> blockstate, a metal is an item in
+    <code>c:ingots/*</code> or <code>c:gems/*</code>, and a <strong>colour is the mean of that
+    item's own art in linear light</strong>, because nothing anywhere states an ingot's colour
+    but the picture of it. Results are sorted before they leave the class, so load order
+    cannot matter (<a href="philosophy.html">philosophy &sect;7</a>).
+</p>
+
+<p>
+    <strong>The output is a pack on disk rather than resources in memory</strong>, which was
+    the owner's own suggested fallback &mdash; a one-time tool you run in the Minecraft
+    directory &mdash; minus the running it. <code>compat/GeneratedPack</code> writes
+    <code>phc/generated/</code> and serves it back through <code>AddPackFindersEvent</code> as
+    both a resource pack and a datapack, carrying a fingerprint of what it was built from:
+    same mods and nothing is written, mods changed and the folder is wiped and rebuilt. The
+    files stay on disk because <strong>a generated model that fails is otherwise a purple cube
+    with nothing logged anywhere</strong>, and being able to open the file that failed is the
+    difference between a five-minute fix and an afternoon. Per wood: eight re-parented models,
+    a 32-variant blockstate, an item definition, loot, a recipe, two tag entries and a lang
+    key, and <strong>no textures at all</strong> &mdash; a double gate has never had art, only
+    a pointer at a plank texture. Per metal: one item wearing <em>one</em> shipped greyscale
+    plate tinted through the equipment asset's dyeable layer, so there is no image code at
+    runtime and it behaves identically on a dedicated server.
+</p>
+
+<p>
+    <strong>How strong the armour is was the one real design question</strong>, answered in
+    three tries: their own chestplate's armour value mapped to the horse-body value of the
+    nearest vanilla material; else a ladder by gems over ingots and the item's
+    <code>Rarity</code>; else iron. The vanilla rungs are read off <code>ArmorMaterials</code>
+    rather than written down, so a vanilla rebalance carries. Step one needs other mods' items
+    to exist, which is why the pack is built at pack-finder time and the numbers are written
+    in <code>ModifyDefaultComponentsEvent</code>. The comment says plainly what the fallback
+    is worth: <strong>where an ore generates is not readable from a jar</strong>, so the ladder
+    is a guess from the two weakest signals there are and will sometimes be wrong. The
+    <a href="villagers.html#metalsmith-modded">metalsmith</a> stocks all of them, at the tier
+    that same number picks &mdash; which also fills out the one profession that was thin
+    because vanilla has only three ingot armours.
+</p>
+
+<p>
+    <strong>A fake mod was built on purpose, because doing nothing correctly is
+    indistinguishable from being broken.</strong> <code>tools/compat/build-test-mod.mjs</code>
+    writes a jar with one wood and two metals, and it found a real bug on its first run: a mod
+    can <em>declare</em> an item in a tag and never register it, and the generated recipe then
+    fails to parse in three walls of red naming somebody else's mod id. Recipes now ask whether
+    the item exists and say which mod and which id when it does not. On a dedicated server all
+    three fingerprint states were confirmed &mdash; generates, short-circuits, wipes &mdash;
+    with zero datapack parse errors and <code>Done()</code> each time.
+</p>
+
+<p>
+    <strong>What it owes, and the list is longer than the list of what was proved.</strong> No
+    real third-party mod has ever been installed beside this
+    (<a href="known-gaps.html#gap-271">gap 271</a>). No generated recipe has ever successfully
+    parsed, because the test mod declares items it never registers &mdash; so what was verified
+    is the <em>skip</em> (<a href="known-gaps.html#gap-272">272</a>). Nothing has been seen
+    rendering at all: not a modded gate, not a tinted armour, not its icon, and the plate art
+    was measured and never looked at (<a href="known-gaps.html#gap-273">273</a>). Two mods that
+    both add a maple give two items with one name
+    (<a href="known-gaps.html#gap-274">274</a>), and the armour tier reads a
+    <code>&lt;material&gt;_chestplate</code> by name, which is a convention and not a contract
+    (<a href="known-gaps.html#gap-275">275</a>). The checklist is
+    <a href="verification.html#compat-0918">&sect;0-FK</a>, and it needs the one thing the test
+    kit cannot make: another mod.
+</p>
+
+<p>
+    <strong>Several findings were dug out of the 26.1.2 sources on the way and would have cost
+    the next session an hour each</strong> &mdash; <code>IModFile.findResource</code> is gone
+    and <code>JarContents</code> replaced it; <code>Pack.ResourcesSupplier</code> has two
+    abstract methods so it is not a lambda; building a <code>Pack</code> by hand means never
+    writing a pack format number; <code>ModifyDefaultComponentsEvent.modify</code>'s
+    <code>Consumer</code> overload is deprecated-for-removal in this SDK itself; datapack tags
+    merge and datapack <em>registries</em> do not. All of them are on
+    <a href="api-notes.html#jar-contents">the API notes</a>.
+</p>
+
+<h2 id="d2026-09-18-equestrians">2026-09-18, after the herd test &mdash; The horseman is four people now</h2>
+
+<p>
+    One villager profession sold tack, carrots, armour, papers, eggs and tickets across five
+    tiers. That is a shop rather than a tradesman, and it left nothing for any of it to
+    become as he rose: his fifth tier was the same counter with dearer things on it. He is
+    <strong>deleted outright</strong> &mdash; no alias, no transitional profession, hard rule
+    6 &mdash; and four take his place: an
+    <a href="villagers.html#equestrians">equestrian leatherworker, scientist, supplier and
+    metalsmith</a>, each with a post, a POI, a hat colour and five tiers of its own.
+</p>
+
+<p>
+    <strong>Four blocks and not one, and that is forced rather than chosen.</strong> A POI
+    hands out exactly one profession &mdash; vanilla reads the job off the job site claimed,
+    not the other way round &mdash; so four jobs need four job sites. They are the same block
+    four times over, sharing one model and one texture set with the
+    <a href="item-equestrian-posts.html">hitch</a>, and making each look like its trade is
+    open work. The recipes are not shared: every post takes two hair cloth and two fences, and
+    the remaining three slots are what tells them apart, which is what keeps
+    <code>check-recipes.mjs</code> able to hold the whole set distinct.
+</p>
+
+<p>
+    <strong>Two loot functions did the work the tiers needed.</strong>
+    <code>set_tack_tint</code> writes the mod&rsquo;s own three-zone <code>tack_tint</code>
+    from a named palette, so it reaches the saddle and the metal fittings that vanilla&rsquo;s
+    <code>dyed_color</code> cannot &mdash; which is what makes the leatherworker&rsquo;s five
+    tiers a ladder you can see, bone meal and flowers at Novice through lapis on diamond
+    fittings at Master. That also <a href="roadmap.html#settled-equestrians">answers</a> the
+    open question the roadmap had been holding since the dyed-saddle trade was withdrawn for
+    selling an invisible upgrade: the objection has expired, and the master tier sells a
+    fitting <em>material</em>, which makes the trade a source rather than a convenience.
+    <code>set_random_gene</code> grew a <code>homozygous</code> flag, which names both alleles
+    the same so the foal is certain to get the gene rather than getting it on a coin flip, and
+    skips genes whose homozygote <code>canOccur</code> rejects rather than selling an inert
+    carrot.
+</p>
+
+<p>
+    <strong>The homestead was rebuilt around them, and the interesting part is what the bake
+    stopped counting by hand.</strong> The house is deepened three rows as well as widened a
+    column, for five beds &mdash; one per sleeper, because a villager who claims a job site
+    and has no bed never sleeps and never restocks, so the bed count is the other half of the
+    post count. The row that is duplicated is the only cross-section a hip roof tiles, and it
+    is also the door&rsquo;s own row, so the door is lifted out first and put back or the west
+    wall grows one door per copy. Interior extents, the run of wall a post may stand in front
+    of, and every post position are now <em>read off the finished grid and asserted</em>
+    rather than counted up from the duplication constants &mdash; so retuning the depth moves
+    the frontage with it instead of silently posting a block over the doorstep.
+</p>
+
+<p>
+    <strong>The cowboy got his own hat file.</strong> He used to read the horseman&rsquo;s
+    profession PNG directly, which was the cheapest possible guarantee the two could not
+    drift. That stopped being possible the moment the horseman became four files in four
+    colours, so <code>tools/villagers/bake-profession-hats.ps1</code> now writes all five from
+    one piece of source art. The trap it documents is that the hat is <em>two</em> rectangles
+    on the sheet and a long way apart &mdash; the crown, and the brim, which unwraps into the
+    far corner &mdash; and recolouring only the crown gives a villager a teal hat with a brown
+    underside, which reads as a texture bug rather than as a mistake in a bake. The texel
+    counts are asserted so a redrawn source fails loudly. None of the four is purple: that is
+    <a href="villagers.html#arcane">the arcane dealer&rsquo;s</a>, and he has to stay
+    pickable out of a crowd.
+</p>
+
+<p>
+    <strong>Fixed on the way past:</strong> <code>cowboy_hitch</code> had shipped with no loot
+    table at all, so breaking one dropped nothing. It has one now and so do the four new posts.
+</p>
+
+<p>
+    <strong>What this bought and what it owes.</strong> It bought four shops that can each get
+    better at one thing, and a checklist item that names which POI is broken rather than
+    reporting that nothing happened. It owes a
+    <a href="known-gaps.html#gap-270">confirmed homestead</a>: the piece grew on the axis the
+    jigsaw bounding-box check is tightest on, the pool weight behind it is arithmetic against
+    the <em>old</em> footprint, and nothing downstream &mdash; four jobs, one surname across
+    five, five beds slept in &mdash; can be tested until a homestead is found in a world. The
+    whole batch is <a href="verification.html#equestrians-0918">&sect;0-FJ</a>.
+</p>
+
 <h2 id="d2026-09-18-herd-test">2026-09-18, after the wizard &mdash; The red test was asserting the bug it was written before</h2>
 
 <p>
@@ -9549,7 +9727,7 @@ tests cover the two rejections and the three shapes that must keep working.</p>
 <ul>
 <li><strong>One item could not be crafted.</strong>
     <a href="villagers.html#workstation">Cowboy Hitch</a> and
-    <a href="item-horsemans-table.html">Horseman&rsquo;s Table</a> had byte-identical shapeless
+    <a href="item-equestrian-posts.html">Horseman&rsquo;s Table</a> (retired since) had byte-identical shapeless
     recipes, so the recipe manager resolved one and the other was unobtainable in survival -
     and those blocks are how <em>both</em> merchant NPCs come to exist.
     <a href="villagers.html">Villagers</a> stated the shared recipe as though it were fine,

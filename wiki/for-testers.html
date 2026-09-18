@@ -90,7 +90,10 @@
 <tr><td>Blank transfer paper</td><td>8 paper around 1 horse hair.</td></tr>
 <tr><td>Equine Research Shelf</td><td>A bookshelf and 2 horse hair.</td></tr>
 <tr><td>Cowboy Hitch</td><td>2 hair cloth, 3 braided rope and 2 fences.</td></tr>
-<tr><td>Horseman's Table</td><td>3 hair cloth, 2 leather and 2 fences.</td></tr>
+<tr><td>Leatherworker's Post</td><td>2 hair cloth, 2 fences and 3 leather.</td></tr>
+<tr><td>Scientist's Post</td><td>2 hair cloth, 2 fences, 2 glass bottles and paper.</td></tr>
+<tr><td>Supplier's Post</td><td>2 hair cloth, 2 fences, 2 braided rope and a carrot.</td></tr>
+<tr><td>Metalsmith's Post</td><td>2 hair cloth, 2 fences and 3 iron ingots.</td></tr>
 <tr><td>Stabilizer carrot</td><td>A golden carrot, horse hair and quartz.</td></tr>
 <tr><td>Magnifier carrot</td><td>A golden carrot, horse hair and glowstone dust.</td></tr>
 </tbody>
@@ -1021,7 +1024,7 @@
     <li>Close the browser and press <kbd>H</kbd> again.</li>
     <li>Quit the game, start it again, open the world and press <kbd>H</kbd>.</li>
     <li>Open <em>Getting started</em> and read the contents list.</li>
-    <li>Scroll to the part about the horseman and look at his picture.</li>
+    <li>Scroll to the part about the four equestrians and look at the picture.</li>
     <li>Drag the scroll bar from top to bottom.</li>
     <li>Set your GUI scale to 4 and look through the page again.</li>
     <li>Tame a mare. Watch chat, then look at the checklist at the end of the page.</li>
@@ -1029,7 +1032,7 @@
     <li>Breed one foal, and write down which checklist boxes tick.</li>
     <li>Raise a horse's bond to 31 and look at the checklist.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the browser opens on Getting started the very first time only; the contents list includes "Heat, pregnancy and foals" and "Horses live in bands"; the horseman wears his work clothes; the scroll bar reaches the end of the page exactly; nothing runs off the edge at scale 4; taming gives one chat line and ticks its box; ticks are still there after reloading; the bond-31 task ticks.</p>
+<p class="tester-pass"><strong>It works if:</strong> the browser opens on Getting started the very first time only; the contents list includes "Heat, pregnancy and foals" and "Horses live in bands"; the equestrian in the picture wears the leatherworker's work clothes and hat rather than looking like an ordinary villager; the scroll bar reaches the end of the page exactly; nothing runs off the edge at scale 4; taming gives one chat line and ticks its box; ticks are still there after reloading; the bond-31 task ticks.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> it opens on Getting started every time, text runs off the page, a tick disappears after reloading, or a box never ticks. In the report, list which boxes the foal ticked.</p>
 <button type="button" class="report-btn" data-report="The Getting started page and its checklist">Report a problem with this test</button>
 </div>
@@ -1163,20 +1166,21 @@
 <button type="button" class="report-btn" data-report="The cowboy and his horses">Report a problem with this test</button>
 </div>
 
-<div class="tester-test" id="t-horseman">
-<h3>Every horseman level has trades</h3>
-<p class="tester-need"><strong>You need:</strong> a horseman (place a Horseman's Table near a villager with no job), and plenty of horse hair to trade.</p>
+<div class="tester-test" id="t-equestrians">
+<h3>Every equestrian level has trades</h3>
+<p class="tester-need"><strong>You need:</strong> one of each of the four posts (Leatherworker's, Scientist's, Supplier's and Metalsmith's), four villagers with no job, and plenty of emeralds and horse hair to trade.</p>
 <ol>
-    <li>Place a Horseman's Table near a villager with no job.</li>
-    <li>Wait a minute for him to take the job.</li>
-    <li>Trade with him again and again.</li>
-    <li>Look at the new trades at each level, up to Master.</li>
-    <li>Buy a research paper or carrot and use it.</li>
-    <li>In a new world, find a plains village that has a spare bed, and look for a horseman who is already there with his own Horseman's Table.</li>
+    <li>Place each of the four posts near a villager with no job, far enough apart that no villager can reach two of them.</li>
+    <li>Wait a minute for each to take a job, and check that each one takes the job for the post beside him &mdash; four different professions, not four of the same.</li>
+    <li>Trade with each of them again and again, up to Master.</li>
+    <li>Look at the new trades at each of the five levels for all four.</li>
+    <li>Buy a saddle or leather horse armour off the leatherworker, a carrot or a breed egg off the scientist, a lead or a whistle off the supplier, and horse armour off the metalsmith, and use what you buy.</li>
+    <li>Sell horse hair, and check the supplier is the only one of the four who buys it.</li>
+    <li>In a new world, find a plains village that has a spare bed, and look for equestrians who are already there with their own posts.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> he takes the job; every level has about 3 trades; no trade offers a legendary gene; what you buy works; some plains villages already have a horseman of their own.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> a level has no trades. Say which level.</p>
-<button type="button" class="report-btn" data-report="Every horseman level has trades">Report a problem with this test</button>
+<p class="tester-pass"><strong>It works if:</strong> each villager takes the job for the post beside him; every level of all four has about 3 trades; no trade offers a legendary gene; what you buy works; only the supplier buys horse hair; some plains villages already have equestrians of their own.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a level has no trades, or two posts hand out the same job. Say which post and which level.</p>
+<button type="button" class="report-btn" data-report="Every equestrian level has trades">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-quiet-chat">
@@ -1186,7 +1190,7 @@
     <li>Play normally near villages and horses for a while.</li>
     <li>Keep an eye on chat.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> you never see grey lines starting with <code>[Cowboy]</code>, <code>[Horseman]</code>, <code>[coat]</code> or <code>[Breeding]</code>.</p>
+<p class="tester-pass"><strong>It works if:</strong> you never see grey lines starting with <code>[Cowboy]</code>, <code>[Equestrian]</code>, <code>[coat]</code> or <code>[Breeding]</code>.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> those lines show up. Copy one into the report.</p>
 <button type="button" class="report-btn" data-report="A normal game is quiet in chat">Report a problem with this test</button>
 </div>
@@ -1816,16 +1820,16 @@
 
 <div class="tester-test" id="t-look-items">
 <h3>Items, villagers and horse sizes</h3>
-<p class="tester-need"><strong>You need:</strong> a signed transfer paper, an Equine Research Shelf item, all five themed splice carrots (Dilution, White, Marking, Performance and Magical), a cowboy and a horseman, and a very big and a very small horse, including a big draft breed from a breed spawn egg.</p>
+<p class="tester-need"><strong>You need:</strong> a signed transfer paper, an Equine Research Shelf item, all five themed splice carrots (Dilution, White, Marking, Performance and Magical), a cowboy and all four equestrians, and a very big and a very small horse, including a big draft breed from a breed spawn egg.</p>
 <ol>
     <li>Hover over the transfer paper and look at the horse picture in it.</li>
     <li>Look at the shelf in your hotbar.</li>
     <li>Put the five themed carrots next to each other in your hotbar.</li>
-    <li>Look at the cowboy and the horseman.</li>
+    <li>Stand the cowboy and the four equestrians together and look at their hats.</li>
     <li>Walk the big and small horses on flat ground and watch their feet. Ride each one.</li>
     <li>Stand next to the draft horse.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the horse picture fits inside its box; the shelf icon looks like a shelf; the five carrots can be told apart at a glance; the cowboy and horseman outfits look finished; feet plant on the ground instead of sliding; you sit in the saddle on both; the draft horse towers over you.</p>
+<p class="tester-pass"><strong>It works if:</strong> the horse picture fits inside its box; the shelf icon looks like a shelf; the five carrots can be told apart at a glance; the cowboy's outfit and all four equestrian outfits look finished, and the five hats are five different colours you can tell apart across a village; feet plant on the ground instead of sliding; you sit in the saddle on both; the draft horse towers over you.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> a picture spills out of its box, an icon is a purple-and-black square, two carrots look the same, feet slide, or you float above a horse.</p>
 <button type="button" class="report-btn" data-report="Items, villagers and horse sizes">Report a problem with this test</button>
 </div>

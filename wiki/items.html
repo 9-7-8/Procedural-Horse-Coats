@@ -42,7 +42,9 @@
 <tr><td><a href="item-research-shelf.html"><strong>Equine Research Shelf</strong></a></td>
     <td>Files research papers and copies them onto blank books, for as long as you keep the original.</td></tr>
 <tr><td><a href="item-equestrian-bench.html"><strong>Equestrian Bench</strong></a></td>
-    <td>Dyes a saddle&rsquo;s seat, bridle and metal fittings separately &mdash; one dye or ingot per part.</td></tr>
+    <td>Dyes a saddle&rsquo;s seat, bridle and metal fittings separately &mdash; a dye in each
+        leather row, a material in the fittings row. Any dye, and any ingot or gem, including
+        <a href="compatibility.html#generated-bench">ones another mod added</a>.</td></tr>
 <tr><td><a href="item-seed-jars.html"><strong>Seed jars</strong></a></td>
     <td>Store a stallion&rsquo;s genetics and breed a mare with him later.</td></tr>
 <tr><td><a href="item-vet-kit.html"><strong>Vet&rsquo;s kit</strong></a></td>
@@ -50,9 +52,14 @@
 <tr><td><a href="item-whistles.html"><strong>Whistles</strong></a> &mdash; basic, golden, echo, ender</td>
     <td>Call every horse you own nearby &mdash; or, with an ender whistle bound to one horse,
         call that horse from anywhere.</td></tr>
-<tr><td><a href="item-double-gates.html"><strong>Double gates</strong></a> &mdash; one per wood</td>
+<tr><td><a href="item-double-gates.html"><strong>Double gates</strong></a> &mdash; one per wood,
+    <a href="item-double-gates.html#modded-woods">including other mods&rsquo; woods</a></td>
     <td>A fence gate two blocks wide, both leaves on one click. The doorway you can lead a
         horse through rather than shove it through.</td></tr>
+<tr><td><a href="compatibility.html#generated-what"><strong>Modded horse armour</strong></a>
+    &mdash; one per metal another mod added</td>
+    <td>A horse armour in that metal, tinted its own colour. You get them by installing a mod
+        that adds an ingot or a gem; nothing here ships one.</td></tr>
 <tr><td><a href="item-stall-signs.html"><strong>Stall signs</strong></a></td>
     <td>Mark a room as one horse&rsquo;s stall.</td></tr>
 <tr><td><a href="item-tickets.html"><strong>Tickets</strong></a> &mdash; four tiers</td>
@@ -61,16 +68,34 @@
     <td>Your one general pen: send any horse you own there, stall or no stall.</td></tr>
 <tr><td><a href="item-transfer-papers.html"><strong>Transfer papers</strong></a></td>
     <td>How a horse changes hands. A signed one is drawn as the horse itself.</td></tr>
-<tr><td><a href="item-horsemans-table.html"><strong>Horseman&rsquo;s Table</strong></a></td>
-    <td>Makes a villager into a horseman.</td></tr>
+<tr><td><a href="item-equestrian-posts.html"><strong>The four posts</strong></a> &mdash;
+    leatherworker&rsquo;s, scientist&rsquo;s, supplier&rsquo;s, metalsmith&rsquo;s</td>
+    <td>Makes a villager into that one of the four
+        <a href="villagers.html#equestrians">equestrians</a>. One post, one trade, one
+        villager.</td></tr>
 <tr><td><a href="villagers.html#workstation"><strong>Cowboy Hitch</strong></a></td>
-    <td>The horseman&rsquo;s table&rsquo;s twin: makes a villager into a cowboy. Written
+    <td>The posts&rsquo; fifth twin: makes a villager into a cowboy. Written
         up with the <a href="villagers.html">villagers</a>.</td></tr>
 <tr><td><a href="item-spawn-eggs.html"><strong>Spawn eggs</strong></a> &mdash; custom, breed, preset</td>
     <td>Build a horse gene by gene, get a foundation horse of a breed, or keep an exact
         horse in an item.</td></tr>
 </tbody>
 </table>
+</div>
+
+<div class="note">
+    <span class="label">Two rows of that table are not a fixed length</span>
+    <p>
+        The double gates and the modded horse armours are <strong>generated from whatever
+        other mods are installed</strong>, so the roster you actually have is longer than the
+        one above in exactly the measure your pack is. Vanilla&rsquo;s twelve woods ship as
+        files; every other wood, and every ingot or gem any mod added, is found by reading
+        those mods&rsquo; jars at startup and written into a pack in
+        <code>.minecraft/phc/generated/</code>. With no such mods installed &mdash; the common
+        case &mdash; nothing is generated and no folder is left behind. The whole mechanism,
+        and what about it is still unproven, is on
+        <a href="compatibility.html#generated">the compatibility page</a>.
+    </p>
 </div>
 
 <h2 id="rules">House rules for every recipe</h2>
@@ -84,7 +109,12 @@
             the shapes are not the puzzle.</li>
         <li><strong>At least one modded ingredient</strong> in every recipe, and every
             output is a modded item, so nothing can collide with a vanilla or
-            third-party recipe.</li>
+            third-party recipe. <strong>That holds for the generated ones too</strong>
+            &mdash; a modded wood&rsquo;s gate takes a braided rope and a modded metal&rsquo;s
+            armour takes a hair cloth, and both output an item in this mod&rsquo;s own
+            namespace, which is what keeps them off
+            <a href="compatibility.html#bhar">BHAR</a>&rsquo;s recipe space and everyone
+            else&rsquo;s.</li>
         <li>The material chain is <strong>reversible</strong> &mdash; a bundle goes back
             to four hairs, a rope back to three bundles &mdash; so nothing is a trap.</li>
     </ul>
@@ -107,19 +137,24 @@
 <h2 id="tack">Tack: the saddle is dyeable</h2>
 
 <p>
-    <strong>A saddle can be any of the sixteen dye colours</strong>, and an undyed one looks
-    exactly as it always has. That second half is the point: the change reaches donkeys,
-    mules, skeleton horses and zombie horses too, and none of them should look any different
-    from the day before it landed.
+    <strong>A saddle carries three colours &mdash; seat, bridle and metal</strong> &mdash; and
+    an undyed one looks exactly as it always has. That second half is the point: the change
+    reaches donkeys, mules, skeleton horses and zombie horses too, and none of them should
+    look any different from the day before it landed.
 </p>
 
 <p>
     Vanilla does not tint saddles &mdash; it builds the saddle&rsquo;s equipment asset with
-    the plain, non-dyeable layer, which is why the
-    <a href="villagers.html#random-trades">horseman&rsquo;s dyed saddle was withdrawn</a>
-    before this existed. This mod ships its own asset in the vanilla pattern instead: a base
-    layer that takes the colour, and an untinted overlay for the buckles, so the hardware
-    stays metal whatever the leather does.
+    the plain, non-dyeable layer, which is why a dyed-saddle trade was written and withdrawn
+    before this existed. This mod ships its own asset in the vanilla pattern instead: three
+    disjoint layers, each taking its own colour, so the hardware can stay metal whatever the
+    leather does or be dyed with it. Vanilla&rsquo;s <code>dyed_color</code> could not have
+    done it at any number of layers &mdash; it holds one value per stack and is read once,
+    outside the layer loop &mdash; so the three live in the mod&rsquo;s own
+    <code>tack_tint</code> component instead. That is also what brought the trade back: the
+    <a href="villagers.html#tack-tint">leatherworker&rsquo;s dyed tack</a> writes the
+    mod&rsquo;s own three-zone <code>tack_tint</code> rather than vanilla&rsquo;s
+    <code>dyed_color</code>, so it reaches the saddle and the fittings both.
 </p>
 
 <h3 id="tack-derived">The textures are derived, not drawn</h3>
@@ -225,8 +260,11 @@
         exact sign block releases one.</li>
     <li><strong>The sheared look</strong> is unbuilt &mdash; see
         <a href="item-horse-hair.html">horse hair</a>.</li>
-    <li>There is no <strong>double-wide gate</strong> block, which the design document
-        lists as a braided-rope product.</li>
+    <li><strong>Nothing generated for another mod&rsquo;s materials has ever been
+        drawn</strong> &mdash; not a modded <a href="item-double-gates.html">double
+        gate</a>, not a modded horse armour, not either one&rsquo;s icon &mdash; and no
+        generated recipe has ever successfully parsed.
+        <a href="known-gaps.html#gap-271">Gaps 271&ndash;275</a>.</li>
     <li>The <code>known_gene_splice_carrot</code> is <strong>one generic item</strong>
         parameterised by a component, so every gene&rsquo;s carrot looks the same in the
         inventory.</li>

@@ -58,6 +58,42 @@
     because that is where somebody reaching for a gate looks rather than in a tab about horses.
 </p>
 
+<h3 id="modded-woods">And one per wood any <em>other</em> mod brought</h3>
+
+<p>
+    <strong>Install a mod that adds a wood and you get a double gate in it, with no patch and
+    nothing to switch on.</strong> The recipe is the same shape &mdash; two of that
+    mod&rsquo;s own fence gates plus a <a href="item-horse-hair.html">braided rope</a> &mdash;
+    and the gate is filed in the Building Blocks tab directly after that mod&rsquo;s single
+    gate, exactly as the twelve are filed after vanilla&rsquo;s.
+</p>
+
+<p>
+    It wears <em>that mod&rsquo;s own plank texture</em>. Nothing is drawn for it, because a
+    double gate has never had art of its own &mdash; only a pointer at a plank texture &mdash;
+    so a modded wood needs that mod&rsquo;s planks and nothing else. The list is read out of
+    the other mods&rsquo; jars before anything registers; how, and what else comes with it, is
+    on <a href="compatibility.html#generated">the compatibility page</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">Two things about a modded gate that are not true of the twelve</span>
+    <p>
+        <strong>Two mods that both add &ldquo;maple&rdquo; give you two gates both called
+        &ldquo;Maple Double Fence Gate&rdquo;</strong> &mdash; distinct items with distinct
+        ids, identical names. The mod&rsquo;s name is left out on purpose, because
+        &ldquo;Somebody&rsquo;s Big Biome Mod Maple Double Fence Gate&rdquo; is worse to read
+        in the far commoner case where there is only one maple.
+    </p>
+    <p>
+        And <strong>a wood whose mod declares a gate it never actually registers gets an
+        uncraftable gate</strong>: the block exists and places, but the recipe is skipped
+        rather than written, with a line in the log naming the mod and the id. That is
+        deliberate &mdash; a recipe naming an item nothing answers to does not quietly do
+        nothing, it fails to parse in three walls of red.
+    </p>
+</div>
+
 <h2 id="placing">Placing and breaking</h2>
 
 <ul>
@@ -192,8 +228,43 @@
     geometry, whose rails sit at x&nbsp;2&ndash;6 and 10&ndash;14; these run one rail the full
     2&ndash;14 and so sample the wrong regions of it, and the gate came out visibly scrambled. A
     planks texture tiles and has no alignment to lose, which is why the other eleven were fine
-    either way.
+    either way. <strong>The modded path makes the same call in the same order</strong> &mdash;
+    <code>ModdedMaterials.plankTexture</code> takes
+    <code>&lt;name&gt;_planks.png</code> if the mod ships one and only falls back to reading a
+    texture id out of that mod&rsquo;s own gate model when it does not, because a mod whose
+    gate sheet is as bespoke as bamboo&rsquo;s would scramble in exactly the same way.
 </p>
+
+<h3 id="generated-drift">The same contract is now written twice, and it can drift</h3>
+
+<div class="note warn">
+    <span class="label">Change one, change the other</span>
+    <p>
+        <code>neoforge-26.1.2/tools/bake-double-gates.mjs</code> writes the nine kinds of file
+        for vanilla&rsquo;s twelve woods <strong>at author time, in JavaScript</strong>.
+        <code>compat/GeneratedGates</code> writes the same nine kinds for
+        <a href="#modded-woods">modded woods</a> <strong>at run time, in Java</strong>. They
+        are one contract in two languages. Change the shape of the blockstate, a model, the
+        item definition, the loot table or the recipe in one and you must change it in the
+        other.
+    </p>
+    <p>
+        <strong>The symptom of missing is a modded gate that is a purple chequerboard while
+        every vanilla one is fine, with nothing logged anywhere.</strong> That is this
+        layer&rsquo;s signature silent failure: an item definition or a blockstate pointing at
+        a model nobody wrote does not warn, it just draws the missing texture. Nothing checks
+        the two agree &mdash; there is no parity test for this pair &mdash; so the only
+        protection is knowing they are a pair. <code>CLAUDE.md</code> carries the rule as
+        well.
+    </p>
+    <p>
+        The reverse-direction trap is the item icon. There is no bare
+        <code>&lt;id&gt;</code> model to point an item definition at, because a double gate is
+        two blocks and neither is &ldquo;the&rdquo; block; both writers point at the
+        <strong>left</strong> half, which is the one the template gives vanilla&rsquo;s gate
+        gui transform to.
+    </p>
+</div>
 
 <h2 id="origin">Where it came from, and the style that is not here</h2>
 
@@ -262,6 +333,9 @@
     Still unseen: the item names, their placement in the Building Blocks tab, the in-wall
     variants, redstone on a pair, and the stall step ticking. See
     <a href="verification.html#double-gates-0917">verification</a>.
+    <strong>A gate for a modded wood has never been drawn at all</strong> &mdash; not in a
+    world, not in a slot, and not against a real third-party mod, only a synthetic test one
+    (<a href="verification.html#compat-0918">&sect;0-FK</a>).
 </p>
 
 </section>

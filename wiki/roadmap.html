@@ -1255,11 +1255,11 @@
     <li>A <code>collectedFrom</code> marker (player-made vs villager-sold) and the
         &ldquo;no Known Gene Splice carrot on a jar&rdquo; recipe restriction are both
         trivial once the above exists.</li>
-    <li><strong>This is what the <a href="villagers.html#horseman">horseman</a> is
+    <li><strong>This is what the <a href="villagers.html#equestrians">scientist</a> is
         missing.</strong> His trade table shipped without the two rows that wanted a
         vial &mdash; selling a random rolled genotype, and buying a player-made one back
         &mdash; because both need <code>collectedFrom</code> and a vial worth rolling.
-        His tier-5 buy row takes a stallion seed jar instead. Adding the rows later is
+        His buy row takes a stallion seed jar at every tier instead. Adding the rows later is
         two JSON files and, for the buy-back, a <code>components</code> predicate on the
         <code>wants</code> block, which the trade format already supports.</li>
 </ul>
@@ -1414,7 +1414,7 @@
         them to tell apart.</li>
     <li><strong>A stable has no owner, no story and no loot.</strong> The buildings
         have chests, and the bake empties them. A stable that came with a
-        <a href="villagers.html">horseman</a> living in it, or with tack in the chests,
+        <a href="villagers.html#equestrians">equestrian</a> living in it, or with tack in the chests,
         is the obvious next thing and is not built.</li>
     <li><strong>Nothing stops a player from simply taking the horses.</strong> They are
         untamed and unowned, so the whole reward is "find building, tame seven rare
@@ -1687,6 +1687,17 @@
     written up on <a href="items.html#tack-fit">the item roster</a>.
 </p>
 
+<p>
+    <strong>Something this section never asked for shipped on 2026-09-18 and changes what is
+    left in it.</strong> The mod now reads every loaded mod's jar and generates a double gate
+    per wood and a horse armour per ingot or gem &mdash; written up on
+    <a href="compatibility.html#generated">Mod compatibility</a>, with what is still unproven
+    about it at <a href="known-gaps.html#gap-271">gaps 271&ndash;275</a>. It was never on this
+    page, so there is nothing here to retire; the consequence for the two items below is that
+    a <code>compat/</code> package, and a working precedent for reading other mods, both exist
+    now, which is what 23.2 was costed against not having.
+</p>
+
 <h3 id="native-tack">23.1 Native tack &mdash; cheap in code, expensive in art</h3>
 
 <p>
@@ -1787,51 +1798,42 @@
     Not a patch &mdash; the two mods both replace the horse and both own coat generation, so
     whoever registers last wins. The useful version is a load-time check that logs
     &ldquo;these two mods both replace the horse; run one&rdquo; rather than letting a player
-    discover it as a half-broken world. <strong>This would be the first
-    <code>ModList.isLoaded</code> call in the repo</strong>, which is worth noting because
-    there is currently no compat package, no optional dependency in
-    <code>neoforge.mods.toml</code>, and therefore no pattern to follow. Cheap, and it also
-    establishes the seam for any later soft dependency. Found 2026-09-15.
+    discover it as a half-broken world. Found 2026-09-15; still unbuilt.
+</p>
+
+<p>
+    <strong>The reason this was called expensive no longer applies.</strong> It was written up
+    as &ldquo;the first <code>ModList.isLoaded</code> call in the repo, with no compat package
+    and therefore no pattern to follow&rdquo;. There is a compat package now &mdash;
+    <code>neoforge-26.1.2/.../neoforge/compat/</code>, which already walks
+    <code>ModList.get().getModFiles()</code> in the mod constructor and already knows how to
+    fail soft on somebody else's jar. So this is a handful of lines in a place that exists,
+    with a working precedent beside it: see
+    <a href="compatibility.html#generated">the compat layer</a>. What is still undecided is
+    only where the warning goes &mdash; a log line is the minimum, but a player who reads logs
+    is not the player this protects.
 </p>
 
 <h3 id="bhar-recipes">23.3 A recipe-collision check against BHAR</h3>
 
 <p>
     <a href="compatibility.html#bhar">BHAR</a> adds crafting recipes for the vanilla saddle
-    and all four horse armours. This mod adds none today, so there is no collision today
-    &mdash; but if it ever does, two recipes claim the same inputs.
-    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> already answers that question
+    and all four horse armours. This mod still adds none <em>for vanilla's</em> items, so
+    there is no collision today.
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> already answers the question
     mechanically and would need only to be pointed at their recipe ids. Note the licence:
     their custom terms forbid redistributing any part, so the check may not embed a copy of
     their files. Found 2026-09-15.
 </p>
 
-<h3 id="tack-trades">23.4 Tack trades the horseman could sell again</h3>
-
 <p>
-    <strong>A dyed-saddle trade was written and withdrawn on 2026-09-15</strong>, because
-    vanilla did not tint saddles and it therefore sold a fourteen-emerald item visually
-    identical to the eight-emerald one. <strong>That reason has expired.</strong> Saddles
-    take three colours now and leather horse armour takes three more, so the trade would
-    sell something real.
-</p>
-
-<p>
-    What is <em>not</em> settled is whether it should exist at all, and that is the question
-    to answer before writing it. The <a href="item-equestrian-bench.html">bench</a> lets a
-    player dye any saddle they own, so a pre-dyed one at a premium is only worth buying if
-    it carries something they cannot easily make &mdash; a fitting material they have not
-    mined, say, which would make the trade a <em>source</em> rather than a convenience.
-    Selling a random colour at a markup is the version worth avoiding: it was withdrawn once
-    for being an invisible upgrade and would deserve withdrawing again for being a pointless
-    one.
-</p>
-
-<p class="muted">
-    Cheap either way &mdash; the trade table already carries four tack entries and the
-    colours are one component on the stack. See
-    <a href="villagers.html#random-trades">the villagers page</a> for how a tier draws its
-    pool.
+    <strong>The mod does now generate horse-armour recipes, and they are deliberately outside
+    the collision space.</strong> A <a href="compatibility.html#generated-what">generated
+    armour</a> is an item in <em>this mod's</em> namespace whose recipe takes six of a modded
+    ingot plus a hair cloth, so no third-party recipe can claim the same output and no vanilla
+    one the same inputs &mdash; which is <a href="items.html#rules">the house rule</a> applied
+    to files nobody wrote by hand. The unbuilt work here is unchanged: a check that would
+    catch it if that ever stopped being true.
 </p>
 
 <h2 id="asked-0915">24. Asked for, and not built</h2>
@@ -1839,7 +1841,7 @@
 <p>
     A batch of thirteen was asked for in one go on <strong>2026-09-15</strong>. The
     <a href="breeds.html#regions">cowboy&rsquo;s regions</a> and the
-    <a href="villagers.html#trade-table">horseman&rsquo;s tack trades</a> shipped, the six
+    <a href="villagers.html#trade-table">tack trades</a> shipped, the six
     third-party projects are written up on
     <a href="compatibility.html">Mod compatibility</a> and in
     &sect;<a href="#mod-patches">23</a>, and 24.1&ndash;24.5 are the remainder. Each was
@@ -2240,8 +2242,9 @@
         beside saddle and armour &mdash; the place a player already looks for tack. This is
         the most discoverable option and the most dangerous one; see below.</li>
     <li><strong>The bench is craftable, and one generates in the cowboy&rsquo;s barn</strong>,
-        so a player meets the feature before knowing to want it. The barn already houses the
-        horseman&rsquo;s table, so the bench reads as part of the same shop.</li>
+        so a player meets the feature before knowing to want it. It stands at the end of the
+        same frontage as the <a href="item-equestrian-posts.html">four posts</a> and the hitch,
+        so the bench reads as part of the same shop.</li>
     <li><strong>No pads on foals.</strong> A foal&rsquo;s UV layout is completely different
         from an adult&rsquo;s, so a foal pad is a second set of art drawn from scratch for
         something worn briefly. Vanilla renders no equipment on a foal either.</li>
@@ -2363,6 +2366,34 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3 id="settled-equestrians">Settled 2026-09-18 &mdash; the horse trader is four people, and sells dyed tack again</h3>
+
+<ul>
+    <li><strong>One villager profession became four.</strong> &sect;19&rsquo;s &ldquo;Horse
+        Master&rdquo; shipped as a single <code>horseman</code> selling tack, carrots,
+        armour, papers, eggs and tickets across five tiers, which made him a shop rather
+        than a tradesman and left no room for any of it to improve as he did. He is
+        <strong>retired outright</strong> &mdash; no alias, no transitional profession
+        &mdash; and a leatherworker, a scientist, a supplier and a metalsmith take his
+        place. <strong>Four blocks, not one</strong>, because a POI hands out exactly one
+        profession; that is forced by vanilla and is not a preference to revisit. See
+        <a href="villagers.html#equestrians">Villagers</a> and
+        <a href="item-equestrian-posts.html">the four posts</a>.</li>
+    <li><strong>The dyed-saddle trade is back, and the question of whether it should exist
+        is answered.</strong> It was written and withdrawn once for selling a saddle
+        indistinguishable from the undyed one, and the open worry after that was that a
+        pre-dyed saddle is only worth buying if it carries something the
+        <a href="item-equestrian-bench.html">bench</a> cannot easily make. It does: the
+        <a href="villagers.html#tack-tint">leatherworker&rsquo;s palettes</a> climb by what
+        the dye <em>costs</em>, and his master tier sells lapis on diamond fittings &mdash;
+        a fitting material, which makes the trade a source rather than a convenience. A
+        random colour at a markup remains the version worth avoiding.</li>
+    <li><strong>None of the four hats may be purple.</strong> Owner&rsquo;s call. Purple is
+        <code>CowboyOverlayLayer.ARCANE_HAT</code>, and the
+        <a href="villagers.html#arcane">arcane dealer</a> has to stay pickable out of a
+        crowd at a glance.</li>
+</ul>
 
 <h3 id="settled-extension-ea">Settled 2026-09-17 &mdash; Extension stays at two alleles</h3>
 
@@ -2537,7 +2568,7 @@
         permanent, and a flag on the horse record, so it survives death and sale. A gelding is
         shown as one, has no stallion behaviour, refuses a jar and bonds 25% faster. Plain use
         examines a heat or a pregnancy, and is where twins are revealed. The kit is crafted
-        (shears, leather, iron; 64 uses) and sold by the horseman. About half a cowboy's males
+        (shears, leather, iron; 64 uses) and sold by the equestrian scientist. About half a cowboy's males
         are geldings, priced lower.</li>
 </ul>
 
@@ -2620,8 +2651,10 @@
         keeps animals. Splitting them lets each use the machinery it actually wants. The
         original case rested partly on his being permanently mounted, which was
         <a href="villagers.html#verified-no-shelter">abandoned</a> a day later &mdash; the split
-        outlived the argument that produced it. See
-        <a href="villagers.html#not-a-profession">Villagers</a>.</li>
+        outlived the argument that produced it. The <em>shopkeeper</em> half has since become
+        <a href="#settled-equestrians">four professions</a>, which does not disturb this call:
+        the line it drew is between a profession and an entity, and it is still exactly where
+        it was. See <a href="villagers.html#not-a-profession">Villagers</a>.</li>
     <li><strong>The cowboy's house is part of the barn's structure piece, not built at
         runtime.</strong> The runtime version looked cheaper and never worked, and
         loosening its flatness test would not have saved it: the work posts stand on the
@@ -2629,7 +2662,7 @@
         that made him. Anything that wants to be near the barn and to exist <em>before</em>
         the cowboy does belongs in the same baked piece for the same reason. The cost is a
         deeper footprint and a piece that generates less often, paid for in pool weight.
-        See <a href="villagers.html#horseman-nights">Villagers</a> and
+        See <a href="villagers.html#house">Villagers</a> and
         <a href="villagers.html#verified-house-baked">gap 61</a>.</li>
     <li><strong>A horse is sold as a paper, not handed over.</strong> The alternative was
         &ldquo;pay the trader, receive a horse&rdquo;, which is one click and leaves

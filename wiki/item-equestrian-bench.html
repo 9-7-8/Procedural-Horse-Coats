@@ -36,8 +36,8 @@
 
 <p>
     <strong>There is also one already standing at every cowboy&rsquo;s homestead</strong>,
-    at the end of the frontage past the <a href="villagers.html#workstation">hitch and the
-    horseman&rsquo;s table</a> &mdash; so you are likely to meet one before you know to want
+    at the far end of the frontage, past the <a href="villagers.html#workstation">hitch and
+    the four posts</a> &mdash; so you are likely to meet one before you know to want
     it. The recipe means you never have to go back there for it.
 </p>
 
@@ -57,16 +57,18 @@
 
 <ul>
     <li><strong>Seat</strong> &mdash; the leather you sit on. Takes any of the sixteen
-        dyes.</li>
+        dyes &mdash; and any dye another mod added, including the odd ones whose colour
+        vanilla has no name for.</li>
     <li><strong>Bridle</strong> &mdash; the headstall, noseband, bit and reins. Also a
         dye, and <strong>independent of the seat</strong>: a black saddle with a red bridle
         is two visits, not a compromise.</li>
     <li><strong>Fittings</strong> &mdash; the buckles and rings. Takes a <em>material</em>
         rather than a dye, which is the whole character of the row: you are not painting the
-        hardware, you are saying what it is made of. Fifteen of them.</li>
+        hardware, you are saying what it is made of. Fifteen of vanilla&rsquo;s, plus
+        <a href="#modded-fittings">every ingot and gem any other mod added</a>.</li>
 </ul>
 
-<h3 id="fittings">The fifteen fittings</h3>
+<h3 id="fittings">The fifteen hand-picked fittings</h3>
 
 <table>
     <thead>
@@ -125,6 +127,38 @@
         identically and cannot trip it.
     </p>
 </div>
+
+<h3 id="modded-fittings">And whatever your other mods brought</h3>
+
+<p>
+    <strong>The fifteen are no longer the whole list.</strong> Any item another mod files
+    under the <code>c:ingots/*</code> or <code>c:gems/*</code> common tags is a fitting too,
+    coloured from its own item art &mdash; so a pack with a tin, a silver and a ruby in it has
+    three more fittings, with nothing to install and nothing to switch on. The tooltip names
+    the <em>material</em> rather than the item, so a modded fitting reads
+    &ldquo;tin&rdquo; the way the fifteen above read &ldquo;brass&rdquo;.
+</p>
+
+<p>
+    <strong>The fifteen win on a clash, and that is the important half.</strong> Several of
+    them were deliberately moved <em>away</em> from their material&rsquo;s own average colour
+    &mdash; basalt cooler, bone creamier, ender pearl deeper &mdash; precisely so that two
+    fittings a player cannot tell apart are not both offered. A modded copper that averaged
+    to its own true colour would quietly redefine copper and undo that, so anything already
+    on the list above answers first and the modded lookup is only ever a fallback. The
+    colours themselves are read off the art because
+    <a href="compatibility.html#generated-colour">there is nowhere else an ingot&rsquo;s
+    colour is written down</a>.
+</p>
+
+<p class="muted">
+    <strong>Nothing pulls a modded fitting away from its neighbour.</strong> The hand-picked
+    fifteen were separated by eye, one at a time; a generated one is simply the average of its
+    own picture. So a pack with several similar metals in it can perfectly well end up with
+    two fittings that look the same on a horse &mdash; which is the exact thing the fifteen
+    were tuned to avoid, and there is no equivalent tuning pass available for materials nobody
+    has seen. It has not been looked at in a game either way.
+</p>
 
 <p class="muted">
     <strong>What the wheel still lacks: pink and magenta, and probably for good.</strong>
@@ -201,14 +235,18 @@
     <li><strong>Blanket</strong> &mdash; the broad sheet over the body. This is the part
         vanilla has always let you dye.</li>
     <li><strong>Trim</strong> &mdash; the brown strapwork and the saddlebags.</li>
-    <li><strong>Fittings</strong> &mdash; the buckles and bars, from the same fifteen
-        materials as a saddle&rsquo;s.</li>
+    <li><strong>Fittings</strong> &mdash; the buckles and bars, from the same list of
+        materials as a saddle&rsquo;s: the <a href="#fittings">fifteen</a> plus
+        <a href="#modded-fittings">whatever your other mods brought</a>.</li>
 </ul>
 
 <p>
     Iron, gold, diamond and netherite horse armour are <em>not</em> accepted, and that is
     deliberate rather than an oversight: none of them is dyeable, so taking them would only
-    promise a result that never appears.
+    promise a result that never appears. The
+    <a href="compatibility.html#generated-what">generated horse armours</a> for other
+    mods&rsquo; metals are not accepted either, for the same reason &mdash; each one already
+    <em>is</em> its metal&rsquo;s colour, and there is no second zone on it to dye.
 </p>
 
 <h3 id="armour-vanilla">The crafting-grid recipe still works, and still does only the blanket</h3>
@@ -291,6 +329,29 @@
     constants were chosen so the three recompose to vanilla. It is what lets all of this
     ride on <code>minecraft:saddle</code> rather than needing an item of our own, so a
     saddle you already owned can be brought to the bench and dyed.
+</p>
+
+<h2 id="slot-filters">What a slot accepts is now a question, not a table lookup</h2>
+
+<p>
+    Both slot filters used to be membership tests &mdash; <code>METALS.containsKey(item)</code>
+    for the fittings row, <code>stack.has(DataComponents.DYE)</code> for the two leather rows.
+    Both are now a call to the same method the <em>result</em> uses:
+    <code>metalColour(stack)</code> and <code>dyeColour(stack)</code> return a colour or null,
+    and a slot accepts whatever is not null.
+</p>
+
+<p>
+    That matters beyond tidiness. <code>mayPlace</code>, <code>quickMoveStack</code> and the
+    recipe all three used to ask the question in their own words, and anything added to one
+    had to be remembered in the other two. Now the set of things the bench takes is defined in
+    exactly one place per row, which is what made
+    <a href="#modded-fittings">admitting modded materials</a> a change to one method rather
+    than to five conditions. The precedence is inside that method: the
+    <a href="#fittings">hand-picked fifteen</a> answer first and the modded lookup is the
+    fallback, and for dyes it is the other way up &mdash; vanilla&rsquo;s component first,
+    because it is the answer for most modded dyes too, and the art-averaged colour only for
+    the ones that carry no component at all.
 </p>
 
 <h2 id="verified">Verified</h2>

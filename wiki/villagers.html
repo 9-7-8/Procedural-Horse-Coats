@@ -18,12 +18,14 @@
 <p class="eyebrow">Gameplay <span class="sep">/</span> villagers</p>
 <h1>Villagers &amp; transfer papers</h1>
 <p class="lede">
-    Two people who trade in horses, and the item that lets a horse be sold without
-    either of them touching it. The <strong>cowboy</strong> lives in a barn on the
+    The people who trade in horses, and the item that lets a horse be sold without
+    any of them touching it. The <strong>cowboy</strong> lives in a barn on the
     edge of a plains village, never gets off their horse, and sells their herd as
-    <strong>transfer papers</strong>; the <strong>horseman</strong> is an ordinary
-    villager profession selling tack and gene goods from a workstation. This page is
-    the source of truth for all three. The items themselves are listed on
+    <strong>transfer papers</strong>; the <strong>four equestrians</strong> are
+    ordinary villager professions &mdash; a leatherworker, a scientist, a supplier and
+    a metalsmith &mdash; each selling their own part of a horse operation from a post
+    of their own. This page is
+    the source of truth for all of them. The items themselves are listed on
     <a href="items.html">Items &amp; recipes</a>; the genetics of the horses the
     cowboy breeds are ordinary <a href="breeds.html">breed founders</a>.
 </p>
@@ -159,7 +161,7 @@
 </p>
 
 <p>
-    The <a href="#horseman">horseman</a> <em>is</em> a real profession, for the
+    The <a href="#equestrians">four equestrians</a> <em>are</em> real professions, for the
     opposite reason: a shopkeeper who walks to a workstation, restocks, gossips and
     goes to bed is exactly what that brain is for.
 </p>
@@ -651,7 +653,7 @@
 <p>
     <code>cowboy_barn.nbt</code> is the whole homestead in one piece: a hand-built stable
     &mdash; hay-bedded floor, water cauldrons, two double doors at each end, the cowboy
-    generated at its centre &mdash; with the <a href="#horseman-nights">house</a> behind it
+    generated at its centre &mdash; with the <a href="#house">house</a> behind it
     along the street, and a <strong>walk</strong> running down the front of both.
 </p>
 
@@ -734,15 +736,28 @@
 <p>
     It goes in at weight <strong>3</strong> against the four vanilla terminators of
     weight 1 each, so roughly three terminator slots in seven. That is not how often it
-    appears. A village has a handful of terminator slots, and the piece is
-    15&times;15 where a terminator is 2&times;3 &mdash; so most of the draws that pick
-    it then fail the bounding-box check and fall through to a small terminator
-    instead. The weight is set high to compensate for exactly that: it was 1 while the
-    piece was 15&times;7 and carried the barn alone, and
-    <a href="#horseman-nights">taking the house in</a> doubled the depth, and so doubled
+    appears. A village has a handful of terminator slots, and the piece is a stable and
+    a house side by side where a terminator is two blocks by three &mdash; so most of the
+    draws that pick it then fail the bounding-box check and fall through to a small
+    terminator instead. The weight is set high to compensate for exactly that: it was 1
+    while the piece carried the barn alone, and
+    <a href="#house">taking the house in</a> doubled the depth, and so doubled
     the ground it has to find. The effect aimed at is &ldquo;most plains villages, where
     there was room&rdquo;.
 </p>
+
+<div class="note warn">
+    <span class="label">And it has grown again since that 3 was chosen</span>
+    <p>
+        Fitting the four equestrians meant <a href="#house">deepening the house</a> three
+        rows on the piece's long axis, which is the axis the bounding-box check is
+        tightest on. <code>bake-barn.py</code> prints the finished size on every run, and
+        it is larger than the size the weight was tuned against.
+        <strong>Nobody has confirmed the homestead still generates at all</strong> since
+        then &mdash; see <a href="known-gaps.html#gap-270">gap 270</a>. If it has got rare,
+        the levers are <code>BarnPoolInjector</code>'s weight and nothing else.
+    </p>
+</div>
 
 <h3 id="pool-injection">Why the pool is edited in code</h3>
 
@@ -812,25 +827,114 @@
 
 <hr>
 
-<h2 id="horseman">The horseman</h2>
+<h2 id="equestrians">The four equestrians</h2>
 
 <p>
-    The roadmap's &ldquo;Horse Master&rdquo;: an ordinary villager profession that
-    sells horse tack and horse-genetics goods from a <strong>Horse Trader's
-    Post</strong>. Five tiers on <em>vanilla's</em> ladder &mdash; Novice, Apprentice,
-    Journeyman, Expert, Master &mdash; not the design document's, which invented an
-    &ldquo;Adept&rdquo; rung that does not exist.
+    The roadmap&rsquo;s &ldquo;Horse Master&rdquo; shipped as <em>one</em> villager, and
+    one villager sold tack, carrots, armour, papers, eggs and tickets across five tiers.
+    That made him a shop rather than a tradesman, and left no room for any of it to get
+    better as he did. He is <strong>retired outright</strong> &mdash; no alias, no
+    transitional profession, so a villager who held the old job comes back unemployed
+    &mdash; and four ordinary villager professions take his place, each with a post, a
+    POI, a hat colour and five tiers of its own. All four run on <em>vanilla&rsquo;s</em>
+    ladder: Novice, Apprentice, Journeyman, Expert, Master &mdash; not the design
+    document&rsquo;s, which invented an &ldquo;Adept&rdquo; rung that does not exist.
 </p>
 
-<h3 id="workstation">Two posts, one texture</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Profession</th><th>Post</th><th>Hat</th><th>Deals in</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Equestrian Leatherworker</strong><br><code>equestrian_leatherworker</code></td>
+    <td>Leatherworker&rsquo;s Post</td>
+    <td>Russet</td>
+    <td>Saddles and leather horse armour, and nothing that is not tack. Buys leather and
+        hair cloth.</td>
+</tr>
+<tr>
+    <td><strong>Equestrian Scientist</strong><br><code>equestrian_scientist</code></td>
+    <td>Scientist&rsquo;s Post</td>
+    <td>Teal</td>
+    <td>The <a href="carrots.html">breeding and splice carrots</a>, the
+        <a href="item-vet-kit.html">vet kit</a> and
+        <a href="item-spawn-eggs.html#breed">breed spawn eggs</a>. Buys carrots, and
+        <a href="item-seed-jars.html">stallion seed jars</a> as research stock.</td>
+</tr>
+<tr>
+    <td><strong>Equestrian Supplier</strong><br><code>equestrian_supplier</code></td>
+    <td>Supplier&rsquo;s Post</td>
+    <td>Olive</td>
+    <td>The general store: carrots, leads, <a href="item-whistles.html">whistles</a>,
+        <a href="item-tickets.html">tickets</a> and signs, blank
+        <a href="#papers">transfer papers</a>,
+        <a href="item-research-papers.html">research papers</a>, the empty seed jar. The
+        one who <strong>buys horse hair</strong>, in every form it comes in.</td>
+</tr>
+<tr>
+    <td><strong>Equestrian Metalsmith</strong><br><code>equestrian_metalsmith</code></td>
+    <td>Metalsmith&rsquo;s Post</td>
+    <td>Steel blue-grey</td>
+    <td>Iron, golden and diamond horse armour. Buys coal, copper, iron, gold and
+        diamonds. Deliberately thin &mdash; see below.</td>
+</tr>
+</tbody>
+</table>
+</div>
 
 <p>
-    <strong>Cowboy Hitch</strong> and <strong>Horseman&rsquo;s Table</strong>: the same
-    block twice, on the same three-face texture set, with different names and different
-    jobs. The <strong>hitch</strong> is 2 hair cloth + 3 braided rope + 2 fence; the <strong>table</strong> is 3 hair cloth + 2 leather + 2 fence. Both shapeless. Neither
-    <em>does</em> anything yet beyond marking a spot &mdash; turning them into real
-    workstations, a hitch you tie a horse to and a table you work leather at, is open
-    work.
+    <strong>The hats are generated, not drawn four times.</strong>
+    <code>neoforge-26.1.2/tools/villagers/bake-profession-hats.ps1</code> takes one piece
+    of source art &mdash; the old horseman&rsquo;s overlay, kept the way
+    <code>tools/barn/*.source.nbt</code> is kept, as an input to a bake rather than as an
+    asset &mdash; and retints the hat in each of the four colours, leaving the belt across
+    the jacket brown in all of them. One outfit, four hats: they are meant to read as one
+    family. The retint keeps each texel&rsquo;s brightness relative to the hat&rsquo;s
+    mean rather than flooding it, so the shading the art was drawn with survives.
+</p>
+
+<p>
+    The script writes a <strong>fifth</strong> file, and that is the point of it being a
+    script at all: <code>textures/entity/villager/cowboy.png</code>, the same art with the
+    hat left its own brown. The <a href="#cowboy">cowboy</a> used to read the
+    horseman&rsquo;s profession PNG straight, which was the cheapest possible guarantee
+    that the two could not drift. That stopped being possible the moment the horseman
+    became four files in four colours &mdash; there is nothing at that path any more, and
+    picking one of the four would have handed him somebody else&rsquo;s hat. The
+    guarantee is now held by the bake instead of by a shared path, which is the stronger
+    of the two.
+</p>
+
+<div class="note rule">
+    <span class="label">None of the four may be purple</span>
+    <p>
+        Owner&rsquo;s call, and it is a constraint rather than a preference.
+        Purple is taken: <code>CowboyOverlayLayer.ARCANE_HAT</code> tints the
+        <a href="#arcane">arcane dealer&rsquo;s</a> hat, and he is the one villager in
+        this mod a player has to be able to pick out of a crowd at a glance. A fifth
+        purple hat would cost him that.
+    </p>
+</div>
+
+<h3 id="workstation">Five posts, one texture</h3>
+
+<p>
+    <strong>Four blocks rather than one shared post</strong>, because a POI hands out
+    exactly one profession &mdash; vanilla picks the job from the job site claimed, not
+    the other way round &mdash; so four jobs need four blocks. With the
+    <strong>Cowboy Hitch</strong> that is five posts, and they are the same block five
+    times: one model, one three-face texture set, five names and five jobs. Making each
+    look like the trade it belongs to is open work.
+</p>
+
+<p>
+    <strong>All five are shapeless, and all five are distinct.</strong> Every one takes
+    two hair cloth and two fences of any kind; what is left of the seven slots is the
+    part that says which post it is &mdash; leather for the leatherworker, glass bottles
+    and paper for the scientist, braided rope and a carrot for the supplier, iron for the
+    metalsmith, and rope for the hitch.
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses two recipes that claim
+    the same inputs, which is what keeps that true as they are retuned.
 </p>
 
 <div class="table-wrap">
@@ -838,13 +942,14 @@
 <thead><tr><th>Block</th><th>Hands out</th><th>How</th></tr></thead>
 <tbody>
 <tr>
-    <td><strong>Horseman&rsquo;s Table</strong></td>
-    <td>the horseman</td>
-    <td>An ordinary <strong>job site</strong>. It backs the
-        <code>horsegenetics:horsemans_table</code> POI, which is added to vanilla&rsquo;s
-        <code>acquirable_job_site</code> and <code>village</code> tags &mdash; tags
-        <em>merge</em> across datapacks, so adding to vanilla&rsquo;s is safe where
-        overriding a worldgen file would not be. One villager per table.</td>
+    <td><strong>The four <code>*_post</code> blocks</strong></td>
+    <td>the four equestrians, one each</td>
+    <td>Ordinary <strong>job sites</strong>. Each backs a POI of its own name, and all
+        four are added to vanilla&rsquo;s <code>acquirable_job_site</code> and
+        <code>village</code> tags &mdash; tags <em>merge</em> across datapacks, so adding
+        to vanilla&rsquo;s is safe where overriding a worldgen file would not be. One
+        villager per post, so a second scientist needs a second Scientist&rsquo;s
+        Post.</td>
 </tr>
 <tr>
     <td><strong>Cowboy Hitch</strong></td>
@@ -862,10 +967,10 @@
 </div>
 
 <div class="note rule">
-    <span class="label">Why two blocks and not one</span>
+    <span class="label">Why a post each and not one post that alternates</span>
     <p>
-        One block tried to do both, handing out a cowboy first and a horseman second by
-        alternating. It could not. Converting the villager meant either
+        One block tried to do two jobs, handing out a cowboy first and a shopkeeper second
+        by alternating. It could not. Converting the villager meant either
         <strong>discarding</strong> them &mdash; which silently holds their job-site ticket
         for ever, because <code>Villager.releaseAllPois</code> is private and runs on
         death, so the post produced one cowboy and then nothing while the rest of the
@@ -873,10 +978,10 @@
         re-assign them, which is two more moving parts than a second block.
     </p>
     <p>
-        A post each is far less clever and simply works. The hitch makes cowboys, the
-        table makes horsemen, and neither has to know the other exists. Discarding the
-        villager is safe at the hitch for exactly the reason it was not safe at the
-        shared post: they never claimed the hitch, because the hitch is not a job site.
+        A post each is far less clever and simply works, and it is the same answer the POI
+        system forces for the four professions anyway. Discarding the villager is safe at
+        the hitch for exactly the reason it was not safe at the shared post: they never
+        claimed the hitch, because the hitch is not a job site.
     </p>
 </div>
 
@@ -888,17 +993,28 @@
     they died.
 </p>
 
-<h3 id="post-at-the-barn">Both of them stand at the house</h3>
+<p>
+    <strong>All five drop themselves when broken.</strong> Worth writing down because for
+    a while one of them did not: <code>cowboy_hitch</code> shipped with no loot table at
+    all, so breaking one destroyed it. The four new posts were given theirs at the same
+    time the hitch got its.
+</p>
+
+<h3 id="post-at-the-barn">All five stand at the house</h3>
 
 <p>
-    They flank the <a href="#horseman-nights">house's</a> front step, one either side of
-    it, with a villager on the <a href="#barn">walk</a> in front of each. A villager takes
-    the post they are standing on &mdash; one becomes the horseman, the other the cowboy.
+    They run down the <a href="#house">house&rsquo;s</a> frontage in the order you meet
+    them walking in from the street: the hitch first, then the doorstep, then the four
+    trade posts, then the <a href="item-equestrian-bench.html">bench</a> at the far end.
+    The hitch comes first because the cowboy is the one who has to exist before the rest
+    of the homestead means anything, and the bench comes last because nobody is employed
+    by it. A villager stands on the walk in front of each post &mdash; one per post, none
+    for the bench &mdash; and takes the job behind them.
 </p>
 
 <p>
     <strong>They were on the barn, and moving them is what fixed the house.</strong> Not a
-    question of where they look right: the house has to exist before either post does, and
+    question of where they look right: the house has to exist before any post does, and
     while the house was built at runtime <em>by the cowboy</em>, the posts had to be
     somewhere the cowboy already was. That ordering is what finally sank the runtime house
     &mdash; the posts are what make a cowboy, so a cowboy cannot be what builds the thing
@@ -910,11 +1026,25 @@
 <p>
     Baked into the structure rather than placed at runtime, because a job-site POI is
     indexed off the block &mdash; putting the block in the world <em>is</em> the whole
-    mechanism &mdash; and because a shop front is architecture. Neither villager is given
-    a profession: letting them take the jobs the ordinary way is the only test there is
-    of the part that has ever been in doubt, which is whether the POI registered and
-    whether the tag merged. Two nitwits standing there for ever is a real answer to a
-    real question.
+    mechanism &mdash; and because a shop front is architecture. <strong>None of the five
+    villagers is given a profession</strong>, and that is the point rather than an
+    oversight: each has to claim its own post the ordinary way and come out a cowboy, a
+    leatherworker, a scientist, a supplier or a metalsmith. Letting them take the jobs
+    themselves is the only test there is of the part that has ever been in doubt &mdash;
+    whether every POI registered and whether the tag merged for all of them &mdash; so a
+    row of nitwits standing there for ever is a real answer to a real question, and one
+    that names <em>which</em> post is the broken one.
+</p>
+
+<p>
+    <strong>Nothing about the frontage is counted by hand.</strong>
+    <code>bake-barn.py</code> reads the west wall&rsquo;s own foundation course off the
+    grid it has just built and takes that as the run of columns a post may stand in &mdash;
+    a post past the end of the wall would hang in the air over the walk, and the eave
+    reaches further than the building does, so &ldquo;is there something overhead&rdquo; is
+    not the test. Every post is then asserted to front wall and to land on an empty cell
+    before it is placed, so moving the door moves the whole frontage with it rather than
+    quietly eating the doorstep.
 </p>
 
 <h3 id="family-names">One family per village</h3>
@@ -922,10 +1052,18 @@
 <p>
     <strong>Whoever is hired first names the family, and everyone after joins it.</strong>
     Both handlers ask the same question &mdash;
-    <code>HorsemanHandler.familySurname</code> &mdash; which looks round the village for
-    a cowboy or a horseman who already has a surname and takes theirs; finding nobody, it
+    <code>EquestrianHandler.familySurname</code> &mdash; which looks round the village for
+    a cowboy or an equestrian who already has a surname and takes theirs; finding nobody, it
     coins a new one. So a village reads as one outfit in the horse trade: Wade Hargreave
-    at the hitch, Frank Hargreave behind the table.
+    at the hitch, Frank Hargreave behind the leatherworker&rsquo;s post, and the scientist,
+    the supplier and the metalsmith Hargreaves down the same frontage.
+</p>
+
+<p>
+    Every profession check in that class asks
+    <code>ModVillagerProfessions.isEquestrian</code> rather than naming one key, so a
+    fifth equestrian added later joins the family by existing and cannot be left out of it
+    by somebody forgetting the file.
 </p>
 
 <p>
@@ -934,9 +1072,9 @@
     so the man selling Fjords is a Halvorsen and the man selling Andalusians is an Olivares.
     The cowboy reads his region off the breed he is known for, which is why
     <code>CowboyHandler.found</code> now settles that breed <em>before</em> it names him
-    &mdash; naming him first threw the connection away. The horseman has no breed of his
-    own, so he takes the region from the nearest cowboy who has one; in a village with no
-    cowboy at all he is the founder and his region is simply rolled.
+    &mdash; naming him first threw the connection away. An equestrian has no breed of their
+    own, so they take the region from the nearest cowboy who has one; in a village with no
+    cowboy at all the first one hired is the founder and their region is simply rolled.
 </p>
 
 <p>
@@ -955,28 +1093,41 @@
 </p>
 
 <p>
-    <strong>Order-independent on purpose.</strong> The hitch and the table hand out their
-    jobs entirely separately, and which villager gets round to which first is down to
-    where they happen to be standing &mdash; so neither role can be the one that owns the
+    <strong>Order-independent on purpose.</strong> The hitch and the four posts hand out
+    their jobs entirely separately, and which villager gets round to which first is down to
+    where they happen to be standing &mdash; so no one role can be the one that owns the
     name. An earlier version had the cowboy coin it and the horseman inherit, which is
     fine right up until the horseman is hired first and there is nobody to inherit from.
 </p>
 
 <p>
     The <em>nearest</em> namesake wins, which only matters in a village with two outfits
-    in it: a second hitch across town founds the Adamses, and a table put up beside it
-    joins the Adamses rather than the Hargreaves at the far end. It counts the two roles
+    in it: a second hitch across town founds the Adamses, and a post put up beside it
+    joins the Adamses rather than the Hargreaves at the far end. It counts the roles
     this mod names and nothing else &mdash; a player who renames their own farmer
     &ldquo;Bob&rdquo; has not founded a horse family.
 </p>
 
-<h3 id="horseman-nights">The horseman keeps vanilla's brain, and gets a house</h3>
+<p>
+    <strong>Why a poll and not an event.</strong> Taking a job is not something NeoForge
+    fires an event for: it happens deep in vanilla&rsquo;s brain, when a villager&rsquo;s
+    <code>AcquirePoi</code> behaviour claims a ticket, and the only outward sign is that
+    their <code>VillagerData</code> now names a profession. So
+    <code>EquestrianHandler</code> watches for that &mdash; one profession comparison per
+    villager tick &mdash; and announces it. That line is also the cheapest answer to the
+    hardest thing about these four to test: when nothing happens there are three
+    indistinguishable reasons (the POI did not register, the tag did not merge, or they
+    simply have not got round to it), and the announcement separates the third from the
+    first two.
+</p>
+
+<h3 id="house">They keep vanilla's brain, and get a house</h3>
 
 <p>
-    Nothing in this mod touches how the horseman behaves. They are a completely ordinary
-    villager with a profession, so going indoors at night, panicking in a raid, hiding
+    Nothing in this mod touches how an equestrian behaves. They are completely ordinary
+    villagers with a profession, so going indoors at night, panicking in a raid, hiding
     from a zombie, restocking and gossiping are all <strong>free</strong> &mdash; that is
-    the whole reason they are a profession where the <a href="#cowboy">cowboy</a> is not.
+    the whole reason they are professions where the <a href="#cowboy">cowboy</a> is not.
 </p>
 
 <p>
@@ -1000,26 +1151,62 @@
         nothing resolves them for a template read straight out of the data pack, so left
         in they would stand in the finished building as jigsaw blocks. The one in the
         doorway becomes air, the one in the floor becomes floor.</li>
-    <li><strong>The interior is widened to four blocks</strong>, by duplicating a column
-        of the plan &mdash; walls, floor, roof and all, so nothing has to be redrawn.
-        Vanilla's three across is a bedroom; four is a bunkhouse with room to walk past
-        the beds.</li>
-    <li><strong>Two beds, pushed together</strong> against the back wall. One is all the
-        horseman needs; the second is for the look of the place.</li>
-    <li><strong>A chest either side of them</strong>, drawing on
-        <code>horsegenetics:chests/cowboy_house</code>: feed by the armful, a lead or a
-        saddle now and then, and one roll in four or so at a piece of this mod's own kit,
-        so a chest can teach you an item exists. Nothing in it should make a player feel
-        they can skip the horseman &mdash; the saddle is the only real prize.</li>
+    <li><strong>One column wider, and three rows deeper</strong>, both by duplicating a
+        cross-section of the plan rather than by drawing a new house &mdash; so every wall,
+        corner, eave and roof stair stays exactly what vanilla drew. Vanilla&rsquo;s three
+        across is a single-file squeeze past the end of a bed; four is the bed and an
+        aisle. The depth is set by the <a href="#post-at-the-barn">frontage</a> rather
+        than by the floor space: the west wall has to carry the hitch, the doorway, four
+        posts and the bench standing side by side, which is more wall than vanilla&rsquo;s
+        house has.</li>
+    <li><strong>A bed per sleeper</strong> against the wall opposite the door, heads to
+        the wall and feet to the aisle. <strong>Five of them</strong>, because the
+        frontage hands out five jobs: a villager who claims a job site and has no bed to go
+        home to never sleeps and never restocks, so the bed count is the other half of the
+        post count and the bake asserts the two agree rather than trusting them to.</li>
+    <li><strong>Two chests</strong>, one in each end of the one interior row the beds do
+        not take, drawing on <code>horsegenetics:chests/cowboy_house</code>: feed by the
+        armful, a lead or a saddle now and then, and one roll in four or so at a piece of
+        this mod's own kit, so a chest can teach you an item exists. Nothing in it should
+        make a player feel they can skip the shops &mdash; the saddle is the only real
+        prize. Both are asserted to have an empty cell to stand in and open from.</li>
     <li><strong>The stair beside the beds comes out.</strong> It is a chair in the vanilla
-        house and it reads as a headboard once there are two beds against that wall.</li>
+        house and it reads as a headboard once there are beds against that wall.</li>
     <li><strong>A step outside the front door</strong>, with the
-        <a href="#post-at-the-barn">two work posts</a> either side of it. The house sits a
-        block proud of the ground the way every vanilla plains house does, so without the
-        step the threshold is a ledge you jump at.</li>
+        <a href="#post-at-the-barn">five posts</a> and the bench down the frontage from it.
+        The house sits a block proud of the ground the way every vanilla plains house does,
+        so without the step the threshold is a ledge you jump at.</li>
     <li><strong>Bark back on the corner posts.</strong> They are stripped oak in vanilla;
         nothing else about a homestead beside a stable is planed.</li>
 </ul>
+
+<div class="note warn">
+    <span class="label">The door has to be lifted out before the house is deepened</span>
+    <p>
+        <strong>Which row is duplicated is not free choice.</strong> At the top course of
+        the roof, vanilla's three rows are a south-sloping stair course, the ridge, and a
+        north-sloping stair course &mdash; and only the ridge tiles. Copy it and the ridge
+        simply gets longer; copy either neighbour and the house grows a flat band of stairs
+        all sloping the same way where the roof should be. The same row is the only one
+        that repeats at every other height too, and <em>it is also the door&rsquo;s
+        row</em>.
+    </p>
+    <p>
+        So the door is duplicated along with everything else unless something is done about
+        it, and the west wall grows one door per copy. <code>bake-barn.py</code> lifts both
+        halves out first, fills the hole with the wall vanilla drew one row along, deepens
+        the house, and sets the same two states back down at the doorway &mdash; read out
+        of the source rather than written in, so the hinge and facing are whatever the
+        export says and the door that goes back is the door that came out.
+    </p>
+</div>
+
+<p>
+    Where the inside of the house <em>is</em> is read off the finished grid rather than
+    counted up from the two duplications by hand: vanilla floors the room in oak planks
+    and nothing else in the building is oak planks at the foundation course, so the plank
+    footprint is the interior by construction, however the bake is retuned.
+</p>
 
 <p>
     It is set down beside the barn with a lane of <code>dirt_path</code> between them, the
@@ -1037,46 +1224,143 @@
     Baking the house into the piece answers the same worry better than the test did: the
     jigsaw generator's own bounding-box check is a far more careful version of &ldquo;is
     there room here&rdquo;, and it runs before anything is placed at all. The price is a
-    piece twice as deep, paid for in <a href="#pool-injection">pool weight</a>.
+    deeper piece, paid for in <a href="#pool-injection">pool weight</a> &mdash; and the
+    four equestrians have just made it deeper again.
 </p>
 
 <p>
     The cowboy will not use a bed &mdash; an <code>AbstractVillager</code> has no schedule
     at all &mdash; which is why they get ten times the health and hostile mobs that ignore
-    them instead.
+    them instead. The fifth bed is his all the same; it is the count that has to match the
+    posts, not the sleeping.
 </p>
 
-<h3 id="trade-table">The trade table</h3>
+<h3 id="trade-table">The four trade tables</h3>
+
+<p>
+    Five tiers each, and <strong>each tier draws three of its pool</strong> &mdash; the
+    <code>amount</code> field in the tier's <code>trade_set</code> file &mdash; so two
+    scientists in different villages are not the same shop. The tiers that list four trades
+    rather than three are the ones where that matters most. What follows is the shape of
+    each ladder; the prices are one JSON file per trade under
+    <code>data/horsegenetics/villager_trade/&lt;profession&gt;/level_N/</code>, which is
+    also the lever if any of them is wrong.
+</p>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Tier</th><th>Buys</th><th>Sells</th></tr></thead>
+<thead><tr><th>Tier</th><th>Leatherworker</th><th>Scientist</th><th>Supplier</th><th>Metalsmith</th></tr></thead>
 <tbody>
-<tr><td><strong>1 Novice</strong></td><td>16 horse hair</td><td>Hair bundle, saddle, leads, leather horse armour</td></tr>
-<tr><td><strong>2 Apprentice</strong></td><td>8 hair bundles</td><td>Basic whistle, blank tickets, vet kit, iron horse armour, a <strong>dyed</strong> leather horse armour</td></tr>
-<tr><td><strong>3 Journeyman</strong></td><td>4 braided rope</td><td>The four general breeding carrots, a common <a href="item-spawn-eggs.html#breed">breed spawn egg</a> (22&nbsp;em)</td></tr>
-<tr><td><strong>4 Expert</strong></td><td>2 hair cloth</td><td>A random common gene carrot, a random uncommon one, a random common/uncommon research paper, an uncommon breed egg (38&nbsp;em), golden horse armour</td></tr>
-<tr><td><strong>5 Master</strong></td><td>1 stallion seed jar</td><td>A random rare gene carrot, a random epic one, a random rare/epic paper, diamond horse armour, a rare breed egg (58&nbsp;em, one use)</td></tr>
+<tr>
+    <td><strong>1 Novice</strong></td>
+    <td>Buys leather. Plain saddle, plain leather horse armour.</td>
+    <td>Buys carrots. Vet kit, stabilizer, magnifier.</td>
+    <td>Buys horse hair. Hair bundle, leads, carrots.</td>
+    <td>Buys coal and iron. Iron horse armour.</td>
+</tr>
+<tr>
+    <td><strong>2 Apprentice</strong></td>
+    <td>Buys hair cloth. Saddle and armour dyed from the <em>flowers</em> palette.</td>
+    <td>Buys seed jars. The unknown gene and epigenetic splices, the dilution splice.</td>
+    <td>Buys hair bundles. Basic whistle, blank tickets, empty seed jar.</td>
+    <td>Buys coal and copper. Iron horse armour, cheaper.</td>
+</tr>
+<tr>
+    <td><strong>3 Journeyman</strong></td>
+    <td>Buys leather. Saddle and armour from the <em>garden</em> palette.</td>
+    <td>A random common gene carrot, the marking splice, a common
+        <a href="item-spawn-eggs.html#breed">breed egg</a>.</td>
+    <td>Buys braided rope. Golden whistle, blank transfer paper, golden carrots.</td>
+    <td>Buys gold. Golden horse armour, iron horse armour.</td>
+</tr>
+<tr>
+    <td><strong>4 Expert</strong></td>
+    <td>Buys hair cloth. Armour from the <em>kiln</em> palette, saddle from
+        <em>deep</em>.</td>
+    <td>A random uncommon gene carrot, the magical splice, an uncommon breed egg.</td>
+    <td>Buys hair cloth. A random common/uncommon research paper, echo whistle, stall
+        sign.</td>
+    <td>Buys diamonds. Golden and diamond horse armour.</td>
+</tr>
+<tr>
+    <td><strong>5 Master</strong></td>
+    <td>Buys leather. Saddle and armour in <em>lapis</em>, on diamond fittings.</td>
+    <td>A <strong>homozygous</strong> rare gene carrot, a homozygous epic one, a rare
+        breed egg.</td>
+    <td>Buys horse hair at double. A random rare/epic paper, ender whistle, holding pen
+        sign.</td>
+    <td>Buys diamonds at double. Diamond and golden horse armour.</td>
+</tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    Each tier draws <strong>three</strong> of its pool, so two horsemen in different
-    villages are not the same shop. <strong>Hair buying is the early-game emerald
-    tap</strong> and therefore the number most likely to want retuning; it is one JSON
-    file per trade.
+    <strong>Hair buying is still the early-game emerald tap</strong>, and it is now the
+    supplier's alone &mdash; hair, bundles, rope and cloth all pass over his counter, which
+    is what makes him the one a player meets first and the number most likely to want
+    retuning.
 </p>
 
 <p>
-    <strong>He now stocks the whole vanilla tack ladder</strong> &mdash; saddle and all four
-    horse armours, leather through diamond, spread one per tier so the good stuff is
-    earned. Adding a trade to a pool dilutes the rest of it, because the draw is three
-    whatever the pool size: tier&nbsp;1 went from four trades to five, so any one of them
-    now shows up three times in five rather than three in four. That is a deliberate
-    trade &mdash; a fuller shop that is less predictable &mdash; and the lever if it goes
-    too far is the <code>amount</code> field in the tier's
-    <code>trade_set</code> file, not the trades themselves.
+    <strong>The metalsmith is deliberately thin, and with vanilla alone cannot easily be
+    otherwise.</strong> Vanilla has three horse armours above leather, which is not five tiers
+    of anything. So his ladder is the same three armours getting cheaper and more plentiful as
+    he rises, against ingots and diamonds getting dearer to sell him &mdash; a smith who gets
+    better at his trade rather than one who learns new tricks. The alternative was giving him
+    someone else's stock to pad him out, which is the thing the split was for.
+</p>
+
+<h3 id="metalsmith-modded">What fills him out: other mods' metals</h3>
+
+<p>
+    <strong>The thinness was always a vanilla problem, and it stops being one the moment
+    anything else in the pack adds a metal.</strong> This mod generates
+    <a href="compatibility.html#generated-what">one horse armour per modded ingot or gem</a>,
+    and the metalsmith stocks every one of them &mdash; so a pack with tin, silver, lead and
+    ruby in it gives him four more armours to sell than the three he shipped with, without a
+    line of trade authoring.
+</p>
+
+<p>
+    <strong>Which tier sells which is the armour's own strength ladder, not a second
+    opinion.</strong> A generated armour's protection is worked out once
+    (<a href="compatibility.html#generated-strength">their own chestplate if it is readable,
+    else a guess from the common tag and the item's rarity, else iron</a>) and its tier is
+    read straight off that number by <code>GeneratedArmour.tierFor</code> &mdash; weakest at
+    Novice, strongest at Master, with the cut points in that one method and nowhere else. The
+    prices sit inside the shipped armours' own range, and the expensive tiers restock less. A
+    player who levels him
+    up for the good stuff should find that the good stuff is good, so the shop's ladder and
+    the armour's ladder have to be the same ladder.
+</p>
+
+<div class="note warn">
+    <span class="label">His tier files are <em>replaced</em>, and they carry the shipped trades</span>
+    <p>
+        <code>minecraft:trade_set</code> is a datapack <strong>registry</strong>, not a tag.
+        Registry files do not merge across packs &mdash; the higher pack wins outright &mdash;
+        and the generated pack sits at the top, so a generated
+        <code>level_3.json</code> <em>is</em> the metalsmith's third tier, not an addition to
+        it. It therefore has to carry the shipped trades as well as the new ones.
+    </p>
+    <p>
+        It gets them by <strong>reading the shipped file off our own classpath</strong> rather
+        than by keeping a second copy of the list in Java. Edit a tier in
+        <code>data/horsegenetics/trade_set/equestrian_metalsmith/</code> and the generated one
+        follows on the next launch; it cannot go stale. If that read ever fails, the generated
+        trades are written on their own &mdash; which loses the vanilla armours from that tier
+        and keeps the modded ones, on the grounds that a tier missing three trades beats a
+        tier that is empty for everybody.
+    </p>
+</div>
+
+<p class="muted">
+    <strong>None of this has been seen in a shop.</strong> The generated trades have only ever
+    been exercised against a synthetic test mod on a dedicated server, where what was
+    confirmed is that the files are written and the datapack parses with no errors &mdash; not
+    that a metalsmith offers them, not that the tiers are sane, and not that a tinted armour
+    draws in a trade window. See <a href="verification.html#compat-0918">&sect;0-FK</a>.
 </p>
 
 <h3 id="random-trades">A random carrot, without a custom listing</h3>
@@ -1113,44 +1397,84 @@
     in it costs a trade slot rather than putting a blank item on sale.
 </p>
 
+<h4 id="homozygous">The carrot that breeds true</h4>
+
 <p>
-    A <strong>dyed</strong> leather horse armour is the same trick again, with the simplest
-    function of the three &mdash; <code>horsegenetics:set_random_dye</code> takes no
-    parameters at all and stamps one of the sixteen dye colours onto whatever it is given:
+    The scientist's master tier adds one optional field:
 </p>
 
-<pre><code class="language-json">{ "function": "horsegenetics:set_random_dye" }</code></pre>
+<pre><code class="language-json">{ "function": "horsegenetics:set_random_gene",
+  "target": "carrot",
+  "min_rarity": "rare",
+  "max_rarity": "rare",
+  "homozygous": true }</code></pre>
 
 <p>
-    The sixteen dyes rather than a free RGB roll, because the point is an item that looks
-    like one somebody dyed, and a random 24-bit colour mostly lands on muddy shades no dye
-    can make. <strong>This depends on no other mod.</strong> That is worth stating because
-    it was scoped as a Saturated Saddles
-    patch: that datapack adds no items, only <code>crafting_dye</code> recipes whose result
-    is the vanilla saddle carrying the vanilla <code>dyed_color</code> component. There is
-    no third-party id to depend on, so there is nothing to detect.
+    A <a href="carrots.html">known gene splice</a> names <em>both</em> alleles of the
+    gamete rather than carrying a flag, so &ldquo;the carrot that breeds true&rdquo; is not
+    a separate concept &mdash; it is the pair <code>X/X</code> where an ordinary one is
+    <code>n/X</code>. Which of the two a carrot gets is normally the gene's own call
+    (<code>Gene.geneCarrotHomozygous</code>); this overrides it upward, and the foal is
+    then <em>certain</em> to get the gene rather than getting it on a coin flip. That is
+    what a fifty-emerald carrot has to be selling.
 </p>
 
-<div class="note warn">
-    <span class="label">It is applied to armour, and deliberately not to saddles</span>
-    <p>
-        <strong>Vanilla does not tint the saddle.</strong>
-        <code>EquipmentAssetProvider</code> builds the leather asset with
-        <code>Layer.leatherDyeable(&hellip;)</code> and the saddle asset with the
-        single-argument <code>Layer</code> constructor, whose dyeable field is
-        <code>Optional.empty()</code> &mdash; so <code>dyed_color</code> on a saddle is set,
-        correct and <em>invisible</em>. The tinted saddle model comes from Saturated
-        Saddles&rsquo; <em>resource pack</em>, not from its datapack and not from vanilla.
-        A dyed-saddle trade was written and withdrawn on 2026-09-15 for exactly that reason:
-        it sold a fourteen-emerald saddle indistinguishable from the eight-emerald one.
-        Shipping a coloured saddle means shipping the dyeable equipment asset ourselves.
-    </p>
-</div>
+<p>
+    <strong>It cannot force a pair the gene forbids.</strong> A locus whose homozygote is
+    lethal &mdash; or that otherwise fails <code>Gene.canOccur</code> &mdash; would make an
+    inert carrot, which is worse than not selling one, so those genes are skipped
+    <em>at the draw</em> rather than sold and silently doing nothing.
+</p>
+
+<h4 id="tack-tint">Dyed tack, on a ladder you can see</h4>
 
 <p>
-    <a href="item-spawn-eggs.html#breed">Breed spawn eggs</a> are the same trick with a second
-    function, <code>horsegenetics:set_random_breed</code>, which takes a commonness window
-    instead of a rarity one:
+    The leatherworker's five tiers are the same trick again, with a function of their own:
+</p>
+
+<pre><code class="language-json">{ "function": "horsegenetics:set_tack_tint",
+  "palette": "flowers" }</code></pre>
+
+<p>
+    Five palettes &mdash; <code>flowers</code>, <code>garden</code>, <code>kiln</code>,
+    <code>deep</code>, <code>lapis</code> &mdash; ordered by <strong>what the dye costs to
+    get</strong> rather than by taste. At his first tier he deals in what you could dye a
+    thing with on the walk to his post, bone meal and whatever is growing; at his last he
+    is selling lapis on diamond fittings. A flat random roll cannot express that, because
+    the expense of the dye <em>is</em> the progression. Seat and bridle roll separately
+    within a palette, so a piece reads as somebody's choice rather than as one flat colour.
+</p>
+
+<p>
+    <strong>This is not vanilla's <code>dyed_color</code>.</strong> That component reaches
+    the blanket of leather horse armour and nothing at all on a saddle. This writes the
+    mod's own three-zone <code>tack_tint</code>, which is what the
+    <a href="items.html#tack">equipment assets this mod ships</a> actually read &mdash; so
+    it colours the saddle too, and it sets the metal fittings, which no vanilla component
+    can express.
+</p>
+
+<p>
+    <strong>That is why the dyed-saddle trade is back.</strong> It was written and
+    withdrawn once, for selling a fourteen-emerald saddle indistinguishable from the
+    eight-emerald one; with three tinted zones on the saddle it now sells something you can
+    see, and the objection has expired rather than been overruled.
+</p>
+
+<p>
+    The older <code>horsegenetics:set_random_dye</code> &mdash; no parameters at all,
+    stamps one of the sixteen dye colours onto whatever it is given &mdash; is still
+    registered and is still what a datapack wants for a plain dyed item. The sixteen dyes
+    rather than a free RGB roll, because the point is an item that looks like one somebody
+    dyed, and a random 24-bit colour mostly lands on muddy shades no dye can make.
+</p>
+
+<h4 id="breed-eggs">Breed eggs, and the region filter</h4>
+
+<p>
+    <a href="item-spawn-eggs.html#breed">Breed spawn eggs</a> are the same trick with a
+    third function, <code>horsegenetics:set_random_breed</code>, which takes a commonness
+    window instead of a rarity one:
 </p>
 
 <pre><code class="language-json">{ "function": "horsegenetics:set_random_breed",
@@ -1161,26 +1485,26 @@
     The membership test is the breed's own <a href="breeds.html#sources">source
     checklist</a> &mdash; a breed is a candidate if it allows <code>spawn_egg</code> &mdash;
     so a breed a player drops into <code>.minecraft/phc/breeds/</code> joins the
-    horseman's stock by being registered, and one that opts out disappears from it, with
+    scientist's stock by being registered, and one that opts out disappears from it, with
     nothing edited either way. Within a window, draws are weighted by the breed's own
-    <code>spawnWeight</code>. Two functions rather than one parameterised thing, for the
+    <code>spawnWeight</code>. Three functions rather than one parameterised thing, for the
     reason there are two loot modifiers: a paper is knowledge and an egg is an animal, and
     a datapack ought to be able to retune one without the other.
 </p>
 
 <p>
-    <strong>The window is then narrowed to the horseman&rsquo;s own part of the world.</strong>
-    He has no region of his own, so he takes one from the nearest cowboy in town &mdash; the
-    same nearest-wins scan his surname uses &mdash; and stocks only breeds from that
-    <a href="breeds.html#regions">region&rsquo;s countries</a>. With no cowboy in town there
-    is no connection and so no filter, and he sells the world; a dungeon chest is unfiltered
-    for the same reason, having no villager to ask. Nothing is stored on him, so a cowboy
-    who moves in or dies changes what is on the counter at the next restock.
+    <strong>The window is then narrowed to the scientist&rsquo;s own part of the
+    world.</strong> He has no region of his own, so he takes one from the nearest cowboy in
+    town &mdash; the same nearest-wins scan his surname uses &mdash; and stocks only breeds
+    from that <a href="breeds.html#regions">region&rsquo;s countries</a>. With no cowboy in
+    town there is no connection and so no filter, and he sells the world; a dungeon chest is
+    unfiltered for the same reason, having no villager to ask. Nothing is stored on him, so a
+    cowboy who moves in or dies changes what is on the counter at the next restock.
 </p>
 
 <p>
     <strong>A region with nothing in a window costs him that trade.</strong> Three of the ten
-    regions have no breed at all in the commonest band, so their horseman has no common breed
+    regions have no breed at all in the commonest band, so their scientist has no common breed
     egg to sell: the function returns an empty stack and vanilla drops the offer, which is the
     same path a player switching most breeds off already takes. That is the owner&rsquo;s call
     over the two alternatives, and the reason is that both of them lie &mdash; widening the
@@ -1193,12 +1517,17 @@
 <ul>
     <li><strong>No random genotype vials, and no buying player-made ones back.</strong>
         Both need the assisted-reproduction / <code>collectedFrom</code> work that is
-        <a href="roadmap.html#ivf">still unbuilt</a>. Tier 5's buy row is a
+        <a href="roadmap.html#ivf">still unbuilt</a>. The scientist's buy row is a
         <em>stallion seed jar</em> instead, which is a real player-made item today.</li>
     <li><strong>No custom gossip type.</strong> <code>HORSE_TRADER</code> was flagged
-        as unverified; the horseman uses vanilla gossip, which costs nothing and
-        works.</li>
+        as unverified; all four use vanilla gossip, which costs nothing and works.</li>
+    <li><strong>The four posts are still four names on one block.</strong> None of them
+        does anything beyond marking a spot, and none of them looks like the trade it
+        belongs to. A hitch you tie a horse to and a bench you work leather at are open
+        work.</li>
 </ul>
+
+
 
 <h2 id="verified">Verified</h2>
 
@@ -1222,11 +1551,13 @@
 </div>
 
 <p id="verified-workstation-recipes">
-    <strong>The two workstations have different recipes</strong> (2026-09-09). <code>cowboy_hitch.json</code> and
-    <code>horsemans_table.json</code> were shapeless over the same seven items, so one block was unobtainable in survival.
-    The hitch is rope-heavy (2 cloth + 3 rope + 2 fence) and the table takes leather (3 cloth + 2 leather + 2 fence).
-    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses two recipes in the same slot, and a vanilla recipe with no
-    result, exempting the mod's custom serialisers.
+    <strong>No two of the posts have the same recipe</strong> (first checked 2026-09-09, and the check is
+    what still holds it). The hitch and the retired horseman's table were shapeless over the same seven
+    items, so one of the two blocks was unobtainable in survival at all. Every post since has been given a
+    filling of its own on top of the shared two hair cloth and two fences, and
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses two recipes in the same slot, and a vanilla
+    recipe with no result, exempting the mod's custom serialisers &mdash; so the five
+    <a href="#workstation">posts</a> cannot collide as they are retuned.
 </p>
 
 <p id="verified-no-shelter">
@@ -1259,25 +1590,46 @@
 </p>
 
 <p id="verified-they-them">
-    <strong>The cowboy and the horseman read as they/them</strong> (owner-confirmed in play,
-    2026-09-10).
+    <strong>The cowboy and the shopkeeper villagers read as they/them</strong> (owner-confirmed in play,
+    2026-09-10, when the shopkeeper was one horseman rather than four equestrians &mdash; the prose rule
+    is unchanged and applies to all of them).
+</p>
+
+<p id="verified-poi-wiring">
+    <strong>A post's POI really does hand out its job, and the tag really does merge</strong> (the
+    2026-09-07 batch, owner play session). This is the half of the villager work that has ever been in
+    doubt, because nothing about it can be tested outside a world: both work posts on the homestead
+    handed out their jobs to the profession-less villagers standing in front of them, which is only
+    possible if the POI registered <em>and</em> if the addition to vanilla's
+    <code>acquirable_job_site</code> tag merged rather than being ignored. The
+    <a href="#post-at-the-barn">five villagers on the walk</a> are the same test again, now asking it of
+    four POIs at once and naming which one is broken.
+</p>
+
+<p id="verified-family-name">
+    <strong>The cowboy and the villager he shares a homestead with share a surname</strong> (the
+    2026-09-07 batch, owner play session). The <a href="#family-names">first-hired-names-the-family</a>
+    rule works in a live village, in whichever order the two happened to claim their posts. What that
+    session could not ask is whether it holds across <em>five</em> hires rather than two.
 </p>
 
 <p id="verified-barn">
     <strong>Seen working in game</strong> (the 2026-09-07 batch, owner play session, before the house
     was baked into the barn&rsquo;s structure piece): the barn generates and sits on the ground with
-    steps up to it, the cowboy founds and has a face, both work posts hand out their jobs, the cowboy
-    and the horseman share a surname, the horseman keeps vanilla&rsquo;s villager brain, and transfer
-    papers work end to end. Not seen since: the baked homestead, its ground course and walk, and the
-    cowboy opening doors (<a href="verification.html#villagers">the checklist</a>).
+    steps up to it, the cowboy founds and has a face, the shopkeeper villager keeps
+    vanilla&rsquo;s villager brain, and transfer papers work end to end. Not seen since: the baked
+    homestead, its ground course and walk, and the cowboy opening doors
+    (<a href="verification.html#villagers">the checklist</a>).
 </p>
 
 <p id="verified-village-tag">
     <strong>Vanilla's <code>minecraft:village</code> POI tag loads again</strong> (checked 2026-09-15). The mod's
     <code>data/minecraft/tags/point_of_interest_type/village.json</code> named <code>horsegenetics:cowboy_hitch</code>
-    after that POI was removed, and a tag naming a missing entry fails to load as a whole. It now lists only
-    <code>horsegenetics:horsemans_table</code> (commit <code>2d840732</code>). None of the 33 saved client logs of
-    2026-09-14 and 15, nor the current one, has a <code>Couldn't load tag</code> line.
+    after that POI was removed, and a tag naming a missing entry fails to load as a whole. The lesson is the
+    one that matters and it outlived the entry: <strong>a POI tag may only name POIs that exist</strong>, so
+    the hitch &mdash; which is deliberately not a POI at all &mdash; must never be listed in one, and the
+    file today names the four posts and nothing else. None of the 33 saved client logs of
+    2026-09-14 and 15, nor the one after that, has a <code>Couldn't load tag</code> line.
 </p>
 
 </article>
