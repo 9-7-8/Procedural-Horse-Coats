@@ -25,8 +25,21 @@ class BreedHerdTest {
 
     @Test
     void aDefaultFamilyBandIsOneStallionAndTheRestMares() {
-        assertEquals(1, BreedHerd.DEFAULT.traditional().stallionCount(4, rng()));
-        assertEquals(1, BreedHerd.DEFAULT.traditional().stallionCount(6, rng()));
+        assertEquals(1, BreedHerd.DEFAULT.traditional().stallionCount(1, rng()));
+        assertEquals(1, BreedHerd.DEFAULT.traditional().stallionCount(
+                1 + BreedHerd.MAX_HAREM_MARES, rng()), "a full harem is still one stallion's");
+    }
+
+    @Test
+    void aDefaultFamilyBandPastItsHaremTurnsTheSurplusStallion() {
+        // The harem cap is what stops a big clump reading as one stallion and a
+        // wall of mares, which is how the wild looked before it existed.
+        BreedHerd.Band band = BreedHerd.DEFAULT.traditional();
+        for (int extra = 1; extra <= 4; extra++) {
+            int adults = 1 + BreedHerd.MAX_HAREM_MARES + extra;
+            assertEquals(1 + extra, band.stallionCount(adults, rng()),
+                    "at " + adults + " adults, only " + BreedHerd.MAX_HAREM_MARES + " may be mares");
+        }
     }
 
     @Test
