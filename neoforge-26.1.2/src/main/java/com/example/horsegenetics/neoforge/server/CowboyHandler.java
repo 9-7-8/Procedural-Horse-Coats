@@ -1,12 +1,14 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.breed.ArcaneStock;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.breed.Region;
+import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
@@ -34,8 +36,10 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -45,7 +49,7 @@ import java.util.UUID;
  * <h2>Founding, on the tick and not on the join</h2>
  * {@code cowboy_barn.nbt} carries a {@code horsegenetics:cowboy} with nothing in
  * it but its id - a structure template can only place an entity, not roll one.
- * So their name, their home, their mount and their herd are all made here, on their first
+ * So their name, their home and their herd are all made here, on their first
  * server tick.
  *
  * <p>They are also <b>restocked</b> from here, on the same tick handler and for
@@ -151,6 +155,19 @@ public final class CowboyHandler {
      */
     private static final int RESTOCK_PER_LOOK = 1;
 
+    /**
+     * How often the man who founds at a barn deals in magic instead of a breed:
+     * about one village in twelve.
+     *
+     * <p>Rare enough that finding one is a thing that happens to a playthrough
+     * rather than a fixture of every village, and common enough that a player
+     * who goes looking will find one in an afternoon's riding. He is the only
+     * reliable way to collect magical loci - they sit near a 0.1% founder weight
+     * in the wild - so "rare" here has to mean rare to <b>meet</b>, never rare to
+     * <b>use</b> once met. Owner's call, 2026-09-18.
+     */
+    private static final float ARCANE_CHANCE = 1.0F / 12.0F;
+
     /** Ticks between the cowboy's own state line, and between attempts to get them back on. */
     private static final int COWBOY_REPORT_INTERVAL = 20;
 
@@ -171,6 +188,12 @@ public final class CowboyHandler {
         }
         if (!cowboy.isFounded()) {
             found(cowboy, level);
+            return;
+        }
+        // A dealer who spawned on the road leaves again. Checked before the
+        // restock clock, so his last act is not to breed a horse he then takes
+        // away with him.
+        if (cowboy.isWanderer() && ArcaneWandererHandler.moveOnIfDue(cowboy, level)) {
             return;
         }
         if (cowboy.tickCount % COWBOY_REPORT_INTERVAL == 0) {
@@ -243,29 +266,71 @@ public final class CowboyHandler {
      */
     private static final java.util.Map<UUID, String> LAST_COWBOY_STATE = new java.util.HashMap<>();
 
+    /**
+     * Found a cowboy <b>where he is standing</b>, dealing in magic, skipping the
+     * walk out to a paddock. For {@link DebugYardArcane} and nothing else.
+     *
+     * <p>The paddock walk is 12-24 blocks in a roughly outward direction, which
+     * is right beside a barn and wrong inside the test yard: it would march him
+     * out of his own pen and build his string in somebody else's, which breaks
+     * the pen isolation every other test in the yard depends on. Everything else
+     * about him is the ordinary founding path, deliberately - a debug fixture
+     * that builds its own herd would be a second copy of the thing under test.
+     */
+    public static void foundArcaneInPlace(Cowboy cowboy, ServerLevel level) {
+        cowboy.setArcane(true);
+        found(cowboy, level, false);
+    }
+
     private static void found(Cowboy cowboy, ServerLevel level) {
+        found(cowboy, level, true);
+    }
+
+    private static void found(Cowboy cowboy, ServerLevel level, boolean walkToPaddock) {
         Rng rng = new NeoRng(cowboy.getRandom());
 
-        // The breed they are known for, settled FIRST - before the name, because
-        // the name comes from the same place the breed does. The premise is that
-        // villagers were pulled out of the real world along with their herds, so
-        // the man selling Fjords is a Halvorsen and the man selling Andalusians
-        // is an Olivares. Naming him before knowing his trade threw that away.
+        // Whether he deals in magic rather than in a breed is settled FIRST: it
+        // is the thing everything else about him follows from, since an arcane
+        // dealer has no breed to be known for and no country to be from.
+        //
+        // Already set means somebody placed him deliberately - the debug yard, a
+        // command - and the roll is skipped rather than given a chance to
+        // overrule them. Founding is the only thing that ever writes this, so an
+        // arcane flag on an unfounded cowboy can only have come from outside.
+        boolean arcane = cowboy.isArcane() || cowboy.getRandom().nextFloat() < ARCANE_CHANCE;
+        cowboy.setArcane(arcane);
+
+        // The breed they are known for, settled before the name, because the name
+        // comes from the same place the breed does. The premise is that villagers
+        // were pulled out of the real world along with their herds, so the man
+        // selling Fjords is a Halvorsen and the man selling Andalusians is an
+        // Olivares. Naming him before knowing his trade threw that away.
         //
         // (Picked at the barn rather than at the paddock he is about to walk to;
         // they are a few blocks apart and share a biome.)
-        Breed favourite = pickBreed(cowboy, level);
-        cowboy.setPreferredBreed(favourite.id());
-        String regionId = regionOf(cowboy)
-                .orElseGet(() -> Region.values()[rng.nextInt(Region.values().length)])
-                .id();
+        Breed favourite = arcane ? null : pickBreed(cowboy, level);
+        if (favourite != null) {
+            cowboy.setPreferredBreed(favourite.id());
+        }
 
-        // The village's horse family, if it has one already - the hitch and the
-        // table hand out their jobs in whatever order, so whoever is hired first
-        // coins the surname and the other joins it. See server/HorsemanHandler.
-        String surname = HorsemanHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng, regionId);
-        cowboy.setCustomName(Component.literal(
-                PersonNameGenerator.forRegion(regionId).generateParts(rng).first() + " " + surname));
+        if (arcane) {
+            // BOTH halves off the arcane tables, and deliberately NOT through
+            // familySurname: the village's horse family is a family, and this
+            // man is not in it. A Blackthorn who turns up selling starlit horses
+            // should not share a surname with the stable hand.
+            cowboy.setCustomName(Component.literal(
+                    PersonNameGenerator.forRegion(Cowboy.ARCANE_NAMES).generate(rng)));
+        } else {
+            String regionId = regionOf(cowboy)
+                    .orElseGet(() -> Region.values()[rng.nextInt(Region.values().length)])
+                    .id();
+            // The village's horse family, if it has one already - the hitch and the
+            // table hand out their jobs in whatever order, so whoever is hired first
+            // coins the surname and the other joins it. See server/HorsemanHandler.
+            String surname = HorsemanHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng, regionId);
+            cowboy.setCustomName(Component.literal(
+                    PersonNameGenerator.forRegion(regionId).generateParts(rng).first() + " " + surname));
+        }
         cowboy.setCustomNameVisible(true);
 
         // Home is where the structure put them - the middle of the barn - and it
@@ -282,7 +347,7 @@ public final class CowboyHandler {
         // five with walls on every side, and a horse is nearly a block and a half
         // wide: placing a string of them in there put half of them in the walls.
         // They walk out to open ground first and the herd is made around them.
-        BlockPos paddock = findPaddock(level, barn);
+        BlockPos paddock = walkToPaddock ? findPaddock(level, barn) : null;
         if (paddock != null) {
             cowboy.snapTo(paddock, cowboy.getYRot(), 0.0F);
         }
@@ -290,9 +355,17 @@ public final class CowboyHandler {
         int herdSize = Cowboy.MIN_HERD + cowboy.getRandom().nextInt(Cowboy.MAX_HERD - Cowboy.MIN_HERD + 1);
         cowboy.setStockTarget(herdSize);
 
-        breedHorse(cowboy, level, rng, favourite);
-        for (int i = 1; i < herdSize; i++) {
-            breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
+        if (arcane) {
+            // One set for the whole string, carried across the loop.
+            Set<String> taken = new LinkedHashSet<>();
+            for (int i = 0; i < herdSize; i++) {
+                breedArcaneHorse(cowboy, level, rng, taken);
+            }
+        } else {
+            breedHorse(cowboy, level, rng, favourite);
+            for (int i = 1; i < herdSize; i++) {
+                breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
+            }
         }
 
         HorseGenetics.LOGGER.info("{} set up at {} with {} horses",
@@ -311,8 +384,13 @@ public final class CowboyHandler {
      */
     private static void announce(Cowboy cowboy, ServerLevel level) {
         DebugAnnounce.sayAt(level, "Cowboy",
+                // Not size() - 1: that subtracted the mount, and there has not been
+                // one since the mounted subsystem was deleted. Every id in the herd
+                // is a horse for sale, and the log line beside this one has always
+                // printed the untouched size - so the two disagreed by one.
                 cowboy.cowboyName() + " set up with "
-                        + (cowboy.herdIds().size() - 1) + " horses for sale",
+                        + cowboy.herdIds().size() + " horses for sale"
+                        + (cowboy.isArcane() ? " (arcane - magical stock)" : ""),
                 cowboy.blockPosition(), ChatFormatting.YELLOW);
     }
 
@@ -327,6 +405,79 @@ public final class CowboyHandler {
      * bred it, and transferring ownership never touches it.
      */
     private static @Nullable Horse breedHorse(Cowboy cowboy, ServerLevel level, Rng rng, Breed breed) {
+        Horse horse = placeStock(cowboy, level);
+        if (horse == null) {
+            return null;
+        }
+        Genome genome = BreedFounder.roll(breed, rng);
+        BreedFounderLog.founder(breed, genome.genotype(), "cowboy");
+        HorseRecord record = recordFor(cowboy, horse, rng, genome, BreedLineage.pure(breed.id()).toToken());
+        // ABOUT HALF HIS MALES ARE GELDINGS (owner, 2026-09-13): the riding stock a
+        // dealer actually sells, a little cheaper than an entire horse
+        // (HorsePrices). His herd is also exempt from natural breeding, so his
+        // string stays the horses he rolled.
+        if (record.sex() == com.example.horsegenetics.common.horse.Sex.MALE && rng.nextFloat() < 0.5F) {
+            record = record.withGelded(true);
+        }
+        return settle(cowboy, level, horse, record);
+    }
+
+    /**
+     * One horse for the dealer who sells magic: a {@code BreedLineage.MIXED}
+     * animal carrying a showing gene from every magical family, none of whose
+     * allele combinations another horse in his string already has.
+     *
+     * <p><b>Never gelded</b>, and that is the whole point of him rather than a
+     * detail: what a player is buying is the genes, and a gelding cannot pass
+     * them on. The ordinary cowboy gelds half his colts because he is selling
+     * something to ride; this man is selling something to breed from, so the
+     * rule that makes his neighbour's string useful would make his string
+     * worthless. (Owner, 2026-09-18.)
+     *
+     * <p>He is exempt from natural breeding like any other cowboy herd, so the
+     * no-two-alike rule stays true: nothing in the paddock can quietly produce
+     * a twelfth horse he did not roll.
+     */
+    private static @Nullable Horse breedArcaneHorse(Cowboy cowboy, ServerLevel level, Rng rng, Set<String> taken) {
+        Horse horse = placeStock(cowboy, level);
+        if (horse == null) {
+            return null;
+        }
+        // rollHorse WRITES to taken, which is what keeps a founding run distinct
+        // without asking the level whether the horse bred a moment ago is visible
+        // yet. That question has a different answer inside one tick than between
+        // two, and getting it wrong would fail silently and in the worst possible
+        // direction: an empty taken set makes every horse an independent roll,
+        // which looks fine and quietly breaks the no-two-alike rule.
+        List<AllelePair> forced = ArcaneStock.rollHorse(rng, taken);
+        Genome genome = BreedFounder.roll(Breeds.FERAL_MIXED, rng, forced);
+        BreedFounderLog.founder(Breeds.FERAL_MIXED, genome.genotype(), "arcane dealer");
+        HorseRecord record = recordFor(cowboy, horse, rng, genome, BreedLineage.MIXED.toToken());
+        return settle(cowboy, level, horse, record);
+    }
+
+    /**
+     * Every showing magical combination the dealer's live string is already
+     * using, as {@code ArcaneStock} tokens.
+     *
+     * <p>Only the loaded, still-sellable horses - the same set the merchant
+     * screen shows. An unloaded one is indistinguishable from a dead one, and
+     * the worst that a missed horse can do here is let one combination appear
+     * twice in a string of ten.
+     */
+    private static Set<String> takenCombos(Cowboy cowboy, ServerLevel level) {
+        Set<String> taken = new LinkedHashSet<>();
+        for (Horse horse : sellableStock(cowboy, level)) {
+            HorseRecord record = HorseRecords.of(horse);
+            if (record.hasName()) {
+                taken.addAll(ArcaneStock.showingTokens(record.genome().genotype()));
+            }
+        }
+        return taken;
+    }
+
+    /** An adult, persistent, unspawned horse standing where the dealer has room for it. */
+    private static @Nullable Horse placeStock(Cowboy cowboy, ServerLevel level) {
         BlockPos spot = findPlacement(cowboy, level);
         if (spot == null) {
             return null;
@@ -338,22 +489,19 @@ public final class CowboyHandler {
         horse.snapTo(spot, level.getRandom().nextFloat() * 360.0F, 0.0F);
         horse.setAge(0);                 // an adult; they do not sell foals
         horse.setPersistenceRequired();  // their stock does not despawn
+        return horse;
+    }
 
-        Genome genome = BreedFounder.roll(breed, rng);
-        BreedFounderLog.founder(breed, genome.genotype(), "cowboy");
+    /** A named founder record credited to the dealer who bred it. */
+    private static HorseRecord recordFor(Cowboy cowboy, Horse horse, Rng rng, Genome genome, String lineage) {
         NameParts name = HorseRecords.newNameParts(rng);
-        HorseRecord record = HorseRecord
-                .founder(horse.getUUID(), name.first(), name.last(), genome,
-                        BreedLineage.pure(breed.id()).toToken())
+        return HorseRecord
+                .founder(horse.getUUID(), name.first(), name.last(), genome, lineage)
                 .withBredBy(cowboy.cowboyName());
-        // ABOUT HALF HIS MALES ARE GELDINGS (owner, 2026-09-13): the riding stock a
-        // dealer actually sells, a little cheaper than an entire horse
-        // (HorsePrices). His herd is also exempt from natural breeding, so his
-        // string stays the horses he rolled.
-        if (record.sex() == com.example.horsegenetics.common.horse.Sex.MALE && rng.nextFloat() < 0.5F) {
-            record = record.withGelded(true);
-        }
+    }
 
+    /** Add the horse to the world, brand it, and put it in the dealer's herd. */
+    private static Horse settle(Cowboy cowboy, ServerLevel level, Horse horse, HorseRecord record) {
         level.addFreshEntity(horse);
         HorseRecords.apply(horse, record);
         horse.setData(ModAttachments.COWBOY_BRAND.get(), CowboyBrand.of(cowboy.getUUID()));
@@ -580,7 +728,7 @@ public final class CowboyHandler {
      *       to come back, because they would be the same six horses forever.</li>
      * </ul>
      *
-     * <p>Only ever the horses they can still sell. Their mount is not stock, a horse
+     * <p>Only ever the horses they can still sell. A horse
      * somebody has already bought the papers for is spoken for, and one that has
      * been tamed has left their hands entirely - {@link #forgetTamed} drops those
      * from the herd so they stop counting against the target they no longer fill.
@@ -601,7 +749,12 @@ public final class CowboyHandler {
 
         Rng rng = new NeoRng(cowboy.getRandom());
         for (int bred = 0; bred < RESTOCK_PER_LOOK && stock.size() < cowboy.stockTarget(); bred++) {
-            Horse horse = breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
+            // Between ticks, so the string really is readable off the level - and
+            // read fresh every time, so a retired horse hands its combinations
+            // back and the replacement may use them again.
+            Horse horse = cowboy.isArcane()
+                    ? breedArcaneHorse(cowboy, level, rng, takenCombos(cowboy, level))
+                    : breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
             if (horse == null) {
                 break; // nowhere to stand it - try again next look
             }
@@ -611,7 +764,7 @@ public final class CowboyHandler {
 
     /**
      * The horses they could write a paper for right now: alive, loaded, untamed,
-     * not their mount, not already sold.
+     * not already sold.
      *
      * <p>The same test {@code Cowboy.updateTrades} applies when it builds the
      * offer list, and deliberately so - "how many has they got?" and "how many can

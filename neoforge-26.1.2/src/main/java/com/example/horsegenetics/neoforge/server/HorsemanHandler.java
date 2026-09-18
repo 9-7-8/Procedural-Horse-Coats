@@ -102,7 +102,11 @@ public final class HorsemanHandler {
         double best = Double.MAX_VALUE;
 
         for (Cowboy cowboy : level.getEntitiesOfClass(Cowboy.class, town)) {
-            if (cowboy == except || cowboy.lastName().isEmpty()) {
+            // An arcane dealer never founds the village's horse family and never
+            // joins it: he is passing through with a string of magical horses,
+            // not somebody's brother. Skipped here as well as when he is named,
+            // or the stable hand ends up a Blackthorn.
+            if (cowboy == except || cowboy.isArcane() || cowboy.lastName().isEmpty()) {
                 continue;
             }
             double distance = cowboy.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);

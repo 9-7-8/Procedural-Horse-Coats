@@ -51,7 +51,24 @@ public class CowboyOverlayLayer extends RenderLayer<VillagerRenderState, Village
             com.example.horsegenetics.neoforge.HorseGenetics.MOD_ID,
             "textures/entity/villager/profession/horseman.png");
 
+    /**
+     * The arcane dealer's hat colour, multiplied over the ordinary horseman hat
+     * rather than drawn from its own texture - one tint against a second PNG to
+     * keep in step with the first.
+     *
+     * <p>Light on purpose. The hat texture is already dark, and a multiply by a
+     * saturated purple takes it to nearly black; this is picked bright enough
+     * that the result reads as purple at riding distance. It is one constant, so
+     * it is the thing to move if it looks wrong in the light.
+     */
+    private static final int ARCANE_HAT = 0xFFC9A0FF;
+
     private final VillagerModel noHatModel;
+
+    /** See {@code CowboyRenderer.createRenderState} for why this is an instanceof. */
+    private static boolean arcaneHat(VillagerRenderState state) {
+        return state instanceof CowboyRenderState cowboyState && cowboyState.arcane;
+    }
 
     public CowboyOverlayLayer(RenderLayerParent<VillagerRenderState, VillagerModel> renderer,
                               VillagerModel noHatModel) {
@@ -66,6 +83,7 @@ public class CowboyOverlayLayer extends RenderLayer<VillagerRenderState, Village
             return;
         }
         renderColoredCutoutModel(noHatModel, ROBE, poseStack, collector, lightCoords, state, -1, 1);
-        renderColoredCutoutModel(getParentModel(), HAT, poseStack, collector, lightCoords, state, -1, 2);
+        renderColoredCutoutModel(getParentModel(), HAT, poseStack, collector, lightCoords, state,
+            arcaneHat(state) ? ARCANE_HAT : -1, 2);
     }
 }

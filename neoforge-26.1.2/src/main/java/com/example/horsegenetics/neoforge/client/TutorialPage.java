@@ -854,12 +854,19 @@ public final class TutorialPage {
                                 + "and it breeds on: a magical horse crossed back into its own breed "
                                 + "stays magical, while crossed with anything else it is an ordinary "
                                 + "cross like any other.",
-                        "Only wild herds are ever magical this way. A cowboy's string, a generated "
-                                + "stable and a breed spawn egg all give you ordinary horses of the "
-                                + "breed, and the gene a magical herd carries is never one of the body "
-                                + "stats and never a disorder - a magical herd is not a sick one."),
+                        "Only wild herds are magical this way. A generated stable and a breed spawn "
+                                + "egg give you ordinary horses of the breed, and the gene a magical "
+                                + "herd carries is never one of the body stats and never a disorder "
+                                + "- a magical herd is not a sick one.",
+                        "One cowboy in twelve is a different thing again: an arcane dealer, who keeps "
+                                + "no breed at all. His horses are Mixed, never gelded, and each one "
+                                + "shows eleven or twelve magical genes with no two of his animals "
+                                + "carrying the same pair. He is dear, and he is the reliable way to "
+                                + "collect what the wild almost never offers. Sometimes one is out on "
+                                + "the road rather than at a barn."),
                 List.of(), Art.NONE,
-                List.of(ProgressTask.MEET_MAGICAL_HERD, ProgressTask.TAME_MAGICAL_HORSE)));
+                List.of(ProgressTask.MEET_MAGICAL_HERD, ProgressTask.TAME_MAGICAL_HORSE,
+                        ProgressTask.BUY_ARCANE_HORSE)));
 
         magic.add(new Step("Sunlight, and blood",
                 List.of("Two magical traits change how you have to keep a horse, and they are worth "

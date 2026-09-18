@@ -44,6 +44,16 @@ public final class HorsePrices {
      */
     public static final Breed.PriceRange DEFAULT_PRICE = new Breed.PriceRange(1, 3);
 
+    /**
+     * What an arcane dealer asks, whatever is standing in front of you: twelve
+     * to twenty-eight emeralds, against one to three for an ordinary horse.
+     *
+     * <p>Dear enough to be a trip you save up for rather than a stop on the way
+     * past - a player clearing out his string is spending most of a day's
+     * trading - and still inside {@link #MAX_EMERALDS}, so the offer renders.
+     */
+    public static final Breed.PriceRange ARCANE_PRICE = new Breed.PriceRange(12, 28);
+
     /** Vanilla's merchant screen cannot show a cost above one stack. */
     private static final int MAX_EMERALDS = 64;
 
@@ -56,7 +66,24 @@ public final class HorsePrices {
      * line to breed from.
      */
     public static int emeraldsFor(HorseRecord record) {
-        int price = roll(rangeFor(record.lineage()), record.id());
+        return emeraldsFor(record, false);
+    }
+
+    /**
+     * What a dealer asks for this horse. {@code arcane} is the man, not the
+     * animal: a dealer who sells magic asks {@link #ARCANE_PRICE} for anything
+     * off his string.
+     *
+     * <p>The markup lives here, at the counter, and deliberately not on the
+     * horse. §4 of the philosophy is that nothing in the model scores a horse -
+     * there is no rarity tier and no "this is the good one" - so a horse's worth
+     * is a fact about who is selling it, exactly like every other price in this
+     * class. A horse with eleven magical loci that a player bred themselves is
+     * worth nothing in particular, and that is correct.
+     */
+    public static int emeraldsFor(HorseRecord record, boolean arcane) {
+        Breed.PriceRange range = arcane ? ARCANE_PRICE : rangeFor(record.lineage());
+        int price = roll(range, record.id());
         return record.gelded() ? Math.max(1, price * 3 / 4) : price;
     }
 

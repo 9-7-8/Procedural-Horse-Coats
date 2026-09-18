@@ -325,6 +325,12 @@ public enum ProgressTask {
     TAME_MAGICAL_HORSE(Group.MAGIC, "Tame a horse out of a magical herd",
             "Take one home and that gene is yours to breed from. Magical crossed back into its own "
                     + "breed stays magical; crossed with anything else it is an ordinary cross."),
+    BUY_ARCANE_HORSE(Group.MAGIC, "Buy a horse from an arcane dealer",
+            "One cowboy in twelve deals in magic instead of a breed, and one turns up out on the "
+                    + "road now and then as well. His horses are Mixed, never gelded, and every one "
+                    + "carries eleven or twelve magical genes it actually shows - no two of his horses "
+                    + "alike. He charges for it. This is the reliable way to collect the loci the wild "
+                    + "hardly ever offers."),
     SUN_SENSITIVE_SEEN(Group.MAGIC, "Watch a horse run from the sun",
             "A sun-sensitive horse catches fire in daylight and loses half a heart every couple of "
                     + "seconds. Watch one break for the deepest shade it can reach and hold there until "

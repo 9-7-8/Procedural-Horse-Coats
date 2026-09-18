@@ -90,17 +90,37 @@ public final class BreedFounder {
      * {@link MagicalVariant}). {@code variant} may be null, for an ordinary herd.
      */
     public static Genome roll(Breed breed, Rng rng, Sex sex, MagicalVariant variant) {
-        return roll(breed, rng, variant).withSex(sex);
+        return roll(breed, rng, sex, variant == null ? List.<AllelePair>of() : List.of(variant.pair()));
+    }
+
+    /**
+     * {@link #roll(Breed, Rng, Sex)} with <b>several</b> pairs stamped on top -
+     * a horse from a dealer who sells magic rather than a breed, whose whole
+     * stock-in-trade is a dozen showing loci at once. See {@link ArcaneStock},
+     * which chooses them; this only applies them.
+     *
+     * <p>They land exactly where a magical herd's one pair lands, and for the
+     * same two reasons: after the no-stray-magic clamp, so they are not wiped by
+     * it, and before the epigenome is built, so the forced copies get their
+     * numbers like any other allele rather than a set of zeroes.
+     */
+    public static Genome roll(Breed breed, Rng rng, Sex sex, List<AllelePair> forced) {
+        return roll(breed, rng, forced).withSex(sex);
     }
 
     public static Genome roll(Breed breed, Rng rng) {
-        return roll(breed, rng, (MagicalVariant) null);
+        return roll(breed, rng, List.<AllelePair>of());
     }
 
-    private static Genome roll(Breed breed, Rng rng, MagicalVariant variant) {
+    /** {@link #roll(Breed, Rng, Sex, List)} with the sex left to the base roll. */
+    public static Genome roll(Breed breed, Rng rng, List<AllelePair> forced) {
         Genotype base = Genotype.random(rng);
         if (breed == Breeds.FERAL_MIXED) {
-            return Genome.of(base, rng);
+            // The feral path takes the base roll whole - but the forced pairs
+            // still have to be stamped, and still before the epigenome: the
+            // arcane dealer's stock is FERAL_MIXED underneath, so skipping them
+            // here would silently hand him eleven wild-type horses.
+            return Genome.of(stamp(base, forced), rng);
         }
 
         // Size is drawn before the genotype pass because it decides the
@@ -150,12 +170,19 @@ public final class BreedFounder {
             }
             // otherwise: keep the base roll (the natural performance genes)
         }
-        if (variant != null) {
-            // Before the epigenome exists, so the magical copies get their numbers like any other allele.
-            g = g.with(variant.pair());
-        }
+        // Before the epigenome exists, so the magical copies get their numbers like any other allele.
+        g = stamp(g, forced);
 
         return stampBands(breed, stampStatTargets(breed, strain, Genome.of(g, rng), rng, size), rng);
+    }
+
+    /** The forced pairs, in the order given; a later pair on the same locus wins. */
+    private static Genotype stamp(Genotype genotype, List<AllelePair> forced) {
+        Genotype g = genotype;
+        for (AllelePair pair : forced) {
+            g = g.with(pair);
+        }
+        return g;
     }
 
     /**

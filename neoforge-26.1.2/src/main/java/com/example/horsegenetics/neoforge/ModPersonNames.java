@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge;
 
 import com.example.horsegenetics.common.breed.Region;
 import com.example.horsegenetics.common.name.PersonNameGenerator;
+import com.example.horsegenetics.neoforge.entity.Cowboy;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -92,10 +93,14 @@ public final class ModPersonNames {
         Path dir = folder();
         ensureFolder(dir);
 
+        // Every region, plus the arcane dealer's tables - which are not a region
+        // and never will be (he has no country), but are named and read exactly
+        // like one, so a player may widen them the same way.
         Set<String> known = new LinkedHashSet<>();
         for (Region region : Region.values()) {
             known.add(region.id());
         }
+        known.add(Cowboy.ARCANE_NAMES);
 
         List<String> problems = PersonNameGenerator.loadFrom(dir, known);
         for (String problem : problems) {
@@ -103,9 +108,9 @@ public final class ModPersonNames {
         }
 
         int added = 0;
-        for (Region region : Region.values()) {
-            added += PersonNameGenerator.extrasFor(region.id(), true)
-                    + PersonNameGenerator.extrasFor(region.id(), false);
+        for (String table : known) {
+            added += PersonNameGenerator.extrasFor(table, true)
+                    + PersonNameGenerator.extrasFor(table, false);
         }
         if (added > 0) {
             HorseGenetics.LOGGER.info("[names] {} extra trader name(s) from {}", added, dir);

@@ -48,7 +48,11 @@ public class CowboyRenderer extends MobRenderer<Cowboy, VillagerRenderState, Vil
 
     @Override
     public VillagerRenderState createRenderState() {
-        return new VillagerRenderState();
+        // Declared as vanilla's type but built as ours. CustomHeadLayer binds its
+        // model to EntityModel<S> exactly, so naming the subclass in the renderer's
+        // generics puts VillagerModel outside that bound - the layers read the extra
+        // field back with an instanceof instead, the way GeneticHorseRenderer does.
+        return new CowboyRenderState();
     }
 
     @Override
@@ -56,5 +60,8 @@ public class CowboyRenderer extends MobRenderer<Cowboy, VillagerRenderState, Vil
         super.extractRenderState(entity, state, partialTicks);
         HoldingEntityRenderState.extractHoldingEntityRenderState(entity, state, this.itemModelResolver);
         state.isUnhappy = entity.getUnhappyCounter() > 0;
+        if (state instanceof CowboyRenderState cowboyState) {
+            cowboyState.arcane = entity.isArcane();
+        }
     }
 }

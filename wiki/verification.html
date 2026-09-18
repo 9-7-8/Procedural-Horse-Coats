@@ -78,6 +78,46 @@
     </p>
 </div>
 
+<h2 id="arcane-dealer-0918">&sect;0-FI &mdash; The cowboy who deals in magic (2026-09-18, soft-verified in the yard; not met in a world)</h2>
+
+<p>
+    <strong>Soft-verified in the test yard on 2026-09-18</strong> &mdash; no geldings,
+    eleven or twelve magical genes a horse, no repeated allele pair, prices in band and
+    steady. That is written up on
+    <a href="villagers.html#verified-arcane-stock">the villagers page</a> and is not
+    repeated here. <strong>What follows is only what the yard could not show.</strong>
+</p>
+
+<p>
+    <strong>He has never been met in a real world.</strong> The yard places him
+    deliberately; <code>CowboyHandler.ARCANE_CHANCE</code> is about one barn in twelve, and
+    nothing has yet confirmed that roll fires at an actual village barn. Expect to ride
+    past eleven ordinary cowboys, and do not conclude he is broken from a handful of
+    villages. The founding announcement says <em>&ldquo;(arcane &mdash; magical
+    stock)&rdquo;</em> and <code>server/DebugAnnounce</code> writes it to the log too, so a
+    long ride can be checked afterwards by grepping <code>latest.log</code> for
+    <code>arcane</code> rather than by watching chat.
+</p>
+
+<p>
+    <strong>Restock is the real unknown.</strong> Leave him, go past 48 blocks, come back,
+    and check the replacement horse is also distinct from everything still standing. That
+    path re-reads the taken set off <em>live genotypes</em> rather than carrying it through
+    the founding loop, so it is the one case the yard and the unit tests both only
+    simulate. The failure to watch for is a string that slowly fills with repeated
+    combinations, which would mean <code>takenCombos</code> is reading an empty herd
+    because the horses are not loaded when <code>restock</code> runs.
+</p>
+
+<p>
+    <strong>Two smaller things the yard did not answer.</strong> Every horse should read
+    <strong>Mixed</strong> in the info panel rather than a breed &mdash; plausible from the
+    code and not actually looked at. And a village that already has a horse family should
+    <em>not</em> lend him its surname: his name came out right in the yard, but the yard
+    has no horseman in it, so the <code>isArcane</code> skip in
+    <code>HorsemanHandler.familySurname</code> has never been exercised against a real one.
+</p>
+
 <h2 id="blight-markings-0917">&sect;0-FH &mdash; Blight, and four markings out of intake (2026-09-17, NOT played)</h2>
 
 <p>

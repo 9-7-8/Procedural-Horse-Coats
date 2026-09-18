@@ -2,11 +2,13 @@ package com.example.horsegenetics.neoforge.entity;
 
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.TransferDeed;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.CowboyDoorGoal;
 import com.example.horsegenetics.neoforge.server.CowboyHandler;
 import com.example.horsegenetics.neoforge.server.HorsePrices;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import com.example.horsegenetics.neoforge.server.HorseRecords;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -23,6 +25,9 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -122,17 +127,40 @@ public class Cowboy extends AbstractVillager {
     /** Most horses in their string. */
     public static final int MAX_HERD = 10;
 
+    /**
+     * The name tables an arcane dealer is named from. Not a {@code Region} - he
+     * has no country, and {@code PersonNameGenerator} keys on a plain string
+     * precisely so that something which is not a place can still have names.
+     */
+    public static final String ARCANE_NAMES = "arcane";
+
     private @Nullable BlockPos home;
     private final List<UUID> herd = new ArrayList<>();
     private final Set<UUID> sold = new LinkedHashSet<>();
     private boolean founded;
     private int stockTarget;
     private @Nullable String preferredBreed;
+    /**
+     * Synched, unlike every other field on this class, because the <b>client</b>
+     * needs it: an arcane dealer wears a purple hat, and a renderer only ever
+     * sees what is synched. Everything else here is server state that the client
+     * has no business knowing.
+     */
+    private static final EntityDataAccessor<Boolean> DATA_ARCANE =
+            SynchedEntityData.defineId(Cowboy.class, EntityDataSerializers.BOOLEAN);
+
+    private long wanderExpiry;
     private int restockCooldown;
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
         setPersistenceRequired();
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_ARCANE, false);
     }
 
     /**
@@ -238,6 +266,48 @@ public class Cowboy extends AbstractVillager {
         this.preferredBreed = breedId;
     }
 
+    /**
+     * Whether this one deals in magic rather than in a breed.
+     *
+     * <p>An arcane dealer keeps no {@link #preferredBreed}, because he has no
+     * country and no speciality to be from: his whole string is
+     * {@code BreedLineage.MIXED} and what makes it worth the ride out is the
+     * genes on it. Everything else about him - the barn, the paddock, the
+     * restock clock, the papers - is an ordinary cowboy's, which is the point
+     * of holding this as one flag rather than a second entity type.
+     *
+     * @see com.example.horsegenetics.common.breed.ArcaneStock
+     */
+    public boolean isArcane() {
+        return this.entityData.get(DATA_ARCANE);
+    }
+
+    public void setArcane(boolean arcane) {
+        this.entityData.set(DATA_ARCANE, arcane);
+    }
+
+    /**
+     * Whether this one spawned on the road rather than with a barn, and will
+     * move on again.
+     *
+     * <p>Zero means he is a fixture - the structure put him somewhere and he
+     * stays there for the life of the world, which is every cowboy who came with
+     * a barn. A wanderer holds the game time he leaves at.
+     *
+     * @see com.example.horsegenetics.neoforge.server.ArcaneWandererHandler
+     */
+    public boolean isWanderer() {
+        return wanderExpiry > 0L;
+    }
+
+    public long wanderExpiry() {
+        return wanderExpiry;
+    }
+
+    public void setWanderExpiry(long gameTime) {
+        this.wanderExpiry = gameTime;
+    }
+
     // --- home and herd --------------------------------------------------
 
     /** The barn, if they have been founded. */
@@ -320,7 +390,7 @@ public class Cowboy extends AbstractVillager {
                 continue; // not founded yet - it will be offered next time
             }
             merchantOffers.add(new MerchantOffer(
-                    new ItemCost(Items.EMERALD, HorsePrices.emeraldsFor(record)),
+                    new ItemCost(Items.EMERALD, HorsePrices.emeraldsFor(record, isArcane())),
                     papersFor(record),
                     1,   // one paper per horse, ever
                     0,   // they are not a levelling villager
@@ -346,6 +416,13 @@ public class Cowboy extends AbstractVillager {
         TransferDeed deed = offer.getResult().get(ModDataComponents.HORSE_DEED.get());
         if (deed != null) {
             markSold(deed.horseId());
+        }
+        // Ticked on buying the PAPER, not on redeeming it. The paper is the
+        // trade - it may be sold on, or never walked out to - and what the
+        // checklist is recording is that the player found the man and dealt with
+        // him, which is the hard part.
+        if (isArcane() && getTradingPlayer() != null) {
+            HorseProgress.complete(getTradingPlayer(), ProgressTask.BUY_ARCANE_HORSE);
         }
     }
 
@@ -427,6 +504,8 @@ public class Cowboy extends AbstractVillager {
         output.putBoolean("Founded", founded);
         output.putInt("StockTarget", stockTarget);
         output.putString("PreferredBreed", preferredBreed == null ? "" : preferredBreed);
+        output.putBoolean("Arcane", isArcane());
+        output.putLong("WanderExpiry", wanderExpiry);
         output.storeNullable("Home", BlockPos.CODEC, home);
         output.store("Herd", UUIDUtil.CODEC.listOf(), List.copyOf(herd));
         output.store("Sold", UUIDUtil.CODEC.listOf(), List.copyOf(sold));
@@ -439,6 +518,8 @@ public class Cowboy extends AbstractVillager {
         this.stockTarget = input.getIntOr("StockTarget", 0);
         String breed = input.getStringOr("PreferredBreed", "");
         this.preferredBreed = breed.isEmpty() ? null : breed;
+        setArcane(input.getBooleanOr("Arcane", false));
+        this.wanderExpiry = input.getLongOr("WanderExpiry", 0L);
         this.home = input.read("Home", BlockPos.CODEC).orElse(null);
         this.herd.clear();
         this.herd.addAll(input.read("Herd", UUIDUtil.CODEC.listOf()).orElse(List.of()));

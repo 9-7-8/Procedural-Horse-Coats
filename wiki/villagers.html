@@ -142,12 +142,20 @@
 <p>
     They are a custom <code>AbstractVillager</code>, not a
     <code>VillagerProfession</code>. A profession is acquired from a job site by a
-    villager whose brain runs vanilla's daily schedule, and that schedule would
-    dismount them every morning to go and stand at a workstation. Everything that makes
-    this character themselves &mdash; always mounted, home is a barn and not a bed, stock
-    is a live herd and not a trade table &mdash; is a fight with that brain. Extending
+    villager whose brain runs vanilla's daily schedule, and what makes this character
+    themselves &mdash; home is a barn and not a bed, stock is a live herd and not a
+    trade table &mdash; is a fight with that brain. Extending
     <code>AbstractVillager</code> keeps the parts that are worth keeping (the merchant
     screen, the villager silhouette, the trading goals) and none of the schedule.
+</p>
+
+<p>
+    <strong>The original case rested partly on his being permanently mounted</strong>
+    &mdash; vanilla's schedule would have dismounted him every morning to go and stand
+    at a workstation, which was the sharpest version of the argument. He came off the
+    horse <a href="#nights">a day later</a>, so that half of it is gone. The split
+    outlived the argument that produced it, because the other two halves were the
+    load-bearing ones all along.
 </p>
 
 <p>
@@ -161,9 +169,11 @@
 <p>
     The structure places them bare in the middle of the barn and
     <code>CowboyHandler</code> builds them on their first server tick. Their
-    <strong>home</strong> is that spot &mdash; the block their routine rides back to and
-    the centre of the box the door code works on &mdash; but they do not
-    <em>found</em> there. The barn's interior is eleven blocks by five with walls on
+    <strong>home</strong> is that spot, but nothing walks them back to it any more
+    &mdash; the dusk ride and the door sweep that both used to read it went with the
+    mounted cowboy, so it is a remembered address rather than a routine.
+    (<code>CowboyDoorGoal</code> still opens doors they bump into; it does not know
+    about this.) They do not <em>found</em> there. The barn's interior is eleven blocks by five with walls on
     every side and a horse is nearly a block and a half wide, so a string of them made
     around the barn's centre came out with half its members standing in the walls.
 </p>
@@ -199,7 +209,7 @@
 <h3 id="herd">Their herd</h3>
 
 <ul>
-    <li><strong>Four to ten horses, plus the one they ride.</strong> All are made on
+    <li><strong>Four to ten horses.</strong> All are made on
         their first server tick, in the barn. That roll is also their
         <code>stockTarget</code> &mdash; the number they are
         <a href="#restock">restocked</a> back up to for the rest of the world's
@@ -209,8 +219,8 @@
         parents, generation 0, and never <code>feral_mixed</code>.</li>
     <li><strong>Half their string is one breed &mdash; the one they are known for.</strong>
         A <code>preferredBreed</code> is settled at founding (drawn from the biome's
-        pool, weighted the way a wild herd is weighted) and the horse they ride is one
-        of them. Every horse they breed after that is their breed until half the target
+        pool, weighted the way a wild herd is weighted), and the first horse of the
+        string is one. Every horse they breed after that is their breed until half the target
         is their breed, and drawn from the biome pool after that &mdash; so a breeder's
         yard reads as a yard with a speciality rather than as a random sample of the
         county. <code>CowboyHandler.nextBreedFor</code> counts rather than flips a
@@ -218,11 +228,11 @@
         enough to be seen, and it self-corrects: sell three of their Fjords and the
         next three they breed are Fjords.</li>
     <li><strong>Every one carries <code>bredBy = their name</code>.</strong></li>
-    <li><strong>The horse they ride is the herd lead.</strong> It is herd slot 0, and
-        every other member carries its UUID as their
-        <code>HorseCareAttachment.herd</code> &mdash; so the browser and the info
-        panel see an ordinary herd with an ordinary lead horse, and the man on top is
-        a detail. It is never for sale.</li>
+    <li><strong>The herd's lead is the man himself.</strong> Every other herd in this
+        mod leads with a horse; this one has had none to lead with since they stopped
+        riding, so each member carries the <em>cowboy's</em> UUID as their
+        <code>HorseCareAttachment.herd</code> rather than another horse's. The browser
+        and the info panel only need the ids to agree, and they do.</li>
     <li><strong>They are branded, not owned.</strong> A <code>CowboyBrand</code>
         attachment holds the cowboy's id. Vanilla lets a player tame any untamed horse
         by climbing on it until it stops bucking, and their whole herd standing there
@@ -303,11 +313,169 @@
     is meant to be something you notice by coming back to a different string, not
     something you watch happen; a horse vanishing in front of you reads as a bug
     however well it is documented. And &ldquo;their string&rdquo; here is exactly the
-    set the merchant screen offers (alive, loaded, untamed, not their mount, not already
+    set the merchant screen offers (alive, loaded, untamed, not already
     papered), because &ldquo;how many have they got?&rdquo; and &ldquo;how many can you
     buy?&rdquo; have to be the same number or they restock to fill a shelf nobody can
     see. Tamed horses are dropped from the herd list entirely, so it cannot grow
     without bound over a long world.
+</p>
+
+<h3 id="arcane">The arcane dealer</h3>
+
+<p>
+    <strong>About one barn in twelve is founded by a man who deals in magic rather
+    than in a breed.</strong> He is the same entity, the same barn, the same paddock,
+    the same restock clock and the same papers &mdash; one saved flag,
+    <code>Cowboy.isArcane()</code>, changes what he is carrying and what he is called.
+    <code>CowboyHandler.ARCANE_CHANCE</code> is the roll, and it happens before the
+    breed is picked, because it is the thing everything else about him follows from.
+</p>
+
+<div class="note rule">
+    <span class="label">Why he exists</span>
+    Magical genes sit near a <strong>0.1% founder weight</strong> in the wild. A player
+    can play for a very long time without meeting one, and the wild population is not a
+    realistic way to collect them &mdash; which made a large part of the registry
+    something you could read about and never obtain. He is the answer to that: a dozen
+    showing loci per horse, restocked and rotated, so <em>go and buy the locus you are
+    missing</em> is a thing a player can actually do.
+</div>
+
+<ul>
+    <li><strong>He stocks no breeds.</strong> Every horse is
+        <code>BreedLineage.MIXED</code> over a <code>feral_mixed</code> founder roll. He
+        keeps no <code>preferredBreed</code>, so he has no
+        <a href="breeds.html#regions">region</a>, which is exactly right: he is not
+        from anywhere.</li>
+    <li><strong>One showing gene from each magical family</strong> &mdash; coat, yield,
+        behaviour, emission, body-stat, ground and strong white, fields and regions,
+        spots and rings, speckle and dust, lines and strokes, and mane and tail
+        &mdash; plus a <strong>colour modifier on a quarter</strong> of them. So eleven
+        or twelve magical loci on every animal.</li>
+    <li><strong>Showing, never carried.</strong> Every one of those is an expressing
+        pair, so a player can see what they are paying for. The rest of the horse stays
+        wild type, which is what keeps eleven magical genes legible rather than a
+        smear.</li>
+    <li><strong>No two horses in his string share an allele combination.</strong>
+        Keyed on the <em>pair</em> and not the gene: two of his horses may both show
+        galaxy if one is homozygous and the other is not, because those are two
+        different animals to breed from and a player collecting loci wants both.</li>
+    <li><strong>He never keeps a gelding.</strong> The ordinary cowboy gelds half his
+        colts because he is selling something to ride; this man is selling something to
+        breed from, and a gelding cannot pass a gene on. The rule that makes his
+        neighbour's string useful would make his worthless.</li>
+    <li><strong>Twelve to twenty-eight emeralds</strong>
+        (<code>HorsePrices.ARCANE_PRICE</code>), against one to three for an ordinary
+        horse. The markup is a fact about the man, not about the animal &mdash; see
+        below.</li>
+</ul>
+
+<h4 id="arcane-wandering">He is also out on the road</h4>
+
+<p>
+    A village is the odd place to meet a man who is not from anywhere, so he turns up
+    away from one as well. <code>ArcaneWandererHandler</code> rolls near each player
+    every ten seconds at <code>SPAWN_CHANCE</code> &mdash; roughly one dealer every two
+    or three hours of play &mdash; places him on open ground 48 to 96 blocks off, and
+    founds him through the same path the barn uses, minus the paddock walk he has no
+    barn to take. Never a second one within 256 blocks of a player: one dealer is an
+    event, three is a shop.
+</p>
+
+<div class="note rule">
+    <span class="label">And he moves on again</span>
+    A <code>Cowboy</code> sets <code>setPersistenceRequired()</code> in its constructor,
+    which is right for one that came with a structure and wrong for one that spawned on
+    a hillside &mdash; every dealer the world ever rolled would still be standing in it,
+    each with up to ten horses that also never despawn. A wanderer carries a
+    <code>wanderExpiry</code> instead: after a day and a half he and his unsold string
+    leave together, and only once no player is within 64 blocks, so he is never seen to
+    vanish. <strong>A horse you have bought and redeemed is tamed, has lost its brand
+    and has left his herd, so it is never taken.</strong>
+</div>
+
+<p>
+    <strong>Hostile mobs ignore every cowboy now</strong>
+    (<code>LivingChangeTargetEvent</code>). <code>Cowboy</code> extends
+    <code>AbstractVillager</code>, which vanilla zombies target by class &mdash; that is
+    why <code>Cowboy.HEALTH</code> is two hundred in the first place. In a village that
+    is survivable, because there are golems and walls and lit ground; a man stood alone
+    on a hillside with ten horses has none of them. The failure that mattered was not
+    him dying, since he mostly does not, but <strong>his string dying</strong>, and a
+    dealer found alive beside his dead stock reads as a broken feature rather than a bad
+    night. His two hundred health stays, because none of this stops a creeper, a fall or
+    a player.
+</p>
+
+<h4 id="arcane-quiet">He does not stock the genes that make a noise</h4>
+
+<p>
+    <code>ArcaneStock.NOISY</code> holds five keys, and they are named one at a time
+    rather than detected, because nothing on a gene says &ldquo;this is audible&rdquo;.
+    Up to ten horses in one pen, all carrying eleven magical loci, turns a gene that is
+    a pleasant surprise on one animal into a paddock a player cannot shop in:
+    <code>meowing</code> is a cat every fifteen seconds, <code>singer</code> plays the
+    opening of a music disc every minute, and <code>base_alarm</code> is dominant and
+    shouts at anything hostile. <code>echolocate</code> (only when tamed and ridden) and
+    <code>ender_echo</code> (only when hurt) are the mild two, and the first to
+    reconsider. None of them is otherwise changed &mdash; all five still breed, and still
+    turn up in wild magical herds.
+</p>
+
+<div class="note">
+    <span class="label">The limit of a list</span>
+    A third-party noisy gene will not be caught by this, and the honest fix for that is a
+    flag on the gene rather than a longer list here. Genes that make no sound themselves
+    but <em>gather</em> noisy mobs &mdash; <code>spawner</code>,
+    <code>pack_leader</code>, the bait expression of <code>magic_mob_aura</code> &mdash;
+    are deliberately still stocked. That is a different complaint, and a different fix if
+    it turns out to be one.
+</div>
+
+<h4 id="arcane-pools">The pools are generated, never listed</h4>
+
+<p>
+    <code>ArcaneStock</code> builds a family's pool by walking
+    <code>Genes.magicalOrder()</code> and asking <code>GeneFamily.of</code>, so
+    <strong>a gene added by a data pack or another mod is in his string the moment it
+    registers</strong>, with no edit anywhere. The only hard-coded thing in the class
+    is which <em>families</em> a horse must cover, and a family is an enum constant
+    rather than a list of genes. Four kinds of locus are held back, the same four
+    <a href="breeds.html#magical-herds"><code>MagicalVariant</code></a> holds back and
+    for the same reasons: the body-stat loci (owned by the breed's stat bands),
+    feral-only genes, sex-linked genes, and disorders.
+</p>
+
+<p>
+    The order the families are drawn in is computed per horse rather than written down,
+    scarcest first. The families are wildly different sizes &mdash; the shipped registry
+    has one with three times another's stock &mdash; and a cramped family drawn last is
+    the one that runs dry. Drawing it first costs nothing and means the horse that
+    misses out is from the family with plenty. That also re-sorts itself when somebody
+    drops in a folder of mane genes, which a hand-written order would not.
+    <code>ArcaneStockTest</code> asserts every required family has room for a whole
+    ten-horse string, so a pack that strips one bare fails a test rather than quietly
+    shipping a dealer with a gene missing.
+</p>
+
+<div class="note">
+    <span class="label">The markup is on the man, not the horse</span>
+    <a href="philosophy.html">&sect;4</a> is that nothing in the model scores a horse
+    &mdash; no rarity tier, no &ldquo;this is the good one&rdquo;. So the price lives at
+    the counter, like every other price: <code>emeraldsFor(record, arcane)</code> takes
+    the dealer as an argument. A horse with eleven magical loci that a player bred
+    themselves is worth nothing in particular, and that is correct.
+</div>
+
+<p>
+    He is named from <code>arcane-alpha.txt</code> and <code>arcane-beta.txt</code>
+    &mdash; witch and wizard names, both halves off those tables. Not a
+    <code>Region</code>: <code>PersonNameGenerator</code> keys on a plain string
+    precisely so that something which is not a place can still have names, and the
+    drop-in folder widens his tables the same way it widens a region's. He is also
+    skipped by <a href="#family-names">the village horse family</a> in both directions
+    &mdash; he neither founds a surname nor joins one, or the stable hand ends up a
+    Blackthorn.
 </p>
 
 <h3 id="routine">Their day</h3>
@@ -972,6 +1140,25 @@
 
 <h2 id="verified">Verified</h2>
 
+<p id="verified-arcane-stock">
+    <strong>The arcane dealer's string is what it claims to be</strong> (2026-09-18, seen in the test yard).
+    <a href="#arcane">Verity Nettlebed</a> founded in row AL with five horses, and the owner read the string
+    off in game: <strong>no geldings</strong>, <strong>eleven or twelve magical genes on every horse</strong>,
+    <strong>no duplicated allele pair</strong> across the string, and <strong>prices in the 12&ndash;28
+    band</strong> and steady between looks. Both halves of his name came off the arcane tables, which is the
+    part most likely to have fallen back silently to a region table. Nothing in the server log warned.
+</p>
+
+<div class="note">
+    <span class="label">Soft-verified, and the distinction matters</span>
+    That was the <em>debug yard</em>, where he is placed deliberately and founded on the spot by
+    <code>CowboyHandler.foundArcaneInPlace</code>. Two things it cannot show, both still listed in
+    <a href="verification.html#arcane-dealer-0918">&sect;0-FI</a>: that the <strong>one-in-twelve roll</strong>
+    actually produces him at a real village barn, and that <strong>restock</strong> keeps the string distinct
+    over time &mdash; that path re-reads the taken set off live genotypes instead of carrying it through the
+    founding loop, and it is the one the yard runs differently from a real world.
+</div>
+
 <p id="verified-workstation-recipes">
     <strong>The two workstations have different recipes</strong> (2026-09-09). <code>cowboy_hitch.json</code> and
     <code>horsemans_table.json</code> were shapeless over the same seven items, so one block was unobtainable in survival.
@@ -984,8 +1171,10 @@
     <strong>The cowboy does not stable his herd at night</strong> (settled 2026-09-07, the owner's call). Walking eleven
     horses through a two-block barn door at dusk never worked: the ground pathfinder rounds a mob up to
     <code>floor(width + 1)</code> blocks, so a horse over about 1.43 scale cannot pass at all; a villager inside is a cork;
-    and the herd shoves itself back out. He dismounts at dusk, spends the night as an ordinary villager on ten times a
-    villager's health, and is walked back to his horse at dawn. <code>CowboyDoors</code>, <code>HerdCollision</code> and
+    and the herd shoves itself back out. He spends the night out in the field as an ordinary villager on ten times a
+    villager's health. (As settled, this read &ldquo;he dismounts at dusk and is walked back to his horse at dawn&rdquo;
+    &mdash; the decision survived the mount being deleted the same week, and only the dismounting half of it expired.)
+    <code>CowboyDoors</code>, <code>HerdCollision</code> and
     the <code>SHELTER</code> duty (about five hundred lines) are gone. Vanilla navigation will not put a large animal
     through a door a player walks through without noticing.
 </p>
