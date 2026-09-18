@@ -26,13 +26,13 @@ public final class ModCreativeTabs {
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .displayItems((params, output) -> {
                         ModItems.TAB_ITEMS.forEach(item -> output.accept(item.get()));
-                        // The double gates come last as a block, rather than
-                        // joining TAB_ITEMS: there are two dozen of them and one
-                        // per wood, so interleaving them with the gameplay items
-                        // would bury the things the tab is actually for. See
-                        // block/DoubleGates.
-                        com.example.horsegenetics.neoforge.block.DoubleGates.items()
-                                .forEach(item -> output.accept(item.get()));
+                        // The double gates are deliberately NOT here. They are
+                        // filed into vanilla's Building Blocks tab instead, each
+                        // directly after the single gate of its own wood, which
+                        // is where somebody reaching for a gate looks - see
+                        // ModItems.addToCreativeTab. Listing them here as well
+                        // would put twelve wood variants in a tab that is about
+                        // horses, and bury the things it exists for.
                         // One filled breed egg per breed that has one. The blank
                         // item is not listed anywhere: its whole content is the
                         // breed component, and an egg without one does nothing.

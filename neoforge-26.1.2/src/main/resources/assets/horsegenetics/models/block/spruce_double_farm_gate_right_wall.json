@@ -1,6 +1,0 @@
-{
-  "parent": "horsegenetics:block/template_double_farm_gate_right_wall",
-  "textures": {
-    "texture": "minecraft:block/spruce_planks"
-  }
-}

@@ -231,6 +231,27 @@ public final class ModItems {
     /** Keep the custom spawn egg in the vanilla Spawn Eggs tab too, next to the real one. */
     @SubscribeEvent
     static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        // THE DOUBLE GATES GO IN BUILDING BLOCKS, each directly after the
+        // vanilla gate it is made from - which is where somebody reaching for a
+        // gate actually looks, rather than in a tab about horses. Owner's call.
+        //
+        // insertAfter asserts its anchor is present and throws if it is not, so
+        // the vanilla gate is checked for first: another mod is entitled to have
+        // removed it, and a hard crash on somebody else's load order would be a
+        // poor trade for a tidy menu.
+        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
+            for (com.example.horsegenetics.neoforge.block.DoubleGates.Gate gate
+                    : com.example.horsegenetics.neoforge.block.DoubleGates.gates()) {
+                boolean anchorPresent = event.getParentEntries().stream()
+                        .anyMatch(stack -> stack.is(gate.vanillaGate()));
+                if (anchorPresent) {
+                    event.insertAfter(
+                            new net.minecraft.world.item.ItemStack(gate.vanillaGate()),
+                            new net.minecraft.world.item.ItemStack(gate.item().get()),
+                            net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                }
+            }
+        }
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(CUSTOM_HORSE_SPAWN_EGG.get());
             // One filled egg per breed that has one. The creative tab is the
