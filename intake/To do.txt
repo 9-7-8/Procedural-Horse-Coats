@@ -11,4 +11,6 @@ Add a roll to determine if twins are identical or fraternal.
 
 Brindle is backwards and inconsistent right now: we need to edit it so it only shows up on females cause it requires two copies. 
 
+add this mod as something strongly recommended to be run with this mod: https://www.curseforge.com/minecraft/mc-mods/customfence
+
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
