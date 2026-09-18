@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "horsegenetics:item/breed_egg/florida_cracker_horse"
+  }
+}

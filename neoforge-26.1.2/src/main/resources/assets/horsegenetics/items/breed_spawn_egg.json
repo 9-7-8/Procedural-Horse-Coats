@@ -1,6 +1,328 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "horsegenetics:item/breed_spawn_egg"
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "horsegenetics:breed",
+    "cases": [
+      {
+        "when": "akhal_teke",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/akhal_teke"
+        }
+      },
+      {
+        "when": "american_cream_draft",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/american_cream_draft"
+        }
+      },
+      {
+        "when": "andalusian",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/andalusian"
+        }
+      },
+      {
+        "when": "arabian",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/arabian"
+        }
+      },
+      {
+        "when": "baise_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/baise_horse"
+        }
+      },
+      {
+        "when": "banker_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/banker_horse"
+        }
+      },
+      {
+        "when": "camargue",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/camargue"
+        }
+      },
+      {
+        "when": "canadian_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/canadian_horse"
+        }
+      },
+      {
+        "when": "caspian_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/caspian_pony"
+        }
+      },
+      {
+        "when": "clydesdale",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/clydesdale"
+        }
+      },
+      {
+        "when": "colorado_ranger",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/colorado_ranger"
+        }
+      },
+      {
+        "when": "connemara_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/connemara_pony"
+        }
+      },
+      {
+        "when": "criollo",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/criollo"
+        }
+      },
+      {
+        "when": "croatian_coldblood",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/croatian_coldblood"
+        }
+      },
+      {
+        "when": "dales_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/dales_pony"
+        }
+      },
+      {
+        "when": "danubian",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/danubian"
+        }
+      },
+      {
+        "when": "dartmoor_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/dartmoor_pony"
+        }
+      },
+      {
+        "when": "debao_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/debao_pony"
+        }
+      },
+      {
+        "when": "dhampir",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/dhampir"
+        }
+      },
+      {
+        "when": "dolahest",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/dolahest"
+        }
+      },
+      {
+        "when": "domestic_mountain_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/domestic_mountain_pony"
+        }
+      },
+      {
+        "when": "exmoor_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/exmoor_pony"
+        }
+      },
+      {
+        "when": "fell_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/fell_pony"
+        }
+      },
+      {
+        "when": "finnhorse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/finnhorse"
+        }
+      },
+      {
+        "when": "florida_cracker_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/florida_cracker_horse"
+        }
+      },
+      {
+        "when": "friesian",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/friesian"
+        }
+      },
+      {
+        "when": "gotland_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/gotland_pony"
+        }
+      },
+      {
+        "when": "guoxia",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/guoxia"
+        }
+      },
+      {
+        "when": "gypsy_vanner",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/gypsy_vanner"
+        }
+      },
+      {
+        "when": "haflinger",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/haflinger"
+        }
+      },
+      {
+        "when": "henson_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/henson_horse"
+        }
+      },
+      {
+        "when": "hequ",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/hequ"
+        }
+      },
+      {
+        "when": "highland_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/highland_pony"
+        }
+      },
+      {
+        "when": "hucul_pony",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/hucul_pony"
+        }
+      },
+      {
+        "when": "icelandic_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/icelandic_horse"
+        }
+      },
+      {
+        "when": "irish_draught",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/irish_draught"
+        }
+      },
+      {
+        "when": "jutland",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/jutland"
+        }
+      },
+      {
+        "when": "kaimanawa",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/kaimanawa"
+        }
+      },
+      {
+        "when": "karabair",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/karabair"
+        }
+      },
+      {
+        "when": "karabakh",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/karabakh"
+        }
+      },
+      {
+        "when": "karakachan",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/karakachan"
+        }
+      },
+      {
+        "when": "kentucky_mountain_saddle_horse",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/kentucky_mountain_saddle_horse"
+        }
+      },
+      {
+        "when": "kiger_mustang",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/kiger_mustang"
+        }
+      },
+      {
+        "when": "kiso",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/kiso"
+        }
+      },
+      {
+        "when": "konik",
+        "model": {
+          "type": "minecraft:model",
+          "model": "horsegenetics:item/breed_egg/konik"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "horsegenetics:item/breed_spawn_egg"
+    }
   }
 }

@@ -193,6 +193,7 @@ and fails *silently* when stale:
 | any AI goal added, removed or re-prioritised | `node wiki/tools/bake-behaviour-hierarchy.mjs` | `wiki/behaviour-hierarchy.html` |
 | a wood, or any geometry, of the **double gates** | `node neoforge-26.1.2/tools/bake-double-gates.mjs` - then the recipe row below, since it writes recipes too. **It only writes**: removing a wood means deleting that wood's files and lang keys by hand | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, both `data/minecraft/tags/block/` files **and** the merged `lang/en_us.json` |
 | any file in `data/horsegenetics/recipe/` | `node neoforge-26.1.2/tools/bake-recipe-reference.mjs` | `assets/horsegenetics/recipe_reference.json` |
+| a **breed egg texture** in `assets/horsegenetics/textures/item/breed_egg/` | `node neoforge-26.1.2/tools/bake-breed-eggs.mjs` - it hard-fails on a filename that is not a breed id, since a case on a value no horse carries never draws | the regenerated `models/item/breed_egg/` **and** `items/breed_spawn_egg.json` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 | any `tools/stables/*.source.nbt`, **or `bake-stables.py` itself** | `python neoforge-26.1.2/tools/stables/bake-stables.py` | the regenerated `data/horsegenetics/structure/*.nbt` |
 

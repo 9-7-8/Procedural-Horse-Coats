@@ -127,8 +127,9 @@
 </p>
 
 <p>
-    Every breed uses the same egg item and the same vanilla-looking texture &mdash; the
-    tooltip is what tells you the breed, whether it is natural or magical, and how common
+    Every breed uses the same egg item. Many breeds have a drawn egg of their own now,
+    and the rest use a vanilla-looking one &mdash; either way the tooltip is what tells
+    you the breed, whether it is natural or magical, and how common
     it is. A few breeds have no egg at all, <strong>Feral Mixed</strong> among them,
     because vanilla&rsquo;s own horse egg already gives you a horse of no particular
     breeding.
@@ -270,6 +271,17 @@
         built has no registry entry, no model file and no lang key, and could never have an
         item of its own; with the breed on the component it gets an egg on exactly the same
         terms as a built-in one.
+    </p>
+    <p>
+        Per-breed <em>art</em> therefore cannot be one texture per item either. The item
+        model definition is a <code>minecraft:select</code> on the component&rsquo;s value
+        &mdash; one case per breed that has a drawn egg, with the vanilla-egg model as its
+        <code>fallback</code>, which is what every breed without art takes, every
+        player-added one included. <code>tools/bake-breed-eggs.mjs</code> generates the
+        cases and the per-breed models from the textures in
+        <code>textures/item/breed_egg/</code>, and refuses to bake a texture whose name is
+        not a real breed id: a case on a value no horse can carry would never match and
+        never draw.
     </p>
 </div>
 

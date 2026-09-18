@@ -37,10 +37,19 @@ import org.jspecify.annotations.Nullable;
  * with the breed on the component it gets an egg on exactly the same terms as
  * the built-in ones, which is the whole promise of making breeds data.
  *
- * <p>The texture is vanilla's horse spawn egg, deliberately. Forty-nine
- * hand-tinted eggs is a lot of art for a thing whose identity is written on the
- * tooltip anyway, and a player who has one in hand wants to know <i>which</i>
- * breed, which is a word, not a colour.
+ * <p>That shape is also what decides how the <b>art</b> works. A breed on a
+ * component cannot have a texture per item, so
+ * {@code assets/horsegenetics/items/breed_spawn_egg.json} is a
+ * {@code minecraft:select} on the component's <i>value</i>: one case per breed
+ * that has a drawn egg, and vanilla's horse spawn egg as the
+ * {@code fallback}. Most breeds take the fallback and always will - a
+ * player-added breed cannot ship art in this jar - so a mixed tab is the
+ * steady state rather than a half-finished one, and the tooltip stays the thing
+ * that actually names the breed.
+ *
+ * <p>The cases and the per-breed models are generated from the textures on
+ * disk by {@code tools/bake-breed-eggs.mjs}; add a
+ * {@code textures/item/breed_egg/<breed_id>.png} and re-run it.
  *
  * <h2>Not craftable</h2>
  * There is no recipe. Eggs come from dungeon chests
