@@ -193,4 +193,10 @@
   .phc-ai-bubble span { display: none; }
   .phc-ai-bubble { padding: 11px; }
   .phc-ai-dialog { padding: 14px; }
+  /* The × is the only way out of the draft dialog on a phone, and at its desk
+     size it is a 22px box - under half the ~44px a fingertip actually lands on,
+     so a miss hits the dialog behind it and nothing happens. Give it the full
+     target; the glyph stays the size it was. */
+  .phc-ai-icon { min-width: 44px; min-height: 44px; padding: 0; }
+  .phc-ai-dialog-head { gap: 4px; }
 }

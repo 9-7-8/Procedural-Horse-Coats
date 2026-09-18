@@ -903,7 +903,13 @@ window.HG = window.HG || {};
     }
     function onKey(e) { if (e.key === "Escape") close(); }
     document.addEventListener("keydown", onKey);
-    overlay.addEventListener("mousedown", function (e) { if (e.target === overlay) close(); });
+    // The backdrop tap is the way out on a phone, which has no Esc key. Judge
+    // the target on the press but close on the click - see the longer note in
+    // wiki/search.js: closing on the press hands the click that follows to
+    // whatever was underneath the finger.
+    var downOnBackdrop = false;
+    overlay.addEventListener("pointerdown", function (e) { downOnBackdrop = e.target === overlay; });
+    overlay.addEventListener("click", function (e) { if (downOnBackdrop && e.target === overlay) close(); });
 
     box.appendChild(el("div", { class: "phc-ai-dialog-head" }, [
       el("h2", { text: opts.title }),

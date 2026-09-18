@@ -28,6 +28,15 @@
 
 * { box-sizing: border-box; }
 
+/* The hidden attribute has to win, always. The browser's own [hidden] rule is a
+   user-agent rule, so ANY author `display:` on the same element beats it - and
+   every overlay here is a flex box, which means `overlay.hidden = true` set the
+   attribute and changed nothing on screen. That is what kept the search panel up
+   after Esc: a popup with no way out, which on a phone is the whole viewport.
+   Keep this ahead of every layout rule; wiki/ai/ai.css carries its own copy,
+   because the two designers do not load this stylesheet. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -545,9 +554,7 @@ body.landing .content { margin-left: 0; padding: 0; }
    flex layout above lives on the BUTTON once that has happened, so the heading
    and its lede stay on one baseline exactly as they did. */
 .section-head.collapsible { display: block; }
-/* Explicit rather than left to the UA sheet: everything inside is a grid, and a
-   display rule that ever lands on the wrapper would beat the hidden attribute. */
-.section-body[hidden] { display: none; }
+/* A collapsed .section-body is hidden by the global [hidden] rule at the top. */
 .section-toggle {
     display: flex;
     align-items: baseline;
@@ -1165,6 +1172,10 @@ body.search-open { overflow: hidden; }
 
 @media (max-width: 900px) {
     .search-overlay { padding: 3vh 0.6rem 1rem 0.6rem; }
+    /* "Esc" is the way out for a reader who has no Esc key, so on a touch
+       screen it gets a whole fingertip rather than the 36x27 it reads at on a
+       desk. The label stays small; only the target grows. */
+    .search-close { min-width: 44px; min-height: 44px; padding: 0.3rem 0.5rem; }
 }
 
 /* ------------------------------------------------------------------ *

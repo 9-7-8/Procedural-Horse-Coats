@@ -223,8 +223,19 @@ window.HG = window.HG || {};
 
         input.addEventListener("input", query);
         overlay.querySelector(".search-close").addEventListener("click", close);
-        overlay.addEventListener("mousedown", function (ev) {
-            if (ev.target === overlay) { close(); }
+        // A tap on the backdrop closes it - the only way out on a phone, which
+        // has no Esc key. It has to close on the CLICK and not on the press:
+        // hiding the overlay under the finger hands the click that follows to
+        // whatever is beneath it, and on the landing page that is a nav link,
+        // so the tap that meant "go away" navigated instead. The press is still
+        // where the target is judged, so a drag that starts inside the panel
+        // and ends on the backdrop does not count as a tap outside it.
+        var downOnBackdrop = false;
+        overlay.addEventListener("pointerdown", function (ev) {
+            downOnBackdrop = ev.target === overlay;
+        });
+        overlay.addEventListener("click", function (ev) {
+            if (downOnBackdrop && ev.target === overlay) { close(); }
         });
         // Warm the index as soon as the box is focused, so the first query is
         // not the thing that waits for a megabyte.
