@@ -248,6 +248,7 @@ window.HG.pages = {
                 { href: "gene-echolocate.html", text: "Echolocate", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-ender-echo.html", text: "Ender echo", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-fireproof.html", text: "Fireproof", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-flying.html", text: "Flying", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-food-preference.html", text: "Food preference", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-guardian.html", text: "Guardian", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-holy-ward.html", text: "Holy ward", kind: "magical", views: ["gameplay","coding","science"] },

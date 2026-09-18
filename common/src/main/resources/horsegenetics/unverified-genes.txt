@@ -246,9 +246,9 @@ horsegenetics.silver
 horsegenetics.magic_zebra
 horsegenetics.grey
 horsegenetics.extension
+horsegenetics.passification
 horsegenetics.accretion_field
 horsegenetics.census
 horsegenetics.cleave_side
-horsegenetics.passification
 horsegenetics.shade
 horsegenetics.wing_cloak

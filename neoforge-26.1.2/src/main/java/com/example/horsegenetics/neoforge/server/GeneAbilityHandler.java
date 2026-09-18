@@ -171,6 +171,29 @@ public final class GeneAbilityHandler {
             return;
         }
 
+        // WHAT DOES THE SERVER THINK THIS HORSE HAS? Once a second, for a ridden
+        // horse that is off the ground. Two sessions were lost to gliding doing
+        // nothing, and the logs could not tell three different bugs apart: the
+        // ability never reaching applyTraversal, the flag being set and vanilla
+        // ignoring it, or the gene not producing the traversal in the first
+        // place. This prints the flags the server resolved, so the next flight
+        // answers that outright instead of by elimination. It sits OUTSIDE the
+        // switch deliberately - a probe inside the case it is meant to diagnose
+        // proves nothing when the case is what is not running.
+        if (horse.isVehicle() && !horse.onGround() && beat(horse, 20)) {
+            StringBuilder flags = new StringBuilder();
+            for (HorseAbilities.Active a : abilities) {
+                if (a.ability() instanceof GeneAbility.Traversal t) {
+                    flags.append(t.flag()).append(' ');
+                }
+            }
+            ActionTrace.log("flight", "airborne ridden | " + horse.getName().getString()
+                    + " traversal=[" + flags.toString().trim() + "]"
+                    + " abilities=" + abilities.size()
+                    + " fallFlying=" + horse.isFallFlying()
+                    + " y=" + String.format("%.1f", horse.getY()));
+        }
+
         boolean moving = isMoving(horse);
         List<GeneAbility.Emitter> prints = null; // hoofprint emitters - laid by stride, after the loop
 
@@ -640,6 +663,89 @@ public final class GeneAbilityHandler {
                         gravity.addOrUpdateTransientModifier(new AttributeModifier(
                                 LAVA_FLOAT_ID, LAVA_FLOAT, AttributeModifier.Operation.ADD_VALUE));
                     }
+                }
+            }
+            case "flight_true" -> {
+                // THE SERVER KEEPS ITS OWN FALL DISTANCE, and that is why landing
+                // still hurt after the client-side reset was fixed. A ridden
+                // horse is moved by the rider's client, but the server does not
+                // take the client's word on falling: handleMoveVehicle calls
+                // vehicle.doCheckFallDamage() with the movement the packet
+                // reported, accumulating a fallDistance of its own. Resetting it
+                // in the travel mixin only ever cleared the CLIENT's copy, so
+                // the server arrived at the ground still holding the whole
+                // descent and charged for it (owner: "landing still caused the
+                // horse to get damage", 2026-09-17).
+                //
+                // Flying down is not falling, on either side. This is still not
+                // fall immunity: it holds only while flight is actually active,
+                // so a horse that stops flying falls like anything else without
+                // bird_boned.
+                if (HorseFlight.active(horse)) {
+                    horse.resetFallDistance();
+                }
+            }
+            case "cloud_walk" -> {
+                // Nothing to do per tick. Creative flight is MOVEMENT, and a
+                // ridden horse's movement is simulated on the RIDER'S CLIENT -
+                // travelRidden hands the server the setDeltaMovement(Vec3.ZERO)
+                // branch - so it is applied in mixin/HorseFlightMixin instead.
+                // cloud_walk is currently killswitched in the gene file and
+                // nothing consumes it. Both are listed rather than left to the
+                // default arm so that grepping the flag lands here.
+            }
+            case "flight_glide" -> {
+                // THE ELYTRA FLAG MUST BE SET HERE, ON THE SERVER, and this is
+                // the whole reason gliding did nothing in the first two test
+                // sessions. Shared flag 7 is synced entity data: the server owns
+                // it and pushes it to the client. The first attempt set it from
+                // the travel mixin, which for a ridden horse only ever runs on
+                // the rider's client - a local write to a value the server is
+                // authoritative for. The server's false won, every tick, and no
+                // horse ever entered travelFallFlying. Owner: "gliding still
+                // doesn't work, I even tried jumping off a ledge" (2026-09-17).
+                //
+                // Set it here and it syncs down to the client, whose travel()
+                // dispatcher then sends the horse into vanilla's real elytra
+                // maths. canGlide() in the mixin is what stops the server's own
+                // updateFallFlying putting it straight back down again.
+                // NO TOGGLE. A glider glides whenever it is off the ground -
+                // owner's call, 2026-09-17 - so there is nothing to switch on
+                // and nothing to forget to switch on. Walking off a ledge is the
+                // whole interface.
+                // RIDDEN ONLY. "Off the ground" alone is not enough: a loose horse
+                // standing in a field flickers onGround server-side, and the first
+                // version churned the flag every other tick on every wild glider
+                // in the world - 212 "glide ON" lines in one short session, all of
+                // them the same untouched horse standing still (2026-09-17). A
+                // glider with nobody on it simply falls, which is what it did
+                // before the gene existed.
+                boolean ridden = horse.getControllingPassenger() != null;
+                boolean airborne = !horse.onGround();
+                boolean lit = horse.isFallFlying();
+                if (ridden && airborne && !lit) {
+                    horse.setSharedFlag(7, true);
+                    ActionTrace.log("flight", "glide ON | " + horse.getName().getString()
+                            + " y=" + String.format("%.1f", horse.getY()));
+                } else if (lit && (!ridden || !airborne)) {
+                    horse.setSharedFlag(7, false);
+                    ActionTrace.log("flight", "glide off | " + horse.getName().getString()
+                            + (ridden ? " (landed)" : " (rider gone)"));
+                }
+                // A glider is not falling either, while it is actually gliding.
+                if (lit) {
+                    horse.resetFallDistance();
+                }
+                // SAY SO EVEN WHEN NOTHING CHANGES, once a second, while a rider
+                // is aboard and off the ground. Two sessions were spent unable to
+                // tell "the flag is never set" apart from "the flag is set and
+                // vanilla ignores it", which are entirely different bugs.
+                if (horse.isVehicle() && airborne && beat(horse, 20)) {
+                    ActionTrace.log("flight", "glide tick | " + horse.getName().getString()
+                            + " fallFlying=" + horse.isFallFlying()
+                            + " onGround=" + horse.onGround()
+                            + " y=" + String.format("%.1f", horse.getY())
+                            + " dy=" + String.format("%.3f", horse.getDeltaMovement().y));
                 }
             }
             case "water_averse" -> {

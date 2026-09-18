@@ -169,6 +169,43 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                LandPayload.TYPE,
+                LandPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.FlightToggle.land(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToServer(
+                DismountPayload.TYPE,
+                DismountPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    // F while flying. Stop the flight first, so the horse is not
+                    // left holding isFlyingVehicle() with nobody aboard.
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.FlightToggle.stop(serverPlayer);
+                        serverPlayer.stopRiding();
+                    }
+                })
+        );
+
+        registrar.playToServer(
+                ToggleFlightPayload.TYPE,
+                ToggleFlightPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    // The server has to agree that this horse is flying, even
+                    // though the rider's client is what moves it: the floating
+                    // vehicle check that would DISCONNECT the rider after 80
+                    // ticks asks isFlyingVehicle() server-side.
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.FlightToggle.toggle(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToServer(
                 RequestHighlightHorsesPayload.TYPE,
                 RequestHighlightHorsesPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {

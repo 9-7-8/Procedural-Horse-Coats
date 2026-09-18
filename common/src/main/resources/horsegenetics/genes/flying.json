@@ -1,0 +1,55 @@
+{
+  "format": 3,
+  "key": "horsegenetics.flying",
+  "name": "Flying",
+  "phase": "magical",
+  "priority": 169,
+  "rarity": "MYTHIC",
+  "blurb": "A horse that leaves the ground, two different ways. Gliding is the dominant one and the one you will actually meet: ride it off a ledge and it soars on momentum like an elytra, trading height for speed and speed for height. True flight - going wherever it is pointed, with no regard for physics at all - is recessive and takes two copies, so it hides in horses that glide or in horses that do nothing. The gene paints nothing: a flying horse looks exactly like any other horse until it leaves the ground.",
+  "alleles": [
+    { "token": "El", "label": "Gliding flight (El)" },
+    { "token": "Tf", "label": "True flight (Tf)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "expressions": [
+    {
+      "id": "true_flight",
+      "name": "True flight",
+      "description": "Rises, hovers and flies wherever its rider points it, indefinitely and without wings. Hold jump to climb; look where you want to go and ride forward. It does not fall, it does not stall, and nothing about the horse's body explains any of it. It takes two copies: a single one is carried and never shows.",
+      "when": ["Tf/Tf"],
+      "effects": [
+        { "type": "traversal", "flag": "flight_true" }
+      ]
+    },
+    {
+      "id": "glide",
+      "name": "Gliding flight",
+      "description": "Glides on momentum like an elytra. A charged jump launches it; from there height is bought with speed and speed with height. It cannot hover, and a horse that runs out of both falls.",
+      "when": ["El/El", "El/Tf", "El/n"],
+      "effects": [
+        { "type": "traversal", "flag": "flight_glide" }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "A horse that stays on the ground.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "El/n": 0.0059997,
+    "Tf/Tf": 0.0005,
+    "n/n": 99.9935003
+  },
+  "notes": [
+    "ONE LOCUS, and gliding sits above true flight: El > Tf > n, with Tf recessive to BOTH of them. El/Tf glides, and Tf/n does nothing at all - it is listed in no expression and falls through to the wild-type catch-all, the way yalia's Ylc/n does. Owner's call, 2026-09-17, reversing the first arrangement: the stronger ability is the harder one to get, so true flight is a thing bred for rather than found, and a glider may be carrying it without anyone knowing.",
+    "TRUE FLIGHT IS SEEDED AS Tf/Tf DIRECTLY, not as carriers. Hardy-Weinberg on a recessive this rare would put a wild Tf/Tf at roughly one horse in four hundred million, which is the same as saying it can only ever be bred - and a gene nobody can find is a gene that may as well not exist (the same rule the disorder loci follow: no invisible carriers in the wild). So Tf/Tf carries a hand-set share and Tf/n carries none. The consequence worth knowing: every wild true-flier breeds true, and the carriers only appear once one is crossed out.",
+    "Cloud-treading is a SEPARATE flag composed onto the gliding one rather than a third flight mode. That way a future gene may grant cloud_walk to a horse that cannot fly, and the glide code never has to know which allele asked for it.",
+    "THE CLOUD-TREADING ALLELE (Ec) IS REMOVED, 2026-09-17, owner's call: get the elytra glide working first. The first attempt only dropped its cloud_walk effect and left the allele in place, still labelled cloud-treading and still occupying a rung of the ladder - which is not a killswitch, it is a gene that lies about itself, and the owner rightly called it still in the game. It is gone from the alleles, the expressions and the founder table; Ec's 0.00299985 went back to n/n. Restoring it means putting those three blocks back and taking the same share off n/n again. cloud_walk remains a legal value in AbilityType.TRAVERSAL, unused, because the flag is not the thing that was wrong.",
+    "THIS GENE FOUND A BUG IN THE EFFECTS LAYER, and it is worth knowing because it was invisible. HorseAbilities.activeFor gated every effect on SpecGene.dose(pair) >= minDose, where dose counts copies of the FIRST-DECLARED allele and minDose defaults to 1. On a two-allele gene those agree. On a dominance series they do not: Tf/Tf counts two copies of the first-declared allele and expressed, El/El counted ZERO - it carries none of that allele at all - and silently lost the effect its own expression declared. Gliding did nothing for three test sessions while true flight worked, and every fix aimed at the movement was aimed at the wrong layer. The fix is SpecGene.abilityDose, which counts copies of anything that is not the wild type; dose is untouched, so perDose coat knobs and every golden stay exactly as they were. It is a strict generalisation - on a two-allele gene the two are identical - so nothing that worked before changes. ANY data-driven gene with three or more alleles was affected, not just this one.",
+    "It grants no protection from falling. That is bird_boned's locus, and breeding the two together is the point - a glider that stalls at height dies without it. Owner's call.",
+    "Founder shares are Hardy-Weinberg on a total flight-allele frequency of 1/20000, which puts an expressing horse at about 1 in 10000 founders. The three alleles are split 1:3:6 with the rarest at the top of the ladder. The six genotype pairs carrying two flight alleles are omitted rather than written as zero - the commonest of them is about one founder in a billion, so 'never in the wild' is simply true.",
+    "flying.json is in the SKIP set of intake/tools/founders.py. That tool rewrites every founder table from a flat per-rarity budget and would flatten the 1:3:6 split on its next bulk run."
+  ]
+}

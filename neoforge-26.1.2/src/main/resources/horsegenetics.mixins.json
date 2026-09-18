@@ -8,7 +8,9 @@
     "LavaTravelMixin",
     "HorseRegenMixin",
     "HorseRearFightMixin",
-    "HorseSwimMixin"
+    "HorseSwimMixin",
+    "HorseFlightMixin",
+    "HorseFlightRiddenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

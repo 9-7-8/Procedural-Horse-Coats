@@ -312,6 +312,13 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.singer", MAGIC_EMISSION);
         MAGICAL_OVERRIDES.put("horsegenetics.pack_leader", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.spawner", MAGIC_BEHAVIOUR);
+        // Flying is the FIRST data-driven gene in this map, and it is here
+        // because it breaks the assumption ofMagicalPriority documents: a gene
+        // written as JSON no longer always paints. Its priority (169) would
+        // band it into MAGIC_CORE, "magical coat genes", which is where the
+        // wiki sidebar, the spawn egg's picker and the browser designer's
+        // family filter would all file a horse that puts nothing on a coat.
+        MAGICAL_OVERRIDES.put("horsegenetics.flying", MAGIC_BEHAVIOUR);
 
         // Cutie mark paints nothing in phase 3 - it draws its emblem in the
         // overlay pass, over the finished texture - but it is unambiguously a

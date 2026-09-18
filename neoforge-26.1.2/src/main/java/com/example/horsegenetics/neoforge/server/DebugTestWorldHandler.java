@@ -451,7 +451,7 @@ public final class DebugTestWorldHandler {
      * it should be - see {@code wiki/horse-dimension.html}.
      */
     private static final String[] BATCHES = {
-            "NEW: fertility OUTSIDE the yard - birth while away, reloads (rows O-T do the rest)",
+            "NEW: FLYING - one egg per allele, a stick to tame, a saddle to ride. Double-tap jump.",
             "NEW: the ender whistle, and wild bands in the OVERWORLD (yard rows R-T run the rest)",
             "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
@@ -674,40 +674,31 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                // FERTILITY AND GESTATION. With debug.tools on, the reproductive
-                // day is one minute: a heat is a minute, a pregnancy is a minute,
-                // a whole cycle is two. The clock steps a mare along rather than
-                // making anyone wait for it.
-                put(inv, legend, 0, many(preset(player, "Test: fertility mare", Sex.FEMALE, false), 2),
-                        "two plain mares - open the info screen: Body now has a Breeding line "
-                                + "(in heat / not in heat, and how long)");
-                put(inv, legend, 1, preset(player, "Test: fertility stallion", Sex.MALE, false),
-                        "a plain stallion - he and a mare IN HEAT should walk towards each other");
-                put(inv, legend, 2, new ItemStack(Items.STICK), "stick - tame all of them");
-                put(inv, legend, 3, new ItemStack(Items.CLOCK),
-                        "clock - right-click an ADULT MARE: into peak heat; once pregnant, due now; "
-                                + "just foaled, straight to foal heat");
-                put(inv, legend, 4, new ItemStack(ModItems.STABILIZER_CARROT.get(), 8),
-                        "stabilizer carrots - feed one to the mare ANY time: no hearts, it just waits on "
-                                + "her. Then golden-carrot the pair while she is in heat: NO instant foal, "
-                                + "she is pregnant (or it didn't take, and the carrot is still on her)");
-                put(inv, legend, 5, many(new ItemStack(ModItems.EMPTY_SEED_JAR.get()), 3),
-                        "empty seed jars - fill from the stallion (golden carrot him first), use on a "
-                                + "mare IN HEAT: pregnant. Out of heat: refused, jar kept");
-                put(inv, legend, 6, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - plain breeding is still an INSTANT foal. Offer one to a "
-                                + "pregnant mare: refused");
-                put(inv, legend, 7, preset(player, "Test: MET carrier mare", Sex.FEMALE, false,
-                                "horsegenetics.met=met/N"),
-                        "MET carrier mare - breed her to the MET stallion by jar or carrots");
-                put(inv, legend, 8, preset(player, "Test: MET carrier stallion", Sex.MALE, false,
-                                "horsegenetics.met=met/N"),
-                        "MET carrier stallion - about one pregnancy in four is LOST EARLY, with the "
-                                + "miscarriage line");
-                tell(player, Component.literal("Do these in the OVERWORLD: the yard's rows O-T cover "
-                                + "everything else. A pregnancy runs about a minute. Get a mare pregnant, "
-                                + "ride far enough that her chunk unloads for a minute, come back: she foals "
-                                + "within two seconds. Then quit to title mid-pregnancy and reload.")
+                // FLYING. One egg per allele of the one locus, each homozygous so
+                // there is no question which mode is being looked at, plus the two
+                // items it takes to get off the ground. Nothing else: the owner
+                // asked for a hotbar with exactly this on it (2026-09-17).
+                //
+                // The gene paints NOTHING, so all three look like ordinary horses
+                // and the egg's name is the only way to tell them apart.
+                put(inv, legend, 0, preset(player, "Test: true flight (Tf/Tf)", Sex.FEMALE, false,
+                                "horsegenetics.flying=Tf/Tf"),
+                        "TRUE flight - DOUBLE-TAP JUMP to start. Jump climbs, sneak descends, F lands, "
+                                + "F twice gets off. Flies at its own genetic speed, building up while "
+                                + "you hold forward");
+                put(inv, legend, 1, preset(player, "Test: glide (El/El)", Sex.FEMALE, false,
+                                "horsegenetics.flying=El/El"),
+                        "GLIDE - no toggle at all: ride it off a ledge and it glides. Elytra physics - "
+                                + "dive for speed, pull up to trade it for height. It cannot hover");
+                put(inv, legend, 2, new ItemStack(Items.STICK), "stick - tame both");
+                put(inv, legend, 3, new ItemStack(Items.SADDLE),
+                        "saddle - flight is ridden-only, so nothing happens until you are on top of it");
+                tell(player, Component.literal("Tame with the stick, saddle up. TRUE FLIGHT (slot 1) is "
+                                + "double-tap jump, like creative flight. GLIDERS (slots 2-3) have no "
+                                + "toggle - ride one off a ledge and it glides. F lands whatever you are "
+                                + "on, safely and from any height; F twice gets you off where you are. "
+                                + "Sneak descends and does NOT dismount. None of them has fall protection "
+                                + "- that is bird_boned's locus - so land rather than step off.")
                         .withStyle(ChatFormatting.GOLD));
             }
             case 2 -> {

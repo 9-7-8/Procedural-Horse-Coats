@@ -46,8 +46,12 @@ BUDGET = {
     'MYTHIC': 0.005,
 }
 
-# The two genes that predate this import and carry hand-set tables.
-SKIP = {'suntouched.json', 'waterborn.json', 'index.json'}
+# Genes that carry hand-set tables this tool must not flatten. The first two
+# predate this import. flying.json is here for a different reason: its three
+# flight alleles are split 1:3:6 across one dominance series, and the flat
+# per-tier budget below would divide the tier evenly and lose that ordering -
+# the rarest allele is meant to be the top of the ladder.
+SKIP = {'suntouched.json', 'waterborn.json', 'flying.json', 'index.json'}
 
 
 def combinations(tokens):

@@ -270,8 +270,16 @@ public final class AbilityType {
             List.of(
                     Param.requiredChoice("flag", List.of(
                                     "walk_on_water", "walk_on_lava", "lava_swim", "fire_immune",
-                                    "fall_immune", "underwater_breathing", "water_averse"),
-                            "the movement / survival flag to grant"),
+                                    "fall_immune", "underwater_breathing", "water_averse",
+                                    "flight_true", "flight_glide", "cloud_walk"),
+                            "the movement / survival flag to grant. The three flight flags are "
+                                    + "deliberately separate values rather than one 'flight' with a "
+                                    + "mode, so that an allele may compose them: the cloud-running "
+                                    + "allele is 'flight_glide' AND 'cloud_walk', and a future gene "
+                                    + "may grant cloud_walk to a horse that cannot fly at all. "
+                                    + "'flight_true' and 'flight_glide' are mutually exclusive "
+                                    + "in practice - they are one locus - but if a horse somehow "
+                                    + "expressed both, the translator takes true flight"),
                     Param.choice("target", List.of("self", "rider", "both"), "self",
                             "who the flag protects - 'rider' and 'both' reach the PLAYER, which "
                                     + "the translator must take back off on dismount")),

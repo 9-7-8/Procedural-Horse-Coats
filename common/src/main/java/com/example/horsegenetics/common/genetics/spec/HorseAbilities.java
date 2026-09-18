@@ -94,7 +94,10 @@ public final class HorseAbilities {
             if (expressed == null || expressed.abilities().isEmpty()) {
                 continue;
             }
-            int dose = spec.dose(pair);
+            // abilityDose, NOT dose: minDose means "expressing copies", and on a
+            // gene with three or more alleles that is not the same as "copies of
+            // the first-declared allele". See SpecGene.abilityDose.
+            int dose = spec.abilityDose(pair);
             for (GeneAbility ability : expressed.abilities()) {
                 if (dose >= ability.minDose()) {
                     out.add(new Active(gene.key(), ability));

@@ -322,6 +322,36 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
         return pair.count(variant);
     }
 
+    /**
+     * <b>How many copies of anything other than the wild type</b> - the dose an {@code effects} entry's
+     * {@code minDose} is measured against.
+     *
+     * <p>It is not {@link #dose}, and the difference only shows on a gene with more than two alleles.
+     * {@code dose} counts the <i>first-declared</i> allele, which is what {@code perDose} wants: a knob that scales
+     * with "how much of the variant". {@code minDose} means something else entirely - the parser rejects anything but
+     * 1 and 2 and calls them <i>"any expressing copy"</i> and <i>"homozygous variant"</i> - and on a dominance series
+     * those two readings come apart badly. A {@code Cr/Cr} horse counts two copies of the first-declared allele and
+     * expresses; an {@code El/El} horse counts <b>zero</b>, because it carries no {@code Cr} at all, and so silently
+     * lost every effect its own expression declared.
+     *
+     * <p>That is the whole reason the flying gene's glide alleles did nothing for three test sessions while true
+     * flight worked (2026-09-17). The ability was never created, so none of the movement code downstream of it ever
+     * ran, and every fix aimed at the movement was aimed at the wrong layer.
+     *
+     * <p>On a two-allele gene this returns exactly what {@code dose} does - the only non-baseline allele IS the
+     * first-declared one - so no gene that works today changes behaviour. And it is deliberately kept off the coat
+     * path: {@code values(ctx)} still calls {@code dose}, so no golden moves.
+     */
+    public int abilityDose(AllelePair pair) {
+        int copies = 0;
+        for (Allele allele : alleles) {
+            if (!allele.equals(baseline)) {
+                copies += pair.count(allele);
+            }
+        }
+        return copies;
+    }
+
     @Override
     public String toString() {
         return "SpecGene[" + spec.key() + "]";
