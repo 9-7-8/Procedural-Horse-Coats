@@ -27,6 +27,80 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-components">2026-09-18, after the collision &mdash; A question that cannot be asked, and twelve recipes nobody read the log for</h2>
+
+<p>
+    The same tester put v0.5.013 on the same 319-jar pack and it still did not start. Their
+    report was better than the bug: it named the line, the cause, and a second crash path they
+    could see coming one frame over. Both were right.
+</p>
+
+<p>
+    <code>ModdedArmour</code> asked another mod's chestplate how strong it was, so a generated
+    armour could sit at the tier that mod had put the metal at. The read is
+    <code>Item.components()</code>, and on a pack with any modded ingot it threw
+    <code>NullPointerException: Components not bound yet</code> and took mod loading with it.
+</p>
+
+<p>
+    <strong>The interesting part is that there is nowhere to move the read to</strong>, and two
+    of the places that look like they should work do not. Reading the 26.1.2 sources settles it:
+    <code>Item.components()</code> delegates to <code>Holder.Reference.components()</code>, which
+    is <code>requireNonNull</code> on a field bound during the <em>first datapack load</em>.
+    <code>ModifyDefaultComponentsEvent</code> is not an exception &mdash; it is the mechanism by
+    which components are built. Nor is deferring into the three-argument
+    <code>Initializer</code> it hands out, which was the obvious next idea and is wrong for a
+    reason you only find by reading
+    <code>DataComponentInitializers.build</code>: it runs <em>every</em> initializer into
+    builders and only then walks the results calling <code>bindComponents</code>, so during that
+    pass nothing is bound, not the item being initialised and not the one you wanted to read.
+    <code>AddPackFindersEvent</code> is earlier still &mdash; which is where the second copy of
+    the bug was waiting, in the tier decision that stocks the metalsmith. The report had seen
+    that one from the stack trace alone.
+</p>
+
+<p>
+    So the question is no longer asked. <code>protectionFor</code> is a pure function of the
+    metal: diamond's body value for a gem, iron's for an ingot, decided at registration. That
+    reverses a documented owner's call and flattens 167 metals to two values, which is recorded
+    as <a href="known-gaps.html#gap-282">gap 274</a> rather than quietly absorbed &mdash; but it
+    also deletes an entire class of load-order dependency, and it is what lets one function be
+    safe at three moments with three different amounts of game in existence. The
+    <a href="api-notes.html#components-not-bound">rule worth carrying forward</a>: anything you
+    need about another mod's item at load time must come from its registry id, or from its jar,
+    or not at all.
+</p>
+
+<p>
+    <strong>Proving it is what found the other bug.</strong> The fix is invisible without another
+    mod installed, so the check was the synthetic jar
+    (<code>tools/compat/build-test-mod.mjs</code>) plus <code>runServer</code> &mdash; and the
+    boot log that came back to <code>Done (0.312s)</code> had twelve red lines in it that had
+    nothing to do with any of this:
+</p>
+
+<pre><code>Couldn't parse data file 'horsegenetics:oak_reaper':
+  Invalid pattern: each row must be the same width</code></pre>
+
+<p>
+    A two-wide row in a three-wide pattern. The game throws out the whole file, so
+    <strong>every reaper in all twelve woods has been uncraftable since carts shipped in
+    0.5.012</strong>, and the only symptom is a recipe that is not there &mdash; indistinguishable
+    from one the player has not unlocked. Fixed in both writers, and
+    <code>check-recipes.mjs</code> now rejects a ragged pattern, one that does not fit
+    3&times;3, a symbol with no key and a key no symbol uses; the guard was run against the real
+    defect before the fix and after it. The wider lesson is not about recipes: <strong>a
+    successful boot is not a clean boot, and nobody had been reading the middle of the log.</strong>
+</p>
+
+<p>
+    Shipped as v0.5.014 with the jar attached. Verified as far as a headless server can verify
+    it: five modded metals scanned, four armours registered, the metalsmith stocking tin and
+    hellforged at tier 2 beside iron horse armour and ruby and entro at tier 5 beside diamond,
+    and no <code>Invalid pattern</code> lines. That is a server, so nothing was drawn, and
+    <strong>the real pack has still not been tried &mdash; this is the third attempt</strong>.
+</p>
+
 <h2 id="d2026-09-18-collision">2026-09-18, after the carts &mdash; Six mods add a steel, and the mod stops loading</h2>
 
 <p>
@@ -58,7 +132,7 @@
 <p>
     The crash lands in a static initialiser reached from the mod constructor, which is what
     turns a cosmetic clash into an <code>ExceptionInInitializerError</code> and a dead mod.
-    <a href="known-gaps.html#gap-274">Gap 274</a> had actually described this feature already,
+    <a href="known-gaps.html#gap-282">Gap 274</a> had actually described this feature already,
     and got it wrong in a way worth recording: it said &ldquo;the ids differ, so nothing is
     ambiguous to the <em>game</em>&rdquo;. True of gates, whose ids carry a namespace. False of
     armour, whose ids did not. The sentence was checked against one half of a feature and
@@ -812,7 +886,7 @@
     rendering at all: not a modded gate, not a tinted armour, not its icon, and the plate art
     was measured and never looked at (<a href="known-gaps.html#gap-273">273</a>). Two mods that
     both add a maple give two items with one name
-    (<a href="known-gaps.html#gap-274">274</a>), and the armour tier reads a
+    (<a href="known-gaps.html#gap-282">274</a>), and the armour tier reads a
     <code>&lt;material&gt;_chestplate</code> by name, which is a convention and not a contract
     (<a href="known-gaps.html#gap-275">275</a>). The checklist is
     <a href="verification.html#compat-0918">&sect;0-FK</a>, and it needs the one thing the test

@@ -58,6 +58,71 @@
     </p>
 </div>
 
+<h2 id="v0-5-014">0.5.014</h2>
+
+<p class="lede">
+    <strong>The second half of the modded-pack fix, and twelve carts that never could be
+    crafted.</strong> 0.5.013 cleared the crash it was cut for and then died one event later on
+    the same pack. This clears that one, and the server boot that proved it turned up a
+    year-zero bug in the reaper's recipe that nobody had ever read the log for.
+</p>
+
+<h3>Loads on a modded pack</h3>
+
+<ul>
+    <li><strong>The generated horse armour no longer asks your other mods' items what they are
+        worth.</strong> It was reading their chestplate's armour value and their ingot's rarity
+        to pick a tier, and <a href="compatibility.html#components-not-bound">that question
+        cannot be asked</a>: those are data components, bound during the first datapack load,
+        which is after every moment the mod can still say what its own items are worth. The
+        crash was <code>NullPointerException: Components not bound yet</code>, and it took the
+        whole mod down at load &mdash; so on a server, the server did not start.</li>
+    <li><strong>There was a second copy of it</strong> a few steps later, in the code that
+        decides which of the metalsmith's tiers stocks the armour. The report only reached the
+        first.</li>
+    <li><strong>A modded gem is now worth what diamond is worth and a modded ingot what iron
+        is</strong>, decided at registration and never revisited. That is a real flattening and
+        it is written up as <a href="known-gaps.html#gap-282">an accepted gap</a> rather than
+        dressed up as a design.</li>
+</ul>
+
+<h3>The reaper was never craftable</h3>
+
+<ul>
+    <li><strong>Every reaper, in all twelve woods, since carts shipped in 0.5.012.</strong> Its
+        recipe had a two-wide row in a three-wide pattern, so the game threw out all twelve
+        files at datapack load with one red line each. The only symptom a player has is a recipe
+        that is not there, which looks exactly like not having found it yet.</li>
+    <li>Fixed in both writers &mdash; the baked recipes for vanilla's woods and
+        <code>GeneratedCarts</code> for modded ones &mdash; and
+        <code>tools/check-recipes.mjs</code> now rejects a ragged pattern, one that does not fit
+        3&times;3, a symbol with no key and a key no symbol uses. Proven against the real defect
+        before and after the fix.</li>
+</ul>
+
+<h2 id="v0-5-013">0.5.013</h2>
+
+<p class="lede">
+    <strong>A hotfix for heavily modded packs, and the first of two.</strong> A tester's 319-jar
+    pack could not start 0.5.012: six of those mods add a steel ingot, the generated horse armour
+    was named after the metal alone, and the second registration threw inside the mod constructor
+    with <code>Duplicate registration redstone_alloy_horse_armor</code>. Nineteen metal names
+    collided on that pack.
+</p>
+
+<ul>
+    <li><strong>One armour per metal name, however many mods brought that metal</strong> &mdash;
+        and <a href="compatibility.html#generated-naming">all of their ingots still forge it</a>,
+        so no mod's metal becomes a dead end. The bench still recognises every one of them for
+        fittings, and each keeps its own colour.</li>
+    <li>A metal named the other way round &mdash; <code>ingot_hellforged</code> rather than
+        <code>hellforged_ingot</code> &mdash; is <strong>Hellforged Horse Armor</strong> rather
+        than &ldquo;Ingot Hellforged Horse Armor&rdquo;.</li>
+    <li>The generated content folder rebuilds itself on upgrade, so it is not left holding
+        armour built by the old naming rule.</li>
+    <li><strong>It was not enough.</strong> The pack still did not start; see 0.5.014 above.</li>
+</ul>
+
 <h2 id="v0-5-012">0.5.012</h2>
 
 <p class="lede">

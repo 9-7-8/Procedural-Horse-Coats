@@ -116,7 +116,10 @@
     never have produced: an armour id built from the material name alone, colliding six ways on
     <code>steel</code>. That is <a href="compatibility.html#generated-naming">fixed and
     released</a> in v0.5.013, and the two single-mod shapes of it are in the synthetic jar now.
-    <strong>What is still open is everything that run could not tell us.</strong> The scan
+    The 0.5.013 launch log came back as well, and named a second blocker one event later
+    &mdash; <a href="compatibility.html#components-not-bound">reading another mod's components at
+    a moment nothing is bound</a>, fixed in v0.5.014.
+    <strong>What is still open is everything those runs could not tell us.</strong> The scan
     reported 40 woods, 167 metals and 3 dyes and then the mod died in its constructor, so those
     counts are the <em>only</em> evidence from real jars: nobody has seen a modded gate, a
     tinted armour or a bench fitting that came out of one, and the per-file assumptions are
@@ -124,9 +127,22 @@
     usual path, that an item model names its texture in <code>layer0</code>, that an ingot's art
     is in the jar that declared the tag. Each has a fallback and no fallback has been exercised.
     The failure is quiet: a wood that is simply not found looks exactly like a wood the player
-    imagined. <strong>The cheapest next step is to ask that tester for the 0.5.013 launch log</strong>
-    &mdash; the <code>compat:</code> lines and the uncraftable warnings alone would settle a
-    dozen of these. <code>wiki/verification.html</code> &sect;0-FK.</li>
+    imagined. <strong>The cheapest next step is the 0.5.014 launch log from that same pack</strong>
+    &mdash; the <code>compat:</code> lines and the uncraftable warnings, from a boot that finally
+    gets past mod loading, would settle a dozen of these at once.
+    <code>wiki/verification.html</code> &sect;0-FK.</li>
+
+<li id="gap-282"><strong>Open, accepted 2026-09-18: every modded ingot is worth exactly iron and
+    every modded gem exactly diamond.</strong> A mod's endgame alloy and its tier-one metal now
+    give a horse the same protection, because
+    <a href="compatibility.html#components-not-bound">nothing that distinguishes them is readable
+    at any moment the mod can still answer</a>. This is a closed technical question and an open
+    design one: 167 metals at two values is a lot of sameness, and nobody has played a pack with
+    it to say whether that reads as boring or as unobtrusive. The signals that <em>are</em>
+    readable in time are all presence-not-value &mdash; whether the mod registered a
+    <code>&lt;material&gt;_chestplate</code> or a full tool set at all &mdash; so a nudge from
+    those is possible and would be a guess on a guess. Not worth inventing before somebody has
+    noticed the flatness.</li>
 
 <li id="gap-272"><strong>Open, found 2026-09-18: no generated recipe has ever successfully parsed.</strong>
     What the test run verified is the <em>skip</em>, not the recipe. The synthetic test mod
