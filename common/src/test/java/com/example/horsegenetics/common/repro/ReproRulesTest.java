@@ -277,6 +277,33 @@ class ReproRulesTest {
         assertEquals(0.25, twins / (double) pregnancies, 0.03);
     }
 
+    /**
+     * About one twin pregnancy in ten is identical, and an identical pair is one
+     * genome rather than two - the same foal twice, epigenome and all, so the
+     * two are alike down to the pattern seeds. A fraternal pair is two ordinary
+     * draws and never coincides.
+     */
+    @Test
+    void aboutOneTwinPregnancyInTenIsIdentical() {
+        Genotype twTw = Genotype.wildType().with(new AllelePair(Genes.FERTILITY.tw, Genes.FERTILITY.tw));
+        int twins = 0;
+        int identical = 0;
+        for (long seed = 0; seed < 8000; seed++) {
+            Optional<Pregnancy> p = Conception.attempt(mating(twTw, Genotype.wildType()), cycleStart(),
+                    DAY * 3 / 4, T, 0, true, true, new SeededRng(seed)).pregnancy();
+            if (p.isEmpty() || !p.get().twins()) {
+                continue;
+            }
+            twins++;
+            if (p.get().embryos().get(0).foal().equals(p.get().embryos().get(1).foal())) {
+                identical++;
+            }
+        }
+        assertTrue(twins > 500, "not enough twin pregnancies to measure: " + twins);
+        assertEquals(ReproRules.IDENTICAL_TWIN_CHANCE, identical / (double) twins, 0.04,
+                identical + " identical out of " + twins + " twin pregnancies");
+    }
+
     /** Two MET carriers lose one pregnancy in four, early, and the embryos say which. */
     @Test
     void aLethalEmbryoIsCarriedThenLostEarly() {

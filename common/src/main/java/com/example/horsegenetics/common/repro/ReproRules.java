@@ -73,6 +73,20 @@ public final class ReproRules {
     /** ...one is lost this often, and both the rest of the time. */
     public static final double TWINS_ONE_LOST = 0.20;
 
+    /**
+     * <b>How often a twin pregnancy is identical rather than fraternal.</b> One
+     * zygote that split, so the two foals are one genome drawn once: same sex,
+     * same colour, and the same epigenetic numbers too, which makes them alike
+     * down to the pattern seeds rather than merely to the genotype (owner's
+     * call, 2026-09-17 - true clones). A fraternal pair is two ordinary draws
+     * and is no more alike than any two full siblings.
+     *
+     * <p>Rarer than this in life, where an equine twin is almost never
+     * identical. A rarity inside a rarity is a thing nobody ever meets, and
+     * twins are already gated behind the fertility locus.
+     */
+    public static final double IDENTICAL_TWIN_CHANCE = 0.10;
+
     /** An early loss happens between these fractions of the way through. */
     public static final double EARLY_LOSS_FROM = 0.10;
     public static final double EARLY_LOSS_TO = 1.0 / 3.0;

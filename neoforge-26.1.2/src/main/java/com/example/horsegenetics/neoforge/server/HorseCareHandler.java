@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -196,7 +197,10 @@ public final class HorseCareHandler {
         // scan and pays for healing; a starving horse cannot heal. It replaced the food half
         // of the old gate - a horse now goes and eats (HungerFoodGoal) - and the water half
         // stays. A blood-drinker still cannot regenerate at all: its bite is its only heal.
-        double hunger = Hunger.drain(horse.getData(ModAttachments.HUNGER.get()), SCAN_INTERVAL);
+        // Scaled by the body: a bigger horse burns a stomach-ful faster, so a shire
+        // is hungry in two thirds of a day where a falabella takes two and a half.
+        double hunger = Hunger.drain(horse.getData(ModAttachments.HUNGER.get()), SCAN_INTERVAL,
+                horse.getAttributeValue(Attributes.SCALE));
         float missing = horse.getMaxHealth() - horse.getHealth();
         if (missing > 0.0F && HorseDietHandler.canRegenerate(horse) && nearWater(level, horse)) {
             double heal = Hunger.affordable(hunger,

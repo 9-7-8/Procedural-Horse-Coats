@@ -94,11 +94,19 @@ public final class Conception {
 
         double twinChance = Genes.FERTILITY.twinChance(m.dam().genotype().pair(Genes.FERTILITY));
         int count = rng.nextFloat() < twinChance ? 2 : 1;
+        // Identical twins are one zygote that split, so the second foal is not
+        // drawn at all - it IS the first, epigenome included. Two consequences
+        // fall out of that rather than being coded: an identical pair is always
+        // the same sex (sex is a locus like any other), and it shares its lethal
+        // draw, so both are lost or neither is.
+        boolean identical = count == 2 && rng.nextFloat() < ReproRules.IDENTICAL_TWIN_CHANCE;
         GenomeSample sireSample = GenomeSample.of(m.sire());
         List<Embryo> embryos = new ArrayList<>(count);
         boolean anyLost = false;
         for (int i = 0; i < count; i++) {
-            Embryo e = draw(m, sireSample, healthActive, lethalsActive, rng);
+            Embryo e = identical && i > 0
+                    ? embryos.get(0)
+                    : draw(m, sireSample, healthActive, lethalsActive, rng);
             anyLost |= e.lostEarly();
             embryos.add(e);
         }

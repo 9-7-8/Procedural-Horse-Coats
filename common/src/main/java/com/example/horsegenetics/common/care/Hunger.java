@@ -116,9 +116,34 @@ public final class Hunger {
         }
     }
 
-    /** Hunger after {@code ticks} of resting drain. */
+    /** Hunger after {@code ticks} of resting drain, for a horse of ordinary size. */
     public static double drain(double hunger, long ticks) {
-        return clamp(hunger - DRAIN_PER_DAY * ticks / DAY_TICKS);
+        return drain(hunger, ticks, 1.0);
+    }
+
+    /**
+     * Hunger after {@code ticks} of resting drain, for a horse whose body is
+     * {@code scale} times the ordinary one.
+     *
+     * <p><b>A bigger horse gets hungry sooner</b> (owner, 2026-09-17), and the
+     * drain is linear in the scale: a shire at 1.43 is hungry in about two
+     * thirds of a day where a falabella at 0.38 takes two and a half.
+     *
+     * <p>Linear rather than the metabolic exponent, and that is a deliberate
+     * departure. Real intake goes as mass to the three-quarters, and mass cubes
+     * with scale, which would put the smallest ponies past a week between meals
+     * and effectively outside the system. The honest reason the exponent does
+     * not belong here is that the pool is a fixed {@link #FULL} for every horse:
+     * a bigger animal has a bigger stomach as well as a bigger appetite, and
+     * with only one of those modelled, what this number says is how fast a
+     * stomach-ful goes rather than how much hay the horse eats in a day.
+     *
+     * <p>A non-positive scale is treated as ordinary, rather than as a horse
+     * that never gets hungry at all.
+     */
+    public static double drain(double hunger, long ticks, double scale) {
+        double factor = scale > 0.0 ? scale : 1.0;
+        return clamp(hunger - DRAIN_PER_DAY * factor * ticks / DAY_TICKS);
     }
 
     /** Can a horse with this much hunger heal at all? */

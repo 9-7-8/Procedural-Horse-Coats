@@ -33,6 +33,28 @@ class HungerTest {
     }
 
     @Test
+    void aBiggerHorseGetsHungrySooner() {
+        assertEquals(Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS),
+                Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 1.0), 1e-9,
+                "the two-argument drain is the ordinary-sized horse");
+        assertEquals(Hunger.FULL - Hunger.DRAIN_PER_DAY * 0.5,
+                Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 0.5), 1e-9,
+                "half the body, half the drain - it is linear in the scale");
+        assertTrue(Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 1.43)
+                        < Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 0.38),
+                "after the same day the shire is hungrier than the falabella");
+    }
+
+    @Test
+    void aHorseWithNoScaleIsAnOrdinaryHorse() {
+        // Not one that never gets hungry: a zero here means nobody set a scale.
+        assertEquals(Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 1.0),
+                Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 0.0), 1e-9);
+        assertEquals(Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, 1.0),
+                Hunger.drain(Hunger.FULL, Hunger.DAY_TICKS, -2.0), 1e-9);
+    }
+
+    @Test
     void aStarvingHorseCannotHeal() {
         assertFalse(Hunger.canHeal(Hunger.STARVING));
         assertFalse(Hunger.canHeal(0.0));
