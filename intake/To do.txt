@@ -11,7 +11,6 @@ Add a roll to determine if twins are identical or fraternal.
 
 
 
-the horseman should sell breed spawn eggs that are from the same countries that their connected cowboy can sell horses from. 
 
 the amount that a horse eats should be derived from the scale of their body-- bigger horses eat more frequently. 
 
