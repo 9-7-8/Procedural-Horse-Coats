@@ -27,6 +27,85 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-flying">2026-09-17, night &mdash; Flying, and the effects bug that was hiding under it</h2>
+
+<p>
+    The owner asked for flight: one locus, a wild type, a creative-style allele and an
+    elytra-style one. What shipped is <a href="gene-flying.html">flying</a> &mdash; three
+    alleles in a dominance series, <code>El &gt; Tf &gt; n</code>, gliding dominant and
+    true flight recessive at two copies. It paints nothing, which makes it the first
+    data-driven gene in <code>GeneFamily</code>&rsquo;s override map: the bands assume a
+    JSON gene always paints, and without an entry it would have been filed under
+    &ldquo;magical coat genes&rdquo;.
+</p>
+
+<h3>Neither flight model is written here</h3>
+
+<p>
+    26.1.2 carries both already, on <code>LivingEntity</code> and neither of them
+    player-gated: <code>travelFlying</code> is creative/ghast flight, and
+    <code>travelFallFlying</code> is the real elytra maths. So the mixins decide
+    <em>when</em> a horse is allowed each one and let vanilla do the physics. That is the
+    determinism rule paying for itself &mdash; there are no invented constants to drift,
+    and a 1.12.2 backport reimplements &ldquo;which vanilla path&rdquo; rather than a
+    table of tuning numbers. True flight&rsquo;s airspeed comes off the horse&rsquo;s own
+    <code>MOVEMENT_SPEED</code>, so the speed loci keep meaning something in the air.
+</p>
+
+<h3>Three sessions of fixing the wrong layer</h3>
+
+<p>
+    Gliding did nothing, three times running, and each fix was aimed downstream of a thing
+    that did not exist. <code>HorseAbilities</code> gated every effect on
+    <code>SpecGene.dose()</code>, which counts copies of the <strong>first-declared</strong>
+    allele, against a <code>minDose</code> defaulting to 1. On a two-allele gene those
+    agree; on a dominance series they do not, so <code>El/El</code> scored zero &mdash; it
+    carries no <code>Tf</code> at all &mdash; and lost the effect its own expression
+    declared. The ability was never created, so the flag, the sync and the mixins were all
+    innocent. <code>SpecGene.abilityDose</code> counts non-wild-type copies instead;
+    <code>dose()</code> is untouched, so <code>perDose</code> coat knobs and both goldens
+    are unchanged. <strong>Any data-driven gene with three or more alleles was
+    affected.</strong>
+</p>
+
+<p>
+    The lesson worth keeping: the diagnostic that broke the deadlock printed what the
+    <em>server</em> thought the horse had (<code>traversal=[]</code> against
+    <code>traversal=[flight_glide]</code>), and it was deliberately placed outside the
+    case it was meant to diagnose &mdash; a probe inside that case would have proved
+    nothing, because the case was what was not running.
+</p>
+
+<h3>Two vanilla traps, both found by crashing</h3>
+
+<p>
+    A floating vehicle disconnects its rider after eighty ticks unless
+    <code>isFlyingVehicle()</code> says otherwise. And <code>updateFallFlying</code> does
+    not merely keep the elytra flag lit &mdash; every twentieth tick it picks a random
+    glider item out of the entity&rsquo;s equipment and damages it. Overriding
+    <code>canGlide()</code> promised an item a horse does not have, so
+    <code>Util.getRandom</code> was handed an empty list and took the server down
+    mid-flight. Cancelling <code>updateFallFlying</code> outright is the honest version:
+    a gene-winged horse has no glider to wear out. The cost is that sculk sensors cannot
+    hear a gliding horse.
+</p>
+
+<p>
+    Fall damage is cancelled at the damage event rather than reset afterwards, because the
+    server accumulates its own <code>fallDistance</code> from the movement packet, outside
+    the entity tick &mdash; a reset is always one call too late, which was learned twice.
+    The gene still grants no fall protection: that is <a href="gene-bird-boned.html">bird
+    boned</a>&rsquo;s locus, and breeding the two together is the point.
+</p>
+
+<p>
+    <strong>Parked deliberately:</strong> the cloud-treading allele. Clouds turn out to be
+    reachable &mdash; 26.1.2 moved cloud height into the common-side
+    <code>EnvironmentAttributes</code> and ships <code>Entity.isInClouds()</code> &mdash;
+    but the allele was removed rather than left in place describing a thing it no longer
+    did. The <code>cloud_walk</code> flag survives, unused.
+</p>
+
 <h2 id="d2026-09-17-double-gates">2026-09-17, later &mdash; A gate two blocks wide, written rather than ported</h2>
 
 <p>

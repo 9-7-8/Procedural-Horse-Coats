@@ -2103,7 +2103,15 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
             (homozygous variant only). Largely superseded by the expression
             table &mdash; a homozygote can be its own outcome with its own
             effects list. Lets a gene gate the
-            louder half of its effect on two copies without an expression language.</dd>
+            louder half of its effect on two copies without an expression language.
+            <br><strong>What it counts:</strong> copies of anything that is
+            <em>not</em> the wild type &mdash; the last allele the file declares.
+            That distinction only matters past two alleles, and it cost three test
+            sessions to find: it used to count copies of the <em>first-declared</em>
+            allele, so on a dominance series every rung below the top silently lost
+            the effects its own expression declared. See
+            <code>SpecGene.abilityDose</code>, and <a href="gene-flying.html">flying</a>,
+            which is the gene that found it.</dd>
     </div>
 </dl>
 
@@ -2314,7 +2322,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <table>
 <thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>flag</code></td><td><em>required</em></td><td>One of <code>walk_on_water</code>, <code>walk_on_lava</code>, <code>fire_immune</code>, <code>fall_immune</code>, <code>underwater_breathing</code>, <code>water_averse</code>.</td></tr>
+<tr><td><code>flag</code></td><td><em>required</em></td><td>One of <code>walk_on_water</code>, <code>walk_on_lava</code>, <code>lava_swim</code>, <code>fire_immune</code>, <code>fall_immune</code>, <code>underwater_breathing</code>, <code>water_averse</code>, <code>flight_true</code>, <code>flight_glide</code>, <code>cloud_walk</code>.</td></tr>
 </tbody>
 </table>
 <p>
@@ -2325,11 +2333,20 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     executed.
 </p>
 <p>
-    The spec lists three more flags the gene layer does not accept:
-    <code>flight</code>, <code>water_movement_efficiency</code> and <code>phasing</code>.
+    The spec lists two more flags the gene layer does not accept:
+    <code>water_movement_efficiency</code> and <code>phasing</code>.
     <code>water_movement_efficiency</code> is a magnitude rather than a boolean and lives on
-    <code>attribute</code> here; <code>flight</code> and <code>phasing</code> are
-    simply absent. See <a href="horse-traits.html#divergences">Divergences</a>.
+    <code>attribute</code> here; <code>phasing</code> is simply absent. See
+    <a href="horse-traits.html#divergences">Divergences</a>.
+</p>
+<p>
+    <strong>Flight is three flags, not one.</strong> The spec named a single
+    <code>flight</code>; what shipped is <code>flight_true</code> (goes where it is
+    pointed, no gravity), <code>flight_glide</code> (vanilla&rsquo;s own elytra physics)
+    and <code>cloud_walk</code>, kept separate so an allele may <em>compose</em> them and
+    a future gene may hand cloud-treading to a horse that cannot fly at all. None of the
+    three is implemented here: each one routes into a movement model 26.1.2 already has,
+    which is what keeps them deterministic. See <a href="gene-flying.html">flying</a>.
 </p>
 <pre><code class="language-json">{ "type": "traversal", "flag": "fire_immune" }</code></pre>
 

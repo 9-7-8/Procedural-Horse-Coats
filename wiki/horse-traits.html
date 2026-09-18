@@ -626,7 +626,8 @@ Component  -> (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td><code>anchor: body</code> vs the spec&rsquo;s <code>entity</code></td><td>Rename</td><td>Same thing, two names. Pick one before external gene packs exist.</td></tr>
 <tr><td>Emitter shapes lack <code>cone</code> and <code>sphere</code></td><td>Narrowing</td><td>No blocker; both are pure geometry.</td></tr>
 <tr><td><code>water_movement_efficiency</code> is an attribute here, a traversal flag in the spec</td><td>Rename</td><td>The gene layer is arguably right &mdash; it is a magnitude, and traversal flags are booleans. Fix the spec, not the code.</td></tr>
-<tr><td><code>flight</code> and <code>phasing</code> traversal flags absent</td><td>Gap</td><td>Both are large behavioural changes; absence is probably correct for now.</td></tr>
+<tr><td><code>flight</code> shipped as three flags, not one</td><td>Widening</td><td>Built 2026-09-17. The spec named one <code>flight</code>; the gene layer has <code>flight_true</code>, <code>flight_glide</code> and <code>cloud_walk</code>, separate so an allele may compose them. <code>cloud_walk</code> parses and is not executed. See <a href="gene-flying.html">flying</a>.</td></tr>
+<tr><td><code>phasing</code> traversal flag absent</td><td>Gap</td><td>A large behavioural change; absence is probably correct for now.</td></tr>
 <tr><td><code>on_interact</code> takes an item ID, not an item tag</td><td>Narrowing</td><td>The spec says <code>item_or_tag</code> everywhere an item appears. Tag support is a translator-side lookup.</td></tr>
 <tr><td><code>yield.produces</code> accepts a recognised item set only</td><td>Narrowing</td><td>The spec allows fluid, effect, entity, block, structure and area-cloud outputs, plus roll tables.</td></tr>
 <tr><td>No trait IDs, cost, relations or budget</td><td>Gap</td><td>The structural prerequisite for most of the unbuilt half of this page.</td></tr>

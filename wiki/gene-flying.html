@@ -149,6 +149,42 @@
 
 <p class="muted">Paints nothing.</p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-flight">
+    <strong>Both flight modes work, in game</strong> (owner-confirmed, 2026-09-17, across
+    five play sessions in one night). Gliding engages on an <code>El</code> horse the
+    moment it leaves the ground and carries it on vanilla&rsquo;s own elytra physics; true
+    flight on a <code>Tf/Tf</code> horse toggles on a double tap of jump, climbs on jump,
+    descends on sneak, and lands on the dismount key without hurting the horse. The last
+    session flew both without a crash, a kick or fall damage.
+</p>
+
+<p id="verified-dose">
+    <strong>The bug this gene found, and how it was proved</strong> &mdash; gliding did
+    nothing for three sessions while true flight worked, and the cause was neither the
+    mixins nor the networking. <code>HorseAbilities</code> gated every effect on
+    <code>SpecGene.dose()</code>, which counts copies of the <em>first-declared</em>
+    allele, so an <code>El/El</code> horse scored zero and silently lost the effect its own
+    expression declared. The evidence that settled it was a server-side probe printing
+    <code>traversal=[]</code> for a glider beside <code>traversal=[flight_true]</code> for
+    a true flier &mdash; deliberately placed <em>outside</em> the branch it was diagnosing,
+    because a probe inside a branch that never runs proves nothing.
+    <code>SpecGene.abilityDose</code> counts non-wild-type copies instead, and both coat
+    goldens were confirmed at zero moved rows.
+</p>
+
+<p id="verified-crash">
+    <strong>Why <code>updateFallFlying</code> is cancelled rather than
+    <code>canGlide()</code> overridden</strong> &mdash; the override reported a glider item
+    that a horse does not carry, and vanilla damages a random one every twenty ticks, so
+    <code>Util.getRandom</code> met an empty list and threw
+    <code>&ldquo;Bound must be positive&rdquo;</code>, taking the server down about a second
+    into the first successful flight. Reproduced once, fixed, and flown since without
+    recurrence. The known cost: a gliding horse fires no <code>ELYTRA_GLIDE</code> game
+    event, so sculk sensors cannot hear one.
+</p>
+
 </section>
 
 </article>

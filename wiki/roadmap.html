@@ -2099,7 +2099,41 @@
         cropped banner is just another generated texture.</li>
 </ul>
 
-<h2 id="settled">26. Settled decisions &mdash; do not reopen</h2>
+<h2 id="cloud-walking">26. Cloud-treading, parked with the hard part already answered</h2>
+
+<p>
+    The <a href="gene-flying.html">flying</a> gene was asked for with three abilities, and
+    shipped with two. The third &mdash; an allele that glides <em>and</em> can come to rest
+    on a cloud and walk about on it &mdash; was killswitched on 2026-09-17 so the elytra
+    glide could be got working first, and the allele was removed rather than left in place
+    describing something it no longer did.
+</p>
+
+<p>
+    <strong>The question that would normally sink this is already answered.</strong> Clouds
+    used to be client-only decoration, which would have meant inventing an invisible surface
+    at an arbitrary height and hoping both sides agreed on it. In 26.1.2 they are not:
+    <code>DimensionSpecialEffects</code> is gone and cloud height moved into the
+    <em>common-side</em> <code>EnvironmentAttributes.CLOUD_HEIGHT</code> &mdash; default
+    <code>192.33</code>, four blocks thick, <code>spatiallyInterpolated</code> and
+    <code>syncable</code> &mdash; and vanilla ships the exact predicate the feature needs,
+    <code>Entity.isInClouds()</code>. So a cloud-treading horse can key off <em>real</em>
+    clouds, on either side, and the horse dimension can set its own cloud height.
+</p>
+
+<p>
+    What is left is design, not discovery: what treading a cloud does to momentum, whether
+    it restores anything, and whether a horse that cannot fly may still be granted it. The
+    <code>cloud_walk</code> flag is already a legal <code>traversal</code> value and is
+    deliberately composed <em>beside</em> <code>flight_glide</code> rather than folded into
+    it, so nothing has to be unpicked to bring it back &mdash; it is an allele, an
+    expression and a founder share, and the share comes back off <code>n/n</code>.
+    One caution worth carrying: the alpha guard in <code>isInClouds()</code> means a
+    dimension whose <code>CLOUD_COLOR</code> is fully transparent has no clouds at all, and
+    the predicate is simply always false there.
+</p>
+
+<h2 id="settled">27. Settled decisions &mdash; do not reopen</h2>
 
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
