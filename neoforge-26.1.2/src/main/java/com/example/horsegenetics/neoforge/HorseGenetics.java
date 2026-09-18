@@ -62,6 +62,11 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.data.loot.ModLootModifiers.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootFunctions.register(modEventBus);
         com.example.horsegenetics.neoforge.world.ModBiomeModifiers.register(modEventBus);
+        // In-game tests. Registration is a no-op unless gametests are enabled
+        // (dev only), so this costs a shipped server nothing. See ModGameTests -
+        // 26.1.2 has no @GameTest annotation and the two-half registration there
+        // is not optional.
+        com.example.horsegenetics.neoforge.gametest.ModGameTests.register(modEventBus);
         // Both settings files live in .minecraft/phc/ beside the breeds folder,
         // not in config/ - see ModBreedSpecs.configFile for how, and why.
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, ModBreedSpecs.configFile("client.toml"));

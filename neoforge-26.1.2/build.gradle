@@ -28,21 +28,37 @@ neoForge {
     runs {
         client {
             client()
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         // Launch straight into the test world and on into the horse dimension's yard
         // (owner, 2026-09-14): ./gradlew :neoforge-26.1.2:runClientTestWorld
-        // The task name is checked (gradlew tasks lists runClientTestWorld). UNVERIFIED: that
-        // ModDevGradle gives it the same run/ game directory as `client`.
+        // The task name is checked (gradlew tasks lists runClientTestWorld). It does share
+        // run/ with `client`, which was the open question here: RunModel's constructor sets
+        // gameDirectory's convention to projectDirectory.dir("run") for EVERY run whatever
+        // its name (ModDevGradle 2.0.144, read off the plugin). That is why the gametest
+        // run below has to override it rather than inherit.
         clientTestWorld {
             client()
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'horsegenetics.autoTestWorld', 'true'
         }
         server {
             server()
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        // Headless in-game tests: ./gradlew :neoforge-26.1.2:runGameTest
+        // There is no gameTestServer() helper in ModDevGradle - the run type is a
+        // plain string, and 'gameTestServer' is a real key in the userdev config
+        // (it sets neoforge.enableGameTest itself). Its own gameDirectory is not
+        // optional: EVERY run defaults to run/, so without this it takes the world
+        // lock off a client that is already up. --universe is wiped and recreated
+        // each run, so it must sit inside that directory. A --tests selector that
+        // matches nothing exits -1, so a typo reads as a failure rather than a pass.
+        gameTest {
+            type = 'gameTestServer'
+            gameDirectory = project.layout.projectDirectory.dir('run-gametest')
+            programArgument '--universe'
+            programArgument 'world'
+            programArgument '--tests'
+            programArgument 'horsegenetics:*'
         }
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'

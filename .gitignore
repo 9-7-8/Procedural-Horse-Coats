@@ -63,3 +63,6 @@ whitelist.json
 banned-ips.json
 banned-players.json
 usercache.json
+
+# The headless gametest run has its own game directory (see build.gradle).
+neoforge-26.1.2/run-gametest/
