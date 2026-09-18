@@ -408,9 +408,12 @@
 </p>
 
 <div class="codebox">
-<pre><code>node wiki/tools/check-path-canvas.mjs      # drive the PATH drawing canvas (failing - gap 263)
+<pre><code>node wiki/tools/check-path-canvas.mjs      # drive the PATH drawing canvas
+node wiki/tools/check-creator-steps.mjs    # does every step show something to fill in?
 node wiki/tools/check-glow-control.mjs     # a layer's glow, which nothing can draw
+node wiki/tools/check-glow-render.mjs      # and whether three actually lights it
 node wiki/tools/check-colour-control.mjs   # the literal / HSL fork, which looks fine either way
+node wiki/tools/check-ai.mjs               # the wiki helper, both providers, both designers
 node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</code></pre>
 </div>
 
@@ -475,6 +478,40 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
         to hit by hand. So the checks read that array after each click, drag and delete;
         the screenshot is a convenience (<code>--shot out.png</code>), never the
         assertion.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">A guard that throws tells you nothing &mdash; make it report</span>
+    <p>
+        <strong>Verified 2026-09-18:</strong> <code>check-path-canvas.mjs</code> passes,
+        41 checks, and the two things that were wrong with it are worth keeping apart.
+    </p>
+    <p>
+        <strong>The canvas was never broken.</strong> The creator boots into the
+        step-by-step view, which sets <code>hidden</code> on
+        <code>section.column.right</code> &mdash; where the mask editor lives &mdash; so
+        <code>.path-canvas</code> was present with a 320&times;267 backing store and
+        <code>clientWidth/Height</code> of <code>0</code>, and every coordinate the guard
+        aimed was aimed at nothing. It ticks the <code>#stepper</code> &ldquo;show
+        everything&rdquo; box first now, the same toggle
+        <code>check-creator-steps.mjs</code> drives. Note that the standing guess &mdash;
+        a starter gene whose first mask was no longer the one <code>masks[0]</code>
+        assumes &mdash; was wrong, and walking the element&rsquo;s ancestors for the first
+        one with a zero <code>clientWidth</code> answered it in one run where reasoning
+        about it had not.
+    </p>
+    <p>
+        <strong>The reason it hid for a day is the second bug, and it is the general
+        one.</strong> <code>checks()</code> <em>buffers</em>: nothing prints until
+        <code>report()</code>. This guard threw mid-run, so <code>report()</code> never
+        ran and the process died with one line of message &mdash; no summary, no count,
+        and no list of what had passed. An exception reads as a broken script; a report
+        saying <em>&ldquo;3 passed, the canvas has size <code>{w:0,h:0}</code>&rdquo;</em>
+        reads as a broken tool and names the cause. The throw is caught and folded into a
+        failed check now, which does the same for any future throw &mdash; a selector that
+        stops matching, a renamed global. <strong>If you write one of these, never let it
+        throw past <code>report()</code>.</strong>
     </p>
 </div>
 

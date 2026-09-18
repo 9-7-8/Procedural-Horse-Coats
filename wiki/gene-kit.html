@@ -410,12 +410,24 @@ private static final double S_NEAR_WHITE = 0.93;</code></pre>
 <h3 id="verified">Verified</h3>
 
 <p id="verified-founder-white">
-    <strong>Founder white is measured, and fine</strong> (2026-09-09). <code>FounderWhiteRateTest</code> walks a founder
-    population: about two founders in three wear white from KIT and MITF, mean coverage about 10% of the sheet, and about
-    8% are loudly marked. Counting white directly reads 91%, an artefact of pale coats (cremello, grey, palomino) on a flat
-    chart, so each founder is composed twice, as rolled and with these loci forced wild, and the difference is taken. The
-    band is deliberately wide, and it is the instrument to tune <code>MitfGene.WILD_SW1_PERCENT</code> and
+    <strong>Founder white is measured, and fine</strong> (2026-09-09, re-measured 2026-09-18).
+    <code>FounderWhiteRateTest</code> walks a founder population: about three founders in five wear white from the
+    marking loci, mean coverage a few per cent of the sheet, and only a small minority are loudly marked. Counting white
+    directly reads 91%, an artefact of pale coats (cremello, grey, palomino) on a flat chart, so each founder is composed
+    twice, as rolled and with these loci forced wild, and the difference is taken. The band is deliberately wide, and it
+    is the instrument to tune <code>MarkingsGene.frequencies()</code>, <code>MitfGene.WILD_SW1_PERCENT</code> and
     <code>KitGene.frequencies()</code> against.
+</p>
+
+<p id="verified-founder-white-loci">
+    <strong>&hellip;and the locus list is part of the instrument.</strong> The test measured only
+    <code>mitf</code>, <code>pax3</code> and <code>kit</code> until 2026-09-18, which stopped being the right set the
+    moment <a href="gene-markings.html">markings</a> took ordinary white over and <code>SW1</code> was deliberately
+    dropped 55% &rarr; 6% to suit. It was then measuring the leftovers, read 42%, and tripped its own floor &mdash; a
+    real signal about the <em>measurement</em> rather than the population. With <code>markings</code> in the list the
+    share is back mid-band. <strong>A new locus that hands out everyday white belongs in
+    <code>MARKING_LOCI</code></strong>, or this quietly starts reporting on the wrong thing. Widening the band would
+    have buried exactly the signal the band exists to raise.
 </p>
 
 <p id="verified-render-0904">
