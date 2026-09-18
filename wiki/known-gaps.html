@@ -83,6 +83,24 @@
     equivalent test for magical herds is safe, because it goes through
     <code>BreedLineage.isMagical()</code> rather than a spelling.</li>
 
+<li id="gap-267"><strong>Open, found 2026-09-17: three genes name an outcome &ldquo;Wild type&rdquo; while giving it a custom id, so it survives a cull aimed at exactly that.</strong>
+    <code>ryr2</code>'s <code>jumper-plain</code>, <code>lcorl</code>'s
+    <code>lcorl-plain</code> and <code>hmga2</code>'s <code>hmga2-plain</code> (as they render:
+    &ldquo;Wild type&rdquo;) are the do-nothing outcome of a gene that paints nothing, which is
+    the category <a href="gene-census.html">the census</a> now drops. They are kept because the
+    rule tests <code>Expression#id()</code> against the conventional <code>"wild"</code> id
+    rather than the display name &mdash; deliberately, since an id is stable identity and a
+    display name is prose that a later edit can change, and keying a deletion rule to prose is
+    how a rename silently removes rows. So the rule is right and these three genes are
+    inconsistent with their siblings.
+    <strong>The fix belongs in the genes, not the tool</strong>: give the outcome the
+    conventional id, or give it a display name that says what it is rather than
+    &ldquo;Wild type&rdquo;. Either way re-run <code>:common:bakeGeneCensus</code>.
+    Two further rows carry the label legitimately and must not be swept up with these &mdash;
+    <code>patn1</code> and <code>patn2</code> each declare a single unnamed expression covering
+    every pair, so their only row <em>is</em> the baseline and deleting it would take the locus
+    off the page entirely; the tool rescues them on purpose.</li>
+
 <li id="gap-266"><strong>Open, found 2026-09-17: two pages describe wild-herd and healing behaviour that the code does not do, and one of them contradicts itself.</strong>
     Found by writing the Getting started wild chapter from the source rather than from the wiki,
     which is why the tutorial does not inherit any of it.
