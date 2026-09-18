@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:pale_oak_fence_gate",
+    "minecraft:pale_oak_fence_gate",
+    "horsegenetics:braided_rope",
+    "horsegenetics:hair_cloth"
+  ],
+  "result": {
+    "id": "horsegenetics:pale_oak_double_farm_gate"
+  }
+}

@@ -509,7 +509,8 @@ public final class TutorialPage {
                         new ItemStack(ModItems.BASIC_TICKET.get()),
                         new ItemStack(ModItems.INTERDIMENSIONAL_TICKET.get()),
                         new ItemStack(ModItems.HOLDING_PEN_TICKET.get())), Art.NONE,
-                List.of(ProgressTask.BUILD_STALL, ProgressTask.HANG_PEN_SIGN,
+                List.of(ProgressTask.BUILD_STALL, ProgressTask.STALL_DOUBLE_GATE,
+                        ProgressTask.HANG_PEN_SIGN,
                         ProgressTask.CRAFT_BLANK_TICKET,
                         ProgressTask.USE_TICKET, ProgressTask.USE_BOUND_TICKET,
                         ProgressTask.USE_INTERDIMENSIONAL_TICKET, ProgressTask.USE_PEN_TICKET)));

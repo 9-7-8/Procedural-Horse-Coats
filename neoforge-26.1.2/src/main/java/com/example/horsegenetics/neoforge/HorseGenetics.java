@@ -45,6 +45,10 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.server.DietFoods.verify();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModDataComponents.register(modEventBus);
+        // The two dozen double gates register themselves into ModBlocks.BLOCKS
+        // and ModItems.ITEMS as this class loads, so it has to be touched before
+        // either register is attached to the bus below.
+        com.example.horsegenetics.neoforge.block.DoubleGates.init();
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         com.example.horsegenetics.neoforge.particle.ModParticles.register(modEventBus);

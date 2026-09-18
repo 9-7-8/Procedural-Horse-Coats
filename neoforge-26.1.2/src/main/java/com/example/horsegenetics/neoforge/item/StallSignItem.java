@@ -156,6 +156,34 @@ public class StallSignItem extends Item {
         // one - not back when the sign was bound, which is a sign in a pocket.
         HorseProgress.complete(ctx.getPlayer(), ProgressTask.BUILD_STALL);
 
+        // AND, separately, whether the stall it just measured is shut with one of
+        // this mod's double gates. Decided here, off the same region, rather than
+        // by watching gates get placed: the task is about the finished stall, and
+        // a gate put down first and signed an hour later should still count.
+        //
+        // A gate is not floor - it is the boundary - so this looks at the cells
+        // AROUND each floor column, not at the columns. Two cells up, because a
+        // gate sits at the height of the way in rather than on the floor tile.
+        boolean doubleGate = false;
+        if (r.region() != null) {
+            outer:
+            for (com.example.horsegenetics.common.stable.StallFill.Column c : r.region().columns()) {
+                for (Direction d : Direction.Plane.HORIZONTAL) {
+                    for (int dy = 0; dy < 2; dy++) {
+                        BlockPos at = new BlockPos(c.x(), c.y() + dy, c.z()).relative(d);
+                        if (level.getBlockState(at).getBlock()
+                                instanceof com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock) {
+                            doubleGate = true;
+                            break outer;
+                        }
+                    }
+                }
+            }
+        }
+        if (doubleGate) {
+            HorseProgress.complete(ctx.getPlayer(), ProgressTask.STALL_DOUBLE_GATE);
+        }
+
         if (ctx.getPlayer() != null && !ctx.getPlayer().getAbilities().instabuild) {
             stack.shrink(1);
         }

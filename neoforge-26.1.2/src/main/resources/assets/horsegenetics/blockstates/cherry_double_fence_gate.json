@@ -1,0 +1,156 @@
+{
+  "variants": {
+    "facing=south,half=left,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left",
+      "uvlock": true
+    },
+    "facing=south,half=right,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right",
+      "uvlock": true
+    },
+    "facing=south,half=left,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_open",
+      "uvlock": true
+    },
+    "facing=south,half=right,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_open",
+      "uvlock": true
+    },
+    "facing=south,half=left,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall",
+      "uvlock": true
+    },
+    "facing=south,half=right,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall",
+      "uvlock": true
+    },
+    "facing=south,half=left,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall_open",
+      "uvlock": true
+    },
+    "facing=south,half=right,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall_open",
+      "uvlock": true
+    },
+    "facing=west,half=left,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=right,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=left,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_open",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=right,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_open",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=left,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=right,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=left,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall_open",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,half=right,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall_open",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north,half=left,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=right,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=left,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_open",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=right,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_open",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=left,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=right,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=left,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall_open",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,half=right,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall_open",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=east,half=left,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=right,in_wall=false,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=left,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_open",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=right,in_wall=false,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_open",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=left,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=right,in_wall=true,open=false": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=left,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_left_wall_open",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,half=right,in_wall=true,open=true": {
+      "model": "horsegenetics:block/cherry_double_fence_gate_right_wall_open",
+      "uvlock": true,
+      "y": 270
+    }
+  }
+}

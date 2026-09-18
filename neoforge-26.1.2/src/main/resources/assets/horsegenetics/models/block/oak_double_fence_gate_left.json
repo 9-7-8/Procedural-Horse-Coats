@@ -1,0 +1,6 @@
+{
+  "parent": "horsegenetics:block/template_double_fence_gate_left",
+  "textures": {
+    "texture": "minecraft:block/oak_planks"
+  }
+}

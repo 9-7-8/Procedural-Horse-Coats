@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:spruce_fence_gate",
+    "minecraft:spruce_fence_gate",
+    "horsegenetics:braided_rope"
+  ],
+  "result": {
+    "id": "horsegenetics:spruce_double_fence_gate"
+  }
+}

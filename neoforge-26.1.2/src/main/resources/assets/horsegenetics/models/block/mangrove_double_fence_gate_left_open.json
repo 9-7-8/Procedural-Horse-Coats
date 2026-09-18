@@ -1,0 +1,6 @@
+{
+  "parent": "horsegenetics:block/template_double_fence_gate_left_open",
+  "textures": {
+    "texture": "minecraft:block/mangrove_planks"
+  }
+}

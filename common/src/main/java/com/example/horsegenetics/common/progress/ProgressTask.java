@@ -182,6 +182,11 @@ public enum ProgressTask {
     BUILD_STALL(Group.HUSBANDRY, "Give a horse a stall",
             "Bind a stall sign to that horse, then hang it on the wall of a room that closes in. "
                     + "A sign that cannot find an enclosed room refuses to go up rather than guess."),
+    STALL_DOUBLE_GATE(Group.HUSBANDRY, "Hang a stall on a double gate",
+            "Build a stall whose doorway is a double fence gate - two blocks wide, both leaves "
+                    + "swinging together on one click, and wide enough to lead a horse through "
+                    + "without catching it on the post. Any wood, either style; it only has to be "
+                    + "part of the stall the sign finds."),
     HANG_PEN_SIGN(Group.HUSBANDRY, "Set up a holding pen",
             "Hang a holding pen sign on the wall of an enclosed pen. A pen belongs to you rather than "
                     + "to one horse - it is where the horse you tamed a minute ago goes."),
