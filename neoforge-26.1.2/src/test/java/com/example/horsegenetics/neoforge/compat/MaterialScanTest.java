@@ -403,6 +403,93 @@ class MaterialScanTest {
     }
 
     @Test
+    void stripsAnAffixAtTheFrontToo() {
+        // bloodmagic:ingot_hellforged, from the pack that took v0.5.012 down.
+        // Only the suffix was stripped, so this was sold as "Ingot Hellforged
+        // Horse Armor".
+        assertEquals("hellforged", new ModdedMaterials.Metal("m:ingot_hellforged", 0, false).material());
+        assertEquals("tin", new ModdedMaterials.Metal("m:ingot_tin", 0, false).material());
+        assertEquals("ruby", new ModdedMaterials.Metal("m:gem_ruby", 0, true).material());
+        // Stripping either end leaves nothing, so neither end is stripped: an
+        // empty material is the id "_horse_armor".
+        assertEquals("ingot", new ModdedMaterials.Metal("m:ingot", 0, false).material());
+        assertEquals("ingot_", new ModdedMaterials.Metal("m:ingot_", 0, false).material());
+    }
+
+    // ------------------------------------------------------------------
+    // One armour per material name
+    // ------------------------------------------------------------------
+
+    private static ModdedMaterials.Metal metal(String id) {
+        return new ModdedMaterials.Metal(id, 0, false);
+    }
+
+    @Test
+    void collapsesTwoModsSameMetalOntoOneArmour() {
+        // The crash, in four lines. v0.5.012 registered one armour per metal and
+        // these two both answer "redstone_alloy_horse_armor", which is a
+        // Duplicate registration and an ExceptionInInitializerError out of the
+        // mod constructor - the whole mod gone, on somebody else's server.
+        List<ModdedMaterials.Metal> metals = List.of(
+                metal("enderio:redstone_alloy_ingot"),
+                metal("energizedpower:redstone_alloy_ingot"));
+
+        List<ModdedMaterials.Metal> armours = MaterialScan.armourMetals(metals);
+
+        assertEquals(1, armours.size(), "one steel, one armour");
+        assertEquals("enderio:redstone_alloy_ingot", armours.get(0).itemId(),
+                "the lowest id wins, so it does not depend on load order");
+        // ...and neither mod's ingot becomes a dead end: both forge it.
+        assertEquals(2, MaterialScan.metalsFor(metals, "redstone_alloy_horse_armor").size());
+    }
+
+    @Test
+    void collapsesOneModsOwnCrystalAndIngotOntoOneArmour() {
+        // ExtendedAE ships entro_crystal AND entro_ingot, and both strip to
+        // "entro". Worth its own test because it shows the bug needs no
+        // 300-mod pack to reproduce - and because namespacing the id, which is
+        // the obvious other fix, would NOT have caught this one.
+        List<ModdedMaterials.Metal> metals = List.of(
+                new ModdedMaterials.Metal("extendedae:entro_crystal", 0, true),
+                new ModdedMaterials.Metal("extendedae:entro_ingot", 0, false));
+
+        assertEquals(1, MaterialScan.armourMetals(metals).size(),
+                "one material name, one armour, even from a single mod");
+    }
+
+    @Test
+    void leavesUncollidingMetalsAloneAndKeepsThemInOrder() {
+        List<ModdedMaterials.Metal> metals = List.of(
+                metal("a:cobalt_ingot"), metal("b:steel_ingot"), metal("c:steel_ingot"),
+                metal("d:zinc_ingot"));
+
+        List<ModdedMaterials.Metal> armours = MaterialScan.armourMetals(metals);
+
+        assertEquals(List.of("cobalt_horse_armor", "steel_horse_armor", "zinc_horse_armor"),
+                armours.stream().map(ModdedMaterials.Metal::armourId).toList());
+    }
+
+    @Test
+    void theArmourCollapseDoesNotTouchTheMetalsThemselves() {
+        // The bench colours a fitting from whichever ingot the player put in it,
+        // so metals() has to keep every one of them even though only one of each
+        // name gets an armour. Collapsing the wrong list would silently stop
+        // five of six steels working at the bench.
+        MaterialScan.Result result = scan(aModWithAWoodAndAMetal(), new FakeJar()
+                .put("data/c/tags/item/ingots/tin.json", "{\"values\":[\"othermod:tin_ingot\"]}")
+                .put("assets/othermod/textures/item/tin_ingot.png", png(16, 0x8899AA, 255)));
+
+        assertEquals(3, result.metals().size(), "two tins and a ruby all survive the scan");
+        assertEquals(2, MaterialScan.armourMetals(result.metals()).size(),
+                "but the two tins share one armour");
+        assertEquals(0x8899AA,
+                result.metals().stream()
+                        .filter(m -> m.itemId().equals("othermod:tin_ingot"))
+                        .findFirst().orElseThrow().colour(),
+                "the losing tin still carries its own colour for the bench");
+    }
+
+    @Test
     void metalColourLooksUpOnlyWhatWasFound() {
         assertNull(ModdedMaterials.metalColour("testmod:never_scanned"),
                 "an id we never saw has no colour, and must not be given one");

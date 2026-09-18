@@ -88,8 +88,23 @@ public record CartWood(String id, String label, Identifier planks, Identifier lo
                         "minecraft:" + name + "_planks",
                         true));
             }
+            final java.util.Set<String> ids = new java.util.HashSet<>();
+            for (final CartWood wood : built) {
+                ids.add(wood.id);
+            }
             for (final ModdedMaterials.Wood wood : ModdedMaterials.woods()) {
-                built.add(of(wood));
+                final CartWood cart = of(wood);
+                // A duplicate id here is six duplicate registry keys, and
+                // Registry.register throws on one - which in this mod's history
+                // means a pack that cannot start. The ids are
+                // <namespace>_<name> and a clash needs two mods whose namespace
+                // and wood name run together the same way, so this is guarding
+                // against the unlikely rather than the expected; the armours
+                // were the expected case, and they took v0.5.012 down.
+                if (!ids.add(cart.id)) {
+                    continue;
+                }
+                built.add(cart);
             }
             all = List.copyOf(built);
         }

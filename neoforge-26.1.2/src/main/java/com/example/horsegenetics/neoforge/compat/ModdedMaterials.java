@@ -67,17 +67,43 @@ public final class ModdedMaterials {
      * @param gem    true for {@code c:gems/*}, false for {@code c:ingots/*}
      */
     public record Metal(String itemId, int colour, boolean gem) {
-        /** The bare material name, e.g. {@code tin} from {@code mymod:tin_ingot}. */
+
+        /** What a mod tacks onto a material name, at either end. */
+        private static final String[] AFFIXES = {"ingot", "gem", "crystal", "shard"};
+
+        /**
+         * The bare material name: {@code tin} from {@code mymod:tin_ingot}, and
+         * also from {@code mymod:ingot_tin}.
+         *
+         * <p><b>Both orders are in the wild.</b> The suffix was the only one
+         * stripped until a 319-jar pack turned up {@code bloodmagic:ingot_hellforged},
+         * which came through untouched and would have been sold to players as
+         * "Ingot Hellforged Horse Armor". The namespace is deliberately not part
+         * of this - see {@link #armourId()}.
+         */
         public String material() {
             String path = itemId.substring(itemId.indexOf(':') + 1);
-            for (String suffix : new String[] {"_ingot", "_gem", "_crystal", "_shard"}) {
-                if (path.endsWith(suffix)) {
-                    return path.substring(0, path.length() - suffix.length());
+            for (String affix : AFFIXES) {
+                String stripped = null;
+                if (path.endsWith("_" + affix)) {
+                    stripped = path.substring(0, path.length() - affix.length() - 1);
+                } else if (path.startsWith(affix + "_")) {
+                    stripped = path.substring(affix.length() + 1);
+                }
+                // An item called exactly "ingot_" leaves nothing behind, and a
+                // material with no name is an id of "_horse_armor".
+                if (stripped != null && !stripped.isEmpty()) {
+                    return stripped;
                 }
             }
             return path;
         }
 
+        /**
+         * <b>Not unique, on purpose</b> - see {@link ModdedMaterials#armourMetals()}.
+         * Six mods adding a steel all answer {@code steel_horse_armor} here, and
+         * exactly one item by that name is registered.
+         */
         public String armourId() {
             return material() + "_horse_armor";
         }
@@ -96,6 +122,41 @@ public final class ModdedMaterials {
 
     public static List<Metal> metals() {
         return result.metals();
+    }
+
+    /**
+     * <b>The metals that get a horse armour of their own</b> - one per
+     * {@link Metal#armourId()}, where {@link #metals()} is one per item.
+     *
+     * <h2>Why these are not the same list</h2>
+     * A horse armour is named after the material and not after the mod, because
+     * "Steel Horse Armor" is what a player is looking for and
+     * "Alltheores Steel Horse Armor" is not. That was written when a material
+     * meant an item, and it does not: a 319-jar pack had <b>six</b> mods filing a
+     * steel ingot under {@code c:ingots/steel}, and one of them was enough to
+     * take down mod loading with a duplicate registration. ExtendedAE manages it
+     * inside a single jar, shipping {@code entro_crystal} and {@code entro_ingot}
+     * both - so namespacing the id would not have been a fix either.
+     *
+     * <p>So the collapse happens here, and it is the honest answer rather than
+     * only the safe one: those six steels share a {@code c:ingots/steel} repair
+     * tag, which means six separately-registered armours would have been six
+     * identical items. Every one of the six ingots still <i>forges</i> the
+     * armour - {@link #metalsFor} is how, and {@code GeneratedArmour} writes one
+     * recipe per ingot - so no mod's metal becomes a dead end.
+     *
+     * <p>The winner is the lowest item id, so it does not depend on which mod
+     * loaded first. {@link #metals()} keeps all of them, because the equestrian
+     * bench colours a fitting from whichever ingot the player actually put in it
+     * and must still know all 167.
+     */
+    public static List<Metal> armourMetals() {
+        return MaterialScan.armourMetals(metals());
+    }
+
+    /** Every metal that forges this armour, in {@link #metals()} order. */
+    public static List<Metal> metalsFor(String armourId) {
+        return MaterialScan.metalsFor(metals(), armourId);
     }
 
     /**

@@ -24,15 +24,28 @@ import net.neoforged.neoforge.registries.DeferredItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <b>A horse armour for every ingot and gem another mod added.</b>
  *
- * <p>One registered item per metal, wearing the shipped greyscale plate tinted
- * to that metal's own colour - see {@link GeneratedArmour} for the files, and
- * {@link ModdedMaterials} for where the metals and the colours come from.
+ * <p>One registered item per <b>material name</b>, wearing the shipped greyscale
+ * plate tinted to that metal's own colour - see {@link GeneratedArmour} for the
+ * files, and {@link ModdedMaterials} for where the metals and the colours come
+ * from.
+ *
+ * <p>Per material name and <b>not</b> per metal, which is the distinction that
+ * cost a release: six mods can all add a steel, and an armour named after the
+ * material collides with itself six times over.
+ * {@link ModdedMaterials#armourMetals()} is where that is resolved and why it is
+ * resolved that way. The consequence here is that
+ * {@link #fromTheirChestplate} reads the chestplate of whichever of the six
+ * mods won - it is one mod's opinion of what steel is worth, standing in for
+ * all of them, which is a smaller error than it sounds like given they are all
+ * describing the same metal.
  *
  * <h2>How strong it is, in three tries</h2>
  * The owner's call was "the mod's own material tier where we can read it, and a
@@ -70,7 +83,7 @@ import java.util.Map;
 @EventBusSubscriber(modid = HorseGenetics.MOD_ID)
 public final class ModdedArmour {
 
-    /** One entry per metal, in {@link ModdedMaterials#metals()} order. */
+    /** One entry per <i>armour</i>, in {@link ModdedMaterials#armourMetals()} order. */
     public record Armour(ModdedMaterials.Metal metal, DeferredItem<Item> item) {
     }
 
@@ -88,8 +101,26 @@ public final class ModdedArmour {
     };
 
     static {
-        for (ModdedMaterials.Metal metal : ModdedMaterials.metals()) {
+        // armourMetals(), not metals(): one armour per material name, however
+        // many mods brought that material. See that method for why, and for why
+        // every one of their ingots still forges it.
+        Set<String> registered = new HashSet<>();
+        for (ModdedMaterials.Metal metal : ModdedMaterials.armourMetals()) {
             String id = metal.armourId();
+            // Belt and braces. The collapse above is what makes this unreachable,
+            // and this is what makes it not matter if a later change to the
+            // naming rule reintroduces a clash: THIS LOOP MUST NOT THROW. It runs
+            // in a static initialiser reached from the mod constructor, on data
+            // read out of other people's jars, so anything it throws is an
+            // ExceptionInInitializerError that takes the whole mod - and with it
+            // the player's server - down at load. v0.5.012 did exactly that on a
+            // 319-jar pack, on `redstone_alloy_horse_armor`. A lost armour is a
+            // log line; a lost mod is an evening.
+            if (!registered.add(id)) {
+                HorseGenetics.LOGGER.warn("compat: two metals both want the id {} - {} gets no armour. "
+                        + "This should be impossible; please report it", id, metal.itemId());
+                continue;
+            }
             DeferredItem<Item> item = ModItems.ITEMS.registerItem(id,
                     properties -> new Item(properties.horseArmor(provisional(metal))));
             // Into the mod's own creative tab as well as the registry. Without

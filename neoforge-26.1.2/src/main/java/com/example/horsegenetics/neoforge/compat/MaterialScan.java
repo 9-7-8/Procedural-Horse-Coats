@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -231,6 +232,43 @@ public final class MaterialScan {
     }
 
     // ------------------------------------------------------------------
+    // One armour per material name
+    // ------------------------------------------------------------------
+
+    /**
+     * Collapse the metals to one per {@link ModdedMaterials.Metal#armourId()}.
+     *
+     * <p>The reasoning is on {@link ModdedMaterials#armourMetals()}, which is the
+     * caller. It is <i>computed</i> here so that it can be tested without a
+     * game: this class is the half of the compat layer with no Minecraft in it,
+     * and "six mods brought a steel" is exactly the kind of thing that is
+     * expensive to discover from a 319-jar pack and cheap to assert in four
+     * lines.
+     *
+     * @param metals sorted by item id, as {@link #of} leaves them - which is what
+     *               makes the winner the lowest id rather than whichever mod FML
+     *               happened to load first
+     */
+    static List<ModdedMaterials.Metal> armourMetals(List<ModdedMaterials.Metal> metals) {
+        Map<String, ModdedMaterials.Metal> byArmour = new LinkedHashMap<>();
+        for (ModdedMaterials.Metal metal : metals) {
+            byArmour.putIfAbsent(metal.armourId(), metal);
+        }
+        return List.copyOf(byArmour.values());
+    }
+
+    /** Every metal that forges this armour, in the order given. */
+    static List<ModdedMaterials.Metal> metalsFor(List<ModdedMaterials.Metal> metals, String armourId) {
+        List<ModdedMaterials.Metal> group = new ArrayList<>();
+        for (ModdedMaterials.Metal metal : metals) {
+            if (metal.armourId().equals(armourId)) {
+                group.add(metal);
+            }
+        }
+        return List.copyOf(group);
+    }
+
+    // ------------------------------------------------------------------
     // Colour
     // ------------------------------------------------------------------
 
@@ -363,6 +401,14 @@ public final class MaterialScan {
                               List<ModdedMaterials.Metal> metals,
                               Map<String, Integer> dyes) {
         StringBuilder sb = new StringBuilder();
+        // The rules that turn this material list into files, as a number to bump
+        // when they change. Without it the fingerprint answers "same mods?" when
+        // the question is "same output?", and a player who upgrades the mod
+        // without touching their mod list keeps a pack the old rules generated -
+        // stale silently, which is the failure mode this whole folder exists to
+        // avoid. Bumped for 0.5.013: armour ids collapse by material name and
+        // an ingot_ prefix comes off.
+        sb.append("rules|2\n");
         for (ModdedMaterials.Wood wood : woods) {
             sb.append("w|").append(wood.namespace()).append(':').append(wood.name())
                     .append('|').append(wood.plankTexture()).append('\n');

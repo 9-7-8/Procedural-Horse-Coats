@@ -25,10 +25,18 @@
 //   horsegenetics:compattest_maple_double_fence_gate   from the maple gate
 //   horsegenetics:tin_horse_armor                      grey-white, from c:ingots/tin
 //   horsegenetics:ruby_horse_armor                     red, from c:gems/ruby
+//   horsegenetics:entro_horse_armor                    ONE, from a colliding pair
+//   horsegenetics:hellforged_horse_armor               NOT ingot_hellforged_*
 //
 // The two metals are deliberately different: tin is an INGOT drawn in near-grey
 // and ruby is a GEM drawn in saturated red, so the averaged colour and the
 // ingot/gem ladder are both exercised rather than one of them twice.
+//
+// The last two are regression cases from the v0.5.012 crash - see the comments
+// on them below. They are the reason this jar is now a test of the failure and
+// not only of the happy path: before the fix, INSTALLING THIS MOD STOPPED
+// HORSE GENETICS LOADING AT ALL. If that ever happens again, it happens here
+// on one developer's machine instead of on somebody's server.
 //
 // IT GOES IN run/mods AND run/ IS GITIGNORED, so this leaves nothing behind in
 // the repo - but it DOES leave a mod in the owner's dev client until it is
@@ -170,6 +178,28 @@ const entries = [
     JSON.stringify({ values: [`${MOD_ID}:ruby_gem`] }, null, 2)],
   [`assets/${MOD_ID}/textures/item/tin_ingot.png`, png(16, [0xD6, 0xD8, 0xDE])],
   [`assets/${MOD_ID}/textures/item/ruby_gem.png`, png(16, [0xC0, 0x1A, 0x2B])],
+
+  // --- and the two shapes that took v0.5.012 down -------------------------
+  // A COLLIDING PAIR. An armour is named after the material and not the mod,
+  // and ExtendedAE ships an entro_crystal and an entro_ingot both - so one jar
+  // is enough to make two metals that want one registry id. Before the fix this
+  // was a Duplicate registration out of ModdedArmour's static initialiser,
+  // which is an ExceptionInInitializerError in the mod constructor: the mod
+  // does not load at all, and takes the player's server with it. It should now
+  // produce ONE entro_horse_armor, forgeable from either.
+  ["data/c/tags/item/ingots/entro.json",
+    JSON.stringify({ values: [`${MOD_ID}:entro_ingot`] }, null, 2)],
+  ["data/c/tags/item/gems/entro.json",
+    JSON.stringify({ values: [`${MOD_ID}:entro_crystal`] }, null, 2)],
+  [`assets/${MOD_ID}/textures/item/entro_ingot.png`, png(16, [0x5A, 0x3C, 0x8E])],
+  [`assets/${MOD_ID}/textures/item/entro_crystal.png`, png(16, [0x8E, 0x5A, 0xC8])],
+
+  // AN AFFIX ON THE FRONT. bloodmagic:ingot_hellforged - only the suffix was
+  // stripped, so this was sold as "Ingot Hellforged Horse Armor". Should now be
+  // hellforged_horse_armor.
+  ["data/c/tags/item/ingots/hellforged.json",
+    JSON.stringify({ values: [`${MOD_ID}:ingot_hellforged`] }, null, 2)],
+  [`assets/${MOD_ID}/textures/item/ingot_hellforged.png`, png(16, [0x3A, 0x1A, 0x14])],
 ];
 
 mkdirSync(MODS, { recursive: true });

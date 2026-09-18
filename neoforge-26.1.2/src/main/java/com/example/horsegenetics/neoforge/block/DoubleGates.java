@@ -80,6 +80,18 @@ public final class DoubleGates {
 
     private static final List<Gate> GATES = new ArrayList<>();
 
+    /**
+     * Every {@code name} already taken - see the guard in {@link #register}.
+     *
+     * <p><b>Declared above the static block, and it has to be.</b> Static
+     * initialisers run in source order: with this below the block, the block's
+     * first call to {@code register} read a field that was still null and threw
+     * an NPE out of the class initialiser - the exact crash-at-mod-construction
+     * shape this field was added to prevent. Caught by a runServer boot before
+     * it reached anybody, which is what that step in the session routine is for.
+     */
+    private static final java.util.Set<String> REGISTERED = new java.util.HashSet<>();
+
     static {
         for (Object[] row : WOODS) {
             WoodType wood = (WoodType) row[0];
@@ -108,6 +120,15 @@ public final class DoubleGates {
     }
 
     private static void register(WoodType wood, String name, java.util.function.Supplier<Item> sourceGate) {
+        // Same guard, and the same reason, as compat/ModdedArmour's: this runs
+        // in a static initialiser on ids built out of other mods' jars, and a
+        // DeferredRegister throws on a duplicate. One missing gate beats a mod
+        // that will not load.
+        if (!REGISTERED.add(name)) {
+            com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.warn(
+                    "compat: two woods both want the gate id {} - the second gets none", name);
+            return;
+        }
         DeferredBlock<DoubleFenceGateBlock> block = ModBlocks.BLOCKS.registerBlock(
                 name,
                 properties -> new DoubleFenceGateBlock(wood, properties),

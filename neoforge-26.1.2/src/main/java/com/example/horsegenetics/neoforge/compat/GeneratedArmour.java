@@ -58,7 +58,9 @@ final class GeneratedArmour {
     }
 
     static void emit(Map<String, byte[]> files, JsonObject lang) {
-        List<ModdedMaterials.Metal> metals = ModdedMaterials.metals();
+        // One armour per material name. Every ingot that shares the name still
+        // forges it - see the recipe block below.
+        List<ModdedMaterials.Metal> metals = ModdedMaterials.armourMetals();
         if (metals.isEmpty()) {
             return;
         }
@@ -119,13 +121,32 @@ final class GeneratedArmour {
             // tools/check-recipes.mjs). These are OUR items, in our namespace,
             // so no third-party recipe can claim the same output; the hair cloth
             // keeps the house rule that every recipe carries a modded input.
-            if (ModdedMaterials.itemExists(metal.itemId())) {
-                GeneratedGates.put(files, "data/" + NS + "/recipe/" + id + ".json", recipe(metal, id));
-            } else {
-                // A common tag naming an item nobody registered - an optional
-                // dependency that is not installed, most likely. The armour is
-                // still sold by the metalsmith; it just cannot be forged.
-                HorseGenetics.LOGGER.warn("compat: {} is in a c: tag but is not a registered item - "
+            // ONE RECIPE PER INGOT, not per armour. Six mods' steel ingots
+            // collapse to one Steel Horse Armor, and if only the winner's ingot
+            // forged it the other five would be a dead end the player cannot see
+            // - they hold a steel ingot, the recipe book shows a steel armour,
+            // and the grid refuses. Same output from several recipes is ordinary
+            // (vanilla does it for planks); same INPUTS would not be, which is
+            // what tools/check-recipes.mjs guards and this does not trip.
+            boolean forgeable = false;
+            for (ModdedMaterials.Metal source : ModdedMaterials.metalsFor(id)) {
+                if (!ModdedMaterials.itemExists(source.itemId())) {
+                    // A common tag naming an item nobody registered - an optional
+                    // dependency that is not installed, most likely.
+                    continue;
+                }
+                // Named after the ingredient, because the id alone would have
+                // every one of the six writing over the last one's file.
+                GeneratedGates.put(files,
+                        "data/" + NS + "/recipe/" + id + "_from_"
+                                + source.itemId().replace(':', '_') + ".json",
+                        recipe(source, id));
+                forgeable = true;
+            }
+            if (!forgeable) {
+                // The armour is still sold by the metalsmith; it just cannot be
+                // forged by anybody.
+                HorseGenetics.LOGGER.warn("compat: no registered item is in the c: tag that named {} - "
                         + "{} is uncraftable", metal.itemId(), id);
             }
 
