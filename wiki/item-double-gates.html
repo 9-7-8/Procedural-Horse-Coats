@@ -19,9 +19,9 @@
 <h1>Double gates</h1>
 <p class="lede">
     A fence gate <strong>two blocks wide</strong>. One item places both halves, one click swings
-    both leaves, and there is no post down the middle to catch a horse on. Twelve woods, two
-    styles, and it is a <a href="item-stall-signs.html">stall</a>&rsquo;s boundary in every state
-    exactly as a vanilla gate is.
+    both leaves, and there is no post down the middle to catch a horse on. One per wood, and it is
+    a <a href="item-stall-signs.html">stall</a>&rsquo;s boundary in every state exactly as a
+    vanilla gate is.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -37,8 +37,7 @@
 <div class="plain">
     <p>
         <strong>Recipe (shapeless):</strong> 2 vanilla fence gates of that wood + 1
-        <a href="item-horse-hair.html">braided rope</a>. The farm style takes 1
-        <a href="item-horse-hair.html">hair cloth</a> on top.
+        <a href="item-horse-hair.html">braided rope</a>.
     </p>
 </div>
 
@@ -50,25 +49,23 @@
     blocks wide ought to cost.
 </p>
 
-<h3 id="woods">Twelve woods, two styles</h3>
+<h3 id="woods">One per wood, filed beside its own gate</h3>
 
 <p>
     Every wood vanilla has a fence gate for: oak, spruce, birch, jungle, acacia, dark oak, pale
-    oak, mangrove, cherry, bamboo, crimson and warped. Each comes as a
-    <strong>double fence gate</strong> &mdash; vanilla&rsquo;s two rails, just twice as wide
-    &mdash; and a <strong>double farm gate</strong>, which runs four rails instead of two and
-    reads as the taller field gate you put across a paddock entrance. They behave identically;
-    the difference is entirely what it looks like.
+    oak, mangrove, cherry, bamboo, crimson and warped. They live in the vanilla
+    <strong>Building Blocks</strong> tab, each one directly after the single gate of its own wood,
+    because that is where somebody reaching for a gate looks rather than in a tab about horses.
 </p>
 
 <h2 id="placing">Placing and breaking</h2>
 
 <ul>
     <li><strong>One item, two blocks.</strong> You place the half you are pointing at and the
-        other appears beside it, on the side the gate is facing away from.</li>
-    <li><strong>It refuses rather than leaving half a gate.</strong> If the second block has
-        nowhere to go &mdash; a wall, a one-wide gap &mdash; nothing is placed and the item stays
-        in your hand. There is no such thing as half a double gate standing on its own.</li>
+        other appears beside it, on whichever side is free.</li>
+    <li><strong>It refuses rather than leaving half a gate.</strong> If <em>neither</em> side has
+        room, nothing is placed and the item stays in your hand. There is no such thing as half a
+        double gate standing on its own.</li>
     <li><strong>Breaking either half takes both</strong>, and you get your one item back. The
         half you did not break is removed rather than dropped, so a gate is never a way to
         duplicate anything.</li>
@@ -122,6 +119,20 @@
     actually broken drops its item, the partner removed this way drops nothing.
 </p>
 
+<h3 id="either-side">The partner takes whichever side is free</h3>
+
+<p>
+    The first version always put it on the counter-clockwise side and refused outright when that
+    cell was occupied. Because the side is decided by the way the <em>player</em> happens to be
+    facing, that silently did nothing roughly half the time &mdash; and the fix a player finds for
+    that is to click the neighbouring block instead, which works, and teaches them the gate takes
+    two clicks. Owner: <em>&ldquo;clicking and nothing happens, then you have to click again on
+    the other block, is not an intuitive gameplay design&rdquo;</em>. Placement now tries both
+    sides and only refuses when neither has room. <code>setPlacedBy</code> writes the partner as
+    the <em>opposite</em> of whatever was placed rather than a hardcoded right half, or both
+    blocks would claim the same half and each delete the other.
+</p>
+
 <h3 id="flip">Opening can flip <code>FACING</code>, and that swaps which side the partner is on</h3>
 
 <p>
@@ -160,11 +171,11 @@
 <h2 id="assets">The assets are generated, and one wood is irregular</h2>
 
 <p>
-    Twelve woods by two styles is twenty-four blocks, each with a 32-variant blockstate, eight
-    models, an item definition, a recipe and a loot table &mdash; well over three hundred files
-    differing only in a wood name and a texture.
-    <code>neoforge-26.1.2/tools/bake-double-gates.mjs</code> derives all of them from one table;
-    re-run it after touching a wood, a style or any of the geometry.
+    Twelve blocks, each with a 32-variant blockstate, eight models, an item definition, a recipe
+    and a loot table &mdash; over a hundred and fifty files differing only in a wood name and a
+    texture. <code>neoforge-26.1.2/tools/bake-double-gates.mjs</code> derives all of them from one
+    table; re-run it after touching a wood or any of the geometry. It only ever <em>writes</em>,
+    so removing a wood means deleting that wood&rsquo;s files by hand as well.
 </p>
 
 <p>
@@ -184,16 +195,25 @@
     either way.
 </p>
 
-<h2 id="origin">Where it came from</h2>
+<h2 id="origin">Where it came from, and the style that is not here</h2>
 
 <p>
     Written from scratch. The mod that prompted it is Fabric-only, publishes no source, and is
     licensed <abbr title="Attribution-NonCommercial-ShareAlike">CC BY-NC-SA 4.0</abbr> &mdash; so
     there was nothing to port even had that been wanted, and a ShareAlike term would not have sat
-    with this repo&rsquo;s <a href="../README.md">CC BY-NC 4.0</a> anyway. Only the idea is
-    borrowed, which is not a thing copyright covers. The farm style in particular is an
-    invention here rather than a reproduction: see
-    <a href="known-gaps.html#gap-269">gap 269</a>.
+    with this repo&rsquo;s CC BY-NC 4.0 anyway. Only the idea is borrowed, which is not a thing
+    copyright covers.
+</p>
+
+<p>
+    That listing also advertised <em>&ldquo;farm-style variant gates&rdquo;</em>, and a second
+    style shipped on the strength of those four words: the same block with four rails instead of
+    two. With no screenshot and no way to run the original, its appearance was a
+    <strong>guess</strong> rather than a reproduction, and it was removed the same evening on the
+    owner&rsquo;s verdict &mdash; <em>&ldquo;what is the double farm gate? It looks
+    weird&rdquo;</em>. <strong>Two gates whose difference nobody can justify is worse than one
+    gate.</strong> Both the generator and <code>DoubleGates</code> say so in a comment, so the
+    idea is not rediscovered and re-added on the same evidence.
 </p>
 
 <h2 id="verified">Verified</h2>
@@ -221,9 +241,14 @@
     changing the model of the fence post next to it&rdquo;.
 </p>
 
+<p>
+    <strong>One-click placement confirmed the same day too</strong> &mdash; &ldquo;placement works
+    great&rdquo; &mdash; after the partner was changed to take whichever side is free.
+</p>
+
 <p class="muted">
-    Still unseen: the item names, the one-click placement fix, the in-wall variants, redstone on
-    a pair, and the stall step ticking. See
+    Still unseen: the item names, their placement in the Building Blocks tab, the in-wall
+    variants, redstone on a pair, and the stall step ticking. See
     <a href="verification.html#double-gates-0917">verification</a>.
 </p>
 
