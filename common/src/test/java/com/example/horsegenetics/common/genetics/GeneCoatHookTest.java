@@ -5,6 +5,8 @@ import com.example.horsegenetics.common.coat.pattern.ColorField;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec;
+import com.example.horsegenetics.common.genetics.spec.SpecGene;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -212,7 +214,41 @@ class GeneCoatHookTest {
                 || gene instanceof com.example.horsegenetics.common.genetics.eye.EyeRequestContribution
                 // ...and the eye loci themselves, which are where it lands.
                 || gene instanceof com.example.horsegenetics.common.genetics.genes.AbstractEyeGene
+                || declaresNoLayers(gene)
                 || paintsNothingOnThisBase(gene);
+    }
+
+    /**
+     * <b>A data-driven gene whose expressing outcome carries only
+     * {@code effects}</b> - abilities, not paint. {@code horsegenetics.flying}
+     * is the first: it grants a traversal flag and says outright in its own
+     * blurb that a flying horse looks exactly like any other horse.
+     *
+     * <p>{@link SpecGene} builds such an outcome a painter that returns
+     * {@code null} <i>deliberately</i>, rather than folding it into the wild
+     * type, because the combination does change the horse - just not its coat.
+     * So {@code null} here is the gene working, and this is the structural way
+     * to say so: it asks the spec whether any layer was declared, which is a
+     * fact about the file rather than about what the painter happened to return.
+     * A general "skip a gene whose hook returns null" would have covered this
+     * case and silently stopped testing any gene that quietly broke - the same
+     * argument {@link #paintsNothingOnThisBase} makes at greater length.
+     *
+     * <p>It is deliberately <b>not</b> keyed on {@code flying}: the next
+     * abilities-only gene should not have to find this list. It catches two
+     * today - {@code flying} at priority 169 and {@code blight} at 185 - and
+     * <b>only {@code flying} was ever reported</b>, because the assertion threw
+     * on it and the loop never reached the second. Worth knowing when reading a
+     * failure here: this test names one gene at a time, so a fix aimed only at
+     * the gene in the message may just uncover the next one.
+     */
+    private static boolean declaresNoLayers(Gene gene) {
+        if (!(gene instanceof SpecGene spec)) {
+            return false;
+        }
+        Genotype gt = homozygousVariant(gene);
+        GeneSpec.ExpressionSpec e = spec.expressionSpecIn(gt.pair(gene), gt);
+        return e != null && e.layers().isEmpty();
     }
 
     /**

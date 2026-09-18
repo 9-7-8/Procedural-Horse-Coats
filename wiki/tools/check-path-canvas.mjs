@@ -41,6 +41,16 @@ const c = checks();
 const POINTS = `HG.ui.state.spec.expressions[0].layers[0].masks[0].points`;
 const read = async () => JSON.parse(await page.evaluate(`JSON.stringify(${POINTS} || null)`));
 
+// The creator boots into the step-by-step view, which hides the right column
+// the mask editor lives in - the canvas is then present with a backing store
+// but zero layout size, so every coordinate below would be aimed at nothing.
+// "Show everything" is the same toggle check-creator-steps.mjs drives.
+await page.evaluate(`(function () {
+  var cb = document.querySelector("#stepper input[type=checkbox]");
+  if (cb && !cb.checked) cb.click();
+})()`);
+await sleep(300);
+
 try {
   c.ok("the creator booted", await page.evaluate("!!(window.HG && HG.ui && HG.pathCanvas)"));
   c.ok("the canvas draws the painter's own curve",

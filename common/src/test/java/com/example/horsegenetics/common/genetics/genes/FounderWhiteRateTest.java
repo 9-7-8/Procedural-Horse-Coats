@@ -16,24 +16,37 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <b>How much of the wild population wears ordinary white markings, and how
  * loudly.</b>
  *
- * <p>This is the measurement known-gaps gap 53 asked for. Two independent loci
- * hand out everyday stars, socks and blazes - {@code MITF}'s {@code SW1}, which
- * a majority of founders carry, and the {@code KIT} boosters, carried by
- * roughly two in five. They are different genes, so they stack, and "white finds
- * white" means the second one to paint runs hotter for the first one's work.
- * Both loci were individually reasonable and <b>nothing had ever measured them
+ * <p>This is the measurement known-gaps gap 53 asked for. Several independent
+ * loci hand out everyday stars, socks and blazes - {@link MarkingsGene}, the
+ * dosage locus that owns ordinary markings outright, plus the {@code MITF},
+ * {@code PAX3} and {@code KIT} alleles whose minimal expressions look like the
+ * same thing. They are different genes, so they stack, and "white finds white"
+ * means the second one to paint runs hotter for the first one's work. Each
+ * locus was individually reasonable and <b>nothing had ever measured them
  * together</b>: the per-genotype tests pin one genotype at a time and the golden
  * files pin specific horses, so neither can answer "what does a paddock look
  * like". The worry was a wild population that reads as a pinto herd.
  *
  * <p><b>It does not.</b> Roughly two founders in three carry some white from
- * these two loci, nearly all of it in the star-and-socks range, and only a small
+ * these loci, nearly all of it in the star-and-socks range, and only a small
  * minority are loudly marked. That is a defensible naturalistic population -
  * real horse populations are mostly marked - so this test exists to <i>hold</i>
- * the number rather than to condemn it. It is also the instrument those two
+ * the number rather than to condemn it. It is also the instrument those
  * frequencies should be tuned against, which is the thing gap 53 actually
- * wanted: {@code MitfGene.WILD_SW1_PERCENT} and {@code KitGene.frequencies()}
- * were previously only ever tuned against each other.
+ * wanted: {@code MarkingsGene.frequencies()},
+ * {@code MitfGene.WILD_SW1_PERCENT} and {@code KitGene.frequencies()} were
+ * previously only ever tuned against each other.
+ *
+ * <h2>The list follows the job, not the gene names</h2>
+ * <p><b>{@link MarkingsGene} must be in the list, and this test failed once
+ * because it was not.</b> {@code SW1} used to stand in for ordinary markings at
+ * 55% of founders; when {@link MarkingsGene} took that job back {@code SW1}
+ * dropped to {@value MitfGene#WILD_SW1_PERCENT}%, and a list naming only the
+ * splash and sabino loci was suddenly measuring the leftovers rather than the
+ * markings. The marked share fell to 42%, tripping the floor below - a real
+ * signal, but about the measurement rather than the population. <b>A new locus
+ * that hands out everyday white belongs in {@code MARKING_LOCI}</b>, or this
+ * test quietly starts reporting on the wrong thing.
  *
  * <h2>Why it differences two renders instead of just counting pale texels</h2>
  *
@@ -55,7 +68,7 @@ class FounderWhiteRateTest {
     private static final int N = HorseSkinGeometry.SHEET_SIZE;
 
     /** The loci that hand out ordinary markings, i.e. the ones being measured. */
-    private static final String[] MARKING_LOCI = {"mitf", "pax3", "kit"};
+    private static final String[] MARKING_LOCI = {"markings", "mitf", "pax3", "kit"};
 
     /**
      * Founders per sample. 200 is two composes each, and it is enough to place
