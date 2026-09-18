@@ -10,6 +10,7 @@ import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.HorseSocialAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -191,6 +192,14 @@ final class DebugYardHerd {
             // Adult days lived past the day each is due, so the first scan sends both.
             born(filly, 3.05, natal, 3.0);
             born(colt, 1.05, natal, 1.0);
+            // ...and make them full siblings on the RECORD, which is the only place
+            // closeKin looks. Sharing a natal band is not kinship: born() carries the
+            // band id, while closeKin reads motherId and fatherId, and a yard horse is
+            // spawned rather than bred so both are empty - "unknown parents never
+            // match", so the brother was an eligible suitor however the pen was timed.
+            // Dropping the stagger was necessary and not sufficient; the first run
+            // after it had the filly join her brother's band as his lead mare.
+            siblings(filly, colt, m1, sire);
         }
 
         int hx = x0 + 10;
@@ -392,6 +401,36 @@ final class DebugYardHerd {
         long bornTick = now - HerdRules.GROW_UP_TICKS - Math.round(adultDays * HerdRules.DAY_TICKS);
         HorseSocialAttachment s = h.getData(ModAttachments.HORSE_SOCIAL.get());
         h.setData(ModAttachments.HORSE_SOCIAL.get(), s.withBirth(bornTick, s.dam(), natal, disperseAfter));
+    }
+
+    /**
+     * Record {@code dam} and {@code sire} as the parents of every one of
+     * {@code foals}, making them full siblings to anything that reads the record.
+     * {@code BandLife.closeKin} is the only caller that cares, and it is why this
+     * exists: the yard's horses are spawned rather than bred, so their records have
+     * no parents and the kinship check can never fire on them.
+     */
+    private static void siblings(@Nullable Horse a, @Nullable Horse b,
+                                 @Nullable Horse dam, @Nullable Horse sire) {
+        if (dam == null || sire == null) {
+            return;
+        }
+        for (Horse foal : new Horse[]{a, b}) {
+            if (foal != null) {
+                // HorseRecords.apply re-derives the visible name from the record, and
+                // the yard's labels are set straight on the entity by DebugTestYard.label
+                // rather than through barnName - so applying here renames "FILLY: LEAVES
+                // NOW" to whatever the generator called her, and the pen stops being
+                // readable in the watch lines. Keep the label across the write.
+                Component label = foal.getCustomName();
+                HorseRecords.apply(foal, HorseRecords.of(foal)
+                        .withParents(dam.getUUID(), sire.getUUID()));
+                if (label != null) {
+                    foal.setCustomName(label);
+                    foal.setCustomNameVisible(true);
+                }
+            }
+        }
     }
 
     private static void band(@Nullable Horse lead, BandType type, Horse... members) {
