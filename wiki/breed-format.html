@@ -483,6 +483,25 @@
     and that the browser bundle holds the same breeds in the same order.
 </p>
 
+<div class="note warn">
+    <span class="label">A new or edited breed also moves the gene census</span>
+    <p>
+        <a href="gene-census.html">The gene census</a> carries a <strong>which breeds carry
+        this</strong> column, and it is read straight off the breed sheets &mdash; every
+        <code>genes</code> pool, and every strain's. So adding a breed, deleting one, or
+        changing one pair in one pool changes that page, and the change does not arrive until
+        <code>./gradlew :common:bakeGeneCensus</code> is run.
+    </p>
+    <p>
+        <strong>Nothing guards this one.</strong> <code>BreedFilesTest</code> protects the
+        shipped files and the browser bundle from going stale; there is no equivalent for the
+        census, so a stale breed column is silent &mdash; and it fails in the direction that
+        matters, because the column exists to find <em>blank spots</em>. A gene a new breed
+        now carries would keep reading as carried by nobody, which is the one answer somebody
+        would act on.
+    </p>
+</div>
+
 <h2>Changing the format lands in four places</h2>
 
 <ul>
