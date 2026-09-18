@@ -16,6 +16,7 @@ public final class ModLootModifiers {
     static {
         SERIALIZERS.register("add_research_paper", () -> AddResearchPaperModifier.CODEC);
         SERIALIZERS.register("add_breed_spawn_egg", () -> AddBreedSpawnEggModifier.CODEC);
+        SERIALIZERS.register("add_golden_carrot_seeds", () -> AddGoldenCarrotSeedsModifier.CODEC);
     }
 
     public static void register(IEventBus modEventBus) {

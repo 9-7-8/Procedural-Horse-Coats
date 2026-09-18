@@ -1,6 +1,23 @@
 {
   "recipes": [
     {
+      "id": "acacia_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:acacia_animal_cart",
+      "count": 1
+    },
+    {
       "id": "acacia_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -12,6 +29,108 @@
       "count": 1
     },
     {
+      "id": "acacia_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:acacia_planks",
+        "minecraft:stick",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:acacia_plow",
+      "count": 1
+    },
+    {
+      "id": "acacia_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:acacia_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:acacia_reaper",
+      "count": 1
+    },
+    {
+      "id": "acacia_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:acacia_planks",
+        "minecraft:chest",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:hopper",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:acacia_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "acacia_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:acacia_planks",
+        "minecraft:chest",
+        "minecraft:acacia_planks",
+        "minecraft:acacia_planks",
+        "minecraft:chest",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:acacia_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "acacia_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_acacia_log",
+        "minecraft:stripped_acacia_log",
+        "minecraft:stripped_acacia_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:acacia_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:acacia_wagon",
+      "count": 1
+    },
+    {
+      "id": "bamboo_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:bamboo_animal_cart",
+      "count": 1
+    },
+    {
       "id": "bamboo_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -20,6 +139,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:bamboo_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "bamboo_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:bamboo_planks",
+        "minecraft:stick",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:bamboo_plow",
+      "count": 1
+    },
+    {
+      "id": "bamboo_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:bamboo_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:bamboo_reaper",
+      "count": 1
+    },
+    {
+      "id": "bamboo_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:bamboo_planks",
+        "minecraft:chest",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:hopper",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:bamboo_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "bamboo_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:bamboo_planks",
+        "minecraft:chest",
+        "minecraft:bamboo_planks",
+        "minecraft:bamboo_planks",
+        "minecraft:chest",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:bamboo_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "bamboo_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_bamboo_block",
+        "minecraft:stripped_bamboo_block",
+        "minecraft:stripped_bamboo_block",
+        "horsegenetics:cart_wheel",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:bamboo_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:bamboo_wagon",
       "count": 1
     },
     {
@@ -44,6 +248,23 @@
       "count": 1
     },
     {
+      "id": "birch_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:birch_animal_cart",
+      "count": 1
+    },
+    {
       "id": "birch_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -52,6 +273,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:birch_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "birch_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:birch_planks",
+        "minecraft:stick",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:birch_plow",
+      "count": 1
+    },
+    {
+      "id": "birch_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:birch_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:birch_reaper",
+      "count": 1
+    },
+    {
+      "id": "birch_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:birch_planks",
+        "minecraft:chest",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:hopper",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:birch_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "birch_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:birch_planks",
+        "minecraft:chest",
+        "minecraft:birch_planks",
+        "minecraft:birch_planks",
+        "minecraft:chest",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:birch_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "birch_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_birch_log",
+        "minecraft:stripped_birch_log",
+        "minecraft:stripped_birch_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:birch_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:birch_wagon",
       "count": 1
     },
     {
@@ -118,6 +424,40 @@
       "type": "horsegenetics:carrot_combine"
     },
     {
+      "id": "cart_wheel",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "#minecraft:planks",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick"
+      ],
+      "out": "horsegenetics:cart_wheel",
+      "count": 1
+    },
+    {
+      "id": "cherry_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:cherry_animal_cart",
+      "count": 1
+    },
+    {
       "id": "cherry_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -126,6 +466,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:cherry_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "cherry_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:cherry_planks",
+        "minecraft:stick",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:cherry_plow",
+      "count": 1
+    },
+    {
+      "id": "cherry_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:cherry_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:cherry_reaper",
+      "count": 1
+    },
+    {
+      "id": "cherry_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:cherry_planks",
+        "minecraft:chest",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:hopper",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:cherry_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "cherry_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:cherry_planks",
+        "minecraft:chest",
+        "minecraft:cherry_planks",
+        "minecraft:cherry_planks",
+        "minecraft:chest",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:cherry_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "cherry_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_cherry_log",
+        "minecraft:stripped_cherry_log",
+        "minecraft:stripped_cherry_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:cherry_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:cherry_wagon",
       "count": 1
     },
     {
@@ -144,6 +569,23 @@
       "count": 1
     },
     {
+      "id": "crimson_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:crimson_animal_cart",
+      "count": 1
+    },
+    {
       "id": "crimson_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -155,6 +597,108 @@
       "count": 1
     },
     {
+      "id": "crimson_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:crimson_planks",
+        "minecraft:stick",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:crimson_plow",
+      "count": 1
+    },
+    {
+      "id": "crimson_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:crimson_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:crimson_reaper",
+      "count": 1
+    },
+    {
+      "id": "crimson_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:crimson_planks",
+        "minecraft:chest",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:hopper",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:crimson_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "crimson_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:crimson_planks",
+        "minecraft:chest",
+        "minecraft:crimson_planks",
+        "minecraft:crimson_planks",
+        "minecraft:chest",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:crimson_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "crimson_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_crimson_stem",
+        "minecraft:stripped_crimson_stem",
+        "minecraft:stripped_crimson_stem",
+        "horsegenetics:cart_wheel",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:crimson_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:crimson_wagon",
+      "count": 1
+    },
+    {
+      "id": "dark_oak_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:dark_oak_animal_cart",
+      "count": 1
+    },
+    {
       "id": "dark_oak_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -163,6 +707,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:dark_oak_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "dark_oak_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:dark_oak_planks",
+        "minecraft:stick",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:dark_oak_plow",
+      "count": 1
+    },
+    {
+      "id": "dark_oak_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:dark_oak_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:dark_oak_reaper",
+      "count": 1
+    },
+    {
+      "id": "dark_oak_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:dark_oak_planks",
+        "minecraft:chest",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:hopper",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:dark_oak_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "dark_oak_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:dark_oak_planks",
+        "minecraft:chest",
+        "minecraft:dark_oak_planks",
+        "minecraft:dark_oak_planks",
+        "minecraft:chest",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:dark_oak_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "dark_oak_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_dark_oak_log",
+        "minecraft:stripped_dark_oak_log",
+        "minecraft:stripped_dark_oak_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:dark_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:dark_oak_wagon",
       "count": 1
     },
     {
@@ -314,6 +943,23 @@
       "count": 1
     },
     {
+      "id": "jungle_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:jungle_animal_cart",
+      "count": 1
+    },
+    {
       "id": "jungle_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -322,6 +968,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:jungle_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "jungle_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:jungle_planks",
+        "minecraft:stick",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:jungle_plow",
+      "count": 1
+    },
+    {
+      "id": "jungle_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:jungle_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:jungle_reaper",
+      "count": 1
+    },
+    {
+      "id": "jungle_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:jungle_planks",
+        "minecraft:chest",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:hopper",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:jungle_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "jungle_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:jungle_planks",
+        "minecraft:chest",
+        "minecraft:jungle_planks",
+        "minecraft:jungle_planks",
+        "minecraft:chest",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:jungle_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "jungle_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_jungle_log",
+        "minecraft:stripped_jungle_log",
+        "minecraft:stripped_jungle_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:jungle_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:jungle_wagon",
       "count": 1
     },
     {
@@ -366,6 +1097,23 @@
       "count": 1
     },
     {
+      "id": "mangrove_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:mangrove_animal_cart",
+      "count": 1
+    },
+    {
       "id": "mangrove_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -374,6 +1122,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:mangrove_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "mangrove_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:mangrove_planks",
+        "minecraft:stick",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:mangrove_plow",
+      "count": 1
+    },
+    {
+      "id": "mangrove_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:mangrove_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:mangrove_reaper",
+      "count": 1
+    },
+    {
+      "id": "mangrove_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:mangrove_planks",
+        "minecraft:chest",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:hopper",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:mangrove_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "mangrove_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:mangrove_planks",
+        "minecraft:chest",
+        "minecraft:mangrove_planks",
+        "minecraft:mangrove_planks",
+        "minecraft:chest",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:mangrove_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "mangrove_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_mangrove_log",
+        "minecraft:stripped_mangrove_log",
+        "minecraft:stripped_mangrove_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:mangrove_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:mangrove_wagon",
       "count": 1
     },
     {
@@ -402,6 +1235,23 @@
       "count": 1
     },
     {
+      "id": "oak_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:oak_animal_cart",
+      "count": 1
+    },
+    {
       "id": "oak_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -413,6 +1263,108 @@
       "count": 1
     },
     {
+      "id": "oak_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:oak_planks",
+        "minecraft:stick",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:oak_plow",
+      "count": 1
+    },
+    {
+      "id": "oak_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:oak_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:oak_reaper",
+      "count": 1
+    },
+    {
+      "id": "oak_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:oak_planks",
+        "minecraft:chest",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:hopper",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:oak_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "oak_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:oak_planks",
+        "minecraft:chest",
+        "minecraft:oak_planks",
+        "minecraft:oak_planks",
+        "minecraft:chest",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:oak_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "oak_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_oak_log",
+        "minecraft:stripped_oak_log",
+        "minecraft:stripped_oak_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:oak_wagon",
+      "count": 1
+    },
+    {
+      "id": "pale_oak_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:pale_oak_animal_cart",
+      "count": 1
+    },
+    {
       "id": "pale_oak_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -421,6 +1373,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:pale_oak_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "pale_oak_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:pale_oak_planks",
+        "minecraft:stick",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:pale_oak_plow",
+      "count": 1
+    },
+    {
+      "id": "pale_oak_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:pale_oak_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:pale_oak_reaper",
+      "count": 1
+    },
+    {
+      "id": "pale_oak_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:pale_oak_planks",
+        "minecraft:chest",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:hopper",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:pale_oak_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "pale_oak_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:pale_oak_planks",
+        "minecraft:chest",
+        "minecraft:pale_oak_planks",
+        "minecraft:pale_oak_planks",
+        "minecraft:chest",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:pale_oak_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "pale_oak_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_pale_oak_log",
+        "minecraft:stripped_pale_oak_log",
+        "minecraft:stripped_pale_oak_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:pale_oak_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:pale_oak_wagon",
       "count": 1
     },
     {
@@ -449,6 +1486,23 @@
       "count": 1
     },
     {
+      "id": "spruce_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:spruce_animal_cart",
+      "count": 1
+    },
+    {
       "id": "spruce_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -457,6 +1511,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:spruce_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "spruce_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:spruce_planks",
+        "minecraft:stick",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:spruce_plow",
+      "count": 1
+    },
+    {
+      "id": "spruce_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:spruce_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:spruce_reaper",
+      "count": 1
+    },
+    {
+      "id": "spruce_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:spruce_planks",
+        "minecraft:chest",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:hopper",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:spruce_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "spruce_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:spruce_planks",
+        "minecraft:chest",
+        "minecraft:spruce_planks",
+        "minecraft:spruce_planks",
+        "minecraft:chest",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:spruce_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "spruce_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_spruce_log",
+        "minecraft:stripped_spruce_log",
+        "minecraft:stripped_spruce_log",
+        "horsegenetics:cart_wheel",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:spruce_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:spruce_wagon",
       "count": 1
     },
     {
@@ -529,6 +1668,23 @@
       "count": 1
     },
     {
+      "id": "warped_animal_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:warped_animal_cart",
+      "count": 1
+    },
+    {
       "id": "warped_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -537,6 +1693,91 @@
         "horsegenetics:braided_rope"
       ],
       "out": "horsegenetics:warped_double_fence_gate",
+      "count": 1
+    },
+    {
+      "id": "warped_plow",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:stick",
+        "minecraft:warped_planks",
+        "minecraft:stick",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:warped_plow",
+      "count": 1
+    },
+    {
+      "id": "warped_reaper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stick",
+        "minecraft:warped_slab",
+        null,
+        "minecraft:stick",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:iron_ingot",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:warped_reaper",
+      "count": 1
+    },
+    {
+      "id": "warped_seed_drill",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:warped_planks",
+        "minecraft:chest",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:hopper",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:warped_seed_drill",
+      "count": 1
+    },
+    {
+      "id": "warped_supply_cart",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:warped_planks",
+        "minecraft:chest",
+        "minecraft:warped_planks",
+        "minecraft:warped_planks",
+        "minecraft:chest",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:warped_supply_cart",
+      "count": 1
+    },
+    {
+      "id": "warped_wagon",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:stripped_warped_stem",
+        "minecraft:stripped_warped_stem",
+        "minecraft:stripped_warped_stem",
+        "horsegenetics:cart_wheel",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel",
+        "horsegenetics:cart_wheel",
+        "minecraft:warped_planks",
+        "horsegenetics:cart_wheel"
+      ],
+      "out": "horsegenetics:warped_wagon",
       "count": 1
     },
     {

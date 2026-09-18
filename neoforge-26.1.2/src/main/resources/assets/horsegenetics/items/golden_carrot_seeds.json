@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "horsegenetics:item/golden_carrot_seeds",
+    "tints": [
+      {
+        "type": "horsegenetics:gold_tint"
+      }
+    ]
+  }
+}

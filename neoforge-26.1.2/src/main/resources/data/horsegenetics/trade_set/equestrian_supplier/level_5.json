@@ -4,7 +4,8 @@
     "horsegenetics:equestrian_supplier/level_5/buy_horse_hair",
     "horsegenetics:equestrian_supplier/level_5/sell_rare_paper",
     "horsegenetics:equestrian_supplier/level_5/sell_ender_whistle",
-    "horsegenetics:equestrian_supplier/level_5/sell_holding_pen_sign"
+    "horsegenetics:equestrian_supplier/level_5/sell_holding_pen_sign",
+    "horsegenetics:equestrian_supplier/level_5/sell_golden_carrot_seeds"
   ],
   "random_sequence": "horsegenetics:trade_set/equestrian_supplier/level_5"
 }

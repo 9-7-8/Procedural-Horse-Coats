@@ -589,6 +589,46 @@ public final class TutorialPage {
         // ------------------------------------------------------------------
         List<Step> farming = new ArrayList<>();
 
+        farming.add(new Step("Wheat, and the hay bale it becomes",
+                List.of("A horse on grass feeds itself. A stable full of horses does not, and the answer "
+                                + "is a wheat field - because what wheat is for, here, is hay bales.",
+                        "Nine wheat makes one bale, and a bale is the largest single meal in the game. "
+                                + "A hungry horse looks about ten blocks for something to eat and takes "
+                                + "the best thing it can reach: a hay bale first, ahead of crops, ahead "
+                                + "of grass, ahead of everything. Set bales down where your horses are "
+                                + "and they will come to them and eat them out of the world - you never "
+                                + "have to hand anything to anyone.",
+                        "That is the whole feeding system for a stable. Grass for a paddock, bales for "
+                                + "anywhere that has run out of it, and a hurt horse needs to have eaten "
+                                + "before it can heal at all.",
+                        "Two warnings. What a horse eats is gone - a crop it can reach is destroyed "
+                                + "outright, so never plant against the paddock fence, and a bale you "
+                                + "put down is a bale that will disappear. And not every horse eats "
+                                + "plants: a meat-eater will go and hunt your chickens instead, and no "
+                                + "amount of hay will interest it.",
+                        "Everything below this is how to work a field at the speed of a horse rather "
+                                + "than at the speed of a hoe."),
+                List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.HAY_BLOCK)), Art.NONE,
+                List.of(ProgressTask.BALE_HAY)));
+
+        farming.add(new Step("Golden carrots, grown",
+                List.of("Golden carrots are the good stuff - and normally they cost eight gold nuggets "
+                                + "each, which puts a real ceiling on how many horses you can work with.",
+                        "There is another way. Golden carrot seeds grow into golden carrots: an ordinary "
+                                + "crop on ordinary farmland, ordinary growth, bone meal and all. A "
+                                + "mature plant gives you a golden carrot and more seeds than you "
+                                + "planted, so a field of them pays for itself.",
+                        "The catch is getting the first seeds. They cannot be crafted from anything, and "
+                                + "a golden carrot itself will not plant. The equestrian supplier sells "
+                                + "them at his top rank for a serious number of emeralds, a few at a "
+                                + "time; otherwise they turn up in the sort of chest you find at the "
+                                + "bottom of a dungeon.",
+                        "No gold ever comes out of the crop - only golden carrots. It is a way to grow "
+                                + "horse food, not a gold mine."),
+                List.of(new ItemStack(ModItems.GOLDEN_CARROT_SEEDS.get()),
+                        new ItemStack(Items.GOLDEN_CARROT)), Art.NONE,
+                List.of(ProgressTask.PLANT_GOLDEN_CARROT, ProgressTask.HARVEST_GOLDEN_CARROT)));
+
         farming.add(new Step("Carts, and the wheel they all start with",
                 List.of("A cart wheel is eight sticks around a plank. Every cart in the game spends two "
                                 + "or four of them, so make several.",

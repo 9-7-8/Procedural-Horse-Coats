@@ -103,6 +103,35 @@ public final class ClientSetup {
         event.register(
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "metal_tint"),
                 MetalTintSource.MAP_CODEC);
+        // The golden carrot seed icon, which is vanilla's wheat seeds in gold.
+        // See GoldTintSource, and registerBlockColours below for the other half.
+        event.register(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "gold_tint"),
+                GoldTintSource.MAP_CODEC);
+    }
+
+    /**
+     * The planted golden carrot crop, coloured.
+     *
+     * <p>Its stage models are vanilla's carrot sheets with a {@code tintindex}
+     * added - that index is what this handler answers, and a model without one
+     * would simply render orange carrots however loud this shouted. The colour
+     * is {@link GoldTintSource#GOLD}, shared with the item tint so the seed in
+     * your hand and the crop in the ground are the same gold.
+     *
+     * <p>The mod's first block tint. 26.1.2 has no lambda-per-tint-index block
+     * colour handler: the event takes a <b>list</b> of
+     * {@link net.minecraft.client.color.block.BlockTintSource}, indexed by the
+     * model's tint index, and {@code BlockTintSource} is a one-method interface
+     * over the block state. One entry, so index 0, which is the index the stage
+     * models carry.
+     */
+    @SubscribeEvent
+    static void registerBlockTintSources(
+            net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.BlockTintSources event) {
+        event.register(
+                java.util.List.of(state -> GoldTintSource.GOLD),
+                com.example.horsegenetics.neoforge.block.ModBlocks.GOLDEN_CARROT_CROP.get());
     }
 
     @SubscribeEvent

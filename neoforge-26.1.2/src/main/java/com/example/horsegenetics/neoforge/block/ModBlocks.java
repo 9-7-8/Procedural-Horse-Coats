@@ -88,6 +88,19 @@ public final class ModBlocks {
             BLOCKS.registerSimpleBlock("cowboy_hitch", ModBlocks::workPost);
 
     /**
+     * <b>Golden carrots, as a crop.</b> Vanilla's carrot in every mechanical
+     * respect; what is different is that the seeds are rare and that no gold
+     * ever comes out of it. See {@link GoldenCarrotCropBlock}.
+     *
+     * <p>No block item: the seed is its own item and places this, exactly as
+     * wheat seeds place wheat. {@code ModItems.GOLDEN_CARROT_SEEDS}.
+     */
+    public static final DeferredBlock<GoldenCarrotCropBlock> GOLDEN_CARROT_CROP =
+            BLOCKS.registerBlock("golden_carrot_crop",
+                    GoldenCarrotCropBlock::new,
+                    GoldenCarrotCropBlock::cropProperties);
+
+    /**
      * The <b>Equine Research Shelf</b> - a bookshelf that files research papers
      * and copies them onto blank books. See {@link EquineResearchShelfBlock}.
      * Properties are a full copy of vanilla's bookshelf, because it is one:

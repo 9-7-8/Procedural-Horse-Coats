@@ -152,6 +152,27 @@ public final class ModItems {
     @SuppressWarnings("deprecation") // Item(Properties) - see SeedJarItem
     public static final DeferredItem<Item> VET_KIT = register("vet_kit", p -> new Item(p.durability(64)));
 
+    /**
+     * <b>Golden carrot seeds</b> - the only way to plant a golden carrot.
+     *
+     * <p>A plain {@code BlockItem} on {@code ModBlocks.GOLDEN_CARROT_CROP}
+     * with {@code useItemDescriptionPrefix()}, which is exactly how 26.1.2
+     * builds {@code wheat_seeds} and {@code carrot} - see
+     * {@code Items.createBlockItemWithCustomItemName}. The prefix call is what
+     * makes it keep its own name ("Golden Carrot Seeds") rather than taking the
+     * block's; there is no {@code ItemNameBlockItem} class in this version.
+     *
+     * <p>Deliberately <b>not craftable</b>. Two sources, both scarce: the
+     * equestrian supplier's top rank, at a price, and dungeon-grade chest loot.
+     * Making a golden carrot itself plantable would have handed every player
+     * who ever crafted one an unlimited supply, which is the opposite of the
+     * point. See GoldenCarrotCropBlock.
+     */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> GOLDEN_CARROT_SEEDS =
+            register("golden_carrot_seeds", p -> new net.minecraft.world.item.BlockItem(
+                    com.example.horsegenetics.neoforge.block.ModBlocks.GOLDEN_CARROT_CROP.get(),
+                    p.useItemDescriptionPrefix()));
+
     // --- tickets (roadmap §11) - send a horse to its stall ----------------
     // The blank is the crafting base and stays inert; the other three are one
     // use each and differ only in reach. See TicketItem / server.TicketHandler.

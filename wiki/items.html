@@ -228,6 +228,69 @@
     render, because the HD body had been the small one all along.
 </p>
 
+<h2 id="golden-carrot-seeds">Golden carrot seeds &mdash; a crop, and not a gold farm</h2>
+
+<p>
+    A golden carrot normally costs eight gold nuggets, which puts a hard ceiling on how many
+    horses you can afford to work with. <strong>Golden carrot seeds</strong> grow them
+    instead: an ordinary crop on ordinary farmland, eight ages, bone-mealable, exactly like
+    vanilla&rsquo;s carrot in every mechanical respect.
+</p>
+
+<p>
+    <strong>No gold comes out of it at any point.</strong> The loot table drops golden carrots
+    and its own seeds and nothing else &mdash; no nugget, no ingot &mdash; and a golden carrot
+    cannot be turned back into gold by any vanilla recipe. It is a way to grow
+    <em>horse food</em>, and a player who plants a field of it ends up with a field of horse
+    food.
+</p>
+
+<p>
+    The gate is getting the first seeds, and there are exactly two ways:
+</p>
+<ul>
+    <li>The <a href="villagers.html">equestrian supplier</a>&rsquo;s <strong>top rank</strong>,
+        at 38 emeralds for one, twice per restock.</li>
+    <li><strong>Dungeon-grade chest loot</strong> &mdash; 7% across eight tables (dungeon,
+        mineshaft, stronghold corridor, plains house, mansion, outpost, jungle temple, desert
+        pyramid), one to three seeds when it hits.</li>
+</ul>
+<p>
+    They are <strong>not craftable from anything</strong>, and a golden carrot itself will not
+    plant. That second point is the load-bearing one: if a golden carrot were the seed, every
+    golden carrot ever crafted from eight nuggets would be plantable and the rarity would be
+    worth nothing. A mature plant gives one golden carrot and two seeds, so a field doubles
+    and pays for itself once you have started it.
+</p>
+
+<div class="note">
+    <span class="label">No art ships for it</span>
+    <p>
+        The crop wears <strong>vanilla&rsquo;s own carrot stage textures</strong>, tinted gold;
+        the seed icon is vanilla&rsquo;s wheat seeds, tinted the same gold. Two routes to one
+        colour, because an item tint cannot reach a block in the world and a block tint cannot
+        reach an item in a slot &mdash; so the constant lives once, on
+        <code>client/GoldTintSource.GOLD</code>, and both read it.
+    </p>
+    <p>
+        This is also the mod&rsquo;s <strong>first block tint</strong>, and 26.1.2 does not
+        have the lambda-per-tint-index block colour handler older versions did:
+        <code>RegisterColorHandlersEvent.BlockTintSources</code> takes a <em>list</em> of
+        one-method <code>BlockTintSource</code>, indexed by the model&rsquo;s tint index. The
+        four stage models therefore parent a template of ours carrying
+        <code>tintindex: 0</code>, because <code>minecraft:block/crop</code> has none and a
+        model without one renders plain orange however loud the handler shouts.
+    </p>
+</div>
+
+<p>
+    Source: <code>block/GoldenCarrotCropBlock</code>,
+    <code>data/loot/AddGoldenCarrotSeedsModifier</code>,
+    <code>server/GoldenCarrotHandler</code> (the two checklist boxes). Taught in
+    <strong>Getting Started &rarr; Farming and haulage</strong>, beside
+    <a href="carts.html">the carts</a>.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">

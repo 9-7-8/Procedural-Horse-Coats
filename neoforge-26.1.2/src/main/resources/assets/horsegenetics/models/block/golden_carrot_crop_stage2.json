@@ -1,0 +1,6 @@
+{
+  "parent": "horsegenetics:block/template_tinted_crop",
+  "textures": {
+    "crop": "minecraft:block/carrots_stage2"
+  }
+}

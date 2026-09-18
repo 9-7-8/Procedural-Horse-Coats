@@ -252,6 +252,17 @@ public enum ProgressTask {
             "Two seats, and small animals will climb in by themselves. The lightest thing to pull, so "
                     + "the one even a weak horse can move at a decent pace."),
 
+    BALE_HAY(Group.FARMING, "Put down a hay bale",
+            "Grow wheat, craft nine of it into a hay bale, and set the bale down where your horses are. "
+                    + "A bale is the largest single meal in the game and the thing a hungry horse will "
+                    + "cross a paddock for, ahead of crops, grass or anything else it can reach."),
+    PLANT_GOLDEN_CARROT(Group.FARMING, "Plant a golden carrot seed",
+            "Golden carrot seeds cannot be crafted. The equestrian supplier sells them at his top rank, "
+                    + "and they turn up in dungeon-grade chests. Plant one on farmland."),
+    HARVEST_GOLDEN_CARROT(Group.FARMING, "Harvest golden carrots",
+            "Break a fully grown golden carrot crop. It gives a golden carrot and more seeds than you "
+                    + "put in, so the first seed you find is the only hard part."),
+
     // ---- 4. Basic breeding --------------------------------------------
     NATURAL_COVER(Group.BASIC_BREEDING, "Let a stallion cover a mare",
             "Leave an entire stallion with a mare while she is in heat, both above nine-tenths health, "
