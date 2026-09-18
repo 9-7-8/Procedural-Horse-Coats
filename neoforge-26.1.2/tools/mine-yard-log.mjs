@@ -153,11 +153,22 @@ section('Gap 243 - a flying lycan must land, not fall out of the world');
 // word alone reports the sign on the pen as though it were the failure it warns
 // about. A real one is a death line; the expectation text always says "expect".
 const outOfWorld = has(/outOfWorld/).filter((l) => !/expect|'from outOfWorld'/.test(l));
-const setDown = has(/set down at/);
+// Same trap as outOfWorld above, and it caught me twice: LYCAN ROUND TRIP's sign
+// quotes the very line it is waiting for, down to the "[trace] lycan |" prefix, so
+// both a bare /set down at/ and a filter on that prefix match the expectation. Only
+// a line whose OWN tag is [trace] lycan counts.
+const lycanLines = lines.filter((l) => /horsegenetics\/\]: \[trace\] lycan \|/.test(l));
+const setDown = lycanLines.filter((l) => /set down at/.test(l));
+const insideBlocks = lycanLines.filter((l) => /inside blocks/.test(l));
 verdict(outOfWorld.length === 0, `${outOfWorld.length} outOfWorld death(s)`);
 outOfWorld.slice(0, 4).forEach((l) => console.log(`        ${l.slice(0, 150)}`));
-console.log(`  'set down at' lines: ${setDown.length}` +
-  (setDown.length === 0 ? '  (the landing path is still unexercised - needs a flying shifter)' : ''));
+console.log(`  reverts needing a safe spot: ${insideBlocks.length} 'inside blocks', `
+  + `${setDown.length} 'set down at'`);
+if (insideBlocks.length === 0 && setDown.length === 0) {
+  console.log("        neither branch ran - no flyer shifted, so the landing is untested");
+} else if (setDown.length === 0) {
+  console.log("        'set down at' is the open-air case; a flyer in a floored pen never reaches it");
+}
 
 // ------------------------------------------------------ gap 259: packing
 section('Gap 259 - no pen\'s watch line may list a horse from the pen next door');
