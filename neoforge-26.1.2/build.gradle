@@ -137,6 +137,24 @@ processResources {
 
 dependencies {
     implementation project(":common")
+
+    // Plain JUnit, no Minecraft. The only thing tested here is compat's
+    // MaterialScan, which deliberately imports nothing from Minecraft or
+    // NeoForge so that it can be exercised without booting either - see its
+    // class note. Gson is explicit because the test classpath does not inherit
+    // the Minecraft libraries the main source set gets from ModDevGradle.
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("com.google.code.gson:gson:2.11.0")
+    testImplementation("org.jspecify:jspecify:1.0.0")
+    // Gradle 9 no longer puts the JUnit Platform launcher on the test runtime
+    // classpath automatically - without this the test JVM fails to start with
+    // "Failed to load JUnit Platform". Version comes from the BOM above.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 // A jar dropped into a real `mods/` folder must be self-contained. Gradle only
