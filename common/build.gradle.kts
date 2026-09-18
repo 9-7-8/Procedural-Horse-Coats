@@ -36,6 +36,21 @@ tasks.test {
     // genotype (177 147 at 11 genes) and CoatTextureComposerTest bakes 2^genes
     // coats. Gradle's 512 MB default stopped being enough at 11 genes.
     maxHeapSize = "2g"
+
+    // CreatorParityTest reads three things that live outside this module, and
+    // Gradle cannot see them. Without this the task is UP-TO-DATE whenever only
+    // the creator's JavaScript or the fixture moved - which is precisely the
+    // change the test exists to catch, and precisely how gap 269 happened: the
+    // flight flags were added to the game and never to schema.js, and nothing
+    // re-ran. Verified by tampering with expected.json and watching the task
+    // skip. Declaring them means a creator-side edit re-runs the suite, which is
+    // the moment you most want it re-run.
+    inputs.files(
+        rootProject.layout.projectDirectory.file("wiki/gene-creator/fixtures/expected.json"),
+        rootProject.layout.projectDirectory.file("wiki/gene-creator/tools/check-parity.mjs"),
+    ).withPropertyName("creatorParityFiles").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir(rootProject.layout.projectDirectory.dir("wiki/gene-creator/js"))
+        .withPropertyName("creatorParityJs").withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 // Render sample coats through the real overlay pipeline (composer + gradient +
