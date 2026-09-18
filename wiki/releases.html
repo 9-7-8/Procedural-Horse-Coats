@@ -58,6 +58,110 @@
     </p>
 </div>
 
+<h2 id="v0-5-008">0.5.008</h2>
+
+<p class="lede">
+    <strong>Breed eggs you can tell apart at a glance, brindle put right, a horseman who
+    sells the horses his own corner of the world produces, and magic that turns up on its
+    own.</strong> A long run of small things, most of which change what an ordinary horse
+    or an ordinary village is like rather than adding anything to find.
+</p>
+
+<h3>Breed spawn eggs have art</h3>
+
+<ul>
+    <li><strong>Forty-five breeds have a drawn egg of their own</strong>, and the rest keep
+        the vanilla-looking one. The breed is still a component on a single item rather than
+        an item per breed &mdash; which is what lets a breed you drop into
+        <code>.minecraft/phc/breeds/</code> have an egg at all &mdash; so the art is chosen
+        by the egg's breed at draw time.</li>
+    <li>A mixed tab is the steady state, not a half-finished one: a player-added breed can
+        never ship art in this jar.</li>
+</ul>
+
+<h3>Brindle only shows on mares now</h3>
+
+<ul>
+    <li><strong>It takes two copies.</strong> A stallion has one X and therefore one copy, so
+        he can never qualify: every stallion carrying brindle is a carrier, and every brindle
+        horse in the world is a mare. It used to show on any stallion that carried it.</li>
+    <li><strong>This settles the gene against its own explanation.</strong> Brindle is a
+        record of which X each patch of skin silenced &mdash; which is why the two sides of
+        the horse never match &mdash; and a horse with one X has nothing to silence.</li>
+    <li><strong>The crosses invert.</strong> No colt is ever brindle, whatever the pairing. A
+        brindle filly needs the allele from both sides; a brindle mare put to a carrier sire
+        throws a brindle filly every time. The allele is five times commoner than it was,
+        because one sex showing p&sup2; is a far smaller number than the old one-copy rate.</li>
+</ul>
+
+<h3>The horseman sells local horses</h3>
+
+<ul>
+    <li><strong>Breed eggs on his counter now come from the region of the nearest cowboy in
+        town</strong> &mdash; the same nearest-wins scan that already decides his surname.
+        A village in Scandinavia stops selling Marwaris.</li>
+    <li><strong>A region with no breed in a price band simply has no trade there.</strong>
+        Three of the ten do, in the commonest band. The alternatives both lie: widening the
+        band sells an uncommon breed at the common price, and falling back on the world pool
+        puts a foreign horse on the counter.</li>
+    <li>No cowboy in town means no connection and so no filter. Dungeon chests are unchanged.</li>
+</ul>
+
+<h3>Twins, appetite, and magic out of nowhere</h3>
+
+<ul>
+    <li><strong>About one twin pregnancy in ten is identical</strong> &mdash; one egg that
+        split, so the two foals are a single draw carried twice and are alike down to the
+        last streak. The other nine are fraternal, as all of them used to be. An identical
+        pair can never be a colt and a filly.</li>
+    <li><strong>A bigger horse gets hungry sooner.</strong> The resting drain follows the
+        horse's body, so a shire empties in about two thirds of a day where a falabella takes
+        two and a half.</li>
+    <li><strong>One bred foal in a thousand is born with a magical gene neither parent
+        had</strong>, and one in a million with two copies. Nothing makes it likelier. It
+        happens only to foals somebody bred &mdash; a horse the world spawned is still
+        exactly its breed.</li>
+    <li><strong>Three new checklist boxes</strong> for those: breed a mutation, breed
+        fraternal twins, breed identical twins.</li>
+</ul>
+
+<h3>Blight, and four new markings</h3>
+
+<ul>
+    <li><strong>Blight</strong> is verdant's opposite: the ground goes back to bare dirt
+        under a horse that has two copies, and the wild growth on it withers. It will not
+        touch a crop, a planted sapling or anything else you put there.</li>
+    <li><strong>Endless knot, paisley spill, smoke scroll and stormvein</strong> &mdash; four
+        drawn markings, two of them traced from artwork.</li>
+    <li>Every coat that already existed is byte-identical. Nothing you own changed colour.</li>
+</ul>
+
+<h3>Housekeeping</h3>
+
+<ul>
+    <li>The <a href="compatibility.html">compatibility page</a> drops Saturated Saddles and
+        Universal Dyeing &mdash; one wholly redundant now that this mod ships its own dyeable
+        saddle, the other verified to contain nothing about horses at all &mdash; and adds
+        <strong>Custom Fences and Walls</strong>, strongly recommended beside this mod.</li>
+    <li>The gene creator's schema mirror had drifted out of step with the game when flying
+        shipped and is back in agreement; the parity check is green again.</li>
+</ul>
+
+<h2 id="v0-5-007">0.5.007</h2>
+
+<p class="lede">
+    <strong>A horse that leaves the ground.</strong> Flight, in three flavours, and the
+    multi-allele effects bug that building it uncovered.
+</p>
+
+<ul>
+    <li><strong>Flying, gliding and cloud-treading.</strong> True flight holds altitude;
+        gliding trades speed for height like an elytra and cannot hover; cloud-walking is
+        independent of both, so a horse may in principle tread cloud without flying at all.</li>
+    <li><strong>The bug it found:</strong> a gene whose effects differed between alleles was
+        not composing them correctly. Written up with the gene.</li>
+</ul>
+
 <h2 id="v0-5-006">0.5.006</h2>
 
 <p class="lede">
