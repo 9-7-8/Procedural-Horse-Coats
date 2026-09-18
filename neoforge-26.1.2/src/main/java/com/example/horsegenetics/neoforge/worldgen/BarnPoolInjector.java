@@ -28,14 +28,25 @@ import java.util.List;
  * the jigsaw system comes to saying "on the outskirts" without hand-placing it
  * and owning terrain fitting ourselves.
  *
- * <p>The barn's own connector (baked into {@code cowboy_barn.nbt}) is a
- * {@code minecraft:street} jigsaw on its west face at <b>y=0</b> - its own
+ * <p>The barn's own connectors (baked into {@code cowboy_barn.nbt}) are
+ * <b>three</b> {@code minecraft:street} jigsaws, all at <b>y=0</b> - its own
  * foundation course. A jigsaw pair lands both blocks at the same world height,
  * and the street connector it meets is one above the road block, so the layer
  * carrying the jigsaw is the layer that rests on the ground. That is the
  * relationship vanilla <i>houses</i> have to a street, and it is what puts the
  * barn one block proud of the road with steps up to its doors. See
  * {@code tools/barn/bake-barn.py} for what it looked like when this was y=1.
+ *
+ * <p><b>Three rather than one, because one fixed the piece's rotation.</b> The
+ * generator turns a candidate until its connector faces back at the street, and
+ * with a single connector exactly one of the four rotations does that - so the
+ * homestead always landed the same way round, 16 blocks out from the road with
+ * 2 of its width on one side of the road's line and 15 on the other. If those
+ * 15 blocks held a village house the piece was thrown out and the slot fell
+ * through to a vanilla terminator, with no second arrangement to try. The three
+ * connectors run down the walk - head-on at the barn's north doors, and one at
+ * each end of the path - so three rotations attach and the generator keeps
+ * whichever fits the ground it has, arriving at the walk either way.
  *
  * <h2>Why this is code and not a datapack file</h2>
  * A datapack can only <b>replace</b> {@code terminators.json}, never add to it.
@@ -49,6 +60,13 @@ import java.util.List;
  * actually draws from. Both have to move together, and {@code maxSize} is a
  * lazy cache of the tallest element, so it is reset in case something has
  * already asked.
+ *
+ * <h2>The weight is not the only lever any more</h2>
+ * It was, while the piece had one connector. The three connectors it carries
+ * now are the other one, and they are the cheaper of the two: weight buys more
+ * <i>draws</i> of a piece that may not fit, orientation buys more <i>ways for
+ * the same draw to fit</i>. Reach for a bake change before reaching for the
+ * number here.
  *
  * <h2>Frequency</h2>
  * Weight 3 against the four vanilla terminators of weight 1 each, so roughly

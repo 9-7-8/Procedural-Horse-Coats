@@ -129,14 +129,23 @@
     into a small hole: <a href="#gap-54">gap 54</a> is the standing worry about how often that
     succeeds, and this makes it strictly worse. <strong>The weight is 3 and that 3 was
     arithmetic against the <em>old</em> footprint</strong>, chosen when the house was first
-    baked in and never measured since; <code>worldgen/BarnPoolInjector</code> and the
-    terminator pool are the only levers, and <code>bake-barn.py</code> prints the finished
-    size on every run if it needs checking. Nothing automated can answer this &mdash; it is
+    baked in and never measured since. Nothing automated can answer this &mdash; it is
     entirely about what the vanilla generator does with the piece &mdash; so it is a fresh
     world and a walk. <strong>The failure mode is silent:</strong> a homestead that has become
     rare looks exactly like a seed that happened not to roll one, and every villager test
     downstream of it (four jobs from four posts, one surname across five, five beds) is
-    blocked behind it. <code>wiki/verification.html</code> &sect;0-AC.</li>
+    blocked behind it. <code>wiki/verification.html</code> &sect;0-AC.
+    <br><strong>2026-09-18, one cause found and addressed, still unmeasured:</strong> the
+    piece carried a <em>single</em> street connector, which fixes its rotation completely
+    &mdash; it could only ever lie one way round against the road, 16 blocks out with 2 of
+    its 18 on one side of the road's line and 15 on the other, and a village house standing
+    in those 15 threw the piece out with no second arrangement to try. It now carries
+    <a href="villagers.html#three-connectors">three</a>, down the walk, so three of the four
+    rotations attach and the generator keeps whichever fits. That is a strictly better
+    chance and not a fix: <strong>the footprint is unchanged at 16&times;18</strong>, the
+    weight is untouched, and how often a plains village actually gets a homestead is still
+    a number nobody has. The walk is what to check &mdash; whichever end the road meets, the
+    path should run from it past the hitch, the door, the four posts and the bench.</li>
 
 <li id="gap-268"><strong>Open, found 2026-09-17: an aggressive horse under a rider will not go to its target &mdash; only the buck half of the rule works.</strong>
     The owner's call when the aggression locus was built was that a saddle is no

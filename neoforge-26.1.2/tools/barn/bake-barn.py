@@ -24,8 +24,9 @@ compensate (see `worldgen/BarnPoolInjector`).
 What the bake adds that a structure-block save cannot carry:
 
   * a ground course under the whole homestead, carrying the path at road level,
-  * a jigsaw block on the barn's west face in the foundation course, so the
-    village generator can attach the piece to a plains-village street connector,
+  * three jigsaw blocks down the walk in the foundation course, so the village
+    generator can attach the piece to a plains-village street connector - and
+    can choose which way round to lay it down,
   * headroom over the barn's doorways, so a big horse can path through them,
   * the house beside the barn - widened, deepened, re-furnished, jigsaws
     resolved,
@@ -520,12 +521,50 @@ for z in range(size[2]):
     put(grid, (WALK_X, 0, z), PATH)
 
 # ================================================= the barn's own fixings
-# ---- the jigsaw connector -------------------------------------------------
-# It sits in the walk column, level with the barn's north pair of doors; the
-# generator rotates the whole piece so this ends up facing back at whichever
-# street connector it attached to. It used to sit in the barn's west face, and
-# moved out with the walk - the position it needs is the piece's own west edge,
-# which is now this column rather than the building.
+# ---- the jigsaw connectors ------------------------------------------------
+# THREE of them, all in the walk column, and the reason is that one was costing
+# the homestead most of its chances to generate.
+#
+# A jigsaw pair fixes the piece's rotation completely: the generator turns the
+# candidate until its connector faces back at the street connector it is
+# attaching to, and for a piece with ONE connector exactly one of the four
+# rotations does that. So the homestead always landed the same way round
+# relative to the road - 16 blocks straight out, 2 blocks to one side of the
+# road's line and 15 to the other, every single time. If those 15 blocks had a
+# village house in them, the piece was thrown out and the slot fell through to a
+# vanilla terminator; there was no second arrangement for the generator to try.
+#
+# With a connector on three faces, three of the four rotations attach, so the
+# generator gets three shots per slot and keeps whichever one fits the ground it
+# has. `JigsawPlacement` shuffles the rotations, so which one it settles on is
+# not biased - it is whichever of the three is tried first and clears the free
+# space test.
+#
+# They all sit in the walk column because the walk is the approach. Whichever
+# end the road meets, it meets the path that runs down the front of both
+# buildings, past the hitch, the door, the four posts and the bench:
+#
+#   west, at z=2   the road comes at the barn's north doors head-on, the walk
+#                  runs left and right from where you step off it
+#   north, at z=0  the road meets the top of the walk; you come down past the
+#                  barn and then the house
+#   south, at z=17 the road meets the foot of the walk; the same approach from
+#                  the other end, house first
+#
+# A connector in the middle of the north or south face instead would be a road
+# running into the barn's own wall, with no way in - the walk column is the only
+# column of the piece a street may legitimately arrive at.
+#
+# Nothing else about the piece changes, and nothing about the box changes: it is
+# 16x18 whichever way it goes down. The unused connectors are replaced by their
+# final_state with the used one (`JigsawReplacementProcessor` runs over the
+# whole piece), so a placed homestead has no jigsaw blocks left in it.
+#
+# Checked against `JigsawPlacement` before adding them: the expansion hack that
+# villages switch on (`use_expansion_hack: true`) only fires for a connector
+# whose forward neighbour is INSIDE the candidate's own box, and all three of
+# these face out of it, so `expandTo` stays 0 and none of them grows the
+# bounding box the fit is tested against.
 #
 # The barn's foundation course, and nothing else. A jigsaw pair lands the two
 # blocks at the same world height, and the street connector it meets sits at the
@@ -547,19 +586,29 @@ for z in range(size[2]):
 # and it has to stay air: `JigsawReplacementProcessor` swaps the jigsaw out
 # during placement, so a solid final_state here would be a block sitting on the
 # walk and would tick the path under it back to dirt.
-JIGSAW_POS = (WALK_X, GROUND, 2)
-final_state = at(grid, JIGSAW_POS)
-assert final_state == AIR, 'final_state would cover the walk'
-put(grid, JIGSAW_POS, 'minecraft:jigsaw[orientation=west_up]', T_cmp({
-    'id': T_str('minecraft:jigsaw'),
-    'name': T_str('minecraft:street'),
-    'target': T_str('minecraft:street'),
-    'pool': T_str('minecraft:empty'),
-    'joint': T_str('aligned'),
-    'final_state': T_str(final_state),
-    'selection_priority': T_int(0),
-    'placement_priority': T_int(0),
-}))
+#
+# The z of each is derived rather than written down: the two end ones have to be
+# the actual ends of the walk, so they track size[2] and move with any change to
+# how deep the piece is.
+JIGSAWS = [
+    ((WALK_X, GROUND, 2), 'west_up'),              # head-on at the barn's north doors
+    ((WALK_X, GROUND, 0), 'north_up'),             # the top of the walk
+    ((WALK_X, GROUND, size[2] - 1), 'south_up'),   # the foot of it
+]
+for pos, orientation in JIGSAWS:
+    final_state = at(grid, pos)
+    assert final_state == AIR, \
+        'the %s connector at %s would cover the walk with %s' % (orientation, pos, final_state)
+    put(grid, pos, 'minecraft:jigsaw[orientation=%s]' % orientation, T_cmp({
+        'id': T_str('minecraft:jigsaw'),
+        'name': T_str('minecraft:street'),
+        'target': T_str('minecraft:street'),
+        'pool': T_str('minecraft:empty'),
+        'joint': T_str('aligned'),
+        'final_state': T_str(final_state),
+        'selection_priority': T_int(0),
+        'placement_priority': T_int(0),
+    }))
 
 # ---- headroom over the barn's doorways -----------------------------------
 # Minecraft's ground pathfinder does not measure a mob, it rounds it up:
@@ -643,7 +692,7 @@ w_payload(out, root)
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST,
       'size', size, 'palette', len(palette), 'blocks', len(blocks),
-      'jigsaw at', JIGSAW_POS, 'final_state', final_state,
+      'jigsaws', [(o, p) for p, o in JIGSAWS],
       'door headers cleared', cleared,
       'house interior x', IN_X, 'z', IN_Z,
       'beds', len(bed_rows), 'frontage z', (frontage[0], frontage[-1]),

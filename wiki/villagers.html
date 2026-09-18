@@ -700,13 +700,66 @@
 </p>
 
 <p>
-    The barn's own connector is a <code>minecraft:street</code> jigsaw on its west
-    face, in the step in front of the north pair of doors. The generator rotates the
-    whole piece so that connector faces back at whatever it attached to.
+    The homestead carries <strong>three</strong> <code>minecraft:street</code> jigsaws,
+    all of them in the <a href="#barn">walk</a> column down its west edge: one facing
+    west in the step in front of the barn's north pair of doors, one facing north at
+    the top of the path, and one facing south at its foot. The generator rotates the
+    whole piece so that <em>one</em> of them faces back at whatever it attached to.
+</p>
+
+<h4 id="three-connectors">Why three, and what one was costing</h4>
+
+<p>
+    A jigsaw pair fixes a piece's rotation completely. The generator turns the
+    candidate until its connector faces back at the street connector, and for a piece
+    with <strong>one</strong> connector exactly one of the four rotations does that
+    &mdash; so the homestead always landed the same way round relative to the road:
+    sixteen blocks straight out, with <strong>two</strong> blocks of its width on one
+    side of the road's line and <strong>fifteen</strong> on the other, every single
+    time. If those fifteen blocks had a village house standing in them, the piece
+    failed the free-space test, the slot fell through to a vanilla terminator, and
+    there was no second arrangement for the generator to try.
 </p>
 
 <p>
-    It sits at <strong><code>y=0</code></strong> &mdash; the barn's own foundation
+    With a connector on three faces, three of the four rotations attach, so the
+    generator gets three attempts at the same slot and keeps whichever one clears the
+    ground it has. <code>JigsawPlacement</code> shuffles the rotations before trying
+    them, so which of the three it settles on is not biased.
+</p>
+
+<p>
+    They are all in the walk column because <strong>the walk is the approach</strong>.
+    Whichever end the road meets, it meets the path that runs down the front of both
+    buildings, past the hitch, the door, the four posts and the bench &mdash; head-on
+    at the barn doors, down from the top of the walk, or up from its foot with the
+    house first. A connector in the middle of the north or south face instead would be
+    a road running into the barn's own wall with no way in; the walk column is the only
+    column of the piece a street may legitimately arrive at.
+</p>
+
+<div class="note">
+    <span class="label">Two things checked in <code>JigsawPlacement</code> before adding them</span>
+    <p>
+        <strong>The box does not grow.</strong> Villages set
+        <code>use_expansion_hack: true</code>, which inflates a candidate's bounding box
+        to make room for children &mdash; but only for a connector whose forward
+        neighbour is <em>inside</em> the candidate's own box. All three of these face out
+        of it, so the expansion is zero and the fit is tested against the piece as drawn.
+    </p>
+    <p>
+        <strong>No stray jigsaw is left behind.</strong> Only one connector is used;
+        <code>JigsawReplacementProcessor</code> runs over the whole piece and swaps
+        every jigsaw block for its <code>final_state</code>, so a placed homestead has
+        none of them in it. All three resolve to air over the path, which is what the
+        walk needs &mdash; a solid one would sit on the path and tick it back to dirt.
+    </p>
+</div>
+
+<h4 id="connector-height">And all three at <code>y=0</code></h4>
+
+<p>
+    They sit at <strong><code>y=0</code></strong> &mdash; the barn's own foundation
     course &mdash; and getting that wrong is what sank the building. A jigsaw pair
     lands its two blocks at the <em>same world height</em>, and the street connector
     it meets is at the street piece's <code>y=1</code>, one <em>above</em> the road
@@ -727,10 +780,13 @@
 </p>
 
 <p>
-    The jigsaw block replaces one of those step blocks, so the bake reads whatever
-    was drawn there out of the source and writes it back as the jigsaw's
+    Each jigsaw block replaces whatever the bake had already laid in its cell, so the
+    bake reads that block back out of the grid and writes it as the jigsaw's
     <code>final_state</code> &mdash; no hand-copied block state to go stale, and
-    re-exporting the barn with something else in that spot just works.
+    re-drawing the piece with something else in one of those spots just works. In the
+    walk column that block is air above the path, and the bake asserts it: a solid
+    <code>final_state</code> there would be a block standing on the walk, and
+    <code>DirtPathBlock</code> does not survive a solid block overhead.
 </p>
 
 <p>
@@ -754,8 +810,16 @@
         tightest on. <code>bake-barn.py</code> prints the finished size on every run, and
         it is larger than the size the weight was tuned against.
         <strong>Nobody has confirmed the homestead still generates at all</strong> since
-        then &mdash; see <a href="known-gaps.html#gap-270">gap 270</a>. If it has got rare,
-        the levers are <code>BarnPoolInjector</code>'s weight and nothing else.
+        then &mdash; see <a href="known-gaps.html#gap-270">gap 270</a>.
+    </p>
+    <p>
+        The lever taken was <a href="#three-connectors">the two extra connectors</a>, and
+        not the weight. The two are not equivalent and the difference is worth keeping
+        straight: <strong>weight buys more draws of a piece that may not fit, orientation
+        buys more ways for the same draw to fit.</strong> Raising the weight further would
+        also crowd out the vanilla terminators it shares the pool with, which is a change
+        to the look of every plains village and not just to ours. So reach for the bake
+        first; <code>BarnPoolInjector</code>'s 3 is the lever of last resort.
     </p>
 </div>
 
