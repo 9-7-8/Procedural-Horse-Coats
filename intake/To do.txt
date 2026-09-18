@@ -15,4 +15,6 @@ add this mod as something strongly recommended to be run with this mod: https://
 
 the horseman should sell breed spawn eggs that are from the same countries that their connected cowboy can sell horses from. 
 
+the amount that a horse eats should be derived from the scale of their body-- bigger horses eat more frequently. 
+
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
