@@ -1,0 +1,6 @@
+Your SVG has six colours, so I built the gene; the earlier Endless Knotwork file came from the wrong upload and can be discarded.
+
+ELEMENT   The veins' single shared direction: in the reference they stream diagonally down-left in parallel.
+SHIPPED   A ridged FRACTAL with warp 0.8. The veins fork and wander correctly but run in every direction. A viewer sees marbling where the source has a current.
+WHY NOT   FRACTAL samples isotropic noise, so no threshold, warp or octave setting gives it a grain. STROKES has an axis, but it draws separate tapering lines. It cannot draw a web whose ridges also bound the pools, and it has no nested tones on one field. SPOTS gets ovals only because `stretch` divides the sample before the lattice walk. FRACTAL has no equivalent, so this is a missing measurement, not missing tuning.
+PROPOSAL  New parameters on FRACTAL: `stretch`=1 (number), `axis`(X|Y|Z), `tilt`=0 (degrees, rotation of the stretch axis in the plane perpendicular to the part's long axis). At a texel it samples the field at the body-space point divided by `stretch` along the tilted axis before the octave sum. Coverage 0 and 1 mean what they mean now. The closest existing mask is SPOTS `stretch`/`axis`. The one thing this adds is directional grain for a continuous noise field, which SPOTS cannot give because it only elongates countable marks.

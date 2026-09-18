@@ -1,0 +1,407 @@
+{
+  "format": 3,
+  "key": "horsegenetics.stormvein",
+  "name": "Stormvein",
+  "phase": "magical",
+  "priority": 163,
+  "rarity": "RARE",
+  "blurb": "The whole horse is marbled electric violet, shot through with forking cyan veins, with pools of its own coat showing through.",
+  "notes": [
+    "Source: a six-colour posterised trace (image_1_.svg). The darkest purple (#170250) was ignored as asked, so those regions are BARE COAT - the dark pools - and the other five colours map to the five layers in the trace's own lightness order: #4a0999 rim, #6415f5 field, #53daf7 vein edge, #a6f3f9 vein, #d0dff8 vein core.",
+    "The trace was not pasted as an SVG mask. It is a texture rather than a drawing: about four hundred quadratic-curve subpaths, which flatten far past the SVG point ceiling, and simplifying them to fit would erase the fine vein detail that is the point. An SVG is also the same on every horse and would need three projections with seams at every box edge to cover the whole body. The marbling is instead rebuilt from body-space FRACTAL fields, which cross part seams with no join and so reach the head, legs, mane and tail as one pattern, and which differ per horse through the two seed knobs.",
+    "Pools and field share one fbm field (blobSeed, scale 5): the field is that field below 0.60, the rim is the band 0.52-0.60 just inside it, next to the pools. Keep those three numbers moving together - the rim is only a rim while its upper edge equals the field's threshold.",
+    "Veins are a separate ridged field (veinSeed, scale 7, 2 octaves, warp 0.8 for wander rather than extra octaves). The three vein tones are the SAME field at rising thresholds (0.68, 0.78, 0.88), so they nest edge-to-core, and each is multiplied by the field mask so no vein crosses a bare pool. Layers 2-5 set over: true so each tone stacks on the one below; without it the near-white core would sum with the cyan and flatten.",
+    "The reference's veins stream diagonally in one direction. FRACTAL is isotropic, so here they wander in every direction; see the tool gap filed with this gene.",
+    "The core threshold of 0.88 at softness 0.04 is near filament width and may break into a dotted line in places; that is close to how sparse the near-white is in the trace. If it vanishes entirely on a bake, drop it to 0.85.",
+    "Two forms, not three: the violet-and-cyan palette is the idea, so a grey version would be a different marking. The coloured form takes two hue knobs because there is no way to set the vein hue as an offset from the field hue.",
+    "Priority 163: a whole-coat ground, so low in the order and under anything smaller.",
+    "Founders are placeholders; run intake/tools/founders.py to budget them from the RARE tier. Svc/n is omitted as a carrier-only pair."
+  ],
+  "alleles": [
+    {
+      "token": "Svn",
+      "label": "Stormvein (Svn)"
+    },
+    {
+      "token": "Svc",
+      "label": "Stormvein, coloured (Svc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "blobSeed",
+      "type": "seed"
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "fieldHue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "veinHue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "storm",
+      "name": "Stormvein",
+      "description": "Electric violet marbling over the whole horse, rimmed dark around pools of bare coat and veined with forking cyan that brightens to white at its core.",
+      "when": [
+        "Svn/Svn",
+        "Svn/Svc",
+        "Svn/n"
+      ],
+      "layers": [
+        {
+          "name": "violet field - everything but the bare pools",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6415f5",
+            "strength": 90
+          }
+        },
+        {
+          "name": "dark violet rim round each bare pool",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.52,
+              "softness": 0.04
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#4a0999",
+            "strength": 90
+          }
+        },
+        {
+          "name": "cyan vein edge",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$veinSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.8,
+              "shape": "ridged",
+              "threshold": 0.68,
+              "softness": 0.08,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#53daf7",
+            "strength": 95
+          }
+        },
+        {
+          "name": "pale cyan vein",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$veinSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.8,
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#a6f3f9",
+            "strength": 95
+          }
+        },
+        {
+          "name": "near-white vein core",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$veinSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.8,
+              "shape": "ridged",
+              "threshold": 0.88,
+              "softness": 0.04,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d0dff8",
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Stormvein",
+      "description": "The same marbling in two colours the line carries, one for the field and one for the veins. Fully recessive.",
+      "when": [
+        "Svc/Svc"
+      ],
+      "layers": [
+        {
+          "name": "violet field - everything but the bare pools",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$fieldHue",
+            "saturation": 0.85,
+            "lightness": 0.5,
+            "strength": 90
+          }
+        },
+        {
+          "name": "dark violet rim round each bare pool",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.52,
+              "softness": 0.04
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$fieldHue",
+            "saturation": 0.85,
+            "lightness": 0.3,
+            "strength": 90
+          }
+        },
+        {
+          "name": "cyan vein edge",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$veinSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.8,
+              "shape": "ridged",
+              "threshold": 0.68,
+              "softness": 0.08,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$veinHue",
+            "saturation": 0.9,
+            "lightness": 0.65,
+            "strength": 95
+          }
+        },
+        {
+          "name": "pale cyan vein",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$veinSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.8,
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$veinHue",
+            "saturation": 0.85,
+            "lightness": 0.8,
+            "strength": 95
+          }
+        },
+        {
+          "name": "near-white vein core",
+          "over": true,
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$blobSeed",
+              "scale": 5.0,
+              "octaves": 3,
+              "warp": 0.5,
+              "shape": "fbm",
+              "threshold": 0.6,
+              "softness": 0.04,
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$veinSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.8,
+              "shape": "ridged",
+              "threshold": 0.88,
+              "softness": 0.04,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$veinHue",
+            "saturation": 0.6,
+            "lightness": 0.9,
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marbling.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Svn/Svn": 0.004,
+    "Svn/Svc": 0.006,
+    "Svn/n": 0.08,
+    "Svc/Svc": 0.006,
+    "n/n": 99.904
+  }
+}
