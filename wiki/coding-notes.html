@@ -152,6 +152,112 @@
     Java is correct, and a bug introduced into both at once is invisible to it forever.
 </p>
 
+<h2 id="sources-lie">The decompiled sources jar is not the API &mdash; <code>javap</code> the real one</h2>
+
+<p>
+    <code>neoforge-26.1.2/build/moddev/artifacts/minecraft-patched-&lt;version&gt;-sources.jar</code>
+    is the obvious place to look up a vanilla signature, and it is right almost all of the
+    time. <strong>Almost.</strong> On 2026-09-18 it showed
+</p>
+
+<pre><code class="language-java">public class BannerFlagModel extends Model&lt;Float&gt; {
+    public final ModelPart flag;</code></pre>
+
+<p>
+    &hellip;and on the strength of that, an access-transformer line widening
+    <code>BannerFlagModel.flag</code> was deleted as redundant. It is <strong>private in the
+    jar the compiler actually reads</strong>, and the deletion cost two compile errors. The
+    line is back, with a comment on it saying the sources lie about this field so nobody
+    tidies it away twice.
+</p>
+
+<p>
+    Treat the sources jar as a <em>readable</em> copy, good for understanding what a method
+    does and for finding the name of something you half-remember. When the question is
+    <strong>"what exactly can I call, and is it public"</strong>, ask the compiled artefact:
+</p>
+
+<pre><code class="language-bash"># the class you are compiling against
+javap -cp neoforge-26.1.2/build/moddev/artifacts/minecraft-patched-26.1.2.100.jar \
+      net.minecraft.client.color.block.BlockTintSource
+
+# NeoForge's own classes are in a different jar entirely
+javap -cp ~/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/&lt;ver&gt;/&lt;hash&gt;/neoforge-&lt;ver&gt;-universal.jar \
+      'net.neoforged.neoforge.client.event.RegisterColorHandlersEvent$BlockTintSources'</code></pre>
+
+<p>
+    There is no <code>javap</code> on this machine's PATH &mdash; it lives in the JDK Gradle
+    provisioned, under <code>~/.gradle/jdks/</code>. A NeoForge inner class needs the
+    <code>$</code> form, and single quotes in bash so the shell leaves it alone. The universal
+    jar carries no sources at all, so for NeoForge's own API <code>javap</code> is often the
+    <em>only</em> answer available without a network.
+</p>
+
+<div class="note">
+    <span class="label">Three more from the same afternoon</span>
+    <p>
+        All four of these compiled fine in a version that did not have them, which is to say
+        they were guesses from memory of an older Minecraft and the compiler was the only
+        thing that said so:
+        <code>BannerModel.getChildPart</code> (it is <code>Model.root().getChild(&hellip;)</code>),
+        <code>ItemNameBlockItem</code> (gone &mdash; vanilla builds <code>wheat_seeds</code> as a
+        plain <code>BlockItem</code> with <code>useItemDescriptionPrefix()</code>),
+        <code>BlockBehaviour.Properties.noCollission</code> (one <em>s</em>), and
+        <code>RegisterColorHandlersEvent.Block</code> (it is <code>BlockTintSources</code>, and
+        it takes a <strong>list</strong> of one-method <code>BlockTintSource</code> rather than
+        the per-tint-index lambda older versions took).
+    </p>
+    <p>
+        The cheap habit: when writing against a vanilla or NeoForge class this repo has never
+        touched before, <code>javap</code> it <em>first</em>. It costs one command and it is
+        faster than a compile round-trip, let alone four.
+    </p>
+</div>
+
+<h2 id="mixin-inherited">A mixin cannot inject into a method the target class does not declare</h2>
+
+<p>
+    <code>HorseTwoRidersMixin</code> injected at the head of
+    <code>AbstractHorse.canAddPassenger</code>. It compiled. Every check was green &mdash;
+    <code>check-recipes</code>, <code>check-progress-tasks</code>, <code>check-links</code>,
+    the unit tests, the full <code>build</code>. The <strong>server refused to boot</strong>:
+</p>
+
+<pre><code>Critical injection failure: @Inject annotation on horsegenetics$allowPillion
+could not find any targets matching 'canAddPassenger' in AbstractHorse</code></pre>
+
+<p>
+    <code>AbstractHorse</code> does not declare it. The method is on <code>Entity</code>, four
+    classes up, and <strong>a mixin injector can only target a method the target class
+    actually has</strong> &mdash; inheritance does not count, because there is no bytecode in
+    <code>AbstractHorse</code> to inject into.
+</p>
+
+<p>
+    Two ways out. Mixin into the class that <em>does</em> declare it &mdash; here
+    <code>Entity</code>, the hottest class in the game and one the
+    <a href="api-notes.html">access-transformer file</a> already argues against touching &mdash;
+    or <strong>add the override to the subclass from the mixin</strong>, which is what
+    <code>CartHorseMixin</code> already does for <code>maxUpStep</code>. The second is
+    correct whenever the method is small enough to reimplement:
+    <code>canAddPassenger</code>'s entire vanilla body is
+    <code>this.passengers.isEmpty()</code>, so generalising it to "fewer than one, or two if
+    this horse is strong enough" is one expression and needs no cross-hierarchy
+    <code>super</code> call for mixin to rewrite.
+</p>
+
+<div class="note warn">
+    <span class="label">Only <code>runServer</code> finds this class of error</span>
+    <p>
+        A mixin's targets are resolved when the class is transformed at load, not when it is
+        compiled. So a wrong target, a wrong descriptor, a wrong injection point and a
+        <code>@Shadow</code> on a field that does not exist are all <strong>invisible to the
+        entire check suite</strong> and fatal at startup. This is the concrete reason
+        <a href="verification.html">the routine</a> says boot a server before tagging &mdash;
+        it is not a formality, it is the only test that runs the mixins at all.
+    </p>
+</div>
+
 <h2 id="refusals">Scan the corpus before adding a refusal</h2>
 
 <p>
