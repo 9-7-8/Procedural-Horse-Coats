@@ -66,20 +66,33 @@ import java.util.List;
  * now are the other one, and they are the cheaper of the two: weight buys more
  * <i>draws</i> of a piece that may not fit, orientation buys more <i>ways for
  * the same draw to fit</i>. Reach for a bake change before reaching for the
- * number here.
+ * number here - and before either, run the census, because the last time this
+ * was reasoned about rather than counted the reasoning was out by a factor of
+ * five.
  *
- * <h2>Frequency</h2>
+ * <h2>Frequency - measured, not reasoned</h2>
  * Weight 3 against the four vanilla terminators of weight 1 each, so roughly
- * three terminator slots in seven. That is not how often it appears: a village
- * has a handful of terminator slots, and the piece is the better part of a
- * chunk square where a terminator is 2x3, so most of the draws that pick it
- * then fail the bounding-box check and fall through to a small terminator
- * instead. The weight is set high to compensate for exactly that - it was 1
- * when the piece carried the barn alone, and taking the house in roughly
- * doubled the ground it has to find. It has since gained a column for the
- * walk along the front, which costs it a little more again. The net effect aimed at is "most plains villages,
- * where there was room". A village that rolls two barns gets two barns; only
- * the first grows a cowboy (see {@code CowboyHandler}).
+ * three terminator slots in seven, and a village has several slots.
+ *
+ * <p>Everything this paragraph used to say after that was wrong, and wrong in
+ * the pessimistic direction: it argued that a piece the better part of a chunk
+ * square, squeezed into a slot vanilla sizes for a 2x3 stub, must fail the
+ * bounding-box check on most of the draws that pick it, and that the homestead
+ * was therefore in danger of being rare or gone. <b>It never was.</b> Counted
+ * over 265 plains villages (see {@code gametest/ModGameTests} and
+ * {@link HomesteadCensus}), the homestead reached <b>93.2%</b> of them on the
+ * single-connector piece and <b>98.9%</b> on the three-connector one. Several
+ * slots at three-sevenths each is simply a lot of chances, and losing one to a
+ * neighbouring house costs the village nothing as long as another slot takes
+ * it.
+ *
+ * <p>So the weight is not doing the work it was raised to do, and it is not
+ * the number to reach for. It is also not free to raise: the pool is shared
+ * with vanilla's four terminators, and crowding them out changes the look of
+ * every plains village and not just ours.
+ *
+ * <p>A village that rolls two barns gets two barns; only the first grows a
+ * cowboy (see {@code CowboyHandler}).
  */
 @EventBusSubscriber
 public final class BarnPoolInjector {

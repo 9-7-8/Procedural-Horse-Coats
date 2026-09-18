@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.gametest;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
+import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -102,6 +103,81 @@ public final class ModGameTests {
         });
     }
 
+    /**
+     * <b>The cowboy's homestead still wins village slots.</b> The piece is
+     * 16x18 going into a terminator pool vanilla fills with 2x3 stubs, so the
+     * bounding-box check is the thing most likely to have quietly stopped
+     * passing - and the failure is silent, because a homestead that has become
+     * rare looks exactly like a seed that did not roll one.
+     *
+     * <p><b>It was not rare, and this is how that was settled.</b> The worry had
+     * been written down three times as unanswerable without a fresh world and a
+     * walk. It is a real measurement instead: {@link HomesteadCensus} runs the
+     * village generator over a run of seeds and reads the finished piece lists,
+     * without generating a chunk. The assertion is a <b>floor</b> and a
+     * deliberately loose one - a guard against the piece falling off a cliff,
+     * not a pin holding a rate steady, because a worldgen number pinned exactly
+     * gets deleted the first time somebody moves a wall.
+     *
+     * <p>The sample is small so the suite stays quick. For a real count, raise
+     * it: {@code PHC_CENSUS_SEEDS} and {@code PHC_CENSUS_VILLAGES} are read
+     * from the environment, so a few hundred villages is one run of
+     * {@code runGameTest} with a variable in front of it, and the breakdown
+     * lands in the log either way.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HOMESTEAD_STILL_GENERATES =
+            TEST_FUNCTIONS.register("homestead_still_generates", () -> ModGameTests::homesteadStillGenerates);
+
+    /** Small enough to keep the suite quick; see the note about the environment overrides. */
+    private static final int CENSUS_SEEDS = 6;
+    private static final int CENSUS_VILLAGES_PER_SEED = 6;
+
+    /**
+     * The floor, set well under what was measured, because what this is
+     * protecting against is the rate falling off a cliff - and a test that
+     * fails on ordinary drift is a test whose number gets edited rather than
+     * read.
+     *
+     * <p><b>Measured 2026-09-18</b>, 40 seeds and 265 plains villages, the same
+     * villages both times: <b>93.2%</b> with the piece's original single
+     * connector, <b>98.9%</b> with three. Both numbers are the surprise. The
+     * standing worry was that the homestead had become rare or stopped
+     * generating altogether, and it never had - see
+     * {@code wiki/villagers.html#measured}.
+     */
+    private static final double CENSUS_FLOOR = 0.75;
+
+    private static void homesteadStillGenerates(GameTestHelper helper) {
+        int seeds = fromEnv("PHC_CENSUS_SEEDS", CENSUS_SEEDS);
+        int villages = fromEnv("PHC_CENSUS_VILLAGES", CENSUS_VILLAGES_PER_SEED);
+
+        HomesteadCensus.Result result = HomesteadCensus.run(helper.getLevel().getServer(), seeds, villages);
+        HorseGenetics.LOGGER.info("[census] homestead in plains villages: {}", result.line());
+
+        if (result.villages() == 0) {
+            helper.fail("the census found no plains villages at all - the harness is broken, not the piece");
+        }
+        if (result.rate() < CENSUS_FLOOR) {
+            helper.fail(String.format(
+                    "the homestead is down to %.1f%% of plains villages (floor %.0f%%): %s",
+                    result.rate() * 100.0, CENSUS_FLOOR * 100.0, result.line()));
+        }
+        helper.succeed();
+    }
+
+    private static int fromEnv(String name, int fallback) {
+        String raw = System.getenv(name);
+        if (raw == null || raw.isBlank()) {
+            return fallback;
+        }
+        try {
+            return Math.max(1, Integer.parseInt(raw.trim()));
+        } catch (NumberFormatException e) {
+            HorseGenetics.LOGGER.warn("[census] {} is not a number: {}", name, raw);
+            return fallback;
+        }
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -124,6 +200,11 @@ public final class ModGameTests {
                         new TestEnvironmentDefinition.AllOf(java.util.List.of()));
         register(event, environment, HARNESS_REACHES_THE_WORLD, 100);
         register(event, environment, DOUBLE_GATE_REDSTONE, 100);
+        // The census is one synchronous burst of worldgen arithmetic inside a
+        // single tick, so its tick budget is not what bounds it - the sample
+        // size is. The generous number is for the environment overrides, which
+        // are meant to be raised a long way.
+        register(event, environment, HOMESTEAD_STILL_GENERATES, 400);
     }
 
     private static void register(RegisterGameTestsEvent event,
