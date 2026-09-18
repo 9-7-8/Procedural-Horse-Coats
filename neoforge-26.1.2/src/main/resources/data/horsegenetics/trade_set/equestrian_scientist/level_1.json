@@ -1,0 +1,10 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_scientist/level_1/buy_carrot",
+    "horsegenetics:equestrian_scientist/level_1/sell_vet_kit",
+    "horsegenetics:equestrian_scientist/level_1/sell_stabilizer",
+    "horsegenetics:equestrian_scientist/level_1/sell_magnifier"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_scientist/level_1"
+}

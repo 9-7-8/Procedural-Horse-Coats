@@ -44,7 +44,7 @@ import java.util.List;
  *
  * <h2>Why the pictures are entities and items, not art</h2>
  * Everything illustrated here is drawn from the game: item stacks through the
- * item renderer, and the horseman and the cowboy as real entities
+ * item renderer, and the equestrian and the cowboy as real entities
  * ({@link TutorialPortraits}). Nothing has to be exported, nothing goes stale
  * when a texture changes, and a resource pack the player has on is reflected -
  * which matters most for exactly the case this page exists for, somebody trying
@@ -73,7 +73,7 @@ public final class TutorialPage {
     /** One illustration beside a step. */
     public enum Art {
         NONE,
-        HORSEMAN,
+        EQUESTRIAN,
         COWBOY
     }
 
@@ -165,8 +165,8 @@ public final class TutorialPage {
                                 + "horses somebody else bred. They are worth finding: the animals in "
                                 + "them are better than anything wandering loose, and nothing whatever "
                                 + "stops you simply taking them.",
-                        "If your own corner of the world will not give you a breed, the horseman "
-                                + "sells breed spawn eggs from his middle ranks - one right-click, one "
+                        "If your own corner of the world will not give you a breed, the equestrian "
+                                + "scientist sells breed spawn eggs from his middle ranks - one right-click, one "
                                 + "foundation horse of that breed, and a line to build from."),
                 List.of(new ItemStack(ModItems.BREED_SPAWN_EGG.get())), Art.NONE,
                 List.of(ProgressTask.DISCOVER_BREED, ProgressTask.BREED_EGG)));
@@ -604,7 +604,7 @@ public final class TutorialPage {
 
         breeding.add(new Step("Reading a mare with a vet's kit",
                 List.of("A vet's kit is shears, leather and an iron ingot, and it lasts sixty-four "
-                                + "procedures. The horseman sells them too.",
+                                + "procedures. The equestrian scientist sells them too.",
                         "Use it on a mare and she tells you where she is: in heat, and whether this is "
                                 + "the better half of it; out of heat, and how long until the next one; "
                                 + "pregnant, and how long to go; or newly foaled and waiting on her "
@@ -655,7 +655,7 @@ public final class TutorialPage {
                                 + "spent whether or not it takes, because it was a real attempt.",
                         "The mare has to be yours. The stallion does not, and that is the point - a "
                                 + "jar that changes hands is how a bloodline travels between players. "
-                                + "The horseman buys filled ones."),
+                                + "The equestrian scientist buys filled ones."),
                 List.of(new ItemStack(ModItems.EMPTY_SEED_JAR.get()),
                         new ItemStack(ModItems.STALLION_SEED_JAR.get())), Art.NONE,
                 List.of(ProgressTask.FILL_SEED_JAR, ProgressTask.USE_SEED_JAR)));
@@ -959,20 +959,28 @@ public final class TutorialPage {
         // ------------------------------------------------------------------
         List<Step> people = new ArrayList<>();
 
-        people.add(new Step("The horseman",
-                List.of("The horseman is a villager with a job you will not have seen before. Put a "
-                                + "Horseman's Table down near one who has no work and they will take "
-                                + "it.",
-                        "He buys horse hair from his first day, which makes him the easiest early "
-                                + "trade in the mod, and works up through rope and cloth. He sells "
-                                + "tack, a whistle and blank tickets early on, then vet's kits, then "
-                                + "breeding carrots and breed spawn eggs - and at the top of his trade "
-                                + "he deals in research papers and buys filled seed jars.",
+        people.add(new Step("The four equestrians",
+                List.of("Four villagers with jobs you will not have seen before, one post each. Put a "
+                                + "post down near a villager who has no work and they will take it.",
+                        "The Leatherworker sells tack - a saddle and leather horse armour - and dyes "
+                                + "it more exotically the higher his tier: plain bone and flower "
+                                + "colours at first, lapis blue with diamond fittings at the top. The "
+                                + "Metalsmith sells horse armour in metal and crystal and nothing "
+                                + "else.",
+                        "The Scientist deals in breeding carrots, the vet's kit and breed spawn eggs, "
+                                + "and buys filled seed jars off you; his best carrots name a rare "
+                                + "gene twice over, so a foal is certain to get it. The Supplier is "
+                                + "the general store - carrots, leads, whistles, tickets, papers, an "
+                                + "empty seed jar - and buys horse hair from his first day, which "
+                                + "makes him the easiest early trade in the mod.",
                         "Buying a paper is not the same as knowing the gene - see above - but it is "
                                 + "how you get one for a horse you have never met."),
-                List.of(new ItemStack(ModItems.HORSEMANS_TABLE.get()),
-                        new ItemStack(Items.EMERALD)), Art.HORSEMAN,
-                List.of(ProgressTask.TRADE_HORSEMAN)));
+                List.of(new ItemStack(ModItems.LEATHERWORKERS_POST.get()),
+                        new ItemStack(ModItems.SCIENTISTS_POST.get()),
+                        new ItemStack(ModItems.METALSMITHS_POST.get()),
+                        new ItemStack(ModItems.SUPPLIERS_POST.get()),
+                        new ItemStack(Items.EMERALD)), Art.EQUESTRIAN,
+                List.of(ProgressTask.TRADE_EQUESTRIAN)));
 
         people.add(new Step("The cowboy",
                 List.of("The cowboy is not a villager at all, and has no profession. A Cowboy Hitch "
@@ -1040,7 +1048,7 @@ public final class TutorialPage {
         if (step.art() != Art.NONE) {
             int artX = x + w - ART;
             switch (step.art()) {
-                case HORSEMAN -> TutorialPortraits.drawHorseman(g, artX, textTop, ART, mouseX, mouseY);
+                case EQUESTRIAN -> TutorialPortraits.drawEquestrian(g, artX, textTop, ART, mouseX, mouseY);
                 case COWBOY -> TutorialPortraits.drawCowboy(g, artX, textTop, ART, mouseX, mouseY);
                 default -> {
                 }

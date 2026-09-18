@@ -47,18 +47,18 @@ public final class BreedPool {
 
     /**
      * The same draw, narrowed to <b>one region's countries</b> - what the
-     * horseman's breed egg trades use, so that the eggs on his counter come from
+     * scientist's breed egg trades use, so that the eggs on his counter come from
      * the same part of the world as the horses his
      * <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/breeds.html#regions">cowboy</a>
      * sells. A {@code null} region draws from everywhere, which is what a
      * dungeon chest does: a chest has no cowboy standing next to it.
      *
      * <p><b>An empty window is a real outcome here, not a bug.</b> Three of the
-     * ten regions have no breed at all in the commonest tier band, so a horseman
+     * ten regions have no breed at all in the commonest tier band, so a scientist
      * there returns {@code null}, the trade produces an empty stack, and vanilla
      * drops the offer - he simply has no common breed egg to sell. That is the
      * owner's call, taken over widening the band or falling back to the world
-     * pool: the alternative to a missing trade is a horseman selling a breed
+     * pool: the alternative to a missing trade is a scientist selling a breed
      * from the other side of the world, which is the one case a player would
      * notice the rule being broken.
      */

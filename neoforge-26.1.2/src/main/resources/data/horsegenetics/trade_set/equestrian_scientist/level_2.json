@@ -1,0 +1,10 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_scientist/level_2/buy_stallion_seed_jar",
+    "horsegenetics:equestrian_scientist/level_2/sell_epigenetic_splice",
+    "horsegenetics:equestrian_scientist/level_2/sell_gene_splice",
+    "horsegenetics:equestrian_scientist/level_2/sell_dilution_splice"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_scientist/level_2"
+}

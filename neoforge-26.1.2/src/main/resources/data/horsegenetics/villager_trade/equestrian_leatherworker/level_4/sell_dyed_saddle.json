@@ -1,0 +1,17 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 21
+  },
+  "gives": {
+    "id": "minecraft:saddle"
+  },
+  "max_uses": 2,
+  "xp": 10,
+  "given_item_modifiers": [
+    {
+      "function": "horsegenetics:set_tack_tint",
+      "palette": "deep"
+    }
+  ]
+}

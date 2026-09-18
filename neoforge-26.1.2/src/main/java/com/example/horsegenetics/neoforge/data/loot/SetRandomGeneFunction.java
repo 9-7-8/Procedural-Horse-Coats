@@ -1,5 +1,8 @@
 package com.example.horsegenetics.neoforge.data.loot;
 
+import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
@@ -25,8 +28,21 @@ import java.util.Locale;
  * { "function": "horsegenetics:set_random_gene",
  *   "target": "carrot",          // or "paper"
  *   "min_rarity": "common",      // optional, default common
- *   "max_rarity": "uncommon" }   // optional, default epic
+ *   "max_rarity": "uncommon",    // optional, default epic
+ *   "homozygous": true }         // optional, default false; carrots only
  * </pre>
+ *
+ * <h2>{@code homozygous}</h2>
+ * A {@code KnownGeneSplice} names <i>both</i> alleles of the gamete rather than
+ * carrying a boolean, so "the carrot that breeds true" is not a separate concept
+ * - it is the pair {@code X/X} instead of {@code n/X}. Normally which of the two
+ * a carrot gets is the gene's own call ({@code Gene.geneCarrotHomozygous}); this
+ * flag overrides it upward, and is what the scientist's master tier sells.
+ *
+ * <p><b>It cannot force a pair the gene forbids.</b> A locus whose homozygote is
+ * lethal - or that otherwise fails {@code Gene.canOccur} - would make an inert
+ * carrot, which is worse than not selling one, so such genes are skipped at the
+ * draw rather than sold and silently doing nothing.
  *
  * <h2>Why a loot function and not a custom trade class</h2>
  * Villager trades are datapack registries in this version, and a trade's
@@ -62,34 +78,63 @@ public class SetRandomGeneFunction extends LootItemConditionalFunction {
             i -> commonFields(i).and(i.group(
                     Which.CODEC.fieldOf("target").forGetter(f -> f.target),
                     RARITY_CODEC.optionalFieldOf("min_rarity", GeneRarity.COMMON).forGetter(f -> f.minRarity),
-                    RARITY_CODEC.optionalFieldOf("max_rarity", GeneRarity.EPIC).forGetter(f -> f.maxRarity)
+                    RARITY_CODEC.optionalFieldOf("max_rarity", GeneRarity.EPIC).forGetter(f -> f.maxRarity),
+                    Codec.BOOL.optionalFieldOf("homozygous", false).forGetter(f -> f.homozygous)
             )).apply(i, SetRandomGeneFunction::new));
 
     private final Which target;
     private final GeneRarity minRarity;
     private final GeneRarity maxRarity;
+    private final boolean homozygous;
 
     protected SetRandomGeneFunction(List<LootItemCondition> conditions,
-                                    Which target, GeneRarity minRarity, GeneRarity maxRarity) {
+                                    Which target, GeneRarity minRarity, GeneRarity maxRarity,
+                                    boolean homozygous) {
         super(conditions);
         this.target = target;
         this.minRarity = minRarity;
         this.maxRarity = maxRarity;
+        this.homozygous = homozygous;
+    }
+
+    /**
+     * Whether {@code gene} could hand over two copies of its variant allele.
+     * Asked before the draw, not after - see {@link GenePool#draw}.
+     */
+    private static boolean canBreedTrue(Gene gene) {
+        if (gene.alleles().isEmpty()) {
+            return false;
+        }
+        Allele variant = gene.alleles().get(0);
+        return gene.canOccur(new AllelePair(variant, variant));
     }
 
     @Override
     protected ItemStack run(ItemStack stack, LootContext context) {
-        Gene gene = GenePool.draw(context.getRandom(), minRarity, maxRarity);
+        Gene gene = GenePool.draw(context.getRandom(), minRarity, maxRarity,
+                homozygous ? SetRandomGeneFunction::canBreedTrue : g -> true);
         if (gene == null) {
             return ItemStack.EMPTY;
         }
         switch (target) {
             case PAPER -> stack.set(ModDataComponents.RESEARCH_GENE.get(), gene.key());
-            case CARROT -> stack.set(ModDataComponents.CARROT_EFFECTS.get(), List.of(
-                    com.example.horsegenetics.common.genetics.CarrotEffect
-                            .defaultSpliceFor(gene).id()));
+            case CARROT -> stack.set(ModDataComponents.CARROT_EFFECTS.get(),
+                    List.of(spliceFor(gene).id()));
         }
         return stack;
+    }
+
+    /**
+     * The pair the carrot names. {@code homozygous} overrides the gene's own
+     * {@code geneCarrotHomozygous} call upward - it never makes a carrot
+     * <i>less</i> certain than the gene would have.
+     */
+    private CarrotEffect spliceFor(Gene gene) {
+        if (!homozygous) {
+            return CarrotEffect.defaultSpliceFor(gene);
+        }
+        String variant = gene.alleles().get(0).token();
+        return new CarrotEffect.KnownGeneSplice(gene.key(), variant, variant);
     }
 
     @Override

@@ -1,0 +1,10 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_supplier/level_4/buy_hair_cloth",
+    "horsegenetics:equestrian_supplier/level_4/sell_common_paper",
+    "horsegenetics:equestrian_supplier/level_4/sell_echo_whistle",
+    "horsegenetics:equestrian_supplier/level_4/sell_stall_sign"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_supplier/level_4"
+}

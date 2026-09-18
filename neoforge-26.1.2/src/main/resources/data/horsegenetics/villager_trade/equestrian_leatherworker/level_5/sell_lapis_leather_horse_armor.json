@@ -1,0 +1,17 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 28
+  },
+  "gives": {
+    "id": "minecraft:leather_horse_armor"
+  },
+  "max_uses": 2,
+  "xp": 15,
+  "given_item_modifiers": [
+    {
+      "function": "horsegenetics:set_tack_tint",
+      "palette": "lapis"
+    }
+  ]
+}

@@ -561,7 +561,10 @@ final class DebugTestYard {
                 || state.is(Blocks.CAULDRON) || state.is(Blocks.WATER_CAULDRON)
                 || state.is(Blocks.LAVA_CAULDRON) || state.is(Blocks.POWDER_SNOW_CAULDRON)
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF.get())
-                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE.get())
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.LEATHERWORKERS_POST.get())
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.SCIENTISTS_POST.get())
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.SUPPLIERS_POST.get())
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.METALSMITHS_POST.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH.get());
     }
 

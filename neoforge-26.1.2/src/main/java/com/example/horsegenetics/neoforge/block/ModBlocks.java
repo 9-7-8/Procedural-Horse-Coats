@@ -17,16 +17,16 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *       {@code BlockItem}: it is never placed by hand, only by
  *       {@link com.example.horsegenetics.neoforge.server.HorsePortalManager}
  *       when a hay frame is lit with a golden carrot.</li>
- *   <li><b>{@code horsemans_table}</b> - the <b>horseman's</b> workstation, and
- *       the block behind the {@code horsegenetics:horsemans_table} POI. An
- *       ordinary placeable block; the POI is what turns an unemployed villager
- *       standing next to it into a horseman ({@code village/ModPoiTypes},
+ *   <li><b>the four <code>*_post</code> blocks</b> - one workstation per
+ *       equestrian, each behind a POI of the same name. Ordinary placeable
+ *       blocks; the POI is what turns an unemployed villager standing next to
+ *       one into that trade ({@code village/ModPoiTypes},
  *       {@code village/ModVillagerProfessions}).</li>
  *   <li><b>{@code cowboy_hitch}</b> - the <b>cowboy's</b> post, the same block
  *       with a different name and no POI at all. A cowboy is an entity rather
  *       than a profession, so there is nothing for one to claim;
- *       {@code server/CowboyHitchHandler} looks for the block instead. Both
- *       share one texture set on purpose - they are a pair.</li>
+ *       {@code server/CowboyHitchHandler} looks for the block instead. All five
+ *       share one texture set on purpose - they are a set.</li>
  * </ul>
  */
 public final class ModBlocks {
@@ -48,25 +48,40 @@ public final class ModBlocks {
                     .noLootTable());
 
     /**
-     * The <b>Horseman's Table</b> - the horseman's job site. A plain block whose
+     * The <b>four equestrians' posts</b> - one job site each. A plain block whose
      * only job is to exist at a position the POI system can index; the
      * profession, the trades and the acquisition rules are all elsewhere.
+     *
+     * <p>Four separate blocks rather than one shared post because a POI hands out
+     * exactly one profession - see {@code village/ModPoiTypes}. They are
+     * identical in every respect but their name and, for now, share the one post
+     * model and texture; making each look like the trade it belongs to is open
+     * work.
      */
-    public static final DeferredBlock<net.minecraft.world.level.block.Block> HORSEMANS_TABLE =
-            BLOCKS.registerSimpleBlock("horsemans_table", ModBlocks::workPost);
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> LEATHERWORKERS_POST =
+            BLOCKS.registerSimpleBlock("leatherworkers_post", ModBlocks::workPost);
+
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> SCIENTISTS_POST =
+            BLOCKS.registerSimpleBlock("scientists_post", ModBlocks::workPost);
+
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> SUPPLIERS_POST =
+            BLOCKS.registerSimpleBlock("suppliers_post", ModBlocks::workPost);
+
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> METALSMITHS_POST =
+            BLOCKS.registerSimpleBlock("metalsmiths_post", ModBlocks::workPost);
 
     /**
      * The <b>Cowboy Hitch</b> - the cowboy's post, and the same block in every
      * respect but its name.
      *
-     * <p>Two blocks rather than one because one block could not do both jobs.
-     * A single post had to hand out a cowboy and then a horseman by alternating,
-     * and the villager it converted took their job-site ticket with them - see
-     * {@code server/CowboyHitchHandler}. A post each is a great deal less clever
-     * and works.
+     * <p>A block of its own rather than a fifth equestrian post because one post
+     * could not do two jobs. A single post had to hand out a cowboy and then a
+     * shopkeeper by alternating, and the villager it converted took their
+     * job-site ticket with them - see {@code server/CowboyHitchHandler}. A post
+     * each is a great deal less clever and works.
      *
-     * <p>Neither of them <i>does</i> anything yet beyond marking a spot. Making
-     * them into real workstations - a hitch you tie a horse to, a table you work
+     * <p>None of them <i>does</i> anything yet beyond marking a spot. Making
+     * them into real workstations - a hitch you tie a horse to, a bench you work
      * leather at - is open work on the roadmap.
      */
     public static final DeferredBlock<net.minecraft.world.level.block.Block> COWBOY_HITCH =

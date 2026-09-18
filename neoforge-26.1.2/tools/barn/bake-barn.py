@@ -27,9 +27,11 @@ What the bake adds that a structure-block save cannot carry:
   * a jigsaw block on the barn's west face in the foundation course, so the
     village generator can attach the piece to a plains-village street connector,
   * headroom over the barn's doorways, so a big horse can path through them,
-  * the house beside the barn - widened, re-furnished, jigsaws resolved,
-  * the two work posts and the two villagers at the house's front door, and
-  * a chest either side of the beds.
+  * the house beside the barn - widened, deepened, re-furnished, jigsaws
+    resolved,
+  * the work posts and the bench down the house's frontage, with a villager
+    standing at each post, and
+  * the beds and the two chests inside it.
 
 The output is what ships. The inputs are kept only so the buildings can be
 edited in game and re-baked - do not point the mod at them.
@@ -253,14 +255,33 @@ for pos in [p for p in house if at(house, p).startswith('minecraft:white_bed')]:
     put(house, pos, AIR)
 put(house, (4, 1, 4), AIR)
 
+# ---- and so does the front door, for the length of the deepening ---------
+# The row the deepening duplicates is the door's own row - it is the only
+# cross-section of a hip roof that tiles, see DEEPEN_AT - so a door left in
+# place would come back once per copy, four doors down the west wall. Lift both
+# halves out first, fill the hole with the wall vanilla drew one row along (plain
+# cobblestone at both heights), and set the same two states back down at the
+# doorway once the building is its final depth.
+#
+# The pair is read out rather than written in: `hinge=right` and `facing=east`
+# are whatever the vanilla export says, and the door that goes back is the door
+# that came out.
+DOOR_POS = (1, 3)
+door_halves = {y: at(house, (DOOR_POS[0], y, DOOR_POS[1])) for y in (1, 2)}
+assert all('oak_door' in s for s in door_halves.values()), 'the door moved in the source'
+for y in door_halves:
+    put(house, (DOOR_POS[0], y, DOOR_POS[1]), at(house, (DOOR_POS[0], y, DOOR_POS[1] - 1)))
+
 # ---- one column wider ----------------------------------------------------
-# The vanilla cottage is three by three inside, which fits two beds and nothing
-# else. Four leaves a column either side of the pair for the chests. Done by
-# duplicating an interior column rather than by drawing a new house: every wall,
-# corner and roof stair stays exactly what vanilla drew, and the only thing that
-# changes is that the middle of the building is one longer. The roof gains a
-# short ridge where it used to come to a point, which is what a hip roof on a
-# rectangle looks like anyway.
+# The vanilla cottage is three by three inside: a bed takes two of the three
+# columns and what is left is a single-file squeeze past the end of it. Four is
+# the bed and a two-block aisle beside it - and the deepening below is what fills
+# that bed column with sleepers. Done by duplicating an interior
+# column rather than by drawing a new house: every wall, corner and roof stair
+# stays exactly what vanilla drew, and the only thing that changes is that the
+# middle of the building is one longer. The roof gains a short ridge where it
+# used to come to a point, which is what a hip roof on a rectangle looks like
+# anyway.
 WIDEN_AT = 3
 widened = {}
 for (x, y, z), cell in house.items():
@@ -271,6 +292,51 @@ for (x, y, z), cell in list(house.items()):
 house = widened
 house_size = [house_size[0] + 1, house_size[1], house_size[2]]
 
+# ---- and three rows deeper -----------------------------------------------
+# The same trick along z, for the same reason: duplicate a cross-section rather
+# than draw a longer house, so the hip roof, the eaves, the corner posts and the
+# gable windows stay exactly what vanilla drew.
+#
+# WHICH row is duplicated is not free choice, and this is the trap. At the top
+# course of the roof (y=6) vanilla's three rows are a south-sloping stair course
+# at z=2, the ridge at z=3, and a north-sloping stair course at z=4. Only z=3
+# tiles: copy it and the ridge simply gets longer, copy either of its neighbours
+# and the house grows a flat band of stairs all sloping the same way where the
+# roof should be. Read off the source the same way at every other height: y=4's
+# eave course and y=5's attic ring both run `stair, planks, void, planks, stair`
+# across z=3, which is a section that repeats, while their z=2 and z=4 rows are
+# solid and do not. So z=3 is the cross-section at all seven levels - and it is
+# also the door's row, which is the whole reason the door is lifted out above.
+#
+# THREE copies, and it is the frontage that sets the number, not the beds. The
+# west wall has to carry the hitch, the doorway, the four profession posts and
+# the bench standing side by side, which is eight columns of wall; vanilla's is
+# five. The interior that comes with eight is six rows deep, which is one row for
+# the chests and one row per sleeper - see the beds below.
+#
+# The cost is three more blocks of bounding box on the piece's long axis. That
+# is the thing most likely to stop the homestead generating, so it is bought for
+# the frontage and not spent on floor space nobody stands in.
+DEEPEN_AT = 3
+DEEPEN_BY = 3
+deepened = {}
+for (x, y, z), cell in house.items():
+    deepened[(x, y, z + DEEPEN_BY if z >= DEEPEN_AT else z)] = cell
+for (x, y, z), cell in list(house.items()):
+    if z == DEEPEN_AT:
+        for extra in range(DEEPEN_BY):
+            deepened[(x, y, z + extra)] = cell
+house = deepened
+house_size = [house_size[0], house_size[1], house_size[2] + DEEPEN_BY]
+
+# ---- the door goes back in ------------------------------------------------
+# At the same z it came out of: the copies land *after* DEEPEN_AT, so the row the
+# door was in is still the row at DEEPEN_AT, and the doorway stays where vanilla
+# put it relative to the front corner rather than sliding down the wall.
+assert DOOR_POS[1] == DEEPEN_AT, 'the deepened row is not the door row - the door would move'
+for y, state in door_halves.items():
+    put(house, (DOOR_POS[0], y, DOOR_POS[1]), state)
+
 # ---- bark back on the corner posts ---------------------------------------
 # Stripped oak in the vanilla house. Nothing else about a homestead beside a
 # stable is planed.
@@ -278,45 +344,117 @@ for pos, (state, nbt) in list(house.items()):
     if state.startswith('minecraft:stripped_oak_log'):
         put(house, pos, state.replace('stripped_oak_log', 'oak_log'), nbt)
 
-# ---- two beds side by side, a chest either side --------------------------
-# Interior is x=2..5, z=2..4 now. The beds take the middle two columns and run
-# away from the door, so walking in you get the length of them rather than the
-# ends; the chests take the columns either side of the pair.
-#
-# Heads to the back wall, feet to the door - which is the way round a bed is put
-# in a room, and the way round these two were not.
-for x in (3, 4):
-    put(house, (x, 1, 2), 'minecraft:white_bed[facing=north,occupied=false,part=head]')
-    put(house, (x, 1, 3), 'minecraft:white_bed[facing=north,occupied=false,part=foot]')
+# ---- where the inside of the house actually is ---------------------------
+# Read off the finished grid rather than counted up from WIDEN_AT and DEEPEN_BY
+# by hand. Vanilla floors the room in oak_planks and nothing else in the building
+# is oak_planks at the foundation course - the walls are cobblestone, the corners
+# are log - so the plank footprint at y=0 *is* the interior, and it is right by
+# construction however the two duplications are retuned.
+floor = [(x, z) for (x, y, z) in house
+         if y == 0 and at(house, (x, y, z)) == 'minecraft:oak_planks']
+IN_X = (min(x for x, _ in floor), max(x for x, _ in floor))
+IN_Z = (min(z for _, z in floor), max(z for _, z in floor))
 
+# ---- a bed per sleeper down the back wall, chests in the row behind -------
+# FIVE sleepers, because the frontage hands out five jobs: the cowboy from the
+# hitch, and the leatherworker, scientist, supplier and metalsmith from the four
+# posts. A villager who claims a job site and has no bed to go home to is a
+# villager who never sleeps and never restocks, so the bed count is not decor -
+# it is the other half of the post count, and the two are written down together.
+#
+# The beds run along x against the wall opposite the door, one per interior row,
+# so the row count IS the sleeper count and neither number is free to drift.
+# Heads to the back wall, feet to the door: the head takes the last interior
+# column before the east wall, the foot the one in front of it, and walking in
+# through the west door you get the feet and the length of the aisle.
+#
+# The one interior row the beds do not take is the row against the north wall,
+# the one you look down on walking in, and it stays the chest row - the two ends
+# of it are the only floor in the building with nothing sleeping on them.
+SLEEPERS = 5
+bed_rows = list(range(IN_Z[0] + 1, IN_Z[1] + 1))
+assert len(bed_rows) == SLEEPERS, \
+    'the house is %d rows deep inside, which sleeps %d - retune DEEPEN_BY' % (
+        IN_Z[1] - IN_Z[0] + 1, len(bed_rows))
+for z in bed_rows:
+    put(house, (IN_X[1], 1, z), 'minecraft:white_bed[facing=east,occupied=false,part=head]')
+    put(house, (IN_X[1] - 1, 1, z), 'minecraft:white_bed[facing=east,occupied=false,part=foot]')
+
+# One chest in each end of that row, so neither can be buried by a bed and both
+# keep their old place at the corners of the room. They do not face the same way:
+# the one on the aisle side looks south down the length of the room, and the one
+# on the bed side has a bed head immediately south of it, so it turns to look at
+# the open square beside it instead. Both are asserted, not eyeballed - the cell
+# the chest goes in has to be empty, and the cell it opens towards has to be
+# somewhere a player can stand.
 CHEST_LOOT = 'horsegenetics:chests/cowboy_house'
-for x in (2, 5):
-    put(house, (x, 1, 2), 'minecraft:chest[facing=south,type=single,waterlogged=false]',
+CHEST_Z = IN_Z[0]
+for x, facing, dx, dz in ((IN_X[0], 'south', 0, 1), (IN_X[1], 'west', -1, 0)):
+    assert at(house, (x, 1, CHEST_Z)) == AIR, 'a chest would bury something'
+    assert at(house, (x + dx, 1, CHEST_Z + dz)) == AIR, 'no room to stand and open the chest'
+    put(house, (x, 1, CHEST_Z),
+        'minecraft:chest[facing=%s,type=single,waterlogged=false]' % facing,
         T_cmp({'LootTable': T_str(CHEST_LOOT), 'id': T_str('minecraft:chest')}))
+
+# ---- the frontage: which column, and which rows of it are real -----------
+# The posts stand in the empty margin column outside the west wall, one block
+# west of the wall itself - so FRONT_X is derived from the interior rather than
+# written down, and the wall it leans on is the column between them.
+#
+# Not every z in that column is a place a post may stand. Outside the walls it is
+# thin air with the roof's eave overhead, and the eave reaches a block further
+# than the building does - so "is there something above it" is not the test.
+# The test is the wall's own foundation course: wherever the west wall has a
+# block at y=0, the post in front of it has a building at its back, and wherever
+# it has not, the post would be standing in the front garden. Read that straight
+# off the grid the deepening has just built, because DEEPEN_BY moves it.
+FRONT_X = IN_X[0] - 2
+WALL_X = FRONT_X + 1
+frontage = [z for z in range(house_size[2]) if at(house, (WALL_X, 0, z)) != AIR]
+assert frontage == list(range(frontage[0], frontage[-1] + 1)), 'the west wall has a hole in it'
 
 # ---- a step up to the front door -----------------------------------------
 # The house sits a block proud of the ground the way every vanilla plains house
 # does, so without one the threshold is a ledge you jump at.
-put(house, (0, 0, 3),
+put(house, (FRONT_X, 0, DOOR_POS[1]),
     'minecraft:oak_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]')
 
-# ---- the work posts, either side of that step ----------------------------
+# ---- the work posts, down the frontage from that step --------------------
 # On the house and not on the barn, because this is where the trade is done: you
-# walk up to the front door of the homestead, not into the stable. The hitch and
-# the table are the same block twice - one hands out a cowboy, the other a
-# horseman - see server/CowboyHitchHandler.
-put(house, (0, 0, 2), 'horsegenetics:cowboy_hitch')
-put(house, (0, 0, 4), 'horsegenetics:horsemans_table')
+# walk up to the front door of the homestead, not into the stable. Every one of
+# them is the same block trick - a job site a profession-less villager claims,
+# see server/CowboyHitchHandler - and each one has a bed waiting for its taker
+# inside, which is what SLEEPERS above is counting.
+#
+# The order is the order you meet them walking the path from the street, and the
+# hitch comes first because the cowboy is the one who has to exist before any of
+# the rest of the homestead means anything. The doorway splits them: hitch on the
+# near side, the four trades on the far side, all of it derived from the door's
+# own row so that moving the door moves the whole frontage with it.
+#
+# The bench is not a job site - nobody is employed by it - so it goes at the far
+# END of the frontage, past the last post, where it fronts the house's back
+# corner post the way it used to front the front one. One here so a player meets
+# tack dyeing before they know to want it; it is craftable too.
+WORK_POSTS = [
+    ('horsegenetics:cowboy_hitch', DOOR_POS[1] - 1),
+    ('horsegenetics:leatherworkers_post', DOOR_POS[1] + 1),
+    ('horsegenetics:scientists_post', DOOR_POS[1] + 2),
+    ('horsegenetics:suppliers_post', DOOR_POS[1] + 3),
+    ('horsegenetics:metalsmiths_post', DOOR_POS[1] + 4),
+]
+BENCH_Z = frontage[-1]
 
-# ---- and the bench, at the end of the same frontage -----------------------
-# One here so a player meets tack dyeing before they know to want it; it is
-# craftable too. The coordinate is not free choice: z=3 is the DOORWAY - the oak
-# step above is the threshold and the door itself is at (1, 1, 3) - so the posts
-# flank it and the bench continues past the table rather than standing in it.
-# z=5 fronts a solid oak_log corner of the house with air above, and z=6 is
-# already outside the walls. `put` overwrites without checking, so moving this
-# means re-checking what is there first.
-put(house, (0, 0, 5), 'horsegenetics:equestrian_bench')
+# `put` overwrites without checking what was there, and the two ways to get this
+# wrong are opposites: a post past the end of the wall hangs in the air over the
+# walk, and a post on a z that is already spoken for silently eats the doorstep.
+# So every coordinate is checked against the grid as built - fronting wall, and
+# empty right now - rather than against a count that was right last time.
+for block, z in WORK_POSTS + [('horsegenetics:equestrian_bench', BENCH_Z)]:
+    assert z in frontage, '%s at z=%d is off the end of the wall' % (block, z)
+    assert at(house, (FRONT_X, 0, z)) == AIR, \
+        '%s at z=%d would overwrite %s' % (block, z, at(house, (FRONT_X, 0, z)))
+    put(house, (FRONT_X, 0, z), block)
 
 # ============================================== compose the two buildings
 # The house goes behind the barn along z, and both front faces stay on the same
@@ -453,17 +591,20 @@ for (x, z) in door_columns:
         cleared += 1
 
 # ============================================================== the people
-# Two plain villagers on the walk in front of the house, one facing each work
-# post across it - on the path itself rather than on top of the post, which is
-# where they stood while the path was a course too high and a column too far in.
-# Neither is given a profession: one claims the table the ordinary way and
-# becomes the horseman, the other is taken on by the hitch and becomes the
-# cowboy. Letting them take the jobs themselves is the only test there is of the
-# part that has ever been in doubt - whether the POI registered and whether the
-# acquirable_job_site tag merged - so two nitwits standing there for ever is a
-# real answer to a real question.
+# One plain villager on the walk per work post, each facing its own post across
+# it - on the path itself rather than on top of the post, which is where they
+# stood while the path was a course too high and a column too far in. The bench
+# gets nobody, because nobody is employed by it.
+#
+# NONE of them is given a profession, and that is the point rather than an
+# oversight: each has to claim its post the ordinary way and come out a cowboy, a
+# leatherworker, a scientist, a supplier or a metalsmith. Letting them take the
+# jobs themselves is the only test there is of the part that has ever been in
+# doubt - whether every POI registered and whether the acquirable_job_site tag
+# merged for all five - so a row of nitwits standing there for ever is a real
+# answer to a real question, and one that names which post is the broken one.
 entities = []
-for z in (2, 4):
+for _, z in WORK_POSTS:
     stand = (WALK_X, GROUND, HOUSE_AT[2] + z)
     entities.append(T_cmp({
         'pos': T_dlist([stand[0] + 0.5, float(stand[1]), stand[2] + 0.5]),
@@ -504,4 +645,6 @@ print('wrote', DST,
       'size', size, 'palette', len(palette), 'blocks', len(blocks),
       'jigsaw at', JIGSAW_POS, 'final_state', final_state,
       'door headers cleared', cleared,
+      'house interior x', IN_X, 'z', IN_Z,
+      'beds', len(bed_rows), 'frontage z', (frontage[0], frontage[-1]),
       'villagers', len(entities))

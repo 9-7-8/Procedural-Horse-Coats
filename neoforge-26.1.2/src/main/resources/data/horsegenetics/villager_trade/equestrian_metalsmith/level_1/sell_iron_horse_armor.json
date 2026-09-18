@@ -1,0 +1,11 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 12
+  },
+  "gives": {
+    "id": "minecraft:iron_horse_armor"
+  },
+  "max_uses": 2,
+  "xp": 1
+}

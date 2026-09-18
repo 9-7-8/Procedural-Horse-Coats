@@ -1,5 +1,8 @@
 {
   "values": [
-    "horsegenetics:horsemans_table"
+    "horsegenetics:leatherworkers_post",
+    "horsegenetics:scientists_post",
+    "horsegenetics:suppliers_post",
+    "horsegenetics:metalsmiths_post"
   ]
 }

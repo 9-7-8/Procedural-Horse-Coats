@@ -69,7 +69,7 @@ import java.util.UUID;
  * that makes this character themselves - home is a barn and not a bed, stock is a
  * live herd and not a trade table - is a fight with that brain. So they are their own
  * {@link AbstractVillager}: they keep the merchant screen, the villager
- * silhouette and the trading goals, and none of the schedule. The <b>horseman</b>
+ * silhouette and the trading goals, and none of the schedule. The <b>equestrians</b>
  * ({@code ModVillagerProfessions}) is the one that is a real profession, because
  * a shopkeeper standing at a workstation is exactly what vanilla's brain is for.
  *
@@ -232,7 +232,7 @@ public class Cowboy extends AbstractVillager {
     }
 
     /**
-     * Their family name. The <b>horseman</b> at the post outside their barn is given
+     * Their family name. The <b>equestrians</b> at the posts outside their barn are given
      * this too, with a first name of their own - the two of them are the family
      * that runs the place, which is the shortest way to say so.
      *

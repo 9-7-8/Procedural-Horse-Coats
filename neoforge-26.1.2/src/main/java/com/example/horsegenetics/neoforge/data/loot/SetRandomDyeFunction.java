@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Loot function: <b>dye the item being produced a random colour</b> - what lets
- * the horseman stock "a red saddle" without sixteen listings and without a
+ * a villager stock "a red armour" without sixteen listings and without a
  * sixteen-item registry of our own.
  *
  * <pre>
@@ -23,7 +23,7 @@ import java.util.List;
  *
  * <p>Same shape and same reasoning as {@link SetRandomBreedFunction}: a villager
  * trade's {@code given_item_modifiers} run when the <b>offer is generated</b>,
- * so the colour is rolled once per restock and then sits in the horseman's
+ * so the colour is rolled once per restock and then sits in the villager's
  * window at a fixed price, rather than re-rolling under the player's cursor.
  *
  * <h2>Why this needs no other mod, and deliberately so</h2>

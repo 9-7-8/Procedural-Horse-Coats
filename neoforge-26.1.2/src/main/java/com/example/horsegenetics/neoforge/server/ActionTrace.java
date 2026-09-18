@@ -299,7 +299,7 @@ public final class ActionTrace {
                     + (event.getEntity().isShiftKeyDown() ? " [SHIFT held]" : ""));
             return;
         }
-        // Villagers matter here too - the cowboy and the horseman are both
+        // Villagers matter here too - the cowboy and the equestrians are all
         // right-click conversations, and "nothing happened" is a real report.
         log("right-click entity", held + " on " + target.getType().builtInRegistryHolder()
                 .key().identifier());

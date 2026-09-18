@@ -91,7 +91,7 @@ public final class ModItems {
     /**
      * <b>Breed spawn eggs</b> - one item, the breed on a {@code breed}
      * component. Not craftable: they come out of dungeon chests and off the
-     * horseman, dear. Single use, and the horse it makes is a foundation horse
+     * scientist, dear. Single use, and the horse it makes is a foundation horse
      * of that breed. See {@link BreedSpawnEggItem}.
      */
     // Registered without joining TAB_ITEMS: a *blank* breed egg is a puzzle,
@@ -188,15 +188,24 @@ public final class ModItems {
     public static final DeferredItem<SignedTransferPaperItem> SIGNED_TRANSFER_PAPER =
             register("signed_transfer_paper", p -> new SignedTransferPaperItem(p.stacksTo(1)));
 
-    // --- the two work posts (roadmap §19) --------------------------------
-    // One each, because one block could not hand out both trades - see
-    // block/ModBlocks.COWBOY_HITCH.
+    // --- the five work posts (roadmap §19) -------------------------------
+    // One per job, because one block could not hand out more than one trade -
+    // see block/ModBlocks.COWBOY_HITCH and village/ModPoiTypes.
     public static final DeferredItem<net.minecraft.world.item.BlockItem> COWBOY_HITCH =
             registerBlockItem("cowboy_hitch",
                     com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> HORSEMANS_TABLE =
-            registerBlockItem("horsemans_table",
-                    com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LEATHERWORKERS_POST =
+            registerBlockItem("leatherworkers_post",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.LEATHERWORKERS_POST);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SCIENTISTS_POST =
+            registerBlockItem("scientists_post",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.SCIENTISTS_POST);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SUPPLIERS_POST =
+            registerBlockItem("suppliers_post",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.SUPPLIERS_POST);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> METALSMITHS_POST =
+            registerBlockItem("metalsmiths_post",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.METALSMITHS_POST);
 
     /** The Equine Research Shelf, as an item you can carry and place. */
     public static final DeferredItem<net.minecraft.world.item.BlockItem> EQUINE_RESEARCH_SHELF =

@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
  * <h2>Why this exists</h2>
  * Most of what this mod does happens where nobody is looking. A cowboy founds
  * the moment their chunk starts ticking, usually before the barn is on screen; a
- * villager takes the horseman job silently; a mounted man changes what they are
+ * villager takes an equestrian job silently; a mounted man changes what they are
  * doing without changing what they look like. All three were previously
  * questions you answered by reading a server log while it scrolled.
  *
@@ -31,7 +31,7 @@ import net.minecraft.server.level.ServerPlayer;
  * identical.
  *
  * <p>Then the mod shipped, and the hard-coded {@code true} shipped with it:
- * players who were handed 0.3.2 got {@code [Cowboy]} and {@code [Horseman]}
+ * players who were handed 0.3.2 got {@code [Cowboy]} and {@code [Horseman]} (now {@code [Equestrian]})
  * lines in their chat, which is noise to somebody who is just playing. So it is
  * now {@link ServerConfig#debugAnnounce()} - <b>on in a dev run, off in a normal
  * install, and switchable in either</b>, which is what you want from someone

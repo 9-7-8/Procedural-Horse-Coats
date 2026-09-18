@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * <b>Draw a random gene of a bounded rarity</b> - the one piece of logic behind
- * every "a random carrot" and "a random paper" the horseman sells.
+ * every "a random carrot" and "a random paper" the equestrians sell.
  *
  * <p>The roadmap's requirement was that a third-party gene joins these pools
  * automatically and that <b>legendary and mythic are never sold</b>. Both fall
@@ -35,6 +35,21 @@ public final class GenePool {
      * toward the commoner end, or {@code null} if the window is empty.
      */
     public static @Nullable Gene draw(RandomSource rng, GeneRarity min, GeneRarity max) {
+        return draw(rng, min, max, gene -> true);
+    }
+
+    /**
+     * As above, but only genes the caller will actually be able to use.
+     *
+     * <p>The filter is applied <b>before</b> the weighted draw rather than after
+     * it, which is the whole reason it exists: drawing first and rejecting after
+     * would either return nothing (costing the villager a trade slot for no
+     * reason) or need a retry loop that can spin. The homozygous carrot is the
+     * caller this was added for - a gene whose homozygote cannot occur is not a
+     * gene it can make a carrot out of.
+     */
+    public static @Nullable Gene draw(RandomSource rng, GeneRarity min, GeneRarity max,
+                                      java.util.function.Predicate<Gene> usable) {
         List<Gene> pool = new ArrayList<>();
         int total = 0;
         for (Gene gene : Genes.codeOrder()) {
@@ -43,6 +58,9 @@ public final class GenePool {
             }
             GeneRarity rarity = gene.rarity();
             if (rarity.ordinal() < min.ordinal() || rarity.ordinal() > max.ordinal()) {
+                continue;
+            }
+            if (!usable.test(gene)) {
                 continue;
             }
             pool.add(gene);

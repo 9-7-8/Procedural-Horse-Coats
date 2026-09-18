@@ -4,7 +4,7 @@ import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.Commonness;
 import com.example.horsegenetics.common.breed.Region;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
-import com.example.horsegenetics.neoforge.server.HorsemanHandler;
+import com.example.horsegenetics.neoforge.server.EquestrianHandler;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.Entity;
@@ -31,7 +31,7 @@ import java.util.Locale;
  * <p>Same shape and same reasoning as {@code SetRandomGeneFunction}: a villager
  * trade's {@code given_item_modifiers} run when the <b>offer is generated</b>,
  * so "a random rare breed egg" is rolled once per restock and then sits in the
- * horseman's window at a fixed price, rather than re-rolling under the player's
+ * scientist's window at a fixed price, rather than re-rolling under the player's
  * cursor.
  *
  * <p>An empty window returns an empty stack, which {@code VillagerTrade.getOffer}
@@ -93,7 +93,7 @@ public class SetRandomBreedFunction extends LootItemConditionalFunction {
         if (trader == null) {
             return null;
         }
-        return HorsemanHandler.nearestCowboyRegion(context.getLevel(), trader.blockPosition(), trader)
+        return EquestrianHandler.nearestCowboyRegion(context.getLevel(), trader.blockPosition(), trader)
                 .orElse(null);
     }
 

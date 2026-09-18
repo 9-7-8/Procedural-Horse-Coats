@@ -1,0 +1,10 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_scientist/level_4/buy_stallion_seed_jar",
+    "horsegenetics:equestrian_scientist/level_4/sell_uncommon_carrot",
+    "horsegenetics:equestrian_scientist/level_4/sell_magical_splice",
+    "horsegenetics:equestrian_scientist/level_4/sell_uncommon_breed_egg"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_scientist/level_4"
+}

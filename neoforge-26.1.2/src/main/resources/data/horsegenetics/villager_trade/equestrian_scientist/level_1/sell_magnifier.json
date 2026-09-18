@@ -1,0 +1,11 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 3
+  },
+  "gives": {
+    "id": "horsegenetics:magnifier_carrot"
+  },
+  "max_uses": 6,
+  "xp": 1
+}

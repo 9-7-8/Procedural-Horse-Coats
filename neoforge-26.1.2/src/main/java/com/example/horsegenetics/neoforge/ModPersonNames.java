@@ -22,8 +22,8 @@ import java.util.Set;
  * launch with a README in it. A broken file is logged and skipped, never fatal.
  *
  * <p><b>Order does not matter here</b>, unlike genes and breeds. A name changes
- * no registry and lengthens no genotype code; it is read when a cowboy or a
- * horseman is first named and nowhere else. It runs after the breeds only
+ * no registry and lengthens no genotype code; it is read when a cowboy or an
+ * equestrian is first named and nowhere else. It runs after the breeds only
  * because {@link Region} is what validates the file names, and reading that
  * class is cheaper once the rest of the world is up.
  */
@@ -36,7 +36,7 @@ public final class ModPersonNames {
             Horse Genetics - drop-in trader names
             =====================================
 
-            The cowboy and the horseman are named from the part of the world
+            The cowboy and the equestrians are named from the part of the world
             their horses came from - a man selling Fjords is a Halvorsen, a man
             selling Andalusians is an Olivares. Every .txt file in this folder
             ADDS names to one of those regions.

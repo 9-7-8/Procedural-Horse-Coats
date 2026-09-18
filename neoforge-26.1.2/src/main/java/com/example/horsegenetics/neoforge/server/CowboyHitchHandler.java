@@ -68,7 +68,7 @@ public final class CowboyHitchHandler {
                 || villager.tickCount % INTERVAL != 0) {
             return;
         }
-        // Only the unemployed: a horseman standing next to a hitch is somebody
+        // Only the unemployed: an equestrian standing next to a hitch is somebody
         // else's, and a farmer has a farm to get back to.
         if (!villager.getVillagerData().profession().is(VillagerProfession.NONE)) {
             return;

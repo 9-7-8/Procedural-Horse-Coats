@@ -107,7 +107,7 @@ public final class ModBreedSpecs {
             too, and your world has only the breeds in this folder. The mod's
             other settings are beside it (server.toml, client.toml), and so is
             ../genes/ for drop-in genes and ../names/ for the names the cowboy
-            and the horseman are given.
+            and the equestrians are given.
 
             Notes:
               * A breed's "id" must be lower case and unique. A file whose id

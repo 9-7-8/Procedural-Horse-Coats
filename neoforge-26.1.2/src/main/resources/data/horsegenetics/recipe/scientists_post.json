@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:hair_cloth",
+    "horsegenetics:hair_cloth",
+    "#minecraft:fences",
+    "#minecraft:fences",
+    "minecraft:glass_bottle",
+    "minecraft:glass_bottle",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "horsegenetics:scientists_post"
+  }
+}

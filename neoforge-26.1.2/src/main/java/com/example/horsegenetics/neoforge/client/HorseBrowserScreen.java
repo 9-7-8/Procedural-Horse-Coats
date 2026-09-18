@@ -2023,7 +2023,7 @@ public final class HorseBrowserScreen extends Screen {
      * <b>The contents list.</b> Fifteen-odd sections of prose and then a
      * checklist is a lot of page to arrive at with only a mouse wheel, and the
      * tab reopens where you left it - so the one thing it was missing was a way
-     * to say "the bit about the horseman" and be taken there.
+     * to say "the bit about the equestrians" and be taken there.
      *
      * <p>Every line is the step's own heading, so the list needs no maintaining
      * as the page changes, and the section you are in is lit - which makes it a

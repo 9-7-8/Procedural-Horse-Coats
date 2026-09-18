@@ -1,0 +1,11 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 6
+  },
+  "gives": {
+    "id": "horsegenetics:stall_sign"
+  },
+  "max_uses": 4,
+  "xp": 10
+}

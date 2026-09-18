@@ -18,7 +18,7 @@ import net.neoforged.neoforge.event.entity.player.TradeWithVillagerEvent;
  * <p>Most tasks are ticked from the handler that already owned the thing -
  * taming from the tame handler, foals from the breeding handler. These three
  * have no such handler: crafting a gene carrot happens in vanilla's crafting
- * code, trading with a horseman happens in vanilla's merchant code, and a
+ * code, trading with an equestrian happens in vanilla's merchant code, and a
  * player's checklist has to reach them on login before they have done anything
  * at all.
  */
@@ -62,12 +62,12 @@ public final class ProgressHooks {
         }
     }
 
-    /** Trading with a <em>horseman</em> specifically - any other villager is not the task. */
+    /** Trading with any of the four <em>equestrians</em> - any other villager is not the task. */
     @SubscribeEvent
     static void onTrade(TradeWithVillagerEvent event) {
         if (event.getAbstractVillager() instanceof Villager villager
-                && villager.getVillagerData().profession().is(ModVillagerProfessions.HORSEMAN.getKey())) {
-            HorseProgress.complete(event.getEntity(), ProgressTask.TRADE_HORSEMAN);
+                && ModVillagerProfessions.isEquestrian(villager.getVillagerData().profession())) {
+            HorseProgress.complete(event.getEntity(), ProgressTask.TRADE_EQUESTRIAN);
         }
     }
 }

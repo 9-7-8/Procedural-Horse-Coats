@@ -10,17 +10,25 @@ import net.minecraft.resources.Identifier;
 
 /**
  * The cowboy's clothes: a plains villager's robe, and over it the same hat and
- * coat the <b>horseman</b> profession wears, so the two characters read as the
- * same trade.
+ * coat the four <b>equestrian</b> professions wear, so they all read as the same
+ * trade.
  *
  * <h2>Why the clothes are layers and not one flattened texture</h2>
  * A villager is drawn in three passes - the bare skin
  * ({@code textures/entity/villager/villager.png}, which is the one that has a
  * <b>face</b> on it), then the biome type's robe, then the profession's
- * overlay. Baking those into a single cowboy texture would store the horseman
- * art twice, and the copy would go stale the first time
- * {@code profession/horseman.png} is repainted. So this reproduces vanilla's
- * order instead, and that file stays the single source for the art.
+ * overlay. Baking those into a single cowboy texture would store the hat art
+ * twice and the copy would go stale, so this reproduces vanilla's order instead.
+ *
+ * <h2>He has his own copy of the hat, and it is generated</h2>
+ * He used to read the horseman's profession texture directly, which was the
+ * cheapest way to guarantee the two could not drift. That stopped being possible
+ * when the horseman became four villagers in four hat colours: there is no file
+ * at that path any more, and picking one of the four would hand him somebody
+ * else's hat. So {@code tools/villagers/bake-profession-hats.ps1} writes his
+ * copy - the same source art with the hat left its own brown - at the same time
+ * it writes the four. The no-drift guarantee is now held by the bake rather than
+ * by a shared path, which is the stronger of the two.
  *
  * <p>The cowboy cannot use vanilla's {@code VillagerProfessionLayer} to do it:
  * that layer reads {@code VillagerData} off the render state to decide which
@@ -29,7 +37,7 @@ import net.minecraft.resources.Identifier;
  * this one look, so both textures here are constants.
  *
  * <h2>The no-hat model</h2>
- * {@code horseman.png.mcmeta} declares {@code hat: full}, which in vanilla means
+ * {@code cowboy.png.mcmeta} declares {@code hat: full}, which in vanilla means
  * "this profession's hat replaces the type's". Vanilla honours that by drawing
  * the type pass on a villager mesh whose head has been cleared
  * ({@link net.minecraft.client.model.geom.ModelLayers#VILLAGER_NO_HAT}), and so
@@ -46,13 +54,13 @@ public class CowboyOverlayLayer extends RenderLayer<VillagerRenderState, Village
     private static final Identifier ROBE =
             Identifier.withDefaultNamespace("textures/entity/villager/type/plains.png");
 
-    /** Shared with the horseman profession - see the class comment. */
+    /** Generated beside the four equestrians' - see the class comment. */
     static final Identifier HAT = Identifier.fromNamespaceAndPath(
             com.example.horsegenetics.neoforge.HorseGenetics.MOD_ID,
-            "textures/entity/villager/profession/horseman.png");
+            "textures/entity/villager/cowboy.png");
 
     /**
-     * The arcane dealer's hat colour, multiplied over the ordinary horseman hat
+     * The arcane dealer's hat colour, multiplied over the ordinary cowboy hat
      * rather than drawn from its own texture - one tint against a second PNG to
      * keep in step with the first.
      *

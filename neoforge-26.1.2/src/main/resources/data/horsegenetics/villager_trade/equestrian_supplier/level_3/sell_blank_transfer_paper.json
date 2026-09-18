@@ -1,0 +1,11 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 2
+  },
+  "gives": {
+    "id": "horsegenetics:blank_transfer_paper"
+  },
+  "max_uses": 8,
+  "xp": 10
+}

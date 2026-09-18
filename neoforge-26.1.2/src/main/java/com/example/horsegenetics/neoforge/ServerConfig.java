@@ -43,10 +43,10 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  *
  * <h2>debug.announce</h2>
  * <b>On in a dev run, off in a normal install.</b> This mod says what it is
- * doing - a cowboy founding, a villager taking the horseman job, a stable being
+ * doing - a cowboy founding, a villager taking an equestrian job, a stable being
  * filled - in chat and in the log, because most of it happens where nobody is
  * looking. That is a development tool and it shipped switched on: the owner's
- * friends played 0.3.2 and got <code>[Cowboy]</code> and <code>[Horseman]</code>
+ * friends played 0.3.2 and got <code>[Cowboy]</code> and <code>[Equestrian]</code>
  * lines in their chat, which is noise to a player and looks like a bug.
  *
  * <p>It is a setting rather than a bare {@code isProduction()} check because
@@ -165,8 +165,8 @@ public final class ServerConfig {
                         com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
-                        "  A cowboy founding, a villager taking the horseman job, a stable",
-                        "  being filled - the [Cowboy] / [Horseman] / [Stables] lines.",
+                        "  A cowboy founding, a villager taking an equestrian job, a stable",
+                        "  being filled - the [Cowboy] / [Equestrian] / [Stables] lines.",
                         "Defaults to ON in a development run and OFF in a normal install,",
                         "which is what the line below actually reports, so this file says",
                         "what this build decided rather than what it usually decides.",

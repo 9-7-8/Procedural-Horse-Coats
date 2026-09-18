@@ -53,7 +53,7 @@ import java.util.UUID;
  * server tick.
  *
  * <p>They are also <b>restocked</b> from here, on the same tick handler and for
- * the same reason - see {@link #restock}. The <b>horseman</b> next door is not
+ * the same reason - see {@link #restock}. The <b>equestrians</b> next door are not
  * built here at all: their post is a block in {@code cowboy_barn.nbt}, in the
  * middle of the road-facing end, and the villager who takes the job off it is a
  * structure entity beside it. A shop front is architecture.
@@ -326,8 +326,8 @@ public final class CowboyHandler {
                     .id();
             // The village's horse family, if it has one already - the hitch and the
             // table hand out their jobs in whatever order, so whoever is hired first
-            // coins the surname and the other joins it. See server/HorsemanHandler.
-            String surname = HorsemanHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng, regionId);
+            // coins the surname and the other joins it. See server/EquestrianHandler.
+            String surname = EquestrianHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng, regionId);
             cowboy.setCustomName(Component.literal(
                     PersonNameGenerator.forRegion(regionId).generateParts(rng).first() + " " + surname));
         }

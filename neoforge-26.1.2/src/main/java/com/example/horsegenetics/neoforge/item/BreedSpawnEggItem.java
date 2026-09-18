@@ -53,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <h2>Not craftable</h2>
  * There is no recipe. Eggs come from dungeon chests
- * ({@code AddBreedSpawnEggModifier}) and from the horseman, dear. A breed may
+ * ({@code AddBreedSpawnEggModifier}) and from the scientist, dear. A breed may
  * opt out of having one at all by leaving {@code spawn_egg} out of its
  * {@code spawn} list, and {@link Breeds#FERAL_MIXED} has none by construction -
  * "a horse of no particular breeding" is what an ordinary vanilla spawn egg
@@ -76,7 +76,7 @@ public class BreedSpawnEggItem extends Item {
         return breed == Breeds.FERAL_MIXED ? null : breed;
     }
 
-    /** An egg for {@code breed} - what the loot function and the horseman's trade hand out. */
+    /** An egg for {@code breed} - what the loot function and the scientist's trade hand out. */
     public static ItemStack of(Breed breed) {
         ItemStack stack = new ItemStack(ModItems.BREED_SPAWN_EGG.get());
         stack.set(ModDataComponents.BREED_ID.get(), breed.id());

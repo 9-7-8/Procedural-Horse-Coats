@@ -1,0 +1,11 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 18
+  },
+  "gives": {
+    "id": "horsegenetics:echo_whistle"
+  },
+  "max_uses": 2,
+  "xp": 10
+}

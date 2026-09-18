@@ -1,0 +1,20 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 55
+  },
+  "gives": {
+    "id": "horsegenetics:known_gene_splice_carrot"
+  },
+  "max_uses": 1,
+  "xp": 30,
+  "given_item_modifiers": [
+    {
+      "function": "horsegenetics:set_random_gene",
+      "target": "carrot",
+      "min_rarity": "epic",
+      "max_rarity": "epic",
+      "homozygous": true
+    }
+  ]
+}

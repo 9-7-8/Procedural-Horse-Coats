@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:hair_cloth",
+    "horsegenetics:hair_cloth",
+    "#minecraft:fences",
+    "#minecraft:fences",
+    "minecraft:leather",
+    "minecraft:leather",
+    "minecraft:leather"
+  ],
+  "result": {
+    "id": "horsegenetics:leatherworkers_post"
+  }
+}

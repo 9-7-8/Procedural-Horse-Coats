@@ -57,7 +57,7 @@ public enum ProgressTask {
             "Tame a horse of any named breed and it joins your breed book. Breeds belong to the country "
                     + "they came from, so what is out there depends on the biome you are standing in."),
     BREED_EGG(Group.WILD, "Found a breed from a spawn egg",
-            "The horseman sells breed spawn eggs from his middle ranks. One right-click puts a "
+            "The equestrian scientist sells breed spawn eggs from his middle ranks. One right-click puts a "
                     + "foundation horse of that breed in front of you - the quick way to a breed your "
                     + "own biomes will never give you."),
     WILD_FOOD_DRIFT(Group.WILD, "Have a wild horse come to you for food",
@@ -156,13 +156,13 @@ public enum ProgressTask {
                     + "it, and the loose hair that comes away in the brush is the base material "
                     + "for nearly everything this mod adds. Once a day, one to three hair."),
     BUNDLE_HAIR(Group.HUSBANDRY, "Bundle up horse hair",
-            "Nine hair into one bundle - how you store a season of grooming, and what the horseman "
-                    + "buys by the armful."),
+            "Nine hair into one bundle - how you store a season of grooming, and what the equestrian "
+                    + "supplier buys by the armful."),
     CRAFT_ROPE(Group.HUSBANDRY, "Twist a braided rope",
             "Horse hair into rope. It is the first thing hair is good for, and the gate on a good "
                     + "deal of the rest."),
     CRAFT_HAIR_CLOTH(Group.HUSBANDRY, "Weave hair cloth",
-            "Coarse cloth from braided rope. The horseman pays better for it than for the rope."),
+            "Coarse cloth from braided rope. The equestrians pay better for it than for the rope."),
     BOND_HORSE(Group.HUSBANDRY, "Bond with a horse",
             "Ride it, feed it and keep it well. Bond builds slowly and unlocks how it behaves around you."),
     BOND_ATTENTIVE(Group.HUSBANDRY, "Bond a horse to attentive",
@@ -192,7 +192,7 @@ public enum ProgressTask {
                     + "to one horse - it is where the horse you tamed a minute ago goes."),
     CRAFT_BLANK_TICKET(Group.HUSBANDRY, "Craft a blank ticket",
             "Paper and horse hair. It does nothing on its own - it is the base every written "
-                    + "ticket is crafted up from, and the horseman sells them by the handful."),
+                    + "ticket is crafted up from, and the supplier sells them by the handful."),
     USE_TICKET(Group.HUSBANDRY, "Send a horse to its stall",
             "Use a written ticket on a horse of yours that has a stall. A basic ticket works in the "
                     + "overworld, a bound one anywhere within one world, an interdimensional one anywhere at all."),
@@ -368,9 +368,10 @@ public enum ProgressTask {
                     + "and what breeding a line back together is for."),
 
     // ---- 7. The villagers -------------------------------------------------
-    TRADE_HORSEMAN(Group.PEOPLE, "Trade with a horseman",
-            "Put a Horseman's Table near an unemployed villager. He deals in research papers, carrots, "
-                    + "tack and breed spawn eggs, and buys horse hair off you from his first day."),
+    TRADE_EQUESTRIAN(Group.PEOPLE, "Trade with an equestrian",
+            "Put any of the four posts near an unemployed villager and one takes the job. The "
+                    + "leatherworker deals in tack, the scientist in carrots and breed eggs, the metalsmith "
+                    + "in armour, and the supplier in everything else - and buys horse hair off you."),
     MEET_COWBOY(Group.PEOPLE, "Meet a cowboy",
             "A Cowboy Hitch makes one. He keeps his own string of four to ten horses and will sell you "
                     + "one - and he only deals in the breeds of the country he came from."),

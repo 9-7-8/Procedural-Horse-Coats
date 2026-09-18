@@ -11,12 +11,12 @@ import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.resources.Identifier;
 
 /**
- * Draws the {@link Cowboy}: a plains villager wearing the horseman's hat.
+ * Draws the {@link Cowboy}: a plains villager wearing the equestrians' hat.
  *
  * <p>Assembled the way vanilla assembles a farmer - the bare villager skin
  * underneath, the biome robe and the trade's overlay on top
  * ({@link CowboyOverlayLayer}) - rather than as one flattened texture, so the
- * cowboy and the horseman villager share a single overlay file and cannot drift
+ * cowboy and the four equestrian villagers are baked from one source and cannot drift
  * apart when it is repainted.
  *
  * <p><b>{@code villager.png} is the base, and it has to be.</b> This used to
@@ -35,7 +35,7 @@ public class CowboyRenderer extends MobRenderer<Cowboy, VillagerRenderState, Vil
     public CowboyRenderer(EntityRendererProvider.Context context) {
         super(context, new VillagerModel(context.bakeLayer(ModelLayers.WANDERING_TRADER)), 0.5F);
         // The robe pass rides a second, head-less copy of the mesh, because the
-        // horseman overlay is a `hat: full` profession - see CowboyOverlayLayer.
+        // equestrian overlay is a `hat: full` profession - see CowboyOverlayLayer.
         this.addLayer(new CowboyOverlayLayer(
                 this, new VillagerModel(context.bakeLayer(ModelLayers.VILLAGER_NO_HAT))));
         this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getPlayerSkinRenderCache()));

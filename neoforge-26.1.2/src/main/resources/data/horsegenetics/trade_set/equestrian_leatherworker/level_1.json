@@ -1,0 +1,9 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_leatherworker/level_1/buy_leather",
+    "horsegenetics:equestrian_leatherworker/level_1/sell_saddle",
+    "horsegenetics:equestrian_leatherworker/level_1/sell_leather_horse_armor"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_leatherworker/level_1"
+}

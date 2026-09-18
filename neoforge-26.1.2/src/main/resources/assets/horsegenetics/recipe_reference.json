@@ -302,21 +302,6 @@
       "count": 4
     },
     {
-      "id": "horsemans_table",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
-        "minecraft:leather",
-        "minecraft:leather",
-        "#minecraft:fences",
-        "#minecraft:fences"
-      ],
-      "out": "horsegenetics:horsemans_table",
-      "count": 1
-    },
-    {
       "id": "interdimensional_ticket",
       "kind": "shapeless",
       "in": [
@@ -343,6 +328,21 @@
       "id": "known_gene_splice_carrot",
       "kind": "custom",
       "type": "horsegenetics:known_gene_splice"
+    },
+    {
+      "id": "leatherworkers_post",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "#minecraft:fences",
+        "#minecraft:fences",
+        "minecraft:leather",
+        "minecraft:leather",
+        "minecraft:leather"
+      ],
+      "out": "horsegenetics:leatherworkers_post",
+      "count": 1
     },
     {
       "id": "magical_gene_splice_carrot",
@@ -387,6 +387,21 @@
       "count": 1
     },
     {
+      "id": "metalsmiths_post",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "#minecraft:fences",
+        "#minecraft:fences",
+        "minecraft:iron_ingot",
+        "minecraft:iron_ingot",
+        "minecraft:iron_ingot"
+      ],
+      "out": "horsegenetics:metalsmiths_post",
+      "count": 1
+    },
+    {
       "id": "oak_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -419,6 +434,21 @@
       "count": 1
     },
     {
+      "id": "scientists_post",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "#minecraft:fences",
+        "#minecraft:fences",
+        "minecraft:glass_bottle",
+        "minecraft:glass_bottle",
+        "minecraft:paper"
+      ],
+      "out": "horsegenetics:scientists_post",
+      "count": 1
+    },
+    {
       "id": "spruce_double_fence_gate",
       "kind": "shapeless",
       "in": [
@@ -448,6 +478,21 @@
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:stall_sign",
+      "count": 1
+    },
+    {
+      "id": "suppliers_post",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "#minecraft:fences",
+        "#minecraft:fences",
+        "horsegenetics:braided_rope",
+        "horsegenetics:braided_rope",
+        "minecraft:carrot"
+      ],
+      "out": "horsegenetics:suppliers_post",
       "count": 1
     },
     {

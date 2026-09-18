@@ -1,0 +1,10 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_supplier/level_3/buy_braided_rope",
+    "horsegenetics:equestrian_supplier/level_3/sell_golden_whistle",
+    "horsegenetics:equestrian_supplier/level_3/sell_blank_transfer_paper",
+    "horsegenetics:equestrian_supplier/level_3/sell_golden_carrot"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_supplier/level_3"
+}

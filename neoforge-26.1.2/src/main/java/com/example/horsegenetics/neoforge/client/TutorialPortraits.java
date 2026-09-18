@@ -16,15 +16,19 @@ import org.joml.Vector3f;
 
 /**
  * <b>The two people the Getting Started tab tells you to look for, drawn rather
- * than described.</b> A horseman is an ordinary villager wearing a profession
+ * than described.</b> An equestrian is an ordinary villager wearing a profession
  * you will not otherwise have seen, and a cowboy is this mod's own mob - both
  * are much easier to recognise from a picture than from a sentence about hats.
+ *
+ * <p>There are four equestrians and one portrait: they differ only in the colour
+ * of the hat, so drawing all four would be four near-identical pictures. The
+ * leatherworker stands for the set.
  *
  * <h2>They are entities, not textures</h2>
  * Built once, kept, and never added to a level: the same trick
  * {@link HorsePortrait} uses. That means they cost nothing until the tab is
  * opened, they follow any resource pack the player has on, and a change to the
- * horseman's profession shows up here without anybody remembering to re-export a
+ * equestrian's profession shows up here without anybody remembering to re-export a
  * picture.
  *
  * <p>Everything here fails soft. A portrait that cannot be built draws nothing
@@ -33,7 +37,7 @@ import org.joml.Vector3f;
  */
 public final class TutorialPortraits {
 
-    private static Villager horseman;
+    private static Villager equestrian;
     private static Entity cowboy;
 
     private TutorialPortraits() {
@@ -41,21 +45,21 @@ public final class TutorialPortraits {
 
     /** Dropped on disconnect - these belong to that world's client level. */
     public static void clear() {
-        horseman = null;
+        equestrian = null;
         cowboy = null;
     }
 
-    public static void drawHorseman(GuiGraphicsExtractor g, int x, int y, int size, int mouseX, int mouseY) {
-        draw(g, horseman(), x, y, size, mouseX, mouseY);
+    public static void drawEquestrian(GuiGraphicsExtractor g, int x, int y, int size, int mouseX, int mouseY) {
+        draw(g, equestrian(), x, y, size, mouseX, mouseY);
     }
 
     public static void drawCowboy(GuiGraphicsExtractor g, int x, int y, int size, int mouseX, int mouseY) {
         draw(g, cowboy(), x, y, size, mouseX, mouseY);
     }
 
-    private static Villager horseman() {
-        if (horseman != null) {
-            return horseman;
+    private static Villager equestrian() {
+        if (equestrian != null) {
+            return equestrian;
         }
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
@@ -69,9 +73,9 @@ public final class TutorialPortraits {
             // The profession is the whole point of the picture - a villager with
             // no job looks like every other villager and teaches nothing.
             villager.setVillagerData(villager.getVillagerData()
-                    .withProfession(ModVillagerProfessions.HORSEMAN)
+                    .withProfession(ModVillagerProfessions.LEATHERWORKER)
                     .withLevel(1));
-            horseman = villager;
+            equestrian = villager;
             return villager;
         } catch (RuntimeException uncreatable) {
             return null;

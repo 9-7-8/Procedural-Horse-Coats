@@ -1,0 +1,9 @@
+{
+  "amount": 3,
+  "trades": [
+    "horsegenetics:equestrian_metalsmith/level_1/buy_coal",
+    "horsegenetics:equestrian_metalsmith/level_1/buy_iron_ingot",
+    "horsegenetics:equestrian_metalsmith/level_1/sell_iron_horse_armor"
+  ],
+  "random_sequence": "horsegenetics:trade_set/equestrian_metalsmith/level_1"
+}
