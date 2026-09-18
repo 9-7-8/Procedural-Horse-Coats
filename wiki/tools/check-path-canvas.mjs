@@ -371,6 +371,17 @@ try {
 
   c.ok("nothing on the console", page.errors().length === 0, page.errors().join(" ;; "));
   if (SHOT) await page.screenshot(SHOT);
+} catch (e) {
+  // REPORT a thrown failure, never propagate it. This guard has to stop early
+  // when there is nothing to aim at - the gestures below a missing canvas would
+  // all click on empty page - but an uncaught throw exits with no summary, no
+  // count and no list of what DID pass. That is precisely how it sat broken for
+  // a day: the message said "no canvas to drive" and nothing said that the nine
+  // checks before it had passed, so it read as a broken script rather than a
+  // broken tool. Folding the throw back into a failed check makes it legible,
+  // and does the same for any future throw - a selector that stops matching, a
+  // renamed global - rather than only for the one that is hard-coded below.
+  c.ok("the check ran to the end", false, e && e.message ? e.message : String(e));
 } finally {
   page.close();
 }
