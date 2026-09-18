@@ -65,6 +65,10 @@ window.HG = window.HG || {};
         + " Everything else still works and the coat sheet is a real bake.");
     }
 
+    // Same six and a half megabytes as the breed designer; same silent minute
+    // on a phone without this.
+    if (HG.bootProgress) { HG.bootProgress.attach($("boot").querySelector(".boot-inner")); }
+
     HG.java.load().then(function (loaded) {
       api = loaded;
       genes = JSON.parse(api.genesJson());

@@ -57,6 +57,223 @@ window.HG = window.HG || {};
 
   var api = null;
 
+  // ---- boot progress ------------------------------------------------------
+  //
+  // Bringing the mod up moves about six megabytes: a 2 MB wasm, a 2.6 MB gene
+  // bundle, the breeds, two name tables and five PNGs. At a desk that is a
+  // second and the boot screen is a formality. On a phone on mobile data it is
+  // a minute or more - and a boot screen that says "Loading the mod..." and
+  // nothing else for a minute cannot be told apart from one that has hung,
+  // which is how it was reported.
+  //
+  // So every stage says so. A boot screen subscribes with
+  //
+  //   HG.java.progress(function (p) { ... });
+  //
+  // and is handed the state at once and again on every change. It carries the
+  // whole ordered PHASES list, so a screen can show what is still to come
+  // instead of one line that keeps changing under the reader; `index` is the
+  // stage running now, `loaded`/`total`/`unit` is progress inside it (total 0
+  // when the server sent no length), and `since` is when the stage began, so a
+  // screen that wants to say "still going" runs its own clock off that rather
+  // than making this file own a timer.
+  var PHASES = [
+    "Checking the browser",
+    "Loading the WebAssembly runtime",
+    "Downloading the mod",
+    "Starting the mod",
+    "Downloading the genes, breeds and textures",
+    "Registering the genes and breeds",
+    "Handing the textures to the pipeline"
+  ];
+
+  var watchers = [];
+  var state = { index: -1, detail: "", loaded: 0, total: 0, unit: "", since: 0, done: false, error: null };
+
+  function snapshot() {
+    return {
+      phases: PHASES.slice(),
+      index: state.index,
+      label: PHASES[state.index] || "",
+      detail: state.detail,
+      loaded: state.loaded,
+      total: state.total,
+      unit: state.unit,
+      since: state.since,
+      done: state.done,
+      error: state.error
+    };
+  }
+
+  function emit() {
+    var snap = snapshot();
+    for (var i = 0; i < watchers.length; i++) {
+      // A boot screen that throws must not take the boot down with it - the
+      // page can survive a broken progress line, not a broken load.
+      try { watchers[i](snap); } catch (e) { console.warn("[horsegenetics] progress watcher: " + e); }
+    }
+  }
+
+  function phase(index, detail) {
+    state.index = index;
+    state.detail = detail || "";
+    state.loaded = 0;
+    state.total = 0;
+    state.unit = "";
+    state.since = Date.now();
+    emit();
+  }
+
+  function measure(loaded, total, unit, detail) {
+    state.loaded = loaded;
+    state.total = total || 0;
+    state.unit = unit || "";
+    if (detail !== undefined) { state.detail = detail; }
+    emit();
+  }
+
+  /**
+   * Watch the boot. The callback is invoked at once with the state as it
+   * stands - a gene page's preview window may subscribe long after the
+   * carrot card on the same page started the load - and on every change after.
+   *
+   * @return a function that unsubscribes
+   */
+  function progress(fn) {
+    watchers.push(fn);
+    fn(snapshot());
+    return function () {
+      var i = watchers.indexOf(fn);
+      if (i >= 0) { watchers.splice(i, 1); }
+    };
+  }
+
+  /**
+   * Does this browser have WebAssembly GC? TeaVM's wasmGC backend needs it, so
+   * a browser without it cannot run this page at all.
+   *
+   * The probe is the smallest module that cannot be understood without GC: a
+   * type section holding one empty struct (0x5f). An engine that predates the
+   * proposal reads 0x5f as an unknown composite form and refuses the module.
+   *
+   * This NEVER gates the boot - a probe that is wrong about a browser that
+   * would in fact have worked would lock a reader out of the page for no
+   * reason. It only gets to explain a failure that has already happened.
+   */
+  function hasWasmGC() {
+    try {
+      return WebAssembly.validate(new Uint8Array(
+        [0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x03, 0x01, 0x5f, 0x00]));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function mb(bytes) {
+    return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + " MB"
+      : Math.round(bytes / 1024) + " KB";
+  }
+
+  /**
+   * Fetch a URL, reporting bytes as they arrive.
+   *
+   * The point is the progress, so the response is read a chunk at a time rather
+   * than with arrayBuffer(). Where there is no readable stream, or the server
+   * sent no Content-Length, it still resolves correctly - the caller just gets
+   * a stage with no bar, which is the same thing the page did before.
+   *
+   * CONTENT-LENGTH IS NOT THE SIZE OF WHAT ARRIVES. GitHub Pages gzips all of
+   * this, and the header then describes the COMPRESSED stream while the reader
+   * hands back decoded bytes - so believing it counts "2.1 MB of 607 KB" and
+   * fills the bar to three hundred per cent, which is worse than no number at
+   * all. Content-Encoding says when that is happening and is readable here (it
+   * is not a forbidden header), so a compressed response reports its bytes with
+   * no denominator. The overshoot check behind it is the belt: a proxy that
+   * strips the header still cannot make the decoded bytes fit inside it.
+   *
+   * @param onChunk called with (bytesSoFar, bytesTotalOrZeroIfUnknown)
+   */
+  function fetchTracked(url, onChunk) {
+    return fetch(url).then(function (res) {
+      if (!res.ok) {
+        throw new Error("could not load " + url + " (HTTP " + res.status + ")");
+      }
+      var encoding = (res.headers.get("content-encoding") || "").toLowerCase();
+      var compressed = encoding !== "" && encoding !== "identity";
+      var total = compressed ? 0 : (Number(res.headers.get("content-length") || 0) || 0);
+      if (!res.body || typeof res.body.getReader !== "function") {
+        return res.arrayBuffer().then(function (buf) {
+          onChunk(buf.byteLength, buf.byteLength);
+          return new Uint8Array(buf);
+        });
+      }
+      var reader = res.body.getReader();
+      var chunks = [];
+      var got = 0;
+      return (function pump() {
+        return reader.read().then(function (r) {
+          if (r.done) {
+            var out = new Uint8Array(got);
+            var at = 0;
+            for (var i = 0; i < chunks.length; i++) { out.set(chunks[i], at); at += chunks[i].length; }
+            return out;
+          }
+          chunks.push(r.value);
+          got += r.value.length;
+          if (total && got > total) { total = 0; }     // compressed after all
+          onChunk(got, total);
+          return pump();
+        });
+      })();
+    });
+  }
+
+  var DECODER = typeof TextDecoder === "function" ? new TextDecoder() : null;
+  function asText(bytes) {
+    if (DECODER) { return DECODER.decode(bytes); }
+    var s = "";                                   // no TextDecoder: old Safari
+    for (var i = 0; i < bytes.length; i += 8192) {
+      s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    }
+    return decodeURIComponent(escape(s));
+  }
+
+  /**
+   * Aggregate byte progress across downloads that run at the same time.
+   *
+   * They are deliberately concurrent - doing them one after another to get a
+   * tidy progress number would make the slow case, which is the only case that
+   * needs a progress number, slower still. So the bars are summed instead. The
+   * total only appears once every response has declared its length; until then
+   * the stage reports bytes with no denominator rather than a total that grows
+   * while the bar fills, which reads as going backwards.
+   */
+  function group(count) {
+    var loaded = [];
+    var totals = [];
+    var finished = 0;
+    for (var i = 0; i < count; i++) { loaded.push(0); totals.push(0); }
+    function report() {
+      var l = 0, t = 0, known = true;
+      for (var j = 0; j < count; j++) {
+        l += loaded[j];
+        if (totals[j]) { t += totals[j]; } else { known = false; }
+      }
+      measure(l, known ? t : 0, "bytes",
+        finished + " of " + count + " files");
+    }
+    return {
+      slot: function (i) {
+        return function (got, total) { loaded[i] = got; totals[i] = total; report(); };
+      },
+      /** For a download with no byte view of its own - an Image, say. */
+      whole: function (i, bytesWhenDone) {
+        return function () { loaded[i] = totals[i] = bytesWhenDone; finished++; report(); };
+      },
+      settle: function (i) { finished++; report(); }
+    };
+  }
+
   /**
    * Decode a PNG into ARGB ints, the layout every int[] in the pipeline uses.
    *
@@ -86,6 +303,13 @@ window.HG = window.HG || {};
     });
   }
 
+  /** decode(), but from bytes already in hand, so the download can be counted. */
+  function decodeFrom(bytes) {
+    var url = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+    function release(v) { URL.revokeObjectURL(url); return v; }
+    return decode(url).then(release, function (e) { release(); throw e; });
+  }
+
   function scriptTag(src) {
     return new Promise(function (resolve, reject) {
       var s = document.createElement("script");
@@ -113,27 +337,56 @@ window.HG = window.HG || {};
   }
 
   function boot() {
+    phase(0);
+    var gcOk = hasWasmGC();
+
     return scriptTag(RUNTIME)
       .then(function () {
+        phase(1);
         if (!window.TeaVM || !window.TeaVM.wasmGC) {
           throw new Error("the wasm runtime did not install itself");
         }
-        return window.TeaVM.wasmGC.load(WASM);
+        phase(2);
+        return fetchTracked(WASM, function (got, total) { measure(got, total, "bytes"); });
+      })
+      .then(function (wasm) {
+        // Nothing to report from in here: compiling and instantiating is one
+        // opaque call, and on a phone it is the second-slowest thing that
+        // happens, so the stage at least has to be named.
+        phase(3, mb(wasm.length) + " to compile - the page may sit still here");
+        // The runtime compiles a non-string argument directly rather than
+        // fetching it (see load() in web.wasm-runtime.js), which is what lets
+        // the download above be ours, and therefore countable.
+        return window.TeaVM.wasmGC.load(wasm);
       })
       .then(function (app) {
         api = app.exports;
         api.main([]);
+        phase(4);
+        var g = group(9);
+        function png(i, url) {
+          return fetchTracked(url, g.slot(i)).then(function (bytes) {
+            g.settle(i);
+            return decodeFrom(bytes);
+          });
+        }
+        function text(i, url) {
+          return fetchTracked(url, g.slot(i)).then(function (bytes) {
+            g.settle(i);
+            return asText(bytes);
+          });
+        }
+        // The order is load-bearing: the block below reads this array by index.
         return Promise.all([
-          decode(ASSETS.gradient), decode(ASSETS.bluepink),
-          decode(ASSETS.adult), decode(ASSETS.baby),
-          fetch(NAMES[0]).then(function (r) { return r.text(); }),
-          fetch(NAMES[1]).then(function (r) { return r.text(); }),
-          fetch(BREEDS).then(function (r) { return r.text(); }),
-          fetch(GENES).then(function (r) { return r.text(); }),
-          decode(ASSETS.greenpink)
+          png(0, ASSETS.gradient), png(1, ASSETS.bluepink),
+          png(2, ASSETS.adult), png(3, ASSETS.baby),
+          text(4, NAMES[0]), text(5, NAMES[1]),
+          text(6, BREEDS), text(7, GENES),
+          png(8, ASSETS.greenpink)
         ]);
       })
       .then(function (imgs) {
+        phase(5);
         // Genes first of all: registering one moves every gene after it in the
         // code order, and a breed names its loci by key, so both have to be in
         // before anything reads or writes a genotype.
@@ -148,6 +401,7 @@ window.HG = window.HG || {};
           console.warn("[horsegenetics] breeds: " + breedProblems[i]);
         }
         checkGenesArrived(imgs[7]);
+        phase(6);
         api.setNameWords(imgs[4], imgs[5]);
         api.setGradient(imgs[0].pixels, imgs[0].width, imgs[0].height);
         // Keyed exactly as LutContribution.lutResources() keys it, so the LUT
@@ -161,7 +415,25 @@ window.HG = window.HG || {};
         if (!api.ready()) {
           throw new Error("the pipeline did not accept its textures");
         }
+        state.done = true;
+        state.detail = "";
+        emit();
         return api;
+      })
+      .catch(function (err) {
+        // A browser with no WebAssembly GC cannot run this page at all, and the
+        // error it raises is about a byte at an offset. Say the real reason -
+        // but only here, after something has actually failed, so a probe that
+        // is wrong about a browser that would have worked costs nobody the page.
+        var message = String(err && err.message ? err.message : err);
+        if (!gcOk) {
+          message = "this browser does not support WebAssembly GC, which is what the mod is"
+            + " compiled to. Current Chrome, Edge, Firefox and Safari all have it; a browser"
+            + " more than a year or two old does not. (" + message + ")";
+        }
+        state.error = message;
+        emit();
+        throw new Error(message);
       });
   }
 
@@ -221,6 +493,9 @@ window.HG = window.HG || {};
   HG.java = {
     load: load,
     decode: decode,
+    progress: progress,
+    hasWasmGC: hasWasmGC,
+    size: mb,
     checkGeometry: checkGeometry,
     get api() { return api; }
   };

@@ -25,6 +25,9 @@ window.HG = window.HG || {};
       return fail("This page loads the mod as WebAssembly, which a browser will not fetch from a " +
         "file:// path. Serve the repository with any static server, or open the published wiki.");
     }
+    // Six and a half megabytes arrive before this page can draw a horse, which
+    // on a phone is a long time to look at a screen that says only "Loading".
+    if (HG.bootProgress) { HG.bootProgress.attach($("boot").querySelector(".boot-inner")); }
     HG.java.load().then(function (api) {
       return fetch("assets/marking-facts.json")
         .then(function (r) { return r.ok ? r.json() : null; })
