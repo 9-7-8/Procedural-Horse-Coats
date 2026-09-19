@@ -7,9 +7,17 @@
 // thing the wiki says they can.
 //
 // It had already happened. cowboy_hitch and horsemans_table shipped with
-// byte-identical shapeless inputs - 3 hair cloth + 2 braided rope + 2 fence -
-// and the wiki documented the shared recipe as though it were a feature, which
-// is how it survived being noticed. See known-gaps gap 92.
+// byte-identical shapeless inputs - at the time, hair cloth + braided rope +
+// fence - and the wiki documented the shared recipe as though it were a
+// feature, which is how it survived being noticed. See known-gaps gap 92.
+// (The cloth and the rope no longer exist; those recipes take raw horse hair
+// now. The collision is the point of the story, not the ingredients.)
+//
+// WHAT THIS CANNOT SEE: it reads only this mod's own recipe folder, so it is
+// blind to a collision with a vanilla or third-party recipe. The house rule -
+// every recipe carries a modded ingredient - was the guard for that, and the
+// double fence gates are now a deliberate exception to it (two vanilla gates
+// and nothing else). Nothing here will catch a pack that collides with them.
 //
 //   node neoforge-26.1.2/tools/check-recipes.mjs
 //

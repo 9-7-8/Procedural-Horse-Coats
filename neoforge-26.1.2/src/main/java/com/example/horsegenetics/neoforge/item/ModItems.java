@@ -23,10 +23,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * gene database, stalls/whistles) have something concrete to wire onto later.
  *
  * <ul>
- *   <li><b>{@link #HORSE_HAIR} / {@link #HORSE_HAIR_BUNDLE}</b> - the material
- *       floor. Hair is sheared off a horse (mechanic not built); 4 hair craft
- *       a bundle and back (roadmap &sect;12.2, first two rungs only - rope and
- *       cloth are not built).</li>
+ *   <li><b>{@link #HORSE_HAIR}</b> - the material floor, and the whole of it.
+ *       Sheared off an adult horse once a day ({@code HorseShearHandler}) and
+ *       taken directly by every recipe that wants hair. The bundle, rope and
+ *       cloth rungs above it were removed; see the comment on the field.</li>
  *   <li><b>Breeding carrots</b> ({@link #UNKNOWN_EPIGENETIC_SPLICE_CARROT},
  *       {@link #UNKNOWN_GENE_SPLICE_CARROT}, {@link #STABILIZER_CARROT},
  *       {@link #MAGNIFIER_CARROT}) - the four general breeding modifiers, plus
@@ -108,10 +108,13 @@ public final class ModItems {
             ITEMS.registerItem("preset_horse_spawn_egg", PresetHorseSpawnEggItem::new);
 
     // --- material floor (roadmap §12.2) -----------------------------------
+    // ONE RUNG, NOT FOUR. There was a chain here - 4 hair to a bundle, 3 bundles
+    // to a braided rope, 4 bundles to a hair cloth - and everything the mod built
+    // out of hair took a rope or a cloth rather than hair. That priced a double
+    // fence gate at twelve hairs and a cowboy hitch at sixty-eight, which is a
+    // shearing grind in front of a fence post. Owner's call: the intermediates
+    // are gone and every recipe that wanted one takes raw hair instead.
     public static final DeferredItem<Item> HORSE_HAIR = simple("horse_hair");
-    public static final DeferredItem<Item> HORSE_HAIR_BUNDLE = simple("horse_hair_bundle");
-    public static final DeferredItem<Item> BRAIDED_ROPE = simple("braided_rope");
-    public static final DeferredItem<Item> HAIR_CLOTH = simple("hair_cloth");
 
     // --- the four breeding carrots (roadmap §14.1) -------------------------
     public static final DeferredItem<Item> UNKNOWN_EPIGENETIC_SPLICE_CARROT = simple("unknown_epigenetic_splice_carrot");

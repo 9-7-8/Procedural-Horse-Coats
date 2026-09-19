@@ -1027,7 +1027,7 @@
 <tbody>
 <tr><td><strong>Stalls and holding pens</strong></td><td>Definition and its consumer are both built &mdash; see <a href="item-stall-signs.html">stall signs</a> and <a href="item-tickets.html">tickets</a>.</td><td><strong>Auto-return</strong> &mdash; a horse that takes itself home, rather than one sent by a ticket. Cleanup beyond breaking the exact sign block: rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash, which needs a <code>RenderLevelStageEvent</code> renderer against the changed 26.1.2 pipeline.</td></tr>
 <tr><td><strong>Whistles</strong></td><td>Built &mdash; three area whistles (16 / 32 / 64 blocks) and the bound, cross-dimension <a href="item-whistles.html#ender">ender whistle</a>.</td><td>Bond gating (&sect;<a href="#bond">14</a>) and walking rather than teleporting &mdash; see <a href="#callable-horses">callable horses</a>, below.</td></tr>
-<tr><td><strong>Double-wide gate</strong></td><td>Crafted via braided rope.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
+<tr><td><strong>Double-wide gate</strong></td><td>Built; two vanilla gates of the wood.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
 </tbody>
 </table>
 </div>
@@ -1065,7 +1065,7 @@
 <ul>
     <li><strong>Real textures.</strong> The four tickets share one, the three whistles
         share one, both stall signs borrow <code>minecraft:item/oak_sign</code>, and
-        <code>braided_rope</code> / <code>hair_cloth</code> have recipes but no art.</li>
+        the removed rope and cloth took their missing art with them.</li>
     <li><strong>Audit <code>item/ModItems</code> against the recipe folder</strong> and
         make sure every craftable item has a shapeless, at-least-one-modded-input recipe
         or a deliberate &ldquo;not craftable, obtained by X&rdquo; note. An item with no
@@ -1860,7 +1860,7 @@
     <strong>The mod does now generate horse-armour recipes, and they are deliberately outside
     the collision space.</strong> A <a href="compatibility.html#generated-what">generated
     armour</a> is an item in <em>this mod's</em> namespace whose recipe takes six of a modded
-    ingot plus a hair cloth, so no third-party recipe can claim the same output and no vanilla
+    ingot plus a horse hair, so no third-party recipe can claim the same output and no vanilla
     one the same inputs &mdash; which is <a href="items.html#rules">the house rule</a> applied
     to files nobody wrote by hand. The unbuilt work here is unchanged: a check that would
     catch it if that ever stopped being true.

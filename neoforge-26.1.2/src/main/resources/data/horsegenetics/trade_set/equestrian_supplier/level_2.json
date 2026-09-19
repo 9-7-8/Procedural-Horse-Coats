@@ -1,7 +1,7 @@
 {
   "amount": 3,
   "trades": [
-    "horsegenetics:equestrian_supplier/level_2/buy_hair_bundles",
+    "horsegenetics:equestrian_supplier/level_2/buy_horse_hair",
     "horsegenetics:equestrian_supplier/level_2/sell_blank_tickets",
     "horsegenetics:equestrian_supplier/level_2/sell_basic_whistle",
     "horsegenetics:equestrian_supplier/level_2/sell_empty_seed_jar"

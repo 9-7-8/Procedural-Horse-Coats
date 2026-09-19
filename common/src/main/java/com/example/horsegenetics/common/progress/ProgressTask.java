@@ -155,14 +155,10 @@ public enum ProgressTask {
             "Right-click one with shears. You are brushing it, not shearing it - the horse enjoys "
                     + "it, and the loose hair that comes away in the brush is the base material "
                     + "for nearly everything this mod adds. Once a day, one to three hair."),
-    BUNDLE_HAIR(Group.HUSBANDRY, "Bundle up horse hair",
-            "Nine hair into one bundle - how you store a season of grooming, and what the equestrian "
-                    + "supplier buys by the armful."),
-    CRAFT_ROPE(Group.HUSBANDRY, "Twist a braided rope",
-            "Horse hair into rope. It is the first thing hair is good for, and the gate on a good "
-                    + "deal of the rest."),
-    CRAFT_HAIR_CLOTH(Group.HUSBANDRY, "Weave hair cloth",
-            "Coarse cloth from braided rope. The equestrians pay better for it than for the rope."),
+    // BUNDLE_HAIR, CRAFT_ROPE and CRAFT_HAIR_CLOTH stood here. The three items
+    // they were about no longer exist - hair goes straight into whatever wants it
+    // - so the tasks could never be completed again, which is exactly what
+    // check-progress-tasks.mjs exists to catch. Deleted rather than reworded.
     BOND_HORSE(Group.HUSBANDRY, "Bond with a horse",
             "Ride it, feed it and keep it well. Bond builds slowly and unlocks how it behaves around you."),
     BOND_ATTENTIVE(Group.HUSBANDRY, "Bond a horse to attentive",

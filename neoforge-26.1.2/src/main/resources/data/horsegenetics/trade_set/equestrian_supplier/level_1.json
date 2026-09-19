@@ -2,7 +2,7 @@
   "amount": 3,
   "trades": [
     "horsegenetics:equestrian_supplier/level_1/buy_horse_hair",
-    "horsegenetics:equestrian_supplier/level_1/sell_horse_hair_bundle",
+    "horsegenetics:equestrian_supplier/level_1/sell_horse_hair",
     "horsegenetics:equestrian_supplier/level_1/sell_lead",
     "horsegenetics:equestrian_supplier/level_1/sell_carrot"
   ],

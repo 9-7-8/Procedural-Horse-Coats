@@ -222,7 +222,11 @@ final class GeneratedArmour {
         for (int i = 0; i < 6; i++) {
             ingredients.add(metal.itemId());
         }
-        ingredients.add(NS + ":hair_cloth");
+        // Was a hair cloth, which cost sixteen hairs. The cloth is gone; the
+        // padding is one hair now. This is still the modded ingredient that keeps
+        // the recipe inside the house rule (wiki/items.html#rules) - six of their
+        // metal would otherwise be an all-foreign ingredient list.
+        ingredients.add(NS + ":horse_hair");
 
         JsonObject result = new JsonObject();
         result.addProperty("id", NS + ":" + id);

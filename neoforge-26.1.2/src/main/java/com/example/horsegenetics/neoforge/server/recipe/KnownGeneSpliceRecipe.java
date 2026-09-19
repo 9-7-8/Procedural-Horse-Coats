@@ -42,8 +42,12 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
     public static final RecipeSerializer<KnownGeneSpliceRecipe> SERIALIZER =
             new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
+    /**
+     * Hair cloth used to be accepted here as well, as a way of paying the same
+     * cost in one slot. The cloth no longer exists, so hair is the only answer.
+     */
     private static boolean isHair(ItemStack s) {
-        return s.is(ModItems.HORSE_HAIR.get()) || s.is(ModItems.HAIR_CLOTH.get());
+        return s.is(ModItems.HORSE_HAIR.get());
     }
 
     /** The gene the paper in this grid documents, if the grid is otherwise a valid gene-carrot craft. */

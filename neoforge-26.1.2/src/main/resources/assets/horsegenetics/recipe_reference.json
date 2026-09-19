@@ -22,8 +22,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:acacia_fence_gate",
-        "minecraft:acacia_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:acacia_fence_gate"
       ],
       "out": "horsegenetics:acacia_double_fence_gate",
       "count": 1
@@ -135,8 +134,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:bamboo_fence_gate",
-        "minecraft:bamboo_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:bamboo_fence_gate"
       ],
       "out": "horsegenetics:bamboo_double_fence_gate",
       "count": 1
@@ -269,8 +267,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:birch_fence_gate",
-        "minecraft:birch_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:birch_fence_gate"
       ],
       "out": "horsegenetics:birch_double_fence_gate",
       "count": 1
@@ -399,26 +396,6 @@
       "count": 1
     },
     {
-      "id": "braided_rope",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:horse_hair_bundle",
-        "horsegenetics:horse_hair_bundle",
-        "horsegenetics:horse_hair_bundle"
-      ],
-      "out": "horsegenetics:braided_rope",
-      "count": 1
-    },
-    {
-      "id": "braided_rope_to_bundles",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:braided_rope"
-      ],
-      "out": "horsegenetics:horse_hair_bundle",
-      "count": 3
-    },
-    {
       "id": "carrot_combine",
       "kind": "custom",
       "type": "horsegenetics:carrot_combine"
@@ -462,8 +439,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:cherry_fence_gate",
-        "minecraft:cherry_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:cherry_fence_gate"
       ],
       "out": "horsegenetics:cherry_double_fence_gate",
       "count": 1
@@ -557,11 +533,11 @@
       "id": "cowboy_hitch",
       "kind": "shapeless",
       "in": [
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
-        "horsegenetics:braided_rope",
-        "horsegenetics:braided_rope",
-        "horsegenetics:braided_rope",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
         "#minecraft:fences",
         "#minecraft:fences"
       ],
@@ -590,8 +566,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:crimson_fence_gate",
-        "minecraft:crimson_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:crimson_fence_gate"
       ],
       "out": "horsegenetics:crimson_double_fence_gate",
       "count": 1
@@ -703,8 +678,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:dark_oak_fence_gate",
-        "minecraft:dark_oak_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:dark_oak_fence_gate"
       ],
       "out": "horsegenetics:dark_oak_double_fence_gate",
       "count": 1
@@ -869,27 +843,6 @@
       "count": 1
     },
     {
-      "id": "hair_cloth",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:horse_hair_bundle",
-        "horsegenetics:horse_hair_bundle",
-        "horsegenetics:horse_hair_bundle",
-        "horsegenetics:horse_hair_bundle"
-      ],
-      "out": "horsegenetics:hair_cloth",
-      "count": 1
-    },
-    {
-      "id": "hair_cloth_to_bundles",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:hair_cloth"
-      ],
-      "out": "horsegenetics:horse_hair_bundle",
-      "count": 4
-    },
-    {
       "id": "holding_pen_sign",
       "kind": "shapeless",
       "in": [
@@ -908,27 +861,6 @@
       ],
       "out": "horsegenetics:holding_pen_ticket",
       "count": 1
-    },
-    {
-      "id": "horse_hair_bundle",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:horse_hair",
-        "horsegenetics:horse_hair",
-        "horsegenetics:horse_hair",
-        "horsegenetics:horse_hair"
-      ],
-      "out": "horsegenetics:horse_hair_bundle",
-      "count": 1
-    },
-    {
-      "id": "horse_hair_from_bundle",
-      "kind": "shapeless",
-      "in": [
-        "horsegenetics:horse_hair_bundle"
-      ],
-      "out": "horsegenetics:horse_hair",
-      "count": 4
     },
     {
       "id": "interdimensional_ticket",
@@ -964,8 +896,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:jungle_fence_gate",
-        "minecraft:jungle_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:jungle_fence_gate"
       ],
       "out": "horsegenetics:jungle_double_fence_gate",
       "count": 1
@@ -1064,8 +995,8 @@
       "id": "leatherworkers_post",
       "kind": "shapeless",
       "in": [
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
         "#minecraft:fences",
         "#minecraft:fences",
         "minecraft:leather",
@@ -1118,8 +1049,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:mangrove_fence_gate",
-        "minecraft:mangrove_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:mangrove_fence_gate"
       ],
       "out": "horsegenetics:mangrove_double_fence_gate",
       "count": 1
@@ -1223,8 +1153,8 @@
       "id": "metalsmiths_post",
       "kind": "shapeless",
       "in": [
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
         "#minecraft:fences",
         "#minecraft:fences",
         "minecraft:iron_ingot",
@@ -1256,8 +1186,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:oak_fence_gate",
-        "minecraft:oak_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:oak_fence_gate"
       ],
       "out": "horsegenetics:oak_double_fence_gate",
       "count": 1
@@ -1369,8 +1298,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:pale_oak_fence_gate",
-        "minecraft:pale_oak_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:pale_oak_fence_gate"
       ],
       "out": "horsegenetics:pale_oak_double_fence_gate",
       "count": 1
@@ -1474,8 +1402,8 @@
       "id": "scientists_post",
       "kind": "shapeless",
       "in": [
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
         "#minecraft:fences",
         "#minecraft:fences",
         "minecraft:glass_bottle",
@@ -1507,8 +1435,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:spruce_fence_gate",
-        "minecraft:spruce_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:spruce_fence_gate"
       ],
       "out": "horsegenetics:spruce_double_fence_gate",
       "count": 1
@@ -1623,12 +1550,12 @@
       "id": "suppliers_post",
       "kind": "shapeless",
       "in": [
-        "horsegenetics:hair_cloth",
-        "horsegenetics:hair_cloth",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
         "#minecraft:fences",
         "#minecraft:fences",
-        "horsegenetics:braided_rope",
-        "horsegenetics:braided_rope",
         "minecraft:carrot"
       ],
       "out": "horsegenetics:suppliers_post",
@@ -1689,8 +1616,7 @@
       "kind": "shapeless",
       "in": [
         "minecraft:warped_fence_gate",
-        "minecraft:warped_fence_gate",
-        "horsegenetics:braided_rope"
+        "minecraft:warped_fence_gate"
       ],
       "out": "horsegenetics:warped_double_fence_gate",
       "count": 1

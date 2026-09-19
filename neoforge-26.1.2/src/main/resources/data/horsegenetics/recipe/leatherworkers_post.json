@@ -2,8 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "horsegenetics:hair_cloth",
-    "horsegenetics:hair_cloth",
+    "horsegenetics:horse_hair",
+    "horsegenetics:horse_hair",
     "#minecraft:fences",
     "#minecraft:fences",
     "minecraft:leather",

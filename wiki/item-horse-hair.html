@@ -16,11 +16,11 @@
 <article class="doc">
 
 <p class="eyebrow">Item <span class="sep">/</span> material</p>
-<h1>Horse hair &amp; the material chain</h1>
+<h1>Horse hair</h1>
 <p class="lede">
-    Horse hair is the base material for almost everything the mod adds. You get it
-    by shearing a horse, and nearly every other item on the wiki is made from it or
-    from something made from it.
+    Horse hair is the base material for almost everything the mod adds, and the only
+    one &mdash; there is nothing you refine it into first. You get it by shearing a
+    horse, and nearly every other item on the wiki takes it directly.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -46,18 +46,36 @@
     </p>
 </div>
 
-<h2 id="chain">What you can make from it</h2>
+<h2 id="chain">There is no chain &mdash; hair goes in raw</h2>
 
-<div class="table-wrap">
-<table>
-<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Reverses to</th></tr></thead>
-<tbody>
-<tr><td><strong>Horse hair</strong></td><td>Shear an adult horse &rarr; 1&ndash;3</td><td>&mdash;</td></tr>
-<tr><td><strong>Hair bundle</strong></td><td>4 &times; horse hair</td><td>4 &times; horse hair</td></tr>
-<tr><td><strong>Braided rope</strong></td><td>3 &times; hair bundle</td><td>3 &times; hair bundle</td></tr>
-<tr><td><strong>Hair cloth</strong></td><td>4 &times; hair bundle</td><td>4 &times; hair bundle</td></tr>
-</tbody>
-</table>
+<p>
+    Hair used to be the bottom of a ladder: four hair made a <strong>hair bundle</strong>,
+    three bundles a <strong>braided rope</strong>, four bundles a <strong>hair cloth</strong>,
+    and the things you actually wanted took the rope or the cloth rather than the hair. All
+    three are gone. <strong>Whatever a recipe wants hair for, it takes horse hair.</strong>
+</p>
+
+<div class="note">
+    <span class="label">What that changed, in hair</span>
+    <p>
+        The ladder was quietly expensive, because the cost compounded. A rope was twelve
+        hairs and a cloth sixteen, so:
+    </p>
+    <div class="table-wrap">
+    <table>
+    <thead><tr><th>Item</th><th>Was</th><th>Now</th></tr></thead>
+    <tbody>
+    <tr><td><a href="item-double-gates.html">Double fence gate</a></td><td>2 gates + <strong>12 hair</strong></td><td>2 gates, no hair at all</td></tr>
+    <tr><td><a href="item-equestrian-posts.html">Equestrian post</a></td><td><strong>32 hair</strong> + fences + goods</td><td><strong>2 hair</strong> + fences + goods</td></tr>
+    <tr><td>Supplier&rsquo;s post</td><td><strong>56 hair</strong> + fences + carrot</td><td><strong>4 hair</strong> + fences + carrot</td></tr>
+    <tr><td><a href="villagers.html#workstation">Cowboy hitch</a></td><td><strong>68 hair</strong> + fences</td><td><strong>5 hair</strong> + fences</td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p>
+        Hair is sheared one to three at a time, once per horse per day, so sixty-eight hair
+        for one hitching post was several real days of brushing. Owner&rsquo;s call.
+    </p>
 </div>
 
 <div class="note">
@@ -67,9 +85,11 @@
             puzzle. The one exception is the
             <a href="item-transfer-papers.html">blank transfer paper</a>.</li>
         <li>Every recipe uses at least one modded item and makes a modded item, so
-            nothing here can clash with a vanilla recipe.</li>
-        <li>The material chain <strong>reverses</strong>: a bundle goes back to four
-            hairs, a rope back to three bundles. Nothing you craft is a trap.</li>
+            nothing here can clash with a vanilla recipe. The one exception is the
+            <a href="items.html#gate-exception">double fence gates</a>, which are two
+            vanilla gates and nothing else.</li>
+        <li>Nothing you craft is a trap, because there is nothing to convert and so no
+            conversion to regret.</li>
     </ul>
 </div>
 
@@ -83,8 +103,8 @@
         <a href="item-transfer-papers.html">transfer papers</a>.</li>
     <li>All five village posts &mdash; the cowboy&rsquo;s hitch and
         <a href="item-equestrian-posts.html">the four posts</a> the equestrians work at
-        &mdash; which each need two hair cloth, and so hair cloth and fences rather than
-        raw hair.</li>
+        &mdash; each a couple of hair and a couple of fences, plus whatever that
+        equestrian works with.</li>
 </ul>
 </section>
 
@@ -120,14 +140,42 @@
     </p>
 </div>
 
-<h2 id="gaps">Known gaps</h2>
+<h2 id="removal">The bundle, the rope and the cloth were removed</h2>
 
-<ul>
-    <li><code>braided_rope</code> and <code>hair_cloth</code> have recipes but no real
-        textures.</li>
-    <li>There is no <strong>double-wide gate</strong> block, which the design document
-        lists as a braided-rope product.</li>
-</ul>
+<p>
+    Three items stood above hair: <code>horse_hair_bundle</code> (4 hair),
+    <code>braided_rope</code> (3 bundles) and <code>hair_cloth</code> (4 bundles), each with
+    a reverse recipe. Everything substantial took a rope or a cloth rather than hair, so the
+    real prices compounded out of sight &mdash; a double fence gate at twelve hair, a cowboy
+    hitch at sixty-eight. All three items, their six chain recipes, their lang keys, models
+    and item definitions are deleted, along with <code>horse_hair_bundle.png</code> (the rope
+    and the cloth never had art of their own; both borrowed it).
+</p>
+
+<p>
+    <strong>Substitution was flat, one for one</strong> &mdash; one rope or one cloth became
+    one hair &mdash; which is what makes the new prices so much lower. A shapeless recipe
+    holds nine items, so preserving the old cost was not on the table even in principle.
+</p>
+
+<p>
+    Three progress tasks went with them: <code>BUNDLE_HAIR</code>, <code>CRAFT_ROPE</code>
+    and <code>CRAFT_HAIR_CLOTH</code> were about crafting items that no longer exist, and a
+    task nothing can complete is exactly what
+    <code>check-progress-tasks.mjs</code> exists to catch.
+    <code>KnownGeneSpliceRecipe</code> also stopped accepting cloth as an alternative to
+    hair, and the husbandry tutorial step lost three of its five icons.
+</p>
+
+<p>
+    <strong>Six villager trades dealt in the removed items</strong> and were folded into the
+    hair ladder rather than deleted. Both professions already improved their buy rate by
+    level, and in raw-hair terms the intermediate trades had all been <em>worse</em> than the
+    supplier&rsquo;s level-1 hair trade &mdash; 32 to 48 hair per emerald against 16. The
+    supplier now buys hair at 16 / 14 / 12 / 10 / 8 per emerald across its five levels, the
+    leatherworker at 14 (level 2) and 10 (level 4), and the supplier&rsquo;s level-1 sale of
+    a bundle is now four hair for an emerald. See <a href="villagers.html">villagers</a>.
+</p>
 
 <h3 id="verified">Verified</h3>
 

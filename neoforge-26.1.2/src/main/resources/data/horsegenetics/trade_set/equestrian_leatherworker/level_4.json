@@ -1,7 +1,7 @@
 {
   "amount": 3,
   "trades": [
-    "horsegenetics:equestrian_leatherworker/level_4/buy_hair_cloth",
+    "horsegenetics:equestrian_leatherworker/level_4/buy_horse_hair",
     "horsegenetics:equestrian_leatherworker/level_4/sell_dyed_leather_horse_armor",
     "horsegenetics:equestrian_leatherworker/level_4/sell_dyed_saddle"
   ],

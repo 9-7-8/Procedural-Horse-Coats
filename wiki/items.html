@@ -31,8 +31,9 @@
 <table>
 <thead><tr><th>Item</th><th>What it is for</th></tr></thead>
 <tbody>
-<tr><td><a href="item-horse-hair.html"><strong>Horse hair</strong></a>, hair bundle, braided rope, hair cloth</td>
-    <td>The material everything else is made from. Shear a horse for it.</td></tr>
+<tr><td><a href="item-horse-hair.html"><strong>Horse hair</strong></a></td>
+    <td>The material everything else is made from, taken raw by every recipe that
+        wants it. Shear a horse for it.</td></tr>
 <tr><td><a href="item-breeding-carrots.html"><strong>Breeding carrots</strong></a> &mdash; stabilizer, magnifier, epigenetic splice, gene splice</td>
     <td>Fed to a parent before breeding; changes what it passes on to the foal.</td></tr>
 <tr><td><a href="item-splice-carrots.html"><strong>Splice carrots</strong></a> &mdash; known, unknown, and five themed</td>
@@ -110,15 +111,38 @@
         <li><strong>At least one modded ingredient</strong> in every recipe, and every
             output is a modded item, so nothing can collide with a vanilla or
             third-party recipe. <strong>That holds for the generated ones too</strong>
-            &mdash; a modded wood&rsquo;s gate takes a braided rope and a modded metal&rsquo;s
-            armour takes a hair cloth, and both output an item in this mod&rsquo;s own
-            namespace, which is what keeps them off
+            &mdash; a modded metal&rsquo;s armour takes a horse hair for its padding, and
+            outputs an item in this mod&rsquo;s own namespace, which is what keeps it off
             <a href="compatibility.html#bhar">BHAR</a>&rsquo;s recipe space and everyone
-            else&rsquo;s.</li>
-        <li>The material chain is <strong>reversible</strong> &mdash; a bundle goes back
-            to four hairs, a rope back to three bundles &mdash; so nothing is a trap.</li>
+            else&rsquo;s. <strong>The one exception is the
+            <a href="item-double-gates.html#recipe">double fence gates</a></strong>, which
+            are two vanilla gates and nothing else &mdash; see below.</li>
+        <li><strong>Horse hair goes in raw.</strong> There is no material chain to climb:
+            whatever a recipe wants hair for, it takes
+            <a href="item-horse-hair.html">horse hair</a>. Nothing is a trap because there
+            is nothing to convert and no conversion to undo.</li>
     </ul>
 </div>
+
+<h3 id="gate-exception">The double gates are outside the modded-ingredient rule</h3>
+
+<p>
+    Every other recipe in the mod carries something of ours. A
+    <a href="item-double-gates.html">double fence gate</a> is two vanilla fence gates of the
+    wood, shapeless, and that is the whole recipe. It took a braided rope for the hinge until
+    the rope was removed; the owner&rsquo;s call was that a gate should not want horse hair at
+    all, and a fence line is the one thing you build dozens of.
+</p>
+
+<p>
+    <strong>Why the risk is judged acceptable:</strong> nothing in vanilla consumes a fence
+    gate &mdash; every vanilla recipe that mentions one produces it &mdash; so there is no
+    collision to have today. What remains is a third-party mod shipping its own two-gate
+    shapeless recipe, which would make one of the two uncraftable with nothing logged.
+    <code>check-recipes.mjs</code> reads only this mod&rsquo;s folder and cannot see it. If a
+    modded pack ever reports a double gate that will not craft, this is the first place to
+    look.
+</p>
 
 <h2 id="notworking">What does not work yet</h2>
 
@@ -314,8 +338,7 @@
     <li><strong>Art.</strong> The four <a href="item-tickets.html">tickets</a> share one
         texture, the four <a href="item-whistles.html">whistles</a> share one, both
         <a href="item-stall-signs.html">stall signs</a> borrow
-        <code>minecraft:item/oak_sign</code>, and <code>braided_rope</code> /
-        <code>hair_cloth</code> have recipes but no real textures. The blank
+        <code>minecraft:item/oak_sign</code>. The blank
         <a href="item-transfer-papers.html">transfer paper</a> reuses the
         <a href="item-research-papers.html">research-paper</a> texture.</li>
     <li><strong>A stall is only ever read by a ticket.</strong> There is no

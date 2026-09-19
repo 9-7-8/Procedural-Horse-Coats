@@ -141,11 +141,10 @@ final class DebugYardGameplay {
         // The whistles need DISTANCE, and the yard's own walkway is the only
         // straight line in the dimension long enough to give it to them: from
         // this door to the back wall is most of two hundred blocks.
-        chest(level, gy, x0 + 5, z0 + 2, "WHISTLES + ROPE", List.of(
+        chest(level, gy, x0 + 5, z0 + 2, "WHISTLES + TICKETS", List.of(
                 stack(ModItems.BASIC_WHISTLE.get(), 1),
                 stack(ModItems.GOLDEN_WHISTLE.get(), 1),
                 stack(ModItems.ECHO_WHISTLE.get(), 1),
-                stack(ModItems.BRAIDED_ROPE.get(), 4),
                 stack(ModItems.INTERDIMENSIONAL_TICKET.get(), 4),
                 stack(ModItems.BASIC_TICKET.get(), 4),
                 stack(ModItems.BLANK_TICKET.get(), 4)));
@@ -153,9 +152,7 @@ final class DebugYardGameplay {
         chest(level, gy, x0 + 8, z0 + 2, "SEED JARS + HAY", List.of(
                 stack(ModItems.EMPTY_SEED_JAR.get(), 4),
                 stack(ModItems.STALLION_SEED_JAR.get(), 4),
-                stack(ModItems.HORSE_HAIR.get(), 16),
-                stack(ModItems.HORSE_HAIR_BUNDLE.get(), 4),
-                stack(ModItems.HAIR_CLOTH.get(), 4),
+                stack(ModItems.HORSE_HAIR.get(), 64),
                 new ItemStack(Items.HAY_BLOCK, 64),
                 new ItemStack(Items.OAK_FENCE, 64),
                 new ItemStack(Items.OAK_FENCE_GATE, 16),
@@ -440,10 +437,7 @@ final class DebugYardGameplay {
                 new ItemStack(Items.SHEARS, 2),
                 new ItemStack(Items.STICK, 4),
                 new ItemStack(Items.IRON_SWORD, 1),
-                stack(ModItems.HORSE_HAIR.get(), 8),
-                stack(ModItems.HORSE_HAIR_BUNDLE.get(), 4),
-                stack(ModItems.HAIR_CLOTH.get(), 4),
-                stack(ModItems.BRAIDED_ROPE.get(), 4)));
+                stack(ModItems.HORSE_HAIR.get(), 64)));
 
         double mid = (z0 + z1) / 2.0;
         DebugTestYard.stock(level, gy, x0 + 5.0, mid, "horsegenetics.potion_milk",

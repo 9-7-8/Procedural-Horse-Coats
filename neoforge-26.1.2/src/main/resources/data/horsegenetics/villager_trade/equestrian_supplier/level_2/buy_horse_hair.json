@@ -1,12 +1,12 @@
 {
   "wants": {
-    "id": "horsegenetics:braided_rope",
-    "count": 4
+    "id": "horsegenetics:horse_hair",
+    "count": 14
   },
   "gives": {
     "id": "minecraft:emerald",
     "count": 1
   },
   "max_uses": 12,
-  "xp": 10
+  "xp": 5
 }

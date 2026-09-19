@@ -728,8 +728,8 @@
         <a href="known-gaps.html#gap-272">gap 272</a>, and the single most likely thing to be
         broken, because <em>it has never once happened</em>. Every run so far skipped every
         recipe. <strong>Pass:</strong> no recipe error in the log at world load, and two of that
-        mod's fence gates plus a braided rope gives you the double gate in a crafting grid;
-        six of their ingot plus a hair cloth gives you the armour.
+        mod's fence gates alone gives you the double gate in a crafting grid;
+        six of their ingot plus one horse hair gives you the armour.
         <strong>Fail:</strong> a wall of red naming <em>their</em> mod id at datapack load. If
         instead the log says <code>declares ... but never registers it</code>, that is the skip
         working as designed and the recipe is still untested &mdash; try a different mod.</li>
@@ -1287,6 +1287,26 @@
         <em>boundary</em> rather than its floor, so the check looks at the cells around each floor
         column &mdash; a stall whose gate is set back oddly is the case that would miss.</li>
     
+    <li><strong>A double gate crafts from two vanilla gates and nothing else.</strong> Put two
+        oak fence gates in the grid. <strong>Pass:</strong> an Oak Double Fence Gate comes out,
+        with no horse hair anywhere in the recipe. Then check a
+        <a href="compatibility.html#generated">modded wood</a> the same way if you have one
+        installed &mdash; that recipe is written at run time by a
+        <a href="item-double-gates.html#generated-drift">separate generator</a> and drifts
+        silently.</li>
+
+    <li><strong>The hair chain is gone and nothing that wanted it is stranded.</strong> The
+        bundle, the braided rope and the hair cloth were deleted; craft each of the five
+        <a href="item-equestrian-posts.html">posts</a> and the
+        <a href="villagers.html#workstation">cowboy hitch</a> from raw
+        <a href="item-horse-hair.html">horse hair</a>. <strong>Pass:</strong> all six craft, at
+        2&ndash;5 hair plus their own filling. <strong>Also check the equestrians:</strong> six
+        villager trades used to deal in the removed items and now buy hair on a ladder &mdash;
+        supplier 16/14/12/10/8 per emerald by level, leatherworker 14 at level 2 and 10 at level
+        4, and the supplier&rsquo;s level-1 sale is 4 hair for an emerald. A trade that wants an
+        item that no longer exists would simply not appear. <em>These counts were set by
+        judgement, not by the owner &mdash; say if they want retuning.</em></li>
+
     <li><strong>Breaking one in creative gives you nothing.</strong> In <em>creative</em>, break a
         double gate &mdash; once striking each half, since they are not symmetric.
         <strong>Pass:</strong> both blocks go and no item drops either time.
@@ -2098,9 +2118,9 @@
     <li><strong>The three written tickets tick per tier.</strong> A basic ticket ticks only
         <em>Send a horse to its stall</em>; a bound and an interdimensional one each also tick
         their own.</li>
-    <li><strong>The four crafted tasks</strong> &mdash; blank ticket, hair bundle, braided rope,
-        hair cloth &mdash; tick at a crafting table, including when the result is shift-clicked
-        out as a stack.</li>
+    <li><strong>The crafted tasks</strong> &mdash; the blank ticket and the gene carrot &mdash;
+        tick at a crafting table, including when the result is shift-clicked out as a stack.
+        (The hair-bundle, braided-rope and hair-cloth tasks were deleted with their items.)</li>
     <li><strong>Feeding by hand now ticks two boxes at once</strong> (<em>Bond with a horse</em>
         and <em>Feed a horse by hand</em>), and a favourite food ticks a third.</li>
     <li><strong>The vet's kit, gelding, and a seed jar used on a mare</strong> each tick.</li>

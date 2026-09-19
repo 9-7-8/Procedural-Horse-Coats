@@ -435,16 +435,15 @@ public final class TutorialPage {
                                 + "shearing it: the horse enjoys it, you get one to three horse hair, "
                                 + "and it is worth two bond. Once a day, per horse.",
                         "Do this early and often. Horse hair is the base material for nearly "
-                                + "everything this mod adds - rope and cloth, the whistles, the stall "
-                                + "signs and the tickets, the seed jars, the transfer papers, the "
-                                + "research shelf, the vet's kit and every breeding carrot. Almost "
-                                + "nothing else can be made without it."),
-                List.of(new ItemStack(Items.SHEARS), new ItemStack(ModItems.HORSE_HAIR.get()),
-                        new ItemStack(ModItems.HORSE_HAIR_BUNDLE.get()),
-                        new ItemStack(ModItems.BRAIDED_ROPE.get()),
-                        new ItemStack(ModItems.HAIR_CLOTH.get())), Art.NONE,
-                List.of(ProgressTask.SHEAR_HORSE, ProgressTask.BUNDLE_HAIR,
-                        ProgressTask.CRAFT_ROPE, ProgressTask.CRAFT_HAIR_CLOTH)));
+                                + "everything this mod adds - the whistles, the stall signs and the "
+                                + "tickets, the seed jars, the transfer papers, the research shelf, "
+                                + "the vet's kit, the equestrian posts and every breeding carrot. "
+                                + "Almost nothing else can be made without it.",
+                        "It goes in raw. There is no bundling or braiding step to get through "
+                                + "first - whatever a recipe wants hair for, it wants hair."),
+                List.of(new ItemStack(Items.SHEARS), new ItemStack(ModItems.HORSE_HAIR.get())),
+                Art.NONE,
+                List.of(ProgressTask.SHEAR_HORSE)));
 
         husbandry.add(new Step("Bonding",
                 List.of("Every horse you tame keeps a private opinion of you: a number from 0 to 100, "

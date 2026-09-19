@@ -1,7 +1,7 @@
 {
   "wants": {
-    "id": "horsegenetics:hair_cloth",
-    "count": 2
+    "id": "horsegenetics:horse_hair",
+    "count": 10
   },
   "gives": {
     "id": "minecraft:emerald",

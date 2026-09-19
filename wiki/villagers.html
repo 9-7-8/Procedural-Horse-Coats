@@ -963,7 +963,7 @@
     <td>Leatherworker&rsquo;s Post</td>
     <td>Russet</td>
     <td>Saddles and leather horse armour, and nothing that is not tack. Buys leather and
-        hair cloth.</td>
+        horse hair.</td>
 </tr>
 <tr>
     <td><strong>Equestrian Scientist</strong><br><code>equestrian_scientist</code></td>
@@ -1042,10 +1042,10 @@
 
 <p>
     <strong>All five are shapeless, and all five are distinct.</strong> Every one takes
-    two hair cloth and two fences of any kind; what is left of the seven slots is the
+    two horse hair and two fences of any kind; what is left of the seven slots is the
     part that says which post it is &mdash; leather for the leatherworker, glass bottles
-    and paper for the scientist, braided rope and a carrot for the supplier, iron for the
-    metalsmith, and rope for the hitch.
+    and paper for the scientist, two more hair and a carrot for the supplier, iron for the
+    metalsmith, and three more hair for the hitch.
     <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses two recipes that claim
     the same inputs, which is what keeps that true as they are retuned.
 </p>
@@ -1368,14 +1368,17 @@
     <td><strong>1 Novice</strong></td>
     <td>Buys leather. Plain saddle, plain leather horse armour.</td>
     <td>Buys carrots. Vet kit, stabilizer, magnifier.</td>
-    <td>Buys horse hair. Hair bundle, leads, carrots.</td>
+    <td>Buys horse hair at 16 to the emerald, and sells it back 4 at a time. Leads,
+        carrots.</td>
     <td>Buys coal and iron. Iron horse armour.</td>
 </tr>
 <tr>
     <td><strong>2 Apprentice</strong></td>
-    <td>Buys hair cloth. Saddle and armour dyed from the <em>flowers</em> palette.</td>
+    <td>Buys horse hair, 14 to the emerald. Saddle and armour dyed from the
+        <em>flowers</em> palette.</td>
     <td>Buys seed jars. The unknown gene and epigenetic splices, the dilution splice.</td>
-    <td>Buys hair bundles. Basic whistle, blank tickets, empty seed jar.</td>
+    <td>Buys horse hair, 14 to the emerald. Basic whistle, blank tickets, empty seed
+        jar.</td>
     <td>Buys coal and copper. Iron horse armour, cheaper.</td>
 </tr>
 <tr>
@@ -1383,16 +1386,17 @@
     <td>Buys leather. Saddle and armour from the <em>garden</em> palette.</td>
     <td>A random common gene carrot, the marking splice, a common
         <a href="item-spawn-eggs.html#breed">breed egg</a>.</td>
-    <td>Buys braided rope. Golden whistle, blank transfer paper, golden carrots.</td>
+    <td>Buys horse hair, 12 to the emerald. Golden whistle, blank transfer paper,
+        golden carrots.</td>
     <td>Buys gold. Golden horse armour, iron horse armour.</td>
 </tr>
 <tr>
     <td><strong>4 Expert</strong></td>
-    <td>Buys hair cloth. Armour from the <em>kiln</em> palette, saddle from
-        <em>deep</em>.</td>
+    <td>Buys horse hair, 10 to the emerald. Armour from the <em>kiln</em> palette,
+        saddle from <em>deep</em>.</td>
     <td>A random uncommon gene carrot, the magical splice, an uncommon breed egg.</td>
-    <td>Buys hair cloth. A random common/uncommon research paper, echo whistle, stall
-        sign.</td>
+    <td>Buys horse hair, 10 to the emerald. A random common/uncommon research paper,
+        echo whistle, stall sign.</td>
     <td>Buys diamonds. Golden and diamond horse armour.</td>
 </tr>
 <tr>
@@ -1667,7 +1671,7 @@
     <strong>No two of the posts have the same recipe</strong> (first checked 2026-09-09, and the check is
     what still holds it). The hitch and the retired horseman's table were shapeless over the same seven
     items, so one of the two blocks was unobtainable in survival at all. Every post since has been given a
-    filling of its own on top of the shared two hair cloth and two fences, and
+    filling of its own on top of the shared two horse hair and two fences, and
     <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses two recipes in the same slot, and a vanilla
     recipe with no result, exempting the mod's custom serialisers &mdash; so the five
     <a href="#workstation">posts</a> cannot collide as they are retuned.
