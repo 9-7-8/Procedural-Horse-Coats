@@ -711,6 +711,8 @@ public final class HorseInfoScreen extends Screen {
      *
      * <p>The wagon is the yardstick because it is the extreme. A figure for the
      * animal cart would flatter every horse alive and separate none of them.
+     * Empty and full, because since cargo started counting towards the load
+     * those are two quite different animals' worth of work.
      *
      * <p>Haulage comes off the synced {@code CART_METRES} attachment rather
      * than any player statistic: it is a fact about the horse, and it is the
@@ -728,6 +730,13 @@ public final class HorseInfoScreen extends Screen {
                 * CartDraft.retention(t.pull(), speed, CartKind.WAGON.load()));
         c.pair("Hauling a wagon", keptPercent + "% of its speed",
                 keptPercent >= 70 ? GOOD : keptPercent < 45 ? BAD : VALUE);
+        // The empty figure alone stopped being the whole story once cargo
+        // counted: the second line is the one that decides whether this horse
+        // can take the trade run, and it is where a weak horse falls apart.
+        int ladenPercent = (int) Math.round(100.0 * CartDraft.retention(t.pull(), speed,
+                CartDraft.loaded(CartKind.WAGON.load(), CartKind.WAGON.cargoShare(), 1.0)));
+        c.pair("...loaded to the roof", ladenPercent + "% of its speed",
+                ladenPercent >= 70 ? GOOD : ladenPercent < 45 ? BAD : VALUE);
         c.pair("Carries", CartDraft.carriesTwoRiders(t.pull()) ? "two riders" : "one rider");
 
         if (horse != null) {

@@ -52,9 +52,40 @@ public abstract class AbstractDrawnInventoryEntity extends AbstractDrawnEntity i
         this.itemStacks.setOnContentsChanged(this::onContentsChanged);
     }
 
-    protected float getFillLevel() {
-        float slots = getItemStacks().stream().filter(s -> !s.isEmpty()).count();
-        return slots / containerSize;
+    /**
+     * <b>How full this cart is</b>, by what is in the slots rather than by how
+     * many slots are touched: a slot holding one arrow out of sixty-four counts
+     * as a sixty-fourth of a slot, not as a full one.
+     *
+     * <p>That distinction is the difference between "the cart is loaded" and
+     * "the cart has been opened". Counting occupied slots would make a horse
+     * labour under nine single torches, and would let a player carry fifty-four
+     * stacks of gold blocks for the same price. It is the slower of the two
+     * calculations and it is only asked once a second, while hitched - see
+     * {@code AbstractDrawnEntity.refreshDraught}.
+     */
+    @Override
+    protected double fillLevel() {
+        return this.containerSize <= 0 ? 0.0 : this.filledSlots(this.containerSize) / this.containerSize;
+    }
+
+    /**
+     * How many slots' worth of goods sit in the first {@code limit} slots, as a
+     * fraction of a full stack each. Split out because the wagon measures itself
+     * against the rows it has actually had chests fitted for, not against the
+     * twelve it could hold.
+     */
+    protected double filledSlots(final int limit) {
+        final int end = Math.min(limit, this.getItemStacks().size());
+        double filled = 0.0;
+        for (int i = 0; i < end; i++) {
+            final ItemStack stack = this.getItemStacks().get(i);
+            if (!stack.isEmpty()) {
+                final int max = Math.max(1, stack.getMaxStackSize());
+                filled += Math.min(1.0, stack.getCount() / (double) max);
+            }
+        }
+        return filled;
     }
 
     public boolean stillValid(@NotNull Player player) {

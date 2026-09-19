@@ -139,6 +139,10 @@ public final class CartsClient {
      * The cart tooltip. Two lines about the vehicle, and - the part that is
      * ours - <b>what the load costs</b>, so a player can compare a wagon against
      * a supply cart before building either.
+     *
+     * <p>Two numbers on a vehicle that carries anything: empty and full. One
+     * number would be a lie on a supply cart, which is most of the time the
+     * heavier half of that pair.
      */
     private static void onTooltip(final ItemTooltipEvent event) {
         if (!(event.getItemStack().getItem() instanceof CartItem cart)) {
@@ -154,12 +158,22 @@ public final class CartsClient {
         lines.add(Component.translatable(key + ".tooltip2").withStyle(ChatFormatting.GRAY));
         // An ordinary horse's retention on this load, as a percentage: the one
         // number that says "this is the heavy one" without a wiki page.
-        final int percent = (int) Math.round(100.0 * CartDraft.retention(
+        final var kind = cart.getCartType();
+        lines.add(Component.translatable("item.horsegenetics.cart.draught", retentionPercent(kind.load()))
+                .withStyle(ChatFormatting.DARK_GRAY));
+        if (kind.cargoShare() > 0.0) {
+            final double full = CartDraft.loaded(kind.load(), kind.cargoShare(), 1.0);
+            lines.add(Component.translatable("item.horsegenetics.cart.cargo", retentionPercent(full))
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
+    }
+
+    /** What an ordinary horse keeps on this load, rounded for a tooltip. */
+    private static int retentionPercent(final double load) {
+        return (int) Math.round(100.0 * CartDraft.retention(
                 com.example.horsegenetics.common.trait.HorseTraits.BASE_PULL,
                 com.example.horsegenetics.common.trait.HorseTraits.BASE_SPEED,
-                cart.getCartType().load()));
-        lines.add(Component.translatable("item.horsegenetics.cart.draught", percent)
-                .withStyle(ChatFormatting.DARK_GRAY));
+                load));
     }
 
     private static void onClientTick(final ClientTickEvent.Post event) {

@@ -74,6 +74,32 @@ public class WagonEntity extends AbstractDrawnInventoryEntity {
         return getChestCount() * 4;
     }
 
+    /**
+     * <b>Half the wagon's extra load is the chests, half is what is in them.</b>
+     *
+     * <p>A chest bolted to a wagon is a chest the horse drags about whether or
+     * not anything is in it, so fitting all three and leaving them empty is
+     * already half of the full penalty; filling them is the other half. It also
+     * means the three chests are a real decision rather than a free upgrade -
+     * they cost seats (see {@link #canAddPassenger}) <i>and</i> they cost speed.
+     *
+     * <p>Measured against the rows that exist, not the twelve a wagon could
+     * have: a single-chest wagon packed to its four rows is as full as a wagon
+     * gets, and reads as a third of the maximum load because it is carrying a
+     * third of the maximum goods.
+     */
+    @Override
+    protected double fillLevel() {
+        final int chests = this.getChestCount();
+        if (chests <= 0) {
+            return 0.0;
+        }
+        final double fitted = chests / (double) this.getMaxChestCount();
+        final int slots = this.getCurrentRowCount() * 9;
+        final double cargo = slots <= 0 ? 0.0 : this.filledSlots(slots) / slots;
+        return 0.5 * fitted * (1.0 + cargo);
+    }
+
     @Override
     protected double getSpacing() {
         return 2.5;
@@ -254,6 +280,25 @@ public class WagonEntity extends AbstractDrawnInventoryEntity {
     @Override
     public void tick() {
         super.tick();
+        // The box seat. Without this the wagon has a controlling passenger and
+        // no way to tell the horse about it, so a driver sat there and nothing
+        // happened - while the item tooltip and the wiki both said it drove.
+        // Same three lines as the animal cart and the reaper, and the same
+        // guard: only onto a real mount, never onto a player pulling on foot,
+        // which made a bad passenger state and crashed the game.
+        final Entity coachman = this.getControllingPassenger();
+        final Entity puller = this.getPulling();
+        if (puller instanceof Mob && coachman != null && puller.getControllingPassenger() == null) {
+            final PostilionEntity postilion = HorseCarts.POSTILION_ENTITY.create(this.level(), EntitySpawnReason.SPAWN_ITEM_USE);
+            if (postilion != null) {
+                postilion.snapTo(puller.getX(), puller.getY(), puller.getZ(), coachman.getYRot(), coachman.getXRot());
+                if (postilion.startRiding(puller)) {
+                    this.level().addFreshEntity(postilion);
+                } else {
+                    postilion.discard();
+                }
+            }
+        }
         if (isLocked()) return;
         List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, -0.01F, 0.2F), EntitySelector.pushableBy(this));
         if (!list.isEmpty()) {

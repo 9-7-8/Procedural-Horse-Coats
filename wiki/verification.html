@@ -474,9 +474,14 @@
         threshold and the seating &mdash; the pillion offset is a number picked to look
         right on vanilla&rsquo;s model, never measured, so the second rider may well be
         inside the first.</li>
-    <li><strong>The wagon&rsquo;s box seat drives the horse.</strong> The postilion path, and
-        the one most likely to fight this mod&rsquo;s own six <code>AbstractHorse</code>
-        mixins. While you are there: <strong>does a horse still fly, swim and cross
+    <li><strong>The wagon&rsquo;s box seat drives the horse.</strong> <strong>Wired on
+        2026-09-19 and never run</strong> &mdash; until then the wagon was the one vehicle
+        that never spawned a postilion, so the seat did nothing at all while the tooltip
+        said it drove. The animal cart and the reaper have always had the same three lines,
+        so if those two steer and the wagon does not, the difference is the wagon&rsquo;s
+        four seats: it is the first passenger who drives, and a wagon boarded by an animal
+        first may hand the reins to nobody. This is also the path most likely to fight this
+        mod&rsquo;s own six <code>AbstractHorse</code> mixins. While you are there: <strong>does a horse still fly, swim and cross
         lava?</strong> <code>CartHorseMixin</code> overrides <code>travel</code>, and the
         argument that it does not break <code>HorseFlightMixin</code> is an argument, not an
         observation.</li>
@@ -489,6 +494,26 @@
         in a grid.</li>
     <li><strong>Wagon storage grows with chests, and five carpets make a roof.</strong>
         9&times;4 &rarr; 9&times;8 &rarr; 12&times;9. Contents must survive a relog.</li>
+    <li><strong>A loaded cart is slower than an empty one, and it changes while you
+        stand there.</strong> New on 2026-09-19 and the whole point of the cargo rule.
+        Hitch an empty supply cart to a horse, note the pace, then fill it from a chest
+        <em>without unhitching</em>: within a second it should be visibly harder work, and
+        emptying it should give the pace back. The same for a wagon as chests go on, and for
+        the animal cart as a second cow climbs in. If nothing changes,
+        <code>refreshDraught</code> is not being reached &mdash; it runs from
+        <code>pulledTick</code>, so a cart that is standing still may simply never be asked.
+        <strong>A plow must <em>not</em> change</strong> when you rack three tools in it.</li>
+    <li><strong>A train of carts costs what its parts cost.</strong> Hitch a cart behind a
+        cart behind a horse and load the back one. The horse should slow for cargo it is not
+        touching; if it does not, <code>currentLoad</code> is not walking the
+        <code>drawn</code> chain and a trailer is a free ride.</li>
+    <li><strong>The info screen&rsquo;s two wagon lines differ.</strong> Overview &rarr;
+        Draught now shows what the horse keeps empty <em>and</em> loaded to the roof. Two
+        identical percentages mean the screen is reading the bare load twice.</li>
+    <li><strong>The cart tooltip shows two numbers on a carrying vehicle and one on an
+        implement.</strong> Shift on a supply cart, a wagon and an animal cart: empty and
+        full. Shift on a plow, reaper or seed drill: one line only, because their load does
+        not move.</li>
     <li><strong>The supply cart shows its cargo</strong>, and a banner flies from a supply
         cart, animal cart or wagon.</li>
     <li><strong>&ldquo;Hauled&rdquo; climbs on the info screen</strong> and is still there

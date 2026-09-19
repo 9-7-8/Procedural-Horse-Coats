@@ -132,6 +132,26 @@
     gets past mod loading, would settle a dozen of these at once.
     <code>wiki/verification.html</code> &sect;0-FK.</li>
 
+<li id="gap-286"><strong>Open, found 2026-09-19: the reaper does not check whether a crop is
+    ripe.</strong> <code>ReaperCartEntity.harvest</code> tests the block against
+    <code>horsegenetics:reaper_harvestable</code>, which includes
+    <code>#minecraft:crops</code> &mdash; a tag on the block, with nothing in it about age. So a
+    reaper drawn over a field planted this morning destroys the seedlings and drops one seed
+    each, and the item tooltip's &ldquo;harvests mature crops&rdquo; is wrong. The fix is a
+    <code>CropBlock.isMaxAge</code> test before the break, with the non-crop entries of the tag
+    (grass, flowers, saplings) exempt from it since they have no age to be at. It was left alone
+    in the sitting that found it because the tag is shared with the plow's clearing lists and
+    the change wants its own look. <a href="carts.html#reaper">Carts &sect;7</a>.</li>
+
+<li id="gap-285"><strong>Open, found 2026-09-19: the supply cart's &ldquo;open from the seat&rdquo;
+    packet is registered and never sent.</strong> <code>OpenSupplyCartPayload</code> has a
+    server handler wired up in <code>HorseCarts.onRegisterPayloads</code> and no sender anywhere
+    in the client &mdash; upstream's key binding for it was not ported, so a player sitting on a
+    supply cart cannot open it without dismounting. Harmless as it stands (a dead payload type
+    costs a registry entry), and the choice is between wiring the inventory key to it or
+    deleting the class. Whichever, do not leave it as the third thing that half exists.
+    <a href="carts.html#supply">Carts &sect;9</a>.</li>
+
 <li id="gap-284"><strong>Open, found 2026-09-18: a glow light block is orphaned when its chunk
     unloads first.</strong> <code>EntityLeaveLevelEvent</code> cannot read blocks &mdash; it runs
     inside <code>DistanceManager.runAllUpdates</code> and any <code>getBlockState</code> there

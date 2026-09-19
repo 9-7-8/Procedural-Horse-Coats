@@ -77,6 +77,8 @@ public abstract class AbstractDrawnEntity extends Entity {
     protected List<CartWheel> wheels;
     private int pullingId = -1;
     private UUID pullingUUID = null;
+    /** The load {@link #applyDraught} last spent, so {@link #refreshDraught} can tell when it has moved. */
+    private double appliedLoad = Double.NaN;
     public Entity pulling;
     protected AbstractDrawnEntity drawn;
 
@@ -150,6 +152,7 @@ public abstract class AbstractDrawnEntity extends Entity {
             setPulling(null);
             return;
         }
+        this.refreshDraught();
         Vec3 targetVec = this.getRelativeTargetVec(1.0F);
         this.handleRotation(targetVec);
         while (this.getYRot() - this.yRotO < -180.0F) {
@@ -196,6 +199,34 @@ public abstract class AbstractDrawnEntity extends Entity {
         }
     }
 
+    /**
+     * <b>Put the horse's speed back where the current load says it should be.</b>
+     *
+     * <p>{@link #applyDraught} runs when a cart is hitched, which used to be the
+     * only moment the load could be known - it was the vehicle's own weight and
+     * nothing else. Now that what is <i>in</i> the cart counts, the load moves
+     * while the horse stands there: a chest is bolted on, fifty stacks go in, a
+     * cow climbs into the animal cart.
+     *
+     * <p>One polled check rather than a hook on each of those, because there are
+     * three unrelated sources and a missed hook is a cart that is silently the
+     * wrong weight - the exact class of bug nothing in a play session would ever
+     * show. Polling is cheap here: this only runs while the cart is hitched, it
+     * runs on the second rather than the tick, and it only touches the attribute
+     * when the number has actually moved.
+     */
+    private void refreshDraught() {
+        if (this.level().isClientSide() || this.tickCount % 20 != 0) {
+            return;
+        }
+        if (this.pulling instanceof LivingEntity living) {
+            final double load = this.currentLoad();
+            if (Double.isNaN(this.appliedLoad) || Math.abs(load - this.appliedLoad) > 1.0e-4) {
+                this.applyDraught(living);
+            }
+        }
+    }
+
     protected Optional<Player> getControllingPlayer() {
         if (this.getPulling() instanceof Player pl) {
             return Optional.of(pl);
@@ -220,6 +251,8 @@ public abstract class AbstractDrawnEntity extends Entity {
                         player.awardStat(HorseCarts.STEER_ANIMAL_CART_CM, cm);
                     } else if (this instanceof ReaperCartEntity) {
                         player.awardStat(HorseCarts.STEER_REAPER_CM, cm);
+                    } else if (this instanceof WagonEntity) {
+                        player.awardStat(HorseCarts.STEER_WAGON_CM, cm);
                     }
                 }
                 Optional<Player> playerOptional = getControllingPlayer();
@@ -285,6 +318,7 @@ public abstract class AbstractDrawnEntity extends Entity {
                     }
                     PacketDistributor.sendToPlayersTrackingEntity(this, new UpdateDrawnPayload(-1, this.getId()));
                     this.pullingUUID = null;
+                    this.appliedLoad = Double.NaN;
                     if (this.tickCount > 20) {
                         this.playDetachSound();
                     }
@@ -457,6 +491,49 @@ public abstract class AbstractDrawnEntity extends Entity {
     }
 
     /**
+     * <b>How full this vehicle is</b>, 0 to 1, for {@link #currentLoad()}.
+     *
+     * <p>Zero here, because a bare {@code AbstractDrawnEntity} has nothing to
+     * put in it: the plow and the reaper are always their own weight. What
+     * counts as "full" is each vehicle's own question - slots for the cargo
+     * carriers, seats for the animal cart - which is exactly why this is here
+     * and not in {@code common/}.
+     */
+    protected double fillLevel() {
+        return 0.0;
+    }
+
+    /**
+     * <b>What this cart asks of a horse right now</b>: its empty load, plus
+     * whatever is in it, plus anything hitched behind it. The number
+     * {@link #applyDraught} spends, and the one that moves while the cart is
+     * being loaded.
+     *
+     * <p>The trailer term matters more than it looks. A cart may be hitched to
+     * another cart - that is upstream's, and it is the nicest thing you can do
+     * with two of them - and without this the whole train is free: the horse
+     * would pay for the first vehicle and haul the other three for nothing,
+     * which is a better deal the more you load them. Charging for the chain
+     * makes a waggon train exactly as expensive as its parts.
+     */
+    public double currentLoad() {
+        return this.loadWithTrailers(0);
+    }
+
+    /** {@link #currentLoad()}, with a depth cap so a looped hitch cannot stack-overflow the server. */
+    private double loadWithTrailers(final int depth) {
+        final CartKind kind = this.getCartKind();
+        final double own = CartDraft.loaded(kind.load(), kind.cargoShare(), this.fillLevel());
+        if (this.drawn == null || this.drawn == this || depth >= MAX_TRAIN) {
+            return own;
+        }
+        return own + this.drawn.loadWithTrailers(depth + 1);
+    }
+
+    /** How many vehicles deep a train is followed before the load stops accumulating. */
+    private static final int MAX_TRAIN = 8;
+
+    /**
      * <b>Hitch this animal and slow it down by what its genetics say.</b>
      *
      * <p>Upstream put one flat number here, out of the config, the same for
@@ -473,6 +550,10 @@ public abstract class AbstractDrawnEntity extends Entity {
      *
      * <p>An animal that is not one of this mod's horses gets the baseline
      * pulling score. A donkey is not weaker than a horse for want of a genome.
+     *
+     * <p>The load is {@link #currentLoad()} rather than the vehicle's bare
+     * weight, so a cart that is loaded after it is hitched gets heavier under
+     * the horse - see {@link #refreshDraught}.
      */
     protected void applyDraught(final LivingEntity puller) {
         final AttributeInstance attr = puller.getAttribute(Attributes.MOVEMENT_SPEED);
@@ -481,7 +562,9 @@ public abstract class AbstractDrawnEntity extends Entity {
         }
         attr.removeModifier(PULL_MODIFIER_ID);
         final double pull = HorseDraft.pullOf(puller);
-        final double modifier = CartDraft.speedModifier(pull, attr.getBaseValue(), this.getCartKind().load());
+        final double load = this.currentLoad();
+        this.appliedLoad = load;
+        final double modifier = CartDraft.speedModifier(pull, attr.getBaseValue(), load);
         if (modifier < 0.0) {
             attr.addTransientModifier(new AttributeModifier(
                     PULL_MODIFIER_ID,

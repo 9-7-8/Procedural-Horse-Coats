@@ -21,6 +21,9 @@ import com.example.horsegenetics.common.progress.ProgressTask;
  * rather more than a third of itself just moving the thing; see
  * {@link CartDraft} for what that does to its speed.
  *
+ * <p>{@link #load()} is the <b>empty</b> vehicle - the tare. What is in it is
+ * {@link #cargoShare()}, and the two meet in {@link CartDraft#loaded}.
+ *
  * <p>The ordering is the order the loads run in, heaviest first, which is also
  * the order the creative tab lists them in. Keep it that way - it is the only
  * place a reader can see the whole ladder at once.
@@ -33,28 +36,30 @@ public enum CartKind {
 
     /**
      * The covered wagon. Seats riders, carries the most, and one passenger
-     * drives the horse from the box seat. The heaviest thing a horse pulls.
+     * drives the horse from the box seat. The heaviest thing a horse pulls -
+     * and the one whose load grows the most, since three chests and twelve rows
+     * of cargo can be bolted onto it.
      */
-    WAGON("wagon", 0.55),
+    WAGON("wagon", 0.55, 0.60),
 
     /**
      * The plow. Lighter than the wagon as a vehicle, but it is dragging a
      * blade through soil rather than rolling on top of it, which is why it
      * sits second rather than near the bottom with the other implements.
      */
-    PLOW("plow", 0.45),
+    PLOW("plow", 0.45, 0.0),
 
     /** The reaper. A cutting bar in the crop, so heavier than the seed drill. */
-    REAPER("reaper", 0.40),
+    REAPER("reaper", 0.40, 0.0),
 
     /** The seed drill. It only has to open the ground, not turn it. */
-    SEED_DRILL("seed_drill", 0.35),
+    SEED_DRILL("seed_drill", 0.35, 0.0),
 
-    /** The supply cart. A chest on two wheels. */
-    SUPPLY_CART("supply_cart", 0.30),
+    /** The supply cart. A chest on two wheels, and it is felt when the chest is full. */
+    SUPPLY_CART("supply_cart", 0.30, 0.50),
 
-    /** The animal cart. Two seats and whatever livestock climbed in. */
-    ANIMAL_CART("animal_cart", 0.25);
+    /** The animal cart. Two seats, and two cows are not two empty seats. */
+    ANIMAL_CART("animal_cart", 0.25, 0.50);
 
     /**
      * The load a stationary machine puts on a horse - a treadmill, a mill, a
@@ -66,10 +71,12 @@ public enum CartKind {
 
     private final String id;
     private final double load;
+    private final double cargoShare;
 
-    CartKind(final String id, final double load) {
+    CartKind(final String id, final double load, final double cargoShare) {
         this.id = id;
         this.load = load;
+        this.cargoShare = cargoShare;
     }
 
     /**
@@ -82,9 +89,29 @@ public enum CartKind {
         return this.id;
     }
 
-    /** How much of an ordinary horse this vehicle uses up. See the class note. */
+    /**
+     * How much of an ordinary horse this vehicle uses up <b>empty</b>. See the
+     * class note, and {@link #cargoShare()} for what filling it adds.
+     */
     public double load() {
         return this.load;
+    }
+
+    /**
+     * <b>How much heavier a full one is than an empty one</b>, as a fraction of
+     * {@link #load()}. A full wagon asks {@code 1 + 0.60} times what a bare one
+     * does; see {@link CartDraft#loaded}.
+     *
+     * <p><b>Zero on all three field implements</b>, and that is the interesting
+     * entry. A plow's load is the blade in the soil, not the three tools racked
+     * on it - a plow does not become half again as hard to drag because you
+     * gave it a second hoe, and a player who has to choose between fitting the
+     * tool and pulling the plow is choosing between a working plow and a useless
+     * one. The carrying vehicles are the ones where a full load is a real
+     * decision, so they are the ones that charge for it.
+     */
+    public double cargoShare() {
+        return this.cargoShare;
     }
 
     /**

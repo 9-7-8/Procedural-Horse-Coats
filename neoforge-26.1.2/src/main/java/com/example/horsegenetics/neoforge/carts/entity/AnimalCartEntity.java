@@ -36,6 +36,21 @@ public final class AnimalCartEntity extends AbstractDrawnEntity {
         return CartsConfig.get().of(CartKind.ANIMAL_CART);
     }
 
+    /**
+     * <b>The animal cart's cargo is whoever is sitting in it.</b> It has no
+     * inventory, so its two seats are its capacity: one cow is half a load and
+     * two is a full one.
+     *
+     * <p>No attempt to weigh a pig against a sheep. The cart only takes animals
+     * under a certain size in the first place ({@link #tick}), so the ones that
+     * fit are all roughly a sheep, and inventing a per-species mass would be a
+     * table nobody could predict from looking at the cart.
+     */
+    @Override
+    protected double fillLevel() {
+        return Math.min(1.0, this.getPassengers().size() / 2.0);
+    }
+
     @Override
     public void tick() {
         super.tick();

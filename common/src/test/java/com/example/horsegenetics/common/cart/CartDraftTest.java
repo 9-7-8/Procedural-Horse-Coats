@@ -129,6 +129,56 @@ class CartDraftTest {
     }
 
     @Test
+    @DisplayName("an empty vehicle is its bare load, and a full one is heavier")
+    void cargoAddsLoadAndNothingElseDoes() {
+        for (final CartKind kind : CartKind.values()) {
+            final double empty = CartDraft.loaded(kind.load(), kind.cargoShare(), 0.0);
+            final double full = CartDraft.loaded(kind.load(), kind.cargoShare(), 1.0);
+            assertEquals(kind.load(), empty, 0.0, kind + ": an empty one must be the bare load");
+            assertTrue(full >= empty, kind + ": filling one must never make it lighter");
+            if (kind.cargoShare() > 0.0) {
+                assertTrue(full > empty, kind + " carries cargo and should feel it");
+                // Half full is half the penalty - the property that lets a
+                // player reason about loading without reading the source.
+                assertEquals(0.5 * (empty + full), CartDraft.loaded(kind.load(), kind.cargoShare(), 0.5),
+                        EPS, kind + ": the cargo term must stay linear");
+            } else {
+                assertEquals(empty, full, 0.0, kind + " has no cargo and must not gain load from one");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("a fill outside 0..1 is clamped rather than believed")
+    void fillIsClamped() {
+        final double load = CartKind.SUPPLY_CART.load();
+        final double share = CartKind.SUPPLY_CART.cargoShare();
+        assertEquals(load, CartDraft.loaded(load, share, -5.0), 0.0, "a negative fill must not discount the cart");
+        assertEquals(CartDraft.loaded(load, share, 1.0), CartDraft.loaded(load, share, 9.0), 0.0,
+                "an over-full cart must cap, not grow without limit");
+    }
+
+    @Test
+    @DisplayName("loading a cart costs speed, and the loaded cart still obeys its ceiling")
+    void aLoadedCartIsSlowerButStillBounded() {
+        final double empty = CartDraft.loaded(CartKind.SUPPLY_CART.load(), CartKind.SUPPLY_CART.cargoShare(), 0.0);
+        final double full = CartDraft.loaded(CartKind.SUPPLY_CART.load(), CartKind.SUPPLY_CART.cargoShare(), 1.0);
+        final double pull = HorseTraits.BASE_PULL;
+        assertTrue(CartDraft.haul(pull, HorseTraits.BASE_SPEED, full)
+                        < CartDraft.haul(pull, HorseTraits.BASE_SPEED, empty),
+                "a full supply cart should be slower than an empty one");
+        assertTrue(CartDraft.ceiling(pull, full) < CartDraft.ceiling(pull, empty),
+                "loading a cart should lower the ceiling, not only the speed");
+        assertTrue(CartDraft.haul(pull, 1000.0, full) <= CartDraft.ceiling(pull, full) + EPS,
+                "a loaded cart must keep its ceiling");
+        // A strong horse must be able to buy the cargo back: the point of the
+        // whole feature is that pulling ability is worth breeding for a full cart.
+        assertTrue(CartDraft.haul(9.0, HorseTraits.BASE_SPEED, full)
+                        > CartDraft.haul(HorseTraits.BASE_PULL, HorseTraits.BASE_SPEED, empty),
+                "a draft horse with a full cart should beat an ordinary horse with an empty one");
+    }
+
+    @Test
     @DisplayName("an ordinary horse does exactly one unit of machine work")
     void ordinaryHorseIsTheMachineBaseline() {
         assertEquals(1.0, CartDraft.workRate(HorseTraits.BASE_PULL, HorseTraits.BASE_SPEED), EPS);

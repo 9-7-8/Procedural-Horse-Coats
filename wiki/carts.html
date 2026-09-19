@@ -25,82 +25,484 @@
     modpack has</strong>, vanilla's twelve and anyone else's. How fast a horse
     pulls one is the first thing that ever read
     <a href="gene-magic-pull.html">pulling ability</a>, and it reads the
-    horse's <em>speed</em> at the same time, on purpose.
+    horse's <em>speed</em> at the same time, on purpose &mdash; and now what is
+    <em>in</em> the cart as well.
     <strong>Derived from AstikorCarts / NiftyCarts / UsefulCarts, MIT</strong>
     &mdash; full lineage <a href="#licence">below</a>.
-    Built 2026-09-18, <strong>not play-tested</strong>; checklist in
-    <a href="verification.html">verification</a>.
+    <strong>Not play-tested</strong>; checklist in
+    <a href="verification.html#carts-0918">verification</a>.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
 
 <h2 id="vehicles">1. The six vehicles</h2>
 <p>
-    Every one of them is pulled by a horse. Craft the <strong>cart wheel</strong>
-    first &mdash; eight sticks around a plank &mdash; because every vehicle
-    spends two or four of them.
-</p>
-<p>
-    Place a cart, sit on a saddled horse, stand near the cart and press
-    <strong>R</strong> to hitch it. Press R again to unhitch. That is the whole
-    interface.
+    Every one of them is pulled by one animal, and they divide cleanly into
+    <strong>three that carry things</strong> &mdash; wagon, supply cart, animal
+    cart &mdash; and <strong>three that do a job to the ground they are dragged
+    over</strong>: plow, reaper, seed drill. Which group a vehicle is in decides
+    almost everything about it, including whether filling it slows your horse
+    down.
 </p>
 
+<div class="table-wrap">
 <table>
     <caption>What each one does, heaviest first</caption>
-    <tr><th>Vehicle</th><th>What it is for</th><th>Load</th></tr>
+    <tr>
+        <th>Vehicle</th><th>Seats</th><th>Holds</th><th>What it is for</th>
+        <th>Load, empty</th><th>Load, full</th>
+    </tr>
     <tr>
         <td><strong>Wagon</strong></td>
-        <td>The carriage. Seats four. Feed it chests and its storage grows from
-            9&times;4 to 9&times;8 to 12&times;9; right-click five wool carpets
-            onto it for a coloured roof. A passenger on the box seat
-            <strong>drives the horse</strong>.</td>
-        <td>0.55</td>
+        <td>4, or fewer with chests</td>
+        <td>up to 108 stacks</td>
+        <td>The carriage. Feed it chests and its storage grows in three stages;
+            five wool carpets give it a coloured roof; a passenger on the box
+            seat <strong>drives the horse</strong>. <a href="#wagon">&sect;5</a></td>
+        <td>0.55</td><td>0.88</td>
     </tr>
     <tr>
         <td><strong>Plow</strong></td>
-        <td>Put a <strong>hoe</strong> in it and it tills grass into farmland as
-            the horse walks; a <strong>shovel</strong> makes dirt paths; an
-            <strong>axe</strong> strips logs. Right-click to toggle it on and
-            off.</td>
-        <td>0.45</td>
+        <td>&mdash;</td>
+        <td>3 tools</td>
+        <td>Tills, paths or strips a three-wide lane as the horse walks, from
+            the tools racked on it. <a href="#plow">&sect;6</a></td>
+        <td>0.45</td><td>0.45</td>
     </tr>
     <tr>
         <td><strong>Reaper</strong></td>
-        <td>Harvests mature crops it is drawn over. Only works while a player
-            is sitting on it.</td>
-        <td>0.40</td>
+        <td>1, and it must be filled</td>
+        <td>&mdash;</td>
+        <td>Cuts a swath of crops and plants beside it. Only works with a
+            player sitting on it. <a href="#reaper">&sect;7</a></td>
+        <td>0.40</td><td>0.40</td>
     </tr>
     <tr>
         <td><strong>Seed drill</strong></td>
-        <td>Plants seeds on farmland it is drawn over. Nine stacks of seeds.</td>
-        <td>0.35</td>
+        <td>&mdash;</td>
+        <td>9 stacks of seed</td>
+        <td>Plants a three-wide lane on farmland it is drawn over. Wants no
+            driver at all. <a href="#drill">&sect;8</a></td>
+        <td>0.35</td><td>0.35</td>
     </tr>
     <tr>
         <td><strong>Supply cart</strong></td>
-        <td>54 stacks, one seat, and it <strong>shows what is in it</strong> &mdash;
-            tools, flowers and paintings are drawn sitting in the bed.</td>
-        <td>0.30</td>
+        <td>1</td>
+        <td>54 stacks</td>
+        <td>The pack mule. <strong>Shows what is in it</strong> &mdash; tools,
+            flowers and paintings are drawn sitting in the bed.
+            <a href="#supply">&sect;9</a></td>
+        <td>0.30</td><td>0.45</td>
     </tr>
     <tr>
         <td><strong>Animal cart</strong></td>
-        <td>Two seats. Small animals climb in by themselves.</td>
-        <td>0.25</td>
+        <td>2</td>
+        <td>2 animals</td>
+        <td>Livestock transport. Small animals climb in by themselves.
+            <a href="#animals">&sect;10</a></td>
+        <td>0.25</td><td>0.38</td>
     </tr>
 </table>
+</div>
 
 <p>
-    The <strong>load</strong> column is the only thing that separates them as
-    far as your horse is concerned, and the item tooltip shows what it costs:
-    hold Shift on any cart and it tells you what fraction of its speed an
-    ordinary horse keeps pulling that one.
-</p>
-<p>
-    Supply carts, animal carts and wagons will fly a <strong>banner</strong>
-    &mdash; right-click one onto the back.
+    <strong>Load</strong> is the only thing that separates them as far as your
+    horse is concerned: it is the fraction of an ordinary horse the vehicle
+    uses up, so 0.55 on an empty wagon means a plain horse is spending rather
+    more than a third of itself just moving the thing. The item tooltip tells
+    you both numbers &mdash; hold Shift on any cart and it says what fraction of
+    its speed an ordinary horse keeps, empty and full.
 </p>
 
-<h2 id="speed">2. Why your horse matters</h2>
+<h2 id="building">2. Building one</h2>
+<p>
+    Craft the <strong>cart wheel</strong> first, because every vehicle spends
+    two of them and the wagon spends four. It is eight sticks around one plank,
+    of <em>any</em> wood; the wheel is not wood-specific, only the cart is.
+</p>
+<p>
+    Every other recipe takes planks (and for the wagon, stripped logs) of
+    <strong>one</strong> wood, and that is the wood the cart comes out in. Mixing
+    woods in the grid crafts nothing.
+</p>
+
+<div class="table-wrap">
+<table>
+    <caption>The recipes. <code>P</code> planks &middot; <code>W</code> cart wheel &middot;
+        <code>S</code> stick &middot; <code>C</code> chest &middot;
+        <code>H</code> hopper &middot; <code>L</code> stripped log &middot;
+        <code>B</code> slab &middot; <code>I</code> iron ingot</caption>
+    <tr><th>Item</th><th>Grid</th><th>Comes to</th></tr>
+    <tr>
+        <td><strong>Cart wheel</strong></td>
+        <td><code>S S S / S P S / S S S</code></td>
+        <td>8 sticks, 1 plank of anything</td>
+    </tr>
+    <tr>
+        <td><strong>Wagon</strong></td>
+        <td><code>L L L / W P W / W P W</code></td>
+        <td>3 stripped logs, 2 planks, <strong>4 wheels</strong></td>
+    </tr>
+    <tr>
+        <td><strong>Plow</strong></td>
+        <td><code>S S S / P S P / W P W</code></td>
+        <td>4 sticks, 3 planks, 2 wheels</td>
+    </tr>
+    <tr>
+        <td><strong>Reaper</strong></td>
+        <td><code>S B &nbsp;. / S P P / I W W</code></td>
+        <td>2 sticks, 1 slab, 2 planks, 1 iron ingot, 2 wheels</td>
+    </tr>
+    <tr>
+        <td><strong>Seed drill</strong></td>
+        <td><code>P C P / P H P / W P W</code></td>
+        <td>5 planks, 1 chest, 1 hopper, 2 wheels</td>
+    </tr>
+    <tr>
+        <td><strong>Supply cart</strong></td>
+        <td><code>P C P / P C P / W P W</code></td>
+        <td>5 planks, 2 chests, 2 wheels</td>
+    </tr>
+    <tr>
+        <td><strong>Animal cart</strong></td>
+        <td><code>P P P / P P P / W P W</code></td>
+        <td>7 planks, 2 wheels</td>
+    </tr>
+</table>
+</div>
+
+<p>
+    The wagon is the odd one out twice over: it is the only vehicle that spends
+    four wheels, and the only one that spends a <strong>stripped log</strong>.
+    That second fact is why some modded woods have five carts and not six
+    &mdash; a mod that never shipped a stripped log cannot build a wagon, so it
+    does not get one. See <a href="#woods">&sect;15</a>.
+</p>
+<p>
+    Place a cart by right-clicking the ground with it. It needs the room: if
+    the cart would overlap a block or another entity, nothing happens and you
+    keep the item.
+</p>
+
+<h2 id="hitching">3. Hitching, unhitching, and trains</h2>
+<p>
+    <strong>Press R</strong> &mdash; "Attach/Detach Cart", rebindable under
+    <em>Horse Carts</em> in the controls. That is the whole interface. It hitches
+    the <strong>nearest cart within about two blocks</strong> of you or of
+    whatever you are riding, and pressing it again unhitches whatever you are
+    pulling.
+</p>
+<ul>
+    <li><strong>You do not need a horse.</strong> Standing on foot and pressing
+        R hitches the cart to <em>you</em>, and you can drag any of the six
+        around yourself. It is slow and none of the genetics apply, but it is
+        how you reposition a cart without fetching an animal.</li>
+    <li><strong>Anything saddleable can pull</strong> &mdash; horses, donkeys,
+        mules, camels. Not pigs or striders, which are steered by a held item
+        rather than reins. An animal that is not one of this mod's horses pulls
+        at the baseline pulling score; a donkey is not feeble for want of a
+        genome.</li>
+    <li><strong>A cart can pull a cart.</strong> Hitch a second vehicle to the
+        back of the first and you have a train, and you can keep going. The
+        horse pays for <strong>all</strong> of it &mdash; the loads of every
+        vehicle in the chain add up on the animal at the front.</li>
+</ul>
+<p>
+    It comes unhitched on its own when the cart is dragged too far from the
+    puller, when a block comes between the two &mdash; drive between two trees
+    and the traces part &mdash; and when the puller dies or itself becomes a
+    passenger. There is an attach and a detach sound, so you can hear which
+    happened without looking.
+</p>
+<p>
+    A hitched cart follows at a fixed distance: about 2.5 blocks for the wagon
+    and 1.3 for the implements, which is the room they need to swing behind a
+    turning horse. Carts climb a one-block step without help.
+</p>
+
+<h2 id="weight">4. Weight: what a full cart costs</h2>
+<div class="note">
+    <p class="label">The rule</p>
+    <p>
+        <strong>A vehicle's load is what it weighs empty, plus what is in
+        it.</strong> Filling a supply cart to the brim adds half again to what it
+        asks of the horse; filling a wagon adds sixty per cent. The three field
+        implements never change &mdash; a plow's load is the blade in the soil,
+        not the tools racked on it.
+    </p>
+</div>
+<p>
+    The cost is <strong>linear in how full the thing is</strong>, so there is no
+    threshold to learn and no cliff to fall off: half a cart is half the
+    penalty, and every stack you add costs the same as the last. What counts as
+    "full" is the one thing that differs by vehicle:
+</p>
+
+<div class="table-wrap">
+<table>
+    <caption>What "full" means</caption>
+    <tr><th>Vehicle</th><th>Measured by</th><th>Notes</th></tr>
+    <tr>
+        <td><strong>Supply cart</strong></td>
+        <td>its 54 slots</td>
+        <td>By <em>goods</em>, not by slots touched: a slot holding one arrow is
+            a sixty-fourth of a slot, not a full one. Nine loose torches do not
+            make a horse labour.</td>
+    </tr>
+    <tr>
+        <td><strong>Wagon</strong></td>
+        <td>chests fitted, then what is in them</td>
+        <td><strong>Half the wagon's extra weight is the chests themselves</strong>,
+            empty or not &mdash; three bolted-on chests and nothing in them is
+            already half the full penalty. Filling them is the other half.</td>
+    </tr>
+    <tr>
+        <td><strong>Animal cart</strong></td>
+        <td>its two seats</td>
+        <td>One cow is half a load, two is a full one. No attempt to weigh a pig
+            against a sheep &mdash; only animals of about that size fit in the
+            first place.</td>
+    </tr>
+    <tr>
+        <td><strong>Plow, reaper, seed drill</strong></td>
+        <td>nothing</td>
+        <td>Deliberately flat. A plow does not become half again as hard to drag
+            because you gave it a second hoe, and a player choosing between
+            fitting the tool and pulling the plow is choosing between a working
+            plow and a useless one.</td>
+    </tr>
+</table>
+</div>
+
+<p>
+    The load is live. Load a cart while it stands hitched and the horse gets
+    slower <strong>within a second</strong>, without unhitching; unload it and
+    the speed comes back. The same is true of a cow climbing into the animal
+    cart, or a chest going onto a wagon mid-journey.
+</p>
+<p>
+    This is the reason to breed a <em>strong</em> horse rather than just a fast
+    one for trade runs specifically. An ordinary horse can trot along with an
+    empty wagon; the same horse with three chests packed is doing close to twice
+    the work, and the difference between an ordinary animal and a draft one
+    stops being cosmetic exactly there.
+</p>
+
+<h2 id="wagon">5. The wagon</h2>
+<p>
+    The biggest, the heaviest, and the only one with a roof. Empty, it seats
+    <strong>four</strong> and holds nothing.
+</p>
+<h3>Chests, and what they cost</h3>
+<p>
+    Right-click the wagon with a <strong>chest</strong> to bolt one on. Its
+    storage grows in three stages, and so does the number of seats it loses:
+</p>
+<div class="table-wrap">
+<table>
+    <caption>Chests against seats</caption>
+    <tr><th>Chests</th><th>Storage</th><th>Seats left</th><th>To fit the next one</th></tr>
+    <tr><td>none</td><td>&mdash;</td><td>4</td><td>any time</td></tr>
+    <tr><td>1</td><td>9&times;4</td><td>4</td><td>no more than 2 aboard</td></tr>
+    <tr><td>2</td><td>9&times;8</td><td>2</td><td>nobody aboard</td></tr>
+    <tr><td>3</td><td>12&times;9</td><td><strong>none</strong></td><td>&mdash;</td></tr>
+</table>
+</div>
+<p>
+    So a full freight wagon is not a passenger wagon, and you cannot sneak the
+    third chest on with the family sitting in the back. The chests come back as
+    items if the wagon is destroyed, along with everything in it.
+</p>
+<h3>The roof</h3>
+<p>
+    Right-click <strong>high on the wagon</strong> &mdash; aim at the hoops, not
+    the bed &mdash; holding at least <strong>five wool carpets</strong> of one
+    colour. That is the roof, in that colour. Doing it again with a different
+    colour swaps it and hands the old five carpets back. Right-click the roof
+    with an empty hand to furl and unfurl it: three positions, open to shut.
+</p>
+<h3>Driving from the box seat</h3>
+<p>
+    The <strong>first person to board drives</strong>. The box seat steers the
+    horse in front through a hidden rider, which is why it works at all &mdash;
+    and that hidden rider occupies a seat on the horse's back, so on a horse
+    strong enough to <a href="#two-riders">carry two</a> you can have a driver on
+    the wagon <em>and</em> somebody riding the horse. That is what makes a
+    carriage read as a carriage rather than a trailer.
+</p>
+<p class="note warn">
+    <span class="label">Newly built</span>
+    The box seat did nothing at all until this was wired up &mdash; the wagon was
+    the one vehicle that never spawned the hidden rider, while its tooltip
+    claimed otherwise. It is code that has never been played. First thing to
+    check in <a href="verification.html#carts-0918">verification</a>.
+</p>
+<h3>Passengers you did not invite</h3>
+<p>
+    Small animals climb into a wagon by themselves if there is a seat, the same
+    way they climb into the animal cart, and tame ones sit down when they do.
+    <strong>Shift-right-click the wagon to throw every non-player passenger
+    out.</strong> A wagon will also fly a <a href="#banners">banner</a>.
+</p>
+
+<h2 id="plow">6. The plow</h2>
+<p>
+    Three slots, three tools, <strong>three lanes</strong>: the tools sit at the
+    left, centre and right of the blade and each works its own furrow about 1.7
+    blocks ahead of the cart. Fit one tool and you plow one lane; fit three and
+    you plow three abreast.
+</p>
+<div class="table-wrap">
+<table>
+    <caption>What each tool does to the ground</caption>
+    <tr><th>Tool</th><th>Effect</th><th>Clears out of the way first</th></tr>
+    <tr><td><strong>Hoe</strong></td><td>tills grass and dirt into farmland</td>
+        <td>grass, ferns, dead bushes, flowers, saplings</td></tr>
+    <tr><td><strong>Shovel</strong></td><td>makes dirt paths</td>
+        <td>the same, plus snow</td></tr>
+    <tr><td><strong>Axe</strong></td><td>strips logs it is dragged past</td>
+        <td>vines, glow lichen</td></tr>
+</table>
+</div>
+<p>
+    That clearing step is what stops a plow jamming on a dandelion: the flower
+    is broken and dropped, then the ground underneath is tilled. Anything else
+    with a tool component can be racked too, and does whatever that tool does
+    when used on a block &mdash; but only those three have blocks they will clear
+    first.
+</p>
+<p>
+    <strong>Right-click the plow to toggle it on and off</strong>, so you can
+    drive one home across a field you have already tilled. It works only while
+    the cart is actually moving, and only while a <strong>player is driving</strong>
+    &mdash; either pulling it on foot or riding the animal that is. A plow towed
+    behind a wandering horse does nothing.
+</p>
+<p>
+    <strong>The tools wear out.</strong> They take durability damage as they
+    work and break with the usual sound, leaving the lane empty until you rack
+    another. Fitting three tools does not make the plow heavier.
+</p>
+
+<h2 id="reaper">7. The reaper</h2>
+<p>
+    A cutting bar that clears a <strong>swath about a block and a half wide
+    beside the cart</strong> as it is drawn along, from roughly 1.1 to 2.3 blocks
+    out to one side. It folds up when it is not working, and unfolds with a
+    trapdoor clunk when it is.
+</p>
+<p>
+    It cuts what a scythe would: <strong>crops, grass and dry grass, ferns,
+    bushes, dead bushes, flowers and saplings</strong>, and anything else tagged
+    as harvestable. Everything drops on the ground where it fell &mdash; the
+    reaper has no inventory of its own, so bring a
+    <a href="#supply">supply cart</a> behind it if you do not fancy walking the
+    field twice.
+</p>
+<p class="note warn">
+    <span class="label">It does not check ripeness</span>
+    The reaper cuts a crop block because it is a crop, not because it is ready.
+    Drive one over a field you planted this morning and you will harvest seedlings.
+    Recorded in <a href="known-gaps.html">known gaps</a>; until it is fixed, the
+    <a href="#drill">seed drill</a> and the reaper want to be run in that order
+    and not the other way round.
+</p>
+<p>
+    <strong>Somebody has to be sitting on it.</strong> Right-click to climb on;
+    shift-right-click and it tells you as much in the status bar. From that seat
+    you steer the horse, the same way the wagon's box seat does, and the game
+    counts the distance separately as "steering".
+</p>
+
+<h2 id="drill">8. The seed drill</h2>
+<p>
+    Nine slots of seed, planted <strong>three lanes wide</strong> &mdash; one to
+    each side of the cart and one down the middle &mdash; onto ground that is
+    already tilled. It plants roughly one seed per step, drawn at random from
+    whichever slots have something plantable in them, so loading it with four
+    kinds of seed gives you a mixed field rather than stripes.
+</p>
+<p>
+    It plants wheat, beetroot, melon and pumpkin seeds, potatoes, carrots,
+    torchflower seeds, pitcher pods and small flowers &mdash; and
+    <strong>any modded crop</strong>, without that mod knowing anything about
+    this one: if the item places a crop block, the drill will sow it.
+</p>
+<p>
+    <strong>It needs no driver.</strong> Unlike the plow and the reaper, a seed
+    drill plants whenever it is being pulled and moving, whoever or whatever is
+    pulling. Lead it behind a plow on the same pass and you till and sow in one
+    trip.
+</p>
+
+<h2 id="supply">9. The supply cart</h2>
+<p>
+    Fifty-four stacks &mdash; a double chest on two wheels &mdash; and the
+    prettiest thing in the cart system: <strong>it shows you what is in
+    it</strong>. The four commonest kinds of thing in the cart are drawn sitting
+    in the bed, blocks stacked before loose items, with real models for tools,
+    armour, flowers, paintings and a spare wheel. You can tell a loaded cart from
+    an empty one at fifty blocks, and roughly what it is loaded with.
+</p>
+<p>
+    <strong>Right-click to sit</strong> on it; <strong>shift-right-click to open
+    it</strong>. If somebody is already sitting on it, right-click opens it
+    instead. Every piece of the cargo rendering can be switched off separately in
+    the client config if it costs you frames, and each falls back to a plain
+    floating item rather than vanishing.
+</p>
+<p>
+    It is the vehicle where <a href="#weight">weight</a> bites hardest in
+    practice, because it is the one you actually fill to the top. A full supply
+    cart asks half again what an empty one does, which puts it level with a plow.
+    It will also fly a <a href="#banners">banner</a>.
+</p>
+
+<h2 id="animals">10. The animal cart</h2>
+<p>
+    Two seats, for players or for livestock, and <strong>animals load
+    themselves</strong>: walk a cow into the back of one, or park it where they
+    mill about, and in they climb. Tame animals sit down once aboard. Only
+    creatures small enough to fit will board &mdash; no cows-in-a-teacup &mdash;
+    and water animals never do.
+</p>
+<p>
+    <strong>Shift-right-click to empty it</strong>: every non-player passenger
+    gets out. Right-click to take a seat yourself, from which you steer the
+    horse, as on the reaper.
+</p>
+<p>
+    Its passengers are its cargo, so two animals make it a
+    <a href="#weight">full cart</a>. It is the lightest vehicle in the game
+    empty, and even with both seats filled it asks less of a horse than an empty
+    reaper &mdash; though rather more than an empty seed drill, which is the
+    thing to remember before you lead a pair of cows up a hill.
+</p>
+
+<h2 id="banners">11. Banners, damage, and what drops</h2>
+<p>
+    <strong>Supply carts, animal carts and wagons will fly a banner</strong>
+    &mdash; right-click one onto the back. Any banner, patterns and all. Putting
+    a second banner on swaps them and hands the first one back.
+</p>
+<p>
+    Carts take damage like a boat: hits accumulate and heal off over a few
+    seconds, and enough of them in quick succession breaks the cart. A creative
+    player breaks one in a single hit. Cactus does nothing to them, and
+    <strong>you cannot break the cart you are sitting in</strong>. When one does
+    break it drops itself, its banner, its contents, and &mdash; for a wagon
+    &mdash; its chests and its carpets, so nothing is ever lost to a mis-swing
+    except the walk back.
+</p>
+<p>
+    One more thing worth knowing before you park: <strong>farm animals keep
+    away from the working vehicles</strong>. Cows, sheep and the rest path around
+    a plow, seed drill, reaper or supply cart standing within about three blocks.
+    They do <em>not</em> avoid the wagon or the animal cart &mdash; which is
+    exactly why those two are the ones they will climb into.
+</p>
+
+<h2 id="speed">12. Why your horse matters</h2>
 <p>
     <strong>Pulling ability sets a ceiling; speed decides how close you get to
     it.</strong> That is the whole rule, and both halves are real.
@@ -115,22 +517,26 @@
 <p>
     So the fastest carthorse is <strong>neither specialist</strong>:
 </p>
+<div class="table-wrap">
 <table>
-    <caption>Pulling a wagon</caption>
+    <caption>Pulling an empty wagon</caption>
     <tr><th>Horse</th><th>Speed</th><th>Pull</th><th>Keeps</th><th>Actual haul speed</th></tr>
     <tr><td>fast and weak</td><td>0.30</td><td>3</td><td>43%</td><td>0.129</td></tr>
     <tr><td>slow and strong</td><td>0.13</td><td>9</td><td>81%</td><td>0.105</td></tr>
     <tr><td><strong>balanced</strong></td><td>0.22</td><td>7</td><td>67%</td><td><strong>0.147</strong></td></tr>
 </table>
+</div>
 <p>
     The balanced horse beats both. This is deliberate and it is the reason the
     model is shaped the way it is &mdash; a draft breed that dumped speed
     entirely would be the obvious and boring answer, so the model does not allow
     it. The numbers in that table are a
-    <a href="#test">unit test</a>, not a claim.
+    <a href="#test">unit test</a>, not a claim. Loading the wagon does not change
+    the shape of any of this; it moves every horse down the same curve, and it
+    moves the weak ones furthest.
 </p>
 
-<h2 id="screen">3. Reading it on the horse</h2>
+<h2 id="screen">13. Reading it on the horse</h2>
 <p>
     Open a horse's information screen (the <strong>i</strong> button on its
     inventory). On the <strong>Overview</strong> tab:
@@ -140,19 +546,27 @@
         is the fifth body stat and not a cart footnote. It shows the 1&ndash;10
         score and a word for it &mdash; <em>feeble, light, ordinary, strong,
         powerful, a true draft horse</em>.</li>
-    <li>A <strong>Draught</strong> block below says what the score buys:
-        how much of its speed this horse would keep hauling a wagon, whether it
-        carries a second rider, and <strong>how far it has hauled in its
-        life</strong>.</li>
+    <li>A <strong>Draught</strong> block below says what the score buys: how much
+        of its speed this horse would keep hauling a wagon <strong>empty and
+        loaded to the roof</strong>, whether it carries a second rider, and
+        <strong>how far it has hauled in its life</strong>.</li>
 </ul>
+<p>
+    The two wagon figures are the useful pair. A horse that keeps most of its
+    speed empty and collapses when loaded is a carriage horse, not a
+    carthorse, and the screen is where you find that out before the trade run
+    rather than during it.
+</p>
 <p>
     That last figure belongs to the <em>horse</em>, not to you. It survives
     being sold, given away or inherited, and it is how you tell a working animal
-    from a fresh one at a glance. (Per-player "distance pulled" statistics exist
-    too, on the vanilla statistics screen, one per vehicle.)
+    from a fresh one at a glance. Your own side of it is on the vanilla
+    statistics screen: distance pulling each of the six vehicles, distance
+    riding in one, and distance steering a wagon, reaper or animal cart from its
+    seat.
 </p>
 
-<h2 id="two-riders">4. Two riders</h2>
+<h2 id="two-riders">14. Two riders</h2>
 <p>
     A horse whose pulling score is <strong>6 or better</strong> carries
     <strong>two riders</strong>. Six is one point above ordinary: a modestly
@@ -164,13 +578,11 @@
     is no separate carrying gene to breed for.
 </p>
 <p>
-    This also matters for the wagon. The box seat drives the horse through a
-    hidden rider, which occupies a seat &mdash; so on a strong horse you can have
-    a driver on the wagon <em>and</em> somebody riding the horse, which is what
-    makes a carriage read as a carriage.
+    This also matters for the wagon, for the reason in <a href="#wagon">&sect;5</a>:
+    the box seat spends one of those two places on the horse's back.
 </p>
 
-<h2 id="woods">5. Every wood, including modded ones</h2>
+<h2 id="woods">15. Every wood, including modded ones</h2>
 <p>
     Carts exist in vanilla's twelve woods and in <strong>every wood any other
     mod you have installed adds</strong>, discovered the same way the
@@ -180,13 +592,16 @@
     time out of the wood you built it from.
 </p>
 <p>
-    One rough edge: a modded wood's carts wear the <strong>oak icon</strong> in
-    the inventory, because there are 72 painted icons in the jar and nothing to
-    paint a thirteenth wood's from. The cart itself is the right wood the moment
-    you place it. See <a href="known-gaps.html">known gaps</a>.
+    Two rough edges. A modded wood with no stripped log gets
+    <strong>five carts and no wagon</strong>, because the wagon recipe spends one
+    &mdash; better than a wagon that cannot be crafted, which is what used to
+    happen. And a modded wood's carts wear the <strong>oak icon</strong> in the
+    inventory, because there are painted icons in the jar for vanilla's woods and
+    nothing to paint a thirteenth from; the cart itself is the right wood the
+    moment you place it. See <a href="known-gaps.html">known gaps</a>.
 </p>
 
-<h2 id="machines">6. Horse-powered machinery</h2>
+<h2 id="machines">16. Horse-powered machinery</h2>
 <p>
     If you have a mod that makes a horse turn a mill or a treadmill, a good
     horse can drive it harder than a bad one. See
@@ -194,26 +609,41 @@
     wired up and what still needs the other mod's cooperation.
 </p>
 
+<h2 id="progress">17. What the game asks of you</h2>
+<p>
+    The carts have a chapter in <strong>Getting Started</strong> &mdash; farming
+    and haulage. Placing a cart ticks one task, hitching one ticks another, and
+    each of the six vehicles has its own task that completes the first time you
+    <em>drive</em> it, which means the cart has actually moved with you at the
+    reins. Upstream's eleven advancements were not ported; this is what replaced
+    them.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
 
-<h2 id="split">7. Where the code is</h2>
+<h2 id="split">18. Where the code is</h2>
 <p>
     The split follows the mod's usual rule &mdash; as much as possible in
     <code>common/</code>, and the NeoForge module translates.
 </p>
 <ul>
     <li><code>common/cart/CartDraft.java</code> &mdash; <strong>the model</strong>.
-        Pure: two doubles and a load in, a retention fraction out. No Minecraft,
-        no RNG, no entity. This is the file to read.</li>
-    <li><code>common/cart/CartKind.java</code> &mdash; the six vehicles and their
-        loads, and <code>MACHINE_LOAD</code> for a treadmill.</li>
+        Pure: two doubles and a load in, a retention fraction out, plus
+        <code>loaded</code>, which turns an empty load and a fill fraction into
+        the load a vehicle actually asks for. No Minecraft, no RNG, no entity.
+        This is the file to read.</li>
+    <li><code>common/cart/CartKind.java</code> &mdash; the six vehicles, their
+        empty loads and their <code>cargoShare</code>, and
+        <code>MACHINE_LOAD</code> for a treadmill.</li>
     <li><code>neoforge/server/HorseDraft.java</code> &mdash; the bridge. Finds a
         live animal's pull and speed, keeps the haulage tally, and is the
-        <strong>public surface other mods integrate against</strong>.</li>
-    <li><code>neoforge/carts/</code> &mdash; the ported cart system itself, 68
-        files. <code>HorseCarts</code> registers it.</li>
+        <strong>public surface other mods integrate against</strong>. Its
+        <code>retention(entity, kind)</code> is the <em>empty</em> vehicle, since
+        a <code>CartKind</code> has nothing to ask how full it is.</li>
+    <li><code>neoforge/carts/</code> &mdash; the ported cart system itself.
+        <code>HorseCarts</code> registers it.</li>
     <li><code>neoforge/carts/CartWood.java</code> &mdash; what replaced vanilla's
         <code>WoodType</code> as the key.</li>
     <li><code>neoforge/compat/GeneratedCarts.java</code> and
@@ -221,7 +651,7 @@
         recipes and lang, for modded woods and vanilla's respectively.</li>
 </ul>
 
-<h2 id="hook">8. The one hook</h2>
+<h2 id="hook">19. The one hook</h2>
 <p>
     Upstream applied a flat <code>pull_speed</code> from the config in
     <code>AbstractDrawnEntity.setPulling</code> &mdash; one number, identical for
@@ -241,7 +671,37 @@
     genome.
 </p>
 
-<h2 id="registration">9. Why the carts use <code>RegisterEvent</code></h2>
+<h2 id="cargo">20. Why the load is polled and not pushed</h2>
+<p>
+    <code>applyDraught</code> used to run exactly once per hitch, because the
+    load was the vehicle's own weight and could not change. Cargo weight broke
+    that: the number now moves while the horse stands still, from
+    <strong>three unrelated places</strong> &mdash; an inventory changing, a chest
+    going onto a wagon, an animal climbing into a cart.
+</p>
+<p>
+    <code>AbstractDrawnEntity.refreshDraught</code> polls instead of hooking all
+    three. A missed hook would be a cart that is silently the wrong weight, which
+    is precisely the class of bug a play session cannot see; one poll cannot be
+    forgotten by the next vehicle somebody adds. It is cheap because it only runs
+    on a hitched cart, only once a second, and only touches the attribute when
+    the number has actually moved.
+</p>
+<p>
+    <code>currentLoad()</code> also walks the <code>drawn</code> chain, so a
+    train of carts charges the horse for every vehicle in it rather than for the
+    first. Depth-capped, because a looped hitch would otherwise recurse until the
+    server fell over.
+</p>
+<p>
+    What counts as "full" is per-vehicle and lives in the entity, not in
+    <code>common/</code>: <code>fillLevel()</code> is goods-per-slot for the
+    inventory carts, seats for the animal cart, chests-then-goods for the wagon,
+    and flat zero for everything else. None of those questions can be asked
+    without a running game, which is exactly the line the module split draws.
+</p>
+
+<h2 id="registration">21. Why the carts use <code>RegisterEvent</code></h2>
 <p>
     Everything else in this mod registers through <code>DeferredRegister</code>,
     and <code>DoubleGates</code> and <code>ModdedArmour</code> both go to real
@@ -259,7 +719,7 @@
     on <code>HorseCarts</code> says so.
 </p>
 
-<h2 id="two-sources">10. The contract that lives twice</h2>
+<h2 id="two-sources">22. The contract that lives twice</h2>
 <p>
     <strong><code>tools/bake-carts.mjs</code> covers vanilla's twelve at author
     time; <code>compat/GeneratedCarts.java</code> covers modded woods at run
@@ -274,7 +734,7 @@
 <pre><code class="language-bash">node neoforge-26.1.2/tools/bake-carts.mjs
 node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 
-<h2 id="textures">11. No cart texture is shipped</h2>
+<h2 id="textures">23. No cart texture is shipped</h2>
 <p>
     Upstream's cleverest idea, and the reason a cart can exist in a wood nobody
     drew art for. <code>mixin/CartModelManagerMixin</code> stitches every cart's
@@ -295,7 +755,7 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
     26.1.2 with a mod installed.
 </p>
 
-<h2 id="mixins">12. Mixins, and the horse ones in particular</h2>
+<h2 id="mixins">24. Mixins, and the horse ones in particular</h2>
 <p>
     Six cart mixins joined the mod's own, in
     <code>horsegenetics.mixins.json</code> &mdash; which now has a
@@ -305,7 +765,7 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 <ul>
     <li><code>CartHorseMixin</code> (AbstractHorse) &mdash; overrides
         <code>travel</code> and <code>maxUpStep</code> and injects at
-        <code>getControllingPassenger</code>, all for the wagon's box seat. Its
+        <code>getControllingPassenger</code>, all for the box seat. Its
         <code>travel</code> override calls <code>super.travel</code> on both
         branches, so <code>HorseFlightMixin</code>'s inject on
         <code>LivingEntity.travel</code> still fires and flight is unaffected.
@@ -316,11 +776,18 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
         <code>getPassengerAttachmentPoint</code>. The pillion offset is a number
         picked to look right, not measured.</li>
 </ul>
-
-<h2 id="test">13. The test</h2>
 <p>
-    <code>common/src/test/java/.../cart/CartDraftTest.java</code>, ten cases.
-    Three of them are the design:
+    The steering itself is a <code>PostilionEntity</code>: a tiny invisible
+    rider the cart puts on the horse, which the driver's seat then moves by
+    packet. Three vehicles spawn one &mdash; the animal cart, the reaper and, as
+    of this change, the wagon, which had the seat and the tooltip but never the
+    rider.
+</p>
+
+<h2 id="test">25. The test</h2>
+<p>
+    <code>common/src/test/java/.../cart/CartDraftTest.java</code>. Three of the
+    cases are the design:
 </p>
 <ul>
     <li><strong>a balanced horse out-hauls both specialists</strong>;</li>
@@ -329,6 +796,14 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
     <li><strong>neither stat is a dump stat</strong> &mdash; raising either one,
         on every vehicle, always hauls faster.</li>
 </ul>
+<p>
+    The cargo rule brought three more: that an empty vehicle is exactly its bare
+    load and a field implement never gains any, that the cargo term stays
+    <em>linear</em> (half full is half the penalty, which is the only property
+    that makes it predictable without reading the source), and that a loaded
+    cart both slows a horse <em>and</em> keeps its ceiling &mdash; loading a cart
+    must lower the asymptote, not escape it.
+</p>
 <pre><code class="language-bash">./gradlew :common:test --tests '*CartDraftTest'</code></pre>
 <p>
     It earned its keep on the first run. The model originally had a flat floor
@@ -341,7 +816,7 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
     <code>HorseTraits.MIN_PULL</code> before the curve.
 </p>
 
-<h2 id="licence">14. Licence and provenance</h2>
+<h2 id="licence">26. Licence and provenance</h2>
 <div class="callout">
     <p>
         <strong>The cart system is MIT-licensed third-party code</strong>, and
@@ -377,20 +852,22 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
     from them without adding their own notices.
 </p>
 
-<h2 id="dropped">15. What was not ported</h2>
+<h2 id="dropped">27. What was not ported</h2>
 <p>
-    Owner's call, 2026-09-18, and recorded here so nobody re-adds it by
-    accident:
+    Owner's call, and recorded here so nobody re-adds it by accident:
 </p>
 <ul>
     <li><strong>The hand cart.</strong> Player-pulled on foot; the one vehicle a
-        horse never touches.</li>
-    <li><strong>All 11 advancements</strong> and their 7 criterion triggers.</li>
+        horse never touches. Note that every <em>other</em> cart can still be
+        pulled by a player on foot &mdash; that is upstream's, and it is kept.</li>
+    <li><strong>All 11 advancements</strong> and their 7 criterion triggers,
+        replaced by the Getting Started tasks in
+        <a href="#progress">&sect;17</a>.</li>
     <li><strong>The slow-speed toggle</strong> &mdash; keybind, payload, config
         value, and the <code>ClientPacketListener</code> mixin that existed only
         to add a line to the mount overlay.</li>
     <li><strong>Per-cart <code>pull_speed</code></strong>, for the reason in
-        &sect;8.</li>
+        <a href="#hook">&sect;19</a>.</li>
 </ul>
 
 </section>
@@ -400,7 +877,7 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
         <a href="gene-magic-pull.html">Pulling ability</a>
         <a href="horse-body.html">The horse's body</a>
         <a href="compatibility.html#horse-powered">Compatibility &mdash; horse-powered machinery</a>
-        <a href="verification.html">To be verified</a>
+        <a href="verification.html#carts-0918">To be verified</a>
     </div>
     Source: <code>common/cart/</code>, <code>neoforge-26.1.2/{carts,compat,server}/</code>
 </div>

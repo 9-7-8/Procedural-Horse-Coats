@@ -252,6 +252,7 @@ public final class HorseCarts {
     public static final Identifier RIDE_CART_CM = resLoc("ride_cart_cm");
     public static final Identifier STEER_ANIMAL_CART_CM = resLoc("steer_animal_cart_cm");
     public static final Identifier STEER_REAPER_CM = resLoc("steer_reaper_cm");
+    public static final Identifier STEER_WAGON_CM = resLoc("steer_wagon_cm");
 
     public static final TagKey<@NotNull Block> PLOW_BREAKABLE_HOE = TagKey.create(Registries.BLOCK, resLoc("plow_breakable/hoe"));
     public static final TagKey<@NotNull Block> PLOW_BREAKABLE_SHOVEL = TagKey.create(Registries.BLOCK, resLoc("plow_breakable/shovel"));
@@ -311,6 +312,7 @@ public final class HorseCarts {
             registerStat(RIDE_CART_CM);
             registerStat(STEER_ANIMAL_CART_CM);
             registerStat(STEER_REAPER_CM);
+            registerStat(STEER_WAGON_CM);
         } else if (event.getRegistryKey().equals(Registries.CREATIVE_MODE_TAB)) {
             Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, resLoc("carts"),
                     CreativeModeTab.builder()

@@ -62,7 +62,12 @@ public final class HorseDraft {
 
     /**
      * The fraction of its own speed this animal keeps while pulling that
-     * vehicle: {@code 1.0} unhitched, and never zero.
+     * vehicle <b>empty</b>: {@code 1.0} unhitched, and never zero.
+     *
+     * <p>Empty because a {@link CartKind} is a kind, not a cart - there is
+     * nothing here to ask how full it is. A caller holding a real vehicle should
+     * pass {@code AbstractDrawnEntity.currentLoad()} to
+     * {@link CartDraft#retention} instead; see {@link CartDraft#loaded}.
      */
     public static double retention(final LivingEntity entity, final CartKind kind) {
         return CartDraft.retention(pullOf(entity), speedOf(entity), kind.load());

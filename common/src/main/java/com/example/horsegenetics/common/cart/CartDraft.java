@@ -26,6 +26,13 @@ import com.example.horsegenetics.common.trait.HorseTraits;
  * wagon is capped no matter how fast it is, and a strong horse that is slow
  * never reaches the ceiling its shoulders could carry.
  *
+ * <h2>The load is not fixed</h2>
+ * {@link CartKind#load()} is the <i>empty</i> vehicle. {@link #loaded} adds
+ * what is in it, so a packed supply cart is a heavier thing than a bare one and
+ * a horse that could trot with an empty wagon may not manage a full one. That
+ * is the whole reason a strong horse is worth breeding for a trade run rather
+ * than only for the vehicle you picked.
+ *
  * <h2>Why both stats, and not just pull</h2>
  * The brief for this model was explicit: speed must not become a dump stat on
  * draft breeds. A model that read pull alone would do exactly that - breed the
@@ -110,6 +117,37 @@ public final class CartDraft {
             return 0.0;
         }
         return load * (Math.max(speed, 0.0) / HorseTraits.BASE_SPEED);
+    }
+
+    /**
+     * <b>What this vehicle actually asks for, given what is in it.</b>
+     * {@code emptyLoad} is the tare - {@link CartKind#load()} - and the cargo
+     * adds up to {@link CartKind#cargoShare()} of it again when the vehicle is
+     * full:
+     *
+     * <pre>{@code   load = emptyLoad * (1 + cargoShare * fill)}</pre>
+     *
+     * <p>Linear in {@code fill}, deliberately. The alternatives were a curve
+     * that punishes the last few stacks harder (which reads as an arbitrary
+     * cliff to anyone who has not read this file) and a threshold (which turns
+     * "how much do I load" into one binary decision made once). Linear means
+     * <b>every stack costs the same</b>, so a player can reason about it without
+     * being told the rule: half a cart is half the penalty.
+     *
+     * <p>{@code fill} is a fraction of capacity, not a count of items, because
+     * capacity is the thing a player can see. What fills a vehicle is the
+     * vehicle's own business and lives in the NeoForge module - slots for the
+     * cargo carriers, seats for the animal cart - since none of it can be asked
+     * without a running game.
+     *
+     * @param fill 0 for empty, 1 for full; anything outside is clamped
+     */
+    public static double loaded(final double emptyLoad, final double cargoShare, final double fill) {
+        if (cargoShare <= 0.0) {
+            return emptyLoad;
+        }
+        final double clamped = Math.max(0.0, Math.min(1.0, fill));
+        return emptyLoad * (1.0 + cargoShare * clamped);
     }
 
     /**
