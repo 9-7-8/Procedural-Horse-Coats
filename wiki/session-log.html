@@ -27,6 +27,102 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-19-gatehair">2026-09-19, later &mdash; A gate that duplicated, and a material chain nobody wanted to climb</h2>
+
+<p>
+    Two separate briefs, both from play, and the second one was the more interesting because
+    it was not phrased as a bug at all.
+</p>
+
+<p>
+    <strong>The duplication.</strong> <q>Breaking a double fence drops two.</q> The cause was a
+    comment that had been wrong since the block was written, and confidently so: the class
+    header explained that returning air from <code>updateShape</code> removed the orphaned half
+    <em>without</em> dropping it, and that this was why no loot-table condition was needed.
+    &ldquo;One item in, one item out.&rdquo; It is not true.
+    <code>Block.updateOrDestroy</code> calls
+    <code>destroyBlock(pos, (updateFlags &amp; 32) == 0)</code>, and an ordinary neighbour
+    update carries no <code>UPDATE_SUPPRESS_DROPS</code>, so both removals ran the loot table
+    and the gate paid twice.
+</p>
+
+<p>
+    <strong>What made it worth writing down</strong> is that vanilla has exactly this problem
+    in doors, beds and double plants, and solves it nowhere near the Java: every door&rsquo;s
+    loot table is conditioned on <code>half=lower</code>. The fix is a data change in two
+    generators (<code>bake-double-gates.mjs</code> for vanilla&rsquo;s woods,
+    <code>compat/GeneratedGates</code> for everyone else&rsquo;s) plus a
+    <code>playerWillDestroy</code> for the mirror case &mdash; in creative, breaking the
+    <em>non</em>-paying half still leaked a free gate out of the partner&rsquo;s removal. The
+    general lesson went to <a href="api-notes.html">api-notes</a>, because any future
+    multi-block block walks into it.
+</p>
+
+<p>
+    <strong>The second brief.</strong> <q>Make the recipe to craft double gates not require
+    horse hair &mdash; and remove the horse rope or bundle or whatever and just make everything
+    that needs those just need horse hair.</q> Reading it out, the real complaint was a
+    compounding price nobody had ever totalled: 4 hair made a bundle, 3 bundles a braided rope,
+    4 bundles a hair cloth, and the things a player actually wanted took the rope or the cloth.
+    So a double fence gate cost <strong>12 horse hair</strong>, an equestrian post 32, the
+    supplier&rsquo;s post 56 and the cowboy hitch <strong>68</strong> &mdash; against a supply
+    of one to three hair per horse per Minecraft day. Nowhere in the source or the wiki was
+    that number written down; it only existed multiplied out.
+</p>
+
+<p>
+    <strong>A constraint decided the shape of the answer.</strong> These are shapeless recipes
+    and the grid holds nine items, so 68 hair cannot be preserved even in principle. Collapsing
+    the chain <em>had</em> to make everything dramatically cheaper. That was put to the owner as
+    a choice rather than assumed, along with two others: which intermediates to delete (all
+    three) and what a hair-free gate should cost (two vanilla gates, nothing else).
+</p>
+
+<p>
+    <strong>That last one broke a house rule</strong>, which is the part worth remembering.
+    Every recipe in the mod carries at least one modded ingredient so that none of them can
+    collide with a vanilla or third-party one &mdash; and a collision is not an error in
+    Minecraft, the manager just resolves one recipe and the other item quietly becomes
+    uncraftable. Two vanilla gates and nothing else gives that up. It was taken deliberately
+    after checking that <em>nothing in vanilla consumes a fence gate</em> (every vanilla recipe
+    mentioning one produces it), documented as
+    <a href="items.html#gate-exception">the one exception</a> rather than left to be discovered,
+    and &mdash; since <code>check-recipes.mjs</code> reads only our own folder and cannot see
+    a third-party clash &mdash; backed by a test that asks the server&rsquo;s recipe manager
+    what two oak gates actually produce.
+</p>
+
+<p>
+    <strong>Both fixes are guarded by mutation-checked gametests</strong>, not by having been
+    looked at. <code>double_gate_drops_one</code> breaks each half in turn (they are not
+    symmetric &mdash; <code>left</code> is the half that pays, so testing one would pass with
+    the condition on the wrong half) and reverting oak&rsquo;s table reproduces the owner&rsquo;s
+    report exactly: <em>expected 1, found 2</em>. <code>double_gate_crafts</code> fails when a
+    stick is added to the recipe. Both on <a href="item-double-gates.html#verified">the gate
+    page</a>.
+</p>
+
+<p>
+    <strong>What the removal actually touched</strong>, which was far more than the recipe
+    folder: three items, six chain recipes, nine lang keys, three item definitions, three
+    models and an orphaned texture; <code>GeneratedArmour</code>&rsquo;s modded-metal padding;
+    <code>KnownGeneSpliceRecipe</code>, which had accepted cloth as an alternative to hair;
+    three progress tasks that would otherwise have become impossible to complete &mdash; caught
+    by <code>check-progress-tasks.mjs</code>, which exists for precisely that; the husbandry
+    tutorial step; two debug chests; and six villager trades.
+</p>
+
+<p>
+    <strong>The trades were the one judgement call not put to the owner</strong>, and it is
+    flagged as such on <a href="verification.html">verification</a>. A literal one-for-one
+    substitution would have made a post cost 2 hair and a trade pay an emerald for 2 hair,
+    which is a money printer. Working out the ladder turned up something better: in raw-hair
+    terms every intermediate trade had <em>already</em> been worse than the supplier&rsquo;s
+    plain level-1 hair trade &mdash; 32 to 48 hair per emerald against 16 &mdash; so they had
+    been close to dead all along. They are now one monotonic ladder, 16/14/12/10/8 per emerald
+    by supplier level.
+</p>
+
 <h2 id="d2026-09-19-cartweight">2026-09-19 &mdash; A cart is as heavy as what is in it, and a seat that never drove</h2>
 
 <p>
