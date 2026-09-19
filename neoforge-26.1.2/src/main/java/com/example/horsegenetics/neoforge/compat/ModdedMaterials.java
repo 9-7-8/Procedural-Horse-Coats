@@ -51,8 +51,13 @@ public final class ModdedMaterials {
      *
      * @param gateId       the mod's own fence gate, which the recipe consumes two of
      * @param plankTexture the texture id the generated models point at
+     * @param strippedLog  whether some jar ships {@code stripped_<name>_log} as an
+     *                     item. Only the wagon spends one, so a wood without it is
+     *                     a wood with five carts instead of six - see
+     *                     {@link MaterialScan#itemShipped}
      */
-    public record Wood(String namespace, String name, String gateId, String plankTexture) {
+    public record Wood(String namespace, String name, String gateId, String plankTexture,
+                       boolean strippedLog) {
         /** The id our double gate takes in <i>our</i> namespace. */
         public String doubleGateId() {
             return namespace + "_" + name + "_double_fence_gate";

@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -113,7 +114,10 @@ public final class MaterialScan {
             dyes.put(id, colourOf(sources, id));
         }
 
-        List<ModdedMaterials.Wood> sortedWoods = List.copyOf(woods.values());
+        // Woods in a second pass too, and for the same reason the metals have
+        // one: a gate declared in one jar may have its planks in another. What
+        // is being asked here is narrower than it looks - see confirmWoods.
+        List<ModdedMaterials.Wood> sortedWoods = List.copyOf(confirmWoods(sources, woods.values()));
         List<ModdedMaterials.Metal> sortedMetals = List.copyOf(metals);
         Map<String, Integer> sortedDyes = Map.copyOf(dyes);
         return new Result(sortedWoods, sortedMetals, sortedDyes,
@@ -150,10 +154,80 @@ public final class MaterialScan {
             }
             String texture = plankTexture(source, namespace, name);
             if (texture != null) {
+                // A candidate only: confirmWoods has the last word, and it needs
+                // every jar read before it can say anything.
                 out.put(namespace + ":" + name, new ModdedMaterials.Wood(
-                        namespace, name, namespace + ":" + name + "_fence_gate", texture));
+                        namespace, name, namespace + ":" + name + "_fence_gate", texture, false));
             }
         });
+    }
+
+    /**
+     * <b>A gate is not a promise of a plank.</b> Drops every candidate wood that
+     * no jar ships a {@code <name>_planks} item for, and records whether one
+     * ships a stripped log.
+     *
+     * <p>This is the fence-gate twin of the rule
+     * <a href="../../../../../../../../wiki/compatibility.html#generated-declared">already
+     * written down for tags</a>: a mod shipping {@code <x>_fence_gate} has told us
+     * the player can place a gate of <i>x</i>, which is all our gate recipe needs,
+     * and <b>nothing more</b>. Our carts go on to spend {@code <x>_planks}, an item
+     * the gate never mentioned.
+     *
+     * <p>The case that forced it: <b>Every Slab</b> generates a fence and gate for
+     * every block in the game, so a 332-jar pack adopted 247 pseudo-woods -
+     * {@code andesite}, {@code black_wool}, {@code coal_ore} - and generated 1,488
+     * cart items that could never be crafted, one warning apiece. Across that pack
+     * this rule rejects 266 of 468 candidates, and every non-EverySlab rejection is
+     * also genuinely not a wood: {@code mcwfences}' metal fences,
+     * {@code refurbished_furniture}'s lattices, {@code framedblocks:framed},
+     * {@code enderio:painted}.
+     *
+     * <p><b>Why a file and not the registry.</b> The registries are empty when this
+     * runs and tags do not exist yet - see {@link ModdedMaterials} - so
+     * {@code ModdedMaterials.itemExists} cannot be reached from here and would
+     * answer false for every mod if it could. The recipe-time check stays where it
+     * is as the backstop; this only stops us <i>registering</i> the item that check
+     * would later have to disown.
+     */
+    private static List<ModdedMaterials.Wood> confirmWoods(
+            List<Source> sources, Collection<ModdedMaterials.Wood> candidates) {
+        List<ModdedMaterials.Wood> out = new ArrayList<>();
+        for (ModdedMaterials.Wood wood : candidates) {
+            if (!itemShipped(sources, wood.namespace(), wood.name() + "_planks")) {
+                continue;
+            }
+            out.add(new ModdedMaterials.Wood(wood.namespace(), wood.name(), wood.gateId(),
+                    wood.plankTexture(),
+                    itemShipped(sources, wood.namespace(), "stripped_" + wood.name() + "_log")));
+        }
+        return out;
+    }
+
+    /**
+     * Does any jar ship the client-side definition of {@code <namespace>:<path>}
+     * as an <b>item</b>?
+     *
+     * <p>Both spellings are accepted because 26.1.2 is mid-migration:
+     * {@code assets/<ns>/items/<path>.json} is the item model definition every item
+     * now carries, and {@code models/item/<path>.json} is the older file a mod that
+     * has not moved still ships.
+     *
+     * <p><b>It can be wrong in one direction only</b>, which is the direction that
+     * costs nothing: a mod that registers an item but ships neither file - because
+     * it generates its assets at runtime, say - loses that wood. That is the same
+     * fail-soft this whole class is built on, and it is why the wood is dropped
+     * rather than the game stopped.
+     */
+    static boolean itemShipped(List<Source> sources, String namespace, String path) {
+        String asItem = "assets/" + namespace + "/items/" + path + ".json";
+        String asModel = "assets/" + namespace + "/models/item/" + path + ".json";
+        for (Source source : sources) {
+            if (source.has(asItem) || source.has(asModel)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -407,11 +481,13 @@ public final class MaterialScan {
         // without touching their mod list keeps a pack the old rules generated -
         // stale silently, which is the failure mode this whole folder exists to
         // avoid. Bumped for 0.5.013: armour ids collapse by material name and
-        // an ingot_ prefix comes off.
-        sb.append("rules|2\n");
+        // an ingot_ prefix comes off. Bumped again for the planks rule: a pack
+        // generated before it holds files for woods that no longer exist.
+        sb.append("rules|3\n");
         for (ModdedMaterials.Wood wood : woods) {
             sb.append("w|").append(wood.namespace()).append(':').append(wood.name())
-                    .append('|').append(wood.plankTexture()).append('\n');
+                    .append('|').append(wood.plankTexture())
+                    .append('|').append(wood.strippedLog()).append('\n');
         }
         for (ModdedMaterials.Metal metal : metals) {
             sb.append("m|").append(metal.itemId()).append('|')

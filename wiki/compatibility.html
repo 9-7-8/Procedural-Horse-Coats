@@ -629,6 +629,55 @@
     from something that is not there.
 </p>
 
+<h3 id="generated-gate-promise">&hellip;and neither is a fence gate</h3>
+
+<p>
+    The same rule, learned a second time in 2026-09-19 from a real 332-jar pack, one rung
+    earlier: <strong>the file that makes us adopt a wood is itself only a declaration.</strong>
+    <code>MaterialScan.collectWoods</code> takes a <code>&lt;name&gt;_fence_gate</code>
+    blockstate as its definition of a wood, and that is exactly right for the thing it was
+    written for &mdash; our double gate spends two of <em>that gate</em>, so the ingredient is
+    guaranteed by the very file we keyed on. It says nothing whatever about
+    <code>&lt;name&gt;_planks</code>, which the carts go on to spend.
+</p>
+<p>
+    <a href="https://modrinth.com/mod/every-slab">Every Slab</a> makes the gap enormous,
+    because it generates a fence and a gate for <em>every block in the game</em>. The pack
+    adopted <strong>287 woods, of which 247 were pseudo-woods</strong> &mdash;
+    <code>andesite</code>, <code>black_wool</code>, <code>coal_ore</code>,
+    <code>budding_amethyst</code> &mdash; and registered <strong>1,488 cart items that could
+    never be crafted</strong>, warning once apiece into a boot log nobody reads twice. The
+    double gates, notably, were <em>fine</em>: all 468 candidates ship their own gate item, so
+    every one of them crafted. Only the carts reached for an item nothing had promised.
+</p>
+<p>
+    So <code>confirmWoods</code> now drops any candidate no jar ships a
+    <code>&lt;name&gt;_planks</code> <em>item</em> for. It must be a file and not
+    <code>itemExists</code>: this runs in the mod constructor where the registries are empty,
+    so the registry answer would be &ldquo;no&rdquo; for every mod on earth
+    (<a href="#generated-seam">the seam is files</a>). It runs as a second pass over every
+    jar, for the same reason <code>colourOf</code> does &mdash; a gate declared in one jar may
+    have its planks in another. Across that pack it rejects 266 of 468 candidates, and every
+    non-EverySlab rejection is also genuinely not a wood: <code>mcwfences</code>&rsquo; metal
+    fences, <code>refurbished_furniture</code>&rsquo;s lattices,
+    <code>framedblocks:framed</code>, <code>enderio:painted</code>. 287 woods become 39.
+</p>
+<p>
+    The recipe-time <code>itemExists</code> check above stays exactly where it is. It is the
+    backstop, and it is still the only thing that can catch an item registered behind a config
+    flag. What changed is that it is no longer asked to disown 1,488 items we should never
+    have registered.
+</p>
+<p>
+    <strong>The wagon has its own version of this.</strong> Only that one cart spends
+    <code>stripped_&lt;name&gt;_log</code>, and nine <em>real</em> modded woods ship no such
+    item &mdash; <code>evilcraft:undead</code>, <code>forbidden_arcanus:edelwood</code> and
+    <code>fungyss</code>, <code>integrateddynamics:menril</code>, four
+    <code>regions_unexplored</code> bioshrooms, <code>undergarden:ancient_root</code>. Those
+    are woods and keep their other five carts; <code>CartWood.has</code> simply gives them no
+    wagon, rather than a wagon that cannot be built.
+</p>
+
 <h3 id="generated-bench">And the bench takes the new materials</h3>
 
 <p>

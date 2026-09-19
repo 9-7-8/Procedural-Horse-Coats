@@ -38,7 +38,24 @@ import java.util.Map;
  * @param shippedIcon whether {@code textures/item/<id>_<cart>.png} is a painted icon in this jar
  */
 public record CartWood(String id, String label, Identifier planks, Identifier log,
-                       Identifier strippedLog, String plankItem, boolean shippedIcon) {
+                       Identifier strippedLog, String plankItem, boolean shippedIcon,
+                       boolean hasStrippedLog) {
+
+    /**
+     * <b>Does this wood get a wagon?</b> Only the wagon spends a stripped log, so
+     * a wood whose mod never shipped one gets the other five carts and no sixth.
+     *
+     * <p>Before this, nine real modded woods in a 332-jar pack registered a wagon
+     * that could not be crafted and said so once a boot -
+     * {@code evilcraft:undead}, {@code forbidden_arcanus:edelwood},
+     * {@code integrateddynamics:menril}, four {@code regions_unexplored}
+     * bioshrooms and {@code undergarden:ancient_root}. Vanilla's twelve all have
+     * one.
+     */
+    public boolean has(final com.example.horsegenetics.common.cart.CartKind kind) {
+        return this.hasStrippedLog
+                || kind != com.example.horsegenetics.common.cart.CartKind.WAGON;
+    }
 
     /**
      * Vanilla's twelve, as {@code {name, log suffix, label}}.
@@ -86,6 +103,7 @@ public record CartWood(String id, String label, Identifier planks, Identifier lo
                         vanillaSprite(name + "_" + row[1]),
                         vanillaSprite("stripped_" + name + "_" + row[1]),
                         "minecraft:" + name + "_planks",
+                        true,
                         true));
             }
             final java.util.Set<String> ids = new java.util.HashSet<>();
@@ -147,7 +165,8 @@ public record CartWood(String id, String label, Identifier planks, Identifier lo
                 Identifier.fromNamespaceAndPath(wood.namespace(), "block/" + wood.name() + "_log"),
                 Identifier.fromNamespaceAndPath(wood.namespace(), "block/stripped_" + wood.name() + "_log"),
                 wood.namespace() + ":" + wood.name() + "_planks",
-                false);
+                false,
+                wood.strippedLog());
     }
 
     private static Identifier vanillaSprite(final String name) {
@@ -202,6 +221,9 @@ public record CartWood(String id, String label, Identifier planks, Identifier lo
      */
     public void lang(final Map<String, String> out) {
         for (final var kind : com.example.horsegenetics.common.cart.CartKind.values()) {
+            if (!has(kind)) {
+                continue;   // no item registered, so a name for it would name nothing
+            }
             out.put("item.horsegenetics." + itemId(kind.id()),
                     this.label + " " + kindLabel(kind.id()));
         }

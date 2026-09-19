@@ -109,6 +109,9 @@ class MaterialScanTest {
                 .put("assets/testmod/blockstates/maple_fence_gate.json",
                         "{\"variants\":{\"\":{\"model\":\"testmod:block/maple_fence_gate\"}}}")
                 .put("assets/testmod/textures/block/maple_planks.png", png(16, 0xC88E5A, 255))
+                // The planks ITEM, which is what a cart recipe spends and what
+                // confirmWoods demands before this counts as a wood at all.
+                .put("assets/testmod/items/maple_planks.json", "{}")
                 .put("data/c/tags/item/ingots/tin.json",
                         "{\"values\":[\"testmod:tin_ingot\"]}")
                 .put("assets/testmod/textures/item/tin_ingot.png", png(16, 0xD6D8DE, 255))
@@ -270,10 +273,68 @@ class MaterialScanTest {
     // The fallbacks
     // ------------------------------------------------------------------
 
+    // ------------------------------------------------------------------
+    // A gate is not a promise of a plank
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>The Every Slab case, in miniature.</b> That mod generates a fence and a
+     * gate for every block in the game, so a 332-jar pack adopted 247 pseudo-woods
+     * - {@code andesite}, {@code black_wool}, {@code coal_ore} - and registered
+     * 1,488 cart items nobody could ever craft. The gate is real and its texture
+     * resolves; what does not exist is {@code andesite_planks}, which is the item
+     * the cart recipes go on to spend.
+     */
+    @Test
+    void aGateWithNoPlanksItemIsNotAWood() {
+        MaterialScan.Result result = scan(new FakeJar()
+                .put("assets/everyslab/blockstates/andesite_fence_gate.json", "{}")
+                .put("assets/everyslab/items/andesite_fence_gate.json", "{}")
+                .put("assets/everyslab/models/block/andesite_fence_gate.json",
+                        "{\"textures\":{\"texture\":\"minecraft:block/andesite\"}}"));
+
+        assertTrue(result.woods().isEmpty(),
+                "a fence gate says a gate can be placed, and nothing more");
+    }
+
+    /** The planks may perfectly well be in another jar, exactly as a metal's art may. */
+    @Test
+    void thePlanksMayBeInADifferentJarFromTheGate() {
+        MaterialScan.Result result = scan(
+                new FakeJar()
+                        .put("assets/testmod/blockstates/maple_fence_gate.json", "{}")
+                        .put("assets/testmod/textures/block/maple_planks.png", png(4, 0x112233, 255)),
+                new FakeJar()
+                        .put("assets/testmod/items/maple_planks.json", "{}"));
+
+        assertEquals(1, result.woods().size(), "one jar declares the gate, another the planks");
+    }
+
+    /**
+     * Only the wagon spends a stripped log. Nine real modded woods in the pack
+     * shipped none, and each registered a wagon that could not be crafted.
+     */
+    @Test
+    void aWoodWithoutAStrippedLogIsStillAWood() {
+        FakeJar noLog = new FakeJar()
+                .put("assets/testmod/blockstates/edelwood_fence_gate.json", "{}")
+                .put("assets/testmod/items/edelwood_planks.json", "{}")
+                .put("assets/testmod/textures/block/edelwood_planks.png", png(4, 0x223344, 255));
+
+        MaterialScan.Result result = scan(noLog);
+        assertEquals(1, result.woods().size(), "no stripped log is not a disqualification");
+        assertFalse(result.woods().get(0).strippedLog(), "and it is recorded as absent");
+
+        MaterialScan.Result withLog = scan(
+                noLog.put("assets/testmod/items/stripped_edelwood_log.json", "{}"));
+        assertTrue(withLog.woods().get(0).strippedLog(), "shipped, so the wagon can be crafted");
+    }
+
     @Test
     void fallsBackToTheGatesOwnModelWhenThereAreNoPlanks() {
         MaterialScan.Result result = scan(new FakeJar()
                 .put("assets/testmod/blockstates/ash_fence_gate.json", "{}")
+                .put("assets/testmod/items/ash_planks.json", "{}")
                 .put("assets/testmod/models/block/ash_fence_gate.json",
                         "{\"textures\":{\"texture\":\"testmod:block/ash_bespoke\"}}"));
 
@@ -288,6 +349,7 @@ class MaterialScanTest {
         // all and therefore fit any. The shipped twelve make the same call.
         MaterialScan.Result result = scan(new FakeJar()
                 .put("assets/testmod/blockstates/bamboo_fence_gate.json", "{}")
+                .put("assets/testmod/items/bamboo_planks.json", "{}")
                 .put("assets/testmod/textures/block/bamboo_planks.png", png(4, 0x445566, 255))
                 .put("assets/testmod/models/block/bamboo_fence_gate.json",
                         "{\"textures\":{\"texture\":\"testmod:block/bamboo_bespoke\"}}"));

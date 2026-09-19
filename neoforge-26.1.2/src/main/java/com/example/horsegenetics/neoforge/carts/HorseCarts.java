@@ -139,6 +139,9 @@ public final class HorseCarts {
         for (final CartKind kind : CartKind.values()) {
             final Map<String, CartItem> byWood = new LinkedHashMap<>();
             for (final CartWood wood : CartWood.all()) {
+                if (!wood.has(kind)) {
+                    continue;   // no stripped log, no wagon - CartWood.has
+                }
                 byWood.put(wood.id(), register(wood.itemId(kind.id()),
                         prop -> new CartItem(wood, kind, prop.stacksTo(1))));
             }

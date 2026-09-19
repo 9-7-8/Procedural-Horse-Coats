@@ -58,6 +58,11 @@ final class GeneratedCarts {
         for (final ModdedMaterials.Wood wood : ModdedMaterials.woods()) {
             final String prefix = wood.namespace() + "_" + wood.name();
             for (final CartKind kind : CartKind.values()) {
+                if (kind == CartKind.WAGON && !wood.strippedLog()) {
+                    // No item was registered for it - see CartWood.has - so a
+                    // model, a name and a recipe here would all point at nothing.
+                    continue;
+                }
                 final String id = prefix + "_" + kind.id();
 
                 // Model + item definition, both pointing at the fallback icon.

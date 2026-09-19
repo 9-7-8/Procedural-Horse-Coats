@@ -78,6 +78,43 @@
     </p>
 </div>
 
+<h2 id="pseudowoods-0919">&sect;0-FY &mdash; 287 modded woods become 39 (2026-09-19, NOT played, needs the big pack)</h2>
+
+<p>
+    A fence gate is not a promise of a plank. With Every Slab installed the pack adopted 247
+    pseudo-woods and registered 1,488 uncraftable cart items; the scan now demands a
+    <code>&lt;name&gt;_planks</code> item file before adopting a wood, and drops the wagon
+    for the nine real woods that ship no stripped log. See
+    <a href="compatibility.html#generated-gate-promise">compatibility &sect; neither is a fence
+    gate</a>. <strong>Predicted from the jars, not observed</strong>: the simulation
+    reproduced the old count of 287 exactly and matched all nine stripped-log warnings by
+    name, but no boot has been done with the change in.
+</p>
+
+<h3>On the big pack &mdash; the numbers, which are the whole check</h3>
+<ul>
+    <li><strong>The boot line should read about 39 modded woods, not 287.</strong>
+        <code>compat: N modded woods, ... fingerprint ...</code>. The fingerprint must also
+        change, or the generated pack is stale and none of the rest of this is real.</li>
+    <li><strong>Every <code>has no planks item</code> warning should be gone</strong> &mdash;
+        there were 1,488. Any that survive name a wood that passed the file check and failed
+        the registry one, which is the interesting case and worth reporting.</li>
+    <li><strong>The nine <code>no stripped log</code> warnings should be gone too</strong>,
+        and those woods should still have their other five carts.</li>
+    <li><strong>Generated file count should fall a long way</strong> from 7,818.</li>
+</ul>
+
+<h3>What this deliberately breaks, and should be looked for</h3>
+<ul>
+    <li><strong>Any EverySlab double gate already placed in the nightly world is now a
+        missing block</strong> &mdash; 248 gate types stopped being registered. They crafted
+        before, so this is the one real cost of the change. Check the nightly world loads
+        without a wall of &ldquo;unknown block&rdquo; errors.</li>
+    <li><strong>A real wood must not have gone missing.</strong> The risk is a mod that
+        registers planks but ships no item model file for them; it would be silently dropped.
+        Spot-check that the wood mods you actually use still have carts and double gates.</li>
+</ul>
+
 <h2 id="bales-0919">&sect;0-FX &mdash; Horses eat other mods' hay bales (2026-09-19, NOT played, needs a second mod installed)</h2>
 
 <p>
