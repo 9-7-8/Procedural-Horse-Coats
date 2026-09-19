@@ -13,6 +13,7 @@ import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.GeneCategory;
 import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.HorseUnits;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBreakdown;
 import com.example.horsegenetics.common.cart.CartDraft;
@@ -621,8 +622,14 @@ public final class HorseInfoScreen extends Screen {
             double max = horse.getAttributeValue(Attributes.MAX_HEALTH);
             c.pair("Health", String.format("%.1f / %.1f  (%.0f hearts)", cur, max, Math.ceil(max / 2.0)),
                     cur < max * 0.4 ? BAD : cur >= max ? GOOD : VALUE);
-            c.pair("Speed", String.format("%.3f", horse.getAttributeValue(Attributes.MOVEMENT_SPEED)));
-            c.pair("Jump", String.format("%.2f", horse.getAttributeValue(Attributes.JUMP_STRENGTH)));
+            // Both in units a player can picture: how fast it runs, and how
+            // high a block it can get onto. The raw attributes are what the
+            // simulation uses and what the designer shows, but neither number
+            // means anything on sight - 0.1875 is not a speed to anybody.
+            c.pair("Speed", String.format("%.1f m/s",
+                    HorseUnits.metresPerSecond(horse.getAttributeValue(Attributes.MOVEMENT_SPEED))));
+            c.pair("Jump", String.format("%.1f m",
+                    HorseUnits.jumpMetres(horse.getAttributeValue(Attributes.JUMP_STRENGTH))));
             // Pull sits with the other four body numbers because it is one of
             // them - the fifth body stat, not a cart footnote. It reads off the
             // genotype rather than an attribute because there is no pull

@@ -136,6 +136,57 @@
     breeding.
 </p>
 
+<h3 id="units">What those numbers are in metres</h3>
+<p>
+    Not one of the four means anything on sight, so the horse&rsquo;s information
+    screen shows <strong>speed in m/s and jump as the height the horse can get
+    onto</strong>. Both conversions are display-only and live in
+    <code>common/trait/HorseUnits</code> &mdash; nothing in the simulation reads
+    them, and the browser designer deliberately keeps showing the raw genetic
+    number, because it is showing genetics.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>attribute</th><th>baseline</th><th>vanilla&rsquo;s roll</th></tr></thead>
+<tbody>
+<tr><td>movement speed</td><td>8.1&nbsp;m/s</td><td>4.9 &ndash; 14.6&nbsp;m/s</td></tr>
+<tr><td>jump strength</td><td>1.6&nbsp;m</td><td>1.1 &ndash; 3.6&nbsp;m</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    Speed is <strong>&times;43.17 m/s per point</strong>. That is not a tuning
+    knob but a property of the player movement model a ridden horse travels on:
+    an entity gains its speed attribute in velocity each tick and keeps
+    <code>0.546</code> of it, which converges on <code>2.2026</code> attribute
+    points of distance per tick, and the rider&rsquo;s forward input carries
+    vanilla&rsquo;s <code>0.98</code>. It is the same constant that makes a
+    walking player&rsquo;s <code>0.1</code> the familiar 4.317&nbsp;m/s, and the
+    one <code>server/HorseSpeedFloor</code> already reasons with in prose.
+</p>
+<p>
+    Jump is <strong>not</strong> linear &mdash; the horse is thrown upward and
+    then fights gravity and drag, so height is a cubic in the attribute. A horse
+    with twice the jump strength clears rather more than twice the height, which
+    is why <code>0.5</code> is 1.6&nbsp;m but <code>1.0</code> &mdash; above
+    anything vanilla rolls, and squarely inside what breeding reaches &mdash; is
+    5.3&nbsp;m.
+    <code>HorseUnitsTest</code> pins both curves against the figures quoted on
+    this page, on <a href="breeds.html#stats">the breed stat curve</a> and in the
+    breed designer, so the mod cannot end up with two answers to &ldquo;how fast
+    is a horse&rdquo;.
+</p>
+<div class="note warn">
+    <span class="label">The jump figure assumes a vanilla-sized horse</span>
+    <p>
+        The cubic is a fit to vanilla jump physics at body scale <code>1.0</code>
+        and normal gravity. A horse carrying the size alleles, or one of the
+        magical jump genes that reaches gravity, may clear something other than
+        what the screen prints. Unmeasured &mdash; see
+        <a href="verification.html#body-stats">verification</a>.
+    </p>
+</div>
+
 <div class="note rule">
     <span class="label">Health never resolves to zero</span>
     <p>

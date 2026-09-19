@@ -78,6 +78,48 @@
     </p>
 </div>
 
+<h2 id="stat-units-0918">&sect;0-FS &mdash; Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h2>
+
+<p>
+    The information screen printed the raw attributes &mdash; <code>0.188</code> and
+    <code>0.50</code> &mdash; which mean nothing to a player. It now prints
+    <strong>m/s</strong> and <strong>the height the horse can get onto</strong>, converted by
+    <code>common/trait/HorseUnits</code>. <code>HorseUnitsTest</code> pins the curves against
+    every metre figure already quoted elsewhere in the mod, so what is left to check is whether
+    the numbers describe the animal in front of you.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+<ul>
+    <li><strong>An ordinary horse reads about 8&nbsp;m/s and 1.6&nbsp;m.</strong> A
+        wild-caught one should land somewhere in 7.4&ndash;13.5&nbsp;m/s and 1.4&ndash;3.0&nbsp;m
+        (this model's wild range, not vanilla's wider roll).</li>
+    <li><strong>Neither ever reads negative or zero</strong> on a horse you can ride, including
+        a deliberately awful bred one. Jump is clamped at zero; if you see a horse whose jump
+        reads <code>0.0&nbsp;m</code>, check it genuinely cannot hop before calling it a bug.</li>
+    <li><strong>The numbers move when the horse does.</strong> Hitch a cart: the speed line
+        should drop by about a third under a wagon, and come back on unhitch. This is the same
+        modifier <a href="#carts-0918">the cart checks</a> are about, now readable in a unit
+        that makes the drop obvious.</li>
+</ul>
+
+<h3>In the game, with your hands &mdash; the part the test cannot do</h3>
+<ul>
+    <li><strong>Race the readout.</strong> Ride a horse along a measured run of blocks on flat
+        ground and time it. If the screen says 8&nbsp;m/s it should cover roughly eight blocks a
+        second. This is the one check that proves the <code>&times;43.17</code> constant rather
+        than the arithmetic around it, and it has never been done.</li>
+    <li><strong>Jump the printed height.</strong> Build a pillar to exactly the height the
+        screen claims and see whether the horse gets onto it &mdash; then one block higher, and
+        see that it cannot. <b>The fit assumes body scale 1.0 and normal gravity</b>, so do this
+        twice: once on an ordinary horse, once on a
+        <a href="horse-body.html#body-size">visibly large or small</a> one. If the big horse
+        clears more than its screen says, the conversion needs the scale attribute in it and
+        <a href="horse-body.html#units">the warning on horse-body</a> becomes a real gap.</li>
+    <li><strong>A flying breed.</strong> Cloudtouched horses reach gravity; check the jump line
+        is not nonsense on one, and say so either way.</li>
+</ul>
+
 <h2 id="compat-collapse-0918">&sect;0-FQ &mdash; One armour per metal name, after v0.5.012 would not load (2026-09-18, NOT played)</h2>
 
 <p>
