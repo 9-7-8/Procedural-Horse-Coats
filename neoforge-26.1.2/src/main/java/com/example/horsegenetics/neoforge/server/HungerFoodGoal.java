@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.care.Hunger;
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.HorseDiet;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.compat.HayBales;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -346,9 +347,12 @@ public final class HungerFoodGoal extends Goal {
         if (st.getBlock() instanceof CakeBlock || st.getBlock() instanceof CandleCakeBlock) {
             food = Hunger.Food.CAKE;
             form = Items.CAKE;
-        } else if (st.is(Blocks.HAY_BLOCK)) {
+        } else if (HayBales.isBale(st)) {
+            // Vanilla's hay block and any other mod's bale - HayBales.BALE_BLOCKS.
+            // The item form is read off the block rather than named, so a narrow
+            // diet judges a modded bale by the same item DietFoods was asked about.
             food = Hunger.Food.HAY;
-            form = Items.HAY_BLOCK;
+            form = st.getBlock().asItem();
         } else if (st.is(BlockTags.CROPS) || st.is(Blocks.PUMPKIN) || st.is(Blocks.MELON) || st.is(Blocks.SUGAR_CANE)) {
             food = Hunger.Food.CROP;
             form = cropItem(st);

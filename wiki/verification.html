@@ -78,6 +78,56 @@
     </p>
 </div>
 
+<h2 id="bales-0919">&sect;0-FX &mdash; Horses eat other mods' hay bales (2026-09-19, NOT played, needs a second mod installed)</h2>
+
+<p>
+    A horse now grazes, heals beside, and can be hand-fed any bale in
+    <code>horsegenetics:hay_bales</code> &mdash; vanilla's, plus
+    <a href="https://modrinth.com/mod/bale-of-sugar-cane">Bale of Sugar Cane</a>'s as an
+    optional entry. <strong>None of it has been seen in a game with that mod installed</strong>;
+    the ids were read out of its jar, not observed. See
+    <a href="compatibility.html#bales">compatibility &sect; bale mods</a>.
+</p>
+
+<h3>With no second mod installed &mdash; do these first, they need nothing but the dev client</h3>
+<ul>
+    <li><strong>A hungry horse still walks to a plain hay bale and eats it.</strong> This is
+        the one that matters most and it is the <em>regression</em> check, not the feature:
+        grazing hay stopped being a hardcoded block and became a tag lookup, so if the tag
+        is wrong every horse silently stops eating hay everywhere. The gametest
+        <code>hay_is_still_a_bale</code> covers the tag itself; this covers the goal that
+        reads it.</li>
+    <li><strong>Hand a hay bale to a hurt tamed horse.</strong> It should heal, consume the
+        bale and give bond exactly as before &mdash; vanilla's own bale is deliberately
+        excluded from the new handler, so any change here is a bug.</li>
+    <li><strong>Hand a hay bale to a full-health adult.</strong> Nothing should happen and
+        the bale should <em>not</em> be eaten. Unchanged vanilla behaviour, worth confirming
+        once because the new handler deliberately reproduces it.</li>
+    <li><strong>A hay portal still lights from real hay bales.</strong> Untouched, but it is
+        the nearest thing to this change.</li>
+</ul>
+
+<h3>With Bale of Sugar Cane installed &mdash; the actual feature, none of it ever run</h3>
+<ul>
+    <li><strong>Does the mod even load beside this one?</strong> Nothing has confirmed the
+        two coexist. Do this before judging anything below.</li>
+    <li><strong>A hungry horse should walk to a sugar cane bale and eat it</strong>, at the
+        same priority as hay &mdash; above crops, below cake.</li>
+    <li><strong>Hand one to a hurt tamed horse.</strong> Expect 20 health, the bale consumed,
+        the eat sound, and bond. A foal should age up 180 seconds with the happy-villager
+        particles.</li>
+    <li><strong>If nothing at all happens, the id is wrong</strong>, not the logic &mdash;
+        that is the designed-for failure and it is silent by intent. Confirm with
+        <code>/data get</code> or by checking the item's id in F3+H, and compare against
+        <code>data/horsegenetics/tags/item/hay_bales.json</code>.</li>
+    <li><strong>A wheat-diet horse should take a sugar cane bale</strong> and an
+        eat-anything horse too. A horse on any other special diet should refuse it with the
+        usual turned-away message &mdash; that path is <code>HorseDietHandler</code>'s and
+        the risk is the two handlers both firing, which would show as a double heal.</li>
+    <li><strong>Stand a hurt horse beside a sugar cane bale and a water source.</strong>
+        Gated healing should tick, the same as beside hay.</li>
+</ul>
+
 <h2 id="suntouched-0918">&sect;0-FW &mdash; Suntouched actually lights the ground now (2026-09-18, NOT played)</h2>
 
 <p>

@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#horsegenetics:hay_bales", "required": false }
+  ]
+}

@@ -951,6 +951,69 @@
     armour-only mod somehow breaks coats.
 </p>
 
+<h2 id="bales">Bale mods &mdash; a horse eats any hay bale</h2>
+
+<p>
+    Asked for <a href="https://modrinth.com/mod/bale-of-sugar-cane">Bale of Sugar Cane</a>
+    (<code>baleofsugarcane</code>), which compresses nine sugar canes into a block built
+    with <code>Properties.ofFullCopy(Blocks.HAY_BLOCK)</code> &mdash; a hay bale in
+    everything but name, which horses nonetheless ignored completely. As of 2026-09-19 a
+    horse grazes one, heals beside one, and takes one from the hand, on vanilla&rsquo;s own
+    hay numbers.
+</p>
+<p>
+    <strong>It is written as a tag, not as a check for that mod.</strong>
+    <code>horsegenetics:hay_bales</code> exists in both the block and item registries and
+    holds vanilla&rsquo;s <code>minecraft:hay_block</code> plus any other mod&rsquo;s bale as
+    a <code>required: false</code> entry. The next bale mod joins by datapack and touches no
+    Java &mdash; including a datapack a player writes themselves.
+</p>
+
+<h3 id="bales-tag-trap">Why a tag was not enough on its own</h3>
+<p>
+    This is the part worth reading before writing anything similar, because vanilla is
+    inconsistent with itself. <code>AbstractHorse.isFood</code> <em>is</em> a tag
+    (<code>minecraft:horse_food</code>), so adding a bale to it is genuinely enough to make a
+    horse want one: temptation, taming, the bond grant, and
+    <code>Horse.mobInteract</code> taking its food branch instead of mounting the player.
+    But <code>AbstractHorse.handleEating</code> &mdash; the method that decides what the food
+    actually <em>does</em> &mdash; is a chain of <code>itemStack.is(Items.X)</code> with no
+    tag anywhere in it.
+</p>
+<p>
+    So a tag on its own produces the worst of both: the horse accepts the bale as food and
+    then heals nothing, ages nothing, and never consumes it, forever. <code>compat/HayBales</code>
+    supplies vanilla&rsquo;s own hay-bale branch instead &mdash; 20 health, 180 seconds off a
+    foal, no temper &mdash; and cancels the interaction. A full-health adult gets nothing and
+    keeps its bale, which is exactly what vanilla&rsquo;s own bale does. Vanilla&rsquo;s
+    <code>hay_block</code> is deliberately excluded from the handler and left to vanilla.
+</p>
+<p>
+    A special-diet horse is left to <code>HorseDietHandler</code> end to end, so nothing is
+    fed twice or fed the wrong amount. A wheat-eater and an eat-anything horse both take a
+    bale (a bale carries no <code>FOOD</code> data component, so
+    <code>DietFoods.isEdible</code> misses it &mdash; that is the one tag exception in an
+    otherwise list-defined file). The <a href="horse-dimension.html">hay portal</a> still
+    wants real hay bales; a sugar cane bale is food, not a doorway.
+</p>
+<p>
+    <strong>The cost of the trade, and the tripwire for it.</strong> Grazing hay used to be
+    <code>st.is(Blocks.HAY_BLOCK)</code> in Java and is now a datapack lookup, which buys the
+    extensibility above at the price of a new silent failure: rename either tag file or break
+    its JSON and <em>every horse in the game stops eating hay at all</em>, with nothing
+    logged and no crash. The gametest <code>horsegenetics:hay_is_still_a_bale</code> asserts
+    vanilla&rsquo;s bale is still in both tags. It was confirmed to fail, with that message,
+    by emptying the tag &mdash; a tripwire nobody has watched trip is not a tripwire.
+</p>
+<p>
+    <strong>Unverified:</strong> the two mods have never been run together. The ids were read
+    out of <code>baleofsugarcane-neoforge-1.0.0+26.1.2.jar</code> itself rather than guessed,
+    which matters here because they do not match each other &mdash; the block is
+    <code>baleofsugarcane:baleofsugarcane</code> and the item is
+    <code>baleofsugarcane:baleofsugarcane_item</code>. A wrong id costs an absent optional tag
+    entry and nothing else.
+</p>
+
 <h2 id="horse-powered">Horse Powered</h2>
 
 <p>

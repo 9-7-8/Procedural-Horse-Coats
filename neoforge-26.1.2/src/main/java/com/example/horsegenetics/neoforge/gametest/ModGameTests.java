@@ -3,10 +3,12 @@ package com.example.horsegenetics.neoforge.gametest;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
+import com.example.horsegenetics.neoforge.compat.HayBales;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.FunctionGameTestInstance;
 import net.minecraft.gametest.framework.TestData;
@@ -26,6 +28,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -339,6 +343,38 @@ public final class ModGameTests {
         // One pass over the recipe list inside a single tick; the budget is slack.
         register(event, environment, EVERY_RECIPE_ENCODES, 100);
         register(event, environment, BUILDING_BLOCKS_SURVIVES, 100);
+        // Two tag lookups in one tick.
+        register(event, environment, HAY_IS_STILL_A_BALE, 100);
+    }
+
+    /**
+     * <b>Vanilla hay is still in the bale tags.</b> Grazing and hand-feeding hay
+     * used to be {@code st.is(Blocks.HAY_BLOCK)} in Java; they are now a datapack
+     * tag, so that another mod's bale can join without a code change
+     * ({@link HayBales}). The cost of that trade is a new silent failure: rename
+     * either tag file, or break its JSON, and every horse in the game stops eating
+     * hay at all, with nothing logged and no crash. This is the tripwire.
+     *
+     * <p>It deliberately asserts only about <b>vanilla's</b> bale. The modded
+     * entries are {@code required: false} by design and the test must pass with no
+     * other mod installed, which is how it will almost always be run.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HAY_IS_STILL_A_BALE =
+            TEST_FUNCTIONS.register("hay_is_still_a_bale", () -> ModGameTests::hayIsStillABale);
+
+    private static void hayIsStillABale(GameTestHelper helper) {
+        if (!HayBales.isBale(Blocks.HAY_BLOCK.defaultBlockState())) {
+            throw new GameTestAssertException(Component.literal(
+                    "minecraft:hay_block is not in horsegenetics:hay_bales - horses have stopped"
+                            + " grazing hay. Check data/horsegenetics/tags/block/hay_bales.json."), 0);
+        }
+        if (!HayBales.isBale(new ItemStack(Items.HAY_BLOCK))) {
+            throw new GameTestAssertException(Component.literal(
+                    "minecraft:hay_block is not in the horsegenetics:hay_bales ITEM tag - a"
+                            + " wheat-diet horse has stopped taking hay from the hand."
+                            + " Check data/horsegenetics/tags/item/hay_bales.json."), 0);
+        }
+        helper.succeed();
     }
 
     private static void register(RegisterGameTestsEvent event,

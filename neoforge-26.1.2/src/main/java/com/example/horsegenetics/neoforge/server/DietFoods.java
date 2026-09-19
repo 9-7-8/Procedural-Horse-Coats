@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.neoforge.compat.HayBales;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,8 +24,10 @@ import java.util.Map;
  *       that many items listed, because the roll that picks one is an index
  *       into this list. {@link #verify()} checks it at startup rather than
  *       letting an out-of-range horse quietly eat nothing;</li>
- *   <li>the lists are the whole definition of a diet. There is no tag and no
- *       predicate hiding elsewhere.</li>
+ *   <li>the lists are the whole definition of a diet, with <b>one</b> exception:
+ *       {@link Diet#WHEAT} also takes anything in {@code horsegenetics:hay_bales},
+ *       because another mod's hay bale is not an item this file could have named.
+ *       See {@link HayBales}. Nothing else hides behind a tag or a predicate.</li>
  * </ul>
  *
  * <p><b>Unverified against a running game.</b> Every item id here is read off
@@ -48,7 +51,11 @@ public final class DietFoods {
             Items.CARROT, Items.POTATO, Items.BEETROOT, Items.MELON_SLICE, Items.APPLE,
             Items.SWEET_BERRIES, Items.GLOW_BERRIES, Items.PUMPKIN);
 
-    private static final List<Item> WHEAT = List.of(Items.WHEAT, Items.HAY_BLOCK);
+    /**
+     * Named with the suffix, unlike its neighbours, so that it cannot be read as
+     * the {@code case WHEAT:} label it sits beside in {@link #accepts}.
+     */
+    private static final List<Item> WHEAT_ITEMS = List.of(Items.WHEAT, Items.HAY_BLOCK);
 
     /** Cooked and prepared - what a person would sit down to. */
     private static final List<Item> HUMAN_FOOD = List.of(
@@ -78,7 +85,7 @@ public final class DietFoods {
             Diet.RAW_MEAT, RAW_MEAT,
             Diet.FISH, FISH,
             Diet.RAW_VEGETABLES, RAW_VEGETABLES,
-            Diet.WHEAT, WHEAT,
+            Diet.WHEAT, WHEAT_ITEMS,
             Diet.HUMAN_FOOD, HUMAN_FOOD,
             Diet.CAKE, CAKE,
             Diet.POTION, POTION,
@@ -114,11 +121,16 @@ public final class DietFoods {
             case BLOOD:     // it bites; nothing a hand holds feeds it
                 return false;
             case ANYTHING:
-                return isEdible(stack);
+                // A bale is food without a FOOD component, so isEdible misses it -
+                // and "eats anything" refusing hay would be the wrong way round.
+                return isEdible(stack) || HayBales.isBale(stack);
             case INGOT:
                 return stack.is(INGOTS.get(clamp(diet.variant(), INGOTS.size())));
             case GEM:
                 return stack.is(GEMS.get(clamp(diet.variant(), GEMS.size())));
+            case WHEAT:
+                // Hay is hay whoever baled it - see the class note's exception.
+                return WHEAT_ITEMS.contains(stack.getItem()) || HayBales.isBale(stack);
             default: {
                 List<Item> items = BY_DIET.get(diet.diet());
                 return items != null && items.contains(stack.getItem());
@@ -136,7 +148,10 @@ public final class DietFoods {
         if (stack.isEmpty()) {
             return false;
         }
-        if (isEdible(stack)) {
+        if (isEdible(stack) || HayBales.isBale(stack)) {
+            // A bale carries no FOOD component and is in no list here, so without
+            // this a wheat-eater could never be offered one by hand: the diet
+            // handler would hand the interaction straight back to vanilla.
             return true;
         }
         for (List<Item> items : BY_DIET.values()) {
