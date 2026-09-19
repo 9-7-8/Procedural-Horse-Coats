@@ -44,6 +44,48 @@ class ReproTextTest {
         assertEquals("about 2 hours", ReproText.duration(72_001));
     }
 
+    /**
+     * The glance line is the shortest of the three readouts, and what it
+     * <i>withholds</i> is the point: no countdown to tick in the corner of a
+     * player's eye, and nothing at all for a mare who is merely between heats.
+     */
+    @Test
+    void theGlanceLineIsAStateWordAndNeverANumber() {
+        Reproduction pregnant = inHeatFromZero().withPregnancy(pregnancy(1, 0, DAY));
+        assertEquals("Pregnant", ReproText.glanceLine(pregnant, DAY / 4, T));
+        // The info line for the same mare does carry a countdown - that is the
+        // difference between asking and glancing.
+        assertTrue(ReproText.breedingLine(pregnant, DAY / 4, T).contains("to go"));
+
+        assertEquals("In heat", ReproText.glanceLine(inHeatFromZero(), 0, T));
+
+        for (long now = 0; now < DAY * 3; now += DAY / 12) {
+            String glance = ReproText.glanceLine(inHeatFromZero(), now, T);
+            assertFalse(glance.contains("about"), "a countdown leaked at " + now + ": " + glance);
+            assertFalse(glance.toLowerCase().contains("twin"), "twins leaked at " + now + ": " + glance);
+        }
+    }
+
+    @Test
+    void aMareBetweenHeatsGetsNoLineAtAll() {
+        // DIESTRUS says "Not in heat - about N min to go" on the info screen and
+        // nothing here: a glance asked no question, so an answer on every horse
+        // in the paddock is noise.
+        Reproduction resting = inHeatFromZero().withCyclePhase(0.5);
+        String info = ReproText.breedingLine(resting, 0, T);
+        assertTrue(info.startsWith("Not in heat"), info);
+        assertEquals("", ReproText.glanceLine(resting, 0, T));
+    }
+
+    @Test
+    void nursingRidesAlongsideWhateverElseIsTrue() {
+        Reproduction nursing = inHeatFromZero().foaled(0, List.of(new UUID(9L, 9L)));
+        assertTrue(nursing.lactating());
+        // Just foaled, so POSTPARTUM: no state word of its own here, but she is
+        // still visibly nursing.
+        assertEquals("Nursing", ReproText.glanceLine(nursing, 1, T));
+    }
+
     @Test
     void theInfoLineNeverRevealsTwinsAndTheKitAlwaysDoes() {
         Reproduction twins = inHeatFromZero().withPregnancy(pregnancy(2, 0, DAY));

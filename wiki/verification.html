@@ -78,6 +78,55 @@
     </p>
 </div>
 
+<h2 id="jade-0918">&sect;0-FV &mdash; A mare's state in Jade's tooltip (2026-09-18, NOT played, nothing here has been seen)</h2>
+
+<p>
+    <strong>The first third-party jar this mod has ever compiled against</strong>, so the first
+    thing to check is not the tooltip but that nothing else broke. Jade is
+    <code>compileOnly</code> and the built jar was confirmed to contain no <code>snownee</code>
+    classes, but no build of this has been launched into a game at all.
+</p>
+
+<h3>Do these first &mdash; the whole feature is downstream of them</h3>
+<ul>
+    <li><strong>The mod still loads with Jade absent.</strong> This is the one that matters. A
+        missing optional dependency that is actually required shows as a crash in the mod
+        constructor, so <code>runServer</code> to <q>Done (</q> with no Jade installed, and grep
+        the log for <code>ERROR</code> &mdash; a green boot line is not a clean boot.</li>
+    <li><strong>The mod still loads with Jade present</strong>, client and server both.</li>
+    <li><strong>The tooltip appears at all.</strong> Point at a mare you know is pregnant.
+        Nothing to configure; if Jade shows the horse but no line, the plugin was not
+        scanned.</li>
+</ul>
+
+<h3>Then the words themselves</h3>
+<ul>
+    <li><strong>A pregnant mare reads <em>Pregnant</em></strong>, a mare in heat <em>In
+        heat</em>, a nursing mare <em>Nursing</em> &mdash; and a mare between heats reads
+        <strong>nothing</strong>. That last one is deliberate and is the easiest to mistake for
+        the feature being broken.</li>
+    <li><strong>Stallions, geldings and foals get no line.</strong> Same rule as the
+        information screen.</li>
+    <li><strong>No countdown ever appears.</strong> Watch one mare through a whole heat; the
+        word should switch, never tick. Worth doing with <code>debug.tools</code> on, where a
+        heat lasts a minute and any leaked timer will be obvious.</li>
+    <li><strong>Twins are still the vet kit's alone.</strong> If the word <q>twins</q> ever
+        reaches the tooltip, a settled decision has been broken.</li>
+</ul>
+
+<h3>The configuration nobody has tried</h3>
+<ul>
+    <li><strong>Jade on the client but NOT on the server.</strong> The heat model is not synced,
+        so the server-data provider never runs; the tooltip should fall back to
+        <em>Pregnant</em> only, and stay silent about heat and nursing rather than going blank.
+        This path has never executed. If it shows nothing at all, the synced
+        <code>PREGNANT</code> attachment is not reaching
+        <code>ReproHandler.pregnantEitherSide</code> the way it is assumed to.</li>
+    <li><strong>It must not freeze the horse.</strong> The information screen takes an inspect
+        lease that stops the horse moving; a tooltip must not. Look at a wandering horse for a
+        while and check it keeps wandering.</li>
+</ul>
+
 <h2 id="barn-name-0918">&sect;0-FU &mdash; Setting a barn name now shows on the screen that set it (2026-09-18, NOT played)</h2>
 
 <p>

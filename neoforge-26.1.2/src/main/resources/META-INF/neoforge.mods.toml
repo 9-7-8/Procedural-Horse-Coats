@@ -28,6 +28,20 @@ UsefulCarts 26.1 port by the UsefulCarts porter. See THIRD_PARTY_NOTICES.md.
     ordering = "NONE"
     side = "BOTH"
 
+# The only optional dependency, and the only third-party mod this is built
+# against at all. compat/JadeHorsePlugin puts a mare's state in Jade's look-at
+# tooltip; Jade finds it by scanning for @WailaPlugin, so with Jade absent the
+# class is never loaded and nothing here notices. AFTER, so Jade's own registry
+# exists before it scans. No versionRange floor is asserted beyond the API this
+# was compiled against (26.1.11) - a lower bound guessed rather than tested is
+# a worse failure than a missing tooltip.
+[[dependencies.horsegenetics]]
+    modId = "jade"
+    type = "optional"
+    versionRange = "[26.1,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
 # FOUR MIXINS. This comment said "THE ONE MIXIN" long after there were four, and
 # that stale line was read as fact and repeated on 2026-09-16 - so it is now a
 # list, which is harder to leave wrong:

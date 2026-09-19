@@ -1031,6 +1031,85 @@
     untouched by any of this and still need a real install to settle.
 </p>
 
+<h2 id="jade">Jade &mdash; and the rule this one breaks</h2>
+
+<p>
+    <strong>Point at a mare with Jade installed and her state appears in the tooltip:</strong>
+    <em>Pregnant</em>, <em>In heat</em>, <em>Nursing</em>, or no line at all. Nothing to switch
+    on. Stallions and foals say nothing, exactly as they say nothing on the information screen.
+</p>
+
+<div class="note warn">
+    <span class="label">This is the first third-party jar the mod compiles against</span>
+    <p>
+        Everywhere else on this page the rule is absolute: <strong>nothing reaches into another
+        mod&rsquo;s classes.</strong> <a href="#horse-powered">Horse Powered</a> states why
+        &mdash; names that a mod never promised can be renamed without warning, and a patch
+        written against guessed ones fails silently.
+    </p>
+    <p>
+        The reason that argument does not apply here is that <strong>Jade publishes a plugin
+        API and versions it</strong>. Building against a published API is the opposite of
+        guessing at private names: if it breaks, it breaks at compile time in this repo rather
+        than silently in somebody&rsquo;s world. It stays <code>compileOnly</code> &mdash; the
+        jar is never shipped and never required, no code here refers to
+        <code>JadeHorsePlugin</code>, and Jade finds it by scanning for
+        <code>@WailaPlugin</code>, so without Jade the class is never loaded at all.
+    </p>
+</div>
+
+<h3 id="jade-detail">Why it says a word and not a sentence</h3>
+
+<p>
+    There are now <strong>three</strong> readouts about breeding, and they are deliberately
+    unequal:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Where</th><th>What it tells you</th><th>What it costs</th></tr></thead>
+<tbody>
+<tr><td>Jade tooltip</td><td><em>Pregnant</em> / <em>In heat</em> / <em>Nursing</em></td>
+    <td>a glance</td></tr>
+<tr><td><a href="fertility.html">Information screen</a></td>
+    <td>the same, plus how long is left and which heat she is in</td>
+    <td>opening her screen</td></tr>
+<tr><td><a href="item-vet-kit.html">The vet&rsquo;s kit</a></td>
+    <td><strong>twins</strong>, where in the heat she is, whether a stallion has covered her</td>
+    <td>an item you had to make</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>No countdowns in the tooltip</strong>, and nothing at all for a mare simply between
+    heats. A tooltip is on screen whenever you glance at a horse, so a ticking
+    &ldquo;about 4 min to go&rdquo; would churn in the corner of your eye across a whole
+    paddock &mdash; and in a world with <code>debug.tools</code> on, where a heat lasts a
+    minute, it would never sit still. A glance asked no question, so it gets no answer unless
+    there is something worth saying. <code>ReproTextTest</code> pins both the words and the
+    silences.
+</p>
+
+<p>
+    It is <strong>not owner-gated</strong>, and that is not an oversight: the same fact is
+    already on the information screen of any horse a player can look at, including horses they
+    do not own. Nothing is newly visible here &mdash; it is the same fact, one glance sooner.
+</p>
+
+<h3 id="jade-server">With Jade on the client only</h3>
+
+<p>
+    The heat model is <strong>not synced</strong> &mdash; no client needs an embryo&rsquo;s
+    genome &mdash; so the real answer is computed server-side and only arrives if Jade is
+    installed there too. When it is not, the tooltip falls back to the one fact the client does
+    hold: pregnancy is a synced boolean, kept so the client can refuse a breeding food without
+    asking. So a client-only Jade still says <em>Pregnant</em> and stays quiet about heat and
+    nursing, rather than going blank.
+    <span class="flag">Unverified</span> in either configuration &mdash; see
+    <a href="verification.html#jade-0918">verification</a>.
+</p>
+
 <h2 id="combat-controls">Horse Combat Controls</h2>
 
 <p>

@@ -135,8 +135,36 @@ processResources {
     }
 }
 
+// The first third-party mod this project has ever compiled against, and the
+// only repository block in this module - ModDevGradle injects the NeoForge and
+// Mojang ones, so there was never a reason for one before.
+//
+// It is here rather than in settings.gradle.kts because it exists for exactly
+// one dependency: Jade's published plugin API. That is the line this does not
+// cross - `compat/HorsePoweredCompat` refuses to reach into another mod's
+// classes because it would be guessing at names that can be renamed without
+// warning, and an API a mod publishes and versions for this purpose is the
+// opposite of a guess.
+repositories {
+    maven {
+        url = "https://api.modrinth.com/maven"
+        content {
+            // Nothing else may be resolved from here. A typo'd coordinate
+            // should fail loudly rather than quietly pull some other artifact
+            // of the same name off Modrinth.
+            includeGroup("maven.modrinth")
+        }
+    }
+}
+
 dependencies {
     implementation project(":common")
+
+    // Jade, compile-only: the jar is never shipped and never required. If it is
+    // absent at runtime nothing here loads, because the only class that touches
+    // it is annotated @WailaPlugin and Jade itself is what scans for that.
+    // 26.1.11 is the newest Jade built for game version 26.1.2.
+    compileOnly "maven.modrinth:jade:26.1.11+neoforge"
 
     // Plain JUnit, no Minecraft. The only thing tested here is compat's
     // MaterialScan, which deliberately imports nothing from Minecraft or
