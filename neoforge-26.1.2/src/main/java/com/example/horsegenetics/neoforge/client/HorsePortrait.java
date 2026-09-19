@@ -76,9 +76,9 @@ public final class HorsePortrait {
             EntityRenderState state = renderer.createRenderState(horse, 1.0F);
             state.shadowPieces.clear();
             state.outlineColor = 0;
-            if (state instanceof GeneticHorseRenderState gs) {
-                gs.coatData = coat;
-            }
+            // Coat and texture ids together - see GeneticHorseRenderer.applyCoat.
+            // Setting gs.coatData alone silently draws the default black horse.
+            GeneticHorseRenderer.applyCoat(state, coat);
             // The same "look at the pointer" swing the family tree uses, so the
             // two screens' horses behave identically.
             float xAngle = (float) Math.atan((cx - mouseX) / 30.0F);

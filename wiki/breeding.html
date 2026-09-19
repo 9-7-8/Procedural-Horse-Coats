@@ -1066,15 +1066,14 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         scroll.</li>
 </ul>
 
-<div class="note warn">
-    <span class="label">Ancestor coats are a stand-in</span>
+<div class="note rule">
+    <span class="label">Ancestor coats are the real ones</span>
     <p>
-        The epigenome lives on the <em>entity</em>, not in the record, so the ancestry
-        database cannot reproduce a dead ancestor&rsquo;s exact coat.
-        <code>FamilyTreeScreen</code> draws ancestors from
-        <code>Epigenome.fromSeed(record UUID)</code> &mdash; stable and plausible, but
-        not necessarily the real one. Moving the epigenome onto
-        <code>HorseRecord</code> would fix it.
+        <code>HorseRecord</code> carries both the genetic code and the epigenome code, so a
+        dead or never-loaded ancestor draws the coat it actually wore. There is
+        deliberately <strong>no stand-in</strong>: a record without a genome draws a blank
+        box rather than a plausible invention, because a pedigree showing a horse that never
+        existed is worse than a pedigree with a gap in it.
     </p>
 </div>
 

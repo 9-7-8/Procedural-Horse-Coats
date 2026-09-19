@@ -1540,9 +1540,9 @@ public final class CustomHorseSpawnScreen extends Screen {
             EntityRenderState state = renderer.createRenderState(horse, 1.0F);
             state.shadowPieces.clear();
             state.outlineColor = 0;
-            if (state instanceof GeneticHorseRenderState gs) {
-                gs.coatData = coat;
-            }
+            // Coat and texture ids together - see GeneticHorseRenderer.applyCoat.
+            // Setting gs.coatData alone silently draws the default black horse.
+            GeneticHorseRenderer.applyCoat(state, coat);
             float pitch = Math.max(-80.0F, Math.min(80.0F, previewPitch));
             float t = (System.currentTimeMillis() - screenOpenedAt) / 1000.0F;
             if (state instanceof LivingEntityRenderState ls) {

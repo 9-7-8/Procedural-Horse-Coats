@@ -47,7 +47,7 @@ window.HG.pages = {
                 { href: "item-splice-carrots.html", text: "Splice carrots", kind: "magical", views: ["gameplay","coding"] },
                 { href: "item-research-papers.html", text: "Research papers", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-research-shelf.html", text: "Equine Research Shelf", kind: "core", views: ["gameplay","coding"] },
-                { href: "item-equestrian-bench.html", text: "Equestrian Bench", kind: "core", views: ["gameplay","coding"] },
+                { href: "item-equestrian-bench.html", text: "Tack Dyeing Bench", kind: "core", views: ["gameplay","coding"] },
                 { href: "progression.html", text: "The checklist \u0026 the collection", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-seed-jars.html", text: "Seed jars", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-vet-kit.html", text: "Vet's kit", kind: "core", views: ["gameplay","coding"] },

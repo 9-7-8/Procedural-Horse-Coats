@@ -214,7 +214,7 @@ public enum ProgressTask {
             "Bind one to a horse you own and it will come from anywhere, even another dimension. "
                     + "It never rebinds, and it crumbles when that horse dies."),
     DYE_TACK(Group.HUSBANDRY, "Dye a piece of tack",
-            "Put a saddle or leather horse armour in an Equestrian Bench and give any of the three "
+            "Put a saddle or leather horse armour in a Tack Dyeing Bench and give any of the three "
                     + "rows a dye or an ingot. Seat, bridle and fittings colour separately."),
     MILK_MARE(Group.HUSBANDRY, "Milk a mare",
             "Right-click a tamed adult mare with an empty bucket. Stallions decline, at some length."),

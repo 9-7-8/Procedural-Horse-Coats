@@ -315,6 +315,31 @@ could not find any targets matching 'canAddPassenger' in AbstractHorse</code></p
     them has an owning page.
 </p>
 
+<h3 id="cached-derivation">A cache added for the world silently froze every GUI</h3>
+
+<p>
+    Coat-bake rationing gave <code>GeneticHorseRenderState</code> a resolved
+    <code>coatId</code> and made <code>getTextureLocation</code> prefer it over the
+    <code>CoatData</code> it used to read. Perfectly correct for a horse in the world,
+    where <code>extractRenderState</code> computes both from the same coat. But <b>four
+    GUI screens assigned <code>coatData</code> after <code>createRenderState</code></b> and
+    relied on the texture being derived from it afterwards. It no longer was, so every
+    ancestor in a family tree, every foal preview and every browser entry drew the
+    wild-type black horse &mdash; and nothing logged, threw, or looked broken enough to
+    notice.
+</p>
+
+<p>
+    The shape to watch for: <strong>caching a derived value next to the thing it was
+    derived from, where somebody else writes the source afterwards.</strong> The two
+    fields no longer move together and the stale one wins. The fix was not to fix four
+    screens but to stop offering the broken half &mdash;
+    <code>GeneticHorseRenderer.applyCoat</code> is now the only supported way to dress a
+    render state, and it moves the coat and both texture ids at once. When you add a
+    precomputed field beside an existing one, <b>grep for every writer of the original</b>
+    before assuming the derivation still holds.
+</p>
+
 <h3 id="lattice">Every layer of one compound element must share its <code>stretch</code></h3>
 
 <p>

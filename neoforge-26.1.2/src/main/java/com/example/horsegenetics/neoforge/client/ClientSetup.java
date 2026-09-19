@@ -55,7 +55,7 @@ public final class ClientSetup {
      * The generated coats are composed from pack resources, so a resource
      * reload has to be able to throw them away - see {@link CoatAssetReload}.
      */
-    /** This mod's menus: the Equine Research Shelf's, and the Equestrian Bench's. */
+    /** This mod's menus: the Equine Research Shelf's, and the Tack Dyeing Bench's. */
     @SubscribeEvent
     static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.RESEARCH_SHELF.get(),

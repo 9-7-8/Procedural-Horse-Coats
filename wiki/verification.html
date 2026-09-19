@@ -78,6 +78,46 @@
     </p>
 </div>
 
+<h2 id="gui-coats-0918">&sect;0-FT &mdash; Every horse in every GUI was the same black horse (2026-09-18, NOT played)</h2>
+
+<p>
+    Reported from a world: the family tree drew every ancestor in the default black coat.
+    The genome was never missing &mdash; it is on the record, it is synced, and the screen
+    built the right <code>CoatData</code> from it. The
+    <a href="session-log.html">coat-bake rationing</a> of 2026-09-13 added a resolved
+    <code>coatId</code> to the render state and made <code>getTextureLocation</code> prefer
+    it, and no GUI was updated to set it; a screen's throwaway model horse is not in
+    <code>ClientCoatCache</code>, so the id resolved from the wild type and the coat assigned
+    a line later was never read again. <code>GeneticHorseRenderer.applyCoat</code> now moves
+    the coat and both texture ids together.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+<ul>
+    <li><strong>The family tree shows different horses.</strong> Open it on a horse with
+        several known ancestors of visibly different colours. Before the fix every box was
+        the same black; they should now disagree with each other, and each should match the
+        horse you remember.</li>
+    <li><strong>All four screens, not just the one that was reported.</strong> The same
+        defect was in the <strong>foal preview</strong> on the horse information screen, the
+        <strong>horse browser</strong>, and the <strong>custom spawn screen</strong>. If the
+        spawn designer looked right before, that was luck &mdash; check it still does.</li>
+    <li><strong>An ancestor with no genome still draws a blank box</strong>, not an invented
+        horse. That is deliberate.</li>
+</ul>
+
+<h3>The two that can still be wrong after the fix</h3>
+<ul>
+    <li><strong>A pedigree of thirty strangers must not stutter.</strong> The bake is still
+        budgeted, so coats that have to wait show the plain stand-in for a frame and resolve
+        over the next few. Open a deep tree of horses you have never rendered and watch:
+        filling in over a moment is correct, a permanent black box is not, and a frozen
+        client is the bug the rationing exists to prevent.</li>
+    <li><strong>A glowing ancestor glows.</strong> The emissive mask rode the same broken
+        field, so a <code>glow</code>-gene horse lost its glow in every GUI too. Put one in a
+        family tree and check.</li>
+</ul>
+
 <h2 id="stat-units-0918">&sect;0-FS &mdash; Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h2>
 
 <p>
@@ -1943,7 +1983,7 @@
 
 <p>
     <strong>There is a crafting route now, and it is the whole point:</strong> the
-    <a href="item-equestrian-bench.html">Equestrian Bench</a>. Craft one, or find the one
+    <a href="item-equestrian-bench.html">Tack Dyeing Bench</a>. Craft one, or find the one
     standing at a cowboy&rsquo;s homestead past the <a href="item-equestrian-posts.html">four
     posts</a> &mdash; the
     generated one has never been seen, so confirm it is actually there and not buried in a

@@ -113,10 +113,17 @@ public final class ModBlocks {
             EquineResearchShelfBlock::shelfProperties);
 
     /**
-     * The <b>Equestrian Bench</b> - dyes a saddle's seat, bridle and metal
+     * The <b>Tack Dyeing Bench</b> - dyes a saddle's seat, bridle and metal
      * hardware independently. No block entity: it computes from its slots, so it
      * is loom-shaped rather than furnace-shaped. See
      * {@link EquestrianBenchBlock}.
+     *
+     * <p><b>The id is still {@code equestrian_bench}</b>, and so are the class
+     * names. It was renamed for players on 2026-09-18 because "equestrian
+     * bench" said nothing about what it does; the id was deliberately left
+     * alone rather than churn the barn structure NBT, the loot table, the
+     * recipe and the baked recipe reference for a cosmetic change. The
+     * divergence is the owner's call, not an oversight.
      */
     public static final DeferredBlock<EquestrianBenchBlock> EQUESTRIAN_BENCH = BLOCKS.registerBlock(
             "equestrian_bench",

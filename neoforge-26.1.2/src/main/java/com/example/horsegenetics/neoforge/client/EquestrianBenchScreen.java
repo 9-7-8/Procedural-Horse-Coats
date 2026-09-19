@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
- * <b>The Equestrian Bench's screen.</b> A saddle, three labelled material slots,
+ * <b>The Tack Dyeing Bench's screen.</b> A saddle, three labelled material slots,
  * a name field, and one result.
  *
  * <h2>Three boxes, not a selector</h2>

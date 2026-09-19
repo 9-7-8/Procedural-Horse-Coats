@@ -647,9 +647,9 @@ public final class FamilyTreeScreen extends Screen {
             EntityRenderState state = renderer.createRenderState(horse, 1.0F);
             state.shadowPieces.clear();
             state.outlineColor = 0;
-            if (state instanceof GeneticHorseRenderState gs) {
-                gs.coatData = coat;
-            }
+            // Coat and texture ids together - see GeneticHorseRenderer.applyCoat.
+            // Setting gs.coatData alone silently draws the default black horse.
+            GeneticHorseRenderer.applyCoat(state, coat);
             // turn toward the cursor (same idea as the vanilla inventory model,
             // just a stronger swing so it clearly "looks at" the pointer)
             float xAngle = (float) Math.atan((cx - mouseX) / 30.0F);

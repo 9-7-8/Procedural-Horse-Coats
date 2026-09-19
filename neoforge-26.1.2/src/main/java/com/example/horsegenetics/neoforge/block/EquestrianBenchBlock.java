@@ -17,7 +17,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * <b>The Equestrian Bench.</b> A saddler's bench: it dyes a saddle's seat, its
+ * <b>The Tack Dyeing Bench.</b> A saddler's bench: it dyes a saddle's seat, its
  * bridle and its metal hardware independently, and will later cut a banner into
  * a saddle pad.
  *

@@ -25,7 +25,7 @@ public final class ModMenus {
                     () -> new MenuType<>(ResearchShelfMenu::new, FeatureFlags.VANILLA_SET));
 
     /**
-     * The <b>Equestrian Bench's</b>. Loom-shaped - three slots and a result
+     * The <b>Tack Dyeing Bench's</b>. Loom-shaped - three slots and a result
      * computed on change - so unlike the shelf's it is backed by a
      * {@code ContainerLevelAccess} rather than a block entity.
      */

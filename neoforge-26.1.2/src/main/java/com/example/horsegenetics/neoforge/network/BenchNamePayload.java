@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 /**
- * The name typed into the Equestrian Bench, on its way to the server.
+ * The name typed into the Tack Dyeing Bench, on its way to the server.
  *
  * <p>Vanilla has a rename packet already, but it is hard-wired to the anvil -
  * its handler checks {@code containerMenu instanceof AnvilMenu} - so a bench

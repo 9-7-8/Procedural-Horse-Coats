@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Map;
 
 /**
- * <b>The Equestrian Bench's menu</b> - dyes a saddle's three zones, and names it.
+ * <b>The Tack Dyeing Bench's menu</b> - dyes a saddle's three zones, and names it.
  *
  * <h2>All three at once</h2>
  * There was a zone selector here and it is gone (owner, 2026-09-16). Three

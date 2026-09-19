@@ -10,6 +10,7 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.AbstractHorseRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.SimpleEquipmentLayer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.HorseRenderState;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.resources.Identifier;
@@ -165,6 +166,42 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             return coatTextureFor(geneticState.coatData, renderState.isBaby, geneticState.breedLabel);
         }
         return coatTextureFor(CoatData.DEFAULT, renderState.isBaby, null);
+    }
+
+    /**
+     * <b>Put a coat on a render state that did not come from a live horse.</b>
+     * The one supported way for a GUI to draw a specific genome.
+     *
+     * <p>A screen builds its model horse as a throwaway client-side entity that
+     * was never in the world, so {@link #extractRenderState} finds nothing for
+     * it in {@link ClientCoatCache} and resolves {@link #coatId} from
+     * {@link CoatData#DEFAULT} - the plain black wild type. Assigning
+     * {@code coatData} afterwards then changes nothing, because
+     * {@link #getTextureLocation} prefers the already-resolved {@code coatId}
+     * and never looks at the coat again. That is how every ancestor in the
+     * family tree came out the same black horse.
+     *
+     * <p>So the coat and the two texture ids have to move together, and they do
+     * it here rather than in four screens that each got it right once and then
+     * drifted. Baked at full detail - nothing on a screen is far away - but
+     * still through the budget, so a pedigree of thirty strangers does not bake
+     * thirty coats in one frame; the ones that have to wait show the stand-in
+     * and are asked for again next frame.
+     *
+     * @param state a render state fresh from {@code createRenderState}; anything
+     *              that is not one of ours is ignored
+     * @param coat  the genome to wear, or {@code null} to leave the state alone
+     */
+    public static void applyCoat(EntityRenderState state, CoatData coat) {
+        if (coat == null || !(state instanceof GeneticHorseRenderState geneticState)) {
+            return;
+        }
+        geneticState.coatData = coat;
+        GeneticCoatTextureFactory.Resolved textures = GeneticCoatTextureFactory.resolve(
+                coat, geneticState.isBaby, CoatTextureComposer.glowParts(coat.genotype()),
+                geneticState.breedLabel, true);
+        geneticState.coatId = textures.coat();
+        geneticState.emissiveCoatId = textures.glow();
     }
 
     /** The generated coat texture for one horse - shared with the family-tree node. */

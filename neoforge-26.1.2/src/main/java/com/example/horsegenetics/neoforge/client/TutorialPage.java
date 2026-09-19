@@ -537,7 +537,7 @@ public final class TutorialPage {
                         ProgressTask.WHISTLE_ECHO, ProgressTask.WHISTLE_ENDER)));
 
         husbandry.add(new Step("Dyeing your tack",
-                List.of("An Equestrian Bench is a saddler's bench - a crafting table, a piece of "
+                List.of("A Tack Dyeing Bench is a saddler's bench - a crafting table, a piece of "
                                 + "leather and two horse hair. There is one standing at every cowboy's "
                                 + "homestead as well, so you may meet one before you know to want it.",
                         "Open it and you get a slot for the tack, a name field, and three labelled "
@@ -1138,7 +1138,7 @@ public final class TutorialPage {
                                 + "the right man rather than the right biome.",
                         "The two of them come as a pair - they built their posts side by side, and the "
                                 + "story in the villages is that they are married. His homestead is "
-                                + "also where you will find an Equestrian Bench already standing."),
+                                + "also where you will find a Tack Dyeing Bench already standing."),
                 List.of(new ItemStack(ModItems.COWBOY_HITCH.get()),
                         new ItemStack(Items.EMERALD)), Art.COWBOY,
                 List.of(ProgressTask.MEET_COWBOY)));

@@ -1584,9 +1584,9 @@ public final class HorseBrowserScreen extends Screen {
             EntityRenderState state = renderer.createRenderState(model, 1.0F);
             state.shadowPieces.clear();
             state.outlineColor = 0;
-            if (state instanceof GeneticHorseRenderState gs) {
-                gs.coatData = coat;
-            }
+            // Coat and texture ids together - see GeneticHorseRenderer.applyCoat.
+            // Setting gs.coatData alone silently draws the default black horse.
+            GeneticHorseRenderer.applyCoat(state, coat);
             // Same construction as FamilyTreeScreen.drawHorseModel: bodyRot runs
             // 180 degrees ahead of yRot, and the pair together is what turns the
             // animal. REST biases the whole thing off square so a row sitting
