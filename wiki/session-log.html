@@ -27,6 +27,81 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-19-cartweight">2026-09-19 &mdash; A cart is as heavy as what is in it, and a seat that never drove</h2>
+
+<p>
+    Released as <a href="releases.html#v0-5-018">0.5.018</a>. The brief was documentation
+    &mdash; <q>add way more gameplay information to the carts page</q> &mdash; and the code
+    changes came out of reading the code to write it down, which is the second time that has
+    happened and is worth noticing as a pattern: <strong>writing the player-facing page is a
+    read of the implementation that nothing else in the routine performs</strong>. A unit
+    test asks whether the code does what it does; the page asks whether what it does is what
+    anyone was told.
+</p>
+
+<p>
+    <strong>The question that started it.</strong> Halfway through the read the owner asked
+    whether a supply cart's load went up as you filled it. It did not. <code>CartKind</code>
+    carried one load per vehicle and <code>applyDraught</code> ran exactly once, at the
+    moment of hitching, because until then the load genuinely could not change. So an empty
+    supply cart and one packed with fifty-four stacks of gold blocks slowed a horse
+    identically, and the three chests you can bolt to a wagon were free. Upstream had even
+    left a <code>getFillLevel</code> on the inventory entity, unread by anything.
+</p>
+
+<p>
+    <strong>The shape chosen, and the two that were not.</strong> Load is now
+    <code>emptyLoad &times; (1 + cargoShare &times; fill)</code> &mdash; linear, on purpose.
+    A curve that punishes the last few stacks harder reads as an arbitrary cliff to anybody
+    who has not read the source, and a threshold turns loading into one binary decision made
+    once. Linear means every stack costs the same, which is a rule a player can infer from
+    playing. <code>cargoShare</code> is zero on the plow, reaper and seed drill, and that is
+    the interesting entry rather than an oversight: <strong>a plow's load is the blade in the
+    soil, not the tools racked on it</strong>, and a player forced to choose between fitting
+    the tool and pulling the plow is choosing between a working plow and a useless one. The
+    carrying vehicles are where a full load is a real decision, so they are the ones that
+    charge for it.
+</p>
+
+<p>
+    <strong>Polling, not hooks.</strong> The load now moves while the horse stands still,
+    from three unrelated places &mdash; an inventory changing, a chest going onto a wagon, an
+    animal climbing in. Three hooks would have been faster and would have been wrong the
+    first time somebody added a fourth source: a missed hook is a cart that is silently the
+    wrong weight, which is exactly the class of fault a play session cannot see.
+    <code>refreshDraught</code> therefore polls on a hitched cart, once a second, and touches
+    the attribute only when the number has actually moved. While there,
+    <code>currentLoad</code> learned to walk the <code>drawn</code> chain: a cart hitched
+    behind a cart was hauled for nothing, which got cheaper the more you loaded the trailer.
+</p>
+
+<p>
+    <strong>The seat that never drove.</strong> Grepping <code>PostilionEntity</code> to
+    describe the box seat turned up two spawn sites, the animal cart and the reaper, and not
+    the wagon. The wagon had the seat, the item tooltip, the javadoc on
+    <code>HorseTwoRidersMixin</code> and a paragraph on its own wiki page, all describing a
+    feature that no line of code performed. Three pieces of documentation agreed with each
+    other and none of them agreed with the program. It is three lines, copied from the
+    animal cart with the same guard against a player pulling on foot, plus the steering
+    statistic the wagon had also been missing.
+</p>
+
+<p>
+    <strong>What was left alone, deliberately.</strong> The reaper cuts crop blocks by tag
+    with no test of age, so it harvests seedlings, and the supply cart's open-from-the-seat
+    payload has a handler and no sender. Both are written up in
+    <a href="known-gaps.html">known gaps</a> rather than fixed in the same sitting &mdash;
+    the first shares a tag with the plow's clearing lists and wants its own look, and the
+    second is a choice between wiring a keybind and deleting a class, which is the owner's
+    to make.
+</p>
+
+<p>
+    The release was tagged on a server boot that reached <code>Done</code> with no
+    <code>ERROR</code> in the log &mdash; on port 25599, because the owner's own server held
+    25565 and the first attempt died at the bind after loading every mod cleanly.
+</p>
+
 <h2 id="d2026-09-19-packbugs">2026-09-19 &mdash; Two mods' worth of wrong, and a brief that was wrong about all of it</h2>
 
 <p>

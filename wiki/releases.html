@@ -58,6 +58,62 @@
     </p>
 </div>
 
+<h2 id="v0-5-018">0.5.018</h2>
+
+<p class="lede">
+    <strong>A cart is as heavy as what is in it.</strong> Until now the draught model read
+    one number per vehicle, so an empty supply cart and one packed with fifty-four stacks
+    slowed a horse by exactly the same amount, and three chests bolted to a wagon were a free
+    upgrade. Loading a cart now costs you, and <strong>the wagon&rsquo;s box seat finally
+    drives the horse</strong> &mdash; it never did, in any version, while three separate
+    places in the game said it would.
+</p>
+
+<ul>
+    <li><strong>Cargo counts.</strong> A vehicle&rsquo;s load is what it weighs empty plus
+        what is in it: a full supply cart asks half again what a bare one does, a full wagon
+        sixty per cent more. It is <em>linear</em> in how full the thing is, so half a cart
+        is half the penalty &mdash; no threshold to learn. Measured by goods rather than by
+        slots touched, so a slot holding one arrow is a sixty-fourth of a slot and nine loose
+        torches do not make a horse labour. <a href="carts.html#weight">The rule</a>.</li>
+    <li><strong>The three field implements are deliberately flat.</strong> A plow&rsquo;s
+        load is the blade in the soil, not the tools racked on it. Fitting a second hoe does
+        not make it harder to drag, because a player choosing between fitting the tool and
+        pulling the plow is choosing between a working plow and a useless one.</li>
+    <li><strong>Chests on a wagon are half its extra weight on their own</strong>, empty or
+        not, and they already cost seats &mdash; three chests leave none. What is in them is
+        the other half. An animal cart is loaded by its passengers: one cow is half a load.</li>
+    <li><strong>The load is live.</strong> Fill a cart that is standing hitched and the horse
+        is slower within a second, without unhitching; empty it and the pace comes back. The
+        same as a chest goes on, or an animal climbs in.</li>
+    <li><strong>A train of carts costs what its parts cost.</strong> A cart hitched behind a
+        cart was previously hauled for nothing &mdash; the horse paid for the first vehicle
+        only, which got cheaper the more you loaded the rest.</li>
+    <li><strong>The wagon&rsquo;s box seat drives.</strong> Only the animal cart and the
+        reaper ever spawned the hidden rider that steers; the wagon had the seat, the
+        tooltip and the wiki page, and did nothing. It also gains the steering statistic the
+        other two already had.</li>
+    <li><strong>Two numbers where there was one.</strong> The cart tooltip shows what an
+        ordinary horse keeps empty <em>and</em> full; the horse&rsquo;s info screen shows the
+        same pair for a wagon. A horse that keeps its speed empty and collapses loaded is a
+        carriage horse, not a carthorse, and that is now visible before the trade run rather
+        than during it.</li>
+    <li><strong>The carts page is largely rewritten</strong> &mdash; recipes for all six,
+        hitching and trains, a section per vehicle, and what the game counts.
+        <a href="carts.html">Carts</a>.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Two things found while writing it down</span>
+    <p>
+        <strong>The reaper does not check whether a crop is ripe</strong> &mdash; it cuts
+        crop blocks at any age, so a field planted this morning is harvested as seedlings.
+        And <strong>a supply cart cannot be opened from its own seat</strong>: the packet
+        exists, the keybind was never ported. Both are recorded in
+        <a href="known-gaps.html">known gaps</a> and neither is fixed here.
+    </p>
+</div>
+
 <h2 id="v0-5-017">0.5.017</h2>
 
 <p class="lede">
