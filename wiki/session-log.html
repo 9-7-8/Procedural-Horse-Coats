@@ -27,6 +27,79 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-19-packbugs">2026-09-19 &mdash; Two mods' worth of wrong, and a brief that was wrong about all of it</h2>
+
+<p>
+    Released as <a href="releases.html#v0-5-017">0.5.017</a>. Both faults are invisible on a dev
+    client with nothing else installed, which is the thread running through the whole session:
+    the compat layer <strong>does nothing measurable until another mod is present</strong>, and
+    until today nothing had measured it.
+</p>
+
+<p>
+    <strong>The hay bale.</strong> Asked for Bale of Sugar Cane, whose block is
+    <code>ofFullCopy(Blocks.HAY_BLOCK)</code> and which horses ignored entirely. The interesting
+    part was not the feature but a vanilla inconsistency found on the way in:
+    <code>AbstractHorse.isFood</code> is a tag, so a tag entry is genuinely enough to make a horse
+    <em>want</em> the bale &mdash; but <code>handleEating</code>, which decides what food
+    <em>does</em>, is a hard-coded <code>is(Items.X)</code> chain with no tag in it. Shipping the
+    tag alone would have produced a horse that accepts the bale forever and never eats it, which
+    is worse than refusing it. The ids came out of the mod&rsquo;s jar rather than being guessed,
+    which mattered: block <code>baleofsugarcane:baleofsugarcane</code>, item
+    <code>baleofsugarcane:baleofsugarcane_item</code>, two names that do not match each other.
+</p>
+
+<p>
+    <strong>Grazing hay stopped being <code>is(Blocks.HAY_BLOCK)</code> and became a tag
+    lookup</strong>, which buys the extensibility and sells a silent failure: break the tag file
+    and every horse in the game quietly stops eating hay. That is what the new gametest
+    <code>hay_is_still_a_bale</code> is for, and it was <em>confirmed to fail</em> by emptying
+    the tag before being trusted. A tripwire nobody has watched trip is not a tripwire.
+</p>
+
+<p>
+    <strong>The pseudo-woods.</strong> A 332-jar pack with Every Slab installed reported 287
+    modded woods. <code>collectWoods</code> defines a wood as anything shipping a
+    <code>&lt;name&gt;_fence_gate</code> blockstate, and Every Slab generates a gate for every
+    block in the game &mdash; so 247 of those were <code>andesite</code>,
+    <code>black_wool</code>, <code>coal_ore</code>, and the mod had registered
+    <strong>1,488 cart items nobody could craft</strong>, each warning once into a boot log.
+    This is <a href="compatibility.html#generated-declared">&ldquo;a tag entry is a declaration,
+    not a promise&rdquo;</a> a second time, one rung earlier and in a different file format.
+</p>
+
+<p>
+    Worth recording that <strong>the double gates were fine</strong>, and the owner asked
+    directly whether they were not. They were not, and for a structural reason: a double gate
+    spends two of <em>that mod&rsquo;s own gate</em>, which is the very file the scan keyed on,
+    so the ingredient is guaranteed by construction &mdash; all 468 candidates ship a gate item
+    and the nightly logged zero gate warnings. Only the carts reached past the declaration, for
+    <code>&lt;name&gt;_planks</code>. Dropping those woods removes 248 working-but-absurd double
+    gates too, which was a decision the owner took rather than a consequence slipped past them.
+</p>
+
+<p>
+    <strong>The rule was simulated over all 332 jars before it was written.</strong> It
+    reproduces the old count of 287 exactly, predicts 39, and independently matches all nine
+    <code>no stripped log</code> warnings by name &mdash; which is how the second bug was found:
+    nine <em>real</em> woods registering a wagon they could never build, because only the wagon
+    spends a stripped log.
+</p>
+
+<p>
+    <strong>The brief was wrong in every particular, and saying so was the useful part.</strong>
+    It prescribed guarding the scan with <code>Item.exists(&lt;ns&gt;:&lt;wood&gt;_planks)</code>,
+    citing pack notes and a prior &ldquo;Epic Knights ghost-ingot case&rdquo;. There is no
+    <code>Item.exists</code> in Minecraft, NeoForge or this repo; there is no Epic Knights case
+    in any file; there are no pack notes; the scan never reads <code>#minecraft:planks</code>;
+    and the real idiom, <code>ModdedMaterials.itemExists</code>, already existed and was already
+    firing &mdash; it just suppressed the recipe while the item stayed registered. It also
+    <em>cannot</em> be moved to the scan, which runs in the mod constructor where the registries
+    are empty, so it would have rejected every mod on earth. The substance was right and the
+    prescription would have broken the feature; the fix had to be a file probe, as a second pass
+    over every jar, because a gate declared in one jar may have its planks in another.
+</p>
+
 <h2 id="d2026-09-18-reports">2026-09-18, evening &mdash; Six reports from play, and what they had in common</h2>
 
 <p>

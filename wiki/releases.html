@@ -58,6 +58,67 @@
     </p>
 </div>
 
+<h2 id="v0-5-017">0.5.017</h2>
+
+<p class="lede">
+    <strong>A modded-pack release.</strong> Two faults that only exist once other mods are
+    installed, and neither of them visible on a dev client with nothing else loaded: a horse
+    that would not eat a hay bale another mod added, and a fence-gate scan that mistook 247
+    blocks for woods and built 1,488 items nobody could craft.
+</p>
+
+<ul>
+    <li><strong>Horses eat other mods&rsquo; hay bales.</strong>
+        <a href="https://modrinth.com/mod/bale-of-sugar-cane">Bale of Sugar Cane</a> builds its
+        block as a full copy of vanilla&rsquo;s hay block &mdash; a bale in everything but name,
+        which horses ignored completely. Any bale in <code>horsegenetics:hay_bales</code> is now
+        grazed, healed beside and taken from the hand on vanilla&rsquo;s own hay numbers. It is a
+        <strong>tag</strong>, so the next bale mod joins by datapack, and so can a player.
+        A tag alone was not enough and would have been worse than nothing: vanilla&rsquo;s
+        <code>isFood</code> is a tag but the method deciding what food <em>does</em> is a
+        hard-coded chain, so the horse would have accepted the bale forever and never eaten it.
+        <a href="compatibility.html#bales">How it works</a>.</li>
+    <li><strong>287 modded woods become 39.</strong> A wood was anything shipping a
+        <code>&lt;name&gt;_fence_gate</code> blockstate. Install
+        <a href="https://modrinth.com/mod/every-slab">Every Slab</a>, which generates a gate for
+        <em>every block in the game</em>, and the mod adopted 247 pseudo-woods &mdash;
+        <code>andesite</code>, <code>black_wool</code>, <code>coal_ore</code> &mdash; and
+        registered <strong>1,488 cart items that could never be crafted</strong>, one warning
+        apiece. A gate is a promise of a gate and nothing more; the carts go on to spend
+        <code>&lt;name&gt;_planks</code>, which must now be shown to exist before a wood is
+        adopted at all. <a href="compatibility.html#generated-gate-promise">Why it is a file
+        check and not a registry one</a>.</li>
+    <li><strong>Nine real woods get five carts instead of a broken sixth.</strong> Only the
+        wagon spends a stripped log, and <code>evilcraft:undead</code>,
+        <code>forbidden_arcanus:edelwood</code> and <code>fungyss</code>,
+        <code>integrateddynamics:menril</code>, four <code>regions_unexplored</code> bioshrooms
+        and <code>undergarden:ancient_root</code> ship none. They keep everything else.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">Upgrading with Every Slab installed</span>
+    <p>
+        <strong>248 double fence gates stop being registered</strong>, and unlike the carts
+        those did craft. Any already placed in a world becomes a missing block. They were
+        gates of concrete, wool and ore &mdash; the cost of no longer treating those as woods.
+    </p>
+    <p>
+        The generated resource pack rebuilds itself: the fingerprint moved to
+        <code>rules|3</code> precisely so a pack built under the old rules is not kept.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Neither fault has been seen fixed in a game</span>
+    <p>
+        Both were diagnosed from a 332-jar pack&rsquo;s boot log and the mod jars themselves,
+        and the wood rule was simulated across all 332 jars before it was written &mdash; it
+        reproduces the old count of 287 exactly and matches all nine stripped-log warnings by
+        name. But no boot has been done with the change in, and Bale of Sugar Cane has never
+        been run beside this mod at all. <a href="verification.html">What to check</a>.
+    </p>
+</div>
+
 <h2 id="v0-5-016">0.5.016</h2>
 
 <p class="lede">
