@@ -132,6 +132,17 @@
     gets past mod loading, would settle a dozen of these at once.
     <code>wiki/verification.html</code> &sect;0-FK.</li>
 
+<li id="gap-283"><strong>Open, found 2026-09-18: a stall sign keeps the name the horse had when it
+    was hung.</strong> Sign text is written once at placement from the bound name
+    (<code>item/StallSignItem</code>), and <code>StallRecord</code> stores that string rather
+    than reading it back off the horse. Give a horse a barn name <em>after</em> its sign is up
+    and the sign, and the stall's entry in <code>StallData</code>, keep the old one for good.
+    The sign is a plain unwaxed oak wall sign, so a player can edit it by hand and the block
+    will be right while the record stays wrong &mdash; which is worse than either alone. The
+    fix is for the barn-name path to walk that horse's stall and rewrite both, and it is not
+    written. Found while tracing "there doesn't seem to be a way to change the barn name";
+    the barn name itself works.</li>
+
 <li id="gap-282"><strong>Open, accepted 2026-09-18: every modded ingot is worth exactly iron and
     every modded gem exactly diamond.</strong> A mod's endgame alloy and its tier-one metal now
     give a horse the same protection, because

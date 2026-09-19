@@ -78,6 +78,39 @@
     </p>
 </div>
 
+<h2 id="barn-name-0918">&sect;0-FU &mdash; Setting a barn name now shows on the screen that set it (2026-09-18, NOT played)</h2>
+
+<p>
+    Reported as "there doesn't seem to be a way to change the barn name". There is, and it
+    always worked &mdash; but <code>HorseInfoScreen</code> held the record it was constructed
+    with and never re-read it, so pressing <strong>Set</strong> changed the horse's floating
+    nameplate and nothing on the screen in front of you. Everything a player can change is now
+    read through a <code>live()</code> accessor that prefers the synced record.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+<ul>
+    <li><strong>Type a barn name, press Set, and watch the screen.</strong> The header line
+        should go from <em>no barn name yet</em> to <em>known around the yard as "&hellip;"</em>
+        immediately, without closing and reopening. That is the whole fix.</li>
+    <li><strong>Clear it again.</strong> An empty box removes the barn name; the header should
+        go back to <em>no barn name yet</em> and the nameplate back to the registered name.</li>
+    <li><strong>It is still gated on ownership.</strong> The box and button only appear on the
+        Overview tab for a tamed horse you own. On someone else's horse, or an untamed one,
+        there should be no box at all &mdash; that is deliberate, not the bug.</li>
+</ul>
+
+<h3>The part that is a discoverability problem, not a bug</h3>
+<ul>
+    <li><strong>The way in is a 14px unlabelled <code>i</code> button hanging off the left edge
+        of the vanilla horse inventory</strong>, and sneak-right-click only opens the info
+        screen on horses you <em>cannot</em> name. Worth deciding whether that is good enough
+        before the next tester meets it.</li>
+    <li><strong>The screen reopens on whichever tab you last closed it on</strong>
+        (<code>lastTab</code> is static). Leave it on Genes, come back, and the barn-name box
+        is simply not there with nothing saying it lives on Overview.</li>
+</ul>
+
 <h2 id="gui-coats-0918">&sect;0-FT &mdash; Every horse in every GUI was the same black horse (2026-09-18, NOT played)</h2>
 
 <p>

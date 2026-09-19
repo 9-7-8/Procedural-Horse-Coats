@@ -276,7 +276,7 @@ public final class HorseInfoScreen extends Screen {
                 Component.literal("Barn name"));
         barnBox.setMaxLength(HorseRecord.MAX_BARN_NAME);
         barnBox.setHint(Component.literal("barn name"));
-        record.barnName().ifPresent(barnBox::setValue);
+        live().barnName().ifPresent(barnBox::setValue);
         addRenderableWidget(barnBox);
 
         setBarnButton = Button.builder(Component.literal("Set"), b -> submitBarnName())
@@ -575,8 +575,8 @@ public final class HorseInfoScreen extends Screen {
         int y = contentTop();
         g.text(this.font, Component.literal(GuiText.clip(fullName(), 48)), x, y, HEADING, false);
         y += lineH() + 2;
-        g.text(this.font, Component.literal(record.barnName().isPresent()
-                        ? "known around the yard as \"" + record.barnName().get() + "\""
+        g.text(this.font, Component.literal(live().barnName().isPresent()
+                        ? "known around the yard as \"" + live().barnName().get() + "\""
                         : "no barn name yet"),
                 x, y, DIM_TEXT, false);
 
@@ -611,9 +611,9 @@ public final class HorseInfoScreen extends Screen {
     private void drawOverview(Cursor c) {
         boolean adult = horse == null || !horse.isBaby();
 
-        c.pair("Sex", record.sexLabel(adult));
-        c.pair("Generation", Integer.toString(record.generation()));
-        c.pair("Breed", record.lineage().displayName());
+        c.pair("Sex", live().sexLabel(adult));
+        c.pair("Generation", Integer.toString(live().generation()));
+        c.pair("Breed", live().lineage().displayName());
         c.rule();
 
         c.label("Body");
@@ -690,10 +690,10 @@ public final class HorseInfoScreen extends Screen {
         c.rule();
 
         c.label("Provenance");
-        c.pair("Bred by", record.bredBy().orElse("— (not bred in captivity)"));
-        c.pair("Tamed by", record.tamedBy().orElse("— (never tamed)"));
+        c.pair("Bred by", live().bredBy().orElse("— (not bred in captivity)"));
+        c.pair("Tamed by", live().tamedBy().orElse("— (never tamed)"));
         String owner = currentOwnerName();
-        if (owner != null && !owner.equals(record.tamedBy().orElse(null))) {
+        if (owner != null && !owner.equals(live().tamedBy().orElse(null))) {
             c.pair("Owner now", owner);
         }
     }
@@ -757,8 +757,34 @@ public final class HorseInfoScreen extends Screen {
         return pull < 9.0 ? "powerful" : "a true draft horse";
     }
 
+    /**
+     * <b>The record as it is now, not as it was when the screen opened.</b>
+     *
+     * <p>{@link #record} is the snapshot the screen was constructed with, and
+     * it never changes. That is fine for the genotype - which cannot - but the
+     * barn name can, from this very screen: pressing <i>Set</i> sends
+     * {@code SetBarnNamePayload}, the server applies it and syncs the new
+     * record back, and every reader here carried on printing the old one. The
+     * horse's floating nameplate changed and the screen did not, which reads
+     * exactly like a button that does nothing.
+     *
+     * <p>So anything a player can change is read through here. The identity
+     * check is not paranoia: entity ids are recycled within a session, and
+     * drawing another horse's name onto this screen would be a worse bug than
+     * the one this fixes.
+     */
+    private HorseRecord live() {
+        if (horse != null) {
+            HorseRecord fresh = ClientHorseRecordCache.get(horse.getId());
+            if (fresh != null && fresh.id().equals(record.id())) {
+                return fresh;
+            }
+        }
+        return record;
+    }
+
     private String fullName() {
-        return (record.firstName() + " " + record.lastName()).strip();
+        return (live().firstName() + " " + live().lastName()).strip();
     }
 
     /**
