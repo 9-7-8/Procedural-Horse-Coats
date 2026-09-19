@@ -108,11 +108,14 @@ final class GeneratedGates {
 
             put(files, "data/" + NS + "/loot_table/blocks/" + id + ".json", blockLoot(id));
 
-            // HOUSE RULE (wiki/items.html#rules): every recipe carries at least
-            // one modded ingredient and every output is a modded item, so none
-            // of these can collide. Two of that mod's own gates plus our rope -
-            // which also means the recipe is unreachable until the player has
-            // the wood, without anything having to check that they do.
+            // THE DOUBLE GATE IS THE HOUSE RULE'S ONE EXCEPTION, here as well as
+            // in bake-double-gates.mjs - two of that mod's own gates and nothing
+            // else. It carried our braided rope until the rope was removed for
+            // being a twelve-hair tax on a building block. The ingredient is
+            // still that mod's, so the recipe stays unreachable until the player
+            // has the wood without anything having to check that they do; what
+            // it no longer carries is an ingredient of OURS. See the long note
+            // in bake-double-gates.mjs for why the collision risk is accepted.
             if (ModdedMaterials.itemExists(wood.gateId())) {
                 put(files, "data/" + NS + "/recipe/" + id + ".json", recipe(wood, id));
             } else {
@@ -192,7 +195,6 @@ final class GeneratedGates {
         JsonArray ingredients = new JsonArray();
         ingredients.add(wood.gateId());
         ingredients.add(wood.gateId());
-        ingredients.add(NS + ":braided_rope");
 
         JsonObject result = new JsonObject();
         result.addProperty("id", NS + ":" + id);

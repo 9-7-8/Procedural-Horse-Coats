@@ -238,6 +238,49 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>Two vanilla fence gates in a grid really do resolve to our double gate.</b>
+     *
+     * <p>This recipe is the <a href="items.html#gate-exception">one exception</a> to
+     * the house rule that every recipe in the mod carries a modded ingredient. The
+     * rule was the guard against a collision - two recipes with the same inputs
+     * are not an error in Minecraft, the manager simply resolves one of them and
+     * the other item becomes uncraftable with <b>nothing logged</b>. Outside the
+     * rule, the only guard left is this test.
+     *
+     * <p>So it does not ask whether the JSON parsed - {@code every_recipe_encodes}
+     * covers that. It puts two oak fence gates in a crafting grid and asserts the
+     * <em>server's own recipe manager</em> hands back our gate, which is the thing
+     * a player actually does. A pack whose recipe wins instead fails here.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> DOUBLE_GATE_CRAFTS =
+            TEST_FUNCTIONS.register("double_gate_crafts", () -> ModGameTests::doubleGateCrafts);
+
+    private static void doubleGateCrafts(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        net.minecraft.world.item.Item want = DoubleGates.gates().get(0).item().get();
+
+        // A 2x1 grid of oak fence gates - the whole recipe.
+        net.minecraft.world.item.crafting.CraftingInput input =
+                net.minecraft.world.item.crafting.CraftingInput.of(2, 1,
+                        List.of(new ItemStack(Items.OAK_FENCE_GATE), new ItemStack(Items.OAK_FENCE_GATE)));
+
+        // assemble(input) - one argument in 26.1.2, no RegistryAccess.
+        ItemStack out = server.getRecipeManager()
+                .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, helper.getLevel())
+                .map(r -> r.value().assemble(input))
+                .orElse(ItemStack.EMPTY);
+
+        if (out.isEmpty()) {
+            helper.fail("two oak fence gates craft nothing - the double gate recipe did not resolve");
+        } else if (!out.is(want)) {
+            // The collision case the house rule used to make impossible.
+            helper.fail("two oak fence gates craft " + out.getItem() + ", not the double gate -"
+                    + " something else claims those inputs");
+        }
+        helper.succeed();
+    }
+
+    /**
      * <b>Every recipe the server would send a joining client actually encodes.</b>
      *
      * <p>This is the cheapest possible version of "a player joins a dedicated
@@ -390,6 +433,8 @@ public final class ModGameTests {
         register(event, environment, DOUBLE_GATE_REDSTONE, 100);
         // Two place-and-break cycles, all inside one tick each.
         register(event, environment, DOUBLE_GATE_DROPS_ONE, 100);
+        // One recipe lookup in a single tick.
+        register(event, environment, DOUBLE_GATE_CRAFTS, 100);
         // The census is one synchronous burst of worldgen arithmetic inside a
         // single tick, so its tick budget is not what bounds it - the sample
         // size is. The generous number is for the environment overrides, which

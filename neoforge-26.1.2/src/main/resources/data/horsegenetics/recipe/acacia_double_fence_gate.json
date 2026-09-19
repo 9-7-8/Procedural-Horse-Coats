@@ -3,8 +3,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:acacia_fence_gate",
-    "minecraft:acacia_fence_gate",
-    "horsegenetics:braided_rope"
+    "minecraft:acacia_fence_gate"
   ],
   "result": {
     "id": "horsegenetics:acacia_double_fence_gate"

@@ -3,8 +3,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:bamboo_fence_gate",
-    "minecraft:bamboo_fence_gate",
-    "horsegenetics:braided_rope"
+    "minecraft:bamboo_fence_gate"
   ],
   "result": {
     "id": "horsegenetics:bamboo_double_fence_gate"

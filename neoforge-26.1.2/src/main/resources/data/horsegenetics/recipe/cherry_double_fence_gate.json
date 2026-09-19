@@ -3,8 +3,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:cherry_fence_gate",
-    "minecraft:cherry_fence_gate",
-    "horsegenetics:braided_rope"
+    "minecraft:cherry_fence_gate"
   ],
   "result": {
     "id": "horsegenetics:cherry_double_fence_gate"

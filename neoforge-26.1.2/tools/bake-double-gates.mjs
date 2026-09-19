@@ -314,18 +314,28 @@ for (const [wood, texture, woodLabel] of WOODS) {
     ],
   });
 
-  // HOUSE RULE (wiki/items.html#rules): every recipe carries at least one modded
-  // ingredient and every output is a modded item, so none of these can collide
-  // with a vanilla or third-party recipe. check-recipes.mjs only reads this mod's
-  // own folder, so it could not catch such a collision - the rule is the guard,
-  // not the checker. Two vanilla gates of the wood, plus rope for the hinge.
+  // THE ONE RECIPE IN THE MOD WITH NO MODDED INGREDIENT, ON PURPOSE.
+  // The house rule (wiki/items.html#rules) is that every recipe carries at least
+  // one modded ingredient so none of them can collide with a vanilla or
+  // third-party one. This is the documented exception. It used to take a braided
+  // rope for the hinge, which priced a paddock's worth of gates at twelve horse
+  // hairs each - and hair is sheared one to three at a time, once per horse per
+  // day. Owner: make the gate not want hair at all. Two gates of the wood, and
+  // that is the whole recipe.
+  //
+  // WHY THAT IS JUDGED SAFE: nothing in vanilla consumes a fence gate - every
+  // vanilla recipe mentioning one produces it - so there is no collision to have
+  // today. The residual risk is a third-party mod shipping its own two-gate
+  // shapeless recipe, which would be ambiguous with this one. check-recipes.mjs
+  // reads only this mod's folder and cannot see that; the rule was the guard and
+  // this recipe is outside it. If a pack ever reports a gate that will not craft,
+  // look here first.
   put(join(D, "recipe", id + ".json"), {
     type: "minecraft:crafting_shapeless",
     category: "misc",
     ingredients: [
       `minecraft:${wood}_fence_gate`,
       `minecraft:${wood}_fence_gate`,
-      `${NS}:braided_rope`,
     ],
     result: { id: `${NS}:${id}` },
   });

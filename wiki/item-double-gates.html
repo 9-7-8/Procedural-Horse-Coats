@@ -34,19 +34,29 @@
     because both leaves are driven by one click, opening it is one action rather than two.
 </p>
 
-<div class="plain">
+<div class="plain" id="recipe">
     <p>
-        <strong>Recipe (shapeless):</strong> 2 vanilla fence gates of that wood + 1
-        <a href="item-horse-hair.html">braided rope</a>.
+        <strong>Recipe (shapeless):</strong> 2 vanilla fence gates of that wood. That is the
+        whole recipe &mdash; <strong>no horse hair</strong>.
+    </p>
+    <p>
+        It took a braided rope for the hinge until the rope was removed, which priced every
+        gate in a fence line at twelve <a href="item-horse-hair.html">horse hair</a>. It is
+        the <a href="items.html#gate-exception">one recipe in the mod</a> carrying no modded
+        ingredient at all.
     </p>
 </div>
 
 <p>
-    The rope is not decoration: it is what keeps these off vanilla&rsquo;s own recipe space. Every
-    recipe in this mod carries at least one modded ingredient, so nothing here can collide with a
-    vanilla or third-party recipe &mdash; see <a href="items.html#rules">the house rules</a>. It
-    also prices the gate honestly, since two gates and a length of rope is roughly what a gate two
-    blocks wide ought to cost.
+    The rope <em>was</em> what kept these off everyone else&rsquo;s recipe space: every recipe in
+    this mod carries at least one modded ingredient so that none of them can collide with a vanilla
+    or third-party one (<a href="items.html#rules">the house rules</a>). Dropping it gives that up
+    for this one recipe. The trade was judged worth it because a fence line is the one thing you
+    build dozens of, and because <strong>nothing in vanilla consumes a fence gate</strong> &mdash;
+    every vanilla recipe that mentions one produces it &mdash; so there is no collision to have
+    unless another mod ships its own two-gate recipe.
+    <code>check-recipes.mjs</code> reads only this mod&rsquo;s folder and would not see that, so a
+    modded pack reporting a double gate that will not craft should be traced here first.
 </p>
 
 <h3 id="woods">One per wood, filed beside its own gate</h3>
@@ -63,7 +73,7 @@
 <p>
     <strong>Install a mod that adds a wood and you get a double gate in it, with no patch and
     nothing to switch on.</strong> The recipe is the same shape &mdash; two of that
-    mod&rsquo;s own fence gates plus a <a href="item-horse-hair.html">braided rope</a> &mdash;
+    mod&rsquo;s own fence gates and nothing else &mdash;
     and the gate is filed in the Building Blocks tab directly after that mod&rsquo;s single
     gate, exactly as the twelve are filed after vanilla&rsquo;s.
 </p>
@@ -319,6 +329,25 @@
 </p>
 
 <h2 id="verified">Verified</h2>
+
+<p id="verified-crafts">
+    <strong>Two vanilla fence gates really do craft one</strong> (2026-09-19, by test).
+    Losing the braided rope took this recipe outside
+    <a href="items.html#gate-exception">the modded-ingredient house rule</a>, and that rule was
+    the only guard against another mod claiming the same inputs &mdash; a collision Minecraft
+    does not report, it just makes one of the two items uncraftable.
+    <code>horsegenetics:double_gate_crafts</code> puts two oak fence gates in a
+    <code>CraftingInput</code> and asks the <em>server&rsquo;s own recipe manager</em> what
+    comes out, so it tests the resolution a player gets rather than whether the JSON parsed.
+    Checked by mutation: adding a stick to the recipe fails it at tick 0 with &ldquo;two oak
+    fence gates craft nothing&rdquo;.
+</p>
+
+<p class="muted">
+    It covers oak only, and only the twelve hand-baked woods exist at test time &mdash; a
+    modded wood&rsquo;s gate is generated at run time and is still on
+    <a href="verification.html">the checklist</a>.
+</p>
 
 <p id="verified-one-item">
     <strong>Breaking a double gate gives back one gate, not two</strong> (2026-09-19, by test).

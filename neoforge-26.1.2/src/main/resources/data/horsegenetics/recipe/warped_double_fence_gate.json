@@ -3,8 +3,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:warped_fence_gate",
-    "minecraft:warped_fence_gate",
-    "horsegenetics:braided_rope"
+    "minecraft:warped_fence_gate"
   ],
   "result": {
     "id": "horsegenetics:warped_double_fence_gate"

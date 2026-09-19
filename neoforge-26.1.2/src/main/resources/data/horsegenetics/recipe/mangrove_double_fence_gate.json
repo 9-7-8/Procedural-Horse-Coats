@@ -3,8 +3,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:mangrove_fence_gate",
-    "minecraft:mangrove_fence_gate",
-    "horsegenetics:braided_rope"
+    "minecraft:mangrove_fence_gate"
   ],
   "result": {
     "id": "horsegenetics:mangrove_double_fence_gate"
