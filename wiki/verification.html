@@ -888,12 +888,39 @@
         <strong>Pass:</strong> a real (non-dev) server or client loads 0.5.009 and reaches the
         main menu with no registry complaint. Cheap, and worth doing before the jar goes to
         anyone outside.</li>
-    <li><strong>The gametest run is real but nearly empty.</strong>
-        <code>./gradlew :neoforge-26.1.2:runGameTest</code> runs two tests headless in about
-        sixteen seconds. Everything in this file whose evidence is a block state rather than a
-        picture is a candidate to move into it &mdash; the stall-detector geometry, the
-        suntouched light cleanup, blight eating grass but not crops. None of that is written
-        yet.</li>
+    <li><strong>The gametest run is real and no longer nearly empty.</strong>
+        <code>./gradlew :neoforge-26.1.2:runGameTest</code> runs five tests headless in well
+        under a minute. Two of them were added after v0.5.014 shipped two bugs that
+        <em>only</em> a client talking to a server could see, and they are the template for the
+        rest: <code>every_recipe_encodes</code> and <code>building_blocks_survives</code> both
+        fail on the old code and both need neither a client nor a player. Everything in this
+        file whose evidence is a block state rather than a picture is still a candidate to move
+        in &mdash; the stall-detector geometry, the suntouched light cleanup, blight eating
+        grass but not crops. None of that is written yet.</li>
+</ul>
+
+<h2 id="join-and-tab-0918">&sect;0-FR &mdash; A join, and a creative tab, on a real client (2026-09-18, NOT played)</h2>
+
+<p>
+    v0.5.014 shipped two faults that <strong>singleplayer cannot show</strong>: every client was
+    kicked during login by an unencodable recipe, and Building Blocks was silently emptied for
+    anyone whose pack made the mod's gate anchor miss. Both are fixed in v0.5.015 and both now
+    have a headless test that fails on the old code. <strong>Neither has been seen from a client
+    seat</strong>, which is the whole category of thing that let them out.
+</p>
+
+<ul>
+    <li><strong>Join a dedicated server with a client and load terrain.</strong> The one check
+        that would have caught the kick. A dev <code>runServer</code> plus a dev client is
+        enough; it does not need the tester's pack.</li>
+    <li><strong>Open Building Blocks and find a double gate directly after its vanilla gate.</strong>
+        The gametest asserts the tab is not empty and holds all twelve, but it cannot see
+        <em>order</em>, and order is the entire reason the insert is done the hard way.</li>
+    <li><strong>The fallback path has never run.</strong> When the anchor is missing the gate is
+        now appended to the end of the tab instead of being dropped. Nothing installed here
+        makes the anchor miss, so that branch is argued rather than observed &mdash; a pack with
+        Regions Unexplored would settle it, and the warning line it logs is the thing to look
+        for.</li>
 </ul>
 
 <h2 id="double-gates-0917">&sect;0-DG &mdash; What the double gates still need looking at (2026-09-17, NOT played)</h2>

@@ -342,7 +342,38 @@
         or from its jar, or not at all.</strong> <code>MaterialScan</code> reads jars for exactly this reason.
         Verified 2026-09-18 by reading <code>DataComponentInitializers</code> and <code>Holder</code> in the
         26.1.2 sources, and on a dedicated server with a synthetic modded-metal mod installed.</li>
-    <li id="armor-material"><strong><code>ArmorMaterial</code> is a plain record you can just construct, and
+    <li id="stream-codec-unit"><strong><code>StreamCodec.unit</code> writes no bytes - it checks
+    <code>equals</code> - so a stateless object used with it must be a <em>singleton</em>.</strong> This
+    shipped a release in which every client was kicked on join. The pattern that looks right and is not:
+    <pre><code>MAP_CODEC    = MapCodec.unit(MyRecipe::new);      // a NEW object per decode
+STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></pre>
+    <code>StreamCodec.unit(v)</code>'s encode is <code>if (!value.equals(v)) throw</code>, and a class
+    extending <code>CustomRecipe</code> declares no <code>equals</code>, so that is identity. The
+    <code>RecipeManager</code> decodes through the map codec, so encode can never succeed. Share one
+    instance and use <code>MapCodec.unit</code>'s <em>value</em> overload.
+    <strong>Why it is a login failure and not a broken recipe:</strong> NeoForge sends the whole recipe
+    set to each joining client as one <code>neoforge:recipe_content</code> payload, so one bad recipe
+    fails the payload, the packet and the login, with
+    <code>EncoderException</code> on the client and <code>Can't encode '...', expected '...'</code> on
+    the server. <strong>Singleplayer never encodes it</strong>, so every test short of a real client
+    joining a real dedicated server passes &mdash; the reason the
+    <code>every_recipe_encodes</code> gametest exists. Found by an outside tester, 2026-09-18.</li>
+
+<li id="creative-tab-throw"><strong>A listener that throws out of
+    <code>BuildCreativeModeTabContentsEvent</code> empties the entire tab, including vanilla's
+    items, with no crash and nothing logged.</strong> <code>CreativeModeTab.buildContents</code>
+    assigns <code>displayItems</code> only <em>after</em> the event returns, so a throw leaves the tab
+    holding its previous contents &mdash; nothing, on a first build. The player sees a whole category
+    missing and cannot tell which mod did it.
+    <strong>So guard exactly the way the API asserts.</strong> <code>insertAfter</code> with
+    <code>PARENT_AND_SEARCH_TABS</code> asserts the anchor is in <em>both</em>
+    <code>getParentEntries()</code> and <code>getSearchEntries()</code>, and both are
+    <code>ItemStackLinkedSet.createTypeAndComponentsSet()</code> &mdash; so membership is item
+    <em>and</em> components, and a <code>stack.is(item)</code> check answers "present" for an anchor
+    the set does not contain. Check both sets, with an <code>ItemStack</code>, and catch anyway: the
+    cost of being wrong is somebody else's tab. Cost a release, 2026-09-18.</li>
+
+<li id="armor-material"><strong><code>ArmorMaterial</code> is a plain record you can just construct, and
         <code>Item.Properties.horseArmor(material)</code> does the rest.</strong> The record is
         <code>(durability, Map&lt;ArmorType, Integer&gt; defense, enchantmentValue, equipSound, toughness,
         knockbackResistance, TagKey&lt;Item&gt; repairIngredient, ResourceKey&lt;EquipmentAsset&gt; assetId)</code>

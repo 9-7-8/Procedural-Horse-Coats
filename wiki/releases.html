@@ -58,6 +58,39 @@
     </p>
 </div>
 
+<h2 id="v0-5-015">0.5.015</h2>
+
+<p class="lede">
+    <strong>Two faults that singleplayer cannot show.</strong> On 0.5.014 every player was kicked
+    during login to a dedicated server, and anyone whose pack made the double-gate anchor miss
+    lost their whole Building Blocks tab. Both are fixed, and both now have a headless test that
+    fails on the old code.
+</p>
+
+<ul>
+    <li><strong>Every client was kicked on join.</strong> Two special recipes could not be written
+        to the network, and the server sends its entire recipe list to each joining player in one
+        packet &mdash; so one unencodable recipe failed the packet and the login. You reached
+        &ldquo;joined the game&rdquo; and dropped before terrain.
+        <a href="api-notes.html#stream-codec-unit">Why, and the shape to avoid</a>.</li>
+    <li><strong>Building Blocks went missing.</strong> The mod files each double gate after the
+        vanilla gate it is made from; if that anchor is not exactly where it expects, the insert
+        throws &mdash; and the game commits a tab's contents only after every mod has written into
+        it, so <a href="api-notes.html#creative-tab-throw">a throw loses the tab, not the
+        gate</a>. Every vanilla block, gone from the menu, with nothing in the log.
+        <code>regions_unexplored:baobab_fence_gate</code> triggered it. The gate is now appended
+        rather than dropped when the anchor is missing, and nothing in here can throw.</li>
+    <li><strong>Two new gametests</strong>, run headless in seconds with no client and no server:
+        one encodes all 1&nbsp;638 recipes exactly as the join packet does, the other builds the
+        Building Blocks tab and checks it is not empty.</li>
+</ul>
+
+<p>
+    Running <code>magistufix</code>? Its two Horse Genetics targets can come out. The three Epic
+    Knights classes still need it &mdash; the identical mistake, in an unrelated codebase, and
+    worth sending on.
+</p>
+
 <h2 id="v0-5-014">0.5.014</h2>
 
 <p class="lede">

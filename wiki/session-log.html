@@ -27,6 +27,56 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-join">2026-09-18, after the components fix &mdash; Two bugs singleplayer cannot see</h2>
+
+<p>
+    The tester's third report, and the best one yet: it named the mechanism, both affected
+    classes, the fix, and the reason release testing had missed it. All four were right, and
+    checking it took longer than fixing it.
+</p>
+
+<p>
+    <strong>Every client was kicked on join.</strong> Both of this mod's special recipes built
+    their map codec from a supplier and their stream codec from a separately-constructed
+    instance. <code>StreamCodec.unit</code> writes no bytes &mdash; it checks that the value
+    you hand it <code>equals</code> the one it captured &mdash; and a <code>CustomRecipe</code>
+    subclass declares no <code>equals</code>, so that is an identity check against an object the
+    <code>RecipeManager</code> never produces. NeoForge sends the whole recipe set to each
+    joining client in one payload, so one unencodable recipe fails the payload, the packet and
+    the login.
+</p>
+
+<p>
+    <strong>Building Blocks was silently emptied.</strong> The gate-filing code did guard its
+    anchor, but not the way <code>insertAfter</code> asserts it: with
+    <code>PARENT_AND_SEARCH_TABS</code> the anchor must be in <em>both</em> entry sets and the
+    guard read only the parent one, and it compared with <code>stack.is(item)</code> where the
+    sets key on item <em>and components</em>. Either mismatch throws &mdash; and
+    <code>CreativeModeTab.buildContents</code> assigns the finished list only after the event
+    returns, so <strong>a throw does not lose our gate, it loses the tab</strong>, vanilla
+    blocks included, with no crash and nothing in the log.
+</p>
+
+<p>
+    <strong>What these two have in common is the point of the session.</strong> Neither is
+    visible in singleplayer &mdash; one needs a packet that is never sent, the other needs
+    another mod's item &mdash; and between them they had survived a full build, a green suite,
+    a clean <code>runServer</code> and a release. So the fixes came with two
+    <a href="api-notes.html#stream-codec-unit">headless gametests</a> that both fail on the old
+    code: <code>every_recipe_encodes</code> pushes all 1&nbsp;638 recipes through
+    <code>Recipe.STREAM_CODEC</code>, the same dispatch the sync uses, and reproduced the
+    tester's exception verbatim when the bug was put back; <code>building_blocks_survives</code>
+    drives <code>tryRebuildTabContents</code> and asserts the tab is not empty. The blunt
+    assertion is deliberate: a missing gate is a nuisance, an empty tab is the disaster.
+</p>
+
+<p>
+    Shipped as v0.5.015. The gametest suite is five tests now rather than three, and
+    <strong>that is the part worth keeping</strong> &mdash; the lesson is not about codecs, it
+    is that this mod's untested surface is the client/server boundary, and it is reachable
+    headlessly after all.
+</p>
+
 <h2 id="d2026-09-18-components">2026-09-18, after the collision &mdash; A question that cannot be asked, and twelve recipes nobody read the log for</h2>
 
 <p>
