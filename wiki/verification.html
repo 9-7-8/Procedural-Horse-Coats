@@ -2719,6 +2719,11 @@
         right-click a tamed horse you own: &ldquo;bound to &hellip; for good&rdquo;. Try an
         untamed horse and someone else&rsquo;s: both refused. Right-click another horse with
         the bound whistle: nothing rebinds.</li>
+    <li><strong>The tooltip names the horse.</strong> An unbound whistle says how to bind it; a
+        bound one says <em>Bound to: &lt;name&gt;</em>. The name rides the component, so check it
+        on a whistle in a chest with the horse in another dimension, and on one carried across a
+        <code>/reload</code> &mdash; a blank name falls back to eight characters of UUID, which
+        means the bind read no horse record.</li>
     <li><strong>Near call.</strong> Walk thirty blocks away and blow it: the horse appears in
         front of you.</li>
     <li><strong>Far call &mdash; the one that can fail invisibly.</strong> Ride a thousand

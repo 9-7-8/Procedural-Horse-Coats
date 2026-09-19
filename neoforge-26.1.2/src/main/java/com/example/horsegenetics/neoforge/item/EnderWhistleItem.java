@@ -3,6 +3,8 @@ package com.example.horsegenetics.neoforge.item;
 import com.example.horsegenetics.neoforge.data.BoundHorse;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.server.EnderWhistleCalls;
+import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +15,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
@@ -67,6 +71,30 @@ public class EnderWhistleItem extends Item {
             player.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * Who this whistle answers to. The same shape the bound stall sign uses, and
+     * for the same reason: a bound whistle and an unbound one are the same item
+     * with the same icon, so without this line the only way to tell them apart
+     * is to blow one.
+     *
+     * <p>The name is carried on the component rather than looked up from the
+     * horse, because the horse may be in another dimension, unloaded, or dead -
+     * and the client has no way to reach it in any of those cases.
+     */
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> adder, TooltipFlag flag) {
+        BoundHorse bound = stack.get(ModDataComponents.BOUND_HORSE.get());
+        if (bound == null) {
+            adder.accept(Component.literal("Right-click a horse you own to bind it, for good.")
+                    .withStyle(ChatFormatting.GRAY));
+        } else {
+            adder.accept(Component.literal("Bound to: "
+                    + (bound.name().isBlank() ? bound.id().toString().substring(0, 8) : bound.name()))
+                    .withStyle(ChatFormatting.GRAY));
+        }
     }
 
     /**

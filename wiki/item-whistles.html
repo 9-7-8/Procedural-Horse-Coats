@@ -83,8 +83,10 @@
 <div class="note warn">
     <span class="label">All four look the same</span>
     <p>
-        The whistles share one texture, and a bound ender whistle does not yet show which horse
-        it belongs to. Keep them apart in your hotbar, or rename them at an anvil.
+        The whistles share one texture, so the four tiers are only told apart by their names.
+        A bound ender whistle at least says <em>Bound to: &lt;horse&gt;</em> on its tooltip, and
+        an unbound one says how to bind it. Keep the area whistles apart in your hotbar, or
+        rename them at an anvil.
     </p>
 </div>
 </section>
@@ -102,7 +104,12 @@
 
 <ul>
     <li><strong><code>item/EnderWhistleItem</code></strong> &mdash; <code>use</code> calls,
-        <code>inventoryTick</code> checks for dust once a second. Stacks to one.</li>
+        <code>inventoryTick</code> checks for dust once a second. Stacks to one.
+        <code>appendHoverText</code> names the bound horse, reading it off the component rather
+        than the entity: the horse may be unloaded, in another dimension, or dead, and the
+        client cannot reach it in any of those cases. Same shape as
+        <a href="item-stall-signs.html">the bound stall sign</a>, which is where the wording
+        came from.</li>
     <li><strong><code>server/EnderWhistleCalls</code></strong> &mdash; binding (an
         <code>EntityInteract</code> handler using <code>HorseOwnership.bindRefusal</code>,
         the same refusal stall signs use), calling, and the dust. The binding is the existing
@@ -137,8 +144,7 @@
 <h2 id="ender-gaps">Known gaps</h2>
 
 <ul>
-    <li>All four whistles share one texture, and a bound ender whistle has no tooltip naming
-        its horse.</li>
+    <li>All four whistles share one texture.</li>
     <li>Nothing gates the area whistles or binding on bond.</li>
     <li>The far-chunk wait and the cross-dimension teleport are written against 26.1.2
         sources and <strong>not seen working</strong> &mdash; see
