@@ -7,7 +7,16 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "horsegenetics:birch_double_fence_gate"
+          "name": "horsegenetics:birch_double_fence_gate",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:birch_double_fence_gate",
+              "properties": {
+                "half": "left"
+              }
+            }
+          ]
         }
       ],
       "conditions": [

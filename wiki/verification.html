@@ -1287,6 +1287,15 @@
         <em>boundary</em> rather than its floor, so the check looks at the cells around each floor
         column &mdash; a stall whose gate is set back oddly is the case that would miss.</li>
     
+    <li><strong>Breaking one in creative gives you nothing.</strong> In <em>creative</em>, break a
+        double gate &mdash; once striking each half, since they are not symmetric.
+        <strong>Pass:</strong> both blocks go and no item drops either time.
+        <a href="item-double-gates.html#one-item-out">The survival case is covered by a test</a>
+        and drops exactly one; this half of that fix is
+        <code>playerWillDestroy</code>, which the test cannot reach because it breaks blocks with
+        no player. Before it, breaking the <em>right</em> half in creative gave you a free gate
+        out of the partner's removal.</li>
+
     <li><strong>Placement refuses cleanly with no room, and says why.</strong> Try to place one
         into a one-block gap. <strong>Pass:</strong> nothing is placed, the item stays in your
         hand &mdash; never a single half left standing &mdash; and you are told

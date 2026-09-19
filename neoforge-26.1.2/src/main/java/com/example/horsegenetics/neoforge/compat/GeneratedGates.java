@@ -138,10 +138,34 @@ final class GeneratedGates {
         put(files, "data/minecraft/tags/block/fence_gates.json", tag);
     }
 
+    /**
+     * <b>One item out, and the {@code half=left} condition is the whole of it.</b>
+     * A pair is two blocks, so breaking one runs two removals - the half that was
+     * struck, and the orphan its partner becomes, which
+     * {@code DoubleFenceGateBlock.updateShape} turns to air. That second removal
+     * is <em>not</em> free of drops: {@code Block.updateOrDestroy} calls
+     * {@code destroyBlock(pos, (flags & 32) == 0)} and an ordinary neighbour
+     * update carries no {@code UPDATE_SUPPRESS_DROPS}, so an unconditional table
+     * pays out twice and the gate duplicates on every break. Vanilla's doors and
+     * beds fix this here rather than in Java - see
+     * {@code data/minecraft/loot_table/blocks/oak_door.json}, conditioned on
+     * {@code half=lower}. Only the loot-carrying half may pay, whichever half was
+     * struck. <b>The author-time twin is {@code tools/bake-double-gates.mjs}.</b>
+     */
     private static JsonObject blockLoot(String id) {
+        JsonObject half = new JsonObject();
+        half.addProperty("half", "left");
+        JsonObject onlyLeft = new JsonObject();
+        onlyLeft.addProperty("condition", "minecraft:block_state_property");
+        onlyLeft.addProperty("block", NS + ":" + id);
+        onlyLeft.add("properties", half);
+        JsonArray entryConditions = new JsonArray();
+        entryConditions.add(onlyLeft);
+
         JsonObject entry = new JsonObject();
         entry.addProperty("type", "minecraft:item");
         entry.addProperty("name", NS + ":" + id);
+        entry.add("conditions", entryConditions);
         JsonArray entries = new JsonArray();
         entries.add(entry);
 

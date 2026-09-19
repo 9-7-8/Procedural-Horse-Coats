@@ -151,8 +151,39 @@
     clockwise for the right. A half whose partner is gone returns air from
     <code>updateShape</code>, the way <code>BedBlock</code> does it. Doing it there rather than in
     a break hook means the pair also survives being taken apart by an explosion, a piston or
-    <code>/setblock</code>, and it gets the drops right with no loot-table condition: the half
-    actually broken drops its item, the partner removed this way drops nothing.
+    <code>/setblock</code>.
+</p>
+
+<h3 id="one-item-out">One item out, and the loot table is what enforces it</h3>
+
+<p>
+    This was written as though returning air from <code>updateShape</code> dropped nothing, and it
+    does not. <code>Block.updateOrDestroy</code> calls
+    <code>destroyBlock(pos, (flags &amp; 32) == 0)</code>, and an ordinary neighbour update carries
+    no <code>UPDATE_SUPPRESS_DROPS</code> &mdash; so the struck half paid out, the orphaned partner
+    paid out again, and <strong>breaking a double gate gave you two</strong>. It shipped that way
+    and the owner found it in play.
+</p>
+
+<p>
+    Vanilla&rsquo;s doors and beds have the same two-block problem and solve it in the
+    <em>data</em>, not in Java: every gate&rsquo;s loot table is conditioned on
+    <code>half=left</code>, so whichever half is struck, exactly one of the two removals pays.
+    Compare <code>data/minecraft/loot_table/blocks/oak_door.json</code>, conditioned on
+    <code>half=lower</code>. The condition is written by
+    <a href="#generated-drift">both generators</a> and a gate that duplicates again means one of
+    them lost it.
+</p>
+
+<p>
+    <code>playerWillDestroy</code> is the other end of the same rule. Because <code>left</code> is
+    the half that pays, a break that should drop <em>nothing</em> &mdash; creative, or one day a
+    tool requirement &mdash; still leaked one item when the <code>right</code> half was the one
+    struck: creative suppresses your own block, but the partner is removed by
+    <code>updateShape</code>, which knows nothing about who swung. So the paying half is taken out
+    first with flag 35, leaving the shape update nothing to pay for.
+    <code>DoorBlock</code> does exactly this through
+    <code>DoublePlantBlock.preventDropFromBottomPart</code>.
 </p>
 
 <h3 id="either-side">The partner takes whichever side is free</h3>
@@ -288,6 +319,27 @@
 </p>
 
 <h2 id="verified">Verified</h2>
+
+<p id="verified-one-item">
+    <strong>Breaking a double gate gives back one gate, not two</strong> (2026-09-19, by test).
+    The owner reported the duplication in play &mdash; &ldquo;breaking a double fence drops
+    two&rdquo; &mdash; and <code>horsegenetics:double_gate_drops_one</code> is the tripwire that
+    followed. It places a pair, breaks it with
+    <code>level.destroyBlock(pos, true)</code>, and asserts exactly one gate item within two blocks;
+    then does it again striking the <em>other</em> half, because <code>left</code> is the half the
+    loot table pays from and breaking only one of the two would pass with the condition on the
+    wrong half. Deliberately <em>not</em> <code>helper.destroyBlock</code>, which passes
+    <code>dropBlock=false</code> and would have passed however wrong the table was.
+</p>
+
+<p>
+    Checked by mutation, not trusted: reverting oak&rsquo;s loot table to the unconditional one
+    fails it at tick 0 with <em>&ldquo;Expected 1 items of type Oak Double Fence Gate: found
+    2&rdquo;</em> &mdash; the reported bug reproduced exactly &mdash; while the other six tests go
+    on passing. <strong>The creative half of the fix is not covered by it</strong>: the test breaks
+    blocks without a player, so <code>playerWillDestroy</code> never runs. Breaking either half in
+    creative and getting nothing is still unseen.
+</p>
 
 <p id="verified-redstone">
     <strong>Redstone moves the pair, not a half</strong> (2026-09-18, by test rather than by hand).

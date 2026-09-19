@@ -123,6 +123,59 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>Breaking a double gate gives back one gate, not two.</b>
+     *
+     * <p>A pair is two blocks and a break removes both: the half that was struck,
+     * and the orphan its partner becomes, which
+     * {@link DoubleFenceGateBlock#updateShape} turns to air. Both removals run
+     * the loot table, so the table has to be conditioned on {@code half=left} or
+     * the gate duplicates on every break - which it did, in play, until the
+     * owner reported it. This is the tripwire, and it is aimed at the
+     * <b>data</b>: the condition is written by two separate generators
+     * ({@code tools/bake-double-gates.mjs} and {@code compat/GeneratedGates}) and
+     * neither the build nor the game says a word if one loses it.
+     *
+     * <p>Both halves are struck in turn, because they are not symmetric - LEFT is
+     * the half that pays, so breaking RIGHT is the case where the drop has to
+     * come from the partner's removal instead. Breaking one and calling it done
+     * would pass with the condition on the wrong half.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> DOUBLE_GATE_DROPS_ONE =
+            TEST_FUNCTIONS.register("double_gate_drops_one", () -> ModGameTests::doubleGateDropsOne);
+
+    private static void doubleGateDropsOne(GameTestHelper helper) {
+        DoubleFenceGateBlock gate = DoubleGates.gates().get(0).block().get();
+        net.minecraft.world.item.Item item = DoubleGates.gates().get(0).item().get();
+
+        for (DoubleFenceGateBlock.Half struck : DoubleFenceGateBlock.Half.values()) {
+            BlockPos left = new BlockPos(0, 0, 0);
+            BlockState leftState = gate.defaultBlockState()
+                    .setValue(DoubleFenceGateBlock.HALF, DoubleFenceGateBlock.Half.LEFT);
+            BlockPos right = left.relative(DoubleFenceGateBlock.partnerDirection(leftState));
+            helper.setBlock(left, leftState);
+            helper.setBlock(right, leftState.setValue(
+                    DoubleFenceGateBlock.HALF, DoubleFenceGateBlock.Half.RIGHT));
+
+            // NOT helper.destroyBlock, which passes dropBlock=false and would make
+            // this pass however wrong the loot table is.
+            BlockPos hit = struck == DoubleFenceGateBlock.Half.LEFT ? left : right;
+            helper.getLevel().destroyBlock(helper.absolutePos(hit), true);
+
+            helper.assertBlockPresent(Blocks.AIR, left);
+            helper.assertBlockPresent(Blocks.AIR, right);
+            // Radius 2 covers both cells, so it counts the pair's whole yield
+            // wherever the item landed.
+            helper.assertItemEntityCountIs(item, left, 2.0, 1);
+
+            for (net.minecraft.world.entity.item.ItemEntity dropped
+                    : helper.getEntities(net.minecraft.world.entity.EntityType.ITEM)) {
+                dropped.discard();
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
      * <b>The cowboy's homestead still wins village slots.</b> The piece is
      * 16x18 going into a terminator pool vanilla fills with 2x3 stubs, so the
      * bounding-box check is the thing most likely to have quietly stopped
@@ -335,6 +388,8 @@ public final class ModGameTests {
                         new TestEnvironmentDefinition.AllOf(java.util.List.of()));
         register(event, environment, HARNESS_REACHES_THE_WORLD, 100);
         register(event, environment, DOUBLE_GATE_REDSTONE, 100);
+        // Two place-and-break cycles, all inside one tick each.
+        register(event, environment, DOUBLE_GATE_DROPS_ONE, 100);
         // The census is one synchronous burst of worldgen arithmetic inside a
         // single tick, so its tick budget is not what bounds it - the sample
         // size is. The generous number is for the environment overrides, which

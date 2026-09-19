@@ -280,13 +280,35 @@ for (const [wood, texture, woodLabel] of WOODS) {
     model: { type: "minecraft:model", model: `${NS}:block/${id}_left` },
   });
 
+  // ONE ITEM OUT, AND THE half=left CONDITION IS THE WHOLE OF IT.
+  // A pair is two blocks, so breaking one runs two removals: the half the
+  // player hit, and the orphan its partner becomes, which DoubleFenceGateBlock
+  // .updateShape turns to air. That second removal is NOT free of drops -
+  // Block.updateOrDestroy calls destroyBlock(pos, (flags & 32) == 0), and an
+  // ordinary neighbour update carries no UPDATE_SUPPRESS_DROPS - so an
+  // unconditional table paid out twice and a gate duplicated every time it was
+  // broken. Vanilla's doors and beds solve it exactly here and not in Java:
+  // only the half that carries the loot may pay, whichever half was struck.
+  // Compare data/minecraft/loot_table/blocks/oak_door.json (half=lower).
   put(join(D, "loot_table/blocks", id + ".json"), {
     type: "minecraft:block",
     pools: [
       {
         rolls: 1,
         bonus_rolls: 0,
-        entries: [{ type: "minecraft:item", name: `${NS}:${id}` }],
+        entries: [
+          {
+            type: "minecraft:item",
+            name: `${NS}:${id}`,
+            conditions: [
+              {
+                condition: "minecraft:block_state_property",
+                block: `${NS}:${id}`,
+                properties: { half: "left" },
+              },
+            ],
+          },
+        ],
         conditions: [{ condition: "minecraft:survives_explosion" }],
       },
     ],

@@ -7,7 +7,16 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "horsegenetics:acacia_double_fence_gate"
+          "name": "horsegenetics:acacia_double_fence_gate",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:acacia_double_fence_gate",
+              "properties": {
+                "half": "left"
+              }
+            }
+          ]
         }
       ],
       "conditions": [

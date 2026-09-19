@@ -66,10 +66,27 @@ import org.jspecify.annotations.Nullable;
  * A half whose partner is gone returns air, the way {@code BedBlock} does it.
  * Doing it there rather than in {@code playerWillDestroy} means the pair also
  * survives being taken apart by things that are not a player breaking a block -
- * an explosion, a piston, {@code /setblock}, another mod - and it gets the drops
- * right without a loot-table condition: the half that was actually broken drops
- * its item, and the partner removed this way drops nothing. One item in, one
- * item out.
+ * an explosion, a piston, {@code /setblock}, another mod.
+ *
+ * <h2>One item in, one item out - and where that is actually enforced</h2>
+ * <b>In the loot table, not here.</b> This was written as though returning air
+ * from {@code updateShape} dropped nothing, and it does not:
+ * {@code Block.updateOrDestroy} calls
+ * {@code destroyBlock(pos, (flags & 32) == 0)}, and an ordinary neighbour update
+ * carries no {@code UPDATE_SUPPRESS_DROPS}. So the struck half paid out and the
+ * orphaned partner paid out again - <b>breaking a double gate gave you two.</b>
+ * Owner, in play: "breaking a double fence drops two".
+ *
+ * <p>Vanilla's doors and beds have the same two-block problem and solve it in
+ * the data: every gate's table is conditioned on {@code half=left}, so whichever
+ * half is struck, exactly one of the two removals pays. Compare
+ * {@code data/minecraft/loot_table/blocks/oak_door.json}. Ours is written by
+ * {@code tools/bake-double-gates.mjs} for vanilla's woods and
+ * {@code compat/GeneratedGates} for everyone else's; <b>both</b> carry the
+ * condition, and a gate that duplicates again means one of them lost it.
+ *
+ * <p>{@link #playerWillDestroy} below is the other end of the same rule: a break
+ * that is not supposed to drop anything at all.
  */
 public class DoubleFenceGateBlock extends FenceGateBlock {
 
@@ -236,6 +253,45 @@ public class DoubleFenceGateBlock extends FenceGateBlock {
         }
         return super.updateShape(state, level, ticks, pos, directionToNeighbour,
                 neighbourPos, neighbourState, random);
+    }
+
+    /**
+     * <b>A break that drops nothing must drop nothing from either half.</b>
+     * The {@code half=left} loot condition makes {@link Half#LEFT} the half that
+     * pays, so a creative player breaking the {@link Half#RIGHT} half got the
+     * item anyway: their own block is suppressed by creative, but the LEFT
+     * partner is removed by {@link #updateShape} through
+     * {@code Block.updateOrDestroy}, which knows nothing about who swung. That is
+     * the duplication bug's mirror image - a free gate out of creative mode.
+     *
+     * <p>So the paying half is taken out first, with flag 35
+     * ({@code UPDATE_SUPPRESS_DROPS} set), leaving {@code updateShape} nothing to
+     * pay for. {@code DoorBlock} does exactly this via
+     * {@code DoublePlantBlock.preventDropFromBottomPart}; this is that method
+     * with the pair's own geometry. Breaking the LEFT half needs no such help -
+     * the RIGHT orphan's loot condition already fails.
+     *
+     * <p>The tool clause matters for the same reason vanilla carries it: a break
+     * that would not have dropped the block must not drop the partner either.
+     * A fence gate needs no tool, so today it is only ever creative that gets
+     * here - it is kept so this stays correct if the block ever gains one.
+     */
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide()
+                && state.getValue(HALF) == Half.RIGHT
+                && (player.preventsBlockDrops() || !player.hasCorrectToolForDrops(state))) {
+            BlockPos otherPos = pos.relative(partnerDirection(state));
+            BlockState otherState = level.getBlockState(otherPos);
+            if (otherState.is(this) && otherState.getValue(HALF) == Half.LEFT) {
+                level.setBlock(otherPos, Blocks.AIR.defaultBlockState(), 35);
+                // The break particles and sound the suppressed removal would
+                // otherwise have made - without this the partner half simply
+                // blinks out, which reads as a glitch rather than a break.
+                level.levelEvent(player, 2001, otherPos, Block.getId(otherState));
+            }
+        }
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     /**
