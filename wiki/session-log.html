@@ -27,6 +27,83 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-reports">2026-09-18, evening &mdash; Six reports from play, and what they had in common</h2>
+
+<p>
+    A session driven entirely by the owner playing and saying what was wrong. Worth recording
+    because <strong>four of the six were the same kind of bug</strong>: a value that was
+    computed correctly, stored correctly and then read from the wrong place.
+</p>
+
+<p>
+    <strong>The family tree drew every ancestor as a plain black horse</strong>, and the obvious
+    theory &mdash; ancestor genomes are not persisted &mdash; was wrong. They are on
+    <code>HorseRecord</code>, they sync, and <code>FamilyTreeScreen</code> built the right
+    <code>CoatData</code> from them. The coat-bake rationing of 2026-09-13 had added a resolved
+    <code>coatId</code> to the render state and made <code>getTextureLocation</code> prefer it;
+    a screen&rsquo;s throwaway model horse is not in <code>ClientCoatCache</code>, so that id
+    resolved from the wild type and the real coat, assigned one line later, was never read
+    again. The general shape is now on
+    <a href="coding-notes.html#cached-derivation">coding notes</a>: <em>caching a derived value
+    beside the thing it is derived from, where somebody else writes the source afterwards</em>.
+    Four screens had it. The fix removed the broken half rather than repairing four copies.
+</p>
+
+<p>
+    <strong>&ldquo;There doesn&rsquo;t seem to be a way to change the barn name&rdquo;</strong>
+    was the same shape again. There is a way, and it worked end to end &mdash;
+    <code>HorseInfoScreen</code> simply held the record it was constructed with in a
+    <code>final</code> field, so pressing <em>Set</em> renamed the horse and its nameplate while
+    the screen kept printing the old name. A button that does nothing, from the outside.
+</p>
+
+<p>
+    <strong>Suntouched was the one that was genuinely three bugs</strong>, and the one where the
+    guess going in was wrong. The prediction was a client-side genome read failing before the
+    record arrived &mdash; the family-tree shape. It is not: the light is a real server-placed
+    block, and it had <em>one</em> candidate position which had to be air. Grass, ferns, snow,
+    crops and shallow water all occupy that block, so failing was the common case outdoors,
+    and the 2026-09-02 check that passed had been done in a swept pen &mdash; the one place a
+    single candidate always works. The lesson worth keeping is about the <em>test venue</em>:
+    a debug yard with a clean floor cannot show a bug whose trigger is ordinary terrain.
+    Separately, singleplayer was not working better than the server, it was littering:
+    <code>EntityLeaveLevelEvent</code> fires on the client level too, the statics are shared in
+    a single JVM, and the client&rsquo;s copy tore the horse out of the tracking map before the
+    server could queue its light for removal. Every glowing horse walked away from left its
+    light burning for good.
+</p>
+
+<p>
+    <strong>Speed and jump in metres</strong> turned up an inconsistency worth recording. Four
+    places in the mod already quoted m/s and nothing checked they agreed. They do: 43.17 m/s per
+    point of movement speed falls out of the player movement model a ridden horse travels on,
+    and the breed curve&rsquo;s 9.71 is that same constant against a different anchor &mdash;
+    the average vanilla horse, not <code>BASE_SPEED</code>. Writing the test also corrected the
+    session&rsquo;s own arithmetic: vanilla&rsquo;s jump roll stops at <code>0.8</code>, about
+    3.6 blocks; the familiar 5.3 is jump strength <code>1.0</code>, which only breeding reaches.
+    Two places had said 5.3 was vanilla&rsquo;s ceiling.
+</p>
+
+<p>
+    <strong>Jade is the first third-party jar this mod compiles against</strong>, and
+    <code>compatibility.html</code> said outright that nothing reaches into another mod&rsquo;s
+    classes. That rule was rewritten rather than quietly excepted. The Horse Powered argument is
+    specifically about <em>guessing at private names</em> that can be renamed without warning; a
+    published, versioned plugin API is the opposite, and fails at compile time here rather than
+    silently in somebody&rsquo;s world. Still <code>compileOnly</code>, and the built jar was
+    checked for leaked classes. The API was read out of the jar with <code>javap</code>, because
+    Jade&rsquo;s own docs document neither <code>IEntityComponentProvider</code> nor
+    <code>EntityAccessor</code>.
+</p>
+
+<p>
+    <strong>One process note.</strong> The first <code>runServer</code> of the night printed
+    <code>BUILD SUCCESSFUL</code> over a server that had crashed and never reached
+    <code>Done (</code>. The cause was mundane &mdash; the owner&rsquo;s own dedicated server
+    held port 25565 &mdash; but it is the cleanest demonstration yet of why that line is not
+    evidence. Grep for <code>Done (</code> and for <code>ERROR</code>, every time.
+</p>
+
 <h2 id="d2026-09-18-join">2026-09-18, after the components fix &mdash; Two bugs singleplayer cannot see</h2>
 
 <p>

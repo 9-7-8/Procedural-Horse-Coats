@@ -58,13 +58,16 @@
     <div>
         <dt>the cast light (<code>light: 12</code>)</dt>
         <dd>The server keeps a single <code>minecraft:light</code> block at light
-            level&nbsp;12 trailing the horse &mdash; moved only when the horse walks
-            into a new block, dropped on death / unload / dimension change
-            (<code>EntityLeaveLevelEvent</code>). It is only placed into air, and it
-            is <strong>skipped in the horse dimension</strong> so the read-only
-            horse dimension doesn&rsquo;t fill with light blocks. A server crash can
-            orphan one block &mdash; the same caveat the portal plots carry. There is
-            no <code>when</code>, so a Suntouched horse always glows, foal included.</dd>
+            level&nbsp;12 trailing the horse &mdash; moved when the horse walks into a
+            new block, dropped on death / unload / dimension change
+            (<code>EntityLeaveLevelEvent</code>). It tries <strong>three</strong>
+            positions, in order: the body block, the one above it, then the feet; a
+            spot counts as free if it is air <em>or</em> already a light block. It is
+            <strong>skipped in the horse dimension</strong> so the read-only horse
+            dimension doesn&rsquo;t fill with light blocks. A server crash, or a chunk
+            unloading before a queued clear runs, can orphan one block &mdash; the
+            same caveat the portal plots carry. There is no <code>when</code>, so a
+            Suntouched horse always glows, foal included.</dd>
     </div>
     <div>
         <dt>the emissive mane (<code>parts: ["HAIR"]</code>)</dt>
@@ -129,6 +132,44 @@
         light cleaning up on death / unload, the foal case, the horse-dimension
         skip, and hard base coats (cremello, dominant white). Checklist item is
         <a href="verification.html#effects">To be verified &sect;13</a>.
+    </p>
+    <p>
+        That 2026-09-02 check was done <strong>in a built pen with a swept floor</strong>,
+        which is exactly where the placement bug below could not show.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Why it cast almost no light on a server (fixed 2026-09-18)</span>
+    <p>
+        Reported from a dedicated server: <q>sometimes it&rsquo;s lit up, sometimes it
+        isn&rsquo;t, but mostly it doesn&rsquo;t cast any light</q>, and noticeably better in
+        singleplayer. Three separate faults, none of them a throttle:
+    </p>
+    <ul>
+        <li><strong>One candidate block, and it had to be air.</strong> The light went at six
+            tenths of the horse&rsquo;s height or nowhere. Tall grass, ferns, flowers, snow
+            layers, crops, shallow water and seagrass all occupy that block, so on natural
+            terrain failing was the <em>common</em> case. It now tries the body block, the one
+            above it, then the feet, and counts an existing light block as free.</li>
+        <li><strong>It trusted its own bookkeeping.</strong> If the tracked position still
+            matched the horse, the code returned without checking the block was there &mdash;
+            so a light broken by a player, a <code>/fill</code>, a piston or a chunk saved
+            before it existed left that horse dark permanently. The position and the block are
+            both checked now.</li>
+        <li><strong>Singleplayer was not working better; it was littering.</strong>
+            <code>EntityLeaveLevelEvent</code> fires on the client level too, and in
+            singleplayer client and integrated server share these static maps. The client&rsquo;s
+            copy removed the horse from the tracking map before the server&rsquo;s copy could
+            queue the block for removal, so the light was <strong>never</strong> cleaned up.
+            Every glowing horse walked away from left its light burning for good. Some of what
+            made singleplayer look right was abandoned light blocks. Now guarded on
+            <code>isClientSide</code>.</li>
+    </ul>
+    <p>
+        Still open: a chunk that unloads before its queued clear runs orphans the block
+        (<a href="known-gaps.html#gap-284">gap 284</a>). Unplayed since the fix &mdash;
+        <a href="verification.html#suntouched-0918">verification &sect;0-FW</a>.
     </p>
 </div>
 

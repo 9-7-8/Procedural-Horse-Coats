@@ -1116,21 +1116,66 @@ public final class GeneAbilityHandler {
             return;
         }
 
-        BlockPos target = BlockPos.containing(horse.getX(), horse.getY() + horse.getBbHeight() * 0.6, horse.getZ());
-        if (target.equals(current)) {
-            return; // already lit where the horse is
+        BlockPos target = glowTarget(horse, level);
+        if (target == null) {
+            // Nowhere within reach will take it this tick. Keep what we have if
+            // it is still really there; forget it if it is not, so that the
+            // next tick tries afresh rather than trusting a block that is gone.
+            if (current != null && !level.getBlockState(current).is(Blocks.LIGHT)) {
+                GLOW_LIGHT.remove(id);
+            }
+            return;
         }
-        if (current != null) {
+        // The second half of this matters as much as the first: a light block
+        // can be broken, /filled, pistoned or lost with a chunk that saved
+        // before it existed, and a horse that trusted GLOW_LIGHT stayed dark
+        // for good because the position still "matched". Verify, do not assume.
+        if (target.equals(current) && level.getBlockState(current).is(Blocks.LIGHT)) {
+            return; // already lit where the horse is, and the light is real
+        }
+        if (current != null && !current.equals(target)) {
             clearLight(level, current);
         }
-        if (level.getBlockState(target).isAir()) {
-            level.setBlock(target, Blocks.LIGHT.defaultBlockState()
-                    .setValue(LightBlock.LEVEL, want)
-                    .setValue(LightBlock.WATERLOGGED, Boolean.FALSE), 2 | 16);
-            GLOW_LIGHT.put(id, target);
-        } else {
-            GLOW_LIGHT.remove(id); // blocked this tick; try again when the horse moves
+        level.setBlock(target, Blocks.LIGHT.defaultBlockState()
+                .setValue(LightBlock.LEVEL, want)
+                .setValue(LightBlock.WATERLOGGED, Boolean.FALSE), 2 | 16);
+        GLOW_LIGHT.put(id, target);
+    }
+
+    /**
+     * <b>Where this horse's light block can go</b>, or {@code null} if nothing
+     * within reach will take it.
+     *
+     * <p>This used to be one position - the block at six tenths of the horse's
+     * height - and it had to be <i>air</i>. That is the whole reason the effect
+     * "mostly doesn't cast any light" on a server: a horse standing in tall
+     * grass, ferns, flowers, snow, crops, shallow water or seagrass has
+     * something in that block, and on natural terrain that is the common case
+     * rather than the exception. A pen with a swept floor - which is what the
+     * debug yard builds, and where this was last looked at - is the one place
+     * the single candidate always worked.
+     *
+     * <p>So it tries three, in order of where the glow looks right: the body
+     * block, the one above it, then the feet. An existing light block counts as
+     * free: it is either this horse's own from a moment ago, or one this system
+     * orphaned when a chunk unloaded out from under a pending clear, and
+     * reclaiming it beats standing dark beside it.
+     *
+     * <p>Deliberately <b>not</b> replaceable-block replacement: breaking a
+     * player's crops or a field of flowers to stand somewhere is a far worse
+     * failure than a dark horse, and undoing it is not possible.
+     */
+    private static BlockPos glowTarget(Horse horse, ServerLevel level) {
+        BlockPos body = BlockPos.containing(
+                horse.getX(), horse.getY() + horse.getBbHeight() * 0.6, horse.getZ());
+        BlockPos feet = BlockPos.containing(horse.getX(), horse.getY(), horse.getZ());
+        for (BlockPos pos : new BlockPos[] {body, body.above(), feet}) {
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir() || state.is(Blocks.LIGHT)) {
+                return pos;
+            }
         }
+        return null;
     }
 
     private static void clearLight(Level level, BlockPos pos) {
@@ -1153,10 +1198,25 @@ public final class GeneAbilityHandler {
 
     private static final Queue<PendingClear> PENDING_LIGHT_CLEARS = new ConcurrentLinkedQueue<>();
 
-    /** Queue a glowing horse's light block for removal when it dies, unloads or changes dimension. */
+    /**
+     * Queue a glowing horse's light block for removal when it dies, unloads or
+     * changes dimension.
+     *
+     * <p><b>Server side only, and the guard is load-bearing.</b>
+     * {@link EntityLeaveLevelEvent} fires on the <i>client</i> level too, and
+     * every map this touches is a static shared by both in singleplayer, where
+     * the client and the integrated server are one JVM. Without the guard the
+     * client's copy of the event tore the horse out of {@code GLOW_LIGHT}
+     * before the server's copy ran, and the {@code instanceof ServerLevel} test
+     * below then skipped the queue - so the block was forgotten and never
+     * removed. Every glowing horse a singleplayer walked away from left its
+     * light burning permanently, and a well-travelled world slowly filled with
+     * them. That is also why the effect looked <i>better</i> in singleplayer
+     * than on a server: some of what was lighting the place up was litter.
+     */
     @SubscribeEvent
     static void onEntityLeave(EntityLeaveLevelEvent event) {
-        if (!(event.getEntity() instanceof Horse horse)) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Horse horse)) {
             return;
         }
         BREATH_DEBT.remove(horse.getUUID());

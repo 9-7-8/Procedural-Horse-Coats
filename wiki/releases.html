@@ -58,6 +58,62 @@
     </p>
 </div>
 
+<h2 id="v0-5-016">0.5.016</h2>
+
+<p class="lede">
+    <strong>A bug-report night.</strong> Six faults reported from play, five of them things that
+    only go wrong once a horse is in front of you: every ancestor in a family tree drawn as the
+    same black horse, a barn-name box that renamed the horse but not the screen, and a glowing
+    horse that mostly failed to glow. Plus two readouts that now say something a player can use,
+    and the mod&rsquo;s first integration with another mod.
+</p>
+
+<ul>
+    <li><strong>Every horse in every GUI was the same black horse.</strong> The family tree drew
+        each ancestor in the plain wild-type coat. The genome was never missing &mdash; a cache
+        added to ration coat baking resolved a texture id <em>before</em> the screen handed over
+        the real coat, and the texture won. The same defect was in the foal preview, the horse
+        browser and the custom spawn screen; all four now go through one call that moves the
+        coat and its textures together. Glowing horses also lost their glow in every GUI, from
+        the same field.</li>
+    <li><strong>Suntouched now actually lights the ground.</strong> It had one candidate block
+        and it had to be air, so a horse standing in grass, flowers, snow or shallow water lit
+        nothing &mdash; the common case outdoors. It tries three positions now, and re-places a
+        light that something else removed instead of trusting its own bookkeeping.
+        <a href="gene-suntouched.html">The three faults</a>. Singleplayer was not working
+        better, it was littering: the cleanup ran on the client too and abandoned every light
+        permanently.</li>
+    <li><strong>The barn name updated the horse but not the screen.</strong> Pressing
+        <em>Set</em> renamed the horse and its nameplate while the screen in front of you kept
+        showing the old name &mdash; it held the record it opened with and never re-read it.
+        Reported, reasonably, as there being no way to change a barn name at all.</li>
+    <li><strong>Speed and jump are in real units.</strong> The information screen printed
+        <code>0.188</code> and <code>0.50</code>; it now says <strong>8.1 m/s</strong> and
+        <strong>1.6 m</strong> &mdash; the height the horse can actually get onto, which is a
+        cubic in jump strength rather than a straight line.
+        <a href="horse-body.html#units">Both conversions</a>.</li>
+    <li><strong>A bound ender whistle says whose it is.</strong> All four whistles share one
+        texture, so a bound one and an unbound one were indistinguishable without blowing it.
+        The horse&rsquo;s name was already on the item; nothing drew it.</li>
+    <li><strong>Jade support.</strong> Point at a mare and her state is in the tooltip:
+        <em>Pregnant</em>, <em>In heat</em>, <em>Nursing</em>, or nothing. No timings and nothing
+        for a mare between heats &mdash; a tooltip is on screen whenever you glance at a horse.
+        Twins are still the vet&rsquo;s kit&rsquo;s alone. Jade is optional; without it nothing
+        changes. <a href="compatibility.html#jade">Why this one is allowed to be a real
+        dependency</a>.</li>
+    <li><strong>The Equestrian Bench is now the Tack Dyeing Bench</strong>, which is what it
+        does. Name only &mdash; placed benches and anything referring to the block id keep
+        working.</li>
+</ul>
+
+<p>
+    Known and not fixed: a stall sign keeps the name the horse had when it was hung
+    (<a href="known-gaps.html#gap-283">gap 283</a>), and a glow light block is orphaned if its
+    chunk unloads before the cleanup runs (<a href="known-gaps.html#gap-284">gap 284</a>).
+    Existing worlds already carry abandoned light blocks from the singleplayer bug above; the
+    fix stops new ones rather than sweeping up old ones.
+</p>
+
 <h2 id="v0-5-015">0.5.015</h2>
 
 <p class="lede">
