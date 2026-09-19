@@ -29,9 +29,16 @@ import net.minecraft.world.level.Level;
  */
 public class KnownGeneSpliceRecipe extends CustomRecipe {
 
-    public static final MapCodec<KnownGeneSpliceRecipe> MAP_CODEC = MapCodec.unit(KnownGeneSpliceRecipe::new);
+    /**
+     * One instance, shared by both codecs. See
+     * {@link CarrotCombineRecipe#INSTANCE} for why a second one is a login kick
+     * on every dedicated server rather than a recipe that does not work.
+     */
+    public static final KnownGeneSpliceRecipe INSTANCE = new KnownGeneSpliceRecipe();
+
+    public static final MapCodec<KnownGeneSpliceRecipe> MAP_CODEC = MapCodec.unit(INSTANCE);
     public static final StreamCodec<RegistryFriendlyByteBuf, KnownGeneSpliceRecipe> STREAM_CODEC =
-            StreamCodec.unit(new KnownGeneSpliceRecipe());
+            StreamCodec.unit(INSTANCE);
     public static final RecipeSerializer<KnownGeneSpliceRecipe> SERIALIZER =
             new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 

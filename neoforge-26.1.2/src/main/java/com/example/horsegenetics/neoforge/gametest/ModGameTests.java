@@ -21,6 +21,21 @@ import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.Collection;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.neoforged.neoforge.network.connection.ConnectionType;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -165,6 +180,122 @@ public final class ModGameTests {
         helper.succeed();
     }
 
+    /**
+     * <b>Every recipe the server would send a joining client actually encodes.</b>
+     *
+     * <p>This is the cheapest possible version of "a player joins a dedicated
+     * server", and it exists because the expensive version is the only other
+     * one. NeoForge sends the entire recipe set to every joining client as a
+     * single {@code neoforge:recipe_content} payload; <b>one recipe that will
+     * not encode fails the payload, the packet and the login</b>, so the symptom
+     * is not a missing recipe but every player being kicked with
+     * {@code EncoderException} before terrain loads.
+     *
+     * <p><b>Singleplayer never encodes it</b> - there is no packet - which is
+     * exactly how v0.5.014 shipped with both of this mod's special recipes
+     * unencodable. {@code StreamCodec.unit} writes no bytes and instead checks
+     * that the value you gave it {@code equals} the one it captured; build the
+     * map codec from a supplier and the {@code RecipeManager} decodes a
+     * different object every time, so that check can never pass. See
+     * {@link com.example.horsegenetics.neoforge.server.recipe.CarrotCombineRecipe#INSTANCE}.
+     *
+     * <p>It encodes through {@link Recipe#STREAM_CODEC}, which is the same
+     * dispatch-on-serializer the sync itself uses, rather than reaching for each
+     * serializer by hand - so it tests the real path and not a reconstruction of
+     * it. Every recipe is covered, not only this mod's: the failure is a
+     * property of the packet, and a recipe from anywhere kicks the same player.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> EVERY_RECIPE_ENCODES =
+            TEST_FUNCTIONS.register("every_recipe_encodes", () -> ModGameTests::everyRecipeEncodes);
+
+    private static void everyRecipeEncodes(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        List<String> broken = new ArrayList<>();
+        int checked = 0;
+
+        for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
+            checked++;
+            RegistryFriendlyByteBuf buf =
+                    new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess(), ConnectionType.NEOFORGE);
+            try {
+                Recipe.STREAM_CODEC.encode(buf, holder.value());
+            } catch (RuntimeException wontEncode) {
+                broken.add(holder.id().identifier() + " - " + wontEncode);
+            } finally {
+                buf.release();
+            }
+        }
+
+        if (checked == 0) {
+            helper.fail("no recipes were loaded at all - the harness is broken, not the recipes");
+        }
+        if (!broken.isEmpty()) {
+            helper.fail(broken.size() + " of " + checked + " recipes will not encode, so every client is "
+                    + "kicked on join: " + String.join("; ", broken));
+        }
+        HorseGenetics.LOGGER.info("[gametest] all {} recipes encode for the join packet", checked);
+        helper.succeed();
+    }
+
+    /**
+     * <b>Building Blocks still has things in it, and our gates are among them.</b>
+     *
+     * <p>The tab is built by an event every mod may write into, and
+     * {@code CreativeModeTab.buildContents} assigns the finished list
+     * <i>after</i> that event returns. <b>So a listener that throws does not
+     * lose its own item - it leaves the tab holding what it had before, which on
+     * a first build is nothing.</b> One mod's bad anchor empties Building Blocks
+     * for vanilla items too, with no crash and nothing in the log; the player
+     * sees a whole category missing and has no way to tell who did it. v0.5.014
+     * did exactly that to anyone with Regions Unexplored installed.
+     *
+     * <p>So the assertion that matters is the <b>blunt</b> one: the tab is not
+     * empty. Our own gates being present is the second check and the weaker one
+     * &mdash; it is the empty tab that is the disaster.
+     *
+     * <p>This cannot reproduce the original anchor, which needed a mod that is
+     * not here. What it does catch is the shape: any future throw out of
+     * {@code addToCreativeTab}, from any cause, on the one tab this mod writes
+     * into.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> BUILDING_BLOCKS_SURVIVES =
+            TEST_FUNCTIONS.register("building_blocks_survives", () -> ModGameTests::buildingBlocksSurvives);
+
+    private static void buildingBlocksSurvives(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        // Normally only the client ever asks for this. It is plain data, so a
+        // server can ask too - which is the whole reason this test is cheap.
+        CreativeModeTabs.tryRebuildTabContents(
+                server.getWorldData().enabledFeatures(), true, server.registryAccess());
+
+        CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(CreativeModeTabs.BUILDING_BLOCKS);
+        if (tab == null) {
+            helper.fail("there is no Building Blocks tab at all - the harness is broken, not the tab");
+            return;
+        }
+        Collection<ItemStack> contents = tab.getDisplayItems();
+        if (contents.isEmpty()) {
+            helper.fail("Building Blocks is EMPTY - a listener threw and the tab kept its previous "
+                    + "(unbuilt) contents. Every vanilla block is gone from the menu, not just ours.");
+        }
+
+        List<String> missing = new ArrayList<>();
+        for (com.example.horsegenetics.neoforge.block.DoubleGates.Gate gate
+                : com.example.horsegenetics.neoforge.block.DoubleGates.gates()) {
+            net.minecraft.world.item.Item ours = gate.item().get();
+            if (contents.stream().noneMatch(stack -> stack.is(ours))) {
+                missing.add(gate.item().getId().toString());
+            }
+        }
+        if (!missing.isEmpty()) {
+            helper.fail(missing.size() + " double gates are not in Building Blocks: "
+                    + String.join(", ", missing));
+        }
+        HorseGenetics.LOGGER.info("[gametest] Building Blocks holds {} stacks, including all {} double gates",
+                contents.size(), com.example.horsegenetics.neoforge.block.DoubleGates.gates().size());
+        helper.succeed();
+    }
+
     private static int fromEnv(String name, int fallback) {
         String raw = System.getenv(name);
         if (raw == null || raw.isBlank()) {
@@ -205,6 +336,9 @@ public final class ModGameTests {
         // size is. The generous number is for the environment overrides, which
         // are meant to be raised a long way.
         register(event, environment, HOMESTEAD_STILL_GENERATES, 400);
+        // One pass over the recipe list inside a single tick; the budget is slack.
+        register(event, environment, EVERY_RECIPE_ENCODES, 100);
+        register(event, environment, BUILDING_BLOCKS_SURVIVES, 100);
     }
 
     private static void register(RegisterGameTestsEvent event,

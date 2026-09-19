@@ -26,9 +26,34 @@ import net.minecraft.world.level.Level;
  */
 public class CarrotCombineRecipe extends CustomRecipe {
 
-    public static final MapCodec<CarrotCombineRecipe> MAP_CODEC = MapCodec.unit(CarrotCombineRecipe::new);
+    /**
+     * <b>One instance, shared by both codecs, and it has to be the same one.</b>
+     *
+     * <p>{@code StreamCodec.unit(v)} does not encode anything - it checks that
+     * what you handed it {@code equals} the value it captured and writes zero
+     * bytes. This recipe has no fields and so no {@code equals}, which makes
+     * that check an identity check. Build the map codec from a <i>supplier</i>
+     * and the {@code RecipeManager} decodes a fresh object that is by
+     * definition not the one the stream codec is holding, so the first attempt
+     * to encode it throws:
+     *
+     * <pre>Can't encode 'CarrotCombineRecipe@3b51', expected 'CarrotCombineRecipe@15b2'</pre>
+     *
+     * <p><b>That is a kick, not a broken recipe.</b> NeoForge sends the whole
+     * recipe set to every joining client as one {@code neoforge:recipe_content}
+     * payload, and one unencodable recipe fails the payload, the packet and the
+     * login. It shipped in v0.5.014 because <b>singleplayer never encodes it</b>
+     * - there is no packet - so every test short of a real client joining a real
+     * dedicated server passes. {@code RecipeStreamCodecTest} is that test
+     * without the server.
+     */
+    public static final CarrotCombineRecipe INSTANCE = new CarrotCombineRecipe();
+
+    // MapCodec.unit(INSTANCE), not MapCodec.unit(INSTANCE::new) - the value
+    // overload, so decoding hands back the very object STREAM_CODEC compares to.
+    public static final MapCodec<CarrotCombineRecipe> MAP_CODEC = MapCodec.unit(INSTANCE);
     public static final StreamCodec<RegistryFriendlyByteBuf, CarrotCombineRecipe> STREAM_CODEC =
-            StreamCodec.unit(new CarrotCombineRecipe());
+            StreamCodec.unit(INSTANCE);
     public static final RecipeSerializer<CarrotCombineRecipe> SERIALIZER =
             new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 

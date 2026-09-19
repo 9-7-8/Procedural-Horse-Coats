@@ -265,10 +265,33 @@ public final class ModItems {
         // vanilla gate it is made from - which is where somebody reaching for a
         // gate actually looks, rather than in a tab about horses. Owner's call.
         //
-        // insertAfter asserts its anchor is present and throws if it is not, so
+        // insertAfter asserts its anchor is present and THROWS if it is not, so
         // the vanilla gate is checked for first: another mod is entitled to have
         // removed it, and a hard crash on somebody else's load order would be a
         // poor trade for a tidy menu.
+        //
+        // THE CHECK HAS TO MATCH THE ASSERT EXACTLY, and v0.5.014's did not, in
+        // two ways that both cost the player the whole tab:
+        //
+        //   1. PARENT_AND_SEARCH_TABS asserts the anchor is in BOTH the parent
+        //      list and the search list. Checking only getParentEntries() passes
+        //      for an anchor another mod put in one and not the other.
+        //   2. These are ItemStackLinkedSet.createTypeAndComponentsSet(), so
+        //      membership is item AND components. `stack.is(anchor)` compares
+        //      the item alone, so an anchor sitting in the tab with components
+        //      on it answers "present" and then fails contains().
+        //
+        // And the damage is out of all proportion to the cause, because
+        // CreativeModeTab.buildContents assigns displayItems only AFTER the
+        // event returns: a throw in here leaves the tab holding what it had
+        // before, which on a first build is nothing. So one bad anchor does not
+        // lose one gate - it silently empties Building Blocks, for vanilla items
+        // too, with no crash and nothing in the log. That is what
+        // regions_unexplored:baobab_fence_gate did in v0.5.014.
+        //
+        // Hence also the catch. The paragraph above is the argument for why a
+        // guard is not enough on its own: the cost of being wrong here is a tab,
+        // and the things that can be wrong are other people's.
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             for (com.example.horsegenetics.neoforge.block.DoubleGates.Gate gate
                     : com.example.horsegenetics.neoforge.block.DoubleGates.gates()) {
@@ -281,13 +304,25 @@ public final class ModItems {
                 if (anchor == null || anchor == net.minecraft.world.item.Items.AIR) {
                     continue;
                 }
-                boolean anchorPresent = event.getParentEntries().stream()
-                        .anyMatch(stack -> stack.is(anchor));
-                if (anchorPresent) {
-                    event.insertAfter(
-                            new net.minecraft.world.item.ItemStack(anchor),
-                            new net.minecraft.world.item.ItemStack(gate.item().get()),
-                            net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                net.minecraft.world.item.ItemStack anchorStack =
+                        new net.minecraft.world.item.ItemStack(anchor);
+                net.minecraft.world.item.ItemStack ours =
+                        new net.minecraft.world.item.ItemStack(gate.item().get());
+                try {
+                    if (event.getParentEntries().contains(anchorStack)
+                            && event.getSearchEntries().contains(anchorStack)) {
+                        event.insertAfter(anchorStack, ours,
+                                net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    } else {
+                        // Still reachable, just not filed next to its parent.
+                        // A gate nobody can find is worse than a gate in the
+                        // wrong place.
+                        event.accept(ours,
+                                net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    }
+                } catch (RuntimeException somebodyElsesTab) {
+                    HorseGenetics.LOGGER.warn("compat: could not file {} beside {} in Building Blocks - {}",
+                            gate.item().getId(), anchor, somebodyElsesTab.toString());
                 }
             }
         }
