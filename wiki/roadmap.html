@@ -323,6 +323,57 @@
         Open-ended; the owner wants a visible batch of these for the 1.0 look.</li>
 </ul>
 
+<h3 id="breed-flavour-genes">Genes a breed designer can build a character out of</h3>
+
+<p>
+    Asked for as a batch, out of <code>intake/</code>: <strong>more genes whose point is
+    flavour</strong> &mdash; loci a breed file can name to alter what its horses do and what they
+    can do, rather than how they look. The existing behaviour family is the model; what is wanted
+    is more of it, and deliberately open-ended. A breed is
+    <a href="breed-format.html">a JSON file</a>, so every gene added here is a knob the designer
+    gets for free.
+</p>
+
+<h4 id="tack-aware">A gene that reads what the horse is wearing</h4>
+
+<p>
+    Named specifically, and it is the one with a real design problem in it. The ask is a locus
+    that <strong>detects whether a horse is saddled or armoured, and which kind</strong>, and
+    reacts &mdash; an allele that slows the horse dramatically while saddled, another that
+    suppresses every aura while saddled, and so on.
+</p>
+
+<ul>
+    <li><strong>The condition vocabulary has nothing that can see equipment.</strong> The
+        <code>when</code> flags read the world and the horse&rsquo;s own state; none of them reads
+        an equipment slot. So this is a new condition flag before it is a gene, which means
+        <a href="making-a-gene.html#contracts">the condition contract</a> &mdash; the flag, the
+        evaluator, the creator&rsquo;s schema mirror, both tables and a parity fixture.</li>
+    <li><strong>&ldquo;Which kind&rdquo; is the expensive half.</strong> A boolean
+        <em>is saddled</em> is cheap. Distinguishing iron from diamond from a modded armour means
+        the flag carries a value, and the generated-armour layer means the set is open-ended
+        rather than a fixed five &mdash; see <a href="compatibility.html#generated">the compat
+        layer</a>. Decide whether the gene asks &ldquo;armoured at all&rdquo;, &ldquo;armoured in
+        this tag&rdquo;, or a material tier, before writing any of it.</li>
+    <li><strong>Watch the phantom saddle.</strong> <code>BarebackSteeringHandler</code> writes the
+        saddle slot every tick on a horse nobody has saddled, so a naive <em>is saddled</em> check
+        is true for horses the player considers bare. Whatever reads the slot has to exclude a
+        stack carrying <code>PHANTOM_SADDLE</code> or the gene will fire constantly and look
+        broken.</li>
+</ul>
+
+<h4 id="aggression-overhaul">The aggression genes may want an overhaul</h4>
+
+<p>
+    Recorded as asked rather than as specified: the note says only that they <em>may need</em>
+    one, with no statement of what is wrong. <strong>Nothing should be rebuilt off that
+    sentence.</strong> The first piece of work is to say what the complaint is &mdash;
+    <a href="gene-aggression.html">aggression</a> carries the moon-sick allele, and
+    <a href="#chase-gene">the chase gene</a> below would generalise the forget-target goal that
+    sits beside it, so an overhaul may turn out to be that entry plus a tidy rather than a
+    rewrite.
+</p>
+
 <h3 id="intake-tool-gaps">Mask parameters the intakes asked for</h3>
 
 <p>
@@ -1513,6 +1564,20 @@
     single heading and a paragraph.
 </p>
 
+<div class="note">
+    <span class="label">Four are written &mdash; and the source is the bottleneck, not the writing</span>
+    <p>
+        <a href="gene-extension.html?view=science">Extension</a>,
+        <a href="gene-agouti.html?view=science">agouti</a>,
+        <a href="gene-ednrb.html?view=science">EDNRB</a> and
+        <a href="gene-kit.html?view=science">KIT</a> were written from owner-supplied source
+        files and are off the lists below. <strong>That is the whole method</strong>: each was
+        blocked on having a source rather than on anybody getting to it, and none of the
+        remaining ones can be done without the same. The three departures the four turned up are
+        <a href="known-gaps.html#gap-297">gaps 297&ndash;299</a>.
+    </p>
+</div>
+
 <p class="muted">
     Magical genes are excluded throughout: they have no real-world counterpart, so having no
     science to write is correct rather than a gap. The method &mdash; and the rule that none of
@@ -1529,13 +1594,6 @@
 </p>
 
 <ul>
-    <li><strong><a href="gene-ednrb.html?view=science">EDNRB</a></strong> &mdash; frame overo and
-        lethal white foal syndrome. <em>Four</em> newer tabs cite it as the cautionary example of
-        a pigment gene with a real health consequence
-        (<a href="gene-tobiano.html#health">tobiano</a>, <a href="gene-matp.html#health">MATP</a>,
-        <a href="gene-champagne.html#health">champagne</a>,
-        <a href="gene-mushroom.html#health">mushroom</a>), and it cannot support the citation.
-        Highest priority here.</li>
     <li><strong><a href="gene-silver.html?view=science">Silver</a></strong> &mdash; cited three
         times for multiple congenital ocular anomalies, and has no MCOA section at all.
         <em>PMEL</em>, the homozygote severity, and why a champagne-plus-silver horse gets its eye
@@ -1545,9 +1603,6 @@
         <a href="gene-pax3.html?view=science">PAX3 twin</a> carries the full SW1&ndash;SW10 table,
         and the asymmetry between the two alleles is the whole point of having two loci. This one
         is close to writable from the PAX3 page alone.</li>
-    <li><strong><a href="gene-kit.html?view=science">KIT</a></strong> &mdash; where
-        <a href="gene-tobiano.html#variant">tobiano's inversion</a> sits, and the home of W20, SB1
-        and the dominant whites that four pages name in passing.</li>
     <li><strong><a href="gene-grey.html?view=science">Grey</a></strong> &mdash; <em>STX17</em>,
         the duplication, and the age-related melanoma risk that
         <a href="gene-matp.html#health">the MATP comparison table</a> lists and grey's own page
@@ -1564,12 +1619,6 @@
 <h3>Then &mdash; foundational loci carrying a paragraph</h3>
 
 <ul>
-    <li><strong><a href="gene-extension.html?view=science">Extension / MC1R</a></strong>, the
-        shortest science tab in the mod, for the locus every other colour gene is described
-        relative to.</li>
-    <li><strong><a href="gene-agouti.html?view=science">Agouti</a></strong> &mdash; good as far
-        as it goes (it is an argument about why there are four bay outcomes) but it has no
-        <em>ASIP</em> variant, no 11&nbsp;bp deletion, no breed distribution.</li>
     <li><strong><a href="gene-lcorl.html?view=science">LCORL</a></strong>, for the major height
         locus. <a href="gene-hmga2.html#size">HMGA2</a> and
         <a href="gene-dun.html#not-build">dun</a> both cite the ECA3 region against it.</li>
@@ -1607,14 +1656,13 @@
 <thead><tr><th>page</th><th>the breed story it is missing</th></tr></thead>
 <tbody>
 <tr><td><a href="gene-leopard.html">leopard complex</a></td><td>Appaloosa, Knabstrupper, Pony of the Americas, Noriker</td></tr>
-<tr><td><a href="gene-ednrb.html">EDNRB</a></td><td>Paint and frame lines &mdash; the concentration <em>is</em> the health story</td></tr>
 <tr><td><a href="gene-acan.html">ACAN</a></td><td>Miniature Horse dwarfism</td></tr>
 <tr><td><a href="gene-megaesophagus.html">megaesophagus</a></td><td>Friesian</td></tr>
 <tr><td><a href="gene-silver.html">silver</a></td><td>Rocky Mountain Horse, Icelandic, Shetland &mdash; and the MCOA link is breed-concentrated</td></tr>
 <tr><td><a href="gene-manchado.html">manchado</a></td><td>the Argentine breeds it was described in</td></tr>
 <tr><td><a href="gene-lcorl.html">LCORL</a></td><td>the draught-versus-pony spread that makes it a size locus at all</td></tr>
 <tr><td><a href="gene-mitf.html">MITF</a></td><td>SW1's cross-breed distribution &mdash; the entire contrast with SW2</td></tr>
-<tr><td><a href="gene-kit.html">KIT</a>, <a href="gene-roan.html">roan</a>, <a href="gene-grey.html">grey</a>, <a href="gene-brindle.html">brindle</a>, <a href="gene-cvm.html">CVM</a>, <a href="gene-ryr2.html">RYR2</a>, <a href="gene-pdk4.html">PDK4</a>, <a href="gene-natural-zebra.html">natural zebra</a></td><td>varies; check each against a source before asserting one</td></tr>
+<tr><td><a href="gene-roan.html">roan</a>, <a href="gene-grey.html">grey</a>, <a href="gene-brindle.html">brindle</a>, <a href="gene-cvm.html">CVM</a>, <a href="gene-ryr2.html">RYR2</a>, <a href="gene-pdk4.html">PDK4</a>, <a href="gene-natural-zebra.html">natural zebra</a></td><td>varies; check each against a source before asserting one</td></tr>
 </tbody>
 </table>
 </div>

@@ -58,6 +58,62 @@
 
 <ol>
 
+<li id="gap-299"><strong>Open, found 2026-09-20 on intake: frame white &ldquo;never&rdquo; crosses the topline here, and the literature says &ldquo;usually does not&rdquo;.</strong>
+    <code>EdnrbGene</code>&rsquo;s <code>TOPLINE_CAP</code> is a <em>hard exclusion</em> &mdash;
+    white is capped outright below the spine and the javadoc says so in as many words. The
+    source describes classic frame as white that &ldquo;often does not cross the topline
+    <em>in a simple frame-only presentation</em>&rdquo;, which is a tendency with exceptions
+    rather than a rule.
+    <strong>The practical cost is small and worth naming anyway:</strong> a frame horse that
+    also carries <a href="gene-tobiano.html">tobiano</a> gets topline white from tobiano, painted
+    separately, so the stacked case &mdash; which is most of the loud overos in life &mdash; comes
+    out right. What cannot happen here is the occasional frame-<em>only</em> horse whose white
+    breaks the rule. Whether to soften the cap into a strong bias is a design call nobody has
+    made; it would move <code>coat-golden.txt</code>. Stated on
+    <a href="gene-ednrb.html?view=science#departs">the science tab</a>, so it will not be
+    &ldquo;corrected&rdquo; by someone who has read only one side &mdash; the same reasoning as
+    <a href="#gap-134">gap 134</a>.</li>
+
+<li id="gap-298"><strong>Open, found 2026-09-20 on intake: the mod can breed a <code>W22</code> horse with no <code>W20</code>, and reported <code>W22</code> horses always have one.</strong>
+    A horse here carries two alleles at a locus and no more, because an allele pair is the
+    model. Real <em>KIT</em> does not work that way: <strong>one chromosome can carry a
+    haplotype of several named variants</strong>, so a horse can carry more than two. The 2024
+    haplotype study found <code>W22</code> consistently linked with <code>W20</code>, documented
+    viable multi-variant haplotypes (<code>W32W35</code>, <code>W34W35</code>,
+    <code>W20W32</code>, <code>W32SB1</code>, <code>W19W34W35</code>), and reported 434 of 8,334
+    horses carrying three or more KIT variants, some carrying six.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10854588/">PMC10854588</a>
+    <strong><code>KitGene</code> already records this as deliberately not modelled</strong> and
+    the reasoning is good &mdash; linkage is a system, not a number, and the mod
+    <a href="decisions.html#settled-genetics">settled against linkage</a> at the top of the
+    genetics model. What was undocumented until now is the <em>consequence</em>: this locus can
+    produce a genotype that, as reported, does not occur in horses, and a
+    <code>W20</code>-linked booster effect that in life rides along with <code>W22</code>
+    automatically is here an independent second allele the player has to draw. Now stated on
+    <a href="gene-kit.html?view=science#departs">the science tab</a>. Reopening it means
+    haplotypes, which is a change to what an allele pair <em>is</em> &mdash; not a KIT fix.</li>
+
+<li id="gap-297"><strong>Open, found 2026-09-20 on intake: the reason recorded for leaving <code>e<sup>a</sup></code> off Extension is contradicted by the owner&rsquo;s own source.</strong>
+    <a href="decisions.html#settled-extension-ea">The settled call</a> is that
+    <code>e<sup>a</sup></code> will not be added because <strong>&ldquo;the two-allele model is
+    accurate to the science as it stands&rdquo;</strong>, and the row was deleted rather than
+    deferred so a later session would not build it. The <em>MC1R</em> source intaken on
+    2026-09-20 says the opposite about the premise: the established, routinely tested equine
+    allele series is <code>E</code>, <code>e</code> (p.S83F) and <code>e<sup>a</sup></code>
+    (p.D84N), all three recognised by UC&nbsp;Davis, with <code>e<sup>a</sup></code> found in a
+    28-breed dataset in Knabstruppers, Paint Horses, Percherons and Quarter Horses.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498372/">PMC9498372</a>
+    <strong>The gene page had already been saying so</strong> &mdash; its science tab described
+    <code>e<sup>a</sup></code> as real and merely unmodelled &mdash; so the page and the decision
+    have quietly disagreed since the call was made, which is exactly the failure
+    <a href="#gap-134">gap 134</a> exists to prevent.
+    <strong>This is not a reopening.</strong> The conclusion may well stand on its own merits:
+    nothing would look different, because <code>e<sup>a</sup></code> is phenotypically red like
+    <code>e</code>, and the value is in the genotype code, the carrier display and what a
+    punnett square can teach. What needs fixing either way is the <em>stated reason</em>, which
+    is now known to be false. <strong>Owner&rsquo;s call</strong>: confirm it on the honest
+    grounds, or add the allele.</li>
+
 <li id="gap-296"><strong>Open, moved here 2026-09-20: six Java comments and a handful of wiki sentences point at roadmap anchors and section numbers that no longer exist.</strong>
     The roadmap was cut back to planned features only, and the decisions moved to
     <a href="decisions.html">their own page</a>. The wiki links were re-pointed in the same

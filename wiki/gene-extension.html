@@ -120,14 +120,221 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
 
 <section class="tab-panel" data-tab="science">
 
-<h2>Not modelled</h2>
+<h2 id="identity">Genetic identity</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>MC1R</em> &mdash; melanocortin 1 receptor. Historically the
+    <b>Extension</b> locus; commercially the <b>Red Factor</b> test</td></tr>
+<tr><th>Product</th><td>A receptor on the surface of the melanocyte. Melanocyte-stimulating
+    hormone activates it; ASIP antagonises it</td></tr>
+<tr><th>Established alleles</th><td><code>E</code> functional;
+    <code>e</code> p.Ser83Phe (S83F); <code>e<sup>a</sup></code> p.Asp84Asn (D84N)</td></tr>
+<tr><th>Inheritance</th><td>Autosomal. <code>E</code> dominant to both red alleles</td></tr>
+</tbody>
+</table>
+</div>
 
 <p>
-    Real <code>MC1R</code> has a third allele, <code>ea</code>, phenotypically red
-    like <code>e</code>. Adding it is
-    <a href="roadmap.html#natural-genes">purely additive</a> now that multi-allele support
-    exists &mdash; the interest
-    is in the code string and the carrier display, not in a new look.
+    <b>Both of this locus&rsquo;s common names mislead.</b> &ldquo;Extension&rdquo; is a
+    historical genetic label, not a claim that the gene extends black over the horse.
+    &ldquo;Red factor&rdquo; is worse: the ordinary dominant allele does not make red pigment,
+    it <em>permits black</em> &mdash; and red pigment is a normal part of mammalian
+    pigmentation, present in every bay horse.
+    <a href="https://vgl.ucdavis.edu/resources/horse-coat-color">UC&nbsp;Davis VGL</a>
+</p>
+
+<h2 id="mechanism">What the locus actually decides</h2>
+
+<p>
+    MC1R sits on the melanocyte. When it is functional and signalling, the cell can switch
+    toward <b>eumelanin</b> &mdash; black to brown-black pigment. Agouti signalling protein
+    antagonises that receptor in particular body regions and at particular hair-growth stages,
+    which is what leaves a bay horse red over the barrel while black survives at the points.
+    When both <em>MC1R</em> copies are loss-of-function, the melanocyte cannot mount the normal
+    coat-hair eumelanin response, <b>pheomelanin</b> predominates, and the horse is red-based.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498372/">PMC9498372</a>
+</p>
+
+<p style="text-align:center">
+    <em>MC1R</em>: can the coat make black pigment?
+    &nbsp;&rarr;&nbsp;
+    <em>ASIP</em>: if yes, where is it restricted?
+</p>
+
+<p>
+    That ordering is what makes Extension <b>epistatic to Agouti</b>. A horse that cannot
+    produce visible coat eumelanin cannot display an Agouti-controlled bay-versus-black
+    difference, so its <a href="gene-agouti.html">agouti</a> genotype is carried invisibly and
+    inherited anyway.
+</p>
+
+<h2 id="alleles">Three alleles, one dominance order</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>Molecular status</th><th>Consequence</th></tr></thead>
+<tbody>
+<tr><td><code>E</code></td><td>Functional, wild-type</td><td>Permits eumelanin. It does
+    <b>not</b> decide black versus bay &mdash; that is chiefly <em>ASIP</em> and
+    modifiers</td></tr>
+<tr><td><code>e</code></td><td>Common recessive red; missense p.S83F</td><td>Loss of normal
+    MC1R function. Red body, red points</td></tr>
+<tr><td><code>e<sup>a</sup></code></td><td>Rare recessive red; missense p.D84N, immediately
+    adjacent in the protein</td><td>Also loss-of-function for coat purposes. Combines with
+    <code>e</code> or itself to give chestnut</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The order is <code>E</code>&nbsp;&gt;&nbsp;<code>e</code> and
+    <code>E</code>&nbsp;&gt;&nbsp;<code>e<sup>a</sup></code>, so
+    <code>E/E</code>, <code>E/e</code> and <code>E/e<sup>a</sup></code> are all
+    black-pigment-capable, and <code>e/e</code>, <code>e/e<sup>a</sup></code> and
+    <code>e<sup>a</sup>/e<sup>a</sup></code> are all chestnut. The last is reported but
+    extremely uncommon in tested populations.
+    <a href="https://vgl.ucdavis.edu/resources/horse-coat-color">UC&nbsp;Davis VGL</a>
+</p>
+
+<h2 id="red-based">What a red-based horse hides</h2>
+
+<p>
+    With no functional <code>E</code>, body hair is red to red-yellow and the mane, tail, lower
+    legs and ear rims are red rather than genetically black. &ldquo;Chestnut&rdquo;,
+    &ldquo;sorrel&rdquo; and &ldquo;liver chestnut&rdquo; are phenotype and breed language, not
+    separate <em>MC1R</em> alleles.
+</p>
+
+<p>
+    <b>Red points are not evidence of agouti failure</b>, which is the single most common
+    misreading of this locus. They are the expected consequence of loss-of-function
+    <em>MC1R</em>: there is no coat eumelanin anywhere for ASIP to place. This is also why a
+    chestnut can throw a black or bay foal &mdash; it may carry <code>a</code> or
+    <code>A</code>, and the moment the other parent supplies <code>E</code> the inherited
+    agouti pattern becomes visible.
+</p>
+
+<h2 id="not-shade">Extension does not explain shade</h2>
+
+<p>
+    The locus is foundational and is <em>not</em> a shade locus. <code>e/e</code> horses run
+    from pale yellow-red through bright copper to very dark liver; <code>E/_ A/_</code> horses
+    run from bright bay to dark bay to near-black seal-like phenotypes.
+    <code>E/E</code> versus <code>E/e</code> shows some bay-shade association in some datasets
+    but is not dependable for an individual horse.
+</p>
+
+<p>
+    The 2020 bay-shade study is the useful counter-example: it found a strong associated region
+    near <em>ASIP</em>/<em>RALY</em> on chromosome 22, so major dark-versus-light bay variation
+    need not come from a new <em>MC1R</em> allele at all. The causal mutation there has not been
+    identified, and the region is hard to fine-map.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7349280/">PMC7349280</a>
+</p>
+
+<div class="note good">
+    <span class="label">The mod is built the way the literature recommends here</span>
+    <p>
+        The source&rsquo;s own advice for a genetics simulator is to treat Extension as a
+        <b>pigment-permission gate</b>, let Agouti operate only when eumelanin is enabled, and
+        assign dark-bay and black-adjacent ambiguity to independent shade modifiers rather than
+        to an invented <em>MC1R</em> allele. That is exactly the split this mod already has:
+        this gene gates, <a href="gene-agouti.html">agouti</a> distributes, and
+        <a href="gene-shade.html">shade</a> carries liver, seal and the bay band. Nothing here
+        needs changing.
+    </p>
+</div>
+
+<h2 id="ea-testing">The <code>e<sup>a</sup></code> problem is a testing problem</h2>
+
+<p>
+    Older red-factor tests often assayed only the common <code>e</code> variant. An
+    <code>E/e<sup>a</sup></code> horse therefore reads as apparently <code>E/E</code> on a
+    limited panel, because it lacks the ordinary <code>e</code> marker while still carrying a
+    recessive red allele; an <code>e/e<sup>a</sup></code> chestnut can be misread the same way.
+    Modern full base-colour panels distinguish all three.
+</p>
+
+<p>
+    The breeding consequence is concrete. Cross a chestnut <code>e/e</code> with a bay or black
+    <code>E/e<sup>a</sup></code> and half the foals are red-based &mdash; from a parent an old
+    panel would have called a non-carrier.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    <code>e<sup>a</sup></code> is uncommon but not theoretical. In a UC&nbsp;Davis dataset of
+    11,281 horses across 28 breeds it appeared in Knabstruppers, Paint Horses, Percherons and
+    Quarter Horses, with a relatedness-filtered estimate in Knabstruppers of 0.035. Earlier
+    reports associated it especially with Black Forest, Hungarian Coldblood and Haflinger
+    populations.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498372/">PMC9498372</a>
+</p>
+
+<p>
+    Note how those two lists differ. <b>A result from a single-breed or single-lab dataset is
+    not a breed exclusion list</b> &mdash; a rare allele looks breed-specific mostly because the
+    other lines have not been tested at scale.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Claim</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td><em>MC1R</em> permits or denies coat eumelanin; <code>e</code> is p.S83F</td><td><b>Established</b></td></tr>
+<tr><td><code>e<sup>a</sup></code> (p.D84N) is a second recessive red allele</td><td><b>Established</b>, and recognised in the routine allele series</td></tr>
+<tr><td>Extension is epistatic to Agouti</td><td><b>Established</b></td></tr>
+<tr><td>Liver, flaxen, sooty, seal brown and blood bay are <em>MC1R</em> outcomes</td><td><b>False.</b> Real phenotype variation, wrong locus</td></tr>
+<tr><td>A dominant-black <code>E<sup>D</sup></code> allele</td><td><b>Unsupported.</b> Never molecularly characterised in horses and not in the modern series</td></tr>
+<tr><td>A distinct established &ldquo;brown&rdquo; allele at this locus</td><td><b>Unsupported</b> by current molecular testing</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>E<sup>D</sup></code> is the locus&rsquo;s most persistent myth and it is worth knowing
+    why it sounded reasonable: in many mammals, different <em>MC1R</em> variants really do cause
+    dominant black. But plausible in another species is not demonstrated in this one, and a
+    phenotypic observation is not an allele. Establishing one needs a reproducible molecular
+    variant, inheritance evidence, functional plausibility and replication in a characterised
+    population. In horses, very dark animals are adequately explained by
+    <code>E/_ a/a</code>, dark-bay shade modifiers, sooty effects, fading and plain visual
+    misclassification.
+</p>
+
+<h2 id="departs">Where the mod departs</h2>
+
+<div class="note warn">
+    <span class="label">Two alleles here, three in the literature</span>
+    <p>
+        This locus ships <code>E</code> and <code>e</code>. The accepted molecular series is
+        <code>E</code>, <code>e</code> and <code>e<sup>a</sup></code>, and the omission is
+        deliberate rather than an oversight &mdash; but <strong>the reason recorded for it does
+        not match this source</strong>. The call was made on the grounds that the two-allele
+        model is accurate to the science as it stands; the source the owner supplied says the
+        three-allele series is the established one.
+        <a href="known-gaps.html#gap-297">Gap 297</a> holds the conflict, and
+        <a href="decisions.html#settled-extension-ea">the decision</a> is the owner&rsquo;s to
+        revisit or confirm &mdash; it is not reopened here.
+    </p>
+    <p>
+        What is <em>not</em> in dispute is that nothing would look different. A third red allele
+        changes the genotype code, the carrier display and what a punnett square can teach; it
+        draws no new horse, because <code>e<sup>a</sup></code> is phenotypically red like
+        <code>e</code>.
+    </p>
+</div>
+
+<p>
+    Two smaller simplifications, both harmless. Commercial <code>A/A</code> results mean
+    &ldquo;deletion not detected&rdquo; rather than proof of sequence identity, a distinction
+    with no in-game analogue. And the mod has no concept of a partial or outdated test panel, so
+    the <code>e<sup>a</sup></code> testing trap above has nothing to bite on here.
 </p>
 
 </section>
