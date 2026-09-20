@@ -58,6 +58,91 @@
     </p>
 </div>
 
+<h2 id="v0-5-020">0.5.020 &mdash; the jumps rework</h2>
+
+<p>
+    <strong>Twelve blocks and thirty-six items became one block and one item.</strong> Everything
+    that used to be an item &mdash; the wood, the style &mdash; is now a control in the jump&rsquo;s
+    own screen, which means every style added from here is a button rather than a
+    thirty-seventh item. The full page is <a href="item-jumps.html">jumps</a>.
+</p>
+
+<h3>What a player gets</h3>
+
+<ul>
+    <li><strong>A screen on every jump.</strong> Right-click it. Two slots for the wood of the
+        rails and the wood of the uprights, <em>separately</em>; a dye for either half; three
+        styles; and a height.</li>
+    <li><strong>Plank swaps are reversible, paint is not.</strong> A plank hands the displaced one
+        back. A dye is spent for good, and the only way to strip paint is a fresh plank in that
+        half &mdash; which pops the old plank out and takes the paint with it.</li>
+    <li><strong>Ten heights</strong>, from 0.1 (a ground pole you walk over) to 2.0 (double), set
+        for the whole fence. A jump is <code>height + &#8539;</code> blocks to clear, so everything
+        under a block is walked over and everything from a block up has to be jumped. Stacking
+        still works on top.</li>
+    <li><strong>Crossrails are one crossed pair up to three blocks wide.</strong> A row is one wide
+        X, not a row of small ones; a run of five gives a three and a two, and longer runs grow an
+        upright where two X&rsquo;s meet.</li>
+    <li><strong>Breed spawn eggs have their own creative tab.</strong> The mod&rsquo;s three now read
+        Horse Genetics, Horse Breeds, Horse Carts.</li>
+</ul>
+
+<p>
+    Also in this range, from earlier the same day: <strong>pressing jump launches at full height</strong>
+    with a cooldown, rather than charging a meter &mdash; so how high a horse jumps is a fact about
+    the horse rather than about the rider&rsquo;s thumb. Gliding still works. That change is also
+    what surfaced <a href="known-gaps.html#gap-287">gap 287</a>.
+</p>
+
+<div class="note danger">
+    <span class="label">Known bugs, open right now</span>
+    <p>
+        Shipped knowingly. <a href="known-gaps.html">Known gaps</a> has the full list; this is the
+        subset that is an actual defect.
+    </p>
+    <ul>
+        <li><strong>New:</strong> a <em>painted</em> jump run shows a visible seam at every block
+            join (<a href="known-gaps.html#gap-288">gap 288</a>). Cosmetic, painted runs only. The
+            suspect is the paint overlay inflating along the rail axis and doubling its own alpha
+            where two blocks meet.</li>
+        <li>The Anglo-Arabian &mdash; a <em>natural</em> breed &mdash; jumps high enough to hurt
+            itself landing (<a href="known-gaps.html#gap-287">gap 287</a>). Nothing is being changed
+            until the breed sheets are audited.</li>
+        <li>Everything carried over from 0.5.019 below, which this release did not touch.</li>
+    </ul>
+</div>
+
+<div class="note">
+    <span class="label">Four API findings, verified rather than remembered</span>
+    <ul>
+        <li><code>BakedModel</code> and <code>IDynamicBakedModel</code> <strong>do not exist</strong>;
+            a model is a <em>list of parts</em>, so N woods across two halves costs N+N rather than
+            N&times;N. <a href="api-notes.html#block-models">API notes</a>.</li>
+        <li><strong>Element rotation is no longer limited to &plusmn;22.5&deg; and
+            &plusmn;45&deg;</strong> &mdash; the angle is an unvalidated float, and there is a new
+            multi-axis form. That limit is what had kept crossrails at one block wide, and the
+            comment asserting it was wrong.</li>
+        <li><strong>A <code>ContainerData</code> value is truncated to 16 bits</strong>, so an RGB
+            colour cannot travel through one. The jump&rsquo;s screen carries the block&rsquo;s
+            position and reads the block directly instead.</li>
+        <li><strong>A block tint is a multiply</strong>, so it can only darken and cannot introduce
+            a hue the texture lacks. Paint is a translucent overlay part rather than a tint on the
+            wood &mdash; see <a href="item-jumps.html#paint">jumps &sect; paint</a>.</li>
+    </ul>
+</div>
+
+<p>
+    <strong>Not built, deliberately:</strong> standards made of any solid block &mdash; cobblestone,
+    brick, glass. Scoped and parked on <a href="roadmap.html">the roadmap</a> at the owner&rsquo;s
+    call, as not needed for a first release.
+</p>
+
+<p>
+    Everything above has been looked at in game <em>except the height ladder</em>, which is built
+    and boots clean but has not been measured against a horse.
+    <a href="verification.html">Verification</a> is the honest list.
+</p>
+
 <h2 id="v0-5-019">0.5.019</h2>
 
 <div class="note danger">
