@@ -78,55 +78,68 @@
     </p>
 </div>
 
-<h2 id="jumps-0920">&sect;0-FZ &mdash; Showjumping rails (2026-09-20, NOT played, nothing here has been seen)</h2>
+<h2 id="jumps-0920">&sect;0-FZ &mdash; Jumps, and how a horse jumps (2026-09-20, PARTLY played)</h2>
 
 <p>
-    A new per-wood block family: one rail per block, standards drawn only at the ends of a run,
-    and <strong>no height property</strong> &mdash; you stack them. See
+    A day's work in one entry, because it all landed together: a per-wood jump block in three
+    styles, and a rewrite of how a ridden horse jumps at all. See
     <a href="item-jumps.html">jumps</a>.
 </p>
 
-<p>
-    <strong>The look, the connection behaviour and the creative menu were confirmed in play on
-    2026-09-20</strong> &mdash; they &ldquo;look great, expand great&rdquo;. That run also sent
-    one thing back: a horse <em>walked over</em> a single jump, because collision followed the
-    model and the rail sits under a horse&rsquo;s 1.0 step height. The collision box is now half
-    a block taller than the model, as a vanilla fence&rsquo;s is. <strong>That fix has not been
-    played.</strong>
-</p>
-
-<h3>Do these first &mdash; the fix, and what it changes</h3>
+<h3>Confirmed in play, 2026-09-20 &mdash; do not re-test</h3>
 <ul>
-    <li><strong>Walk a horse into a single jump.</strong> It must now <em>stop</em>, not step
-        over. This is the whole point of the change.</li>
-    <li><strong>Then ride at it.</strong> An ordinary horse should clear a single jump, and a
-        genuinely bad jumper should not &mdash; that difference is the feature.</li>
-    <li><strong>Stack two, three, four.</strong> Find which rung a known horse stops at, and
-        whether it agrees with the metres on the horse screen. That comparison is the real prize
-        here: <code>HorseUnits.jumpMetres</code> is an <em>unverified</em> cubic, and this is the
-        first instrument that can test it.</li>
-    <li><strong>Try to jump one on foot.</strong> You should not be able to, exactly as with a
-        fence. If you can, the collision override is not being applied.</li>
-    <li><strong>Does what you see match what you hit?</strong> Ride along a row and feel for
-        collision off to the side of the rail. The shape is written three times over (baker,
-        <code>JumpBlock</code>, <code>GeneratedJumps</code>), and there is now a fourth thing to
-        keep in step &mdash; the render top and the collision top.</li>
+    <li><strong>The fence collision.</strong> A jump stops a horse instead of being stepped over.
+        Owner: it &ldquo;now actually feels like a challenge&rdquo;. The first build let collision
+        follow the model and a horse walked over a single jump.</li>
+    <li><strong>The look, and rows.</strong> They &ldquo;look great, expand great&rdquo; &mdash;
+        including the row-of-three case that was broken before release, where the middle block
+        pointed at a model nobody had written.</li>
+    <li><strong>The T-post on verticals</strong>, every third block along a run.</li>
+    <li><strong>Instant jump and the draining meter.</strong> Press to leap at full height,
+        cooldown drains over about a second. Owner: &ldquo;the jump meter decays and everything
+        looks perfect&rdquo;.</li>
+    <li><strong>Gliding still works</strong> with the new jump system, and feels good &mdash; the
+        one thing the charge removal was most likely to break, since the
+        <a href="gene-flying.html">glide</a> allele is launched by a jump.</li>
 </ul>
 
-<h3>Still unchecked from the first pass</h3>
+<h3>Built since that session and NOT played</h3>
 <ul>
-    <li><strong>Rotation.</strong> Place jumps facing all four ways and confirm the posts land at
-        the ends of the rail every time, not on the approach side.</li>
-    <li><strong>The recipe:</strong> 2 fences + 1 horse hair &rarr; 4 jumps, shapeless. Check the
-        yield is four.</li>
+    <li><strong>Oxer and crossrails.</strong> Two rails with a spread, and two poles crossed in an
+        X. Look at a crossrail facing <em>all four ways</em>: it is the one style that is not
+        UV-locked, because its elements are themselves rotated 45&deg;, and the argument for that
+        is reasoning about the renderer rather than something anybody has seen.</li>
+    <li><strong>Every style in the creative tab.</strong> Only the vertical was there at first.
+        Check all three of a wood appear, grouped together.</li>
+    <li><strong>Breaking an oxer gives back an oxer</strong>, not a vertical. The loot table is a
+        switch on the style property; before, the style was silently lost.</li>
+    <li><strong>Stacks inherit facing</strong> from the jump below, so a two-high fence cannot come
+        out crosswise. Style is deliberately <em>not</em> inherited &mdash; an oxer held over a
+        vertical should still place an oxer.</li>
+    <li><strong>A stick restyles, a plank repaints.</strong> Both cost one item, neither in
+        creative, and repainting to the wood it already is should refuse rather than eat the plank.
+        <b>Both are due to be replaced</b> by a two-slot screen on the block, so do not spend long
+        on them.</li>
+    <li><strong>The recipe is 3 fences + 1 horse hair &rarr; 4.</strong> Mixed woods do not craft
+        at all yet; that wants a custom recipe.</li>
     <li><strong>Both families still mine with an axe.</strong> The gates and the jumps share
-        <code>mineable/axe</code> and both bakers now merge into it. A regression here is
-        invisible &mdash; the blocks still break, just slowly and with no drop &mdash; so it has
-        to be checked on purpose, on a gate <em>and</em> a jump.</li>
+        <code>mineable/axe</code> and both bakers merge into it. A regression is invisible &mdash;
+        the block still breaks, just slowly and with no drop &mdash; so check a gate <em>and</em> a
+        jump on purpose.</li>
     <li><strong>Modded woods</strong> need a second mod installed and have never been generated.
-        <code>Wood.fenceId()</code> is composed rather than scanned, so a wood whose fence is
-        named unusually gets a jump that cannot be crafted and a warning in the log.</li>
+        <code>Wood.fenceId()</code> and the plank id are both composed rather than scanned, so an
+        unusually-named wood gets a jump that cannot be crafted or repainted, and a warning.</li>
 </ul>
+
+<h3>The measurement nobody has taken</h3>
+<p>
+    <strong>Which rung of a stack a given horse stops at, and whether it agrees with the metres on
+    the horse screen.</strong> This is the whole reason the family was built before the prettier
+    obstacle types: <code>HorseUnits.jumpMetres</code> is an <em>unverified</em> cubic, and a stack
+    of jumps is the first instrument that can test it. It has already paid for itself once &mdash;
+    see <a href="known-gaps.html#gap-287">gap 287</a>, where the Anglo-Arabian turned out to jump
+    high enough to hurt itself landing.
+</p>
 
 <h2 id="pseudowoods-0919">&sect;0-FY &mdash; 287 modded woods become 39 (2026-09-19, NOT played, needs the big pack)</h2>
 
