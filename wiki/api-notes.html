@@ -403,6 +403,33 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
         will drift.</li>
 </ul>
 
+<h2 id="at-overrides">An access transformer widens a declaration, not its overrides</h2>
+
+<p>
+    Widening a <code>protected</code> method that a vanilla subclass overrides <strong>breaks
+    the Minecraft recompile</strong>, not your module. The AT makes the parent&rsquo;s
+    declaration public; the override keeps the access it was written with; and Java calls
+    that &ldquo;attempting to assign weaker access privileges&rdquo;, so the whole of
+    <code>createMinecraftArtifacts</code> fails before this mod is compiled at all.
+</p>
+
+<p>
+    Seen 2026-09-20 on
+    <code>AbstractHorse.doPlayerRide(Player)</code>, which
+    <code>TraderLlama</code> overrides:
+</p>
+
+<pre><code>ERROR Line: 75, doPlayerRide(...) in TraderLlama cannot override doPlayerRide(...) in AbstractHorse
+  attempting to assign weaker access privileges; was public in /net/minecraft/.../TraderLlama.java</code></pre>
+
+<p>
+    The error names a file you did not touch and never mentions the AT, which is what makes it
+    expensive. <strong>Before widening anything, look for overrides</strong>; widening all of
+    them works but grows a line per subclass, so for a four-line method the cheaper answer is to
+    copy the body and say in a comment that you did. The three ATs in this mod that <em>are</em>
+    safe are a field, a leaf method and a class &mdash; nothing with a subclass under it.
+</p>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>
