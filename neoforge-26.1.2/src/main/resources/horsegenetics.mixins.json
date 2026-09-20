@@ -12,12 +12,14 @@
     "HorseFlightMixin",
     "HorseFlightRiddenMixin",
     "HorseTwoRidersMixin",
+    "HorseInstantJumpMixin",
     "CartHorseMixin",
     "CartEntityInvoker"
   ],
   "client": [
     "CartClientLevelMixin",
     "CartLocalPlayerMixin",
+    "JumpBarCooldownMixin",
     "CartModelManagerMixin",
     "CartModelPartMixin"
   ],

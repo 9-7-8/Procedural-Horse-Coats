@@ -114,6 +114,23 @@ public final class ServerConfig {
 
     public static final ModConfigSpec.BooleanValue BODY_SIZE;
 
+    /**
+     * <b>Instant jump</b> - press to leap at full height, then wait out a
+     * cooldown, instead of holding the key to charge.
+     *
+     * <p>SERVER-SIDE, by the same rule as {@link #BODY_SIZE}: it moves the
+     * entity, so the server's answer is the one that counts. NeoForge syncs a
+     * server config to every client on it, which is what lets the rider's own
+     * client and its jump bar read the same three values.
+     */
+    public static final ModConfigSpec.BooleanValue INSTANT_JUMP;
+
+    /** How long a horse cannot jump for after jumping, in ticks. */
+    public static final ModConfigSpec.IntValue JUMP_COOLDOWN_TICKS;
+
+    /** Extra forward throw on a jump, as a multiple of vanilla's. */
+    public static final ModConfigSpec.DoubleValue JUMP_FORWARD_BOOST;
+
     public static final ModConfigSpec.DoubleValue GESTATION_DAYS;
 
     /**
@@ -153,6 +170,34 @@ public final class ServerConfig {
                         "Like health.mode, a change reaches horses already in the world when",
                         "they next load - each horse re-resolves its body once per level load.")
                 .define("body.size", true);
+        INSTANT_JUMP = builder
+                .comment("Whether pressing jump launches the horse at once, at full height. (default: true)",
+                        "Vanilla charges: you hold the key, a meter fills, and the horse leaps on",
+                        "RELEASE at whatever the meter reached. That makes how high a horse jumps",
+                        "partly a fact about the rider's thumb, so a good horse ridden badly clears",
+                        "less than a mediocre one ridden well - which quietly works against the",
+                        "whole point of breeding for jump.",
+                        "With this on, the press IS the jump, always at that horse's maximum, and",
+                        "the meter becomes a cooldown draining back to ready. What a horse clears",
+                        "is then a fact about the horse.",
+                        "Off restores vanilla's charge exactly, cooldown and all.")
+                .define("ride.instant_jump", true);
+        JUMP_COOLDOWN_TICKS = builder
+                .comment("How long after a jump before the horse can jump again, in ticks (20 = 1 second). (default: 20)",
+                        "This is what the jump meter shows while it drains. Ignored when",
+                        "ride.instant_jump is off.",
+                        "Vanilla's camel - which is where this whole mechanic is borrowed from,",
+                        "dash and all - uses 55. Twenty is a horse, not a camel.")
+                .defineInRange("ride.jump_cooldown_ticks", 20, 0, 200);
+        JUMP_FORWARD_BOOST = builder
+                .comment("Extra forward throw on a jump, as a multiple of vanilla's. (default: 1.0)",
+                        "0 is vanilla: a jump adds a fixed forward nudge, and only while the rider",
+                        "holds forward. 1.0 doubles that nudge, 2.0 triples it.",
+                        "This is pure feel. Vanilla's number is small enough that a jump reads as a",
+                        "hop rather than as a horse going over something.",
+                        "It changes distance, never height - what a horse can clear is untouched,",
+                        "so the metres on the horse screen stay honest.")
+                .defineInRange("ride.jump_forward_boost", 1.0, 0.0, 5.0);
         GESTATION_DAYS = builder
                 .comment("How long a pregnancy lasts, in Minecraft days (one day = 20 minutes). (default: 1)",
                         "Only the mod's own breeding makes a pregnancy - seed jars, breeding carrots and",
@@ -205,6 +250,33 @@ public final class ServerConfig {
      * means every horse is the vanilla size - see the {@code body.size} section
      * above for why a world would want that.
      */
+    /** Safe read - falls back to the default if the config isn't loaded yet. */
+    public static boolean instantJump() {
+        try {
+            return INSTANT_JUMP.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** Safe read - falls back to the default if the config isn't loaded yet. */
+    public static int jumpCooldownTicks() {
+        try {
+            return JUMP_COOLDOWN_TICKS.get();
+        } catch (IllegalStateException notLoaded) {
+            return 20;
+        }
+    }
+
+    /** Safe read - falls back to the default if the config isn't loaded yet. */
+    public static double jumpForwardBoost() {
+        try {
+            return JUMP_FORWARD_BOOST.get();
+        } catch (IllegalStateException notLoaded) {
+            return 1.0;
+        }
+    }
+
     public static boolean bodySizeActive() {
         try {
             return BODY_SIZE.get();
