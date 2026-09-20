@@ -592,14 +592,20 @@ for (const style of STYLES) {
           const v = {
             type: `${NS}:jump`,
             rails: `jump_${style}_rails`,
-            // A SPANNING STYLE NAMES THE BASE, not a connection state. Its
-            // standards depend on how the run divides into X's, which is only
-            // known once the run has been walked - so JumpModel appends the
-            // suffix itself. Every other style's standards follow LEFT and
-            // RIGHT straight out of the blockstate, as they should.
-            standards: style === "crossrails"
-              ? `jump_${style}_standards`
-              : `jump_${style}_standards${suffixFor(left, right)}`,
+            // THE STANDARDS FIELD IS A BASE, NOT A CONNECTION STATE, for every
+            // style. JumpModel appends the suffix itself, because which blocks
+            // post is decided by where the group boundaries fall and that is
+            // only known once the run has been walked - which a blockstate
+            // cannot do, since it sees one neighbour.
+            //
+            // This read `..._standards${suffixFor(left, right)}` for the
+            // non-spanning styles for one build, from back when only crossrails
+            // chose their own. The model appended a second suffix to it and
+            // every vertical in a run asked for `_standards_lr_l`, which is
+            // nothing - a missing-texture cube on every jump with a neighbour.
+            // check-block-models.mjs passed throughout: it reads the ids in the
+            // blockstate, and those were all real.
+            standards: `jump_${style}_standards`,
             // "spanning" tells JumpModel to bake the six segment models and the
             // four standards states beside the plain ones, and to pick between
             // them per position. Only crossrails have them.

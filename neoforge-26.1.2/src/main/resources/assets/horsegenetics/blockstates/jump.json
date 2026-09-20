@@ -9,19 +9,19 @@
     "facing=south,left=false,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_r",
+      "standards": "jump_vertical_standards",
       "uvlock": true
     },
     "facing=south,left=true,right=false,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_l",
+      "standards": "jump_vertical_standards",
       "uvlock": true
     },
     "facing=south,left=true,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_lr",
+      "standards": "jump_vertical_standards",
       "uvlock": true
     },
     "facing=west,left=false,right=false,style=vertical": {
@@ -34,21 +34,21 @@
     "facing=west,left=false,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_r",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 90
     },
     "facing=west,left=true,right=false,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_l",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 90
     },
     "facing=west,left=true,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_lr",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 90
     },
@@ -62,21 +62,21 @@
     "facing=north,left=false,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_r",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 180
     },
     "facing=north,left=true,right=false,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_l",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 180
     },
     "facing=north,left=true,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_lr",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 180
     },
@@ -90,21 +90,21 @@
     "facing=east,left=false,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_r",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 270
     },
     "facing=east,left=true,right=false,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_l",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 270
     },
     "facing=east,left=true,right=true,style=vertical": {
       "type": "horsegenetics:jump",
       "rails": "jump_vertical_rails",
-      "standards": "jump_vertical_standards_lr",
+      "standards": "jump_vertical_standards",
       "uvlock": true,
       "y": 270
     },
@@ -117,19 +117,19 @@
     "facing=south,left=false,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_r",
+      "standards": "jump_oxer_standards",
       "uvlock": true
     },
     "facing=south,left=true,right=false,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_l",
+      "standards": "jump_oxer_standards",
       "uvlock": true
     },
     "facing=south,left=true,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_lr",
+      "standards": "jump_oxer_standards",
       "uvlock": true
     },
     "facing=west,left=false,right=false,style=oxer": {
@@ -142,21 +142,21 @@
     "facing=west,left=false,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_r",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 90
     },
     "facing=west,left=true,right=false,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_l",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 90
     },
     "facing=west,left=true,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_lr",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 90
     },
@@ -170,21 +170,21 @@
     "facing=north,left=false,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_r",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 180
     },
     "facing=north,left=true,right=false,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_l",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 180
     },
     "facing=north,left=true,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_lr",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 180
     },
@@ -198,21 +198,21 @@
     "facing=east,left=false,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_r",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 270
     },
     "facing=east,left=true,right=false,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_l",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 270
     },
     "facing=east,left=true,right=true,style=oxer": {
       "type": "horsegenetics:jump",
       "rails": "jump_oxer_rails",
-      "standards": "jump_oxer_standards_lr",
+      "standards": "jump_oxer_standards",
       "uvlock": true,
       "y": 270
     },
