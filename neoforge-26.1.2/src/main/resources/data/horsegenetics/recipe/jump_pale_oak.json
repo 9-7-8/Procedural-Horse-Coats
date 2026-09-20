@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:pale_oak_fence",
+    "minecraft:pale_oak_fence",
+    "minecraft:pale_oak_fence",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "count": 4,
+    "id": "horsegenetics:jump",
+    "components": {
+      "horsegenetics:jump_rails": "pale_oak",
+      "horsegenetics:jump_standards": "pale_oak"
+    }
+  }
+}

@@ -68,26 +68,48 @@ public final class ModCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> JUMPS =
             TABS.register("jumps", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.horsegenetics.jumps"))
-                    // The first registered jump, which is oak's - Jumps keeps
-                    // vanilla's wood order. Taken from the list rather than
-                    // named, so this cannot point at a block that was removed.
-                    .icon(() -> new ItemStack(
-                            com.example.horsegenetics.neoforge.block.Jumps.jumps().get(0).item().get()))
+                    // An oak vertical, stamped like every other entry below.
+                    .icon(ModCreativeTabs::oakJump)
                     .withTabsBefore(MAIN.getKey())
                     .displayItems((params, output) -> {
-                        // Vanilla's twelve in vanilla's wood order, then every
-                        // modded wood by id - whatever order FML loaded them in.
-                        // EVERY style of every wood, not just the vertical. Grouped
-                        // by wood rather than by style, so the twelve oaks sit
-                        // together the way somebody building one course wants.
-                        for (com.example.horsegenetics.neoforge.block.Jumps.Jump jump
-                                : com.example.horsegenetics.neoforge.block.Jumps.jumps()) {
-                            for (var item : jump.items()) {
-                                output.accept(item.get());
+                        // THREE ITEMS, ONE ENTRY PER WOOD PER STYLE. The woods
+                        // are components rather than items now - see
+                        // ModDataComponents.JUMP_RAILS - so the tab is where a
+                        // player still gets to pick one without crafting it.
+                        // Vanilla does the same with potions: one item, a shelf
+                        // of stamped stacks.
+                        //
+                        // Grouped by wood rather than by style, so the three
+                        // oaks sit together the way somebody building one course
+                        // wants. Vanilla's twelve in vanilla's order first, then
+                        // every wood another mod brought.
+                        for (String wood : com.example.horsegenetics.neoforge.block.JumpWoods.keys()) {
+                            var materials =
+                                    new com.example.horsegenetics.neoforge.block.JumpMaterials(wood, wood);
+                            for (var item : com.example.horsegenetics.neoforge.block.Jumps.items()) {
+                                ItemStack stack = new ItemStack(item);
+                                materials.writeTo(stack);
+                                output.accept(stack);
                             }
                         }
                     })
                     .build());
+
+    /**
+     * The tab's icon: an oak vertical, stamped with its woods like every entry
+     * in it.
+     *
+     * <p>Stamped rather than bare on purpose - an unstamped jump is a jump with
+     * no components, which is a different stack from the oak one the tab hands
+     * out, and an icon that does not match a single item in its own tab is
+     * confusing for no gain.
+     */
+    private static ItemStack oakJump() {
+        ItemStack stack = new ItemStack(com.example.horsegenetics.neoforge.block.Jumps.item(
+                com.example.horsegenetics.neoforge.block.JumpBlock.Style.VERTICAL));
+        com.example.horsegenetics.neoforge.block.JumpMaterials.DEFAULT.writeTo(stack);
+        return stack;
+    }
 
     private ModCreativeTabs() {
     }

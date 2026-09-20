@@ -5,14 +5,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -82,7 +78,15 @@ import java.util.Map;
  * depending on which way the player happened to be walking when they placed
  * each block. Axis is the honest test.
  *
- * @see Jumps for the per-wood registration
+ * <h2>One block, and the woods are data</h2>
+ * There were twelve of these, one per wood, until the standards and the rails
+ * had to be able to differ. That pair as blockstate properties is 12 x 12 x
+ * everything else - 13,824 states, every one allocated at registry bootstrap on
+ * the server as well as the client - so the woods live on
+ * {@link JumpBlockEntity} and {@code client/JumpModel} reads them per position.
+ *
+ * @see Jumps for the three style items this one block is placed by
+ * @see com.example.horsegenetics.neoforge.menu.JumpMenu for the screen that edits one
  */
 public class JumpBlock extends HorizontalDirectionalBlock
         implements net.minecraft.world.level.block.EntityBlock {
@@ -144,10 +148,6 @@ public class JumpBlock extends HorizontalDirectionalBlock
             this.name = name;
         }
 
-        public Style next() {
-            return values()[(this.ordinal() + 1) % values().length];
-        }
-
         @Override
         public String getSerializedName() {
             return this.name;
@@ -165,10 +165,15 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * style that jumped differently would make the instrument depend on
      * decoration.
      *
-     * <p><b>Changed in place by right-clicking</b> rather than by having an
-     * item per style. Three styles times twelve woods would be thirty-six
-     * items for a difference the player can see at a glance, and cycling in
-     * place means a built course can be restyled without being rebuilt.
+     * <p><b>A blockstate property, not data on the block entity</b>, unlike the
+     * two woods. It changes the geometry and therefore the model and the
+     * collision box, and there are three of it - so it costs three states where
+     * the woods would have cost a hundred and forty-four. That is the whole
+     * rule: what the model picks a <i>shape</i> by stays a property; what it
+     * picks a <i>texture</i> by became data.
+     *
+     * <p>Changed in place, from the jump's screen, and free. A built course can
+     * be restyled without being rebuilt.
      */
     public static final EnumProperty<Style> STYLE = EnumProperty.create("style", Style.class);
 
@@ -525,51 +530,110 @@ public class JumpBlock extends HorizontalDirectionalBlock
 
 
     /**
-     * <b>Changing a jump costs something.</b> A stick restyles it; a plank
-     * repaints it in that plank's wood.
+     * <b>Right-click opens the jump's screen</b> - two plank slots and three
+     * style buttons.
      *
-     * <p>Owner's call, and the reason is that a course is a thing you build
-     * rather than a thing you fiddle with: a free right-click makes style and
-     * wood into a toggle, and a material cost makes them a decision. Both are
-     * deliberately cheap - one item - because the cost is meant to be a brake,
-     * not a tax. Neither is consumed in creative.
+     * <p>This replaced two right-click interactions (owner, 2026-09-20): a
+     * stick cycled the style and a plank repainted the whole block, each
+     * spending its item. Both belonged to a jump that was <i>twelve blocks</i>,
+     * one per wood, where a repaint was a swap to a sibling block carrying its
+     * properties across. Two woods on one jump cannot be a block each, so the
+     * woods became block-entity data - and once they are data, a plank held in
+     * the hand can no longer say <i>which half</i> of the jump it is for.
      *
-     * <p><b>Restyle is a stick</b>, because a style is an arrangement of poles
-     * and a stick is the closest vanilla has to one. <b>Repaint is a plank</b>
-     * of the wood you want, which is also how you say <i>which</i> wood - there
-     * is no menu and no cycle order to learn, you simply hold the wood.
+     * <p><b>It opens with an item in hand too</b>, which is not incidental: the
+     * thing you are usually holding when you want this window is a plank. Every
+     * item but one falls through to here - see {@link #useItemOn} for the one,
+     * and for why the exception is not optional.
      *
-     * <p>Repainting swaps to the sibling block of that wood and carries every
-     * property across with {@code withPropertiesOf}, so facing, style and the
-     * connection flags all survive. That is the whole reason the twelve woods
-     * are separate blocks and not data - and it is the part that will change
-     * when the standards and rails become independently coloured, because two
-     * woods on one jump cannot be a block each.
+     * @see com.example.horsegenetics.neoforge.menu.JumpMenu
+     */
+    /**
+     * <b>A jump held against a jump stacks it. Everything else opens the
+     * screen.</b>
+     *
+     * <p>This override exists for one case and it is the important one.
+     * {@code ServerPlayerGameMode.useItemOn} calls
+     * {@link #useWithoutItem} whenever the block's {@code useItemOn} comes back
+     * {@code TRY_WITH_EMPTY_HAND} - <b>the hand does not have to be empty</b>,
+     * despite the name; only a sneaking player with something in their hands
+     * suppresses it. So the inherited default would open this block's screen
+     * when a player right-clicked a jump while holding a jump, and <em>height
+     * is stacking</em>: putting one on top of another is the single most common
+     * thing anybody does to this block, and it would have needed a shift-click
+     * forever.
+     *
+     * <p>{@code PASS} rather than {@code TRY_WITH_EMPTY_HAND} is what makes the
+     * difference: {@code PASS} is not a {@code TryEmptyHandInteraction}, so the
+     * dispatch skips the screen and falls through to the item's own
+     * {@code useOn}, which places the block.
+     *
+     * <p>Everything else - a plank, a pickaxe, an empty hand - goes to the
+     * screen, and a player who wants to place some <i>other</i> block against a
+     * jump sneaks, exactly as they already do against a chest.
      */
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
-                                          BlockPos pos, Player player, InteractionHand hand,
+                                          BlockPos pos, Player player,
+                                          net.minecraft.world.InteractionHand hand,
                                           BlockHitResult hit) {
-        boolean restyle = stack.is(Items.STICK);
-        JumpBlock repaint = restyle ? null : Jumps.byPlank(stack.getItem());
-        if (!restyle && repaint == null) {
+        if (stack.getItem() instanceof com.example.horsegenetics.neoforge.item.JumpItem) {
             return InteractionResult.PASS;
         }
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        if (restyle) {
-            level.setBlockAndUpdate(pos, state.setValue(STYLE, state.getValue(STYLE).next()));
-        } else if (repaint == state.getBlock()) {
-            // Already that wood. Refusing costs the player nothing and is
-            // better than silently eating a plank for no change.
-            return InteractionResult.PASS;
-        } else {
-            level.setBlockAndUpdate(pos, repaint.withPropertiesOf(state));
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (id, inventory, who) -> new com.example.horsegenetics.neoforge.menu.JumpMenu(
+                            id, inventory, net.minecraft.world.inventory.ContainerLevelAccess.create(level, pos)),
+                    state.getBlock().getName()));
         }
-        stack.consume(1, player);
-        level.playSound(null, pos, SoundType.WOOD.getPlaceSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
         return InteractionResult.CONSUME;
+    }
+
+    /**
+     * <b>Carry the item's two woods into the block that was just placed.</b>
+     *
+     * <p>The stack's components are the only place they are: a jump broken out
+     * of a course keeps them through {@code copy_components} in the loot table,
+     * and a crafted one gets them from its recipe's result. Without this the
+     * round trip loses them and every jump placed is oak, which reads as "the
+     * screen did not save" rather than as a placement bug.
+     */
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state,
+                            @Nullable net.minecraft.world.entity.LivingEntity placer,
+                            ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (level.getBlockEntity(pos) instanceof JumpBlockEntity jump) {
+            jump.setMaterials(JumpMaterials.fromComponents(stack));
+        }
+    }
+
+    /**
+     * Pick-block gives back <b>this style, in these woods</b>.
+     *
+     * <p>The default would hand over whichever item the block's
+     * {@code asItem()} resolves to - the vertical - stripped of its woods, so
+     * middle-clicking a birch-railed oxer while building a course would put a
+     * plain oak vertical in the hand. That is the kind of thing that is only
+     * ever noticed three jumps later.
+     */
+    @Override
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state,
+                                          boolean includeData) {
+        ItemStack stack = new ItemStack(Jumps.item(state.getValue(STYLE)));
+        if (level.getBlockEntity(pos) instanceof JumpBlockEntity jump) {
+            jump.materials().writeTo(stack);
+        }
+        return stack;
     }
 
     // --- rotation and mirroring ---------------------------------------------

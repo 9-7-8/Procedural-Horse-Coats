@@ -8,90 +8,90 @@
         "when": "oak",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/oak_jump_vertical"
+          "model": "horsegenetics:block/oak_jump_crossrails"
         }
       },
       {
         "when": "spruce",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/spruce_jump_vertical"
+          "model": "horsegenetics:block/spruce_jump_crossrails"
         }
       },
       {
         "when": "birch",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/birch_jump_vertical"
+          "model": "horsegenetics:block/birch_jump_crossrails"
         }
       },
       {
         "when": "jungle",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/jungle_jump_vertical"
+          "model": "horsegenetics:block/jungle_jump_crossrails"
         }
       },
       {
         "when": "acacia",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/acacia_jump_vertical"
+          "model": "horsegenetics:block/acacia_jump_crossrails"
         }
       },
       {
         "when": "dark_oak",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/dark_oak_jump_vertical"
+          "model": "horsegenetics:block/dark_oak_jump_crossrails"
         }
       },
       {
         "when": "pale_oak",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/pale_oak_jump_vertical"
+          "model": "horsegenetics:block/pale_oak_jump_crossrails"
         }
       },
       {
         "when": "mangrove",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/mangrove_jump_vertical"
+          "model": "horsegenetics:block/mangrove_jump_crossrails"
         }
       },
       {
         "when": "cherry",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/cherry_jump_vertical"
+          "model": "horsegenetics:block/cherry_jump_crossrails"
         }
       },
       {
         "when": "bamboo",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/bamboo_jump_vertical"
+          "model": "horsegenetics:block/bamboo_jump_crossrails"
         }
       },
       {
         "when": "crimson",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/crimson_jump_vertical"
+          "model": "horsegenetics:block/crimson_jump_crossrails"
         }
       },
       {
         "when": "warped",
         "model": {
           "type": "minecraft:model",
-          "model": "horsegenetics:block/warped_jump_vertical"
+          "model": "horsegenetics:block/warped_jump_crossrails"
         }
       }
     ],
     "fallback": {
       "type": "minecraft:model",
-      "model": "horsegenetics:block/oak_jump_vertical"
+      "model": "horsegenetics:block/oak_jump_crossrails"
     }
   }
 }

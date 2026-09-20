@@ -1,0 +1,85 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:jump",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:jump",
+              "properties": {
+                "style": "vertical"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "source": "block_entity",
+              "include": [
+                "horsegenetics:jump_rails",
+                "horsegenetics:jump_standards"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:jump_oxer",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:jump",
+              "properties": {
+                "style": "oxer"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "source": "block_entity",
+              "include": [
+                "horsegenetics:jump_rails",
+                "horsegenetics:jump_standards"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:jump_crossrails",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:jump",
+              "properties": {
+                "style": "crossrails"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "source": "block_entity",
+              "include": [
+                "horsegenetics:jump_rails",
+                "horsegenetics:jump_standards"
+              ]
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

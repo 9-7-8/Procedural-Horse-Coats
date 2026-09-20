@@ -101,6 +101,45 @@ public class JumpBlockEntity extends BlockEntity {
                 .orElse(JumpMaterials.DEFAULT);
     }
 
+    // --- the item form ------------------------------------------------------
+    //
+    // These three are what carry the two woods across the break-and-replace
+    // round trip. The loot table copies the components out with
+    // minecraft:copy_components (source: block_entity), which reads
+    // collectImplicitComponents; placing the item back applies them through
+    // applyImplicitComponents. Miss either half and a birch-railed jump comes
+    // back oak, which reads as "the screen did not save".
+
+    @Override
+    protected void applyImplicitComponents(
+            net.minecraft.core.component.DataComponentGetter components) {
+        super.applyImplicitComponents(components);
+        this.materials = JumpMaterials.fromComponents(components);
+    }
+
+    @Override
+    protected void collectImplicitComponents(
+            net.minecraft.core.component.DataComponentMap.Builder builder) {
+        super.collectImplicitComponents(builder);
+        this.materials.writeTo(builder);
+    }
+
+    /**
+     * Keep the two woods out of the item's <i>saved NBT</i> as well as in its
+     * components.
+     *
+     * <p>Without this they are written twice - once as components and once in
+     * the block-entity data the stack carries - and the copy in the NBT wins on
+     * placement, so an edit made through the screen after the item was stamped
+     * would be quietly undone. Vanilla's containers all do this for the same
+     * reason.
+     */
+    @Override
+    public void removeComponentsFromTag(net.minecraft.world.level.storage.ValueOutput output) {
+        super.removeComponentsFromTag(output);
+        output.discard("materials");
+    }
+
     // --- sync ---------------------------------------------------------------
 
     @Override

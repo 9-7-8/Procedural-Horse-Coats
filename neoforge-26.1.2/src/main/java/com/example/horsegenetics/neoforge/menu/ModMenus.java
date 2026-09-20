@@ -33,6 +33,15 @@ public final class ModMenus {
             MENUS.register("equestrian_bench",
                     () -> new MenuType<>(EquestrianBenchMenu::new, FeatureFlags.VANILLA_SET));
 
+    /**
+     * <b>A jump's</b> - two plank slots and three style buttons. Backed by the
+     * block entity that holds the two woods, and by the blockstate that holds
+     * the style, so it keeps nothing itself; see {@link JumpMenu}.
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<JumpMenu>> JUMP =
+            MENUS.register("jump",
+                    () -> new MenuType<>(JumpMenu::new, FeatureFlags.VANILLA_SET));
+
     public static void register(IEventBus modEventBus) {
         MENUS.register(modEventBus);
     }

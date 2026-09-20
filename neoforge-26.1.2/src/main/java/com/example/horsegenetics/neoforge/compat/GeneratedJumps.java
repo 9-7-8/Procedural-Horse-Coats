@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.compat;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.block.JumpWoods;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -9,42 +10,51 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * The generated half of "a showjumping rail for every wood another mod added".
+ * The generated half of "a showjumping rail can be made of every wood another
+ * mod added".
  *
- * <p>The registered half is in {@code block/Jumps}; this writes the files that
- * make one visible, placeable, craftable and breakable.
+ * <h2>There is no block here any more, and that is the point</h2>
+ * This used to register-and-generate a whole jump <i>block</i> per modded wood,
+ * beside the shipped twelve. It does not, because there are no per-wood blocks
+ * left: a jump's two woods are {@code JumpBlockEntity} data, so a new wood needs
+ * no block, no item, no blockstate and no loot table. What it needs is
+ * <b>models</b> - the parts {@code client/JumpModel} composes - a <b>recipe</b>
+ * that stamps its name onto the crafted item, a <b>name</b>, and a <b>case</b>
+ * in each of the three item definitions so its icon is right.
  *
- * <h2>There are no textures here, and that is the whole trick</h2>
- * A jump has never had art of its own. Every shape is a shipped template
- * model - {@code horsegenetics:block/template_jump_<style><connection>} - and a
- * wood's models are each one line: a parent and a texture id. So a modded wood needs
- * no generated PNG at all; it needs a pointer at the plank texture <i>that mod
- * already drew</i>, exactly as the shipped twelve point at vanilla's.
+ * <h2>There are no textures here, and that is the older trick</h2>
+ * A jump has never had art of its own. Every shape is a shipped template model -
+ * {@code horsegenetics:block/template_jump_<style>...} - and a wood's models are
+ * each one line: a parent and a texture id. So a modded wood needs no generated
+ * PNG at all; it needs a pointer at the plank texture <i>that mod already
+ * drew</i>, exactly as the shipped twelve point at vanilla's.
  *
  * <h2>This file and bake-jumps.mjs must agree</h2>
  * {@code neoforge-26.1.2/tools/bake-jumps.mjs} writes the same kinds of file
  * for vanilla's twelve, at author time, and this writes them for modded woods
  * at run time. <b>They are the same contract in two languages and they can
- * drift.</b> If you change the shape of a blockstate, a model, the item
- * definition, the loot table or the recipe in one, change it in the other - the
- * symptom of missing is a modded jump that is a purple chequerboard while every
- * vanilla one is fine, with nothing logged anywhere.
+ * drift.</b> If you change the shape of a model, the item definition or the
+ * recipe in one, change it in the other - the symptom of missing is a modded
+ * jump that is a purple chequerboard while every vanilla one is fine, with
+ * nothing logged anywhere.
+ *
+ * <p>The item definitions are the one place this <b>replaces</b> a shipped file
+ * rather than adding beside it: the generated pack sits at
+ * {@code Pack.Position.TOP}, and the three {@code items/jump*.json} it writes
+ * carry vanilla's twelve cases <i>and</i> the modded ones. A select case list
+ * cannot be merged across packs, so it has to be rewritten whole.
  *
  * @see GeneratedGates which this is deliberately a copy of, and whose
- *      {@code put} and {@code mergeBlockTag} it reuses
+ *      {@code put} it reuses
  */
 final class GeneratedJumps {
 
-    /** Must match {@code Jumps.STYLE}. */
+    /** Must match {@code Jumps.BASE} and {@code STYLE} in bake-jumps.mjs. */
     static final String STYLE = "jump";
     private static final String NS = HorseGenetics.MOD_ID;
 
     /** Must match {@code RECIPE_YIELD} in bake-jumps.mjs. */
     private static final int RECIPE_YIELD = 4;
-
-    /** Authored for facing=south; blockstate y rotation maps clockwise. */
-    private static final Map<String, Integer> ROTATION = Map.of(
-            "south", 0, "west", 90, "north", 180, "east", 270);
 
     /** Every connection suffix, in the order the models are written. */
     private static final String[] CONNECTIONS = {"", "_l", "_r", "_lr", "_lr_post"};
@@ -53,43 +63,14 @@ final class GeneratedJumps {
     private static final String[] STYLES = {"vertical", "oxer", "crossrails"};
 
     /**
-     * The item id suffix and display label for each style, in {@link #STYLES}
-     * order. The vertical is the bare id and takes its name from the block;
-     * the other two need names of their own. {@code STYLE_ITEM} in
-     * bake-jumps.mjs is the twin.
+     * The item id suffix for each style, in {@link #STYLES} order. The vertical
+     * is the bare {@code jump}. {@code STYLE_ITEM} in bake-jumps.mjs is the
+     * twin.
      */
     private static final String[] STYLE_SUFFIX = {"", "_oxer", "_crossrails"};
-    private static final String[] STYLE_LABEL = {null, "Oxer", "Crossrails"};
 
     /** Must match {@code RECIPE_FENCES} in bake-jumps.mjs. */
     private static final int RECIPE_FENCES = 3;
-
-    /**
-     * The model suffix for a set of flags.
-     *
-     * <p><b>One method, called from both the model loop and the blockstate
-     * loop</b>, because writing it out twice is how this shipped broken the
-     * first time: composing {@code (left ? "_l" : "") + (right ? "_r" : "")}
-     * gives {@code "_l_r"}, the models are named {@code "_lr"}, and the
-     * mismatch is invisible until somebody places three jumps in a row and the
-     * middle one is a purple cube. Only the both-connected case differs, so a
-     * row of two looks perfect and the bug hides. The author-time twin is
-     * {@code suffixFor} in bake-jumps.mjs.
-     *
-     * <p>{@code post} is honoured only mid-run, matching
-     * {@code JumpBlock.withPost}, which never sets it otherwise. The blockstate
-     * still has to name every combination, so the end-of-run states map to the
-     * postless model rather than to one that would then have to exist.
-     */
-    private static String suffix(boolean left, boolean right, boolean post) {
-        if (left && right) {
-            return post ? "_lr_post" : "_lr";
-        }
-        if (left) {
-            return "_l";
-        }
-        return right ? "_r" : "";
-    }
 
     private GeneratedJumps() {
     }
@@ -99,79 +80,34 @@ final class GeneratedJumps {
         if (woods.isEmpty()) {
             return;
         }
-        JsonArray tagValues = new JsonArray();
 
         for (ModdedMaterials.Wood wood : woods) {
+            // The wood KEY, which is what a jump stores and what every model id
+            // is composed from. jumpId() is that key plus "_jump", and the model
+            // names follow the shipped ones exactly: <key>_jump_<style>_rails.
             String id = wood.jumpId();
-            tagValues.add(NS + ":" + id);
-            lang.addProperty("block." + NS + "." + id, label(wood) + " Jump");
 
-            // ---- one model per style per connection state --------------------
-            // The suffix names the CONNECTIONS, not the standards: "_l" means a
-            // jump continues the rail to the left, so the left standard is the
-            // one that is gone, "_lr" is a bare rail mid-run, and "_lr_post"
-            // is that rail carrying an intermediate upright.
+            // What the screen and every item name call this wood.
+            // JumpWoods.label reads this key, and title-cases the wood key
+            // itself if it is missing - so a wood whose mod ships no lang is
+            // still legible, just less prettily.
+            lang.addProperty(NS + ".wood." + wood.namespace() + "_" + wood.name(), label(wood));
+
             for (String style : STYLES) {
+                // The icon model: a whole jump of one wood, both standards.
+                put(files, id + "_" + style, "template_" + STYLE + "_" + style, wood);
+                // The two halves the block's model composes. The suffix names
+                // the CONNECTIONS, not the standards: "_l" means a jump
+                // continues the rail to the left, so the left standard is the
+                // one that is gone, "_lr" is a bare rail mid-run, and
+                // "_lr_post" is that rail carrying an intermediate upright.
+                put(files, id + "_" + style + "_rails",
+                        "template_jump_" + style + "_rails", wood);
                 for (String suffix : CONNECTIONS) {
-                    JsonObject model = new JsonObject();
-                    model.addProperty("parent",
-                            NS + ":block/template_" + STYLE + "_" + style + suffix);
-                    JsonObject textures = new JsonObject();
-                    textures.addProperty("texture", wood.plankTexture());
-                    model.add("textures", textures);
-                    put(files, "assets/" + NS + "/models/block/" + id + "_" + style + suffix
-                            + ".json", model);
+                    put(files, id + "_" + style + "_standards" + suffix,
+                            "template_jump_" + style + "_standards" + suffix, wood);
                 }
             }
-
-            // ---- 3 styles x 4 facings x left x right x post = 96 variants -----
-            JsonObject variants = new JsonObject();
-            for (String style : STYLES) {
-                for (Map.Entry<String, Integer> facing : ROTATION.entrySet()) {
-                    for (boolean left : new boolean[] {false, true}) {
-                        for (boolean right : new boolean[] {false, true}) {
-                            for (boolean post : new boolean[] {false, true}) {
-                                JsonObject variant = new JsonObject();
-                                variant.addProperty("model", NS + ":block/" + id + "_" + style
-                                        + suffix(left, right, post));
-                                // NOT uvlocked on the crossrails: uvlock re-projects
-                                // a face's UVs against the block axes after the
-                                // blockstate's y rotation, and on an element that is
-                                // ITSELF rotated 45 degrees the two fight and the
-                                // grain shears. bake-jumps.mjs does the same.
-                                variant.addProperty("uvlock", !"crossrails".equals(style));
-                                if (facing.getValue() != 0) {
-                                    variant.addProperty("y", facing.getValue());
-                                }
-                                variants.add("facing=" + facing.getKey() + ",left=" + left
-                                        + ",post=" + post + ",right=" + right
-                                        + ",style=" + style, variant);
-                            }
-                        }
-                    }
-                }
-            }
-            JsonObject blockstate = new JsonObject();
-            blockstate.add("variants", variants);
-            put(files, "assets/" + NS + "/blockstates/" + id + ".json", blockstate);
-
-            // ---- one item per style ------------------------------------------
-            // Each points at that style's both-standards model, the only one of
-            // the five given a gui transform in the shipped template.
-            for (int i = 0; i < STYLES.length; i++) {
-                JsonObject itemModel = new JsonObject();
-                itemModel.addProperty("type", "minecraft:model");
-                itemModel.addProperty("model", NS + ":block/" + id + "_" + STYLES[i]);
-                JsonObject item = new JsonObject();
-                item.add("model", itemModel);
-                put(files, "assets/" + NS + "/items/" + id + STYLE_SUFFIX[i] + ".json", item);
-                if (STYLE_LABEL[i] != null) {
-                    lang.addProperty("item." + NS + "." + id + STYLE_SUFFIX[i],
-                            label(wood) + " " + STYLE_LABEL[i]);
-                }
-            }
-
-            put(files, "data/" + NS + "/loot_table/blocks/" + id + ".json", blockLoot(id));
 
             // THE RECIPE NEEDS THAT MOD'S FENCE, AND Wood.fenceId IS COMPOSED
             // RATHER THAN SCANNED - the material scan looks for fence GATES,
@@ -180,73 +116,82 @@ final class GeneratedJumps {
             // not registered does not fail quietly: it fails to parse and takes
             // the rest of the generated pack with it.
             if (ModdedMaterials.itemExists(wood.fenceId())) {
-                put(files, "data/" + NS + "/recipe/" + id + ".json", recipe(wood, id));
+                GeneratedGates.put(files, "data/" + NS + "/recipe/" + STYLE + "_"
+                        + wood.namespace() + "_" + wood.name() + ".json", recipe(wood));
             } else {
                 HorseGenetics.LOGGER.warn("compat: {} ships a fence gate but no {} - "
-                        + "the jump is uncraftable", wood.namespace(), wood.fenceId());
+                        + "jumps cannot be crafted in that wood", wood.namespace(), wood.fenceId());
             }
         }
 
-        // ---- the vanilla block tag -----------------------------------------
-        // Additive twice over: tag files MERGE across datapacks, so this
-        // contributes the modded jumps beside the shipped twelve rather than
-        // replacing them; and mergeBlockTag keeps it from stamping on the
-        // double gates, which are in the same tag and the same file map.
-        GeneratedGates.mergeBlockTag(files, "data/minecraft/tags/block/mineable/axe.json", tagValues);
+        // ---- the three item definitions, rewritten whole --------------------
+        // JumpWoods.keys() is vanilla's twelve and then every modded wood, and
+        // is the same list the model bakes parts for - so an icon case exists
+        // for exactly the woods a jump can actually be.
+        for (int i = 0; i < STYLES.length; i++) {
+            GeneratedGates.put(files,
+                    "assets/" + NS + "/items/" + STYLE + STYLE_SUFFIX[i] + ".json",
+                    itemDefinition(STYLES[i]));
+        }
+    }
+
+    /** One model file: a parent and a plank texture, which is all a wood needs. */
+    private static void put(Map<String, byte[]> files, String name, String template,
+                            ModdedMaterials.Wood wood) {
+        JsonObject textures = new JsonObject();
+        textures.addProperty("texture", wood.plankTexture());
+        JsonObject model = new JsonObject();
+        model.addProperty("parent", NS + ":block/" + template);
+        model.add("textures", textures);
+        GeneratedGates.put(files, "assets/" + NS + "/models/block/" + name + ".json", model);
     }
 
     /**
-     * An ordinary single-drop table.
+     * One style's item definition: a {@code minecraft:select} on the rails
+     * component, with a case per wood.
      *
-     * <p>Unlike {@link GeneratedGates#blockLoot} there is no {@code half}
-     * condition, and there must not be one: a jump is <b>one</b> block, so
-     * there is no partner to orphan and nothing that could pay out twice. The
-     * conditions here select the <i>style</i>, not a half.
+     * <p>Selecting on the <b>rails</b> alone rather than on a pair-valued
+     * component is what keeps this at one case per wood instead of one per
+     * pair; the icon is therefore always right about the rails and says nothing
+     * about the standards, which is the correct trade at sixteen pixels. The
+     * fallback is oak, so a jump carrying no components at all - a {@code /give}
+     * - draws as one rather than as a missing model.
      */
-    private static JsonObject blockLoot(String id) {
-        // ONE DROP, BUT THE RIGHT STYLE'S ITEM. A pool with rolls:1 picks among
-        // the entries whose conditions pass, and exactly one style condition
-        // can pass, so this is a switch rather than a lottery. Without it,
-        // breaking an oxer hands back a vertical and the style is quietly lost.
-        JsonArray entries = new JsonArray();
-        for (int i = 0; i < STYLES.length; i++) {
-            JsonObject styleProperty = new JsonObject();
-            styleProperty.addProperty("style", STYLES[i]);
-            JsonObject isStyle = new JsonObject();
-            isStyle.addProperty("condition", "minecraft:block_state_property");
-            isStyle.addProperty("block", NS + ":" + id);
-            isStyle.add("properties", styleProperty);
-            JsonArray entryConditions = new JsonArray();
-            entryConditions.add(isStyle);
-
-            JsonObject entry = new JsonObject();
-            entry.addProperty("type", "minecraft:item");
-            entry.addProperty("name", NS + ":" + id + STYLE_SUFFIX[i]);
-            entry.add("conditions", entryConditions);
-            entries.add(entry);
+    private static JsonObject itemDefinition(String style) {
+        JsonArray cases = new JsonArray();
+        for (String wood : JumpWoods.keys()) {
+            JsonObject one = new JsonObject();
+            one.addProperty("when", wood);
+            one.add("model", styleModel(wood, style));
+            cases.add(one);
         }
 
-        JsonObject survives = new JsonObject();
-        survives.addProperty("condition", "minecraft:survives_explosion");
-        JsonArray conditions = new JsonArray();
-        conditions.add(survives);
+        JsonObject select = new JsonObject();
+        select.addProperty("type", "minecraft:select");
+        select.addProperty("property", "minecraft:component");
+        select.addProperty("component", NS + ":jump_rails");
+        select.add("cases", cases);
+        select.add("fallback", styleModel("oak", style));
 
-        JsonObject pool = new JsonObject();
-        pool.addProperty("rolls", 1);
-        pool.addProperty("bonus_rolls", 0);
-        pool.add("entries", entries);
-        pool.add("conditions", conditions);
-        JsonArray pools = new JsonArray();
-        pools.add(pool);
+        JsonObject definition = new JsonObject();
+        definition.add("model", select);
+        return definition;
+    }
 
-        JsonObject loot = new JsonObject();
-        loot.addProperty("type", "minecraft:block");
-        loot.add("pools", pools);
-        return loot;
+    private static JsonObject styleModel(String wood, String style) {
+        JsonObject model = new JsonObject();
+        model.addProperty("type", "minecraft:model");
+        model.addProperty("model", NS + ":block/" + wood + "_" + STYLE + "_" + style);
+        return model;
     }
 
     /**
-     * Three of that mod's fences and one raw horse hair, yielding four.
+     * Three of that mod's fences and one raw horse hair, yielding four - of the
+     * <b>one</b> jump item, stamped with this wood.
+     *
+     * <p>The wood is not in the result's id any more, it is in its
+     * {@code components}. That is the whole reason twelve-plus recipes can make
+     * one item and it still comes out fir.
      *
      * <p>The hair is what keeps this inside the house rule
      * ({@code wiki/items.html#rules}) rather than making the jumps a second
@@ -255,16 +200,22 @@ final class GeneratedJumps {
      * carry over to plain fences. The yield is what keeps the hair from being a
      * tax: four jumps a hair, so a twelve-fence course costs three.
      */
-    private static JsonObject recipe(ModdedMaterials.Wood wood, String id) {
+    private static JsonObject recipe(ModdedMaterials.Wood wood) {
         JsonArray ingredients = new JsonArray();
         for (int i = 0; i < RECIPE_FENCES; i++) {
             ingredients.add(wood.fenceId());
         }
         ingredients.add(NS + ":horse_hair");
 
+        String key = wood.namespace() + "_" + wood.name();
+        JsonObject components = new JsonObject();
+        components.addProperty(NS + ":jump_rails", key);
+        components.addProperty(NS + ":jump_standards", key);
+
         JsonObject result = new JsonObject();
         result.addProperty("count", RECIPE_YIELD);
-        result.addProperty("id", NS + ":" + id);
+        result.addProperty("id", NS + ":" + STYLE);
+        result.add("components", components);
 
         JsonObject recipe = new JsonObject();
         recipe.addProperty("type", "minecraft:crafting_shapeless");
@@ -294,9 +245,5 @@ final class GeneratedJumps {
             out.append(word.substring(0, 1).toUpperCase(Locale.ROOT)).append(word.substring(1));
         }
         return out.toString();
-    }
-
-    private static void put(Map<String, byte[]> files, String path, JsonObject json) {
-        GeneratedGates.put(files, path, json);
     }
 }

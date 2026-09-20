@@ -143,6 +143,40 @@ public final class ModDataComponents {
                     .networkSynchronized(SaddleTint.STREAM_CODEC)
                     .build());
 
+    /**
+     * <b>The wood of a jump's rails</b>, as a {@code JumpWoods} key - and
+     * {@link #JUMP_STANDARDS} the wood of its uprights.
+     *
+     * <h2>Two components rather than one record, and the reason is the icon</h2>
+     * A jump's block entity holds a {@code JumpMaterials} - one immutable record
+     * of both woods - and that is the right shape for it. The <i>item</i> splits
+     * it in two because of how a client item definition picks a model:
+     * {@code minecraft:select} on {@code minecraft:component} matches the
+     * <b>whole value</b> of one component, so a single pair-valued component
+     * would need a case per pair - a hundred and forty-four of them per style -
+     * to draw a mixed jump correctly. Split, the icon selects on the rails alone
+     * in twelve cases and is never wrong about the half it shows.
+     *
+     * <p><b>Both are always present</b>, oak included, on every jump this mod
+     * hands out - the recipes write them, the creative tab writes them, and the
+     * loot table copies them off the block entity. That is deliberate: an item
+     * with no components and an item saying "oak" are the same jump but do not
+     * stack, and a creative-tab jump that will not stack with a crafted one is
+     * the kind of thing that gets reported as an inventory bug.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> JUMP_RAILS =
+            TYPES.register("jump_rails", () -> DataComponentType.<String>builder()
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(ByteBufCodecs.STRING_UTF8)
+                    .build());
+
+    /** The wood of a jump's uprights. See {@link #JUMP_RAILS}. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> JUMP_STANDARDS =
+            TYPES.register("jump_standards", () -> DataComponentType.<String>builder()
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(ByteBufCodecs.STRING_UTF8)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

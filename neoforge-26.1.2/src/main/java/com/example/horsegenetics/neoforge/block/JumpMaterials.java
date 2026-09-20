@@ -66,4 +66,46 @@ public record JumpMaterials(String rails, String standards) {
     public boolean uniform() {
         return this.rails.equals(this.standards);
     }
+
+    // --- the item form ------------------------------------------------------
+    //
+    // On an ITEM the two woods are two separate string components rather than
+    // one of these, because a client item definition selects a model on the
+    // whole value of one component - see ModDataComponents.JUMP_RAILS. These
+    // three methods are the only places that know that, so the rest of the mod
+    // goes on passing a JumpMaterials around.
+
+    /**
+     * What an item says it is made of, defaulting either half that is missing.
+     *
+     * <p>Takes a {@link DataComponentGetter} rather than an {@code ItemStack}
+     * because a block entity's implicit-component hook is handed one of those
+     * and not a stack.
+     */
+    public static JumpMaterials fromComponents(
+            net.minecraft.core.component.DataComponentGetter components) {
+        return new JumpMaterials(
+                components.getOrDefault(
+                        com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_RAILS.get(),
+                        DEFAULT_WOOD),
+                components.getOrDefault(
+                        com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS.get(),
+                        DEFAULT_WOOD));
+    }
+
+    /** Stamp both woods onto a stack. Always both, oak included - see the component's note. */
+    public void writeTo(net.minecraft.world.item.ItemStack stack) {
+        stack.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_RAILS.get(),
+                this.rails);
+        stack.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS.get(),
+                this.standards);
+    }
+
+    /** The same, into the map a block entity collects its implicit components into. */
+    public void writeTo(net.minecraft.core.component.DataComponentMap.Builder builder) {
+        builder.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_RAILS.get(),
+                this.rails);
+        builder.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS.get(),
+                this.standards);
+    }
 }

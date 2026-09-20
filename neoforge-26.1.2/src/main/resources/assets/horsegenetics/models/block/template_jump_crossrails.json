@@ -1,4 +1,5 @@
 {
+  "parent": "block/block",
   "textures": {
     "particle": "#texture"
   },
@@ -294,7 +295,6 @@
       }
     }
   ],
-  "parent": "block/block",
   "display": {
     "gui": {
       "rotation": [

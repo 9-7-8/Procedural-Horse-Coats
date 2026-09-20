@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.client;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.JumpBlockEntity;
 import com.example.horsegenetics.neoforge.block.JumpMaterials;
+import com.example.horsegenetics.neoforge.block.JumpWoods;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

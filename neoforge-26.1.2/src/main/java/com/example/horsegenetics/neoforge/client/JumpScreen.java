@@ -1,0 +1,134 @@
+package com.example.horsegenetics.neoforge.client;
+
+import com.example.horsegenetics.neoforge.block.JumpBlock;
+import com.example.horsegenetics.neoforge.block.JumpWoods;
+import com.example.horsegenetics.neoforge.menu.JumpMenu;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+
+/**
+ * <b>A jump's screen.</b> Two plank slots and three style buttons.
+ *
+ * <h2>Nothing here decides anything</h2>
+ * Every control sends and then waits. A plank goes into a slot and the
+ * <i>server</i> performs the exchange; a style button sends its id through
+ * {@code handleInventoryButtonClick} and the <i>server</i> sets the blockstate.
+ * What this draws - the two wood names, which button is pressed in - is read
+ * back out of the menu's synced data, so the window is always showing the block
+ * rather than showing what the player just asked for. That matters for the one
+ * case a local prediction would get wrong: two players with the same jump open.
+ *
+ * <h2>The current style is the disabled button</h2>
+ * Rather than a tick, a highlight or a fourth widget. A greyed-out button reads
+ * as "already this" to anyone who has used a vanilla screen, and it also stops
+ * the pointless round trip of setting the style it already has.
+ *
+ * @see JumpMenu for the exchange, and for why the woods travel as indices
+ */
+public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
+
+    private static final Component RAILS = Component.translatable("horsegenetics.jump.rails");
+    private static final Component STANDARDS = Component.translatable("horsegenetics.jump.standards");
+    private static final Component STYLE = Component.translatable("horsegenetics.jump.style");
+
+    private final Button[] styleButtons = new Button[JumpMenu.STYLE_BUTTONS];
+
+    public JumpScreen(JumpMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title, JumpMenu.WIDTH, JumpMenu.HEIGHT);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        this.titleLabelX = JumpMenu.MARGIN;
+        this.titleLabelY = JumpMenu.TITLE_Y;
+        this.inventoryLabelX = JumpMenu.MARGIN;
+        this.inventoryLabelY = JumpMenu.INV_LABEL_Y;
+
+        JumpBlock.Style[] styles = JumpBlock.Style.values();
+        for (int i = 0; i < this.styleButtons.length; i++) {
+            int id = i;
+            Component label = Component.translatable(
+                    "horsegenetics.jump.style." + styles[i].getSerializedName());
+            this.styleButtons[i] = Button.builder(label, button -> press(id))
+                    .bounds(this.leftPos + JumpMenu.BUTTON_X[i], this.topPos + JumpMenu.BUTTON_Y,
+                            JumpMenu.BUTTON_W, JumpMenu.BUTTON_H)
+                    .build();
+            this.addRenderableWidget(this.styleButtons[i]);
+        }
+        syncButtons();
+    }
+
+    private void press(int id) {
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, id);
+        }
+    }
+
+    /**
+     * The block can change under an open screen - a second player's window, a
+     * command - so the pressed-in button is re-read every tick rather than set
+     * when this one clicked.
+     */
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        syncButtons();
+    }
+
+    private void syncButtons() {
+        int current = this.menu.style().ordinal();
+        for (int i = 0; i < this.styleButtons.length; i++) {
+            if (this.styleButtons[i] != null) {
+                this.styleButtons[i].active = i != current;
+            }
+        }
+    }
+
+    @Override
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
+
+        VanillaPanel.window(g, leftPos, topPos, JumpMenu.WIDTH, JumpMenu.HEIGHT);
+        VanillaPanel.slot(g, leftPos + JumpMenu.SLOT_X, topPos + JumpMenu.RAILS_Y);
+        VanillaPanel.slot(g, leftPos + JumpMenu.SLOT_X, topPos + JumpMenu.STANDARDS_Y);
+
+        for (int i = 0; i < 27; i++) {
+            VanillaPanel.slot(g, leftPos + JumpMenu.MARGIN + (i % 9) * 18,
+                    topPos + JumpMenu.INV_Y + (i / 9) * 18);
+        }
+        for (int i = 0; i < 9; i++) {
+            VanillaPanel.slot(g, leftPos + JumpMenu.MARGIN + i * 18,
+                    topPos + JumpMenu.INV_Y + 3 * 18 + 4);
+        }
+    }
+
+    /**
+     * Window-relative coordinates: the caller has already translated to
+     * {@code (leftPos, topPos)}, and adding them again is what threw the
+     * research shelf's labels off its window.
+     */
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        g.text(this.font, this.title, JumpMenu.MARGIN, JumpMenu.TITLE_Y, VanillaPanel.TEXT, false);
+        g.text(this.font, this.playerInventoryTitle, JumpMenu.MARGIN, JumpMenu.INV_LABEL_Y,
+                VanillaPanel.TEXT, false);
+
+        // Two lines to a row: what the slot is for, then what is in the block
+        // right now. The wood is the answer, so it gets the darker ink.
+        row(g, RAILS, this.menu.railsWood(), JumpMenu.RAILS_Y);
+        row(g, STANDARDS, this.menu.standardsWood(), JumpMenu.STANDARDS_Y);
+
+        g.text(this.font, STYLE, JumpMenu.MARGIN, JumpMenu.STYLE_LABEL_Y,
+                VanillaPanel.TEXT_DIM, false);
+    }
+
+    private void row(GuiGraphicsExtractor g, Component caption, String wood, int y) {
+        g.text(this.font, caption, JumpMenu.LABEL_X, y + 1, VanillaPanel.TEXT_DIM, false);
+        g.text(this.font, JumpWoods.label(wood), JumpMenu.LABEL_X, y + 10,
+                VanillaPanel.TEXT, false);
+    }
+}

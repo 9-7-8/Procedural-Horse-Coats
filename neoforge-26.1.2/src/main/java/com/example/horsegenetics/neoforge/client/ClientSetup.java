@@ -78,6 +78,8 @@ public final class ClientSetup {
                 ResearchShelfScreen::new);
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.EQUESTRIAN_BENCH.get(),
                 EquestrianBenchScreen::new);
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.JUMP.get(),
+                JumpScreen::new);
     }
 
     /** Molten hooves' glowing prints - see {@link HoofprintParticle}. */

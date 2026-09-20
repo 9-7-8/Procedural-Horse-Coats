@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:cherry_fence",
+    "minecraft:cherry_fence",
+    "minecraft:cherry_fence",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "count": 4,
+    "id": "horsegenetics:jump",
+    "components": {
+      "horsegenetics:jump_rails": "cherry",
+      "horsegenetics:jump_standards": "cherry"
+    }
+  }
+}

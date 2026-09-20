@@ -83,18 +83,18 @@ const STYLE_LABEL = "Jump";
 const STYLES = ["vertical", "oxer", "crossrails"];
 
 /**
- * What each style is called in an item name, and the id suffix its item
- * carries.
+ * Per style: the suffix its item id carries, the noun its item NAME ends in,
+ * and what its button in the jump's screen says.
  *
- * The VERTICAL is the bare `<wood>_jump` and is named from the BLOCK, because
- * its item is the one registered with useBlockDescriptionPrefix(). The other
- * two need names of their own - "Oak Oxer", not a second "Oak Jump" - so they
- * get `item.horsegenetics.*` keys here. Jumps.register is the twin.
+ * The vertical is the bare `jump` and is named "Oak Jump"; its button says
+ * "Vertical", because "Jump" on a button beside "Oxer" and "Crossrails" reads
+ * as the heading rather than as one of three choices. Jumps.java is the twin
+ * for the ids, JumpScreen for the buttons.
  */
 const STYLE_ITEM = {
-  vertical: { suffix: "", label: null },
-  oxer: { suffix: "_oxer", label: "Oxer" },
-  crossrails: { suffix: "_crossrails", label: "Crossrails" },
+  vertical: { suffix: "", label: "Jump", button: "Vertical" },
+  oxer: { suffix: "_oxer", label: "Oxer", button: "Oxer" },
+  crossrails: { suffix: "_crossrails", label: "Crossrails", button: "Crossrails" },
 };
 
 /** How many a single craft yields, and how many fences it takes. */
@@ -241,171 +241,52 @@ function elementsFor(style, suffix) {
 }
 
 // --- templates ------------------------------------------------------------
-// Three styles x five connection states, carrying the actual boxes, which
-// every wood then parents to with only its texture changed.
+//
+// A jump is drawn as TWO PARTS - a rails model and a standards model - which
+// client/JumpModel pushes one of each of, in whichever two woods the block
+// entity names. That is the trick that turns a 12 x 12 product into a 12 + 12
+// sum: one part per wood per half, not one model per PAIR of woods.
+//
+// The rails do not change with the connection state, only the standards do, so
+// there is one rails template per style and five standards templates.
+//
+// The WHOLE-JUMP template is still written, and is now used for one thing only:
+// the icon in an inventory slot. An item has no block entity to read, so its
+// model is an ordinary single model of one wood - see the item definitions
+// below, which select one per wood off the rails component.
 
 for (const style of STYLES) {
-  for (const suffix of CONNECTIONS) {
-    const model = {
-      textures: { particle: "#texture" },
-      elements: elementsFor(style, suffix),
-    };
-    // Only the both-standards model of each style is ever shown in an
-    // inventory slot, so it is the only one that needs a display transform.
+  put(join(A, "models/block", `template_${STYLE}_${style}.json`), {
+    parent: "block/block",
+    textures: { particle: "#texture" },
+    elements: elementsFor(style, ""),
     // Vanilla's fence gui pose: a jump is long and low and looks like nothing
     // at all face-on.
-    if (suffix === "") {
-      model.parent = "block/block";
-      model.display = {
-        gui: { rotation: [30, 45, 0], translation: [0, -2, 0], scale: [0.8, 0.8, 0.8] },
-        head: { rotation: [0, 0, 0], translation: [0, -3, -6], scale: [1, 1, 1] },
-      };
-    }
-    put(join(A, "models/block", `template_${STYLE}_${style}${suffix}.json`), model);
-  }
-}
+    display: {
+      gui: { rotation: [30, 45, 0], translation: [0, -2, 0], scale: [0.8, 0.8, 0.8] },
+      head: { rotation: [0, 0, 0], translation: [0, -3, -6], scale: [1, 1, 1] },
+    },
+  });
 
-// --- per-wood models, blockstates, items, recipes, loot --------------------
+  put(join(A, "models/block", `template_jump_${style}_rails.json`), {
+    textures: { particle: "#texture" },
+    elements: STYLE_PARTS[style].bars,
+  });
 
-// Authored for facing=south. Blockstate y rotation maps a direction clockwise.
-const VARIANT_ROTATION = { south: 0, west: 90, north: 180, east: 270 };
-
-const lang = {};
-const tagValues = [];
-
-for (const [wood, texture, woodLabel] of WOODS) {
-  const id = `${wood}_${STYLE}`;
-  tagValues.push(`${NS}:${id}`);
-  lang[`block.${NS}.${id}`] = `${woodLabel} ${STYLE_LABEL}`;
-
-  for (const style of STYLES) {
-    for (const suffix of CONNECTIONS) {
-      put(join(A, "models/block", `${id}_${style}${suffix}.json`), {
-        parent: `${NS}:block/template_${STYLE}_${style}${suffix}`,
-        textures: { texture },
-      });
-    }
-  }
-
-  // 3 styles x 4 facings x left x right x post = 96 variants
-  const variants = {};
-  for (const style of STYLES) {
-    for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
-      for (const left of [false, true]) {
-        for (const right of [false, true]) {
-          for (const post of [false, true]) {
-            const v = {
-              model: `${NS}:block/${id}_${style}${suffixFor(left, right, post)}`,
-              // NOT uvlocked on the crossrails. uvlock re-projects a face's UVs
-              // against the block axes after the blockstate's y rotation, and on
-              // an element that is ITSELF rotated 45 degrees the two fight and
-              // the grain shears. The other two styles are axis-aligned and lock
-              // cleanly. UNVERIFIED: this is reasoning about the renderer, not
-              // something that has been looked at.
-              uvlock: style !== "crossrails",
-            };
-            if (y !== 0) v.y = y;
-            // Property order in the key does not matter to the game, but
-            // keeping it alphabetical keeps the diffs readable.
-            variants[
-              `facing=${facing},left=${left},post=${post},right=${right},style=${style}`
-            ] = v;
-          }
-        }
-      }
-    }
-  }
-  put(join(A, "blockstates", id + ".json"), { variants });
-
-  // ONE ITEM PER STYLE. Each points at that style's both-standards model,
-  // which is the only one of the five given a gui transform above.
-  for (const style of STYLES) {
-    const { suffix, label } = STYLE_ITEM[style];
-    put(join(A, "items", id + suffix + ".json"), {
-      model: { type: "minecraft:model", model: `${NS}:block/${id}_${style}` },
+  for (const suffix of CONNECTIONS) {
+    // A mid-run block with no post draws no standards at all. An empty
+    // elements list is legal and bakes to nothing, which is what we want -
+    // but it must still EXIST, because the model id is referenced.
+    put(join(A, "models/block", `template_jump_${style}_standards${suffix}.json`), {
+      textures: { particle: "#texture" },
+      elements: splitElements(style, suffix).standards,
     });
-    if (label !== null) {
-      lang[`item.${NS}.${id}${suffix}`] = `${woodLabel} ${label}`;
-    }
   }
-
-  // ONE DROP, BUT THE RIGHT STYLE'S ITEM. A pool with rolls:1 picks among the
-  // entries whose conditions pass, and exactly one style condition can pass,
-  // so this is a switch rather than a lottery. Without it, breaking an oxer
-  // hands back a vertical and the style is quietly lost - which is the kind of
-  // thing nobody reports as a bug, they just stop using the feature.
-  //
-  // Unlike the double gate this is ONE block, so there is no partner to orphan
-  // and no half=left condition to get right.
-  put(join(D, "loot_table/blocks", id + ".json"), {
-    type: "minecraft:block",
-    pools: [
-      {
-        rolls: 1,
-        bonus_rolls: 0,
-        entries: STYLES.map((style) => ({
-          type: "minecraft:item",
-          name: `${NS}:${id}${STYLE_ITEM[style].suffix}`,
-          conditions: [
-            {
-              condition: "minecraft:block_state_property",
-              block: `${NS}:${id}`,
-              properties: { style },
-            },
-          ],
-        })),
-        conditions: [{ condition: "minecraft:survives_explosion" }],
-      },
-    ],
-  });
-
-  // THE HOUSE RULE IS OBEYED HERE, AND THE YIELD IS WHY IT CAN BE.
-  // wiki/items.html#rules: every recipe carries at least one modded
-  // ingredient, so none of them can collide with a vanilla or third-party one.
-  // The double gate is the documented exception; this is deliberately NOT a
-  // second one, because the argument that got the gate its exemption - nothing
-  // in vanilla consumes a fence gate - does not hold for plain fences, which
-  // plenty of mods do consume.
-  //
-  // So it takes one raw horse hair. The thing to avoid was the braided rope
-  // the gate used to want, which priced a paddock at twelve hairs a gate; a
-  // hair is sheared one to three at a time, once per horse per day. Four jumps
-  // per hair is the other side of that.
-  //
-  // THIS IS THE SAME-WOOD RECIPE. A mixed-wood craft - three fences of
-  // different woods giving a jump of whichever wood there was most of - cannot
-  // be a data recipe at all, because the result depends on the inputs. That is
-  // a custom recipe in Java and it is separate work; until it lands, mixing
-  // woods simply does not craft.
-  put(join(D, "recipe", id + ".json"), {
-    type: "minecraft:crafting_shapeless",
-    category: "building",
-    ingredients: [
-      ...Array(RECIPE_FENCES).fill(`minecraft:${wood}_fence`),
-      `${NS}:horse_hair`,
-    ],
-    result: { count: RECIPE_YIELD, id: `${NS}:${id}` },
-  });
 }
-
-// --- THE SINGLE BLOCK -----------------------------------------------------
-//
-// The twelve per-wood blocks above are being replaced by ONE block whose woods
-// are block-entity data, so that the rails and the standards can be different
-// woods. As blockstate properties that pair would be 12 x 12 x everything else
-// - 13,824 states, every one allocated at registry bootstrap on the server too.
-//
-// The model that reads the data is client/JumpModel, selected by the "type"
-// field below. It needs the geometry SPLIT IN TWO - a rails model and a
-// standards model per wood - because it composes a jump out of one part of
-// each. That is the trick that turns a 12 x 12 product into a 12 + 12 sum.
-//
-// While the migration is in progress this emits ALONGSIDE the per-wood assets
-// rather than instead of them, so the game keeps loading at every step.
 
 /** Which elements belong to the rails half, and which to the standards half. */
 function splitElements(style, suffix) {
-  const { bars, depth } = STYLE_PARTS[style];
+  const { depth } = STYLE_PARTS[style];
   const connectedLeft = suffix === "_l" || suffix.startsWith("_lr");
   const connectedRight = suffix === "_r" || suffix.startsWith("_lr");
   const standards = [];
@@ -414,29 +295,32 @@ function splitElements(style, suffix) {
   // The intermediate post is a STANDARD, not a rail: it is an upright, and it
   // should take the standards' wood when the two differ.
   if (suffix === "_lr_post") standards.push(POST);
-  return { rails: [...bars], standards };
+  return { rails: [...STYLE_PARTS[style].bars], standards };
 }
 
-for (const style of STYLES) {
-  // The rails do not change with the connection state - only the standards do -
-  // so there is one rails model per style rather than one per connection.
-  put(join(A, "models/block", `template_jump_${style}_rails.json`), {
-    textures: { particle: "#texture" },
-    elements: STYLE_PARTS[style].bars,
-  });
-  for (const suffix of CONNECTIONS) {
-    const { standards } = splitElements(style, suffix);
-    const model = { textures: { particle: "#texture" } };
-    // A mid-run block with no post draws no standards at all. An empty
-    // elements list is legal and bakes to nothing, which is what we want -
-    // but it must still EXIST, because the model id is referenced.
-    model.elements = standards;
-    put(join(A, "models/block", `template_jump_${style}_standards${suffix}.json`), model);
-  }
-}
+// --- per-wood models and recipes -------------------------------------------
+//
+// THERE IS NO PER-WOOD BLOCK ANY MORE, and no per-wood item. There were twelve
+// of each until 2026-09-20, when the woods became block-entity data so that a
+// jump's rails and its standards could differ. What a wood still needs is
+// models - three per style, each one line of parent-and-texture - and a recipe
+// that stamps its name onto the crafted item.
 
-for (const [wood, texture] of WOODS) {
+const lang = {};
+
+for (const [wood, texture, woodLabel] of WOODS) {
+  // What the screen and every item name call this wood. NOT the plank's own
+  // name, which is "Oak Planks" and would give "Oak Planks Jump".
+  // JumpWoods.label reads these, and falls back to the title-cased key for a
+  // modded wood that has none.
+  lang[`horsegenetics.wood.${wood}`] = woodLabel;
+
   for (const style of STYLES) {
+    // The icon model: a whole jump of one wood, both standards drawn.
+    put(join(A, "models/block", `${wood}_${STYLE}_${style}.json`), {
+      parent: `${NS}:block/template_${STYLE}_${style}`,
+      textures: { texture },
+    });
     put(join(A, "models/block", `${wood}_jump_${style}_rails.json`), {
       parent: `${NS}:block/template_jump_${style}_rails`,
       textures: { texture },
@@ -448,27 +332,75 @@ for (const [wood, texture] of WOODS) {
       });
     }
   }
+
+  // THE HOUSE RULE IS OBEYED HERE, AND THE YIELD IS WHY IT CAN BE.
+  // wiki/items.html#rules: every recipe carries at least one modded
+  // ingredient, so none of them can collide with a vanilla or third-party one.
+  // The double gate is the documented exception; this is deliberately NOT a
+  // second one, because the argument that got the gate its exemption - nothing
+  // in vanilla consumes a fence gate - does not hold for plain fences, which
+  // plenty of mods do consume.
+  //
+  // So it takes one raw horse hair. A hair is sheared one to three at a time,
+  // once per horse per day; four jumps per hair is the other side of that.
+  //
+  // ONE RECIPE PER WOOD STILL, even though there is one item. The wood is not
+  // in the id any more, it is in the result's COMPONENTS - which is the whole
+  // reason twelve recipes can make one item and it still comes out birch. A
+  // mixed-wood craft remains impossible, and is now also unnecessary: put the
+  // jump down and swap one half's plank in its screen.
+  //
+  // Only the VERTICAL is craftable. The other two styles are a free click in
+  // the screen, so a recipe for each would be twenty-four files to save one.
+  put(join(D, "recipe", `${STYLE}_${wood}.json`), {
+    type: "minecraft:crafting_shapeless",
+    category: "building",
+    ingredients: [
+      ...Array(RECIPE_FENCES).fill(`minecraft:${wood}_fence`),
+      `${NS}:horse_hair`,
+    ],
+    result: {
+      count: RECIPE_YIELD,
+      id: `${NS}:${STYLE}`,
+      components: {
+        [`${NS}:jump_rails`]: wood,
+        [`${NS}:jump_standards`]: wood,
+      },
+    },
+  });
 }
 
-// One blockstate for the one block. Every variant names the custom model and
-// the two SUFFIXES it should compose per wood - the wood list itself is not in
-// here, because it would be twenty-four entries repeated ninety-six times and
-// half of it depends on which other mods are installed. See JumpModel.Unbaked.
-const singleVariants = {};
+// --- the one block ---------------------------------------------------------
+
+// Authored for facing=south. Blockstate y rotation maps a direction clockwise.
+const VARIANT_ROTATION = { south: 0, west: 90, north: 180, east: 270 };
+
+// Every variant names the custom model and the two SUFFIXES it should compose
+// per wood - the wood list itself is not in here, because it would be
+// twenty-four entries repeated ninety-six times and half of it depends on which
+// other mods are installed. See JumpModel.Unbaked.
+const variants = {};
 for (const style of STYLES) {
   for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
     for (const left of [false, true]) {
       for (const right of [false, true]) {
         for (const post of [false, true]) {
-          const conn = suffixFor(left, right, post);
           const v = {
             type: `${NS}:jump`,
             rails: `jump_${style}_rails`,
-            standards: `jump_${style}_standards${conn}`,
+            standards: `jump_${style}_standards${suffixFor(left, right, post)}`,
+            // NOT uvlocked on the crossrails. uvlock re-projects a face's UVs
+            // against the block axes after the blockstate's y rotation, and on
+            // an element that is ITSELF rotated 45 degrees the two fight and
+            // the grain shears. The other two styles are axis-aligned and lock
+            // cleanly. UNVERIFIED: this is reasoning about the renderer, not
+            // something that has been looked at.
             uvlock: style !== "crossrails",
           };
           if (y !== 0) v.y = y;
-          singleVariants[
+          // Property order in the key does not matter to the game, but
+          // keeping it alphabetical keeps the diffs readable.
+          variants[
             `facing=${facing},left=${left},post=${post},right=${right},style=${style}`
           ] = v;
         }
@@ -476,32 +408,113 @@ for (const style of STYLES) {
     }
   }
 }
-put(join(A, "blockstates", "jump.json"), { variants: singleVariants });
+put(join(A, "blockstates", `${STYLE}.json`), { variants });
 
-// The item shows the oak vertical. Which wood an item PLACES comes from its
-// materials component, not from the model - the icon is just an icon.
-put(join(A, "items", "jump.json"), {
-  model: { type: "minecraft:model", model: `${NS}:block/oak_jump_vertical` },
+// ONE ITEM PER STYLE, AND EACH PICKS ITS ICON OFF A COMPONENT.
+//
+// minecraft:select with property minecraft:component matches the WHOLE value of
+// one component, so this selects on jump_rails alone - twelve cases - rather
+// than on a pair-valued component, which would need a case per pair. The icon
+// is therefore always right about the rails and says nothing about the
+// standards, which is the correct trade at sixteen pixels.
+//
+// The fallback is oak: a jump with no components at all (a /give, an older
+// item) draws as one rather than as a missing model.
+for (const style of STYLES) {
+  const { suffix, label } = STYLE_ITEM[style];
+  const model = (wood) => ({
+    type: "minecraft:model",
+    model: `${NS}:block/${wood}_${STYLE}_${style}`,
+  });
+  put(join(A, "items", `${STYLE}${suffix}.json`), {
+    model: {
+      type: "minecraft:select",
+      property: "minecraft:component",
+      component: `${NS}:jump_rails`,
+      cases: WOODS.map(([wood]) => ({ when: wood, model: model(wood) })),
+      fallback: model("oak"),
+    },
+  });
+
+  // "%s Jump" / "%s & %s Jump" - JumpItem.getName picks between them on
+  // whether the two woods match, because a jump whose halves differ has no one
+  // wood to be named after.
+  lang[`item.${NS}.${STYLE}${suffix}`] = `%s ${label}`;
+  lang[`item.${NS}.${STYLE}${suffix}.mixed`] = `%s & %s ${label}`;
+}
+
+// ONE DROP, BUT THE RIGHT STYLE'S ITEM, CARRYING THE RIGHT TWO WOODS.
+//
+// A pool with rolls:1 picks among the entries whose conditions pass, and
+// exactly one style condition can pass, so this is a switch rather than a
+// lottery. Without it, breaking an oxer hands back a vertical and the style is
+// quietly lost - which is the kind of thing nobody reports as a bug, they just
+// stop using the feature.
+//
+// copy_components is the OTHER half of that, and it is new here: the two woods
+// live on the block entity, and without copying them off it every jump broken
+// out of a course comes back oak. JumpBlockEntity.collectImplicitComponents is
+// what it reads; JumpBlock.setPlacedBy is what puts them back.
+put(join(D, "loot_table/blocks", `${STYLE}.json`), {
+  type: "minecraft:block",
+  pools: [
+    {
+      rolls: 1,
+      bonus_rolls: 0,
+      entries: STYLES.map((style) => ({
+        type: "minecraft:item",
+        name: `${NS}:${STYLE}${STYLE_ITEM[style].suffix}`,
+        conditions: [
+          {
+            condition: "minecraft:block_state_property",
+            block: `${NS}:${STYLE}`,
+            properties: { style },
+          },
+        ],
+        functions: [
+          {
+            function: "minecraft:copy_components",
+            source: "block_entity",
+            include: [`${NS}:jump_rails`, `${NS}:jump_standards`],
+          },
+        ],
+      })),
+      conditions: [{ condition: "minecraft:survives_explosion" }],
+    },
+  ],
 });
 
-lang[`block.${NS}.jump`] = "Jump";
+// The block's own name, which is what the screen's title bar shows.
+lang[`block.${NS}.${STYLE}`] = STYLE_LABEL;
+
+// The screen: two row captions, the style heading, and a button per style.
+lang[`${NS}.jump.rails`] = "Rails";
+lang[`${NS}.jump.standards`] = "Standards";
+lang[`${NS}.jump.style`] = "Style";
+for (const style of STYLES) {
+  lang[`${NS}.jump.style.${style}`] = STYLE_ITEM[style].button;
+}
 
 // --- tags -----------------------------------------------------------------
 // MERGED, not replaced: mineable/axe already belongs to the double gates, and
 // a datapack has one file per tag. Writing {values: ours} here would silently
 // take an axe off every gate in the mod. bake-double-gates.mjs merges into the
 // same file for the same reason - if you add a third family, merge too.
+//
+// ONE VALUE NOW, not twelve. The twelve per-wood ids are stale and were deleted
+// by hand when the block families merged; a tag naming a block that does not
+// exist is not an error, so nothing would have told us.
 
 const axePath = join(MC_TAGS, "mineable/axe.json");
 const existingTag = existsSync(axePath)
   ? JSON.parse(readFileSync(axePath, "utf8")).values ?? []
   : [];
-const merged = [...new Set([...existingTag, ...tagValues])];
+const merged = [...new Set([...existingTag, `${NS}:${STYLE}`])];
 put(axePath, { values: merged });
 
 // --- lang -----------------------------------------------------------------
 // Merged into the existing file rather than replacing it: every other key in
-// there is hand-written. Merging only ADDS, so a removed jump's key has to be
+// there is hand-written. Merging only ADDS, so a removed wood's key has to be
 // taken out by hand.
 
 const langPath = join(A, "lang/en_us.json");
@@ -510,7 +523,7 @@ for (const [k, v] of Object.entries(lang)) existing[k] = v;
 writeFileSync(langPath, JSON.stringify(existing, null, 2) + "\n", "utf8");
 
 console.log(
-  `jumps: ${WOODS.length} woods, ${STYLES.length} styles, ` +
-    `${STYLES.length * CONNECTIONS.length} templates, ${written} files written, ` +
-    `${Object.keys(lang).length} lang keys merged, ${merged.length} values in mineable/axe`
+  `jumps: one block, ${STYLES.length} items, ${WOODS.length} woods, ` +
+    `${written} files written, ${Object.keys(lang).length} lang keys merged, ` +
+    `${merged.length} values in mineable/axe`
 );
