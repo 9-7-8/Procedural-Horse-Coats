@@ -224,6 +224,27 @@
     gets past mod loading, would settle a dozen of these at once.
     <code>wiki/verification.html</code> &sect;0-FK.</li>
 
+<li id="gap-288"><strong>Open, found 2026-09-20 in play: a painted jump shows a visible seam
+    where one block meets the next.</strong> Owner, on the finished dyeing system: the dyeing
+    &ldquo;looks a little rough on connected sections (there&rsquo;s a noticeable seam)&rdquo;.
+    Accepted for this release rather than fixed &mdash; it is cosmetic, and only on painted runs.
+    <p>
+    <strong>The likely cause is the overlay&rsquo;s inflation.</strong> Paint is a second part laid
+    over the wood, the same boxes grown by <code>OVERLAY_INFLATE</code> (0.12px) so the two
+    surfaces do not z-fight &mdash; see <a href="item-jumps.html#paint">jumps &sect; paint</a>. That
+    inflation grows the box on <em>every</em> axis, including along the rail, so each block&rsquo;s
+    overlay pokes 0.12px into its neighbour&rsquo;s and two translucent surfaces overlap at every
+    seam. A translucent quad drawn twice is drawn twice: the doubled alpha is a darker line exactly
+    where the blocks meet.
+    </p>
+    <p>
+    <strong>If that is it, the fix is not to inflate along the rail axis</strong> &mdash; the
+    z-fighting it prevents is between the overlay and the wood <em>under</em> it, which is a
+    y and z problem, not an x one. Worth testing before believing: the seam has not been traced,
+    only reasoned about, and an unpainted run shows no seam at all, which is the evidence for the
+    overlay being the culprit rather than the geometry.
+    </p>
+</li>
 <li id="gap-287"><strong>Open, found 2026-09-20 in play: the Anglo-Arabian jumps high enough to
     hurt itself landing.</strong> A <em>natural</em> breed &mdash; no magical locus involved &mdash; clears
     enough height that it takes fall damage coming down. Owner, riding one, and the whole finding: it

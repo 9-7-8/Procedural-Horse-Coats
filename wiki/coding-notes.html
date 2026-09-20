@@ -152,6 +152,37 @@
     Java is correct, and a bug introduced into both at once is invisible to it forever.
 </p>
 
+<h2 id="missing-models">A green boot is not a clean boot &mdash; grep for missing models, not errors</h2>
+
+<p>
+    A block whose model id does not resolve draws as the purple-and-black cube and logs
+    <strong>at WARN</strong>:
+</p>
+
+<pre><code class="language-bash">grep -c "Missing block model" run/logs/latest.log</code></pre>
+
+<p>
+    Nothing about it is an <code>ERROR</code> or a <code>FATAL</code>. A boot can report zero of
+    both and still be missing a hundred models &mdash; which is exactly what happened on
+    2026-09-20: 104 missing jump models across two builds, reported as clean boots both times,
+    because the grep was for <code>/ERROR\]</code>. Add this one to the boot check.
+</p>
+
+<div class="note">
+    <span class="label">And the repo tool cannot catch it either</span>
+    <p>
+        <code>check-block-models.mjs</code> walks every blockstate and item definition and asserts
+        the model ids <em>named in them</em> exist. It passed through that entire bug, twice,
+        because every id named in the blockstate was real &mdash; the broken one was
+        <strong>composed in Java</strong>, one layer past anything the checker reads.
+    </p>
+    <p>
+        So: whenever a model id is built by concatenation at run time &mdash;
+        <code>JumpModel</code> does it for woods, connection states and crossrail slices &mdash;
+        the checker is not covering you and the log is the only thing that is.
+    </p>
+</div>
+
 <h2 id="sources-lie">The decompiled sources jar is not the API &mdash; <code>javap</code> the real one</h2>
 
 <p>
