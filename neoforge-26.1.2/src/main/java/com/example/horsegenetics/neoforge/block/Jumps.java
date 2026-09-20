@@ -50,7 +50,12 @@ public final class Jumps {
                        java.util.function.Supplier<Item> sourceFence,
                        String plankId,
                        DeferredBlock<JumpBlock> block,
-                       DeferredItem<BlockItem> item) {
+                       List<DeferredItem<BlockItem>> items) {
+
+        /** The vertical, which is the style the plain {@code <wood>_jump} item places. */
+        public DeferredItem<BlockItem> item() {
+            return this.items.get(0);
+        }
     }
 
     /** Vanilla's twelve, each beside the fence it is built from. */
@@ -131,14 +136,31 @@ public final class Jumps {
                         .noOcclusion()
                         .ignitedByLava());
 
-        // useBlockDescriptionPrefix() or every one of these is named from an
-        // `item.horsegenetics.*` key that does not exist - BlockItem in 26.1.2
-        // does NOT defer its description id to its block, so a `block.*` lang
-        // key is simply never consulted. Same line, same reason, as the gates'.
-        DeferredItem<BlockItem> item = ModItems.ITEMS.registerItem(name,
-                p -> new BlockItem(block.get(), p.useBlockDescriptionPrefix()));
+        // ONE ITEM PER STYLE, all placing this one block.
+        //
+        // Style is a blockstate property, so a single BlockItem only ever
+        // places the default - which is exactly what the owner found: "I only
+        // see the vertical in the creative tab". Several BlockItems may point
+        // at one Block and differ only in the state they place. See JumpItem.
+        //
+        // The VERTICAL keeps the bare `<wood>_jump` id and takes its name from
+        // the block, via useBlockDescriptionPrefix(): BlockItem in 26.1.2 does
+        // NOT defer its description id to its block, so without that line a
+        // `block.*` lang key is never consulted. The other styles need names of
+        // their own ("Oak Oxer", not a second "Oak Jump"), so they are NOT
+        // given the prefix and carry `item.horsegenetics.*` keys instead -
+        // written by bake-jumps.mjs.
+        List<DeferredItem<BlockItem>> items = new ArrayList<>();
+        for (JumpBlock.Style style : JumpBlock.Style.values()) {
+            boolean vertical = style == JumpBlock.Style.VERTICAL;
+            String itemName = vertical ? name : name + "_" + style.getSerializedName();
+            items.add(ModItems.ITEMS.registerItem(itemName,
+                    p -> new com.example.horsegenetics.neoforge.item.JumpItem(
+                            block.get(), style,
+                            vertical ? p.useBlockDescriptionPrefix() : p)));
+        }
 
-        JUMPS.add(new Jump(wood(name), sourceFence, plankId, block, item));
+        JUMPS.add(new Jump(wood(name), sourceFence, plankId, block, List.copyOf(items)));
     }
 
     /**

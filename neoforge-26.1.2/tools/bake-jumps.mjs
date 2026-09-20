@@ -82,6 +82,21 @@ const STYLE_LABEL = "Jump";
 /** Must match JumpBlock.Style, in the same order. */
 const STYLES = ["vertical", "oxer", "crossrails"];
 
+/**
+ * What each style is called in an item name, and the id suffix its item
+ * carries.
+ *
+ * The VERTICAL is the bare `<wood>_jump` and is named from the BLOCK, because
+ * its item is the one registered with useBlockDescriptionPrefix(). The other
+ * two need names of their own - "Oak Oxer", not a second "Oak Jump" - so they
+ * get `item.horsegenetics.*` keys here. Jumps.register is the twin.
+ */
+const STYLE_ITEM = {
+  vertical: { suffix: "", label: null },
+  oxer: { suffix: "_oxer", label: "Oxer" },
+  crossrails: { suffix: "_crossrails", label: "Crossrails" },
+};
+
 /** How many a single craft yields, and how many fences it takes. */
 const RECIPE_YIELD = 4;
 const RECIPE_FENCES = 3;
@@ -302,21 +317,43 @@ for (const [wood, texture, woodLabel] of WOODS) {
   }
   put(join(A, "blockstates", id + ".json"), { variants });
 
-  // The icon is the vertical with both standards - the only model given a gui
-  // transform above, and the style the item places.
-  put(join(A, "items", id + ".json"), {
-    model: { type: "minecraft:model", model: `${NS}:block/${id}_vertical` },
-  });
+  // ONE ITEM PER STYLE. Each points at that style's both-standards model,
+  // which is the only one of the five given a gui transform above.
+  for (const style of STYLES) {
+    const { suffix, label } = STYLE_ITEM[style];
+    put(join(A, "items", id + suffix + ".json"), {
+      model: { type: "minecraft:model", model: `${NS}:block/${id}_${style}` },
+    });
+    if (label !== null) {
+      lang[`item.${NS}.${id}${suffix}`] = `${woodLabel} ${label}`;
+    }
+  }
 
-  // An ordinary single-drop table. Unlike the double gate this is ONE block,
-  // so there is no partner to orphan and no half=left condition to get right.
+  // ONE DROP, BUT THE RIGHT STYLE'S ITEM. A pool with rolls:1 picks among the
+  // entries whose conditions pass, and exactly one style condition can pass,
+  // so this is a switch rather than a lottery. Without it, breaking an oxer
+  // hands back a vertical and the style is quietly lost - which is the kind of
+  // thing nobody reports as a bug, they just stop using the feature.
+  //
+  // Unlike the double gate this is ONE block, so there is no partner to orphan
+  // and no half=left condition to get right.
   put(join(D, "loot_table/blocks", id + ".json"), {
     type: "minecraft:block",
     pools: [
       {
         rolls: 1,
         bonus_rolls: 0,
-        entries: [{ type: "minecraft:item", name: `${NS}:${id}` }],
+        entries: STYLES.map((style) => ({
+          type: "minecraft:item",
+          name: `${NS}:${id}${STYLE_ITEM[style].suffix}`,
+          conditions: [
+            {
+              condition: "minecraft:block_state_property",
+              block: `${NS}:${id}`,
+              properties: { style },
+            },
+          ],
+        })),
         conditions: [{ condition: "minecraft:survives_explosion" }],
       },
     ],

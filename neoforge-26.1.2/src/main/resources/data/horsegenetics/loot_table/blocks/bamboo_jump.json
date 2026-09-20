@@ -7,7 +7,42 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "horsegenetics:bamboo_jump"
+          "name": "horsegenetics:bamboo_jump",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:bamboo_jump",
+              "properties": {
+                "style": "vertical"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:bamboo_jump_oxer",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:bamboo_jump",
+              "properties": {
+                "style": "oxer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:bamboo_jump_crossrails",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:bamboo_jump",
+              "properties": {
+                "style": "crossrails"
+              }
+            }
+          ]
         }
       ],
       "conditions": [

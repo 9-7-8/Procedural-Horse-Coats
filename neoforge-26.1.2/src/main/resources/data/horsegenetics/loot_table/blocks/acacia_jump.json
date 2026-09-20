@@ -7,7 +7,42 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "horsegenetics:acacia_jump"
+          "name": "horsegenetics:acacia_jump",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:acacia_jump",
+              "properties": {
+                "style": "vertical"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:acacia_jump_oxer",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:acacia_jump",
+              "properties": {
+                "style": "oxer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:acacia_jump_crossrails",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:acacia_jump",
+              "properties": {
+                "style": "crossrails"
+              }
+            }
+          ]
         }
       ],
       "conditions": [

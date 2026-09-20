@@ -7,7 +7,42 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "horsegenetics:oak_jump"
+          "name": "horsegenetics:oak_jump",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:oak_jump",
+              "properties": {
+                "style": "vertical"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:oak_jump_oxer",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:oak_jump",
+              "properties": {
+                "style": "oxer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:oak_jump_crossrails",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:oak_jump",
+              "properties": {
+                "style": "crossrails"
+              }
+            }
+          ]
         }
       ],
       "conditions": [

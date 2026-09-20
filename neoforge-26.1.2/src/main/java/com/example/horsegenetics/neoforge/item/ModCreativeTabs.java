@@ -77,9 +77,14 @@ public final class ModCreativeTabs {
                     .displayItems((params, output) -> {
                         // Vanilla's twelve in vanilla's wood order, then every
                         // modded wood by id - whatever order FML loaded them in.
+                        // EVERY style of every wood, not just the vertical. Grouped
+                        // by wood rather than by style, so the twelve oaks sit
+                        // together the way somebody building one course wants.
                         for (com.example.horsegenetics.neoforge.block.Jumps.Jump jump
                                 : com.example.horsegenetics.neoforge.block.Jumps.jumps()) {
-                            output.accept(jump.item().get());
+                            for (var item : jump.items()) {
+                                output.accept(item.get());
+                            }
                         }
                     })
                     .build());

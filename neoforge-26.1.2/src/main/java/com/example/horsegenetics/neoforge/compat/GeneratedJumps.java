@@ -52,6 +52,15 @@ final class GeneratedJumps {
     /** Must match {@code JumpBlock.Style}, in the same order. */
     private static final String[] STYLES = {"vertical", "oxer", "crossrails"};
 
+    /**
+     * The item id suffix and display label for each style, in {@link #STYLES}
+     * order. The vertical is the bare id and takes its name from the block;
+     * the other two need names of their own. {@code STYLE_ITEM} in
+     * bake-jumps.mjs is the twin.
+     */
+    private static final String[] STYLE_SUFFIX = {"", "_oxer", "_crossrails"};
+    private static final String[] STYLE_LABEL = {null, "Oxer", "Crossrails"};
+
     /** Must match {@code RECIPE_FENCES} in bake-jumps.mjs. */
     private static final int RECIPE_FENCES = 3;
 
@@ -146,15 +155,21 @@ final class GeneratedJumps {
             blockstate.add("variants", variants);
             put(files, "assets/" + NS + "/blockstates/" + id + ".json", blockstate);
 
-            // ---- the icon is the vertical, with both standards ---------------
-            // The only model given a gui transform in the shipped template, and
-            // the style the item places.
-            JsonObject itemModel = new JsonObject();
-            itemModel.addProperty("type", "minecraft:model");
-            itemModel.addProperty("model", NS + ":block/" + id + "_vertical");
-            JsonObject item = new JsonObject();
-            item.add("model", itemModel);
-            put(files, "assets/" + NS + "/items/" + id + ".json", item);
+            // ---- one item per style ------------------------------------------
+            // Each points at that style's both-standards model, the only one of
+            // the five given a gui transform in the shipped template.
+            for (int i = 0; i < STYLES.length; i++) {
+                JsonObject itemModel = new JsonObject();
+                itemModel.addProperty("type", "minecraft:model");
+                itemModel.addProperty("model", NS + ":block/" + id + "_" + STYLES[i]);
+                JsonObject item = new JsonObject();
+                item.add("model", itemModel);
+                put(files, "assets/" + NS + "/items/" + id + STYLE_SUFFIX[i] + ".json", item);
+                if (STYLE_LABEL[i] != null) {
+                    lang.addProperty("item." + NS + "." + id + STYLE_SUFFIX[i],
+                            label(wood) + " " + STYLE_LABEL[i]);
+                }
+            }
 
             put(files, "data/" + NS + "/loot_table/blocks/" + id + ".json", blockLoot(id));
 
@@ -185,14 +200,31 @@ final class GeneratedJumps {
      *
      * <p>Unlike {@link GeneratedGates#blockLoot} there is no {@code half}
      * condition, and there must not be one: a jump is <b>one</b> block, so
-     * there is no partner to orphan and nothing that could pay out twice.
+     * there is no partner to orphan and nothing that could pay out twice. The
+     * conditions here select the <i>style</i>, not a half.
      */
     private static JsonObject blockLoot(String id) {
-        JsonObject entry = new JsonObject();
-        entry.addProperty("type", "minecraft:item");
-        entry.addProperty("name", NS + ":" + id);
+        // ONE DROP, BUT THE RIGHT STYLE'S ITEM. A pool with rolls:1 picks among
+        // the entries whose conditions pass, and exactly one style condition
+        // can pass, so this is a switch rather than a lottery. Without it,
+        // breaking an oxer hands back a vertical and the style is quietly lost.
         JsonArray entries = new JsonArray();
-        entries.add(entry);
+        for (int i = 0; i < STYLES.length; i++) {
+            JsonObject styleProperty = new JsonObject();
+            styleProperty.addProperty("style", STYLES[i]);
+            JsonObject isStyle = new JsonObject();
+            isStyle.addProperty("condition", "minecraft:block_state_property");
+            isStyle.addProperty("block", NS + ":" + id);
+            isStyle.add("properties", styleProperty);
+            JsonArray entryConditions = new JsonArray();
+            entryConditions.add(isStyle);
+
+            JsonObject entry = new JsonObject();
+            entry.addProperty("type", "minecraft:item");
+            entry.addProperty("name", NS + ":" + id + STYLE_SUFFIX[i]);
+            entry.add("conditions", entryConditions);
+            entries.add(entry);
+        }
 
         JsonObject survives = new JsonObject();
         survives.addProperty("condition", "minecraft:survives_explosion");

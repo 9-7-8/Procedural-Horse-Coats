@@ -18,10 +18,10 @@
 <p class="eyebrow">Block <span class="sep">/</span> the yard</p>
 <h1>Jumps</h1>
 <p class="lede">
-    A showjumping rail, and a real obstacle: like a fence, it <strong>cannot be stepped
-    over</strong>. Place them <strong>side by side</strong> to widen a fence and <strong>on top of
-    each other</strong> to raise it &mdash; there is no height setting, because the stack
-    <em>is</em> the height. One per wood, and the first thing in the mod that makes a
+    A showjumping fence in three styles, and a real obstacle: like a fence, it <strong>cannot be
+    stepped over</strong>. Place them <strong>side by side</strong> to widen it and <strong>on top
+    of each other</strong> to raise it &mdash; there is no height setting, because the stack
+    <em>is</em> the height. One of each style per wood, and the first thing in the mod that makes a
     horse&rsquo;s <a href="horse-body.html">jump stat</a> something you can watch rather than read.
 </p>
 
@@ -38,7 +38,7 @@
 
 <div class="plain" id="recipe">
     <p>
-        <strong>Recipe (shapeless):</strong> 2 vanilla fences of that wood + 1
+        <strong>Recipe (shapeless):</strong> 3 vanilla fences of that wood + 1
         <a href="item-horse-hair.html">horse hair</a> &rarr; <strong>4 jumps</strong>.
     </p>
     <p>
@@ -47,6 +47,52 @@
         costs three hairs, which is an afternoon with one horse rather than a reason not to build.
     </p>
 </div>
+
+<h2 id="styles">Three styles, and changing one costs something</h2>
+
+<p>
+    Every jump is one of three shapes. <strong>None of them is more than one block deep</strong>
+    &mdash; real courses put ground poles in front of an oxer, and we deliberately do not, because
+    a jump that occupies two blocks stops being a thing you put in a row and starts being a
+    structure.
+</p>
+
+<table>
+    <thead>
+        <tr><th>Style</th><th>What it is</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><strong>Vertical</strong></td><td>One rail. The plain fence, and what a jump
+            starts as.</td></tr>
+        <tr><td><strong>Oxer</strong></td><td>Two rails with a spread, front and back, with wider
+            standards to hold them.</td></tr>
+        <tr><td><strong>Crossrails</strong></td><td>Two poles crossed in an X, lowest in the
+            middle &mdash; the shape you school a young horse over.</td></tr>
+    </tbody>
+</table>
+
+<div class="plain" id="changing">
+    <p>
+        <strong>A stick restyles it.</strong> Right-click a placed jump holding a stick and it
+        becomes the next style, spending the stick.
+    </p>
+    <p>
+        <strong>A plank repaints it</strong> in that plank&rsquo;s wood, spending the plank. That
+        is also how you say <em>which</em> wood &mdash; there is no menu and no cycle order to
+        learn, you hold the wood you want. Holding the wood it already is does nothing and costs
+        nothing.
+    </p>
+    <p>
+        Neither is consumed in creative. Both are deliberately one item: a course is a thing you
+        build rather than fiddle with, and the cost is meant to be a brake, not a tax.
+    </p>
+</div>
+
+<p>
+    <strong>Style changes nothing about the jumping.</strong> All three collide identically, so a
+    stack of three is the same fence whichever shape you build it from. That is on purpose &mdash;
+    see <a href="#why-cosmetic">why style is cosmetic</a>.
+</p>
 
 <h2 id="height">Height is the stack, and it is a measuring stick</h2>
 
@@ -99,14 +145,27 @@
 <ul>
     <li><strong>Facing</strong> is set when you place it, from the way you are looking, and the
         rail runs across that. A row placed while walking sideways comes out straight.</li>
+    <li><strong>A jump placed on top of a jump takes the facing of the one below</strong>, so a
+        stack lines up however you walk around it while building. Only facing is inherited &mdash;
+        the style still comes from the item in your hand, so you can stack an oxer on a
+        vertical.</li>
     <li><strong>A single jump is already a fence.</strong> There is no trot-pole height &mdash;
         the lowest thing you can build is one a horse has to leave the ground for.</li>
     <li><strong>A jump facing north and one facing south are the same fence</strong>, so they
         join up. You do not have to approach a row from a consistent side to build it.</li>
     <li>Jumps join to jumps and to nothing else &mdash; they will not connect to a fence, a
         <a href="item-double-gates.html">double gate</a> or a wall.</li>
-    <li>An axe is the right tool, and one jump drops one jump.</li>
+    <li>An axe is the right tool, and a jump drops <em>its own style</em> &mdash; break an oxer,
+        get an oxer back.</li>
 </ul>
+
+<p>
+    Jumps live in their <strong>own creative tab</strong>, &ldquo;Horse Jumps&rdquo;, rather
+    than in Building Blocks where the <a href="item-double-gates.html">double gates</a> are. A
+    gate is a building block horses happen to care about; a jump is horse equipment, useless
+    without one. <strong>Every style of every wood is in there</strong>, grouped by wood, so the
+    three oaks sit together rather than the twelve verticals.
+</p>
 
 <p>
     Every wood has one, including <strong>woods other mods added</strong> &mdash; those are
@@ -117,8 +176,16 @@
 <h2 id="not-yet">What it is not, yet</h2>
 
 <p>
-    This is one jump type: a plain vertical rail. Cross-country has a vocabulary well beyond it
-    &mdash; logs, brush, ditches, oxers, fillers, water &mdash; and none of that is built. Nothing
+    Three styles is not a course designer&rsquo;s vocabulary. <strong>A wall</strong> is the next
+    one and is a different problem: &ldquo;wall&rdquo; means cobblestone, brick, stone brick &mdash;
+    a material axis that is not the twelve woods, so it waits on jumps carrying their material as
+    data rather than as one block per wood. Beyond that, cross-country wants logs, brush, ditches,
+    fillers and water, and none of it is built.
+</p>
+
+<p>
+    <strong>The standards and the rails cannot yet be different woods</strong>, which is the other
+    thing waiting on that same change: two woods on one jump cannot be a block each. Nothing
     scores a round, times one, or notices that a horse knocked a rail, because a jump is currently
     scenery with a collision box. <a href="roadmap.html#items">The roadmap</a> is where that
     lives.
@@ -169,6 +236,25 @@
     share a top in the drawn shape (15 and 16) &mdash; collapsing those into one number quietly
     lops a pixel off every post. And the tall box applies to players as much as horses, so a
     course cannot be crossed on foot. That is intended, and it is what a fence does.
+</p>
+
+<h2 id="uvlock">The crossrails are not UV-locked</h2>
+
+<p>
+    The X is drawn with <strong>model element rotation</strong>, which vanilla caps at
+    &plusmn;45&deg; about one axis &mdash; exactly enough for a crossrail and no more. A 16-long
+    bar turned 45&deg; projects to about 11 across, so it stays inside its own block. That is why
+    <strong>crossrails do not run together</strong> the way the other two styles do: each is its
+    own X. Intended, not a limitation waiting to be fixed.
+</p>
+
+<p>
+    <strong>UNVERIFIED, and reasoning rather than observation:</strong> the crossrails blockstate
+    sets <code>uvlock: false</code> where the other styles set true. UV-lock re-projects a
+    face&rsquo;s texture against the block axes after the blockstate&rsquo;s <code>y</code>
+    rotation, and on an element that is <em>itself</em> rotated 45&deg; the two rotations fight
+    and the grain shears. The axis-aligned styles lock cleanly. Worth looking at a crossrail
+    facing each of the four ways before trusting it.
 </p>
 
 <h2 id="three-copies">The geometry is written three times</h2>
@@ -255,6 +341,23 @@
 <p>
     It also costs nothing. No property, no cycling interaction, no lang keys, no extra variants,
     and the ladder comes out evenly spaced for free because blocks are one block tall.
+</p>
+
+<h2 id="why-cosmetic">Why style is cosmetic</h2>
+
+<p>
+    An oxer is a harder fence than a vertical in life, and it would have been easy to make one
+    here. It is deliberately not. The height ladder is the mod&rsquo;s one honest reading of a
+    horse&rsquo;s jump genetics, and it stays readable only while <strong>a stack of three means
+    the same thing whatever it is built from</strong>. A style that jumped differently would make
+    the measurement depend on decoration, and you would no longer be able to compare two horses
+    without also comparing the fences you happened to build for them.
+</p>
+
+<p>
+    So difficulty lives in the one axis that is honest about itself &mdash; how high you stack it
+    &mdash; and style is what the course <em>looks</em> like. That also means a rider can rebuild
+    a course to taste without changing what it tests.
 </p>
 
 <h2 id="instrument">What a stack can actually measure</h2>

@@ -7,7 +7,42 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "horsegenetics:mangrove_jump"
+          "name": "horsegenetics:mangrove_jump",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:mangrove_jump",
+              "properties": {
+                "style": "vertical"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:mangrove_jump_oxer",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:mangrove_jump",
+              "properties": {
+                "style": "oxer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "horsegenetics:mangrove_jump_crossrails",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "horsegenetics:mangrove_jump",
+              "properties": {
+                "style": "crossrails"
+              }
+            }
+          ]
         }
       ],
       "conditions": [

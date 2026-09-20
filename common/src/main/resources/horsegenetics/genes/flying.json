@@ -24,7 +24,7 @@
     {
       "id": "glide",
       "name": "Gliding flight",
-      "description": "Glides on momentum like an elytra. A charged jump launches it; from there height is bought with speed and speed with height. It cannot hover, and a horse that runs out of both falls.",
+      "description": "Glides on momentum like an elytra. A jump launches it; from there height is bought with speed and speed with height. It cannot hover, and a horse that runs out of both falls.",
       "when": ["El/El", "El/Tf", "El/n"],
       "effects": [
         { "type": "traversal", "flag": "flight_glide" }

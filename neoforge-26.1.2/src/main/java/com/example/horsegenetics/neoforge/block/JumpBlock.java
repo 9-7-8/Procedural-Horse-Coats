@@ -453,9 +453,32 @@ public class JumpBlock extends HorizontalDirectionalBlock {
         return state.setValue(POST, midRun && postsHere(pos, state.getValue(FACING)));
     }
 
+    /**
+     * <b>A jump placed on top of a jump takes its facing.</b>
+     *
+     * <p>Without this, stacking is a lottery: facing comes from whichever way
+     * the player happened to be looking, so the second block of a two-high
+     * fence can come out crosswise to the first. Owner, building one: "we do
+     * need to be able to cleanly stack verticals". Inheriting from below makes
+     * a stack line up however you walk around it.
+     *
+     * <p><b>Facing follows the stack; style follows the hand.</b> The style is
+     * deliberately <i>not</i> inherited - {@code JumpItem} applies it after
+     * this runs, so a player holding an oxer gets an oxer even on top of a
+     * vertical. Only what would otherwise be arbitrary is taken from below.
+     *
+     * <p>Only the block directly below is consulted, not the sides. A jump
+     * beside a jump is usually the start of the same fence line, but not
+     * always, and overriding the player's facing there would make a row
+     * impossible to turn a corner with.
+     */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        Direction facing = context.getHorizontalDirection().getOpposite();
+        LevelReader below = context.getLevel();
+        BlockState under = below.getBlockState(context.getClickedPos().below());
+        Direction facing = under.getBlock() instanceof JumpBlock
+                ? under.getValue(FACING)
+                : context.getHorizontalDirection().getOpposite();
         BlockState state = this.defaultBlockState().setValue(FACING, facing);
         LevelReader level = context.getLevel();
         BlockPos pos = context.getClickedPos();

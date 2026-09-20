@@ -62,7 +62,7 @@ public abstract class HorseFlightRiddenMixin {
      */
     @Inject(method = "onPlayerJump", at = @At("HEAD"), cancellable = true)
     private void horsegenetics$noRearingInFlight(int jumpAmount, CallbackInfo ci) {
-        // CREATIVE ONLY. A gliding horse needs its jump: the charged leap is how
+        // CREATIVE ONLY. A gliding horse needs its jump: the leap is how
         // it gets off the ground, and HorseFlightMixin only lights the elytra
         // flag once the horse is airborne. Suppressing the rear for every flying
         // mode would have left a glider standing in a field unable to launch -
