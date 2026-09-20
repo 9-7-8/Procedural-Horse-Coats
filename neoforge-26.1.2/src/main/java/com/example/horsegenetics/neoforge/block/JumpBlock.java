@@ -224,8 +224,12 @@ public class JumpBlock extends HorizontalDirectionalBlock
             // that no style here is more than a block deep.
             case OXER -> new Bar[] {new Bar(11, RAIL_TOP, 2, 6), new Bar(11, RAIL_TOP, 10, 14)};
             // The X is drawn by the model with rotated elements, which a
-            // VoxelShape cannot express; this is only its bounding bar.
-            case CROSSRAILS -> new Bar[] {new Bar(2, 14, 6, 10)};
+            // VoxelShape cannot express; this is only its bounding bar. It
+            // spans the FULL block now that the arms are sized by their
+            // projection rather than by their own length - an outline still
+            // stopping at 14 would sit visibly inside the poles it is meant to
+            // be tracing.
+            case CROSSRAILS -> new Bar[] {new Bar(0, 16, 6, 10)};
         };
     }
 

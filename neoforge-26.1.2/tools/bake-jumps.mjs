@@ -201,16 +201,30 @@ const POST = {
 /**
  * One arm of the X, rotated in the block's own model.
  *
- * Element rotation is limited to +/-45 and +/-22.5 about ONE axis, which is
- * exactly enough for a crossrail. A 16-long bar turned 45 degrees about z
- * projects to about 11.3 across, so it stays inside the block rather than
- * poking into its neighbours - which is right: crossrails are each their own
- * X, and do not run together the way the other two styles do.
+ * THE ARM IS LONGER THAN THE BLOCK IS WIDE, AND THAT IS THE FIX.
+ * A bar 16 long turned 45 degrees only PROJECTS about 11.3 across, so the X sat
+ * marooned in the middle of its block: it never reached the standards, and a
+ * row of crossrails was a row of little disconnected X's with a gap at every
+ * seam. The owner's verdict, three times, was that the crossrails "look bad".
+ *
+ * So the arm is sized by its projection instead - half-length 8/cos(angle),
+ * which lands its centre line exactly on the block's corners. It now meets the
+ * standards at the ends of a run and meets its neighbour's arm mid-run, which
+ * is what a real crossrail line looks like. Element bounds may legally run from
+ * -16 to 32, so the overhang is fine.
+ *
+ * THE OLD COMMENT HERE CLAIMED element rotation was limited to +/-45 and
+ * +/-22.5 about one axis. **That is no longer true in 26.1.2** - the angle is
+ * an unvalidated float and there is a second multi-axis form - so a shallower
+ * arm spanning two or three blocks is expressible whenever that gets built.
+ * See wiki/item-jumps.html.
  */
 function crossArm(angle) {
+  // Sized by projection: the half-length whose horizontal span is exactly 8.
+  const half = 8 / Math.cos((Math.abs(angle) * Math.PI) / 180);
   return {
-    from: [0, 7, 6],
-    to: [16, 10, 10],
+    from: [8 - half, 7, 6],
+    to: [8 + half, 10, 10],
     rotation: { origin: [8, 8, 8], axis: "z", angle },
     faces: {
       down: face([0, 6, 16, 10]),
@@ -349,30 +363,56 @@ function splitElements(style, suffix) {
 
 const lang = {};
 
-// THE PAINTED PARTS, which are not per wood.
+// THE PAINT OVERLAY, which is not per wood and is not a wood at all.
 //
-// A dyed half is drawn on pale, neutral timber rather than on its own wood, and
-// the reason is arithmetic: a block tint is a MULTIPLY, so it can only darken
-// and can only ever deepen a hue the texture already has. Blue over oak came
-// out a dark brown-navy, and blue over a dark modded wood came out "nearly
-// black purple" (owner, 2026-09-20). Vanilla dyes leather against a greyscale
-// base for exactly this reason, and painted_pole.png is that base.
+// A dyed half keeps its own wood part and gains a SECOND part laid over it:
+// the same boxes, very slightly inflated, drawn in flat white at a fixed alpha
+// and tinted. So the result is an alpha blend - wood*(1-a) + dye*a - and the
+// grain and shading underneath survive at full contrast.
 //
-// It is also what a real jump looks like: showjumping poles are painted solid
-// colours and you do not see the grain through the paint. So there is ONE set
-// of painted models for every wood - 18 files, not 18 per wood - and the wood a
-// painted jump is made of is remembered underneath and comes back the moment
-// the paint is stripped.
-const PAINTED_TEXTURE = `${NS}:block/painted_pole`;
+// It got here by two wrong turns, both worth recording. Tinting the wood itself
+// is a MULTIPLY, which can only darken and cannot shift a hue the wood does not
+// already have: blue-on-oak came out a dark navy-brown. Painting a pale neutral
+// pole instead fixed the colour and threw the wood away with it - "we're losing
+// too much of the original texture/shading" (owner). An overlay is the only one
+// of the three that keeps both.
+//
+// INFLATION IS NOT OPTIONAL. Two coplanar surfaces z-fight, and z-fighting on a
+// fence rail reads as flickering dirt rather than as a rendering bug. OVERLAY_
+// INFLATE is in the same pixel units as the boxes.
+const OVERLAY_TEXTURE = `${NS}:block/paint_overlay`;
+const OVERLAY_INFLATE = 0.12;
+
+/** The same elements, grown a hair in every direction, keeping their tint index. */
+function inflated(elements) {
+  return elements.map((element) => ({
+    ...element,
+    from: element.from.map((v) => v - OVERLAY_INFLATE),
+    to: element.to.map((v) => v + OVERLAY_INFLATE),
+  }));
+}
+
 for (const style of STYLES) {
-  put(join(A, "models/block", `painted_jump_${style}_rails.json`), {
-    parent: `${NS}:block/template_jump_${style}_rails`,
-    textures: { texture: PAINTED_TEXTURE },
+  put(join(A, "models/block", `overlay_jump_${style}_rails.json`), {
+    // force_translucent, because the sprite is flat white at a constant alpha
+    // and we are not leaving the render layer to be inferred from it: a wash
+    // that came out CUTOUT would threshold to fully opaque and hide the very
+    // wood it exists to let through.
+    textures: {
+      texture: { sprite: OVERLAY_TEXTURE, force_translucent: true },
+      particle: OVERLAY_TEXTURE,
+    },
+    elements: inflated(tinted(STYLE_PARTS[style].bars, RAILS_TINT)),
   });
   for (const suffix of CONNECTIONS) {
-    put(join(A, "models/block", `painted_jump_${style}_standards${suffix}.json`), {
-      parent: `${NS}:block/template_jump_${style}_standards${suffix}`,
-      textures: { texture: PAINTED_TEXTURE },
+    put(join(A, "models/block", `overlay_jump_${style}_standards${suffix}.json`), {
+      textures: {
+        texture: { sprite: OVERLAY_TEXTURE, force_translucent: true },
+        particle: OVERLAY_TEXTURE,
+      },
+      elements: inflated(
+        tinted(splitElements(style, suffix).standards, STANDARDS_TINT)
+      ),
     });
   }
 }

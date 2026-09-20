@@ -1,0 +1,85 @@
+{
+  "textures": {
+    "texture": {
+      "sprite": "horsegenetics:block/paint_overlay",
+      "force_translucent": true
+    },
+    "particle": "horsegenetics:block/paint_overlay"
+  },
+  "elements": [
+    {
+      "from": [
+        12.88,
+        -0.12,
+        4.88
+      ],
+      "to": [
+        16.12,
+        16.12,
+        11.12
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            13,
+            5,
+            16,
+            11
+          ],
+          "texture": "#texture",
+          "tintindex": 1
+        },
+        "up": {
+          "uv": [
+            13,
+            5,
+            16,
+            11
+          ],
+          "texture": "#texture",
+          "tintindex": 1
+        },
+        "north": {
+          "uv": [
+            13,
+            0,
+            16,
+            16
+          ],
+          "texture": "#texture",
+          "tintindex": 1
+        },
+        "south": {
+          "uv": [
+            13,
+            0,
+            16,
+            16
+          ],
+          "texture": "#texture",
+          "tintindex": 1
+        },
+        "west": {
+          "uv": [
+            5,
+            0,
+            11,
+            16
+          ],
+          "texture": "#texture",
+          "tintindex": 1
+        },
+        "east": {
+          "uv": [
+            5,
+            0,
+            11,
+            16
+          ],
+          "texture": "#texture",
+          "tintindex": 1
+        }
+      }
+    }
+  ]
+}

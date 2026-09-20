@@ -1,6 +1,0 @@
-{
-  "parent": "horsegenetics:block/template_jump_oxer_rails",
-  "textures": {
-    "texture": "horsegenetics:block/painted_pole"
-  }
-}

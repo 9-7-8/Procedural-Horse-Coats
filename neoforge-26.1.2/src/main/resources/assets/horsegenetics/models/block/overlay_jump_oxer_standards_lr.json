@@ -1,0 +1,10 @@
+{
+  "textures": {
+    "texture": {
+      "sprite": "horsegenetics:block/paint_overlay",
+      "force_translucent": true
+    },
+    "particle": "horsegenetics:block/paint_overlay"
+  },
+  "elements": []
+}
