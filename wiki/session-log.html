@@ -27,6 +27,53 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-20-dailyrelease">2026-09-20 &mdash; A daily release, packaging the gate fix and the hair chain removal</h2>
+
+<p>
+    Released as <a href="releases.html#v0-5-018-2026-09-20">0.5.018.2026.09.20</a>. This is the
+    scheduled daily release job, not a working session &mdash; its only job is to look at what
+    landed on <code>main</code> since the last tag, decide whether it is worth a release, and if
+    so cut one. Four commits had landed since 0.5.018 (the double-gate duplication fix and the
+    horse-hair chain removal, both written up in the entry below), so a release was warranted.
+</p>
+
+<p>
+    <strong>The version number is a separate lineage from the manual one.</strong>
+    <code>gradle.properties</code>&rsquo; own numbering rule &mdash; only the last of the three
+    dotted numbers moves, and only the owner moves the middle one &mdash; governs the
+    hand-cut releases like 0.5.018. This job instead appends the release date to whatever the
+    last manual version was (<code>0.5.018.2026.09.20</code>), so an automated daily package
+    never collides with, or pre-empts, a number the owner has not chosen yet.
+</p>
+
+<p>
+    <strong>The known-bugs box is new.</strong> The release now opens with a curated list of
+    what is <em>actually broken</em> right now, pulled from <a href="known-gaps.html">known
+    gaps</a> and filtered down to real defects &mdash; wrong behaviour, duplication risk, dead
+    mechanics &mdash; leaving out unbuilt work, deferred calls and unverified claims, which stay
+    on that page rather than cluttering a release note. It is worth keeping in later releases
+    too, since a player reading a changelog wants to know what still bites before they read what
+    is new.
+</p>
+
+<p>
+    <strong>No jar shipped with this release.</strong> Two toolchain gaps were worked around by
+    installing from the system package manager rather than the blocked host itself &mdash;
+    <code>foojay</code>, Gradle's auto-provisioner, returned 403 for both the JDK 17
+    <code>:common</code> wants and the JDK 25 <code>:neoforge-26.1.2</code> wants, and
+    <code>apt-get install openjdk-17-jdk-headless openjdk-25-jdk-headless</code> supplied both
+    from a different, permitted host. <code>:common:compileJava</code> then went green. But
+    <code>:neoforge-26.1.2:build</code> needs NeoForge's own NeoForm runtime tool to turn
+    vanilla into buildable Minecraft artifacts, and that comes from
+    <code>maven.neoforged.net</code>, which this sandbox's egress policy also returns 403 for
+    &mdash; and unlike a JDK there is no alternate, permitted host carrying it. <strong>Per the
+    proxy's own instructions, a 403 is not something to route around</strong>, so the build
+    stops there: green through <code>:common</code>, unproven from
+    <code>:neoforge-26.1.2</code> on. This release is source-and-docs only. The next session with
+    real network access should build and boot-check it before anyone treats the code as
+    confirmed working.
+</p>
+
 <h2 id="d2026-09-19-gatehair">2026-09-19, later &mdash; A gate that duplicated, and a material chain nobody wanted to climb</h2>
 
 <p>

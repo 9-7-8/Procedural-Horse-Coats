@@ -58,6 +58,104 @@
     </p>
 </div>
 
+<h2 id="v0-5-018-2026-09-20">0.5.018.2026.09.20</h2>
+
+<div class="note danger">
+    <span class="label">Known bugs, open right now</span>
+    <p>
+        Not fixed in this release. Design gaps, unbuilt work and unverified claims live on
+        <a href="known-gaps.html">known gaps</a> in full &mdash; this is only the subset that is
+        an actual defect: wrong behaviour, a duplication risk, or something that silently does
+        not work.
+    </p>
+    <p><strong>Duplication / exploit risk:</strong></p>
+    <ul>
+        <li>The bareback-steering &ldquo;phantom saddle&rdquo; is a real, working saddle item.
+            The only thing stopping it escaping into a permanent, invisible-textured free saddle
+            &mdash; a hopper, a dispenser, a death drop, another mod's inventory hook, a second
+            player &mdash; is a per-tick sweep, and none of those other paths has been checked.</li>
+        <li>A horse's cowboy-brand is erased if the horse and its cowboy ever load in different
+            chunks, which is a standing way to deliberately unbrand a horse.</li>
+    </ul>
+    <p><strong>Broken or misfiring mechanics:</strong></p>
+    <ul>
+        <li>The reaper cart destroys immature crops for one seed each instead of only ripe ones
+            &mdash; contradicts its own &ldquo;harvests mature crops&rdquo; tooltip.</li>
+        <li>The supply cart's open-from-the-seat packet is wired up server-side and never sent
+            &mdash; nothing lets you open one without dismounting.</li>
+        <li>Ringwork's two signature rings paint nothing at all, and its other two layers are
+            inside-out.</li>
+        <li>Central marks on seven-plus genes (pupils, eyespots, agate eye, corolla, contour
+            cells, and more) rarely land on the visible coat at all.</li>
+        <li>An aggressive horse under a rider throws the rider but then cannot chase or attack
+            &mdash; half the mechanic never fires while mounted.</li>
+        <li>A breed file's <code>jump</code> and <code>health</code> ranges silently collapse to
+            their low value instead of keeping the full spread, with no warning.</li>
+        <li>Auroraband's marking misses the horse entirely on roughly one seed in six.</li>
+        <li>Moonwing's gold band nearly vanishes on white-coated horses, from a colour-summing
+            bug.</li>
+        <li>Natural and magic zebra draw their stripes from independent seeds, so a horse with
+            both shows two misaligned patterns.</li>
+        <li>A glow-gene light block can be permanently orphaned lit if its chunk unloads before
+            cleanup runs.</li>
+        <li>A stall sign keeps a horse's old name forever after the horse is renamed.</li>
+        <li>The horse browser's filters run over a capped roster, so &ldquo;no horse carries
+            gene X&rdquo; can be a false result.</li>
+        <li>Seven &ldquo;inverting&rdquo; magical markings never actually invert.</li>
+        <li>The gene creator tool silently drops a gene's <code>needs</code> block on save,
+            quietly disabling that locus.</li>
+    </ul>
+    <p>
+        Full detail, evidence and fix notes for every one of these are on
+        <a href="known-gaps.html">known gaps</a>, searchable by the gap number in each entry.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>A gate that duplicated, and a material chain nobody wanted to climb.</strong>
+    Breaking a double fence gate dropped two of them &mdash; a decade-old class of bug vanilla
+    solves in doors and beds, which this mod's own gate never did &mdash; and crafting one, plus
+    everything downstream of horse hair, cost far more hair than anybody had ever added up.
+</p>
+
+<ul>
+    <li><strong>A double gate now drops one.</strong> The class header's own comment was wrong:
+        returning air from <code>updateShape</code> does <em>not</em> suppress drops, so both
+        halves of the pair paid out on every break. Fixed the way vanilla's doors are &mdash; a
+        loot-table condition on the paying half &mdash; in both the vanilla-wood generator and
+        the modded-wood compat layer, plus the mirror case where breaking the wrong half in
+        creative used to leak a free gate. Guarded by a mutation-checked gametest.
+        <a href="item-double-gates.html">Double gates</a>.</li>
+    <li><strong>Horse hair goes in raw.</strong> The horse-hair bundle, braided rope and hair
+        cloth are gone &mdash; three items and six chain recipes that quietly compounded the
+        price of everything built from hair. A double fence gate cost twelve horse hair before
+        this; an equestrian post cost thirty-two, the supplier's post fifty-six, the cowboy
+        hitch sixty-eight. Nothing wanted a chain item any more, so a double gate is now two
+        vanilla fence gates and nothing else &mdash; the one recipe in the mod without a modded
+        ingredient, and documented as the deliberate exception it is.
+        <a href="item-horse-hair.html">Horse hair</a>.</li>
+    <li><strong>Six villager trades were re-tuned, not just re-priced.</strong> A flat
+        one-for-one substitution for the deleted items would have made a post cost two hair and
+        a trade pay an emerald for two &mdash; a money printer. The supplier and leatherworker's
+        hair trades now scale by level instead, at rates judged rather than specified by the
+        owner and flagged on <a href="verification.html">to be verified</a> for retuning.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">No jar with this one &mdash; source only</span>
+    <p>
+        This is the automated daily release job, not a working session, and it hit a wall the
+        owner's own machine does not have: <code>:common</code> built clean, but
+        <code>:neoforge-26.1.2:build</code> needs NeoForge's NeoForm runtime tool from
+        <code>maven.neoforged.net</code>, which this sandbox's network policy blocks outright.
+        <strong>The code is untested beyond what the four commits below already verified in
+        their own sessions</strong> &mdash; nobody has re-run the suite, built the jar, or booted
+        a server against this exact tag. Build it yourself before trusting it, and see
+        <a href="verification.html">to be verified</a> for what those four commits already
+        confirmed on their own.
+    </p>
+</div>
+
 <h2 id="v0-5-018">0.5.018</h2>
 
 <p class="lede">
