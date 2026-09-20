@@ -120,7 +120,10 @@ public class JumpModel implements DynamicBlockStateModel {
      * owner asked for "between them". That grouping is only known once the run
      * has been walked, which happens here and not in the blockstate.
      *
-     * <p>Indexed by {@link #connection}.
+     * <p>Indexed by {@link #connection}. Held for EVERY style, not only the
+     * spanning one: an upright at each group boundary is how every run longer
+     * than three gets posted, and that is as true of a plain vertical as of a
+     * crossrail.
      */
     private final Map<String, BlockStateModelPart[]> standardsVariants;
     private final BlockStateModelPart[] overlayStandardsVariants;
@@ -158,28 +161,36 @@ public class JumpModel implements DynamicBlockStateModel {
         // THE WOOD ALWAYS GOES IN. A painted half gains a second part on top
         // rather than replacing its first, which is the whole reason the grain
         // survives being painted.
-        int segment = this.railSegments == null
-                ? -1
-                : JumpBlock.crossSegment(level, pos, state);
-        BlockStateModelPart railPart = segment < 0
+        int segment = JumpBlock.segment(level, pos, state);
+
+        BlockStateModelPart railPart = this.railSegments == null
                 ? this.rails.getOrDefault(materials.rails(), this.fallbackRails)
                 : segmentOf(materials.rails(), JumpBlock.segmentIndex(
                         JumpBlock.crossSpan(segment), JumpBlock.crossIndex(segment)));
 
-        // A CROSSRAIL POSTS AT THE START OF EVERY GROUP, not only at the start
-        // of the run: a run of six is two X's, and the second one wants an
-        // upright at its left end even though the rail carries on through it.
-        // Only the LEFT edge of a group is posted, so the boundary between two
-        // X's carries one upright rather than two back to back on the same
-        // face; the far right end of the whole run still gets its standard from
-        // the blockstate's RIGHT flag, the ordinary way.
-        int connection = segment < 0
-                ? -1
-                : connection(!JumpBlock.crossStartsGroup(segment),
-                        state.getValue(JumpBlock.RIGHT));
-        BlockStateModelPart standardPart = connection < 0
-                ? this.standards.getOrDefault(materials.standards(), this.fallbackStandards)
-                : variantOf(this.standardsVariants, materials.standards(), connection,
+        // A RUN IS POSTED AT THE START OF EVERY GROUP OF THREE, not only at its
+        // two ends - which is what replaced the centred T the block used to
+        // carry. The owner's complaint about that T was that a three-wide run
+        // had one "in the middle": it did, because the old rule posted every
+        // third BLOCK by world position rather than every third block OF THE
+        // RUN, so a run of three could have a post one in from the end.
+        //
+        // A group's upright goes on its LOW-x face, which this codebase calls
+        // the RIGHT standard - "left" is the counter-clockwise side and lies at
+        // high x. Index 0 is the low-x end of a group, so it is the RIGHT
+        // standard that a group start draws. Getting that backwards is what put
+        // a pole in the middle of a two-wide crossrail and "one off" on a
+        // three-wide.
+        //
+        // Only the low-x face of a group is posted, never the high-x one, so a
+        // boundary between two groups carries ONE upright rather than two back
+        // to back on the same face. The high-x end of the whole run still gets
+        // its standard from the blockstate's LEFT flag, the ordinary way.
+        int connection = connection(
+                state.getValue(JumpBlock.LEFT),
+                state.getValue(JumpBlock.RIGHT) && !JumpBlock.startsGroup(segment));
+        BlockStateModelPart standardPart =
+                variantOf(this.standardsVariants, materials.standards(), connection,
                         this.fallbackStandards);
         if (railPart != null) {
             parts.add(railPart);
@@ -188,12 +199,13 @@ public class JumpModel implements DynamicBlockStateModel {
             parts.add(standardPart);
         }
         if (materials.railsDye() != JumpMaterials.UNDYED) {
-            parts.add(segment < 0 ? this.overlayRails : this.overlaySegments[segment]);
+            parts.add(this.overlaySegments == null
+                    ? this.overlayRails
+                    : this.overlaySegments[JumpBlock.segmentIndex(
+                            JumpBlock.crossSpan(segment), JumpBlock.crossIndex(segment))]);
         }
         if (materials.standardsDye() != JumpMaterials.UNDYED) {
-            parts.add(connection < 0
-                    ? this.overlayStandards
-                    : this.overlayStandardsVariants[connection]);
+            parts.add(this.overlayStandardsVariants[connection]);
         }
     }
 
@@ -237,12 +249,12 @@ public class JumpModel implements DynamicBlockStateModel {
                                     RandomSource random) {
         JumpMaterials materials = level.getModelData(pos).get(JumpBlockEntity.MATERIALS);
         JumpMaterials key = materials == null ? JumpMaterials.DEFAULT : materials;
-        // The SLICE is part of the geometry too - two crossrails of identical
-        // woods draw different poles depending on where in their run they sit,
-        // so a cache keyed on the woods alone would hand one the other's.
-        return this.railSegments == null
-                ? key
-                : List.of(key, JumpBlock.crossSegment(level, pos, state));
+        // THE PLACE IN THE RUN IS PART OF THE GEOMETRY TOO. Two jumps of
+        // identical woods draw different uprights depending on whether they
+        // start a group, and two crossrails draw different poles depending on
+        // where in their run they sit - so a cache keyed on the woods alone
+        // would hand one of them the other's mesh.
+        return List.of(key, JumpBlock.segment(level, pos, state));
     }
 
     @Override
@@ -327,21 +339,28 @@ public class JumpModel implements DynamicBlockStateModel {
             // The six slices, but ONLY for a spanning style. Baking them for
             // every style would be five wasted parts per wood per variant, on a
             // file that already has ninety-six variants.
+            // THE STANDARDS ARE ALWAYS MODEL-CHOSEN. Every style posts at its
+            // group boundaries, and which blocks start a group is only known
+            // once the run has been walked - which the blockstate cannot do,
+            // since it sees one neighbour.
+            Map<String, BlockStateModelPart[]> uprights = new LinkedHashMap<>();
+            for (String wood : JumpWoods.keys()) {
+                uprights.put(wood, bakeConnections(baker, wood));
+            }
+            Map<String, BlockStateModelPart[]> standardsVariants = Map.copyOf(uprights);
+            BlockStateModelPart[] overlayStandardsVariants = bakeConnections(baker, OVERLAY);
+
+            // The six rails slices are crossrails-only: every other style draws
+            // the same rails in every block of a run and has nothing to choose.
             Map<String, BlockStateModelPart[]> segments = null;
             BlockStateModelPart[] overlaySegments = null;
-            Map<String, BlockStateModelPart[]> standardsVariants = null;
-            BlockStateModelPart[] overlayStandardsVariants = null;
             if (this.spanning) {
                 Map<String, BlockStateModelPart[]> slices = new LinkedHashMap<>();
-                Map<String, BlockStateModelPart[]> uprights = new LinkedHashMap<>();
                 for (String wood : JumpWoods.keys()) {
                     slices.put(wood, bakeSlices(baker, wood));
-                    uprights.put(wood, bakeConnections(baker, wood));
                 }
                 segments = Map.copyOf(slices);
-                standardsVariants = Map.copyOf(uprights);
                 overlaySegments = bakeSlices(baker, OVERLAY);
-                overlayStandardsVariants = bakeConnections(baker, OVERLAY);
             }
             return new JumpModel(Map.copyOf(railParts), Map.copyOf(standardParts),
                     SimpleModelWrapper.bake(baker, model(OVERLAY, this.rails),
@@ -359,15 +378,21 @@ public class JumpModel implements DynamicBlockStateModel {
          * model can append its own.
          */
         private BlockStateModelPart[] bakeConnections(ModelBaker baker, String wood) {
-            String[] suffixes = {"", "_l", "_r", "_lr"};
-            BlockStateModelPart[] parts = new BlockStateModelPart[suffixes.length];
-            for (int i = 0; i < suffixes.length; i++) {
+            BlockStateModelPart[] parts = new BlockStateModelPart[CONNECTIONS.length];
+            for (int i = 0; i < CONNECTIONS.length; i++) {
                 parts[i] = SimpleModelWrapper.bake(
-                        baker, model(wood, this.standards + suffixes[i]),
+                        baker, model(wood, this.standards + CONNECTIONS[i]),
                         this.state.asModelState());
             }
             return parts;
         }
+
+        /**
+         * The four connection states, in {@link #connection} order. The twin is
+         * {@code CONNECTIONS} in bake-jumps.mjs - which no longer carries a
+         * fifth "_lr_post" entry, because the centred T it named is gone.
+         */
+        private static final String[] CONNECTIONS = {"", "_l", "_r", "_lr"};
 
         /** One wood's six slices, in {@code JumpBlock.segmentIndex} order. */
         private BlockStateModelPart[] bakeSlices(ModelBaker baker, String wood) {
@@ -391,6 +416,12 @@ public class JumpModel implements DynamicBlockStateModel {
             }
             resolver.markDependency(model(OVERLAY, this.rails));
             resolver.markDependency(model(OVERLAY, this.standards));
+            for (String suffix : CONNECTIONS) {
+                for (String wood : JumpWoods.keys()) {
+                    resolver.markDependency(model(wood, this.standards + suffix));
+                }
+                resolver.markDependency(model(OVERLAY, this.standards + suffix));
+            }
             if (this.spanning) {
                 for (int span = 1; span <= JumpBlock.CROSS_MAX_SPAN; span++) {
                     for (int index = 0; index < span; index++) {
@@ -400,12 +431,6 @@ public class JumpModel implements DynamicBlockStateModel {
                         }
                         resolver.markDependency(model(OVERLAY, this.rails + slice));
                     }
-                }
-                for (String suffix : new String[] {"", "_l", "_r", "_lr"}) {
-                    for (String wood : JumpWoods.keys()) {
-                        resolver.markDependency(model(wood, this.standards + suffix));
-                    }
-                    resolver.markDependency(model(OVERLAY, this.standards + suffix));
                 }
             }
         }

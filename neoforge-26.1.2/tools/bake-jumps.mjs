@@ -180,23 +180,6 @@ function standard(x0, zMin, zMax) {
   };
 }
 
-/**
- * The intermediate upright - the T where a post meets the rail partway along a
- * run. Dead centre, so it is the same box whichever way the rail runs.
- * JumpBlock.post() is the twin.
- */
-const POST = {
-  from: [6, 0, 6],
-  to: [10, 16, 10],
-  faces: {
-    down: face([6, 6, 10, 10]),
-    up: face([6, 6, 10, 10]),
-    north: face([6, 0, 10, 16]),
-    south: face([6, 0, 10, 16]),
-    west: face([6, 0, 10, 16]),
-    east: face([6, 0, 10, 16]),
-  },
-};
 
 /**
  * <b>One block's share of a crossed pair that spans up to three blocks.</b>
@@ -235,9 +218,25 @@ const CROSS_RISE = 16;
 /** The y the low end of a pole sits at - the ground. */
 const CROSS_LOW = 0;
 
-/** How thick a pole is, and how deep. */
+/** How thick a pole is. */
 const CROSS_THICK = 3;
-const CROSS_DEPTH = [6, 10];
+
+/**
+ * THE TWO POLES SIT AT DIFFERENT DEPTHS, and pass rather than intersect.
+ *
+ * A real crossrail is two poles in cups at different depths - they cross in
+ * front of one another, they do not occupy the same wood. Drawn at one depth
+ * they overlap wherever they meet, and two coplanar boxes z-fight: at 45
+ * degrees that is a small diamond at the block's centre, but on a two-wide X
+ * the poles converge right at the seam between the blocks and the fight runs
+ * along a visible wedge. Separating them costs nothing and is what the real
+ * thing does.
+ *
+ * The gap between them is wider than OVERLAY_INFLATE, so the painted overlay
+ * boxes do not overlap either.
+ */
+const CROSS_DEPTH_RISING = [5, 7.8];
+const CROSS_DEPTH_FALLING = [8.2, 11];
 
 /** Every span a crossrail can have, and every position within it. */
 const CROSS_SPANS = [1, 2, 3];
@@ -245,10 +244,10 @@ const CROSS_SPANS = [1, 2, 3];
 /** The id suffix for one segment: s2i0 is the left half of a two-wide X. */
 const crossSuffix = (span, index) => `_s${span}i${index}`;
 
-function crossArm(yCentre, angleDegrees, half) {
+function crossArm(yCentre, angleDegrees, half, depth) {
   return {
-    from: [8 - half, yCentre - CROSS_THICK / 2, CROSS_DEPTH[0]],
-    to: [8 + half, yCentre + CROSS_THICK / 2, CROSS_DEPTH[1]],
+    from: [8 - half, yCentre - CROSS_THICK / 2, depth[0]],
+    to: [8 + half, yCentre + CROSS_THICK / 2, depth[1]],
     // Rotated about the bar's OWN centre, so it turns in place rather than
     // swinging away from the height it was placed at.
     rotation: { origin: [8, yCentre, 8], axis: "z", angle: angleDegrees },
@@ -273,7 +272,10 @@ function crossSegment(span, index) {
   const along = (16 * index + 8) / width;
   const rising = CROSS_LOW + along * CROSS_RISE;
   const falling = CROSS_LOW + (1 - along) * CROSS_RISE;
-  return [crossArm(rising, degrees, half), crossArm(falling, -degrees, half)];
+  return [
+    crossArm(rising, degrees, half, CROSS_DEPTH_RISING),
+    crossArm(falling, -degrees, half, CROSS_DEPTH_FALLING),
+  ];
 }
 
 /**
@@ -305,11 +307,20 @@ const STYLE_PARTS = {
  * the end-of-run states map to the postless model rather than to one that
  * would then have to exist.
  */
-const suffixFor = (left, right, post) =>
-  left && right ? (post ? "_lr_post" : "_lr") : left ? "_l" : right ? "_r" : "";
+const suffixFor = (left, right) =>
+  left && right ? "_lr" : left ? "_l" : right ? "_r" : "";
 
-/** Every connection suffix, in the order the models are written. */
-const CONNECTIONS = ["", "_l", "_r", "_lr", "_lr_post"];
+/**
+ * Every connection suffix, in the order the models are written.
+ *
+ * THERE IS NO "_lr_post" ANY MORE. The centred T it named is gone: a run is now
+ * posted with an UPRIGHT at each group boundary, on the block's own face, not
+ * with a post through the middle of a block. The owner's complaint was that a
+ * three-wide run had a T "in the middle" of it - it did, because the old rule
+ * posted every third block by WORLD POSITION rather than every third block of
+ * the run. JumpModel.CONNECTIONS is the twin.
+ */
+const CONNECTIONS = ["", "_l", "_r", "_lr"];
 
 /** The elements of one style in one connection state. */
 function elementsFor(style, suffix) {
@@ -324,9 +335,6 @@ function elementsFor(style, suffix) {
   }
   if (!connectedRight) {
     els.push(standard(0, depth[0], depth[1]));
-  }
-  if (suffix === "_lr_post") {
-    els.push(POST);
   }
   return els;
 }
@@ -409,7 +417,6 @@ function splitElements(style, suffix) {
   if (!connectedRight) standards.push(standard(0, depth[0], depth[1]));
   // The intermediate post is a STANDARD, not a rail: it is an upright, and it
   // should take the standards' wood when the two differ.
-  if (suffix === "_lr_post") standards.push(POST);
   return { rails: [...STYLE_PARTS[style].bars], standards };
 }
 
@@ -581,7 +588,7 @@ for (const style of STYLES) {
   for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
     for (const left of [false, true]) {
       for (const right of [false, true]) {
-        for (const post of [false, true]) {
+        {
           const v = {
             type: `${NS}:jump`,
             rails: `jump_${style}_rails`,
@@ -592,7 +599,7 @@ for (const style of STYLES) {
             // RIGHT straight out of the blockstate, as they should.
             standards: style === "crossrails"
               ? `jump_${style}_standards`
-              : `jump_${style}_standards${suffixFor(left, right, post)}`,
+              : `jump_${style}_standards${suffixFor(left, right)}`,
             // "spanning" tells JumpModel to bake the six segment models and the
             // four standards states beside the plain ones, and to pick between
             // them per position. Only crossrails have them.
@@ -609,7 +616,7 @@ for (const style of STYLES) {
           // Property order in the key does not matter to the game, but
           // keeping it alphabetical keeps the diffs readable.
           variants[
-            `facing=${facing},left=${left},post=${post},right=${right},style=${style}`
+            `facing=${facing},left=${left},right=${right},style=${style}`
           ] = v;
         }
       }

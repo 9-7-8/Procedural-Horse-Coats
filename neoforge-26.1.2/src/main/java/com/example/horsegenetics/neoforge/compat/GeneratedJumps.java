@@ -56,8 +56,16 @@ final class GeneratedJumps {
     /** Must match {@code RECIPE_YIELD} in bake-jumps.mjs. */
     private static final int RECIPE_YIELD = 4;
 
-    /** Every connection suffix, in the order the models are written. */
-    private static final String[] CONNECTIONS = {"", "_l", "_r", "_lr", "_lr_post"};
+    /**
+     * Every connection suffix, in the order the models are written.
+     *
+     * <p><b>No {@code "_lr_post"}.</b> The centred T it named is gone: a run is
+     * posted with an upright at each group boundary now, on the block's own
+     * face, rather than with a post through the middle of a block.
+     * {@code CONNECTIONS} in bake-jumps.mjs and {@code JumpModel.CONNECTIONS}
+     * are the twins.
+     */
+    private static final String[] CONNECTIONS = {"", "_l", "_r", "_lr"};
 
     /** Must match {@code JumpBlock.Style}, in the same order. */
     private static final String[] STYLES = {"vertical", "oxer", "crossrails"};

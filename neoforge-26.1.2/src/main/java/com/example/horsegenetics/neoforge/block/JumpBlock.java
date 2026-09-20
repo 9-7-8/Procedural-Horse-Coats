@@ -103,30 +103,6 @@ public class JumpBlock extends HorizontalDirectionalBlock
     public static final BooleanProperty RIGHT = BooleanProperty.create("right");
 
     /**
-     * True when this block draws an <b>intermediate upright</b> - the T where a
-     * post meets the rail partway along a run.
-     *
-     * <p>A long fence line that is one unbroken rail between two distant
-     * standards does not look like a fence; real ones are posted at intervals.
-     * So a run grows a post every {@link #POST_SPACING} blocks. Owner's ask,
-     * and it is purely cosmetic - the post adds no collision the rail does not
-     * already have.
-     *
-     * <p><b>It is a function of world position, not of the run.</b> The post
-     * lands where the coordinate along the rail axis divides by three, rather
-     * than being counted from the end of the run, and that is deliberate: two
-     * parallel fence lines then post in the same places instead of drifting
-     * against each other, and extending a run from either end does not shuffle
-     * every post along it. The cost is that where a run <i>starts</i> does not
-     * affect where its posts fall, which is the right trade for a thing you
-     * build by eye.
-     */
-    public static final BooleanProperty POST = BooleanProperty.create("post");
-
-    /** One intermediate upright every this many blocks along a run. */
-    private static final int POST_SPACING = 3;
-
-    /**
      * <b>What kind of fence this is.</b> Cosmetic only - see {@link #STYLE}.
      *
      * <p>Every style is <b>one block deep at most</b>. The owner was explicit:
@@ -287,8 +263,7 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     private static final Map<ShapeKey, VoxelShape> COLLISION_SHAPES = buildShapes(true);
 
-    private record ShapeKey(Style style, Direction facing, boolean left, boolean right,
-                            boolean post) {
+    private record ShapeKey(Style style, Direction facing, boolean left, boolean right) {
     }
 
     public JumpBlock(Properties properties) {
@@ -297,8 +272,7 @@ public class JumpBlock extends HorizontalDirectionalBlock
                 .setValue(FACING, Direction.NORTH)
                 .setValue(STYLE, Style.VERTICAL)
                 .setValue(LEFT, false)
-                .setValue(RIGHT, false)
-                .setValue(POST, false));
+                .setValue(RIGHT, false));
     }
 
     @Override
@@ -320,7 +294,7 @@ public class JumpBlock extends HorizontalDirectionalBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, STYLE, LEFT, RIGHT, POST);
+        builder.add(FACING, STYLE, LEFT, RIGHT);
     }
 
     // --- shape --------------------------------------------------------------
@@ -351,35 +325,20 @@ public class JumpBlock extends HorizontalDirectionalBlock
                 Direction leftSide = facing.getCounterClockWise();
                 for (boolean left : new boolean[] {false, true}) {
                     for (boolean right : new boolean[] {false, true}) {
-                        for (boolean post : new boolean[] {false, true}) {
-                            VoxelShape shape = bars;
-                            if (!left) {
-                                shape = Shapes.or(shape, standard(leftSide, standardTop, depth));
-                            }
-                            if (!right) {
-                                shape = Shapes.or(shape,
-                                        standard(leftSide.getOpposite(), standardTop, depth));
-                            }
-                            if (post) {
-                                shape = Shapes.or(shape, post(standardTop));
-                            }
-                            shapes.put(new ShapeKey(style, facing, left, right, post), shape);
+                        VoxelShape shape = bars;
+                        if (!left) {
+                            shape = Shapes.or(shape, standard(leftSide, standardTop, depth));
                         }
+                        if (!right) {
+                            shape = Shapes.or(shape,
+                                    standard(leftSide.getOpposite(), standardTop, depth));
+                        }
+                        shapes.put(new ShapeKey(style, facing, left, right), shape);
                     }
                 }
             }
         }
         return Map.copyOf(shapes);
-    }
-
-    /**
-     * The intermediate upright, dead centre of the block.
-     *
-     * <p>Centred on both axes, so it is the same box whichever way the rail
-     * runs and needs no per-facing case.
-     */
-    private static VoxelShape post(int top) {
-        return Block.box(6, 0, 6, 10, top, 10);
     }
 
     /**
@@ -436,7 +395,7 @@ public class JumpBlock extends HorizontalDirectionalBlock
 
     private static ShapeKey key(BlockState state) {
         return new ShapeKey(state.getValue(STYLE), state.getValue(FACING),
-                state.getValue(LEFT), state.getValue(RIGHT), state.getValue(POST));
+                state.getValue(LEFT), state.getValue(RIGHT));
     }
 
     // --- connection ---------------------------------------------------------
@@ -514,14 +473,14 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * worker threads against a region snapshot. It reads nothing but block
      * states, which is safe there.
      */
-    public static int crossSegment(BlockGetter level, BlockPos pos, BlockState state) {
-        Direction.Axis axis = state.getValue(FACING).getAxis();
-        Direction along = state.getValue(FACING).getCounterClockWise();
+    public static int segment(BlockGetter level, BlockPos pos, BlockState state) {
+        // "Left" is the counter-clockwise side and lies at HIGH x in the
+        // authored frame, so the run is walked from the LOW-x end - which is
+        // the side index 0 belongs to, and the side its upright goes on.
+        Direction left = state.getValue(FACING).getCounterClockWise();
 
-        // How far the run goes each way, bounded. "Back" is the direction the
-        // run is cut from, so it decides every group boundary in it.
-        int back = reach(level, pos, along.getOpposite(), axis);
-        int forward = reach(level, pos, along, axis);
+        int back = reach(level, pos, left.getOpposite(), state);
+        int forward = reach(level, pos, left, state);
 
         int offset = back;                       // our place in the whole run
         int length = back + 1 + forward;
@@ -530,17 +489,21 @@ public class JumpBlock extends HorizontalDirectionalBlock
         return span * 4 + (offset - groupStart);
     }
 
-    /** How many crossrails continue in one direction, up to {@link #CROSS_MAX_RUN}. */
+    /**
+     * How many jumps continue this run in one direction, up to
+     * {@link #CROSS_MAX_RUN}.
+     *
+     * <p>{@link #connects} is the test, so a run is broken by exactly what
+     * breaks a rail: a different style, a different axis, anything that is not
+     * a jump.
+     */
     private static int reach(BlockGetter level, BlockPos pos, Direction direction,
-                             Direction.Axis axis) {
+                             BlockState state) {
         int found = 0;
         BlockPos.MutableBlockPos cursor = pos.mutable();
         while (found < CROSS_MAX_RUN) {
             cursor.move(direction);
-            BlockState there = level.getBlockState(cursor);
-            if (!(there.getBlock() instanceof JumpBlock)
-                    || there.getValue(STYLE) != Style.CROSSRAILS
-                    || there.getValue(FACING).getAxis() != axis) {
+            if (!connects(state, level.getBlockState(cursor))) {
                 break;
             }
             found++;
@@ -571,7 +534,7 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * whole run still gets its standard the ordinary way, from
      * {@link #RIGHT} - see {@code JumpModel.collectParts}.
      */
-    public static boolean crossStartsGroup(int segment) {
+    public static boolean startsGroup(int segment) {
         return crossIndex(segment) == 0;
     }
 
@@ -581,45 +544,6 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     public static int segmentIndex(int span, int index) {
         return span * (span - 1) / 2 + index;
-    }
-
-    /**
-     * Is this position one of the ones that carries an intermediate upright?
-     *
-     * <p>{@code floorMod} rather than {@code %}: coordinates go negative, and
-     * Java's remainder does too, so a plain {@code % 3 == 0} posts correctly
-     * east of the origin and irregularly west of it. That is the kind of bug
-     * that is invisible in a test world built near spawn.
-     */
-    private static boolean postsHere(BlockPos pos, Direction facing) {
-        int along = facing.getAxis() == Direction.Axis.Z ? pos.getX() : pos.getZ();
-        return Math.floorMod(along, POST_SPACING) == 0;
-    }
-
-    /**
-     * An intermediate upright only belongs <b>mid-run</b> - where the rail
-     * carries on in both directions. At the end of a run there is already a
-     * standard, and a post one block in from it reads as a mistake rather than
-     * as a fence.
-     */
-    private static BlockState withPost(BlockState state, BlockPos pos) {
-        boolean midRun = state.getValue(LEFT) && state.getValue(RIGHT);
-        return state.setValue(POST, midRun && postsTo(state.getValue(STYLE))
-                && postsHere(pos, state.getValue(FACING)));
-    }
-
-    /**
-     * <b>Crossrails never grow an intermediate post.</b>
-     *
-     * <p>The post is an upright through the middle of the block, and the middle
-     * of the block is exactly where a crossrail's two poles cross - so the post
-     * lands on top of the X and hides the one feature the style has. Owner, on
-     * seeing it: the crossrails "looks bad and it has the pole in the center
-     * now". The post was written for the vertical, where it is a T under a
-     * single rail, and it reads correctly on an oxer too, between the two.
-     */
-    private static boolean postsTo(Style style) {
-        return style != Style.CROSSRAILS;
     }
 
     /**
@@ -707,11 +631,10 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     public static BlockState connected(BlockState state, LevelReader level, BlockPos pos) {
         Direction leftSide = state.getValue(FACING).getCounterClockWise();
-        return withPost(state
+        return state
                 .setValue(LEFT, connects(state, level.getBlockState(pos.relative(leftSide))))
                 .setValue(RIGHT,
-                        connects(state, level.getBlockState(pos.relative(leftSide.getOpposite())))),
-                pos);
+                        connects(state, level.getBlockState(pos.relative(leftSide.getOpposite()))));
     }
 
     /**
@@ -727,10 +650,10 @@ public class JumpBlock extends HorizontalDirectionalBlock
                                      BlockState neighbourState, RandomSource random) {
         Direction leftSide = state.getValue(FACING).getCounterClockWise();
         if (directionToNeighbour == leftSide) {
-            return withPost(state.setValue(LEFT, connects(state, neighbourState)), pos);
+            return state.setValue(LEFT, connects(state, neighbourState));
         }
         if (directionToNeighbour == leftSide.getOpposite()) {
-            return withPost(state.setValue(RIGHT, connects(state, neighbourState)), pos);
+            return state.setValue(RIGHT, connects(state, neighbourState));
         }
         return state;
     }
@@ -856,8 +779,6 @@ public class JumpBlock extends HorizontalDirectionalBlock
     @Override
     protected BlockState mirror(BlockState state, Mirror mirror) {
         BlockState turned = state.rotate(mirror.getRotation(state.getValue(FACING)));
-        // POST rides along unchanged: a mirror swaps the ends of the run but
-        // does not move the block, and the post is a property of where it is.
         return turned
                 .setValue(LEFT, state.getValue(RIGHT))
                 .setValue(RIGHT, state.getValue(LEFT));

@@ -41,12 +41,13 @@ const SIZE = 16;
 /**
  * How much of the paint you see, 0-1. The one number worth tuning.
  *
- * 0.62 keeps the grain and the shading clearly readable while the colour still
- * reads as the colour rather than as a tint - which is the balance the owner
- * asked for after the fully-opaque version ("we're losing too much of the
- * original texture/shading") and the multiply version ("making it too dark").
+ * Walked down twice from play. 0.62 still read as "too strong"; at 0.45 the
+ * wood is plainly the wood and the colour is plainly a coat of paint on it,
+ * which is the balance asked for after the fully-opaque version ("we're losing
+ * too much of the original texture/shading") and the multiply version ("making
+ * it too dark").
  */
-const OPACITY = 0.62;
+const OPACITY = 0.45;
 
 const ALPHA = Math.round(OPACITY * 255);
 
