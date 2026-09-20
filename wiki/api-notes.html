@@ -403,6 +403,53 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
         will drift.</li>
 </ul>
 
+<h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
+
+<p>
+    The block model system was rewritten. If you are following a tutorial, a Stack Overflow answer
+    or a memory of how this worked, <strong>it will not compile</strong>. Read out of
+    <code>minecraft-patched-26.1.2.100-sources.jar</code> and the NeoForge sources jar, and then
+    confirmed by a clean boot with the model actually baking.
+</p>
+
+<ul>
+    <li><strong><code>BakedModel</code> and <code>IDynamicBakedModel</code> do not exist.</strong>
+        The baked block model interface is
+        <code>net.minecraft.client.renderer.block.dispatch.BlockStateModel</code>.</li>
+    <li><strong>A model is a <em>list of parts</em>, not a blob of quads.</strong> The quads live
+        on <code>BlockStateModelPart</code>, and <code>SimpleModelWrapper</code> is the concrete
+        one you bake with. This is the single most useful fact here: parts compose, so N woods on
+        two independent halves costs <b>N + N</b> baked parts, not N&times;N.</li>
+    <li><strong>The per-position hook is NeoForge&rsquo;s
+        <code>DynamicBlockStateModel.collectParts(level, pos, state, random, parts)</code></strong>,
+        and it runs on <b>chunk-meshing worker threads</b>. Do not touch the block entity from it
+        &mdash; read <code>level.getModelData(pos)</code>, and make what you put in
+        <code>ModelData</code> immutable.</li>
+    <li><strong>Registration is the <code>RegisterBlockStateModels</code> event</strong>, not a
+        model loader. It dispatches on a <code>"type"</code> field <em>inside a blockstate
+        variant</em>, so the hook is at the blockstate level, not the model-JSON level.
+        <code>ModelEvent.RegisterGeometryLoaders</code> is now
+        <code>ModelEvent.RegisterLoaders</code> and is a different thing.</li>
+    <li><strong><code>BlockRenderDispatcher</code> is gone</strong>; terrain goes
+        <code>SectionCompiler</code> &rarr; <code>ModelBlockRenderer.tesselateBlock</code>.</li>
+    <li><strong>A block tint cannot swap a texture.</strong> <code>BlockTintSource</code> returns
+        an <code>int</code> that multiplies the sprite, so it will never turn birch grain into
+        jungle grain &mdash; and its caching keys on blockstate properties only, so
+        block-entity-derived colour fights the cache as well.</li>
+    <li><strong>Syncing a block entity is not enough to redraw it.</strong> The chunk section is
+        already meshed; nothing re-meshes it because data changed. Ask for a model-data refresh
+        <em>and</em> tell the level the block changed, on both the sending and receiving sides.
+        Missing this looks exactly like &ldquo;the change did not apply&rdquo;.</li>
+    <li><b>Unconfirmed:</b> <code>createGeometryKey</code> is declared and implemented but nothing
+        in vanilla 26.1.2 calls it &mdash; it is a hook for third-party chunk meshers. Returning a
+        real key is free insurance; returning <code>null</code> is safe.</li>
+</ul>
+
+<p>
+    The worked example to copy is NeoForge&rsquo;s own <code>CompositeBlockModel</code>. Ours is
+    <code>client/JumpModel</code>.
+</p>
+
 <h2 id="verified">Verified</h2>
 
 <p id="verified-melee-cooldown">

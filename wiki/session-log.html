@@ -27,6 +27,93 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-20-jumps">2026-09-20 &mdash; Jumps, how a horse jumps at all, and a model architecture left half-migrated</h2>
+
+<p>
+    Started as &ldquo;can we take the models from this mod&rdquo; and ended with the mod&rsquo;s
+    first custom block model. Three existing Minecraft jump projects were checked and
+    <strong>all three are All Rights Reserved for their assets</strong> &mdash; the one that
+    splits its licences reserves precisely the half worth having &mdash; so the geometry here is
+    drawn from the real-world object. That finding is on
+    <a href="item-jumps.html#art">the jumps page</a> so nobody repeats the search.
+</p>
+
+<h3>What shipped and was played</h3>
+
+<p>
+    A per-wood <a href="item-jumps.html">jump block</a>: a rail spanning the block, standards
+    drawn only at the ends of a run, a T-post every third block, and <strong>no height
+    property</strong> &mdash; you stack them. It shipped <em>wrong</em> first: collision followed
+    the model, so the rail sat under a horse&rsquo;s 1.0 step height and got walked over. The fix
+    is vanilla&rsquo;s own fence trick &mdash; collide half a block taller than you draw &mdash;
+    and the owner&rsquo;s verdict was that it &ldquo;now actually feels like a challenge&rdquo;.
+    The ground-pole framing that had justified the original was a rationalisation of a
+    limitation, and was deleted rather than kept.
+</p>
+
+<p>
+    Then <strong>how a ridden horse jumps</strong>, which turned out to matter more than the
+    block. Vanilla charges: hold the key, a meter fills, the horse leaps on <em>release</em> at
+    whatever it reached &mdash; so jump height is partly a fact about the rider&rsquo;s thumb, and
+    a well-bred horse ridden badly clears less than a mediocre one ridden well. In a mod whose
+    argument is that genetics decide what a horse can do, that is the player&rsquo;s hand on the
+    scale. Pressing now launches at full height with a cooldown that drains the meter.
+    <strong>Mojang had already shipped this on the camel</strong>: <code>getJumpCooldown()</code> is
+    already in the interface, <code>LocalPlayer.aiStep</code> already skips its charge block when it
+    is nonzero, and the HUD already shows the bar for it. Confirmed in play, gliding included.
+</p>
+
+<h3>The finding that paid for the whole thing</h3>
+
+<p>
+    A stack of jumps is the first instrument in the mod that makes jump <em>visible</em> &mdash;
+    everything else prints the attribute. On its first outing it found
+    <a href="known-gaps.html#gap-287">gap 287</a>: the Anglo-Arabian, a natural breed, jumps high
+    enough to hurt itself landing. <strong>The instant-jump change did not cause that, it stopped
+    hiding it</strong> &mdash; charging meant a horse only reached its ceiling if you held the
+    key, and the reflex on a horse that leaps too far is to tap, which silently capped it.
+</p>
+
+<h3>The half-migrated part &mdash; read this before touching jumps</h3>
+
+<p>
+    The owner asked that the standards and the rails be independently coloured. As blockstate
+    properties that is 12 x 12 x everything else = <strong>13,824 block states</strong>, every one
+    allocated at registry bootstrap on the server as well as the client, so the woods have to be
+    block-entity data and the model has to read them per position.
+</p>
+
+<p>
+    <strong>That architecture is built and proven; nothing is migrated onto it yet.</strong> The
+    twelve per-wood blocks are still registered and still work. The new single
+    <code>horsegenetics:jump</code> block exists beside them with a block entity, a working custom
+    model and a blockstate &mdash; but no recipe, no loot table, no creative-tab entry and no
+    screen. A client boots clean with no bake failures, which is what proves the codec parses and
+    the model bakes. See <a href="api-notes.html#block-models">the API notes</a> for the shape,
+    because <em>everything written before 1.21.4 is wrong about it</em>.
+</p>
+
+<p>
+    <strong>What is left, in order:</strong> a two-slot screen on the block (rails wood, standards
+    wood, the displaced plank pops back out &mdash; owner&rsquo;s design, and it replaces both the
+    stick-restyle and the plank-repaint); loot and a recipe on the new block; deleting the twelve
+    old blocks and their thirty-six items; then three things that were all waiting on materials
+    being data &mdash; a <strong>wall</strong> style (&ldquo;wall&rdquo; means cobblestone and
+    brick, a material axis that is not the twelve woods), <strong>crossrails that span up to three
+    blocks</strong> as one crossed pair rather than a row of separate X&rsquo;s, and
+    <strong>half and third height</strong> jumps as walkable ground poles. The last needs its own
+    warning: stacked clearances do <em>not</em> add on a block grid, so a third-height jump on top
+    of a full one clears exactly what the full one did.
+</p>
+
+<p>
+    Also settled along the way: style is <strong>cosmetic</strong> &mdash; all three collide
+    identically, so a stack of three means the same thing whatever it is built from, which is the
+    only reason the height ladder stays an honest reading of genetics. And jumps live in their own
+    creative tab for now, to be folded back into the horse tab once the rework drops the item
+    count from thirty-six to about nine.
+</p>
+
 <h2 id="d2026-09-20-intake-science">2026-09-20, later still &mdash; Four base-colour loci get their science, and three of them disagree with us</h2>
 
 <p>
