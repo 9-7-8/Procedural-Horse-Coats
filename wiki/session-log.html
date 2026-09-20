@@ -27,6 +27,72 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-20-roadmap">2026-09-20, later &mdash; The roadmap stops being four lists in a trench coat</h2>
+
+<p>
+    Wiki only, by instruction: no code was touched. <a href="roadmap.html">The roadmap</a> had
+    grown to a little over three thousand lines and only a fraction of it was a roadmap. It
+    carried defects in shipped code, questions waiting on the owner, a long record of settled
+    calls under &ldquo;do not reopen&rdquo;, and &mdash; the reason it kept growing &mdash;
+    <strong>shipped work that had been annotated rather than deleted</strong>. Whole sections
+    opened with a green note saying the section was done. The owner&rsquo;s instruction was
+    blunt: nothing in there but planned future features.
+</p>
+
+<p>
+    <strong>The settled calls became a page.</strong> They are the largest single thing that was
+    in the wrong place and the one with the clearest claim to existing somewhere: roughly five
+    hundred lines of &ldquo;this was asked, this is the answer, here is why&rdquo;, which is
+    exactly the material a later session re-litigates if it cannot find it.
+    <a href="decisions.html">Design decisions</a> now holds them, regrouped by subject rather
+    than by the date they happened to be made &mdash; what the mod deliberately is not doing,
+    the authoring calls, the coat pipeline, the genetics model, health and aging, care and
+    the gameplay layer &mdash; with the dated batches kept underneath in their original words.
+    The open questions went with them, including four that were scattered through the backlog
+    as if they were tasks: the champagne foal&rsquo;s eye colour, the studbook taxonomy, what
+    a breed&rsquo;s <code>country</code> field is <em>for</em>, and the provisional calls made
+    overnight that nobody has confirmed or reversed.
+</p>
+
+<p>
+    <strong>Five defects moved to <a href="known-gaps.html">known gaps</a></strong> (292&ndash;296):
+    the leopard complex not reading the coat it is handed, the one-tick default-black wild horse,
+    the equipment that does not follow <code>Attributes.SCALE</code>, the hemizygous locus that
+    prints as a pair, and the Java comments still pointing at roadmap anchors this change
+    deleted. That last one is the price of a wiki-only session and is written down as such:
+    four one-line comment edits nobody can make from here, and no check that would catch them,
+    because <code>check-links.mjs</code> does not read Java.
+</p>
+
+<p>
+    <strong>Two things were stale rather than merely misfiled.</strong> The roadmap still listed
+    the saddle not fitting a resized horse; it was fixed and confirmed in a world on 09-16, and
+    <a href="items.html#tack-fit">the items page</a> has the write-up including the wrong
+    diagnosis that preceded it. And <a href="pipeline.html">the pipeline page</a> still said
+    EDNRB&rsquo;s frame band and every <code>cover</code> knob were whole-horse fractions.
+    Checked against <code>EdnrbGene</code> rather than against the prose: the band is measured
+    on the barrel&rsquo;s own bounds and <code>paintFrame</code> sorts the field and cuts at the
+    quantile matching <code>cover</code>. Both claims were deleted. <strong>The roadmap had
+    recorded both as done and nobody had propagated it</strong>, which is the failure mode the
+    delete-don&rsquo;t-annotate rule exists to prevent, caught in the act.
+</p>
+
+<p>
+    <strong>Also written up rather than dropped:</strong> how to write a gene&rsquo;s science tab
+    is <a href="coding-notes.html#science-tab">technique</a> now, including the rule that none of
+    it is ever written from the model&rsquo;s memory. The roadmap keeps the list of which tabs
+    are still thin, without the word counts &mdash; those were a derived number sitting in prose,
+    which is <a href="known-gaps.html#gap-13">the repeat offender</a>.
+</p>
+
+<p>
+    The result is 1,700-odd lines of planned features, sections named and not numbered, and four
+    named destinations in a note at the top so the next thing that does not belong has somewhere
+    to go. <code>CLAUDE.md</code>&rsquo;s routing table gained the new page and the roadmap rule
+    was rewritten to say &ldquo;planned features only&rdquo; rather than &ldquo;unbuilt
+    work&rdquo;, which had been quietly wide enough to admit all four lists.
+</p>
+
 <h2 id="d2026-09-20-release">2026-09-20 &mdash; 0.5.019, and two releases for one set of changes</h2>
 
 <p>
@@ -1352,7 +1418,7 @@
     from a named palette, so it reaches the saddle and the metal fittings that vanilla&rsquo;s
     <code>dyed_color</code> cannot &mdash; which is what makes the leatherworker&rsquo;s five
     tiers a ladder you can see, bone meal and flowers at Novice through lapis on diamond
-    fittings at Master. That also <a href="roadmap.html#settled-equestrians">answers</a> the
+    fittings at Master. That also <a href="decisions.html#settled-equestrians">answers</a> the
     open question the roadmap had been holding since the dyed-saddle trade was withdrawn for
     selling an invisible upgrade: the objection has expired, and the master tier sells a
     fitting <em>material</em>, which makes the trade a source rather than a convenience.
@@ -2573,7 +2639,7 @@
 
 <p>
     The owner asked what was next on the roadmap. The top of
-    <a href="roadmap.html#start">Where to start</a> is play-testing, which is hers rather than
+    <a href="roadmap.html">the roadmap</a> is play-testing, which is hers rather than
     mine, so the next buildable item was &sect;10&rsquo;s last unbuilt piece:
     <strong>per-region colour</strong>.
 </p>
@@ -5666,7 +5732,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     The owner went to bed asking for breeding to be finished, the gaps closed, tests designed, and
     the debug area rebuilt so that everything could be audited in the morning. Nobody was awake
     to ask, so the calls that were not purely technical are on the roadmap as
-    <a href="roadmap.html#provisional">provisional</a>, to confirm or reverse. Nothing was played.
+    <a href="decisions.html#provisional">provisional</a>, to confirm or reverse. Nothing was played.
     The audit is <a href="verification.html#fertility">&sect;0-DV</a>, in order.
 </p>
 
@@ -5714,7 +5780,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     &ldquo;that's now basically just base game behavior&rdquo;, with heat and pregnancy slowing
     the rate and conception limited to loaded chunks. The follow-up questions turned it into
     natural breeding for every horse, and a way to stop it. The calls are under
-    <a href="roadmap.html#settled">settled decisions</a>. Nothing has been played:
+    <a href="decisions.html#settled">settled decisions</a>. Nothing has been played:
     <a href="verification.html#fertility">&sect;0-DV</a>, test kit batch 2.
 </p>
 
@@ -5743,7 +5809,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     The in-progress design page from the evening had seven open questions. This session put
     them to the owner one at a time, along with every implementation choice the breeding
     code raised, then built the whole first slice. The calls are under
-    <a href="roadmap.html#settled">settled decisions</a>, and the reference is
+    <a href="decisions.html#settled">settled decisions</a>, and the reference is
     <a href="fertility.html">fertility &amp; gestation</a>. Nothing has been played:
     <a href="verification.html#fertility">&sect;0-DV</a>, test kit batch 1.
 </p>
@@ -9351,7 +9417,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 
 <h4>What the next session should pick up</h4>
 
-<p>Gap 154 (closed 2026-09-10 - see <a href="roadmap.html#settled">settled decisions</a>) &mdash; the Breeds tab ignores creative and
+<p>Gap 154 (closed 2026-09-10 - see <a href="decisions.html#settled">settled decisions</a>) &mdash; the Breeds tab ignores creative and
     did not fill in on a tame. The creative half is certain and small; the taming half has a
     named prime suspect (a <code>BreedLineage</code> token that is not a bare
     <code>Breed.id()</code>) and should be checked there first.</p>
@@ -10102,7 +10168,7 @@ something else</h4>
         reverted.
     </p>
     <p>
-        <strong>Resume from <a href="roadmap.html#paused">the roadmap's paused note</a></strong>,
+        <strong>Resume from <a href="roadmap.html">the roadmap</a></strong>,
         which says what the next job is and what question is waiting on the owner first.
     </p>
 </div>
@@ -10184,7 +10250,7 @@ index.</p>
 <h3 id="fractal-mask-2026-09-09">A gene can be a fractal &mdash; and a stale roadmap sent the session somewhere else first.</h3>
 
 <p>The session opened by picking the top item off
-<a href="roadmap.html#start">the roadmap</a> and found <strong>two thirds of it already
+<a href="roadmap.html">the roadmap</a> and found <strong>two thirds of it already
 shipped</strong>. &sect;1.1 listed three white-pattern calibration defects; the entry for
 EDNRB&rsquo;s frame band still cited <code>BAND_LO</code> / <code>BAND_HI</code>, which
 have not existed since the barrel-and-neck rewrite, and the entry for the
@@ -10370,7 +10436,7 @@ nobody had looked.</p>
 
 <h4>Everything else that diverges, diverges for one reason</h4>
 
-<p>The <a href="roadmap.html#settled">missing age model</a>, showing through on gene after
+<p>The <a href="decisions.html#settled">missing age model</a>, showing through on gene after
 gene. <a href="gene-toe1.html">Cerebellar abiotrophy</a> arrives at six weeks and worsens
 for months; <a href="gene-prkdc.html">SCID</a> gives a foal a fortnight of perfect health on
 its dam&rsquo;s borrowed antibodies; <a href="gene-ppib.html">HERDA</a> is a horse that is
@@ -11962,7 +12028,7 @@ one.</li>
 
 <li><strong>The predicted routing failure was real, and on the pages that could least afford it.</strong> Measuring prose per gameplay tab found <strong>26 pages whose gameplay tab was seven words</strong> - two headings and the widgets - because they carry neither a look-alike table nor a breed list, which were the only two things the routing rule could move onto Gameplay. Agouti, tobiano, roan, MATP, shade, sooty, leopard and natural zebra were all in that set. Each now opens with a short plain-language "What it does" written from what the page already asserts; thinnest tab is 44 words, median 95. The other direction - whether anything reached Gameplay that should not have, and whether the 307 sections that defaulted to Coding belong there - is still unread. <a href="known-gaps.html#gap-88">Gap 88</a>.</li>
 
-<li><strong>And the landing page had been quietly lying about the size of the mod.</strong> Checked at the end of the session because CLAUDE.md names derived numbers as a repeat offender: three of the hero's four headline stats were stale. <strong>48 genes</strong> against a real 69; <strong>4.3&times;10<sup>31</sup> genotypes</strong> against 6.7&times;10<sup>48</sup>; and <strong>11,098,128,386 visually distinct coats</strong> against 3,121,348,608,000,004 - six orders of magnitude out. Only the breed count was right. Verified against the built jar rather than recounted by hand, corrected, and the accessor names left in a comment beside them. This is <a href="known-gaps.html#gap-13">gap 13</a> recurring on the most-read page in the repo, so the actual fix - generating the four numbers from a Gradle task - went on the roadmap rather than being trusted to somebody remembering (and <a href="roadmap.html#settled">shipped</a> the next day). <a href="known-gaps.html#gap-93">Gap 93</a>.</li>
+<li><strong>And the landing page had been quietly lying about the size of the mod.</strong> Checked at the end of the session because CLAUDE.md names derived numbers as a repeat offender: three of the hero's four headline stats were stale. <strong>48 genes</strong> against a real 69; <strong>4.3&times;10<sup>31</sup> genotypes</strong> against 6.7&times;10<sup>48</sup>; and <strong>11,098,128,386 visually distinct coats</strong> against 3,121,348,608,000,004 - six orders of magnitude out. Only the breed count was right. Verified against the built jar rather than recounted by hand, corrected, and the accessor names left in a comment beside them. This is <a href="known-gaps.html#gap-13">gap 13</a> recurring on the most-read page in the repo, so the actual fix - generating the four numbers from a Gradle task - went on the roadmap rather than being trusted to somebody remembering (and <a href="decisions.html#settled">shipped</a> the next day). <a href="known-gaps.html#gap-93">Gap 93</a>.</li>
 </ul>
 
 <h3 id="breeds-as-data-2026-09-07">Built 2026-09-07, NOT yet looked at: breeds became JSON files, and got spawn eggs, a designer, and a splice mark.</h3>
@@ -12148,7 +12214,7 @@ one.</li>
 
 <li><strong>HYPP is the first locus that is two things at once.</strong> A survivable heart reducer on one copy and a lethal on two, which nothing in the mod had been, and the reason <code>DominantDisorderGene</code> is a second base class rather than a flag on the first. It is also the only locus where the breeding mistake is one you make with your eyes open: an affected horse is visibly unwell and can still be excellent on every other axis, so it is genuinely tempting, and two of them throw a dead foal one time in four.</li>
 
-<li><strong>The reference&rsquo;s percentages turned out to be unusable as arithmetic.</strong> Each disorder carries a health / speed / jump percentage, and the obvious implementation is to multiply. Read literally against a 22-health baseline, HYPP&rsquo;s "30% health" makes an <em>affected but living</em> horse worse than several of the mod&rsquo;s outright lethals &mdash; which is plainly not what the table means. So every new locus is calibrated against the disorders that already ship and the reference is used for the <em>ordering</em> only. Recorded on <code>roadmap.html#decisions</code>, because whatever the severity model turns out to be, it does not get to inherit those numbers either.</li>
+<li><strong>The reference&rsquo;s percentages turned out to be unusable as arithmetic.</strong> Each disorder carries a health / speed / jump percentage, and the obvious implementation is to multiply. Read literally against a 22-health baseline, HYPP&rsquo;s "30% health" makes an <em>affected but living</em> horse worse than several of the mod&rsquo;s outright lethals &mdash; which is plainly not what the table means. So every new locus is calibrated against the disorders that already ship and the reference is used for the <em>ordering</em> only. Recorded on <code>decisions.html#decisions</code>, because whatever the severity model turns out to be, it does not get to inherit those numbers either.</li>
 
 <li><strong>Two of the nine have no gene behind them, and say so.</strong> CVM and megaesophagus are well-attested heritable breed conditions with no agreed causal variant. Every other natural gene in the mod names a real locus with a real published mutation, so rather than invent a respectable-looking symbol they are keyed on the condition itself and both pages state plainly that one recessive locus is the mod&rsquo;s simplification. The alternative was to leave them out; they earn their place because the simplification is honest at the level the mod models anything.</li>
 
@@ -12661,7 +12727,7 @@ one.</li>
 
 <h3 id="dun-2026-09-06">Built 2026-09-06, NOT yet looked at: dun re-derived from a field guide &mdash; grullo goes blue, and the leg bars stop being bracelets.</h3>
 
-<p>Owner handed over a reference write-up and two specific complaints: the leg markings did not look correct, and dun on black should be grulla, a grey-blue. Both were real and both had the same root. The whole locus is rebuilt around <a href="gene-dun.html#one-mask">one dilution and one mask</a>; <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity green against freshly baked fixtures, <code>coat-golden.txt</code> regenerated, creator and designer assets re-baked. Closes the dun row on <a href="roadmap.html#defects">roadmap &sect;1</a>; checklist <a href="verification.html#dun">&sect;0-D</a>.</p>
+<p>Owner handed over a reference write-up and two specific complaints: the leg markings did not look correct, and dun on black should be grulla, a grey-blue. Both were real and both had the same root. The whole locus is rebuilt around <a href="gene-dun.html#one-mask">one dilution and one mask</a>; <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity green against freshly baked fixtures, <code>coat-golden.txt</code> regenerated, creator and designer assets re-baked. Closes the dun row on <a href="known-gaps.html#gap-292">roadmap &sect;1</a>; checklist <a href="verification.html#dun">&sect;0-D</a>.</p>
 
 <ul>
 <li><strong>Grullo was a mouse-<em>brown</em>, and it is the same bug as the whiten one above, seen from the other side.</strong> A black horse stores <code>(red 1, black 1)</code> &mdash; pheomelanin the eumelanin masks. Scale both pigments together and the black comes off <em>first</em>, unmasking that red on the way out and walking the sample down the chart&rsquo;s gold diagonal. <a href="pipeline.html"><code>PigmentField.diluteNeutral</code></a> is the fix and the deliberate opposite of the existing <code>dilute()</code>: scale the <em>visible</em> red (<code>red &times; (1 - black)</code>) and only then the black, so a black base slides down the neutral column instead. Same invariant <code>whiten</code> keeps, with the two pigments free to move separately.
@@ -12836,7 +12902,7 @@ had to go.</p>
 </li>
 <li><strong>An hour went into a distribution that measured 100/0/0 and was correct</strong> (<a href="genetics-model.html#verified-seed-scramble">#44</a>). <code>SeededRng</code> wraps <code>java.util.Random</code>, whose first <code>nextFloat()</code> off <em>sequential</em> seeds spans only about 0.22 to 0.59 &mdash; so a test looping <code>new SeededRng(seed++)</code> and asking for one float never sees either end of the range. Harmless in play (a real epigenetic seed is a full random long) and lethal in a test. The fix in a test is to pull many rolls from one generator; fixing it properly means mixing the seed inside <code>SeededRng</code>, which moves every horse's coat and wants to be a deliberate pass.
 </li>
-<li><strong>Two things were deliberately not built.</strong> Filmy and blind eyes, because cloudiness is cornea and lens rather than iris pigment and belongs with the conditions, not this channel. And champagne foals' blue-green eyes: the hook is not told which skin it is baking, and with aging out of scope a foal that is <em>permanently</em> blue-green may be worse than one that never was. Both on <a href="roadmap.html#eyes">the roadmap</a>.
+<li><strong>Two things were deliberately not built.</strong> Filmy and blind eyes, because cloudiness is cornea and lens rather than iris pigment and belongs with the conditions, not this channel. And champagne foals' blue-green eyes: the hook is not told which skin it is baking, and with aging out of scope a foal that is <em>permanently</em> blue-green may be worse than one that never was. Both on <a href="decisions.html#open-eyes">the roadmap</a>.
 </li>
 <li><strong>A stale count went with it.</strong> <code>SpecGeneTest</code> hard-coded the built-in gene count and had to be edited every time a gene was added; it reads <code>Genes.codeOrder().size()</code> before registering now. Same for the golden test's &ldquo;20 genotypes&rdquo; on the pipeline page.
 </li>
@@ -13163,7 +13229,7 @@ had to go.</p>
 </li>
 <li><strong>Eight LP outcomes</strong>, chosen by <code>expressionIn(pair, genotype)</code> reading the two modifier pairs + LP zygosity: <code>mottled</code> / <code>varnish-roan</code> (LP alone, het/hom), <code>leopard</code> / <code>fewspot</code> (+PATN1), <code>blanket</code> / <code>snowcap</code> (+PATN2), <code>semi-leopard</code> (both). <code>expressionOf(pair)</code> is deliberately <strong>coarse</strong> - <code>WILD</code> or <code>VARNISH_ROAN</code> for any LP pair - so the catalogue keeps two leopard pens, not eight.
 </li>
-<li><strong>New <code>Gene.coatDependsOn() -&gt; List&lt;String&gt;</code></strong> (default empty). The PATN modifiers have <code>affectsCoat()</code> false, so they'd be dropped from <code>Genotype.coatCode()</code> and a <code>LP/LP PATN1/PATN1</code> horse would collide in the texture cache with a plain <code>LP/LP</code> one. <code>LeopardGene.coatDependsOn()</code> names both; <code>coatCode()</code> folds their alleles in <strong>only when LP actually paints on that horse</strong> (checked via <code>expressionIn(...).wildType()</code>), so a PATN carrier with no LP still shares its texture (golden test asserts byte-identity). <code>BreedFounder</code> also treats a <code>coatDependsOn</code> gene like a coat gene (forced wild unless the breed names it). <strong>It is the model's only cross-locus gene</strong>, and <code>wiki/roadmap.html#settled</code> discourages it for third-party genes.
+<li><strong>New <code>Gene.coatDependsOn() -&gt; List&lt;String&gt;</code></strong> (default empty). The PATN modifiers have <code>affectsCoat()</code> false, so they'd be dropped from <code>Genotype.coatCode()</code> and a <code>LP/LP PATN1/PATN1</code> horse would collide in the texture cache with a plain <code>LP/LP</code> one. <code>LeopardGene.coatDependsOn()</code> names both; <code>coatCode()</code> folds their alleles in <strong>only when LP actually paints on that horse</strong> (checked via <code>expressionIn(...).wildType()</code>), so a PATN carrier with no LP still shares its texture (golden test asserts byte-identity). <code>BreedFounder</code> also treats a <code>coatDependsOn</code> gene like a coat gene (forced wild unless the breed names it). <strong>It is the model's only cross-locus gene</strong>, and <code>wiki/decisions.html#settled</code> discourages it for third-party genes.
 </li>
 <li><strong>Painters</strong> (all phase 1, off the expressing LP copy's seed): <code>paintSpotted</code> (whole horse white, round base-colour spots from <code>BodyNoise.cellDistance</code> Worley - fewspot = wider spacing, smaller radius), <code>paintBlanket</code> (white from the rump forward to a <code>coverage</code> fraction of the <code>BODY</code> X-span, wobbled edge, Worley spots inside; snowcap sets density 0; a big blanket creeps onto the hind legs), <code>paintVarnish</code> (a hair-by-hair white mix weighted 1 on the barrel/neck, ~½ on the head, 0 on mane/tail/ears, slightly asymmetric; mottled also drops a few crisp snowflake spots). <strong>"White finds white" is NOT applied</strong> - leopard composes at priority 73 (early), so leopard+sabino just stacks. Flagged.
 </li>
@@ -13390,7 +13456,7 @@ had to go.</p>
 </li>
 <li><strong>Spawn side - herds by connected clump (4th revision).</strong> <code>BreedSpawnHandler</code> (<code>FinalizeSpawnEvent</code>) does one thing: on a NATURAL / CHUNK_GENERATION / SPAWNER spawn, set <code>horse.getPersistentData()</code> <code>horsegenetics:wild_spawn</code>. <strong>The <code>SpawnGroupData</code> route is dead</strong> - <code>Horse.finalizeSpawn</code> replaces any custom pack data with its own <code>Horse.HorseGroupData</code> between <em>every</em> member, so the <code>BandData</code> approach silently made every horse "member 0" with its own breed -&gt; "herds are all mixed / groups of 4 solo Unknowns". <code>HerdManager</code> forms the herd by <strong>proximity</strong> instead (deferred one tick). Non-natural spawns (egg with a pre-set record; <code>/summon</code>) have no flag -&gt; lone <code>unknown</code>. Two <code>data/horsegenetics/neoforge/biome_modifier/</code> JSONs: <code>add_horse_herds</code> (37 biomes, <strong>weight 10, minCount 3, maxCount 6</strong>) and <code>add_horse_loners</code> (<code>#minecraft:is_overworld</code>, <strong>weight 1, 1-1</strong>) - a strong bias to packs. <strong>Horses now spawn in taiga, jungle, badlands, swamp, snowy biomes and mushroom fields</strong> - none vanilla.
 </li>
-<li><strong>Breed labels combine</strong> (<code>BreedLineage.combine</code>, in <code>applyBredFoal</code>): A x A -&gt; A; A x B -&gt; "A x B cross" (components sorted, order-free); same cross x itself or x one of its own breeds -&gt; that cross; cross x anything else -&gt; Mixed; Mixed x anything -&gt; Mixed. <strong>Unknown acts as an ordinary distinct breed</strong> (Friesian x Unknown -&gt; a cross; owner may want it absorbing like Mixed - flagged <code>wiki/roadmap.html#decisions</code>). A <strong>cross</strong> averages its two components' stat bands per axis (only where both pin it); Mixed/Unknown pin nothing.
+<li><strong>Breed labels combine</strong> (<code>BreedLineage.combine</code>, in <code>applyBredFoal</code>): A x A -&gt; A; A x B -&gt; "A x B cross" (components sorted, order-free); same cross x itself or x one of its own breeds -&gt; that cross; cross x anything else -&gt; Mixed; Mixed x anything -&gt; Mixed. <strong>Unknown acts as an ordinary distinct breed</strong> (Friesian x Unknown -&gt; a cross; owner may want it absorbing like Mixed - flagged <code>wiki/decisions.html#decisions</code>). A <strong>cross</strong> averages its two components' stat bands per axis (only where both pin it); Mixed/Unknown pin nothing.
 </li>
 <li><strong><code>HorseRecord</code> gained <code>Optional&lt;String&gt; breed</code></strong> (position 7, after <code>epigenomeCode</code>); codec <code>breed</code> optional field; <code>founder</code>/<code>bred</code> factories gained a <code>breedToken</code> param (old arities kept, delegating to <code>unknown</code>); <code>record.lineage()</code> -&gt; <code>BreedLineage</code>, <code>record.traits()</code> is breed-aware. <code>StoredGenome</code> (seed jar) gained a <code>breed</code> field so a seed-jar foal crosses right.
 </li>

@@ -29,6 +29,7 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | A defect, a gap, or an unchecked assumption | `wiki/known-gaps.html` |
 | Something to go look at in-game | `wiki/verification.html` |
 | Work not started yet | `wiki/roadmap.html` |
+| A design call - made, or still open | `wiki/decisions.html` |
 | An API quirk of this SDK | `wiki/api-notes.html` |
 | **A derived number** (gene counts, catalogue sizes, test counts) | the code that computes it |
 
@@ -74,17 +75,20 @@ the same change as the code, and never copy it back into here.
 | Living beside other mods | `wiki/compatibility.html` |
 | **What is broken / unproven / half-built** | `wiki/known-gaps.html` |
 | **The `runClient` checklist** - update after every play session | `wiki/verification.html` |
-| **Unbuilt work**, priority-ordered; `#settled` records closed calls | `wiki/roadmap.html` |
+| **Planned features**, priority-ordered, and *nothing else* | `wiki/roadmap.html` |
+| **Design calls** - settled (do not reopen) and still open | `wiki/decisions.html` |
 | **What each session built, and why** | `wiki/session-log.html` |
 
 `README.md` is **user-facing only** - what the mod does, how to play it,
 install, licence. No status, no architecture, no API notes.
-Two rules about the backlog page, both learned the hard way:
-- **Link the roadmap by anchor, never by `§` number** (`#defects`,
-  `#health-genes`, `#settled`). It was renumbered once and will be again.
-- **Only unbuilt work lives there.** When something ships, *delete* it and write
-  it up on its own page. "Marked shipped" is not "moved", and only moving it
-  keeps one source of truth.
+Two rules about the roadmap, both learned the hard way:
+- **Link it by anchor, never by `§` number** (`#health-genes`, `#browser`). It
+  has been renumbered twice; the sections carry no numbers at all now.
+- **Planned features only.** When something ships, *delete* it and write it up on
+  its own page - "marked shipped" is not "moved". A decision goes to
+  `wiki/decisions.html`, a defect to `wiki/known-gaps.html`, a thing to go and
+  look at to `wiki/verification.html`. It had swallowed all four before, and was
+  ten times this file's budget for it.
 
 ---
 ## Hard rules

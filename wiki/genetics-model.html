@@ -88,9 +88,10 @@
         string</strong> is the all-wild-type genotype. A bad <em>allele
         token</em> on a known gene is still a hard error. So adding or removing a
         gene is just a coat regeneration &mdash; no padding, no version field, no
-        positional / legacy fallback. What happens when a <em>player</em>
-        installs a gene mod is <a href="roadmap.html#gene-api">still an open
-        question</a>.
+        positional / legacy fallback. A gene mod registers through
+        <a href="making-a-gene.html#register"><code>RegisterHorseGenesEvent</code></a>, and
+        <strong>no third-party gene has ever actually been registered</strong> &mdash;
+        <a href="verification.html#gene-api">&sect;0-CM</a>.
     </p>
 </div>
 

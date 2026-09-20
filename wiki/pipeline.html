@@ -619,7 +619,7 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
         <code>Genotype.coatCode()</code> by default &mdash; <code>LP</code>&rsquo;s
         new <code>Gene.coatDependsOn()</code> declaration folds their alleles into the
         texture key, but only for a horse that actually carries <code>LP</code>. The
-        <a href="roadmap.html#settled">roadmap</a> steers third-party genes away
+        <a href="decisions.html#settled">roadmap</a> steers third-party genes away
         from this.
     </p>
 </div>
@@ -937,9 +937,12 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
 </p>
 
 <p class="muted">
-    Two calibration items are still outstanding and both are the same mistake elsewhere:
-    <a href="gene-ednrb.html">EDNRB</a>'s frame band and every <code>cover</code> knob are
-    still whole-horse fractions. See <a href="roadmap.html#defects">the roadmap</a>.
+    Both of the calibration items that used to stand here are done.
+    <a href="gene-ednrb.html">EDNRB</a>'s frame band is measured on the barrel's own height,
+    with a separate band on the neck's, and every <code>cover</code> knob is an area fraction
+    by construction &mdash; <code>EdnrbGene.paintFrame</code> and <code>TobianoGene</code>
+    score every eligible texel, sort, and cut at the quantile matching <code>cover</code>, so
+    the knob cannot drift when the field or the geometry moves under it.
 </p>
 
 <h2 id="white-finds-white">White finds white</h2>

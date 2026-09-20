@@ -989,6 +989,40 @@ done</code></pre>
     </p>
 </div>
 
+<h2 id="science-tab">Writing a gene&rsquo;s science tab</h2>
+
+<p>
+    The pass that wrote twenty-five of them established a shape, and it is worth following
+    rather than re-deriving. A tab carries: the locus and the variant with coordinates, the
+    mechanism, the real inheritance table, breed-by-breed frequency where anyone has measured
+    it, an <em>established / inferred / unsupported</em> split, and &mdash; last, and the reason
+    the pass was worth doing &mdash; <strong>an explicit statement of where the mod departs from
+    the literature</strong>. A rewrite that omits that last section has missed the point; three
+    of those disagreements turned out to be substantive enough to become
+    <a href="known-gaps.html#gap-134">gap 134</a>.
+</p>
+
+<div class="note danger">
+    <span class="label">Never write one from memory</span>
+    <p>
+        The twenty-five came from <strong>owner-supplied source files</strong>, and that is the
+        only reason they can state coordinates and frequencies. A veterinary claim invented to
+        fill a section is worse than the stub it replaced, and worse than the honest absence the
+        stub replaced before that. If there is no source to hand, leave the stub and say so.
+    </p>
+</div>
+
+<p>
+    The shape to copy is any of the twenty-five &mdash;
+    <a href="gene-mushroom.html?view=science">mushroom</a> is the cleanest short one and
+    <a href="gene-dun.html?view=science">dun</a> the fullest. A tab that is short because it is a
+    <em>complete argument</em> rather than a survey is finished; do not pad it to match a word
+    count. When one is written, re-run <code>node wiki/tools/sync-page-views.mjs</code>,
+    <code>node wiki/tools/build-search-index.mjs</code> and
+    <code>node wiki/tools/check-links.mjs</code>. Which tabs are still thin is on
+    <a href="roadmap.html#science-tabs">the roadmap</a>.
+</p>
+
 <h2 id="verified">Verified</h2>
 
 <p id="verified-bake-golden">

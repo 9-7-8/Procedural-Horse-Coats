@@ -102,7 +102,8 @@ window.HG.pages = {
                 { href: "for-testers.html", text: "For Testers", kind: "core", views: ["coding"] },
                 { href: "known-gaps.html", text: "Known gaps & lessons", kind: "core", views: ["coding"] },
                 { href: "compatibility.html", text: "Mod compatibility", kind: "core", views: ["coding"] },
-                { href: "roadmap.html", text: "Roadmap / backlog", kind: "core", views: ["coding"] },
+                { href: "roadmap.html", text: "Roadmap", kind: "core", views: ["coding"] },
+                { href: "decisions.html", text: "Design decisions", kind: "core", views: ["coding","science"] },
                 { href: "timeline-of-genes.html", text: "Timeline of genes", kind: "core", views: ["coding"] },
                 { href: "gene-census.html", text: "Gene census", kind: "core", views: ["gameplay","coding"] },
                 { href: "session-log.html", text: "Session log", kind: "core", views: ["coding"] }

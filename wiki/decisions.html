@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design decisions &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> calls that have been made</p>
+<h1>Design decisions</h1>
+<p class="lede">
+    The answers, kept so a later session does not relitigate them &mdash; and the handful of
+    questions still open, which change what gets built and so are worth more than a day of
+    building around. <strong>Nothing here is work.</strong> Work lives on
+    <a href="roadmap.html">the roadmap</a>, which carries planned features and nothing else;
+    defects live in <a href="known-gaps.html">known gaps</a>; the general
+    <em>why</em> &mdash; the principles a call is argued from &mdash; is
+    <a href="philosophy.html">Philosophy</a>.
+</p>
+
+<div class="note">
+    <span class="label">A decision on this page beats a sentence anywhere else</span>
+    <p>
+        When a call here and a system page disagree, the system page is stale: fix it in the
+        same change. When a call is <em>reversed</em>, rewrite the entry rather than adding a
+        second one underneath &mdash; two answers to one question is how a settled thing gets
+        reopened by accident.
+    </p>
+</div>
+
+<h2 id="decisions">Open calls</h2>
+
+<p>
+    Each of these changes what gets built. They are questions, not tasks: nothing on the
+    roadmap is waiting for a session to answer them by itself.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Question</th><th>Where it stands</th></tr></thead>
+<tbody>
+<tr><td><strong>Should <code>Condition</code> gain a severity / onset model?</strong></td><td>The mod&rsquo;s health model is binary: a locus is <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code>, or a flat heart reduction. The <code>naturalgeneref.md</code> disorder table is richer &mdash; each gene carries a <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>, and distinguishes <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em> conditions. HERDA, PSSM1, HYPP and CA (<a href="roadmap.html#health-genes">the health layer</a>) all fit that shape and none fits &ldquo;fewer hearts&rdquo; cleanly. Two ways: <strong>(a)</strong> keep the binary model and render each as a flat heart cost plus a flat speed / jump multiplier &mdash; cheap, loses the &ldquo;flares up under exertion&rdquo; character; <strong>(b)</strong> give <code>Condition</code> a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code> / <code>PROGRESSIVE</code> kind that the health resolve and a future status tick both read. (b) is the reference&rsquo;s model and the natural companion to the effect architecture (<a href="roadmap.html#trait-rules">group traits</a>). <strong>Still not decided &mdash; but all four of those genes have now shipped under (a)</strong>, so the question has changed from &ldquo;which model&rdquo; to &ldquo;is (b) worth a migration&rdquo;. Building them also settled one thing the question did not anticipate: the reference&rsquo;s percentages could not be used as arithmetic at all. Read literally against a 22-health baseline they make an <em>affected but living</em> HYPP horse worse than several of the mod&rsquo;s outright lethals, so every one of the new loci is calibrated against the disorders that already ship and uses the reference only for the <em>ordering</em>. Whatever (b) turns out to be, it does not get to inherit those numbers.</td></tr>
+<tr><td><strong>How is a cutie mark chosen &mdash; and should the gene be polygenic?</strong></td><td><strong>The hook is built</strong> (2026-09-06): <code>CutieMarkContribution</code> lets any gene modify the mark, and <code>markFor</code> folds every implementor over the base emblem in code order &mdash; the <a href="gene-light.html">light</a> locus is the first user and makes the mark glow. What is still open is the <em>content</em>: which genes and breeds should bias the <strong>item pool</strong> (a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons), and whether mark <em>colour</em> is worth having &mdash; a per-instance tint is not renderable through <code>ItemStackRenderState.submit</code>, so it would need a custom render type. Wants more fictional breeds (<a href="roadmap.html#breeds">the breed backlog</a>) to be worth doing.</td></tr>
+<tr><td><strong>The 1.12.2 backport.</strong></td><td>Not a question so much as a standing constraint. Everything on <a href="roadmap.html">the roadmap</a> is <code>common/</code>-side except entity scale, gait animation, the health tick handler and the gene registration hook &mdash; those four are the only places the backport goal should shape a design.</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<h3 id="open-eyes">Should a champagne foal be born blue-green?</h3>
+
+<p>
+    A real champagne foal is born blue-green and matures to amber or hazel. Here it is the
+    adult colour from birth: <code>EyeColorContribution</code> is not told which skin is being
+    baked, and with <a href="philosophy.html">aging out of scope</a> there is nothing to mature
+    through. Adding a <code>boolean adult</code> to the hook is a five-implementor change and
+    would be cheap. The question is whether a foal that is <em>permanently</em> blue-green is
+    better or worse than one that never was.
+</p>
+
+<h3 id="open-studbook">Open versus closed studbooks &mdash; model them, or not?</h3>
+
+<p>
+    Nothing models them anywhere, and this is an open question rather than an oversight. The
+    real-world taxonomy is closed purebred books, graded books that admit approved outside
+    blood, appendix / upgrade pathways, and crossbreed registries &mdash; and the breed format
+    cannot say which a breed is: <code>BreedSpecParser</code>&rsquo;s key whitelist has no such
+    field, and the idea survives only as prose (the Zangersheide&rsquo;s <code>notes</code>
+    describe an open performance book exactly, with no mechanic behind it).
+    <strong>There is a counter-argument already on the record</strong>:
+    <a href="known-gaps.html#gap-134">gap 134</a> ruled that &ldquo;a studbook has no analogue
+    in a game&rdquo; in a different context. The nearest existing hook is
+    <a href="breeds.html#strains">strains</a>, itself limited by
+    <a href="known-gaps.html#gap-256">gap 256</a>. <strong>Owner&rsquo;s call before any of it
+    is built</strong> &mdash; and it gates a batch of the sport-horse books on
+    <a href="roadmap.html#breed-coverage">the roadmap</a>, which are open,
+    performance-selected books rather than breeding populations.
+</p>
+
+<h3 id="open-country">What is a breed&rsquo;s <code>country</code> for?</h3>
+
+<p>
+    Nearly every breed carries one and nothing reads it.
+    <a href="breed-format.html">The format page</a> says the token must be a nation rather than
+    a region &ldquo;because the mechanic this feeds keys on a country&rdquo;, and that mechanic
+    does not exist &mdash; the only readers are the writer and a pass-through in
+    <code>BreedSpawnSettings</code>. Worth deciding what it is <em>for</em> before the
+    catalogue grows by another country&rsquo;s worth of drafts.
+</p>
+<h3 id="provisional">Provisional 2026-09-13, night &mdash; made while the owner slept: confirm or reverse</h3>
+
+<p>
+    The owner asked for breeding to be finished and its gaps closed overnight, with nobody awake
+    to ask. These are the calls that were not purely technical. Each one is built the conservative
+    way and is cheap to reverse. Move each into a settled list, or undo it.
+</p>
+
+<ul>
+    <li><strong>Impossible genotypes are embryonic lethals through a check, not through new
+        conditions on KIT, MITF and PAX3</strong> (<a href="known-gaps.html#gap-225">gap 225</a>).
+        Real lethal conditions on those genes would also remove all three loci from the random
+        splice carrot's pool: sabino, the W boosters, dominant white, SW1 and SW2. That is a
+        gameplay change, so it is not made.</li>
+    <li><strong>A gelded wild colt still disperses to a bachelor band</strong>, rather than being
+        treated as a mare by <code>BandLife</code>. Geldings only happen to owned horses, so this
+        almost never matters.</li>
+    <li><strong>A gelding's one-off bond grants</strong> (feeding, shearing) get a quarter more,
+        rounded down, so a +2 feed stays +2.</li>
+    <li><strong>The test yard can switch natural breeding off per mare</strong>
+        (<code>DebugYardFertility.noNaturalCovers</code>), and does so in the carrot pens and every
+        fertility pen whose test is something else. The owner's &ldquo;the yard is not
+        exempt&rdquo; still holds for every other pen, which will now breed on its own.</li>
+    <li><strong>Test kit batch 2 (the paddock) was deleted</strong>, because yard rows O to Q do the
+        same thing without building a paddock. Batch 1 was re-aimed at the two things the yard
+        cannot do: a birth while unloaded, and a reload.</li>
+</ul>
+
+<h3 id="owner-questions">Owner questions carried over from the checklist</h3>
+
+<p>
+    Asked on the 2026-09-06 and 09-07 checklist sections and never answered. They were design calls, not checks, so
+    they moved here when <a href="verification.html">the checklist</a> was tidied on 2026-09-15.
+</p>
+
+<ul>
+    <li><strong>Bay shade.</strong> Is a blood bay red enough? The chart's warmest corner, <code>#965C3F</code>, is the
+        reddest a bay body can be, so a redder one means changing the chart
+        (<a href="gene-lut.html?view=lab">LUT lab</a>), not <code>BayCoat</code>. Should the four bay bands be named in the
+        UI? Is 5% seal brown the right rarity? And is a soft inner-limb point on seal brown worth building, when no gene
+        can address a leg box's medial <code>Face</code> yet?</li>
+    <li><strong>Pangar&eacute;: is the pale too pale?</strong> A strong mealy belly ends around <code>MEALY_RED</code>,
+        already raised once because the chart has no gold band (<a href="known-gaps.html#gap-49">gap 49</a>). It may still
+        be too far.</li>
+</ul>
+
+<h2 id="settled">Settled &mdash; do not reopen</h2>
+
+<p>
+    Answers, not work. Grouped by subject first, then the dated batches.
+</p>
+
+<h3 id="settled-scope">What the mod is deliberately not doing</h3>
+
+<ul>
+    <li><strong>Aging is out entirely</strong>, and everything that rides on it. See
+        <a href="#settled-health">health and aging</a>, below.</li>
+    <li><strong>Imprinting, mosaicism, crossing over and linkage are not planned</strong>,
+        and neither are polygenic traits &mdash; see
+        <a href="#settled-genetics">the genetics model</a>.</li>
+    <li><strong>Sexual dimorphism in the coat.</strong> Sex paints nothing, and deliberately
+        never will. A stallion&rsquo;s crest would be a separate gene <em>reading</em> the sex
+        locus, not the sex locus growing a painter.</li>
+    <li><strong>Medicine hat is not a gene.</strong> A near-white sabino keeps its ears and
+        the back of its poll because <code>WhitePattern.sabino</code> never paints the ears;
+        whether that reads as a bonnet on any given horse is left to fall out of the draw. It
+        is not modelled, not retained for, and not rolled. (Owner&rsquo;s call.)</li>
+    <li><strong>Filmy and blind eyes are not an eye-colour category.</strong> Cloudiness is
+        cornea, lens or inflammation rather than iris pigment, so it would want to be a
+        <a href="horse-body.html">condition</a> and not a claim on
+        <a href="eye-colour.html">that channel</a>.</li>
+    <li id="settled-extension-ea"><strong><code>ea</code> will not be added to <a href="gene-extension.html">Extension</a>.</strong>
+        The two-allele model is accurate to the science as it stands, so there is nothing to
+        fix: <code>E</code> and <code>e</code> are the locus. Recorded as deleted rather than
+        deferred, because &ldquo;not yet&rdquo; invites a later session to build it. (Owner,
+        2026-09-17.)</li>
+    <li><strong><code>A+</code> and <code>At</code> as real agouti alleles were dropped</strong>
+        (owner, 2026-09-15): the published evidence for them does not hold up, and the mod
+        already manages seal and liver its own way &mdash; seal is the top of
+        <a href="gene-agouti.html">agouti</a>&rsquo;s shade band.</li>
+    <li><strong>Two behaviour genes were cut from the twenty-nine-gene batch.</strong>
+        <em>Moon-sick</em> was already shipped as the <code>Aga/Aga</code> allele on
+        <a href="gene-aggression.html">aggression</a>, and a second locus doing the same thing
+        is not a gene. <em>Electric</em> cannot be built as described: redstone power comes
+        from blocks and never from entities, so the honest version is either per-tick block
+        placement or pressure plates, which already respond to every horse in vanilla. Neither
+        should be reopened without a new argument.</li>
+    <li><strong>&ldquo;Add a red border to every white area&rdquo; and &ldquo;turn all the
+        black to pink&rdquo; are capability tests, not planned genes.</strong> Neither is
+        committed; both are the acceptance test for whether a magical gene can actually
+        <em>see</em> what is underneath it.</li>
+    <li><strong>A guardian horse will not retaliate against a <em>player</em> attacker.</strong>
+        A deliberate limitation rather than a gap: 26.1.2 exposes no server-side PvP flag to
+        gate it on, and a horse joining a fight between two people without either agreeing is
+        the wrong default. It wants a mod config option, not a code fix.</li>
+    <li><strong>The &ldquo;limited custom egg&rdquo; is cut.</strong> A creative-only item
+        setting extension and agouti plus one heterozygous custom gene is a strict subset of
+        what the <a href="item-spawn-eggs.html#custom">custom horse spawn egg</a> already does,
+        with its own validation code to maintain. If a placeable, giftable object is wanted for
+        events and prizes, give the spawner an <em>export as spawn egg</em> output instead:
+        one screen, one validator, one code path.</li>
+    <li><strong>Tack gets no stats.</strong> <a href="philosophy.html">Philosophy</a> is
+        explicit that no outcome is &ldquo;better&rdquo; and that the mod should add texture,
+        not chores. Cosmetic tack is in keeping; a tiered tack ladder is not.</li>
+    <li><strong>Three breed cosmetics are explicitly not modelled</strong> &mdash; the
+        Akhal-Teke / Karabakh metallic sheen (a shader), the Marwari&rsquo;s inward-curving ear
+        tips (a mesh change), and dished / convex / Roman head profiles. Noted on the breeds
+        and left there.</li>
+    <li><strong>Pink and magenta saddle fittings are unreachable, and that is the design.</strong>
+        See <a href="#settled-tack">the tack calls</a>, below.</li>
+</ul>
+
+<h3 id="settled-authoring">Authoring and the tools</h3>
+
+<ul>
+    <li><strong><code>AbstractPatternGene</code> will not be written from an entry, only from
+        duplication.</strong> It was promised as absorbing &ldquo;the <code>BodyNoise</code>
+        boilerplate and the pull-N-knobs-off-the-expressing-copy helper&rdquo;. Neither exists
+        as boilerplate: reading epigenetics is the single line
+        <code>ctx.epigeneticsFor(KEY)</code>, and <code>BodyNoise</code> is a static call whose
+        arguments are the whole design of the pattern using it. A base wrapping those would
+        hide one line and constrain the interesting one. If a pattern base is worth writing it
+        will be because a <em>third</em> pattern gene wants the same shape &mdash; write it
+        then, from the duplication.</li>
+    <li><strong>The creator&rsquo;s <code>when</code> editor stays flat, and a nested condition
+        stays read-only.</strong> The form edits a flat <em>all</em> / <em>any</em> of
+        (optionally negated) flags, which is every condition any shipped gene uses. A nested
+        condition is preserved byte-for-byte and shown read-only, because silently flattening
+        someone&rsquo;s tree is worse than declining to edit it. A real tree editor is only
+        worth building once a gene needs one.</li>
+    <li><strong>A science tab is never written from the model&rsquo;s memory.</strong> The
+        pass that wrote twenty-five of them worked from owner-supplied source files, which is
+        the only reason they can state coordinates and frequencies. A veterinary claim invented
+        to fill a section is worse than the stub it replaced, and worse than the honest absence
+        the stub replaced before that. The method is on
+        <a href="coding-notes.html#science-tab">coding notes</a>.</li>
+</ul>
+
+<h3 id="settled-pipeline">Coat pipeline</h3>
+<ul>
+    <li>Phase 3 is a <strong>signed add/subtract on unclamped <code>int</code>
+        channels</strong>, capped only at conversion, applied over the natural result
+        &mdash; zebra is a large negative contribution, not a special case.</li>
+    <li><strong>Context-aware phase-3 genes are intended</strong>, not a compromise: a
+        magical gene reads the accumulated result and adds relative to it. Order matters,
+        and that is fine &mdash; every gene has a fixed <strong>priority number</strong>,
+        so the outcome is fully deterministic. Magical genes are allowed to be physically
+        unrealistic.</li>
+    <li>A magical gene <strong>can</strong> paint a dominant-white horse (white is
+        natural, magical runs after) and <strong>does</strong> see both the natural coat
+        and the accumulated magical deltas.</li>
+    <li><strong>One gene cannot act in both phases.</strong></li>
+    <li><code>100</code> <strong>is</strong> magical, and all three-digit priorities are
+        magical; the <code>0</code>&ndash;<code>99</code> band is <strong>convention with
+        a log warning</strong>, not enforcement.</li>
+    <li><strong>Group traits may affect the coat</strong>, so they get a phase and a
+        priority like a gene.</li>
+</ul>
+
+<h3 id="settled-genetics">Genetics model</h3>
+<ul>
+    <li>Inheritance is <strong>Mendelian with two exceptions</strong>: <strong>X-linked
+        and Y-linked</strong> genes. Crossing over, maternal inheritance, imprinting,
+        mosaicism and <strong>polygenic traits</strong> are all out.</li>
+    <li><strong>Polygenic inheritance is cut.</strong> PDK4, CKM and the jumping QTLs are
+        polygenic in reality; each became <strong>one atomic gene</strong> with two
+        alleles and an additive weight. Atomic genes are legible &mdash; a player can
+        breed <em>for</em> one &mdash; where a hidden sum of anonymous markers reads as a
+        dice roll. Group traits (<a href="roadmap.html#trait-rules">on the roadmap</a>) stay, because they
+        are Mendelian epistasis rather than polygenic weighting.</li>
+    <li><strong>Sex is itself a gene</strong> at <strong>priority 1</strong>. A stallion
+        carries a real <code>X</code> <em>and</em> a <code>Y</code> (two occupied slots,
+        no structural change to <code>AllelePair</code> / <code>Epigenome</code>), so both
+        X-linked and Y-linked genes are expressible. A hemizygous allele
+        <strong>displays</strong> with an <code>X-</code> / <code>Y-</code> prefix; the
+        code keeps the bare token.</li>
+    <li><strong>A physical locus with many patterns is one gene</strong> (KIT, MITF,
+        MATP) with a large allele set. There is <strong>no dominance property at
+        all</strong> &mdash; the gene declares an <code>Expression</code> per distinct
+        outcome and maps every allele combination to one of them. Grouping alleles onto
+        one locus is a modelling choice, <strong>not linkage</strong> (linkage: settled
+        no).</li>
+    <li><strong>Determinism, masking and &ldquo;changes nothing&rdquo; are per
+        <em>combination</em></strong>, not per gene and not per allele. An
+        <code>Allele</code> carries no visible / deterministic hint at all &mdash; only a
+        token, a label and a slot order.</li>
+    <li><strong>Every wild type is one look.</strong> A gene may declare several, but the
+        gallery collapses them into one pen, because &ldquo;changes nothing&rdquo; is one
+        appearance.</li>
+    <li><strong>The epigenome lives on <code>HorseRecord</code></strong>, beside the
+        genotype, not on a separate entity attachment. Both are heritable facts assigned
+        once at birth.</li>
+    <li><strong>Founder frequency is per genotype</strong>, declared by the gene author,
+        normalised proportionally if the percentages do not sum to 100. This replaced the
+        old &ldquo;1 in N&rdquo; per-allele frequency. The <strong>Unknown Gene Splice
+        carrot has its own per-gene distribution</strong> of the same shape, kept separate
+        so the two can differ; omitted &rarr; uniform over the gene&rsquo;s pairs.</li>
+    <li>The genotype is a <strong>list keyed by gene, not a positional string</strong>.
+        Adding or removing a gene is cheap: a missing gene reads as wild type, an unknown
+        one is dropped, and either just triggers a coat regeneration. <strong>No
+        segment-padding, no back-compat handling</strong> &mdash; the mod is pre-release
+        and keeps no saves.</li>
+    <li>A foal inherits each allele copy&rsquo;s epigenetics <strong>drifted, not
+        verbatim</strong>. This reopened and replaced the original &ldquo;verbatim, no
+        re-roll&rdquo; answer, and it did it without the per-gene opt-in flag that was
+        proposed for the job: <em>every</em> scalar takes a tiny two-sided exponential
+        nudge at every breeding, seeds and categories get a small chance of an outright
+        re-roll, and the bound is the hard safety clamp rather than the design range a
+        founder is rolled in &mdash; so a line bred long enough is allowed somewhere no
+        wild horse has been. See <a href="breeding.html#drift">breeding &sect; drift</a>.</li>
+    <li>Allele tokens are <strong>alphanumeric</strong>, 1&ndash;128 chars, wild type
+        <code>n</code>.</li>
+</ul>
+
+<h3 id="settled-health">Health and aging</h3>
+<ul>
+    <li><strong>Aging is out entirely.</strong> No coats that change over time, no death
+        of old age. This is a firm no, not a deferral. Two consequences:
+        <strong>grey&rsquo;s fixed progression is the design, not a gap</strong>, and
+        <strong>flea-bitten grey is cut with it</strong>. Grey&rsquo;s melanoma risk
+        is <em>reported</em> and never simulated &mdash; an informational condition
+        off the copy number, with no lesion drawn and no stat docked; see
+        <a href="gene-grey.html#melanoma">the gene page</a>.</li>
+    <li><strong>Health is fewer hearts</strong> plus lethal foals. <strong>All</strong>
+        the health genetics get built; the deaths sit behind a config toggle that is
+        <strong>on by default</strong>. Three positions: full genetics + deaths (default),
+        genetics + reduced hearts but no deaths, off.</li>
+</ul>
+
+<h3 id="settled-care">Care, bond and the gameplay layer</h3>
+<ul>
+    <li>Pen pairs share a <strong>genotype only</strong>.</li>
+    <li>Hand-feeding <strong>bypasses</strong> the healing gate.</li>
+    <li><strong>Every time-gated action is once per 24,000-tick Minecraft day</strong>
+        unless there is a specific reason otherwise &mdash; bond&rsquo;s daily cap,
+        milking, shearing, the seed-jar donor cooldown.</li>
+    <li>Milking needs a <strong>tamed, full-health mare</strong>.</li>
+    <li>The <strong>herd comfort buff is passive health regen</strong>. Stamina is
+        <strong>not</strong> becoming a real resource.</li>
+    <li><strong>The Horse Master villager exists.</strong> The earlier &ldquo;removed as
+        unthematic&rdquo; line was from an older design and is dead.</li>
+    <li><strong>The gene database is a plain progressive record</strong>, not a fog of
+        war. Nothing is ever hidden in the info panel or the code; discovery gates only
+        the gene-carrot recipe display.</li>
+    <li>A <strong>fed carrot behaves like a vanilla golden carrot for timing</strong>: a
+        temporary breeding-mode-style window, consumed on breed, gone when it lapses
+        &mdash; not permanent stored state. Different carrot types show
+        <strong>differently-coloured heart particles</strong> as feedback.</li>
+    <li>The <strong>Unknown Epigenetic Splice carrot re-rolls every allele copy the fed
+        parent passes on</strong> &mdash; expressing <em>and</em> non-expressing.</li>
+    <li>The <strong>seed jar stores enough of the sire&rsquo;s record</strong> (not just
+        his UUID) to place him in the family tree, and stores the <strong>genotype, not a
+        frozen gamete</strong> &mdash; the draw is at impregnation, exactly like natural
+        breeding.</li>
+    <li>A <strong>sheared horse gets a render-layer overlay</strong> &mdash; it only has
+        to read as vaguely different, not look good; no coat-variant texture.</li>
+    <li>A gene that declares no rarity <strong>defaults to the gold-ingot tier</strong>,
+        and a gene <strong>can opt out of having a Known Gene Splice carrot</strong> at
+        all (sex, the recessive lethals, extension, agouti).</li>
+    <li><strong>Cross-locus reads and epigenetic branching are discouraged for
+        third-party genes.</strong> They make a gene hard to reason about, hard to show in
+        a punnett square and hard to breed toward. The
+        <a href="gene-leopard.html">leopard complex</a> earns the exception because it is
+        a real, famous pattern that genuinely works that way; the capability exists for
+        the built-ins and is not a recommended pattern. <strong>A gene file can reach it
+        now</strong> (2026-09-08) through
+        <a href="making-a-gene.html#needs"><code>needs</code></a>, which
+        <a href="gene-accretion.html">accretion</a> uses to split &ldquo;is there a pale
+        field, and what colour&rdquo; from &ldquo;which half of the horse&rdquo;. That
+        does not change the advice: it makes the discouraged thing <em>possible</em> from
+        data, not recommended.</li>
+</ul>
+
+<h3 id="settled-dated">The dated batches</h3>
+
+<h3 id="settled-equestrians">Settled 2026-09-18 &mdash; the horse trader is four people, and sells dyed tack again</h3>
+
+<ul>
+    <li><strong>One villager profession became four.</strong> The backlog&rsquo;s &ldquo;Horse Master&rdquo; shipped as a single <code>horseman</code> selling tack, carrots,
+        armour, papers, eggs and tickets across five tiers, which made him a shop rather
+        than a tradesman and left no room for any of it to improve as he did. He is
+        <strong>retired outright</strong> &mdash; no alias, no transitional profession
+        &mdash; and a leatherworker, a scientist, a supplier and a metalsmith take his
+        place. <strong>Four blocks, not one</strong>, because a POI hands out exactly one
+        profession; that is forced by vanilla and is not a preference to revisit. See
+        <a href="villagers.html#equestrians">Villagers</a> and
+        <a href="item-equestrian-posts.html">the four posts</a>.</li>
+    <li><strong>The dyed-saddle trade is back, and the question of whether it should exist
+        is answered.</strong> It was written and withdrawn once for selling a saddle
+        indistinguishable from the undyed one, and the open worry after that was that a
+        pre-dyed saddle is only worth buying if it carries something the
+        <a href="item-equestrian-bench.html">bench</a> cannot easily make. It does: the
+        <a href="villagers.html#tack-tint">leatherworker&rsquo;s palettes</a> climb by what
+        the dye <em>costs</em>, and his master tier sells lapis on diamond fittings &mdash;
+        a fitting material, which makes the trade a source rather than a convenience. A
+        random colour at a markup remains the version worth avoiding.</li>
+    <li><strong>None of the four hats may be purple.</strong> Owner&rsquo;s call. Purple is
+        <code>CowboyOverlayLayer.ARCANE_HAT</code>, and the
+        <a href="villagers.html#arcane">arcane dealer</a> has to stay pickable out of a
+        crowd at a glance.</li>
+</ul>
+
+<h3 id="settled-tack">Settled 2026-09-16 &mdash; three calls about dyeable tack</h3>
+
+<ul>
+    <li><strong>Pink and magenta fittings are unreachable, and that is the design rather
+        than a shortfall.</strong> The fittings row takes a <em>material</em>, not a dye:
+        you are not painting the hardware, you are saying what it is made of. No vanilla
+        material is pink, and the only way to reach it would be admitting dyes into that
+        row &mdash; which would cost it the whole thing that makes it interesting. Blue and
+        black were real holes and lapis and coal filled them; this one stays open on
+        purpose.</li>
+    <li><strong>The bench refuses iron, gold, diamond and netherite horse armour.</strong>
+        None of them is dyeable, so accepting them would only offer a result that never
+        appears. Refusing at <code>mayPlace</code> is a clearer answer than an empty output
+        slot.</li>
+    <li><strong>The 92 shadow texels of leather horse armour stay undyeable.</strong> They
+        are the near-black depth inside the bags and across the central box, and they read
+        as <em>shadow</em> rather than as material. Tinting them is exactly how dyed tack
+        starts looking like a flat sticker, so the third zone is the metal and not
+        everything that is left.</li>
+</ul>
+
+<h3>Settled 2026-09-14 &mdash; the two breeding gaps left open overnight</h3>
+
+<ul>
+    <li><strong>A natural cover works the way vanilla breeding does</strong>
+        (<a href="fertility.html#verified-cover-reach">gap 230, since verified</a>). The owner: &ldquo;figure out how
+        minecraft normally handles that for vanilla, then do the same thing.&rdquo; Vanilla ignores
+        line of sight for breeding partners and requires sixty ticks of approach inside three
+        blocks, so a cover does exactly that. A fence does not stop a stallion, just as it does not
+        stop two cows.</li>
+    <li><strong>Seed-jar and debug-clock clicks are server-authoritative</strong>
+        (<a href="known-gaps.html#gap-231">gap 231</a>). The owner: fine, &ldquo;as long as it
+        doesn't break single-player games&rdquo;. It doesn't: the click packet reaches the server
+        before the client's cancel, and the integrated server runs the same handlers.</li>
+</ul>
+<h3>Settled 2026-09-13 &mdash; fertility &amp; gestation</h3>
+
+<p>
+    Settled with the owner question by question; the design is written up on
+    <a href="fertility.html">fertility &amp; gestation</a>. The first slice is everything below
+    except wild band breeding.
+</p>
+
+<ul>
+    <li><strong>Scope: fertility genes plus pregnancy on the mod's own paths.</strong> Plain
+        golden-carrot breeding stays instant. Pregnancy happens through the seed jar,
+        a carrot-armed parent on either side, and a stallion left with mares (see below). There is no "gestation everywhere" setting.</li>
+    <li><strong>A gene that sometimes gives no foal from golden carrots does not count as
+        removing vanilla behaviour.</strong> Only the subfertile allele can cause a miss:
+        the chance is the product of both parents' allele factors, where <code>+</code> is 1
+        and <code>sf/sf</code> is 0.5. The fertility epigenome number never touches plain
+        golden-carrot breeding, and plain golden carrots never give twins.</li>
+    <li><strong>Mares cycle, and heat gates only the mod's paths.</strong> Out of heat, a
+        mare refuses a seed jar and it is kept; a carrot-armed pairing out of heat does not
+        take. Heat replaces vanilla love as the jar's window. A mare shows heat as an info-screen line, and she
+        and a nearby stallion walk toward each other.</li>
+    <li><strong>Game time, not day time.</strong> Every deadline is an absolute
+        <code>getGameTime()</code> tick, so sleeping and <code>/time set</code> advance
+        nothing. The mare's state is derived from stored anchors, not advanced by
+        transitions.</li>
+    <li><strong>Timing: one master setting, <code>gestation_days</code> (default 1).</strong>
+        Every other stage is <code>gestation &times; reference / 340</code>, floored at one
+        Minecraft day. Peak fertility is the second half of estrus.</li>
+    <li><strong>The genome is drawn at conception</strong>, while carrot bias is still in
+        hand, and stored on the mare as embryos in a new <code>HORSE_REPRO</code> attachment
+        (not kept on death). The client receives only a summary.</li>
+    <li><strong>A due date that passes while unloaded</strong> foals the next time the mare
+        is loaded, and every clock starts from then.</li>
+    <li><strong>A failed conception says so at once</strong>, on the action bar. Odds on the
+        mod's paths: 80% in the second half of heat, 50% in the first, 60% on foal heat.
+        These are scaled by the mare's fertility number and the stallion's covers penalty,
+        and capped at 95%.</li>
+    <li><strong>A lethal-at-conception embryo is a pregnancy lost early</strong>, using the
+        existing miscarriage signs, and she returns to cycling.</li>
+    <li><strong>Pregnant mares</strong> show "Pregnant, about N days left", are 15% slower
+        in the last third, and refuse golden carrots. If she dies, the pregnancy is
+        lost.</li>
+    <li><strong>Twins are possible, and rare.</strong> 75% both live, 20% one lost, 5% both
+        lost.</li>
+    <li><strong>Foal heat and a lactation flag</strong> follow birth. Lactation ends when
+        the foal grows up, or has been more than 32 blocks from her for a day.</li>
+    <li><strong>Ownership:</strong> the foal is tamed to whoever owns the mare at birth.
+        <code>bredBy</code> is the player who arranged the mating, stored in the
+        embryo.</li>
+    <li><strong>Stallions</strong> have no cycle. Beyond three covers or jar fills in a
+        Minecraft day, his conception odds halve.</li>
+    <li><strong>One Java gene, <code>horsegenetics.fertility</code>:</strong> alleles wild
+        <code>+</code>, subfertile <code>sf</code> (recessive) and twinning <code>tw</code>
+        (additive). Each copy carries a Gaussian <code>fertility</code> number, and the
+        expressed copy counts. Wild founders are carriers only, rarely. Named breeds may
+        name the gene. It is filed as a natural gene with an honest science tab saying the
+        real trait is polygenic.</li>
+    <li><strong>Testing:</strong> <code>debug.tools</code> speeds the reproductive day, the
+        debug clock steps a mare's state, and a <code>/testkit</code> batch covers
+        fertility.</li>
+    <li><strong>Breeding carrots wait until the next breeding that takes.</strong> The owner,
+        mid-build: they &ldquo;should just apply indefinitely until the next successful
+        breeding&rdquo;. A carrot arms the horse, and only a conception uses it up; it
+        survives a breeding that did not take. A mare accepts a carrot in or out of heat.
+        A carrot no longer puts a horse in love, so breeding is always a separate act. A
+        jar filled from an armed stallion carries his effects, and a jar used on an armed
+        mare applies hers.</li>
+    <li><strong>The Spontaneous Breeding gene is gone; every horse breeds on its own.</strong>
+        The owner: it was &ldquo;now basically just base game behavior. If you leave a stallion
+        around mares, he's going to make babies.&rdquo; Tamed and wild, once per heat when they
+        meet, in loaded chunks only. Both must be healthy enough &mdash; not badly hurt; full
+        health exactly was the rule until 2026-09-16, and it made a scratch permanent
+        infertility (<a href="fertility.html#settled-cover-health">why</a>) &mdash; and neither
+        ridden nor leashed. Eight other horses within sixteen blocks of her stops it. Three natural covers
+        in a day is a hard stop for him. The foal is credited to the mare's owner. Cowboy herds
+        are exempt; the yard and the horse dimension are not.</li>
+    <li><strong>Gelding, with a vet's kit.</strong> Sneak-use on your own stallion or colt. It is
+        permanent, and a flag on the horse record, so it survives death and sale. A gelding is
+        shown as one, has no stallion behaviour, refuses a jar and bonds 25% faster. Plain use
+        examines a heat or a pregnancy, and is where twins are revealed. The kit is crafted
+        (shears, leather, iron; 64 uses) and sold by the equestrian scientist. About half a cowboy's males
+        are geldings, priced lower.</li>
+</ul>
+
+<h3>Settled 2026-09-10</h3>
+
+<ul>
+    <li><strong>Only pure-bred horses fill in a Breeds row.</strong> A cross
+        (<code>cross:a+b</code>) or a spliced line teaches the breed book nothing. Owner's
+        call - it was already how the code behaved, and is now the rule rather than a gap.</li>
+    <li><strong>One holding pen per player.</strong> A second holding pen sign moves the pen.
+        The owner considered and rejected several pens per player the same day.</li>
+    <li><strong>A spawner feeds uncapped.</strong> Two creatures per meal the horse eats, no
+        local cap - the food is the cost, and the owner will price it. Only a meal actually
+        eaten counts.</li>
+    <li><strong>A hurt mare refuses to be milked</strong>, bottle or bucket, and says so.</li>
+</ul>
+
+<h3>Settled 2026-09-08</h3>
+
+<ul>
+    <li><strong>A gene that changes no pixel of the coat gets no icon, not a picture of
+        a horse it has nothing to do with.</strong> The baker used to fall back to the
+        plain bay for the thirty-six genes with no coat of their own - the health loci,
+        the magical stat genes, and the ones like cutie mark and particle that draw in a
+        client render layer rather than in the sheet. Honest and useless: a jump gene's
+        card showed a horse that says nothing about it, and a run of identical bays down
+        a page reads as a bug rather than as a fact. Their cards are words now, and
+        <code>GeneIconTool</code> <em>deletes</em> a stale bake rather than skipping it,
+        so a gene that loses its paint loses its picture on the next run.</li>
+    <li><strong>The icon camera is two angles, not three tuned components.</strong> It was
+        a hand-picked view vector plus a basis built with cross products, one of which had
+        an inverted sign - so &ldquo;up&rdquo; was 45&deg; off perpendicular and the whole
+        projection was sheared along the view axis. Azimuth and elevation give an
+        orthonormal basis by construction, and they are also the two numbers anybody
+        actually wants to change. <strong>Do not go back to a vector</strong>: the reason
+        the bug survived a day is that a sheared horse still looks like a horse, and a
+        basis nobody can check by reading it is a basis nobody checks.</li>
+    <li><strong>The wiki groups genes the way the gene editors do, and neither list is
+        written by hand.</strong> The sidebar had five hand-written gene sections
+        (&ldquo;Natural genes&rdquo;, &ldquo;White pattern loci&rdquo;, &ldquo;Performance
+        &amp; size genes&rdquo;&hellip;) and the landing page had its own arrangement
+        again, and the two gene editors' new family filter would have been a third.
+        <a href="genetics-model.html">GeneFamily</a> is the one table now, and
+        <code>:common:bakeGeneWikiPages</code> writes both lists from the registry: a gene
+        page is registered by <em>existing</em>. Its sidebar label is the page's own
+        <code>&lt;h1&gt;</code> and its views are the tab panels it carries, so neither can
+        promise something the page does not have.</li>
+    <li><strong>The landing page's four headline numbers are generated.</strong> That was
+        this section, and <a href="known-gaps.html#gap-93">gap 93</a>. It did not need a
+        new Gradle task in the end - <code>bakeGeneWikiPages</code> was already rewriting
+        <code>index.html</code> for the gene cards, so the stats block went in the same
+        pass and behind the same markers. The distinct-coat count now prints as a floor:
+        it passed <code>Long.MAX_VALUE</code> somewhere in the eighty-four magical genes,
+        and a saturated counter should say so rather than quote its own ceiling.</li>
+    <li><strong>A horse moves between the two editors as a whole horse, through one
+        format.</strong> The backlog asked for an <em>Import horse file</em> button beside the
+        spawn egg's <b>Paste code</b>. It shipped as a replacement for it rather than a
+        neighbour: there is one format,
+        <a href="item-spawn-eggs.html#egg"><code>common/horse/HorseFile</code></a>, the
+        designer's <b>Export</b> / <b>Import</b> write it to a file and the spawn egg's
+        <b>Copy horse</b> / <b>Paste</b> write it to the clipboard, and <em>Copy code</em>
+        / <em>Paste code</em> are gone. Keeping both would have meant two ways to copy a
+        horse of which one silently loses its epigenetics, its name and its breed, and
+        nobody reads a button and thinks "this one is the lossy one".</li>
+    <li><strong>Importing is not creative-gated.</strong> The backlog left this open. It can
+        only build a horse the editor could already build by hand, and everything above
+        the Spawn button works in every game mode on purpose &mdash; the editor is a
+        viewer that can also spawn. Spawning stays creative-only and still re-checked on
+        the server.</li>
+</ul>
+
+<h3>Settled 2026-09-07</h3>
+
+<ul>
+    <li><strong>The village horse trader is two people, not one.</strong> The backlog
+        described one villager profession that would sell items. It shipped as a
+        <strong>horseman</strong> (that profession, exactly) and a <strong>cowboy</strong>
+        who is not a profession at all: his stock is a live herd rather than a trade
+        table, and a shopkeeper's daily schedule is the wrong machinery for a man who
+        keeps animals. Splitting them lets each use the machinery it actually wants. The
+        original case rested partly on his being permanently mounted, which was
+        <a href="villagers.html#verified-no-shelter">abandoned</a> a day later &mdash; the split
+        outlived the argument that produced it. The <em>shopkeeper</em> half has since become
+        <a href="#settled-equestrians">four professions</a>, which does not disturb this call:
+        the line it drew is between a profession and an entity, and it is still exactly where
+        it was. See <a href="villagers.html#not-a-profession">Villagers</a>.</li>
+    <li><strong>The cowboy's house is part of the barn's structure piece, not built at
+        runtime.</strong> The runtime version looked cheaper and never worked, and
+        loosening its flatness test would not have saved it: the work posts stand on the
+        house, the work posts are what make a cowboy, and a cowboy cannot build the thing
+        that made him. Anything that wants to be near the barn and to exist <em>before</em>
+        the cowboy does belongs in the same baked piece for the same reason. The cost is a
+        deeper footprint and a piece that generates less often, paid for in pool weight.
+        See <a href="villagers.html#house">Villagers</a> and
+        <a href="villagers.html#verified-house-baked">gap 61</a>.</li>
+    <li><strong>A horse is sold as a paper, not handed over.</strong> The alternative was
+        &ldquo;pay the trader, receive a horse&rdquo;, which is one click and leaves
+        nothing behind. A <a href="villagers.html#bearer">signed transfer paper</a> is a
+        bearer claim on one named animal that is still standing where it was: the buyer
+        has to go and collect it, and until they do the claim is an object they can trade
+        onward, sell at a markup, or lose. That is the entire reason the item exists in
+        this shape, and it is also what makes an in-village horse market possible between
+        <em>players</em>, which no amount of villager trading would have.</li>
+    <li><strong>Ownership moves; breeding does not.</strong> Every transfer path leaves
+        <code>bredBy</code> alone, so a horse bred by a cowboy still says so after four
+        owners and <code>HorseRecord.attribution()</code> keeps naming him in the family
+        tree. <code>tamedBy</code> is only ever written when blank, because it records
+        who first got a rope on the animal - also not a thing a sale changes.</li>
+</ul>
+
+<h3>Settled 2026-09-06</h3>
+
+<ul>
+    <li><strong>A zebra and a brindle horse do not share a stripe painter.</strong> They
+        did, on the grounds that both are &ldquo;stripes on a horse&rdquo;, and it is why
+        both of them looked wrong: a zebra&rsquo;s bands are crisp, symmetric and
+        organised round a <em>body map</em> &mdash; vertical on the barrel, arcing over
+        the hip, ringing the legs, tightening on the neck and face &mdash; while
+        brindle&rsquo;s are soft, broken, unequal in width and <em>deliberately different
+        on the two sides of one horse</em>, because they are a record of X-inactivation
+        mosaicism. A generic stripe field phases on <code>|z|</code> and is therefore
+        structurally symmetric, so it cannot express brindle at all. They have a field
+        each: <code>ZebraStripes</code> and <code>BlaschkoStripes</code>. See
+        <a href="body-space.html#stripe-fields">Body space</a>.</li>
+    <li><strong>A zebra is dark with the colour taken out, not white with black added
+        on.</strong> The dark hair is the default state and a white stripe is locally
+        suppressed melanin, so <code>ZebraStripes</code> returns the <em>dark</em> band
+        coverage and <a href="gene-natural-zebra.html">natural zebra</a> whitens
+        <code>1 - c</code> in phase 1. <a href="gene-magic-zebra.html">Magic zebra</a>
+        blackens <code>c</code> in phase 3 &mdash; the only way to stripe a horse with no
+        pigment left to remove, and the reason the magical one exists at all.</li>
+    <li><strong>Brindle is white, not a dilution.</strong> A brindle streak goes to white
+        hair whatever the horse under it is. The original &ldquo;a lighter shade of the
+        base colour&rdquo; reading is defensible from the literature &mdash; real BR1 is
+        as much a hair-<em>texture</em> trait as a pigment one &mdash; but the mod has one
+        channel and it is colour, so the pigment half is drawn at its most legible and the
+        texture half is a paragraph on <a href="gene-brindle.html#biology">the gene
+        page</a>.</li>
+    <li><strong>Attachments on the vanilla <code>Horse</code>, never a subclass.</strong>
+        <code>EntityCustomHorse extends HorseEntity</code> is <em>dead</em> and is not
+        coming back. Everything hangs off the vanilla horse and the coat is injected at
+        render time. It keeps horses in existing worlds working, keeps the 1.12.2
+        backport cheap, and avoids spawn replacement &mdash; the fragile part &mdash;
+        entirely. The cost is that only one mod can own the horse renderer; that trade
+        and the rest of the compatibility surface are written up on
+        <a href="compatibility.html">Mod compatibility</a>.</li>
+    <li><strong>&ldquo;Unknown&rdquo; is now <em>Feral Mixed</em>, and it is
+        absorbing.</strong> Any cross involving a Feral Mixed horse produces a plain
+        <strong>Mixed</strong> foal &mdash; Feral&nbsp;&times;&nbsp;Feral included, so
+        there is no back door to a &ldquo;pure feral&rdquo; line. As Unknown it combined
+        like an ordinary distinct breed, which forced the model to answer whether a wild
+        loner had a stat band, a gene pool and a claim to purity. Making it absorbing
+        deletes the question instead of answering it, and says the true thing: a horse of
+        unrecorded ancestry contributes unrecorded ancestry.</li>
+    <li><strong>A cross's stat band stays the per-axis average.</strong> The alternative
+        &mdash; an F1 leaning toward the stronger parent &mdash; was rejected because
+        <em>the Mendelian draw is already doing that work</em>. The band only sets the
+        <em>range</em>; whether a cross foal carries a variant copy at all is inherited
+        allele by allele, and which point inside the band it lands on comes from its own
+        epigenetic seeds. A foal that inherits no <code>Swift</code> copy sits on the
+        baseline whatever its label says. Weighting the band as well would be putting a
+        thumb on a scale that is already loaded.</li>
+    <li><strong>A player may splice a horse into a lethal genotype &mdash; but only on
+        purpose.</strong> The <em>Known</em> Gene Splice carrot names the gene, and what
+        the player does with it is their business. The <em>Unknown</em> Gene Splice
+        carrot has a <strong>blacklist</strong>: it may never roll a locus that kills or
+        costs hearts. The list is <strong>derived</strong>, not typed &mdash; every
+        combination the carrot could roll is resolved through <code>HorseTraits</code> and
+        the locus is dropped if any of them is lethal, impairing, or short of baseline
+        health &mdash; so a health gene added later is excluded by having done its job.
+        Hearts are the line: a pony allele or a <code>Sluggish</code> copy makes a slower
+        horse, not a damaged one, and a surprise you did not want is what the carrot is
+        for. See <code>SpliceSafety</code>.</li>
+    <li><strong>The horse dimension is reachable in survival.</strong> That is what the
+        no-break / no-harm rules in it are <em>for</em> &mdash; they are what stop it
+        becoming an infinite meat and brick dimension, and they were written with survival
+        access in mind. Hay-bale portals already work in any build; the interdimensional
+        ticket is a convenience on top, not the gate.</li>
+    <li><strong>Cutie mark is a channel with a modifier hook</strong>, like the LUT.
+        Other genes reach it through <code>CutieMarkContribution</code> rather than
+        growing their own copy of it. It can afford the hook precisely because the emblem
+        is <em>the last thing drawn</em> &mdash; nothing composes over it, nothing reads
+        it back, and it is not in the baked coat at all, so a modifier cannot corrupt an
+        accumulator or move a texture key.</li>
+    <li><strong>Eye colour is a channel with ranked claims</strong>, and the iris is the
+        <strong>dark</strong> texels &mdash; the sclera stays white. Blue out-ranks any
+        pigment colour, because a depigmented iris has nothing left to recolour. The blue
+        eye belongs to the white loci and is <em>not</em> a gene of its own.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="philosophy.html">Philosophy &mdash; the principles behind these</a>
+        <a href="roadmap.html">Roadmap &mdash; planned features</a>
+        <a href="known-gaps.html">Known gaps &amp; lessons</a>
+        <a href="session-log.html">Session log</a>
+    </div>
+    An entry here is an answer. If it has turned back into a question, rewrite it &mdash;
+    do not add a second answer below the first.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
