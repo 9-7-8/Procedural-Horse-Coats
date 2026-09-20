@@ -11,6 +11,18 @@
     "horsegenetics:cherry_double_fence_gate",
     "horsegenetics:bamboo_double_fence_gate",
     "horsegenetics:crimson_double_fence_gate",
-    "horsegenetics:warped_double_fence_gate"
+    "horsegenetics:warped_double_fence_gate",
+    "horsegenetics:oak_jump",
+    "horsegenetics:spruce_jump",
+    "horsegenetics:birch_jump",
+    "horsegenetics:jungle_jump",
+    "horsegenetics:acacia_jump",
+    "horsegenetics:dark_oak_jump",
+    "horsegenetics:pale_oak_jump",
+    "horsegenetics:mangrove_jump",
+    "horsegenetics:cherry_jump",
+    "horsegenetics:bamboo_jump",
+    "horsegenetics:crimson_jump",
+    "horsegenetics:warped_jump"
   ]
 }

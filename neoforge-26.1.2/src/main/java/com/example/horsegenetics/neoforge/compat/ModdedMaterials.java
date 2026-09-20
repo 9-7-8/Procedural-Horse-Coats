@@ -62,6 +62,27 @@ public final class ModdedMaterials {
         public String doubleGateId() {
             return namespace + "_" + name + "_double_fence_gate";
         }
+
+        /** The id our showjumping rail takes in <i>our</i> namespace. */
+        public String jumpId() {
+            return namespace + "_" + name + "_jump";
+        }
+
+        /**
+         * The mod's own fence, which the jump recipe consumes two of.
+         *
+         * <p><b>Composed, not scanned</b>, unlike {@link #gateId()} - the scan
+         * looks for fence <i>gates</i>, because that is what the double gate
+         * needed, and a wood that ships one essentially always ships the plain
+         * fence beside it. Composing is therefore a good guess rather than a
+         * safe one, so every caller must put it through
+         * {@link ModdedMaterials#itemExists} first: a recipe naming an item
+         * that is not there does not fail quietly, it fails to parse and takes
+         * the rest of the generated pack with it.
+         */
+        public String fenceId() {
+            return namespace + ":" + name + "_fence";
+        }
     }
 
     /**

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:acacia_fence",
+    "minecraft:acacia_fence",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "count": 4,
+    "id": "horsegenetics:acacia_jump"
+  }
+}

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jumps &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Block <span class="sep">/</span> the yard</p>
+<h1>Jumps</h1>
+<p class="lede">
+    A showjumping rail. Place them <strong>side by side</strong> to widen a fence and
+    <strong>on top of each other</strong> to raise it &mdash; there is no height setting, because
+    the stack <em>is</em> the height. One per wood, and the first thing in the mod that makes a
+    horse&rsquo;s <a href="horse-body.html">jump stat</a> something you can watch rather than read.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="use">What it is for</h2>
+
+<p>
+    A jump is one rail across the block with an upright <strong>standard</strong> at each end of
+    the run. Put two beside each other and they become one continuous rail with a post at either
+    extremity, the way a real fence line looks; the standards in the middle disappear on their own,
+    so you never have to think about it.
+</p>
+
+<div class="plain" id="recipe">
+    <p>
+        <strong>Recipe (shapeless):</strong> 2 vanilla fences of that wood + 1
+        <a href="item-horse-hair.html">horse hair</a> &rarr; <strong>4 jumps</strong>.
+    </p>
+    <p>
+        Four to a hair on purpose. A course is the one thing you build dozens of, and a hair is
+        sheared one to three at a time, once per horse per day &mdash; so a twelve-fence course
+        costs three hairs, which is an afternoon with one horse rather than a reason not to build.
+    </p>
+</div>
+
+<h2 id="height">Height is the stack, and it is a measuring stick</h2>
+
+<p>
+    The rail tops out just under one block, which is exactly a horse&rsquo;s step height. So a
+    single jump on the ground is <strong>not an obstacle</strong> &mdash; a horse walks over it.
+    That is a ground pole, and it is what you trot a young horse over. The fence starts at
+    <em>two</em>.
+</p>
+
+<p>
+    From there every block you add asks for about one more block of clearance, which makes a stack
+    a ladder you can read off:
+</p>
+
+<table>
+    <thead>
+        <tr><th>Stack</th><th>What it is</th><th>Who clears it</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>1</td><td>Ground pole</td><td>Everything &mdash; it is walked over, not jumped</td></tr>
+        <tr><td>2</td><td>A small vertical</td><td>Most horses</td></tr>
+        <tr><td>3</td><td>A real fence</td><td>A decent jumper</td></tr>
+        <tr><td>4</td><td>A big one</td><td>Something you bred on purpose</td></tr>
+        <tr><td>5+</td><td>Puissance</td><td>A horse carrying the magical jump locus</td></tr>
+    </tbody>
+</table>
+
+<p>
+    The point is not the number. It is that two horses that look identical on a stat screen are
+    separated by a fence one of them stops at, which is the whole argument for the mod being about
+    breeding rather than about rolling.
+</p>
+
+<h2 id="health">Is it dangerous?</h2>
+
+<p>
+    No. A jump is a fence: a horse that refuses it stops, and one that hits it takes nothing. It
+    has no effect on a horse&rsquo;s health, its condition or its <a href="horse-care.html">bond</a>,
+    and failing one costs nothing but the attempt.
+</p>
+
+<h2 id="building">Building a course</h2>
+
+<ul>
+    <li><strong>Facing</strong> is set when you place it, from the way you are looking, and the
+        rail runs across that. A row placed while walking sideways comes out straight.</li>
+    <li><strong>A jump facing north and one facing south are the same fence</strong>, so they
+        join up. You do not have to approach a row from a consistent side to build it.</li>
+    <li>Jumps join to jumps and to nothing else &mdash; they will not connect to a fence, a
+        <a href="item-double-gates.html">double gate</a> or a wall.</li>
+    <li>An axe is the right tool, and one jump drops one jump.</li>
+</ul>
+
+<p>
+    Every wood has one, including <strong>woods other mods added</strong> &mdash; those are
+    generated at run time from that mod&rsquo;s own plank texture, so they arrive looking right
+    without anybody drawing anything. See <a href="compatibility.html">compatibility</a>.
+</p>
+
+<h2 id="not-yet">What it is not, yet</h2>
+
+<p>
+    This is one jump type: a plain vertical rail. Cross-country has a vocabulary well beyond it
+    &mdash; logs, brush, ditches, oxers, fillers, water &mdash; and none of that is built. Nothing
+    scores a round, times one, or notices that a horse knocked a rail, because a jump is currently
+    scenery with a collision box. <a href="roadmap.html#items">The roadmap</a> is where that
+    lives.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="classes">Where it lives</h2>
+
+<ul>
+    <li><code>block/JumpBlock</code> &mdash; the geometry, the connection rule, the
+        <code>VoxelShape</code>.</li>
+    <li><code>block/Jumps</code> &mdash; the per-wood registration, vanilla&rsquo;s twelve then
+        every modded wood. Deliberately the same shape as <code>block/DoubleGates</code>, down to
+        the duplicate-id guard declared <em>above</em> the static block; that ordering is not
+        stylistic, and the gates crashed mod construction with an NPE out of a class initialiser
+        for getting it wrong.</li>
+    <li><code>tools/bake-jumps.mjs</code> &mdash; every shipped asset, for vanilla&rsquo;s woods,
+        at author time.</li>
+    <li><code>compat/GeneratedJumps</code> &mdash; the same files for other mods&rsquo; woods, at
+        run time.</li>
+</ul>
+
+<h2 id="three-copies">The geometry is written three times</h2>
+
+<p>
+    This is the thing to be careful about. The same shape exists as boxes in
+    <code>bake-jumps.mjs</code>, as a <code>VoxelShape</code> in <code>JumpBlock</code>, and again
+    in <code>GeneratedJumps</code> for modded woods. <strong>Change one, change all three.</strong>
+</p>
+
+<p>
+    Each drift fails differently and none of them logs. Model against shape gives you a jump you
+    can see in one place and collide with in another. Baker against generator gives you a modded
+    jump that is a purple cube while every vanilla one is fine.
+</p>
+
+<h2 id="connection">Left, right, and the suffix that was wrong</h2>
+
+<p>
+    <code>LEFT</code> and <code>RIGHT</code> are fence-style connection flags: true means another
+    jump continues the rail on that side, so the standard there is <em>not</em> drawn. Left is
+    <code>facing.getCounterClockWise()</code>, the same definition
+    <code>DoubleGates.partnerDirection</code> uses &mdash; keep the two families agreeing about
+    which way is left.
+</p>
+
+<div class="plain">
+    <p>
+        <strong>Verified 2026-09-20, by <code>check-block-models.mjs</code>, on its first run.</strong>
+        The blockstate composed its model suffix as
+        <code>(left?"_l":"") + (right?"_r":"")</code>, giving <code>_l_r</code>, while the models
+        were written <code>_lr</code>. Only the both-connected case differs, so a lone jump and a
+        row of <em>two</em> were perfect and the middle of every row of three was a purple cube.
+    </p>
+    <p>
+        Both generators now derive the suffix from one function rather than composing it, and the
+        check is a repo tool: <code>node neoforge-26.1.2/tools/check-block-models.mjs</code>, which
+        walks every blockstate, item definition and model parent and asserts the file is there. It
+        covers the shipped assets only &mdash; the run-time generated pack is not on disk and is
+        still guarded by nothing but the class docs.
+    </p>
+</div>
+
+<h2 id="tags">The axe tag is shared, so it merges</h2>
+
+<p>
+    <code>mineable/axe</code> holds the double gates as well, and a datapack has exactly one file
+    per tag. Both bakers therefore <strong>merge</strong> into it rather than writing
+    <code>{values: ours}</code>, and <code>GeneratedGates.mergeBlockTag</code> does the same for
+    the run-time pack so it does not matter which generator runs first.
+</p>
+
+<p>
+    Getting this wrong is worth describing because of how quietly it fails: the losing family keeps
+    working, mines slowly, and drops nothing without an axe. That reads as a balance decision, not
+    a bug, and could sit there for months. After running either baker, check both families are
+    still in the tag.
+</p>
+
+<h2 id="unverified">Unverified</h2>
+
+<p>
+    <code>JumpBlock.getShape</code> is the only <code>VoxelShape</code> override in the NeoForge
+    module, so its signature is corroborated by nothing else in the repo &mdash; the compiler is
+    the whole check, and it passes. <strong>Nothing here has been seen in game.</strong> The height
+    ladder on the Gameplay tab is derived from a horse&rsquo;s 1.0 step height and the rail&rsquo;s
+    top at y=15/16; it has not been ridden. See <a href="verification.html">verification</a>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why-stacking">Why stacking, and not a height property</h2>
+
+<p>
+    A height state was the obvious design: right-click to cycle 1&ndash;4, like a repeater. It was
+    rejected because it makes the jump <em>assert</em> a height, and the block has no business
+    knowing one. Stacking makes height a consequence of geometry instead &mdash; the horse is
+    answering a question about the world, not about a number somebody typed into a blockstate.
+</p>
+
+<p>
+    It also costs nothing. No property, no cycling interaction, no lang keys, no extra variants,
+    and the ladder comes out evenly spaced for free because blocks are one block tall.
+</p>
+
+<h2 id="instrument">What a stack can actually measure</h2>
+
+<p>
+    This matters more than a decoration has any right to. Nothing else in the mod makes jump
+    <em>visible</em>: the debug yard&rsquo;s stat pens measure it by printing
+    <code>Attributes.JUMP_STRENGTH</code>, which is reading the answer rather than asking the
+    question.
+</p>
+
+<p>
+    And there is a claim waiting to be checked. <code>common/trait/HorseUnits.jumpMetres</code>
+    converts jump strength to metres through a cubic &mdash; it is what the info screen prints as
+    &ldquo;x.x m&rdquo; &mdash; and <strong>its own class doc admits the fit is unverified against
+    this mod&rsquo;s horses</strong>, assuming scale 1.0 and normal gravity. A stack of jumps is
+    the instrument that can finally test it: breed for a known strength, build the ladder, and see
+    which rung the horse stops at. If the cubic is right, the rung and the metres agree.
+</p>
+
+<p>
+    That is a genuine experiment the mod could not previously run, and it is the reason this
+    family was worth building before the prettier obstacle types.
+</p>
+
+<h2 id="art">Why the art is ours</h2>
+
+<p>
+    Three existing Minecraft projects cover this ground &mdash; DragN&rsquo;s XC Jumps,
+    EquestrianMod&rsquo;s obstacles, and the Showjumping Craft CIT pack. <strong>All three are All
+    Rights Reserved for their assets</strong>, and the one that splits its licences (MIT code,
+    reserved art) reserves precisely the half that would have been worth having. The author policy
+    behind the first is explicit that models and textures may not go into a standalone mod; the
+    exceptions are texture packs and dependent addons, which we are not.
+</p>
+
+<p>
+    Our own licence makes it worse rather than better: this mod is CC BY-NC 4.0 and its jars go to
+    outside testers, so shipping someone&rsquo;s reserved art would mean sublicensing it, which
+    needs written permission and not a friendly nod. So the geometry here is drawn from the
+    real-world object. A showjumping vertical is a rail between two standards; that is not anyone&rsquo;s
+    invention, and building it from the same vocabulary is clear.
+</p>
+
+<p>
+    Recorded here so the next session does not repeat the search. The answer will not have changed.
+</p>
+
+</section>
+
+</article>
+</main>
+</body>
+</html>

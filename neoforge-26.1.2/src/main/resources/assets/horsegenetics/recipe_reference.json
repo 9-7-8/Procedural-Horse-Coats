@@ -28,6 +28,17 @@
       "count": 1
     },
     {
+      "id": "acacia_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:acacia_fence",
+        "minecraft:acacia_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:acacia_jump",
+      "count": 4
+    },
+    {
       "id": "acacia_plow",
       "kind": "shaped",
       "grid": [
@@ -138,6 +149,17 @@
       ],
       "out": "horsegenetics:bamboo_double_fence_gate",
       "count": 1
+    },
+    {
+      "id": "bamboo_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:bamboo_fence",
+        "minecraft:bamboo_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:bamboo_jump",
+      "count": 4
     },
     {
       "id": "bamboo_plow",
@@ -271,6 +293,17 @@
       ],
       "out": "horsegenetics:birch_double_fence_gate",
       "count": 1
+    },
+    {
+      "id": "birch_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:birch_fence",
+        "minecraft:birch_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:birch_jump",
+      "count": 4
     },
     {
       "id": "birch_plow",
@@ -445,6 +478,17 @@
       "count": 1
     },
     {
+      "id": "cherry_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:cherry_fence",
+        "minecraft:cherry_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:cherry_jump",
+      "count": 4
+    },
+    {
       "id": "cherry_plow",
       "kind": "shaped",
       "grid": [
@@ -572,6 +616,17 @@
       "count": 1
     },
     {
+      "id": "crimson_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:crimson_fence",
+        "minecraft:crimson_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:crimson_jump",
+      "count": 4
+    },
+    {
       "id": "crimson_plow",
       "kind": "shaped",
       "grid": [
@@ -682,6 +737,17 @@
       ],
       "out": "horsegenetics:dark_oak_double_fence_gate",
       "count": 1
+    },
+    {
+      "id": "dark_oak_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:dark_oak_fence",
+        "minecraft:dark_oak_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:dark_oak_jump",
+      "count": 4
     },
     {
       "id": "dark_oak_plow",
@@ -902,6 +968,17 @@
       "count": 1
     },
     {
+      "id": "jungle_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:jungle_fence",
+        "minecraft:jungle_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:jungle_jump",
+      "count": 4
+    },
+    {
       "id": "jungle_plow",
       "kind": "shaped",
       "grid": [
@@ -1055,6 +1132,17 @@
       "count": 1
     },
     {
+      "id": "mangrove_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:mangrove_fence",
+        "minecraft:mangrove_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:mangrove_jump",
+      "count": 4
+    },
+    {
       "id": "mangrove_plow",
       "kind": "shaped",
       "grid": [
@@ -1192,6 +1280,17 @@
       "count": 1
     },
     {
+      "id": "oak_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:oak_fence",
+        "minecraft:oak_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:oak_jump",
+      "count": 4
+    },
+    {
       "id": "oak_plow",
       "kind": "shaped",
       "grid": [
@@ -1302,6 +1401,17 @@
       ],
       "out": "horsegenetics:pale_oak_double_fence_gate",
       "count": 1
+    },
+    {
+      "id": "pale_oak_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:pale_oak_fence",
+        "minecraft:pale_oak_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:pale_oak_jump",
+      "count": 4
     },
     {
       "id": "pale_oak_plow",
@@ -1439,6 +1549,17 @@
       ],
       "out": "horsegenetics:spruce_double_fence_gate",
       "count": 1
+    },
+    {
+      "id": "spruce_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:spruce_fence",
+        "minecraft:spruce_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:spruce_jump",
+      "count": 4
     },
     {
       "id": "spruce_plow",
@@ -1620,6 +1741,17 @@
       ],
       "out": "horsegenetics:warped_double_fence_gate",
       "count": 1
+    },
+    {
+      "id": "warped_jump",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:warped_fence",
+        "minecraft:warped_fence",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:warped_jump",
+      "count": 4
     },
     {
       "id": "warped_plow",

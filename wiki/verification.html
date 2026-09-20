@@ -78,6 +78,53 @@
     </p>
 </div>
 
+<h2 id="jumps-0920">&sect;0-FZ &mdash; Showjumping rails (2026-09-20, NOT played, nothing here has been seen)</h2>
+
+<p>
+    A new per-wood block family: one rail per block, standards drawn only at the ends of a run,
+    and <strong>no height property</strong> &mdash; you stack them. See
+    <a href="item-jumps.html">jumps</a>. The module builds, every blockstate resolves to a model
+    that exists (<code>check-block-models.mjs</code>), and <strong>that is the entire extent of
+    what is known</strong>. No client and no server has loaded it; the dedicated server running
+    on this machine predates the change.
+</p>
+
+<h3>Do these first &mdash; they are the ones that can be badly wrong</h3>
+<ul>
+    <li><strong>Does a row of three join up?</strong> Place three in a line. The two outer ones
+        should have an upright post on the outside only, and the middle one should be a bare
+        rail with no posts at all. <strong>The middle block is the one that was broken</strong>
+        &mdash; it pointed at a model nobody had written, and a row of two looked perfect while
+        hiding it. If it is a purple cube, the fix did not take.</li>
+    <li><strong>Walk a horse at a single jump on the ground.</strong> It should step over without
+        jumping. That is the claim the whole height ladder rests on, and it is derived from a
+        1.0 step height rather than observed.</li>
+    <li><strong>Stack two and ride at it.</strong> An ordinary horse should clear it. Then three,
+        then four, and find where a given horse stops.</li>
+    <li><strong>Does what you see match what you hit?</strong> The shape is written three times
+        over (baker, <code>JumpBlock</code>, <code>GeneratedJumps</code>). Ride along a row and
+        feel for a jump you collide with off to the side of the rail, or pass through.</li>
+    <li><strong>Rotation.</strong> Place jumps facing all four ways and confirm the posts land at
+        the ends of the rail every time, not on the approach side.</li>
+</ul>
+
+<h3>Then the plumbing</h3>
+<ul>
+    <li><strong>The recipe:</strong> 2 fences + 1 horse hair &rarr; 4 jumps, shapeless. Check the
+        yield is four and that it does not collide with the double gate's.</li>
+    <li><strong>Both families still mine with an axe.</strong> The gates and the jumps share
+        <code>mineable/axe</code> and both bakers now merge into it. A regression here is
+        invisible &mdash; the blocks still break, just slowly and with no drop &mdash; so it has
+        to be checked on purpose, on a gate <em>and</em> a jump.</li>
+    <li><strong>Creative menu:</strong> each jump filed in Building Blocks directly after the
+        vanilla fence of its wood. If Building Blocks is <em>empty</em>, that is the known
+        catastrophic failure mode of the insertion guard, not a jump problem &mdash; see
+        <code>ModItems.fileAfter</code>.</li>
+    <li><strong>Modded woods</strong> need a second mod installed and have never been generated.
+        <code>Wood.fenceId()</code> is composed rather than scanned, so a wood whose fence is
+        named unusually gets a jump that cannot be crafted and a warning in the log.</li>
+</ul>
+
 <h2 id="pseudowoods-0919">&sect;0-FY &mdash; 287 modded woods become 39 (2026-09-19, NOT played, needs the big pack)</h2>
 
 <p>

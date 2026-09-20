@@ -298,35 +298,14 @@ public final class ModItems {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             for (com.example.horsegenetics.neoforge.block.DoubleGates.Gate gate
                     : com.example.horsegenetics.neoforge.block.DoubleGates.gates()) {
-                // Resolved here rather than held on the record, because a gate
-                // for a modded wood is filed after an item from a mod that had
-                // not registered it yet when ours was built. By now everything
-                // has, and a mod that declared a gate in its assets and then did
-                // not register one comes back as AIR rather than throwing.
-                net.minecraft.world.item.Item anchor = gate.sourceGate().get();
-                if (anchor == null || anchor == net.minecraft.world.item.Items.AIR) {
-                    continue;
-                }
-                net.minecraft.world.item.ItemStack anchorStack =
-                        new net.minecraft.world.item.ItemStack(anchor);
-                net.minecraft.world.item.ItemStack ours =
-                        new net.minecraft.world.item.ItemStack(gate.item().get());
-                try {
-                    if (event.getParentEntries().contains(anchorStack)
-                            && event.getSearchEntries().contains(anchorStack)) {
-                        event.insertAfter(anchorStack, ours,
-                                net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                    } else {
-                        // Still reachable, just not filed next to its parent.
-                        // A gate nobody can find is worse than a gate in the
-                        // wrong place.
-                        event.accept(ours,
-                                net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                    }
-                } catch (RuntimeException somebodyElsesTab) {
-                    HorseGenetics.LOGGER.warn("compat: could not file {} beside {} in Building Blocks - {}",
-                            gate.item().getId(), anchor, somebodyElsesTab.toString());
-                }
+                fileAfter(event, gate.sourceGate().get(), gate.item().get(), gate.item().getId());
+            }
+            // THE JUMPS GO HERE TOO, each after the vanilla fence it is made
+            // from - same argument as the gates: somebody building a paddock is
+            // in this tab, not in a tab about horses.
+            for (com.example.horsegenetics.neoforge.block.Jumps.Jump jump
+                    : com.example.horsegenetics.neoforge.block.Jumps.jumps()) {
+                fileAfter(event, jump.sourceFence().get(), jump.item().get(), jump.item().getId());
             }
         }
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
@@ -339,6 +318,49 @@ public final class ModItems {
                             com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
                 event.accept(BreedSpawnEggItem.of(breed));
             }
+        }
+    }
+
+    /**
+     * File one of ours directly after the vanilla item it is built from, or
+     * failing that anywhere in the tab at all.
+     *
+     * <p>Shared by the double gates and the jumps. <b>Read the long note at the
+     * head of {@link #addToCreativeTab} before touching this</b> - every line
+     * of it is load-bearing, and the cost of getting it wrong is not one item
+     * in the wrong place but the whole of Building Blocks silently empty, for
+     * vanilla items too, with nothing in the log.
+     *
+     * @param anchor the vanilla item to file after. Resolved by the caller at
+     *               event time rather than held on a record, because a block
+     *               for a modded wood is filed after an item from a mod that
+     *               had not registered it when ours was built; a mod that
+     *               declared one in its assets and never registered it comes
+     *               back as AIR here rather than throwing.
+     */
+    private static void fileAfter(BuildCreativeModeTabContentsEvent event,
+                                  net.minecraft.world.item.Item anchor,
+                                  net.minecraft.world.item.Item ourItem,
+                                  Object idForLog) {
+        if (anchor == null || anchor == net.minecraft.world.item.Items.AIR) {
+            return;
+        }
+        net.minecraft.world.item.ItemStack anchorStack = new net.minecraft.world.item.ItemStack(anchor);
+        net.minecraft.world.item.ItemStack ours = new net.minecraft.world.item.ItemStack(ourItem);
+        try {
+            if (event.getParentEntries().contains(anchorStack)
+                    && event.getSearchEntries().contains(anchorStack)) {
+                event.insertAfter(anchorStack, ours,
+                        net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+            } else {
+                // Still reachable, just not filed next to its parent. One of
+                // these nobody can find is worse than one in the wrong place.
+                event.accept(ours,
+                        net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+            }
+        } catch (RuntimeException somebodyElsesTab) {
+            HorseGenetics.LOGGER.warn("compat: could not file {} beside {} in Building Blocks - {}",
+                    idForLog, anchor, somebodyElsesTab.toString());
         }
     }
 

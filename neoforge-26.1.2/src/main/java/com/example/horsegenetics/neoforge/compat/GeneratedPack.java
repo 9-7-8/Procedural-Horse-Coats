@@ -124,6 +124,7 @@ public final class GeneratedPack {
         GeneratedGates.emit(files, lang);
         GeneratedArmour.emit(files, lang);
         GeneratedCarts.emit(files, lang);
+        GeneratedJumps.emit(files, lang);
         if (!lang.isEmpty()) {
             GeneratedGates.put(files,
                     "assets/" + HorseGenetics.MOD_ID + "/lang/en_us.json", lang);

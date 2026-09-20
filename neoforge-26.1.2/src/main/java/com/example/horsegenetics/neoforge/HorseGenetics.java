@@ -61,6 +61,9 @@ public final class HorseGenetics {
         // either register is attached to the bus below - and after the scan
         // above, which is where its modded woods come from.
         com.example.horsegenetics.neoforge.block.DoubleGates.init();
+        // Same contract, same reason: the jumps register themselves as this
+        // class loads, so touch it before the registers go on the bus.
+        com.example.horsegenetics.neoforge.block.Jumps.init();
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         com.example.horsegenetics.neoforge.particle.ModParticles.register(modEventBus);

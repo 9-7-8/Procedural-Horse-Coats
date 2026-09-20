@@ -137,8 +137,51 @@ final class GeneratedGates {
         // asserting things about woods that are no longer installed.
         JsonObject tag = new JsonObject();
         tag.add("values", tagValues);
-        put(files, "data/minecraft/tags/block/mineable/axe.json", tag);
         put(files, "data/minecraft/tags/block/fence_gates.json", tag);
+        // mineable/axe is shared with the showjumping rails, and this map has
+        // one entry per path - a plain put here would drop whichever family
+        // ran first. See mergeBlockTag.
+        mergeBlockTag(files, "data/minecraft/tags/block/mineable/axe.json", tagValues);
+    }
+
+    /**
+     * Add {@code values} to a block tag already in {@code files}, rather than
+     * replacing it.
+     *
+     * <p><b>More than one generator contributes to {@code mineable/axe}</b> -
+     * the double gates and the jumps today - and a datapack has exactly one
+     * file per tag, so the last plain {@code put} would win and the other
+     * family would quietly lose its tool. That failure is invisible: nothing
+     * logs, nothing is a chequerboard, the blocks simply mine slowly and drop
+     * nothing without an axe, which reads as a balance choice rather than a
+     * bug. Every generator touching a shared tag must come through here.
+     *
+     * <p>Order-independent on purpose, so it does not matter which generator
+     * {@code GeneratedPack.build} happens to call first.
+     */
+    static void mergeBlockTag(Map<String, byte[]> files, String path, JsonArray values) {
+        java.util.Set<String> seen = new java.util.LinkedHashSet<>();
+        byte[] prior = files.get(path);
+        if (prior != null) {
+            JsonObject existing = com.google.gson.JsonParser
+                    .parseString(new String(prior, java.nio.charset.StandardCharsets.UTF_8))
+                    .getAsJsonObject();
+            if (existing.has("values")) {
+                for (com.google.gson.JsonElement e : existing.getAsJsonArray("values")) {
+                    seen.add(e.getAsString());
+                }
+            }
+        }
+        for (com.google.gson.JsonElement e : values) {
+            seen.add(e.getAsString());
+        }
+        JsonArray merged = new JsonArray();
+        for (String value : seen) {
+            merged.add(value);
+        }
+        JsonObject tag = new JsonObject();
+        tag.add("values", merged);
+        put(files, path, tag);
     }
 
     /**

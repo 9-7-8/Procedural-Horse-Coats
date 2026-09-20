@@ -44,7 +44,7 @@
 // boundary, so the pair reads as one opening with a post at each end and the two
 // leaves meeting in the middle.
 
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -344,10 +344,21 @@ for (const [wood, texture, woodLabel] of WOODS) {
 // --- tags -----------------------------------------------------------------
 // Joining vanilla's own tags: mineable/axe so an axe is the right tool, and
 // fence_gates so anything reading that tag (ours and other mods') sees these.
+//
+// fence_gates is replaced outright - it is only ever gates. mineable/axe is
+// MERGED, because the showjumping rails are in it too and a datapack has one
+// file per tag: writing {values: gates} would silently take an axe off every
+// jump in the mod, which shows up as nothing worse than slow mining and so
+// would not be noticed for months. bake-jumps.mjs merges into it from the
+// other side. A third family joins the same way.
 
-for (const tag of ["mineable/axe", "fence_gates"]) {
-  put(join(MC_TAGS, tag + ".json"), { values: tagValues });
-}
+put(join(MC_TAGS, "fence_gates.json"), { values: tagValues });
+
+const axePath = join(MC_TAGS, "mineable/axe.json");
+const existingAxe = existsSync(axePath)
+  ? JSON.parse(readFileSync(axePath, "utf8")).values ?? []
+  : [];
+put(axePath, { values: [...new Set([...existingAxe, ...tagValues])] });
 
 // --- lang -----------------------------------------------------------------
 // Merged into the existing file rather than replacing it: every other key in

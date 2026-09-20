@@ -1,0 +1,80 @@
+{
+  "variants": {
+    "facing=south,left=false,right=false": {
+      "model": "horsegenetics:block/birch_jump",
+      "uvlock": true
+    },
+    "facing=south,left=false,right=true": {
+      "model": "horsegenetics:block/birch_jump_r",
+      "uvlock": true
+    },
+    "facing=south,left=true,right=false": {
+      "model": "horsegenetics:block/birch_jump_l",
+      "uvlock": true
+    },
+    "facing=south,left=true,right=true": {
+      "model": "horsegenetics:block/birch_jump_lr",
+      "uvlock": true
+    },
+    "facing=west,left=false,right=false": {
+      "model": "horsegenetics:block/birch_jump",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,left=false,right=true": {
+      "model": "horsegenetics:block/birch_jump_r",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,left=true,right=false": {
+      "model": "horsegenetics:block/birch_jump_l",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,left=true,right=true": {
+      "model": "horsegenetics:block/birch_jump_lr",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north,left=false,right=false": {
+      "model": "horsegenetics:block/birch_jump",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,left=false,right=true": {
+      "model": "horsegenetics:block/birch_jump_r",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,left=true,right=false": {
+      "model": "horsegenetics:block/birch_jump_l",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,left=true,right=true": {
+      "model": "horsegenetics:block/birch_jump_lr",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=east,left=false,right=false": {
+      "model": "horsegenetics:block/birch_jump",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=false,right=true": {
+      "model": "horsegenetics:block/birch_jump_r",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=true,right=false": {
+      "model": "horsegenetics:block/birch_jump_l",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=true,right=true": {
+      "model": "horsegenetics:block/birch_jump_lr",
+      "uvlock": true,
+      "y": 270
+    }
+  }
+}

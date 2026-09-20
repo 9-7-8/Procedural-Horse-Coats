@@ -258,5 +258,17 @@
   "tooltip.horsegenetics.transfer_paper.issued_by": "Made out by %s",
   "tooltip.horsegenetics.transfer_paper.redeem": "Right-click this horse to claim it",
   "tooltip.horsegenetics.transfer_paper.unbound": "Unbound - remake it at a bench",
-  "tooltip.horsegenetics.transfer_paper.unwritten": "Blank - no horse named"
+  "tooltip.horsegenetics.transfer_paper.unwritten": "Blank - no horse named",
+  "block.horsegenetics.oak_jump": "Oak Jump",
+  "block.horsegenetics.spruce_jump": "Spruce Jump",
+  "block.horsegenetics.birch_jump": "Birch Jump",
+  "block.horsegenetics.jungle_jump": "Jungle Jump",
+  "block.horsegenetics.acacia_jump": "Acacia Jump",
+  "block.horsegenetics.dark_oak_jump": "Dark Oak Jump",
+  "block.horsegenetics.pale_oak_jump": "Pale Oak Jump",
+  "block.horsegenetics.mangrove_jump": "Mangrove Jump",
+  "block.horsegenetics.cherry_jump": "Cherry Jump",
+  "block.horsegenetics.bamboo_jump": "Bamboo Jump",
+  "block.horsegenetics.crimson_jump": "Crimson Jump",
+  "block.horsegenetics.warped_jump": "Warped Jump"
 }
