@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "place_cart"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:cart_wheel"
+    },
+    "title": {
+      "text": "Build a cart and set it down"
+    },
+    "description": {
+      "text": "Craft a cart wheel first - eight sticks around a plank - then any cart from planks and wheels."
+    }
+  }
+}

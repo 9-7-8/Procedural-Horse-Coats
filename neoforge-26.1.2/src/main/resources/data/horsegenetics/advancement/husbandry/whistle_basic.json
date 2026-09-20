@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "whistle_basic"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:basic_whistle"
+    },
+    "title": {
+      "text": "Use a basic whistle"
+    },
+    "description": {
+      "text": "Calls every tamed horse you own within sixteen blocks."
+    }
+  }
+}

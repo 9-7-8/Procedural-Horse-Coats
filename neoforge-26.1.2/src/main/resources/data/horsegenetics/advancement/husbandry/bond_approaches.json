@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bond_approaches"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:iron_ingot"
+    },
+    "title": {
+      "text": "Bond a horse to approaching"
+    },
+    "description": {
+      "text": "Bond 61."
+    }
+  }
+}

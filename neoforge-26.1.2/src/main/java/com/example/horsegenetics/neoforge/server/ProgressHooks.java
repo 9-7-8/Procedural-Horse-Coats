@@ -32,13 +32,20 @@ public final class ProgressHooks {
      * Send the checklist on the way in. Without this a returning player's ticks
      * are all absent until the first task completes, which reads as having lost
      * them.
+     *
+     * <p>And award the advancement behind every task already ticked. A save
+     * that was played before the advancements existed has the boxes and none of
+     * the toasts, and a task only ever fires once, so without this catch-up
+     * that player never gets them at all. Awarding one already held is a no-op.
      */
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player
                 && player.level() instanceof ServerLevel level
                 && level.getServer() != null) {
-            HorseProgressData.get(level.getServer()).sync(player);
+            HorseProgressData data = HorseProgressData.get(level.getServer());
+            data.sync(player);
+            data.awardEverythingDone(player);
         }
     }
 

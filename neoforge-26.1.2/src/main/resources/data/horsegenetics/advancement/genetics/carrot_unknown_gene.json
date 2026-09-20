@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "carrot_unknown_gene"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:unknown_gene_splice_carrot"
+    },
+    "title": {
+      "text": "Use an unknown gene splice carrot"
+    },
+    "description": {
+      "text": "Rolls one random gene and redraws that parent's contribution to it."
+    }
+  }
+}

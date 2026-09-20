@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "fill_seed_jar"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:empty_seed_jar"
+    },
+    "title": {
+      "text": "Fill a seed jar"
+    },
+    "description": {
+      "text": "Feed an entire stallion of yours a golden carrot, then use an empty jar on him."
+    }
+  }
+}

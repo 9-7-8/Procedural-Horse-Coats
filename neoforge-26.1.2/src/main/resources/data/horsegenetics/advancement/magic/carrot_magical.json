@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "carrot_magical"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:magical_gene_splice_carrot"
+    },
+    "title": {
+      "text": "Use a magical splice carrot"
+    },
+    "description": {
+      "text": "Everything a real horse could not do."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "breed_mutation"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:nether_star"
+    },
+    "title": {
+      "text": "Breed a mutation"
+    },
+    "description": {
+      "text": "Now and then a foal bred in captivity is born carrying a magical gene neither of its parents had - a mutation, out of nowhere."
+    },
+    "frame": "challenge"
+  }
+}

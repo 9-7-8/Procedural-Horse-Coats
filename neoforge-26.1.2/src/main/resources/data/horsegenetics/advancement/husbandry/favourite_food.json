@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "favourite_food"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:golden_apple"
+    },
+    "title": {
+      "text": "Find a horse's favourite food"
+    },
+    "description": {
+      "text": "Every horse has one food it likes above all others."
+    }
+  }
+}

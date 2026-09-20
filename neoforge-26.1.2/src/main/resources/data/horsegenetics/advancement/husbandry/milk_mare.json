@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "milk_mare"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:milk_bucket"
+    },
+    "title": {
+      "text": "Milk a mare"
+    },
+    "description": {
+      "text": "Right-click a tamed adult mare with an empty bucket."
+    }
+  }
+}

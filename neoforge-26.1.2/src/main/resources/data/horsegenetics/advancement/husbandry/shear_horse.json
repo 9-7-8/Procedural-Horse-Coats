@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "shear_horse"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:shears"
+    },
+    "title": {
+      "text": "Groom a horse for hair"
+    },
+    "description": {
+      "text": "Right-click one with shears."
+    }
+  }
+}

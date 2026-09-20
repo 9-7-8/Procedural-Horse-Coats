@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "dye_tack"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:leather_horse_armor"
+    },
+    "title": {
+      "text": "Dye a piece of tack"
+    },
+    "description": {
+      "text": "Put a saddle or leather horse armour in a Tack Dyeing Bench and give any of the three rows a dye or an ingot."
+    }
+  }
+}

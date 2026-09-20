@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:root",
+  "criteria": {
+    "any_in_chapter": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "chapter": "wild"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:grass_block"
+    },
+    "title": {
+      "text": "Horses in the wild"
+    },
+    "description": {
+      "text": "What horses get up to when nobody owns them."
+    },
+    "frame": "goal"
+  }
+}

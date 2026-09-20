@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "wild_displace"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:bucket"
+    },
+    "title": {
+      "text": "Watch one horse push another off water"
+    },
+    "description": {
+      "text": "Rank decides who drinks first."
+    }
+  }
+}

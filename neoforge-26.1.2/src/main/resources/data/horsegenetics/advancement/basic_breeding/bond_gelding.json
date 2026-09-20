@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bond_gelding"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:iron_ingot"
+    },
+    "title": {
+      "text": "Bond a gelding to approaching"
+    },
+    "description": {
+      "text": "Get a gelding of yours to bond 61."
+    }
+  }
+}

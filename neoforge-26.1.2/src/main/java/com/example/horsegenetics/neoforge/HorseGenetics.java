@@ -77,6 +77,9 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.data.loot.ModLootModifiers.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootFunctions.register(modEventBus);
         com.example.horsegenetics.neoforge.world.ModBiomeModifiers.register(modEventBus);
+        // The one criterion trigger behind every advancement this mod ships -
+        // all of which are baked off ProgressTask. See ModTriggers.
+        com.example.horsegenetics.neoforge.advancement.ModTriggers.register(modEventBus);
         // In-game tests. Registration is a no-op unless gametests are enabled
         // (dev only), so this costs a shipped server nothing. See ModGameTests -
         // 26.1.2 has no @GameTest annotation and the two-half registration there

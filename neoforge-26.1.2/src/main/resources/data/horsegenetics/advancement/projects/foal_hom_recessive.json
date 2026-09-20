@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:projects",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "foal_hom_recessive"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:lapis_lazuli"
+    },
+    "title": {
+      "text": "Breed a foal homozygous for a recessive allele"
+    },
+    "description": {
+      "text": "Two copies of something neither parent necessarily showed."
+    },
+    "frame": "challenge"
+  }
+}

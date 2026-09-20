@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "natural_cover"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:poppy"
+    },
+    "title": {
+      "text": "Let a stallion cover a mare"
+    },
+    "description": {
+      "text": "Leave an entire stallion with a mare while she is in heat, both above nine-tenths health, neither ridden nor on a lead, and fewer than eight horses crowding her."
+    }
+  }
+}

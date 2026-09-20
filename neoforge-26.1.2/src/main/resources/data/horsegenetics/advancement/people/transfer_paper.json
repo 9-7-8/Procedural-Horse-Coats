@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:people",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "transfer_paper"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:signed_transfer_paper"
+    },
+    "title": {
+      "text": "Sign a transfer paper"
+    },
+    "description": {
+      "text": "How a horse changes hands: sign it against one you own and whoever holds it can claim the horse."
+    }
+  }
+}

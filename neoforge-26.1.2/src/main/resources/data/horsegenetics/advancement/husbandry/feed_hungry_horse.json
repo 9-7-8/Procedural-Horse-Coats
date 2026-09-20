@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "feed_hungry_horse"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:bread"
+    },
+    "title": {
+      "text": "Put food into a hungry horse"
+    },
+    "description": {
+      "text": "A horse carries an invisible store of food and spends it on mending - two of it per health point."
+    }
+  }
+}

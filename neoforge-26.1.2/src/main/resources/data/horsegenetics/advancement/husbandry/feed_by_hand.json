@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "feed_by_hand"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:sugar"
+    },
+    "title": {
+      "text": "Feed a horse by hand"
+    },
+    "description": {
+      "text": "Hold food a horse will eat and use it on one of yours."
+    }
+  }
+}

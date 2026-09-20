@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "sun_sensitive_seen"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:fire_charge"
+    },
+    "title": {
+      "text": "Watch a horse run from the sun"
+    },
+    "description": {
+      "text": "A sun-sensitive horse catches fire in daylight and loses half a heart every couple of seconds."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "whistle_ender"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:ender_whistle"
+    },
+    "title": {
+      "text": "Call a horse with an ender whistle"
+    },
+    "description": {
+      "text": "Bind one to a horse you own and it will come from anywhere, even another dimension."
+    },
+    "frame": "goal"
+  }
+}

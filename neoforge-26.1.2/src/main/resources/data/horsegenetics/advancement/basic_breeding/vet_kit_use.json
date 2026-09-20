@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "vet_kit_use"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:vet_kit"
+    },
+    "title": {
+      "text": "Read a horse with a vet's kit"
+    },
+    "description": {
+      "text": "Use it on a mare to hear whether she is in heat, how good the half is, or whether she is pregnant - twins included, which nothing else will tell you."
+    }
+  }
+}

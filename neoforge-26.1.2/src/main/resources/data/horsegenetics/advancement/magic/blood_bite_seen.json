@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "blood_bite_seen"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:redstone"
+    },
+    "title": {
+      "text": "Watch a horse drink blood"
+    },
+    "description": {
+      "text": "A blood-drinker cannot mend beside water and nothing in your hand will feed it."
+    }
+  }
+}

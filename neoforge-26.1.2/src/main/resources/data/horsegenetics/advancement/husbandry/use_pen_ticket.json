@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "use_pen_ticket"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:holding_pen_ticket"
+    },
+    "title": {
+      "text": "Send a horse to your pen"
+    },
+    "description": {
+      "text": "A holding pen ticket takes any horse you own to your pen, from any world, whether or not it has a stall of its own."
+    }
+  }
+}

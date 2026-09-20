@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "meet_magical_herd"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:glowstone_dust"
+    },
+    "title": {
+      "text": "Find a magical herd"
+    },
+    "description": {
+      "text": "About one wild herd in twenty is a magical version of an ordinary breed: every horse in it carries the same single magical gene, and every one of them shows it rather than carrying it silently."
+    },
+    "frame": "challenge"
+  }
+}

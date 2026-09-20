@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "steer_bareback"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:diamond"
+    },
+    "title": {
+      "text": "Steer a horse with no saddle"
+    },
+    "description": {
+      "text": "Ride a horse of yours that has reached bond 81 without tacking it up."
+    },
+    "frame": "challenge"
+  }
+}

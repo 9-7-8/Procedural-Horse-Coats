@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "magical_gene_discovered"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:glow_ink_sac"
+    },
+    "title": {
+      "text": "Discover a magical gene"
+    },
+    "description": {
+      "text": "Own a living horse carrying one."
+    },
+    "frame": "goal"
+  }
+}

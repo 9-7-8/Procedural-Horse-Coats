@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "use_bound_ticket"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:bound_ticket"
+    },
+    "title": {
+      "text": "Use a bound ticket"
+    },
+    "description": {
+      "text": "The middle tier - anywhere inside one world, the horse dimension included."
+    }
+  }
+}

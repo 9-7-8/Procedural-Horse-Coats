@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "plant_golden_carrot"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:golden_carrot_seeds"
+    },
+    "title": {
+      "text": "Plant a golden carrot seed"
+    },
+    "description": {
+      "text": "Golden carrot seeds cannot be crafted."
+    }
+  }
+}

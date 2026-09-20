@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "wild_bolt"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:feather"
+    },
+    "title": {
+      "text": "Watch a horse bolt"
+    },
+    "description": {
+      "text": "Startle one and it runs."
+    }
+  }
+}

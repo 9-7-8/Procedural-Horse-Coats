@@ -1,0 +1,21 @@
+{
+  "criteria": {
+    "any_task": {
+      "trigger": "horsegenetics:progress_task"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:saddle"
+    },
+    "title": {
+      "text": "Horse Genetics"
+    },
+    "description": {
+      "text": "Everything there is to find out about horses."
+    },
+    "background": "minecraft:gui/advancements/backgrounds/husbandry",
+    "show_toast": false,
+    "announce_to_chat": false
+  }
+}

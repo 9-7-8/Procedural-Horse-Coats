@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:people",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "trade_equestrian"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:suppliers_post"
+    },
+    "title": {
+      "text": "Trade with an equestrian"
+    },
+    "description": {
+      "text": "Put any of the four posts near an unemployed villager and one takes the job."
+    }
+  }
+}

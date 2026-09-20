@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "breed_egg"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:breed_spawn_egg"
+    },
+    "title": {
+      "text": "Found a breed from a spawn egg"
+    },
+    "description": {
+      "text": "The equestrian scientist sells breed spawn eggs from his middle ranks."
+    }
+  }
+}

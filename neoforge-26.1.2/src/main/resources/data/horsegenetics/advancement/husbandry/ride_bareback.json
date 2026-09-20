@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "ride_bareback"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:leather_boots"
+    },
+    "title": {
+      "text": "Ride a horse bareback"
+    },
+    "description": {
+      "text": "Get on one of your own horses with no saddle on it."
+    }
+  }
+}

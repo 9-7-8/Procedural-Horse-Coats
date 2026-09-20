@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "meet_dhampir"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:spider_eye"
+    },
+    "title": {
+      "text": "Find a dhampir"
+    },
+    "description": {
+      "text": "A rare breed that founds its herds at night, in thirteen biomes."
+    }
+  }
+}

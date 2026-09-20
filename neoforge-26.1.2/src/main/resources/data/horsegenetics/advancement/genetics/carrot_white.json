@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "carrot_white"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:white_gene_splice_carrot"
+    },
+    "title": {
+      "text": "Use a white splice carrot"
+    },
+    "description": {
+      "text": "Narrows it to the white and spotting genes, roan, and the leopard complex."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:root",
+  "criteria": {
+    "any_in_chapter": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "chapter": "projects"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:experience_bottle"
+    },
+    "title": {
+      "text": "Breeding projects"
+    },
+    "description": {
+      "text": "The outcomes you have to set out to breed."
+    },
+    "frame": "goal"
+  }
+}

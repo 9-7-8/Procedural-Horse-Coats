@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "discover_gene"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:spyglass"
+    },
+    "title": {
+      "text": "Discover a gene"
+    },
+    "description": {
+      "text": "Own a living horse that carries something other than the plain baseline."
+    },
+    "frame": "goal"
+  }
+}

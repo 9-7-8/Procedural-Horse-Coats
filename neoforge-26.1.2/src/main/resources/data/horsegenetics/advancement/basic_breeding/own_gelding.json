@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "own_gelding"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:gray_dye"
+    },
+    "title": {
+      "text": "Own a gelding"
+    },
+    "description": {
+      "text": "Have one in your care, however he got that way - gelded by your own hand or bought already done."
+    }
+  }
+}

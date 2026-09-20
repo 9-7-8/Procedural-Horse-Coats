@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.neoforge.ClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -11,7 +12,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
- * <b>Sneak and use on a horse you do not own to read its genes.</b>
+ * <b>Use on a horse to read its genes.</b> A plain right-click with an empty
+ * hand, on any horse at all, unless the player has turned that off - see
+ * {@code ClientConfig.rightClickOpensInfo}, and the half of this class's note
+ * below that was written when it was sneak-only.
  *
  * <p>Until this, the only way into {@link HorseInfoScreen} was the {@code i}
  * button on the vanilla horse inventory - and that inventory only opens on a
@@ -22,14 +26,25 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  * are the entire product. Buying blind is not a purchase, it is a raffle, and
  * the arcane dealer does not work without this.
  *
- * <h2>Why not on a tamed horse too</h2>
- * The owner asked for "any horse", and this deliberately stops short of one:
- * sneak-and-use on a tamed horse is how vanilla opens the saddle and armour
- * slots, and taking that over would cost a player the ability to tack up. A
- * tamed horse already reaches the same screen in one more click, through the
- * {@code i} button that {@link HorseScreenHooks} puts on that inventory. So the
- * rule is <b>the horses whose inventory you cannot open anyway</b>, which is the
- * set the request was actually about.
+ * <h2>Two rules, and a setting that chooses between them</h2>
+ * <b>On</b> (the default): an empty-handed right-click on <i>any</i> horse
+ * opens the screen. That is the whole of it - no sneaking, tamed or not.
+ * <b>Off</b>: sneak and use, and only on a horse that is not tamed. That was
+ * the original rule, and it stopped short of a tamed horse on purpose, because
+ * sneak-and-use on one is how vanilla opens the saddle and armour slots and
+ * taking it over would have cost the player the ability to tack up.
+ *
+ * <p>What made the first rule affordable is that <b>the screen now carries the
+ * tack itself</b> - saddle and armour sit on its Overview tab
+ * ({@code HorseTackSlot}) - so the vanilla inventory is no longer the only way
+ * to a saddle, and the {@code i} button ({@link HorseScreenHooks}) is no longer
+ * the only way to this screen. The one thing the click <i>did</i> own that the
+ * screen has to give back is mounting: hence the Ride button, and hence it
+ * being on the same tab.
+ *
+ * <p>Either way, <b>an empty hand only</b>. A name tag, a lead, food, a
+ * research paper or a carrot all mean something specific on a horse, and none
+ * of them should open a window instead.
  *
  * <h2>Why client-side only</h2>
  * The screen needs nothing from the server: {@code ClientHorseRecordCache} is
@@ -54,11 +69,18 @@ public final class HorseInfoInteraction {
         if (!(event.getTarget() instanceof AbstractHorse horse)) {
             return;
         }
-        if (!event.getEntity().isSecondaryUseActive() || !event.getItemStack().isEmpty()) {
+        if (!event.getItemStack().isEmpty()) {
             return; // an empty hand only - a paper, a name tag or a carrot all mean something else
         }
-        if (horse.isTamed()) {
-            return; // vanilla's inventory, and the i button on it - see the class note
+        if (event.getEntity().isSecondaryUseActive()) {
+            // Sneak and use is left exactly as it was, whatever the setting:
+            // on a tamed horse it is vanilla's inventory, which has to stay
+            // reachable, and on any other it is this screen.
+            if (horse.isTamed()) {
+                return;
+            }
+        } else if (!ClientConfig.rightClickOpensInfo()) {
+            return; // plain clicks are not ours unless the player asked for that
         }
         HorseRecord record = ClientHorseRecordCache.get(horse.getId());
         if (record == null) {

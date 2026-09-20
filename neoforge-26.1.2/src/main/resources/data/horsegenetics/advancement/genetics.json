@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:root",
+  "criteria": {
+    "any_in_chapter": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "chapter": "genetics"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:research_paper"
+    },
+    "title": {
+      "text": "Genetics"
+    },
+    "description": {
+      "text": "Reading what a horse carries, and choosing what it passes on."
+    },
+    "frame": "goal"
+  }
+}

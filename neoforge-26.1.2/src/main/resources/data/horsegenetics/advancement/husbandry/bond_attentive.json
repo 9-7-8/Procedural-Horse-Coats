@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bond_attentive"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:copper_ingot"
+    },
+    "title": {
+      "text": "Bond a horse to attentive"
+    },
+    "description": {
+      "text": "Bond 31."
+    }
+  }
+}

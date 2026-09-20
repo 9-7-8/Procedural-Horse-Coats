@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bond_horse"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:leather"
+    },
+    "title": {
+      "text": "Bond with a horse"
+    },
+    "description": {
+      "text": "Ride it, feed it and keep it well."
+    }
+  }
+}

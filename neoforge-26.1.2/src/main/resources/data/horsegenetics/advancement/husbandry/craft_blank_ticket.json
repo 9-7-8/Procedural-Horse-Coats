@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "craft_blank_ticket"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:blank_ticket"
+    },
+    "title": {
+      "text": "Craft a blank ticket"
+    },
+    "description": {
+      "text": "Paper and horse hair."
+    }
+  }
+}

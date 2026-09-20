@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "form_herd"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:lead"
+    },
+    "title": {
+      "text": "Let your horses form a herd"
+    },
+    "description": {
+      "text": "Keep two horses within ten blocks of each other for long enough and they band up on their own."
+    },
+    "frame": "goal"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "enter_dimension"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:ender_pearl"
+    },
+    "title": {
+      "text": "Visit the horse dimension"
+    },
+    "description": {
+      "text": "Stand in the lit portal for ten seconds."
+    },
+    "frame": "goal"
+  }
+}

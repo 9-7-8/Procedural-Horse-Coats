@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "wild_read_social"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:book"
+    },
+    "title": {
+      "text": "Read a wild horse's place in its band"
+    },
+    "description": {
+      "text": "Open a wild horse and look at Social."
+    }
+  }
+}

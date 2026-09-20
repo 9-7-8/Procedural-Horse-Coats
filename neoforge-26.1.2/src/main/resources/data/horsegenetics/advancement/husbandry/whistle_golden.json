@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "whistle_golden"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:golden_whistle"
+    },
+    "title": {
+      "text": "Use a golden whistle"
+    },
+    "description": {
+      "text": "The middle tier - thirty-two blocks instead of sixteen."
+    }
+  }
+}

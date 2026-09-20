@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "carrot_marking"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:marking_gene_splice_carrot"
+    },
+    "title": {
+      "text": "Use a marking splice carrot"
+    },
+    "description": {
+      "text": "Sooty, pangaré, primitive striping and brindle - the genes that draw on a coat rather than recolour it."
+    }
+  }
+}

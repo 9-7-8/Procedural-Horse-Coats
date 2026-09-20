@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "stall_double_gate"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:oak_double_fence_gate"
+    },
+    "title": {
+      "text": "Hang a stall on a double gate"
+    },
+    "description": {
+      "text": "Build a stall whose doorway is a double fence gate - two blocks wide, both leaves swinging together on one click, and wide enough to lead a horse through without catching it on the post."
+    }
+  }
+}

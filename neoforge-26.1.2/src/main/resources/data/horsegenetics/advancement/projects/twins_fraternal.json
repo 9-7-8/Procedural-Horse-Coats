@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:projects",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "twins_fraternal"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:egg"
+    },
+    "title": {
+      "text": "Breed fraternal twins"
+    },
+    "description": {
+      "text": "Two foals out of one pregnancy, drawn separately, and no more alike than any brother and sister."
+    },
+    "frame": "challenge"
+  }
+}

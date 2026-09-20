@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "light_portal"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:hay_block"
+    },
+    "title": {
+      "text": "Light a hay portal"
+    },
+    "description": {
+      "text": "Build a frame of hay bales like a nether portal and right-click it with a golden carrot."
+    },
+    "frame": "goal"
+  }
+}

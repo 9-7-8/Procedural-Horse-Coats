@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "whistle_echo"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:echo_whistle"
+    },
+    "title": {
+      "text": "Use an echo whistle"
+    },
+    "description": {
+      "text": "Sixty-four blocks, the longest reach of the three area whistles."
+    }
+  }
+}

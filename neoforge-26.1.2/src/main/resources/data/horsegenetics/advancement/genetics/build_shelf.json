@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "build_shelf"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:equine_research_shelf"
+    },
+    "title": {
+      "text": "Build an Equine Research Shelf"
+    },
+    "description": {
+      "text": "One bookshelf and two horse hair."
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "wild_graze"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:short_grass"
+    },
+    "title": {
+      "text": "Watch a horse feed itself"
+    },
+    "description": {
+      "text": "A hungry horse goes looking within about ten blocks and eats what it finds, worst to best; a less hungry one nibbles whatever it is standing on."
+    }
+  }
+}

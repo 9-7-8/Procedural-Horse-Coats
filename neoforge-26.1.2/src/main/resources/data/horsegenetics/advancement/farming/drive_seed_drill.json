@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "drive_seed_drill"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:oak_seed_drill"
+    },
+    "title": {
+      "text": "Drive a seed drill"
+    },
+    "description": {
+      "text": "Nine stacks of seeds, planted on any farmland it is drawn across."
+    }
+  }
+}

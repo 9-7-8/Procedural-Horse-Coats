@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:root",
+  "criteria": {
+    "any_in_chapter": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "chapter": "basic_breeding"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:golden_carrot"
+    },
+    "title": {
+      "text": "Basic breeding"
+    },
+    "description": {
+      "text": "Getting a third horse out of two."
+    },
+    "frame": "goal"
+  }
+}

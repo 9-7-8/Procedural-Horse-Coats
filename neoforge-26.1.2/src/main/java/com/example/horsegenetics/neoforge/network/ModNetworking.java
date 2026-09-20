@@ -277,6 +277,18 @@ public final class ModNetworking {
                         handleOffspringRequest(payload, context.player()))
         );
 
+        registrar.playToServer(
+                TackSlotPayload.TYPE,
+                TackSlotPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleTackSlot(payload, context.player()))
+        );
+
+        registrar.playToServer(
+                MountHorsePayload.TYPE,
+                MountHorsePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleMountHorse(payload, context.player()))
+        );
+
         registrar.playToClient(
                 HorseCoatBatchPayload.TYPE,
                 HorseCoatBatchPayload.STREAM_CODEC,
@@ -434,6 +446,96 @@ public final class ModNetworking {
             }
         }
         return false;
+    }
+
+    /**
+     * One click on a tack slot: swap what the horse is wearing there with what
+     * the player is holding.
+     *
+     * <p><b>A swap, not a drag.</b> The information screen is a plain screen
+     * with no container behind it and no carried stack, so the hand is the only
+     * cursor there is - holding a saddle and clicking the saddle slot puts it
+     * on, clicking it empty-handed takes it off. That also makes the whole
+     * interaction one packet the server can check in one place, which a set of
+     * container clicks would not be.
+     *
+     * <p>Refused unless the horse is the player's and within reach. The screen
+     * opens on <i>any</i> horse - a stranger's, a cowboy's string - so "near
+     * enough to read" stopped being "yours to tack up" the day that landed; see
+     * {@code handleSetBarnName}, which guards the same gap.
+     */
+    private static void handleTackSlot(TackSlotPayload payload, net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        com.example.horsegenetics.neoforge.entity.HorseTackSlot tack =
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.byName(payload.slot());
+        if (tack == null) {
+            return;
+        }
+        Entity target = serverPlayer.level().getEntity(payload.entityId());
+        if (!(target instanceof Horse horse) || !horse.closerThan(serverPlayer, 8.0)
+                || !com.example.horsegenetics.neoforge.server.HorseOwnership.isOwner(
+                        horse, serverPlayer.getUUID())) {
+            return;
+        }
+
+        ItemStack held = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack worn = tack.on(horse);
+        boolean putting = tack.accepts(horse, held);
+        if (!putting && worn.isEmpty()) {
+            return; // nothing to take off and nothing that would go on
+        }
+
+        if (putting) {
+            horse.setItemSlot(tack.slot(), held.split(1));
+            horse.setGuaranteedDrop(tack.slot());
+        } else {
+            horse.setItemSlot(tack.slot(), ItemStack.EMPTY);
+        }
+        if (!worn.isEmpty()) {
+            // Back to the player, and on the floor at their feet if there is no
+            // room - never deleted.
+            if (!serverPlayer.getInventory().add(worn)) {
+                serverPlayer.drop(worn, false);
+            }
+        }
+        serverPlayer.containerMenu.broadcastChanges();
+    }
+
+    /**
+     * The Ride button on the information screen. See {@link MountHorsePayload}
+     * for why it exists at all.
+     *
+     * <p>Deliberately <b>not</b> restricted to a horse the player owns: getting
+     * on an untamed one and being thrown off is how a horse is tamed, and that
+     * is the half of riding this button most has to keep. A branded horse - a
+     * cowboy's string - is refused, exactly as every other interaction with one
+     * is.
+     */
+    private static void handleMountHorse(MountHorsePayload payload, net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        Entity target = serverPlayer.level().getEntity(payload.entityId());
+        if (!(target instanceof Horse horse) || !horse.closerThan(serverPlayer, 8.0)) {
+            return;
+        }
+        if (horse.isVehicle() || horse.isBaby() || serverPlayer.isPassenger()
+                || com.example.horsegenetics.neoforge.server.TransferPaperHandler.isBranded(horse)) {
+            return;
+        }
+        serverPlayer.closeContainer();
+        // AbstractHorse.doPlayerRide, by hand. Widening it with an access
+        // transformer was the first go and cost the whole build: AT widens the
+        // declaration and not the overrides, so TraderLlama's protected one
+        // became "weaker access" and Minecraft itself stopped recompiling.
+        // These four lines are what it does, and they are all public.
+        horse.setEating(false);
+        horse.clearStanding();
+        serverPlayer.setYRot(horse.getYRot());
+        serverPlayer.setXRot(horse.getXRot());
+        serverPlayer.startRiding(horse);
     }
 
     private static void handleSetBarnName(SetBarnNamePayload payload, net.minecraft.world.entity.player.Player player) {

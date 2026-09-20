@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "carrot_magnifier"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:magnifier_carrot"
+    },
+    "title": {
+      "text": "Use a magnifier carrot"
+    },
+    "description": {
+      "text": "The mirror of the stabilizer - the recessive copy instead."
+    }
+  }
+}

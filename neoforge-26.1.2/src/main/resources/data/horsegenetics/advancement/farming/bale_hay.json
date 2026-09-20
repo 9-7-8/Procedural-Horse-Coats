@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bale_hay"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:hay_block"
+    },
+    "title": {
+      "text": "Put down a hay bale"
+    },
+    "description": {
+      "text": "Grow wheat, craft nine of it into a hay bale, and set the bale down where your horses are."
+    }
+  }
+}

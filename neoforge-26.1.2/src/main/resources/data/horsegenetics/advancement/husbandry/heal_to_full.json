@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "heal_to_full"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:glistering_melon_slice"
+    },
+    "title": {
+      "text": "Mend a horse all the way back up"
+    },
+    "description": {
+      "text": "Feed it, then leave it standing within three blocks of water."
+    },
+    "frame": "goal"
+  }
+}

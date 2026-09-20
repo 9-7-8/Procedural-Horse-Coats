@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bond_follows"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:gold_ingot"
+    },
+    "title": {
+      "text": "Bond a horse to following"
+    },
+    "description": {
+      "text": "Bond 81."
+    },
+    "frame": "challenge"
+  }
+}

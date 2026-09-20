@@ -50,4 +50,51 @@ if (unwired.length) {
   );
   process.exit(1);
 }
-console.log(`progress tasks OK - all ${tasks.length} are completed by something`);
+// ...and every task is also an advancement.
+//
+// The tree is baked off this same enum by bake-advancements.mjs, so the two can
+// only disagree by somebody adding a task and not re-running the bake - at
+// which point the new box ticks in the book and no toast ever comes up for it,
+// which is precisely the half-wired state the check above exists to prevent.
+// A stale advancement is the mirror of it: a task deleted from the enum leaves
+// a card in the tree that nothing can ever complete.
+const advDir = join(repo, "neoforge-26.1.2/src/main/resources/data/horsegenetics/advancement");
+const baked = new Set();
+const walkAdv = (dir, prefix) => {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walkAdv(p, prefix + name + "/");
+    else if (name.endsWith(".json")) baked.add(prefix + name.slice(0, -5));
+  }
+};
+walkAdv(advDir, "");
+
+const chapterOf = new Map();
+for (const m of body.matchAll(/^\s{4}([A-Z][A-Z0-9_]*)\(Group\.([A-Z_]+),/gm)) {
+  chapterOf.set(m[1], m[2].toLowerCase());
+}
+const wantedTasks = tasks.map((t) => `${chapterOf.get(t)}/${t.toLowerCase()}`);
+const missing = wantedTasks.filter((a) => !baked.has(a));
+// Everything that is not a leaf task: the root and the eight chapter nodes.
+const chapters = new Set(chapterOf.values());
+const orphans = [...baked].filter(
+  (a) => !wantedTasks.includes(a) && a !== "root" && !chapters.has(a),
+);
+if (missing.length || orphans.length) {
+  if (missing.length) {
+    console.error(
+      `check-progress-tasks: ${missing.length} task(s) with no advancement:\n  ` + missing.join("\n  "),
+    );
+  }
+  if (orphans.length) {
+    console.error(
+      `check-progress-tasks: ${orphans.length} advancement(s) no task backs:\n  ` + orphans.join("\n  "),
+    );
+  }
+  console.error("\nRun: node neoforge-26.1.2/tools/bake-advancements.mjs");
+  process.exit(1);
+}
+
+console.log(
+  `progress tasks OK - all ${tasks.length} are completed by something, and all ${tasks.length} are advancements`,
+);

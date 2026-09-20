@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "tame_magical_horse"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:enchanted_book"
+    },
+    "title": {
+      "text": "Tame a horse out of a magical herd"
+    },
+    "description": {
+      "text": "Take one home and that gene is yours to breed from."
+    }
+  }
+}

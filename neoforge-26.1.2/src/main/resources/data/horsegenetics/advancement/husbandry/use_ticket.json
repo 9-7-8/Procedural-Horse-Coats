@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "use_ticket"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:basic_ticket"
+    },
+    "title": {
+      "text": "Send a horse to its stall"
+    },
+    "description": {
+      "text": "Use a written ticket on a horse of yours that has a stall."
+    }
+  }
+}

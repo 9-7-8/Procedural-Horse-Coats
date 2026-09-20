@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "build_stall"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:stall_sign"
+    },
+    "title": {
+      "text": "Give a horse a stall"
+    },
+    "description": {
+      "text": "Bind a stall sign to that horse, then hang it on the wall of a room that closes in."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "tame_dhampir"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:fermented_spider_eye"
+    },
+    "title": {
+      "text": "Tame a dhampir"
+    },
+    "description": {
+      "text": "A seal brown one tames like any other horse."
+    },
+    "frame": "challenge"
+  }
+}

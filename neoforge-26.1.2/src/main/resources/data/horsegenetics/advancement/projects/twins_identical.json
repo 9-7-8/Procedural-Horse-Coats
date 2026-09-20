@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:projects",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "twins_identical"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:diamond"
+    },
+    "title": {
+      "text": "Breed identical twins"
+    },
+    "description": {
+      "text": "One egg that split, so the two foals are a single draw rather than two: the same sex, the same colour, and the same markings down to the last streak."
+    },
+    "frame": "challenge"
+  }
+}

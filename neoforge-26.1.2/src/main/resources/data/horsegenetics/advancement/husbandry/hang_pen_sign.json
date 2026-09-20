@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "hang_pen_sign"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:holding_pen_sign"
+    },
+    "title": {
+      "text": "Set up a holding pen"
+    },
+    "description": {
+      "text": "Hang a holding pen sign on the wall of an enclosed pen."
+    }
+  }
+}

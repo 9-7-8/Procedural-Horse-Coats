@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "harvest_golden_carrot"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:golden_carrot"
+    },
+    "title": {
+      "text": "Harvest golden carrots"
+    },
+    "description": {
+      "text": "Break a fully grown golden carrot crop."
+    }
+  }
+}

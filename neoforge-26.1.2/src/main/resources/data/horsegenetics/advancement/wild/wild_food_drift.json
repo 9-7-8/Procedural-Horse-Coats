@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "wild_food_drift"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:wheat"
+    },
+    "title": {
+      "text": "Have a wild horse come to you for food"
+    },
+    "description": {
+      "text": "Hold something a horse will eat and stand within about ten blocks of a wild one."
+    }
+  }
+}

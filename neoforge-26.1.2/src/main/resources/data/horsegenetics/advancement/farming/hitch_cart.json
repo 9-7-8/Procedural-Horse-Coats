@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "hitch_cart"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:lead"
+    },
+    "title": {
+      "text": "Hitch a cart to a horse"
+    },
+    "description": {
+      "text": "Sit on a saddled horse, get close to a cart you have placed, and press R."
+    }
+  }
+}

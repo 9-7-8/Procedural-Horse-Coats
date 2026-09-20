@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "breed_foal"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:custom_horse_spawn_egg"
+    },
+    "title": {
+      "text": "Get your first foal"
+    },
+    "description": {
+      "text": "However you arrange it."
+    },
+    "frame": "goal"
+  }
+}

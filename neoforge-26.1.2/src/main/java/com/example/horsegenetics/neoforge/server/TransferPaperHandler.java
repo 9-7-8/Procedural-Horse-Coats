@@ -131,8 +131,15 @@ public final class TransferPaperHandler {
         }
     }
 
-    /** Cheap client-side-safe test: is there a brand at all? */
-    private static boolean isBranded(Horse horse) {
+    /**
+     * Cheap client-side-safe test: is there a brand at all?
+     *
+     * <p>Public because the Ride button on the information screen has to make
+     * the same refusal ({@code ModNetworking.handleMountHorse}) - a button that
+     * walked past the brand would be a way to ride a cowboy's string off his
+     * hitch without paying for it.
+     */
+    public static boolean isBranded(Horse horse) {
         var brand = horse.getData(
                 com.example.horsegenetics.neoforge.data.ModAttachments.COWBOY_BRAND.get());
         return brand != null && brand.isBranded();

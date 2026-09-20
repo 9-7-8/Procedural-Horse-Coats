@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "bring_horse_home"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:ender_eye"
+    },
+    "title": {
+      "text": "Bring a horse back from it"
+    },
+    "description": {
+      "text": "Lead or ride one into the return portal."
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:basic_breeding",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "use_seed_jar"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:stallion_seed_jar"
+    },
+    "title": {
+      "text": "Use a seed jar on a mare"
+    },
+    "description": {
+      "text": "She has to be in heat."
+    }
+  }
+}

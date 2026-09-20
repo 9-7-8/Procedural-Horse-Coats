@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "barn_name"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:paper"
+    },
+    "title": {
+      "text": "Give a horse a barn name"
+    },
+    "description": {
+      "text": "Open a tamed horse's inventory, click the i hanging off the left of the window, and type into the box on Overview."
+    }
+  }
+}

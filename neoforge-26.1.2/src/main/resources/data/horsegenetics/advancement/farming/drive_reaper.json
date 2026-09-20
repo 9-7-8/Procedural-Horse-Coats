@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:farming",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "drive_reaper"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:oak_reaper"
+    },
+    "title": {
+      "text": "Drive a reaper"
+    },
+    "description": {
+      "text": "It harvests mature crops it is drawn over - but only while a player is sitting on it, so this one you really do have to ride."
+    }
+  }
+}

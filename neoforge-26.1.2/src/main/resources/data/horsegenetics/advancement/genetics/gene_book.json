@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "gene_book"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:book"
+    },
+    "title": {
+      "text": "Research a gene with a book"
+    },
+    "description": {
+      "text": "Right-click any horse while holding a book."
+    }
+  }
+}

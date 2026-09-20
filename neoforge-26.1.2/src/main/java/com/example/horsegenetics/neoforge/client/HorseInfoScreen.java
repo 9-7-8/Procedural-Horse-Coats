@@ -21,6 +21,9 @@ import com.example.horsegenetics.common.cart.CartKind;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.neoforge.entity.HorseTackSlot;
+import com.example.horsegenetics.neoforge.network.MountHorsePayload;
+import com.example.horsegenetics.neoforge.network.TackSlotPayload;
 import com.example.horsegenetics.neoforge.network.InspectHorsePayload;
 import com.example.horsegenetics.neoforge.network.OffspringDataPayload;
 import com.example.horsegenetics.neoforge.network.OffspringRequestPayload;
@@ -35,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -147,6 +151,15 @@ public final class HorseInfoScreen extends Screen {
     private static final int OFFSPRING_HEADER_H = 24;
 
     /** One descendant's portrait, and the pitch of a row of them. */
+    /**
+     * A tack slot, and the gap between two of them. Eighteen is vanilla's slot
+     * - 16 of item with a pixel of well on each side - because these hold the
+     * same saddle and the same barding, and a slot that is not slot-sized reads
+     * as a picture of one rather than somewhere to click.
+     */
+    private static final int SLOT = 18;
+    private static final int SLOT_GAP = 8;
+
     private static final int FOAL_W = 40;
     private static final int FOAL_H = 40;
     private static final int FOAL_GAP = 4;
@@ -179,6 +192,14 @@ public final class HorseInfoScreen extends Screen {
 
     /** Ticks since the screen opened, for the once-a-second hold heartbeat. */
     private int heldTicks;
+
+    /** Where the tack slots landed this frame - see {@code Cursor.tack}. */
+    private record TackHit(HorseTackSlot slot, int x, int y) {
+    }
+
+    private final List<TackHit> tackHits = new ArrayList<>();
+
+    private Button rideButton;
 
     public HorseInfoScreen(HorseRecord record, @Nullable AbstractHorse horse, @Nullable Screen parent) {
         super(Component.literal(record.displayName()));
@@ -302,6 +323,18 @@ public final class HorseInfoScreen extends Screen {
                 .build();
         addRenderableWidget(offspringRefreshButton);
 
+        // Ride. It is on Overview with the tack because that is the tab about
+        // this horse as an animal rather than as a genotype - and it is here at
+        // all because the right-click that used to mount now opens this screen.
+        // See ClientConfig.rightClickOpensInfo and MountHorsePayload.
+        rideButton = Button.builder(Component.literal("Ride"), b -> mount())
+                .bounds(contentRight() - buttonW("Ride"), contentTop() - 2, buttonW("Ride"), 16)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                        "Get on. A horse that is not yet tamed will try to throw you off - "
+                                + "which is how it is tamed.")))
+                .build();
+        addRenderableWidget(rideButton);
+
         applyTabWidgets();
         sendHold(true);
     }
@@ -337,6 +370,16 @@ public final class HorseInfoScreen extends Screen {
             setBarnButton.visible = overview;
             setBarnButton.active = overview;
         }
+        if (rideButton != null) {
+            // A foal, a horse somebody is already on, and a cowboy's branded
+            // string are all refused by the server - so the button is not
+            // offered for them either. Taming is riding, so an untamed horse
+            // keeps it.
+            boolean rideable = tab == Tab.OVERVIEW && horse != null && !horse.isBaby()
+                    && !horse.isVehicle() && !brandedStock();
+            rideButton.visible = rideable;
+            rideButton.active = rideable;
+        }
         boolean genes = tab == Tab.GENES;
         if (baselineFilterButton != null) {
             baselineFilterButton.visible = genes;
@@ -364,6 +407,90 @@ public final class HorseInfoScreen extends Screen {
         var owner = horse.getOwnerReference();
         var viewer = Minecraft.getInstance().player;
         return owner != null && viewer != null && viewer.getUUID().equals(owner.getUUID());
+    }
+
+    /**
+     * Is this one of a cowboy's string? The brand is a synced attachment, so
+     * this is the same answer the server's {@code TransferPaperHandler} gives -
+     * the screen hides what that would refuse rather than offering a button
+     * that does nothing.
+     */
+    private boolean brandedStock() {
+        if (horse == null) {
+            return false;
+        }
+        var brand = horse.getData(ModAttachments.COWBOY_BRAND.get());
+        return brand != null && brand.isBranded();
+    }
+
+    /** The Ride button. The screen closes on the way - you cannot read it from the saddle. */
+    private void mount() {
+        if (horse == null) {
+            return;
+        }
+        ClientPacketDistributor.sendToServer(new MountHorsePayload(horse.getId()));
+        Minecraft.getInstance().setScreen(null);
+    }
+
+    /**
+     * One tack slot: the well, the item in it, and the hover.
+     *
+     * <p>A slot the player cannot use is drawn flat and dim rather than hidden.
+     * A foal has no saddle slot and never will until it grows, and a stranger's
+     * horse has tack you may look at and not take - in both cases an empty gap
+     * where a slot should be reads as a bug, and a greyed slot reads as the
+     * rule it is.
+     */
+    private void drawTackSlot(GuiGraphicsExtractor g, HorseTackSlot slot, int x, int y,
+                              int mouseX, int mouseY) {
+        boolean usable = ownsHorse() && horse != null && horse.canUseSlot(slot.slot());
+        ItemStack worn = horse == null ? ItemStack.EMPTY : slot.on(horse);
+
+        g.fill(x, y, x + SLOT, y + SLOT, FIELD_WELL);
+        int edge = usable ? FIELD_EDGE : RULE;
+        g.fill(x, y, x + SLOT, y + 1, edge);
+        g.fill(x, y + SLOT - 1, x + SLOT, y + SLOT, edge);
+        g.fill(x, y, x + 1, y + SLOT, edge);
+        g.fill(x + SLOT - 1, y, x + SLOT, y + SLOT, edge);
+
+        if (!worn.isEmpty()) {
+            g.item(worn, x + 1, y + 1);
+            g.itemDecorations(this.font, worn, x + 1, y + 1);
+        }
+
+        boolean over = mouseX >= x && mouseX < x + SLOT && mouseY >= y && mouseY < y + SLOT
+                && mouseY >= pageTop() - 2 && mouseY <= panelBottom() - PAD;
+        if (!over) {
+            return;
+        }
+        g.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, 0x30FFFFFF);
+        if (!worn.isEmpty()) {
+            g.setTooltipForNextFrame(this.font, worn, mouseX, mouseY);
+        } else {
+            g.setTooltipForNextFrame(Component.literal(slot.hint()), mouseX, mouseY);
+        }
+    }
+
+    /**
+     * A click on a tack slot. One click swaps that slot with what is in your
+     * hand - the server decides which direction and refuses anything that is
+     * not yours; see {@code ModNetworking.handleTackSlot}.
+     */
+    private boolean clickTack(double mx, double my) {
+        if (horse == null || !ownsHorse() || my < pageTop() - 2 || my > panelBottom() - PAD) {
+            return false;
+        }
+        for (TackHit hit : tackHits) {
+            if (mx >= hit.x() && mx < hit.x() + SLOT && my >= hit.y() && my < hit.y() + SLOT) {
+                if (!horse.canUseSlot(hit.slot().slot())) {
+                    return true; // a foal's saddle slot: a real slot, and not yet usable
+                }
+                ClientPacketDistributor.sendToServer(
+                        new TackSlotPayload(horse.getId(), hit.slot().name()));
+                return true;
+            }
+        }
+        return false;
     }
 
     private void submitBarnName() {
@@ -422,6 +549,9 @@ public final class HorseInfoScreen extends Screen {
         Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
             select(hit);
+            return true;
+        }
+        if (tab == Tab.OVERVIEW && clickTack(event.x(), event.y())) {
             return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -517,8 +647,9 @@ public final class HorseInfoScreen extends Screen {
 
         g.enableScissor(pl + 1, top - 2, pr - 1, bottom + 4);
         Cursor c = new Cursor(g, contentLeft(), y0, contentWidth());
+        tackHits.clear();
         switch (tab) {
-            case OVERVIEW -> drawOverview(c);
+            case OVERVIEW -> drawOverview(c, mouseX, mouseY);
             case GENES -> drawGenes(c);
             case HEALTH -> drawHealth(c);
             case COAT -> drawGeneList(c, GeneCategory.COAT, "Nothing but the baseline colour genes.");
@@ -608,7 +739,7 @@ public final class HorseInfoScreen extends Screen {
         g.fill(x1 - 1, y0, x1, y1, edge);
     }
 
-    private void drawOverview(Cursor c) {
+    private void drawOverview(Cursor c, int mouseX, int mouseY) {
         boolean adult = horse == null || !horse.isBaby();
 
         c.pair("Sex", live().sexLabel(adult));
@@ -655,6 +786,22 @@ public final class HorseInfoScreen extends Screen {
         }
 
         drawDraught(c);
+
+        // Tack. Two slots today - saddle and armour - and the row is built from
+        // HorseTackSlot.values(), so a third is a line in that enum. Only drawn
+        // for a horse that is actually here: the screen also opens on a record
+        // with no entity behind it (the browser), and there is nothing to tack.
+        if (horse != null) {
+            c.rule();
+            c.label("Tack");
+            c.tack(mouseX, mouseY);
+            if (!ownsHorse()) {
+                c.wrapped("Not your horse - you can see what it is wearing and no more.", DESC, 0);
+            } else {
+                c.wrapped("Click a slot to put on what you are holding, or to take off what is there.",
+                        DESC, 0);
+            }
+        }
 
         ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
         if (care != null) {
@@ -1319,6 +1466,31 @@ public final class HorseInfoScreen extends Screen {
 
         void gap(int px) {
             y += px;
+        }
+
+        /**
+         * The row of tack slots, and the Ride button's twin in spirit: the only
+         * part of any of these pages you can click <i>into</i> rather than read.
+         *
+         * <p>It records where each slot landed on the way past
+         * ({@link #tackHits}) rather than working the geometry out twice, which
+         * is what keeps a scrolled page's slots clickable in the right place -
+         * the y it is drawn at is already the scrolled one.
+         */
+        void tack(int mouseX, int mouseY) {
+            int sx = x;
+            for (HorseTackSlot slot : HorseTackSlot.values()) {
+                g.text(font, Component.literal(slot.label()), sx, y, LABEL, false);
+                sx += Math.max(SLOT + SLOT_GAP, font.width(slot.label()) + SLOT_GAP);
+            }
+            y += lineH();
+            sx = x;
+            for (HorseTackSlot slot : HorseTackSlot.values()) {
+                drawTackSlot(g, slot, sx, y, mouseX, mouseY);
+                tackHits.add(new TackHit(slot, sx, y));
+                sx += Math.max(SLOT + SLOT_GAP, font.width(slot.label()) + SLOT_GAP);
+            }
+            y += SLOT + 4;
         }
 
         /**

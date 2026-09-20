@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "use_interdimensional_ticket"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:interdimensional_ticket"
+    },
+    "title": {
+      "text": "Use an interdimensional ticket"
+    },
+    "description": {
+      "text": "The top tier - any world to any other."
+    },
+    "frame": "challenge"
+  }
+}

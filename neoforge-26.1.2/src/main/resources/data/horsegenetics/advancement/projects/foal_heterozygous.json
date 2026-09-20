@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:projects",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "foal_heterozygous"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:quartz"
+    },
+    "title": {
+      "text": "Breed a foal carrying something it does not show"
+    },
+    "description": {
+      "text": "Two different alleles at one locus."
+    }
+  }
+}

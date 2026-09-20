@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "wild_groom"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:brush"
+    },
+    "title": {
+      "text": "Watch two horses groom each other"
+    },
+    "description": {
+      "text": "Two that have become grooming partners stand head to tail and work on each other for a good while."
+    }
+  }
+}

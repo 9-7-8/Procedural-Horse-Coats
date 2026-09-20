@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:genetics",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "use_gene_carrot"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:carrot_on_a_stick"
+    },
+    "title": {
+      "text": "Feed a gene carrot to a parent"
+    },
+    "description": {
+      "text": "That parent will pass the gene on instead of leaving it to a coin flip."
+    }
+  }
+}

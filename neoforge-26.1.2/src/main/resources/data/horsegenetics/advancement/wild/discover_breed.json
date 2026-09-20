@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:wild",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "discover_breed"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:written_book"
+    },
+    "title": {
+      "text": "Meet a breed"
+    },
+    "description": {
+      "text": "Tame a horse of any named breed and it joins your breed book."
+    }
+  }
+}

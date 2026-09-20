@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "horse_injured"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:bone"
+    },
+    "title": {
+      "text": "Have a horse of yours get hurt"
+    },
+    "description": {
+      "text": "This one will happen without your help."
+    }
+  }
+}

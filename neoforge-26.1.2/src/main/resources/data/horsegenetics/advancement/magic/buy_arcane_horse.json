@@ -1,0 +1,23 @@
+{
+  "parent": "horsegenetics:magic",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "buy_arcane_horse"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:emerald_block"
+    },
+    "title": {
+      "text": "Buy a horse from an arcane dealer"
+    },
+    "description": {
+      "text": "One cowboy in twelve deals in magic instead of a breed, and one turns up out on the road now and then as well."
+    },
+    "frame": "goal"
+  }
+}

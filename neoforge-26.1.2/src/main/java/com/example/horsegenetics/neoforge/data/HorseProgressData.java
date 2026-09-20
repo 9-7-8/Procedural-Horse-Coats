@@ -2,12 +2,12 @@ package com.example.horsegenetics.neoforge.data;
 
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.advancement.ModTriggers;
+import com.example.horsegenetics.neoforge.advancement.ProgressTaskTrigger;
 import com.example.horsegenetics.neoforge.network.ProgressSyncPayload;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,8 +40,12 @@ import java.util.UUID;
  * <h2>Completing is idempotent and says so once</h2>
  * Handlers call {@link #complete} freely - on every tame, every foal, every
  * whistle - so it has to be cheap and silent when nothing changed. The one time
- * it is not silent is the first: a single chat line, because a checklist nobody
- * notices ticking is a checklist nobody opens.
+ * it is not silent is the first, and what says so is <b>an advancement</b>:
+ * every task is also one ({@link ProgressTaskTrigger}), so the toast and the
+ * chat line are vanilla's, they can be turned off in vanilla's settings, and
+ * the tick is in {@code /advancement} and the advancement screen as well as in
+ * the book. This class wrote its own green chat line until that landed; two
+ * announcements of one event is one too many.
  */
 public final class HorseProgressData extends SavedData {
 
@@ -86,7 +90,7 @@ public final class HorseProgressData extends SavedData {
      * Tick one task off. Does nothing if it was already done, so a caller never
      * has to check first.
      *
-     * @return true the first time, which is when the chat line is said
+     * @return true the first time, which is when the advancement is awarded
      */
     public boolean complete(ServerPlayer player, ProgressTask task) {
         Set<String> done = byPlayer.computeIfAbsent(player.getUUID(), k -> new LinkedHashSet<>());
@@ -95,12 +99,41 @@ public final class HorseProgressData extends SavedData {
         }
         setDirty();
         sync(player);
-        int total = ProgressTask.values().length;
-        player.sendSystemMessage(Component.literal("[✔] ").withStyle(ChatFormatting.GREEN)
-                .append(Component.literal(task.title()).withStyle(ChatFormatting.WHITE))
-                .append(Component.literal("  (" + done.size() + "/" + total + ")")
-                        .withStyle(ChatFormatting.DARK_GRAY)));
+        award(player, task);
         return true;
+    }
+
+    /**
+     * Fire the criterion behind this task's advancement.
+     *
+     * <p>Deliberately not called on a repeat completion: the trigger walks
+     * every listener the player has on it, and {@link #complete} is called from
+     * goals that tick. Once, on the first, is what an advancement needs.
+     *
+     * <p>{@link #awardEverythingDone} is the other caller, and the reason this
+     * is separate: a player whose ticks predate the advancements existing has
+     * the boxes and not the toasts, and nothing would ever fire for them again.
+     */
+    private static void award(ServerPlayer player, ProgressTask task) {
+        ModTriggers.PROGRESS_TASK.get().trigger(player, task);
+    }
+
+    /**
+     * Fire the criterion for everything this player has already done - on
+     * login, from {@code ProgressHooks}.
+     *
+     * <p>It is how the advancements catch up with a save that ticked its boxes
+     * before they existed, and how a revoked one comes back. Awarding an
+     * advancement a player already holds does nothing, so this is safe every
+     * login rather than once.
+     */
+    public void awardEverythingDone(ServerPlayer player) {
+        for (String id : doneBy(player.getUUID())) {
+            ProgressTask task = ProgressTask.byId(id);
+            if (task != null) {
+                award(player, task);
+            }
+        }
     }
 
     public Set<String> doneBy(UUID player) {
