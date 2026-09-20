@@ -1888,6 +1888,15 @@
     rather than left to be read again. None of them is started.
 </p>
 
+<p>
+    <strong>24.14&ndash;24.16 came out of reading Simply Horses on 2026-09-20</strong>, a dead
+    1.5.2 alpha, for things it has that we do not. Most of its list turned out to be
+    <em>built</em> here already &mdash; herd stallions with fights and succession, cart trains,
+    a load model, breeds &mdash; and one of the rest, a stamina meter, is
+    <a href="#settled">settled against</a>. These three are what was left. Ideas only: nothing
+    of that mod&rsquo;s comes near this one.
+</p>
+
 <h3 id="weather-spawning">24.1 Breeds that only spawn in certain weather</h3>
 
 <p>
@@ -2214,6 +2223,76 @@
     corner, build it again. It wants the same per-tick mutable state
     <a href="#storm-fed">24.10</a> wants, and for the same reason, so whichever is built
     first should put that attachment somewhere the other can use.
+</p>
+
+<h3 id="lasso">24.14 A lasso, and catching as something you do</h3>
+
+<p>
+    Out of Simply Horses, 2026-09-20. A thrown or held item that <strong>catches a wild
+    horse</strong> and holds it while it is gentled, so that taming is an activity with a tool
+    rather than a dice roll you repeat. That mod ran it as a multi-day break: lasso the horse,
+    it struggles, roughly two days later it is yours.
+</p>
+<p>
+    <strong>The length of it is the problem, not the idea.</strong>
+    <a href="philosophy.html">Philosophy &sect;8</a> is &ldquo;add texture, do not add
+    chores&rdquo;, and a two-day timer on a horse you have already caught is a chore with a
+    progress bar. What survives the rule is the <em>catching</em> &mdash; a rope that stops a
+    wild horse bolting, so approaching a band is a stalk rather than a chase. The mod already
+    has everything downstream of that: taming by hand is built
+    (<a href="horse-care.html#hand-taming">hand-feeding</a>), and wild bands already flee,
+    guard and hold together.
+</p>
+<p>
+    <strong>It would be the first item in the mod that targets an entity</strong>, which is
+    where the research has to start; everything else here acts on a block or on a held stack.
+    Vanilla&rsquo;s own lead is the closest model, and the mod currently only <em>reads</em>
+    <code>isLeashed()</code> to suppress goals. A braided rope item existed once as a crafting
+    intermediate and was removed for pricing a fence line at twelve horse hairs &mdash; if a
+    rope comes back it must not come back as that.
+</p>
+
+<h3 id="draught-teams">24.15 Draught teams &mdash; more than one horse to a vehicle</h3>
+
+<p>
+    Out of Simply Horses, 2026-09-20. Two or four horses harnessed to one wagon, connected by
+    a <strong>whippletree</strong>, with the rider leading from the near horse.
+</p>
+<p>
+    <strong>The carts are built on one animal per vehicle and say so.</strong>
+    <code>AbstractDrawnEntity.applyDraught</code> takes a single puller and applies a single
+    speed modifier, and <a href="carts.html">the carts page</a> states the rule outright. So
+    this is not a feature to add beside the cart code; it is a change to the shape of it. The
+    weight model is the half that already fits &mdash; <code>CartDraft</code> computes a speed
+    ceiling from capacity against load, and two horses is simply more capacity.
+</p>
+<p>
+    <strong>Trains are the thing this is <em>not</em></strong>, and the two get confused.
+    Coupling several vehicles behind one horse is built and shipped
+    (<a href="carts.html#hitching">hitching and trains</a>, up to eight). This is the other
+    axis: several horses in front of one vehicle. A design that does both needs to say what
+    happens when you combine them.
+</p>
+
+<h3 id="vardo">24.16 A vardo &mdash; a cart you can sleep in</h3>
+
+<p>
+    Out of Simply Horses, 2026-09-20. A caravan that is a <strong>moving home</strong>: you
+    sleep inside it, and it carries your respawn point with it.
+</p>
+<p>
+    <strong>Nothing in the mod touches sleep or respawn today</strong> &mdash; no
+    <code>startSleeping</code>, no <code>setRespawnPosition</code>, no bed &mdash; so this is
+    the whole of the work, and it is the interesting half rather than the modelling. The wagon
+    it would be built on already exists, already seats riders, already takes chests and already
+    has a dyeable furling roof, so the vehicle is not the question. Sleeping in a thing that
+    moves is.
+</p>
+<p>
+    <strong>The obvious trap is a respawn point that drives away.</strong> A bed sets a fixed
+    position; a vardo&rsquo;s is wherever the cart now is, or wherever it was when you slept,
+    and those differ the moment somebody hitches it up. Decide that before any of it is built,
+    because it decides whether the feature is a mobile base or a novelty bed.
 </p>
 
 <h2 id="equestrian-bench">25. The Tack Dyeing Bench</h2>
