@@ -86,6 +86,30 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     /** The clockwise side. See {@link #LEFT}. */
     public static final BooleanProperty RIGHT = BooleanProperty.create("right");
 
+    /**
+     * True when this block draws an <b>intermediate upright</b> - the T where a
+     * post meets the rail partway along a run.
+     *
+     * <p>A long fence line that is one unbroken rail between two distant
+     * standards does not look like a fence; real ones are posted at intervals.
+     * So a run grows a post every {@link #POST_SPACING} blocks. Owner's ask,
+     * and it is purely cosmetic - the post adds no collision the rail does not
+     * already have.
+     *
+     * <p><b>It is a function of world position, not of the run.</b> The post
+     * lands where the coordinate along the rail axis divides by three, rather
+     * than being counted from the end of the run, and that is deliberate: two
+     * parallel fence lines then post in the same places instead of drifting
+     * against each other, and extending a run from either end does not shuffle
+     * every post along it. The cost is that where a run <i>starts</i> does not
+     * affect where its posts fall, which is the right trade for a thing you
+     * build by eye.
+     */
+    public static final BooleanProperty POST = BooleanProperty.create("post");
+
+    /** One intermediate upright every this many blocks along a run. */
+    private static final int POST_SPACING = 3;
+
     // --- geometry -----------------------------------------------------------
     //
     // Model space, 0-16. The rail spans the full width so adjacent jumps meet
@@ -93,8 +117,8 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     // between two posts rather than a solid slab.
     //
     // The standards run the FULL height, y 0-16, on purpose: stacked, they form
-    // one continuous upright, which is what a real standard is. A lone jump
-    // therefore has two stubby posts, which is correct for a ground pole.
+    // one continuous upright, which is what a real standard is - and so does the
+    // intermediate post, for the same reason.
 
     /** Where the drawn rail stops. */
     private static final int RAIL_TOP = 15;
@@ -128,9 +152,9 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     /**
      * Every shape this block can have, built once.
      *
-     * <p>Four facings times two connection flags each is sixteen states and
-     * only eight distinct shapes - a jump facing north and one facing south
-     * occupy the same boxes. Caching on the pair actually used rather than
+     * <p>Four facings times three booleans is thirty-two states and half that
+     * many distinct shapes - a jump facing north and one facing south occupy
+     * the same boxes. Caching on the combination actually used rather than
      * recomputing per collision test keeps {@link #getShape} free, which
      * matters: a horse galloping a course is asking this question every tick.
      */
@@ -145,7 +169,7 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     private static final Map<ShapeKey, VoxelShape> COLLISION_SHAPES =
             buildShapes(COLLISION_TOP, COLLISION_TOP);
 
-    private record ShapeKey(Direction facing, boolean left, boolean right) {
+    private record ShapeKey(Direction facing, boolean left, boolean right, boolean post) {
     }
 
     public JumpBlock(Properties properties) {
@@ -153,7 +177,8 @@ public class JumpBlock extends HorizontalDirectionalBlock {
         this.registerDefaultState(this.defaultBlockState()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(LEFT, false)
-                .setValue(RIGHT, false));
+                .setValue(RIGHT, false)
+                .setValue(POST, false));
     }
 
     @Override
@@ -163,7 +188,7 @@ public class JumpBlock extends HorizontalDirectionalBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LEFT, RIGHT);
+        builder.add(FACING, LEFT, RIGHT, POST);
     }
 
     // --- shape --------------------------------------------------------------
@@ -182,22 +207,37 @@ public class JumpBlock extends HorizontalDirectionalBlock {
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             for (boolean left : new boolean[] {false, true}) {
                 for (boolean right : new boolean[] {false, true}) {
-                    // The rail lies across the facing: a jump facing north or
-                    // south (axis Z) is a barrier running east-west.
-                    VoxelShape shape = facing.getAxis() == Direction.Axis.Z
-                            ? railX(railTop) : railZ(railTop);
-                    Direction leftSide = facing.getCounterClockWise();
-                    if (!left) {
-                        shape = Shapes.or(shape, standard(leftSide, standardTop));
+                    for (boolean post : new boolean[] {false, true}) {
+                        // The rail lies across the facing: a jump facing north
+                        // or south (axis Z) is a barrier running east-west.
+                        VoxelShape shape = facing.getAxis() == Direction.Axis.Z
+                                ? railX(railTop) : railZ(railTop);
+                        Direction leftSide = facing.getCounterClockWise();
+                        if (!left) {
+                            shape = Shapes.or(shape, standard(leftSide, standardTop));
+                        }
+                        if (!right) {
+                            shape = Shapes.or(shape, standard(leftSide.getOpposite(), standardTop));
+                        }
+                        if (post) {
+                            shape = Shapes.or(shape, post(standardTop));
+                        }
+                        shapes.put(new ShapeKey(facing, left, right, post), shape);
                     }
-                    if (!right) {
-                        shape = Shapes.or(shape, standard(leftSide.getOpposite(), standardTop));
-                    }
-                    shapes.put(new ShapeKey(facing, left, right), shape);
                 }
             }
         }
         return Map.copyOf(shapes);
+    }
+
+    /**
+     * The intermediate upright, dead centre of the block.
+     *
+     * <p>Centred on both axes, so it is the same box whichever way the rail
+     * runs and needs no per-facing case.
+     */
+    private static VoxelShape post(int top) {
+        return Block.box(6, 0, 6, 10, top, 10);
     }
 
     /**
@@ -251,8 +291,8 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     }
 
     private static ShapeKey key(BlockState state) {
-        return new ShapeKey(
-                state.getValue(FACING), state.getValue(LEFT), state.getValue(RIGHT));
+        return new ShapeKey(state.getValue(FACING), state.getValue(LEFT),
+                state.getValue(RIGHT), state.getValue(POST));
     }
 
     // --- connection ---------------------------------------------------------
@@ -267,6 +307,30 @@ public class JumpBlock extends HorizontalDirectionalBlock {
                 && neighbour.getValue(FACING).getAxis() == state.getValue(FACING).getAxis();
     }
 
+    /**
+     * Is this position one of the ones that carries an intermediate upright?
+     *
+     * <p>{@code floorMod} rather than {@code %}: coordinates go negative, and
+     * Java's remainder does too, so a plain {@code % 3 == 0} posts correctly
+     * east of the origin and irregularly west of it. That is the kind of bug
+     * that is invisible in a test world built near spawn.
+     */
+    private static boolean postsHere(BlockPos pos, Direction facing) {
+        int along = facing.getAxis() == Direction.Axis.Z ? pos.getX() : pos.getZ();
+        return Math.floorMod(along, POST_SPACING) == 0;
+    }
+
+    /**
+     * An intermediate upright only belongs <b>mid-run</b> - where the rail
+     * carries on in both directions. At the end of a run there is already a
+     * standard, and a post one block in from it reads as a mistake rather than
+     * as a fence.
+     */
+    private static BlockState withPost(BlockState state, BlockPos pos) {
+        boolean midRun = state.getValue(LEFT) && state.getValue(RIGHT);
+        return state.setValue(POST, midRun && postsHere(pos, state.getValue(FACING)));
+    }
+
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection().getOpposite();
@@ -274,9 +338,10 @@ public class JumpBlock extends HorizontalDirectionalBlock {
         LevelReader level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Direction leftSide = facing.getCounterClockWise();
-        return state
+        return withPost(state
                 .setValue(LEFT, connects(state, level.getBlockState(pos.relative(leftSide))))
-                .setValue(RIGHT, connects(state, level.getBlockState(pos.relative(leftSide.getOpposite()))));
+                .setValue(RIGHT, connects(state, level.getBlockState(pos.relative(leftSide.getOpposite())))),
+                pos);
     }
 
     /**
@@ -292,10 +357,10 @@ public class JumpBlock extends HorizontalDirectionalBlock {
                                      BlockState neighbourState, RandomSource random) {
         Direction leftSide = state.getValue(FACING).getCounterClockWise();
         if (directionToNeighbour == leftSide) {
-            return state.setValue(LEFT, connects(state, neighbourState));
+            return withPost(state.setValue(LEFT, connects(state, neighbourState)), pos);
         }
         if (directionToNeighbour == leftSide.getOpposite()) {
-            return state.setValue(RIGHT, connects(state, neighbourState));
+            return withPost(state.setValue(RIGHT, connects(state, neighbourState)), pos);
         }
         return state;
     }
@@ -319,6 +384,8 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     @Override
     protected BlockState mirror(BlockState state, Mirror mirror) {
         BlockState turned = state.rotate(mirror.getRotation(state.getValue(FACING)));
+        // POST rides along unchanged: a mirror swaps the ends of the run but
+        // does not move the block, and the post is a property of where it is.
         return turned
                 .setValue(LEFT, state.getValue(RIGHT))
                 .setValue(RIGHT, state.getValue(LEFT));

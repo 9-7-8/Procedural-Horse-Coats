@@ -44,6 +44,46 @@ public final class ModCreativeTabs {
                     })
                     .build());
 
+    /**
+     * <b>The jumps, in a tab of their own.</b>
+     *
+     * <p>They were filed into vanilla's Building Blocks for one build, beside
+     * the fence of each wood, on the same argument the
+     * {@link com.example.horsegenetics.neoforge.block.DoubleGates double gates}
+     * are: somebody building a paddock is in that tab. The owner's call was
+     * that the argument does not carry, because a gate is a thing anyone
+     * builds with and <b>a jump is horse equipment</b> - it has no use to a
+     * player without a horse, so it does not belong in a vanilla tab at all.
+     *
+     * <p><b>A tab rather than a shelf in {@link #MAIN}</b>, which was the other
+     * option, because this is one style of jump and there are to be more -
+     * logs, brush, ditches, oxers, fillers. Each style is another twelve woods,
+     * so the roster grows by the dozen; put two styles in the horse tab and the
+     * carrots, whistles and papers it exists for are off the bottom of it.
+     *
+     * <p>The gates stay in Building Blocks. That is not an inconsistency: a
+     * fence gate is a building block that horses happen to care about, and a
+     * jump is horse equipment shaped like a fence.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> JUMPS =
+            TABS.register("jumps", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.horsegenetics.jumps"))
+                    // The first registered jump, which is oak's - Jumps keeps
+                    // vanilla's wood order. Taken from the list rather than
+                    // named, so this cannot point at a block that was removed.
+                    .icon(() -> new ItemStack(
+                            com.example.horsegenetics.neoforge.block.Jumps.jumps().get(0).item().get()))
+                    .withTabsBefore(MAIN.getKey())
+                    .displayItems((params, output) -> {
+                        // Vanilla's twelve in vanilla's wood order, then every
+                        // modded wood by id - whatever order FML loaded them in.
+                        for (com.example.horsegenetics.neoforge.block.Jumps.Jump jump
+                                : com.example.horsegenetics.neoforge.block.Jumps.jumps()) {
+                            output.accept(jump.item().get());
+                        }
+                    })
+                    .build());
+
     private ModCreativeTabs() {
     }
 }

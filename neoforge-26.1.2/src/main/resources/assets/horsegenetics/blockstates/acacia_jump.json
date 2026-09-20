@@ -1,78 +1,154 @@
 {
   "variants": {
-    "facing=south,left=false,right=false": {
+    "facing=south,left=false,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump",
       "uvlock": true
     },
-    "facing=south,left=false,right=true": {
+    "facing=south,left=false,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump",
+      "uvlock": true
+    },
+    "facing=south,left=false,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_r",
       "uvlock": true
     },
-    "facing=south,left=true,right=false": {
+    "facing=south,left=false,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_r",
+      "uvlock": true
+    },
+    "facing=south,left=true,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump_l",
       "uvlock": true
     },
-    "facing=south,left=true,right=true": {
+    "facing=south,left=true,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump_l",
+      "uvlock": true
+    },
+    "facing=south,left=true,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_lr",
       "uvlock": true
     },
-    "facing=west,left=false,right=false": {
+    "facing=south,left=true,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_lr_post",
+      "uvlock": true
+    },
+    "facing=west,left=false,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump",
       "uvlock": true,
       "y": 90
     },
-    "facing=west,left=false,right=true": {
+    "facing=west,left=false,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,left=false,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_r",
       "uvlock": true,
       "y": 90
     },
-    "facing=west,left=true,right=false": {
+    "facing=west,left=false,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_r",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,left=true,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump_l",
       "uvlock": true,
       "y": 90
     },
-    "facing=west,left=true,right=true": {
+    "facing=west,left=true,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump_l",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=west,left=true,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_lr",
       "uvlock": true,
       "y": 90
     },
-    "facing=north,left=false,right=false": {
+    "facing=west,left=true,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_lr_post",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north,left=false,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump",
       "uvlock": true,
       "y": 180
     },
-    "facing=north,left=false,right=true": {
+    "facing=north,left=false,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,left=false,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_r",
       "uvlock": true,
       "y": 180
     },
-    "facing=north,left=true,right=false": {
+    "facing=north,left=false,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_r",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,left=true,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump_l",
       "uvlock": true,
       "y": 180
     },
-    "facing=north,left=true,right=true": {
+    "facing=north,left=true,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump_l",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=north,left=true,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_lr",
       "uvlock": true,
       "y": 180
     },
-    "facing=east,left=false,right=false": {
+    "facing=north,left=true,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_lr_post",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=east,left=false,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump",
       "uvlock": true,
       "y": 270
     },
-    "facing=east,left=false,right=true": {
+    "facing=east,left=false,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=false,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_r",
       "uvlock": true,
       "y": 270
     },
-    "facing=east,left=true,right=false": {
+    "facing=east,left=false,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_r",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=true,right=false,post=false": {
       "model": "horsegenetics:block/acacia_jump_l",
       "uvlock": true,
       "y": 270
     },
-    "facing=east,left=true,right=true": {
+    "facing=east,left=true,right=false,post=true": {
+      "model": "horsegenetics:block/acacia_jump_l",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=true,right=true,post=false": {
       "model": "horsegenetics:block/acacia_jump_lr",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=east,left=true,right=true,post=true": {
+      "model": "horsegenetics:block/acacia_jump_lr_post",
       "uvlock": true,
       "y": 270
     }

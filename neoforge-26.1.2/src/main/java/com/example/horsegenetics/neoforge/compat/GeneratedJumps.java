@@ -15,8 +15,8 @@ import java.util.Map;
  * make one visible, placeable, craftable and breakable.
  *
  * <h2>There are no textures here, and that is the whole trick</h2>
- * A jump has never had art of its own. The four shapes are shipped template
- * models - {@code horsegenetics:block/template_jump*} - and a wood's four
+ * A jump has never had art of its own. The five shapes are shipped template
+ * models - {@code horsegenetics:block/template_jump*} - and a wood's five
  * models are each one line: a parent and a texture id. So a modded wood needs
  * no generated PNG at all; it needs a pointer at the plank texture <i>that mod
  * already drew</i>, exactly as the shipped twelve point at vanilla's.
@@ -47,10 +47,10 @@ final class GeneratedJumps {
             "south", 0, "west", 90, "north", 180, "east", 270);
 
     /** Every model suffix, in the order the models are written. */
-    private static final String[] SUFFIXES = {"", "_l", "_r", "_lr"};
+    private static final String[] SUFFIXES = {"", "_l", "_r", "_lr", "_lr_post"};
 
     /**
-     * The model suffix for a pair of connection flags.
+     * The model suffix for a set of flags.
      *
      * <p><b>One method, called from both the model loop and the blockstate
      * loop</b>, because writing it out twice is how this shipped broken the
@@ -60,10 +60,15 @@ final class GeneratedJumps {
      * middle one is a purple cube. Only the both-connected case differs, so a
      * row of two looks perfect and the bug hides. The author-time twin is
      * {@code suffixFor} in bake-jumps.mjs.
+     *
+     * <p>{@code post} is honoured only mid-run, matching
+     * {@code JumpBlock.withPost}, which never sets it otherwise. The blockstate
+     * still has to name every combination, so the end-of-run states map to the
+     * postless model rather than to one that would then have to exist.
      */
-    private static String suffix(boolean left, boolean right) {
+    private static String suffix(boolean left, boolean right, boolean post) {
         if (left && right) {
-            return "_lr";
+            return post ? "_lr_post" : "_lr";
         }
         if (left) {
             return "_l";
@@ -86,10 +91,11 @@ final class GeneratedJumps {
             tagValues.add(NS + ":" + id);
             lang.addProperty("block." + NS + "." + id, label(wood) + " Jump");
 
-            // ---- four models, one line of difference each -------------------
+            // ---- five models, one line of difference each -------------------
             // The suffix names the CONNECTIONS, not the standards: "_l" means a
             // jump continues the rail to the left, so the left standard is the
-            // one that is gone, and "_lr" is a bare rail mid-run.
+            // one that is gone, "_lr" is a bare rail mid-run, and "_lr_post"
+            // is that rail carrying an intermediate upright.
             for (String suffix : SUFFIXES) {
                 JsonObject model = new JsonObject();
                 model.addProperty("parent", NS + ":block/template_" + STYLE + suffix);
@@ -99,19 +105,22 @@ final class GeneratedJumps {
                 put(files, "assets/" + NS + "/models/block/" + id + suffix + ".json", model);
             }
 
-            // ---- 4 facings x left x right = 16 variants ----------------------
+            // ---- 4 facings x left x right x post = 32 variants ----------------
             JsonObject variants = new JsonObject();
             for (Map.Entry<String, Integer> facing : ROTATION.entrySet()) {
                 for (boolean left : new boolean[] {false, true}) {
                     for (boolean right : new boolean[] {false, true}) {
-                        JsonObject variant = new JsonObject();
-                        variant.addProperty("model", NS + ":block/" + id + suffix(left, right));
-                        variant.addProperty("uvlock", true);
-                        if (facing.getValue() != 0) {
-                            variant.addProperty("y", facing.getValue());
+                        for (boolean post : new boolean[] {false, true}) {
+                            JsonObject variant = new JsonObject();
+                            variant.addProperty("model",
+                                    NS + ":block/" + id + suffix(left, right, post));
+                            variant.addProperty("uvlock", true);
+                            if (facing.getValue() != 0) {
+                                variant.addProperty("y", facing.getValue());
+                            }
+                            variants.add("facing=" + facing.getKey() + ",left=" + left
+                                    + ",right=" + right + ",post=" + post, variant);
                         }
-                        variants.add("facing=" + facing.getKey()
-                                + ",left=" + left + ",right=" + right, variant);
                     }
                 }
             }

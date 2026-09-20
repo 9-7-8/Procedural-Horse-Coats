@@ -3,8 +3,8 @@
 //
 // WHY THIS EXISTS
 // The same reason as bake-double-gates.mjs, which this is modelled on: twelve
-// woods times four connection shapes is forty-eight models, twelve blockstates
-// of sixteen variants, and a recipe, loot table and lang key each, whose only
+// woods times five connection shapes is sixty models, twelve blockstates of
+// thirty-two variants, and a recipe, loot table and lang key each, whose only
 // difference is a wood name and a plank texture. Nobody writes that correctly
 // twice, and a wrong texture id fails silently as a purple chequerboard on the
 // one jump nobody happens to craft.
@@ -25,11 +25,18 @@
 // must agree, or the jump you can see and the jump you collide with differ.
 //
 // HEIGHT IS STACKING
-// There is no height state. The rail tops out at y=15, below a horse's 1.0
-// step height, so one jump on the ground is a ground pole that gets walked
-// over and two is the first real obstacle. The standards run the full 0-16 so
-// that a stack reads as one continuous upright. Do not "fix" the lone jump's
-// stubby posts: that is a ground pole and it is correct.
+// There is no height state; you stack them, and each block asks for one more
+// block of clearance. The bottom rung is 1.5 blocks because the COLLISION box
+// is half a block taller than anything drawn here - that lives in JumpBlock,
+// not in this file, and without it a horse steps straight over a lone jump.
+// The standards run the full 0-16 so that a stack reads as one continuous
+// upright, and so does the intermediate post.
+//
+// THE INTERMEDIATE POST
+// A long run grows a T-post every third block, so a fence line is not one
+// unbroken rail between two distant standards. Which blocks get one is decided
+// in JumpBlock.postsHere off the world coordinate, not here - this file only
+// has to provide the model for a mid-run rail that carries one.
 //
 // WHICH SIDE IS LEFT
 // Authored for facing=south, exactly like the gates, and rotated by the
@@ -131,21 +138,41 @@ const STANDARD_RIGHT = {
 };
 
 /**
- * The four shapes, keyed by the suffix their models carry.
+ * The intermediate upright - the T where a post meets the rail partway along a
+ * run. Dead centre of the block, so it is the same box whichever way the rail
+ * runs and needs no per-facing variant. JumpBlock.post() is the twin.
+ */
+const POST = {
+  from: [6, 0, 6],
+  to: [10, 16, 10],
+  faces: {
+    down: face([6, 6, 10, 10]),
+    up: face([6, 6, 10, 10]),
+    north: face([6, 0, 10, 16]),
+    south: face([6, 0, 10, 16]),
+    west: face([6, 0, 10, 16]),
+    east: face([6, 0, 10, 16]),
+  },
+};
+
+/**
+ * The five shapes, keyed by the suffix their models carry.
  *
  * The suffix names the CONNECTIONS, not the standards: `_l` means a jump
  * continues the rail on the left, so the left standard is the one that is
- * gone. `_lr` is a bare rail in the middle of a run.
+ * gone. `_lr` is a bare rail mid-run, and `_lr_post` is that same rail
+ * carrying an intermediate upright.
  */
 const SHAPES = [
   ["", [RAIL, STANDARD_LEFT, STANDARD_RIGHT]],
   ["_l", [RAIL, STANDARD_RIGHT]],
   ["_r", [RAIL, STANDARD_LEFT]],
   ["_lr", [RAIL]],
+  ["_lr_post", [RAIL, POST]],
 ];
 
 /**
- * The model suffix for a pair of connection flags.
+ * The model suffix for a set of flags.
  *
  * <p>ONE function, called from both the model loop and the blockstate loop,
  * because writing it out twice is how this shipped broken the first time:
@@ -153,12 +180,17 @@ const SHAPES = [
  * named "_lr", and the mismatch is invisible until somebody places three jumps
  * in a row and the middle one is a purple cube. Only the both-connected case
  * differs, so a row of two looks perfect. GeneratedJumps.suffix is the twin.
+ *
+ * `post` is honoured only mid-run, matching JumpBlock.withPost, which never
+ * sets it otherwise. The blockstate still has to name every combination, so the
+ * end-of-run states map to the postless model rather than to one that would
+ * then have to exist.
  */
-const suffixFor = (left, right) =>
-  left && right ? "_lr" : left ? "_l" : right ? "_r" : "";
+const suffixFor = (left, right, post) =>
+  left && right ? (post ? "_lr_post" : "_lr") : left ? "_l" : right ? "_r" : "";
 
 // --- templates ------------------------------------------------------------
-// Four models carrying the actual boxes, which every wood then parents to with
+// Five models carrying the actual boxes, which every wood then parents to with
 // only its texture changed.
 
 for (const [suffix, elements] of SHAPES) {
@@ -196,14 +228,19 @@ for (const [wood, texture, woodLabel] of WOODS) {
     });
   }
 
-  // 4 facings x left x right = 16 variants
+  // 4 facings x left x right x post = 32 variants
   const variants = {};
   for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
     for (const left of [false, true]) {
       for (const right of [false, true]) {
-        const v = { model: `${NS}:block/${id}${suffixFor(left, right)}`, uvlock: true };
-        if (y !== 0) v.y = y;
-        variants[`facing=${facing},left=${left},right=${right}`] = v;
+        for (const post of [false, true]) {
+          const v = {
+            model: `${NS}:block/${id}${suffixFor(left, right, post)}`,
+            uvlock: true,
+          };
+          if (y !== 0) v.y = y;
+          variants[`facing=${facing},left=${left},right=${right},post=${post}`] = v;
+        }
       }
     }
   }

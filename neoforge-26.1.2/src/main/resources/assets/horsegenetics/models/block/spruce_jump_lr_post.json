@@ -1,0 +1,6 @@
+{
+  "parent": "horsegenetics:block/template_jump_lr_post",
+  "textures": {
+    "texture": "minecraft:block/spruce_planks"
+  }
+}
