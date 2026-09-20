@@ -1,22 +1,18 @@
 {
   "textures": {
-    "texture": {
-      "sprite": "horsegenetics:block/paint_overlay",
-      "force_translucent": true
-    },
-    "particle": "horsegenetics:block/paint_overlay"
+    "particle": "#texture"
   },
   "elements": [
     {
       "from": [
-        -3.4337084989847595,
-        6.38,
-        5.88
+        -0.4327404271156787,
+        6.5,
+        6
       ],
       "to": [
-        19.43370849898476,
-        9.62,
-        10.12
+        16.43274042711568,
+        9.5,
+        10
       ],
       "rotation": {
         "origin": [
@@ -25,7 +21,7 @@
           8
         ],
         "axis": "z",
-        "angle": 45
+        "angle": 18.43494882292201
       },
       "faces": {
         "down": {
@@ -92,14 +88,14 @@
     },
     {
       "from": [
-        -3.4337084989847595,
-        6.38,
-        5.88
+        -0.4327404271156787,
+        6.5,
+        6
       ],
       "to": [
-        19.43370849898476,
-        9.62,
-        10.12
+        16.43274042711568,
+        9.5,
+        10
       ],
       "rotation": {
         "origin": [
@@ -108,7 +104,7 @@
           8
         ],
         "axis": "z",
-        "angle": -45
+        "angle": -18.43494882292201
       },
       "faces": {
         "down": {

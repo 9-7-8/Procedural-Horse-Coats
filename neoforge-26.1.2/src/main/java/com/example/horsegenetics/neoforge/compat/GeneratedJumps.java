@@ -69,6 +69,9 @@ final class GeneratedJumps {
      */
     private static final String ICON_STYLE = "vertical";
 
+    /** Must match {@code JumpBlock.CROSS_MAX_SPAN} and {@code CROSS_SPANS} in bake-jumps.mjs. */
+    private static final int CROSS_MAX_SPAN = 3;
+
     /** Must match {@code RECIPE_FENCES} in bake-jumps.mjs. */
     private static final int RECIPE_FENCES = 3;
 
@@ -103,6 +106,21 @@ final class GeneratedJumps {
                 // "_lr_post" is that rail carrying an intermediate upright.
                 put(files, id + "_" + style + "_rails",
                         "template_jump_" + style + "_rails", wood);
+                // CROSSRAILS ALSO NEED THEIR SIX SLICES. A crossed pair spans
+                // up to three blocks and each block draws its own share of it,
+                // so there is a rails model per span and position - see
+                // JumpBlock.crossSegment. Miss these for a modded wood and its
+                // crossrails are a purple cube the moment two are placed in a
+                // row, while every vanilla one is fine.
+                if ("crossrails".equals(style)) {
+                    for (int span = 1; span <= CROSS_MAX_SPAN; span++) {
+                        for (int index = 0; index < span; index++) {
+                            String slice = "_s" + span + "i" + index;
+                            put(files, id + "_" + style + "_rails" + slice,
+                                    "template_jump_" + style + "_rails" + slice, wood);
+                        }
+                    }
+                }
                 for (String suffix : CONNECTIONS) {
                     put(files, id + "_" + style + "_standards" + suffix,
                             "template_jump_" + style + "_standards" + suffix, wood);

@@ -463,6 +463,84 @@ public class JumpBlock extends HorizontalDirectionalBlock
                 && neighbour.getValue(STYLE) == state.getValue(STYLE);
     }
 
+    // --- the crossed pair -----------------------------------------------
+    //
+    // A crossrail is TWO POLES crossing once, and a wide one is two LONG poles
+    // crossing once across the whole obstacle - not one X per block. So a
+    // crossrail has to know which slice of a shared pair it is drawing, and
+    // that is what these two work out.
+
+    /** How many blocks a crossed pair may span. */
+    public static final int CROSS_MAX_SPAN = 3;
+
+    /** How many distinct slices that makes: 1 + 2 + 3. */
+    public static final int CROSS_SEGMENTS = 6;
+
+    /**
+     * <b>Which slice of a crossed pair this block draws</b>, as an index into
+     * the six segment models: {@code s1i0, s2i0, s2i1, s3i0, s3i1, s3i2}.
+     *
+     * <h2>Runs are grouped by world position, exactly as the post is</h2>
+     * The triple a crossrail belongs to is decided by
+     * {@code floorMod(along, 3)} rather than by counting from the end of the
+     * run, for the same reasons {@link #postsHere} does it: two parallel
+     * crossrail lines then cross in the same places instead of drifting against
+     * each other, and extending a run from either end does not re-cut every X
+     * along it.
+     *
+     * <p>The span is then the <i>contiguous</i> crossrails within that triple
+     * that include this block. So a run of five is a three-wide X and a
+     * two-wide one, not a five-wide smear, and a run of two that happens to
+     * straddle a triple boundary is two lone X's - deterministic, and the price
+     * of not having the shape of a jump depend on the order it was built in.
+     *
+     * <p>Called from {@code JumpModel.collectParts}, which runs on chunk-meshing
+     * worker threads against a region snapshot. It reads nothing but block
+     * states, which is safe there.
+     */
+    public static int crossSegment(BlockGetter level, BlockPos pos, BlockState state) {
+        Direction.Axis axis = state.getValue(FACING).getAxis();
+        // A jump facing north or south is a barrier running east-west, so its
+        // rail - and its run - lies along x.
+        boolean alongX = axis == Direction.Axis.Z;
+        int along = alongX ? pos.getX() : pos.getZ();
+        int base = along - Math.floorMod(along, CROSS_MAX_SPAN);
+        int me = along - base;
+
+        boolean[] occupied = new boolean[CROSS_MAX_SPAN];
+        for (int k = 0; k < CROSS_MAX_SPAN; k++) {
+            if (k == me) {
+                occupied[k] = true;
+                continue;
+            }
+            BlockPos at = alongX
+                    ? new BlockPos(base + k, pos.getY(), pos.getZ())
+                    : new BlockPos(pos.getX(), pos.getY(), base + k);
+            BlockState there = level.getBlockState(at);
+            occupied[k] = there.getBlock() instanceof JumpBlock
+                    && there.getValue(STYLE) == Style.CROSSRAILS
+                    && there.getValue(FACING).getAxis() == axis;
+        }
+
+        int start = me;
+        while (start > 0 && occupied[start - 1]) {
+            start--;
+        }
+        int end = me;
+        while (end < CROSS_MAX_SPAN - 1 && occupied[end + 1]) {
+            end++;
+        }
+        return segmentIndex(end - start + 1, me - start);
+    }
+
+    /**
+     * The six slices in one order, which the model's array and the baker's
+     * {@code crossSuffix} both follow: spans in order, positions within each.
+     */
+    public static int segmentIndex(int span, int index) {
+        return span * (span - 1) / 2 + index;
+    }
+
     /**
      * Is this position one of the ones that carries an intermediate upright?
      *

@@ -436,54 +436,63 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=false,post=true,right=false,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=false,post=false,right=true,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=false,post=true,right=true,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=true,post=false,right=false,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=true,post=true,right=false,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=true,post=false,right=true,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr",
+      "spanning": true,
       "uvlock": false
     },
     "facing=south,left=true,post=true,right=true,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr_post",
+      "spanning": true,
       "uvlock": false
     },
     "facing=west,left=false,post=false,right=false,style=crossrails": {
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -491,6 +500,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -498,6 +508,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -505,6 +516,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -512,6 +524,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -519,6 +532,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -526,6 +540,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -533,6 +548,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr_post",
+      "spanning": true,
       "uvlock": false,
       "y": 90
     },
@@ -540,6 +556,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -547,6 +564,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -554,6 +572,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -561,6 +580,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -568,6 +588,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -575,6 +596,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -582,6 +604,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -589,6 +612,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr_post",
+      "spanning": true,
       "uvlock": false,
       "y": 180
     },
@@ -596,6 +620,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -603,6 +628,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -610,6 +636,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -617,6 +644,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_r",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -624,6 +652,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -631,6 +660,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_l",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -638,6 +668,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     },
@@ -645,6 +676,7 @@
       "type": "horsegenetics:jump",
       "rails": "jump_crossrails_rails",
       "standards": "jump_crossrails_standards_lr_post",
+      "spanning": true,
       "uvlock": false,
       "y": 270
     }

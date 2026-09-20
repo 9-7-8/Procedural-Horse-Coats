@@ -199,33 +199,59 @@ const POST = {
 };
 
 /**
- * One arm of the X, rotated in the block's own model.
+ * <b>One block's share of a crossed pair that spans up to three blocks.</b>
  *
- * THE ARM IS LONGER THAN THE BLOCK IS WIDE, AND THAT IS THE FIX.
- * A bar 16 long turned 45 degrees only PROJECTS about 11.3 across, so the X sat
- * marooned in the middle of its block: it never reached the standards, and a
- * row of crossrails was a row of little disconnected X's with a gap at every
- * seam. The owner's verdict, three times, was that the crossrails "look bad".
+ * A crossrail is not one X per block. It is TWO POLES crossing once, and a wide
+ * one is two long poles crossing once across the whole obstacle - which is what
+ * the owner asked for after three goes at it: "you need one pair of rails that
+ * spans up to 3 blocks wide". A row of little per-block X's is a row of little
+ * per-block X's however well each one is drawn.
  *
- * So the arm is sized by its projection instead - half-length 8/cos(angle),
- * which lands its centre line exactly on the block's corners. It now meets the
- * standards at the ends of a run and meets its neighbour's arm mid-run, which
- * is what a real crossrail line looks like. Element bounds may legally run from
- * -16 to 32, so the overhang is fine.
+ * So the poles are defined ONCE across the whole run and each block draws the
+ * slice of them that passes through it. Over a run of width W = 16 * span, pole
+ * A climbs from CROSS_LOW to CROSS_LOW + CROSS_RISE and pole B falls the other
+ * way; they cross dead centre. Block `index` covers run-x from 16*index to
+ * 16*index + 16, so its slice is a short bar at the height each pole has at the
+ * middle of that range, turned to the pole's own angle.
  *
- * THE OLD COMMENT HERE CLAIMED element rotation was limited to +/-45 and
- * +/-22.5 about one axis. **That is no longer true in 26.1.2** - the angle is
- * an unvalidated float and there is a second multi-axis form - so a shallower
- * arm spanning two or three blocks is expressible whenever that gets built.
- * See wiki/item-jumps.html.
+ * THE ANGLE IS THE RUN'S, NOT 45 DEGREES. atan(rise / width): about 45 for one
+ * block, 27 for two, 18 for three. That used to be impossible - element
+ * rotation was limited to +/-45 and +/-22.5 about one axis - and in 26.1.2 it
+ * is not: the angle is an unvalidated float. Verified against the artefacts,
+ * because the comment that used to sit here asserted the opposite.
+ *
+ * THE BAR IS LONGER THAN THE BLOCK IS WIDE. A bar of length L turned by theta
+ * only projects L*cos(theta) across, so sizing by length leaves a gap at every
+ * seam - which is exactly how the old single-block X ended up marooned in the
+ * middle of its block, touching neither the standards nor its neighbour. Sizing
+ * by PROJECTION instead - half-length 8/cos(theta) - makes each slice hand off
+ * to the next one exactly at the block boundary, so the pole reads as one
+ * unbroken pole. Element bounds may legally run from -16 to 32.
  */
-function crossArm(angle) {
-  // Sized by projection: the half-length whose horizontal span is exactly 8.
-  const half = 8 / Math.cos((Math.abs(angle) * Math.PI) / 180);
+
+/** How far a pole climbs across the WHOLE run, whatever the run's width. */
+const CROSS_RISE = 16;
+
+/** The y the low end of a pole sits at - the ground. */
+const CROSS_LOW = 0;
+
+/** How thick a pole is, and how deep. */
+const CROSS_THICK = 3;
+const CROSS_DEPTH = [6, 10];
+
+/** Every span a crossrail can have, and every position within it. */
+const CROSS_SPANS = [1, 2, 3];
+
+/** The id suffix for one segment: s2i0 is the left half of a two-wide X. */
+const crossSuffix = (span, index) => `_s${span}i${index}`;
+
+function crossArm(yCentre, angleDegrees, half) {
   return {
-    from: [8 - half, 7, 6],
-    to: [8 + half, 10, 10],
-    rotation: { origin: [8, 8, 8], axis: "z", angle },
+    from: [8 - half, yCentre - CROSS_THICK / 2, CROSS_DEPTH[0]],
+    to: [8 + half, yCentre + CROSS_THICK / 2, CROSS_DEPTH[1]],
+    // Rotated about the bar's OWN centre, so it turns in place rather than
+    // swinging away from the height it was placed at.
+    rotation: { origin: [8, yCentre, 8], axis: "z", angle: angleDegrees },
     faces: {
       down: face([0, 6, 16, 10]),
       up: face([0, 6, 16, 10]),
@@ -237,6 +263,19 @@ function crossArm(angle) {
   };
 }
 
+/** The two pole slices block `index` of a `span`-wide crossrail draws. */
+function crossSegment(span, index) {
+  const width = 16 * span;
+  const theta = Math.atan2(CROSS_RISE, width);
+  const degrees = (theta * 180) / Math.PI;
+  const half = 8 / Math.cos(theta);
+  // Where the middle of this block sits along the run, as a fraction of it.
+  const along = (16 * index + 8) / width;
+  const rising = CROSS_LOW + along * CROSS_RISE;
+  const falling = CROSS_LOW + (1 - along) * CROSS_RISE;
+  return [crossArm(rising, degrees, half), crossArm(falling, -degrees, half)];
+}
+
 /**
  * Each style: the bars it draws, and how deep its standards must be to
  * enclose them. Mirrors JumpBlock.drawnBars and JumpBlock.standardDepth.
@@ -245,7 +284,10 @@ const STYLE_PARTS = {
   vertical: { bars: [bar(11, 15, 6, 10)], depth: [5, 11] },
   // Front and back within the one block. The standards widen to hold both.
   oxer: { bars: [bar(11, 15, 2, 6), bar(11, 15, 10, 14)], depth: [1, 15] },
-  crossrails: { bars: [crossArm(45), crossArm(-45)], depth: [5, 11] },
+  // A LONE crossrail, which is segment s1i0. A run of two or three draws
+  // different slices - see crossSegment - but this is the shape the icon and
+  // the single-block case use, and the one JumpBlock's VoxelShape bounds.
+  crossrails: { bars: crossSegment(1, 0), depth: [5, 11] },
 };
 
 /**
@@ -328,6 +370,24 @@ for (const style of STYLES) {
     elements: tinted(STYLE_PARTS[style].bars, RAILS_TINT),
   });
 
+  // CROSSRAILS GET ONE RAILS MODEL PER SEGMENT - six of them, for the three
+  // spans and each position within them. Every other style's rails are the same
+  // in every block of a run, so they get the one above and nothing else.
+  if (style === "crossrails") {
+    for (const span of CROSS_SPANS) {
+      for (let index = 0; index < span; index++) {
+        put(
+          join(A, "models/block",
+            `template_jump_${style}_rails${crossSuffix(span, index)}.json`),
+          {
+            textures: { particle: "#texture" },
+            elements: tinted(crossSegment(span, index), RAILS_TINT),
+          }
+        );
+      }
+    }
+  }
+
   for (const suffix of CONNECTIONS) {
     // A mid-run block with no post draws no standards at all. An empty
     // elements list is legal and bakes to nothing, which is what we want -
@@ -393,6 +453,23 @@ function inflated(elements) {
 }
 
 for (const style of STYLES) {
+  if (style === "crossrails") {
+    for (const span of CROSS_SPANS) {
+      for (let index = 0; index < span; index++) {
+        put(
+          join(A, "models/block",
+            `overlay_jump_${style}_rails${crossSuffix(span, index)}.json`),
+          {
+            textures: {
+              texture: { sprite: OVERLAY_TEXTURE, force_translucent: true },
+              particle: OVERLAY_TEXTURE,
+            },
+            elements: inflated(tinted(crossSegment(span, index), RAILS_TINT)),
+          }
+        );
+      }
+    }
+  }
   put(join(A, "models/block", `overlay_jump_${style}_rails.json`), {
     // force_translucent, because the sprite is flat white at a constant alpha
     // and we are not leaving the render layer to be inferred from it: a wash
@@ -434,6 +511,17 @@ for (const [wood, texture, woodLabel] of WOODS) {
       parent: `${NS}:block/template_jump_${style}_rails`,
       textures: { texture },
     });
+    if (style === "crossrails") {
+      for (const span of CROSS_SPANS) {
+        for (let index = 0; index < span; index++) {
+          const seg = crossSuffix(span, index);
+          put(join(A, "models/block", `${wood}_jump_${style}_rails${seg}.json`), {
+            parent: `${NS}:block/template_jump_${style}_rails${seg}`,
+            textures: { texture },
+          });
+        }
+      }
+    }
     for (const suffix of CONNECTIONS) {
       put(join(A, "models/block", `${wood}_jump_${style}_standards${suffix}.json`), {
         parent: `${NS}:block/template_jump_${style}_standards${suffix}`,
@@ -498,6 +586,11 @@ for (const style of STYLES) {
             type: `${NS}:jump`,
             rails: `jump_${style}_rails`,
             standards: `jump_${style}_standards${suffixFor(left, right, post)}`,
+            // "spanning" tells JumpModel to bake the six segment models beside
+            // the plain one and pick between them per position. Only crossrails
+            // have them; every other style draws the same rails in every block
+            // of a run, so asking it to bake six would be five wasted.
+            ...(style === "crossrails" ? { spanning: true } : {}),
             // NOT uvlocked on the crossrails. uvlock re-projects a face's UVs
             // against the block axes after the blockstate's y rotation, and on
             // an element that is ITSELF rotated 45 degrees the two fight and

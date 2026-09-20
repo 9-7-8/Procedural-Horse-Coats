@@ -1,0 +1,6 @@
+{
+  "parent": "horsegenetics:block/template_jump_crossrails_rails_s2i1",
+  "textures": {
+    "texture": "minecraft:block/mangrove_planks"
+  }
+}
