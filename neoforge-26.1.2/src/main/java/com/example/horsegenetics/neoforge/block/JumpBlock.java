@@ -477,22 +477,38 @@ public class JumpBlock extends HorizontalDirectionalBlock
     public static final int CROSS_SEGMENTS = 6;
 
     /**
-     * <b>Which slice of a crossed pair this block draws</b>, as an index into
-     * the six segment models: {@code s1i0, s2i0, s2i1, s3i0, s3i1, s3i2}.
+     * How far a run is followed when working out where its X's fall.
      *
-     * <h2>Runs are grouped by world position, exactly as the post is</h2>
-     * The triple a crossrail belongs to is decided by
-     * {@code floorMod(along, 3)} rather than by counting from the end of the
-     * run, for the same reasons {@link #postsHere} does it: two parallel
-     * crossrail lines then cross in the same places instead of drifting against
-     * each other, and extending a run from either end does not re-cut every X
-     * along it.
+     * <p>A bound rather than no bound because this runs at <i>mesh</i> time,
+     * once per crossrail: an unbounded walk down a thousand-block fence would
+     * be a thousand lookups per block in it. Runs longer than this simply get
+     * cut into X's from the far end of the scan instead of from the true start,
+     * which is a cosmetic difference nobody building a course will ever reach.
+     */
+    private static final int CROSS_MAX_RUN = 32;
+
+    /**
+     * <b>Which slice of a crossed pair this block draws</b>, packed as
+     * {@code span * 4 + index}.
      *
-     * <p>The span is then the <i>contiguous</i> crossrails within that triple
-     * that include this block. So a run of five is a three-wide X and a
-     * two-wide one, not a five-wide smear, and a run of two that happens to
-     * straddle a triple boundary is two lone X's - deterministic, and the price
-     * of not having the shape of a jump depend on the order it was built in.
+     * <h2>Grouped from the START OF THE RUN, not from world position</h2>
+     * This counted in triples off the world coordinate first - the same rule
+     * {@link #postsHere} uses for the intermediate post - and the rule is wrong
+     * here for a reason worth keeping. A three-block run only lands inside one
+     * such triple when it happens to begin on a multiple of three, so <b>two
+     * runs in three came out as a two-wide X and a lone one</b>. The owner built
+     * one and got exactly that: "it now correctly spans 2, but it should span up
+     * to 3."
+     *
+     * <p>So the run is found first and cut into groups of three from its own
+     * start. A run of three is always one three-wide X; a run of five is a
+     * three and a two; a run of seven is a three, a three and a lone one.
+     *
+     * <p><b>The cost is that extending a run from its left end re-cuts every X
+     * along it</b>, where the position-based rule never moved an existing one.
+     * That is the trade, and it is the right way round: a course is built once
+     * and looked at afterwards, so being able to <i>say</i> how wide a crossrail
+     * will be beats never re-drawing one.
      *
      * <p>Called from {@code JumpModel.collectParts}, which runs on chunk-meshing
      * worker threads against a region snapshot. It reads nothing but block
@@ -500,37 +516,63 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     public static int crossSegment(BlockGetter level, BlockPos pos, BlockState state) {
         Direction.Axis axis = state.getValue(FACING).getAxis();
-        // A jump facing north or south is a barrier running east-west, so its
-        // rail - and its run - lies along x.
-        boolean alongX = axis == Direction.Axis.Z;
-        int along = alongX ? pos.getX() : pos.getZ();
-        int base = along - Math.floorMod(along, CROSS_MAX_SPAN);
-        int me = along - base;
+        Direction along = state.getValue(FACING).getCounterClockWise();
 
-        boolean[] occupied = new boolean[CROSS_MAX_SPAN];
-        for (int k = 0; k < CROSS_MAX_SPAN; k++) {
-            if (k == me) {
-                occupied[k] = true;
-                continue;
+        // How far the run goes each way, bounded. "Back" is the direction the
+        // run is cut from, so it decides every group boundary in it.
+        int back = reach(level, pos, along.getOpposite(), axis);
+        int forward = reach(level, pos, along, axis);
+
+        int offset = back;                       // our place in the whole run
+        int length = back + 1 + forward;
+        int groupStart = offset - offset % CROSS_MAX_SPAN;
+        int span = Math.min(CROSS_MAX_SPAN, length - groupStart);
+        return span * 4 + (offset - groupStart);
+    }
+
+    /** How many crossrails continue in one direction, up to {@link #CROSS_MAX_RUN}. */
+    private static int reach(BlockGetter level, BlockPos pos, Direction direction,
+                             Direction.Axis axis) {
+        int found = 0;
+        BlockPos.MutableBlockPos cursor = pos.mutable();
+        while (found < CROSS_MAX_RUN) {
+            cursor.move(direction);
+            BlockState there = level.getBlockState(cursor);
+            if (!(there.getBlock() instanceof JumpBlock)
+                    || there.getValue(STYLE) != Style.CROSSRAILS
+                    || there.getValue(FACING).getAxis() != axis) {
+                break;
             }
-            BlockPos at = alongX
-                    ? new BlockPos(base + k, pos.getY(), pos.getZ())
-                    : new BlockPos(pos.getX(), pos.getY(), base + k);
-            BlockState there = level.getBlockState(at);
-            occupied[k] = there.getBlock() instanceof JumpBlock
-                    && there.getValue(STYLE) == Style.CROSSRAILS
-                    && there.getValue(FACING).getAxis() == axis;
+            found++;
         }
+        return found;
+    }
 
-        int start = me;
-        while (start > 0 && occupied[start - 1]) {
-            start--;
-        }
-        int end = me;
-        while (end < CROSS_MAX_SPAN - 1 && occupied[end + 1]) {
-            end++;
-        }
-        return segmentIndex(end - start + 1, me - start);
+    /** How many blocks wide the X this block belongs to is. */
+    public static int crossSpan(int segment) {
+        return segment >> 2;
+    }
+
+    /** Where in that X this block sits, counted from its left end. */
+    public static int crossIndex(int segment) {
+        return segment & 3;
+    }
+
+    /**
+     * <b>Does this crossrail draw the upright on its left-hand end?</b>
+     *
+     * <p>True at the start of every <i>group</i>, not only at the start of the
+     * run - which is how a run longer than three grows a post where two X's
+     * meet. Owner: "after 3 wide it needs to make the T block between them."
+     *
+     * <p>Only the LEFT edge of a group is posted, never the right, so the
+     * boundary between two X's carries exactly <b>one</b> upright rather than
+     * two back-to-back ones straddling the same face. The far right end of the
+     * whole run still gets its standard the ordinary way, from
+     * {@link #RIGHT} - see {@code JumpModel.collectParts}.
+     */
+    public static boolean crossStartsGroup(int segment) {
+        return crossIndex(segment) == 0;
     }
 
     /**

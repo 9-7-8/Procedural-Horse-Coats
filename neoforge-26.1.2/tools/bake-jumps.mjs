@@ -585,11 +585,17 @@ for (const style of STYLES) {
           const v = {
             type: `${NS}:jump`,
             rails: `jump_${style}_rails`,
-            standards: `jump_${style}_standards${suffixFor(left, right, post)}`,
-            // "spanning" tells JumpModel to bake the six segment models beside
-            // the plain one and pick between them per position. Only crossrails
-            // have them; every other style draws the same rails in every block
-            // of a run, so asking it to bake six would be five wasted.
+            // A SPANNING STYLE NAMES THE BASE, not a connection state. Its
+            // standards depend on how the run divides into X's, which is only
+            // known once the run has been walked - so JumpModel appends the
+            // suffix itself. Every other style's standards follow LEFT and
+            // RIGHT straight out of the blockstate, as they should.
+            standards: style === "crossrails"
+              ? `jump_${style}_standards`
+              : `jump_${style}_standards${suffixFor(left, right, post)}`,
+            // "spanning" tells JumpModel to bake the six segment models and the
+            // four standards states beside the plain ones, and to pick between
+            // them per position. Only crossrails have them.
             ...(style === "crossrails" ? { spanning: true } : {}),
             // NOT uvlocked on the crossrails. uvlock re-projects a face's UVs
             // against the block axes after the blockstate's y rotation, and on
