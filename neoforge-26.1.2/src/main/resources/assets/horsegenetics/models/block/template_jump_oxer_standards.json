@@ -22,7 +22,8 @@
             16,
             15
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "up": {
           "uv": [
@@ -31,7 +32,8 @@
             16,
             15
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "north": {
           "uv": [
@@ -40,7 +42,8 @@
             16,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "south": {
           "uv": [
@@ -49,7 +52,8 @@
             16,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "west": {
           "uv": [
@@ -58,7 +62,8 @@
             15,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "east": {
           "uv": [
@@ -67,7 +72,8 @@
             15,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         }
       }
     },
@@ -90,7 +96,8 @@
             3,
             15
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "up": {
           "uv": [
@@ -99,7 +106,8 @@
             3,
             15
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "north": {
           "uv": [
@@ -108,7 +116,8 @@
             3,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "south": {
           "uv": [
@@ -117,7 +126,8 @@
             3,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "west": {
           "uv": [
@@ -126,7 +136,8 @@
             15,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         },
         "east": {
           "uv": [
@@ -135,7 +146,8 @@
             15,
             16
           ],
-          "texture": "#texture"
+          "texture": "#texture",
+          "tintindex": 1
         }
       }
     }

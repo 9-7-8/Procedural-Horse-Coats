@@ -300,12 +300,14 @@ public final class ModItems {
                     : com.example.horsegenetics.neoforge.block.DoubleGates.gates()) {
                 fileAfter(event, gate.sourceGate().get(), gate.item().get(), gate.item().getId());
             }
-            // THE JUMPS ARE DELIBERATELY NOT HERE. They were, for one build,
-            // filed after the vanilla fence of each wood on the same argument
-            // the gates use. The owner's call was that it does not carry: a
-            // gate is a building block horses happen to care about, and a jump
-            // is horse equipment that is useless without one. They have a tab
-            // of their own - see ModCreativeTabs.JUMPS.
+            // THE JUMP IS DELIBERATELY NOT HERE. It was, for one build, filed
+            // after the vanilla fence of each wood on the same argument the
+            // gates use. The owner's call was that it does not carry: a gate is
+            // a building block horses happen to care about, and a jump is horse
+            // equipment that is useless without one. It then had a tab of its
+            // own for a day, and now sits in ModCreativeTabs.MAIN with the rest
+            // of the horse things - there is one jump item, and a tab holding
+            // one thing is worse than a row.
         }
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(CUSTOM_HORSE_SPAWN_EGG.get());

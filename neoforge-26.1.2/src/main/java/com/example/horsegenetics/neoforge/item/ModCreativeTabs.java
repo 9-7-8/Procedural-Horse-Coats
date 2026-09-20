@@ -41,73 +41,32 @@ public final class ModCreativeTabs {
                                         com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
                             output.accept(BreedSpawnEggItem.of(breed));
                         }
+                        // THE JUMP, folded back in here. It had a tab of its
+                        // own, on the argument that "each style is another
+                        // twelve woods, so the roster grows by the dozen" and
+                        // would bury the carrots and papers this tab exists
+                        // for. That argument is dead: there is ONE jump item
+                        // now, because both the wood and the style moved into
+                        // the block's own screen, and every style added from
+                        // here is a button rather than a thirty-seventh item.
+                        // A tab holding one thing is worse than a row.
+                        output.accept(oakJump());
                     })
                     .build());
 
     /**
-     * <b>The jumps, in a tab of their own.</b>
+     * <b>The creative tab's jump</b> - oak, and stamped with its woods.
      *
-     * <p>They were filed into vanilla's Building Blocks for one build, beside
-     * the fence of each wood, on the same argument the
-     * {@link com.example.horsegenetics.neoforge.block.DoubleGates double gates}
-     * are: somebody building a paddock is in that tab. The owner's call was
-     * that the argument does not carry, because a gate is a thing anyone
-     * builds with and <b>a jump is horse equipment</b> - it has no use to a
-     * player without a horse, so it does not belong in a vanilla tab at all.
+     * <p>Stamped rather than bare on purpose: an unstamped jump is a jump with
+     * no components, which is a <i>different stack</i> from the oak one the
+     * recipes produce, and two stacks of the same thing that refuse to merge
+     * gets reported as an inventory bug. See {@code ModDataComponents.JUMP_RAILS}.
      *
-     * <p><b>A tab rather than a shelf in {@link #MAIN}</b>, which was the other
-     * option, because this is one style of jump and there are to be more -
-     * logs, brush, ditches, oxers, fillers. Each style is another twelve woods,
-     * so the roster grows by the dozen; put two styles in the horse tab and the
-     * carrots, whistles and papers it exists for are off the bottom of it.
-     *
-     * <p>The gates stay in Building Blocks. That is not an inconsistency: a
-     * fence gate is a building block that horses happen to care about, and a
-     * jump is horse equipment shaped like a fence.
-     */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> JUMPS =
-            TABS.register("jumps", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.horsegenetics.jumps"))
-                    // An oak vertical, stamped like every other entry below.
-                    .icon(ModCreativeTabs::oakJump)
-                    .withTabsBefore(MAIN.getKey())
-                    .displayItems((params, output) -> {
-                        // THREE ENTRIES. Not three per wood, and not thirty-six.
-                        //
-                        // This tab listed one stamped stack per wood per style
-                        // for about an hour, which is convenient and is also
-                        // indistinguishable from the thirty-six items the whole
-                        // rework existed to delete - the owner's first look at
-                        // it was "all the jumps are separate items in their own
-                        // tab", which was the migration succeeding and reading
-                        // as though it had not happened. A tab is a statement
-                        // about what a thing IS, and a jump is three items whose
-                        // wood is something you choose afterwards.
-                        //
-                        // So: oak, because that is what a jump is when nothing
-                        // says otherwise, and every other wood is a craft or two
-                        // planks in the block's own screen.
-                        for (var item : com.example.horsegenetics.neoforge.block.Jumps.items()) {
-                            ItemStack stack = new ItemStack(item);
-                            com.example.horsegenetics.neoforge.block.JumpMaterials.DEFAULT
-                                    .writeTo(stack);
-                            output.accept(stack);
-                        }
-                    })
-                    .build());
-
-    /**
-     * The tab's icon: an oak vertical, stamped with its woods like every entry
-     * in it.
-     *
-     * <p>Stamped rather than bare on purpose - an unstamped jump is a jump with
-     * no components, which is a different stack from the oak one the tab hands
-     * out, and an icon that does not match a single item in its own tab is
-     * confusing for no gain.
+     * <p>Only the plain oak one is offered. Every other wood is three fences in
+     * a grid, or two planks in the block's own screen.
      */
     private static ItemStack oakJump() {
-        ItemStack stack = new ItemStack(com.example.horsegenetics.neoforge.block.Jumps.item(
-                com.example.horsegenetics.neoforge.block.JumpBlock.Style.VERTICAL));
+        ItemStack stack = new ItemStack(com.example.horsegenetics.neoforge.block.Jumps.item());
         com.example.horsegenetics.neoforge.block.JumpMaterials.DEFAULT.writeTo(stack);
         return stack;
     }

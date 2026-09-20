@@ -20,7 +20,7 @@ import java.util.Map;
  * no block, no item, no blockstate and no loot table. What it needs is
  * <b>models</b> - the parts {@code client/JumpModel} composes - a <b>recipe</b>
  * that stamps its name onto the crafted item, a <b>name</b>, and a <b>case</b>
- * in each of the three item definitions so its icon is right.
+ * in the item definition so its icon is right.
  *
  * <h2>There are no textures here, and that is the older trick</h2>
  * A jump has never had art of its own. Every shape is a shipped template model -
@@ -38,11 +38,11 @@ import java.util.Map;
  * jump that is a purple chequerboard while every vanilla one is fine, with
  * nothing logged anywhere.
  *
- * <p>The item definitions are the one place this <b>replaces</b> a shipped file
+ * <p>The item definition is the one place this <b>replaces</b> a shipped file
  * rather than adding beside it: the generated pack sits at
- * {@code Pack.Position.TOP}, and the three {@code items/jump*.json} it writes
- * carry vanilla's twelve cases <i>and</i> the modded ones. A select case list
- * cannot be merged across packs, so it has to be rewritten whole.
+ * {@code Pack.Position.TOP}, and the {@code items/jump.json} it writes carries
+ * vanilla's twelve cases <i>and</i> the modded ones. A select case list cannot
+ * be merged across packs, so it has to be rewritten whole.
  *
  * @see GeneratedGates which this is deliberately a copy of, and whose
  *      {@code put} it reuses
@@ -63,11 +63,11 @@ final class GeneratedJumps {
     private static final String[] STYLES = {"vertical", "oxer", "crossrails"};
 
     /**
-     * The item id suffix for each style, in {@link #STYLES} order. The vertical
-     * is the bare {@code jump}. {@code STYLE_ITEM} in bake-jumps.mjs is the
-     * twin.
+     * The style the ITEM ICON is drawn as. Style is not on the item at all -
+     * there is one jump item and style is chosen after placing - so this is
+     * only ever a picture. {@code ICON_STYLE} in bake-jumps.mjs is the twin.
      */
-    private static final String[] STYLE_SUFFIX = {"", "_oxer", "_crossrails"};
+    private static final String ICON_STYLE = "vertical";
 
     /** Must match {@code RECIPE_FENCES} in bake-jumps.mjs. */
     private static final int RECIPE_FENCES = 3;
@@ -124,15 +124,12 @@ final class GeneratedJumps {
             }
         }
 
-        // ---- the three item definitions, rewritten whole --------------------
+        // ---- the item definition, rewritten whole ---------------------------
         // JumpWoods.keys() is vanilla's twelve and then every modded wood, and
         // is the same list the model bakes parts for - so an icon case exists
         // for exactly the woods a jump can actually be.
-        for (int i = 0; i < STYLES.length; i++) {
-            GeneratedGates.put(files,
-                    "assets/" + NS + "/items/" + STYLE + STYLE_SUFFIX[i] + ".json",
-                    itemDefinition(STYLES[i]));
-        }
+        GeneratedGates.put(files, "assets/" + NS + "/items/" + STYLE + ".json",
+                itemDefinition());
     }
 
     /** One model file: a parent and a plank texture, which is all a wood needs. */
@@ -147,8 +144,8 @@ final class GeneratedJumps {
     }
 
     /**
-     * One style's item definition: a {@code minecraft:select} on the rails
-     * component, with a case per wood.
+     * The item definition: a {@code minecraft:select} on the rails component,
+     * with a case per wood.
      *
      * <p>Selecting on the <b>rails</b> alone rather than on a pair-valued
      * component is what keeps this at one case per wood instead of one per
@@ -157,12 +154,12 @@ final class GeneratedJumps {
      * fallback is oak, so a jump carrying no components at all - a {@code /give}
      * - draws as one rather than as a missing model.
      */
-    private static JsonObject itemDefinition(String style) {
+    private static JsonObject itemDefinition() {
         JsonArray cases = new JsonArray();
         for (String wood : JumpWoods.keys()) {
             JsonObject one = new JsonObject();
             one.addProperty("when", wood);
-            one.add("model", styleModel(wood, style));
+            one.add("model", iconModel(wood));
             cases.add(one);
         }
 
@@ -171,17 +168,33 @@ final class GeneratedJumps {
         select.addProperty("property", "minecraft:component");
         select.addProperty("component", NS + ":jump_rails");
         select.add("cases", cases);
-        select.add("fallback", styleModel("oak", style));
+        select.add("fallback", iconModel("oak"));
 
         JsonObject definition = new JsonObject();
         definition.add("model", select);
         return definition;
     }
 
-    private static JsonObject styleModel(String wood, String style) {
+    /**
+     * One wood's icon: a whole vertical jump, carrying the two paint tints.
+     *
+     * <p>The {@code tints} array is <b>order-sensitive</b> - entry 0 colours
+     * every face whose {@code tintindex} is 0, the rails, and entry 1 the
+     * uprights. Same contract as {@code RAILS_TINT}/{@code STANDARDS_TINT} in
+     * bake-jumps.mjs and the list {@code client/JumpTintSource} registers, and
+     * nothing checks any of the three against each other.
+     */
+    private static JsonObject iconModel(String wood) {
+        JsonArray tints = new JsonArray();
+        for (String id : new String[] {NS + ":jump_rails_tint", NS + ":jump_standards_tint"}) {
+            JsonObject tint = new JsonObject();
+            tint.addProperty("type", id);
+            tints.add(tint);
+        }
         JsonObject model = new JsonObject();
         model.addProperty("type", "minecraft:model");
-        model.addProperty("model", NS + ":block/" + wood + "_" + STYLE + "_" + style);
+        model.addProperty("model", NS + ":block/" + wood + "_" + STYLE + "_" + ICON_STYLE);
+        model.add("tints", tints);
         return model;
     }
 

@@ -177,6 +177,35 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.STRING_UTF8)
                     .build());
 
+    /**
+     * <b>The paint on a jump's rails</b> - an RGB multiplier - and
+     * {@link #JUMP_STANDARDS_DYE} the paint on its uprights.
+     *
+     * <p><b>Absent means bare wood</b>, which is the opposite convention to
+     * {@link #JUMP_RAILS} and is deliberate: almost every jump is unpainted, so
+     * the common case carries no component and two plain jumps merge in a
+     * chest. The wood components are always written because a jump is
+     * <i>always</i> made of something; paint it usually is not.
+     *
+     * <p>A dye is <b>spent for good</b> - it never comes back out of the
+     * block - and the only way to undo a coat is to put a fresh plank in that
+     * half, which pops the old plank out and strips the paint with it. Owner's
+     * design, and not realistic; it is legible, which is what one slot per half
+     * doing two jobs needs to be.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> JUMP_RAILS_DYE =
+            TYPES.register("jump_rails_dye", () -> DataComponentType.<Integer>builder()
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT)
+                    .build());
+
+    /** The paint on a jump's uprights. See {@link #JUMP_RAILS_DYE}. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> JUMP_STANDARDS_DYE =
+            TYPES.register("jump_standards_dye", () -> DataComponentType.<Integer>builder()
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

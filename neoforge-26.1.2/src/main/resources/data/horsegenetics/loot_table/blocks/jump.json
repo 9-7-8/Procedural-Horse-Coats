@@ -8,68 +8,15 @@
         {
           "type": "minecraft:item",
           "name": "horsegenetics:jump",
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "horsegenetics:jump",
-              "properties": {
-                "style": "vertical"
-              }
-            }
-          ],
           "functions": [
             {
               "function": "minecraft:copy_components",
               "source": "block_entity",
               "include": [
                 "horsegenetics:jump_rails",
-                "horsegenetics:jump_standards"
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "horsegenetics:jump_oxer",
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "horsegenetics:jump",
-              "properties": {
-                "style": "oxer"
-              }
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:copy_components",
-              "source": "block_entity",
-              "include": [
-                "horsegenetics:jump_rails",
-                "horsegenetics:jump_standards"
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "horsegenetics:jump_crossrails",
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "horsegenetics:jump",
-              "properties": {
-                "style": "crossrails"
-              }
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:copy_components",
-              "source": "block_entity",
-              "include": [
-                "horsegenetics:jump_rails",
-                "horsegenetics:jump_standards"
+                "horsegenetics:jump_standards",
+                "horsegenetics:jump_rails_dye",
+                "horsegenetics:jump_standards_dye"
               ]
             }
           ]

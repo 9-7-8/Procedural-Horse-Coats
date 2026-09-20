@@ -34,13 +34,23 @@ public final class ModMenus {
                     () -> new MenuType<>(EquestrianBenchMenu::new, FeatureFlags.VANILLA_SET));
 
     /**
-     * <b>A jump's</b> - two plank slots and three style buttons. Backed by the
-     * block entity that holds the two woods, and by the blockstate that holds
-     * the style, so it keeps nothing itself; see {@link JumpMenu}.
+     * <b>A jump's</b> - two slots that take a plank or a dye, and three style
+     * buttons. Backed by the block entity that holds the woods and the paint,
+     * and by the blockstate that holds the style, so it keeps nothing itself.
+     *
+     * <p><b>The only menu here built by NeoForge's extra-data factory.</b>
+     * Vanilla's {@code MenuType} constructor hands a client menu an id and an
+     * inventory and nothing else, and this one needs the block's <i>position</i>
+     * - it reads everything it draws off the block rather than syncing a copy.
+     * {@code IMenuTypeExtension.create} is the supported way to say so, and
+     * {@code ServerPlayer.openMenu(provider, buf -> ...)} is what fills it in.
+     *
+     * @see JumpMenu for why it reads the block instead of carrying a ContainerData
      */
     public static final DeferredHolder<MenuType<?>, MenuType<JumpMenu>> JUMP =
             MENUS.register("jump",
-                    () -> new MenuType<>(JumpMenu::new, FeatureFlags.VANILLA_SET));
+                    () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension
+                            .create(JumpMenu::new));
 
     public static void register(IEventBus modEventBus) {
         MENUS.register(modEventBus);

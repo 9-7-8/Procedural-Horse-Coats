@@ -83,19 +83,24 @@ const STYLE_LABEL = "Jump";
 const STYLES = ["vertical", "oxer", "crossrails"];
 
 /**
- * Per style: the suffix its item id carries, the noun its item NAME ends in,
- * and what its button in the jump's screen says.
+ * What each style's BUTTON in the jump's screen says.
  *
- * The vertical is the bare `jump` and is named "Oak Jump"; its button says
- * "Vertical", because "Jump" on a button beside "Oxer" and "Crossrails" reads
- * as the heading rather than as one of three choices. Jumps.java is the twin
- * for the ids, JumpScreen for the buttons.
+ * There is no item per style any more - there is one jump item, and style is
+ * chosen after placing (owner, 2026-09-20: "let's just combine this all into
+ * one horse jump item"). So this is a label table and nothing else; JumpScreen
+ * is the twin, and JumpBlock.Style holds the ids.
  */
-const STYLE_ITEM = {
-  vertical: { suffix: "", label: "Jump", button: "Vertical" },
-  oxer: { suffix: "_oxer", label: "Oxer", button: "Oxer" },
-  crossrails: { suffix: "_crossrails", label: "Crossrails", button: "Crossrails" },
+const STYLE_BUTTON = {
+  vertical: "Vertical",
+  oxer: "Oxer",
+  crossrails: "Crossrails",
 };
+
+/** The noun every jump item's name ends in. */
+const ITEM_LABEL = "Horse Jump";
+
+/** The style the ITEM ICON is drawn as. Style is not on the item; this is a picture. */
+const ICON_STYLE = "vertical";
 
 /** How many a single craft yields, and how many fences it takes. */
 const RECIPE_YIELD = 4;
@@ -111,6 +116,36 @@ function put(path, value) {
 // --- geometry -------------------------------------------------------------
 
 const face = (uv) => ({ uv, texture: "#texture" });
+
+// WHICH TINT INDEX EACH HALF CARRIES.
+//
+// A jump can be painted, per half, and paint is a tint rather than a texture:
+// client/JumpTintSource is registered as a LIST of two BlockTintSources and the
+// list index is the tintindex on the face. So every rail face says 0 and every
+// upright face says 1, and the block's two halves can be two colours.
+//
+// These must match the order JumpTintSource registers them in, and the tints[]
+// array in the item definition below. Nothing checks it: a swap shows as a
+// jump whose rails take the colour you painted its standards.
+const RAILS_TINT = 0;
+const STANDARDS_TINT = 1;
+
+/**
+ * The same elements, every face tagged with a tint index.
+ *
+ * Applied at the last moment rather than built into bar()/standard()/POST,
+ * because the SAME boxes are used twice - once split into a rails model and a
+ * standards model for the block, and once combined into the whole-jump model
+ * the item icon uses - and only the tagging differs between them.
+ */
+function tinted(elements, tintindex) {
+  return elements.map((element) => ({
+    ...element,
+    faces: Object.fromEntries(
+      Object.entries(element.faces).map(([side, f]) => [side, { ...f, tintindex }])
+    ),
+  }));
+}
 
 /** A rail: a box spanning the full width, at some height and depth. */
 function bar(yMin, yMax, zMin, zMax) {
@@ -259,7 +294,13 @@ for (const style of STYLES) {
   put(join(A, "models/block", `template_${STYLE}_${style}.json`), {
     parent: "block/block",
     textures: { particle: "#texture" },
-    elements: elementsFor(style, ""),
+    // Composed from the SAME split the block's two parts are, so the icon
+    // cannot drift from the block, and so its two halves carry the two tint
+    // indices the item's own tints[] pair feeds.
+    elements: [
+      ...tinted(splitElements(style, "").rails, RAILS_TINT),
+      ...tinted(splitElements(style, "").standards, STANDARDS_TINT),
+    ],
     // Vanilla's fence gui pose: a jump is long and low and looks like nothing
     // at all face-on.
     display: {
@@ -270,7 +311,7 @@ for (const style of STYLES) {
 
   put(join(A, "models/block", `template_jump_${style}_rails.json`), {
     textures: { particle: "#texture" },
-    elements: STYLE_PARTS[style].bars,
+    elements: tinted(STYLE_PARTS[style].bars, RAILS_TINT),
   });
 
   for (const suffix of CONNECTIONS) {
@@ -279,7 +320,7 @@ for (const style of STYLES) {
     // but it must still EXIST, because the model id is referenced.
     put(join(A, "models/block", `template_jump_${style}_standards${suffix}.json`), {
       textures: { particle: "#texture" },
-      elements: splitElements(style, suffix).standards,
+      elements: tinted(splitElements(style, suffix).standards, STANDARDS_TINT),
     });
   }
 }
@@ -410,23 +451,33 @@ for (const style of STYLES) {
 }
 put(join(A, "blockstates", `${STYLE}.json`), { variants });
 
-// ONE ITEM PER STYLE, AND EACH PICKS ITS ICON OFF A COMPONENT.
+// ONE ITEM, PICKING ITS ICON OFF A COMPONENT AND ITS TWO COLOURS OFF TWO MORE.
 //
 // minecraft:select with property minecraft:component matches the WHOLE value of
 // one component, so this selects on jump_rails alone - twelve cases - rather
 // than on a pair-valued component, which would need a case per pair. The icon
 // is therefore always right about the rails and says nothing about the
-// standards, which is the correct trade at sixteen pixels.
+// standards' WOOD, which is the correct trade at sixteen pixels.
 //
-// The fallback is oak: a jump with no components at all (a /give, an older
-// item) draws as one rather than as a missing model.
-for (const style of STYLES) {
-  const { suffix, label } = STYLE_ITEM[style];
+// The fallback is oak: a jump with no components at all (a /give) draws as one
+// rather than as a missing model.
+//
+// THE TWO TINTS ARE ORDER-SENSITIVE. tints[0] feeds every face whose
+// tintindex is 0 - the rails - and tints[1] the standards. That order has to
+// match RAILS_TINT/STANDARDS_TINT above and the list JumpTintSource registers;
+// nothing checks it, and a swap shows as a jump whose rails take the colour you
+// painted its uprights. The item's paint DOES show both halves, unlike its
+// wood, because a tint is a colour per face rather than a whole model.
+{
   const model = (wood) => ({
     type: "minecraft:model",
-    model: `${NS}:block/${wood}_${STYLE}_${style}`,
+    model: `${NS}:block/${wood}_${STYLE}_${ICON_STYLE}`,
+    tints: [
+      { type: `${NS}:jump_rails_tint` },
+      { type: `${NS}:jump_standards_tint` },
+    ],
   });
-  put(join(A, "items", `${STYLE}${suffix}.json`), {
+  put(join(A, "items", `${STYLE}.json`), {
     model: {
       type: "minecraft:select",
       property: "minecraft:component",
@@ -435,50 +486,51 @@ for (const style of STYLES) {
       fallback: model("oak"),
     },
   });
-
-  // "%s Jump" / "%s & %s Jump" - JumpItem.getName picks between them on
-  // whether the two woods match, because a jump whose halves differ has no one
-  // wood to be named after.
-  lang[`item.${NS}.${STYLE}${suffix}`] = `%s ${label}`;
-  lang[`item.${NS}.${STYLE}${suffix}.mixed`] = `%s & %s ${label}`;
 }
 
-// ONE DROP, BUT THE RIGHT STYLE'S ITEM, CARRYING THE RIGHT TWO WOODS.
+// "%s Horse Jump" / "%s & %s Horse Jump" - JumpItem.getName picks between them
+// on whether the two halves match, wood AND paint, because a jump whose halves
+// differ has no one thing to be named after.
+lang[`item.${NS}.${STYLE}`] = `%s ${ITEM_LABEL}`;
+lang[`item.${NS}.${STYLE}.mixed`] = `%s & %s ${ITEM_LABEL}`;
+
+// ONE DROP, CARRYING THE RIGHT TWO WOODS AND WHATEVER PAINT IS ON THEM.
 //
-// A pool with rolls:1 picks among the entries whose conditions pass, and
-// exactly one style condition can pass, so this is a switch rather than a
-// lottery. Without it, breaking an oxer hands back a vertical and the style is
-// quietly lost - which is the kind of thing nobody reports as a bug, they just
-// stop using the feature.
+// It used to be a three-entry switch on the style property, because there was
+// an item per style and breaking an oxer had to give an oxer back. There is one
+// item now, so there is one entry: style is not on the item at all, and a jump
+// broken out of a course and put back down takes its style from whatever it
+// lands next to.
 //
-// copy_components is the OTHER half of that, and it is new here: the two woods
-// live on the block entity, and without copying them off it every jump broken
-// out of a course comes back oak. JumpBlockEntity.collectImplicitComponents is
-// what it reads; JumpBlock.setPlacedBy is what puts them back.
+// copy_components is what carries everything that IS on the item. The woods and
+// the paint live on the block entity, and without copying them off it every
+// jump broken out of a course comes back plain oak.
+// JumpBlockEntity.collectImplicitComponents is what it reads;
+// JumpBlock.setPlacedBy is what puts them back.
 put(join(D, "loot_table/blocks", `${STYLE}.json`), {
   type: "minecraft:block",
   pools: [
     {
       rolls: 1,
       bonus_rolls: 0,
-      entries: STYLES.map((style) => ({
-        type: "minecraft:item",
-        name: `${NS}:${STYLE}${STYLE_ITEM[style].suffix}`,
-        conditions: [
-          {
-            condition: "minecraft:block_state_property",
-            block: `${NS}:${STYLE}`,
-            properties: { style },
-          },
-        ],
-        functions: [
-          {
-            function: "minecraft:copy_components",
-            source: "block_entity",
-            include: [`${NS}:jump_rails`, `${NS}:jump_standards`],
-          },
-        ],
-      })),
+      entries: [
+        {
+          type: "minecraft:item",
+          name: `${NS}:${STYLE}`,
+          functions: [
+            {
+              function: "minecraft:copy_components",
+              source: "block_entity",
+              include: [
+                `${NS}:jump_rails`,
+                `${NS}:jump_standards`,
+                `${NS}:jump_rails_dye`,
+                `${NS}:jump_standards_dye`,
+              ],
+            },
+          ],
+        },
+      ],
       conditions: [{ condition: "minecraft:survives_explosion" }],
     },
   ],
@@ -492,8 +544,12 @@ lang[`${NS}.jump.rails`] = "Rails";
 lang[`${NS}.jump.standards`] = "Standards";
 lang[`${NS}.jump.style`] = "Style";
 for (const style of STYLES) {
-  lang[`${NS}.jump.style.${style}`] = STYLE_ITEM[style].button;
+  lang[`${NS}.jump.style.${style}`] = STYLE_BUTTON[style];
 }
+
+// The action-bar line a player gets the first times they place one, until they
+// open a screen. One item with everything behind a right-click needs saying.
+lang[`${NS}.jump.hint`] = "Right-click the jump to choose its wood, paint and style";
 
 // --- tags -----------------------------------------------------------------
 // MERGED, not replaced: mineable/axe already belongs to the double gates, and
@@ -523,7 +579,7 @@ for (const [k, v] of Object.entries(lang)) existing[k] = v;
 writeFileSync(langPath, JSON.stringify(existing, null, 2) + "\n", "utf8");
 
 console.log(
-  `jumps: one block, ${STYLES.length} items, ${WOODS.length} woods, ` +
+  `jumps: one block, one item, ${STYLES.length} styles, ${WOODS.length} woods, ` +
     `${written} files written, ${Object.keys(lang).length} lang keys merged, ` +
     `${merged.length} values in mineable/axe`
 );

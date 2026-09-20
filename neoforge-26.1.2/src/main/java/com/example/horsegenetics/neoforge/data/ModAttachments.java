@@ -104,6 +104,22 @@ public final class ModAttachments {
                     .sync(net.minecraft.network.codec.ByteBufCodecs.BOOL)
                     .build());
 
+    // Whether this PLAYER has been told that a jump is customised by
+    // right-clicking it. A jump is one item with everything about it hidden
+    // behind a screen, so there is nothing about the item to discover the
+    // screen from - hence an action-bar line the first few times one is placed.
+    //
+    // It stops for good the moment they actually open one, which is the only
+    // honest signal that the hint has done its job. Serialized, because a hint
+    // that comes back after every relog is worse than no hint; NOT synced,
+    // since the decision to show it is taken on the server, where the block is
+    // placed.
+    public static final Supplier<AttachmentType<Boolean>> JUMP_SCREEN_KNOWN =
+            ATTACHMENT_TYPES.register("jump_screen_known", () -> AttachmentType
+                    .<Boolean>builder(() -> Boolean.FALSE)
+                    .serialize(com.mojang.serialization.Codec.BOOL.fieldOf("jump_screen_known"))
+                    .build());
+
     // Timed-interaction stamps (last shear, last per-gene yield, ...). Gated
     // "once per Minecraft day". Replaces the static cooldown map that used to
     // live in GeneYieldHandler. copyOnDeath so a re-summoned horse keeps them.

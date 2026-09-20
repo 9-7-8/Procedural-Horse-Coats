@@ -273,16 +273,13 @@
   "horsegenetics.wood.bamboo": "Bamboo",
   "horsegenetics.wood.crimson": "Crimson",
   "horsegenetics.wood.warped": "Warped",
-  "item.horsegenetics.jump": "%s Jump",
-  "item.horsegenetics.jump.mixed": "%s & %s Jump",
-  "item.horsegenetics.jump_oxer": "%s Oxer",
-  "item.horsegenetics.jump_oxer.mixed": "%s & %s Oxer",
-  "item.horsegenetics.jump_crossrails": "%s Crossrails",
-  "item.horsegenetics.jump_crossrails.mixed": "%s & %s Crossrails",
+  "item.horsegenetics.jump": "%s Horse Jump",
+  "item.horsegenetics.jump.mixed": "%s & %s Horse Jump",
   "horsegenetics.jump.rails": "Rails",
   "horsegenetics.jump.standards": "Standards",
   "horsegenetics.jump.style": "Style",
   "horsegenetics.jump.style.vertical": "Vertical",
   "horsegenetics.jump.style.oxer": "Oxer",
-  "horsegenetics.jump.style.crossrails": "Crossrails"
+  "horsegenetics.jump.style.crossrails": "Crossrails",
+  "horsegenetics.jump.hint": "Right-click the jump to choose its wood, paint and style"
 }

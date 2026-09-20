@@ -85,7 +85,7 @@ import java.util.Map;
  * the server as well as the client - so the woods live on
  * {@link JumpBlockEntity} and {@code client/JumpModel} reads them per position.
  *
- * @see Jumps for the three style items this one block is placed by
+ * @see Jumps for the one item this block is placed by, and the placement hint
  * @see com.example.horsegenetics.neoforge.menu.JumpMenu for the screen that edits one
  */
 public class JumpBlock extends HorizontalDirectionalBlock
@@ -492,39 +492,75 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * need to be able to cleanly stack verticals". Inheriting from below makes
      * a stack line up however you walk around it.
      *
-     * <p><b>Facing follows the stack; style follows the hand.</b> The style is
-     * deliberately <i>not</i> inherited - {@code JumpItem} applies it after
-     * this runs, so a player holding an oxer gets an oxer even on top of a
-     * vertical. Only what would otherwise be arbitrary is taken from below.
-     *
-     * <p>Only the block directly below is consulted, not the sides. A jump
-     * beside a jump is usually the start of the same fence line, but not
-     * always, and overriding the player's facing there would make a row
+     * <p>Only the block directly below is consulted for <b>facing</b>, not the
+     * sides. A jump beside a jump is usually the start of the same fence line,
+     * but not always, and overriding the player's facing there would make a row
      * impossible to turn a corner with.
+     *
+     * <p><b>Style is inherited too, and from the sides as well.</b> It used to
+     * come from the item - there was an item per style - and there is one item
+     * now, so a newly placed jump has to get its style from somewhere or every
+     * block of an oxer course would be placed as a vertical and restyled by
+     * hand. Below first, then either neighbour along the rail axis: extending a
+     * run continues that run's style, and stacking continues the stack's.
+     *
+     * <p>Which means <b>the first jump of a course is the only one you have to
+     * dress</b>, and the rest of the line follows it. A course of mixed styles
+     * is still built by putting a block down and pressing a button, exactly as
+     * before - the inheritance only decides what it starts as.
      */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        LevelReader below = context.getLevel();
-        BlockState under = below.getBlockState(context.getClickedPos().below());
+        LevelReader level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState under = level.getBlockState(pos.below());
         Direction facing = under.getBlock() instanceof JumpBlock
                 ? under.getValue(FACING)
                 : context.getHorizontalDirection().getOpposite();
-        BlockState state = this.defaultBlockState().setValue(FACING, facing);
-        return connected(state, context.getLevel(), context.getClickedPos());
+        BlockState state = this.defaultBlockState()
+                .setValue(FACING, facing)
+                .setValue(STYLE, inheritedStyle(level, pos, facing));
+        return connected(state, level, pos);
+    }
+
+    /**
+     * The style a jump placed here should start as: the one below it, else one
+     * beside it along the rail, else the default.
+     *
+     * <p>The two sides are consulted in a fixed order rather than by which is
+     * nearer the player, so that placing the same block twice in the same gap
+     * gives the same answer. Between two runs of different styles somebody has
+     * to lose, and a rule you can state beats one that depends on where you
+     * were standing.
+     */
+    private static JumpBlock.Style inheritedStyle(LevelReader level, BlockPos pos, Direction facing) {
+        BlockState under = level.getBlockState(pos.below());
+        if (under.getBlock() instanceof JumpBlock) {
+            return under.getValue(STYLE);
+        }
+        Direction leftSide = facing.getCounterClockWise();
+        for (Direction side : new Direction[] {leftSide, leftSide.getOpposite()}) {
+            BlockState beside = level.getBlockState(pos.relative(side));
+            if (beside.getBlock() instanceof JumpBlock
+                    && beside.getValue(FACING).getAxis() == facing.getAxis()) {
+                return beside.getValue(STYLE);
+            }
+        }
+        return Style.VERTICAL;
     }
 
     /**
      * <b>Work out this state's two connection flags and its post</b> from what
      * is actually beside it.
      *
-     * <p>Public and static because <b>the style has to be set before this runs
-     * and is not known here</b>. {@link #connects} tests style as well as axis,
-     * so a state computed as a vertical and then restyled to an oxer carries
-     * connections that belong to a block that never existed - an oxer sharing
-     * a vertical's standards, which is exactly the look this was changed to
-     * stop. The two callers that set a style therefore call this afterwards:
-     * {@code JumpItem.getPlacementState} when one is placed, and
-     * {@code JumpMenu.clickMenuButton} when one is restyled in its screen.
+     * <p>Public and static because <b>the style has to be settled before this
+     * runs</b>. {@link #connects} tests style as well as axis, so computing the
+     * flags for one style and then changing it leaves connections belonging to
+     * a block that never existed - an oxer sharing a vertical's standards,
+     * which is exactly the look this was added to stop. So
+     * {@link #getStateForPlacement} sets the inherited style first and calls
+     * this last, and {@code JumpMenu.clickMenuButton} calls it again whenever a
+     * placed jump is restyled in its screen.
      *
      * <p>The <i>neighbours</i> fix themselves - {@code setBlockAndUpdate} and
      * placement both run {@link #updateShape} on them - but a block never
@@ -622,10 +658,19 @@ public class JumpBlock extends HorizontalDirectionalBlock
             return InteractionResult.SUCCESS;
         }
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            // They have found the screen, so the placement hint has done its
+            // job and stops for good.
+            Jumps.learned(serverPlayer);
+            // The position goes in the opening packet: the client menu reads
+            // everything it draws straight off this block rather than being
+            // sent a copy. See JumpMenu, and ModMenus.JUMP for the factory.
             serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
                     (id, inventory, who) -> new com.example.horsegenetics.neoforge.menu.JumpMenu(
-                            id, inventory, net.minecraft.world.inventory.ContainerLevelAccess.create(level, pos)),
-                    state.getBlock().getName()));
+                            id, inventory,
+                            net.minecraft.world.inventory.ContainerLevelAccess.create(level, pos),
+                            pos),
+                    state.getBlock().getName()),
+                    buffer -> buffer.writeBlockPos(pos));
         }
         return InteractionResult.CONSUME;
     }
@@ -647,21 +692,31 @@ public class JumpBlock extends HorizontalDirectionalBlock
         if (level.getBlockEntity(pos) instanceof JumpBlockEntity jump) {
             jump.setMaterials(JumpMaterials.fromComponents(stack));
         }
+        // ...and tell them where everything about this block lives, because
+        // there is one jump item and nothing about it says "right-click me".
+        // Jumps.hint stops on its own once they have opened one.
+        if (!level.isClientSide() && placer instanceof Player player) {
+            Jumps.hint(player);
+        }
     }
 
     /**
-     * Pick-block gives back <b>this style, in these woods</b>.
+     * Pick-block gives back <b>a jump in these woods</b>.
      *
-     * <p>The default would hand over whichever item the block's
-     * {@code asItem()} resolves to - the vertical - stripped of its woods, so
-     * middle-clicking a birch-railed oxer while building a course would put a
-     * plain oak vertical in the hand. That is the kind of thing that is only
-     * ever noticed three jumps later.
+     * <p>The default would hand over the item stripped of its woods, so
+     * middle-clicking a birch-railed jump while building a course would put a
+     * plain oak one in the hand. That is the kind of thing that is only ever
+     * noticed three jumps later.
+     *
+     * <p>The <i>style</i> is not carried, and cannot be: there is one item and
+     * style is not on it. Pick-block on an oxer gives a jump, which places as
+     * an oxer anyway whenever it lands beside or on top of one - see
+     * {@link #getStateForPlacement}.
      */
     @Override
     protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state,
                                           boolean includeData) {
-        ItemStack stack = new ItemStack(Jumps.item(state.getValue(STYLE)));
+        ItemStack stack = new ItemStack(Jumps.item());
         if (level.getBlockEntity(pos) instanceof JumpBlockEntity jump) {
             jump.materials().writeTo(stack);
         }

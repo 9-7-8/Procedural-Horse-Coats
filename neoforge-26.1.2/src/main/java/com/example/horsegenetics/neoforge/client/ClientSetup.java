@@ -126,6 +126,18 @@ public final class ClientSetup {
         event.register(
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "gold_tint"),
                 GoldTintSource.MAP_CODEC);
+        // A jump's two coats of paint on its icon, one per half. The ids are
+        // what the tints[] array in assets/horsegenetics/items/jump.json names,
+        // and their ORDER there is what decides which half each colours - see
+        // JumpTintSource.
+        event.register(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        HorseGenetics.MOD_ID, "jump_rails_tint"),
+                JumpTintSource.Item.RAILS_CODEC);
+        event.register(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        HorseGenetics.MOD_ID, "jump_standards_tint"),
+                JumpTintSource.Item.STANDARDS_CODEC);
     }
 
     /**
@@ -150,6 +162,12 @@ public final class ClientSetup {
         event.register(
                 java.util.List.of(state -> GoldTintSource.GOLD),
                 com.example.horsegenetics.neoforge.block.ModBlocks.GOLDEN_CARROT_CROP.get());
+        // THE JUMP'S TWO HALVES, IN TINT-INDEX ORDER: rails 0, standards 1.
+        // Two entries rather than one, which is the whole reason a jump can be
+        // painted per part at all - the list index IS the model's tintindex,
+        // and the two halves are already separate model parts.
+        event.register(JumpTintSource.BLOCK_SOURCES,
+                com.example.horsegenetics.neoforge.block.ModBlocks.JUMP.get());
     }
 
     @SubscribeEvent

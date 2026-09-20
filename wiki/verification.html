@@ -116,14 +116,27 @@
     <li><strong>Stacks inherit facing</strong> from the jump below, so a two-high fence cannot come
         out crosswise. Style is deliberately <em>not</em> inherited &mdash; an oxer held over a
         vertical should still place an oxer.</li>
-    <li><strong>The jump&rsquo;s screen &mdash; the whole migration, and none of it is played.</strong>
-        Right-click a placed jump. Two plank slots and three style buttons; the current style&rsquo;s
-        button is greyed out. Drop a plank in the <em>rails</em> slot: that half changes wood
-        <em>and a plank of the old wood arrives in your inventory</em>. Do the same to the
-        standards with a different wood and look at the block &mdash; <b>the rails and the
-        uprights should be visibly different woods</b>, which is the whole point of the rework and
-        has never been seen. Then check the T-post takes the <em>standards&rsquo;</em> wood, not
-        the rails&rsquo;.</li>
+    <li><strong>A jump whose two halves are different woods.</strong> The screen itself is
+        confirmed (see <a href="item-jumps.html#two-woods">the page</a>); <b>this</b> is not, and
+        it is the thing the entire rework exists for. Put birch in the rails slot and leave the
+        standards oak, then look at the block. Then check the T-post takes the
+        <em>standards&rsquo;</em> wood, not the rails&rsquo;.</li>
+    <li><strong>Paint, all of it.</strong> A dye in a slot colours that half and is spent for good.
+        Check: the colour multiplies over the grain rather than replacing it; the two halves can be
+        two different colours; the swatch in the screen matches the block; a fresh plank in that
+        half <em>strips</em> the paint and pops the old plank out; and the dye never comes back.
+        The tint index is a list index in three files that nothing cross-checks
+        (<a href="item-jumps.html#paint">why</a>), so the specific failure to watch for is
+        <b>rails taking the colour you painted the uprights</b>.</li>
+    <li><strong>Shift-clicking a stack of two or more planks does both halves at once</strong>, and
+        a single plank does the rails only.</li>
+    <li><strong>The placement hint.</strong> The first times you place a jump, an action-bar line
+        says to right-click it. It should stop for good once you have actually opened one, and
+        should not come back after a relog.</li>
+    <li><strong>Style is inherited when you extend a run</strong> &mdash; from the jump below,
+        else from either jump beside it along the rail. Place one oxer, then build a line off it
+        and check you do not have to press a button again. There is one item now, so this is the
+        only thing stopping a course of oxers being thirty button presses.</li>
     <li><strong>The break-and-replace round trip.</strong> Mine a two-wood jump and put it back:
         it must come back in <em>both</em> its woods and its own style. The item&rsquo;s name
         should read &ldquo;Oak &amp; Birch Oxer&rdquo;. This is four pieces of machinery in a row
@@ -132,15 +145,14 @@
     <li><strong>Stacking still beats the screen.</strong> Holding a jump and right-clicking a jump
         must <em>place</em>, not open the window. This needed an explicit override and is the one
         regression that would make the block unusable; check it first.</li>
-    <li><strong>The creative tab has three things in it</strong> &mdash; an oak vertical, oxer and
-        crossrail &mdash; where it had thirty-six. Then check the <em>icons</em> track the wood:
-        craft or swap a jump to birch and look at it in a slot. That is a
+    <li><strong>There is one jump item, in the horse tab.</strong> Not thirty-six, not three, and
+        no tab of its own. Then check the <em>icon</em> tracks the wood and the paint: craft a
+        birch one, paint it, and look at it in a slot. The wood half of that is a
         <code>minecraft:select</code> on a component and <b>no vanilla file uses that
         property</b>, so its JSON shape was read off the codecs rather than copied from a shipped
         example; a wrong guess shows as every wood drawing as oak.</li>
-    <li><strong>An oxer beside a vertical keeps both sets of standards</strong>, and restyling one
-        in the middle of a run grows its own standards back straight away. Only same-style jumps
-        share a rail now.</li>
+    <li><strong>Restyling a jump in the middle of a run grows its own standards back</strong>
+        straight away, now that only same-style jumps share a rail.</li>
     <li><strong>The recipe is 3 fences of one wood + 1 horse hair &rarr; 4 of that wood.</strong>
         Twelve recipes now make <em>one</em> item and the wood arrives as a component. Craft
         spruce and check you get spruce, not oak. Mixed woods still do not craft, which is now

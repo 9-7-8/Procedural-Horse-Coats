@@ -5,6 +5,8 @@ import com.example.horsegenetics.neoforge.block.JumpBlockEntity;
 import com.example.horsegenetics.neoforge.block.JumpMaterials;
 import com.example.horsegenetics.neoforge.block.JumpWoods;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -12,15 +14,12 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * <b>The jump's screen.</b> Two plank slots - the rails and the standards - and
@@ -90,25 +89,27 @@ public final class JumpMenu extends AbstractContainerMenu {
     public static final int INV_Y = 112;
 
     // ------------------------------------------------------------------
-    // Synced state. Three ints, because the client's copy of this menu is
-    // built by a MenuType that hands it no position and no block entity.
+    // WHAT THE CLIENT KNOWS, AND HOW.
     //
-    // Woods travel as INDICES INTO JumpWoods.keys(), not as strings: a
-    // ContainerData is a vector of ints and that is all it is. The list is
-    // identical on both sides - it is read out of the installed jars rather
-    // than off a registry, which is exactly the property compat/ModdedMaterials
-    // exists to give. An index that does not resolve falls back to the default
-    // wood rather than throwing.
+    // It gets one thing: the block's POSITION, written into the menu's opening
+    // packet. Everything the screen draws is then read straight off the block
+    // at that position - the style from its blockstate, the woods and the paint
+    // from its block entity - because JumpBlockEntity already syncs itself to
+    // every client tracking the chunk. It has to: the model reads those woods.
+    //
+    // THIS REPLACED A ContainerData, and the reason is worth keeping. Three
+    // ints carried style and two wood indices perfectly well, and then dye was
+    // added and they could not: ClientboundContainerSetDataPacket reads and
+    // writes its value with readShort/writeShort, so every value in a
+    // ContainerData is silently truncated to 16 bits and an RGB colour needs
+    // 24. Splitting each colour across two slots would have worked and would
+    // have been a lie about what a menu's data vector is for. Reading the block
+    // is simpler, carries anything, and cannot drift from what the model draws.
     // ------------------------------------------------------------------
-
-    public static final int DATA_STYLE = 0;
-    public static final int DATA_RAILS = 1;
-    public static final int DATA_STANDARDS = 2;
-    private static final int DATA_COUNT = 3;
 
     private final Player player;
     private final ContainerLevelAccess access;
-    private final ContainerData data;
+    private final BlockPos pos;
 
     /**
      * Guards {@link #slotsChanged} against itself.
@@ -131,90 +132,82 @@ public final class JumpMenu extends AbstractContainerMenu {
         }
     };
 
-    /** Client constructor - the menu type hands us no world access. */
-    public JumpMenu(int containerId, Inventory inventory) {
-        this(containerId, inventory, ContainerLevelAccess.NULL, new net.minecraft.world.inventory.SimpleContainerData(DATA_COUNT));
+    /**
+     * <b>Client constructor</b> - the position arrives in the menu's opening
+     * packet, written by {@code JumpBlock.useWithoutItem}.
+     *
+     * <p>This is NeoForge's extra-data menu ({@code IMenuTypeExtension.create}
+     * in {@link ModMenus}), which exists precisely so a client menu can be
+     * built knowing something the vanilla two-argument factory cannot tell it.
+     */
+    public JumpMenu(int containerId, Inventory inventory, RegistryFriendlyByteBuf extra) {
+        this(containerId, inventory, ContainerLevelAccess.NULL, extra.readBlockPos());
     }
 
-    public JumpMenu(int containerId, Inventory inventory, ContainerLevelAccess access) {
-        this(containerId, inventory, access, null);
-    }
-
-    private JumpMenu(int containerId, Inventory inventory, ContainerLevelAccess access,
-                     @Nullable ContainerData clientData) {
+    public JumpMenu(int containerId, Inventory inventory, ContainerLevelAccess access,
+                    BlockPos pos) {
         super(ModMenus.JUMP.get(), containerId);
         this.player = inventory.player;
         this.access = access;
-        this.data = clientData != null ? clientData : liveData(access);
+        this.pos = pos;
 
         addSlot(plankSlot(SLOT_RAILS, RAILS_Y));
         addSlot(plankSlot(SLOT_STANDARDS, STANDARDS_Y));
         addStandardInventorySlots(inventory, MARGIN, INV_Y);
-        addDataSlots(this.data);
+    }
+
+    /** Where the jump is. Both sides have it; both sides read the block with it. */
+    public BlockPos pos() {
+        return this.pos;
     }
 
     /**
-     * The server's three ints, read off the world every time they are polled.
+     * A slot that takes <b>a plank or a dye</b>, and nothing else.
      *
-     * <p>Live rather than cached on purpose: the style lives in the
-     * <i>blockstate</i> and the woods in the <i>block entity</i>, and both can
-     * be changed by something other than this menu - a second player's screen,
-     * a command, a piston one day. {@code broadcastChanges} diffs these against
-     * what the client last saw, so reading them fresh costs three field reads a
-     * tick and keeps two open screens honest with each other.
+     * <p>One slot per half doing both jobs, rather than four slots. That is
+     * what makes the rule statable in a sentence: <i>whatever you put in this
+     * slot, this half becomes</i>. A plank re-woods it and strips its paint; a
+     * dye paints it.
+     *
+     * <p>{@link #accepts} is the entire test, which is why it is also the
+     * entire test in {@link #quickMoveStack}: one predicate, so shift-clicking
+     * can never put something in a slot a click could not.
      */
-    private static ContainerData liveData(ContainerLevelAccess access) {
-        return new ContainerData() {
-            @Override
-            public int get(int index) {
-                return access.evaluate((level, pos) -> {
-                    BlockState state = level.getBlockState(pos);
-                    if (!(state.getBlock() instanceof JumpBlock)) {
-                        return 0;
-                    }
-                    if (index == DATA_STYLE) {
-                        return state.getValue(JumpBlock.STYLE).ordinal();
-                    }
-                    JumpMaterials materials = materialsAt(level, pos);
-                    String wood = index == DATA_RAILS ? materials.rails() : materials.standards();
-                    return Math.max(0, JumpWoods.keys().indexOf(wood));
-                }, 0);
-            }
-
-            @Override
-            public void set(int index, int value) {
-                // Nothing to write back. The client never sets these - every
-                // change goes through a slot or clickMenuButton, which land on
-                // the block and come back round through get().
-            }
-
-            @Override
-            public int getCount() {
-                return DATA_COUNT;
-            }
-        };
-    }
-
-    private static JumpMaterials materialsAt(net.minecraft.world.level.Level level,
-                                             net.minecraft.core.BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof JumpBlockEntity jump
-                ? jump.materials()
-                : JumpMaterials.DEFAULT;
+    /** What a part slot will take: a plank of a known wood, or a dye. */
+    public static boolean accepts(ItemStack stack) {
+        return JumpWoods.keyOfPlank(stack.getItem()) != null || dyeColour(stack) != null;
     }
 
     /**
-     * A slot that takes a plank of any wood a jump can be made of, and nothing
-     * else.
+     * <b>The colour this stack paints with</b>, or null if it is not a dye.
      *
-     * <p>{@code JumpWoods.keyOfPlank} is the entire test, which is why it is
-     * also the entire test in {@link #quickMoveStack}: one predicate, so
-     * shift-clicking can never put something in a slot a click could not.
+     * <p>Vanilla's {@code minecraft:dye} component first, which is all sixteen
+     * of vanilla's and most modded dyes - a mod adding "a red dye" gives it
+     * that component and has always worked. The fallback is the one case that
+     * does not: a dye whose colour vanilla has no name for, which carries no
+     * component and can only be read off its own art.
+     *
+     * <p>The same three lines as {@code EquestrianBenchMenu.dyeColour}, and
+     * deliberately not shared: extracting them would make the bench depend on
+     * the jumps or both on a third class, for three lines. If a third thing
+     * dyes, extract it then.
      */
+    public static @Nullable Integer dyeColour(ItemStack stack) {
+        net.minecraft.world.item.DyeColor dye =
+                stack.get(net.minecraft.core.component.DataComponents.DYE);
+        if (dye != null) {
+            return dye.getTextureDiffuseColor() & 0xFFFFFF;
+        }
+        return com.example.horsegenetics.neoforge.compat.ModdedMaterials.dyes().get(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        .getKey(stack.getItem()).toString());
+    }
+
     private Slot plankSlot(int index, int y) {
         return new Slot(input, index, SLOT_X, y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return JumpWoods.keyOfPlank(stack.getItem()) != null;
+                return accepts(stack);
             }
         };
     }
@@ -232,7 +225,7 @@ public final class JumpMenu extends AbstractContainerMenu {
     @Override
     public void slotsChanged(Container container) {
         super.slotsChanged(container);
-        if (this.access == ContainerLevelAccess.NULL || this.swapping) {
+        if (this.player.level().isClientSide() || this.swapping) {
             return;
         }
         this.swapping = true;
@@ -265,30 +258,52 @@ public final class JumpMenu extends AbstractContainerMenu {
         if (offered.isEmpty()) {
             return false;
         }
-        String wood = JumpWoods.keyOfPlank(offered.getItem());
         JumpMaterials now = jump.materials();
-        String current = rails ? now.rails() : now.standards();
-        // A plank of the wood it already is sits in the slot doing nothing and
-        // is handed back on close. Refusing to spend it is the same courtesy
-        // the old plank-repaint paid: better than eating one for no change.
-        if (wood == null || wood.equals(current)) {
+        String wood = JumpWoods.keyOfPlank(offered.getItem());
+
+        if (wood != null) {
+            String current = rails ? now.rails() : now.standards();
+            int paint = rails ? now.railsDye() : now.standardsDye();
+            // A plank of the wood it already is, on a half with no paint to
+            // strip, does nothing - so it sits in the slot and is handed back
+            // on close rather than being eaten for no change. If the half IS
+            // painted, that same plank is a strip-back and does plenty.
+            if (wood.equals(current) && paint == JumpMaterials.UNDYED) {
+                return false;
+            }
+            // RE-WOODING STRIPS THE PAINT - withRails and withStandards do it -
+            // and it is the only thing that does. A dye never comes back out.
+            jump.setMaterials(rails ? now.withRails(wood) : now.withStandards(wood));
+            spend(offered, slot);
+            // THE DISPLACED PLANK, and only the plank. Into the player's
+            // inventory rather than back into the slot, because the slot
+            // usually still holds the rest of the stack they just put in and
+            // two woods cannot share one slot. placeItemBackInInventory drops
+            // it at their feet if there is no room, so wood is never destroyed.
+            Item plank = JumpWoods.plankOf(current);
+            if (plank != null) {
+                this.player.getInventory().placeItemBackInInventory(new ItemStack(plank));
+            }
+            return true;
+        }
+
+        Integer colour = dyeColour(offered);
+        if (colour == null || colour == (rails ? now.railsDye() : now.standardsDye())) {
             return false;
         }
+        // A DYE IS SPENT AND NOTHING COMES BACK, which is what makes paint a
+        // decision where the wood swap is a preference: a jump can always be
+        // put back to the wood it was, and the dye can never be got back out
+        // of it. Owner's rule.
+        jump.setMaterials(rails ? now.withRailsDye(colour) : now.withStandardsDye(colour));
+        spend(offered, slot);
+        return true;
+    }
 
-        jump.setMaterials(rails ? now.withRails(wood) : now.withStandards(wood));
+    /** Take one off what the player offered, leaving the rest in the slot. */
+    private void spend(ItemStack offered, int slot) {
         offered.shrink(1);
         this.input.setItem(slot, offered.isEmpty() ? ItemStack.EMPTY : offered);
-
-        // THE DISPLACED PLANK. Into the player's inventory rather than back into
-        // the slot, because the slot usually still holds the rest of the stack
-        // they just put in and two woods cannot share one slot.
-        // placeItemBackInInventory drops it at their feet if there is no room,
-        // so the wood is never destroyed.
-        Item plank = JumpWoods.plankOf(current);
-        if (plank != null) {
-            this.player.getInventory().placeItemBackInInventory(new ItemStack(plank));
-        }
-        return true;
     }
 
     /**
@@ -327,35 +342,43 @@ public final class JumpMenu extends AbstractContainerMenu {
     }
 
     // --- what the screen reads ----------------------------------------------
+    //
+    // Straight off the block, on whichever side is asking. The client's copy of
+    // the block entity is kept current by JumpBlockEntity's own sync, so these
+    // are the same values the model is drawing with - by construction, rather
+    // than by two code paths agreeing.
 
-    /** The style the block is wearing, as both sides see it. */
+    /** What this jump is made of and painted with, or the default if it is gone. */
+    public JumpMaterials materials() {
+        return this.player.level().getBlockEntity(this.pos) instanceof JumpBlockEntity jump
+                ? jump.materials()
+                : JumpMaterials.DEFAULT;
+    }
+
+    /** The style the block is wearing. */
     public JumpBlock.Style style() {
-        int ordinal = this.data.get(DATA_STYLE);
-        JumpBlock.Style[] all = JumpBlock.Style.values();
-        return ordinal >= 0 && ordinal < all.length ? all[ordinal] : JumpBlock.Style.VERTICAL;
-    }
-
-    /** The wood key of the rails, or the default if the index does not resolve. */
-    public String railsWood() {
-        return wood(DATA_RAILS);
-    }
-
-    /** The wood key of the standards. */
-    public String standardsWood() {
-        return wood(DATA_STANDARDS);
-    }
-
-    private String wood(int index) {
-        List<String> keys = JumpWoods.keys();
-        int i = this.data.get(index);
-        return i >= 0 && i < keys.size() ? keys.get(i) : JumpMaterials.DEFAULT_WOOD;
+        BlockState state = this.player.level().getBlockState(this.pos);
+        return state.getBlock() instanceof JumpBlock
+                ? state.getValue(JumpBlock.STYLE)
+                : JumpBlock.Style.VERTICAL;
     }
 
     // --- housekeeping -------------------------------------------------------
 
     /**
-     * Shift-click. Out of the slots into the player; from the player, a plank
-     * finds the first free plank slot and everything else goes nowhere.
+     * Shift-click. Out of the slots into the player; from the player,
+     * <b>one plank into each half at once</b>.
+     *
+     * <p>A stack of two or more re-woods the whole jump in a single click -
+     * one plank to the rails, one to the standards - which is what somebody
+     * holding a stack of birch means by shift-clicking it at an oak jump
+     * (owner, 2026-09-20). A single plank goes to the rails alone, because
+     * there is only one of it and the rails are the half you actually jump.
+     *
+     * <p>Spending exactly one per half rather than dumping the stack is what
+     * makes this safe: each insert fires {@link #slotsChanged}, which performs
+     * the exchange and empties the slot again, so the loop's second pass finds
+     * the standards slot free. Nothing is left behind to hand back.
      */
     @Override
     public ItemStack quickMoveStack(Player who, int index) {
@@ -370,10 +393,18 @@ public final class JumpMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
             slot.onQuickCraft(stack, original);
-        } else if (JumpWoods.keyOfPlank(stack.getItem()) != null) {
-            if (!moveItemStackTo(stack, SLOT_RAILS, SLOT_COUNT, false)) {
+        } else if (accepts(stack)) {
+            int placed = 0;
+            for (int part = SLOT_RAILS; part < SLOT_COUNT && placed < original.getCount(); part++) {
+                if (this.input.getItem(part).isEmpty()) {
+                    this.input.setItem(part, stack.copyWithCount(1));
+                    placed++;
+                }
+            }
+            if (placed == 0) {
                 return ItemStack.EMPTY;
             }
+            stack.shrink(placed);
         } else {
             return ItemStack.EMPTY;
         }

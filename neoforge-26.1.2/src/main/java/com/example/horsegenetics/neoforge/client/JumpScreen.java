@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.neoforge.block.JumpBlock;
+import com.example.horsegenetics.neoforge.block.JumpMaterials;
 import com.example.horsegenetics.neoforge.block.JumpWoods;
 import com.example.horsegenetics.neoforge.menu.JumpMenu;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -13,13 +14,14 @@ import net.minecraft.world.entity.player.Inventory;
  * <b>A jump's screen.</b> Two plank slots and three style buttons.
  *
  * <h2>Nothing here decides anything</h2>
- * Every control sends and then waits. A plank goes into a slot and the
+ * Every control sends and then waits. A plank or a dye goes into a slot and the
  * <i>server</i> performs the exchange; a style button sends its id through
  * {@code handleInventoryButtonClick} and the <i>server</i> sets the blockstate.
- * What this draws - the two wood names, which button is pressed in - is read
- * back out of the menu's synced data, so the window is always showing the block
- * rather than showing what the player just asked for. That matters for the one
- * case a local prediction would get wrong: two players with the same jump open.
+ * What this draws - the two wood names, the two paint swatches, which button is
+ * pressed in - is read straight off the block itself, so the window is always
+ * showing the block rather than showing what the player just asked for. That
+ * matters for the one case a local prediction would get wrong: two players with
+ * the same jump open.
  *
  * <h2>The current style is the disabled button</h2>
  * Rather than a tick, a highlight or a fourth widget. A greyed-out button reads
@@ -33,6 +35,10 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
     private static final Component RAILS = Component.translatable("horsegenetics.jump.rails");
     private static final Component STANDARDS = Component.translatable("horsegenetics.jump.standards");
     private static final Component STYLE = Component.translatable("horsegenetics.jump.style");
+
+    /** The paint swatch: where it sits in a row, and how big. */
+    private static final int SWATCH_X = 150;
+    private static final int SWATCH_SIZE = 10;
 
     private final Button[] styleButtons = new Button[JumpMenu.STYLE_BUTTONS];
 
@@ -119,16 +125,35 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
 
         // Two lines to a row: what the slot is for, then what is in the block
         // right now. The wood is the answer, so it gets the darker ink.
-        row(g, RAILS, this.menu.railsWood(), JumpMenu.RAILS_Y);
-        row(g, STANDARDS, this.menu.standardsWood(), JumpMenu.STANDARDS_Y);
+        JumpMaterials materials = this.menu.materials();
+        row(g, RAILS, materials.rails(), materials.railsDye(), JumpMenu.RAILS_Y);
+        row(g, STANDARDS, materials.standards(), materials.standardsDye(),
+                JumpMenu.STANDARDS_Y);
 
         g.text(this.font, STYLE, JumpMenu.MARGIN, JumpMenu.STYLE_LABEL_Y,
                 VanillaPanel.TEXT_DIM, false);
     }
 
-    private void row(GuiGraphicsExtractor g, Component caption, String wood, int y) {
+    /**
+     * One half's row: what the slot is for, what wood is in it, and - only if
+     * it has been painted - a swatch of the colour.
+     *
+     * <p>A swatch rather than colouring the wood's name, which was the cheaper
+     * idea: a jump painted black or dark blue would have had an unreadable
+     * label, and the one thing this row has to do is say what the half is made
+     * of. The paint is extra information and gets its own square.
+     */
+    private void row(GuiGraphicsExtractor g, Component caption, String wood, int dye, int y) {
         g.text(this.font, caption, JumpMenu.LABEL_X, y + 1, VanillaPanel.TEXT_DIM, false);
         g.text(this.font, JumpWoods.label(wood), JumpMenu.LABEL_X, y + 10,
                 VanillaPanel.TEXT, false);
+        if (dye != JumpMaterials.UNDYED) {
+            int top = y + (18 - SWATCH_SIZE) / 2;
+            // Bordered, so a swatch the colour of the panel is still a square.
+            g.fill(SWATCH_X - 1, top - 1, SWATCH_X + SWATCH_SIZE + 1, top + SWATCH_SIZE + 1,
+                    VanillaPanel.BORDER);
+            g.fill(SWATCH_X, top, SWATCH_X + SWATCH_SIZE, top + SWATCH_SIZE,
+                    0xFF000000 | dye);
+        }
     }
 }
