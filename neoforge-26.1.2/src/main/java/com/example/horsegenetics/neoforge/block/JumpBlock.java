@@ -29,14 +29,15 @@ import java.util.Map;
  *
  * <h2>Height is stacking, and that is the whole design</h2>
  * There is no height property. A jump is one block tall; you make a bigger one
- * by putting another on top. That falls out of collision rather than being
- * arranged: the drawn rail tops out at y=15/16, <b>below a horse's 1.0 step
- * height</b>, so a single jump on the ground is walked over - it is a ground
- * pole, or a cavaletti. Two high must be cleared. Every further block adds
- * almost exactly one block of required clearance, which turns a stack into a
- * <em>calibrated</em> test: a horse that clears four is saying something
- * specific about {@code Attributes.JUMP_STRENGTH}, and therefore about its
- * genes.
+ * by putting another on top, and each block added asks for one more block of
+ * clearance. That turns a stack into a <em>calibrated</em> test: a horse that
+ * clears three is saying something specific about
+ * {@code Attributes.JUMP_STRENGTH}, and therefore about its genes.
+ *
+ * <p><b>The bottom rung is 1.5 blocks, not 1.0</b>, because the collision box
+ * is half a block taller than the model - see {@link #getCollisionShape}.
+ * Without that a lone jump sits under a horse's 1.0 step height and is simply
+ * walked across, which is what shipped first and came straight back from play.
  *
  * <p>That matters more than it looks. Nothing else in the mod makes jump
  * <i>visible</i> - the debug yard's stat pens measure it by printing the
@@ -95,11 +96,34 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     // one continuous upright, which is what a real standard is. A lone jump
     // therefore has two stubby posts, which is correct for a ground pole.
 
+    /** Where the drawn rail stops. */
+    private static final int RAIL_TOP = 15;
+
+    /** Where the drawn standards stop - the full block, so a stack is continuous. */
+    private static final int STANDARD_TOP = 16;
+
+    /**
+     * Where the <i>collision</i> boxes stop - half a block above this one.
+     *
+     * <p><b>Vanilla's own fence number.</b> A fence is drawn one block tall and
+     * collides one and a half, which is the only reason a player or a horse
+     * cannot step over one; without it a 16-high barrier sits under a horse's
+     * 1.0 step height and gets walked across. This block shipped without it and
+     * the owner's verdict in play was immediate: the jumps &ldquo;look great,
+     * expand great&rdquo;, but a horse walked over them and it
+     * &ldquo;doesn't feel immersive&rdquo;. Make it behave like a fence.
+     */
+    private static final int COLLISION_TOP = 24;
+
     /** Rail running east-west, for a jump facing north or south. */
-    private static final VoxelShape RAIL_X = Block.box(0, 11, 6, 16, 15, 10);
+    private static VoxelShape railX(int top) {
+        return Block.box(0, 11, 6, 16, top, 10);
+    }
 
     /** Rail running north-south, for a jump facing east or west. */
-    private static final VoxelShape RAIL_Z = Block.box(6, 11, 0, 10, 15, 16);
+    private static VoxelShape railZ(int top) {
+        return Block.box(6, 11, 0, 10, top, 16);
+    }
 
     /**
      * Every shape this block can have, built once.
@@ -110,7 +134,16 @@ public class JumpBlock extends HorizontalDirectionalBlock {
      * recomputing per collision test keeps {@link #getShape} free, which
      * matters: a horse galloping a course is asking this question every tick.
      */
-    private static final Map<ShapeKey, VoxelShape> SHAPES = buildShapes();
+    private static final Map<ShapeKey, VoxelShape> SHAPES = buildShapes(RAIL_TOP, STANDARD_TOP);
+
+    /**
+     * The same shapes again, raised to {@link #COLLISION_TOP}.
+     *
+     * <p>This is the fence trick, and it is the whole reason a jump is an
+     * obstacle rather than a step - see the class note.
+     */
+    private static final Map<ShapeKey, VoxelShape> COLLISION_SHAPES =
+            buildShapes(COLLISION_TOP, COLLISION_TOP);
 
     private record ShapeKey(Direction facing, boolean left, boolean right) {
     }
@@ -135,20 +168,30 @@ public class JumpBlock extends HorizontalDirectionalBlock {
 
     // --- shape --------------------------------------------------------------
 
-    private static Map<ShapeKey, VoxelShape> buildShapes() {
+    /**
+     * @param railTop     where the rail box stops
+     * @param standardTop where the two upright boxes stop. <b>Not the same as
+     *                    {@code railTop} for the drawn shape</b> - the rail
+     *                    stops at 15 and the standards run the full 16, which
+     *                    is what makes a stack read as one continuous upright.
+     *                    Collapsing these two into one number silently lops a
+     *                    pixel off every post.
+     */
+    private static Map<ShapeKey, VoxelShape> buildShapes(int railTop, int standardTop) {
         Map<ShapeKey, VoxelShape> shapes = new HashMap<>();
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             for (boolean left : new boolean[] {false, true}) {
                 for (boolean right : new boolean[] {false, true}) {
                     // The rail lies across the facing: a jump facing north or
                     // south (axis Z) is a barrier running east-west.
-                    VoxelShape shape = facing.getAxis() == Direction.Axis.Z ? RAIL_X : RAIL_Z;
+                    VoxelShape shape = facing.getAxis() == Direction.Axis.Z
+                            ? railX(railTop) : railZ(railTop);
                     Direction leftSide = facing.getCounterClockWise();
                     if (!left) {
-                        shape = Shapes.or(shape, standard(leftSide));
+                        shape = Shapes.or(shape, standard(leftSide, standardTop));
                     }
                     if (!right) {
-                        shape = Shapes.or(shape, standard(leftSide.getOpposite()));
+                        shape = Shapes.or(shape, standard(leftSide.getOpposite(), standardTop));
                     }
                     shapes.put(new ShapeKey(facing, left, right), shape);
                 }
@@ -157,13 +200,19 @@ public class JumpBlock extends HorizontalDirectionalBlock {
         return Map.copyOf(shapes);
     }
 
-    /** The upright post hard against the given side of the block. */
-    private static VoxelShape standard(Direction side) {
+    /**
+     * The upright post hard against the given side of the block.
+     *
+     * <p>The post starts at y=0 rather than at the rail, so a stack reads as
+     * one continuous upright and so there is no gap at the foot of a fence
+     * line for something to walk through.
+     */
+    private static VoxelShape standard(Direction side, int top) {
         return switch (side) {
-            case EAST -> Block.box(13, 0, 5, 16, 16, 11);
-            case WEST -> Block.box(0, 0, 5, 3, 16, 11);
-            case SOUTH -> Block.box(5, 0, 13, 11, 16, 16);
-            case NORTH -> Block.box(5, 0, 0, 11, 16, 3);
+            case EAST -> Block.box(13, 0, 5, 16, top, 11);
+            case WEST -> Block.box(0, 0, 5, 3, top, 11);
+            case SOUTH -> Block.box(5, 0, 13, 11, top, 16);
+            case NORTH -> Block.box(5, 0, 0, 11, top, 3);
             default -> Shapes.empty();
         };
     }
@@ -174,8 +223,36 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
                                   CollisionContext context) {
-        return SHAPES.get(new ShapeKey(
-                state.getValue(FACING), state.getValue(LEFT), state.getValue(RIGHT)));
+        return SHAPES.get(key(state));
+    }
+
+    /**
+     * <b>Half a block taller than the jump looks</b>, exactly as a vanilla
+     * fence is.
+     *
+     * <p>This is the difference between a jump and a decoration. The drawn rail
+     * tops out below a horse's 1.0 step height, so with collision following the
+     * model a horse simply <em>walks over</em> a single jump - which is what
+     * shipped first, and what the owner sent back: they &ldquo;look great,
+     * expand great&rdquo;, but being stepped across &ldquo;doesn't feel
+     * immersive&rdquo;. Raising only the collision keeps the fence looking
+     * right and makes it behave like one.
+     *
+     * <p>The invisible half-block above the rail is the same bargain vanilla
+     * strikes with every fence and wall, and players already read it as normal.
+     * <b>It applies to the player too</b>: you cannot jump a jump on foot any
+     * more than you can jump a fence, so a course is walked around rather than
+     * through. That is the vanilla behaviour and it is intended.
+     */
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos,
+                                           CollisionContext context) {
+        return COLLISION_SHAPES.get(key(state));
+    }
+
+    private static ShapeKey key(BlockState state) {
+        return new ShapeKey(
+                state.getValue(FACING), state.getValue(LEFT), state.getValue(RIGHT));
     }
 
     // --- connection ---------------------------------------------------------

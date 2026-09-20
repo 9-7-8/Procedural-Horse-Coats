@@ -83,43 +83,46 @@
 <p>
     A new per-wood block family: one rail per block, standards drawn only at the ends of a run,
     and <strong>no height property</strong> &mdash; you stack them. See
-    <a href="item-jumps.html">jumps</a>. The module builds, every blockstate resolves to a model
-    that exists (<code>check-block-models.mjs</code>), and <strong>that is the entire extent of
-    what is known</strong>. No client and no server has loaded it; the dedicated server running
-    on this machine predates the change.
+    <a href="item-jumps.html">jumps</a>.
 </p>
 
-<h3>Do these first &mdash; they are the ones that can be badly wrong</h3>
+<p>
+    <strong>The look, the connection behaviour and the creative menu were confirmed in play on
+    2026-09-20</strong> &mdash; they &ldquo;look great, expand great&rdquo;. That run also sent
+    one thing back: a horse <em>walked over</em> a single jump, because collision followed the
+    model and the rail sits under a horse&rsquo;s 1.0 step height. The collision box is now half
+    a block taller than the model, as a vanilla fence&rsquo;s is. <strong>That fix has not been
+    played.</strong>
+</p>
+
+<h3>Do these first &mdash; the fix, and what it changes</h3>
 <ul>
-    <li><strong>Does a row of three join up?</strong> Place three in a line. The two outer ones
-        should have an upright post on the outside only, and the middle one should be a bare
-        rail with no posts at all. <strong>The middle block is the one that was broken</strong>
-        &mdash; it pointed at a model nobody had written, and a row of two looked perfect while
-        hiding it. If it is a purple cube, the fix did not take.</li>
-    <li><strong>Walk a horse at a single jump on the ground.</strong> It should step over without
-        jumping. That is the claim the whole height ladder rests on, and it is derived from a
-        1.0 step height rather than observed.</li>
-    <li><strong>Stack two and ride at it.</strong> An ordinary horse should clear it. Then three,
-        then four, and find where a given horse stops.</li>
-    <li><strong>Does what you see match what you hit?</strong> The shape is written three times
-        over (baker, <code>JumpBlock</code>, <code>GeneratedJumps</code>). Ride along a row and
-        feel for a jump you collide with off to the side of the rail, or pass through.</li>
-    <li><strong>Rotation.</strong> Place jumps facing all four ways and confirm the posts land at
-        the ends of the rail every time, not on the approach side.</li>
+    <li><strong>Walk a horse into a single jump.</strong> It must now <em>stop</em>, not step
+        over. This is the whole point of the change.</li>
+    <li><strong>Then ride at it.</strong> An ordinary horse should clear a single jump, and a
+        genuinely bad jumper should not &mdash; that difference is the feature.</li>
+    <li><strong>Stack two, three, four.</strong> Find which rung a known horse stops at, and
+        whether it agrees with the metres on the horse screen. That comparison is the real prize
+        here: <code>HorseUnits.jumpMetres</code> is an <em>unverified</em> cubic, and this is the
+        first instrument that can test it.</li>
+    <li><strong>Try to jump one on foot.</strong> You should not be able to, exactly as with a
+        fence. If you can, the collision override is not being applied.</li>
+    <li><strong>Does what you see match what you hit?</strong> Ride along a row and feel for
+        collision off to the side of the rail. The shape is written three times over (baker,
+        <code>JumpBlock</code>, <code>GeneratedJumps</code>), and there is now a fourth thing to
+        keep in step &mdash; the render top and the collision top.</li>
 </ul>
 
-<h3>Then the plumbing</h3>
+<h3>Still unchecked from the first pass</h3>
 <ul>
+    <li><strong>Rotation.</strong> Place jumps facing all four ways and confirm the posts land at
+        the ends of the rail every time, not on the approach side.</li>
     <li><strong>The recipe:</strong> 2 fences + 1 horse hair &rarr; 4 jumps, shapeless. Check the
-        yield is four and that it does not collide with the double gate's.</li>
+        yield is four.</li>
     <li><strong>Both families still mine with an axe.</strong> The gates and the jumps share
         <code>mineable/axe</code> and both bakers now merge into it. A regression here is
         invisible &mdash; the blocks still break, just slowly and with no drop &mdash; so it has
         to be checked on purpose, on a gate <em>and</em> a jump.</li>
-    <li><strong>Creative menu:</strong> each jump filed in Building Blocks directly after the
-        vanilla fence of its wood. If Building Blocks is <em>empty</em>, that is the known
-        catastrophic failure mode of the insertion guard, not a jump problem &mdash; see
-        <code>ModItems.fileAfter</code>.</li>
     <li><strong>Modded woods</strong> need a second mod installed and have never been generated.
         <code>Wood.fenceId()</code> is composed rather than scanned, so a wood whose fence is
         named unusually gets a jump that cannot be crafted and a warning in the log.</li>

@@ -18,9 +18,10 @@
 <p class="eyebrow">Block <span class="sep">/</span> the yard</p>
 <h1>Jumps</h1>
 <p class="lede">
-    A showjumping rail. Place them <strong>side by side</strong> to widen a fence and
-    <strong>on top of each other</strong> to raise it &mdash; there is no height setting, because
-    the stack <em>is</em> the height. One per wood, and the first thing in the mod that makes a
+    A showjumping rail, and a real obstacle: like a fence, it <strong>cannot be stepped
+    over</strong>. Place them <strong>side by side</strong> to widen a fence and <strong>on top of
+    each other</strong> to raise it &mdash; there is no height setting, because the stack
+    <em>is</em> the height. One per wood, and the first thing in the mod that makes a
     horse&rsquo;s <a href="horse-body.html">jump stat</a> something you can watch rather than read.
 </p>
 
@@ -50,29 +51,34 @@
 <h2 id="height">Height is the stack, and it is a measuring stick</h2>
 
 <p>
-    The rail tops out just under one block, which is exactly a horse&rsquo;s step height. So a
-    single jump on the ground is <strong>not an obstacle</strong> &mdash; a horse walks over it.
-    That is a ground pole, and it is what you trot a young horse over. The fence starts at
-    <em>two</em>.
+    A jump is <strong>a block and a half to clear, not a block</strong>. It is drawn one block
+    tall but stops you like a fence does, which is the same bargain vanilla makes with every
+    fence and wall: half a block of it is invisible. Without that a horse just steps over the
+    rail, because a horse steps a full block without breaking stride.
 </p>
 
 <p>
-    From there every block you add asks for about one more block of clearance, which makes a stack
-    a ladder you can read off:
+    Every block you stack on top asks for one more block of clearance, which makes a stack a
+    ladder you can read off:
 </p>
 
 <table>
     <thead>
-        <tr><th>Stack</th><th>What it is</th><th>Who clears it</th></tr>
+        <tr><th>Stack</th><th>To clear</th><th>What it is</th></tr>
     </thead>
     <tbody>
-        <tr><td>1</td><td>Ground pole</td><td>Everything &mdash; it is walked over, not jumped</td></tr>
-        <tr><td>2</td><td>A small vertical</td><td>Most horses</td></tr>
-        <tr><td>3</td><td>A real fence</td><td>A decent jumper</td></tr>
-        <tr><td>4</td><td>A big one</td><td>Something you bred on purpose</td></tr>
-        <tr><td>5+</td><td>Puissance</td><td>A horse carrying the magical jump locus</td></tr>
+        <tr><td>1</td><td>1&frac12; blocks</td><td>A low fence. Most horses manage, a bad jumper does not</td></tr>
+        <tr><td>2</td><td>2&frac12;</td><td>A proper vertical &mdash; wants a horse bred for it</td></tr>
+        <tr><td>3</td><td>3&frac12;</td><td>Beyond anything the natural loci reach on their own</td></tr>
+        <tr><td>4+</td><td>4&frac12;</td><td>Puissance. A horse carrying the magical jump locus</td></tr>
     </tbody>
 </table>
+
+<p>
+    <strong>You cannot jump one on foot</strong>, any more than you can jump a fence, so a course
+    is something you walk around and ride through. That is deliberate and it is the vanilla
+    behaviour.
+</p>
 
 <p>
     The point is not the number. It is that two horses that look identical on a stat screen are
@@ -93,6 +99,8 @@
 <ul>
     <li><strong>Facing</strong> is set when you place it, from the way you are looking, and the
         rail runs across that. A row placed while walking sideways comes out straight.</li>
+    <li><strong>A single jump is already a fence.</strong> There is no trot-pole height &mdash;
+        the lowest thing you can build is one a horse has to leave the ground for.</li>
     <li><strong>A jump facing north and one facing south are the same fence</strong>, so they
         join up. You do not have to approach a row from a consistent side to build it.</li>
     <li>Jumps join to jumps and to nothing else &mdash; they will not connect to a fence, a
@@ -135,6 +143,33 @@
     <li><code>compat/GeneratedJumps</code> &mdash; the same files for other mods&rsquo; woods, at
         run time.</li>
 </ul>
+
+<h2 id="collision">The collision box is taller than the model</h2>
+
+<p>
+    <code>JumpBlock.getCollisionShape</code> returns the same boxes as
+    <code>getShape</code> but topped at <strong>24/16</strong> rather than 15 and 16 &mdash;
+    vanilla&rsquo;s own fence number. The outline and the model stay tight to the rail, so the
+    block still looks right; only what you bump into is taller.
+</p>
+
+<div class="plain">
+    <p>
+        <strong>Verified 2026-09-20, in play, and this is why it exists.</strong> The first build
+        let collision follow the model, which put the rail under a horse&rsquo;s 1.0 step height.
+        Owner&rsquo;s verdict: the jumps &ldquo;look great, expand great&rdquo;, but a horse
+        walked straight over them and it &ldquo;doesn&rsquo;t feel immersive&rdquo;. The fix is
+        the fence trick and nothing else &mdash; no model change, no new state.
+    </p>
+</div>
+
+<p>
+    Two consequences worth knowing before changing it. <strong>The render and collision shapes are
+    built by one function with two different tops</strong>, and the rail and the standards do not
+    share a top in the drawn shape (15 and 16) &mdash; collapsing those into one number quietly
+    lops a pixel off every post. And the tall box applies to players as much as horses, so a
+    course cannot be crossed on foot. That is intended, and it is what a fence does.
+</p>
 
 <h2 id="three-copies">The geometry is written three times</h2>
 
@@ -196,11 +231,12 @@
 <h2 id="unverified">Unverified</h2>
 
 <p>
-    <code>JumpBlock.getShape</code> is the only <code>VoxelShape</code> override in the NeoForge
-    module, so its signature is corroborated by nothing else in the repo &mdash; the compiler is
-    the whole check, and it passes. <strong>Nothing here has been seen in game.</strong> The height
-    ladder on the Gameplay tab is derived from a horse&rsquo;s 1.0 step height and the rail&rsquo;s
-    top at y=15/16; it has not been ridden. See <a href="verification.html">verification</a>.
+    The look and the connection behaviour <strong>were confirmed in play on 2026-09-20</strong>
+    &mdash; they &ldquo;look great, expand great&rdquo;, and the row-of-three case that was
+    broken drew correctly. <strong>The height ladder has not been ridden.</strong> It follows from
+    a 1.5-block collision box and a horse&rsquo;s 1.0 step height, and which rung a given horse
+    stops at is exactly the thing still to be measured &mdash; along with whether it agrees with
+    <code>HorseUnits.jumpMetres</code>. See <a href="verification.html">verification</a>.
 </p>
 
 </section>
