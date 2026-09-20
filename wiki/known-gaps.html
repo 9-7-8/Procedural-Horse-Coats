@@ -132,6 +132,39 @@
     gets past mod loading, would settle a dozen of these at once.
     <code>wiki/verification.html</code> &sect;0-FK.</li>
 
+<li id="gap-287"><strong>Open, found 2026-09-20 in play: the Anglo-Arabian jumps high enough to
+    hurt itself landing.</strong> A <em>natural</em> breed &mdash; no magical locus involved &mdash; clears
+    enough height that it takes fall damage coming down. Owner, riding one, and the whole finding: it
+    &ldquo;jumps so high that it damages itself when it falls&rdquo;.
+    <strong>Nothing is being changed until the breed sheets are audited</strong>; that is the owner&rsquo;s
+    call and this entry is the note for it.
+    <p>
+    <strong>The jump change did not cause this, it stopped hiding it.</strong> Until 2026-09-20 a rider
+    charged the jump, so a horse only reached its ceiling if you held the key &mdash; and the natural
+    reflex on a horse that leaps too far is to tap instead, which silently capped it. Now the press
+    <em>is</em> the jump and every jump is that horse&rsquo;s maximum, so a breed whose ceiling is above
+    the fall-damage threshold reaches it every single time. See
+    <a href="item-jumps.html#instrument">jumps &sect; what a stack can measure</a>: the instant jump was
+    built to make height a clean reading of genetics, and the first thing it read was a breed out of range.
+    </p>
+    <p>
+    <strong>Where to look, and it is probably not the jump code.</strong> The chain is the breed sheet&rsquo;s
+    jump score &rarr; <code>BreedStatCurve</code> &rarr; <code>Attributes.JUMP_STRENGTH</code> &rarr; the
+    cubic in <code>HorseUnits.jumpMetres</code>. Two of those are worth suspecting before the breed itself:
+    the curve&rsquo;s ceiling is calibrated against a top score that only one shipped breed reaches, and the
+    cubic is <strong>unverified against this mod&rsquo;s horses</strong> by its own class doc &mdash; so the
+    metres a sheet promises and the blocks a horse actually clears may never have been compared until now.
+    A stack of jumps is the instrument for exactly that comparison.
+    <strong>Audit the scored axis across every breed, not just this one</strong>: whatever put the
+    Anglo-Arabian over the line applies to anything else scored near it.
+    </p>
+    <p>
+    <strong>Related but distinct:</strong> <a href="#gap-278">gap 278</a> &mdash; a breed&rsquo;s
+    <code>jump</code> range silently collapses to its low end. That bug makes a sheet <em>quieter</em> than
+    written, so it is not the cause here, but any audit of jump scores will trip over it and should fix
+    both at once rather than balancing against a value the parser is discarding.
+    </p></li>
+
 <li id="gap-286"><strong>Open, found 2026-09-19: the reaper does not check whether a crop is
     ripe.</strong> <code>ReaperCartEntity.harvest</code> tests the block against
     <code>horsegenetics:reaper_harvestable</code>, which includes
