@@ -480,7 +480,22 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     private static BlockState withPost(BlockState state, BlockPos pos) {
         boolean midRun = state.getValue(LEFT) && state.getValue(RIGHT);
-        return state.setValue(POST, midRun && postsHere(pos, state.getValue(FACING)));
+        return state.setValue(POST, midRun && postsTo(state.getValue(STYLE))
+                && postsHere(pos, state.getValue(FACING)));
+    }
+
+    /**
+     * <b>Crossrails never grow an intermediate post.</b>
+     *
+     * <p>The post is an upright through the middle of the block, and the middle
+     * of the block is exactly where a crossrail's two poles cross - so the post
+     * lands on top of the X and hides the one feature the style has. Owner, on
+     * seeing it: the crossrails "looks bad and it has the pole in the center
+     * now". The post was written for the vertical, where it is a T under a
+     * single rail, and it reads correctly on an oxer too, between the two.
+     */
+    private static boolean postsTo(Style style) {
+        return style != Style.CROSSRAILS;
     }
 
     /**
@@ -609,48 +624,23 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * woods became block-entity data - and once they are data, a plank held in
      * the hand can no longer say <i>which half</i> of the jump it is for.
      *
-     * <p><b>It opens with an item in hand too</b>, which is not incidental: the
-     * thing you are usually holding when you want this window is a plank. Every
-     * item but one falls through to here - see {@link #useItemOn} for the one,
-     * and for why the exception is not optional.
+     * <p><b>It opens with anything in hand, including another jump.</b> There
+     * was an exception for that case - a jump held against a jump placed rather
+     * than opening, on the argument that stacking is the commonest thing
+     * anybody does to this block - and the owner reversed it on seeing it:
+     * "right clicking on a jump with a jump in hand should open the jump
+     * customization menu and not place another block". Sneaking places, which
+     * is what a player already does to put a block against a chest, and it
+     * means the window is reachable no matter what is in your hand.
+     *
+     * <p>Mechanically this is simply <i>not</i> overriding {@code useItemOn}:
+     * {@code ServerPlayerGameMode.useItemOn} calls this whenever a block's
+     * {@code useItemOn} comes back {@code TRY_WITH_EMPTY_HAND}, and <b>the hand
+     * does not have to be empty</b> despite the name - only a sneaking player
+     * with something in their hands suppresses it.
      *
      * @see com.example.horsegenetics.neoforge.menu.JumpMenu
      */
-    /**
-     * <b>A jump held against a jump stacks it. Everything else opens the
-     * screen.</b>
-     *
-     * <p>This override exists for one case and it is the important one.
-     * {@code ServerPlayerGameMode.useItemOn} calls
-     * {@link #useWithoutItem} whenever the block's {@code useItemOn} comes back
-     * {@code TRY_WITH_EMPTY_HAND} - <b>the hand does not have to be empty</b>,
-     * despite the name; only a sneaking player with something in their hands
-     * suppresses it. So the inherited default would open this block's screen
-     * when a player right-clicked a jump while holding a jump, and <em>height
-     * is stacking</em>: putting one on top of another is the single most common
-     * thing anybody does to this block, and it would have needed a shift-click
-     * forever.
-     *
-     * <p>{@code PASS} rather than {@code TRY_WITH_EMPTY_HAND} is what makes the
-     * difference: {@code PASS} is not a {@code TryEmptyHandInteraction}, so the
-     * dispatch skips the screen and falls through to the item's own
-     * {@code useOn}, which places the block.
-     *
-     * <p>Everything else - a plank, a pickaxe, an empty hand - goes to the
-     * screen, and a player who wants to place some <i>other</i> block against a
-     * jump sneaks, exactly as they already do against a chest.
-     */
-    @Override
-    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
-                                          BlockPos pos, Player player,
-                                          net.minecraft.world.InteractionHand hand,
-                                          BlockHitResult hit) {
-        if (stack.getItem() instanceof com.example.horsegenetics.neoforge.item.JumpItem) {
-            return InteractionResult.PASS;
-        }
-        return super.useItemOn(stack, state, level, pos, player, hand, hit);
-    }
-
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {

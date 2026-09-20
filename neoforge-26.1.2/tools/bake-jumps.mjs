@@ -349,6 +349,34 @@ function splitElements(style, suffix) {
 
 const lang = {};
 
+// THE PAINTED PARTS, which are not per wood.
+//
+// A dyed half is drawn on pale, neutral timber rather than on its own wood, and
+// the reason is arithmetic: a block tint is a MULTIPLY, so it can only darken
+// and can only ever deepen a hue the texture already has. Blue over oak came
+// out a dark brown-navy, and blue over a dark modded wood came out "nearly
+// black purple" (owner, 2026-09-20). Vanilla dyes leather against a greyscale
+// base for exactly this reason, and painted_pole.png is that base.
+//
+// It is also what a real jump looks like: showjumping poles are painted solid
+// colours and you do not see the grain through the paint. So there is ONE set
+// of painted models for every wood - 18 files, not 18 per wood - and the wood a
+// painted jump is made of is remembered underneath and comes back the moment
+// the paint is stripped.
+const PAINTED_TEXTURE = `${NS}:block/painted_pole`;
+for (const style of STYLES) {
+  put(join(A, "models/block", `painted_jump_${style}_rails.json`), {
+    parent: `${NS}:block/template_jump_${style}_rails`,
+    textures: { texture: PAINTED_TEXTURE },
+  });
+  for (const suffix of CONNECTIONS) {
+    put(join(A, "models/block", `painted_jump_${style}_standards${suffix}.json`), {
+      parent: `${NS}:block/template_jump_${style}_standards${suffix}`,
+      textures: { texture: PAINTED_TEXTURE },
+    });
+  }
+}
+
 for (const [wood, texture, woodLabel] of WOODS) {
   // What the screen and every item name call this wood. NOT the plank's own
   // name, which is "Oak Planks" and would give "Oak Planks Jump".

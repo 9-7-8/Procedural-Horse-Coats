@@ -71,10 +71,34 @@ public class JumpModel implements DynamicBlockStateModel {
     private final BlockStateModelPart fallbackRails;
     private final BlockStateModelPart fallbackStandards;
 
+    /**
+     * The same two halves drawn on <b>pale neutral timber</b>, for a half that
+     * has been painted.
+     *
+     * <p><b>A tint can only darken</b> - it is a multiply - so painting a half
+     * by tinting its own wood cannot produce a colour the wood does not already
+     * have. Blue over oak came out a dark brown-navy and blue over a dark
+     * modded wood came out "nearly black purple" (owner, 2026-09-20). Vanilla
+     * dyes leather against a greyscale base for the same reason, and these are
+     * that base: swapping the PART, not just the tint, is what lets a painted
+     * jump be the colour it was painted.
+     *
+     * <p>Not per wood, deliberately - one set for all of them. A real
+     * showjumping pole is painted a solid colour and you do not see the grain
+     * through it, so a painted half genuinely has no wood to show. The wood is
+     * still stored, and comes back the instant the paint is stripped.
+     */
+    private final BlockStateModelPart paintedRails;
+    private final BlockStateModelPart paintedStandards;
+
     private JumpModel(Map<String, BlockStateModelPart> rails,
-                      Map<String, BlockStateModelPart> standards) {
+                      Map<String, BlockStateModelPart> standards,
+                      BlockStateModelPart paintedRails,
+                      BlockStateModelPart paintedStandards) {
         this.rails = rails;
         this.standards = standards;
+        this.paintedRails = paintedRails;
+        this.paintedStandards = paintedStandards;
         // A wood key that no longer resolves - a wood whose mod was removed
         // since the jump was placed - draws as the default rather than as
         // nothing. A jump that vanishes is far worse than one in the wrong wood.
@@ -89,9 +113,17 @@ public class JumpModel implements DynamicBlockStateModel {
         if (materials == null) {
             materials = JumpMaterials.DEFAULT;
         }
-        BlockStateModelPart railPart = this.rails.getOrDefault(materials.rails(), this.fallbackRails);
+        // A painted half is a different PART, not just a different tint - see
+        // the field note. The tint still does the colouring; this only decides
+        // what it is colouring.
+        BlockStateModelPart railPart =
+                materials.railsDye() != JumpMaterials.UNDYED
+                        ? this.paintedRails
+                        : this.rails.getOrDefault(materials.rails(), this.fallbackRails);
         BlockStateModelPart standardPart =
-                this.standards.getOrDefault(materials.standards(), this.fallbackStandards);
+                materials.standardsDye() != JumpMaterials.UNDYED
+                        ? this.paintedStandards
+                        : this.standards.getOrDefault(materials.standards(), this.fallbackStandards);
         if (railPart != null) {
             parts.add(railPart);
         }
@@ -156,6 +188,14 @@ public class JumpModel implements DynamicBlockStateModel {
                 Variant.SimpleModelState.MAP_CODEC.forGetter(Unbaked::state)
         ).apply(i, Unbaked::new));
 
+        /**
+         * The pseudo-wood the painted parts are filed under, so that one
+         * {@code model(wood, suffix)} call composes both the real woods'
+         * ids and the painted ones. {@code PAINTED_TEXTURE} in
+         * bake-jumps.mjs writes the files.
+         */
+        private static final String PAINTED = "painted";
+
         private Identifier model(String wood, String suffix) {
             return Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
                     "block/" + wood + "_" + suffix);
@@ -171,7 +211,11 @@ public class JumpModel implements DynamicBlockStateModel {
                 standardParts.put(wood, SimpleModelWrapper.bake(
                         baker, model(wood, this.standards), this.state.asModelState()));
             }
-            return new JumpModel(Map.copyOf(railParts), Map.copyOf(standardParts));
+            return new JumpModel(Map.copyOf(railParts), Map.copyOf(standardParts),
+                    SimpleModelWrapper.bake(baker, model(PAINTED, this.rails),
+                            this.state.asModelState()),
+                    SimpleModelWrapper.bake(baker, model(PAINTED, this.standards),
+                            this.state.asModelState()));
         }
 
         @Override
@@ -180,6 +224,8 @@ public class JumpModel implements DynamicBlockStateModel {
                 resolver.markDependency(model(wood, this.rails));
                 resolver.markDependency(model(wood, this.standards));
             }
+            resolver.markDependency(model(PAINTED, this.rails));
+            resolver.markDependency(model(PAINTED, this.standards));
         }
 
         @Override
