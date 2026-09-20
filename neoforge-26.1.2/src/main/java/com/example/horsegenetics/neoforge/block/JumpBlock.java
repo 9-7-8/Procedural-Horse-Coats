@@ -441,10 +441,22 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * Does the block on {@code side} continue this jump's rail?
      *
      * <p>Axis rather than exact facing - see the class note.
+     *
+     * <p><b>And the same style.</b> Two different styles standing side by side
+     * are not one fence: an oxer's rails are front and back where a vertical's
+     * is down the middle, and its standards are deeper to hold them. Dropping
+     * the standard between them leaves an oxer's two rails running into thin
+     * air beside a vertical's one, with nothing holding either up. Owner, on
+     * seeing it: &ldquo;jumps shouldn't connect to jumps of a different type,
+     * it looks wrong&rdquo;.
+     *
+     * <p>A run of one style therefore posts at <i>its</i> ends, and a course
+     * built of alternating styles reads as the separate obstacles it is.
      */
     private static boolean connects(BlockState state, BlockState neighbour) {
         return neighbour.getBlock() instanceof JumpBlock
-                && neighbour.getValue(FACING).getAxis() == state.getValue(FACING).getAxis();
+                && neighbour.getValue(FACING).getAxis() == state.getValue(FACING).getAxis()
+                && neighbour.getValue(STYLE) == state.getValue(STYLE);
     }
 
     /**
@@ -498,12 +510,32 @@ public class JumpBlock extends HorizontalDirectionalBlock
                 ? under.getValue(FACING)
                 : context.getHorizontalDirection().getOpposite();
         BlockState state = this.defaultBlockState().setValue(FACING, facing);
-        LevelReader level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        Direction leftSide = facing.getCounterClockWise();
+        return connected(state, context.getLevel(), context.getClickedPos());
+    }
+
+    /**
+     * <b>Work out this state's two connection flags and its post</b> from what
+     * is actually beside it.
+     *
+     * <p>Public and static because <b>the style has to be set before this runs
+     * and is not known here</b>. {@link #connects} tests style as well as axis,
+     * so a state computed as a vertical and then restyled to an oxer carries
+     * connections that belong to a block that never existed - an oxer sharing
+     * a vertical's standards, which is exactly the look this was changed to
+     * stop. The two callers that set a style therefore call this afterwards:
+     * {@code JumpItem.getPlacementState} when one is placed, and
+     * {@code JumpMenu.clickMenuButton} when one is restyled in its screen.
+     *
+     * <p>The <i>neighbours</i> fix themselves - {@code setBlockAndUpdate} and
+     * placement both run {@link #updateShape} on them - but a block never
+     * receives its own update, so this is the half that has to be asked for.
+     */
+    public static BlockState connected(BlockState state, LevelReader level, BlockPos pos) {
+        Direction leftSide = state.getValue(FACING).getCounterClockWise();
         return withPost(state
                 .setValue(LEFT, connects(state, level.getBlockState(pos.relative(leftSide))))
-                .setValue(RIGHT, connects(state, level.getBlockState(pos.relative(leftSide.getOpposite())))),
+                .setValue(RIGHT,
+                        connects(state, level.getBlockState(pos.relative(leftSide.getOpposite())))),
                 pos);
     }
 

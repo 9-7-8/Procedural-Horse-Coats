@@ -314,7 +314,12 @@ public final class JumpMenu extends AbstractContainerMenu {
         this.access.execute((level, pos) -> {
             BlockState state = level.getBlockState(pos);
             if (state.getBlock() instanceof JumpBlock && state.getValue(JumpBlock.STYLE) != style) {
-                level.setBlockAndUpdate(pos, state.setValue(JumpBlock.STYLE, style));
+                // Recomputed, not just re-styled: a jump connects only to a jump
+                // of the SAME style, so restyling one in the middle of a run has
+                // to grow its own standards back. setBlockAndUpdate tells the
+                // neighbours, but a block never receives its own update.
+                level.setBlockAndUpdate(pos, JumpBlock.connected(
+                        state.setValue(JumpBlock.STYLE, style), level, pos));
                 level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
         });

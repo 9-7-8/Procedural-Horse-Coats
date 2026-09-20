@@ -72,25 +72,26 @@ public final class ModCreativeTabs {
                     .icon(ModCreativeTabs::oakJump)
                     .withTabsBefore(MAIN.getKey())
                     .displayItems((params, output) -> {
-                        // THREE ITEMS, ONE ENTRY PER WOOD PER STYLE. The woods
-                        // are components rather than items now - see
-                        // ModDataComponents.JUMP_RAILS - so the tab is where a
-                        // player still gets to pick one without crafting it.
-                        // Vanilla does the same with potions: one item, a shelf
-                        // of stamped stacks.
+                        // THREE ENTRIES. Not three per wood, and not thirty-six.
                         //
-                        // Grouped by wood rather than by style, so the three
-                        // oaks sit together the way somebody building one course
-                        // wants. Vanilla's twelve in vanilla's order first, then
-                        // every wood another mod brought.
-                        for (String wood : com.example.horsegenetics.neoforge.block.JumpWoods.keys()) {
-                            var materials =
-                                    new com.example.horsegenetics.neoforge.block.JumpMaterials(wood, wood);
-                            for (var item : com.example.horsegenetics.neoforge.block.Jumps.items()) {
-                                ItemStack stack = new ItemStack(item);
-                                materials.writeTo(stack);
-                                output.accept(stack);
-                            }
+                        // This tab listed one stamped stack per wood per style
+                        // for about an hour, which is convenient and is also
+                        // indistinguishable from the thirty-six items the whole
+                        // rework existed to delete - the owner's first look at
+                        // it was "all the jumps are separate items in their own
+                        // tab", which was the migration succeeding and reading
+                        // as though it had not happened. A tab is a statement
+                        // about what a thing IS, and a jump is three items whose
+                        // wood is something you choose afterwards.
+                        //
+                        // So: oak, because that is what a jump is when nothing
+                        // says otherwise, and every other wood is a craft or two
+                        // planks in the block's own screen.
+                        for (var item : com.example.horsegenetics.neoforge.block.Jumps.items()) {
+                            ItemStack stack = new ItemStack(item);
+                            com.example.horsegenetics.neoforge.block.JumpMaterials.DEFAULT
+                                    .writeTo(stack);
+                            output.accept(stack);
                         }
                     })
                     .build());

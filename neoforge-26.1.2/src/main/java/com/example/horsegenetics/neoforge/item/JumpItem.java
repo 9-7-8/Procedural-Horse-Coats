@@ -45,10 +45,25 @@ public class JumpItem extends BlockItem {
         return this.style;
     }
 
+    /**
+     * The style goes on <b>after</b> the block's own
+     * {@code getStateForPlacement}, and the connection flags are then recomputed
+     * <b>after that</b>.
+     *
+     * <p>The recompute is not optional: a jump only connects to a jump of the
+     * same style, and the block computed its flags while this stack's style was
+     * still the default. Without the second pass an oxer placed beside a
+     * vertical would come out sharing its standards - the look that was
+     * deliberately stopped.
+     */
     @Override
     protected @Nullable BlockState getPlacementState(BlockPlaceContext context) {
         BlockState state = super.getPlacementState(context);
-        return state == null ? null : state.setValue(JumpBlock.STYLE, this.style);
+        if (state == null) {
+            return null;
+        }
+        return JumpBlock.connected(state.setValue(JumpBlock.STYLE, this.style),
+                context.getLevel(), context.getClickedPos());
     }
 
     /**

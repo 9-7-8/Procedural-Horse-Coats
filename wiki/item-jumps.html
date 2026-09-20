@@ -21,8 +21,9 @@
     A showjumping fence in three styles, and a real obstacle: like a fence, it <strong>cannot be
     stepped over</strong>. Place them <strong>side by side</strong> to widen it and <strong>on top
     of each other</strong> to raise it &mdash; there is no height setting, because the stack
-    <em>is</em> the height. One of each style per wood, and the first thing in the mod that makes a
-    horse&rsquo;s <a href="horse-body.html">jump stat</a> something you can watch rather than read.
+    <em>is</em> the height. Its rails and its uprights can be <strong>different woods</strong>, set
+    in the jump&rsquo;s own screen, and it is the first thing in the mod that makes a horse&rsquo;s
+    <a href="horse-body.html">jump stat</a> something you can watch rather than read.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -38,8 +39,14 @@
 
 <div class="plain" id="recipe">
     <p>
-        <strong>Recipe (shapeless):</strong> 3 vanilla fences of that wood + 1
-        <a href="item-horse-hair.html">horse hair</a> &rarr; <strong>4 jumps</strong>.
+        <strong>Recipe (shapeless):</strong> 3 vanilla fences of one wood + 1
+        <a href="item-horse-hair.html">horse hair</a> &rarr; <strong>4 jumps of that wood</strong>.
+    </p>
+    <p>
+        The wood is not a different <em>item</em> &mdash; there is one jump item per style, and the
+        wood rides on the stack, which is why an oak jump and a birch jump are two stacks with
+        different names rather than two items. Three fences of mixed woods do not craft; put the
+        jump down and swap a half in its screen instead.
     </p>
     <p>
         Four to a hair on purpose. A course is the one thing you build dozens of, and a hair is
@@ -73,18 +80,20 @@
 
 <div class="plain" id="changing">
     <p>
-        <strong>A stick restyles it.</strong> Right-click a placed jump holding a stick and it
-        becomes the next style, spending the stick.
+        <strong>Right-click a placed jump and it opens.</strong> Two slots and three buttons: the
+        wood of the <strong>rails</strong>, the wood of the <strong>standards</strong>, and which of
+        the three styles it is. Everything about a jump that is not its position is changed here.
     </p>
     <p>
-        <strong>A plank repaints it</strong> in that plank&rsquo;s wood, spending the plank. That
-        is also how you say <em>which</em> wood &mdash; there is no menu and no cycle order to
-        learn, you hold the wood you want. Holding the wood it already is does nothing and costs
-        nothing.
+        <strong>Drop a plank in a slot and that half becomes that wood</strong> &mdash; one plank is
+        spent and <strong>a plank of the wood it used to be comes straight back to you</strong>. So
+        re-dressing a built course costs nothing at all, and you can put it back exactly as it was.
+        A plank of the wood it already is sits there and is not spent. The style buttons are free.
     </p>
     <p>
-        Neither is consumed in creative. Both are deliberately one item: a course is a thing you
-        build rather than fiddle with, and the cost is meant to be a brake, not a tax.
+        Holding a jump and right-clicking a jump still <strong>stacks</strong> it rather than opening
+        the window &mdash; stacking is the thing you do most. To place some <em>other</em> block
+        against a jump, sneak, exactly as you would against a chest.
     </p>
 </div>
 
@@ -155,6 +164,11 @@
         join up. You do not have to approach a row from a consistent side to build it.</li>
     <li>Jumps join to jumps and to nothing else &mdash; they will not connect to a fence, a
         <a href="item-double-gates.html">double gate</a> or a wall.</li>
+    <li><strong>And only to jumps of the same style.</strong> An oxer beside a vertical is two
+        obstacles, not one fence, so each keeps its own standards. They are genuinely different
+        shapes &mdash; an oxer's rails are front and back where a vertical's is down the middle,
+        and its standards are deeper to hold them &mdash; so sharing a standard left an oxer's two
+        rails running into thin air with nothing holding them up.</li>
     <li>An axe is the right tool, and a jump drops <em>its own style</em> &mdash; break an oxer,
         get an oxer back.</li>
 </ul>
@@ -163,8 +177,9 @@
     Jumps live in their <strong>own creative tab</strong>, &ldquo;Horse Jumps&rdquo;, rather
     than in Building Blocks where the <a href="item-double-gates.html">double gates</a> are. A
     gate is a building block horses happen to care about; a jump is horse equipment, useless
-    without one. <strong>Every style of every wood is in there</strong>, grouped by wood, so the
-    three oaks sit together rather than the twelve verticals.
+    without one. <strong>There are three things in it</strong> &mdash; a vertical, an oxer and a
+    crossrail, all oak &mdash; because that is what a jump now <em>is</em>. The wood is not a
+    separate item; craft the wood you want, or put an oak one down and swap its planks.
 </p>
 
 <p>
@@ -177,18 +192,28 @@
 
 <p>
     Three styles is not a course designer&rsquo;s vocabulary. <strong>A wall</strong> is the next
-    one and is a different problem: &ldquo;wall&rdquo; means cobblestone, brick, stone brick &mdash;
-    a material axis that is not the twelve woods, so it waits on jumps carrying their material as
-    data rather than as one block per wood. Beyond that, cross-country wants logs, brush, ditches,
-    fillers and water, and none of it is built.
+    one, and the thing that was blocking it is now gone: &ldquo;wall&rdquo; means cobblestone,
+    brick, stone brick &mdash; a material axis that is not the twelve woods &mdash; and a jump now
+    carries its material as data rather than being one block per wood, so a second axis costs a
+    list and some models rather than another dozen blocks. Also waiting on nothing but the work:
+    <strong>crossrails spanning up to three blocks</strong> as one crossed pair rather than a row of
+    separate X&rsquo;s, and <strong>half and third height</strong> jumps as walkable ground poles.
+    Beyond that, cross-country wants logs, brush, ditches, fillers and water, and none of it is
+    built.
 </p>
 
+<div class="plain">
+    <p>
+        <strong>A warning for whoever builds the short ones.</strong> Stacked clearances do
+        <em>not</em> add on a block grid. A third-height jump on top of a full one clears exactly
+        what the full one did, because the obstacle is the block column, not the sum of the rails
+        in it. The height ladder below only reads honestly while every jump is one block.
+    </p>
+</div>
+
 <p>
-    <strong>The standards and the rails cannot yet be different woods</strong>, which is the other
-    thing waiting on that same change: two woods on one jump cannot be a block each. Nothing
-    scores a round, times one, or notices that a horse knocked a rail, because a jump is currently
-    scenery with a collision box. <a href="roadmap.html#items">The roadmap</a> is where that
-    lives.
+    Nothing scores a round, times one, or notices that a horse knocked a rail, because a jump is
+    scenery with a collision box. <a href="roadmap.html#items">The roadmap</a> is where that lives.
 </p>
 
 </section>
@@ -199,17 +224,87 @@
 
 <ul>
     <li><code>block/JumpBlock</code> &mdash; the geometry, the connection rule, the
-        <code>VoxelShape</code>.</li>
-    <li><code>block/Jumps</code> &mdash; the per-wood registration, vanilla&rsquo;s twelve then
-        every modded wood. Deliberately the same shape as <code>block/DoubleGates</code>, down to
-        the duplicate-id guard declared <em>above</em> the static block; that ordering is not
-        stylistic, and the gates crashed mod construction with an NPE out of a class initialiser
-        for getting it wrong.</li>
+        <code>VoxelShape</code>, and the two <code>use</code> overrides that decide between
+        stacking and opening the screen.</li>
+    <li><code>block/JumpBlockEntity</code> &mdash; the two woods, the client sync, and the
+        implicit components that survive a break-and-replace.</li>
+    <li><code>block/JumpMaterials</code> &mdash; the pair itself, and the only place that knows it
+        is <em>two</em> components on an item.</li>
+    <li><code>block/JumpWoods</code> &mdash; every wood a jump can be, the plank that stands for
+        each, and what to call it. Read by the model, the screen, the item names and the tab.</li>
+    <li><code>block/Jumps</code> &mdash; the three style items, and nothing else. It registered
+        twelve blocks and thirty-six items until 2026-09-20.</li>
+    <li><code>menu/JumpMenu</code> + <code>client/JumpScreen</code> &mdash; the two slots, the
+        plank exchange and the three style buttons.</li>
+    <li><code>client/JumpModel</code> &mdash; the custom block model that reads the two woods per
+        position. See <a href="api-notes.html#block-models">the API notes</a>, because everything
+        written before 1.21.4 is wrong about how one of these is built.</li>
     <li><code>tools/bake-jumps.mjs</code> &mdash; every shipped asset, for vanilla&rsquo;s woods,
         at author time.</li>
     <li><code>compat/GeneratedJumps</code> &mdash; the same files for other mods&rsquo; woods, at
         run time.</li>
 </ul>
+
+<h2 id="two-woods">The woods are data, and the item carries two components</h2>
+
+<p>
+    The owner&rsquo;s ask was that the standards and the rails be independently coloured. As
+    blockstate properties that pair is 12 &times; 12 &times; everything else &mdash;
+    <strong>13,824 block states</strong>, every one allocated at registry bootstrap on the server as
+    well as the client. So the woods are <code>JumpBlockEntity</code> data and the model reads them
+    per position, which is what collapsed twelve blocks into one.
+</p>
+
+<p>
+    <strong>On the item they are two separate string components</strong>,
+    <code>horsegenetics:jump_rails</code> and <code>horsegenetics:jump_standards</code>, rather than
+    one pair-valued component &mdash; and the reason is the icon.
+    <code>minecraft:select</code> on <code>minecraft:component</code> matches the <em>whole value</em>
+    of one component, so a pair would need a case per pair: a hundred and forty-four per style, for
+    a sixteen-pixel picture. Split, the icon selects on the rails alone in twelve cases and is never
+    wrong about the half it shows.
+</p>
+
+<p>
+    Both are <strong>always present</strong>, oak included, on every jump the mod hands out &mdash;
+    the recipes write them, the creative tab writes them, the loot table copies them off the block
+    entity. An item with no components and an item saying &ldquo;oak&rdquo; are the same jump but do
+    not stack, and a creative-tab jump that will not stack with a crafted one gets reported as an
+    inventory bug.
+</p>
+
+<div class="plain">
+    <p>
+        <strong>The round trip is four pieces and all four are needed.</strong>
+        <code>collectImplicitComponents</code> puts the woods on the way out;
+        <code>minecraft:copy_components</code> with <code>"source": "block_entity"</code> in the loot
+        table is what asks for them; <code>setPlacedBy</code> puts them back into the block entity on
+        placement; and <code>removeComponentsFromTag</code> discards the block-entity copy so the
+        item does not carry the same woods twice and let the stale copy win. Miss any one and a
+        birch-railed jump comes back oak &mdash; which reads as &ldquo;the screen did not
+        save&rdquo;, not as a loot bug.
+    </p>
+</div>
+
+<h2 id="stacking-vs-screen">Stacking beats the screen, and that needed an override</h2>
+
+<p>
+    <code>ServerPlayerGameMode.useItemOn</code> calls a block&rsquo;s
+    <code>useWithoutItem</code> whenever its <code>useItemOn</code> returns
+    <code>TRY_WITH_EMPTY_HAND</code> &mdash; <strong>the hand does not have to be empty</strong>,
+    despite the name. Only a sneaking player with something in their hands suppresses it. So a
+    block that opens a screen from <code>useWithoutItem</code> opens it even when the player is
+    holding the block itself.
+</p>
+
+<p>
+    For a chest that is fine. For a jump it is not: <em>height is stacking</em>, so putting one on
+    top of another is the most common thing anybody does to this block, and it would have needed a
+    shift-click forever. <code>JumpBlock.useItemOn</code> therefore returns
+    <code>InteractionResult.PASS</code> &mdash; which is <em>not</em> a
+    <code>TryEmptyHandInteraction</code>, so the dispatch skips the screen and falls through to the
+    item&rsquo;s own <code>useOn</code> &mdash; for a <code>JumpItem</code> and only for one.
+</p>
 
 <h2 id="collision">The collision box is taller than the model</h2>
 

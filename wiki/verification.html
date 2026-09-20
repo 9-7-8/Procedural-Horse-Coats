@@ -116,12 +116,35 @@
     <li><strong>Stacks inherit facing</strong> from the jump below, so a two-high fence cannot come
         out crosswise. Style is deliberately <em>not</em> inherited &mdash; an oxer held over a
         vertical should still place an oxer.</li>
-    <li><strong>A stick restyles, a plank repaints.</strong> Both cost one item, neither in
-        creative, and repainting to the wood it already is should refuse rather than eat the plank.
-        <b>Both are due to be replaced</b> by a two-slot screen on the block, so do not spend long
-        on them.</li>
-    <li><strong>The recipe is 3 fences + 1 horse hair &rarr; 4.</strong> Mixed woods do not craft
-        at all yet; that wants a custom recipe.</li>
+    <li><strong>The jump&rsquo;s screen &mdash; the whole migration, and none of it is played.</strong>
+        Right-click a placed jump. Two plank slots and three style buttons; the current style&rsquo;s
+        button is greyed out. Drop a plank in the <em>rails</em> slot: that half changes wood
+        <em>and a plank of the old wood arrives in your inventory</em>. Do the same to the
+        standards with a different wood and look at the block &mdash; <b>the rails and the
+        uprights should be visibly different woods</b>, which is the whole point of the rework and
+        has never been seen. Then check the T-post takes the <em>standards&rsquo;</em> wood, not
+        the rails&rsquo;.</li>
+    <li><strong>The break-and-replace round trip.</strong> Mine a two-wood jump and put it back:
+        it must come back in <em>both</em> its woods and its own style. The item&rsquo;s name
+        should read &ldquo;Oak &amp; Birch Oxer&rdquo;. This is four pieces of machinery in a row
+        (see <a href="item-jumps.html#two-woods">the page</a>) and any one of them failing looks
+        identical: the jump comes back oak.</li>
+    <li><strong>Stacking still beats the screen.</strong> Holding a jump and right-clicking a jump
+        must <em>place</em>, not open the window. This needed an explicit override and is the one
+        regression that would make the block unusable; check it first.</li>
+    <li><strong>The creative tab has three things in it</strong> &mdash; an oak vertical, oxer and
+        crossrail &mdash; where it had thirty-six. Then check the <em>icons</em> track the wood:
+        craft or swap a jump to birch and look at it in a slot. That is a
+        <code>minecraft:select</code> on a component and <b>no vanilla file uses that
+        property</b>, so its JSON shape was read off the codecs rather than copied from a shipped
+        example; a wrong guess shows as every wood drawing as oak.</li>
+    <li><strong>An oxer beside a vertical keeps both sets of standards</strong>, and restyling one
+        in the middle of a run grows its own standards back straight away. Only same-style jumps
+        share a rail now.</li>
+    <li><strong>The recipe is 3 fences of one wood + 1 horse hair &rarr; 4 of that wood.</strong>
+        Twelve recipes now make <em>one</em> item and the wood arrives as a component. Craft
+        spruce and check you get spruce, not oak. Mixed woods still do not craft, which is now
+        deliberate rather than pending.</li>
     <li><strong>Both families still mine with an axe.</strong> The gates and the jumps share
         <code>mineable/axe</code> and both bakers merge into it. A regression is invisible &mdash;
         the block still breaks, just slowly and with no drop &mdash; so check a gate <em>and</em> a
