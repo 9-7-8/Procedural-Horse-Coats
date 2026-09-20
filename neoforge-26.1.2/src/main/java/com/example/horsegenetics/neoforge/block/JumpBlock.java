@@ -263,7 +263,8 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     private static final Map<ShapeKey, VoxelShape> COLLISION_SHAPES = buildShapes(true);
 
-    private record ShapeKey(Style style, Direction facing, boolean left, boolean right) {
+    private record ShapeKey(Style style, Direction facing, boolean left, boolean right,
+                            int size) {
     }
 
     public JumpBlock(Properties properties) {
@@ -309,36 +310,65 @@ public class JumpBlock extends HorizontalDirectionalBlock
      *                    pixel off every post.
      */
     private static Map<ShapeKey, VoxelShape> buildShapes(boolean collision) {
-        int standardTop = collision ? COLLISION_TOP : STANDARD_TOP;
         Map<ShapeKey, VoxelShape> shapes = new HashMap<>();
-        for (Style style : Style.values()) {
-            int[] depth = standardDepth(style);
-            for (Direction facing : Direction.Plane.HORIZONTAL) {
-                VoxelShape bars = Shapes.empty();
-                if (collision) {
-                    bars = box(collisionBar(style), facing);
-                } else {
-                    for (Bar bar : drawnBars(style)) {
-                        bars = Shapes.or(bars, box(bar, facing));
+        for (int size = 0; size < JumpMaterials.SIZES.length; size++) {
+            float scale = JumpMaterials.SIZES[size];
+            // THE HALF-BLOCK OF INVISIBLE FENCE DOES NOT SCALE. Everything drawn
+            // shrinks with the jump; the bargain that stops a horse stepping
+            // over it is a constant, so a jump is always `size + 0.5` blocks to
+            // clear. That is what makes the bottom of the ladder work without a
+            // rule of its own - a 0.1 pole clears at 0.6, under a horse's 1.0
+            // step height, so it is walked over exactly as a ground pole should
+            // be.
+            int standardTop = collision
+                    ? Math.round(STANDARD_TOP * scale) + (COLLISION_TOP - STANDARD_TOP)
+                    : Math.round(STANDARD_TOP * scale);
+            for (Style style : Style.values()) {
+                int[] depth = standardDepth(style);
+                for (Direction facing : Direction.Plane.HORIZONTAL) {
+                    VoxelShape bars = Shapes.empty();
+                    if (collision) {
+                        bars = box(scaled(collisionBar(style), scale, true), facing);
+                    } else {
+                        for (Bar bar : drawnBars(style)) {
+                            bars = Shapes.or(bars, box(scaled(bar, scale, false), facing));
+                        }
                     }
-                }
-                Direction leftSide = facing.getCounterClockWise();
-                for (boolean left : new boolean[] {false, true}) {
-                    for (boolean right : new boolean[] {false, true}) {
-                        VoxelShape shape = bars;
-                        if (!left) {
-                            shape = Shapes.or(shape, standard(leftSide, standardTop, depth));
+                    Direction leftSide = facing.getCounterClockWise();
+                    for (boolean left : new boolean[] {false, true}) {
+                        for (boolean right : new boolean[] {false, true}) {
+                            VoxelShape shape = bars;
+                            if (!left) {
+                                shape = Shapes.or(shape, standard(leftSide, standardTop, depth));
+                            }
+                            if (!right) {
+                                shape = Shapes.or(shape,
+                                        standard(leftSide.getOpposite(), standardTop, depth));
+                            }
+                            shapes.put(new ShapeKey(style, facing, left, right, size), shape);
                         }
-                        if (!right) {
-                            shape = Shapes.or(shape,
-                                    standard(leftSide.getOpposite(), standardTop, depth));
-                        }
-                        shapes.put(new ShapeKey(style, facing, left, right), shape);
                     }
                 }
             }
         }
         return Map.copyOf(shapes);
+    }
+
+    /**
+     * One bar at a jump's height.
+     *
+     * <p>Scaling is about the FLOOR, which is how the model scales too: a jump
+     * grows upwards out of the ground rather than about its own middle.
+     *
+     * @param keepTop for a collision bar, whose top is the constant half-block
+     *                above the drawn height and must not be scaled twice
+     */
+    private static Bar scaled(Bar bar, float scale, boolean keepTop) {
+        int top = keepTop
+                ? Math.round((bar.yMax() - (COLLISION_TOP - STANDARD_TOP)) * scale)
+                        + (COLLISION_TOP - STANDARD_TOP)
+                : Math.round(bar.yMax() * scale);
+        return new Bar(Math.round(bar.yMin() * scale), top, bar.zMin(), bar.zMax());
     }
 
     /**
@@ -366,7 +396,7 @@ public class JumpBlock extends HorizontalDirectionalBlock
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
                                   CollisionContext context) {
-        return SHAPES.get(key(state));
+        return SHAPES.get(key(state, level, pos));
     }
 
     /**
@@ -390,12 +420,27 @@ public class JumpBlock extends HorizontalDirectionalBlock
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos,
                                            CollisionContext context) {
-        return COLLISION_SHAPES.get(key(state));
+        return COLLISION_SHAPES.get(key(state, level, pos));
     }
 
-    private static ShapeKey key(BlockState state) {
+    /**
+     * <b>The shape depends on the block ENTITY</b>, because the height does.
+     *
+     * <p>That is a thing to be careful with - a shape is asked for far more
+     * often than a model is baked, and this adds a block-entity lookup to every
+     * collision test. It is the pattern vanilla's shulker box uses for exactly
+     * the same reason, and the alternative was a ten-value blockstate property
+     * multiplying every state in the file by ten.
+     *
+     * <p>No block entity - which happens while a chunk is still loading, and in
+     * the odd placement check - means the ordinary one-block jump.
+     */
+    private static ShapeKey key(BlockState state, BlockGetter level, BlockPos pos) {
+        int size = level.getBlockEntity(pos) instanceof JumpBlockEntity jump
+                ? JumpMaterials.clampSize(jump.materials().size())
+                : JumpMaterials.DEFAULT_SIZE;
         return new ShapeKey(state.getValue(STYLE), state.getValue(FACING),
-                state.getValue(LEFT), state.getValue(RIGHT));
+                state.getValue(LEFT), state.getValue(RIGHT), size);
     }
 
     // --- connection ---------------------------------------------------------
@@ -536,6 +581,41 @@ public class JumpBlock extends HorizontalDirectionalBlock
      */
     public static boolean startsGroup(int segment) {
         return crossIndex(segment) == 0;
+    }
+
+    /**
+     * <b>Set a jump's height, and every jump joined to it.</b>
+     *
+     * <p>A fence has a height; each block of it does not. Owner's call, and it
+     * is also the only version that cannot go wrong by accident - you can build
+     * a stepped line deliberately by breaking the run, and you cannot build one
+     * by forgetting to click eleven times.
+     *
+     * <p>Bounded by {@link #CROSS_MAX_RUN} each way, like every other walk here.
+     */
+    public static void setRunSize(Level level, BlockPos pos, BlockState state, int size) {
+        Direction left = state.getValue(FACING).getCounterClockWise();
+        applySize(level, pos, size);
+        for (Direction direction : new Direction[] {left, left.getOpposite()}) {
+            BlockPos.MutableBlockPos cursor = pos.mutable();
+            for (int step = 0; step < CROSS_MAX_RUN; step++) {
+                cursor.move(direction);
+                if (!connects(state, level.getBlockState(cursor))) {
+                    break;
+                }
+                applySize(level, cursor.immutable(), size);
+            }
+        }
+    }
+
+    private static void applySize(Level level, BlockPos pos, int size) {
+        if (level.getBlockEntity(pos) instanceof JumpBlockEntity jump
+                && jump.materials().size() != size) {
+            jump.setMaterials(jump.materials().withSize(size));
+            // The SHAPE changed, not just the look, so the whole block has to be
+            // re-broadcast rather than only the model data refreshed.
+            level.setBlock(pos, level.getBlockState(pos), Block.UPDATE_ALL);
+        }
     }
 
     /**

@@ -21,8 +21,9 @@
     A showjumping fence in three styles, and a real obstacle: like a fence, it <strong>cannot be
     stepped over</strong>. Place them <strong>side by side</strong> to widen it and <strong>on top
     of each other</strong> to raise it &mdash; there is no height setting, because the stack
-    <em>is</em> the height. <strong>One item</strong>: its style, its two woods and its two coats
-    of paint are all chosen after you put it down, by right-clicking it. And it is the first thing
+    <em>is</em> the height &mdash; or set one directly, anywhere from a ground pole to double.
+    <strong>One item</strong>: its height, its style, its two woods and its two coats of paint are
+    all chosen after you put it down, by right-clicking it. And it is the first thing
     in the mod that makes a horse&rsquo;s <a href="horse-body.html">jump stat</a> something you can
     watch rather than read.
 </p>
@@ -83,10 +84,10 @@
 
 <div class="plain" id="changing">
     <p>
-        <strong>Right-click a placed jump and it opens.</strong> Two slots and three buttons: one
-        slot for the <strong>rails</strong>, one for the <strong>standards</strong>, and a button
-        per style. Everything about a jump that is not its position is changed here, which is why
-        there is only one item.
+        <strong>Right-click a placed jump and it opens.</strong> Two slots for the
+        <strong>rails</strong> and the <strong>standards</strong>, a button per style, and a
+        <strong>height</strong> you step up and down. Everything about a jump that is not its
+        position is changed here, which is why there is only one item.
     </p>
     <p>
         <strong>A plank in a slot re-woods that half.</strong> One plank is spent and
@@ -107,7 +108,14 @@
         dye back.
     </p>
     <p>
-        The style buttons are free. <strong>Right-clicking a jump opens the window whatever is in
+        <strong>Height applies to the whole fence</strong>, not to the block you clicked &mdash; a
+        fence has a height, each block of it does not. Ten rungs, from
+        <strong>0.1</strong> (a ground pole) to <strong>2.0</strong> (double), and the screen shows
+        both the height and what a horse has to clear. To build a stepped line on purpose, break
+        the run and set the halves separately.
+    </p>
+    <p>
+        The style and height buttons are free. <strong>Right-clicking a jump opens the window whatever is in
         your hand</strong>, another jump included &mdash; <strong>sneak to place</strong> instead,
         the same thing you already do to put a block against a chest.
     </p>
@@ -119,31 +127,41 @@
     see <a href="#why-cosmetic">why style is cosmetic</a>.
 </p>
 
-<h2 id="height">Height is the stack, and it is a measuring stick</h2>
+<h2 id="height">Height is a measuring stick</h2>
 
 <p>
-    A jump is <strong>a block and a half to clear, not a block</strong>. It is drawn one block
-    tall but stops you like a fence does, which is the same bargain vanilla makes with every
-    fence and wall: half a block of it is invisible. Without that a horse just steps over the
-    rail, because a horse steps a full block without breaking stride.
+    A jump is <strong>half a block taller to clear than it looks</strong>. It stops you like a
+    fence does, which is the same bargain vanilla makes with every fence and wall: half a block of
+    it is invisible. Without that a horse just steps over the rail, because a horse steps a full
+    block without breaking stride.
 </p>
 
 <p>
-    Every block you stack on top asks for one more block of clearance, which makes a stack a
-    ladder you can read off:
+    <strong>That half-block does not scale</strong>, which is what makes the whole range work
+    without a special case. A jump is <code>height + &frac12;</code> blocks to clear:
 </p>
 
 <table>
     <thead>
-        <tr><th>Stack</th><th>To clear</th><th>What it is</th></tr>
+        <tr><th>Height</th><th>To clear</th><th>What it is</th></tr>
     </thead>
     <tbody>
-        <tr><td>1</td><td>1&frac12; blocks</td><td>A low fence. Most horses manage, a bad jumper does not</td></tr>
-        <tr><td>2</td><td>2&frac12;</td><td>A proper vertical &mdash; wants a horse bred for it</td></tr>
-        <tr><td>3</td><td>3&frac12;</td><td>Beyond anything the natural loci reach on their own</td></tr>
-        <tr><td>4+</td><td>4&frac12;</td><td>Puissance. A horse carrying the magical jump locus</td></tr>
+        <tr><td>0.1</td><td>0.6 blocks</td><td>A <strong>ground pole</strong>. Under a horse&rsquo;s
+            1.0 step, so it is walked over &mdash; schooling, not an obstacle</td></tr>
+        <tr><td>0.3</td><td>0.8</td><td>Still walkable. A trot pole</td></tr>
+        <tr><td>0.5</td><td>1.0</td><td>Exactly step height. The point it stops being scenery</td></tr>
+        <tr><td>1.0</td><td>1&frac12;</td><td>A low fence. Most horses manage, a bad jumper does not</td></tr>
+        <tr><td>1.5</td><td>2</td><td>Wants a horse bred for it</td></tr>
+        <tr><td>2.0</td><td>2&frac12;</td><td>Beyond anything the natural loci reach on their own</td></tr>
     </tbody>
 </table>
+
+<p>
+    <strong>And you can still stack.</strong> A jump on top of a jump adds its own height on top of
+    the one below, so the range above 2&frac12; is reached the way it always was. Note that the
+    invisible half-block does not add twice &mdash; two stacked jumps clear at the sum of their
+    heights plus one half, not plus two.
+</p>
 
 <p>
     <strong>You cannot jump one on foot</strong>, any more than you can jump a fence, so a course
@@ -539,19 +557,49 @@
 
 <section class="tab-panel" data-tab="science">
 
-<h2 id="why-stacking">Why stacking, and not a height property</h2>
+<h2 id="why-stacking">Stacking, and the height that was added beside it</h2>
 
 <p>
-    A height state was the obvious design: right-click to cycle 1&ndash;4, like a repeater. It was
-    rejected because it makes the jump <em>assert</em> a height, and the block has no business
-    knowing one. Stacking makes height a consequence of geometry instead &mdash; the horse is
-    answering a question about the world, not about a number somebody typed into a blockstate.
+    <strong>This section used to argue against a settable height, and it was overruled.</strong>
+    The argument was that a height state makes the jump <em>assert</em> a height, and that a block
+    has no business knowing one &mdash; stacking makes height a consequence of geometry instead, so
+    the horse is answering a question about the world rather than about a number somebody typed
+    into a blockstate. It also cost nothing, and the ladder came out evenly spaced for free because
+    blocks are one block tall.
 </p>
 
 <p>
-    It also costs nothing. No property, no cycling interaction, no lang keys, no extra variants,
-    and the ladder comes out evenly spaced for free because blocks are one block tall.
+    Two things were wrong with it. The first is that <strong>a one-block granularity is a bad
+    instrument</strong>: the interesting part of the range for a real horse sits between nothing
+    and one block, and a ladder whose bottom rung is &ldquo;a fence most horses clear&rdquo; cannot
+    see into it at all. The second is that it rules out the <strong>ground pole</strong>, which is
+    not a measurement at all &mdash; it is the thing you school a young horse over, and it has to
+    be walkable.
 </p>
+
+<p>
+    So height is a settable ladder of ten now, and <em>stacking still works on top of it</em>. The
+    honest part of the original argument survives intact: the jump still asserts nothing about the
+    <em>horse</em>. It is a number about the obstacle, the horse either clears it or does not, and
+    the reading is the same reading. What changed is only the resolution of the ruler.
+</p>
+
+<div class="plain">
+    <p>
+        <strong>The cost is real and is worth knowing.</strong> A height is a scale on baked
+        geometry, and there is no per-position transform on a
+        <code>BlockStateModelPart</code> &mdash; so <em>every rung is a complete second copy of
+        every part</em>, baked with a scaling <code>ModelState</code> composed into it. Ten heights
+        is ten times the bake work. That is why it is a ladder of ten chosen heights and not a
+        slider, and why the rungs are fine below one block and coarse above it.
+    </p>
+    <p>
+        It is also why the height lives on the <strong>block entity</strong> rather than in the
+        blockstate: ten values as a property would have multiplied every state in the file by ten.
+        The shape reads it per position instead, which is what vanilla&rsquo;s shulker box does for
+        the same reason.
+    </p>
+</div>
 
 <h2 id="why-cosmetic">Why style is cosmetic</h2>
 

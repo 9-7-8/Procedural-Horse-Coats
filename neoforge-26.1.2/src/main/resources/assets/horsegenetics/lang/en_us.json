@@ -281,5 +281,7 @@
   "horsegenetics.jump.style.vertical": "Vertical",
   "horsegenetics.jump.style.oxer": "Oxer",
   "horsegenetics.jump.style.crossrails": "Crossrails",
-  "horsegenetics.jump.hint": "Right-click the jump to choose its wood, paint and style"
+  "horsegenetics.jump.hint": "Right-click the jump to choose its wood, paint and style",
+  "horsegenetics.jump.size": "Height",
+  "horsegenetics.jump.size.value": "%s blocks · %s to clear"
 }

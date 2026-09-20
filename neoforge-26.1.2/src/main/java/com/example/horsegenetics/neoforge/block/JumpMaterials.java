@@ -27,7 +27,43 @@ import net.minecraft.network.codec.StreamCodec;
  * @param rails     the wood of the poles a horse jumps
  * @param standards the wood of the uprights at the ends of a run
  */
-public record JumpMaterials(String rails, String standards, int railsDye, int standardsDye) {
+public record JumpMaterials(String rails, String standards, int railsDye, int standardsDye,
+                            int size) {
+
+    /**
+     * <b>Every height a jump can be</b>, as a multiple of a block, in the order
+     * the screen steps through them.
+     *
+     * <p>Ten rungs rather than even tenths, and rather than five presets: fine
+     * where it matters and coarse where it does not. <b>Below 1.0 the steps are
+     * small</b>, because that is where a jump stops being an obstacle and
+     * becomes a ground pole - the interesting part of the range - and above it
+     * they widen, because nobody needs to tell 1.6 from 1.7 blocks apart.
+     *
+     * <p>A jump is <b>{@code size + 0.5} blocks to clear</b>: the drawn height
+     * scales, and the half-block of invisible fence on top does not. That falls
+     * out rather than being designed, and it is what makes the bottom of this
+     * ladder work - 0.1 clears at 0.6, well under a horse's 1.0 step height, so
+     * a ground pole is walked over without needing a rule of its own.
+     *
+     * <p>Every entry costs a scaled bake of every part, which is the only
+     * reason this is a ladder and not a slider.
+     */
+    public static final float[] SIZES =
+            {0.1F, 0.2F, 0.3F, 0.5F, 0.75F, 1.0F, 1.25F, 1.5F, 1.75F, 2.0F};
+
+    /** One block, which is what a jump has always been and what a craft gives. */
+    public static final int DEFAULT_SIZE = 5;
+
+    /** Clamp anything arriving from disk or the wire into the ladder. */
+    public static int clampSize(int size) {
+        return Math.max(0, Math.min(SIZES.length - 1, size));
+    }
+
+    /** This jump's height, as a multiple of a block. */
+    public float scale() {
+        return SIZES[clampSize(this.size)];
+    }
 
     /** What a jump is made of when nothing says otherwise. */
     public static final String DEFAULT_WOOD = "oak";
@@ -43,7 +79,7 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
     public static final int UNDYED = -1;
 
     public static final JumpMaterials DEFAULT =
-            new JumpMaterials(DEFAULT_WOOD, DEFAULT_WOOD, UNDYED, UNDYED);
+            new JumpMaterials(DEFAULT_WOOD, DEFAULT_WOOD, UNDYED, UNDYED, DEFAULT_SIZE);
 
     public static final Codec<JumpMaterials> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("rails").forGetter(JumpMaterials::rails),
@@ -53,12 +89,13 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
             // hundreds of block entities in a course is worth not writing.
             Codec.INT.optionalFieldOf("rails_dye", UNDYED).forGetter(JumpMaterials::railsDye),
             Codec.INT.optionalFieldOf("standards_dye", UNDYED)
-                    .forGetter(JumpMaterials::standardsDye)
+                    .forGetter(JumpMaterials::standardsDye),
+            Codec.INT.optionalFieldOf("size", DEFAULT_SIZE).forGetter(JumpMaterials::size)
     ).apply(i, JumpMaterials::new));
 
     /** A jump of one wood throughout, unpainted - what a craft gives. */
     public static JumpMaterials of(String wood) {
-        return new JumpMaterials(wood, wood, UNDYED, UNDYED);
+        return new JumpMaterials(wood, wood, UNDYED, UNDYED, DEFAULT_SIZE);
     }
 
     /** The colour a part is drawn in, as a multiplier, or white if it is bare. */
@@ -85,6 +122,7 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
                     ByteBufCodecs.STRING_UTF8, JumpMaterials::standards,
                     ByteBufCodecs.VAR_INT, JumpMaterials::railsDye,
                     ByteBufCodecs.VAR_INT, JumpMaterials::standardsDye,
+                    ByteBufCodecs.VAR_INT, JumpMaterials::size,
                     JumpMaterials::new);
 
     /**
@@ -99,22 +137,28 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
      * does both jobs and the rule is one sentence.
      */
     public JumpMaterials withRails(String wood) {
-        return new JumpMaterials(wood, this.standards, UNDYED, this.standardsDye);
+        return new JumpMaterials(wood, this.standards, UNDYED, this.standardsDye, this.size);
     }
 
     /** New standards, stripped back to bare wood. See {@link #withRails}. */
     public JumpMaterials withStandards(String wood) {
-        return new JumpMaterials(this.rails, wood, this.railsDye, UNDYED);
+        return new JumpMaterials(this.rails, wood, this.railsDye, UNDYED, this.size);
     }
 
     /** The same jump with its rails painted. */
     public JumpMaterials withRailsDye(int colour) {
-        return new JumpMaterials(this.rails, this.standards, colour, this.standardsDye);
+        return new JumpMaterials(this.rails, this.standards, colour, this.standardsDye, this.size);
     }
 
     /** The same jump with its standards painted. */
     public JumpMaterials withStandardsDye(int colour) {
-        return new JumpMaterials(this.rails, this.standards, this.railsDye, colour);
+        return new JumpMaterials(this.rails, this.standards, this.railsDye, colour, this.size);
+    }
+
+    /** The same jump at a different height. */
+    public JumpMaterials withSize(int index) {
+        return new JumpMaterials(this.rails, this.standards, this.railsDye, this.standardsDye,
+                clampSize(index));
     }
 
     /**
@@ -157,7 +201,10 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
                         UNDYED),
                 components.getOrDefault(
                         com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS_DYE.get(),
-                        UNDYED));
+                        UNDYED),
+                clampSize(components.getOrDefault(
+                        com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_SIZE.get(),
+                        DEFAULT_SIZE)));
     }
 
     /**
@@ -174,6 +221,15 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
         stack.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS.get(), this.standards);
         setOrClear(stack, com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_RAILS_DYE.get(), this.railsDye);
         setOrClear(stack, com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS_DYE.get(), this.standardsDye);
+        // Size is written only when it is NOT the ordinary one block, for the
+        // same reason the dyes are: an item saying "size 5" and an item saying
+        // nothing are the same jump, and two stacks of the same jump that will
+        // not merge get reported as an inventory bug.
+        if (this.size == DEFAULT_SIZE) {
+            stack.remove(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_SIZE.get());
+        } else {
+            stack.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_SIZE.get(), this.size);
+        }
     }
 
     private static void setOrClear(net.minecraft.world.item.ItemStack stack,
@@ -195,6 +251,9 @@ public record JumpMaterials(String rails, String standards, int railsDye, int st
         }
         if (this.standardsDye != UNDYED) {
             builder.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_STANDARDS_DYE.get(), this.standardsDye);
+        }
+        if (this.size != DEFAULT_SIZE) {
+            builder.set(com.example.horsegenetics.neoforge.data.ModDataComponents.JUMP_SIZE.get(), this.size);
         }
     }
 }

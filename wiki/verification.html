@@ -130,6 +130,17 @@
         <b>rails taking the colour you painted the uprights</b>.</li>
     <li><strong>Shift-clicking a stack of two or more planks does both halves at once</strong>, and
         a single plank does the rails only.</li>
+    <li><strong>Height, all ten rungs, and none of it played.</strong> The &minus; / + pair sets
+        the <em>whole run</em>, not the block you clicked. Check the two ends of the ladder grey
+        out. Then check the two that matter: <strong>0.1 is walked over</strong> by a horse and by
+        you, and <strong>2.0 is one block that takes 2&frac12; to clear</strong>. The collision
+        box is built per rung and the model is a separately baked copy per rung, so the failure to
+        watch for is <b>a jump you can see but walk through, or stop at a foot from</b> - the two
+        drifting apart.</li>
+    <li><strong>Stacking still adds on top of a set height</strong>, and the invisible half-block
+        does not add twice.</li>
+    <li><strong>A jump keeps its height through break-and-replace</strong>, like its woods and its
+        paint - it is a fifth component on the item.</li>
     <li><strong>The placement hint.</strong> The first times you place a jump, an action-bar line
         says to right-click it. It should stop for good once you have actually opened one, and
         should not come back after a relog.</li>

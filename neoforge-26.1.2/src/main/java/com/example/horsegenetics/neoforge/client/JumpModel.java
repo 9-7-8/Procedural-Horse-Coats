@@ -68,6 +68,21 @@ public class JumpModel implements DynamicBlockStateModel {
     /** The {@code "type"} that selects this model in a blockstate variant. */
     public static final Identifier ID = Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "jump");
 
+    /**
+     * <b>One whole model per height</b>, indexed by {@code JumpMaterials.SIZES}.
+     *
+     * <p>A jump's height is a scale on its geometry, and geometry is baked -
+     * there is no per-position transform on a {@code BlockStateModelPart}. So
+     * every rung of the ladder is a complete second copy of every part, baked
+     * with a scaling {@code ModelState} composed into it.
+     *
+     * <p><b>That is what makes the ladder a ladder and not a slider.</b> Ten
+     * heights is ten times the bake work; a hundred would be a hundred. The
+     * rungs are chosen to be fine where a jump stops being an obstacle and
+     * coarse where nobody can tell the difference.
+     */
+    private final JumpModel[] sizes;
+
     private final Map<String, BlockStateModelPart> rails;
     private final Map<String, BlockStateModelPart> standards;
     private final BlockStateModelPart fallbackRails;
@@ -135,7 +150,8 @@ public class JumpModel implements DynamicBlockStateModel {
                       @Nullable Map<String, BlockStateModelPart[]> railSegments,
                       BlockStateModelPart @Nullable [] overlaySegments,
                       @Nullable Map<String, BlockStateModelPart[]> standardsVariants,
-                      BlockStateModelPart @Nullable [] overlayStandardsVariants) {
+                      BlockStateModelPart @Nullable [] overlayStandardsVariants,
+                      JumpModel @Nullable [] sizes) {
         this.rails = rails;
         this.standards = standards;
         this.overlayRails = overlayRails;
@@ -144,6 +160,7 @@ public class JumpModel implements DynamicBlockStateModel {
         this.overlaySegments = overlaySegments;
         this.standardsVariants = standardsVariants;
         this.overlayStandardsVariants = overlayStandardsVariants;
+        this.sizes = sizes;
         // A wood key that no longer resolves - a wood whose mod was removed
         // since the jump was placed - draws as the default rather than as
         // nothing. A jump that vanishes is far worse than one in the wrong wood.
@@ -157,6 +174,14 @@ public class JumpModel implements DynamicBlockStateModel {
         JumpMaterials materials = level.getModelData(pos).get(JumpBlockEntity.MATERIALS);
         if (materials == null) {
             materials = JumpMaterials.DEFAULT;
+        }
+        // HEIGHT FIRST: hand the whole job to the copy baked at this jump's
+        // scale. Only the top-level model holds the ladder; the rungs hold null
+        // and do the actual work, so this recurses exactly once.
+        if (this.sizes != null) {
+            this.sizes[JumpMaterials.clampSize(materials.size())]
+                    .collectParts(level, pos, state, random, parts);
+            return;
         }
         // THE WOOD ALWAYS GOES IN. A painted half gains a second part on top
         // rather than replacing its first, which is the whole reason the grain
@@ -254,7 +279,7 @@ public class JumpModel implements DynamicBlockStateModel {
         // start a group, and two crossrails draw different poles depending on
         // where in their run they sit - so a cache keyed on the woods alone
         // would hand one of them the other's mesh.
-        return List.of(key, JumpBlock.segment(level, pos, state));
+        return List.of(key, JumpBlock.segment(level, pos, state), key.size());
     }
 
     @Override
@@ -328,13 +353,37 @@ public class JumpModel implements DynamicBlockStateModel {
 
         @Override
         public BlockStateModel bake(ModelBaker baker) {
+            JumpModel[] ladder = new JumpModel[JumpMaterials.SIZES.length];
+            for (int size = 0; size < ladder.length; size++) {
+                ladder[size] = bakeAt(baker, JumpMaterials.SIZES[size]);
+            }
+            // The ladder's own parts are never drawn - collectParts hands
+            // straight off to a rung - but a model must still answer for its
+            // particle and its material flags, so it is a real one at 1.0.
+            JumpModel top = bakeAt(baker, 1.0F);
+            return new JumpModel(top.rails, top.standards, top.overlayRails,
+                    top.overlayStandards, top.railSegments, top.overlaySegments,
+                    top.standardsVariants, top.overlayStandardsVariants, ladder);
+        }
+
+        /**
+         * Every part, baked at one height.
+         *
+         * <p>The scale is composed into the {@code ModelState} as a NeoForge
+         * root transform, which is the supported way to get an arbitrary
+         * transform into baked geometry - {@code SimpleModelWrapper} takes no
+         * scale of its own. It scales about the block's own origin, so a jump
+         * grows upward out of the floor rather than about its middle, matching
+         * how {@code JumpBlock} scales the collision box.
+         */
+        private JumpModel bakeAt(ModelBaker baker, float scale) {
             Map<String, BlockStateModelPart> railParts = new LinkedHashMap<>();
             Map<String, BlockStateModelPart> standardParts = new LinkedHashMap<>();
             for (String wood : JumpWoods.keys()) {
                 railParts.put(wood, SimpleModelWrapper.bake(
-                        baker, model(wood, this.rails), this.state.asModelState()));
+                        baker, model(wood, this.rails), modelState(scale)));
                 standardParts.put(wood, SimpleModelWrapper.bake(
-                        baker, model(wood, this.standards), this.state.asModelState()));
+                        baker, model(wood, this.standards), modelState(scale)));
             }
             // The six slices, but ONLY for a spanning style. Baking them for
             // every style would be five wasted parts per wood per variant, on a
@@ -345,10 +394,11 @@ public class JumpModel implements DynamicBlockStateModel {
             // since it sees one neighbour.
             Map<String, BlockStateModelPart[]> uprights = new LinkedHashMap<>();
             for (String wood : JumpWoods.keys()) {
-                uprights.put(wood, bakeConnections(baker, wood));
+                uprights.put(wood, bakeConnections(baker, wood, scale));
             }
             Map<String, BlockStateModelPart[]> standardsVariants = Map.copyOf(uprights);
-            BlockStateModelPart[] overlayStandardsVariants = bakeConnections(baker, OVERLAY);
+            BlockStateModelPart[] overlayStandardsVariants =
+                    bakeConnections(baker, OVERLAY, scale);
 
             // The six rails slices are crossrails-only: every other style draws
             // the same rails in every block of a run and has nothing to choose.
@@ -357,18 +407,28 @@ public class JumpModel implements DynamicBlockStateModel {
             if (this.spanning) {
                 Map<String, BlockStateModelPart[]> slices = new LinkedHashMap<>();
                 for (String wood : JumpWoods.keys()) {
-                    slices.put(wood, bakeSlices(baker, wood));
+                    slices.put(wood, bakeSlices(baker, wood, scale));
                 }
                 segments = Map.copyOf(slices);
-                overlaySegments = bakeSlices(baker, OVERLAY);
+                overlaySegments = bakeSlices(baker, OVERLAY, scale);
             }
             return new JumpModel(Map.copyOf(railParts), Map.copyOf(standardParts),
-                    SimpleModelWrapper.bake(baker, model(OVERLAY, this.rails),
-                            this.state.asModelState()),
+                    SimpleModelWrapper.bake(baker, model(OVERLAY, this.rails), modelState(scale)),
                     SimpleModelWrapper.bake(baker, model(OVERLAY, this.standards),
-                            this.state.asModelState()),
+                            modelState(scale)),
                     segments, overlaySegments,
-                    standardsVariants, overlayStandardsVariants);
+                    standardsVariants, overlayStandardsVariants, null);
+        }
+
+        /** This variant's rotation, with a height scale composed into it. */
+        private net.minecraft.client.renderer.block.dispatch.ModelState modelState(float scale) {
+            net.minecraft.client.renderer.block.dispatch.ModelState rotation = this.state.asModelState();
+            if (scale == 1.0F) {
+                return rotation;
+            }
+            return net.neoforged.neoforge.client.model.UnbakedElementsHelper
+                    .composeRootTransformIntoModelState(rotation, new com.mojang.math.Transformation(
+                            null, null, new org.joml.Vector3f(1.0F, scale, 1.0F), null));
         }
 
         /**
@@ -377,12 +437,11 @@ public class JumpModel implements DynamicBlockStateModel {
          * the baker writes it without a connection suffix precisely so the
          * model can append its own.
          */
-        private BlockStateModelPart[] bakeConnections(ModelBaker baker, String wood) {
+        private BlockStateModelPart[] bakeConnections(ModelBaker baker, String wood, float scale) {
             BlockStateModelPart[] parts = new BlockStateModelPart[CONNECTIONS.length];
             for (int i = 0; i < CONNECTIONS.length; i++) {
                 parts[i] = SimpleModelWrapper.bake(
-                        baker, model(wood, this.standards + CONNECTIONS[i]),
-                        this.state.asModelState());
+                        baker, model(wood, this.standards + CONNECTIONS[i]), modelState(scale));
             }
             return parts;
         }
@@ -395,14 +454,13 @@ public class JumpModel implements DynamicBlockStateModel {
         private static final String[] CONNECTIONS = {"", "_l", "_r", "_lr"};
 
         /** One wood's six slices, in {@code JumpBlock.segmentIndex} order. */
-        private BlockStateModelPart[] bakeSlices(ModelBaker baker, String wood) {
+        private BlockStateModelPart[] bakeSlices(ModelBaker baker, String wood, float scale) {
             BlockStateModelPart[] slices =
                     new BlockStateModelPart[JumpBlock.CROSS_SEGMENTS];
             for (int span = 1; span <= JumpBlock.CROSS_MAX_SPAN; span++) {
                 for (int index = 0; index < span; index++) {
                     slices[JumpBlock.segmentIndex(span, index)] = SimpleModelWrapper.bake(
-                            baker, model(wood, this.rails + slice(span, index)),
-                            this.state.asModelState());
+                            baker, model(wood, this.rails + slice(span, index)), modelState(scale));
                 }
             }
             return slices;

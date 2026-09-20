@@ -206,6 +206,23 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.VAR_INT)
                     .build());
 
+    /**
+     * <b>How tall a jump is</b>, as an index into {@code JumpMaterials.SIZES} -
+     * a ladder from a ground pole at a tenth of a block to double height.
+     *
+     * <p>An index rather than the number itself, because the model bakes one
+     * scaled copy of every part per rung and the index <i>is</i> which copy.
+     *
+     * <p><b>Absent means one block</b>, the ordinary jump, the same convention
+     * the dyes use and for the same reason: the common case carries no
+     * component, so two plain jumps merge in a chest.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> JUMP_SIZE =
+            TYPES.register("jump_size", () -> DataComponentType.<Integer>builder()
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

@@ -59,8 +59,14 @@ public final class JumpMenu extends AbstractContainerMenu {
     public static final int SLOT_STANDARDS = 1;
     private static final int SLOT_COUNT = 2;
 
-    /** Button ids, which are {@link JumpBlock.Style} ordinals. See {@link #clickMenuButton}. */
+    /** Button ids 0-2, which are {@link JumpBlock.Style} ordinals. See {@link #clickMenuButton}. */
     public static final int STYLE_BUTTONS = 3;
+
+    /** Button id 3: one rung shorter. */
+    public static final int BUTTON_SHORTER = STYLE_BUTTONS;
+
+    /** Button id 4: one rung taller. */
+    public static final int BUTTON_TALLER = STYLE_BUTTONS + 1;
 
     // ------------------------------------------------------------------
     // Layout, owned here so the screen has one place to read it from -
@@ -68,7 +74,7 @@ public final class JumpMenu extends AbstractContainerMenu {
     // ------------------------------------------------------------------
 
     public static final int WIDTH = 176;
-    public static final int HEIGHT = 194;
+    public static final int HEIGHT = 220;
     public static final int MARGIN = 8;
     public static final int TITLE_Y = 6;
 
@@ -85,8 +91,18 @@ public final class JumpMenu extends AbstractContainerMenu {
     /** The three style buttons' left edges. */
     public static final int[] BUTTON_X = {8, 62, 116};
 
-    public static final int INV_LABEL_Y = 100;
-    public static final int INV_Y = 112;
+    /** The height row: a caption, two nudge buttons and the number between them. */
+    public static final int SIZE_LABEL_Y = 104;
+    public static final int SIZE_BUTTON_Y = 100;
+    public static final int SIZE_BUTTON_W = 20;
+    public static final int SIZE_BUTTON_H = 20;
+    public static final int SIZE_MINUS_X = 96;
+    public static final int SIZE_PLUS_X = 148;
+    /** Where the number itself is centred, between the two buttons. */
+    public static final int SIZE_VALUE_X = 138;
+
+    public static final int INV_LABEL_Y = 126;
+    public static final int INV_Y = 138;
 
     // ------------------------------------------------------------------
     // WHAT THE CLIENT KNOWS, AND HOW.
@@ -322,6 +338,9 @@ public final class JumpMenu extends AbstractContainerMenu {
      */
     @Override
     public boolean clickMenuButton(Player who, int id) {
+        if (id == BUTTON_SHORTER || id == BUTTON_TALLER) {
+            return nudgeSize(id == BUTTON_TALLER ? 1 : -1);
+        }
         if (id < 0 || id >= STYLE_BUTTONS) {
             return false;
         }
@@ -335,6 +354,35 @@ public final class JumpMenu extends AbstractContainerMenu {
                 // neighbours, but a block never receives its own update.
                 level.setBlockAndUpdate(pos, JumpBlock.connected(
                         state.setValue(JumpBlock.STYLE, style), level, pos));
+                level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+        });
+        return true;
+    }
+
+    /**
+     * <b>A rung up or down, for the whole run.</b>
+     *
+     * <p>A fence has a height; each block of it does not. So this sets every
+     * jump joined to this one - see {@code JumpBlock.setRunSize} - which is the
+     * only version that cannot go wrong by accident. A stepped line is still
+     * buildable on purpose, by breaking the run.
+     *
+     * <p>Free, like the style buttons, and for the same reason: height is the
+     * one thing about a jump that is a <i>measurement</i> rather than a
+     * decoration, and charging for the rung you are testing at would be
+     * charging to ask the question.
+     */
+    private boolean nudgeSize(int step) {
+        this.access.execute((level, pos) -> {
+            BlockState state = level.getBlockState(pos);
+            if (!(state.getBlock() instanceof JumpBlock)) {
+                return;
+            }
+            int now = materials().size();
+            int wanted = JumpMaterials.clampSize(now + step);
+            if (wanted != now) {
+                JumpBlock.setRunSize(level, pos, state, wanted);
                 level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
         });

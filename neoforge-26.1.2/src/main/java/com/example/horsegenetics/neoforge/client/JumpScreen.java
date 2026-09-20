@@ -35,12 +35,17 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
     private static final Component RAILS = Component.translatable("horsegenetics.jump.rails");
     private static final Component STANDARDS = Component.translatable("horsegenetics.jump.standards");
     private static final Component STYLE = Component.translatable("horsegenetics.jump.style");
+    private static final Component SIZE = Component.translatable("horsegenetics.jump.size");
+    private static final Component SHORTER = Component.literal("\u2212");
+    private static final Component TALLER = Component.literal("+");
 
     /** The paint swatch: where it sits in a row, and how big. */
     private static final int SWATCH_X = 150;
     private static final int SWATCH_SIZE = 10;
 
     private final Button[] styleButtons = new Button[JumpMenu.STYLE_BUTTONS];
+    private Button shorter;
+    private Button taller;
 
     public JumpScreen(JumpMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, JumpMenu.WIDTH, JumpMenu.HEIGHT);
@@ -65,6 +70,17 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
                     .build();
             this.addRenderableWidget(this.styleButtons[i]);
         }
+        this.shorter = Button.builder(SHORTER, button -> press(JumpMenu.BUTTON_SHORTER))
+                .bounds(this.leftPos + JumpMenu.SIZE_MINUS_X, this.topPos + JumpMenu.SIZE_BUTTON_Y,
+                        JumpMenu.SIZE_BUTTON_W, JumpMenu.SIZE_BUTTON_H)
+                .build();
+        this.taller = Button.builder(TALLER, button -> press(JumpMenu.BUTTON_TALLER))
+                .bounds(this.leftPos + JumpMenu.SIZE_PLUS_X, this.topPos + JumpMenu.SIZE_BUTTON_Y,
+                        JumpMenu.SIZE_BUTTON_W, JumpMenu.SIZE_BUTTON_H)
+                .build();
+        this.addRenderableWidget(this.shorter);
+        this.addRenderableWidget(this.taller);
+
         syncButtons();
     }
 
@@ -91,6 +107,15 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
             if (this.styleButtons[i] != null) {
                 this.styleButtons[i].active = i != current;
             }
+        }
+        // The ends of the ladder grey out, so the range is visible rather than
+        // something you discover by clicking into nothing.
+        int size = JumpMaterials.clampSize(this.menu.materials().size());
+        if (this.shorter != null) {
+            this.shorter.active = size > 0;
+        }
+        if (this.taller != null) {
+            this.taller.active = size < JumpMaterials.SIZES.length - 1;
         }
     }
 
@@ -132,6 +157,26 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
 
         g.text(this.font, STYLE, JumpMenu.MARGIN, JumpMenu.STYLE_LABEL_Y,
                 VanillaPanel.TEXT_DIM, false);
+
+        // THE HEIGHT, AND WHAT IT MEANS. The multiple on its own is a number
+        // nobody can act on; the blocks-to-clear is the thing a player is
+        // actually asking about when they set one, and it is the number the
+        // horse has to beat.
+        g.text(this.font, SIZE, JumpMenu.MARGIN, JumpMenu.SIZE_LABEL_Y,
+                VanillaPanel.TEXT_DIM, false);
+        float scale = materials.scale();
+        Component reading = Component.translatable("horsegenetics.jump.size.value",
+                trim(scale), trim(scale + 0.5F));
+        g.text(this.font, reading,
+                JumpMenu.SIZE_VALUE_X - this.font.width(reading) / 2, JumpMenu.SIZE_LABEL_Y,
+                VanillaPanel.TEXT, false);
+    }
+
+    /** "1" rather than "1.0", but "0.75" in full. */
+    private static String trim(float value) {
+        String text = String.format(java.util.Locale.ROOT, "%.2f", value);
+        text = text.replaceAll("0+$", "");
+        return text.endsWith(".") ? text.substring(0, text.length() - 1) : text;
     }
 
     /**

@@ -706,6 +706,7 @@ put(join(D, "loot_table/blocks", `${STYLE}.json`), {
                 `${NS}:jump_standards`,
                 `${NS}:jump_rails_dye`,
                 `${NS}:jump_standards_dye`,
+                `${NS}:jump_size`,
               ],
             },
           ],
@@ -723,6 +724,11 @@ lang[`block.${NS}.${STYLE}`] = STYLE_LABEL;
 lang[`${NS}.jump.rails`] = "Rails";
 lang[`${NS}.jump.standards`] = "Standards";
 lang[`${NS}.jump.style`] = "Style";
+lang[`${NS}.jump.size`] = "Height";
+// The multiple on its own is a number nobody can act on; the blocks-to-clear is
+// what a player is actually asking when they set one, and it is the number the
+// horse has to beat. JumpScreen formats both.
+lang[`${NS}.jump.size.value`] = "%s blocks · %s to clear";
 for (const style of STYLES) {
   lang[`${NS}.jump.style.${style}`] = STYLE_BUTTON[style];
 }
