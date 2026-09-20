@@ -169,7 +169,6 @@
   "item.horsegenetics.warped_wagon": "Warped Wagon",
   "item.horsegenetics.white_gene_splice_carrot": "White Gene Splice Carrot",
   "itemGroup.horsegenetics.carts": "Horse Carts",
-  "itemGroup.horsegenetics.jumps": "Horse Jumps",
   "itemGroup.horsegenetics.main": "Horse Genetics",
   "key.categories.horsegenetics.debug": "Horse Genetics (Debug)",
   "key.category.horsegenetics.carts": "Horse Carts",
@@ -283,5 +282,7 @@
   "horsegenetics.jump.style.crossrails": "Crossrails",
   "horsegenetics.jump.hint": "Right-click the jump to choose its wood, paint and style",
   "horsegenetics.jump.size": "Height",
-  "horsegenetics.jump.size.value": "%s blocks · %s to clear"
+  "horsegenetics.jump.size.value": "%s blocks",
+  "horsegenetics.jump.size.clear": "%s to clear",
+  "itemGroup.horsegenetics.breeds": "Horse Breeds"
 }

@@ -728,7 +728,8 @@ lang[`${NS}.jump.size`] = "Height";
 // The multiple on its own is a number nobody can act on; the blocks-to-clear is
 // what a player is actually asking when they set one, and it is the number the
 // horse has to beat. JumpScreen formats both.
-lang[`${NS}.jump.size.value`] = "%s blocks · %s to clear";
+lang[`${NS}.jump.size.value`] = "%s blocks";
+lang[`${NS}.jump.size.clear`] = "%s to clear";
 for (const style of STYLES) {
   lang[`${NS}.jump.style.${style}`] = STYLE_BUTTON[style];
 }

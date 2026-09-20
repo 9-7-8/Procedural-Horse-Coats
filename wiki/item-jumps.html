@@ -108,11 +108,12 @@
         dye back.
     </p>
     <p>
-        <strong>Height applies to the whole fence</strong>, not to the block you clicked &mdash; a
-        fence has a height, each block of it does not. Ten rungs, from
+        <strong>Height and style both apply to the whole fence</strong>, not to the block you
+        clicked &mdash; a fence has a height and is one kind of fence; each block of it is
+        neither. To build a mixed or stepped line on purpose, break the run and set the halves
+        separately. Ten rungs, from
         <strong>0.1</strong> (a ground pole) to <strong>2.0</strong> (double), and the screen shows
-        both the height and what a horse has to clear. To build a stepped line on purpose, break
-        the run and set the halves separately.
+        both the height and what a horse has to clear.
     </p>
     <p>
         The style and height buttons are free. <strong>Right-clicking a jump opens the window whatever is in
@@ -130,15 +131,15 @@
 <h2 id="height">Height is a measuring stick</h2>
 
 <p>
-    A jump is <strong>half a block taller to clear than it looks</strong>. It stops you like a
-    fence does, which is the same bargain vanilla makes with every fence and wall: half a block of
-    it is invisible. Without that a horse just steps over the rail, because a horse steps a full
-    block without breaking stride.
+    A jump is <strong>an eighth of a block taller to clear than it looks</strong>. It stops you
+    like a fence does, and a sliver of it is invisible &mdash; without that a horse simply steps
+    over the rail, because a horse steps a full block without breaking stride.
 </p>
 
 <p>
-    <strong>That half-block does not scale</strong>, which is what makes the whole range work
-    without a special case. A jump is <code>height + &frac12;</code> blocks to clear:
+    <strong>That sliver does not scale</strong>, which is what makes the whole range work without
+    a special case. A jump is <code>height + &#8539;</code> blocks to clear, so what you have to
+    clear is never far from what you can see:
 </p>
 
 <table>
@@ -146,21 +147,26 @@
         <tr><th>Height</th><th>To clear</th><th>What it is</th></tr>
     </thead>
     <tbody>
-        <tr><td>0.1</td><td>0.6 blocks</td><td>A <strong>ground pole</strong>. Under a horse&rsquo;s
-            1.0 step, so it is walked over &mdash; schooling, not an obstacle</td></tr>
-        <tr><td>0.3</td><td>0.8</td><td>Still walkable. A trot pole</td></tr>
-        <tr><td>0.5</td><td>1.0</td><td>Exactly step height. The point it stops being scenery</td></tr>
-        <tr><td>1.0</td><td>1&frac12;</td><td>A low fence. Most horses manage, a bad jumper does not</td></tr>
-        <tr><td>1.5</td><td>2</td><td>Wants a horse bred for it</td></tr>
-        <tr><td>2.0</td><td>2&frac12;</td><td>Beyond anything the natural loci reach on their own</td></tr>
+        <tr><td>0.1</td><td>0.25 blocks</td><td>A <strong>ground pole</strong> &mdash; schooling,
+            not an obstacle</td></tr>
+        <tr><td>0.5</td><td>0.625</td><td>A trot pole. Still walked over</td></tr>
+        <tr><td>0.75</td><td>0.875</td><td>The last walkable rung</td></tr>
+        <tr><td>1.0</td><td>1.125</td><td>A low fence, and the first real one. Most horses manage,
+            a bad jumper does not</td></tr>
+        <tr><td>1.5</td><td>1.625</td><td>Wants a horse bred for it</td></tr>
+        <tr><td>2.0</td><td>2.125</td><td>Beyond anything the natural loci reach on their own</td></tr>
     </tbody>
 </table>
 
 <p>
-    <strong>And you can still stack.</strong> A jump on top of a jump adds its own height on top of
-    the one below, so the range above 2&frac12; is reached the way it always was. Note that the
-    invisible half-block does not add twice &mdash; two stacked jumps clear at the sum of their
-    heights plus one half, not plus two.
+    <strong>The line falls where you can see it.</strong> Everything under a block is walked over
+    and everything from a block up has to be jumped &mdash; a rule you can read off the fence
+    rather than one you learn by failing at it.
+</p>
+
+<p>
+    <strong>And you can still stack.</strong> A jump on top of a jump adds its own height to the one
+    below, so the range above 2 is reached the way it always was.
 </p>
 
 <p>

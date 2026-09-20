@@ -74,7 +74,7 @@ public final class JumpMenu extends AbstractContainerMenu {
     // ------------------------------------------------------------------
 
     public static final int WIDTH = 176;
-    public static final int HEIGHT = 220;
+    public static final int HEIGHT = 224;
     public static final int MARGIN = 8;
     public static final int TITLE_Y = 6;
 
@@ -91,18 +91,22 @@ public final class JumpMenu extends AbstractContainerMenu {
     /** The three style buttons' left edges. */
     public static final int[] BUTTON_X = {8, 62, 116};
 
-    /** The height row: a caption, two nudge buttons and the number between them. */
+    // The height row. TWO LINES OF TEXT ON THE LEFT, both buttons hard right -
+    // one line beside the buttons overlapped them the moment the reading grew
+    // to "0.3 blocks - 0.8 to clear", which is most of the ladder.
     public static final int SIZE_LABEL_Y = 104;
-    public static final int SIZE_BUTTON_Y = 100;
+    /** The second line, under the first: what a horse actually has to clear. */
+    public static final int SIZE_CLEAR_Y = SIZE_LABEL_Y + 11;
+    /** Where the height itself is drawn, just right of its caption. */
+    public static final int SIZE_VALUE_X = 46;
+    public static final int SIZE_BUTTON_Y = 102;
     public static final int SIZE_BUTTON_W = 20;
     public static final int SIZE_BUTTON_H = 20;
-    public static final int SIZE_MINUS_X = 96;
+    public static final int SIZE_MINUS_X = 124;
     public static final int SIZE_PLUS_X = 148;
-    /** Where the number itself is centred, between the two buttons. */
-    public static final int SIZE_VALUE_X = 138;
 
-    public static final int INV_LABEL_Y = 126;
-    public static final int INV_Y = 138;
+    public static final int INV_LABEL_Y = 130;
+    public static final int INV_Y = 142;
 
     // ------------------------------------------------------------------
     // WHAT THE CLIENT KNOWS, AND HOW.
@@ -348,12 +352,13 @@ public final class JumpMenu extends AbstractContainerMenu {
         this.access.execute((level, pos) -> {
             BlockState state = level.getBlockState(pos);
             if (state.getBlock() instanceof JumpBlock && state.getValue(JumpBlock.STYLE) != style) {
-                // Recomputed, not just re-styled: a jump connects only to a jump
-                // of the SAME style, so restyling one in the middle of a run has
-                // to grow its own standards back. setBlockAndUpdate tells the
-                // neighbours, but a block never receives its own update.
-                level.setBlockAndUpdate(pos, JumpBlock.connected(
-                        state.setValue(JumpBlock.STYLE, style), level, pos));
+                // THE WHOLE RUN, like the height - a fence is one kind of fence,
+                // and restyling a built line block by block is eleven clicks to
+                // get back where you started. JumpBlock.setRunStyle collects the
+                // run before it changes anything, because a jump only connects
+                // to a jump of the same style and the walk would otherwise stop
+                // at its own first step.
+                JumpBlock.setRunStyle(level, pos, state, style);
                 level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
         });

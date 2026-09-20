@@ -170,17 +170,51 @@ public class JumpBlock extends HorizontalDirectionalBlock
     private static final int STANDARD_TOP = 16;
 
     /**
-     * Where the <i>collision</i> boxes stop - half a block above this one.
+     * Where the <i>collision</i> boxes stop - <b>two pixels</b> above the drawn
+     * height, and no more.
      *
-     * <p><b>Vanilla's own fence number.</b> A fence is drawn one block tall and
-     * collides one and a half, which is the only reason a player or a horse
-     * cannot step over one; without it a 16-high barrier sits under a horse's
-     * 1.0 step height and gets walked across. This block shipped without it and
-     * the owner's verdict in play was immediate: the jumps &ldquo;look great,
-     * expand great&rdquo;, but a horse walked over them and it
-     * &ldquo;doesn't feel immersive&rdquo;. Make it behave like a fence.
+     * <h2>Why there is any margin at all</h2>
+     * A horse steps a full block without breaking stride, so a barrier whose
+     * collision stops at its own drawn top is walked across. That is what
+     * shipped first, and the owner's verdict in play was immediate: the jumps
+     * &ldquo;look great, expand great&rdquo;, but a horse walked over them and
+     * it &ldquo;doesn't feel immersive&rdquo;.
+     *
+     * <h2>Why it is two pixels and not eight</h2>
+     * It was eight - vanilla's fence number, a jump drawn one block tall and
+     * colliding one and a half. Vanilla needs that much because its fence is
+     * exactly one block and the margin has to clear a 1.0 step on its own. A
+     * jump has a <i>height</i>, so it does not: the margin only has to be
+     * enough that a full-height one is not steppable, and two pixels puts it at
+     * 1.125.
+     *
+     * <p>Eight was a lie the rest of the time. A two-block jump asked for two
+     * and a half, which is half a block of obstacle nobody can see - and the
+     * owner asked for exactly this: make &ldquo;to clear&rdquo; much closer to
+     * the visual model. It now tracks it within an eighth of a block at every
+     * height.
+     *
+     * <p><b>It also draws the line in the right place.</b> With eight, a
+     * three-quarter jump cleared at 1.25 and was an obstacle despite looking
+     * like a pole you could step over. With two, everything under a block is
+     * walkable and everything from a block up is not, which is a rule a player
+     * can see rather than learn.
      */
-    private static final int COLLISION_TOP = 24;
+    private static final int COLLISION_TOP = 18;
+
+    /** How far collision runs above the drawn height, in model pixels. */
+    public static final int COLLISION_MARGIN = COLLISION_TOP - STANDARD_TOP;
+
+    /**
+     * <b>What a horse actually has to clear</b>, in blocks, for a given height.
+     *
+     * <p>Computed from the same integers the {@code VoxelShape} is built from,
+     * so the number the screen shows is the number the horse meets rather than
+     * a second opinion about it.
+     */
+    public static float clearance(float scale) {
+        return (Math.round(STANDARD_TOP * scale) + COLLISION_MARGIN) / (float) STANDARD_TOP;
+    }
 
     /**
      * One horizontal bar of a style, in the authored facing=south frame where
@@ -594,8 +628,50 @@ public class JumpBlock extends HorizontalDirectionalBlock
      * <p>Bounded by {@link #CROSS_MAX_RUN} each way, like every other walk here.
      */
     public static void setRunSize(Level level, BlockPos pos, BlockState state, int size) {
+        for (BlockPos at : run(level, pos, state)) {
+            applySize(level, at, size);
+        }
+    }
+
+    /**
+     * <b>Restyle a jump, and every jump joined to it.</b>
+     *
+     * <p>Same argument as the height: a fence is one kind of fence, and
+     * restyling a built line one block at a time is eleven clicks to get back
+     * to where you started. A deliberately mixed line is still buildable by
+     * breaking the run.
+     *
+     * <p><b>The run has to be collected before anything changes.</b>
+     * {@link #connects} tests style, so the moment the first block becomes an
+     * oxer it stops connecting to the verticals beside it and the walk would
+     * stop dead at its own first step. And the connection flags can only be
+     * recomputed once every block has the new style, which is why this is two
+     * passes and not one.
+     */
+    public static void setRunStyle(Level level, BlockPos pos, BlockState state, Style style) {
+        java.util.List<BlockPos> run = run(level, pos, state);
+        for (BlockPos at : run) {
+            BlockState there = level.getBlockState(at);
+            if (there.getBlock() instanceof JumpBlock) {
+                level.setBlock(at, there.setValue(STYLE, style), Block.UPDATE_ALL);
+            }
+        }
+        for (BlockPos at : run) {
+            BlockState there = level.getBlockState(at);
+            if (there.getBlock() instanceof JumpBlock) {
+                level.setBlock(at, connected(there, level, at), Block.UPDATE_ALL);
+            }
+        }
+    }
+
+    /**
+     * Every jump in this one's run, itself included, bounded by
+     * {@link #CROSS_MAX_RUN} each way.
+     */
+    private static java.util.List<BlockPos> run(Level level, BlockPos pos, BlockState state) {
+        java.util.List<BlockPos> found = new java.util.ArrayList<>();
+        found.add(pos);
         Direction left = state.getValue(FACING).getCounterClockWise();
-        applySize(level, pos, size);
         for (Direction direction : new Direction[] {left, left.getOpposite()}) {
             BlockPos.MutableBlockPos cursor = pos.mutable();
             for (int step = 0; step < CROSS_MAX_RUN; step++) {
@@ -603,9 +679,10 @@ public class JumpBlock extends HorizontalDirectionalBlock
                 if (!connects(state, level.getBlockState(cursor))) {
                     break;
                 }
-                applySize(level, cursor.immutable(), size);
+                found.add(cursor.immutable());
             }
         }
+        return found;
     }
 
     private static void applySize(Level level, BlockPos pos, int size) {

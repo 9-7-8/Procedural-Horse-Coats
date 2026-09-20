@@ -158,18 +158,21 @@ public final class JumpScreen extends AbstractContainerScreen<JumpMenu> {
         g.text(this.font, STYLE, JumpMenu.MARGIN, JumpMenu.STYLE_LABEL_Y,
                 VanillaPanel.TEXT_DIM, false);
 
-        // THE HEIGHT, AND WHAT IT MEANS. The multiple on its own is a number
-        // nobody can act on; the blocks-to-clear is the thing a player is
-        // actually asking about when they set one, and it is the number the
-        // horse has to beat.
+        // THE HEIGHT, AND WHAT IT MEANS, on two lines with the buttons hard
+        // right of both. The multiple on its own is a number nobody can act on;
+        // the blocks-to-clear is the thing a player is actually asking when
+        // they set one, and it is the number the horse has to beat. It is read
+        // from the same integers the collision box is built from, so it is the
+        // number rather than a second opinion about it.
+        float scale = materials.scale();
         g.text(this.font, SIZE, JumpMenu.MARGIN, JumpMenu.SIZE_LABEL_Y,
                 VanillaPanel.TEXT_DIM, false);
-        float scale = materials.scale();
-        Component reading = Component.translatable("horsegenetics.jump.size.value",
-                trim(scale), trim(scale + 0.5F));
-        g.text(this.font, reading,
-                JumpMenu.SIZE_VALUE_X - this.font.width(reading) / 2, JumpMenu.SIZE_LABEL_Y,
-                VanillaPanel.TEXT, false);
+        g.text(this.font, Component.literal(trim(scale)),
+                JumpMenu.SIZE_VALUE_X, JumpMenu.SIZE_LABEL_Y, VanillaPanel.TEXT, false);
+        g.text(this.font,
+                Component.translatable("horsegenetics.jump.size.clear",
+                        trim(JumpBlock.clearance(scale))),
+                JumpMenu.MARGIN, JumpMenu.SIZE_CLEAR_Y, VanillaPanel.TEXT_DIM, false);
     }
 
     /** "1" rather than "1.0", but "0.75" in full. */

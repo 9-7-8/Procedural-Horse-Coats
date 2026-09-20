@@ -10,9 +10,31 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * One creative tab holding every gameplay-layer item ({@link ModItems#TAB_ITEMS}).
- * The custom horse spawn egg additionally shows in the vanilla Spawn Eggs tab
- * (see {@link ModItems#addToCreativeTab}).
+ * <b>This mod's creative tabs, and the order they sit in.</b>
+ *
+ * <p>Three, reading left to right as the thing you build with, the thing you
+ * populate it with, and the thing you hitch to it:
+ *
+ * <ol>
+ *   <li><b>Horse Genetics</b> - the gameplay layer. Carrots, papers, tickets,
+ *       whistles, tack, and the blocks a yard is made of.</li>
+ *   <li><b>Horse Breeds</b> - one spawn egg per breed, and nothing else.</li>
+ *   <li><b>Horse Carts</b> - registered over in {@code carts/HorseCarts},
+ *       because that package is a self-contained subsystem and owns its own
+ *       registrations.</li>
+ * </ol>
+ *
+ * <p><b>The breeds have a tab because of how many there are.</b> They were in
+ * the main tab, one filled egg per breed that has one, and that is a list which
+ * grows every time somebody writes a breed file - a shelf of eggs that pushed
+ * the carrots and papers the tab exists for off the bottom of it. A tab per
+ * <i>kind of thing</i> survives the roster growing; a tab per subsystem does
+ * not, which is why the jumps do not have one (see {@link #MAIN}).
+ *
+ * <p>The custom horse spawn egg additionally shows in the vanilla Spawn Eggs
+ * tab (see {@link ModItems#addToCreativeTab}). The double gates are filed into
+ * vanilla's Building Blocks beside the gate of their own wood, which is where
+ * somebody reaching for a gate looks.
  */
 public final class ModCreativeTabs {
 
@@ -33,14 +55,12 @@ public final class ModCreativeTabs {
                         // ModItems.addToCreativeTab. Listing them here as well
                         // would put twelve wood variants in a tab that is about
                         // horses, and bury the things it exists for.
-                        // One filled breed egg per breed that has one. The blank
-                        // item is not listed anywhere: its whole content is the
-                        // breed component, and an egg without one does nothing.
-                        for (com.example.horsegenetics.common.breed.Breed breed
-                                : com.example.horsegenetics.common.breed.Breeds.from(
-                                        com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
-                            output.accept(BreedSpawnEggItem.of(breed));
-                        }
+                        // THE BREED EGGS ARE NOT HERE ANY MORE - they have a tab
+                        // of their own (BREEDS below), because there is one per
+                        // breed and that is a list that grows every time somebody
+                        // writes a breed file. They were burying the carrots and
+                        // papers this tab exists for.
+                        //
                         // THE JUMP, folded back in here. It had a tab of its
                         // own, on the argument that "each style is another
                         // twelve woods, so the roster grows by the dozen" and
@@ -53,6 +73,49 @@ public final class ModCreativeTabs {
                         output.accept(oakJump());
                     })
                     .build());
+
+    /**
+     * <b>One spawn egg per breed</b>, and nothing else in it.
+     *
+     * <p>Filled eggs only. The blank {@code breed_spawn_egg} item is not listed
+     * anywhere: its whole content is the breed component, and an egg without
+     * one does nothing - it is a puzzle rather than an item.
+     *
+     * <p>Sits directly after {@link #MAIN}, so the two horse tabs are
+     * neighbours rather than being separated by whatever else is installed.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> BREEDS =
+            TABS.register("breeds", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.horsegenetics.breeds"))
+                    // The first breed that has an egg, rather than a named one:
+                    // an icon that cannot point at a breed somebody deleted.
+                    .icon(ModCreativeTabs::firstBreedEgg)
+                    .withTabsAfter(MAIN.getKey())
+                    .displayItems((params, output) -> {
+                        for (com.example.horsegenetics.common.breed.Breed breed
+                                : com.example.horsegenetics.common.breed.Breeds.from(
+                                        com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
+                            output.accept(BreedSpawnEggItem.of(breed));
+                        }
+                    })
+                    .build());
+
+    /**
+     * The breeds tab's icon.
+     *
+     * <p>Taken from the list rather than named, so it cannot point at a breed
+     * that was deleted or renamed. A blank egg is the fallback for the case
+     * that should never happen - no breed carrying one at all - because a tab
+     * with no icon is worse than a tab with a dull one.
+     */
+    private static ItemStack firstBreedEgg() {
+        for (com.example.horsegenetics.common.breed.Breed breed
+                : com.example.horsegenetics.common.breed.Breeds.from(
+                        com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
+            return BreedSpawnEggItem.of(breed);
+        }
+        return new ItemStack(ModItems.BREED_SPAWN_EGG.get());
+    }
 
     /**
      * <b>The creative tab's jump</b> - oak, and stamped with its woods.

@@ -318,6 +318,11 @@ public final class HorseCarts {
                     CreativeModeTab.builder()
                             .title(Component.translatable("itemGroup.horsegenetics.carts"))
                             .icon(() -> new ItemStack(item(CartKind.WAGON, CartWood.fallback())))
+                            // Last of this mod's three, after Horse Genetics and
+                            // Horse Breeds - the thing you hitch to the horse you
+                            // bred, in the yard you built. See ModCreativeTabs.
+                            .withTabsAfter(com.example.horsegenetics.neoforge.item.ModCreativeTabs
+                                    .BREEDS.getKey())
                             .displayItems((params, output) -> {
                                 output.accept(WHEEL);
                                 // Wood-major, so one wood's whole set sits together -
