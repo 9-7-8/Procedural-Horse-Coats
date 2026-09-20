@@ -388,6 +388,104 @@ for (const [wood, texture, woodLabel] of WOODS) {
   });
 }
 
+// --- THE SINGLE BLOCK -----------------------------------------------------
+//
+// The twelve per-wood blocks above are being replaced by ONE block whose woods
+// are block-entity data, so that the rails and the standards can be different
+// woods. As blockstate properties that pair would be 12 x 12 x everything else
+// - 13,824 states, every one allocated at registry bootstrap on the server too.
+//
+// The model that reads the data is client/JumpModel, selected by the "type"
+// field below. It needs the geometry SPLIT IN TWO - a rails model and a
+// standards model per wood - because it composes a jump out of one part of
+// each. That is the trick that turns a 12 x 12 product into a 12 + 12 sum.
+//
+// While the migration is in progress this emits ALONGSIDE the per-wood assets
+// rather than instead of them, so the game keeps loading at every step.
+
+/** Which elements belong to the rails half, and which to the standards half. */
+function splitElements(style, suffix) {
+  const { bars, depth } = STYLE_PARTS[style];
+  const connectedLeft = suffix === "_l" || suffix.startsWith("_lr");
+  const connectedRight = suffix === "_r" || suffix.startsWith("_lr");
+  const standards = [];
+  if (!connectedLeft) standards.push(standard(13, depth[0], depth[1]));
+  if (!connectedRight) standards.push(standard(0, depth[0], depth[1]));
+  // The intermediate post is a STANDARD, not a rail: it is an upright, and it
+  // should take the standards' wood when the two differ.
+  if (suffix === "_lr_post") standards.push(POST);
+  return { rails: [...bars], standards };
+}
+
+for (const style of STYLES) {
+  // The rails do not change with the connection state - only the standards do -
+  // so there is one rails model per style rather than one per connection.
+  put(join(A, "models/block", `template_jump_${style}_rails.json`), {
+    textures: { particle: "#texture" },
+    elements: STYLE_PARTS[style].bars,
+  });
+  for (const suffix of CONNECTIONS) {
+    const { standards } = splitElements(style, suffix);
+    const model = { textures: { particle: "#texture" } };
+    // A mid-run block with no post draws no standards at all. An empty
+    // elements list is legal and bakes to nothing, which is what we want -
+    // but it must still EXIST, because the model id is referenced.
+    model.elements = standards;
+    put(join(A, "models/block", `template_jump_${style}_standards${suffix}.json`), model);
+  }
+}
+
+for (const [wood, texture] of WOODS) {
+  for (const style of STYLES) {
+    put(join(A, "models/block", `${wood}_jump_${style}_rails.json`), {
+      parent: `${NS}:block/template_jump_${style}_rails`,
+      textures: { texture },
+    });
+    for (const suffix of CONNECTIONS) {
+      put(join(A, "models/block", `${wood}_jump_${style}_standards${suffix}.json`), {
+        parent: `${NS}:block/template_jump_${style}_standards${suffix}`,
+        textures: { texture },
+      });
+    }
+  }
+}
+
+// One blockstate for the one block. Every variant names the custom model and
+// the two SUFFIXES it should compose per wood - the wood list itself is not in
+// here, because it would be twenty-four entries repeated ninety-six times and
+// half of it depends on which other mods are installed. See JumpModel.Unbaked.
+const singleVariants = {};
+for (const style of STYLES) {
+  for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
+    for (const left of [false, true]) {
+      for (const right of [false, true]) {
+        for (const post of [false, true]) {
+          const conn = suffixFor(left, right, post);
+          const v = {
+            type: `${NS}:jump`,
+            rails: `jump_${style}_rails`,
+            standards: `jump_${style}_standards${conn}`,
+            uvlock: style !== "crossrails",
+          };
+          if (y !== 0) v.y = y;
+          singleVariants[
+            `facing=${facing},left=${left},post=${post},right=${right},style=${style}`
+          ] = v;
+        }
+      }
+    }
+  }
+}
+put(join(A, "blockstates", "jump.json"), { variants: singleVariants });
+
+// The item shows the oak vertical. Which wood an item PLACES comes from its
+// materials component, not from the model - the icon is just an icon.
+put(join(A, "items", "jump.json"), {
+  model: { type: "minecraft:model", model: `${NS}:block/oak_jump_vertical` },
+});
+
+lang[`block.${NS}.jump`] = "Jump";
+
 // --- tags -----------------------------------------------------------------
 // MERGED, not replaced: mineable/axe already belongs to the double gates, and
 // a datapack has one file per tag. Writing {values: ours} here would silently

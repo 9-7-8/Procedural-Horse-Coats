@@ -84,7 +84,8 @@ import java.util.Map;
  *
  * @see Jumps for the per-wood registration
  */
-public class JumpBlock extends HorizontalDirectionalBlock {
+public class JumpBlock extends HorizontalDirectionalBlock
+        implements net.minecraft.world.level.block.EntityBlock {
 
     public static final MapCodec<JumpBlock> CODEC = simpleCodec(JumpBlock::new);
 
@@ -294,6 +295,18 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     @Override
     protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
         return CODEC;
+    }
+
+    /**
+     * Every jump carries one, and it holds nothing but the two woods.
+     *
+     * <p>Data only - no ticker. A course is hundreds of these, and this block
+     * deliberately does not implement {@code getTicker}.
+     */
+    @Override
+    public @Nullable net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(
+            BlockPos pos, BlockState state) {
+        return new JumpBlockEntity(pos, state);
     }
 
     @Override

@@ -261,6 +261,19 @@ public final class ModItems {
         ModCreativeTabs.TABS.register(modEventBus);
     }
 
+    /**
+     * <b>The one jump item</b>, for the one jump block.
+     *
+     * <p>Placed alongside the twelve per-wood items while the migration runs;
+     * those go when the per-wood blocks do. Its wood comes from the block
+     * entity once placed, not from the item, so the icon is only an icon.
+     */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> JUMP =
+            ITEMS.registerItem("jump",
+                    p -> new net.minecraft.world.item.BlockItem(
+                            com.example.horsegenetics.neoforge.block.ModBlocks.JUMP.get(),
+                            p.useBlockDescriptionPrefix()));
+
     /** Keep the custom spawn egg in the vanilla Spawn Eggs tab too, next to the real one. */
     @SubscribeEvent
     static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {

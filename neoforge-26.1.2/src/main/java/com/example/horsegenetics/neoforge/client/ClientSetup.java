@@ -56,6 +56,22 @@ public final class ClientSetup {
      * reload has to be able to throw them away - see {@link CoatAssetReload}.
      */
     /** This mod's menus: the Equine Research Shelf's, and the Tack Dyeing Bench's. */
+    /**
+     * <b>The jump's two-wood model.</b> The first custom block model in the mod.
+     *
+     * <p>26.1.2 has no {@code BakedModel} and no {@code IDynamicBakedModel} -
+     * both were removed - so this is NOT the shape any tutorial will show. The
+     * interface is {@code BlockStateModel}, the per-position hook is NeoForge's
+     * {@code DynamicBlockStateModel}, and a model is selected by a
+     * {@code "type"} field inside a blockstate variant, dispatched through this
+     * event. See {@link JumpModel}.
+     */
+    @SubscribeEvent
+    static void registerBlockStateModels(
+            net.neoforged.neoforge.client.event.RegisterBlockStateModels event) {
+        event.registerModel(JumpModel.ID, JumpModel.Unbaked.MAP_CODEC);
+    }
+
     @SubscribeEvent
     static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.RESEARCH_SHELF.get(),

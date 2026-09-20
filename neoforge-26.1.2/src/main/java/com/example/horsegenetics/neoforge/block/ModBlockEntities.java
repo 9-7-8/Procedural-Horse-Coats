@@ -22,6 +22,15 @@ public final class ModBlockEntities {
                     () -> new BlockEntityType<>(EquineResearchShelfBlockEntity::new,
                             ModBlocks.RESEARCH_SHELF.get()));
 
+    /**
+     * <b>Every jump has one</b>, and it holds nothing but the two woods it is
+     * made of. Data only - no ticker, no inventory. See {@link JumpBlockEntity}
+     * for why that matters when a course is hundreds of blocks.
+     */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<JumpBlockEntity>> JUMP =
+            BLOCK_ENTITIES.register("jump",
+                    () -> new BlockEntityType<>(JumpBlockEntity::new, ModBlocks.JUMP.get()));
+
     public static void register(IEventBus modEventBus) {
         BLOCK_ENTITIES.register(modEventBus);
     }

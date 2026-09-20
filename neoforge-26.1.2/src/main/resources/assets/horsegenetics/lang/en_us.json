@@ -295,5 +295,6 @@
   "item.horsegenetics.crimson_jump_oxer": "Crimson Oxer",
   "item.horsegenetics.crimson_jump_crossrails": "Crimson Crossrails",
   "item.horsegenetics.warped_jump_oxer": "Warped Oxer",
-  "item.horsegenetics.warped_jump_crossrails": "Warped Crossrails"
+  "item.horsegenetics.warped_jump_crossrails": "Warped Crossrails",
+  "block.horsegenetics.jump": "Jump"
 }

@@ -130,6 +130,28 @@ public final class ModBlocks {
             EquestrianBenchBlock::new,
             EquestrianBenchBlock::benchProperties);
 
+    /**
+     * <b>The one jump block.</b> Every style, every wood, every pair of woods.
+     *
+     * <p>It replaces twelve per-wood blocks. The wood is
+     * {@link JumpBlockEntity} data rather than a property because the standards
+     * and the rails must be independently choosable, and as properties that is
+     * 12 x 12 x everything else - <b>13,824 block states</b>, all allocated at
+     * registry bootstrap on the server as well as the client.
+     */
+    public static final DeferredBlock<JumpBlock> JUMP = BLOCKS.registerBlock(
+            "jump",
+            JumpBlock::new,
+            // Vanilla fence strength and wood sound. noOcclusion() because it is
+            // nowhere near a full cube: without it the faces of the blocks
+            // behind a jump are culled and a course is full of holes.
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F, 3.0F)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()
+                    .ignitedByLava());
+
     /** Shared properties: both posts are plain, breakable, flammable wood. */
     private static BlockBehaviour.Properties workPost() {
         return BlockBehaviour.Properties.of()
