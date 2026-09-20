@@ -382,24 +382,6 @@
         draw a web whose ridges also bound the pools.</li>
 </ul>
 
-<h3 id="behaviour-left">Behavioural, diet and shapeshifting genes</h3>
-
-<p>
-    A family that changes what a horse <em>does</em> rather than how it looks, riding the
-    <a href="making-a-gene.html#block"><code>effects</code></a> path plus whatever new verbs
-    each needs. Most of the family ships; these are the ones that do not.
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Gene / family</th><th>What it does</th><th>What it needs</th></tr></thead>
-<tbody>
-<tr><td><strong>Diet genes</strong></td><td>A carnivore horse &mdash; eats or is fed meat, refuses or is unaffected by plants. The hook for vampire and werewolf breeds.</td><td>Partly built: <code>HorseDietHandler</code> and the diet locus ship. What is missing is the rest of the vocabulary and the breeding / taming side. <strong><a href="gene-food-preference.html">Food preference</a> deliberately overrides it</strong>, and that ordering is a contract rather than an accident.</td></tr>
-<tr><td><strong>Vampire horses</strong></td><td>Heal <strong>only</strong> by damaging other living mobs; optionally take sun damage like a skeleton.</td><td>Suppress the gated regen for these horses and add a lifesteal-on-attack effect. Sun damage is a burn-in-daylight tick reusing the skeleton condition. The <code>temper</code> verb and the <code>on_hurt</code> trigger both exist, so this is cheaper than it was.</td></tr>
-</tbody>
-</table>
-</div>
-
 <h3 id="cloud-walking">Cloud-treading</h3>
 
 <p>
@@ -487,7 +469,7 @@
 <thead><tr><th>Thing</th><th>What is missing</th></tr></thead>
 <tbody>
 <tr><td><strong>Stalls and holding pens</strong><br><span class="muted">built: <a href="item-stall-signs.html">stall signs</a>, <a href="item-tickets.html">tickets</a></span></td><td><strong>Auto-return</strong> &mdash; a horse that takes itself home, rather than one sent by a ticket. Cleanup beyond breaking the exact sign block: rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash, which needs a <code>RenderLevelStageEvent</code> renderer against the changed 26.1.2 pipeline.</td></tr>
-<tr><td><strong>Obstacles beyond the plain rail</strong><br><span class="muted">built: <a href="item-jumps.html">the vertical rail, per wood</a></span></td><td><strong>The rest of the vocabulary</strong>: logs, brush, ditches, oxers (two rails with a spread), fillers, walls, water. Each is geometry in the same baker, so the cost per type is low &mdash; what is genuinely missing is a reason for them to differ mechanically rather than only visually, which nobody has specified. Also unbuilt: <strong>anything that notices a round</strong> &mdash; no timing, no scoring, no knocked rail, no refusal. A jump is scenery with a collision box, and the <a href="item-jumps.html#instrument">measuring-stick argument</a> is the only gameplay it has.</td></tr>
+<tr><td><strong>Obstacles beyond the three styles</strong><br><span class="muted">built: <a href="item-jumps.html">vertical, oxer and crossrails</a>, per wood</span></td><td><strong>The rest of the vocabulary</strong>: logs, brush, ditches, fillers, walls, water. Each is geometry in the same baker, so the cost per type is low, and the owner&rsquo;s hard rule bounds it &mdash; <strong>no style is more than one block deep</strong>, because a jump that occupies two blocks stops being a thing you put in a row and starts being a structure. Also unbuilt: <strong>anything that notices a round</strong> &mdash; no timing, no scoring, no knocked rail, no refusal. A jump is scenery with a collision box, and the <a href="item-jumps.html#instrument">measuring-stick argument</a> is the only gameplay it has. Note the three that exist collide <em>identically</em> on purpose, so a stack of three means the same thing whatever it is built from; anything that made a style matter mechanically would be taking that back, and the height ladder is an honest reading of genetics because it does not.</td></tr>
 </tbody>
 </table>
 </div>
@@ -908,31 +890,11 @@
 
 <h2 id="mod-patches">Mod patches</h2>
 
-<h3 id="pull-consumer">Something has to read pulling ability</h3>
-
 <p>
-    <a href="gene-magic-pull.html">Magic pull</a> ships and <strong>nothing consumes it</strong>.
-    The genetics half is done and is not what is left here: every horse resolves a pull score on
-    a 1&ndash;10 scale, every breed is scored, and the number inherits and drifts on the allele
-    copies. What is unbuilt is the other end.
+    What is left after the compatibility pass. Two of the three patches that were asked for
+    turned out to need no patch at all; the detail is on
+    <a href="compatibility.html">Mod compatibility</a> and is not repeated here.
 </p>
-
-<ul>
-    <li><strong>The intended consumer is the cart mod</strong> sitting in <code>intake/</code>
-        with an integration brief beside it. That integration is its own piece of work and is
-        not costed here; this item is only the seam between the two.</li>
-    <li><strong>Whatever reads it first inherits two decisions the genetics deliberately did not
-        make.</strong> What a score is worth in load &mdash; the scale is calibrated so that 5
-        is an ordinary horse and 10 a draught breed, and nothing further. And <strong>what
-        happens above 10</strong>: <code>Traits.pull()</code> has a floor and no ceiling on
-        purpose, because drift is clamped far wider than the design range so a line bred for
-        pull is meant to keep climbing. A consumer that assumes a 1&ndash;10 bound will meet a
-        15 eventually.</li>
-    <li><strong>It needs somewhere to be seen.</strong> Until a screen prints it the number
-        cannot be checked by playing &mdash; <a href="known-gaps.html#gap-277">gap 277</a>. The
-        horse information screen's Health tab already breaks the body down per gene and would
-        take a pull row without new machinery.</li>
-</ul>
 
 <h3 id="native-tack">Native tack &mdash; cheap in code, expensive in art</h3>
 
@@ -1269,33 +1231,6 @@
     page was built to avoid.
 </p>
 
-<h3 id="two-up-riding">Two players on one horse</h3>
-
-<p>
-    One rider drives, the second is carried &mdash; no controls, no second set of reins, just
-    along for the ride.
-</p>
-<p>
-    <strong>Vanilla allows one passenger and decides the driver by position.</strong>
-    <code>AbstractHorse.getControllingPassenger()</code> hands control to the <em>first</em>
-    passenger, which is the half that makes this cheap: seat a second player after the first and
-    they are inert by construction, with no need to take anything away from them. What has to
-    move is the seat count, which vanilla caps at one, and the second seat's position, which
-    otherwise puts both riders in the same place.
-</p>
-<p>
-    <strong>A mixin is the established path here</strong> &mdash; this mod already owns several
-    on the horse, including two for flight. The relevant prior art is
-    <code>server/BarebackSteeringHandler</code>, which exists because
-    <code>getControllingPassenger</code> is gated on <code>isSaddled()</code> with no hook on it;
-    anything done here has to keep working with the phantom saddle that handler equips.
-    <strong>The questions worth settling before building</strong>: whether a pillion rider is
-    thrown when the horse rears (<code>HorseRearFightMixin</code>), whether
-    <a href="gene-flying.html">flight</a> carries two (<code>HorseFlightRiddenMixin</code> reads
-    the controlling passenger only), and whether a carried player can be dismounted by the driver
-    rather than only by themselves.
-</p>
-
 <h3 id="horse-chests">Horse chests</h3>
 
 <p>
@@ -1433,9 +1368,9 @@
     Held on the horse as a small state machine &mdash; idle, a warning beat, then the forced ride
     &mdash; rather than as scattered booleans. <strong>The warning beat is the design
     question</strong>: without it this is a mount that kills you with no tell, which is a
-    different and worse thing than a monster you can recognise. Note the overlap with
-    <a href="#two-up-riding">two-up riding</a>: both touch who is aboard and who is steering, and
-    they should agree about it rather than each solving it.
+    different and worse thing than a monster you can recognise. It also has to agree with the
+    two seats a strong horse already carries &mdash; a forced ride with a pillion aboard is a
+    case the ride-lock has to answer rather than discover.
 </p>
 
 <h3 id="momentum-sprint">Momentum sprint</h3>

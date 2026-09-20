@@ -27,6 +27,88 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-20-roadmap-stale">2026-09-20, after the roadmap cut &mdash; Three entries that described a mod from a fortnight ago</h2>
+
+<p>
+    The owner read the trimmed roadmap and said two of its entries were describing work that is
+    in the game. They were right, and a third turned up on the sweep that followed.
+    <strong>The cut had moved the page&rsquo;s sections around faithfully and checked almost
+    none of them against the code</strong> &mdash; which is the same failure the page exists to
+    prevent, committed while tidying the page that exists to prevent it.
+</p>
+
+<ul>
+    <li><strong>&ldquo;Something has to read pulling ability&rdquo; is done twice over.</strong>
+        <code>HorseDraft</code> reads <code>traitsOf(horse).pull()</code>,
+        <code>AbstractDrawnEntity.applyDraught</code> spends it, and
+        <code>CartDraft.retention</code> turns it into a speed ceiling. The entry also said the
+        number needed somewhere to be seen: the information screen prints a Pull row with a word
+        for it, a Draught block giving empty and laden retention, whether the horse carries a
+        second rider, and a lifetime hauled distance that survives being sold. And the &ldquo;what
+        happens above 10&rdquo; question it parked is answered in <code>CartDraft</code>'s own
+        comment &mdash; the score is clamped at the floor and <em>deliberately not</em> at the
+        top. Written up at <a href="carts.html">carts &sect;12 and &sect;13</a>.</li>
+    <li><strong>The diet and vampire rows are the same mistake.</strong>
+        <a href="gene-diet.html">Diet</a> ships a wild type and nine narrow diets &mdash; meat,
+        fish, wheat, cake, potions, lava, one metal, one gem and blood &mdash; with a carrot,
+        feral-only inheritance and a documented override contract with
+        <a href="gene-food-preference.html">food preference</a>. And &ldquo;vampire horses: heal
+        only by damaging other living mobs, optionally take sun damage&rdquo; is the
+        <a href="gene-diet.html#blood">blood diet</a> composed with
+        <a href="gene-sun-sensitivity.html">sun sensitivity</a>, down to the detail that a
+        sun-sensitive blood-drinker shelters first and eats after dark. Both rows went, and with
+        them the whole behavioural-gene family section, which had nothing else left in it.</li>
+    <li><strong>Two players on one horse, found on the sweep.</strong>
+        <code>HorseTwoRidersMixin</code> gates a second seat on
+        <code>CartDraft.TWO_RIDER_PULL</code>, places the pillion along the horse's body axis
+        rotated by yaw, and squares it with the wagon's hidden postilion so a driver on the box
+        and a rider on the horse coexist. The three questions the entry said to settle first are
+        not open either: the rear mixin only touches <code>isImmobile</code> and ejects nobody,
+        and the flight mixin works through <code>getRiddenInput</code> on the controlling
+        passenger, so a pillion is carried by construction. The in-game check was already on
+        <a href="verification.html">the checklist</a>.</li>
+</ul>
+
+<p>
+    <strong><a href="known-gaps.html">Gap 277</a> went with them</strong> &mdash; &ldquo;pulling
+    ability is a number nothing reads, shows, or can be checked against&rdquo; was false in its
+    headline and in most of its body. Its one surviving point, that the debug yard has no pull
+    pen because the stat pens read a named vanilla attribute and pull is not one, was not
+    re-filed: the information screen now answers the question the pen was for.
+</p>
+
+<p>
+    <strong>The rest of the page was then swept rather than trusted</strong>, which is the part
+    worth keeping. Every remaining entry in &ldquo;asked for, and not built&rdquo; was checked
+    against the source: no chase gene, no grab gene, no storm-fed reservoir, no block-preference
+    locus, no kelpie, no momentum sprint, no lasso or rope item, no horse chest, no horse shoes,
+    no <code>weather</code> key in <code>BreedSpecParser</code>, nothing touching
+    <code>startSleeping</code> or <code>setRespawnPosition</code>, and no checkbox rule anywhere
+    in <code>styles.css</code>. The gameplay layer checked out too &mdash;
+    <code>RESEARCH_GENE</code> is still a bare gene-key <code>String</code>, there is no
+    <code>collectedFrom</code>, no bonding tab and no per-copy epigenetics editor. Those entries
+    stand.
+</p>
+
+<p>
+    <strong>And it happened again mid-session.</strong> A jump-styles commit landed on
+    <code>main</code> while this was being written, shipping the oxer that the obstacles entry
+    listed as missing. That entry now names the three styles that exist and drops the oxer from
+    the wanted list &mdash; and it gained the thing the commit makes sharper rather than softer:
+    all three styles collide <em>identically</em> on purpose, so a stack of three means the same
+    thing whatever it is built from, and anything that made a style matter mechanically would be
+    taking that back. The owner&rsquo;s one-block-deep rule is recorded with it, since it bounds
+    every obstacle still on the list.
+</p>
+
+<p>
+    <strong>The lesson is cheap to state and was expensive here:</strong> moving an entry is not
+    reading it. A backlog entry is a claim about the <em>current</em> code, and a session that
+    reorganises one without opening the code is laundering its age &mdash; the entries came out
+    of the cut looking freshly reviewed and three of them were describing a mod from a fortnight
+    earlier. The grep that settles it is usually one line, and all three of these fell to one.
+</p>
+
 <h2 id="d2026-09-20-roadmap">2026-09-20, later &mdash; The roadmap stops being four lists in a trench coat</h2>
 
 <p>

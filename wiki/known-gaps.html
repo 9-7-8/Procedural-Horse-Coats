@@ -58,19 +58,22 @@
 
 <ol>
 
-<li id="gap-296"><strong>Open, moved here 2026-09-20: five Java comments and a handful of wiki sentences point at roadmap anchors that no longer exist.</strong>
+<li id="gap-296"><strong>Open, moved here 2026-09-20: six Java comments and a handful of wiki sentences point at roadmap anchors and section numbers that no longer exist.</strong>
     The roadmap was cut back to planned features only, and the decisions moved to
     <a href="decisions.html">their own page</a>. The wiki links were re-pointed in the same
     change; <strong>the Java ones were not</strong>, because that session was wiki-only.
     <code>CutieMarkContribution</code> and <code>ReproRules</code> still cite
-    <code>decisions.html#settled</code> (now <code>decisions.html#settled</code>), and
+    <code>roadmap.html#settled</code> (now <code>decisions.html#settled</code>), and
     <code>PpibGene</code> and <code>Scn4aGene</code> still cite &ldquo;roadmap &sect;3&rdquo;
     for the severity-model question (now
     <a href="decisions.html#decisions">decisions &sect; open calls</a>).
-    <code>SpliceSafety</code>&rsquo;s <code>roadmap.html#sex-linked</code> still resolves.
+    <code>HorseCareHandler</code> cites &ldquo;roadmap &sect;12&rdquo; and &ldquo;&sect;13&rdquo;
+    for shearing and the sleeping bond source, and the roadmap has carried no section numbers
+    since. <code>SpliceSafety</code>&rsquo;s <code>roadmap.html#sex-linked</code> still
+    resolves.
     <strong>Nothing checks these:</strong> <code>wiki/tools/check-links.mjs</code> walks the
     wiki and does not read Java, so a comment pointing at a dead anchor is invisible until
-    somebody follows it. The fix is a one-line edit in each of the four files.</li>
+    somebody follows it. The fix is a one-line edit in each of the five files.</li>
 
 <li id="gap-295"><strong>Open, moved here 2026-09-20: a stallion&rsquo;s hemizygous locus prints as a pair in two places.</strong>
     The genotype short form prints <code>X-Brn</code>, which is the intended form. The
@@ -122,24 +125,6 @@
     <a href="breed-book.html#cloudtouched">Cloudtouched</a>, not by a test. The fix is three lines and a decision about
     whether the range was ever meant to be there; the risk in fixing it is that any breed later written with a jump or
     health range would change behaviour the first time someone repaired it.</li>
-
-<li id="gap-277"><strong>Open, built 2026-09-18: pulling ability is a number nothing reads, shows, or can be checked against.</strong>
-    <a href="gene-magic-pull.html">Magic pull</a> resolves, inherits and drifts on every horse in the
-    world, and <strong>no system consumes it and no screen prints it</strong>. That is the intended
-    state &mdash; it was built ahead of the cart mod in <code>intake/</code>, and what a pull score is
-    worth in cart loads is the cart layer&rsquo;s decision &mdash; but it leaves a real gap rather than
-    a tidy one. <strong>An unread number cannot be wrong in any way anybody would notice</strong>, so
-    the 1&ndash;10 calibration, the per-copy spread and the breed scores are all unfalsifiable until
-    something reads them; <code>MagicPullGeneTest</code> pins that the code does what the code says,
-    which is a different claim. It also means the locus has <em>no debug-yard pen</em>: the stat pens
-    read a named vanilla attribute&rsquo;s range, pull is not an attribute, and a pen that cannot
-    answer its own question is worse than none.
-    <strong>The second half is the ceiling.</strong> <code>Traits.pull()</code> has a floor
-    (<code>MIN_PULL</code>) and deliberately none above &mdash; epigenetic drift is clamped eight
-    design-spans wide, so a line bred for pull is meant to run past 10 and will. Nothing downstream
-    exists yet to say what a 15 does, and whatever reads this number first inherits the job of
-    deciding. See <a href="verification.html#pull-0918">verification &sect;0-FM</a>, which is a
-    placeholder for a check that cannot be run yet rather than one nobody got to.</li>
 
 <li id="gap-276"><strong>Open, found 2026-09-18: the &times; on the AI draft dialog was reported as not closing it on a phone, and the cause was never found.</strong>
     Reported alongside the search panel that genuinely would not close
