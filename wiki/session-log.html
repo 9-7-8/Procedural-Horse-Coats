@@ -27,6 +27,99 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-20-advancements">2026-09-20, later still &mdash; The checklist becomes advancements, and the horse menu opens on a click</h2>
+
+<p>
+    Two asks, one build. Shipped as <strong>v0.5.021</strong>.
+</p>
+
+<h3>Every checklist task is now a real advancement</h3>
+
+<p>
+    The Getting Started book&rsquo;s boxes were a private list the mod drew for itself and
+    announced with its own green chat line. They are now also <strong>Minecraft
+    advancements</strong>: a <em>Horse Genetics</em> tab, a root, eight chapter nodes and a
+    card per task, with toasts, chat, <code>/advancement</code> and the gamerule that
+    silences it. The mod&rsquo;s own chat line is gone &mdash; two announcements of one
+    event is one too many, and vanilla&rsquo;s can be turned off by the player, which a
+    hand-rolled line never could. Full writeup:
+    <a href="progression.html#advancements">progression</a>.
+</p>
+
+<p>
+    <strong>The shape is one trigger, not a hundred.</strong>
+    <code>horsegenetics:progress_task</code> fires once from
+    <code>HorseProgressData.complete</code>, and the condition names which task; a
+    <code>chapter</code> condition matches anything in a chapter and an empty one matches
+    anything at all, which is how the chapter nodes and the root are earned without a
+    hundred-entry requirements array. A trigger per task would have been a hundred classes
+    saying the same thing.
+</p>
+
+<p>
+    <strong>The JSON is baked, not written.</strong>
+    <code>tools/bake-advancements.mjs</code> reads the enum and rewrites the whole
+    directory, so a deleted task loses its card too. Text is literal rather than a
+    translation key, because the English already lives in the enum and a lang key would be
+    a second copy of it. The one thing it cannot derive is the icon, so those are a
+    hand-written map in the script &mdash; validated against the mod&rsquo;s item
+    definitions and against vanilla&rsquo;s item list read out of the patched jar, because
+    an icon naming an item that does not exist makes the advancement fail to load
+    <em>silently</em>.
+</p>
+
+<p>
+    The owner asked that future checklist items become advancements too, so that is now a
+    check rather than a habit: <code>check-progress-tasks.mjs</code> fails on a task with
+    no advancement and on an advancement no task backs, beside its original sweep for a
+    task nothing can complete. And <code>ProgressHooks.onLogin</code> awards everything
+    already ticked, which is what lets the advancements arrive after the fact on a save
+    that was played without them &mdash; at the cost of one flood of toasts, once.
+</p>
+
+<h3>A right-click opens the horse menu</h3>
+
+<p>
+    Empty-handed, no sneaking, on any horse. It is a client setting,
+    <code>horseScreen.rightClickOpens</code>, on by default. Sneak-and-use is deliberately
+    <em>not</em> taken over, so vanilla&rsquo;s inventory stays one gesture away, and an
+    empty hand is required, so food, leads, name tags and papers all still mean what they
+    meant.
+</p>
+
+<p>
+    <strong>The click it takes over is the one that mounts</strong> &mdash; which is also
+    how a wild horse is tamed. That is the whole risk in this change, and the answer is a
+    <strong>Ride</strong> button on Overview doing exactly what the click did, bucking
+    included. Anything less would have quietly cost the game its taming.
+</p>
+
+<h3>And the menu grew the tack</h3>
+
+<p>
+    Saddle and body armour, as two real slots on Overview, built from
+    <code>HorseTackSlot.values()</code> so a bridle or a blanket is a line in that enum
+    rather than a screen rewrite &mdash; which is what the owner asked for. They are
+    entity <code>EquipmentSlot</code>s, not container slots, so no menu had to be opened
+    on the server and the client already had them off synced equipment.
+    <strong>One click is a swap with your hand</strong>: this is a plain
+    <code>Screen</code> with no carried stack, so the hand is the only cursor there is,
+    and the whole interaction is one packet the server checks in one place.
+</p>
+
+<div class="note">
+    <span class="label">An access transformer widens a declaration, not its overrides</span>
+    <p>
+        The Ride button first tried to call <code>AbstractHorse.doPlayerRide</code> through
+        an AT. That broke the <em>Minecraft</em> recompile outright:
+        <code>TraderLlama</code> overrides it and stayed protected, which is &ldquo;weaker
+        access privileges&rdquo; and 6&nbsp;882 source files that no longer compile. The
+        four lines were copied instead. Worth remembering before widening anything a
+        subclass overrides &mdash; the failure is not in your module and does not mention
+        your name.
+    </p>
+</div>
+
 <h2 id="d2026-09-20-jumps-migration">2026-09-20, later &mdash; The jumps become one item, and get a screen, paint and a height</h2>
 
 <p>

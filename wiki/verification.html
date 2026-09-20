@@ -78,6 +78,68 @@
     </p>
 </div>
 
+<h2 id="advancements-0920">&sect;0-GA &mdash; The checklist becomes advancements, and the horse menu opens on a click (2026-09-20, NOT played)</h2>
+
+<p>
+    Two things in one build: every checklist task is now a real advancement
+    (<a href="progression.html#advancements">progression</a>), and a plain right-click on
+    any horse opens this mod's screen, which has grown saddle and armour slots and a Ride
+    button (<a href="breeding.html#H">breeding &sect;H</a>). A dedicated server boots clean
+    and loads all 112 advancement files &mdash; 1617 vanilla + 112 ours = the 1729 the log
+    reports &mdash; so nothing here is about whether they <em>parse</em>. None of it has
+    been in front of a player.
+</p>
+
+<h3>Do these first &mdash; one right-click answers most of it</h3>
+<ul>
+    <li><strong>Right-click a wild horse with an empty hand.</strong> The information
+        screen should open, and you should <em>not</em> be thrown into the saddle. Then
+        the same on a tamed horse of yours, and on a foal.</li>
+    <li><strong>The Ride button</strong>, top right of Overview. It should close the screen
+        and put you on. On a wild horse it should buck you off exactly as a right-click
+        used to &mdash; <strong>tame one entirely through the button</strong>, because if
+        that does not work the setting has cost the game its taming.</li>
+    <li><strong>The tack slots</strong> under <em>Tack</em> on Overview. Hold a saddle,
+        click the left slot: it goes on, and the horse is rideable. Click it again empty-handed:
+        it comes back to you. The same with iron barding on the right slot. Then try it
+        with a <em>full</em> inventory &mdash; the taken-off item should drop at your feet
+        rather than vanish.</li>
+    <li><strong>A horse that is not yours.</strong> Open a cowboy's string, or a stranger's
+        horse: the slots should show what it is wearing, be drawn dim, and do nothing on a
+        click.</li>
+    <li><strong>Sneak-right-click a tamed horse of yours.</strong> Vanilla's inventory
+        should still open, unchanged, with the <strong>i</strong> button on it. That is the
+        escape hatch and it is deliberately not taken over.</li>
+    <li><strong>Something in your hand.</strong> Wheat, a lead, a name tag, a research
+        paper, a golden carrot: every one of them should do what it always did, not open a
+        window.</li>
+    <li><strong><code>horseScreen.rightClickOpens = false</code></strong> in
+        <code>client.toml</code>. Right-click should go back to mounting, and the screen
+        should still be reachable by sneaking on a wild horse and by the
+        <strong>i</strong> button on a tamed one.</li>
+</ul>
+
+<h3>The advancements, which need a player who has ticked something</h3>
+<ul>
+    <li><strong>The first login is the flood.</strong> A save with boxes already ticked
+        awards all of them at once. Expect a run of toasts and chat lines, once. If it
+        happens on <em>every</em> login, that is a bug and the catch-up in
+        <code>ProgressHooks.onLogin</code> is where to look.</li>
+    <li><strong>The tab.</strong> Open the advancement screen: there should be a
+        <em>Horse Genetics</em> tab with a root, eight chapter nodes off it, and each
+        chapter's tasks fanned out from its own node. Check the tree is readable at that
+        width &mdash; the wild chapter has nineteen children.</li>
+    <li><strong>One fresh tick.</strong> Do something not yet done &mdash; milk a mare,
+        say &mdash; and watch for the toast, the chat line and the box in the book all
+        agreeing. The mod's own green <code>[&check;]</code> line should be gone.</li>
+    <li><strong>Turn it off.</strong> <code>/gamerule announceAdvancements false</code>
+        should silence the chat half, which is the whole argument for having dropped the
+        hand-rolled line.</li>
+    <li><strong>The icons.</strong> A hundred and twelve of them were hand-assigned and
+        machine-checked for existence, not for sense. Any that reads as plainly wrong is
+        a line in <code>bake-advancements.mjs</code>.</li>
+</ul>
+
 <h2 id="jumps-0920">&sect;0-FZ &mdash; Jumps, and how a horse jumps (2026-09-20, PARTLY played)</h2>
 
 <p>

@@ -178,7 +178,7 @@ node wiki/tools/check-links.mjs                # every href, #fragment and id in
 node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
 node neoforge-26.1.2/tools/check-block-models.mjs # no blockstate points at a model nobody wrote
 node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
-node neoforge-26.1.2/tools/check-progress-tasks.mjs # no checklist task nothing can complete
+node neoforge-26.1.2/tools/check-progress-tasks.mjs # every checklist task is hooked, and is an advancement
 ```
 Requires JDK 25 (auto-provisioned). Crash reports: `neoforge-26.1.2/run/crash-reports/`.
 **Never run the full `:common:test` unless the owner asks.** It is ten minutes and
@@ -204,6 +204,7 @@ and fails *silently* when stale:
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages) | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
+| **`ProgressTask`** - a checklist task added, deleted or retitled | `node neoforge-26.1.2/tools/bake-advancements.mjs` (a new task needs an icon in its `ICON` map first), then `check-progress-tasks.mjs`. Every task is also an advancement, and the bake is the only thing that makes it one | `neoforge-26.1.2/.../data/horsegenetics/advancement/` |
 | any AI goal added, removed or re-prioritised | `node wiki/tools/bake-behaviour-hierarchy.mjs` | `wiki/behaviour-hierarchy.html` |
 | a wood, or any geometry, of the **double gates** | `node neoforge-26.1.2/tools/bake-double-gates.mjs` - then the recipe row below, since it writes recipes too. **It only writes**: removing a wood means deleting that wood's files and lang keys by hand | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, both `data/minecraft/tags/block/` files **and** the merged `lang/en_us.json` |
 | a wood, or any geometry, of the **jumps** | `node neoforge-26.1.2/tools/bake-jumps.mjs` - then the recipe row below. It **merges** `mineable/axe`, which the gates are also in, so re-run `bake-double-gates.mjs` after it and check both families are still in that tag. Geometry is written twice more: `block/JumpBlock`'s VoxelShape, and `compat/GeneratedJumps` | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, `data/minecraft/tags/block/mineable/axe.json` **and** the merged `lang/en_us.json` |

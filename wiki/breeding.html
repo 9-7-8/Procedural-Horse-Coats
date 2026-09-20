@@ -965,6 +965,55 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             excludes itself, because its <code>isActive()</code> already asks
             <code>canUseSlot(SADDLE)</code>, which is false for a baby.
         </p></li>
+    <li><strong>A plain right-click opens it, on any horse.</strong> Empty-handed, no
+        sneaking, tamed or not &mdash; <code>HorseInfoInteraction</code> takes the click on
+        the client and cancels it, so the server never sees the interaction at all. It is
+        a <em>client</em> setting, <code>horseScreen.rightClickOpens</code> in
+        <code>client.toml</code>, on by default; turned off, the rule reverts to the
+        original one &mdash; sneak and use, and only on a horse whose inventory you could
+        not open anyway. <strong>Sneak and use is never taken over</strong>, whatever the
+        setting: on a tamed horse that is vanilla's inventory, which has to stay reachable.
+
+        <p>
+            <strong>An empty hand only.</strong> Food, a lead, a name tag, a research
+            paper and a carrot all mean something specific on a horse, and none of them
+            should open a window instead. That rule is what makes taking the plain click
+            affordable at all.
+        </p>
+
+        <p>
+            The click it takes over is the one that <strong>mounts</strong> &mdash; which
+            is also how a wild horse is tamed &mdash; so Overview carries a
+            <strong>Ride</strong> button, sending <code>MountHorsePayload</code>. The
+            server repeats vanilla's <code>doPlayerRide</code> by hand (stop eating, come
+            down off the rear, face the same way, mount): widening that method with an
+            access transformer was tried first and broke the <em>Minecraft</em> recompile,
+            because an AT widens a declaration and not its overrides and
+            <code>TraderLlama</code>'s stayed protected. The button is refused for a foal,
+            a horse somebody is already on, and a cowboy's branded string &mdash; and
+            offered for an <em>untamed</em> horse on purpose, since being thrown off is
+            the point.
+        </p></li>
+    <li><strong>Overview carries the tack.</strong> Two real slots &mdash; saddle and
+        body armour &mdash; drawn from <code>HorseTackSlot.values()</code>, which is a list
+        precisely because two is not where it stops. Both are genuine
+        <code>EquipmentSlot</code>s on the entity rather than container slots, so the
+        client already has them off synced equipment and the server sets them with
+        <code>setItemSlot</code>.
+
+        <p>
+            <strong>One click is a swap with your hand</strong>, not a drag: this is a
+            plain <code>Screen</code> with no container behind it and therefore no carried
+            stack, so the hand is the only cursor there is. Holding a saddle and clicking
+            the saddle slot puts it on; clicking it empty-handed takes it off and into
+            your inventory, or onto the floor if there is no room. That also makes the
+            whole interaction <em>one</em> packet
+            (<code>TackSlotPayload</code> &rarr; <code>ModNetworking.handleTackSlot</code>)
+            that the server checks in one place: yours, and within eight blocks, or
+            nothing happens. A slot you cannot use &mdash; a foal's saddle, a stranger's
+            anything &mdash; is drawn dim rather than hidden, because a gap where a slot
+            should be reads as a bug and a greyed one reads as the rule it is.
+        </p></li>
     <li><code>HorseInfoScreen</code> is a seven-tab full-window overlay in the same dark
         chrome as the horse browser: <strong>Overview</strong> (name, the barn-name
         editor, sex, generation, breed, the four live body numbers, bond, conditions, and

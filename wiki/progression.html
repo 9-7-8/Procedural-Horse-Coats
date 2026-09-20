@@ -61,8 +61,53 @@
     stops being advice and starts being homework.
 </p>
 
+<h3 id="advancements">Every task is also an advancement</h3>
+
 <p>
-    Ticking one says so in chat, once, with a running count. The chapters are:
+    Ticking a box off is how this mod earns you a <strong>real Minecraft
+    advancement</strong> &mdash; the toast in the corner, the line in chat, a card in the
+    advancement screen under a <em>Horse Genetics</em> tab of its own, and a name
+    <code>/advancement</code> and any datapack can use. There is one per task, plus one
+    per chapter and a root that holds the tab, and nothing about them is hand-written:
+    they are baked off the same enum the book&rsquo;s boxes are drawn from, so the two
+    lists cannot drift.
+</p>
+
+<p>
+    The tree is one tab, eight branches. The <strong>root</strong> is earned by ticking
+    anything at all; each <strong>chapter</strong> node by ticking anything in that
+    chapter, so the tree lights up as you wander into a subject rather than only when you
+    have exhausted it; and each <strong>task</strong> hangs off its chapter.
+    A handful are purple <em>challenge</em> frames &mdash; identical twins, a mutation, a
+    dhampir tamed, steering a horse bare &mdash; and a handful gold <em>goals</em>, for the
+    moments something opens up. The card&rsquo;s description is the first sentence of the
+    same hint the book gives you.
+</p>
+
+<div class="note">
+    <span class="label">The mod no longer says anything itself</span>
+    <p>
+        It used to print its own green <code>[&check;]</code> line with a running count.
+        That is gone: the advancement announces itself, in vanilla&rsquo;s words, through
+        vanilla&rsquo;s settings &mdash; so a player who wants silence can turn toasts or
+        the <code>announceAdvancements</code> gamerule off and be obeyed, which a hand-rolled
+        chat line never let them do. Two announcements of one event is one too many.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">A save from before this pops them all at once</span>
+    <p>
+        The first login on a world whose boxes were ticked before the advancements existed
+        awards every one of them in one go, so expect a run of toasts. It happens once:
+        an advancement already held is never re-awarded. The catch-up is on purpose &mdash;
+        a task fires exactly once, ever, so without it those advancements could never be
+        earned at all.
+    </p>
+</div>
+
+<p>
+    The chapters are:
 </p>
 
 <ul>
@@ -210,9 +255,58 @@
     <code>HorseProgress.complete(player, task)</code> is the whole API a handler uses. It
     swallows a client-side player, a null and a server-less world, because it is called
     from a dozen files and the twelfth call site will be careless.
-    <code>HorseProgressData</code> is the {@code SavedData} behind it, keyed by player
-    UUID beside the gene database, and completing is idempotent - it says something in
-    chat exactly once.
+    <code>HorseProgressData</code> is the <code>SavedData</code> behind it, keyed by player
+    UUID beside the gene database, and completing is idempotent &mdash; the first time is
+    the only time anything happens.
+</p>
+
+<h2 id="advancement-bake">One trigger, and a hundred baked advancements</h2>
+
+<p>
+    What happens on that first time is <code>ProgressTaskTrigger</code>, this mod&rsquo;s
+    single <code>CriterionTrigger</code> (<code>horsegenetics:progress_task</code>,
+    registered in <code>ModTriggers</code>). A trigger per task would be a hundred classes
+    saying the same thing; instead the condition names the task, and three shapes of it
+    cover the whole tree:
+</p>
+
+<table>
+<tr><th>Condition</th><th>Matches</th><th>Used by</th></tr>
+<tr><td><code>{"task": "tame_mare"}</code></td><td>that one task</td><td>every leaf</td></tr>
+<tr><td><code>{"chapter": "wild"}</code></td><td>anything in that chapter</td><td>the eight chapter nodes</td></tr>
+<tr><td><code>{}</code></td><td>any task at all</td><td>the tab&rsquo;s root</td></tr>
+</table>
+
+<p>
+    The JSON under <code>data/horsegenetics/advancement/</code> is <strong>generated</strong>
+    by <code>node neoforge-26.1.2/tools/bake-advancements.mjs</code>, which reads the enum
+    and rewrites the whole directory &mdash; so a deleted task loses its advancement too.
+    Titles and descriptions are <em>literal</em> text components rather than translation
+    keys, because the English already lives in the enum and a lang key would be a second
+    copy of it kept in step by hand. The one thing the bake cannot derive is the
+    <strong>icon</strong>: those are a hand-written map in the script, validated against the
+    mod&rsquo;s own item definitions and against vanilla&rsquo;s item list read out of the
+    patched jar &mdash; an icon naming an item that does not exist makes the advancement
+    fail to load silently, with nothing in the log.
+</p>
+
+<div class="note">
+    <span class="label">Add a task, re-run the bake</span>
+    <p>
+        <code>check-progress-tasks.mjs</code> now fails on a task with no advancement
+        <em>and</em> on an advancement no task backs, alongside its original sweep for a
+        task nothing can complete. A new checklist item is therefore three things: the enum
+        line, the hook, and an icon in the bake &mdash; and the check names whichever you
+        forgot.
+    </p>
+</div>
+
+<p>
+    <code>HorseProgressData.awardEverythingDone</code>, called from
+    <code>ProgressHooks.onLogin</code>, fires the trigger for everything a player has
+    already ticked. It is what lets advancements arrive after the fact on a save that was
+    played without them; awarding one a player holds does nothing, so it is safe every
+    login rather than once.
 </p>
 
 <h2 id="collection-storage">The collection is a second set, on purpose</h2>
