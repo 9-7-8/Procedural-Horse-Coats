@@ -58,7 +58,7 @@
     </p>
 </div>
 
-<h2 id="v0-5-018-2026-09-20">0.5.018.2026.09.20</h2>
+<h2 id="v0-5-019">0.5.019</h2>
 
 <div class="note danger">
     <span class="label">Known bugs, open right now</span>
@@ -112,47 +112,63 @@
 </div>
 
 <p class="lede">
-    <strong>A gate that duplicated, and a material chain nobody wanted to climb.</strong>
-    Breaking a double fence gate dropped two of them &mdash; a decade-old class of bug vanilla
-    solves in doors and beds, which this mod's own gate never did &mdash; and crafting one, plus
-    everything downstream of horse hair, cost far more hair than anybody had ever added up.
+    <strong>Horse hair goes in raw, and a gate you break no longer gives you two.</strong>
+    A material chain three items deep sat between the shears and everything worth building with
+    hair, and it multiplied out to prices nobody had ever totalled &mdash; a cowboy hitch was
+    <strong>68 horse hair</strong>, against a supply of one to three per horse per day. The chain
+    is gone. Separately, every double fence gate had been duplicating itself on every break since
+    the block was written.
 </p>
 
 <ul>
-    <li><strong>A double gate now drops one.</strong> The class header's own comment was wrong:
-        returning air from <code>updateShape</code> does <em>not</em> suppress drops, so both
-        halves of the pair paid out on every break. Fixed the way vanilla's doors are &mdash; a
-        loot-table condition on the paying half &mdash; in both the vanilla-wood generator and
-        the modded-wood compat layer, plus the mirror case where breaking the wrong half in
-        creative used to leak a free gate. Guarded by a mutation-checked gametest.
-        <a href="item-double-gates.html">Double gates</a>.</li>
-    <li><strong>Horse hair goes in raw.</strong> The horse-hair bundle, braided rope and hair
-        cloth are gone &mdash; three items and six chain recipes that quietly compounded the
-        price of everything built from hair. A double fence gate cost twelve horse hair before
-        this; an equestrian post cost thirty-two, the supplier's post fifty-six, the cowboy
-        hitch sixty-eight. Nothing wanted a chain item any more, so a double gate is now two
-        vanilla fence gates and nothing else &mdash; the one recipe in the mod without a modded
-        ingredient, and documented as the deliberate exception it is.
-        <a href="item-horse-hair.html">Horse hair</a>.</li>
-    <li><strong>Six villager trades were re-tuned, not just re-priced.</strong> A flat
-        one-for-one substitution for the deleted items would have made a post cost two hair and
-        a trade pay an emerald for two &mdash; a money printer. The supplier and leatherworker's
-        hair trades now scale by level instead, at rates judged rather than specified by the
-        owner and flagged on <a href="verification.html">to be verified</a> for retuning.</li>
+    <li><strong>The bundle, the braided rope and the hair cloth are deleted.</strong>
+        Everything that wanted one now takes horse hair directly, one for one, so an equestrian
+        post is <strong>2 hair</strong> instead of 32, the supplier&rsquo;s post 4 instead of 56,
+        and the cowboy hitch <strong>5 instead of 68</strong>. The old prices could not be
+        preserved even in principle &mdash; a shapeless recipe holds nine items and 68 hair does
+        not fit. <a href="item-horse-hair.html#chain">Why there is no chain</a>.</li>
+    <li><strong>A double fence gate is two fence gates of that wood, and no hair at all.</strong>
+        It used to want a braided rope for the hinge, which was twelve horse hair on top of the
+        two vanilla gates &mdash; a fence line was several real days of brushing horses. It is
+        also the one recipe in the mod without a modded ingredient, taken deliberately and
+        documented as <a href="items.html#gate-exception">the exception it is</a>.
+        <a href="item-double-gates.html#recipe">The recipe</a>.</li>
+    <li><strong>Breaking a double gate drops one gate.</strong> The block&rsquo;s own header
+        comment was wrong: returning air from <code>updateShape</code> does <em>not</em> suppress
+        drops, so a pair being two blocks meant two removals and <em>both</em> paid out the loot
+        table. Fixed the way vanilla fixes it for doors and beds &mdash; in the loot table,
+        conditioned on the half that pays &mdash; for the twelve vanilla woods and for modded
+        woods alike. Breaking one in creative leaked a free gate the other way round, and that is
+        fixed too.</li>
+    <li><strong>Six villager trades dealt in the removed items</strong> and are folded into the
+        hair ladder rather than deleted. In raw-hair terms every one of them had <em>already</em>
+        been worse than the supplier&rsquo;s plain level-1 hair trade &mdash; 32 to 48 hair per
+        emerald against 16 &mdash; so they were close to dead before this. The supplier now buys
+        hair at 16/14/12/10/8 per emerald across its five levels and the leatherworker at 14 and
+        10. <a href="villagers.html#trade-table">The trade tables</a>.</li>
+    <li><strong>Three progress tasks and three tutorial icons went with the items.</strong> They
+        were about crafting things that no longer exist, and a task nothing can complete is what
+        the progress checker exists to catch.</li>
 </ul>
 
 <div class="note warn">
-    <span class="label">No jar with this one &mdash; source only</span>
+    <span class="label">Upgrading</span>
     <p>
-        This is the automated daily release job, not a working session, and it hit a wall the
-        owner's own machine does not have: <code>:common</code> built clean, but
-        <code>:neoforge-26.1.2:build</code> needs NeoForge's NeoForm runtime tool from
-        <code>maven.neoforged.net</code>, which this sandbox's network policy blocks outright.
-        <strong>The code is untested beyond what the four commits below already verified in
-        their own sessions</strong> &mdash; nobody has re-run the suite, built the jar, or booted
-        a server against this exact tag. Build it yourself before trusting it, and see
-        <a href="verification.html">to be verified</a> for what those four commits already
-        confirmed on their own.
+        <strong>Stacks of horse hair bundles, braided ropes and hair cloths in an existing world
+        will vanish</strong> &mdash; the mod carries no back-compat by standing rule. Nothing else
+        in this release touches saved data.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">What is guarded, and what is not</span>
+    <p>
+        Both gate fixes are held by mutation-checked gametests &mdash; reverting oak&rsquo;s loot
+        table reproduces the original report exactly (<em>expected 1, found 2</em>), and adding a
+        stick to the recipe fails the crafting test. <strong>The new trade rates are a judgement
+        call, not the owner&rsquo;s</strong>, and are flagged for retuning on
+        <a href="verification.html">to be verified</a>; so is the creative-mode break, which no
+        test can reach because it needs a player.
     </p>
 </div>
 

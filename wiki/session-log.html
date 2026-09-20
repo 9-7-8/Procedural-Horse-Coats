@@ -27,58 +27,59 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
-<h2 id="d2026-09-20-dailyrelease">2026-09-20 &mdash; A daily release, packaging the gate fix and the hair chain removal</h2>
+<h2 id="d2026-09-20-release">2026-09-20 &mdash; 0.5.019, and two releases for one set of changes</h2>
 
 <p>
-    Released as <a href="releases.html#v0-5-018-2026-09-20">0.5.018.2026.09.20</a>. This is the
-    scheduled daily release job, not a working session &mdash; its only job is to look at what
-    landed on <code>main</code> since the last tag, decide whether it is worth a release, and if
-    so cut one. Four commits had landed since 0.5.018 (the double-gate duplication fix and the
-    horse-hair chain removal, both written up in the entry below), so a release was warranted.
+    Released as <a href="releases.html#v0-5-019">0.5.019</a>: the double-gate duplication fix and
+    the horse-hair chain removal, packaged, built, boot-checked and shipped as a jar. The
+    interesting part of the session was not the release but what it collided with.
 </p>
 
 <p>
-    <strong>The version number is a separate lineage from the manual one.</strong>
-    <code>gradle.properties</code>&rsquo; own numbering rule &mdash; only the last of the three
-    dotted numbers moves, and only the owner moves the middle one &mdash; governs the
-    hand-cut releases like 0.5.018. This job instead appends the release date to whatever the
-    last manual version was (<code>0.5.018.2026.09.20</code>), so an automated daily package
-    never collides with, or pre-empts, a number the owner has not chosen yet.
+    <strong>A scheduled daily release job had already released the same work, four hours
+    earlier.</strong> It is a cloud routine that looks at what landed on <code>main</code> since
+    the last tag and cuts a release if it is worth one &mdash; and on its first run it did
+    exactly that, writing its own entry here and on the releases page under the version
+    <code>0.5.018.2026.09.20</code>. So <code>main</code> had a release for the gate and hair
+    work, and this session was cutting a second one for the same four commits without knowing.
+    The divergence only surfaced at <code>git push</code>, which was rejected.
 </p>
 
 <p>
-    <strong>The known-bugs box is new.</strong> The release now opens with a curated list of
-    what is <em>actually broken</em> right now, pulled from <a href="known-gaps.html">known
-    gaps</a> and filtered down to real defects &mdash; wrong behaviour, duplication risk, dead
-    mechanics &mdash; leaving out unbuilt work, deferred calls and unverified claims, which stay
-    on that page rather than cluttering a release note. It is worth keeping in later releases
-    too, since a player reading a changelog wants to know what still bites before they read what
-    is new.
+    <strong>What the job could not do is the reason it was retired.</strong> Its sandbox blocks
+    <code>maven.neoforged.net</code>, so <code>:neoforge-26.1.2:build</code> could not run:
+    <code>:common</code> compiled and nothing else did, and the release shipped no jar. That is
+    the whole value of a release here &mdash; outside testers are on tagged builds, and a source
+    tag they cannot build is not something they can play. A release that cannot build the mod, on
+    a schedule, will also silently consume each day's work into an untested version number. The
+    owner's call was to fold its entry into <code>0.5.019</code> and delete the schedule; releases
+    stay hand-cut, with a jar and a server boot behind them.
 </p>
 
 <p>
-    <strong>No jar shipped with this release.</strong> Two toolchain gaps were worked around by
-    installing from the system package manager rather than the blocked host itself &mdash;
-    <code>foojay</code>, Gradle's auto-provisioner, returned 403 for both the JDK 17
-    <code>:common</code> wants and the JDK 25 <code>:neoforge-26.1.2</code> wants, and
-    <code>apt-get install openjdk-17-jdk-headless openjdk-25-jdk-headless</code> supplied both
-    from a different, permitted host. <code>:common:compileJava</code> then went green. But
-    <code>:neoforge-26.1.2:build</code> needs NeoForge's own NeoForm runtime tool to turn
-    vanilla into buildable Minecraft artifacts, and that comes from
-    <code>maven.neoforged.net</code>, which this sandbox's egress policy also returns 403 for
-    &mdash; and unlike a JDK there is no alternate, permitted host carrying it. <strong>Per the
-    proxy's own instructions, a 403 is not something to route around</strong>, so the build
-    stops there: green through <code>:common</code>, unproven from
-    <code>:neoforge-26.1.2</code> on. This release is source-and-docs only. The next session with
-    real network access should build and boot-check it before anyone treats the code as
-    confirmed working.
+    <strong>Its one genuinely good idea was kept.</strong> The job opened its release with a
+    curated <q>known bugs, open right now</q> box &mdash; <a href="known-gaps.html">known
+    gaps</a> filtered down to actual defects (wrong behaviour, duplication risk, dead mechanics)
+    and stripped of unbuilt work, deferred calls and unverified claims. A player reading a
+    changelog does want to know what still bites before they read what is new. It carries over
+    to 0.5.019 verbatim and is worth keeping in later releases.
+</p>
+
+<p>
+    <strong>The release itself was cut the usual way.</strong> Jar built and its
+    <code>neoforge.mods.toml</code> read back as <code>0.5.019</code> rather than assumed; a
+    dedicated server booted to <code>Done</code> with no ERROR line, on port 25599 because the
+    owner's own server holds 25565, and the world logged its own
+    <code>0.5.018 -&gt; 0.5.019</code> upgrade; parity, recipes, progress tasks, gene tabs and
+    wiki links all green.
 </p>
 
 <h2 id="d2026-09-19-gatehair">2026-09-19, later &mdash; A gate that duplicated, and a material chain nobody wanted to climb</h2>
 
 <p>
-    Two separate briefs, both from play, and the second one was the more interesting because
-    it was not phrased as a bug at all.
+    Released as <a href="releases.html#v0-5-019">0.5.019</a>. Two separate briefs, both from
+    play, and the second one was the more interesting because it was not phrased as a bug at
+    all.
 </p>
 
 <p>
