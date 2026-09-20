@@ -1,42 +1,45 @@
 #!/usr/bin/env node
-// Generate every asset and data file for the showjumping rails.
+// Generate every asset and data file for the showjumping jumps.
 //
 // WHY THIS EXISTS
 // The same reason as bake-double-gates.mjs, which this is modelled on: twelve
-// woods times five connection shapes is sixty models, twelve blockstates of
-// thirty-two variants, and a recipe, loot table and lang key each, whose only
+// woods times three styles times five connection shapes is a hundred and
+// eighty models, plus twelve blockstates of ninety-six variants, whose only
 // difference is a wood name and a plank texture. Nobody writes that correctly
 // twice, and a wrong texture id fails silently as a purple chequerboard on the
 // one jump nobody happens to craft.
 //
 //   node neoforge-26.1.2/tools/bake-jumps.mjs
 //
-// Re-run it after changing WOODS or any of the geometry below; see CLAUDE.md's
-// regenerate table. It only ever WRITES - removing a wood means deleting that
-// wood's files and lang keys by hand.
+// Re-run it after changing WOODS, STYLES or any geometry below; see CLAUDE.md's
+// regenerate table. It only ever WRITES - removing a wood or a style means
+// deleting those files and lang keys by hand.
 //
-// THE GEOMETRY, AND WHY THE STANDARDS ARE CONDITIONAL
-// A jump is a rail spanning the whole block plus an upright standard at each
-// END of a run. The standards are drawn only where the rail stops, which is
-// what the two connection flags are for - a row of jumps that each drew both
-// standards would grow a pair of posts between every adjacent pair, which is
-// precisely the double-post look the double gate was reworked to avoid. See
-// block/JumpBlock for the matching VoxelShape; the two are written twice and
-// must agree, or the jump you can see and the jump you collide with differ.
+// THE STYLES, AND THE ONE HARD RULE ABOUT THEM
+//   vertical   - one rail. The original.
+//   oxer       - two rails with a spread, FRONT AND BACK INSIDE ONE BLOCK.
+//   crossrails - two poles crossed in an X, lowest in the middle.
+// **No style is more than one block deep**, owner's rule. Real courses put
+// ground poles in front of an oxer and we are deliberately not building that:
+// a jump that occupies two blocks stops being a thing you put in a row and
+// starts being a structure.
 //
-// HEIGHT IS STACKING
-// There is no height state; you stack them, and each block asks for one more
-// block of clearance. The bottom rung is 1.5 blocks because the COLLISION box
-// is half a block taller than anything drawn here - that lives in JumpBlock,
-// not in this file, and without it a horse steps straight over a lone jump.
-// The standards run the full 0-16 so that a stack reads as one continuous
-// upright, and so does the intermediate post.
+// Style is COSMETIC. Every style collides identically, so a stack of three
+// means the same thing whatever it is built from - which is what keeps the
+// height ladder an honest reading of a horse's genetics. The collision boxes
+// live in block/JumpBlock, not here.
+//
+// THE STANDARDS ARE CONDITIONAL
+// A jump is its rails plus an upright standard at each END of a run. The
+// standards are drawn only where the rail stops, which is what the two
+// connection flags are for - a row of jumps that each drew both standards
+// would grow a pair of posts between every adjacent pair, precisely the
+// double-post look the double gate was reworked to avoid.
 //
 // THE INTERMEDIATE POST
-// A long run grows a T-post every third block, so a fence line is not one
-// unbroken rail between two distant standards. Which blocks get one is decided
+// A long run grows a T-post every third block. Which blocks get one is decided
 // in JumpBlock.postsHere off the world coordinate, not here - this file only
-// has to provide the model for a mid-run rail that carries one.
+// provides the model for a mid-run rail that carries one.
 //
 // WHICH SIDE IS LEFT
 // Authored for facing=south, exactly like the gates, and rotated by the
@@ -76,8 +79,12 @@ const WOODS = [
 const STYLE = "jump";
 const STYLE_LABEL = "Jump";
 
-/** How many a single craft yields - see the recipe note at the bottom. */
+/** Must match JumpBlock.Style, in the same order. */
+const STYLES = ["vertical", "oxer", "crossrails"];
+
+/** How many a single craft yields, and how many fences it takes. */
 const RECIPE_YIELD = 4;
+const RECIPE_FENCES = 3;
 
 let written = 0;
 function put(path, value) {
@@ -90,57 +97,43 @@ function put(path, value) {
 
 const face = (uv) => ({ uv, texture: "#texture" });
 
-/**
- * The rail: the full width of the block, so two adjacent jumps meet with no
- * seam. Its end caps are left in rather than culled - between two jumps they
- * are back-to-back quads facing opposite ways, which back-face culling handles
- * and which therefore does not z-fight.
- */
-const RAIL = {
-  from: [0, 11, 6],
-  to: [16, 15, 10],
-  faces: {
-    down: face([0, 6, 16, 10]),
-    up: face([0, 6, 16, 10]),
-    north: face([0, 1, 16, 5]),
-    south: face([0, 1, 16, 5]),
-    west: face([6, 1, 10, 5]),
-    east: face([6, 1, 10, 5]),
-  },
-};
+/** A rail: a box spanning the full width, at some height and depth. */
+function bar(yMin, yMax, zMin, zMax) {
+  return {
+    from: [0, yMin, zMin],
+    to: [16, yMax, zMax],
+    faces: {
+      down: face([0, zMin, 16, zMax]),
+      up: face([0, zMin, 16, zMax]),
+      north: face([0, 16 - yMax, 16, 16 - yMin]),
+      south: face([0, 16 - yMax, 16, 16 - yMin]),
+      west: face([zMin, 16 - yMax, zMax, 16 - yMin]),
+      east: face([zMin, 16 - yMax, zMax, 16 - yMin]),
+    },
+  };
+}
 
-/** The standard at high x - the LEFT one, for the authored facing=south. */
-const STANDARD_LEFT = {
-  from: [13, 0, 5],
-  to: [16, 16, 11],
-  faces: {
-    down: face([13, 5, 16, 11]),
-    up: face([13, 5, 16, 11]),
-    north: face([13, 0, 16, 16]),
-    south: face([13, 0, 16, 16]),
-    west: face([5, 0, 11, 16]),
-    east: face([5, 0, 11, 16]),
-  },
-};
-
-/** The standard at low x - the RIGHT one. */
-const STANDARD_RIGHT = {
-  from: [0, 0, 5],
-  to: [3, 16, 11],
-  faces: {
-    down: face([0, 5, 3, 11]),
-    up: face([0, 5, 3, 11]),
-    north: face([0, 0, 3, 16]),
-    south: face([0, 0, 3, 16]),
-    west: face([5, 0, 11, 16]),
-    east: face([5, 0, 11, 16]),
-  },
-};
+/** An upright at one end of the run. `x0` is 13 for the LEFT (high x) one. */
+function standard(x0, zMin, zMax) {
+  const x1 = x0 + 3;
+  return {
+    from: [x0, 0, zMin],
+    to: [x1, 16, zMax],
+    faces: {
+      down: face([x0, zMin, x1, zMax]),
+      up: face([x0, zMin, x1, zMax]),
+      north: face([x0, 0, x1, 16]),
+      south: face([x0, 0, x1, 16]),
+      west: face([zMin, 0, zMax, 16]),
+      east: face([zMin, 0, zMax, 16]),
+    },
+  };
+}
 
 /**
  * The intermediate upright - the T where a post meets the rail partway along a
- * run. Dead centre of the block, so it is the same box whichever way the rail
- * runs and needs no per-facing variant. JumpBlock.post() is the twin.
+ * run. Dead centre, so it is the same box whichever way the rail runs.
+ * JumpBlock.post() is the twin.
  */
 const POST = {
   from: [6, 0, 6],
@@ -156,25 +149,45 @@ const POST = {
 };
 
 /**
- * The five shapes, keyed by the suffix their models carry.
+ * One arm of the X, rotated in the block's own model.
  *
- * The suffix names the CONNECTIONS, not the standards: `_l` means a jump
- * continues the rail on the left, so the left standard is the one that is
- * gone. `_lr` is a bare rail mid-run, and `_lr_post` is that same rail
- * carrying an intermediate upright.
+ * Element rotation is limited to +/-45 and +/-22.5 about ONE axis, which is
+ * exactly enough for a crossrail. A 16-long bar turned 45 degrees about z
+ * projects to about 11.3 across, so it stays inside the block rather than
+ * poking into its neighbours - which is right: crossrails are each their own
+ * X, and do not run together the way the other two styles do.
  */
-const SHAPES = [
-  ["", [RAIL, STANDARD_LEFT, STANDARD_RIGHT]],
-  ["_l", [RAIL, STANDARD_RIGHT]],
-  ["_r", [RAIL, STANDARD_LEFT]],
-  ["_lr", [RAIL]],
-  ["_lr_post", [RAIL, POST]],
-];
+function crossArm(angle) {
+  return {
+    from: [0, 7, 6],
+    to: [16, 10, 10],
+    rotation: { origin: [8, 8, 8], axis: "z", angle },
+    faces: {
+      down: face([0, 6, 16, 10]),
+      up: face([0, 6, 16, 10]),
+      north: face([0, 6, 16, 9]),
+      south: face([0, 6, 16, 9]),
+      west: face([6, 6, 10, 9]),
+      east: face([6, 6, 10, 9]),
+    },
+  };
+}
 
 /**
- * The model suffix for a set of flags.
+ * Each style: the bars it draws, and how deep its standards must be to
+ * enclose them. Mirrors JumpBlock.drawnBars and JumpBlock.standardDepth.
+ */
+const STYLE_PARTS = {
+  vertical: { bars: [bar(11, 15, 6, 10)], depth: [5, 11] },
+  // Front and back within the one block. The standards widen to hold both.
+  oxer: { bars: [bar(11, 15, 2, 6), bar(11, 15, 10, 14)], depth: [1, 15] },
+  crossrails: { bars: [crossArm(45), crossArm(-45)], depth: [5, 11] },
+};
+
+/**
+ * The model suffix for a set of connection flags.
  *
- * <p>ONE function, called from both the model loop and the blockstate loop,
+ * ONE function, called from both the model loop and the blockstate loop,
  * because writing it out twice is how this shipped broken the first time:
  * composing `(left?"_l":"") + (right?"_r":"")` gives "_l_r", the models are
  * named "_lr", and the mismatch is invisible until somebody places three jumps
@@ -182,30 +195,59 @@ const SHAPES = [
  * differs, so a row of two looks perfect. GeneratedJumps.suffix is the twin.
  *
  * `post` is honoured only mid-run, matching JumpBlock.withPost, which never
- * sets it otherwise. The blockstate still has to name every combination, so the
- * end-of-run states map to the postless model rather than to one that would
- * then have to exist.
+ * sets it otherwise. The blockstate still has to name every combination, so
+ * the end-of-run states map to the postless model rather than to one that
+ * would then have to exist.
  */
 const suffixFor = (left, right, post) =>
   left && right ? (post ? "_lr_post" : "_lr") : left ? "_l" : right ? "_r" : "";
 
-// --- templates ------------------------------------------------------------
-// Five models carrying the actual boxes, which every wood then parents to with
-// only its texture changed.
+/** Every connection suffix, in the order the models are written. */
+const CONNECTIONS = ["", "_l", "_r", "_lr", "_lr_post"];
 
-for (const [suffix, elements] of SHAPES) {
-  const model = { textures: { particle: "#texture" }, elements };
-  // Only the both-standards model is ever shown in an inventory slot, so it is
-  // the only one that needs a display transform. Vanilla's fence gui pose:
-  // a jump is long and low and looks like nothing at all face-on.
-  if (suffix === "") {
-    model.parent = "block/block";
-    model.display = {
-      gui: { rotation: [30, 45, 0], translation: [0, -2, 0], scale: [0.8, 0.8, 0.8] },
-      head: { rotation: [0, 0, 0], translation: [0, -3, -6], scale: [1, 1, 1] },
-    };
+/** The elements of one style in one connection state. */
+function elementsFor(style, suffix) {
+  const { bars, depth } = STYLE_PARTS[style];
+  const els = [...bars];
+  // The suffix names CONNECTIONS, so a connected side is the one with NO
+  // standard: the rail carries on into the next block.
+  const connectedLeft = suffix === "_l" || suffix.startsWith("_lr");
+  const connectedRight = suffix === "_r" || suffix.startsWith("_lr");
+  if (!connectedLeft) {
+    els.push(standard(13, depth[0], depth[1]));
   }
-  put(join(A, "models/block", `template_${STYLE}${suffix}.json`), model);
+  if (!connectedRight) {
+    els.push(standard(0, depth[0], depth[1]));
+  }
+  if (suffix === "_lr_post") {
+    els.push(POST);
+  }
+  return els;
+}
+
+// --- templates ------------------------------------------------------------
+// Three styles x five connection states, carrying the actual boxes, which
+// every wood then parents to with only its texture changed.
+
+for (const style of STYLES) {
+  for (const suffix of CONNECTIONS) {
+    const model = {
+      textures: { particle: "#texture" },
+      elements: elementsFor(style, suffix),
+    };
+    // Only the both-standards model of each style is ever shown in an
+    // inventory slot, so it is the only one that needs a display transform.
+    // Vanilla's fence gui pose: a jump is long and low and looks like nothing
+    // at all face-on.
+    if (suffix === "") {
+      model.parent = "block/block";
+      model.display = {
+        gui: { rotation: [30, 45, 0], translation: [0, -2, 0], scale: [0.8, 0.8, 0.8] },
+        head: { rotation: [0, 0, 0], translation: [0, -3, -6], scale: [1, 1, 1] },
+      };
+    }
+    put(join(A, "models/block", `template_${STYLE}_${style}${suffix}.json`), model);
+  }
 }
 
 // --- per-wood models, blockstates, items, recipes, loot --------------------
@@ -221,35 +263,49 @@ for (const [wood, texture, woodLabel] of WOODS) {
   tagValues.push(`${NS}:${id}`);
   lang[`block.${NS}.${id}`] = `${woodLabel} ${STYLE_LABEL}`;
 
-  for (const [suffix] of SHAPES) {
-    put(join(A, "models/block", id + suffix + ".json"), {
-      parent: `${NS}:block/template_${STYLE}${suffix}`,
-      textures: { texture },
-    });
+  for (const style of STYLES) {
+    for (const suffix of CONNECTIONS) {
+      put(join(A, "models/block", `${id}_${style}${suffix}.json`), {
+        parent: `${NS}:block/template_${STYLE}_${style}${suffix}`,
+        textures: { texture },
+      });
+    }
   }
 
-  // 4 facings x left x right x post = 32 variants
+  // 3 styles x 4 facings x left x right x post = 96 variants
   const variants = {};
-  for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
-    for (const left of [false, true]) {
-      for (const right of [false, true]) {
-        for (const post of [false, true]) {
-          const v = {
-            model: `${NS}:block/${id}${suffixFor(left, right, post)}`,
-            uvlock: true,
-          };
-          if (y !== 0) v.y = y;
-          variants[`facing=${facing},left=${left},right=${right},post=${post}`] = v;
+  for (const style of STYLES) {
+    for (const [facing, y] of Object.entries(VARIANT_ROTATION)) {
+      for (const left of [false, true]) {
+        for (const right of [false, true]) {
+          for (const post of [false, true]) {
+            const v = {
+              model: `${NS}:block/${id}_${style}${suffixFor(left, right, post)}`,
+              // NOT uvlocked on the crossrails. uvlock re-projects a face's UVs
+              // against the block axes after the blockstate's y rotation, and on
+              // an element that is ITSELF rotated 45 degrees the two fight and
+              // the grain shears. The other two styles are axis-aligned and lock
+              // cleanly. UNVERIFIED: this is reasoning about the renderer, not
+              // something that has been looked at.
+              uvlock: style !== "crossrails",
+            };
+            if (y !== 0) v.y = y;
+            // Property order in the key does not matter to the game, but
+            // keeping it alphabetical keeps the diffs readable.
+            variants[
+              `facing=${facing},left=${left},post=${post},right=${right},style=${style}`
+            ] = v;
+          }
         }
       }
     }
   }
   put(join(A, "blockstates", id + ".json"), { variants });
 
-  // The icon is the both-standards model - the only one given a gui transform
-  // above, and the only one that reads as a jump rather than as a plank.
+  // The icon is the vertical with both standards - the only model given a gui
+  // transform above, and the style the item places.
   put(join(A, "items", id + ".json"), {
-    model: { type: "minecraft:model", model: `${NS}:block/${id}` },
+    model: { type: "minecraft:model", model: `${NS}:block/${id}_vertical` },
   });
 
   // An ordinary single-drop table. Unlike the double gate this is ONE block,
@@ -277,15 +333,18 @@ for (const [wood, texture, woodLabel] of WOODS) {
   // So it takes one raw horse hair. The thing to avoid was the braided rope
   // the gate used to want, which priced a paddock at twelve hairs a gate; a
   // hair is sheared one to three at a time, once per horse per day. Four jumps
-  // per hair is the other side of that: a twelve-fence course costs three
-  // hairs, which is one horse's afternoon. Raw, per the rule that landed with
-  // the rope's removal - no intermediate, nothing to craft first.
+  // per hair is the other side of that.
+  //
+  // THIS IS THE SAME-WOOD RECIPE. A mixed-wood craft - three fences of
+  // different woods giving a jump of whichever wood there was most of - cannot
+  // be a data recipe at all, because the result depends on the inputs. That is
+  // a custom recipe in Java and it is separate work; until it lands, mixing
+  // woods simply does not craft.
   put(join(D, "recipe", id + ".json"), {
     type: "minecraft:crafting_shapeless",
     category: "building",
     ingredients: [
-      `minecraft:${wood}_fence`,
-      `minecraft:${wood}_fence`,
+      ...Array(RECIPE_FENCES).fill(`minecraft:${wood}_fence`),
       `${NS}:horse_hair`,
     ],
     result: { count: RECIPE_YIELD, id: `${NS}:${id}` },
@@ -316,7 +375,7 @@ for (const [k, v] of Object.entries(lang)) existing[k] = v;
 writeFileSync(langPath, JSON.stringify(existing, null, 2) + "\n", "utf8");
 
 console.log(
-  `jumps: ${WOODS.length} woods, ${SHAPES.length} templates, ` +
-    `${written} files written, ${Object.keys(lang).length} lang keys merged, ` +
-    `${merged.length} values in mineable/axe`
+  `jumps: ${WOODS.length} woods, ${STYLES.length} styles, ` +
+    `${STYLES.length * CONNECTIONS.length} templates, ${written} files written, ` +
+    `${Object.keys(lang).length} lang keys merged, ${merged.length} values in mineable/axe`
 );

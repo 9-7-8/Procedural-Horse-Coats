@@ -33,6 +33,7 @@
       "in": [
         "minecraft:acacia_fence",
         "minecraft:acacia_fence",
+        "minecraft:acacia_fence",
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:acacia_jump",
@@ -154,6 +155,7 @@
       "id": "bamboo_jump",
       "kind": "shapeless",
       "in": [
+        "minecraft:bamboo_fence",
         "minecraft:bamboo_fence",
         "minecraft:bamboo_fence",
         "horsegenetics:horse_hair"
@@ -298,6 +300,7 @@
       "id": "birch_jump",
       "kind": "shapeless",
       "in": [
+        "minecraft:birch_fence",
         "minecraft:birch_fence",
         "minecraft:birch_fence",
         "horsegenetics:horse_hair"
@@ -483,6 +486,7 @@
       "in": [
         "minecraft:cherry_fence",
         "minecraft:cherry_fence",
+        "minecraft:cherry_fence",
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:cherry_jump",
@@ -621,6 +625,7 @@
       "in": [
         "minecraft:crimson_fence",
         "minecraft:crimson_fence",
+        "minecraft:crimson_fence",
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:crimson_jump",
@@ -742,6 +747,7 @@
       "id": "dark_oak_jump",
       "kind": "shapeless",
       "in": [
+        "minecraft:dark_oak_fence",
         "minecraft:dark_oak_fence",
         "minecraft:dark_oak_fence",
         "horsegenetics:horse_hair"
@@ -973,6 +979,7 @@
       "in": [
         "minecraft:jungle_fence",
         "minecraft:jungle_fence",
+        "minecraft:jungle_fence",
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:jungle_jump",
@@ -1137,6 +1144,7 @@
       "in": [
         "minecraft:mangrove_fence",
         "minecraft:mangrove_fence",
+        "minecraft:mangrove_fence",
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:mangrove_jump",
@@ -1285,6 +1293,7 @@
       "in": [
         "minecraft:oak_fence",
         "minecraft:oak_fence",
+        "minecraft:oak_fence",
         "horsegenetics:horse_hair"
       ],
       "out": "horsegenetics:oak_jump",
@@ -1406,6 +1415,7 @@
       "id": "pale_oak_jump",
       "kind": "shapeless",
       "in": [
+        "minecraft:pale_oak_fence",
         "minecraft:pale_oak_fence",
         "minecraft:pale_oak_fence",
         "horsegenetics:horse_hair"
@@ -1554,6 +1564,7 @@
       "id": "spruce_jump",
       "kind": "shapeless",
       "in": [
+        "minecraft:spruce_fence",
         "minecraft:spruce_fence",
         "minecraft:spruce_fence",
         "horsegenetics:horse_hair"
@@ -1746,6 +1757,7 @@
       "id": "warped_jump",
       "kind": "shapeless",
       "in": [
+        "minecraft:warped_fence",
         "minecraft:warped_fence",
         "minecraft:warped_fence",
         "horsegenetics:horse_hair"

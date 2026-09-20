@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "horsegenetics:block/mangrove_jump"
+    "model": "horsegenetics:block/mangrove_jump_vertical"
   }
 }

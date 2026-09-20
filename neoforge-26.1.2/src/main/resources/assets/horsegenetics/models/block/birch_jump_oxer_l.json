@@ -1,0 +1,6 @@
+{
+  "parent": "horsegenetics:block/template_jump_oxer_l",
+  "textures": {
+    "texture": "minecraft:block/birch_planks"
+  }
+}

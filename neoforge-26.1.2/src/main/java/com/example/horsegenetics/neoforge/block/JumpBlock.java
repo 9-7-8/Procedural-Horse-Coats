@@ -4,6 +4,16 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
@@ -15,6 +25,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -110,6 +121,56 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     /** One intermediate upright every this many blocks along a run. */
     private static final int POST_SPACING = 3;
 
+    /**
+     * <b>What kind of fence this is.</b> Cosmetic only - see {@link #STYLE}.
+     *
+     * <p>Every style is <b>one block deep at most</b>. The owner was explicit:
+     * real courses have oxers with ground poles leading up to them, and we are
+     * not building those, because a jump that occupies two blocks stops being a
+     * thing you can put in a row and start being a structure.
+     */
+    public enum Style implements StringRepresentable {
+        /** One rail. The original, and the default. */
+        VERTICAL("vertical"),
+        /** Two rails with a spread, front and back, inside the one block. */
+        OXER("oxer"),
+        /** Two poles crossed in an X, lowest in the middle. */
+        CROSSRAILS("crossrails");
+
+        private final String name;
+
+        Style(String name) {
+            this.name = name;
+        }
+
+        public Style next() {
+            return values()[(this.ordinal() + 1) % values().length];
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+    }
+
+    /**
+     * <b>Cosmetic, deliberately.</b> Every style is the same obstacle - same
+     * clearance, same collision - and differs only in what it looks like.
+     *
+     * <p>That is a design choice and not a shortcut. The height ladder is the
+     * mod's one honest reading of a horse's jump genetics
+     * ({@code wiki/item-jumps.html#instrument}), and it stays readable only
+     * while a stack of three means the same thing whatever it is built from. A
+     * style that jumped differently would make the instrument depend on
+     * decoration.
+     *
+     * <p><b>Changed in place by right-clicking</b> rather than by having an
+     * item per style. Three styles times twelve woods would be thirty-six
+     * items for a difference the player can see at a glance, and cycling in
+     * place means a built course can be restyled without being rebuilt.
+     */
+    public static final EnumProperty<Style> STYLE = EnumProperty.create("style", Style.class);
+
     // --- geometry -----------------------------------------------------------
     //
     // Model space, 0-16. The rail spans the full width so adjacent jumps meet
@@ -139,26 +200,74 @@ public class JumpBlock extends HorizontalDirectionalBlock {
      */
     private static final int COLLISION_TOP = 24;
 
-    /** Rail running east-west, for a jump facing north or south. */
-    private static VoxelShape railX(int top) {
-        return Block.box(0, 11, 6, 16, top, 10);
+    /**
+     * One horizontal bar of a style, in the authored facing=south frame where
+     * the rail runs along x.
+     *
+     * <p>Only y and z vary between styles - every bar spans the full width, so
+     * that adjacent jumps meet with no seam whatever they are built as.
+     */
+    private record Bar(int yMin, int yMax, int zMin, int zMax) {
     }
 
-    /** Rail running north-south, for a jump facing east or west. */
-    private static VoxelShape railZ(int top) {
-        return Block.box(6, 11, 0, 10, top, 16);
+    /** The bars a style DRAWS. */
+    private static Bar[] drawnBars(Style style) {
+        return switch (style) {
+            case VERTICAL -> new Bar[] {new Bar(11, RAIL_TOP, 6, 10)};
+            // Front and back inside the ONE block - the owner's hard rule is
+            // that no style here is more than a block deep.
+            case OXER -> new Bar[] {new Bar(11, RAIL_TOP, 2, 6), new Bar(11, RAIL_TOP, 10, 14)};
+            // The X is drawn by the model with rotated elements, which a
+            // VoxelShape cannot express; this is only its bounding bar.
+            case CROSSRAILS -> new Bar[] {new Bar(2, 14, 6, 10)};
+        };
+    }
+
+    /**
+     * The single box a style COLLIDES with, which is <b>not</b> its drawn shape.
+     *
+     * <p>An oxer's two rails collide as the solid slab between them and the
+     * crossrails' X collides as the block it occupies, because a horse that
+     * clips a gap between two poles and passes through is worse than a horse
+     * stopped by a fence that looks slightly emptier than it is. It also keeps
+     * the promise {@link #STYLE} makes: every style is the same obstacle.
+     */
+    private static Bar collisionBar(Style style) {
+        return switch (style) {
+            case VERTICAL -> new Bar(11, COLLISION_TOP, 6, 10);
+            case OXER -> new Bar(11, COLLISION_TOP, 2, 14);
+            case CROSSRAILS -> new Bar(2, COLLISION_TOP, 6, 10);
+        };
+    }
+
+    /** How deep the standards must be to enclose the style, as [zMin, zMax]. */
+    private static int[] standardDepth(Style style) {
+        return style == Style.OXER ? new int[] {1, 15} : new int[] {5, 11};
+    }
+
+    /**
+     * Turn a bar into a box for the given facing.
+     *
+     * <p>A jump facing north or south (axis Z) is a barrier running east-west,
+     * so the bar's z range is the block's z. Facing east or west swaps them.
+     */
+    private static VoxelShape box(Bar bar, Direction facing) {
+        return facing.getAxis() == Direction.Axis.Z
+                ? Block.box(0, bar.yMin(), bar.zMin(), 16, bar.yMax(), bar.zMax())
+                : Block.box(bar.zMin(), bar.yMin(), 0, bar.zMax(), bar.yMax(), 16);
     }
 
     /**
      * Every shape this block can have, built once.
      *
-     * <p>Four facings times three booleans is thirty-two states and half that
-     * many distinct shapes - a jump facing north and one facing south occupy
-     * the same boxes. Caching on the combination actually used rather than
+     * <p>Three styles times four facings times three booleans is ninety-six
+     * states and half that many distinct shapes - a jump facing north and one
+     * facing south occupy the same boxes. Caching on the combination used
+     * rather than
      * recomputing per collision test keeps {@link #getShape} free, which
      * matters: a horse galloping a course is asking this question every tick.
      */
-    private static final Map<ShapeKey, VoxelShape> SHAPES = buildShapes(RAIL_TOP, STANDARD_TOP);
+    private static final Map<ShapeKey, VoxelShape> SHAPES = buildShapes(false);
 
     /**
      * The same shapes again, raised to {@link #COLLISION_TOP}.
@@ -166,16 +275,17 @@ public class JumpBlock extends HorizontalDirectionalBlock {
      * <p>This is the fence trick, and it is the whole reason a jump is an
      * obstacle rather than a step - see the class note.
      */
-    private static final Map<ShapeKey, VoxelShape> COLLISION_SHAPES =
-            buildShapes(COLLISION_TOP, COLLISION_TOP);
+    private static final Map<ShapeKey, VoxelShape> COLLISION_SHAPES = buildShapes(true);
 
-    private record ShapeKey(Direction facing, boolean left, boolean right, boolean post) {
+    private record ShapeKey(Style style, Direction facing, boolean left, boolean right,
+                            boolean post) {
     }
 
     public JumpBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState()
                 .setValue(FACING, Direction.NORTH)
+                .setValue(STYLE, Style.VERTICAL)
                 .setValue(LEFT, false)
                 .setValue(RIGHT, false)
                 .setValue(POST, false));
@@ -188,7 +298,7 @@ public class JumpBlock extends HorizontalDirectionalBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LEFT, RIGHT, POST);
+        builder.add(FACING, STYLE, LEFT, RIGHT, POST);
     }
 
     // --- shape --------------------------------------------------------------
@@ -202,27 +312,37 @@ public class JumpBlock extends HorizontalDirectionalBlock {
      *                    Collapsing these two into one number silently lops a
      *                    pixel off every post.
      */
-    private static Map<ShapeKey, VoxelShape> buildShapes(int railTop, int standardTop) {
+    private static Map<ShapeKey, VoxelShape> buildShapes(boolean collision) {
+        int standardTop = collision ? COLLISION_TOP : STANDARD_TOP;
         Map<ShapeKey, VoxelShape> shapes = new HashMap<>();
-        for (Direction facing : Direction.Plane.HORIZONTAL) {
-            for (boolean left : new boolean[] {false, true}) {
-                for (boolean right : new boolean[] {false, true}) {
-                    for (boolean post : new boolean[] {false, true}) {
-                        // The rail lies across the facing: a jump facing north
-                        // or south (axis Z) is a barrier running east-west.
-                        VoxelShape shape = facing.getAxis() == Direction.Axis.Z
-                                ? railX(railTop) : railZ(railTop);
-                        Direction leftSide = facing.getCounterClockWise();
-                        if (!left) {
-                            shape = Shapes.or(shape, standard(leftSide, standardTop));
+        for (Style style : Style.values()) {
+            int[] depth = standardDepth(style);
+            for (Direction facing : Direction.Plane.HORIZONTAL) {
+                VoxelShape bars = Shapes.empty();
+                if (collision) {
+                    bars = box(collisionBar(style), facing);
+                } else {
+                    for (Bar bar : drawnBars(style)) {
+                        bars = Shapes.or(bars, box(bar, facing));
+                    }
+                }
+                Direction leftSide = facing.getCounterClockWise();
+                for (boolean left : new boolean[] {false, true}) {
+                    for (boolean right : new boolean[] {false, true}) {
+                        for (boolean post : new boolean[] {false, true}) {
+                            VoxelShape shape = bars;
+                            if (!left) {
+                                shape = Shapes.or(shape, standard(leftSide, standardTop, depth));
+                            }
+                            if (!right) {
+                                shape = Shapes.or(shape,
+                                        standard(leftSide.getOpposite(), standardTop, depth));
+                            }
+                            if (post) {
+                                shape = Shapes.or(shape, post(standardTop));
+                            }
+                            shapes.put(new ShapeKey(style, facing, left, right, post), shape);
                         }
-                        if (!right) {
-                            shape = Shapes.or(shape, standard(leftSide.getOpposite(), standardTop));
-                        }
-                        if (post) {
-                            shape = Shapes.or(shape, post(standardTop));
-                        }
-                        shapes.put(new ShapeKey(facing, left, right, post), shape);
                     }
                 }
             }
@@ -247,12 +367,14 @@ public class JumpBlock extends HorizontalDirectionalBlock {
      * one continuous upright and so there is no gap at the foot of a fence
      * line for something to walk through.
      */
-    private static VoxelShape standard(Direction side, int top) {
+    private static VoxelShape standard(Direction side, int top, int[] depth) {
+        int lo = depth[0];
+        int hi = depth[1];
         return switch (side) {
-            case EAST -> Block.box(13, 0, 5, 16, top, 11);
-            case WEST -> Block.box(0, 0, 5, 3, top, 11);
-            case SOUTH -> Block.box(5, 0, 13, 11, top, 16);
-            case NORTH -> Block.box(5, 0, 0, 11, top, 3);
+            case EAST -> Block.box(13, 0, lo, 16, top, hi);
+            case WEST -> Block.box(0, 0, lo, 3, top, hi);
+            case SOUTH -> Block.box(lo, 0, 13, hi, top, 16);
+            case NORTH -> Block.box(lo, 0, 0, hi, top, 3);
             default -> Shapes.empty();
         };
     }
@@ -291,8 +413,8 @@ public class JumpBlock extends HorizontalDirectionalBlock {
     }
 
     private static ShapeKey key(BlockState state) {
-        return new ShapeKey(state.getValue(FACING), state.getValue(LEFT),
-                state.getValue(RIGHT), state.getValue(POST));
+        return new ShapeKey(state.getValue(STYLE), state.getValue(FACING),
+                state.getValue(LEFT), state.getValue(RIGHT), state.getValue(POST));
     }
 
     // --- connection ---------------------------------------------------------
@@ -363,6 +485,55 @@ public class JumpBlock extends HorizontalDirectionalBlock {
             return withPost(state.setValue(RIGHT, connects(state, neighbourState)), pos);
         }
         return state;
+    }
+
+
+    /**
+     * <b>Changing a jump costs something.</b> A stick restyles it; a plank
+     * repaints it in that plank's wood.
+     *
+     * <p>Owner's call, and the reason is that a course is a thing you build
+     * rather than a thing you fiddle with: a free right-click makes style and
+     * wood into a toggle, and a material cost makes them a decision. Both are
+     * deliberately cheap - one item - because the cost is meant to be a brake,
+     * not a tax. Neither is consumed in creative.
+     *
+     * <p><b>Restyle is a stick</b>, because a style is an arrangement of poles
+     * and a stick is the closest vanilla has to one. <b>Repaint is a plank</b>
+     * of the wood you want, which is also how you say <i>which</i> wood - there
+     * is no menu and no cycle order to learn, you simply hold the wood.
+     *
+     * <p>Repainting swaps to the sibling block of that wood and carries every
+     * property across with {@code withPropertiesOf}, so facing, style and the
+     * connection flags all survive. That is the whole reason the twelve woods
+     * are separate blocks and not data - and it is the part that will change
+     * when the standards and rails become independently coloured, because two
+     * woods on one jump cannot be a block each.
+     */
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+                                          BlockPos pos, Player player, InteractionHand hand,
+                                          BlockHitResult hit) {
+        boolean restyle = stack.is(Items.STICK);
+        JumpBlock repaint = restyle ? null : Jumps.byPlank(stack.getItem());
+        if (!restyle && repaint == null) {
+            return InteractionResult.PASS;
+        }
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        if (restyle) {
+            level.setBlockAndUpdate(pos, state.setValue(STYLE, state.getValue(STYLE).next()));
+        } else if (repaint == state.getBlock()) {
+            // Already that wood. Refusing costs the player nothing and is
+            // better than silently eating a plank for no change.
+            return InteractionResult.PASS;
+        } else {
+            level.setBlockAndUpdate(pos, repaint.withPropertiesOf(state));
+        }
+        stack.consume(1, player);
+        level.playSound(null, pos, SoundType.WOOD.getPlaceSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
+        return InteractionResult.CONSUME;
     }
 
     // --- rotation and mirroring ---------------------------------------------

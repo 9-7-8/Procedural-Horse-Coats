@@ -15,9 +15,9 @@ import java.util.Map;
  * make one visible, placeable, craftable and breakable.
  *
  * <h2>There are no textures here, and that is the whole trick</h2>
- * A jump has never had art of its own. The five shapes are shipped template
- * models - {@code horsegenetics:block/template_jump*} - and a wood's five
- * models are each one line: a parent and a texture id. So a modded wood needs
+ * A jump has never had art of its own. Every shape is a shipped template
+ * model - {@code horsegenetics:block/template_jump_<style><connection>} - and a
+ * wood's models are each one line: a parent and a texture id. So a modded wood needs
  * no generated PNG at all; it needs a pointer at the plank texture <i>that mod
  * already drew</i>, exactly as the shipped twelve point at vanilla's.
  *
@@ -46,8 +46,14 @@ final class GeneratedJumps {
     private static final Map<String, Integer> ROTATION = Map.of(
             "south", 0, "west", 90, "north", 180, "east", 270);
 
-    /** Every model suffix, in the order the models are written. */
-    private static final String[] SUFFIXES = {"", "_l", "_r", "_lr", "_lr_post"};
+    /** Every connection suffix, in the order the models are written. */
+    private static final String[] CONNECTIONS = {"", "_l", "_r", "_lr", "_lr_post"};
+
+    /** Must match {@code JumpBlock.Style}, in the same order. */
+    private static final String[] STYLES = {"vertical", "oxer", "crossrails"};
+
+    /** Must match {@code RECIPE_FENCES} in bake-jumps.mjs. */
+    private static final int RECIPE_FENCES = 3;
 
     /**
      * The model suffix for a set of flags.
@@ -91,35 +97,47 @@ final class GeneratedJumps {
             tagValues.add(NS + ":" + id);
             lang.addProperty("block." + NS + "." + id, label(wood) + " Jump");
 
-            // ---- five models, one line of difference each -------------------
+            // ---- one model per style per connection state --------------------
             // The suffix names the CONNECTIONS, not the standards: "_l" means a
             // jump continues the rail to the left, so the left standard is the
             // one that is gone, "_lr" is a bare rail mid-run, and "_lr_post"
             // is that rail carrying an intermediate upright.
-            for (String suffix : SUFFIXES) {
-                JsonObject model = new JsonObject();
-                model.addProperty("parent", NS + ":block/template_" + STYLE + suffix);
-                JsonObject textures = new JsonObject();
-                textures.addProperty("texture", wood.plankTexture());
-                model.add("textures", textures);
-                put(files, "assets/" + NS + "/models/block/" + id + suffix + ".json", model);
+            for (String style : STYLES) {
+                for (String suffix : CONNECTIONS) {
+                    JsonObject model = new JsonObject();
+                    model.addProperty("parent",
+                            NS + ":block/template_" + STYLE + "_" + style + suffix);
+                    JsonObject textures = new JsonObject();
+                    textures.addProperty("texture", wood.plankTexture());
+                    model.add("textures", textures);
+                    put(files, "assets/" + NS + "/models/block/" + id + "_" + style + suffix
+                            + ".json", model);
+                }
             }
 
-            // ---- 4 facings x left x right x post = 32 variants ----------------
+            // ---- 3 styles x 4 facings x left x right x post = 96 variants -----
             JsonObject variants = new JsonObject();
-            for (Map.Entry<String, Integer> facing : ROTATION.entrySet()) {
-                for (boolean left : new boolean[] {false, true}) {
-                    for (boolean right : new boolean[] {false, true}) {
-                        for (boolean post : new boolean[] {false, true}) {
-                            JsonObject variant = new JsonObject();
-                            variant.addProperty("model",
-                                    NS + ":block/" + id + suffix(left, right, post));
-                            variant.addProperty("uvlock", true);
-                            if (facing.getValue() != 0) {
-                                variant.addProperty("y", facing.getValue());
+            for (String style : STYLES) {
+                for (Map.Entry<String, Integer> facing : ROTATION.entrySet()) {
+                    for (boolean left : new boolean[] {false, true}) {
+                        for (boolean right : new boolean[] {false, true}) {
+                            for (boolean post : new boolean[] {false, true}) {
+                                JsonObject variant = new JsonObject();
+                                variant.addProperty("model", NS + ":block/" + id + "_" + style
+                                        + suffix(left, right, post));
+                                // NOT uvlocked on the crossrails: uvlock re-projects
+                                // a face's UVs against the block axes after the
+                                // blockstate's y rotation, and on an element that is
+                                // ITSELF rotated 45 degrees the two fight and the
+                                // grain shears. bake-jumps.mjs does the same.
+                                variant.addProperty("uvlock", !"crossrails".equals(style));
+                                if (facing.getValue() != 0) {
+                                    variant.addProperty("y", facing.getValue());
+                                }
+                                variants.add("facing=" + facing.getKey() + ",left=" + left
+                                        + ",post=" + post + ",right=" + right
+                                        + ",style=" + style, variant);
                             }
-                            variants.add("facing=" + facing.getKey() + ",left=" + left
-                                    + ",right=" + right + ",post=" + post, variant);
                         }
                     }
                 }
@@ -128,12 +146,12 @@ final class GeneratedJumps {
             blockstate.add("variants", variants);
             put(files, "assets/" + NS + "/blockstates/" + id + ".json", blockstate);
 
-            // ---- the icon is the both-standards model ------------------------
-            // The only one given a gui transform in the shipped template, and
-            // the only one that reads as a jump rather than as a plank.
+            // ---- the icon is the vertical, with both standards ---------------
+            // The only model given a gui transform in the shipped template, and
+            // the style the item places.
             JsonObject itemModel = new JsonObject();
             itemModel.addProperty("type", "minecraft:model");
-            itemModel.addProperty("model", NS + ":block/" + id);
+            itemModel.addProperty("model", NS + ":block/" + id + "_vertical");
             JsonObject item = new JsonObject();
             item.add("model", itemModel);
             put(files, "assets/" + NS + "/items/" + id + ".json", item);
@@ -196,7 +214,7 @@ final class GeneratedJumps {
     }
 
     /**
-     * Two of that mod's fences and one raw horse hair, yielding four.
+     * Three of that mod's fences and one raw horse hair, yielding four.
      *
      * <p>The hair is what keeps this inside the house rule
      * ({@code wiki/items.html#rules}) rather than making the jumps a second
@@ -207,8 +225,9 @@ final class GeneratedJumps {
      */
     private static JsonObject recipe(ModdedMaterials.Wood wood, String id) {
         JsonArray ingredients = new JsonArray();
-        ingredients.add(wood.fenceId());
-        ingredients.add(wood.fenceId());
+        for (int i = 0; i < RECIPE_FENCES; i++) {
+            ingredients.add(wood.fenceId());
+        }
         ingredients.add(NS + ":horse_hair");
 
         JsonObject result = new JsonObject();

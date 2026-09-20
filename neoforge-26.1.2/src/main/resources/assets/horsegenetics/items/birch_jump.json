@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "horsegenetics:block/birch_jump"
+    "model": "horsegenetics:block/birch_jump_vertical"
   }
 }

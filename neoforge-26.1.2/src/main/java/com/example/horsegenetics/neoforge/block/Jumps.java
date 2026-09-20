@@ -25,10 +25,11 @@ import java.util.List;
  * and they were paid for once already.
  *
  * <p><b>The wood list is vanilla's twelve</b>, the same roster the gates carry,
- * each paired with its vanilla {@link Items} fence. That pairing is doing two
- * jobs: it is the creative-menu anchor the jump is filed after, and it is a
- * <em>compile</em> error if a wood is misspelled - which is the whole point of
- * writing it as constants rather than composing {@code name + "_fence"}.
+ * each paired with its vanilla {@link Items} fence. <b>Nothing reads that fence
+ * any more</b> - it was the creative-menu anchor until the jumps left vanilla's
+ * Building Blocks for a tab of their own - and it is kept because it is still a
+ * <em>compile</em> error if a wood is misspelled, which is the whole point of
+ * writing the list as constants rather than composing {@code name + "_fence"}.
  * {@code tools/bake-jumps.mjs} carries the same twelve and the two must agree:
  * a wood here with no generated blockstate is a purple chequerboard, and a wood
  * there with no block registered is a file the game never reads.
@@ -47,6 +48,7 @@ public final class Jumps {
      */
     public record Jump(WoodType wood,
                        java.util.function.Supplier<Item> sourceFence,
+                       String plankId,
                        DeferredBlock<JumpBlock> block,
                        DeferredItem<BlockItem> item) {
     }
@@ -83,7 +85,8 @@ public final class Jumps {
         for (Object[] row : WOODS) {
             WoodType wood = (WoodType) row[0];
             Item vanillaFence = (Item) row[1];
-            register(wood.name() + "_" + STYLE, () -> vanillaFence);
+            register(wood.name() + "_" + STYLE, () -> vanillaFence,
+                    "minecraft:" + wood.name() + "_planks");
         }
         // ...and one for every wood another mod brought. Read out of those
         // mods' own jars before anything registers - see compat/ModdedMaterials
@@ -93,12 +96,18 @@ public final class Jumps {
         for (var wood : com.example.horsegenetics.neoforge.compat.ModdedMaterials.woods()) {
             net.minecraft.resources.Identifier source =
                     net.minecraft.resources.Identifier.parse(wood.fenceId());
+            // The plank ITEM id, derived from the plank TEXTURE id the scan
+            // recorded - "ns:block/fir_planks" names the item "ns:fir_planks".
+            // Composed rather than scanned, like Wood.fenceId, so every use of
+            // it has to tolerate the item not existing.
             register(wood.jumpId(),
-                    () -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(source));
+                    () -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(source),
+                    wood.plankTexture().replace("block/", ""));
         }
     }
 
-    private static void register(String name, java.util.function.Supplier<Item> sourceFence) {
+    private static void register(String name, java.util.function.Supplier<Item> sourceFence,
+                                 String plankId) {
         // Same guard, same reason, as DoubleGates' and compat/ModdedArmour's:
         // this runs in a static initialiser on ids built out of other mods'
         // jars, and a DeferredRegister throws on a duplicate. One missing jump
@@ -129,7 +138,7 @@ public final class Jumps {
         DeferredItem<BlockItem> item = ModItems.ITEMS.registerItem(name,
                 p -> new BlockItem(block.get(), p.useBlockDescriptionPrefix()));
 
-        JUMPS.add(new Jump(wood(name), sourceFence, block, item));
+        JUMPS.add(new Jump(wood(name), sourceFence, plankId, block, item));
     }
 
     /**
@@ -145,6 +154,37 @@ public final class Jumps {
         }
         return WoodType.OAK;
     }
+
+    /**
+     * The jump block made of the wood whose planks these are, or null.
+     *
+     * <p>Backs the plank-recolour interaction in {@link JumpBlock}. Built once,
+     * lazily, on first use rather than in the static block: the plank ITEMS are
+     * other people's registry entries and are not there yet while this class is
+     * registering its own.
+     */
+    public static @org.jetbrains.annotations.Nullable JumpBlock byPlank(Item plank) {
+        if (BY_PLANK == null) {
+            java.util.Map<Item, JumpBlock> map = new java.util.HashMap<>();
+            for (Jump jump : JUMPS) {
+                net.minecraft.resources.Identifier id =
+                        net.minecraft.resources.Identifier.tryParse(jump.plankId());
+                if (id == null) {
+                    continue;
+                }
+                Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(id);
+                // A composed id that names nothing comes back as AIR, and a wood
+                // whose planks are missing simply cannot be painted on.
+                if (item != null && item != Items.AIR) {
+                    map.putIfAbsent(item, jump.block().get());
+                }
+            }
+            BY_PLANK = map;
+        }
+        return BY_PLANK.get(plank);
+    }
+
+    private static volatile java.util.@org.jetbrains.annotations.Nullable Map<Item, JumpBlock> BY_PLANK;
 
     /** Every jump: vanilla's twelve in vanilla's wood order, then the modded ones by id. */
     public static List<Jump> jumps() {
