@@ -17,5 +17,21 @@ https://www.curseforge.com/minecraft/mc-mods/realistic-horse-genetics
 The main difference between this mod and ours is that they have bespoke coats, rather than procedurally generated ones. But see if there's anything other than that that they offer, that we can integrate into our mod. 
 
 https://www.curseforge.com/minecraft/mc-mods/animania
-I want to implement the troughs from this using my existing framework for modular things made of wood, and allow it to be made in any square/rectangle shape. Also the salt licks. Also imement anything from this which applies to horses. But keep in line with our existing philosophy, especially that of carrot not stick. 
+I want to implement the troughs from this using my existing framework for modular things made of wood, and allow it to be made in any square/rectangle shape. Also the salt licks. Also imement anything from this which applies to horses. But keep in line with our existing philosophy, especially that of carrot not stick. Also see if that mod adds a cart, and see if we can add that to our roster of carts? 
 
+Overhaul how carts are made in our mod. Add a cart crafting bench, which allows you to select the wood for every individual piece of the cart as well as dye or paint the wood. This crafting bench should also allow you to make jumps in a similar fashion, applying not just dye but patterns as well, and letting you alter the opacity of them, as well as adding little flags to the jumps and doing potentially two deep jumps. 
+
+
+https://www.planetminecraft.com/mod/simply-cross-country-1-16-5/
+Adding jumps that look more like these. 
+
+https://www.planetminecraft.com/mod/wonderful-enchantments/
+Some of these horse armor enchantments might be better as genes, but let's integrate horse armor enchantments into our mod, and allow them to be applied (with logic) to any tack or horse shoes created. We will also need to expand the inventory screen to allow two chest slots, a slot for every individual piece of tack including separating out the saddle and bridle, the barding, saddle pad, boots on every leg, horse shoes on every leg, martingale/collar, and flymask. And each piece should be enchantable.
+
+The location of the horse on the h menu when you click it should use the /tp command to attempt to teleport your horse to you. Add another column that's active when any client side map mod is active, where they check a box and it creates a wyapoint over their horse that updates every 30 seconds. 
+
+The h menu should refresh automatically every time it's opened, a horse birth occurs, or a horse death 
+Occurs. 
+
+https://www.curseforge.com/minecraft/mc-mods/sullys-mod
+Examine this mod and see if there's any horse features worth integrating into ours. 
