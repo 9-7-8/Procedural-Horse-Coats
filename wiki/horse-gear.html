@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horse gear &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
+<h1>Horse gear: the nineteen slots</h1>
+<p class="lede">
+    Everything a horse wears, in one place. A <strong>Gear tab</strong> on the
+    horse information screen holds <strong>nineteen slots</strong> laid out on a
+    picture of the horse itself &mdash; head, mane and tail, body, chest, a slot
+    per leg and a slot per hoof, and two for saddlebags. Two of them are real
+    vanilla equipment slots and the other seventeen are a data attachment of our
+    own, which is the constraint the whole system is shaped by.
+    <strong>The slots exist; almost nothing to put in them does yet.</strong>
+    The roster, the storage and the screen shipped first on purpose &mdash; every
+    piece that follows is one row in a tag. What is still planned is on this
+    page&rsquo;s own <strong>Roadmap</strong> tab, which is the single home for
+    gear plans.
+</p>
+
+<div class="note warn"><span class="label">Built, and not yet played</span>
+    <p>
+        The Gear tab, the nineteen-slot roster and the attachment behind it landed
+        on 2026-09-21 and <strong>have not been opened in a game</strong>. What to
+        look at, in the order worth looking, is on this page&rsquo;s own
+        <a href="#verification">Verification</a> tab. The two slots that came before
+        it &mdash; saddle and barding &mdash; are the only ones with anything to put
+        in them, and they worked on the old flat row.
+    </p>
+</div>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="where">Where it is</h2>
+<p>
+    Open a horse&rsquo;s inventory as you always have, and press the small
+    <strong>i</strong> button beside it. That is this mod&rsquo;s own horse
+    information screen &mdash; the one with Overview, Genes, Health and the rest
+    &mdash; and <strong>Gear</strong> is the second tab along. The
+    <kbd>H</kbd> key is a different screen: that is the horse
+    <a href="breeding.html">browser</a>, your roster and reference, and it has no
+    slots in it.
+</p>
+<p>
+    Overview used to carry the two tack slots in a row under the stats. It now
+    says how many pieces the horse is wearing and sends you here, because a row
+    nineteen slots wide would have pushed the rest of Overview off the page.
+</p>
+
+<h2 id="slots">The nineteen slots</h2>
+<p>
+    They are arranged on a small three-quarter view of the horse, in the place
+    the gear actually goes: the near fore boot is under the near fore leg, the
+    tail slot is behind the tail. You find a slot by looking at the horse rather
+    than by reading a list.
+</p>
+
+<table>
+    <tr><th>Zone</th><th>Slots</th><th>What goes there</th></tr>
+    <tr><td><strong>Head</strong></td><td>Headstall, Mask</td>
+        <td>A bridle or a halter &mdash; one or the other, never both &mdash; and
+            a fly mask or something with more in mind than flies.</td></tr>
+    <tr><td><strong>Mane and tail</strong></td><td>Mane, Tail</td>
+        <td>Whatever is worked into the hair.</td></tr>
+    <tr><td><strong>Body</strong></td><td>Pad, Saddle, Barding, Blanket</td>
+        <td>The pad under the saddle, the saddle, armour, and a rug or sheet for
+            a horse that is not being ridden.</td></tr>
+    <tr><td><strong>Chest</strong></td><td>Chest</td>
+        <td>A martingale or a collar, across the chest.</td></tr>
+    <tr><td><strong>Legs</strong></td><td>Boot &times; 4</td>
+        <td>One per leg.</td></tr>
+    <tr><td><strong>Hooves</strong></td><td>Shoe &times; 4</td>
+        <td>One per hoof, and a different thing from a boot.</td></tr>
+    <tr><td><strong>Storage</strong></td><td>Bag &times; 2</td>
+        <td>Saddlebags, near side and off side.</td></tr>
+</table>
+
+<div class="note"><span class="label">A bridle and a halter share one slot on purpose</span>
+    <p>
+        They are genuinely different pieces &mdash; a haltered horse can be led
+        and lunged, a bridled one can be steered, and neither substitutes for the
+        other &mdash; but <strong>a horse cannot wear both at once</strong>, so
+        they are two items competing for one slot rather than two slots. This
+        reverses an earlier plan that gave them a slot each; the distinction
+        survives intact, it just lives in the items. What having a halter lets
+        you <em>do</em> is <a href="roadmap.html#ground-work">ground work</a>,
+        still on the main roadmap because it is a riding mechanic rather than a
+        piece of gear.
+    </p>
+</div>
+
+<div class="note"><span class="label">Four legs and four hooves, not a set of four</span>
+    <p>
+        A horse can throw a single shoe and wear unevenly, and a roster that
+        could only say &ldquo;shoes: yes&rdquo; could never say which. Eight
+        slots is the price of being able to.
+    </p>
+</div>
+
+<h2 id="using">Putting something on</h2>
+<ul>
+    <li><strong>One click is a swap with your hand.</strong> Click a slot to put
+        on what you are holding, or to take off what is there. There is no
+        dragging: this is a plain screen with no container behind it, so there is
+        no carried stack to drag with.</li>
+    <li><strong>Nothing is ever deleted.</strong> What comes off goes to your
+        inventory, or on the floor at your feet if there is no room.</li>
+    <li><strong>Your horse, and within eight blocks.</strong> The screen opens on
+        any horse &mdash; a stranger&rsquo;s, a cowboy&rsquo;s string &mdash; so
+        you can see what one is wearing and no more. A slot you cannot use is
+        drawn dim rather than hidden, because a gap where a slot should be reads
+        as a bug and a greyed slot reads as the rule it is.</li>
+    <li><strong>A foal wears nothing.</strong> Every slot is closed until it
+        grows up. Tack sized for an adult is the one thing a growing horse should
+        not be carrying.</li>
+</ul>
+
+<div class="note warn"><span class="label">Seventeen of the nineteen are empty by design</span>
+    <p>
+        Only the <strong>saddle</strong> and the <strong>barding</strong> have
+        anything in the world that fits them today. The other seventeen accept
+        nothing &mdash; not because they are broken, but because the gear that
+        fills them has not been made. The tab says so on screen, so it reads as
+        unfinished rather than faulty.
+    </p>
+    <p>
+        Each piece joins its slot as it is made, and nothing on this page needs
+        changing when one does. The <strong>Roadmap</strong> tab is what is
+        coming.
+    </p>
+</div>
+
+<div class="note rule"><span class="label">Gear does something, or it is not made</span>
+    <p>
+        Cosmetic-only equipment is the thing this mod does not add. Breeding is
+        the one place pure aesthetics are allowed; everything else must provide
+        utility, so tack, barding and shoes carry real effects. That includes the
+        mane and tail slots: whatever eventually goes in them has to
+        <em>do</em> something, not merely look like a braid. The rule is
+        <a href="philosophy.html#utility-not-decoration">philosophy &sect; utility, not
+        decoration</a>, and it reversed an earlier &ldquo;tack gets no
+        stats&rdquo; call &mdash; see
+        <a href="decisions.html#settled-tack-stats">design decisions</a>.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="ceiling">The two-slot ceiling</h2>
+<p>
+    <strong>This is the constraint the whole system is shaped by.</strong>
+    <code>EquipmentSlot</code> has exactly two animal entries &mdash;
+    <code>BODY</code> and <code>SADDLE</code> &mdash; and
+    <code>EquipmentClientInfo.LayerType</code> is not extensible. Nineteen slots
+    were therefore never going to be nineteen equipment slots. The two real ones
+    are spent on the saddle and the barding, which are the two vanilla already
+    draws for free; every other piece is a key in a synced data attachment.
+</p>
+
+<h2 id="roster">The roster is the layout</h2>
+<p>
+    <code>entity/HorseTackSlot</code> is the whole table. Each constant carries
+    its backing (an <code>EquipmentSlot</code>, or <code>null</code> for a gear
+    slot), its zone, its label, its one-line hint, and <strong>its position on
+    the paper doll</strong> as a fraction of the doll&rsquo;s box. That last part
+    is what keeps the screen out of it: adding a slot is a line in the enum plus
+    a tag, and the screen is not touched.
+</p>
+<ul>
+    <li><code>isVanilla()</code> is the difference between the two backings, and
+        nothing outside the enum should need to ask &mdash; <code>on()</code> and
+        <code>set()</code> cover both.</li>
+    <li><code>usableOn(horse)</code> is vanilla&rsquo;s <code>canUseSlot</code>
+        for the two real slots and &ldquo;not a foal&rdquo; for the rest.</li>
+    <li><code>accepts(horse, stack)</code> asks vanilla for the two real slots
+        and asks the slot&rsquo;s <strong>item tag</strong> for the rest.</li>
+</ul>
+
+<h2 id="tags">What a slot accepts is a tag</h2>
+<p>
+    Every gear slot reads an item tag named for it &mdash;
+    <code>horsegenetics:gear/mane</code>,
+    <code>horsegenetics:gear/shoe_front_left</code>, and so on, seventeen of
+    them. <strong>All seventeen are empty.</strong> A slot whose tag is empty
+    correctly refuses everything rather than accepting dirt, which is exactly the
+    behaviour wanted while the pieces do not exist. Shipping a piece means adding
+    it to its tag, and a datapack can do the same without touching Java.
+</p>
+
+<h2 id="attachment">Why an attachment and not a container</h2>
+<p>
+    <code>data/HorseGear</code> is the store: an immutable map of slot name to
+    <code>ItemStack</code>, registered as <code>HORSE_GEAR</code> in
+    <code>ModAttachments</code>, serialized, <strong>synced</strong> and
+    <code>copyOnDeath</code>. A container was the other option and is worse on
+    two counts:
+</p>
+<ul>
+    <li><strong>A widened container is reachable by hoppers.</strong> An
+        attachment is not.</li>
+    <li><strong><code>AbstractMountInventoryMenu.quickMoveStack</code> is
+        shared</strong> with donkeys, mules, llamas and nautiluses, and computes
+        every shift-click range from hardcoded indices. A slot inserted anywhere
+        in that arithmetic is how items duplicate or vanish, and it is the
+        failure that looks fine until somebody shift-clicks with a chest on the
+        horse.</li>
+</ul>
+<p>
+    This is also the shape vanilla itself uses: the saddle and armour slots are
+    not backed by the horse&rsquo;s container either &mdash;
+    <code>Mob.createEquipmentSlotContainer</code> fronts the equipment array with
+    a view that owns no storage.
+</p>
+
+<div class="note rule"><span class="label">One authority, and every stack is copied</span>
+    <p>
+        The attachment is the only place a worn piece lives and is never mirrored
+        into a container. Every stack crossing the boundary is copied, so a caller
+        holding the stack it passed in cannot mutate what the horse is wearing,
+        and the map is unmodifiable &mdash; every change returns a new
+        <code>HorseGear</code>.
+    </p>
+</div>
+
+<div class="note"><span class="label">Keyed by name, not by ordinal</span>
+    <p>
+        The same reason <code>TackSlotPayload</code> sends the name: an ordinal in
+        saved data silently re-points at a different slot the moment the enum
+        gains a constant in the middle, and this enum is expected to keep
+        growing. An unknown key is kept rather than dropped, so a piece parked
+        behind a removed slot is still there if the slot comes back.
+    </p>
+</div>
+
+<h2 id="click">The click path</h2>
+<p>
+    Unchanged in shape from the two-slot version, and still <em>one</em> packet.
+    <code>HorseInfoScreen.clickTack</code> sends
+    <code>TackSlotPayload(entityId, slotName)</code>;
+    <code>ModNetworking.handleTackSlot</code> checks the horse is the
+    player&rsquo;s and within eight blocks, then calls
+    <code>HorseTackSlot.set</code> &mdash; the one place that knows which backing
+    a slot has. A vanilla slot also gets <code>setGuaranteedDrop</code>, so tack
+    a player put on is tack they get back.
+</p>
+
+<h2 id="doll">The paper doll</h2>
+<p>
+    <code>Cursor.gear</code> draws the horse first and the slots over it, each at
+    <code>anchorX/anchorY</code> of the doll box, and records where each landed in
+    <code>tackHits</code> rather than working the geometry out twice &mdash; which
+    is what keeps a scrolled page&rsquo;s slots clickable in the right place.
+</p>
+<p>
+    The horse is <code>HorsePortrait.drawPosed</code>, a new fixed-angle
+    companion to the mouse-following <code>draw</code>. <strong>The doll&rsquo;s
+    horse has to hold still</strong>: its slots are positioned anatomically, so a
+    portrait that swung to follow the cursor would put the near fore leg
+    somewhere different from the boot slot that belongs to it. The pose is a
+    three-quarter view because face-on overlaps the near and off legs, and four
+    boot slots would then point at one visible leg.
+</p>
+
+<h2 id="verify">The roster checks itself at boot</h2>
+<p>
+    <code>HorseTackSlot.verify()</code> runs from the mod constructor, beside
+    <code>DietFoods.verify</code> and for the same reason: <strong>every way this
+    table can be wrong fails silently in the game.</strong> Two slots given the
+    same anchor draw exactly on top of each other, so one is unclickable and the
+    tab merely looks like it has one slot fewer. An anchor outside 0..1 puts a
+    slot off the doll, invisible but still holding its click box. A third
+    constant handed a real <code>EquipmentSlot</code> would take one the saddle or
+    the barding needs. None of that throws on its own and none of it logs.
+</p>
+<div class="note"><span class="label">Why it is not a unit test</span>
+    <p>
+        It cannot be. This module&rsquo;s test source set has <strong>no Minecraft
+        on its classpath</strong> on purpose &mdash; see
+        <code>MaterialScanTest</code>, which imports none &mdash; and
+        <code>HorseTackSlot</code> cannot even be loaded without one, since its
+        fields are <code>EquipmentSlot</code> and <code>TagKey</code>. A boot-time
+        throw is the cheapest check that actually runs.
+    </p>
+</div>
+
+<div class="note warn"><span class="label">Nothing is drawn on the horse yet</span>
+    <p>
+        There is <strong>no render layer</strong> for any of the seventeen gear
+        slots, because there is nothing to render. The saddle and the barding draw
+        as they always have, through vanilla. Every piece past those two needs a
+        render layer of our own &mdash; the pattern this mod already has ten
+        instances of &mdash; and the plan for deriving that geometry rather than
+        modelling it by hand is on the Roadmap tab.
+    </p>
+</div>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Everything still planned for horse gear">
+
+<p class="lede">
+    <strong>Every gear plan, in one place.</strong> These sections used to be
+    spread across the main <a href="roadmap.html">roadmap</a> and were moved here
+    whole, so that the accessories system, the shoes, the native-tack art
+    research, the saddlebags and the saddle pad are read together rather than
+    found one at a time. The main roadmap keeps what is <em>next to</em> gear
+    without being gear: <a href="roadmap.html#ground-work">ground work</a>, the
+    <a href="roadmap.html#cart-bench">cart and jump bench</a>,
+    <a href="roadmap.html#tack-aware">a gene that reads what the horse is
+    wearing</a>, and <a href="roadmap.html#rider-comfort">rider comfort</a>.
+</p>
+
+<div class="note"><span class="label">Some of this has now shipped</span>
+    <p>
+        The slot roster, the attachment behind it and the screen that draws them
+        landed on 2026-09-21 and are documented on the Gameplay and Coding tabs
+        above rather than here. What follows is what is still to build. Where a
+        section below describes the roster as fifteen slots or as unbuilt, the
+        Gameplay tab is the one that is true.
+    </p>
+</div>
+
+
+<hr>
+
+<h2 id="accessories">The accessories system &mdash; everything a horse wears, made one way</h2>
+
+<p>
+    <strong>This is one system, not eight features.</strong> Tack, barding, horse shoes, saddle
+    pads, chests and the enchantments on any of them were asked for separately over several
+    months and kept being scoped separately; each time, the same four questions came back
+    &mdash; where does the piece live if the horse has only two equipment slots, how is it
+    made, how is it decorated, and how is it drawn. <strong>They get one answer here, and
+    the sections below are that answer's parts rather than independent tickets.</strong>
+    Everything already researched for
+    <a href="#native-tack">native tack</a>, <a href="#horse-shoes">shoes</a> and
+    <a href="#equestrian-bench">the saddle pad</a> is folded in and not restated.
+</p>
+
+<div class="note">
+    <span class="label">Tack has stats now &mdash; a settled call was reversed to allow this</span>
+    <p>
+        &ldquo;Tack gets no stats&rdquo; was settled, and argued from
+        <a href="philosophy.html">philosophy</a>&rsquo;s &ldquo;add texture, do not add
+        chores&rdquo;. <strong>The owner reversed it on 2026-09-21</strong> and replaced the
+        reasoning: <em>nothing this mod adds may be purely aesthetic except breeding &mdash;
+        everything else must provide utility</em>, which makes cosmetic-only tack the thing to
+        avoid rather than the thing to ship. Armour value, shoe effects and tack enchantments are
+        therefore the point of this system rather than a ladder bolted onto a cosmetic one. The
+        record is <a href="decisions.html#settled-tack-stats">on design decisions</a> and the
+        rule is <a href="philosophy.html#utility-not-decoration">on philosophy</a>.
+    </p>
+</div>
+
+<h3 id="accessories-slots">The slot roster</h3>
+
+<p>
+    The screen grows from two slots to <strong>fifteen</strong>. Asked for explicitly, and
+    listed here because the count is what decides the architecture rather than the art:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Slot</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. <strong>The bridle is the minimum tack required to control a horse</strong> &mdash; which is a real gameplay rule and not a slot, and it has to reckon with <code>BarebackSteeringHandler</code>'s phantom saddle, which writes the saddle slot every tick.</td></tr>
+<tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="roadmap.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
+<tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
+<tr><td><strong>Saddle pad</strong></td><td>Designed already &mdash; <a href="#equestrian-bench">the banner-cut pad</a>.</td></tr>
+<tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
+<tr><td><strong>Shoes</strong> &times; 4</td><td>One per hoof, and a different thing from a boot. <a href="#horse-shoes">Research below.</a></td></tr>
+<tr><td><strong>Martingale / collar</strong>, <strong>fly mask</strong></td><td>The two remaining real pieces of tack.</td></tr>
+<tr><td><strong>Chest</strong> &times; 2</td><td><a href="#horse-chests">Storage</a>, which is its own section because a chest is not worn.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>Fifteen slots cannot be fifteen <code>EquipmentSlot</code>s</strong>, and this is
+    the load-bearing constraint the whole system is shaped by:
+    <code>EquipmentSlot</code> has exactly two animal entries, <code>BODY</code> and
+    <code>SADDLE</code>, and <code>EquipmentClientInfo.LayerType</code> is not extensible. So
+    every piece past the second is a <strong>synced data attachment plus a render layer of our
+    own</strong> &mdash; the pattern this mod already has ten instances of &mdash; and the two
+    real slots are spent on whichever two benefit most from vanilla drawing them for free.
+    <a href="#native-tack">Native tack</a> works the alpha-cutout finding out in detail and it
+    applies to every row above.
+</p>
+
+<p>
+    <strong>The seam for this already exists and was built expecting it.</strong>
+    <code>entity/HorseTackSlot</code> is an enum of exactly two constants &mdash;
+    <code>SADDLE</code> and <code>ARMOUR</code> &mdash; whose own documentation says the shape is
+    there for later and names <em>&ldquo;a bridle, a blanket and shoes&rdquo;</em> as the obvious
+    next ones &mdash; and a halter is a bridle's near neighbour. The screen that draws them is ours rather than vanilla's
+    (<code>HorseInfoScreen.drawTackSlot</code>, reached by the small <strong>i</strong> button
+    <code>HorseScreenHooks</code> adds beside vanilla's horse inventory), and clicks already
+    round-trip through <code>TackSlotPayload</code>. <strong>So the roster is this enum growing
+    by thirteen, and the screen it feeds</strong> &mdash; which is a much smaller statement of the
+    work than fourteen new systems, and is the reason to do it as one change.
+</p>
+
+<p>
+    <strong>Per-leg is four times the geometry problem, not one-quarter of it.</strong> Boots
+    and shoes are the only rows that anchor to <em>four</em> animated bones rather than to the
+    body, so they are the ones to prototype first; if four independently-rendered leg pieces do
+    not work, the rest of the roster does not care, and if they do, everything else is easier.
+    <code>CutieMarkLayer</code> is the worked precedent for geometry riding an animated bone.
+</p>
+
+<h3 id="accessories-geometry">Deriving the models instead of drawing them</h3>
+
+<p>
+    The owner's proposal, and it is the difference between this being affordable and not:
+    <strong>clone the existing horse model and erase every part the piece does not touch</strong>,
+    rather than modelling fourteen pieces by hand. That is exactly what the
+    <a href="#native-tack">alpha-cutout finding</a> already establishes for equipment &mdash; a
+    cube whose texels are transparent does not appear, so one mesh is many pieces purely by
+    which part of the sheet is painted &mdash; and generalising it from &ldquo;three pieces off
+    the saddle mesh&rdquo; to &ldquo;a piece is a named subset of the horse's own parts&rdquo; is
+    the actual feature.
+</p>
+<p>
+    <strong>The open question is inflation, not erasure.</strong> A piece derived from
+    <code>HORSE_BODY</code> has to clear the skin or it z-fights, which the saddle-pad research
+    already found the hard way; a per-piece inflation value is probably the whole of what the
+    derivation needs to take as a parameter. Worth proving on one leg boot before any of the
+    roster is committed to.
+</p>
+
+<h3 id="accessories-bench">The tack bench, and what a bench buys</h3>
+
+<p>
+    <strong>All of it is made at a bench of our own, and the reasoning is as much about
+    recipes as about fiction.</strong> The owner's three arguments, which are all good ones:
+</p>
+
+<ul>
+    <li><strong>It removes the recipe-collision problem entirely.</strong> A bench recipe is in
+        our own menu type and cannot collide with vanilla's crafting table or with another mod's
+        &mdash; which is the standing worry that <code>check-recipes.mjs</code> and
+        <a href="roadmap.html#bhar-recipes">the BHAR check</a> exist to manage.</li>
+    <li><strong>It is one switch.</strong> Disable the bench in config and horse armour cannot
+        be crafted, with no per-recipe gating anywhere.</li>
+    <li><strong>It takes a formula, not a list.</strong> The bench generates its recipes from a
+        shape &times; a material, so <em>all</em> horse armour including modded metals is
+        craftable without a file per combination &mdash; which is the same trick
+        <a href="compatibility.html#generated">the generated-materials layer</a> already plays,
+        and should share its material roster rather than build a second one.</li>
+</ul>
+
+<p>
+    Saddles and bridles are made here too, so the bench is the single place tack comes from.
+    Note it is a <em>third</em> bench: <a href="item-equestrian-bench.html">the dyeing bench</a>
+    ships and <a href="roadmap.html#cart-bench">the cart and jump bench</a> is proposed, and three benches
+    with overlapping jobs wants a deliberate answer about what distinguishes them before the
+    second one is built.
+</p>
+
+<h3 id="accessories-decoration">Dye, pattern, banner, and a preview</h3>
+
+<ul>
+    <li><strong>The dyeing bench grows to cover every new piece</strong>, not just the saddle
+        and leather barding it dyes today.</li>
+    <li><strong>Patterns, not just colours</strong> &mdash; stripes and dots were named. That is
+        a second tint layer and a pattern id per piece, which
+        <code>IClientItemExtensions.getArmorLayerTintColor</code> already makes cheap for two
+        colours on one stack (see <a href="#native-tack">native tack</a>), and expensive past
+        that.</li>
+    <li><strong>Banner patterns as an alternative to the mod's own.</strong> Already designed
+        for the saddle pad as <a href="#equestrian-bench">a chosen rectangle of a banner</a>;
+        generalising it to every piece is the ask, and the feasibility question flagged there is
+        unanswered and gates all of it.</li>
+    <li><strong>A 3D preview in the bench, on any horse you own.</strong> The horse browser
+        already renders live horses, so the renderer exists; what does not is a preview that
+        shows an <em>unmade</em> piece, which means the model derivation above has to run
+        client-side on a configuration that no item carries yet.</li>
+</ul>
+
+<h3 id="accessories-enchanting">Enchanted tack &mdash; and which of these are really genes</h3>
+
+<p>
+    <strong>Every piece in the roster is enchantable.</strong> Horse armour enchantments were
+    asked for from <em>Wonderful Enchantments</em>, to be applied &ldquo;with logic&rdquo; to any
+    tack or shoe &mdash; meaning an enchantment has to declare which slots it is legal on, since
+    a fly mask and a shoe do not want the same list.
+</p>
+<p>
+    <strong>The owner's own caveat is the interesting part: some of these are better as
+    genes.</strong> That is a real fork and it should be decided per effect rather than
+    wholesale, because the two are opposites in this mod &mdash; a gene is inherited, breedable
+    and the point of the project; an enchantment is bought with levels and transfers with an
+    item. The rule that falls out: <em>if you would want to breed for it, it is a gene; if you
+    would want to move it between horses, it is an enchantment.</em> Worth writing as a decision
+    before the first one is built.
+</p>
+<p class="muted">
+    <strong>Nothing in this mod is enchantable today, and one near-miss is worth knowing
+    about.</strong> There is no enchantment registered, no <code>enchantable</code> component on
+    any item, and no <code>enchantable/</code> item tag shipped. <code>compat/ModdedArmour</code>
+    does build each generated armour as a real <code>ArmorMaterial</code> carrying iron's
+    <code>enchantmentValue()</code> &mdash; but with no <code>enchantable</code> component
+    <strong>that value is inert</strong>, so a generated barding is not enchantable either. The
+    mod's only enchantment code runs the other way: <code>GeneDeathHandler.enchantedSword()</code>
+    rolls one onto a dropped sword. So the first enchantable piece pays for the whole path.
+</p>
+
+<div class="note">
+    <span class="label">A ready-made roster, from a mod that built it as saddle upgrades</span>
+    <p>
+        <a href="https://www.curseforge.com/minecraft/mc-mods/horse-tweaks">Horse Tweaks</a>
+        (MIT, Minecraft 1.12.2, abandoned 2019) put seven abilities on a single
+        <em>Enhanced Saddle</em> as NBT flags, each costing saddle durability while it was doing
+        something: <strong>swimming, easy jump, thorns, frost walker, leaf walker, feather fall
+        and fire resistance</strong>. That is this section's roster already written by somebody
+        else, and <strong>the owner's call on 2026-09-21 was to take it as enchantments</strong>
+        rather than as a saddle &mdash; which is also the answer the rule above gives, since every
+        one of them is a thing you would want to move between horses.
+    </p>
+    <p>
+        Two are already ours by another route and should <em>not</em> become enchantments:
+        swimming is <a href="horse-care.html">shipped</a> through
+        <code>HorseWaterRidingHandler</code> and <code>HorseSwimMixin</code>, and easy jump is
+        shipped as <code>HorseInstantJumpMixin</code> behind <code>ride.instant_jump</code>.
+        <strong>Feather fall is the one to think hardest about</strong> &mdash; we cancel fall
+        damage today only while a horse is genuinely flying
+        (<code>server/FlightFallGuard</code>), and an enchantment that does it for any horse is a
+        larger change to how riding works than its five neighbours.
+    </p>
+    <p class="muted">
+        The durability-per-use idea is worth keeping even though the saddle is not: it is what
+        stopped seven permanent abilities being strictly free, and an enchanted piece of tack has
+        the same problem.
+    </p>
+</div>
+
+<h3 id="accessories-materials">The armour materials still missing</h3>
+
+<p>
+    Named from two mods and grouped because they are the same work:
+    <strong>netherite</strong> (from
+    <a href="https://modrinth.com/mod/simple-netherite-horse-armor">Simple Netherite Horse
+    Armor</a>) and the <strong>bone, ender, emerald, obsidian and blaze</strong> set (from
+    <a href="https://www.planetminecraft.com/mod/1-16-4-special-armor-amp-tool-sets-bone-ender-emerald-obsidian-blaze-fabric/">Special
+    Armor &amp; Tool Sets</a>).
+</p>
+<p>
+    <strong>Netherite is not an oversight, and that is what makes it a decision rather than a
+    task.</strong> <a href="compatibility.html#generated">The generated-materials layer</a>
+    derives an armour per <em>modded</em> metal or gem from <code>c:ingots/*</code> and
+    <code>c:gems/*</code>, and <code>MaterialScan.collectTagged</code> deliberately skips every
+    tag entry in the <code>minecraft:</code> namespace &mdash; because vanilla's own armours are
+    left to <a href="compatibility.html#bhar">BHAR</a> on purpose. A
+    <code>netherite_horse_armor</code> therefore means crossing that line knowingly. It is a
+    defensible crossing, since vanilla ships no netherite horse armour for BHAR to have a recipe
+    for, but it should be recorded as a call rather than slipped in as a material.
+</p>
+<p>
+    <strong>The other five are outside the scan by shape, not by policy.</strong> Emerald is
+    the near-miss &mdash; it is a gem, so the machinery fits it exactly, and it is excluded only
+    because <code>minecraft:emerald</code> is vanilla; bone, ender, obsidian and blaze are not
+    ingots or gems at all and no <code>c:</code> tag will ever surface them. So this row is
+    really one question asked twice: <em>should the scan be widened to name vanilla materials
+    deliberately</em>, and if so, five or six armours fall out of one change rather than five
+    hand-written ones. Answer that before writing any of them.
+</p>
+
+<h3 id="accessories-stand">The armour stand, and the tack pack</h3>
+
+<p>
+    From <em>Horse Armor Stand</em>, and expanded well past it. A stand that
+    <strong>wears anything a horse can wear</strong> &mdash; which makes it the display case for
+    the roster above and, not incidentally, the test rig for it.
+</p>
+<ul>
+    <li><strong>Right-click opens a screen</strong> with scale, wood and paint (through
+        <a href="roadmap.html#cart-bench">the same wood-and-paint system</a> the carts and jumps use), and a
+        <strong>pose</strong> chosen as a frozen frame of any animation a horse actually has
+        &mdash; which is the one genuinely novel piece, since it means sampling the animation
+        state machine at an arbitrary point rather than playing it.</li>
+    <li><strong>The tack pack</strong> is the part with gameplay in it: right-click the stand to
+        load every piece on it into one bag, right-click a naked horse to dress it, right-click a
+        dressed horse to strip it back into the bag. <em>This is the answer to fourteen slots
+        being tedious</em>, and it is worth building early for that reason rather than late as a
+        convenience &mdash; a fourteen-slot screen without it is a chore, and
+        <a href="philosophy.html">philosophy</a> says not to add those.</li>
+</ul>
+
+<h3 id="accessories-curios">Curios, if it is there &mdash; and never a dependency</h3>
+
+<p>
+    <strong>Wanted, and explicitly not a hard dependency.</strong> The shape that satisfies both:
+    the attachment is the authority and the slots are ours, and a Curios integration is a
+    <em>view</em> onto them registered only when the mod is present &mdash; the same fail-soft
+    pattern <code>neoforge/compat/</code> already uses to read other mods' jars without
+    depending on them.
+</p>
+<p>
+    <strong>Two things to check before promising it.</strong> Curios is built around slots on a
+    <em>player</em>; whether its API models slots on an arbitrary entity on 26.1.2, and whether a
+    Curios-owned slot can be the authority for something a render layer of ours draws, are both
+    unverified here. If the answer is that Curios cannot hold horse slots, the integration
+    inverts &mdash; a rider's Curios slot holding tack for the horse they are on &mdash; which is
+    a different and smaller feature, and should be recognised as a substitute rather than shipped
+    as if it were the thing asked for.
+</p>
+
+<h3 id="horse-shoes">Horse shoes &mdash; craftable, enchantable, equippable</h3>
+
+<p>
+    Shoes as real equipment: crafted from a metal, enchantable like armour, worn on the hooves.
+</p>
+<p>
+    <strong>There is no third slot to put them in.</strong> The horse family has two equipment
+    slots, the saddle and the body, and both are spoken for &mdash; this mod already writes to
+    them (<code>BarebackSteeringHandler</code>'s phantom saddle) and already replaces their
+    assets (<code>assets/minecraft/equipment/saddle.json</code>). So shoes are a data attachment
+    plus a render layer of our own, not an <code>EquipmentSlot</code>, and the enchantable half
+    means a genuine <code>Item</code> carrying enchantments rather than a flag on the horse.
+</p>
+<p>
+    <strong>What they could do</strong> is the part worth deciding first, because it decides
+    whether they are tack or a gimmick: grip on ice, speed or quiet on particular blocks,
+    fall-damage reduction, protection from hot ground &mdash; and, if wear is wanted, a
+    durability that is the first thing in the mod to consume itself. Note the overlap with
+    <a href="#native-tack">native tack</a> and with
+    <a href="#equestrian-bench">the saddle pad</a>: three separate pieces of tack work that
+    should share one answer about how tack is made, decorated and rendered, rather than three.
+</p>
+
+<p class="muted">
+    <strong>That last paragraph is what this whole section is the answer to.</strong> It closed by
+    naming the overlap with native tack and the saddle pad and asking for
+    &ldquo;one answer about how tack is made, decorated and rendered, rather than three&rdquo;.
+    The answer is <a href="#accessories-bench">the bench</a>,
+    <a href="#accessories-decoration">the decoration screen</a> and
+    <a href="#accessories-geometry">derived geometry</a> &mdash; so what is left specific to
+    shoes is only <em>what they do</em>, and four of them per horse.
+</p>
+
+<h3 id="native-tack">Native tack &mdash; cheap in code, expensive in art</h3>
+
+<p>
+    Assessed against this codebase rather than in the abstract. Every seam already exists:
+    <code>CutieMarkLayer</code> is a worked precedent for geometry anchored to an animated bone
+    (<code>body.translateAndRotate(poseStack)</code>), <code>EquineSaddleModel</code> shows the
+    cube layout for head strapwork, a new item is one line in <code>ModItems</code>, and the
+    synced-attachment pattern has ten instances already.
+</p>
+
+<ul>
+    <li><strong>Geometry is hidden with alpha, not with JSON &mdash; and that is the finding
+        that changes this section.</strong> Equipment draws through an alpha-cutout pass, so any
+        cube whose texels are left transparent simply does not appear. One existing mesh
+        therefore becomes many pieces purely by which part of the sheet is painted. A
+        <strong>halter</strong> is <code>head_saddle</code> + <code>mouth_saddle_wrap</code>
+        with everything else erased; a <strong>bridle</strong> adds the bits and reins; a
+        <strong>blanket</strong> is the horse-armour body cube. <em>No modeling, and for those
+        three, no Java at all.</em></li>
+    <li><strong>A blanket needs no <code>minecraft:</code> override.</strong> Equipment assets
+        are keyed by the file's own namespace, so
+        <code>assets/horsegenetics/equipment/blanket.json</code> registers
+        <code>horsegenetics:blanket</code> and its texture resolves under our namespace too.
+        Equipping is not tag-gated: <code>Horse.canUseSlot</code> returns true unconditionally,
+        so any item with <code>Equippable(slot=BODY)</code> equips and renders. Cost per piece:
+        one JSON, one or two PNGs, three lines of registration.</li>
+    <li><strong>The two-slot ceiling is real but less binding than it looked.</strong>
+        <code>EquipmentSlot</code> has exactly two animal slots and
+        <code>EquipmentClientInfo.LayerType</code> is non-extended, so <em>three</em>
+        simultaneous pieces still needs a synced attachment and a bespoke layer. But two pieces
+        &mdash; one on <code>BODY</code>, one on <code>SADDLE</code> &mdash; are free today and
+        carry independent dye colours, because they are two stacks.</li>
+    <li><strong>Two colours on ONE item: use NeoForge's hook, not a custom layer.</strong>
+        Vanilla reads the dye once, outside the layer loop, so a single stack gives one colour
+        however many layers it declares. NeoForge's
+        <code>IClientItemExtensions.getArmorLayerTintColor</code> exists for exactly this and
+        hands you the layer index; returning 0 skips a layer entirely, which is free per-piece
+        toggling. About twenty lines of client Java and a two-int component &mdash; no new
+        geometry, no custom render layer. This supersedes the draw-the-parts-twice idea, which
+        additionally does not work as written: rendering is deferred, so toggling
+        <code>part.visible</code> between two submits mutates one shared model and both draw
+        the final state.</li>
+    <li><strong>Two traps worth writing down.</strong> A saddle <em>pad</em> must use the
+        <code>HORSE_BODY</code> mesh (inflated 0.1, so it clears the skin) and not the
+        <code>HORSE_SADDLE</code> body cube, which is exactly coincident with the horse and
+        z-fights. And the reins' visibility is hardwired to <code>isRidden</code> in
+        <code>EquineSaddleModel.setupAnim</code>, so a bridle inherits that and cannot change
+        it without Java.</li>
+    <li><strong>The four riding <em>sets</em> are not four features, they are four art
+        styles.</strong> English, western, racing and jumping share identical code and differ
+        only in textures &mdash; and Horse Tack's are All Rights Reserved even though sekelsta's
+        code is MIT, so not one may be copied. This project ships four tickets sharing one
+        texture and four whistles sharing another; it cannot afford seven sets of sixteen PNGs.
+        <strong>A draft harness</strong> is the only category needing genuinely new geometry.</li>
+    <li><strong>There is no third-party code to start from &mdash; checked, not assumed.</strong>
+        Horse Tack's source was read in full: two Java files, a long list of literal
+        registrations, no rendering and no equip logic, on APIs 26.1.2 has removed. The taxonomy
+        is the only transferable part &mdash; saddle pad, halter, english / jumping / western /
+        racing tack, cart harness, and blankets (solid, trimmed, novelty) &mdash; and its two
+        lessons are both cautionary: <em>do not</em> pre-register colour variants (dyeable
+        layers collapse each &times;16 run to one item), and <em>do not</em> pre-register
+        combinations (that was a one-slot workaround; we have two slots).</li>
+    <li><strong>Minimum viable version:</strong> one saddle pad and one halter, dyeable through
+        vanilla <code>dyed_color</code>, on a new synced attachment, drawn by one render layer.
+        No stats (<a href="decisions.html#settled-scope">settled</a>), no sets, no foal support
+        &mdash; vanilla already draws no equipment on babies.</li>
+    <li><strong>It contradicts the current positioning.</strong>
+        <a href="compatibility.html">Mod compatibility</a> says in as many words that tack is
+        what this mod deliberately leaves to others and that the two are &ldquo;almost perfectly
+        complementary&rdquo;. Shipping native tack means rewriting that claim in the same
+        change.</li>
+</ul>
+
+<hr>
+
+<h2 id="horse-chests">Horse chests, ender chests, and the look of a loaded horse</h2>
+
+<p>
+    Give a horse saddlebags &mdash; storage that travels with the animal &mdash; in
+    <strong>two slots</strong>, per <a href="#accessories-slots">the roster</a>.
+</p>
+<p>
+    <strong>A horse is deliberately not a chested horse in vanilla.</strong> The chest flag, the
+    extra slots and the screen that shows them all live on
+    <code>AbstractChestedHorse</code> (donkey, mule, llama), and <code>Horse</code> does not
+    extend it &mdash; so there is nothing to switch on, and this is a container of our own or it
+    is nothing.
+</p>
+<p>
+    <strong>That part is well-trodden ground here.</strong> The mod already registers menus
+    (<code>menu/ModMenus</code>, with <code>EquestrianBenchMenu</code> and
+    <code>ResearchShelfMenu</code> as working examples) and already stores per-horse state in a
+    data attachment, which is where a container would live. <strong>It also already runs six
+    containers on the things a horse <em>pulls</em></strong> &mdash;
+    <code>WagonMenu</code> alone is three chests over twelve rows, all backed by
+    <code>carts/util/CartInventory</code> &mdash; so the inventory code is written and only its
+    owner changes. <code>entity/HorseTackSlot</code> draws the line explicitly today:
+    <em>&ldquo;the chest a donkey carries is not one of these and is not here.&rdquo;</em>
+</p>
+
+<ul>
+    <li><strong>An ender chest on a horse</strong> was asked for by name. It is the interesting
+        one because it has no contents of its own &mdash; it is a view onto the player's ender
+        inventory, so it sidesteps every question about what happens to the contents on death or
+        on <a href="item-transfer-papers.html">a transfer of ownership</a>, and raises one of its
+        own: <em>whose</em> ender inventory, the owner's or the rider's.</li>
+    <li><strong>Chests from other mods must work.</strong> Not a hardcoded list of chest items
+        &mdash; the same rule the rest of the compat layer follows. A chest is whatever carries
+        the right tag, and its look comes from what it is. <em>Its</em> size is the container's
+        own business and should not be confused with the horse's: the bullet below is the
+        ceiling the animal imposes, and a roomy modded chest does not raise it. Which of the
+        two binds &mdash; and whether a big chest on a weak horse is refused or simply
+        part-filled &mdash; wants deciding once rather than per chest.</li>
+    <li><strong>The look of a chested horse is its own complaint, and a fair one.</strong>
+        Vanilla's chested donkey is two boxes clipped to its flanks. Since this mod already
+        re-renders the horse and <a href="#accessories-geometry">is proposing to derive
+        equipment geometry from the horse's own parts</a>, panniers that actually sit on the
+        animal are the same feature as everything else in
+        <a href="#accessories">the accessories system</a> and should be built with it, not
+        before it.</li>
+    <li><strong>Capacity is a function of <em>pulling ability</em>, not size</strong> (owner).
+        That stat already exists and is already resolved from the genome: a 1&ndash;10 score
+        read as <code>HorseTraits.pull()</code>, reached through
+        <code>HorseDraft.pullOf</code>, falling back to <code>HorseTraits.BASE_PULL</code> for a
+        horse with no genome of ours. So there is nothing to derive &mdash; the number a
+        saddlebag should read is the number <a href="carts.html">the carts</a> already read.
+        <strong>Size would have been the wrong proxy</strong>, and cheaply wrong: it measures
+        how big a horse is rather than what it can shift, so a tall light horse would out-carry
+        a cob that plainly should win. Pull is the honest stat, and using it means
+        <em>one</em> axis of strength runs through carts and storage both, so a horse bred to
+        haul a wagon is the horse that carries the most &mdash; rather than two parallel
+        breeding goals that happen to look alike.</li>
+    <li><strong>Still undecided:</strong> whether the chest is a vanilla chest right-clicked
+        onto the horse or an item of our own; whether it survives a transfer of ownership and
+        what happens to the contents if it does not; and whether it appears beside the saddle in
+        the horse screen or in a screen of its own.</li>
+</ul>
+
+<hr>
+
+<h2 id="equestrian-bench">The saddle pad, and cutting a banner into one</h2>
+
+<p>
+    The <a href="item-equestrian-bench.html">Tack Dyeing Bench</a> ships its dyeing half. The
+    unbuilt half is the <strong>saddle pad</strong>: a pad fitted to the horse, whose design is
+    a <strong>chosen rectangle of a banner</strong> placed on it. Written as design and risks
+    rather than as a plan, because one feasibility question is still open.
+</p>
+
+<h3>The design</h3>
+
+<ul>
+    <li><strong>The pad rides its own attachment, not an equipment slot.</strong> There are only
+        two animal slots and horse armour holds one, so a slot-based pad would mean riding
+        unarmoured. An attachment plus a render layer costs roughly 150 lines and buys armour
+        <em>and</em> pad together. It needs no modeling: the layer can bake vanilla's
+        <code>HORSE_ARMOR</code> mesh, which already covers the body.</li>
+    <li><strong>The pad is authored at maximum coverage and cut down by the player.</strong>
+        The texture is drawn as the largest sheet the body can carry, and the bench lets the
+        player scale it freely in every direction &mdash; so &ldquo;saddle pad&rdquo; and
+        &ldquo;full caparison&rdquo; are the same item at two settings rather than two items.
+        The extent is part of the design, stored with it.</li>
+    <li><strong>The banner is placed, not merely cropped.</strong> Under the pad the player
+        moves, scales, squashes, stretches and tiles the banner image freely; the crop rectangle
+        is the start of it, not the whole of it. Mechanically that is a 2D transform &mdash;
+        offset, scale per axis, tile on or off &mdash; carried on the component beside the
+        pattern list, which is cheap to store and cheap to apply.</li>
+    <li><strong>The layout is the player's choice too.</strong> Once per flank, continuous
+        across the whole sheet, tiled, or flanks-with-a-plain-ground: all four are settings at
+        the bench.</li>
+    <li><strong>The banner is consumed, and a pad is washable.</strong> Making a pad spends the
+        banner; washing strips the design back to a blank pad and loses it. Mistakes stay cheap
+        without making the banner free.</li>
+    <li><strong>The pad is fitted from a third slot in the horse's own inventory</strong>,
+        beside saddle and armour &mdash; the place a player already looks for tack. This is the
+        most discoverable option and the most dangerous one; see below.</li>
+    <li><strong>No pads on foals.</strong> A foal's UV layout is completely different from an
+        adult's, so a foal pad is a second set of art drawn from scratch for something worn
+        briefly. Vanilla renders no equipment on a foal either.</li>
+</ul>
+
+<h3>The risks</h3>
+
+<ul>
+    <li><strong>The live 3D preview is the open one.</strong> A horse that re-bakes while the
+        player drags is precisely the shape of the incident recorded in
+        <code>GeneticCoatTextureFactory</code>, where unbudgeted per-frame baking froze the
+        owner's machine. It must be designed around rather than discovered: bake on release
+        rather than per frame, or preview the transform as a UV change on an already-baked
+        sheet and only re-composite when the pattern set itself changes. The existing texel
+        budget, cache and reload invalidation are the right machinery; they have to be wired in
+        from the start.</li>
+    <li><strong>Rasterising a banner is answered and is not a risk.</strong> A pattern layer
+        resolves to an ordinary resource PNG under <code>textures/entity/banner/</code>, all
+        64&times;64, and the composite is <code>base &times; baseColour</code> then alpha-over
+        each <code>pattern &times; layerColour</code>. The coat engine's loader,
+        <code>NativeImage</code> compositor and <code>DynamicTexture</code> upload all apply
+        unchanged. The banner's own front face is a clean 20&times;40 texel rectangle at origin
+        (1,1), so a crop has real coordinates to work in. The in-GUI preview is free: vanilla
+        renders a live <code>BannerPatternLayers</code> into a GUI rect already, which is how
+        the loom does it.</li>
+    <li><strong>The third slot: the danger is not where it looked.</strong> NeoForge offers
+        <em>no</em> hook, so a slot beside the saddle means a mixin on
+        <code>HorseInventoryMenu</code>, or our own separate screen. <strong>No screen mixin is
+        needed</strong> &mdash; a supported render event can draw the empty-slot hole, which
+        avoids putting a client-only mixin in a config that has no <code>"client"</code> section
+        and would crash a dedicated server.</li>
+    <li><strong>The real risk is <code>quickMoveStack</code>, not the slot.</strong>
+        <code>AbstractMountInventoryMenu.quickMoveStack</code> is shared with donkeys, mules,
+        llamas and nautiluses, and computes every shift-click range from hardcoded
+        <code>0</code>, <code>1</code>, <code>2</code> and
+        <code>2 + mountContainer.getContainerSize()</code>. A third slot invalidates that
+        arithmetic wherever it is inserted, and a mis-ranged <code>moveItemStackTo</code> is how
+        items duplicate or vanish. It is also the failure that looks fine until somebody
+        shift-clicks with a chest on the horse. Secondary: the client builds its own menu from
+        the open packet, so the mod must stay network-required on both sides or every slot index
+        is off by one.</li>
+    <li><strong>Storing the pad in an attachment is blessed, not a hack.</strong> The saddle and
+        armour slots are not backed by the horse's container either &mdash;
+        <code>Mob.createEquipmentSlotContainer</code> fronts the equipment array with a
+        <code>ContainerSingleItem</code> view that owns no storage. A pad slot reading an
+        attachment is the same shape. Keep one authority (never mirror it into a container),
+        store <code>stack.copy()</code> and write back through <code>setData</code>, and it
+        stays out of hopper reach, which a widened container would not.</li>
+    <li><strong>Two hazards from <a href="known-gaps.html">gap 156</a>.</strong> Do not build
+        the pad on <code>EquipmentSlot.SADDLE</code>, and never let a pad item carry
+        <code>PHANTOM_SADDLE</code>: <code>BarebackSteeringHandler</code> writes that slot every
+        tick and its <code>reclaim</code> sweep destroys anything carrying that component in a
+        rider's inventory.</li>
+</ul>
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<p class="lede">
+    <strong>Built on 2026-09-21, and not yet opened in a game.</strong> Ordered the way
+    <a href="verification.html">to be verified</a> orders everything: what can be wrong
+    <em>invisibly</em> first, &ldquo;does it look right&rdquo; last. Delete an item from here
+    once it is confirmed and write what was seen, when, on the Coding tab &mdash; this list
+    only shrinks.
+</p>
+
+<p>
+    The tack row moved off Overview onto a new <strong>Gear</strong> tab and grew to
+    nineteen slots, laid out on a portrait of the horse
+    (<a href="horse-gear.html">horse gear</a>). Only the saddle and the barding have
+    anything that fits them; the other seventeen ride a new synced attachment
+    (<code>HORSE_GEAR</code>) and accept nothing yet, by design. The module builds and
+    <code>HorseTackSlot.verify()</code> runs at mod construction, so a duplicate anchor or a
+    third vanilla slot would refuse to boot &mdash; <strong>but no client has opened the
+    tab</strong>, and a server boot was not run this session because another NeoForge
+    instance held the run directory.
+</p>
+
+<h3>Do these first &mdash; they can be wrong invisibly</h3>
+<ul>
+    <li><strong>The saddle and barding still work.</strong> This is the regression that
+        matters: they moved screens and their write path changed from an inline
+        <code>setItemSlot</code> to <code>HorseTackSlot.set</code>. On a tamed horse of
+        yours, put a saddle on from the Gear tab, ride it, take it off, and check it came
+        back. Then iron barding. Then both with a <strong>full inventory</strong> &mdash;
+        what comes off must drop at your feet, never vanish.</li>
+    <li><strong>Click every one of the other seventeen slots holding something.</strong>
+        Nothing should happen at all &mdash; no item consumed, no item duplicated, no
+        packet error in the log. An empty tag is meant to refuse everything; the failure to
+        look for is a slot that <em>accepts</em> an item and then loses it.</li>
+    <li><strong>The click boxes line up with what is drawn.</strong> Nineteen slots are
+        positioned from fractions of the doll box and the hit test is recorded on the way
+        past, so a slot whose tooltip names one thing while the click swaps another is the
+        bug to watch for. Hover each and check the tooltip names the slot you are over
+        &mdash; particularly the four boots and the four shoes, which are the rows most
+        easily transposed.</li>
+    <li><strong>Scroll the page and click again.</strong> The hit boxes are recorded at the
+        scrolled y; if that is wrong the slots stay clickable at their unscrolled
+        positions, which reads as the tab being dead below the fold.</li>
+    <li><strong>A foal.</strong> Every slot should be drawn dim and do nothing, and the tab
+        should say so in words rather than just refusing.</li>
+    <li><strong>A horse that is not yours</strong> &mdash; a cowboy's string, or a
+        stranger's. The slots show what it wears, drawn dim, and a click does nothing.</li>
+    <li><strong>A horse with no entity behind it.</strong> Open the information screen from
+        the browser, on a record rather than an animal, and go to Gear: it should say there
+        is nothing to dress rather than draw an empty doll or throw.</li>
+</ul>
+
+<h3>Then look at it</h3>
+<ul>
+    <li><strong>Does the paper doll read as a horse?</strong> The pose is a fixed
+        three-quarter view (yaw 52&deg;, pitch 6&deg;) chosen so all four legs separate. If
+        the near and off legs overlap, the four boot slots are pointing at two visible legs
+        and the angle wants changing &mdash; it is two constants in
+        <code>HorseInfoScreen</code>.</li>
+    <li><strong>Do the slots sit where the gear goes?</strong> Every anchor is a guess made
+        without ever seeing it rendered. The mane, tail and chest slots are the likely
+        offenders.</li>
+    <li><strong>Overview's replacement line.</strong> It should say how many pieces the
+        horse is wearing and send you to Gear.</li>
+    <li><strong>Eight tabs still fit</strong> the tab strip at small window widths and at
+        GUI scale 4 &mdash; the strip is centred, not scrollable, so Gear is the tab that
+        pushes it over.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="items.html">Items &amp; recipes</a>
+        <a href="item-equestrian-bench.html">Tack Dyeing Bench</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="verification.html">To be verified</a>
+    </div>
+    Source: <code>neoforge-26.1.2/{entity,data,client,network}/</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

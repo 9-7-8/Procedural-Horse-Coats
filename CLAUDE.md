@@ -27,7 +27,7 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | Anything with a date on it | `wiki/session-log.html` |
 | How a gene, system or class works | its own wiki page (see the map) |
 | A defect, a gap, or an unchecked assumption | `wiki/known-gaps.html` |
-| Something to go look at in-game | `wiki/verification.html` |
+| Something to go look at in-game | a **Verification tab on that thing's own page** |
 | Work not started yet | `wiki/roadmap.html` |
 | A design call - made, or still open | `wiki/decisions.html` |
 | An API quirk of this SDK | `wiki/api-notes.html` |
@@ -74,7 +74,7 @@ the same change as the code, and never copy it back into here.
 | **Technique** - how to find things out here; traps between two pages | `wiki/coding-notes.html` |
 | Living beside other mods | `wiki/compatibility.html` |
 | **What is broken / unproven / half-built** | `wiki/known-gaps.html` |
-| **The `runClient` checklist** - update after every play session | `wiki/verification.html` |
+| **The `runClient` checklist** - older entries only; new work is verified on its own page | `wiki/verification.html` |
 | **Planned features**, priority-ordered, and *nothing else* | `wiki/roadmap.html` |
 | **Design calls** - settled (do not reopen) and still open | `wiki/decisions.html` |
 | **What each session built, and why** | `wiki/session-log.html` |
@@ -134,7 +134,12 @@ Two rules about the roadmap, both learned the hard way:
    is harvested and put back verbatim.
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
    code does. More useful to the next session than silent confidence.
-9. **When something recorded as a gap or as unverified is fixed and verified, delete it**
+9. **A new thing's verification checklist goes on a Verification tab of its own page**
+   (`data-tab="verification"`, per `wiki/tabs.js`) - not in `wiki/verification.html`, which
+   now holds older entries only. Same for its roadmap: if a subject has a page, its plans go
+   on a **Roadmap tab there**, and `wiki/roadmap.html` keeps one sentence pointing at it.
+   `wiki/horse-gear.html` is the worked example of both. (Owner, 2026-09-21.)
+   **When something recorded as a gap or as unverified is fixed and verified, delete it**
    from `wiki/known-gaps.html` and `wiki/verification.html` in the same change, and put what
    was verified, when and on what evidence in the **coding tab of that thing's own page**.
    No "Closed" entries or "Confirmed" notes left behind: those two pages only shrink. (Owner.)
@@ -249,8 +254,9 @@ where the session actually landed rather than narrating it mid-change.
 4. **Then update the docs to what is true now** - not "what I changed today".
    Walk the map above and honour the source-of-truth rule. At minimum:
    `wiki/session-log.html` (a new dated entry at the top),
-   `wiki/verification.html` (delete what the owner confirmed in-game, add what
-   is newly unplayed *and where to look*), `wiki/known-gaps.html` (delete what
+   the **Verification tab of each page the session built on** (what is newly
+   unplayed *and where to look*), `wiki/verification.html` (delete only what the
+   owner confirmed in-game), `wiki/known-gaps.html` (delete what
    closed, add what was discovered), plus any gene or system page the session
    moved, and `wiki/nav.js` if a page was added.
 5. **Audit this file and put it back under budget.** Not "did I add anything" -

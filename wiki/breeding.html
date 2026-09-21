@@ -994,12 +994,15 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             offered for an <em>untamed</em> horse on purpose, since being thrown off is
             the point.
         </p></li>
-    <li><strong>Overview carries the tack.</strong> Two real slots &mdash; saddle and
-        body armour &mdash; drawn from <code>HorseTackSlot.values()</code>, which is a list
-        precisely because two is not where it stops. Both are genuine
-        <code>EquipmentSlot</code>s on the entity rather than container slots, so the
-        client already has them off synced equipment and the server sets them with
-        <code>setItemSlot</code>.
+    <li><strong>The Gear tab carries the tack</strong>, and Overview now only says how many
+        pieces a horse is wearing. It is <strong>nineteen</strong> slots arranged on a
+        portrait of the horse rather than the two-slot row Overview used to hold &mdash;
+        still drawn from <code>HorseTackSlot.values()</code>, which was always a list
+        because two was never where it stopped. Only the saddle and the barding are genuine
+        <code>EquipmentSlot</code>s, so the client has those off synced equipment and the
+        server sets them with <code>setItemSlot</code>; the other seventeen ride the
+        <code>HORSE_GEAR</code> attachment. <a href="horse-gear.html">Horse gear</a> is the
+        page for all of it.
 
         <p>
             <strong>One click is a swap with your hand</strong>, not a drag: this is a
@@ -1014,10 +1017,11 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             anything &mdash; is drawn dim rather than hidden, because a gap where a slot
             should be reads as a bug and a greyed one reads as the rule it is.
         </p></li>
-    <li><code>HorseInfoScreen</code> is a seven-tab full-window overlay in the same dark
+    <li><code>HorseInfoScreen</code> is an eight-tab full-window overlay in the same dark
         chrome as the horse browser: <strong>Overview</strong> (name, the barn-name
         editor, sex, generation, breed, the four live body numbers, bond, conditions, and
-        who bred / tamed / owns it), <strong>Genes</strong>, <strong>Health</strong>
+        who bred / tamed / owns it), <strong><a href="horse-gear.html">Gear</a></strong>
+        (the nineteen slots), <strong>Genes</strong>, <strong>Health</strong>
         (each gene's <em>own</em> contribution to speed / health / jump / size, from
         <code>TraitBreakdown</code>, plus the disorders), <strong>Coat</strong>,
         <strong>Other genes</strong>, <strong>Offspring</strong>, and

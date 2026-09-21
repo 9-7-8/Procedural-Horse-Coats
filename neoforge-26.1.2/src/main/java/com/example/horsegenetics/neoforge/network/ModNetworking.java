@@ -487,12 +487,10 @@ public final class ModNetworking {
             return; // nothing to take off and nothing that would go on
         }
 
-        if (putting) {
-            horse.setItemSlot(tack.slot(), held.split(1));
-            horse.setGuaranteedDrop(tack.slot());
-        } else {
-            horse.setItemSlot(tack.slot(), ItemStack.EMPTY);
-        }
+        // One call for both backings: the saddle and the barding are real
+        // equipment slots, the other seventeen are keys in the HORSE_GEAR
+        // attachment, and HorseTackSlot.set is the only place that knows which.
+        tack.set(horse, putting ? held.split(1) : ItemStack.EMPTY);
         if (!worn.isEmpty()) {
             // Back to the player, and on the floor at their feet if there is no
             // room - never deleted.

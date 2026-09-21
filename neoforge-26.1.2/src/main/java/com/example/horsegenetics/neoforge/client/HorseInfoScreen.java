@@ -93,6 +93,7 @@ public final class HorseInfoScreen extends Screen {
 
     private enum Tab {
         OVERVIEW("Overview"),
+        GEAR("Gear"),
         GENES("Genes"),
         HEALTH("Health"),
         COAT("Coat"),
@@ -163,6 +164,28 @@ public final class HorseInfoScreen extends Screen {
     private static final int FOAL_W = 40;
     private static final int FOAL_H = 40;
     private static final int FOAL_GAP = 4;
+
+    /**
+     * The Gear tab's paper doll: the box the horse and its nineteen slots share.
+     * Every slot's place inside it comes from {@code HorseTackSlot.anchorX} and
+     * {@code anchorY} as a fraction of this box, so these are the only two
+     * numbers the layout has and the roster carries the rest.
+     */
+    private static final int DOLL_W = 420;
+    private static final int DOLL_H = 264;
+
+    /** Where the horse itself sits inside the doll, leaving gutters for slots. */
+    private static final float PORTRAIT_X0 = 0.27f;
+    private static final float PORTRAIT_X1 = 0.73f;
+    private static final float PORTRAIT_Y0 = 0.13f;
+    private static final float PORTRAIT_Y1 = 0.64f;
+
+    /**
+     * A three-quarter view, held still. Face-on would overlap the near and off
+     * legs, and the four boot slots would then point at one visible leg.
+     */
+    private static final float DOLL_YAW = 52.0f;
+    private static final float DOLL_PITCH = 6.0f;
 
     /** Remembered across openings - reopening on the tab you were reading. */
     private static Tab lastTab = Tab.OVERVIEW;
@@ -443,7 +466,7 @@ public final class HorseInfoScreen extends Screen {
      */
     private void drawTackSlot(GuiGraphicsExtractor g, HorseTackSlot slot, int x, int y,
                               int mouseX, int mouseY) {
-        boolean usable = ownsHorse() && horse != null && horse.canUseSlot(slot.slot());
+        boolean usable = ownsHorse() && horse != null && slot.usableOn(horse);
         ItemStack worn = horse == null ? ItemStack.EMPTY : slot.on(horse);
 
         g.fill(x, y, x + SLOT, y + SLOT, FIELD_WELL);
@@ -482,7 +505,7 @@ public final class HorseInfoScreen extends Screen {
         }
         for (TackHit hit : tackHits) {
             if (mx >= hit.x() && mx < hit.x() + SLOT && my >= hit.y() && my < hit.y() + SLOT) {
-                if (!horse.canUseSlot(hit.slot().slot())) {
+                if (!hit.slot().usableOn(horse)) {
                     return true; // a foal's saddle slot: a real slot, and not yet usable
                 }
                 ClientPacketDistributor.sendToServer(
@@ -551,7 +574,7 @@ public final class HorseInfoScreen extends Screen {
             select(hit);
             return true;
         }
-        if (tab == Tab.OVERVIEW && clickTack(event.x(), event.y())) {
+        if (tab == Tab.GEAR && clickTack(event.x(), event.y())) {
             return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -650,6 +673,7 @@ public final class HorseInfoScreen extends Screen {
         tackHits.clear();
         switch (tab) {
             case OVERVIEW -> drawOverview(c, mouseX, mouseY);
+            case GEAR -> drawGear(c, mouseX, mouseY);
             case GENES -> drawGenes(c);
             case HEALTH -> drawHealth(c);
             case COAT -> drawGeneList(c, GeneCategory.COAT, "Nothing but the baseline colour genes.");
@@ -787,20 +811,20 @@ public final class HorseInfoScreen extends Screen {
 
         drawDraught(c);
 
-        // Tack. Two slots today - saddle and armour - and the row is built from
-        // HorseTackSlot.values(), so a third is a line in that enum. Only drawn
-        // for a horse that is actually here: the screen also opens on a record
-        // with no entity behind it (the browser), and there is nothing to tack.
+        // Tack used to be a row here. It moved to the Gear tab when the roster
+        // went from two slots to nineteen - a row that wide would have pushed
+        // the rest of Overview off the page, and nineteen slots want to be
+        // arranged on a horse rather than in a line. What stays is a count, so
+        // a player reading Overview still learns the horse is wearing
+        // something and where to go for it.
         if (horse != null) {
             c.rule();
             c.label("Tack");
-            c.tack(mouseX, mouseY);
-            if (!ownsHorse()) {
-                c.wrapped("Not your horse - you can see what it is wearing and no more.", DESC, 0);
-            } else {
-                c.wrapped("Click a slot to put on what you are holding, or to take off what is there.",
-                        DESC, 0);
-            }
+            int worn = wornCount();
+            c.wrapped(worn == 0
+                    ? "Wearing nothing. The Gear tab is where you dress it."
+                    : "Wearing " + worn + (worn == 1 ? " piece" : " pieces")
+                            + ". The Gear tab has the slots.", DESC, 0);
         }
 
         ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
@@ -997,6 +1021,64 @@ public final class HorseInfoScreen extends Screen {
         } catch (RuntimeException unresolvable) {
             return HorseTraits.baseline();
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Gear
+    // ------------------------------------------------------------------
+
+    /** How many of the nineteen slots are filled. Overview reports this. */
+    private int wornCount() {
+        if (horse == null) {
+            return 0;
+        }
+        int worn = 0;
+        for (HorseTackSlot slot : HorseTackSlot.values()) {
+            if (!slot.on(horse).isEmpty()) {
+                worn++;
+            }
+        }
+        return worn;
+    }
+
+    /**
+     * <b>The Gear tab.</b> Nineteen slots arranged on the horse itself - see
+     * {@code Cursor.gear} for the doll, and {@code HorseTackSlot} for why only
+     * two of them are real equipment slots.
+     *
+     * <p>Like the tack row it replaces, it is drawn only for a horse that is
+     * actually here: this screen also opens on a record with no entity behind
+     * it (from the browser), and there is nothing to dress.
+     */
+    private void drawGear(Cursor c, int mouseX, int mouseY) {
+        if (horse == null) {
+            c.wrapped("This horse is a record rather than an animal standing in front of you, "
+                    + "so there is nothing here to dress.", DESC, 0);
+            return;
+        }
+
+        c.gear(mouseX, mouseY);
+
+        if (!ownsHorse()) {
+            c.wrapped("Not your horse - you can see what it is wearing and no more.", DESC, 0);
+        } else if (horse.isBaby()) {
+            c.wrapped("A foal wears nothing. Tack sized for an adult is the one thing a growing "
+                    + "horse should not be carrying, so every slot is closed until it grows up.",
+                    DESC, 0);
+        } else {
+            c.wrapped("Click a slot to put on what you are holding, or to take off what is there.",
+                    DESC, 0);
+        }
+
+        // Honesty about the state of the roster. Seventeen of these nineteen
+        // slots have no item in the world that fits them yet - the slots, the
+        // storage and the screen landed first, deliberately, and each piece
+        // joins its slot's tag as it is made. Without this line the tab reads
+        // as broken rather than as unfinished.
+        c.gap(4);
+        c.wrapped("Only the saddle and the barding have anything to put in them so far. "
+                + "The other seventeen slots are built and empty - the gear that fills them "
+                + "is still to be made.", DIM_TEXT, 0);
     }
 
     // ------------------------------------------------------------------
@@ -1469,28 +1551,42 @@ public final class HorseInfoScreen extends Screen {
         }
 
         /**
-         * The row of tack slots, and the Ride button's twin in spirit: the only
-         * part of any of these pages you can click <i>into</i> rather than read.
+         * <b>The paper doll.</b> The horse's own portrait in the middle and the
+         * nineteen slots arranged around it where the gear actually sits - so
+         * the near fore boot is under the near fore leg and the tail slot is
+         * behind the tail, and a player finds a slot by looking at the horse
+         * rather than by reading a list.
          *
-         * <p>It records where each slot landed on the way past
-         * ({@link #tackHits}) rather than working the geometry out twice, which
-         * is what keeps a scrolled page's slots clickable in the right place -
-         * the y it is drawn at is already the scrolled one.
+         * <p>Every position comes from {@code HorseTackSlot.anchorX/anchorY} as
+         * a fraction of the doll's box, so the layout is the roster and adding
+         * a slot moves nothing here.
+         *
+         * <p>Like the row it replaced, it records where each slot landed on the
+         * way past ({@link #tackHits}) rather than working the geometry out
+         * twice - which is what keeps a scrolled page's slots clickable in the
+         * right place, since the y it is drawn at is already the scrolled one.
          */
-        void tack(int mouseX, int mouseY) {
-            int sx = x;
+        void gear(int mouseX, int mouseY) {
+            int dollW = Math.min(DOLL_W, width);
+            int dollH = DOLL_H;
+            int dx = x + (width - dollW) / 2;
+
+            // The horse first, so a slot that overlaps it reads as sitting on
+            // the animal rather than behind it.
+            int px = dx + Math.round(dollW * PORTRAIT_X0);
+            int pw = Math.round(dollW * (PORTRAIT_X1 - PORTRAIT_X0));
+            int py = y + Math.round(dollH * PORTRAIT_Y0);
+            int ph = Math.round(dollH * (PORTRAIT_Y1 - PORTRAIT_Y0));
+            HorsePortrait.drawPosed(g, coatOf(record), horse != null && horse.isBaby(),
+                    px, py, pw, ph, DOLL_YAW, DOLL_PITCH);
+
             for (HorseTackSlot slot : HorseTackSlot.values()) {
-                g.text(font, Component.literal(slot.label()), sx, y, LABEL, false);
-                sx += Math.max(SLOT + SLOT_GAP, font.width(slot.label()) + SLOT_GAP);
+                int sx = dx + Math.round((dollW - SLOT) * slot.anchorX());
+                int sy = y + Math.round((dollH - SLOT) * slot.anchorY());
+                drawTackSlot(g, slot, sx, sy, mouseX, mouseY);
+                tackHits.add(new TackHit(slot, sx, sy));
             }
-            y += lineH();
-            sx = x;
-            for (HorseTackSlot slot : HorseTackSlot.values()) {
-                drawTackSlot(g, slot, sx, y, mouseX, mouseY);
-                tackHits.add(new TackHit(slot, sx, y));
-                sx += Math.max(SLOT + SLOT_GAP, font.width(slot.label()) + SLOT_GAP);
-            }
-            y += SLOT + 4;
+            y += dollH + 4;
         }
 
         /**

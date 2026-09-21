@@ -55,21 +55,39 @@ public final class HorsePortrait {
      */
     public static void draw(GuiGraphicsExtractor g, CoatData coat, boolean baby,
                             int x, int y, int w, int h, int mouseX, int mouseY) {
+        int cx = x + w / 2;
+        int cy = y + h / 2;
+        float yawDeg = (float) Math.atan((cx - mouseX) / 30.0F) * 42.0F;
+        float pitchDeg = (float) Math.atan((cy - mouseY) / 30.0F) * 22.0F;
+        drawPosed(g, coat, baby, x, y, w, h, yawDeg, pitchDeg);
+    }
+
+    /**
+     * The same horse at an angle the caller picks rather than one the pointer
+     * picks. The Gear tab's paper doll needs this: its slots are positioned
+     * anatomically, so the horse under them has to hold still - a portrait that
+     * swings to follow the cursor would put the near fore leg somewhere
+     * different from the boot slot that belongs to it.
+     *
+     * @param yawDeg   0 faces the viewer; around 50 is a three-quarter view,
+     *                 which is the one that separates all four legs.
+     * @param pitchDeg positive tips the horse's nose down toward the viewer.
+     */
+    public static void drawPosed(GuiGraphicsExtractor g, CoatData coat, boolean baby,
+                                 int x, int y, int w, int h, float yawDeg, float pitchDeg) {
         g.fill(x, y, x + w, y + h, WELL);
         if (coat == null) {
             return;
         }
         Horse horse = model(baby);
-        if (horse == null || !drawModel(g, horse, coat, x, y, w, h, mouseX, mouseY)) {
+        if (horse == null || !drawModel(g, horse, coat, x, y, w, h, yawDeg, pitchDeg)) {
             drawSwatch(g, coat, x, y, w, h);
         }
     }
 
     /** @return false when the render state could not be built, so the caller falls back. */
     private static boolean drawModel(GuiGraphicsExtractor g, Horse horse, CoatData coat,
-                                     int x, int y, int w, int h, int mouseX, int mouseY) {
-        int cx = x + w / 2;
-        int cy = y + h / 2;
+                                     int x, int y, int w, int h, float yawDeg, float pitchDeg) {
         try {
             EntityRenderer<? super Horse, ?> renderer =
                     Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(horse);
@@ -79,24 +97,20 @@ public final class HorsePortrait {
             // Coat and texture ids together - see GeneticHorseRenderer.applyCoat.
             // Setting gs.coatData alone silently draws the default black horse.
             GeneticHorseRenderer.applyCoat(state, coat);
-            // The same "look at the pointer" swing the family tree uses, so the
-            // two screens' horses behave identically.
-            float xAngle = (float) Math.atan((cx - mouseX) / 30.0F);
-            float yAngle = (float) Math.atan((cy - mouseY) / 30.0F);
             if (state instanceof LivingEntityRenderState ls) {
                 // The horse's own SCALE attribute is thrown away here on
                 // purpose: a table row is a fixed box, and a draught horse
                 // drawn twice the size of a pony would break the grid rather
                 // than tell the reader something the Size column does not.
-                ls.bodyRot = 180.0F + xAngle * 42.0F;
-                ls.yRot = xAngle * 42.0F;
-                ls.xRot = -yAngle * 22.0F;
+                ls.bodyRot = 180.0F + yawDeg;
+                ls.yRot = yawDeg;
+                ls.xRot = -pitchDeg;
                 ls.boundingBoxWidth = ls.boundingBoxWidth / ls.scale;
                 ls.boundingBoxHeight = ls.boundingBoxHeight / ls.scale;
                 ls.scale = 1.0F;
             }
             Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
-            Quaternionf xRotation = new Quaternionf().rotateX(yAngle * 22.0F * ((float) Math.PI / 180.0F));
+            Quaternionf xRotation = new Quaternionf().rotateX(pitchDeg * ((float) Math.PI / 180.0F));
             rotation.mul(xRotation);
             Vector3f translation = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F);
             g.entity(state, h * MODEL_SCALE_PER_PIXEL, translation, rotation, xRotation,

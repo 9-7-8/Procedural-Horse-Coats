@@ -43,6 +43,11 @@ public final class HorseGenetics {
         // the only thing that checks the two agree, and the failure it catches
         // is silent (a horse that would simply never accept anything).
         com.example.horsegenetics.neoforge.server.DietFoods.verify();
+        // The gear roster's own invariants - two vanilla slots and no two
+        // slots anchored on the same spot of the paper doll. Same reason as
+        // the line above: every way that table can be wrong is invisible in
+        // the game. See entity/HorseTackSlot.verify.
+        com.example.horsegenetics.neoforge.entity.HorseTackSlot.verify();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModDataComponents.register(modEventBus);
         // What the OTHER mods in this pack brought - the woods we can make a

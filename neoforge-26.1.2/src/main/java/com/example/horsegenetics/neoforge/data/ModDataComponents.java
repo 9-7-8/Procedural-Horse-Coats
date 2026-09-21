@@ -129,7 +129,7 @@ public final class ModDataComponents {
     /**
      * The three colours of a dyed saddle ({@link SaddleTint}) - seat leather,
      * bridle leather and metal hardware, dyed independently at the
-     * <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/roadmap.html#equestrian-bench">Equestrian
+     * <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/horse-gear.html#equestrian-bench">Equestrian
      * Bench</a>. Not {@code dyed_color}, because vanilla holds one value per
      * stack and reads it once for every layer; see that record for the rest.
      *

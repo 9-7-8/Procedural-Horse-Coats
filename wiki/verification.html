@@ -24,6 +24,31 @@
     goes on the coding tab of that thing's own page (hard rule 9).
 </p>
 
+<div class="note rule">
+    <span class="label">New work is verified on its own page, not here</span>
+    <p>
+        <strong>Convention from 2026-09-21, and it applies to everything built from now
+        on.</strong> A new feature's checklist goes on a <strong>Verification tab of the
+        page for the thing itself</strong> &mdash;
+        <code>&lt;section id="verification" class="tab-panel" data-tab="verification"
+        data-tab-label="Verification"&gt;</code>, the same page-local tab mechanism
+        <code>wiki/tabs.js</code> already supports. <a href="horse-gear.html#verification">Horse
+        gear</a> is the worked example.
+    </p>
+    <p>
+        <strong>Why.</strong> A checklist kept beside the thing it tests is read by whoever
+        opens that page, and is deleted by whoever confirms it. Gathered into one document it
+        becomes a wall nobody reads to the bottom of, and its entries outlive the memory of
+        what they were about. The ordering rule below is unchanged and still applies wherever
+        a checklist lives.
+    </p>
+    <p>
+        <strong>What stays here.</strong> The sections already written, until each is
+        confirmed and deleted or moved to its subject's own page; anything that genuinely
+        spans several pages; and this page's own rules. The list only shrinks.
+    </p>
+</div>
+
 <div class="note danger">
     <span class="label">How this page is ordered: "does it look right" goes LAST</span>
     <p>
@@ -99,11 +124,13 @@
         and put you on. On a wild horse it should buck you off exactly as a right-click
         used to &mdash; <strong>tame one entirely through the button</strong>, because if
         that does not work the setting has cost the game its taming.</li>
-    <li><strong>The tack slots</strong> under <em>Tack</em> on Overview. Hold a saddle,
-        click the left slot: it goes on, and the horse is rideable. Click it again empty-handed:
-        it comes back to you. The same with iron barding on the right slot. Then try it
-        with a <em>full</em> inventory &mdash; the taken-off item should drop at your feet
-        rather than vanish.</li>
+    <li><strong>The tack slots</strong> &mdash; now on the <em>Gear</em> tab rather than
+        Overview, and checked on
+        <a href="horse-gear.html#verification">horse gear &sect; verification</a>.
+        Hold a saddle, click the saddle slot: it goes on,
+        and the horse is rideable. Click it again empty-handed: it comes back to you. The
+        same with iron barding. Then try it with a <em>full</em> inventory &mdash; the
+        taken-off item should drop at your feet rather than vanish.</li>
     <li><strong>A horse that is not yours.</strong> Open a cowboy's string, or a stranger's
         horse: the slots should show what it is wearing, be drawn dim, and do nothing on a
         click.</li>

@@ -32,6 +32,7 @@ window.HG.pages = {
             items: [
                 { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "carts.html", text: "Carts: wagons, plows & draught", kind: "core", views: ["gameplay","coding"] },
+                { href: "horse-gear.html", text: "Horse gear: the nineteen slots", kind: "core", views: ["gameplay","coding"] },
                 { href: "carrots.html", text: "Breeding carrots & the gene database", kind: "magical", views: ["gameplay","coding"] },
                 { href: "items.html", text: "Items & recipes", kind: "core", views: ["gameplay","coding"] },
                 { href: "villagers.html", text: "Villagers & transfer papers", kind: "core", views: ["gameplay","coding"] },

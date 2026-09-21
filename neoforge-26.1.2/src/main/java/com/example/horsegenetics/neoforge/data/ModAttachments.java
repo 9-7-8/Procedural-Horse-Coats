@@ -163,6 +163,22 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Everything a horse wears that vanilla has no equipment slot for - see
+    // HorseGear. Synced, because the Gear tab draws the worn stacks on the
+    // client and there is no container open to carry them; the click that
+    // changes one is still a server-checked packet (TackSlotPayload), so the
+    // sync is a read-only view rather than an authority. copyOnDeath so a
+    // re-summoned horse is still dressed - the same call HORSE_CARE makes,
+    // and losing a full set of tack to a death you did not see would be worse
+    // than losing a bond.
+    public static final Supplier<AttachmentType<HorseGear>> HORSE_GEAR =
+            ATTACHMENT_TYPES.register("horse_gear", () -> AttachmentType
+                    .builder(() -> HorseGear.EMPTY)
+                    .serialize(HorseGear.MAP_CODEC)
+                    .sync(HorseGear.STREAM_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     // The horse a shifted lycanthrope used to be, held on the ANIMAL rather than
     // on a horse - at night there is no horse to hold it. See data/LycanShift.
     // Not copyOnDeath: an animal that dies takes the horse inside it with it.
