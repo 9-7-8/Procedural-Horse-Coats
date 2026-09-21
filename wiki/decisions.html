@@ -424,6 +424,56 @@
 
 <h3 id="settled-dated">The dated batches</h3>
 
+<h3 id="settled-horsemanship">Settled 2026-09-21 &mdash; a rider may outperform a genome, and a carrot may not</h3>
+
+<ul>
+    <li id="settled-rider-skill"><strong>A horsemanship skill is in, and the standing objection
+        against it is answered rather than ignored.</strong> This page and
+        <a href="roadmap.html#mod-survey">the survey backlog</a> both held that a player-progression
+        ladder cuts against <a href="philosophy.html">breeding being the progression</a> &mdash;
+        the same objection that <em>still stands</em> against
+        <a href="roadmap.html#out-of-scope-competitions">competitions</a>. The owner's reframing
+        is what settles it: <strong>bonding makes the horse listen, and skill makes you a better
+        rider</strong>. Neither makes the horse a better horse, so no second ladder is built
+        beside breeding &mdash; what is built is a reason to ride the horse you bred. See
+        <a href="roadmap.html#horsemanship">horsemanship</a>.</li>
+    <li id="settled-pairing-bonus"><strong>The bonus belongs to the pairing and is never written
+        to the animal.</strong> It is an <code>AttributeModifier</code> applied on mount and
+        removed on dismount, computed from rider skill and bond with <em>that</em> horse. A
+        horse's stored stats stay exactly its genome, <code>HorseInfoScreen</code> keeps telling
+        the truth, and a sold horse carries none of the seller's skill. <strong>This is the
+        load-bearing half of the call</strong>, and every future proposal of the same shape should
+        be tested against it.</li>
+    <li id="settled-skill-stats"><strong>Speed and jump only &mdash; never health, never
+        size.</strong> Those are <a href="roadmap.html#health-genes">health-gene</a> territory,
+        and a rider adding hearts would stop a genetically frail horse being legible at a glance,
+        which is precisely how <a href="philosophy.html#care">&sect;8</a> chose to express
+        frailty.</li>
+    <li id="settled-stat-carrots"><strong>A carrot may never change a horse's stats or its
+        coat.</strong> Horse Upgrades' diamond, ender, redstone and lapis carrots &mdash; a
+        permanent heart, more jump, more speed, a recoloured coat &mdash; are all refused. Our
+        carrots act on <em>inheritance</em>; a stat carrot makes the displayed numbers stop
+        describing the genotype, and a recolour carrot breaks the one thing
+        <a href="pipeline.html">the pipeline</a> exists to guarantee. Written up beside the rule
+        it breaks, at <a href="carrots.html#rejected-stat-carrots">carrots</a>. The distinction
+        against the call above is deliberate and is the test to apply: <em>the carrot changes the
+        horse, riding well changes the ride.</em></li>
+    <li id="settled-skills-optional"><strong>An RPG skills mod is an optional dependency and will
+        never be a requirement.</strong> Pufferfish's Skills is the hook, chosen after reading all
+        three of the owner's skills mods from their jars; the tree ships as data in our own jar
+        and is inert without it, and with no skills mod installed <strong>bond alone carries the
+        feature at a lower ceiling</strong>. A player without the mod is never locked out of
+        anything &mdash; installing one raises a ceiling rather than switching a feature on. The
+        reasoning, and why RPG Attribute System and Skill Tree were not chosen, is on
+        <a href="roadmap.html#horsemanship-hook">the roadmap</a>.</li>
+    <li id="settled-qol-licences"><strong>Nothing is ported from the quality-of-life cluster,
+        whatever its licence says.</strong> The five mods read on 2026-09-21 are MIT, GPL-3.0,
+        MPL-2.0, CC BY-NC-SA and All Rights Reserved; the owner's call was <em>ideas only,
+        always</em> &mdash; one rule instead of five, no per-file provenance to track, and no
+        share-alike or GPL term reaching a CC BY-NC repo. Each is named on the coding tab of
+        whatever it inspired, per <a href="#settled-attribution">the attribution call</a>.</li>
+</ul>
+
 <h3 id="settled-equestrians">Settled 2026-09-18 &mdash; the horse trader is four people, and sells dyed tack again</h3>
 
 <ul>

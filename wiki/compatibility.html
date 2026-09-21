@@ -981,6 +981,82 @@
         architecture</a>) and a magical swim-speed locus. Two mods changing how a ridden
         horse behaves in water is the one place they overlap in substance.</li>
 </ul>
+<p class="muted">
+    <strong>It also already ships three of the tweaks we harvested</strong> from the
+    quality-of-life cluster &mdash; the reduced mining penalty while mounted, horse/player
+    inventory switching, and horses in boats. That is an argument for reading
+    <a href="roadmap.html#rider-comfort">rider comfort</a> and
+    <a href="roadmap.html#mod-survey">the HorseInBoat row</a> against this mod before building
+    any of them: a player running Horseman would get each behaviour twice, and the cheapest
+    version of some of these may be a recommendation rather than an implementation.
+</p>
+
+<h2 id="superb-steeds">Superb Steeds &mdash; a second answer to a question we are also answering</h2>
+
+<p>
+    <a href="https://modrinth.com/mod/superb-steeds">Superb Steeds</a> (MoriyaShiine, All Rights
+    Reserved) was read from source on 2026-09-21. It matters more than most rows here for one
+    reason: <strong>it has a branch targeting NeoForge 26.1.x, which is our own version</strong>,
+    and it is actively maintained. Most of the overlapping mods on this page cannot be installed
+    beside this one at all; this one can.
+</p>
+
+<p>
+    It replaces vanilla's per-horse stat variance with uniform base stats &mdash; health 30, speed
+    0.16875, jump 0.5 &mdash; by mixing into <code>generateMaxHealth</code>,
+    <code>generateJumpStrength</code>, <code>generateSpeed</code> and
+    <code>setOffspringAttribute</code>, and then hands each horse a 1&ndash;5 star rating in speed
+    and jump that is <em>trained upward by riding it</em>: roughly six minutes in the saddle per
+    level, rendered as star icons beside the horse inventory screen.
+</p>
+
+<div class="note">
+    <span class="label">It looks like a head-on collision with the genetics, and it is not</span>
+    <p>
+        <strong>Its base-stat flattening never reaches us.</strong>
+        <a href="#attributes">We overwrite base values</a> from the genotype on every join
+        &mdash; <code>HorseRecords.applyTraitsToEntity</code> &mdash; so whatever Superb Steeds
+        wrote at spawn is replaced by ours the next time the horse loads. Its
+        <code>setOffspringAttribute</code> mixin is moot for the same reason: our foals resolve
+        their stats from a genotype and never inherit an attribute.
+    </p>
+    <p>
+        <strong>What does survive is its training.</strong> Star levels are applied as
+        <code>AttributeModifier</code>s, and modifiers compose on top of our base values exactly
+        as the attributes section says they do. So a horse in a world running both mods has our
+        genome <em>plus</em> its stars &mdash; which is not breakage, but it is a second
+        progression quietly stacking on the first.
+    </p>
+</div>
+
+<p>
+    That makes this an unusually close call rather than a refusal, because
+    <a href="roadmap.html#horsemanship">horsemanship</a> is <em>this mod answering the same
+    question</em>: both say riding should make a horse perform above its raw numbers. The
+    difference is where the gain lives. Superb Steeds writes it to the animal, so the horse is
+    permanently better and carries it when sold; ours belongs to the pairing of one rider with one
+    horse and exists only while you are mounted. <strong>Two training systems on one horse is a
+    bug generator</strong>, the same argument that sits on
+    <a href="#icys">bond under Icy's Better Horses</a>: one of them has to be picked, not merged.
+</p>
+
+<p>
+    <strong>Planned: detect it and say so</strong>, the way
+    <a href="roadmap.html#rhg-detection">Realistic Horse Genetics detection</a> is planned. The
+    bad outcome here is silent &mdash; a player sees stars climbing on a horse whose genome says
+    otherwise, and has no way to know which mod is talking. A line at load naming both mods costs
+    almost nothing and is worth more than any patch.
+</p>
+
+<p class="muted">
+    Three of its smaller tweaks are separable from all of the above and were harvested rather than
+    refused: <strong>feeding a mounted horse by looking down at it</strong>, <strong>leather horse
+    armour letting a horse cross powder snow</strong>, and <strong>skeleton horses ignoring soul
+    sand's slowdown</strong>. Its &ldquo;a tamed horse needs no saddle to steer&rdquo; was
+    <em>not</em> taken &mdash; we already do that better, gated on bond, as
+    <a href="horse-care.html#bareback-steering">bareback steering at tier 3</a>. Note the licence
+    is All Rights Reserved: it was read for understanding, and nothing may be copied from it.
+</p>
 
 <h2 id="armour">Mods that only change horse armour</h2>
 

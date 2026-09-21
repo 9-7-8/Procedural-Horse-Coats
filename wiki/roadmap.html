@@ -752,6 +752,35 @@
         is &mdash; is still open and belongs with that section.</li>
 </ul>
 
+<h3 id="bond-behaviours">Two more tier behaviours, both harvested rather than invented</h3>
+
+<p>
+    Both came out of <a href="#mod-survey">the quality-of-life cluster</a>, and both were keyed to
+    something else in their original mods. <strong>Keying them to bond instead is the whole
+    adaptation</strong> &mdash; it is the idiom
+    <a href="horse-care.html#bareback-steering">bareback steering at tier 3</a> already
+    established, it makes them a reward rather than a default, and it leaves a low-bond horse
+    behaving exactly as vanilla does.
+</p>
+
+<ul>
+    <li><strong>A horse that trusts you stops bucking.</strong> Horse Buff removes vanilla's
+        random bucking outright; Superb Steeds keys it to being saddled. Here it is a bond tier:
+        the random interruption fades as the horse comes to trust you.
+        <strong><code>HorseRearFightMixin</code> and the aggro rearing stay untouched</strong>
+        &mdash; a horse that rears because you hit it, or because its herd is fighting, should go
+        on doing so. The point is that rearing stops being noise and starts meaning
+        something.</li>
+    <li><strong>A bonded horse waits where you left it.</strong> Horse Tweaks pins a 16-block home
+        on dismount and clears it with a lead; Horse Buff just stops saddled horses idling away.
+        Here, at a tier, the horse stops wandering when you dismount and waits for you &mdash; no
+        new item, no leash, and a low-bond horse still drifts, which is the thing bond is
+        <em>for</em>. Note this is adjacent to a real gap rather than identical to it:
+        <code>setPersistenceRequired</code> is called today only on cowboy stock, egg-spawned
+        horses and the debug pens, so an owned horse can still despawn. Whether the persistence
+        fix rides along with this or ships separately as a bug is open.</li>
+</ul>
+
 <h3 id="grooming-tool">A grooming tool, tiered &mdash; and shears stop working on a horse</h3>
 
 <p>
@@ -1188,11 +1217,31 @@
     restraint rather than capability: every number already exists on
     <code>HorseInfoScreen</code>, and the reason to show speed, jump, health and bond while
     riding is that opening a screen mid-gallop is not a thing anyone does. Keep it to what
-    changes while you ride. The related ask &mdash;
-    <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars
-    Alone</a>, an HUD-declutter mod &mdash; points the same way and is on
-    <a href="#mod-survey">the survey list</a>.
+    changes while you ride.
 </p>
+
+<div class="note">
+    <span class="label">Leave My Bars Alone was read, and the call was to fold it in here rather than rebuild it</span>
+    <p>
+        <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars
+        Alone</a> (Fuzs, MPL-2.0) does exactly two things, and it was read from source on
+        2026-09-21 because it is one of the very few mods on this page with a branch targeting
+        <strong>our own Minecraft version</strong>. It re-adds the food bar as an extra stacked
+        GUI layer anchored to <code>VEHICLE_HEALTH</code> &mdash; it does not move the mount's
+        health bar &mdash; and it narrows when vanilla is <em>allowed</em> to swap the XP bar for
+        the jump-charge bar, via one <code>@ModifyVariable</code> into
+        <code>nextContextualInfoState</code>, so XP stays visible unless you are actually
+        mid-charge. Two config booleans, both default on, no keybind, two files in the whole mod.
+    </p>
+    <p>
+        <strong>The owner's call was not to rebuild either half.</strong> We do not touch vanilla
+        bars separately; instead this section is designed so that <em>our</em> readout does not
+        add to the clutter in the first place, and the vanilla bar problem stays solved by a
+        maintained mod that already solves it. <strong>One thing to check when this is built:</strong>
+        <code>JumpBarCooldownMixin</code> already modifies the same vanilla jump bar, so the two
+        want testing together before either is claimed to work.
+    </p>
+</div>
 
 <h3 id="menu-restyle">A different look for the menu &mdash; explicitly not committed</h3>
 
@@ -1586,6 +1635,35 @@
     mod's only enchantment code runs the other way: <code>GeneDeathHandler.enchantedSword()</code>
     rolls one onto a dropped sword. So the first enchantable piece pays for the whole path.
 </p>
+
+<div class="note">
+    <span class="label">A ready-made roster, from a mod that built it as saddle upgrades</span>
+    <p>
+        <a href="https://www.curseforge.com/minecraft/mc-mods/horse-tweaks">Horse Tweaks</a>
+        (MIT, Minecraft 1.12.2, abandoned 2019) put seven abilities on a single
+        <em>Enhanced Saddle</em> as NBT flags, each costing saddle durability while it was doing
+        something: <strong>swimming, easy jump, thorns, frost walker, leaf walker, feather fall
+        and fire resistance</strong>. That is this section's roster already written by somebody
+        else, and <strong>the owner's call on 2026-09-21 was to take it as enchantments</strong>
+        rather than as a saddle &mdash; which is also the answer the rule above gives, since every
+        one of them is a thing you would want to move between horses.
+    </p>
+    <p>
+        Two are already ours by another route and should <em>not</em> become enchantments:
+        swimming is <a href="horse-care.html">shipped</a> through
+        <code>HorseWaterRidingHandler</code> and <code>HorseSwimMixin</code>, and easy jump is
+        shipped as <code>HorseInstantJumpMixin</code> behind <code>ride.instant_jump</code>.
+        <strong>Feather fall is the one to think hardest about</strong> &mdash; we cancel fall
+        damage today only while a horse is genuinely flying
+        (<code>server/FlightFallGuard</code>), and an enchantment that does it for any horse is a
+        larger change to how riding works than its five neighbours.
+    </p>
+    <p class="muted">
+        The durability-per-use idea is worth keeping even though the saddle is not: it is what
+        stopped seven permanent abilities being strictly free, and an enchanted piece of tack has
+        the same problem.
+    </p>
+</div>
 
 <h3 id="accessories-materials">The armour materials still missing</h3>
 
@@ -2098,6 +2176,162 @@
 
 <hr>
 
+<h2 id="horsemanship">Horsemanship &mdash; the rider is half of what a horse can do</h2>
+
+<p>
+    <strong>This reverses a position this page held twice.</strong> A horsemanship skill sat on
+    the survey backlog for months with an objection attached: it would be the first thing in the
+    mod where the <em>player</em> progresses rather than the horse, which cuts against
+    <a href="philosophy.html">breeding being the progression</a> &mdash; the same objection that
+    still stands against <a href="#out-of-scope-competitions">a competition ladder</a>. The owner
+    reframed it on 2026-09-21 and the reframing is what makes it buildable:
+    <strong>bonding makes the horse listen, and skill makes you a better rider.</strong> Neither
+    makes the horse a better horse.
+</p>
+
+<div class="note">
+    <span class="label">The bonus belongs to the pairing, and never to the animal</span>
+    <p>
+        <strong>A horse's stored stats are always exactly its genome.</strong> The bonus is an
+        <code>AttributeModifier</code> added when you mount and removed when you dismount,
+        computed from your skill and your bond <em>with that horse</em>. Nothing is ever written
+        to the horse.
+    </p>
+    <p>
+        That is the whole of why this is allowed and
+        <a href="carrots.html#rejected-stat-carrots">a carrot that adds a heart is not</a>. The
+        carrot changes the horse; this changes the ride. It also means
+        <code>HorseInfoScreen</code> keeps telling the truth, a sold horse carries none of your
+        skill with it, and the same horse under a novice performs at its genome exactly as it
+        does today.
+    </p>
+</div>
+
+<h3 id="horsemanship-curve">What it may move, and how far</h3>
+
+<ul>
+    <li><strong>Speed and jump only.</strong> Never health, never size &mdash; those are
+        <a href="#health-genes">health-gene</a> territory, and a rider adding hearts would make a
+        genetically frail horse stop being legible at a glance, which is the whole reason
+        <a href="philosophy.html#care">frailty is expressed as fewer hearts</a>.</li>
+    <li><strong>Uncapped, with sharply diminishing returns.</strong> The owner's call, and it is
+        the part of this section carrying the design risk: with no hard ceiling, the curve is the
+        <em>only</em> thing keeping a well-ridden ordinary horse from overtaking a bred one. Pick
+        the curve against real genome spread &mdash; the gap between a poor and a good horse's
+        resolved speed &mdash; and not in the abstract. Write the chosen shape and the numbers it
+        was measured against on this page's eventual replacement, because a curve nobody can
+        re-derive is a curve the next session will quietly get wrong.</li>
+    <li><strong>Two axes, multiplied.</strong> General skill carries between horses; bond is the
+        per-horse half and <a href="horse-care.html#bond">already exists</a>. A skilled rider on
+        a stranger's horse is competent and not at their best, which is the behaviour worth
+        having.</li>
+</ul>
+
+<h3 id="horsemanship-hook">The hook: Pufferfish&rsquo;s Skills, and a tree that is pure data</h3>
+
+<p>
+    <strong>An optional dependency, never a requirement.</strong> Three skills mods were read from
+    their jars on 2026-09-21 &mdash;
+    <a href="https://modrinth.com/mod/puffish-skills">Pufferfish's Skills</a>,
+    <a href="https://www.curseforge.com/minecraft/mc-mods/rpg-attribute-system">RPG Attribute
+    System</a> and Skill Tree (RPG Series) &mdash; and only the first is a usable seam.
+</p>
+
+<ul>
+    <li><strong>The tree is shipped as data and needs no code at all.</strong> Pufferfish's
+        <code>PackConfigReader</code> scans <em>every</em> namespace for
+        <code>data/&lt;ns&gt;/puffish_skills/config.json</code>, so a category living at
+        <code>data/horsegenetics/puffish_skills/categories/horsemanship/</code> is read when the
+        mod is installed and is inert when it is not. <strong>No registration, no
+        <code>ModList.isLoaded</code> check, no presence probe</strong> &mdash; without the mod
+        the tree simply does not exist. Skill Tree ships its own two categories exactly this way,
+        which makes its jar the schema documentation.</li>
+    <li><strong>The effect needs no branch either.</strong> The built-in
+        <code>puffish_skills:attribute</code> reward applies a real vanilla
+        <code>AttributeModifier</code> to <em>any</em> registered attribute, including one we
+        register unconditionally. Register <code>horsegenetics:horsemanship</code>, read
+        <code>player.getAttributeValue(...)</code> always, and with no skills mod present the
+        value sits at its baseline forever. That is a genuine zero-branch soft dependency, and it
+        is the shape to copy for any future optional integration.</li>
+    <li><strong>Anything the built-in rewards cannot express</strong> &mdash; touching bond or
+        genetics directly &mdash; goes through <code>SkillsAPI.registerReward</code> from a class
+        in the NeoForge module that is only ever loaded behind
+        <code>ModList.get().isLoaded("puffish_skills")</code>, with the mod as a
+        <code>compileOnly</code> dependency. Standard idiom; keep it to the cases that earn
+        it.</li>
+    <li><strong>Reading a level</strong> is
+        <code>SkillsAPI.getCategory(id).map(c -&gt; c.getSpentPoints(player))</code>, or
+        <code>c.getExperience().map(e -&gt; e.getLevel(player))</code>. There are unlock and lock
+        events, on Pufferfish's own pub/sub rather than the NeoForge bus.</li>
+</ul>
+
+<p class="muted">
+    <strong>Why not the other two.</strong> RPG Attribute System has an <code>api</code> package,
+    but its <code>isAvailable()</code> is compiled as a literal <code>return true</code> and is
+    useless as a presence check; it exposes <em>no</em> events, so any integration has to poll
+    <code>RasApi.getLevel(player)</code> on mount; and its eight attributes are fixed with no room
+    for a ninth. It is a reasonable <em>secondary</em> signal &mdash; overall player level gating
+    how deep the tree can be bought into &mdash; and cannot host the tree.
+    <strong>Skill Tree has no <code>api</code> package at all</strong> and hard-requires
+    <code>spell_engine</code> and <code>spell_power</code>; it is content sitting on Pufferfish's,
+    so any level worth reading from it is a Pufferfish query anyway. KubeJS is a real third seam
+    for a server-specific tweak, and not a substitute for something we want to ship in the jar.
+</p>
+
+<h3 id="horsemanship-nomod">Most players have no skills mod, and the feature still exists</h3>
+
+<p>
+    <strong>Bond alone carries it, at a lower ceiling.</strong> Nobody is locked out, and
+    installing a skills mod <em>raises</em> your ceiling rather than switching a feature on. This
+    is also what makes the thing buildable in the first place: the whole system can be written,
+    tuned and tested against bond before any hook exists, and the Pufferfish tree is then additive
+    on top of something already working.
+</p>
+
+<hr>
+
+<h2 id="rider-comfort">Rider comfort &mdash; four small things, and one that touches the coat</h2>
+
+<p>
+    Harvested from the quality-of-life cluster. None touches genetics, and each is small enough to
+    ship on its own. <strong>Every one of them wants a config switch written with it</strong>, per
+    <a href="#config-everything">the config sweep</a>.
+</p>
+
+<ul>
+    <li><strong>Remove the mining-speed debuff while mounted.</strong> Vanilla gives you a fifth
+        of your mining speed on horseback. Taken from Horse Buff. Worth being honest that this is
+        the one of the four that <em>alters</em> rather than adds, so
+        <a href="philosophy.html#vanilla-intact">vanilla stays intact</a> has a claim on it and
+        the switch matters more here than elsewhere.</li>
+    <li><strong>A keybind to open your own inventory while riding.</strong> Horse Buff binds it to
+        <kbd>ALT</kbd>+<kbd>E</kbd>. We already own <kbd>H</kbd> for the browser through
+        <code>client/HorseBrowserKeyBindings</code>, so the idiom and the registration exist. This
+        one adds a door rather than closing one.</li>
+    <li><strong>Fade the horse out as you look down.</strong> Horse Buff fades the mount for
+        sightlines, with an optional head-pitch offset of up to 45&deg;.
+        <strong>This is the one with a real unknown in it:</strong> we are the only mod here whose
+        coat is generated per horse, and a half-transparent procedural coat is a rendering case
+        nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
+        transparency before designing the feature around it.</li>
+    <li><strong>Leads return to your inventory</strong> instead of dropping on the ground, falling
+        back to a drop when the inventory is full. From Horse Tweaks. Pure annoyance removal and
+        nothing in this mod's design objects.</li>
+    <li><strong>Right-click with a saddle or armour equips it</strong> rather than opening the
+        horse screen. Also Horse Tweaks. <strong>The one most likely to collide with something we
+        ship:</strong> <code>client/HorseScreenHooks</code>, the <code>i</code> button and the
+        <code>right-click to open</code> client option all live on that same interaction, so this
+        needs designing against them rather than beside them.</li>
+</ul>
+
+<p class="muted">
+    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered and
+    declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing it moves
+    a number every other mod's pathing assumes.
+</p>
+
+<hr>
+
 <h2 id="mod-survey">The survey backlog &mdash; mods to read before building</h2>
 
 <p>
@@ -2148,6 +2382,26 @@
     <a href="#out-of-scope-competitions">out of scope</a>.
 </p>
 
+<p class="muted">
+    <strong>The quality-of-life cluster was read as one batch on 2026-09-21 and its row is
+    gone.</strong> Two of the six names were not what the row thought they were, so
+    <strong>the cluster is five mods</strong>. The <em>Horse Buff</em> listed at 9minecraft is a
+    fabricated repost &mdash; it advertises builds for Minecraft 26.2 and 26.3 that exist nowhere
+    upstream, drops three of the real mod's features and invents one (see-through mount armour)
+    &mdash; so it was dropped rather than read. The real
+    <a href="https://modrinth.com/mod/horsebuff">Horse Buff</a> is archived on both GitHub and
+    Modrinth and its own README names <a href="compatibility.html#horseman">Horseman</a> as its
+    successor, which we had already read. <em>Horse Upgrades</em> is <strong>two unrelated mods
+    sharing a name</strong>: the CurseForge link is a Minecraft 1.8 mod from 2016 whose carrots
+    granted permanent stat gains, and the Modrinth one is horseshoes forged on an anvil, which
+    <a href="#horse-shoes">this page already owns</a>. What was taken went to
+    <a href="#horsemanship">horsemanship</a>, <a href="#rider-comfort">rider comfort</a>,
+    <a href="#bond">bond</a> and <a href="#accessories-enchanting">enchanted tack</a>; the one
+    live compatibility question went to
+    <a href="compatibility.html#superb-steeds">Superb Steeds</a>. What was refused is recorded in
+    each.
+</p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Mod</th><th>The question asked of it</th><th>Where the answer goes</th></tr></thead>
@@ -2167,8 +2421,6 @@
 
 <tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/sullys-mod">Sully&rsquo;s Mod</a> and <a href="https://www.planetminecraft.com/mod/minecraft-upgraded-mod/">Minecraft Upgraded</a></td><td>Any horse features worth integrating. Both are broad mods where horses are a corner, so expect one or two ideas each rather than a system.</td><td>Here</td></tr>
 
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/horse-upgrades">Horse Upgrades</a>, <a href="https://www.9minecraft.net/horse-buff-9minecraft-mod/">Horse Buff</a>, <a href="https://modrinth.com/mod/horsebuff">HorseBuff</a>, <a href="https://www.9minecraft.net/horse-tweaks-mod/">Horse Tweaks</a>, <a href="https://modrinth.com/mod/superb-steeds">Superb Steeds</a>, <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars Alone</a></td><td><strong>The quality-of-life cluster &mdash; read as one batch, not six.</strong> They overlap heavily and the useful output is a single deduplicated list of tweaks measured against what this mod already does, rather than six separate verdicts. <em>Leave My Bars Alone</em> is the odd one out and the most concrete: an HUD-clutter fix worth adapting on its own terms.</td><td>Here, as one list</td></tr>
-
 <tr><td><a href="https://www.9minecraft.net/horse-statistics-mod/">Horse Statistics</a> and <a href="https://www.9minecraft.net/ridehud-mod/">RideHUD</a></td><td>RideHUD is wanted <strong>integrated</strong> rather than assessed &mdash; see <a href="#horse-menu">the horse menu</a>. Horse Statistics gets the narrower question: anything it shows that we do not.</td><td><a href="#horse-menu">The horse menu</a></td></tr>
 
 <tr><td><a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology Dictionary</a></td><td><strong>Its UI, not its content.</strong> Explicitly <em>not committed to</em>: possibly an alternative style for the horse menu rather than a replacement. Recorded so the idea is not lost, and flagged so nobody builds it as a decision that was made.</td><td><a href="#horse-menu">The horse menu</a></td></tr>
@@ -2185,9 +2437,7 @@
 
 <tr><td><a href="https://modrinth.com/mod/trotting-wagons">Trotting Wagons</a></td><td>More carts for the roster. <code>CartKind</code> takes a new entry cheaply; the art does not.</td><td><a href="carts.html">Carts</a></td></tr>
 
-<tr><td><a href="https://modrinth.com/mod/horseinboat">HorseInBoat</a></td><td><strong>Not a survey &mdash; a feature.</strong> &ldquo;Add horses to boats.&rdquo; Vanilla refuses to let a horse board a boat; this is a small, self-contained, obviously useful change and it is the cheapest row on this page. Watch one thing: <a href="known-gaps.html#gap-73">gap 73</a> records that a horse in a boat is already an untested case for the lycanthropy shift.</td><td>Here, once scoped</td></tr>
-
-<tr><td>An RPG skills mod <span class="muted">(unnamed &mdash; pick one)</span></td><td>A <strong>horsemanship skill</strong>: taming by mounting gets faster, or wild horses approach you for food. Speculative and named as such. The interesting half is that it is the first thing in the mod where the <em>player</em> progresses rather than the horse, which cuts against <a href="philosophy.html">breeding being the progression</a> &mdash; a design question before an integration one.</td><td><a href="decisions.html">Decisions</a>, first</td></tr>
+<tr><td><a href="https://modrinth.com/mod/horseinboat">HorseInBoat</a></td><td><strong>Not a survey &mdash; a feature.</strong> &ldquo;Add horses to boats.&rdquo; Vanilla refuses to let a horse board a boat; this is a small, self-contained, obviously useful change and it is the cheapest row on this page. Watch one thing: <a href="known-gaps.html#gap-73">gap 73</a> records that a horse in a boat is already an untested case for the lycanthropy shift. <strong>A second implementation to read:</strong> Horse Buff did this too, and put the horse in a <em>raft</em> rather than a boat, on the grounds that a boat breaks easily when ridden-while-riding &mdash; worth knowing before picking the entity.</td><td>Here, once scoped</td></tr>
 
 <tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/icy-better-horses">Icy&rsquo;s Better Horses</a></td><td><a href="compatibility.html#icys">Read once</a> and found to overlap heavily &mdash; bond, breeds, gendered breeding, stat inheritance, spawning. Asked again, for <em>adaptation</em> rather than compatibility: what does it do better.</td><td>Here</td></tr>
 
