@@ -653,6 +653,41 @@
 </table>
 </div>
 
+<h3 id="stall-bars">Stall bars &mdash; a third per-material block family</h3>
+
+<p>
+    A connecting, waterloggable horizontal-bars block, built the way
+    <a href="item-jumps.html">jumps</a> and the double gates already are: authored for vanilla's
+    woods by a <code>tools/bake-*.mjs</code> script, generated for other mods' materials at run
+    time by a <code>compat/Generated*</code> class, and the two halves kept in step by hand
+    because nothing checks them.
+</p>
+
+<ul>
+    <li><strong>It has to earn its place under the utility rule</strong> &mdash;
+        <a href="philosophy.html#utility-not-decoration">nothing this mod adds may be purely
+        aesthetic except breeding</a> &mdash; and a block that pens a horse no better than a
+        fence does not. Both of its utilities fall out of the same physical fact, which is a
+        good sign they are the right ones. <strong>Bars are see-through</strong>, so a stalled
+        horse still counts its herd and stays settled where a solid wall would isolate it. And
+        <strong>bars are reachable</strong>, so you can groom, feed and lead a horse through
+        them without opening the gate.</li>
+    <li><strong>The herd half is the interesting one.</strong> It is a second consumer for a
+        herd computation that has none, and it makes stable <em>layout</em> matter &mdash; the
+        first time a block this mod adds cares where it sits relative to another.</li>
+    <li><strong>It makes the jump bake cache worth doing.</strong>
+        <code>JumpModel.Unbaked.bake</code> already loops every material once per blockstate
+        variant. A third family on the same pattern is the point at which that stops being
+        wasteful and starts being the cost &mdash; a cache keyed on (model id, rotation), as the
+        standards row in the table above already argues on its own grounds.</li>
+</ul>
+
+<p class="muted">
+    From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>,
+    whose <code>BlockHorizontalBars</code> is the shape &mdash; connecting, waterloggable, and
+    with no gameplay attached to it whatever.
+</p>
+
 <h3 id="callable-horses">Callable horses &mdash; what is left after the ender whistle</h3>
 
 <p>
@@ -708,12 +743,94 @@
     <li><strong>Being led on a lead counts.</strong> Walking a leashed horse is taking it for a
         walk &mdash; a small per-tick trickle while <code>isLeashed()</code>, the holder is the
         owner, and both are moving, capped by the daily limit like everything else.</li>
-    <li><strong>Flavour interactions</strong> &mdash; petting, brushing, cleaning. Cheap if
-        animation-only: right-click with an empty hand (or a <code>brush</code> item) plays a
-        short interaction and gives a little bond, and <strong>brushing heals</strong> a small
-        amount &mdash; a second route through the healing gate, or exempt from it the way
-        hand-feeding is. A brush is one more line in the crafting economy.</li>
+    <li><strong>Flavour interactions</strong> &mdash; petting and cleaning. Cheap if
+        animation-only: right-click with an empty hand plays a short interaction and gives a
+        little bond. <strong>Brushing is no longer one of these.</strong> It grew into
+        <a href="#grooming-tool">the grooming tool</a> below, which replaces shears outright
+        rather than sitting beside them; whether grooming also <em>heals</em> a small amount
+        &mdash; a second route through the healing gate, or exempt from it the way hand-feeding
+        is &mdash; is still open and belongs with that section.</li>
 </ul>
+
+<h3 id="grooming-tool">A grooming tool, tiered &mdash; and shears stop working on a horse</h3>
+
+<p>
+    Grooming is built, and it is <code>minecraft:shears</code>.
+    <code>server/HorseShearHandler</code> gives an adult horse 1&ndash;3
+    <a href="item-horse-hair.html">horse hair</a> and <strong>+2 bond</strong> once per
+    Minecraft day, with a brush sound, heart particles and a message that already calls it
+    grooming rather than shearing &mdash; the dressing was changed on 2026-09-13, and the
+    mechanic never was shearing. <strong>What is missing is the tool.</strong> The verb reads as
+    care and the item in your hand is a pair of blades.
+</p>
+
+<ul>
+    <li><strong>A grooming tool replaces shears outright</strong> &mdash; not a better path
+        beside them. Shears on a horse do nothing, and the one verb has one item. Anything less
+        leaves the blades in the game as the beginner's grooming tool, which is the thing being
+        fixed.</li>
+    <li><strong>One verb, tiered by material</strong>, the way tack tiers are already scoped
+        rather than the way a six-tool roster would be. A better tool grooms for <strong>more
+        bond and a shorter cooldown</strong>. The hair yield stays 1&ndash;3 at every tier, so
+        grooming never turns into a farming action and the bond stays the reason to do it.</li>
+    <li><strong>The top tier grooms the whole herd at once.</strong> That is the ladder's
+        destination, and it is the only rung that does something the lower ones cannot. It also
+        gives the herd computation a <em>consumer</em> &mdash; the Herds list below records that
+        it has none today, so this closes a listed gap rather than adding a system beside
+        it.</li>
+    <li><strong>The contract is wider than the handler.</strong>
+        <code>ProgressTask.SHEAR_HORSE</code> and its advancement
+        <code>husbandry/shear_horse.json</code> are both named for the old item, so a rename
+        means <code>bake-advancements.mjs</code> and then
+        <code>check-progress-tasks.mjs</code>. The <a href="item-vet-kit.html">vet kit</a>
+        recipe takes shears as an ingredient and is unaffected &mdash; shears keep every use
+        they have that is not a horse.</li>
+</ul>
+
+<p class="muted">
+    The six-tool roster &mdash; dandy brush, body brush, rubber and metal curry combs, hoof
+    pick, sponge &mdash; came from
+    <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a> and
+    was <strong>deliberately not taken</strong>. Six tools only earn their keep against a
+    per-horse condition that decays, and a horse that suffers for going unbrushed is exactly the
+    punishing husbandry <a href="philosophy.html">philosophy</a> rules out. The material ladder
+    is what survived of it.
+</p>
+
+<h3 id="ground-work">Ground work &mdash; a halter, a lead and a lunge line</h3>
+
+<p>
+    <strong>Bond you build without riding.</strong> Clip a lunge line to a haltered horse and it
+    works a circle around you; bond accrues on
+    <a href="horse-care.html">the existing slow tick</a>, capped by the same daily limit as
+    everything else. The point is the horses you cannot or will not ride &mdash; a foal, one
+    carrying a <a href="horse-body.html">disorder</a>, one you have not saddled &mdash; which
+    today have no bond source but hand-feeding.
+</p>
+
+<ul>
+    <li><strong>The halter is a slot</strong> and belongs to
+        <a href="#accessories-slots">the accessories roster</a>, where it is listed. What lives
+        here is what having one lets you do.</li>
+    <li><strong>The lead is vanilla's.</strong> No new item: <code>isLeashed()</code> already
+        drives the walking-bond bullet above, and lungeing is that same relationship held
+        still.</li>
+    <li><strong>The lunge line is the one new item, and the mechanic is the work.</strong> A
+        horse circling a fixed point is movement nothing in the mod does, and it has to yield to
+        being ridden, to fleeing and to the herd goals rather than fight them. That is a
+        priority in the goal selector, so
+        <a href="behaviour-hierarchy.html">the behaviour hierarchy</a> and its bake are part of
+        the contract.</li>
+    <li><strong>Riding crop, lunge whip and driving whip are skipped.</strong> They are
+        implements for striking a horse to make it go, and the care layer is built on the
+        opposite premise. Recorded here so nobody re-proposes them from the same source.</li>
+</ul>
+
+<p class="muted">
+    From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>,
+    which shipped a halter, a lead and a lunge line in sixteen colours each, with no behaviour
+    attached to any of them.
+</p>
 
 <h3>Herds</h3>
 
@@ -1320,7 +1437,7 @@
 <h3 id="accessories-slots">The slot roster</h3>
 
 <p>
-    The screen grows from two slots to <strong>fourteen</strong>. Asked for explicitly, and
+    The screen grows from two slots to <strong>fifteen</strong>. Asked for explicitly, and
     listed here because the count is what decides the architecture rather than the art:
 </p>
 
@@ -1329,6 +1446,7 @@
 <thead><tr><th>Slot</th><th>Notes</th></tr></thead>
 <tbody>
 <tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. <strong>The bridle is the minimum tack required to control a horse</strong> &mdash; which is a real gameplay rule and not a slot, and it has to reckon with <code>BarebackSteeringHandler</code>'s phantom saddle, which writes the saddle slot every tick.</td></tr>
+<tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
 <tr><td><strong>Saddle pad</strong></td><td>Designed already &mdash; <a href="#equestrian-bench">the banner-cut pad</a>.</td></tr>
 <tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
@@ -1340,7 +1458,7 @@
 </div>
 
 <p>
-    <strong>Fourteen slots cannot be fourteen <code>EquipmentSlot</code>s</strong>, and this is
+    <strong>Fifteen slots cannot be fifteen <code>EquipmentSlot</code>s</strong>, and this is
     the load-bearing constraint the whole system is shaped by:
     <code>EquipmentSlot</code> has exactly two animal entries, <code>BODY</code> and
     <code>SADDLE</code>, and <code>EquipmentClientInfo.LayerType</code> is not extensible. So
@@ -1356,11 +1474,11 @@
     <code>entity/HorseTackSlot</code> is an enum of exactly two constants &mdash;
     <code>SADDLE</code> and <code>ARMOUR</code> &mdash; whose own documentation says the shape is
     there for later and names <em>&ldquo;a bridle, a blanket and shoes&rdquo;</em> as the obvious
-    next ones. The screen that draws them is ours rather than vanilla's
+    next ones &mdash; and a halter is a bridle's near neighbour. The screen that draws them is ours rather than vanilla's
     (<code>HorseInfoScreen.drawTackSlot</code>, reached by the small <strong>i</strong> button
     <code>HorseScreenHooks</code> adds beside vanilla's horse inventory), and clicks already
     round-trip through <code>TackSlotPayload</code>. <strong>So the roster is this enum growing
-    by twelve, and the screen it feeds</strong> &mdash; which is a much smaller statement of the
+    by thirteen, and the screen it feeds</strong> &mdash; which is a much smaller statement of the
     work than fourteen new systems, and is the reason to do it as one change.
 </p>
 
@@ -2014,12 +2132,26 @@
     harvest, which is a different question and is why they appear below anyway.
 </p>
 
+<p class="muted">
+    <strong><a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply
+    Equine</a> was read exhaustively on 2026-09-21 and its row is gone.</strong> It is an
+    abandoned Minecraft 1.15.2 mod that never shipped a horse entity &mdash; 197 items, three
+    blocks, no recipes, and a &ldquo;grooming system&rdquo; that is one particle call behind one
+    of the 197 &mdash; so it needs no compatibility row and the harvest is ideas only. What was
+    taken: <a href="#grooming-tool">the grooming tool</a>,
+    <a href="#ground-work">ground work</a>, <a href="#stall-bars">stall bars</a> and the halter
+    on <a href="#accessories-slots">the slot roster</a>. What was rejected is recorded in each,
+    except the <strong>stable-mucking loop</strong> &mdash; muck rake, layered shavings block,
+    thatch block &mdash; which was skipped outright on the same grounds as the six-tool grooming
+    roster: upkeep chores are the husbandry <a href="philosophy.html">philosophy</a> rules out,
+    and we already have grazing, hay bales and pens. The rosettes went to
+    <a href="#out-of-scope-competitions">out of scope</a>.
+</p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Mod</th><th>The question asked of it</th><th>Where the answer goes</th></tr></thead>
 <tbody>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a></td><td><strong>Walk through every part of it</strong> and mark each add / adapt / skip. The only one asked for exhaustively rather than for highlights, so it is the biggest single row and probably the most valuable.</td><td>Here, as sections</td></tr>
 
 <tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a></td><td>Troughs and salt licks are already lifted out as <a href="#troughs">their own section</a>. What is left: anything else that applies to horses, and <em>whether it adds a cart we could add to the roster</em>. Keep to carrot-not-stick &mdash; Animania's husbandry is the sort that punishes.</td><td>Here / <a href="carts.html">carts</a></td></tr>
 
@@ -2560,6 +2692,47 @@
     complete arguments rather than surveys. Padding a finished argument to match a word count is
     the opposite of the point.
 </p>
+
+<hr>
+
+<h2 id="out-of-scope">Deliberately out of scope &mdash; for an add-on, not for this mod</h2>
+
+<p>
+    <strong>This page is planned features and nothing else, so this section is the one exception
+    and is labelled as one.</strong> Each entry was proposed, considered, and placed
+    <em>outside</em> the base mod &mdash; not deferred, not a gap, not waiting on anything. It
+    is here so the next person to have the idea finds the answer instead of re-proposing it, and
+    so a section does not get built by somebody reading the request and not the verdict.
+</p>
+
+<h3 id="out-of-scope-competitions">Racing and competitions</h3>
+
+<p>
+    Shows, races, judging, and the ribbons that come out of them <strong>belong in a separate
+    add-on mod</strong>, attaching to a horse's <a href="breeding.html">pedigree</a> rather than
+    living in the base mod. (Owner, 2026-09-21, deciding what to do with the Simply Equine
+    rosettes.)
+</p>
+
+<ul>
+    <li><strong>The seam it would attach to already exists and is stable.</strong> A horse
+        carries a pedigree, a <a href="breeding.html">horse record</a> and
+        resolved-not-rolled stats; a competition layer reads those and writes a result back.
+        That is a clean boundary, and it is the reason this can be somebody else's jar rather
+        than a fork of ours.</li>
+    <li><strong>Why it is not base.</strong> A competition ladder is progression for the
+        <em>player</em>, and <a href="philosophy.html">breeding is this mod's progression</a>.
+        Building shows in would put a second, louder ladder beside the one the whole design is
+        shaped around &mdash; the same objection that sits on
+        <a href="#mod-survey">the survey row</a> for a horsemanship skill, and it should be
+        answered the same way if that one is ever picked up.</li>
+    <li><strong>What it takes with it.</strong> Simply Equine's twelve rosettes, Champion and
+        Reserve Champion among them. They were the obvious award item, and an award has no
+        utility without something to win it at &mdash; which
+        <a href="philosophy.html#utility-not-decoration">the utility rule</a> does not allow. So
+        they go here rather than onto <a href="#items">the item roster</a>, and an add-on that
+        adds the shows can add the ribbons in the same change.</li>
+</ul>
 
 <div class="page-foot">
     <div class="seealso">
