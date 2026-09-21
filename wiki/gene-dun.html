@@ -972,6 +972,62 @@ D    body  red = 1.00 &times; 0.93 = 0.930, black &times; 0.42
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p><code>d1</code> grew leg bars and a shoulder shadow on a <strong>5% take off visible red</strong>, so the first question is whether they can be seen on a chestnut; the regressions to fear are a <code>d1</code> black gaining bars and a bay&rsquo;s black points losing their protection.</p>
+</div>
+
+<h3 id="dun-d1-marks-0917"><code>d1</code> gets its bars and shoulder shadow (2026-09-17, NOT played)</h3>
+
+<p>
+    <a href="gene-dun.html#d1"><code>d1</code></a> drew the dorsal stripe alone; it now draws the
+    leg bars and the shoulder bar as well, at the same depths <code>D</code> uses. The whole
+    effect rides on a <strong>5% take off the visible red</strong>, so the one thing worth
+    finding out in-game is whether it is visible at all &mdash; the offline test proves the
+    pigment moves, not that an eye can see it.
+</p>
+<ul>
+    <li><strong>Is it actually visible?</strong> The real question. Spawn a <code>d1/d1</code>
+        <em>chestnut</em> &mdash; the base that shows it most, because all of its pigment is red
+        and none is locked up as a point &mdash; and look at the foreleg above the knee. If
+        nothing reads there at any angle, the honest outcome is that this needs more contrast
+        than 5% allows, and that belongs back in <a href="known-gaps.html">known gaps</a> rather
+        than being quietly called shipped.</li>
+    <li><strong>A <code>d1</code> black must be completely unchanged.</strong> Not "similar" &mdash;
+        <em>byte-identical</em>, which is what a real non-dun black looks like. A black
+        <code>d1</code> horse that has grown visible bars means the dilution has started taking
+        black off, and the non-dun half of the locus is broken.</li>
+    <li><strong>A bay's black points must not gain bars.</strong> The lower legs of a
+        <code>d1</code> bay are absolute points (<code>red = 0</code>), so they have nothing to
+        give up. Bars on the black part of the leg mean <code>alreadyAPoint</code> has stopped
+        protecting it.</li>
+    <li><strong>No <code>D</code> horse may look any different.</strong> A real dun's rendering
+        was not meant to move at all. The whole-horse golden confirms this offline &mdash; every
+        row that moved carries a <code>d1</code> and no <code>D</code> &mdash; so a visibly
+        changed dun in-game would mean the game path and the test path disagree.</li>
+    <li><strong>No face markings on a <code>d1</code>.</strong> The mask and cobwebbing stay
+        <code>D</code>-only. A cobwebbed forehead on a non-dun horse is the flag.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the faint bars
+        read as primitive markings rather than as dirt or noise, and whether a <code>d1</code>
+        bay reads as meaningfully different from a plain bay at riding distance.</li>
+</ul>
+
+
+<h3 id="open-older-gene-dun">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong><code>d1</code> paints nothing on a black</strong> (bake golden). A <code>d1</code> horse's mane has no pale edges.</li>
+    <li><strong>Dun's genome display.</strong> <code>GeneCodeDisplay</code> writes <code>nD</code> for <code>D/d2</code>, <code>nd1</code> for <code>d1/d2</code>, <code>d1d1</code> for <code>d1/d1</code>, and the seed jar tooltip names data-driven genes (the display bug fixed 2026-09-03, never re-checked). A unit test.</li>
+    <li><strong>About 18% of wild horses carry a dorsal stripe with no dilution</strong> (<code>d1</code> is 1 in 10 per allele), against about 8% duns. Readable off a founder-table test; frequency tuning is parked by the owner (<a href="known-gaps.html#gap-214">gap 214</a>).</li>
+    <li><strong>Dun's midtstol.</strong> A grullo and especially a bay dun have a near-black centre line in mane and tail, reading as one system with the dorsal stripe, and a Fjord herd shows it on nearly every horse. A red dun's line is faint but visible, and a cream-diluted dun is the showiest.</li>
+    <li><strong>Dun</strong> (<code>dun=D/d2</code> on three bases, and <code>d1/d2</code>). Grullo is blue-grey; leg bars are short uneven strokes at knee and hock that differ leg to leg; bay dun keeps black points with no grey cuff; black points (on every dark horse) keep strand detail; red dun is nearly a chestnut; the dorsal stripe runs withers to tail, not down the face; about half get a soft shoulder bar and two in five a face mask; <code>d1</code> is invisible on black; a dun foal reads as dun. <a href="gene-dun.html">Dun</a>.</li>
+    <li><strong><code>d1</code>, marked but not dun.</strong> <code>agouti=A/a dun=d1/d1</code> beside a plain bay: the same bay with a darker spine line. <code>extension=e/e dun=d1/d2</code>: a redder dorsal line nose to tail. On a plain black <code>d1/d1</code> must be indistinguishable from black. <code>D/d1</code> looks exactly like <code>D/d2</code>. <a href="gene-dun.html">Dun</a>.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-matp.html">MATP</a>

@@ -889,6 +889,16 @@
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>
+        The tack row became a nineteen-slot <strong>Gear</strong> tab that no client has
+        opened, so the saddle and barding still working through their new write path is the
+        regression to check first, and the seventeen empty slots must refuse an item rather
+        than eat one.
+    </p>
+</div>
+
 <p class="lede">
     <strong>Built on 2026-09-21, and not yet opened in a game.</strong> Ordered the way
     <a href="verification.html">to be verified</a> orders everything: what can be wrong
@@ -956,6 +966,28 @@
         pushes it over.</li>
 </ul>
 
+
+<h3 id="advancements-0920-tack">The tack slots move to the Gear tab (2026-09-20, NOT played)</h3>
+
+<p>
+    A plain right-click on any horse now opens this mod's screen
+    (<a href="breeding.html#advancements-0920-menu">the menu itself is checked on
+    breeding</a>), and the tack slots live on the <em>Gear</em> tab rather than Overview.
+    Not played.
+</p>
+
+<ul>
+    <li><strong>The tack slots.</strong> Hold a saddle, click the saddle slot: it goes on,
+        and the horse is rideable. Click it again empty-handed: it comes back to you. The
+        same with iron barding. Then try it with a <em>full</em> inventory &mdash; the
+        taken-off item should drop at your feet rather than vanish.</li>
+</ul>
+
+<h3 id="open-older-horse-gear">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>A tamed foal's inventory.</strong> Shift-right-click a tamed foal: its inventory opens with no saddle or armour slot, and <strong>i</strong> works from it. Holding a breeding carrot, a name tag, a transfer paper or shears, each still does its own thing.</li>
+</ul>
 </section>
 
 <div class="page-foot">

@@ -148,10 +148,60 @@
     <li>Nothing gates the area whistles or binding on bond.</li>
     <li>The far-chunk wait and the cross-dimension teleport are written against 26.1.2
         sources and <strong>not seen working</strong> &mdash; see
-        <a href="verification.html#ender-whistle">verification</a>.</li>
+        <a href="#verification">the verification tab</a>.</li>
     <li>A horse moved while its chunk was unloaded by something other than itself (a piston,
         another mod) is looked for where it was last seen, and not found.</li>
 </ul>
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; a bound whistle must also survive a reload holding its horse's name and crumble when that horse dies.</p>
+</div>
+
+<h3 id="evening-0913">The ender whistle (built the evening of 2026-09-13, NOT played)</h3>
+
+<p>
+    None of this has been in a game; everything below is covered by unit tests on the genetics side only.
+    <strong>Test kit batch 2</strong> is the ender whistle and the overworld half of
+    <a href="horse-care.html#evening-0913-band-life">band life</a>.
+</p>
+<ul>
+    <li><strong>Bind.</strong> Craft one (echo whistle + eye of ender + ender pearl) and
+        right-click a tamed horse you own: &ldquo;bound to &hellip; for good&rdquo;. Try an
+        untamed horse and someone else&rsquo;s: both refused. Right-click another horse with
+        the bound whistle: nothing rebinds.</li>
+    <li><strong>The tooltip names the horse.</strong> An unbound whistle says how to bind it; a
+        bound one says <em>Bound to: &lt;name&gt;</em>. The name rides the component, so check it
+        on a whistle in a chest with the horse in another dimension, and on one carried across a
+        <code>/reload</code> &mdash; a blank name falls back to eight characters of UUID, which
+        means the bind read no horse record.</li>
+    <li><strong>Far call &mdash; the one that can fail invisibly.</strong> Ride a thousand
+        blocks away (so the horse&rsquo;s chunk unloads), then blow it. Expect &ldquo;echoes a
+        long way off&rdquo; and the horse within five seconds. If it always says nothing
+        answered, the portal ticket or the entity-section wait is wrong.</li>
+    <li><strong>Near call.</strong> Walk thirty blocks away and blow it: the horse appears in
+        front of you.</li>
+    <li><strong>Across dimensions.</strong> Leave the horse in the overworld, go through a
+        Nether portal, blow it. Then the reverse. Check the horse that arrives still has its
+        name, coat and genome (open its information screen) &mdash; a cross-dimension teleport
+        re-creates the entity.</li>
+    <li><strong>Sold.</strong> Transfer the horse to a second account with papers; the first
+        account blowing the whistle should be told the horse no longer answers.</li>
+    <li><strong>Dust.</strong> Put the whistle in a chest, kill the horse, take the whistle out:
+        it crumbles with the message. Kill another while holding its whistle: crumbles within a
+        second.</li>
+</ul>
+
+<h3 id="open-older-item-whistles">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Basic, golden and echo whistles</strong> (16, 32, 64 blocks). Your tamed horses in range land beside you on the ground, spread out, with a chat count; an untamed horse, someone else's, or one being ridden is left alone, and a leashed one is unleashed. Stand 20 blocks off: basic says none, golden fetches it. <a href="item-whistles.html">Whistles</a>.</li>
+</ul>
+
 </section>
 
 <div class="page-foot">

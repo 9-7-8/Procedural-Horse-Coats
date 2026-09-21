@@ -161,6 +161,22 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Gap 241 re-asked, after the equine exclusion moved into <code>MobGroups</code> and fleeing moved onto the shared <code>temper</code> verb: a <code>Fnc/Fnc</code> horse must flee <code>minecraft:cow</code> and never its own band &mdash; and a <strong>silent no-op</strong> is the failure to watch for.</p>
+</div>
+
+<h3 id="open-older-gene-skittish">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>A shy horse still leaves its own band alone</strong> (yard: <code>Fnc/Fnc</code> with a band and two cows, row X). <strong>Pass:</strong> flee lines name <code>minecraft:cow</code> and never <code>minecraft:horse</code>. This is <a href="gene-skittish.html#verified-night-shy">gap 241</a> re-asked, because the equine exclusion moved out of the night handler into <code>MobGroups</code> when fleeing moved onto the shared <code>temper</code> verb &mdash; and because <code>temper</code> used to ignore <code>flee</code> outright, a silent no-op is the failure to watch for.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-aggression.html">Aggression</a>

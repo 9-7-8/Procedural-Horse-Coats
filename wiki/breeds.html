@@ -908,7 +908,7 @@
     step renders, the viewport sizes itself in both layouts without forcing the page wider than a phone, the herd and the
     example founder roll, random markings land in the file, export names an unnamed breed, a built-in breed imports, and
     the console is clean. An untouched step writes nothing. Whether the steps read clearly to a person is
-    <a href="verification.html#breeds-overhaul">verification &sect;0-CA</a>.
+    on <a href="#verification">the verification tab</a>.
 </p>
 
 <ul id="verified-switched-off">
@@ -928,7 +928,7 @@
         <li>that cross &times; Thoroughbred: 6, all <code>mixed</code>.</li>
     </ul>
     <em>Still open:</em> the cross <em>stats</em> (a Thoroughbred &times; Arabian foal still fast, one &times; Friesian
-    regressing), in <a href="verification.html#breeds">verification &sect;0e</a>.
+    regressing), in <a href="gene-b4galt7.html#breeds">verification &sect;0e</a>.
 </p>
 
 <p id="verified-herds">
@@ -940,7 +940,7 @@
     loaded; <code>HerdManager</code> flood-fills the connected clump and elects a deterministic
     lowest-UUID lead whose UUID seeds the breed draw, so every member lands on the same herd whatever
     order the handler reaches them. Still unwatched: the last horse of a very spread pack
-    (<a href="verification.html#breeds">verification &sect;0e</a>).
+    (<a href="gene-b4galt7.html#breeds">verification &sect;0e</a>).
 </p>
 
 <p id="verified-settings-folder">
@@ -950,6 +950,292 @@
     <code>breed-spawning.toml</code>. <code>run/config/</code> holds only FML's and NeoForge's own files, nothing of this
     mod's, so the old <code>config/horsegenetics/</code> location is not written.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, and a harem that should cap at four mares.</p>
+</div>
+
+<h3 id="new-breeds-0915">Five new breeds, and a country on every breed (2026-09-15, NOT played)</h3>
+
+<p>
+    The first five out of <code>intake/</code> &mdash; <strong>Anglo-Arabian, Australian Stock Horse, Azteca,
+    American Bashkir Curly, Chincoteague Pony</strong> &mdash; bringing the shipped count to 55. Every breed also
+    gained a <a href="breed-format.html"><code>country</code></a> token, backfilled across the 49 earthly ones.
+    Green on the bench: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>,
+    <code>BreedSpecParserTest</code>, <code>BreedFounderTest</code>, <code>check-links</code> and the designer boot
+    check. <strong>None of these five has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>They spawn at all, and in the right country.</strong> The cheapest check and the one that fails
+        silently: a breed file that loads but never heads a herd looks identical to one that does not exist. Ride
+        plains and savanna and read <code>latest.log</code> for a <code>[Breeds]</code> founder line naming each.
+        <strong>Pass:</strong> Australian Stock Horse and Azteca in savanna, Anglo-Arabian in plains or flower
+        forest, Bashkir Curly in taiga or grove. The Chincoteague is the awkward one &mdash; beach, stony shore
+        and mangrove swamp rarely have the grass and light a horse needs, so it may take a deliberate look.</li>
+    <li><strong>The Chincoteague reads as pinto from a distance.</strong> Tobiano is its signature and
+        <code>SW1</code> splash is heavy, so a band should be loudly white-marked with blue or part-blue eyes far
+        more often than a feral population. <strong>Pass:</strong> a visibly patterned pony herd, not a solid one.
+        This is the breed most likely to look wrong if the strain weights are off.</li>
+    <li><strong>The Bashkir Curly is <em>not</em> curly, on purpose.</strong> There is no hair-texture locus
+        (<a href="roadmap.html#natural-genes">roadmap &sect;11</a>), so it is a hardy saddle horse with the widest
+        colour pool of any breed here. <strong>Pass:</strong> a herd that looks assorted &mdash; chestnut, bay,
+        grey, dilutes, roan, pinto and the occasional leopard. If it looks uniform, the pool is not being read.</li>
+    <li><strong>The Azteca's two strains split about 9 to 1.</strong> Nine founders in ten solid Mexican-standard,
+        one in ten carrying Paint-derived tobiano, frame, sabino or splash. <strong>Pass:</strong> a patterned
+        Azteca is a rare and slightly surprising sight, not the normal one.</li>
+    <li><strong>Sizes land where the book says.</strong> The intake drafts' own size bands contradicted their
+        stated hand ranges and were re-derived, so this is the number most worth a spot check against
+        <a href="breeds.html#commonness">the table</a>. <strong>Pass:</strong> a Chincoteague reads 12.0&ndash;13.2 hh
+        on the info screen and an Anglo-Arabian 15.2&ndash;16.3.</li>
+    <li><strong>Nothing needs looking at for <code>country</code></strong> &mdash; it is data only, displayed
+        nowhere in game yet, and the mechanic it is for is not built.</li>
+</ul>
+
+<h3 id="new-breeds-0915b">Five more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h3>
+
+<p>
+    <strong>Anadolu, Barb, Boerperd, Budyonny, Chilean Corralero.</strong> Green on the bench:
+    <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
+    <code>check-parity</code>, <code>check-links</code> and the designer boot check. Every gene pool was
+    confirmed to survive the bake round-trip, which matters more than it sounds: a bad allele token is
+    <em>warned and dropped</em>, so a breed can load quietly missing a locus and every test still passes.
+    <strong>None of these five has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The Budyonny does not turn up wild &mdash; and that path has never run before.</strong> It is the
+        <em>first shipped breed to use the <code>spawn</code> checklist</em>
+        (<a href="breed-format.html#where">the format page</a>): <code>["cowboy", "spawn_egg", "stable"]</code>, no
+        <code>wild</code>. Every other breed has always taken the default of all four, so
+        <code>Breed.allows</code> being honoured at herd founding is asserted by nothing in a real world.
+        <strong>Pass:</strong> ride plains, meadow and forest at length and never see a Budyonny herd, while the
+        cowboy still offers one and the spawn egg still exists. <strong>Fail, and it is the interesting kind:</strong>
+        a wild Budyonny band means the checklist is being ignored, which would be quietly wrong for every future
+        breed that uses it.</li>
+    <li><strong>The other four head herds at all, in the right country.</strong> The cheapest check and the one that
+        fails silently &mdash; a breed file that loads but never leads a herd looks exactly like one that does not
+        exist. Read <code>latest.log</code> for a <code>[Breeds]</code> founder line naming each.
+        <strong>Pass:</strong> Anadolu in plains, meadow or savanna (it is <em>common</em>, so it should be the
+        easiest of the five by a distance); Barb in desert or savanna; Boerperd in savanna or plateau; Chilean
+        Corralero in plains or dry hills.</li>
+    <li><strong>A Barb band reads as a pale smudge.</strong> Grey is the whole point of the breed here &mdash; about
+        seven founders in ten grey out, and <em>nothing else varies</em>. <strong>Pass:</strong> a mostly-grey band
+        with a real minority of plain bay, black and chestnut, and no dilution, roan, pinto or leopard anywhere in
+        it. If the band looks colour-assorted, the pool is not being read.</li>
+    <li><strong>The Budyonny is chestnut about four times in five</strong> (<code>e</code> at 0.9), the rest bay or
+        brown with black scarce. <strong>Pass:</strong> a stable's worth of them is overwhelmingly red, with no
+        grey, cream, dun, pinto or leopard at all. The golden metallic sheen is <em>not</em> modelled, so do not
+        read a plain chestnut as a failure.</li>
+    <li><strong>The Boerperd is broad in colour but never patterned.</strong> Cream, grey, rare dun, roan, flaxen and
+        rabicano over any base &mdash; and solid-bodied by breed standard. <strong>Pass:</strong> buckskins,
+        palominos, roans and the odd dun, with <em>no</em> tobiano, sabino, frame or splash on any of them. It also
+        carries <code>DMRT3</code> gait deliberately, which cannot be seen yet
+        (<a href="roadmap.html">gait is unbuilt</a>) &mdash; nothing to check there.</li>
+    <li><strong>Sizes land where the table says.</strong> These were re-derived from the cited metric heights through
+        the real scale rather than taken from the drafts, so this is the number most worth a spot check against
+        <a href="breeds.html#commonness">the table</a>. <strong>Pass:</strong> an Anadolu reads 12.1&ndash;14.0 hh on
+        the info screen, a Budyonny 16.0&ndash;16.3, and a Chilean Corralero 13.2&ndash;14.2.</li>
+</ul>
+
+<h3 id="new-breeds-0915c">Five more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h3>
+
+<p>
+    <strong>Colorado Ranger, Criollo, Croatian Coldblood, Danubian, Domestic Mountain Pony.</strong>
+    Green on the bench: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>,
+    <code>BreedSpecParserTest</code>, <code>check-parity</code>, <code>check-links</code> and the
+    designer boot check. Every gene pool of all five was confirmed to survive the bake round-trip
+    pair by pair (20, 17, 11, 7 and 6 pools), because a bad allele token is <em>warned and
+    dropped</em> &mdash; a breed can load quietly missing a locus with every test still passing.
+    <strong>None of these five has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The Colorado Ranger's solid strain must be completely free of leopard &mdash; and
+        that path is new.</strong> It is the first shipped breed whose strain <em>forces loci wild</em>
+        (<code>lp/lp</code>, <code>n/n</code>, <code>n/n</code>) rather than naming a pool to draw from.
+        <strong>Pass:</strong> across a large sample, about 11 founders in 20 show no leopard character
+        at all &mdash; no spots, no blanket, no varnish &mdash; and the other 9 do.
+        <strong>Fail, and it is the interesting kind:</strong> any spotting on a solid-strain founder
+        means a forced-wild pool inside a strain is not being honoured, which would be quietly wrong
+        for every future breed that tries it.</li>
+    <li><strong>A manchado foal is now reachable from a breed.</strong> The Criollo is the
+        <em>first breed ever to name <a href="gene-manchado.html">manchado</a></em>, at carriers only
+        (6%, a design call &mdash; there is no test to measure). No founder should ever show it.
+        <strong>Pass:</strong> no manchado on any wild Criollo, and a <code>ma/Ma</code> &times;
+        <code>ma/Ma</code> pair eventually throws a foal with the dorsal white sheet, the rounded
+        base-colour islands and a dark head and legs. This is the only route to that pattern besides
+        the wild founder table.</li>
+    <li><strong>Two more breeds that never run wild.</strong> The Croatian Coldblood and the Danubian
+        are the second and third to use the <code>spawn</code> checklist after the Budyonny
+        (<code>["cowboy", "spawn_egg", "stable"]</code>). <strong>Pass:</strong> ride plains, meadow,
+        river, swamp and forest at length and never see a herd of either, while the cowboy still sells
+        one and the eggs still exist.</li>
+    <li><strong>Does a dark-skewed shade pool actually read as dark bay?</strong> The Domestic Mountain
+        Pony is the test case for standing <a href="gene-agouti.html">shade</a> in for the dropped
+        <code>At</code> allele: its study reports dark bay 44% and black 36%, so <code>a/a</code>
+        carries the black and the shade pool is deliberately skewed to <code>ShD</code> instead of the
+        house-standard spread. <strong>Pass:</strong> a band that reads as black and very dark brown,
+        with ordinary bright bay a clear minority. If the <code>A_</code> horses look like ordinary
+        bays, shade is not doing the job the agouti call assumed it would, and that conclusion matters
+        well beyond this breed.</li>
+    <li><strong>The Criollo should be visibly a dun breed.</strong> Seven founders in ten are the
+        traditional strain, where dun dominates and a double copy is ordinary.
+        <strong>Pass:</strong> most of a band is bay dun, red dun or grullo with a dorsal stripe and
+        leg barring; the rest is plainer. <strong>Also worth a look:</strong> the Domestic Mountain
+        Pony's dun rate is an <em>honest disagreement with its own source</em> &mdash; <code>D</code>
+        at 0.09 makes about 17% of founders dun where the study classified only 8% that way by eye.
+        The allele frequency was followed. If duns look too frequent in play, that is the call to
+        revisit, not a bug.</li>
+    <li><strong>Sizes were re-derived, not taken from the drafts</strong> &mdash; and then
+        corrected once. The drafts' own scale numbers contradicted their own stated heights in
+        all five cases, so each band came from the cited metric or hand heights instead.
+        <strong>The curve is not linear:</strong> below the 15.75&nbsp;hh baseline a scale is
+        just <code>hands / 15.75</code>, but above it the part over 1.0 is <em>tripled</em>
+        (<code>BreedStatCurve.BIG_GAMMA</code>), so a draught horse visibly towers. Three of
+        these five were first written with the linear rule and were a third of a hand short at
+        the top. That prompted an audit of <em>every</em> breed, which found the same mistake in
+        four breeds shipped earlier &mdash; the Anglo-Arabian, Australian Stock Horse, Azteca and
+        Budyonny were all shorter than their own table row claimed &mdash; so seven files were
+        corrected and every height string on both breed pages was regenerated from the files
+        (<a href="known-gaps.html#gap-257">gap 257</a>). <strong>Pass:</strong> a Domestic
+        Mountain Pony reads
+        12.3&ndash;14.1 hh, a Croatian Coldblood 14.3&ndash;16.1 hh and a Colorado Ranger
+        14.2&ndash;16.0 hh against <a href="breeds.html#commonness">the table</a>. Nothing
+        asserts this in a test, which is why it is here.</li>
+</ul>
+
+<div class="note">
+    <span class="label">One intake file did not hold the breed its name promised</span>
+    <p>
+        <code>intake/Croatian warmblood.md</code> contained a complete, well-sourced draft of the
+        <strong>Croatian Coldblood</strong> (<i>Hrvatski hladnokrvnjak</i>), not the Croatian
+        Warmblood &mdash; it names the coldblood throughout and contrasts it with the Posavac. The
+        coldblood is what shipped, and the file was consumed. <strong>If a Croatian Warmblood was
+        wanted, no draft for it has ever arrived</strong> and one would need re-supplying. Recorded
+        here because deleting the file removed the only trace of that queue entry.
+    </p>
+</div>
+
+
+<h3 id="after-1057-magical-herds">Magical herds in the running build (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. Each change was type-checked against the running client's
+    classpath when it was written. What is left below is looking at it.
+</p>
+<ul>
+    <li><strong>Magical herds</strong> (<a href="breeds.html#magical-herds">breeds</a>). Set <code>[magical_herds] chance = 1.0</code> in
+        <code>phc/breed-spawning.toml</code> and ride into a plains biome. <strong>Pass:</strong> every new wild herd reads
+        <em>Magical (Breed)</em>, every member of one herd shows the same magical gene, and the log names it
+        (<code>[Breeds] a magical herd of</code>). Breed a Magical horse to its own breed: the foal is Magical. Breed it to another breed: an ordinary cross. Then set
+        <code>enabled = false</code>: no more magical herds. Put <code>chance</code> back to 0.05 afterwards.</li>
+</ul>
+
+<h3 id="evening-0913-breed-designer">Breed designer: two steps where Temper was (2026-09-13, NOT checked)</h3>
+
+<ul>
+    <li><strong>Day &amp; night habits</strong> and <strong>Fighting &amp; defence</strong>
+        replace Temper, and nothing that used to be offered there is missing from both. (A
+        page check, not a game one.)</li>
+</ul>
+
+<h3 id="herd-shape-0915">A breed's herd shape, and fertility in the breed designer (2026-09-15, built after the 16:11 run, NOT played)</h3>
+
+<p>
+    A breed may now say how its wild herds are founded &mdash; the share founded as bachelor bands, and how many
+    stallions and mares each kind of band wants (<a href="breed-format.html#herd-shape"><code>herd</code></a>,
+    <code>BreedHerd</code>). <strong>This changes how every wild herd in the world is put together</strong>, so it is
+    first below. Green on the bench: <code>:neoforge-26.1.2:build</code>, creator parity (7169 checks),
+    <code>check-links</code>, the designer boot check, <code>check-ai.mjs</code> (35 checks, including that the breed
+    designer boots with a clean console), and the breed test classes &mdash; <code>BreedHerdTest</code>,
+    <code>BreedSpecParserTest</code>, <code>BreedFilesTest</code>, <code>BreedSpawnSettingsTest</code>. None of that is
+    a game.
+    <strong>The <code>BreedHerdTest</code> half of that claim did not survive the next day:</strong> the 2026-09-17
+    harem cap made one of its cases red, and it stayed red until 2026-09-18 because nothing runs the suite
+    (<a href="known-gaps.html#gap-269">gap 269</a>). Green again, and the cases below are the ones that were never a
+    bench check anyway.
+</p>
+<ul>
+    <li><strong>Wild herds still form at all.</strong> The first thing to lose if this is wrong, and it fails
+        invisibly: sex assignment moved from one-horse-at-a-time to an assignment made over the whole clump from the
+        lead's seed, so a disagreement between members would show as <em>two herds where there should be one</em>, or
+        horses with no herd. Ride into plains and read <code>latest.log</code>: every member of a pack should share one
+        <code>[Breeds]</code> founder line's breed, and the inspect panel should show the same herd for all of them.
+        <strong>Pass:</strong> packs of 2&ndash;6, one herd each, and one stallion in a family band up to five adults
+        &mdash; at six, the adult over the four-mare cap is a second stallion, not a mare.</li>
+    <li><strong>A harem fills to four mares and then stops, and the wild is not all mares.</strong> Joining an
+        existing traditional band made a horse a mare unconditionally until 2026-09-17, so this needs a count in a
+        world rather than a look at one band. Count grown horses across several separate groups in fresh land, then
+        do it again where you have been playing a long time. <strong>Pass:</strong> both sexes in roughly comparable
+        numbers once the groups are added together, no traditional band holding more than four mares, and the
+        long-played area no worse than the fresh one.</li>
+    <li><strong>A bachelor band is still all male, at any size.</strong> The clamp that guarantees it is unit-tested,
+        but not in a world. <strong>Pass:</strong> no mare ever appears in a band the log founded as
+        <code>BACHELOR</code>.</li>
+    <li><strong>A breed's own composition is honoured.</strong> Nothing shipped sets <code>herd</code> &mdash; all 50
+        files are deliberately unchanged &mdash; so this needs a drop-in. Put a breed in
+        <code>phc/breeds/</code> with <code>"herd": {"bachelor_chance": 1.0}</code> and another with
+        <code>{"traditional": {"stallions": 1, "mares": [3, 4]}}</code>, in a biome you can find.
+        <strong>Pass:</strong> the first is only ever found as stallion bands; the second's family bands run to three or
+        four mares whenever the pack is big enough. Remember the limit: a pack of three cannot hold four mares, because
+        the game spawns the pack before the breed is chosen.</li>
+    <li><strong>The breed designer's additions need none of your time</strong>
+        (<a href="breed-designer/index.html">breed designer</a>) &mdash; recorded here only so it is clear they were
+        not skipped. A <strong>Breeding</strong> step now carries fertility, which was reachable on no step at all
+        before; <strong>Where it lives</strong> has the herd controls; <strong>Price and kind</strong> has a
+        magical-herds checkbox, which is a fixed bug as much as a control (a breed file saying it has no magical herds
+        used to lose that silently on load-and-save). A headless run of the page covered the mechanics &mdash; 17
+        checks: it boots clean, the Breeding step is in the list and offers fertility, all three changed steps render,
+        the <code>herd</code> block it writes is <strong>accepted by the game's own parser compiled to wasm</strong> and
+        survives a round trip exactly, a breed left at its defaults writes no <code>herd</code> or
+        <code>magical_variant</code> key at all, and a share above 1 or a negative count is refused. What is left is
+        whether the boxes <em>read</em> well, which is a look whenever you are next in there.</li>
+</ul>
+
+<h3 id="open-older-breeds">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Choosing which breeds spawn</strong> (tester guide, <em>Choosing which breeds spawn</em>; <a href="breeds.html#world-settings">breeds</a>). Set <code>shipped_breeds_enabled = false</code> and <code>feral_mixed.enabled = false</code>, and drop in one dark-forest breed. <strong>Pass:</strong> plains have no horses and dark forests have only that breed, and a refused lone horse logs <code>[Breeds] wild horse at ... not spawned</code>. <code>feral_mixed.herd_weight = 100</code> makes most herds Feral Mixed. A cowboy never sells a switched-off breed (the dev run has the Morgan off). Mods &rarr; Horse Genetics &rarr; Config still opens all three files.</li>
+    <li><strong>H &rarr; Breeds &rarr; Open breeds folder</strong> opens the OS file browser on <code>phc/breeds/</code>. <code>Util.getPlatform().openPath</code> is unverified on Windows.</li>
+    <li><strong>Two extreme breeds cross into a spread.</strong> A Percheron &times; Falabella's foals range from large to small by the copies they drew. A wild Percheron is still huge and a Thoroughbred still fast. See <a href="breeds.html#founder-only">breeds</a>.</li>
+    <li><strong>Dhampir in the overworld.</strong> A band spawns only at night on open grassland: seal brown with red eyes, about one in ten white. A wild-spawned white one runs for shade at sunrise without a chunk reload, and a seal brown does not burn and eats hay.</li>
+    <li><strong>A Friesian &times; Feral Mixed foal reads plain <em>Mixed</em></strong>, not a cross, and the egg's Breed dropdown lists Feral Mixed. <a href="breeds.html">Breeds</a>.</li>
+    <li><strong>Flying through fresh chunks does not crash the server</strong> (the <code>DistanceManager.runAllUpdates</code> NPE). Fly a long way near many herds, draft-heavy biomes especially. <a href="known-gaps.html#gap-31">Gap 31</a>.</li>
+    <li><strong>Wild herds hold together.</strong> A spawned pack stays clumped and wanders after one horse, and the last horse of a widely spread pack joins it rather than falling out as a lone Feral Mixed.</li>
+    <li><strong>Cross stats.</strong> A Thoroughbred &times; Arabian foal is still fast; a Thoroughbred &times; Friesian foal regresses toward ordinary speed. The labels themselves are <a href="breeds.html#verified-cross-labels">verified</a>.</li>
+    <li><strong>No stray magic on a breed</strong> (unit test to write; <a href="breeds.html#magic">breeds</a>). Roll every breed's founders through <code>BreedFounder.roll</code> and assert no magical coat, particle or ability locus the breed does not list. <code>BreedFounderTest</code> only checks named loci today. The Breeds tab's plates are the same founder rolls, so this covers them too. Only Feral Mixed may carry random magic.</li>
+    <li><strong>A breed cannot make a back-half Cleave</strong> (unit test). <code>BreedFounder</code> forces a named modifier wild unless the breed lists it, so every breed horse should be <code>cleave_side=n/n</code>; the same holds for accretion field. Assert it over the breed roster.</li>
+    <li><strong>Two seal-brown Dhampirs throw a white foal about one time in four</strong>, and the whole white animal rarely (yard RATIO pen). A seal brown's health is about twice an ordinary horse's, its speed about a quarter higher and its jump half again. A white one's are triple, half again and double.</li>
+    <li><strong>The <a href="breed-designer/">breed designer</a>, by a person</strong> (the mechanics run headlessly, <a href="breeds.html#verified-breed-designer">verified</a>). Walk all sixteen steps and note anything confusing. Adding champagne or KIT/splash shows amber or blue eyes in the eye strip, naming the gene. Colour search (&ldquo;orange&rdquo;, a hex) lists only colourable genes and locks one. A range under a gene keeps the preview inside it.</li>
+    <li><strong>More breed designer checks</strong>: <strong>Chosen so far</strong> jumps back to any step. <strong>Reroll example founder</strong> and the six founders show only picked traits. The magical-marking filters from <code>marking-facts.json</code> agree with your eye (&ldquo;covers at most 5%&rdquo; is small; &ldquo;Tail, and nowhere else&rdquo; is tail genes). A refresh mid-breed comes back where you left it. An underlined gene name shows its hover picture, as the horse designer's canvas does.</li>
+    <li><strong>The Breeds tab entry</strong>: the plate horse, the biome list and body scores, and whether &ldquo;known to carry&rdquo; naming only discovered genes reads as informative or broken.</li>
+    <li><strong>Breeds read on the body.</strong> Percheron, Shire and Clydesdale tower over the player, a Quarter Horse looks ordinary, Falabella and Shetland are tiny, and Thoroughbred herds look faster than draft herds.</li>
+</ul>
+
+<h3 id="tester-fixes-0917-wild-sexes">Wild horses come in both sexes, fixed from the testers' first day on 0.5.004 (2026-09-17, NOT played)</h3>
+
+<p>
+    Reported from outside, and fixed against a report rather than against a play session here
+    &mdash; so it wants confirming by the person who found it.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>Wild horses come in both sexes</strong> (tester guide,
+        <em><a href="for-testers.html#t-wild-sexes">Wild horses come in both sexes</a></em>;
+        <a href="breeds.html#bands">bands</a>). Counted across groups, not within one band
+        &mdash; a single band is <em>meant</em> to be one stallion and a few mares, or else
+        all male. <strong>Pass:</strong> comparable totals overall, no traditional band
+        above four mares, and an area played in for a long time no worse than fresh land.
+        The old rule only went wrong for horses <em>joining</em> a band, so a freshly
+        founded pack always looked fine &mdash; which is why this wants a long-played
+        world.</li>
+</ul>
+</section>
 
 </article>
 </main>

@@ -96,8 +96,46 @@
     now transforms in the player&rsquo;s hand, creative included. The genome string the tooltip showed
     omitted the data-driven genes, a <code>GeneCodeDisplay</code> display bug rather than bad stored
     data, fixed 2026-09-03 and not re-checked. The breeding-mode gate and impregnation are unverified
-    (<a href="verification.html#seed-jar">verification item 16</a>).
+    (<a href="#verification">the verification tab</a>).
 </p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>A whole stud pen sits built and unplayed in row P west &mdash; the risks are a jar foal whose <strong>pedigree never records the stud as sire</strong>, heat-state refusals firing the wrong way round, and a cross-breed foal labelled plain Mixed instead of naming its cross.</p>
+</div>
+
+<h3 id="fertility-jar-stud">Row P west, the jar stud (built 2026-09-13, NOT played)</h3>
+
+<p>
+    One leg of the <a href="fertility.html#fertility">breeding and fertility audit</a>, in the test yard:
+    <strong>Row P west, JAR STUD and JAR &amp; KIT BENCH</strong>. The stud has his own
+    pen, two blocks from the mares', so he cannot breed them the ordinary way. All three
+    arrive untamed; tame them with the chest's stick.
+</p>
+<ul>
+    <li>Feed the stud a stabilizer carrot, then a golden carrot, and fill a jar. The tooltip
+        says <em>Carries 1 carrot effect</em>.</li>
+    <li>Use the jar on OUT OF HEAT: refused, jar kept.</li>
+    <li>Use it on IN HEAT: <em>is pregnant</em> or <em>didn't take</em>.</li>
+    <li>Clock the other mare into heat and use a second jar.</li>
+    <li>When that foal is born, its Family tab shows the stud as sire (the pedigree edge),
+        and its generation counts his.</li>
+    <li>Finally, geld him with the vet's kit &mdash; that step is on
+        <a href="item-vet-kit.html#fertility-gelding">the vet's kit</a>, and a new jar is refused
+        afterwards.</li>
+</ul>
+
+<h3 id="open-older-item-seed-jars">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Seed-jar breed labels.</strong> A jar foal from a pure mare and a pure sire of another breed reads as their cross, and one from a feral donor reads plain Mixed.</li>
+    <li><strong>Seed jar collection refusals.</strong> An unfed stallion refuses (&ldquo;must be in breeding mode&rdquo;, <code>isInLove</code>) with no mount, and a fed one stops being in love once collected. An empty jar on a mare, or a filled jar on a stallion or foal, names the horse and does nothing. A filled jar keeps its sire across a reload and a chest. The mare side is <a href="fertility.html#fertility-yard">JAR STUD</a>; collection is <a href="item-seed-jars.html#verified-collect">verified</a>.</li>
+</ul>
 
 </section>
 

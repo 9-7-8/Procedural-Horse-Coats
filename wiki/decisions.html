@@ -269,6 +269,27 @@
 <h3 id="settled-authoring">Authoring and the tools</h3>
 
 <ul>
+    <li id="settled-verification-generated"><strong>Verification is written on the page for
+        the thing, and <a href="verification.html">the verification page</a> is generated
+        from nothing else.</strong> (Owner, 2026-09-21.) A checklist goes on a
+        <strong>Verification tab</strong> of the subject's own page, opening with one
+        sentence in a summary box;
+        <code>wiki/tools/bake-verification-index.mjs</code> harvests those sentences into an
+        alphabetical index and <strong>nothing is ever hand-written onto that page</strong>.
+        A verified item does not get ticked, it <strong>moves</strong> &mdash; off the
+        Verification tab and onto the <strong>Coding</strong> tab beside it, as what was
+        seen, when, and on what evidence &mdash; so a page whose last check is confirmed
+        loses the tab and leaves the index by itself.
+        <strong>Why, and it is the second time this exact thing has been learned:</strong>
+        the page had reached 3&nbsp;700 lines and sixty sections, which is a wall nobody
+        reads to the bottom of, and its entries had outlived the memory of what they were
+        about &mdash; sixty-seven of its anchors were empty stubs that other pages still
+        linked to, so the links resolved and told the reader nothing. The same failure
+        emptied <code>CLAUDE.md</code> and the roadmap before it. A checklist kept beside
+        the thing it tests is read by whoever opens that page and deleted by whoever
+        confirms it; gathered into one document it is read by nobody and deleted by nobody.
+        If a check has no page to live on, <em>that is a missing page</em>, not a reason to
+        write it on the index.</li>
     <li><strong><code>AbstractPatternGene</code> will not be written from an entry, only from
         duplication.</strong> It was promised as absorbing &ldquo;the <code>BodyNoise</code>
         boilerplate and the pull-N-knobs-off-the-expressing-copy helper&rdquo;. Neither exists

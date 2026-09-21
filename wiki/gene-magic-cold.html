@@ -106,6 +106,32 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Built and running since 2026-09-15 but never looked at: ride a tolerant and a sensitive horse past the snow line and confirm the speed or jump change <strong>begins within a few seconds of crossing</strong>, because the biome flags are only sampled on an interval.</p>
+</div>
+
+<h3 id="after-1057-cold">Cold tolerance in the running build (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. Each change was type-checked against the running client's
+    classpath when it was written. What is left below is looking at it. The heat half is on
+    <a href="gene-magic-heat.html#after-1057-heat">the heat page</a>.
+</p>
+<ul>
+    <li><strong>Cold tolerance.</strong> Spawn a tolerant and a sensitive <code>magic_cold</code> horse with the custom egg
+        and ride each onto a snowy biome and up a mountain past the snow line. <strong>Pass:</strong> the speed or jump
+        change starts within a few seconds of crossing (the flags are sampled on an interval) and stops on the way back,
+        tolerant up and sensitive down, and a plains horse is unchanged. The wild half: an Icelandic herd in the snow
+        should mostly be tolerant.</li>
+</ul>
+
+</section>
+
 </article>
 </main>
 </body>

@@ -695,6 +695,39 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Cream, pearl and champagne now draw from per-breed founder pools, so counting comes before looking: Andalusian herds should throw the odd classic pearl, <strong>no Belgian or Arabian should ever be cream</strong>, and the look-alike genotypes must still breed apart.</p>
+</div>
+
+<h3 id="after-1057-matp">MATP in the running build (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. The MATP change passed <code>CoatPipelineGoldenTest</code>,
+    <code>CoatBakeGoldenTest</code> and <code>GenotypeCatalogTest</code>. What is left below is looking at it.
+</p>
+<ul>
+    <li><strong>MATP founder rates</strong> (<a href="gene-matp.html#frequency-ordering">MATP</a>). <strong>Pass:</strong> Feral Mixed herds show cream horses often and classic pearls almost never.</li>
+    <li><strong>Every breed's MATP pool</strong> (<a href="gene-matp.html#breed-frequencies">the table</a>). <strong>Pass:</strong> a herd of Andalusians or Lusitanos
+        turns up the odd classic pearl and a Quarter Horse or Welsh herd plenty of palominos and buckskins. No Belgian, Dartmoor,
+        Knabstrupper, Arabian or other breed without a pool is ever cream. An American Cream Draft is gold champagne with amber eyes.</li>
+</ul>
+
+<h3 id="open-older-gene-matp">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The MATP look-alikes breed apart</strong> (unit test or yard RATIO pen). <code>Cr/Cr</code> passes cream to every foal and <code>Cr/sun</code> to half. <code>sun/N</code> and <code>sno/N</code> bake identical to <code>N/N</code>.</li>
+    <li><strong>Sunshine and snowdrop.</strong> A perlino, <code>sno/sno</code>, <code>Cr/sun</code> and <code>Cr/sno</code> look indistinguishable, and <code>sun/sun</code> reads as champagne with an amber eye. A sunshine chestnut is close to a cremello (<a href="known-gaps.html#gap-49">gap 49</a>) but no closer than a gold champagne.</li>
+    <li><strong>The default gradient and dilutions.</strong> Plain chestnut, bay and black read as the right horses and a black keeps its hair shading; single cream and pearl are told apart on a bay or black; champagne is a warm tan (gold) or chocolate (classic); a smoky black keeps its red; buckskin and amber champagne points read right. <a href="gene-matp.html">MATP</a>, <a href="gene-champagne.html">champagne</a>.</li>
+    <li><strong>MATP on the model.</strong> <code>Cr/N</code>, <code>Cr/Cr</code>, <code>prl/prl</code> and <code>Cr/prl</code>. The last should read as a double dilute, not a single cream; <code>prl/N</code> looks like <code>N/N</code>. <a href="gene-matp.html">MATP</a>.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="genetics-model.html#combinations">Alleles, combinations and expressions</a>

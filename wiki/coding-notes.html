@@ -1157,6 +1157,50 @@ done</code></pre>
     page; only reading the finished code against them found the bugs.
 </p>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Diagnostics are the half that can be wrong quietly: a jar install must stay silent in chat where the dev run is not, and F8&rsquo;s highlight must time out rather than crash &mdash; the rest is wiki chrome, including a phone search panel whose close has only ever been proven in emulation.</p>
+</div>
+
+<h3 id="open-older-coding-notes">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>F8's highlight turns off and times out without crashing</strong> (tester guide, <em>The F8 horse highlight does not crash the game</em>). <strong>Pass:</strong> the second press says <em>Horse highlight OFF</em>, and four minutes near a herd with a lead gives <em>Horse highlight timed out</em>. The lead's name goes back to white. <em>Horse highlight hit an error and switched itself off</em> means the guard caught something, so read the stack trace.</li>
+    <li><strong>Chat stays quiet</strong> (tester guide, <em>A normal game is quiet in chat</em>). <code>[coat]</code> lines go to the log only, except for a coat that came out bare white.</li>
+    <li><strong>A normal install is quiet in chat.</strong> In a jar install (not a dev run) no <code>[Cowboy]</code> or <code>[Equestrian]</code> lines reach chat, the log says <code>[Debug] chat+log diagnostics enabled=false</code>, and <code>debug.announce = true</code> brings them back. (The dev half is seen in every yard log.)</li>
+    <li><strong>Three wiki surfaces.</strong> <a href="paint-order.html">Paint order</a> lists every painting gene, highest first (the failure is the whole list missing); a gene page's punnett square is two parent pickers and four foals, including on <a href="gene-kit.html">KIT</a> and <a href="gene-cleave.html">Cleave</a>; the landing page's sections collapse, with the health genes shut by default.</li>
+    <li><strong>The view tabs, beyond what the tester guide covers.</strong> Switching tab re-filters the sidebar (Coding gains the project pages); a link to a section on another tab switches to it (flaxen's gameplay link to <code>#dosage</code>); a copied URL reopens on the same tab; <a href="gene-plod1.html">PLOD1</a> (no viewer) leads with its inheritance table; <a href="gene-suntouched.html">suntouched</a> and <a href="gene-waterborn.html">waterborn</a> show no broken table.</li>
+    <li><strong>The landing page's views and the search.</strong> The three view buttons change the hero; on Gameplay the modder and project sections vanish with their headings; Science lists only pages with a science tab plus the core pages, and a gene clicked from there opens on its science tab. Search <strong>flaxen</strong>: the flaxen page is first. Results carry the right tab chip and land scrolled to the section; note whether the first keystroke's index load (<a href="known-gaps.html#gap-90">gap 90</a>) is perceptibly slow.</li>
+</ul>
+
+<h3 id="phone-0918">The wiki on an actual phone (2026-09-18, checked in emulation only)</h3>
+
+<p>
+    Three phone reports were fixed or explained this session, and every one of them was
+    verified in <strong>headless Chrome at 390&times;844 with touch emulation</strong>, which
+    is not a phone. What emulation cannot see: a real fingertip, iOS&rsquo;s keyboard
+    behaviour, and a real mobile connection. Two of the four things to try on the device that
+    saw the problem are the search panel, below; the other two are the
+    <a href="ai-setup.html#phone-0918-ai-dialog">&times; on <em>Draft a breed with AI</em></a>
+    and the <a href="architecture.html#phone-0918-designer-boot">breed designer's boot</a>.
+</p>
+
+<ol>
+    <li><strong>The search panel closes.</strong> Open it from the sidebar button, then tap
+        <em>Esc</em>. It should go, and the page behind it should scroll again. Then reopen it
+        and tap the dimmed area outside the panel &mdash; that should close it too, and
+        <strong>must not navigate anywhere</strong>.</li>
+    <li><strong>The search returns results.</strong> Type a gene name. It was never actually
+        searching forever &mdash; it was never closing &mdash; but confirm the results arrive
+        rather than sitting on &ldquo;Searching&hellip;&rdquo;, which would be a separate and
+        genuinely new problem.</li>
+</ol>
+
+</section>
+
 </article>
 </main>
 </body>

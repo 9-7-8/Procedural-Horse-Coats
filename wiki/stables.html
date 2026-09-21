@@ -24,7 +24,7 @@
     <strong>each is somebody else&rsquo;s build</strong>, and the attributions below
     are the point of this page as much as the mechanics are.
     <strong>Built 2026-09-07, not play-tested</strong> &mdash; checklist in
-    <a href="verification.html#stables">verification &sect;0-AK</a>.
+    <a href="roadmap.html#stables">verification &sect;0-AK</a>.
 </p>
 
 <div class="note danger">
@@ -386,6 +386,29 @@
     queued as well as when it is filled, ungated by <a href="architecture.html#verified-debug-announce">debug.announce</a>.
     Not yet seen in a world: <a href="known-gaps.html#gap-136">gap 136</a>.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Generated stables fail at two ends nobody has watched &mdash; a building <strong>buried in the ground</strong> in a fresh world, and one that generates but never fills, where only the <code>[Stables] queued</code> and <code>filled</code> log lines say which half broke; each stable's horses must also carry the genes its entry promises.</p>
+</div>
+
+<h3 id="open-older-stables">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Stables sit on the ground in a new world</strong> (<a href="known-gaps.html#gap-147">gap 147</a>). Needs a fresh world. If one is still buried, try dropping <code>meadow</code> and <code>savanna_plateau</code> from the biome tag.</li>
+    <li><strong>A stable gets its horses</strong> (<a href="known-gaps.html#gap-136">gap 136</a>; the rotation fix is <a href="stables.html#verified-rotated-starts">recorded</a>, not seen). Find a generated stable, reload its chunk if empty, walk back. The log's <code>[Stables] queued</code> and <code>[Stables] filled … with N horse(s)</code> lines say which half broke.</li>
+    <li><strong>Where a stable's horses stand</strong> (<a href="known-gaps.html#gap-82">gap 82</a>): not in a corridor, a tack room or a wall.</li>
+    <li><strong>Each stable's horses carry what it promises.</strong> Open <kbd>i</kbd> on every horse in each of the three (<a href="stables.html">stables</a>). <strong>Pass:</strong> Horse Stable has seven (four outside, three in stalls), each with two rare-or-better natural genes and nothing magical; Stables is all Friesian, each with at least one homozygous magical trait (most exactly one); TM U Stable is all white-marking breeds with no painting magical gene.</li>
+    <li><strong>Arriving from the far side of TM U Stable</strong> (86 blocks across). <strong>Pass:</strong> the horses are there when you walk in, not appearing around you as its start chunk loads (<a href="known-gaps.html#gap-81">gap 81</a>).</li>
+    <li><strong>A datapack stable works.</strong> Drop in a fourth structure NBT with its JSON beside it, as <a href="stables.html">the page</a> promises ("two files and no Java"). <strong>Pass:</strong> it generates and fills. While there, say whether stable spacing makes them worth finding and findable.</li>
+    <li><strong>A stable JSON with no structure behind it is ignored</strong> (a <code>runServer</code> boot with such a drop-in). <strong>Pass:</strong> the server reaches <code>Done (</code> with at most a warning, no crash.</li>
+    <li><strong>The stables against their screenshots</strong> (linked on <a href="stables.html#the-three">stables</a>): stairs and slabs facing right (computed by hand from 1.12 data nibbles), whole doors, no floating or missing roof, no one-material-in-the-wrong-place (torches, signs, trapdoors, glass panes), and TM U Stable's saddle stands as barrels.</li>
+</ul>
+
+</section>
 
 </article>
 </main>

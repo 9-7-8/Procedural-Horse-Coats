@@ -271,6 +271,48 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Carts finally read pulling ability, which makes the parked questions askable: whether a 10 and a 1 feel like different animals, whether the step from 4 to 6 earns its <strong>second-rider threshold</strong>, and whether an uncapped <code>Traits.pull()</code> survives a bred line climbing past 10.</p>
+</div>
+
+<h3 id="pull-0918">Pulling ability, now that something reads it (2026-09-18, NOT played)</h3>
+
+<p>
+    This section used to say there was nothing to look at. As of the cart port there is:
+    <a href="gene-magic-pull.html">magic pull</a> now sets how fast a horse drags a load,
+    whether it carries a second rider, and its <code>draft_power</code> work rate.
+    <strong>The questions that were parked here are now askable.</strong>
+</p>
+
+<ul>
+    <li><strong>Does a 10 feel like a draught horse and a 1 like a miniature?</strong> The
+        scale&rsquo;s shape was never testable before. Hitch both to a wagon and see whether
+        the difference reads as a different animal or as a slightly different number.</li>
+    <li><strong>Is the gap between 4 and 6 worth breeding for?</strong> 6 is also the second-rider
+        threshold, so that one step should feel like a real gain. If it does not, the
+        threshold and the curve disagree.</li>
+    <li><strong>Does a bred line running past 10 break anything?</strong>
+        <code>Traits.pull()</code> has a floor and <strong>no ceiling</strong>.
+        <code>CartDraft</code> handles arbitrary values by construction &mdash; the test
+        checks up to a million &mdash; but nothing has watched a real line climb.</li>
+    <li><strong>Pull on the info screen.</strong> It now sits beside Jump with a word for it
+        (<em>feeble</em> &hellip; <em>a true draft horse</em>), and a <strong>Draught</strong>
+        block below. Read it on a horse and check the word matches the feeling.</li>
+</ul>
+
+<p>
+    <strong>A debug-yard pen is still not possible</strong>, for the original reason: the stat
+    pens read a named attribute&rsquo;s range across a pen, and pull is not an attribute.
+    <code>draft_power</code> is, though, and a pen on that would answer the shape question
+    indirectly &mdash; worth considering if the above proves hard to eyeball.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-body.html">The horse&rsquo;s body</a>

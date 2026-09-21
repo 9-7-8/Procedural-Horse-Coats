@@ -222,6 +222,23 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Silent hooves rest on <code>NightBehaviourHandler</code> catching whichever <code>PlayLevelSoundEvent</code> shape a horse step actually fires, and the supersede rule now spans two handlers &mdash; if a watcher both hunts and stares, <strong><code>GeneAbilityHandler</code>'s call to <code>noteActing</code></strong> is the suspect.</p>
+</div>
+
+<h3 id="open-older-gene-magic-night-watch">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>A night watcher's footsteps are silent.</strong> Stand near a <a href="gene-magic-night-watch.html">night watch</a> horse at night while it moves. <strong>Pass:</strong> no hoof sounds. <code>NightBehaviourHandler</code> handles both <code>PlayLevelSoundEvent</code> shapes because which one a horse step fires was never determined.</li>
+    <li><strong>The supersede rule, across two handlers</strong> (yard: a horse homozygous for a night watch form and for an <a href="gene-aggression.html">aggression</a> or <a href="gene-skittish.html">skittishness</a> allele, with a cow, logged at night). <strong>Pass:</strong> it deals with the cow rather than doing both, then resumes watching once the cow is gone. <strong>Newly at risk since 2026-09-17:</strong> temperament and watching now live in different handlers, and the rule is carried by <code>GeneAbilityHandler</code> calling <code>NightBehaviourHandler.noteActing</code>. If a horse both hunts and stares, that call is the thing to check.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-aggression.html">Aggression</a>

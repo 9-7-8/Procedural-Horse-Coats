@@ -119,6 +119,32 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Riding <code>Htol/Htol</code> and <code>Hsen/Hsen</code> across a plains-to-desert border is the whole of it: the change must <strong>start within a few seconds of crossing</strong> and reverse on the way back, with an Arabian herd in a desert mostly tolerant.</p>
+</div>
+
+<h3 id="after-1057-heat">Heat tolerance in the running build (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. Each change was type-checked against the running client's
+    classpath when it was written. What is left below is looking at it. The cold half is on
+    <a href="gene-magic-cold.html#after-1057-cold">the cold page</a>.
+</p>
+<ul>
+    <li><strong>Heat tolerance.</strong> Spawn
+        <code>magic_heat=Htol/Htol</code> and <code>magic_heat=Hsen/Hsen</code> horses with the custom egg and ride each across
+        a plains-to-desert border, then a jungle. <strong>Pass:</strong> the speed or jump change starts within a few seconds of crossing
+        (the flags are sampled on an interval) and stops on the way back, tolerant up and sensitive down, and a plains horse
+        is unchanged. The wild half: an Arabian herd in a desert should mostly be tolerant.</li>
+</ul>
+
+</section>
+
 </article>
 </main>
 </body>

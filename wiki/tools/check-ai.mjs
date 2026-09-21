@@ -9,7 +9,7 @@
 // endpoints with canned streams (split mid-line, as a real stream arrives) and
 // passes everything else - the wasm, the search index - through untouched.
 // What it cannot tell you is whether a real model writes good files; that is a
-// person with a key (wiki/verification.html#ai-helpers).
+// person with a key (wiki/ai-setup.html#ai-helpers, on its Verification tab).
 
 import { open, checks, findChrome, sleep } from "./chrome.mjs";
 import { pathToFileURL } from "node:url";

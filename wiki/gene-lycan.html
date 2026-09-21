@@ -266,7 +266,7 @@
     <p>
         This gene <em>discards a horse entity and creates a different one</em>, twice a
         day. Written against 26.1.2 sources and never watched happen. The things to
-        check first are on <a href="verification.html#lycan">To be verified &sect;0-AH</a>, and the top
+        check first are on <a href="#verification">the verification tab</a>, and the top
         of that list is: does a shifted horse come back with its name, its record and
         its pedigree intact?
     </p>
@@ -419,13 +419,72 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>One narrow branch dominates &mdash; the <code>set down at</code> revert over genuinely open air has never fired, since every shifter tested so far came back over solid ground; behind it sit a bucketed were-cod kept past dawn, a shifted horse across a chunk unload, and what each form refuses.</p>
+</div>
+
+<h3 id="hunger-0914-lycan">What the lycan logging still owes (2026-09-14, built 22:12)</h3>
+<p>
+    What is left here reads off <code>latest.log</code> and is not settled yet.
+</p>
+<ul>
+    <li><strong>Flying lycans land at dawn</strong> (<a href="known-gaps.html#gap-243">gap 243</a>, fixed
+        2026-09-15). Wild bat and parrot shifters live in the corridor pens and fly off at dusk.
+        <strong>Pass:</strong> no <code>horse died ... from outOfWorld</code> all run, and a
+        <code>[trace] lycan | ... set down at</code> line for any that come back over nothing.
+        <strong>The 16:11 run of 2026-09-15 half-answers this and no more.</strong> Nothing died of
+        <code>outOfWorld</code> in six hours, which is the first half. But every shifter in the yard that run
+        was a wolf or a cow &mdash; 19 round trips each, all reading <code>round trip SAME</code> &mdash; so
+        nothing reverted over open air and <em>not one</em> <code>set down at</code> line was logged. The
+        set-down path itself is still unexercised; it needs a bat or parrot shifter over the corridor.</li>
+</ul>
+
+<h3 id="open-older-gene-lycan">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>A bucketed were-cod at dawn.</strong> Bucket a <code>lycan=Cod/Cod</code> horse's fish form after dark, keep the bucket past dawn, then empty it. The horse must come back whole, not be lost inside the bucket item. See <a href="gene-lycan.html">lycan</a> and <a href="known-gaps.html#gap-74">gap 74</a>.</li>
+    <li><strong>A shifted horse across an unload.</strong> Walk away until a were-animal's chunk unloads overnight, or log out, and come back after dawn: the horse is back with its name and record. Also take the animal a hundred blocks before dawn: the horse wakes where the animal stands.</li>
+    <li><strong>Lycans and riders, dimensions and health.</strong> Ride a lycan into dusk: you are thrown, not carried into the tag. In the Nether it never shifts, and one that walks in shifted turns back at once. Hurt it to half at dusk: the animal is at half its own health, and a hurt animal gives back a hurt horse.</li>
+    <li><strong>What a were-animal refuses.</strong> A were-pig with a saddle, a were-camel, a were-strider and a were-happy-ghast all refuse a rider without eating the saddle. A transfer paper, shears, a gene carrot and the <strong>i</strong> button do nothing on any form. A were-sheep shears and a were-cat tames like the real animal.</li>
+    <li><strong>The were-animal's temper.</strong> Hit one and walk away: it follows and strikes for about three points a second, gives up after three seconds out of sight, and forgets at dawn. Hit a were-chicken too, since no form has an attack attribute and the damage is dealt by hand.</li>
+    <li><strong>Lycan and rainbow looks.</strong> A shifted animal's walking dust cloud reads, even on a tadpole or a happy ghast. Two were-wolves are different colours. Rainbow dust reads as a rainbow at the slow end of its cycle, several horses are on different hues at once, and the spawn egg's mote preview cycles too.</li>
+</ul>
+
+<h3 id="unattended-0918-lycan">The open-air revert, left unplayed by the overnight run of 2026-09-18</h3>
+
+<p>
+    An unattended night of 2026-09-18 answered half of the flying revert by log rather than by
+    eye. What is below is the half it could not reach. The rest of what that night left
+    unplayed is on <a href="architecture.html#unattended-0918">architecture</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge</h4>
+
+<ul>
+    <li><strong>The bat lycan's landing is answered; the open-air case is not.</strong> A
+        <code>LYCAN BAT</code> in the LYCAN ROUND TRIP pen came back at dawn
+        <code>inside blocks</code>, was displaced to a free spot, and read
+        <code>round trip SAME</code> &mdash; the only one of six shifters that needed the branch,
+        because it is the only one that flies. Written up on
+        <a href="gene-lycan.html#verified-flying-revert">the gene's page</a>. <strong>What is
+        left:</strong> the <code>set down at</code> case, which is a revert over genuinely open
+        air. A bat in a floored pen never reaches it, so it wants one seeded over the
+        corridor.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-sun-sensitivity.html">Sun sensitivity &mdash; the other gene that is only behaviour</a>
         <a href="gene-particle.html">The particle locus</a>
         <a href="gene-rainbow-dust.html">Rainbow dust</a>
         <a href="known-gaps.html">What is unproven about this</a>
-        <a href="verification.html#lycan">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/LycanGene.java</code>,
     <code>neoforge/server/LycanthropyHandler.java</code>

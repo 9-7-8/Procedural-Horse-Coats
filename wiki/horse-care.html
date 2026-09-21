@@ -243,7 +243,7 @@
     <a href="?view=science#science-bands">science tab</a> has the research): not in one
     herd with a leader, but in small <strong>bands</strong> that change over time.
     Nothing here has been played yet &mdash; see
-    <a href="verification.html#herd-life">verification</a>.
+    <a href="#verification">the verification tab</a>.
 </p>
 
 <h3 id="roles">Who is who</h3>
@@ -567,7 +567,7 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <strong>Taming by hand works</strong> (owner-confirmed in play, 2026-09-10). <em>Still
     unwatched:</em> horses peeling off a wild herd for a player walking past crouched with food, a
     carnivore ignoring a carrot, and a dhampir not coming at all
-    (<a href="verification.html#stall-rewrite">verification &sect;0-BJ</a>).
+    (<a href="item-stall-signs.html#verification">the stall-sign rewrite&rsquo;s verification tab</a>).
 </p>
 
 </section>
@@ -1093,6 +1093,141 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
         Ethologica (2023)</a>, on ritualised encounters between familiar horses.</li>
 </ul>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Band life has never run outside the yard, and its sharpest question was never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her &mdash; and a draught should now go for food far oftener than a pony.</p>
+</div>
+
+<h3 id="hunger-by-size-0917">A bigger horse gets hungry sooner (2026-09-17, NOT played)</h3>
+
+<p>
+    The resting hunger drain is now proportional to the horse&rsquo;s body scale, where it used
+    to be one rate for every horse. Hunger is invisible, so every check here is really about
+    <em>how often the horse goes to eat</em>.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The draught eats more often than the pony.</strong> Pen a shire-sized horse and
+        a falabella-sized one together with grass or hay in reach, and leave them for a few
+        Minecraft days. <strong>Pass:</strong> the big one goes for food noticeably more often
+        &mdash; roughly every two thirds of a day against two and a half for the small one.
+        <strong>Fail:</strong> they eat on the same rhythm, which means the scale is not
+        reaching the drain.</li>
+    <li><strong>Nothing starves that did not before.</strong> The drain only moved with size,
+        and healing still cannot take a horse below starving.
+        <strong>Pass:</strong> ordinary horses behave as they always did; only the very large
+        ones are hungrier. Worth a look because a yard of draughts could now strip grass faster
+        than it regrows.</li>
+</ul>
+
+
+<h3 id="after-1057-close-kin">A filly is not recruited by her brother (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. Each change was type-checked against the running client's
+    classpath when it was written. What is left below is looking at it.
+</p>
+<ul>
+    <li><strong>A filly is not recruited by her brother</strong> (<a href="horse-care.html#verified-closekin">gap 234</a>).
+        <strong>The 16:11 run did not test this</strong>, and the pen is why: LEAVING HOME staggers its colt three
+        minutes behind its filly, so he had not left when she chose and was never the nearest bachelor. Both
+        dispersed cleanly and no kin pair formed, but <code>closeKin</code> was never asked the question.
+        <strong>Drop the stagger</strong> so the two disperse together, then check that no
+        <code>left the band it was born into</code> line pairs a filly with a colt from the same dam or sire.</li>
+</ul>
+
+<h3 id="evening-0913-band-life">Band life (built the evening of 2026-09-13, NOT played)</h3>
+
+<p>
+    None of this has been in a game; everything below is covered by unit tests on the genetics side only.
+    <strong>Test kit batch 2</strong> is the overworld half of band life and
+    <a href="item-whistles.html#evening-0913">the ender whistle</a>.
+</p>
+<p>
+    Everything here that runs without a player is now in the yard's rows R to T
+    (<a href="horse-care.html#herd-yard">the herd yard</a>): the leaderless band, takeovers, sparring,
+    dispersal, transfers, herding, grooming, displacement and a dam defending her foal. What is
+    left needs the overworld or your hands:
+</p>
+<ul>
+    <li><strong>Dispersal from birth</strong> takes days. A foal actually born into a wild band
+        should leave it a few days after growing up, and the log says <code>left the band it was
+        born into</code>.</li>
+    <li><strong>Tick time with hundreds of wild horses in the overworld.</strong></li>
+    <li><strong>The Social section on a real wild band.</strong> Open a wild mare&rsquo;s
+        information screen. You should see a role (lead mare or band mare), a standing, and after
+        a few minutes companions by name.</li>
+    <li><strong>Herding by hand.</strong> Lead a wild mare twenty blocks from her band and let
+        go. Does her stallion fetch her, or does she walk back on her own?</li>
+    <li><strong>Dam and foal.</strong> Breed a tamed pair and lead the mare away: the foal
+        follows. Hit the foal yourself: a tamed dam must <em>not</em> go for you.</li>
+</ul>
+
+<h3 id="herd-yard">Band life in the yard: rows Q and R (built 2026-09-14, NOT played)</h3>
+
+<p>
+    Everything band life can do without a player now happens in the yard, on a clock. Go
+    through the hay portal once, since the yard builds as you arrive. Then leave it for an hour, or
+    for the night: stay in the dimension and out of the pause menu, the same as
+    every other unattended run. <strong>Do the breeding audit
+    (<a href="fertility.html#fertility">breeding and fertility</a>) while this runs</strong>, because these rows start
+    themselves the moment they are built.
+</p>
+<p>
+    <strong>What the log gives you:</strong> each pen's <code>[watch]</code> line carries
+    <code>social:</code>. For every horse that is its role, its band, how many pen-mates it
+    outranks and yields to, its grooming partner, its rival, its health and its target.
+    <code>[trace] herd</code> lines are the events. <code>[trace] test yard</code> lines are what
+    the clocks did, and each one says what to expect next. Every rate is a first guess
+    <em>per Minecraft day</em> (twenty minutes), so &ldquo;within the hour&rdquo; means likely,
+    not certain.
+</p>
+<ol>
+    <li><strong>With your hands, only if you are passing:</strong> open a wild horse's
+        information screen in these pens and check its Social section matches its watch line.</li>
+</ol>
+<p>
+    Grep <code>[trace] herd</code>, <code>[trace] test yard</code>, and <code>[watch]</code>
+    followed by any pen's name.
+</p>
+
+<h3 id="hunger-0914">What hunger changes in the pens around it (2026-09-14, built 22:12)</h3>
+<p>
+    Hunger itself is <a href="horse-care.html#verified-hunger">verified</a> &mdash; row V's four pens
+    came out right twice, most recently over the six hours of the 16:11 run. What is left is what a
+    hungry horse does to the pen it stands in.
+</p>
+<div class="note warn">
+    <span class="label">It changes the pens around it</span>
+    <p>
+        Hungry horses eat whatever food is in their pen, and eating uses it up. <strong>The dryad
+        pens' grass will turn to dirt</strong>, and a dryad cannot plant on dirt, so their planting
+        rates fall once their horses get hungry (about twenty minutes in). DRYAD FLOWER's flowers
+        get eaten. Any pen that needs its food to last needs a restock or a stone floor. (The
+        DISPLACEMENT pen had one until it was deleted as verified on 2026-09-15.)
+    </p>
+</div>
+
+<h3 id="open-older-horse-care">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Feeding says when it did nothing</strong> (tester guide, <em>Feeding tells you when it did nothing</em>; <a href="horse-care.html">horse care</a>). A hurt horse eats with no message. A full-health, max-bond horse still eats and says <em>&hellip;eats it happily, but did not seem to need it</em>, and the food is used up. A horse at its daily bond cap gets the same message. A carnivore foal takes its apple favourite, sugar and cocoa-bean favourites are accepted, and a special-diet horse still refuses ordinary food (<a href="gene-diet.html">diet</a>).</li>
+    <li><strong>Horses amble to food and gallop for a favourite</strong> (tester guide, <em>Horses come for food, and run for their favourite</em>; <a href="horse-care.html#food-tempt">horse care</a>). Wheat draws a drift you can walk away from. A <code>food_preference=Car/Car</code> horse notices from about twice as far and gallops. <strong>If the two speeds are not obviously different, the feature has failed.</strong> Also check: the horse stops about 2.5 blocks off; lowering your hand stops it; crouch-taming wins the tie; a carnivore ignores a carrot but runs at a forbidden favourite; ridden or leashed horses ignore food; and a big herd costs no visible tick time.</li>
+    <li><strong>Crouch-feed taming in a wild herd</strong> (<a href="known-gaps.html#gap-155">gap 155</a>; hand taming itself is <a href="horse-care.html#verified-taming">verified</a>). Walk past a wild herd crouched with food: horses should not peel off from a distance too easily. A carnivore should ignore a carrot, and a dhampir should not come at all.</li>
+    <li><strong>Hearts stop at the daily cap</strong> (<a href="known-gaps.html#gap-155">gap 155</a>). Hand-feed a tamed horse past <code>HorseCareAttachment.DAILY_CAP</code> bond in a day: the hearts must stop, which is the only sign the cap exists.</li>
+    <li><strong>The phantom saddle cannot be taken</strong> (<a href="known-gaps.html#gap-156">gap 156</a>). Ride a bond-tier-3 horse with no saddle: it steers and jumps, and shows no saddle. Open its inventory while riding and try to take the saddle: you get nothing. Dismount: the horse is bare, and a horse you saddled yourself is untouched.</li>
+    <li><strong>Feel: shearing is worth 2 bond.</strong> Keeping a horse sheared should no longer out-bond hand-feeding and treats.</li>
+    <li><strong>Wild horses aggro like wolves.</strong> Hit one: it and its herd-mates within 24 blocks turn and kick you, and calm down about three seconds after you are out of sight. Tamed horses never do.</li>
+    <li><strong>Bond tiers change behaviour.</strong> At 31-60 a dismounted horse turns to face you within 10 blocks, at 61-80 it walks to you, at 81-100 it follows round fences and stops about three blocks off; none of it while leashed or ridden. And two horses kept within 10 blocks for ten minutes show <code>&bull; in a herd</code> on the information screen, which clears ten minutes after they are parted. <a href="horse-care.html">Horse care</a>.</li>
+</ul>
 </section>
 
 <div class="page-foot">

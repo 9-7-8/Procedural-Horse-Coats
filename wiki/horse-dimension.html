@@ -858,6 +858,189 @@
         every one logged <code>by NATURAL</code>, after it replaced <code>minecraft:the_void</code>.</li>
 </ul>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Start here, because in 0.5.004 walking through a hay portal crashed the game outright: confirm the dimension can be entered at all, then that the rebuilt two-sided corridor <strong>ends in a wall rather than the void</strong> and that a given pen holds the same four horses, and the same breed, every visit.</p>
+</div>
+
+<h3 id="corridor-two-columns-0917">The horse dimension becomes two lists: coats to check, and every breed (2026-09-17, NOT played)</h3>
+
+<p>
+    The corridor was two thousand random genotypes on both sides. It is now a
+    <strong>different question down each side</strong>, and the right-hand one <em>ends</em>:
+    one pen per allele combination of every gene whose wiki page carries no
+    <code>Verified</code> block, worst-first. Ask <code>CoatCheckPlan.size()</code> how long
+    that is; it falls every time a gene is confirmed. Full write-up:
+    <a href="horse-dimension.html#pens">what is in the pens</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The corridor still builds as you walk, and still ends in a wall.</strong>
+        It is far shorter than it was, so the end cap is now reachable on foot. <em>Pass:</em>
+        walking to the end finds a wall rather than a drop into the void, and the log has no
+        <code>test yard is NOT sound</code> line. This is the half most likely to be wrong:
+        <code>LAST_SEGMENT_INDEX</code> is derived from the plan now, and if it is short the
+        last pens simply do not exist.</li>
+    <li><strong>Pen <em>n</em> is the same horse every visit.</strong> Both columns are
+        deterministic, which the random corridor could not promise. <em>Pass:</em> leave and
+        re-enter, walk to the same pen number, and the sign and the four horses match.</li>
+    <li><strong>The left column is every breed, alphabetically, and loops.</strong>
+        <em>Pass:</em> the first pens are A-named breeds, no pen says <code>Feral Mixed</code>,
+        and the names restart from A after the last breed rather than stopping.</li>
+    <li><strong>A breed pen's horses really are that breed.</strong> They are rolled through
+        <code>BreedFounder</code> and stamped with the breed's lineage token, not just given a
+        matching genotype. <em>Pass:</em> open one in the horse browser and the breed on the
+        record is the breed on the sign.</li>
+    <li><strong>The four base coats are the four base coats.</strong> Each coat-check pen
+        holds a black, a bay, a chestnut and a white horse, named on the nameplate.
+        <em>Pass:</em> four horses, four nameplates, and the chestnut is chestnut rather than
+        a second bay.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The signs say what the marking should look like.</strong> A pen carries up to
+        four boards: the pen number and gene, the outcome's name, then its description
+        wrapped across the rest. <em>Pass:</em> the boards read in order left to right and no
+        sentence is cut off mid-word where a board was available.</li>
+    <li><strong>The entrance says the corridor has two sides.</strong> Two signs by the
+        return portal. <em>Pass:</em> somebody who has never been here can tell which side is
+        which from them alone.</li>
+</ul>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> the markings
+        themselves. That is the whole point of the column, but it is also the cheapest thing
+        to judge and the thing that announces itself &mdash; so it goes last, per this page's
+        own rule. It is written up for testers as
+        <a href="for-testers.html#t-look-pens">walk the horse pens</a>, and the one thing
+        worth reporting precisely is the <strong>white</strong> horse: anything drawn on it
+        is a gene ignoring a mask.</li>
+</ul>
+
+<h4>The yard lost its looking pens</h4>
+
+<ul>
+    <li><strong>Row E's gilded-crackle stall and row D's egg-layer pen are gone.</strong> The
+        crackle stall asked only &ldquo;does this look right?&rdquo;, which the corridor now
+        answers for every unconfirmed marking; the egg layer's last open question (the cap)
+        was closed by the overnight run of 2026-09-14/15 and is written up at
+        <a href="gene-egg-layer.html#verified">its own page</a>. <em>Pass:</em> the yard still
+        builds and logs <code>test yard built and walkable</code>, row E still holds the pool,
+        and nothing fell through a hole where a pen used to be.</li>
+    <li><strong>The magic stat pens now tell you to ride.</strong> Their sign said what the
+        census prints, which is not something a tester does. <em>Pass:</em> riding the two
+        horses in a pen, one feels different from the other.</li>
+</ul>
+
+
+<h3 id="after-1057-bone-meal-sign">The BONE MEAL pen's sign (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. What is left below is looking at it.
+</p>
+<ul>
+    <li><strong>The BONE MEAL pen's sign</strong> now names <code>[watch] gene fertilised</code>.</li>
+</ul>
+
+<h3 id="herd-yard-pens">The yard was packed, and the pens now share walls (2026-09-14, NOT played)</h3>
+
+<p>
+    The breeding and herd rows (now O to R) used to run more than three hundred blocks deep.
+    The pens confirmed that morning (NATURAL PAIR, GELDING CONTROL, SUBFERTILE PAIR, COWBOY
+    STOCK, SPARRING and HERDING) were deleted rather than packed. Now they share walls,
+    because inside the yard <strong>a horse's breeding and band checks only see the horses in its own
+    pen</strong> (<code>YardPens</code>). Outside the yard nothing changed. Before that, the
+    breeding cap and every band decision counted horses through walls, so pens had to stand
+    far apart. The breeding pens still keep a three-block gap between them, because vanilla's
+    golden-carrot breeding ignores walls. The jar stud now has his own pen, two blocks from the
+    mares. Pass for the packing itself: no pen's <code>[watch]</code> line ever lists a horse
+    from the pen next door, and no <code>not covered: … other horses</code> line counts more
+    horses than its pen holds. <strong>Known to fail, and wider than row U</strong>
+    (<a href="known-gaps.html#gap-259">gap 259</a>): a ratio stud wanders into the pen next door, and in
+    the birth and splice rows a pen's watch line carries its neighbour's mare for a whole run &mdash;
+    SPLICE WHITE listed SPLICE DILUTION's mare in 278 censuses and CROSS SAME listed BOND's in 643, each
+    counted in both pens at once, which is the watch box overlapping rather than a horse straying. The
+    <code>not covered: … other horses</code> half held: no line counted more horses than its pen holds.
+    Rows Q and R showed no stray; HOST BAND listing LEAVING HOME's horses is by design, since those pens
+    share a group.
+</p>
+
+<h3 id="open-0913-tack-room-and-rain">The tack room and the dimension's rain (still open after 2026-09-13)</h3>
+
+<h4>Nothing here needs looking at to judge &mdash; do this first</h4>
+<ul>
+    <li><strong>The tack room is built, never confirmed.</strong></li>
+</ul>
+
+<h4>Visual, and therefore last</h4>
+<ul>
+    <li><strong>Rain falls visibly in the horse dimension.</strong> The <code>debug_pens</code> biome carried
+        <code>"has_precipitation": false</code> until 2026-09-13, so the level rained and the biome
+        dropped nothing. Needs a restart after the datapack change.</li>
+</ul>
+
+<h3 id="open-older-horse-dimension">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The corridor's rest stops</strong> (tester guide, <em>The hay portal and the horse pens</em>; <a href="horse-dimension.html#rest-stops">horse dimension</a>). <strong>Pass:</strong> there is a break with a hay portal after every 25 pens and the numbers never skip. Stepping through a rest-stop portal takes you and your tamed horses home. That is <code>plotContaining</code> resolving the plot from the portal's X, which has only ever been exercised at the entrance. Walking the road never clips the portal, the floor and walls are unbroken across a break, and pen 2,000 and the end cap still exist.</li>
+    <li><strong>Hay portals tear down and relight.</strong> Break one hay bale out of a lit portal: the whole interior vanishes. Then light a fresh overworld portal and the horse dimension's return portal, since a portal block now deletes itself when not enclosed and is briefly unenclosed while filling in.</li>
+    <li><strong>The corridor's far end.</strong> Pen 2,000, about 7,000 blocks out, ends in a wall. (Gap 243 found the unbuilt far end open to the void, so check where the built corridor stops.)</li>
+    <li><strong>No plain pens, and about half magical.</strong> <code>ShowcaseGenotypes.random</code> guarantees one expressing coat gene past extension and agouti and flips a coin per pen for a magical gene. A unit test over a few thousand draws settles both, and each pen's sign should name exactly what its pair carries.</li>
+    <li><strong>A pen sign's genotype code</strong>, with over a hundred genes, wraps onto three lines and overflows the last deliberately. Look at one and say if it is unreadable.</li>
+</ul>
+
+<h3 id="tester-fixes-0917-dimension">The 0.5.004 blocker: the dimension could not be entered (2026-09-17, NOT played)</h3>
+
+<p>
+    Reported from outside on the testers' first day on 0.5.004, and fixed against the report
+    rather than against a play session here &mdash; so it wants confirming by the person who
+    found it. It is the one of the five that matters most, because until it is true
+    <a href="horse-dimension.html#corridor-two-columns-0917">&sect;0-EV</a> cannot be started at
+    all: every check in that entry begins &ldquo;walk in&rdquo;, and in 0.5.004 walking in
+    crashed the game.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do this first</h4>
+
+<ul>
+    <li><strong>The horse dimension can be entered.</strong> Light a hay portal, stand in
+        it, and go through. <strong>Pass:</strong> you arrive standing on the road with the
+        corridor in front of you, and no crash report is written. This is the whole of the
+        0.5.004 blocker: <code>CoatCheckPlan.Pen.sex()</code> threw on the first pen built,
+        which happened during the teleport. A unit test now walks all 438 pens, so a
+        failure here would mean something other than the fault that was fixed.</li>
+</ul>
+
+<h3 id="unattended-0918-yard">The yard's soundness line, after the overnight run of 2026-09-18</h3>
+
+<p>
+    The unattended night of 2026-09-18 made this line trustworthy again, and left it wanting
+    nothing but time to prove itself. The rest of what that night left unplayed is on
+    <a href="architecture.html#unattended-0918">architecture</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge</h4>
+
+<ul>
+    <li><strong>The yard's soundness line means something again.</strong> It named its own
+        obstruction on the first boot (a flush water cauldron, now in the furniture allowlist)
+        and has read <code>test yard built and walkable</code> since. <strong>Pass:</strong> it
+        keeps saying that. A <code>NOT sound</code> line now carries a position and a block id,
+        so the next one is worth believing &mdash; which it was not for the four sessions it
+        spent crying wolf.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="items.html">Items &amp; recipes</a>

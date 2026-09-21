@@ -138,6 +138,31 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Hardy itself is verified, but the guardian <strong>lost its one recorded fight</strong>; with horses now swinging every 10 ticks and kicking monsters for 6, the retest is to let a zombie hit <em>you</em> and watch the guardian close on it, kill it, and live.</p>
+</div>
+
+<h3 id="open-0913-guardian">The guardian in a fight (still open after 2026-09-13)</h3>
+
+<p>Nothing here needs looking at to judge.</p>
+<ul>
+    <li><strong>The guardian</strong> (row J west, <code>Hardy/Hardy</code>, arrives
+        untamed). Tame it, then let a zombie from the chest hit <em>you</em> &mdash; not the
+        horse. Horses now swing every 10 ticks against a zombie's 20
+        (<a href="gene-aggression.html#verified-swing-rate">verified on the aggression page</a>); a fighting horse should still close
+        on its target rather than stand reared.
+        <br><strong>2026-09-14: the horse lost the fight</strong> (the gene itself is
+        <a href="#verified-guardian">verified</a>). <strong>Horses now kick monsters twice as hard</strong> (6 for an ordinary
+        horse, <code>HorseAggroHandler.onHorseKicksMonster</code>). <strong>Pass:</strong> the
+        guardian kills a single zombie and lives.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-aggression.html">Aggression</a>

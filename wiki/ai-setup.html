@@ -268,6 +268,69 @@
     <code>PROVIDERS</code> in <code>ai-core.js</code> and to the table <a href="#providers">above</a>.
 </p>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Headless runs with canned replies pass, but <strong>no real provider, sign-in or GitHub issue has ever been exercised</strong> &mdash; the OpenRouter key exchange is the half that fails invisibly, and the enlarged close button on <em>Draft a breed with AI</em> is still only a guess at the cause.</p>
+</div>
+
+<h3 id="ai-helpers">The AI helpers (built 2026-09-13, checkable from a phone)</h3>
+
+<p>
+    Not in the game at all, so these can be done on the live wiki from anywhere.
+    <code>node wiki/tools/check-ai.mjs</code> drives the chat and both designers
+    headlessly with the AI replaced by canned replies, and passes. What it cannot
+    exercise is a real provider, a real sign-in, or GitHub accepting a real issue.
+    Behaviour first:
+</p>
+<ul>
+    <li><strong>Connect with OpenRouter &mdash; the one that can fail invisibly.</strong> On
+        <a href="ai-setup.html#settings">AI helpers</a>, press it, sign in, approve. You
+        should land back on the page with &ldquo;Connected to OpenRouter&rdquo; and a key in the
+        box. If you land back and nothing happens, the key exchange failed. The page never
+        shows the code, so tell me what the address bar said.</li>
+    <li><strong>A real answer.</strong> Press <em>Test it</em>, then ask the chat something
+        the wiki covers (&ldquo;what does flaxen do?&rdquo;). It should answer and link a real
+        page. Ask something it does not cover, and it should say so rather than invent an
+        answer.</li>
+    <li><strong>A bug report, both ways.</strong> Press <em>Report a bug</em> and describe a
+        made-up bug until the form appears. <em>Open it on GitHub</em> should open the
+        new-issue page filled in. Do not submit it, or close it afterwards. Then add a token and
+        <em>File it on GitHub</em> for real, once, and close the issue it makes.</li>
+    <li><strong>Draft with AI, breed designer.</strong> Describe a breed. It should end on a
+        green &ldquo;parser accepts it&rdquo;, and <em>Use it</em> should fill the steps. Try a
+        photo of a real horse with the default free model: does the colour come out anywhere
+        near?</li>
+    <li><strong>Draft with AI, gene creator.</strong> Describe a simple marking. Free models
+        may need all three tries, so how often one gets there at all is worth knowing.</li>
+    <li><strong>On the phone itself:</strong> the chat should open full-screen, the keyboard
+        should not hide the box you type in, and the bubble should not sit on anything you need
+        on a wiki page.</li>
+    <li><strong>Forget key</strong> and <strong>Forget everything</strong>: reload and check the
+        box is empty.</li>
+</ul>
+
+<h3 id="phone-0918-ai-dialog">The &times; on <em>Draft a breed with AI</em>, on an actual phone (2026-09-18, checked in emulation only)</h3>
+
+<p>
+    One of three phone reports fixed or explained this session, and like the rest of them it was
+    verified in <strong>headless Chrome at 390&times;844 with touch emulation</strong>, which is
+    not a phone. What emulation cannot see: a real fingertip, iOS&rsquo;s keyboard behaviour, and
+    a real mobile connection. A minute on the device that saw the problem settles it.
+</p>
+
+<ul>
+    <li><strong>The &times; on <em>Draft a breed with AI</em>.</strong> This is the one that
+        could not be reproduced at all &mdash; <a href="known-gaps.html#gap-276">gap 276</a>.
+        Its target is 44px now instead of 22, which is a guess at the cause. If it still does
+        nothing, the two useful details are whether the dialog <strong>flickers</strong> or
+        does nothing at all, and whether the <strong>keyboard was up</strong> when you tapped.</li>
+</ul>
+
+</section>
+
 </article>
 </main>
 </body>

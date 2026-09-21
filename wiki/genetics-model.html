@@ -91,7 +91,7 @@
         positional / legacy fallback. A gene mod registers through
         <a href="making-a-gene.html#register"><code>RegisterHorseGenesEvent</code></a>, and
         <strong>no third-party gene has ever actually been registered</strong> &mdash;
-        <a href="verification.html#gene-api">&sect;0-CM</a>.
+        see <a href="making-a-gene.html#verification">what is still unrun on the gene API</a>.
     </p>
 </div>
 
@@ -902,6 +902,29 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     family-tree fallback now &mdash; foals and adults alike are fully generated
     through the <a href="pipeline.html">coat pipeline</a>.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Eight carried-over checks on the model itself, invisible ones first: an old world on a new jar must load and <em>log</em> a horse&rsquo;s retired Cleave alleles rather than drop them silently, one genotype code must spawn identical speed, health and jump twice, and the Genes tab&rsquo;s <strong>carrier filter</strong> must keep silent loci listed.</p>
+</div>
+
+<h3 id="open-older-genetics-model">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>An old world on a new jar</strong> (tester guide, <em>An old world after updating the mod</em>). It loads. A horse that carried Cleave's retired alleles logs <code>[genes] a saved horse carried 'horsegenetics.cleave=...'</code> and comes back without the marking (<a href="known-gaps.html#gap-193">gap 193</a>).</li>
+    <li><strong>The Genes tab keeps carriers.</strong> On opening, the filter reads <em>Only what it carries</em>, and a horse's silent carrier locus stays listed with it on. Turned off, the list grows to every locus. A plain stallion has no brindle row with the filter on (<code>n/Y</code> with it off), while a <code>Brn/Y</code> stallion and a <code>Brn/n</code> mare keep theirs. <code>KIT</code> is under Coat on an ordinary sabino and under Other genes on a near-white.</li>
+    <li><strong>Drift shows in the numbers, not the horse.</strong> Compare one epigenetic value on a parent and its foal: they differ around the fourth decimal (<a href="known-gaps.html#gap-64">gap 64</a>).</li>
+    <li><strong>The same genotype gives the same horse.</strong> Spawn two horses from one code and compare speed, health and jump on the information screen: identical.</li>
+    <li><strong>The short genome string shows data genes.</strong> A horse carrying <a href="gene-suntouched.html">Suntouched</a> or <a href="gene-waterborn.html">Waterborn</a> lists it (<code>GeneCodeDisplay.shortForm</code>). No test covers a loaded gene yet; add one to <code>GeneCodeDisplayTest</code>.</li>
+    <li><strong>No wild homozygote.</strong> No wild horse is ever <code>Big/Big</code>, <code>Small/Small</code>, <code>Big/Small</code>, or doubled at magic speed, health or jump. Unit-tested over founders; a yard census of wild horses would confirm it in the world.</li>
+    <li><strong>A paddock of ordinary horses still reads as a mixed herd</strong>, not a pinto herd, after every coat redrew (<a href="genetics-model.html#verified-seed-scramble">seed scramble</a>); about two in three wear some white. <a href="gene-quarter.html">Quarter</a> shows one clean quadrant (double-quarter one clean half) with no seam and no half-strength wash.</li>
+    <li><strong>Epigenetics on screen.</strong> The Coat tab's value rows fit, including ednrb's nine values with four per-leg numbers on one line, and the <code>&rsaquo;</code> expressed-copy mark means something. A foal's marking matches the parent it took the allele from. Any blank ancestor portrait in the family tree is a record with no genome, and worth naming.</li>
+</ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">

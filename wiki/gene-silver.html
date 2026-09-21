@@ -176,6 +176,71 @@ f.dilute(px, py,
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Silver's new dapples were checked against a single offline render, which cannot show the population: dapple strength must <strong>vary between horses and reach zero</strong>, inherit from dappled parents, and hold steady across a reload &mdash; and a <code>Z/z</code> horse must name ocular cysts while losing no hearts at all.</p>
+</div>
+
+<h3 id="silver-dapples-0917">Silver finally draws its dapples (2026-09-17, NOT played)</h3>
+
+<p>
+    <a href="gene-silver.html">Silver</a> shipped as the dilution only; the dapples the
+    gene is named for are now drawn, and the flaxen mane has been pulled paler in the same
+    change. Checked against an offline render rather than by asking for game time, but a
+    render is a still image of one horse &mdash; <strong>what it cannot show is the
+    population</strong>, which is where the remaining risk is.
+</p>
+<ul>
+    <li><strong>The dapple strength varies between horses, and reaches zero.</strong>
+        Strength is an epigenetic value on the allele running the full range, so some
+        silvers should barely dapple and some should show it clearly. <strong>If every
+        silver horse dapples identically the epigenetics are not being read per allele</strong>
+        &mdash; which is the specific failure this design invites, and the one a single
+        render cannot detect.</li>
+    <li><strong>It inherits, and drifts.</strong> Breed two heavily dappled silvers and
+        confirm the foals trend dappled; the seed and spacing sit on the allele, so a line
+        should be selectable toward it. A foal whose dappling is unrelated to either parent
+        means the value is being re-rolled rather than inherited.</li>
+    <li><strong>The same horse dapples identically every time.</strong> Note one, leave and
+        rejoin the world. A lattice that moves between reloads means something is sampling
+        fresh randomness at paint time instead of reading stored epigenetics.</li>
+    <li><strong>A chestnut silver still shows almost nothing.</strong> The dapple modulates
+        how much <em>black</em> a texel keeps, so on a red horse there is nothing for it to
+        act on. A visibly dappled chestnut would mean the modulation is touching red.</li>
+    <li><strong>Grey and silver together do not fight.</strong> A horse carrying both has
+        two dapple lattices at different depths and spacings. They should read as one
+        coherently dappled horse, not as interference or moir&eacute;.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the dappling
+        reads as dappling at riding distance rather than as spots or as noise, and whether
+        the paler mane still reads as flaxen rather than as white.</li>
+</ul>
+
+
+<h3 id="health-loci-0917-silver">Silver's MCOA split by dose (2026-09-17, NOT played)</h3>
+
+<p>
+    Silver&rsquo;s MCOA now splits by dose, and shipped alongside four new health loci.
+    <strong>It has not been seen in a world.</strong> The quickest way in is the custom spawn
+    egg.
+</p>
+<ul>
+    <li><strong>Silver's dose split.</strong> On a <a href="breed-book.html">Rocky Mountain
+        Horse</a> (12% <code>Z/Z</code>, 46% <code>Z/z</code>): a <code>Z/z</code> horse names
+        ocular cysts and loses <b>nothing</b>; a <code>Z/Z</code> horse names the ocular
+        anomalies and is down two hearts. A <code>Z/z</code> horse short a heart means the dose
+        split is inverted or collapsed.</li>
+</ul>
+
+<h3 id="open-older-gene-silver">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Silver and mushroom.</strong> Silver on black is chocolate with a near-flaxen mane, on bay silvers only the points, on chestnut invisible. Mushroom <code>Mu/Mu</code> on chestnut is flat sepia and near-invisible on black or bay. <a href="gene-silver.html">Silver</a>, <a href="gene-mushroom.html">mushroom</a>.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-mushroom.html">Mushroom</a>

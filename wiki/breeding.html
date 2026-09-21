@@ -1212,8 +1212,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     Breeding preview tab renders; and the information screen&rsquo;s Genes and Other genes tabs render
     with gene rows. So the roster payload registers and reaches <code>HorseRoster</code>. The three
     defects those reports found (buttons over text, brindle on every stallion, <code>KIT</code> filed
-    under Other genes) were fixed and are not re-checked:
-    <a href="verification.html#h-menu">verification &sect;0-AI</a>.
+    under Other genes) were fixed and are not re-checked: see
+    <a href="#verification">the verification tab</a>.
 </p>
 
 <p id="verified-foal-names">
@@ -1381,6 +1381,175 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         breeding and growth times.</li>
 </ul>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Right-click now opens this mod&rsquo;s own screen on every horse, so the check that outranks the rest is that a wild one can still be tamed entirely through the Ride button; under it sit a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
+</div>
+
+<h3 id="barn-name-0918">Setting a barn name now shows on the screen that set it (2026-09-18, NOT played)</h3>
+
+<p>
+    Reported as "there doesn't seem to be a way to change the barn name". There is, and it
+    always worked &mdash; but <code>HorseInfoScreen</code> held the record it was constructed
+    with and never re-read it, so pressing <strong>Set</strong> changed the horse's floating
+    nameplate and nothing on the screen in front of you. Everything a player can change is now
+    read through a <code>live()</code> accessor that prefers the synced record.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+<ul>
+    <li><strong>Type a barn name, press Set, and watch the screen.</strong> The header line
+        should go from <em>no barn name yet</em> to <em>known around the yard as "&hellip;"</em>
+        immediately, without closing and reopening. That is the whole fix.</li>
+    <li><strong>Clear it again.</strong> An empty box removes the barn name; the header should
+        go back to <em>no barn name yet</em> and the nameplate back to the registered name.</li>
+    <li><strong>It is still gated on ownership.</strong> The box and button only appear on the
+        Overview tab for a tamed horse you own. On someone else's horse, or an untamed one,
+        there should be no box at all &mdash; that is deliberate, not the bug.</li>
+</ul>
+
+<h4>The part that is a discoverability problem, not a bug</h4>
+<ul>
+    <li><strong>The way in is a 14px unlabelled <code>i</code> button hanging off the left edge
+        of the vanilla horse inventory</strong>, and sneak-right-click only opens the info
+        screen on horses you <em>cannot</em> name. Worth deciding whether that is good enough
+        before the next tester meets it.</li>
+    <li><strong>The screen reopens on whichever tab you last closed it on</strong>
+        (<code>lastTab</code> is static). Leave it on Genes, come back, and the barn-name box
+        is simply not there with nothing saying it lives on Overview.</li>
+</ul>
+
+
+<h3 id="advancements-0920-menu">The horse menu opens on a click (2026-09-20, NOT played)</h3>
+
+<p>
+    A plain right-click on any horse now opens this mod's screen, which has grown saddle and
+    armour slots and a Ride button (<a href="#H">&sect;H</a>). The tack slots themselves are
+    checked on <a href="horse-gear.html#advancements-0920-tack">horse gear</a>. None of this
+    has been in front of a player.
+</p>
+
+<h4>Do these first &mdash; one right-click answers most of it</h4>
+<ul>
+    <li><strong>Right-click a wild horse with an empty hand.</strong> The information
+        screen should open, and you should <em>not</em> be thrown into the saddle. Then
+        the same on a tamed horse of yours, and on a foal.</li>
+    <li><strong>The Ride button</strong>, top right of Overview. It should close the screen
+        and put you on. On a wild horse it should buck you off exactly as a right-click
+        used to &mdash; <strong>tame one entirely through the button</strong>, because if
+        that does not work the setting has cost the game its taming.</li>
+    <li><strong>A horse that is not yours.</strong> Open a cowboy's string, or a stranger's
+        horse: the slots should show what it is wearing, be drawn dim, and do nothing on a
+        click.</li>
+    <li><strong>Sneak-right-click a tamed horse of yours.</strong> Vanilla's inventory
+        should still open, unchanged, with the <strong>i</strong> button on it. That is the
+        escape hatch and it is deliberately not taken over.</li>
+    <li><strong>Something in your hand.</strong> Wheat, a lead, a name tag, a research
+        paper, a golden carrot: every one of them should do what it always did, not open a
+        window.</li>
+    <li><strong><code>horseScreen.rightClickOpens = false</code></strong> in
+        <code>client.toml</code>. Right-click should go back to mounting, and the screen
+        should still be reachable by sneaking on a wild horse and by the
+        <strong>i</strong> button on a tamed one.</li>
+</ul>
+
+<h3 id="hunger-0914-ratio">What the ratio logging still owes (2026-09-14, built 22:12)</h3>
+<p>
+    What is left here reads off <code>latest.log</code> and is not settled yet.
+</p>
+<ul>
+    <li><strong>Gap 245's shadow logging stays on, and only the old anomaly is left.</strong> The ratios
+        themselves are <a href="breeding.html#verified-ratio-1-2-1">verified</a> over two long instrumented
+        runs, most recently 95 to 102 foals a pen across six hours. What the logging is still there for is the
+        19:08 run's 0 <code>H/H</code> in 35, which has never come back
+        (<a href="known-gaps.html#gap-245">gap 245</a>). <strong>Read:</strong> if a pen's real tally leaves
+        1&nbsp;:&nbsp;2&nbsp;:&nbsp;1 while its shadow does not, the mare's random stream is the cause; if both
+        skew, the genomes are; a <code>SHARED</code> random is a finding on its own. One more clean all-day run
+        and the entry can close. <strong>Read across midnight:</strong> <code>latest.log</code> restarts at
+        00:00, and the earlier part of a run is in <code>run/logs/&lt;date&gt;-1.log.gz</code>.</li>
+</ul>
+
+<h3 id="mutation-0917">Magic out of nowhere, and a new checklist box (2026-09-17, NOT played)</h3>
+
+<p>
+    A bred foal now has a one-in-a-thousand chance of being born with a magical allele
+    neither parent had, and one in a million of taking two. The rate and the exclusions are
+    unit-tested; what no test can show is that the box ticks in a real game. A checklist
+    entry went in with it &mdash; <em>Breed a mutation</em>. Two more went in at the same
+    time, <em>Breed fraternal twins</em> and <em>Breed identical twins</em>, and are checked
+    on <a href="fertility.html#mutation-0917-twins">twinning</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A mutation ticks its box.</strong> At one in a thousand this is not something
+        to sit and wait for; the honest check is to notice whether <em>Breed a mutation</em>
+        has ticked after a long breeding session, and whether the foal it ticked on really
+        does carry a magical gene neither parent had. <strong>Fail:</strong> the box ticks on
+        an ordinary foal, which would mean the detector is reading inheritance as novelty.</li>
+    <li><strong>Only the breeder is credited.</strong> The mutation box goes to whoever
+        arranged the breeding; the twin boxes go to the mare&rsquo;s owner at foaling.
+        <strong>Pass:</strong> a second player standing nearby does not get either.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>Wild horses never mutate.</strong> A mutation is a foal-only event by design,
+        so a wild-caught horse should still be exactly its breed.
+        <strong>Pass:</strong> wild horses of a named breed go on carrying no stray magic, as
+        they did before &mdash; this is the rule the change was scoped not to break.</li>
+</ul>
+
+<h3 id="open-older">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Gene&hellip; and Allele&hellip; on My horses</strong> (tester guide, <em>My horses lists all your horses</em>). What the lists contain is unit-tested (<code>RosterGeneticsTest</code>). What is left is the menu itself: picking a gene narrows the allele list, and <em>Any gene</em> undoes it. A second allele replaces the first. A click outside dismisses the menu without reaching the table, the wheel scrolls a long list, and losing the last carrier of a gene drops it on the next refresh. Limited by the roster cap (<a href="known-gaps.html#gap-76">gap 76</a>).</li>
+    <li id="browser-scroll-0-3-7"><strong>The H browser's scroll bars drag.</strong> The gene list's is known to. Check the tab strip's bar, both breeding-preview pickers, My horses, Recipes, Alleles and the two detail panes, and that clicking the bare track jumps the thumb.</li>
+    <li><strong>The browser remembers where you were.</strong> Close it mid-page and reopen: same tab, scroll, selected gene, search text and sort. Horse-specific selections drop only on disconnect.</li>
+    <li><strong>Typing in the H browser's gene search</strong> never closes the window (the <kbd>e</kbd> key), and backspace, the arrows and ctrl+A/C/V still work in the box. (The spawn egg's box is <a href="item-spawn-eggs.html#verified-gene-search">verified</a>; this is the browser's.)</li>
+    <li><strong>A horse held still by its information screen</strong> (<a href="known-gaps.html#gap-77">gap 77</a>). Open <strong>i</strong> on a walking horse: it stands, and walks again within a second or two of closing. A ridden horse still steers. Open it, then <code>/kill</code> yourself or Alt-F4: the horse moves again within about three seconds.</li>
+    <li><strong>Back to a working inventory</strong> (<a href="known-gaps.html#gap-71">gap 71</a>). Done or Escape on the information screen returns to the horse inventory, and moving the saddle to your inventory still works. The family tree's Done returns to the information screen.</li>
+    <li><strong>My horses lists every horse you own.</strong> One left in another dimension and one in an unloaded chunk show <em>not loaded</em>, <code>?</code> bond and adult. Tame a horse with the screen shut: it appears on open and again after Refresh. Clicking a heading sorts and reverses it, and an unknown bond sorts to one end.</li>
+    <li><strong>The My horses filter.</strong> Try <code>mare</code>, <code>foal</code>, <code>-lethal</code>, <code>gen&gt;2</code>, <code>bond&gt;50</code>, <code>breed:shire</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code> and <code>mare gen&gt;2</code>. Half-typed <code>speed&gt;</code> or <code>gene:</code> filters to nothing without throwing. <code>gene:&lt;token&gt;</code> lists a silent carrier that <code>expresses:</code> does not.</li>
+    <li><strong>The Offspring tab.</strong> It is empty until Refresh and says so. On a horse you have bred from, foals and grandfoals sit under their own headings, and a horse bred back into its line appears once without looping. Refresh on horse A then on B shows B's descendants, not A's.</li>
+    <li><strong>The information screen's round trips.</strong> Type a barn name, press Set, close and reopen: it stuck. Copy the Genes tab's full code into the custom spawn egg: the horse that appears is this one. Owner now shows only on a <a href="item-transfer-papers.html">transferred</a> horse.</li>
+    <li><strong>The breeding preview's roster and odds.</strong> Your horses are in both lists, including one you were given a transfer paper for. A mare and a stallion that share a recessive read <code>1 in 4</code>.</li>
+    <li><strong>Size and colour are inherited, not rerolled.</strong> A foal of a large horse carries that percentage; a coloured-mane horse's foal gets the same mane colour.</li>
+    <li><strong>The family tree</strong> still draws with a foal that died at birth in it. <a href="breeding.html">Breeding</a>.</li>
+    <li><strong>Name-tag rename window.</strong> Right-click a tamed horse with any name tag: the window opens prefilled and you are not put on the horse. Confirm spends exactly one tag and the information screen shows the new name; Cancel or <kbd>Esc</kbd> spends nothing; walking out of range before confirming is refused; vanilla's floating name is never set. The window was unusable in 0.5.004 &mdash; it painted its panel over its own boxes and buttons &mdash; so check first that you can <em>see</em> both name boxes, both buttons and the letters you type.</li>
+    <li><strong>Save and reload keeps the horse.</strong> Before quitting to title, note a strongly marked horse's markings and one epigenetic value, a stallion, a big horse's size, speed and jump, an injured horse's health, and a bonded pair's bond and herd. After reloading, all of it matches. Any repaint means the quantised epigenome did not round-trip, and an injured horse must not come back healed.</li>
+    <li><strong>Family tree scroll mode.</strong> Set <code>familyTree.scrollBar = true</code> in <code>phc/client.toml</code>: the wheel and the right-edge thumb scroll the tree. Shrink-to-fit is <a href="breeding.html#verified-family-tree">verified</a>.</li>
+    <li><strong>A foal's stats against its parents.</strong> A bred foal's speed and health land on its attributes, and the information screen's comparison against <code>parentStats</code> reads the right way round.</li>
+    <li><strong>The browser at GUI scale 2, 3 and 4 and in a narrow window.</strong> The thirteen My horses columns squeeze but stay legible, especially Name, Breed, Coat and Where. The coat column reads like <em>Bay, tobiano, silver</em>. No button sits on text: check Only what varies, Refresh, the filter box, and the Genes filter and Offspring Refresh on the information screen.</li>
+    <li><strong>The portraits.</strong> Row portraits fill in a moment after the row, without the row jumping, and never trigger a request per frame (a stutter that grows). A loaded foal draws as a foal, and a horse you can see matches its row. Breeding preview portraits sit in both pickers and above the squares, scrolling with the pane. Offspring descendants draw in their real coats at once.</li>
+    <li><strong>The information screen's chrome.</strong> The <strong>i</strong> button hangs off the left edge and is still on screen at GUI scale 4 in a small window. The barn-name box is framed and turns blue on focus, not washed-out grey. Coat, Health and Other genes have faint hairline dividers. Health reads green above the baseline and red below, and <em>0.164</em> is legible on the dark panel.</li>
+    <li><strong>The family tree draws ancestors' real coats.</strong> A bay, grey or splash ancestor shows the same markings in the tree as in the world.</li>
+</ul>
+
+<h3 id="tester-fixes-0917-rename">The rename window, fixed from the testers' first day on 0.5.004 (2026-09-17, NOT played)</h3>
+
+<p>
+    Reported from outside, and fixed against a report rather than against a play session here
+    &mdash; so it wants confirming by the person who found it.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The rename window can be used.</strong> Right-click a tamed horse with a
+        name tag (tester guide, <em><a href="for-testers.html#t-name-tag">Renaming a horse
+        with a name tag</a></em>). <strong>Pass:</strong> both name boxes, the Rename
+        button and the Cancel button are all <em>visible</em>; typing shows letters; Cancel
+        and <kbd>Esc</kbd> both close it and spend no tag. It was drawing its panel over
+        its own widgets, so the whole window read as dead.</li>
+</ul>
 </section>
 
 <div class="page-foot">

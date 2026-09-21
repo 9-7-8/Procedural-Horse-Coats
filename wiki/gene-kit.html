@@ -711,6 +711,41 @@ private static final double S_NEAR_WHITE = 0.93;</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Nine <code>W</code> alleles have never been spawned, but the half that can be wrong invisibly is whether two different boosters still count as two, whether <strong><code>W31/W31</code> is refused as nonviable</strong>, and whether <code>W23/W23</code> really left the designer.</p>
+</div>
+
+<h3 id="after-1057">KIT&rsquo;s white alleles in the running build (2026-09-15, NOT yet looked at)</h3>
+
+<p>
+    <strong>All of this is in the 16:11 run</strong>, which was built and launched after the ward-pen fix, so it is the
+    first run that carries every change of the day. Each change was type-checked against the running client's classpath
+    when it was written. What is left below is looking at it.
+</p>
+<ul>
+    <li><strong>KIT: W22, the linked alleles and speckled white.</strong> Spawn
+        <code>kit=W22/N</code>, <code>kit=W22/W20</code>, <code>kit=W26/N</code> and <code>kit=W21/N</code>. <strong>Pass:</strong> a broad
+        sabino, a pure white, an extensive white, and a horse flecked white through the coat with a white face and a coloured
+        mane. Whether the speckle reads as <em>&yacute;rusk&jacute;&oacute;ttur</em> rather than roan is a look for you.</li>
+    <li><strong>The rest of the published <code>KIT</code> <code>W</code> alleles.</strong> Spawn <code>kit=W2/N</code>,
+        <code>kit=W1/N</code>, <code>kit=W31/N</code> and <code>kit=W19/W19</code> with the custom egg. <strong>Pass:</strong> all white,
+        near-white, broad sabino and near-white again, and <code>W31/W31</code> is refused as nonviable.</li>
+</ul>
+
+<h3 id="open-older-gene-kit">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Two different KIT boosters count as two</strong> (<code>*CoatBakeGoldenTest</code> or a unit test). <code>kit=W32/W34</code> resolves the same as <code>W35/W35</code>, and <code>W15/W15</code> is a listed, viable near-white.</li>
+    <li><strong><code>W23/W23</code> is gone from the horse designer</strong>, where it used to be the allele the designer opened on, and <code>W15/W15</code> is offered.</li>
+    <li><strong>KIT boosters in a herd.</strong> A big mixed herd has more stars and socks but no more sabinos or near-whites. The ladder <code>W35/N</code> &rarr; <code>W35/W35</code> &rarr; <code>SB1/N</code> &rarr; <code>SB1/W35</code> &rarr; <code>W13/N</code> &rarr; <code>SB1/SB1</code> &rarr; <code>W22/N</code> whitens at every step. Thoroughbreds are the most-marked common breed, and Quarter Horses and Paints show the stacking.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-mitf.html">MITF (splash white)</a>

@@ -1297,7 +1297,7 @@
     asking. So a client-only Jade still says <em>Pregnant</em> and stays quiet about heat and
     nursing, rather than going blank.
     <span class="flag">Unverified</span> in either configuration &mdash; see
-    <a href="verification.html#jade-0918">verification</a>.
+    <a href="compatibility.html#jade-0918">verification</a>.
 </p>
 
 <h2 id="combat-controls">Horse Combat Controls</h2>
@@ -1680,6 +1680,305 @@
         but 167 metals at two values is a lot of sameness, and nobody has played with it to
         say whether it reads as boring or as unobtrusive.</li>
 </ul>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, and a hay-bale tag lookup that would silently stop every horse in the world eating hay &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
+</div>
+
+<h3 id="pseudowoods-0919">287 modded woods become 39 (2026-09-19, NOT played, needs the big pack)</h3>
+
+<p>
+    A fence gate is not a promise of a plank. With Every Slab installed the pack adopted 247
+    pseudo-woods and registered 1,488 uncraftable cart items; the scan now demands a
+    <code>&lt;name&gt;_planks</code> item file before adopting a wood, and drops the wagon
+    for the nine real woods that ship no stripped log. See
+    <a href="compatibility.html#generated-gate-promise">compatibility &sect; neither is a fence
+    gate</a>. <strong>Predicted from the jars, not observed</strong>: the simulation
+    reproduced the old count of 287 exactly and matched all nine stripped-log warnings by
+    name, but no boot has been done with the change in.
+</p>
+
+<h4>On the big pack &mdash; the numbers, which are the whole check</h4>
+<ul>
+    <li><strong>The boot line should read about 39 modded woods, not 287.</strong>
+        <code>compat: N modded woods, ... fingerprint ...</code>. The fingerprint must also
+        change, or the generated pack is stale and none of the rest of this is real.</li>
+    <li><strong>Every <code>has no planks item</code> warning should be gone</strong> &mdash;
+        there were 1,488. Any that survive name a wood that passed the file check and failed
+        the registry one, which is the interesting case and worth reporting.</li>
+    <li><strong>The nine <code>no stripped log</code> warnings should be gone too</strong>,
+        and those woods should still have their other five carts.</li>
+    <li><strong>Generated file count should fall a long way</strong> from 7,818.</li>
+</ul>
+
+<h4>What this deliberately breaks, and should be looked for</h4>
+<ul>
+    <li><strong>Any EverySlab double gate already placed in the nightly world is now a
+        missing block</strong> &mdash; 248 gate types stopped being registered. They crafted
+        before, so this is the one real cost of the change. Check the nightly world loads
+        without a wall of &ldquo;unknown block&rdquo; errors.</li>
+    <li><strong>A real wood must not have gone missing.</strong> The risk is a mod that
+        registers planks but ships no item model file for them; it would be silently dropped.
+        Spot-check that the wood mods you actually use still have carts and double gates.</li>
+</ul>
+
+<h3 id="bales-0919">Horses eat other mods' hay bales (2026-09-19, NOT played, needs a second mod installed)</h3>
+
+<p>
+    A horse now grazes, heals beside, and can be hand-fed any bale in
+    <code>horsegenetics:hay_bales</code> &mdash; vanilla's, plus
+    <a href="https://modrinth.com/mod/bale-of-sugar-cane">Bale of Sugar Cane</a>'s as an
+    optional entry. <strong>None of it has been seen in a game with that mod installed</strong>;
+    the ids were read out of its jar, not observed. See
+    <a href="compatibility.html#bales">compatibility &sect; bale mods</a>.
+</p>
+
+<h4>With no second mod installed &mdash; do these first, they need nothing but the dev client</h4>
+<ul>
+    <li><strong>A hungry horse still walks to a plain hay bale and eats it.</strong> This is
+        the one that matters most and it is the <em>regression</em> check, not the feature:
+        grazing hay stopped being a hardcoded block and became a tag lookup, so if the tag
+        is wrong every horse silently stops eating hay everywhere. The gametest
+        <code>hay_is_still_a_bale</code> covers the tag itself; this covers the goal that
+        reads it.</li>
+    <li><strong>Hand a hay bale to a hurt tamed horse.</strong> It should heal, consume the
+        bale and give bond exactly as before &mdash; vanilla's own bale is deliberately
+        excluded from the new handler, so any change here is a bug.</li>
+    <li><strong>Hand a hay bale to a full-health adult.</strong> Nothing should happen and
+        the bale should <em>not</em> be eaten. Unchanged vanilla behaviour, worth confirming
+        once because the new handler deliberately reproduces it.</li>
+    <li><strong>A hay portal still lights from real hay bales.</strong> Untouched, but it is
+        the nearest thing to this change.</li>
+</ul>
+
+<h4>With Bale of Sugar Cane installed &mdash; the actual feature, none of it ever run</h4>
+<ul>
+    <li><strong>Does the mod even load beside this one?</strong> Nothing has confirmed the
+        two coexist. Do this before judging anything below.</li>
+    <li><strong>A hungry horse should walk to a sugar cane bale and eat it</strong>, at the
+        same priority as hay &mdash; above crops, below cake.</li>
+    <li><strong>Hand one to a hurt tamed horse.</strong> Expect 20 health, the bale consumed,
+        the eat sound, and bond. A foal should age up 180 seconds with the happy-villager
+        particles.</li>
+    <li><strong>If nothing at all happens, the id is wrong</strong>, not the logic &mdash;
+        that is the designed-for failure and it is silent by intent. Confirm with
+        <code>/data get</code> or by checking the item's id in F3+H, and compare against
+        <code>data/horsegenetics/tags/item/hay_bales.json</code>.</li>
+    <li><strong>A wheat-diet horse should take a sugar cane bale</strong> and an
+        eat-anything horse too. A horse on any other special diet should refuse it with the
+        usual turned-away message &mdash; that path is <code>HorseDietHandler</code>'s and
+        the risk is the two handlers both firing, which would show as a double heal.</li>
+    <li><strong>Stand a hurt horse beside a sugar cane bale and a water source.</strong>
+        Gated healing should tick, the same as beside hay.</li>
+</ul>
+
+<h3 id="jade-0918">A mare's state in Jade's tooltip (2026-09-18, NOT played, nothing here has been seen)</h3>
+
+<p>
+    <strong>The first third-party jar this mod has ever compiled against</strong>, so the first
+    thing to check is not the tooltip but that nothing else broke. Jade is
+    <code>compileOnly</code> and the built jar was confirmed to contain no <code>snownee</code>
+    classes, but no build of this has been launched into a game at all.
+</p>
+
+<h4>Do these first &mdash; the whole feature is downstream of them</h4>
+<ul>
+    <li><strong>The mod still loads with Jade absent.</strong> This is the one that matters. A
+        missing optional dependency that is actually required shows as a crash in the mod
+        constructor, so <code>runServer</code> to <q>Done (</q> with no Jade installed, and grep
+        the log for <code>ERROR</code> &mdash; a green boot line is not a clean boot.</li>
+    <li><strong>The mod still loads with Jade present</strong>, client and server both.</li>
+    <li><strong>The tooltip appears at all.</strong> Point at a mare you know is pregnant.
+        Nothing to configure; if Jade shows the horse but no line, the plugin was not
+        scanned.</li>
+</ul>
+
+<h4>Then the words themselves</h4>
+<ul>
+    <li><strong>A pregnant mare reads <em>Pregnant</em></strong>, a mare in heat <em>In
+        heat</em>, a nursing mare <em>Nursing</em> &mdash; and a mare between heats reads
+        <strong>nothing</strong>. That last one is deliberate and is the easiest to mistake for
+        the feature being broken.</li>
+    <li><strong>Stallions, geldings and foals get no line.</strong> Same rule as the
+        information screen.</li>
+    <li><strong>No countdown ever appears.</strong> Watch one mare through a whole heat; the
+        word should switch, never tick. Worth doing with <code>debug.tools</code> on, where a
+        heat lasts a minute and any leaked timer will be obvious.</li>
+    <li><strong>Twins are still the vet kit's alone.</strong> If the word <q>twins</q> ever
+        reaches the tooltip, a settled decision has been broken.</li>
+</ul>
+
+<h4>The configuration nobody has tried</h4>
+<ul>
+    <li><strong>Jade on the client but NOT on the server.</strong> The heat model is not synced,
+        so the server-data provider never runs; the tooltip should fall back to
+        <em>Pregnant</em> only, and stay silent about heat and nursing rather than going blank.
+        This path has never executed. If it shows nothing at all, the synced
+        <code>PREGNANT</code> attachment is not reaching
+        <code>ReproHandler.pregnantEitherSide</code> the way it is assumed to.</li>
+    <li><strong>It must not freeze the horse.</strong> The information screen takes an inspect
+        lease that stops the horse moving; a tooltip must not. Look at a wandering horse for a
+        while and check it keeps wandering.</li>
+</ul>
+
+<h3 id="compat-collapse-0918">One armour per metal name, after v0.5.012 would not load (2026-09-18, NOT played)</h3>
+
+<p>
+    A tester's 319-jar pack could not start v0.5.012: six of those mods add a steel ingot, the
+    generated horse armour was named after the metal alone, and the second registration threw
+    inside the mod constructor. v0.5.013
+    <a href="compatibility.html#generated-naming">collapses the ids by material name</a>.
+    <strong>What is confirmed</strong> is a <code>runServer</code> boot to <code>Done</code>
+    against a synthetic mod carrying the two single-jar shapes of the bug: 5 metals scanned, 4
+    armours registered, one <code>entro_horse_armor</code> rather than two, and
+    <code>hellforged_horse_armor</code> rather than <code>ingot_hellforged_horse_armor</code>.
+    That is a server, so <em>nothing was drawn</em>, and the tester's pack has not been tried
+    again.
+</p>
+
+<ul>
+    <li><strong>Does the real pack start now?</strong> The one question that matters, and only
+        the tester can answer it. It did not on v0.5.013 &mdash; the launch log came back with a
+        second blocker one event later, fixed in v0.5.014 and re-checked the same way (boot to
+        <code>Done (0.312s)</code> with five modded metals, ingots stocked at the
+        metalsmith&rsquo;s tier 2 beside iron horse armour and gems at tier 5 beside diamond).
+        <strong>v0.5.014 is the third attempt and has not been tried on the real pack either.</strong>
+        Worth asking for the launch log either way &mdash; from a boot that gets past mod
+        loading, the <code>compat:</code> lines and the uncraftable warnings would close a good
+        part of <a href="known-gaps.html#gap-271">gap 271</a> on their own.</li>
+    <li><strong>Is there exactly one Steel Horse Armor in the creative menu, and does every
+        mod's steel ingot forge it?</strong> The per-ingot recipes have never been parsed by
+        the game &mdash; the synthetic mod registers no items, so they are still skipped
+        unwritten (<a href="known-gaps.html#gap-272">gap 272</a>). <strong>This is the most
+        likely thing in the release to be wrong</strong>, because it is the only part the
+        server boot could not exercise at all.</li>
+    <li><strong>Does the collapsed armour wear a sensible colour?</strong> It is tinted from
+        the winning ingot's art &mdash; the lowest item id &mdash; so a steel armour may be
+        coloured from a mod the player does not think of as the steel mod.</li>
+    <li><strong>Does <code>phc/generated/</code> rebuild itself on upgrade?</strong> The
+        fingerprint carries a rules version now, so a player upgrading without touching their
+        mod list should see the folder wiped and rewritten. Nothing has tested the upgrade
+        path; both boots here were first runs.</li>
+</ul>
+
+
+<h3 id="compat-0918">Gates and armour for other mods' materials (2026-09-18, one real pack, nothing drawn)</h3>
+
+<p>
+    The mod now reads every other mod's jar at startup and generates a
+    <a href="item-double-gates.html#modded-woods">double gate</a> per wood they added and a
+    horse armour per ingot or gem, into a pack at <code>.minecraft/phc/generated/</code>. All
+    of it works &mdash; against a <strong>synthetic</strong> test mod, on a
+    <strong>dedicated server</strong>, where nothing draws. It has met real mods exactly once,
+    on a tester's 319-jar pack, and
+    <a href="compatibility.html#compat-collapse-0918">that run crashed</a> before anything was
+    generated &mdash; see that section for what it did and did not settle.
+    <a href="known-gaps.html#gap-271">Gap 271</a> to
+    <a href="known-gaps.html#gap-275">275</a> are what that leaves open. The mechanism is on
+    <a href="compatibility.html#generated">the compatibility page</a>.
+</p>
+
+<div class="note">
+    <span class="label">This section needs something the test kit cannot make: another mod</span>
+    <p>
+        <strong>Pick a mod that builds for 26.1.2 and adds a wood, an ingot or a gem</strong>
+        &mdash; the kind of thing this is for is a biome or a tech mod, not a horse mod, and
+        the compatibility page's own recommendations are a fine place to start.
+        <a href="compatibility.html#customfence">Custom Fences and Walls</a> is the obvious
+        first try for the gate half <em>if</em> it turns out to ship its own woods rather than
+        restyling vanilla's; anything at all with an ingot in it does the armour half. Drop the
+        jar in <code>neoforge-26.1.2/run/mods/</code>. <strong>Two</strong> wood-adding mods, if
+        two can be found, is what answers the duplicate-name question below.
+    </p>
+    <p>
+        The whole run can be read out of <code>run/logs/latest.log</code> by grepping
+        <code>compat:</code> &mdash; every line this layer writes carries that prefix, and the
+        counts, the fingerprint, the file count and every skipped recipe are all on one of
+        them.
+    </p>
+</div>
+
+<h4>Do these first &mdash; they cost nothing and can be wrong invisibly</h4>
+
+<ul>
+    <li><strong>With no extra mods at all, nothing changed.</strong> Launch the dev run as it
+        stands. <strong>Pass:</strong> one line reading <code>compat: 0 modded woods, 0 modded
+        metals...</code> and <code>compat: nothing to generate</code>, and
+        <strong>no <code>run/phc/generated/</code> folder on disk</strong> &mdash; an empty
+        folder nobody can explain is the thing that was specifically avoided.
+        <strong>Fail:</strong> a folder, or any file in it. This is the one check that says the
+        common case &mdash; almost every player &mdash; is untouched, so do it before anything
+        else.</li>
+    <li><strong>The scan finds what the mod actually ships.</strong> Add the mod, launch, read
+        the <code>compat:</code> count line. <strong>Pass:</strong> the wood and metal counts
+        match what that mod's own item list says it adds. <strong>Fail, and it is the silent
+        one:</strong> zero woods from a mod that plainly has ten. That means the file layout
+        assumption missed &mdash; a blockstate somewhere unexpected, or a plank texture not at
+        <code>textures/block/&lt;name&gt;_planks.png</code> and no readable texture id in the
+        gate model either, which drops the wood entirely rather than logging.
+        <a href="known-gaps.html#gap-271">Gap 271</a>.</li>
+    <li><strong>The pack is written, and is readable.</strong> Open
+        <code>run/phc/generated/</code>. <strong>Pass:</strong> a <code>README.txt</code>, a
+        <code>.fingerprint</code>, and under <code>assets/</code> and <code>data/</code> the
+        models, blockstate, item definition, loot table, recipe, tags and lang for each wood.
+        Open one model and check the <code>textures.texture</code> value is that mod's real
+        plank texture id. <strong>This is the point of the folder</strong> &mdash; being able
+        to read the file that failed is the whole reason it is on disk and not in memory.</li>
+    <li><strong>The fingerprint short-circuits.</strong> Relaunch without changing the mod list.
+        <strong>Pass:</strong> <code>compat: generated pack is current (&lt;hash&gt;)</code> and
+        no file in the folder has a new timestamp. <strong>Then remove the mod and relaunch:</strong>
+        the folder is wiped, and with nothing else installed it does not come back.
+        <em>All three of these states were confirmed on a server against the synthetic mod;
+        the point of redoing them is that the fingerprint is taken over the real mod's real
+        colours.</em></li>
+    <li><strong>A generated recipe actually parses</strong> &mdash;
+        <a href="known-gaps.html#gap-272">gap 272</a>, and the single most likely thing to be
+        broken, because <em>it has never once happened</em>. Every run so far skipped every
+        recipe. <strong>Pass:</strong> no recipe error in the log at world load, and two of that
+        mod's fence gates alone gives you the double gate in a crafting grid;
+        six of their ingot plus one horse hair gives you the armour.
+        <strong>Fail:</strong> a wall of red naming <em>their</em> mod id at datapack load. If
+        instead the log says <code>declares ... but never registers it</code>, that is the skip
+        working as designed and the recipe is still untested &mdash; try a different mod.</li>
+    <li><strong>A generated armour is worth roughly what their metal is worth.</strong> Read the
+        armour value in the tooltip and compare it to where that mod puts the metal.
+        <strong>Pass:</strong> a starter metal is around iron and an endgame one is up near
+        diamond or netherite, and nothing exceeds netherite. <strong>Fail is a judgement, not
+        an error:</strong> say which metal and what it gave, because
+        <a href="known-gaps.html#gap-275">gap 275</a> is explicit that the ladder is a guess
+        from two weak signals and the only way it improves is somebody reporting a case.</li>
+</ul>
+
+<h4>And then the looking, which has never been done at all</h4>
+
+<ul>
+    <li><strong>A generated horse armour draws, worn and in the slot</strong> &mdash; and in
+        <em>its metal's colour both times</em>. This is the check that matters, because the
+        colour reaches the two places by two entirely different mechanisms (the equipment
+        asset's dyeable layer for the worn armour, <code>MetalTintSource</code> for the icon).
+        <strong>Fail:</strong> one of the two plain grey or plain white means only one of the
+        two routes is working, and which one tells you immediately which file to open. Nobody
+        has ever seen the plate art at all &mdash; it was measured, not looked at &mdash; so
+        also just say whether it reads as horse armour.</li>
+    <li><strong>Two wood mods, and the names collide.</strong> Only if two can be found. Both
+        &ldquo;Maple Double Fence Gate&rdquo;, distinct items.
+        <a href="known-gaps.html#gap-274">Gap 274</a> is a decision waiting on somebody seeing
+        how bad it actually looks in a creative search.</li>
+</ul>
+
+<p>
+    The gates' own half of this &mdash; whether a modded gate draws at all, and whether its
+    icon and name land &mdash; is on
+    <a href="item-double-gates.html#compat-0918-gates">the double gates page</a>. The
+    metalsmith's armour trades are on
+    <a href="villagers.html#compat-0918-metalsmith">the villagers page</a>, and the fittings
+    slot on <a href="item-equestrian-bench.html#compat-0918-bench">the bench's</a>.
+</p>
+</section>
 
 </article>
 </main>

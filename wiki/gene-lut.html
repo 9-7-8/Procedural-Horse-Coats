@@ -365,6 +365,25 @@ does.</p>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>All of this is the browser <strong>LUT lab</strong> rather than the game: it must be served over http and not <code>file://</code>, and then the uploads, the sampled-footprint overlay, the pinned colour marks and a log free of <code>could not load alternate LUT</code> each want exercising.</p>
+</div>
+
+<h3 id="open-older-gene-lut">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The <a href="gene-lut.html">LUT lab</a> comes up and reads correctly</strong> (served, not <code>file://</code>): chart and horse side by side, stacking under 860px; the corner labels match the art; the rotated Y caption sits beside the chart; the hover swatch tracks the cursor and resets on leave.</li>
+    <li><strong>LUT lab uploads.</strong> The button and a drag onto the panel each add a selected &#9650; button and update the size line, several files at once too; the horse visibly changes; switching between Natural, Blue / pink and an upload works. &ldquo;Natural&rdquo; shows the designer's copy of the gradient (<a href="known-gaps.html#gap-48">gap 48</a>).</li>
+    <li><strong>LUT lab overlay and marks.</strong> The footprint dims unsampled chart with a dashed range box and a crosshair on the stated centre of mass; <code>Ch/Ch</code> to <code>Cr/Cr</code> on a chestnut walks it from about 45% to 92%; unticking leaves the bare chart; an all-white horse says &ldquo;no pigment anywhere&rdquo;. A click pins an amber mark under the cursor; <code>#B0A08A</code> finds a plausible spot, <code>#00FF00</code> warns it is far off, <code>nonsense</code> is refused. Stacked dilutions caption every token, <code>Cr/prl</code> matches <code>Cr/Cr</code>, and the dice moves tobiano patches only.</li>
+    <li><strong>The green/pink LUT</strong> (<code>Grnpnk/Grnpnk</code>) over a black, a bay and a chestnut, each a different corner of the chart; and no <code>could not load alternate LUT</code> in the log (<a href="known-gaps.html#gap-36">gap 36</a>).</li>
+</ul>
+
+</section>
+
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>

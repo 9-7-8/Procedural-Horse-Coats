@@ -120,7 +120,7 @@
         the blue particle trail works. <strong>Still unverified:</strong>
         <code>walk_on_water</code> (an approximation &mdash; surface buoyancy, not a
         solid plane) and the tamed-mare milking. Checklist item is
-        <a href="verification.html#effects">To be verified &sect;13</a>.
+        <a href="gene-suntouched.html#effects">To be verified &sect;13</a>.
     </p>
 </div>
 
@@ -211,7 +211,7 @@
     live game (boot log: <code>[genes] loaded 2 data-driven gene(s)</code>): the neon-blue streaks in
     the mane and tail render, and the blue particle trail works. Still unchecked: streaks on cremello and
     dominant white, walking on water, and milking for water
-    (<a href="verification.html#effects">the checklist</a>).
+    (<a href="gene-suntouched.html#effects">the checklist</a>).
 </p>
 
 <p id="verified-effects-translated">
@@ -249,13 +249,30 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Ride a grown waterborn horse into deep water and it should hold the surface without bobbing, sticking at the edge or ducking your head under; then check its streaks and suntouched&rsquo;s glowing mane both survive the <strong>hard coats</strong>, cremello and dominant white, with foals showing them on the tail alone.</p>
+</div>
+
+<h3 id="open-older-gene-waterborn">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Waterborn with a rider.</strong> Ride a grown waterborn horse into deep water: it stays at the surface without bobbing, sticking at the edge or putting your head under.</li>
+    <li><strong>Waterborn and Suntouched on hard coats.</strong> Waterborn's streaks and Suntouched's glowing mane both read over cremello and dominant white; each foal shows them on the tail only and a Suntouched foal still casts light; two waterborn horses' streaks differ and a foal's match its parent's.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="making-a-gene.html#block">Gene effects reference</a>
         <a href="horse-traits.html">Trait &amp; effect architecture</a>
         <a href="gene-mane-color.html">Mane colour (the TOWARD move)</a>
         <a href="making-a-gene.html#the-shape">The gene file format</a>
-        <a href="verification.html#effects">What to check in-game</a>
+        <a href="gene-suntouched.html#effects">What to check in-game</a>
     </div>
     Source: <code>common/src/main/resources/horsegenetics/example-genes/waterborn.json</code>
     (and the shipped copy under <code>neoforge-26.1.2/&hellip;/resources/horsegenetics/genes/</code>)

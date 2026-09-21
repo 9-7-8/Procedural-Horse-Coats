@@ -131,7 +131,7 @@
         the horse lights the area around it. <strong>Still unverified:</strong> the
         light cleaning up on death / unload, the foal case, the horse-dimension
         skip, and hard base coats (cremello, dominant white). Checklist item is
-        <a href="verification.html#effects">To be verified &sect;13</a>.
+        <a href="gene-suntouched.html#effects">To be verified &sect;13</a>.
     </p>
     <p>
         That 2026-09-02 check was done <strong>in a built pen with a swept floor</strong>,
@@ -169,7 +169,7 @@
     <p>
         Still open: a chunk that unloads before its queued clear runs orphans the block
         (<a href="known-gaps.html#gap-284">gap 284</a>). Unplayed since the fix &mdash;
-        <a href="verification.html#suntouched-0918">verification &sect;0-FW</a>.
+        <a href="gene-suntouched.html#suntouched-0918">verification &sect;0-FW</a>.
     </p>
 </div>
 
@@ -242,7 +242,7 @@
     <strong>The <code>glow</code> verb, seen in game 2026-09-02:</strong> the emissive gold mane and tail
     render and look good, the gold-dust <code>emitter</code> shows, and the horse lights the area around
     it with a trailing <code>minecraft:light</code> block. Still unchecked: the light cleaning up on death
-    or unload, a foal, and hard base coats (<a href="verification.html#effects">verification item 13</a>).
+    or unload, a foal, and hard base coats (<a href="gene-suntouched.html#effects">verification item 13</a>).
 </p>
 
 <p id="verified-no-light-in-dimension">
@@ -274,13 +274,73 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Suntouched&rsquo;s light was rebuilt after a dedicated-server report of no light at all: check it lights the ground through tall grass, flowers, a snow layer and shallow water, that a broken light block returns within a tick, and that riding away in singleplayer leaves <strong>no trail of abandoned light blocks</strong>.</p>
+</div>
+
+<h3 id="suntouched-0918">Suntouched actually lights the ground now (2026-09-18, NOT played)</h3>
+
+<p>
+    Reported from a dedicated server: mostly no light at all, occasionally some. The light had
+    one candidate block and it had to be air, so any horse standing in grass, flowers, snow or
+    shallow water lit nothing &mdash; and the 2026-09-02 check that passed was done in a swept
+    pen, the one place a single candidate always works. See
+    <a href="gene-suntouched.html">the gene page</a> for all three faults.
+</p>
+
+<h4>Do these first &mdash; outdoors, not in a pen</h4>
+<ul>
+    <li><strong>Stand a Suntouched horse in tall grass at night.</strong> This is the case that
+        used to fail and the reason the report exists. It should light the ground. Repeat in
+        flowers, in a snow layer, and in water a block deep.</li>
+    <li><strong>Walk it across broken country</strong> and watch the light keep up. Gaps while
+        moving fast on a server are expected &mdash; the light is placed at the server's copy of
+        a ridden horse, which is a round trip behind the rider &mdash; but it should never go
+        dark and <em>stay</em> dark.</li>
+    <li><strong>Break the light block under a standing horse.</strong> It should come back
+        within a tick. Before the fix that horse stayed dark for good.</li>
+</ul>
+
+<h4>The singleplayer half, which was quietly the worse bug</h4>
+<ul>
+    <li><strong>In singleplayer, ride a glowing horse a long way out and come back.</strong>
+        There should be <strong>no trail of abandoned light blocks</strong>. Before the fix
+        every horse you walked away from left its light burning permanently, which is part of
+        why singleplayer looked better than a server. A world that has been played on already
+        has this litter in it &mdash; existing orphans are not cleaned up by the fix, they are
+        just reclaimed by the next horse to stand there.</li>
+    <li><strong>Two Suntouched horses standing together</strong> should both be near a light,
+        not one dark. They may share a block; that is intended.</li>
+</ul>
+
+<h4>Still open regardless</h4>
+<ul>
+    <li><strong>A chunk that unloads before its queued clear runs orphans the block</strong>
+        (<a href="known-gaps.html#gap-284">gap 284</a>). Expected, recorded, not fixed &mdash;
+        do not report it as a regression.</li>
+    <li>The horse-dimension skip is still switched off with the other dimension checks, so the
+        gallery does take light blocks. <a href="known-gaps.html#gap-204">Gap 204</a>.</li>
+</ul>
+
+
+<h3 id="open-older-gene-suntouched">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Suntouched's light is cleaned up.</strong> Kill the horse, or ride far enough to unload it: the <code>minecraft:light</code> block goes with it. Gallop and check the light never fills a spot that has a block in it. <a href="gene-suntouched.html">Suntouched</a>.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="making-a-gene.html#glow">glow verb reference</a>
         <a href="gene-waterborn.html">Waterborn (the other shipped gene)</a>
         <a href="horse-traits.html">Trait &amp; effect architecture</a>
         <a href="making-a-gene.html#the-shape">The gene file format</a>
-        <a href="verification.html#effects">What to check in-game</a>
+        <a href="gene-suntouched.html#effects">What to check in-game</a>
     </div>
     Source: <code>common/src/main/resources/horsegenetics/example-genes/suntouched.json</code>
     (and the shipped copy under <code>neoforge-26.1.2/&hellip;/resources/horsegenetics/genes/</code>)

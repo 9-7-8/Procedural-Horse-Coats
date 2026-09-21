@@ -665,7 +665,7 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
     unpitched part it equals part space to the bit, and the old trick is an affine function of it (max residual 0.0002),
     so cosmic, shark, stars and suit came back byte-identical in the bake golden. <code>PartLocalFrameTest</code> pins the
     frame, and <code>GeneFilesTest</code> refuses a <code>WAVES</code> amplitude far above 1 in a normalised space. Not
-    yet seen on a horse: <a href="verification.html#local-space">verification &sect;0-AW</a>.
+    yet seen on a horse: <a href="making-a-gene.html#local-space">verification &sect;0-AW</a>.
 </p>
 
 <p id="verified-posed-parity">
@@ -685,6 +685,40 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
     with the belly at 100%. It was the root cause of &ldquo;white over the whole topline&rdquo;, not a calibration
     fault, and it hid for a day behind a stale creator fixture.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Nothing here fails invisibly &mdash; it is all geometry somebody has to look at: six local-space genes that had never painted a pixel, collars that should encircle a neck rather than slide round it as an ellipse, <a href="gene-goth.html">goth</a>&rsquo;s rescaled depth knob, and a <code>p/p</code> foal, whose neck pitch has never been rendered at all.</p>
+</div>
+
+<h3 id="open-older-body-space">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The six local-space genes that had never painted</strong>: <a href="gene-beetle-pearl.html">beetle pearl</a>'s cap over the poll, <a href="gene-diamond-scutes.html">diamond scutes</a>' chain up the crest, <a href="gene-duskfall-speckle.html">duskfall speckle</a> thickest along the crest, <a href="gene-nebula-points.html">nebula points</a>' fan, and <a href="gene-ink-scroll.html">ink scroll</a> and <a href="gene-wyrmwood-sigils.html">wyrmwood sigils</a>' collars, which should encircle the neck rather than slide round it as an ellipse. Also <a href="gene-goth.html">goth</a>'s hood along the crest and over the ears, off the throat and face (its depth knob changed units, so a known goth looks different), and any of these on a <strong>foal</strong>, whose neck pitch has never been rendered.</li>
+</ul>
+
+<h3 id="tuning-moved-0917-foal-scale">A scaled foal has never been seen (2026-09-17, NOT played)</h3>
+
+<p>
+    A tuning question moved off <a href="roadmap.html">the roadmap</a> on 2026-09-17: not
+    unbuilt, just a shape already in the game that only a person looking at it can judge. It
+    therefore ranks <strong>below</strong> every behavioural check &mdash; it announces itself
+    the moment anybody looks.
+</p>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li><strong>A scaled foal has never been seen</strong>, and <code>Skin.BABY</code>&rsquo;s
+        projection is already approximate, so check a <code>p/p</code> foal before
+        anything else that scales is added. <strong>Pass:</strong> a marking lands on the
+        foal's body the way it lands on an adult's, neither stretched nor truncated.</li>
+</ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">

@@ -571,7 +571,7 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
 
 <p>
     There is no genetic eye <em>colour</em> gene yet &mdash; a real one is a
-    <a href="verification.html#eyes">wanted gene</a>, and the classic hook is blue eyes
+    <a href="gene-extreme-white-dominant.html#eyes">wanted gene</a>, and the classic hook is blue eyes
     on cream double-dilutes. <a href="gene-light.html">Light</a> gilds them, but it
     does it from phase 6, not here.
 </p>
@@ -1163,7 +1163,7 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
     whose capacity is texels with an entry floor, and every removal goes through one hook that frees the texture.
     <code>CoatAssetReload</code> registers through <code>AddClientReloadListenersEvent</code>
     (<code>RegisterClientReloadListenersEvent</code> does not exist in 26.1.2). <code>TexelBudgetCacheTest</code> caught
-    an off-by-one in eviction. The in-game half is <a href="verification.html#coat-cache">verification &sect;0-AV</a>.
+    an off-by-one in eviction. The in-game half is on <a href="#verification">the verification tab</a>.
 </p>
 
 <p id="verified-phase3-blend">
@@ -1192,6 +1192,158 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
     <a href="gene-scarab-dapple.html">scarab dapple</a>, whose white forms were regraded. The
     pipeline golden moved six rows, all of them the one new Cleave horse.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>A fix for <strong>every GUI drawing the same black horse</strong> is in and unseen, so family tree, foal preview, browser and spawn screen all want opening on a deep pedigree &mdash; and <code>coats.bakeBudgetMs</code> has still never been measured with a person actually rendering, which no yard run can supply.</p>
+</div>
+
+<h3 id="gui-coats-0918">Every horse in every GUI was the same black horse (2026-09-18, NOT played)</h3>
+
+<p>
+    Reported from a world: the family tree drew every ancestor in the default black coat.
+    The genome was never missing &mdash; it is on the record, it is synced, and the screen
+    built the right <code>CoatData</code> from it. The
+    <a href="session-log.html">coat-bake rationing</a> of 2026-09-13 added a resolved
+    <code>coatId</code> to the render state and made <code>getTextureLocation</code> prefer
+    it, and no GUI was updated to set it; a screen's throwaway model horse is not in
+    <code>ClientCoatCache</code>, so the id resolved from the wild type and the coat assigned
+    a line later was never read again. <code>GeneticHorseRenderer.applyCoat</code> now moves
+    the coat and both texture ids together.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+<ul>
+    <li><strong>The family tree shows different horses.</strong> Open it on a horse with
+        several known ancestors of visibly different colours. Before the fix every box was
+        the same black; they should now disagree with each other, and each should match the
+        horse you remember.</li>
+    <li><strong>All four screens, not just the one that was reported.</strong> The same
+        defect was in the <strong>foal preview</strong> on the horse information screen, the
+        <strong>horse browser</strong>, and the <strong>custom spawn screen</strong>. If the
+        spawn designer looked right before, that was luck &mdash; check it still does.</li>
+    <li><strong>An ancestor with no genome still draws a blank box</strong>, not an invented
+        horse. That is deliberate.</li>
+</ul>
+
+<h4>The two that can still be wrong after the fix</h4>
+<ul>
+    <li><strong>A pedigree of thirty strangers must not stutter.</strong> The bake is still
+        budgeted, so coats that have to wait show the plain stand-in for a frame and resolve
+        over the next few. Open a deep tree of horses you have never rendered and watch:
+        filling in over a moment is correct, a permanent black box is not, and a frozen
+        client is the bug the rationing exists to prevent.</li>
+    <li><strong>A glowing ancestor glows.</strong> The emissive mask rode the same broken
+        field, so a <code>glow</code>-gene horse lost its glow in every GUI too. Put one in a
+        family tree and check.</li>
+</ul>
+
+<h3 id="glow-preview-0917">A glow can be seen without the game: lights-out in the browser (2026-09-17, NOT played)</h3>
+
+<p>
+    The <a href="horse-designer/">horse designer</a>, the
+    <a href="breed-designer/">breed designer</a> and <strong>every</strong>
+    <code>gene-*.html</code> preview carry a <strong>lights-out toggle</strong>. The scene
+    dims and the lit texels stay where they are, drawn from the sheet the mod itself
+    builds: <code>CoatTextureComposer.Baked.glowSheet</code> is now the one
+    implementation, reached in game by the texture factory and in the browser by
+    <code>DesignerApi.coatGlow</code> / <code>coatGlowOf</code>. The gene pages reveal the
+    button <em>only</em> when a bake actually returns glow texels, so a gene that cannot
+    glow never offers a dead one. The creator is deliberately excluded &mdash;
+    <a href="roadmap.html#designer">&sect;10</a> says why.
+</p>
+
+<div class="note good">
+    <span class="label">Most of this is settled by measurement &mdash; do not spend eyes on it</span>
+    <p>
+        <strong>Both coat goldens came through untouched</strong>, with
+        <code>GlowIntensityTest</code> and <code>LitGeneTest</code> green: nothing moved a
+        pixel, which is the claim that the fold was <em>lifted</em> rather than rewritten.
+        The NeoForge side got <strong>smaller</strong> for it &mdash;
+        <code>GeneticCoatTextureFactory</code> and <code>GeneticHorseRenderer</code> both
+        shed their copies.
+    </p>
+    <p>
+        <code>GlowSheetTest</code> pins the arithmetic the picture cannot show: a level of
+        0.4 arrives as <strong>alpha 102</strong>, the RGB stays the coat&rsquo;s own colour
+        at that texel, a transparent texel is never lit, a <code>glow</code> effect lights a
+        whole part outright, and an ordinary horse produces <code>null</code> rather than a
+        sheet of zeroes. <code>check-glow-render.mjs</code> pins the browser half, including
+        the one API that was a guess: <strong>three r128 does honour
+        <code>emissiveMap</code></strong> on both the Lambert material the horse designer
+        uses and the Standard material everything else uses. On a real gene page, tron
+        reveals the button and agouti leaves it hidden &mdash; which is the whole chain,
+        export to DOM, proved in a browser.
+    </p>
+</div>
+
+<h4>In the game, with your hands &mdash; the part no test reached</h4>
+
+<ul>
+    <li><strong>A glowing horse still glows in the world.</strong> This change refactored
+        the renderer&rsquo;s glow path, and no golden covers a renderer. Any of
+        <a href="gene-tron.html">tron</a>, <a href="gene-lantern.html">lantern</a> or
+        <a href="gene-emberveins.html">ember veins</a>, at night. If this one is wrong,
+        nothing else here matters.</li>
+    <li><strong>Does the spawn egg already show it?</strong> Open the custom spawn egg on a
+        glowing gene. The preview goes through the real renderer, so
+        <code>EmissiveCoatLayer</code> is already drawing there &mdash; the open question is
+        whether it <em>reads</em> against the GUI&rsquo;s own directional shading, or whether
+        the panel is too bright for a glow to tell. It got no lights-out button on purpose:
+        vanilla&rsquo;s <code>g.entity(...)</code> has no lighting hook, so dimming it means
+        baking a second darkened texture per horse. <strong>Worth doing only if this looks
+        wrong.</strong></li>
+</ul>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li><strong>Is the dark dark enough, and not too dark?</strong> The lights-out view does
+        not go to black &mdash; a horse lit by nothing is a silhouette, and you could not
+        tell whether the unlit half of a marking is the shape you drew. The levels are a
+        first guess (<code>NIGHT</code> in <code>scene.js</code> and
+        <code>viewport.js</code>).</li>
+    <li><strong>Does a dim glow read as dim?</strong> Tron&rsquo;s haloes are
+        <code>0.25</code>; lantern runs 0.18&ndash;0.22 with a knob. They should look
+        <em>fainter</em>, not <em>darker</em> &mdash; if a low level reads as a muddy smudge
+        rather than a soft light, the premultiply in <code>setGlow</code> is the suspect.</li>
+</ul>
+
+
+<h3 id="open-0913">Coat performance and the distant stand-in (still open after 2026-09-13)</h3>
+
+<h4>Nothing here needs looking at to judge &mdash; do this first</h4>
+<ul>
+    <li><strong>Performance readings</strong>, from the log (<a href="known-gaps.html#gap-221">gap 221</a>).
+        <em>The tick half is answered:</em> the six-hour 16:11 run of 2026-09-15 logged
+        <code>Can't keep up</code> exactly once, at world load, and its last census read 50.0 ms a tick &mdash; a clean
+        20 TPS &mdash; with 437 entities, 411 of them horses. <em>The coat half a yard run cannot answer at all:</em>
+        that run finished <code>coat baking: 0 bakes</code>, because nobody is at the keyboard and nothing renders,
+        so <code>coats.bakeBudgetMs</code> = 4 has still never been measured against real drawing. It needs a
+        person riding into a herd, which is the tester guide's <em>Riding up to a big herd does not freeze the
+        game</em>, with <code>latest.log</code> attached. <code>[Founding]</code> lines on loading into the yard
+        still want reading.</li>
+</ul>
+
+<h4>Visual, and therefore last</h4>
+<ul>
+    <li><strong>Distant horses wear the plain stand-in coat</strong> and change to their own once, as you come
+        within 32 blocks, without flickering back.</li>
+</ul>
+
+<h3 id="open-older-pipeline">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>F3+T recolours every horse.</strong> Edit <code>redblackgradient.png</code> (or switch a resource pack) with horses on screen and press F3+T. <strong>Pass:</strong> every horse recolours, nothing stutters or crashes, and leaving the world logs how many coat textures and glow masks were released and recycled (<a href="pipeline.html#verified-texture-cache">pipeline</a>).</li>
+    <li><strong>The black alleles on dark coats.</strong> Thirty-six of the forty-two black forms were never looked at: check them on black and seal brown horses, where a near-black marking can vanish. Also pavonem's and concentric eyespots' regraded white forms (move <code>LIGHT_LO</code> by hand if they read worse).</li>
+    <li><strong>No single-frame white flash in a crowd.</strong> Stand among two dozen different horses, or open a large family tree, and watch for a horse flashing the bare template (a texture evicted mid-frame). An ordinary horse must not recompose every frame (a repeating <code>[coat]</code> chat line), and a glowing one still glows.</li>
+    <li><strong>Face markings.</strong> <code>kit=W20/N</code> rerolled gives stars, snips and nothing; up the ladder (<code>W20/W20</code>, <code>SB1/N</code>, <code>mitf=SW1/SW1</code>, <code>ednrb=O/N</code>, <code>SB1/SB1</code>) reads star, star and stripe, blaze, bald face. A star is a star at 128px and sits above the eyes, a snip lands on the nostrils, a blaze no longer wraps under the jaw, a foal's snip lands at the nose, and a KIT star has torn edges against splash's clean ones. <a href="pipeline.html#face-markings">Pipeline</a>.</li>
+    <li><strong>Foals.</strong> A bay foal with black points, a splash foal with socks, a champagne foal gold, a grey foal born its base colour. Watch the head and neck (a rest-pose approximation on <code>HdBabyHorseModel</code>) for stray dark patches.</li>
+</ul>
+</section>
 
 <div class="page-foot">
     <div class="seealso">

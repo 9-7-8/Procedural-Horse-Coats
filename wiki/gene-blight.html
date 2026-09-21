@@ -135,6 +135,44 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Blight is the one gene here that edits the world: walk a <code>Bli/Bli</code> horse through a wheat field and <strong>the crop must survive</strong> while the grass, moss and podzol around it turn to dirt &mdash; and no horse may carry it invisibly.</p>
+</div>
+
+<h3 id="blight-markings-0917">Blight, and four markings out of intake (2026-09-17, NOT played)</h3>
+
+<p>
+    Blight is verdant's opposite: a <code>Bli/Bli</code> horse
+    turns the ground it walks on back to bare dirt and kills the wild growth on it. Four
+    drawn markings came in with it &mdash;
+    <a href="gene-endless-knot.html">endless knot</a>,
+    <a href="gene-paisley-spill.html">paisley spill</a>,
+    <a href="gene-smoke-scroll.html">smoke scroll</a> and
+    <a href="gene-stormvein.html">stormvein</a>, each with its own checks on its own page.
+    Every coat in the golden is byte-identical
+    to before, so nothing that already existed moved; all five of these are unseen.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>Blight eats the right blocks and only those.</strong> Stand a
+        <code>Bli/Bli</code> horse on grass. <strong>Pass:</strong> grass, moss, mycelium and
+        podzol within two blocks turn to dirt, and wild grass, ferns and flowers on top wither
+        away, a beat at a time. <strong>Fail, and this is the one that matters:</strong> a
+        crop, a planted sapling, a potted plant or anything else a player placed is touched.
+        Walk one through a wheat field on purpose &mdash; the field must survive.</li>
+    <li><strong>It is rare and never carried.</strong> <strong>Pass:</strong> roughly one wild
+        horse in three hundred blights, and no horse carries it invisibly; the founder table
+        seeds the expressing pair directly.</li>
+</ul>
+
+</section>
+
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>

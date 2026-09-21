@@ -20,8 +20,8 @@
 <p class="lede">
     The mod&rsquo;s first mechanism for <strong>influencing inheritance</strong>,
     and the knowledge layer that gates it. Built 2026-09-05,
-    <strong>not play-tested</strong> &mdash; checklist in
-    <a href="verification.html#carrots-db">verification &sect;0f</a>. This page is
+    <strong>not play-tested</strong> &mdash; checklist on
+    <a href="#verification">the verification tab</a>. This page is
     the source of truth for the mechanism; the <em>recipes</em> are on
     <a href="item-breeding-carrots.html">items</a>, and what is still missing is on
     <a href="roadmap.html">the roadmap</a>.
@@ -505,6 +505,57 @@
     <strong>The gene previews turn in 3D</strong> (owner-confirmed in play, 2026-09-10, and the
     owner likes them).
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Rows L to N of the test yard have never been walked end to end &mdash; the pair either side of a divider must not breed through it &mdash; and no themed splice has been fed in bulk to see whether it reads as its theme or as one favourite gene; the rest is layout at GUI scale 2, 3 and 4.</p>
+</div>
+
+<h3 id="fertility-carrot-pens">Rows L to N, the carrot pens (built 2026-09-13, NOT played)</h3>
+
+<p>
+    One leg of the <a href="fertility.html#fertility">breeding and fertility audit</a>, in the test yard.
+</p>
+<ul>
+    <li><strong>Rows L to N, the carrot pens:</strong> follow one sign end to end. The pair must
+        <strong>not</strong> breed through the divider on their own; natural covers are switched off
+        in those pens (<a href="fertility.html#verified-cover-reach">verified on the fertility page</a>).</li>
+</ul>
+
+<h3 id="open-older-carrots">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The gene-carrot card.</strong> It reads as a crafting grid with the mod's items tinted; no-carrot loci (sex, extension, agouti, LUT, the recessive disorders) show a note instead; it fits at the page bottom on pages with no see-also block; under 620px the result wraps under the grid. On <a href="gene-tobiano.html">tobiano</a>, card and preview fetch <code>web.wasm</code> once between them.</li>
+    <li><strong>Gene database layout.</strong> At GUI scale 2, 3 and 4 the filter, count and first row are clear of each other, and the detail pane (summary, alleles, phenotype sentences) stacks without collision and scrolls as one.</li>
+</ul>
+
+<h3 id="tuning-moved-0917-splice">Does a themed splice read as its theme? (2026-09-17, NOT played)</h3>
+
+<p>
+    A tuning question moved off <a href="roadmap.html">the roadmap</a> on 2026-09-17: not
+    unbuilt, just a number already in the game that only a person looking at it can judge. It
+    therefore ranks <strong>below</strong> every behavioural check &mdash; it announces itself
+    the moment anybody looks.
+</p>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li><strong>A themed splice reads as its theme, not as one gene.</strong> Feed each of
+        the <a href="carrots.html#themed">five themed splices</a> several times over. Each
+        rolls a uniform locus out of its slice, so a pool of five (marking) hits each
+        locus four times as often as a pool of twenty would. <strong>Pass:</strong> it
+        reads as &ldquo;this carrot is about markings&rdquo; rather than &ldquo;this
+        carrot always gives me sooty&rdquo;. A per-theme weighting, or letting a gene
+        declare its own weight, is the lever if it does not. The sibling question &mdash;
+        whether the plain Unknown Gene Splice table is too wide &mdash; is in
+        <a href="breeding.html#open-older">&sect;0-EB</a>.</li>
+</ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">

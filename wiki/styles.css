@@ -1446,3 +1446,50 @@ a.card .card-text {
     background: var(--view-soft);
     font-size: 0.85rem;
 }
+
+/* ------------------------------------------------------------------ *
+ * Verification
+ *
+ * Two pieces of one mechanism. A page that has something built and not
+ * yet seen in a game carries a Verification tab, and that tab opens
+ * with ONE sentence in a .verify-summary box saying what is waiting.
+ * wiki/tools/bake-verification-index.mjs harvests those sentences into
+ * the .verify-index on verification.html, alphabetically, so the index
+ * is never typed and a page joins it by growing the tab.
+ * ------------------------------------------------------------------ */
+
+.note.verify-summary { border-left-color: var(--warn); }
+.note.verify-summary .label { color: var(--warn); }
+.note.verify-summary p { font-size: 1.02rem; line-height: 1.6; }
+
+.verify-count { color: var(--text-dim); margin: 0 0 1.4rem 0; }
+
+.verify-index { list-style: none; margin: 0 0 1.5rem 0; padding: 0; max-width: 52rem; }
+.verify-index li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.9rem;
+    padding: 0.7rem 0 0.75rem 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+.verify-index li:last-child { border-bottom: none; }
+.verify-index a { font-weight: 600; text-decoration: none; }
+.verify-index a:hover { text-decoration: underline; }
+.verify-checks {
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    align-self: center;
+}
+.verify-what {
+    grid-column: 1 / -1;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+.verify-what code { font-size: 0.85em; }
+
+@media (max-width: 700px) {
+    .verify-index li { grid-template-columns: 1fr; }
+    .verify-checks { align-self: start; }
+}

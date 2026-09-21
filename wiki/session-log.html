@@ -1823,7 +1823,7 @@
     <code>hellforged_horse_armor</code> correctly named. <strong>The per-ingot recipes are not
     verified at all</strong> &mdash; the synthetic mod registers no items, so every generated
     recipe still takes the <code>itemExists</code> skip, and that is now the most likely thing
-    in the release to be wrong (<a href="verification.html#compat-collapse-0918">&sect;0-FQ</a>,
+    in the release to be wrong (<a href="compatibility.html#compat-collapse-0918">&sect;0-FQ</a>,
     <a href="known-gaps.html#gap-272">gap 272</a>). The next real question is one only the
     tester can answer, and it is worth asking for the launch log either way.
 </p>
@@ -1962,7 +1962,7 @@
 <p>
     <strong>None of it has been played.</strong> The build is green, the server boots, 106
     checklist tasks all have something that completes them &mdash; and
-    <a href="verification.html#carts-0918">&sect;0-FO</a> is fourteen checks long, starting
+    <a href="carts.html#carts-0918">&sect;0-FO</a> is fourteen checks long, starting
     with "the game starts" and "a strong horse is visibly faster than a weak one on the same
     cart", which is the whole feature in one line.
 </p>
@@ -2521,7 +2521,7 @@
     (<a href="known-gaps.html#gap-282">274</a>), and the armour tier reads a
     <code>&lt;material&gt;_chestplate</code> by name, which is a convention and not a contract
     (<a href="known-gaps.html#gap-275">275</a>). The checklist is
-    <a href="verification.html#compat-0918">&sect;0-FK</a>, and it needs the one thing the test
+    <a href="compatibility.html#compat-0918">&sect;0-FK</a>, and it needs the one thing the test
     kit cannot make: another mod.
 </p>
 
@@ -2615,7 +2615,7 @@
     jigsaw bounding-box check is tightest on, the pool weight behind it is arithmetic against
     the <em>old</em> footprint, and nothing downstream &mdash; four jobs, one surname across
     five, five beds slept in &mdash; can be tested until a homestead is found in a world. The
-    whole batch is <a href="verification.html#equestrians-0918">&sect;0-FJ</a>.
+    whole batch is <a href="villagers.html#equestrians-0918">&sect;0-FJ</a>.
 </p>
 
 <h2 id="d2026-09-18-herd-test">2026-09-18, after the wizard &mdash; The red test was asserting the bug it was written before</h2>
@@ -3439,7 +3439,7 @@
     the point: a box that ticked for a fight behind a hill would be claiming the player had seen
     something they had not. Four hooks needed a firing guard because they sit inside goals that
     tick, and those are the ones that can stick on or off &mdash;
-    <a href="verification.html#tutorial-chapters-0916">&sect;0-EO</a> says which.
+    <a href="progression.html#tutorial-chapters-0916">&sect;0-EO</a> says which.
 </p>
 
 <p>
@@ -3775,7 +3775,7 @@
         swept hue / one flat colour), driven off the schema so it cannot offer an illegal
         key. It is syntax-checked and the designer boots clean, but the
         <a href="gene-creator/">creator</a> itself was not opened &mdash;
-        <a href="verification.html#regions-0917">&sect;0-EZ</a>.</li>
+        <a href="making-a-gene.html#regions-0917">&sect;0-EZ</a>.</li>
     <li><strong><a href="known-gaps.html#gap-164">Gap 164</a> is still open.</strong> A region
         can now hold its own hue, which is a second independent draw and still not
         &ldquo;this hue plus 180 degrees&rdquo;. Nothing here brings arithmetic to a
@@ -4078,7 +4078,7 @@
     greener. <strong>The owner took that deliberately rather than revert it</strong>, on the
     argument that stacking is what the layers always meant; whether the hypsometric ramp still
     reads as a contour map is the open question at
-    <a href="verification.html#over-payoff-0917">&sect;0-EY</a>.
+    <a href="gene-contour.html#over-payoff-0917">&sect;0-EY</a>.
 </p>
 
 <h3>Two traps worth keeping</h3>
@@ -4127,7 +4127,7 @@
 </p>
 
 <ul>
-    <li><strong>Five moved</strong> to a new <a href="verification.html#tuning-moved-0917">&sect;0-EW</a>,
+    <li><strong>Five moved</strong> to a new <a href="horse-body.html#tuning-moved-0917">&sect;0-EW</a>,
         ranked below the behavioural checks by that page&rsquo;s own rule, since each
         announces itself the moment anybody looks: the themed splices&rsquo; per-theme
         weighting, a scaled foal against <code>Skin.BABY</code>&rsquo;s approximate
@@ -4374,7 +4374,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     <strong>What is not settled is whether 5% is visible at all in game.</strong> The tests prove
     the pigment moves, not that an eye can see it.
-    <a href="verification.html#dun-d1-marks-0917">&sect;0-EU</a> leads with that question and says
+    <a href="gene-dun.html#dun-d1-marks-0917">&sect;0-EU</a> leads with that question and says
     plainly that if nothing reads on a <code>d1/d1</code> chestnut&rsquo;s foreleg, this goes back
     to <a href="known-gaps.html">known gaps</a> rather than being quietly called shipped.
 </p>
@@ -4833,7 +4833,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     happen on the horse's shared slow tick, with nobody interacting, so they are credited to
     <code>horse.getOwner()</code> when that owner is loaded. That is the most likely thing
     here to be subtly wrong in either direction, and it is why it leads
-    <a href="verification.html#tutorial-chapters-0916">&sect;0-EO</a> rather than sitting in
+    <a href="progression.html#tutorial-chapters-0916">&sect;0-EO</a> rather than sitting in
     the list with the rest.
 </p>
 
@@ -4916,7 +4916,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     <em>The bug was wider than the mare.</em> Exact-equality full health meant a wolf bite or a lost
     stallion fight sterilised any horse until it found water. <strong>Not played yet</strong> &mdash;
-    three checks are waiting in <a href="verification.html#fertility">&sect;0-DV</a>, and row W should
+    three checks are waiting in <a href="fertility.html#fertility">&sect;0-DV</a>, and row W should
     finally produce a usable sample for <a href="known-gaps.html#gap-225">gap 225</a>'s ratios.
 </p>
 
@@ -5096,7 +5096,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     leather and thrown the dye away without a word. It now seeds the blanket from
     <code>dyed_color</code>. The failure mode is the nasty kind &mdash; you get a result, it
     simply is not the one you asked for &mdash; so it is a named check on
-    <a href="verification.html#dyeable-armour-0916">the verification list</a> rather than
+    <a href="item-equestrian-bench.html#dyeable-armour-0916">the verification list</a> rather than
     something to stumble into.
 </p>
 
@@ -5609,7 +5609,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     <li><code>verification.html</code> lost the block calling the fourteen &ldquo;pushed unbaked and
         untested&rdquo; and &ldquo;deliberately still waiting&rdquo;; its own instruction was to delete it
         when green. It is replaced by
-        <a href="verification.html#new-breeds-0915g">&sect;0-EK</a>, which records what the bake found and
+        <a href="breed-book.html#new-breeds-0915g">&sect;0-EK</a>, which records what the bake found and
         that the fourteen are still unplayed.</li>
     <li>Two stale derived numbers on the roadmap said &ldquo;the 49&rdquo; against a catalogue that
         <code>Breeds.all().size()</code> owns &mdash; the repeat offender the standing rules name.</li>
@@ -5978,7 +5978,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     hand-written field order matched <code>BreedSpecWriter</code> and the bake churned nothing; and
     <code>everyShippedFileLoadsWithNoErrorsAndNoWarnings</code> is the one that proves no allele token
     was warned and silently dropped. <strong>None of the fifteen has been seen in a world</strong> &mdash;
-    see <a href="verification.html#new-breeds-0915e">the checklist</a>.
+    see <a href="breed-book.html#new-breeds-0915e">the checklist</a>.
 </p>
 
 <h2 id="d2026-09-15g">2026-09-15, later still &mdash; fourteen breeds, four drafts that were two horses, and a stub declined</h2>
@@ -6114,7 +6114,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         <code>intake/Croatian warmblood.md</code> was a complete, well-sourced draft of the Croatian
         <em>Coldblood</em>, naming it throughout and contrasting it with the Posavac. The coldblood shipped and the
         file was consumed, so <strong>if a Croatian Warmblood was wanted, no draft for it has ever arrived.</strong>
-        Recorded on <a href="verification.html#new-breeds-0915c">the checklist</a> because deleting the file removed
+        Recorded on <a href="breeds.html#new-breeds-0915c">the checklist</a> because deleting the file removed
         the only trace of that queue entry.</li>
 </ul>
 
@@ -6193,7 +6193,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     every pool of the five new breeds was dumped back out of the <em>baked</em> files pair by pair, because a wrong
     allele token is warned and dropped rather than thrown. <strong>None of the five has been seen in a world, and
     four already-shipped breeds are now visibly taller</strong> &mdash;
-    <a href="verification.html#new-breeds-0915c">&sect;0-EG</a> says what to look at, and the dark-bay check on the
+    <a href="breeds.html#new-breeds-0915c">&sect;0-EG</a> says what to look at, and the dark-bay check on the
     Domestic Mountain Pony is the one that matters beyond its own breed. <strong>Three calls are the owner's:</strong>
     whether the American Cream Draft's Critical status should make it <code>very_rare</code> and wild-less, whether
     the Irish Draught keeps roan and cream against its studbook's six colours, and which ordering the next batch
@@ -6218,7 +6218,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         (<a href="breed-format.html#where">&ldquo;a breed the cowboy has heard of but that no longer runs
         wild&rdquo;</a>). Nothing had ever used it: all 55 previous breeds take the default of all four sources. So
         the field is documented, parsed, and <em>unexercised in a real world</em> &mdash;
-        <a href="verification.html#new-breeds-0915b">&sect;0-EF</a> makes "no wild Budyonny" the first thing to look
+        <a href="breeds.html#new-breeds-0915b">&sect;0-EF</a> makes "no wild Budyonny" the first thing to look
         at, because a failure there would be silently wrong for every breed that uses it later.</li>
     <li><strong>Gap 256 got its second breed, which was the condition it named for being fixed.</strong> The draft
         wanted the three historical Budyonny types &mdash; Massive, Eastern, Middle &mdash; as strains differing in
@@ -6272,7 +6272,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     Green: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
     <code>check-parity</code>, <code>check-links</code>, the designer boot check. <strong>None of the five has been
-    seen in a world</strong> &mdash; <a href="verification.html#new-breeds-0915b">&sect;0-EF</a> says what to look
+    seen in a world</strong> &mdash; <a href="breeds.html#new-breeds-0915b">&sect;0-EF</a> says what to look
     at. The five <code>.md</code> files were deleted from <code>intake/</code>, leaving 52 breed drafts queued; the
     next five alphabetically are <strong>Colorado ranger, criollo, Croatian warmblood, Danubian</strong> and the
     <strong>Domestic Mountain Pony</strong>, but re-sort the folder first &mdash; the owner pushes new files
@@ -6324,7 +6324,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     Green: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
     <code>BreedFounderTest</code>, <code>check-links</code>, the designer boot check. <strong>None of the five has
-    been seen in a world</strong> &mdash; <a href="verification.html#new-breeds-0915">&sect;0-EE</a> says what to look
+    been seen in a world</strong> &mdash; <a href="breeds.html#new-breeds-0915">&sect;0-EE</a> says what to look
     at. The five <code>.md</code> files were deleted from <code>intake/</code>, leaving 58; note that the folder's
     alphabetical order was disturbed mid-session by a 36-file push, so the next batch is not simply the next five.
 </p>
@@ -6386,7 +6386,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         server for exactly this reason), and <code>checkBreedJson</code> returns <code>ok</code>, not
         <code>good</code> &mdash; asserting the wrong field name reported four failures that were entirely the probe's.</li>
     <li><strong>Not played.</strong> Wild-herd founding changed for every breed, and none of it has been in a world:
-        <a href="verification.html#herd-shape-0915">verification &sect;0-ED</a>, which is ranked first because a
+        <a href="breeds.html#herd-shape-0915">verification &sect;0-ED</a>, which is ranked first because a
         disagreement between clump members fails invisibly &mdash; as two herds where there should be one.</li>
 </ul>
 
@@ -6584,7 +6584,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
             <li><strong>Pick up first:</strong> read the 15:36 run's log for gap 253 (no <code>inWall</code> in the LYCAN pens),
                 gap 244 (dryad pens), gap 245 (ratio shares) and gap 250 (BLOOD ONLY biting), plus the SPAWNER WARD pen's
                 PASS line.</li>
-            <li>Then the in-game looks listed at the top of <a href="verification.html#after-1057">the checklist</a>: speckled
+            <li>Then the in-game looks listed at the top of <a href="gene-kit.html#after-1057">the checklist</a>: speckled
                 white, W22, the climate genes and magical herds.</li>
             <li>The intake folder holds 23 breed write-ups the owner queued.</li>
             <li>The full <code>:common:test</code> suite was not run this session.</li>
@@ -6738,7 +6738,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     The owner is leaving the yard up all day and asked for more dryad pens, plus anything
     else that benefits from a very long run. Two kinds fit (<code>DebugYardLong</code>, rows S to U;
-    <a href="verification.html#all-day">&sect;0-DX</a>).
+    <a href="horse-dimension.html#verification">the all-day pens</a>).
 </p>
 <ul>
     <li><strong>Eight dryad pens on a stone floor.</strong> The first night showed saplings three
@@ -6796,8 +6796,8 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         band after its stallion dies; dispersal of both sexes; herding firing; sparring without
         damage; grooming partners; tick time with about 270 horses; maternity to the minute; natural
         covers; the subfertile pair's single cover per heat; the gelding control; the cap holding;
-        cowboy stock. The details are on <a href="verification.html#herd-yard">&sect;0-DW</a> and
-        <a href="verification.html#fertility">&sect;0-DV</a>.</li>
+        cowboy stock. The details are on <a href="horse-care.html#herd-yard">&sect;0-DW</a> and
+        <a href="fertility.html#fertility">&sect;0-DV</a>.</li>
     <li><strong>Then the confirmed pens went.</strong> NATURAL PAIR, GELDING CONTROL, SUBFERTILE
         PAIR, COWBOY STOCK, SPARRING and HERDING were deleted, and what was left packed into four
         rows, O&ndash;R. Pens with an open half stayed.</li>
@@ -6833,7 +6833,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         leaderless band, sparring, herding, grooming, displacement, a takeover and a dam defending
         her foal. Each pen sets up the state its event needs, such as a colt already due to leave or
         stallions who already know each other, then acts on a clock where a player would have. The
-        audit is <a href="verification.html#herd-yard">&sect;0-DW</a>.</li>
+        audit is <a href="horse-care.html#herd-yard">&sect;0-DW</a>.</li>
     <li><strong>Rows thirty blocks apart, not the yard's grid.</strong> A wild horse's reach does not
         stop at a fence (challenge 24, guard 16, transfer 32, dispersal 64), so each row holds one wild
         group, and the tamed pens sit beside it where no band decision can see them.</li>
@@ -6856,7 +6856,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 
 <p>
     The owner settled the two gaps left open overnight and ended the session. The morning's
-    audit is unchanged: <a href="verification.html#fertility">&sect;0-DV</a>.
+    audit is unchanged: <a href="fertility.html#fertility">&sect;0-DV</a>.
 </p>
 
 <ul>
@@ -6881,7 +6881,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     the debug area rebuilt so that everything could be audited in the morning. Nobody was awake
     to ask, so the calls that were not purely technical are on the roadmap as
     <a href="decisions.html#provisional">provisional</a>, to confirm or reverse. Nothing was played.
-    The audit is <a href="verification.html#fertility">&sect;0-DV</a>, in order.
+    The audit is <a href="fertility.html#fertility">&sect;0-DV</a>, in order.
 </p>
 
 <ul>
@@ -6929,7 +6929,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     the rate and conception limited to loaded chunks. The follow-up questions turned it into
     natural breeding for every horse, and a way to stop it. The calls are under
     <a href="decisions.html#settled">settled decisions</a>. Nothing has been played:
-    <a href="verification.html#fertility">&sect;0-DV</a>, test kit batch 2.
+    <a href="fertility.html#fertility">&sect;0-DV</a>, test kit batch 2.
 </p>
 
 <ul>
@@ -6959,7 +6959,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     code raised, then built the whole first slice. The calls are under
     <a href="decisions.html#settled">settled decisions</a>, and the reference is
     <a href="fertility.html">fertility &amp; gestation</a>. Nothing has been played:
-    <a href="verification.html#fertility">&sect;0-DV</a>, test kit batch 1.
+    <a href="fertility.html#fertility">&sect;0-DV</a>, test kit batch 1.
 </p>
 
 <ul>
@@ -6998,9 +6998,9 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     One long list from the owner, worked through from a phone, with every in-game test
     saved for the end. None of it has been played; what each piece needs checking is in
-    <a href="verification.html#ai-helpers">verification &sect;0-DU</a>,
-    <a href="verification.html#evening-0913">&sect;0-DT</a> and
-    <a href="verification.html#dhampir">&sect;0-R</a>, and test kit batches 1 and 2 are
+    <a href="ai-setup.html#ai-helpers">verification &sect;0-DU</a>,
+    <a href="item-whistles.html#evening-0913">&sect;0-DT</a> and
+    <a href="breed-book.html#dhampir">&sect;0-R</a>, and test kit batches 1 and 2 are
     aimed at them.
 </p>
 
@@ -7129,7 +7129,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 </ul>
 
 <p>
-    What is still open, and where to look: <a href="verification.html#open-0913">verification &rarr; &sect;0-DS</a>.
+    What is still open, and where to look: <a href="pipeline.html#open-0913">verification &rarr; &sect;0-DS</a>.
 </p>
 
 <h2 id="d2026-09-13e">2026-09-13 &mdash; a long play session, and the day a convention turned out to be breaking features</h2>
@@ -8231,7 +8231,8 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     the tick loop</strong>. Worth being blunt about: this binding is registered
     <em>outside</em> the production gate on purpose, because the testers asked for it, so
     "it is only a dev tool" was never true of it and a released jar could hit this.
-    <a href="verification.html#highlight-crash">&sect;0-CQ</a>, with the API asymmetry on
+    The crash is written up on <a href="coding-notes.html#verification">the coding-notes
+    verification tab</a>, with the API asymmetry on
     <a href="api-notes.html">api-notes</a> - <code>addPlayerToTeam</code> is forgiving,
     <code>removePlayerFromTeam</code> is not.
 </p>
@@ -8262,7 +8263,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     it (hard rule 5). The screen now also <strong>says in the log</strong> when the two
     groups collide, because the failure it produces is a button that looks alive, is
     alive, and cannot be pressed, and that leaves nothing to find.
-    <a href="verification.html#kit-and-egg">&sect;0-CR</a>.
+    Left to check: <a href="gene-kit.html#verification">KIT&rsquo;s verification tab</a>.
 </p>
 
 <h3>Then three genes picked it up</h3>
@@ -8338,8 +8339,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     One session, the roadmap's first and second entries. Both were long-standing, both
     turned out to be smaller than the page implied once the groundwork underneath them
     had shipped, and both are now waiting on a person rather than on code
-    (<a href="verification.html#path-canvas">&sect;0-CL</a>,
-    <a href="verification.html#gene-api">&sect;0-CM</a>).
+    (<a href="making-a-gene.html#verification">the gene-authoring verification tab</a>).
 </p>
 
 <h3>The <code>PATH</code> drawing canvas</h3>
@@ -8433,7 +8433,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
         loader's own <code>constructMods</code> rather than assumed, and it compiles
         &mdash; but it has never run with a second mod present, and no test in this repo
         can make it. Flagged in the class note and on
-        <a href="verification.html#gene-api">&sect;0-CM</a>, which carries a cheap
+        <a href="making-a-gene.html#verification">the gene-authoring verification tab</a>, which carries a cheap
         log-line check that needs no second mod.</li>
 </ul>
 
@@ -8700,9 +8700,9 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
         <code>breed-spawning.toml</code> moving the Friesian and switching the Morgan off -
         and a dedicated server confirmed all of them load.</li>
     <li>By the end the owner asked for tests that are not &ldquo;does this look pretty
-        in-game&rdquo;, so the front two batches are now
-        <a href="verification.html#behaviour-batch">&sect;0-BT</a>'s own ranking of what
-        fails badly rather than visibly: spontaneous breeding left in a field for days and
+        in-game&rdquo;, so the front two batches are now ranked by what
+        fails badly rather than visibly (the goals themselves are on
+        <a href="behaviour-hierarchy.html">the behaviour hierarchy</a>): spontaneous breeding left in a field for days and
         then counted, a ward beside a working spawner farm, pack leaders in one stable, a
         dryad left half an hour; then ender echo under a rider, hydrophobic, food preference,
         ocean-born.</li>
@@ -8723,7 +8723,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
         being a POI when the hitch and the table were split, and a tag with one missing entry
         fails whole - taking vanilla's own village POIs with it. Found in the log while
         checking something else. Waiting:
-        <a href="verification.html#village-tag">&sect;0-CD</a>.</li>
+        <a href="villagers.html#verification">the villagers verification tab</a>.</li>
     <li><strong>Bare stripes along the spine</strong> on both drip genes: <code>WAVES</code>
         displaces the <em>whole</em> band, so a far edge at 1.05 with a 0.2 amplitude dips to
         0.85 of the barrel once per wavelength.</li>
@@ -8846,7 +8846,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     the spawn rate and location of every shipped breed - down to switching all of them off,
     Feral Mixed included, with a horse that has nothing to be simply not spawning. Commit
     <code>94332fb</code>; tagged <a href="releases.html#v0-5-000">0.5.000</a>. Waiting in
-    game: <a href="verification.html#world-settings">&sect;0-CC</a>.
+    game: <a href="breeds.html#world-settings">&sect;0-CC</a>.
 </p>
 
 <h3>One folder</h3>
@@ -8922,8 +8922,8 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 <p>
     The owner's fourteen-point list after walking the new designer, and one principle that
     fell out of it: <strong>now that breeds are designed, magic in a breed is a design
-    decision</strong>. Everything is <a href="verification.html#breeds-exact">waiting in
-    game</a>.
+    decision</strong>. Everything is waiting in game, on
+    <a href="breeds.html#verification">the breeds verification tab</a>.
 </p>
 
 <h3>No stray magic, no background disorders</h3>
@@ -9006,7 +9006,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     <a href="philosophy.html#concepts-are-breeds">the philosophy page</a>: <strong>a concept
     is a breed, not a gene</strong> - a zombie horse is a zombie <em>breed</em> of ordinary
     genes (rotted markings, a temper, a low speed score), not one indivisible zombie gene.
-    Everything is <a href="verification.html#breeds-overhaul">waiting in game</a>.
+    Everything is waiting in game, on <a href="breeds.html#verification">the breeds verification tab</a>.
 </p>
 
 <h3>The breed designer, rebuilt</h3>
@@ -9085,7 +9085,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     The whole intake folder: three authoring batches of 7, 7 and 4 genes with a note each,
     and six more with none. Commits <code>a6d76bd</code> (the batch exactly as it arrived,
     so the unsimplified traces survive in history) and <code>b3f9e9b</code> (the install).
-    Every gene is <a href="verification.html#intake-evening">waiting in game</a>.
+    Every gene is waiting in game.
 </p>
 
 <h3>Checked before anything was opened</h3>
@@ -9369,7 +9369,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     <strong>Every horse in the world changed.</strong> Brown is the dominant iris allele, so
     every horse now has a painted brown iris where it had the template&rsquo;s flat black.
     Both goldens moved wholesale, all 203 gene icons were rebaked, and none of it has been seen
-    in game &mdash; <a href="verification.html#eye-loci">&sect;0-BU</a> is the checklist, and
+    in game &mdash; <a href="eye-colour.html#verification">eye colour&rsquo;s verification tab</a> is the checklist, and
     its first four items are the ones that could be <em>wrong</em> rather than merely unseen.
 </p>
 
@@ -9500,8 +9500,8 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 
 <p>
     <strong>Nothing in this batch has been seen in game.</strong>
-    <a href="verification.html#behaviour-batch">&sect;0-BT</a> is the checklist, ordered by
-    what can do damage first.
+    The goals are listed on <a href="behaviour-hierarchy.html">the behaviour hierarchy</a>,
+    and the checklist was ordered by what can do damage first.
 </p>
 
 
@@ -10127,7 +10127,8 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     three greys where that one has three hues. The side effect is that the gene&rsquo;s wiki
     icon flipped to the coloured allele, because <code>CoatVisibility</code> photographs
     whichever allele moves the most texels and the darkest grey sits close enough to a bay to
-    lose the count. Noted on <a href="verification.html#gene-tuning">verification</a> so it is
+    lose the count. Noted on <a href="making-a-gene.html#verification">the gene-authoring
+    verification tab</a> so it is
     not reported later as a bug.</p>
 
 <h4>Nymphaline</h4>
@@ -10319,7 +10320,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     Across the mod the share of founders expressing some magical gene went from 16.32% to
     13.35% <em>while gaining twenty-two genes</em>. The table and the question of whether
     those are the right numbers are on
-    <a href="verification.html#engine-fallout">verification &sect;0-BM</a>; the fix, if they
+    <a href="making-a-gene.html#verification">the gene-authoring verification tab</a>; the fix, if they
     are wrong, is a gene&rsquo;s <code>rarity</code> tier and another run, never a
     hand-edited founders block.</p>
 
@@ -11704,7 +11705,7 @@ no server to ask at all (<a href="known-gaps.html#gap-133">gap 133</a>).</p>
 <code>config/&lt;modid&gt;-server.toml</code>, and a world's <code>serverconfig/</code>
 folder is an optional <em>override</em> of that path rather than where the file is made.
 The verification entry said the wrong one until the generated file was actually looked at.
-Checks: <a href="verification.html#body-size-toggle">&sect;0-AX</a>, and the first of them
+The checks are on <a href="gene-body-size.html">the body size gene</a>, and the first of them
 is that the <em>default</em> is unchanged &mdash; a mistake here flattens every world
 silently.</p>
 
@@ -13002,7 +13003,7 @@ one.</li>
 
 <li><strong>Every gene preview now opens on six base coats rather than three.</strong> Bay, black and chestnut are the three <em>pigments</em> every marking is read against, and they are no background at all for a gene that modifies somebody else's white: fielded now draws nothing on any of them, and a preview of it on three solid horses is three pictures of a plain bay. So <code>BaseCoats</code> gained a tobiano, a splash and a sabino bay &mdash; heterozygous, and picked to cover the three shapes white comes in.</li>
 
-<li><strong>What was not built.</strong> Nothing on the list was skipped, but one item was <em>interpreted</em>: &ldquo;change flametouched to have the preview be of the single-color flametouched&rdquo; describes an outcome that did not exist, so the gradient form was made single-coloured &mdash; one hue whose <em>strength</em> ramps fore-and-aft, rather than a hue sweeping through two or three &mdash; which makes the form the preview opens on the single-coloured one. The flame form beside it keeps its sweep. If that reading is wrong the fix is small and the item is flagged on <a href="verification.html#gene-fixes">the checklist</a>.</li>
+<li><strong>What was not built.</strong> Nothing on the list was skipped, but one item was <em>interpreted</em>: &ldquo;change flametouched to have the preview be of the single-color flametouched&rdquo; describes an outcome that did not exist, so the gradient form was made single-coloured &mdash; one hue whose <em>strength</em> ramps fore-and-aft, rather than a hue sweeping through two or three &mdash; which makes the form the preview opens on the single-coloured one. The flame form beside it keeps its sweep. If that reading is wrong the fix is small.</li>
 
 </ul>
 
@@ -13105,7 +13106,7 @@ one.</li>
 
 <h3 id="magic-import-2026-09-08">Built 2026-09-08, NOT yet looked at in game: eighty-four magical genes, imported in bulk out of <code>process/</code>.</h3>
 
-<p>Owner-driven, one overnight request. Every gene is a JSON file &mdash; none of them is a Java class. Each has its own generated page, gathered at the time by seven family indexes &mdash; ground and strong white, fields and regions, spots and rings, speckle and dust, lines and strokes, mane and tail, colour modifiers. (Those index pages were later deleted as redundant to the landing page.) Checklist <a href="verification.html#magic-import">&sect;0-AN</a>. Gaps <a href="known-gaps.html#gap-94">94</a>&ndash;<a href="known-gaps.html#gap-97">97</a>.</p>
+<p>Owner-driven, one overnight request. Every gene is a JSON file &mdash; none of them is a Java class. Each has its own generated page, gathered at the time by seven family indexes &mdash; ground and strong white, fields and regions, spots and rings, speckle and dust, lines and strokes, mane and tail, colour modifiers. (Those index pages were later deleted as redundant to the landing page.) Gaps <a href="known-gaps.html#gap-94">94</a>&ndash;<a href="known-gaps.html#gap-97">97</a>.</p>
 
 <ul>
 
@@ -13147,7 +13148,7 @@ one.</li>
 
 <h3 id="three-views-2026-09-07">Built 2026-09-07, NOT yet looked at: the wiki became three views &mdash; Gameplay, Coding, Science &mdash; and got a real search.</h3>
 
-<p>Owner-driven, one request with four things in it. Design: every <a href="gene-flaxen.html">gene page</a>, every <a href="items.html">item page</a>, the <a href="../index.html">landing page</a>. Checklist <a href="verification.html#three-views">&sect;0-AM</a>. Gaps <a href="known-gaps.html#gap-88">88</a>&ndash;<a href="known-gaps.html#gap-91">91</a>.</p>
+<p>Owner-driven, one request with four things in it. Design: every <a href="gene-flaxen.html">gene page</a>, every <a href="items.html">item page</a>, the <a href="../index.html">landing page</a>. Checklist on <a href="coding-notes.html#verification">the coding-notes verification tab</a>. Gaps <a href="known-gaps.html#gap-88">88</a>&ndash;<a href="known-gaps.html#gap-91">91</a>.</p>
 
 <ul>
 <li><strong>The wiki was serving three readers one index, and serving none of them.</strong> A player who wants to know what a flaxen looks like, someone adding a gene, and someone checking the model against real horse genetics want almost disjoint subsets of the same page. The split is <code>wiki/tabs.js</code> reading <code>&lt;section class="tab-panel" data-tab&gt;</code>; a page with <em>no</em> panels is left completely alone, which is why the seventeen pages that are one subject for one audience needed no edit at all. The chosen view rides in <code>?view=</code> and in sessionStorage and is pushed through every link the sidebar and the index build, so choosing Science and clicking Flaxen opens Flaxen's science tab.</li>
@@ -13164,7 +13165,7 @@ one.</li>
 
 <li><strong>The page list moved out of <code>nav.js</code> into <code>wiki/pages.js</code>.</strong> The landing page needs the same list to know which cards to hide in which view, and a second copy would have drifted the first time a page was added. Hard rule 7 now names <code>pages.js</code>. Which views a <em>tabbed</em> page appears in is not an editorial call at all - it is exactly the tabs it has - so <code>sync-page-views.mjs</code> reads them out of the HTML and writes them back, and only an untabbed page keeps a hand-set value.</li>
 
-<li><strong>24 natural gene pages came out with no science tab, and were left that way.</strong> Their real-world material is in the lede rather than in a section a split could pick up. Writing a stub would have meant either inventing veterinary claims or shipping 24 pages whose science tab says "not written yet", and an honest absence beats both. They are listed in <a href="verification.html#three-views">verification</a> as the next thing to write. The magical genes having no science tab is correct, not a gap - they are invented.</li>
+<li><strong>24 natural gene pages came out with no science tab, and were left that way.</strong> Their real-world material is in the lede rather than in a section a split could pick up. Writing a stub would have meant either inventing veterinary claims or shipping 24 pages whose science tab says "not written yet", and an honest absence beats both. They are listed on <a href="coding-notes.html#verification">the coding-notes verification tab</a> as the next thing to write. The magical genes having no science tab is correct, not a gap - they are invented.</li>
 </ul>
 
 <p><strong>Audited afterwards, same day.</strong> Two of the gaps this session opened were checkable in the repo without a browser, so they were.</p>
@@ -13181,7 +13182,7 @@ one.</li>
 
 <h3 id="breeds-as-data-2026-09-07">Built 2026-09-07, NOT yet looked at: breeds became JSON files, and got spawn eggs, a designer, and a splice mark.</h3>
 
-<p>Owner-driven, one request with four things in it. Design: <a href="breed-format.html">the breed file format</a>, <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">items</a>, <a href="carrots.html#spliced">carrots</a>. Checklist <a href="verification.html#breeds-as-data">&sect;0-AL</a>. Gaps <a href="breeds.html#verified-breed-designer">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.</p>
+<p>Owner-driven, one request with four things in it. Design: <a href="breed-format.html">the breed file format</a>, <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">items</a>, <a href="carrots.html#spliced">carrots</a>. Gaps <a href="breeds.html#verified-breed-designer">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.</p>
 
 <ul>
 <li><strong>The 49 breeds were not translated by hand, and that was the whole plan.</strong> An 885-line <code>Breeds.java</code> retyped as 49 JSON files is 49 chances to mistype an allele weight and no way to notice. So the writer came first: <code>BreedSpecWriter</code> turns a <code>Breed</code> back into the file that would produce it, <code>BreedFileTool</code> ran it over the Java definitions once, and only then were the definitions deleted. <code>BreedFilesTest</code> now asserts every shipped file is exactly what a fresh bake would write, so the two halves cannot drift apart afterwards either.</li>
@@ -13213,7 +13214,7 @@ one.</li>
 
 <h3 id="stables-2026-09-07">Built 2026-09-07, NOT yet looked at: three stables that generate with rare horses already in them.</h3>
 
-<p>Owner-driven, one request with three buildings attached. Design and <strong>attribution</strong>: <a href="stables.html">generated stables</a>. Checklist <a href="verification.html#stables">&sect;0-AK</a>. Gaps <a href="known-gaps.html#gap-80">80</a>&ndash;<a href="known-gaps.html#gap-82">82</a>.</p>
+<p>Owner-driven, one request with three buildings attached. Design and <strong>attribution</strong>: <a href="stables.html">generated stables</a>. Checklist <a href="roadmap.html#stables">&sect;0-AK</a>. Gaps <a href="known-gaps.html#gap-80">80</a>&ndash;<a href="known-gaps.html#gap-82">82</a>.</p>
 
 <ul>
 <li><strong>None of the three files was a Minecraft structure, and that was most of the work.</strong> Two are Sponge Schematic v2 and one is a legacy MCEdit <code>.schematic</code> carrying numeric 1.12 block ids with no block names in it at all. <code>tools/stables/bake-stables.py</code> converts both. <strong>The trick that made it affordable is the DataVersion</strong>: the output claims to be 1.13.2 rather than current, because the game runs every structure it loads through the DataFixer against the file's own version - so <code>grass_path</code> becoming <code>dirt_path</code>, and every other rename in twelve years of Minecraft, is done by the game rather than by a hand-written table that would be subtly wrong. The legacy id table therefore only has to reach 1.13, and it stops there on purpose.</li>
@@ -13245,7 +13246,7 @@ one.</li>
 
 <h3 id="themed-carrots-2026-09-07">Built 2026-09-07, NOT yet looked at: five themed random splice carrots.</h3>
 
-<p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="item-breeding-carrots.html">items</a>. Checklist <a href="verification.html#themed-carrots">&sect;0-AJ</a>.</p>
+<p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="item-breeding-carrots.html">items</a>. Checklist on <a href="item-splice-carrots.html#verification">the splice carrots&rsquo; verification tab</a>.</p>
 
 <ul>
 <li><strong>They are one field, not five carrots.</strong> <code>CarrotEffect.GeneSplice</code> gained a <code>SpliceCategory</code>, and everything downstream &mdash; the token, the fold, the combine recipe, the feed handler &mdash; carried on working. That was the point of the check: if adding five carrots had needed five <code>CarrotEffect</code> cases and five <code>fold</code> branches, the abstraction the <a href="roadmap.html#carrot-content">roadmap</a> claimed was cheap would not have been.</li>
@@ -13265,7 +13266,7 @@ one.</li>
 
 <h3 id="h-menu-2026-09-07">Built 2026-09-07, NOT yet looked at: the stable as a table, and an information screen you can read.</h3>
 
-<p>Owner-driven, ten requests in one pass. Design: <a href="roadmap.html#browser">roadmap &sect; the horse browser</a>, <a href="breeding.html#H">breeding &sect; client sync</a>. Checklist <a href="verification.html#h-menu">&sect;0-AI</a>. Gaps <a href="known-gaps.html#gap-76">76</a>, <a href="known-gaps.html#gap-77">77</a>.</p>
+<p>Owner-driven, ten requests in one pass. Design: <a href="roadmap.html#browser">roadmap &sect; the horse browser</a>, <a href="breeding.html#H">breeding &sect; client sync</a>. Checklist on <a href="breeding.html#verification">breeding&rsquo;s verification tab</a>. Gaps <a href="known-gaps.html#gap-76">76</a>, <a href="known-gaps.html#gap-77">77</a>.</p>
 
 <ul>
 <li><strong>Two screens were painting over their own widgets, and it explains the request that opened the session.</strong> &ldquo;Make the barn name box more obvious as a box you can type in&rdquo; &mdash; it was not a styling problem. <code>Screen.extractRenderState</code> draws the widgets and <em>then</em> hands over, which is right for a screen with a background and wrong for one that fills the window with a 94%-opaque panel: the <code>EditBox</code> was drawn, and then buried. Same cause on the browser, where <code>extractLabels</code> runs after both the widget and the slot passes and the Crafting tab's own button sits inside the panel it draws. Both now put the chrome down first. Worth writing down because <strong>the bug was legible in the source from the day it was written and nobody had a reason to read that far</strong> &mdash; it took a cosmetic complaint to find it, and the honest lesson is about untested GUIs rather than about draw order.</li>
@@ -13305,7 +13306,7 @@ one.</li>
 
 <h3 id="lycan-2026-09-07">Built 2026-09-07, NOT yet looked at: a horse that is a wolf until dawn, a horse that kicks up rainbows, and a particle locus that stopped showing on one copy.</h3>
 
-<p>Owner-driven, three requests. Design: <a href="gene-lycan.html">LYCAN</a>, <a href="gene-rainbow-dust.html">rainbow dust</a>, <a href="gene-particle.html#dominance">the particle locus going recessive</a>. Checklist <a href="verification.html#lycan">&sect;0-AH</a>. Gaps <a href="known-gaps.html#gap-73">73</a>&ndash;<a href="known-gaps.html#gap-75">75</a>.</p>
+<p>Owner-driven, three requests. Design: <a href="gene-lycan.html">LYCAN</a>, <a href="gene-rainbow-dust.html">rainbow dust</a>, <a href="gene-particle.html#dominance">the particle locus going recessive</a>. Checklist on <a href="gene-lycan.html#verification">LYCAN&rsquo;s verification tab</a>. Gaps <a href="known-gaps.html#gap-73">73</a>&ndash;<a href="known-gaps.html#gap-75">75</a>.</p>
 
 <ul>
 <li><strong>The werewolf gene swaps the entity, and the requirement is what forced that.</strong> The roadmap scoped the <code>WERE</code> locus &ldquo;render-layer first, entity-swap second&rdquo;, and the owner's spec overruled it in one clause: a shifted horse must be interactable in all the ways its animal is and no others, <em>&ldquo;up to and including breeding with other members of that species&rdquo;</em>. A horse wearing a wolf skin cannot be bred with a wolf. It also cannot be tamed with a bone, sheared, bucketed, or fed a cookie, and every one of those would have to be hand-written and would still be wrong for the next mob on the list. So at dusk the <code>Horse</code> is discarded and a real animal takes its place. <strong>The &ldquo;and no others&rdquo; half then falls out for free</strong>: while it is a wolf there is no horse in the world, so none of this mod's own horse interactions can see it. The single thing left to enforce by hand is riding.</li>
@@ -13329,7 +13330,7 @@ one.</li>
 
 <h3 id="horse-info-2026-09-07">Built 2026-09-07, NOT yet looked at: an information screen behind an &ldquo;i&rdquo;, a breeding preview, and a mare that miscarries.</h3>
 
-<p>Owner-driven, five requests in one session. Design: <a href="breeding.html#H">breeding &sect; client sync</a>, <a href="breeding.html#miscarriage">&sect; the miscarriage</a>, <a href="breeding.html#breeding-debug">&sect; every draw written down</a>. Checklist <a href="verification.html#horse-info">&sect;0-AG</a>.</p>
+<p>Owner-driven, five requests in one session. Design: <a href="breeding.html#H">breeding &sect; client sync</a>, <a href="breeding.html#miscarriage">&sect; the miscarriage</a>, <a href="breeding.html#breeding-debug">&sect; every draw written down</a>. Checklist on <a href="breeding.html#verification">breeding&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The horse inventory screen now owns exactly one pixel of ours.</strong> An <strong>i</strong> button in its top-left corner, and nothing else. The grey 128-pixel side panel behind a collapsible tab is <em>deleted</em>, and so is <code>GeneInspectScreen</code>; everything both of them said moved into <code>HorseInfoScreen</code>, a six-tab full-window overlay in the browser's dark chrome. The panel had been growing a row per session &mdash; it gained the four body numbers, then a condition list, then a bond line &mdash; and it was a column trying to hold a page. Deleting rather than hiding is the risk worth naming: if the new screen fails to open there is no longer any way to read a horse's record in game (<a href="known-gaps.html#gap-71">gap 71</a>).</li>
@@ -13353,7 +13354,7 @@ one.</li>
 
 <h3 id="health-genes-2026-09-07">Built 2026-09-07, NOT yet looked at: the rest of the reference&rsquo;s disorders, and the first dominant ones.</h3>
 
-<p>Closes the roadmap&rsquo;s &sect;12 gene table. Design: <a href="horse-body.html#disorder-shapes">the two shapes a disorder comes in</a>; a page each under Health genes. Checklist <a href="verification.html#health-genes">&sect;0-AF</a>.</p>
+<p>Closes the roadmap&rsquo;s &sect;12 gene table. Design: <a href="horse-body.html#disorder-shapes">the two shapes a disorder comes in</a>; a page each under Health genes. Checklist on <a href="horse-body.html#verification">the horse-body verification tab</a>.</p>
 
 <ul>
 <li><strong>Nine loci, seven of which were nearly free.</strong> HERDA, SCID, lavender foal, cerebellar abiotrophy, CVM, GBED and megaesophagus are all simple recessives, so they are <code>RecessiveDisorderGene</code> subclasses of about forty lines each &mdash; a name, a carrier rate, a <code>Condition</code> and four numbers. That base class existing is the whole reason the batch was one session rather than several, which is what the roadmap predicted when it said to batch them.</li>
@@ -13375,7 +13376,7 @@ one.</li>
 
 <h3 id="literal-epigenetics-2026-09-07">Built 2026-09-07, NOT yet looked at: epigenetics become literal numbers, foals drift, and a breed stops chasing its own horses.</h3>
 
-<p>Owner-driven, and the largest single change to the genetics model so far. Design: <a href="genetics-model.html#epigenetics">the genetics model</a>, <a href="breeding.html#drift">breeding &sect; drift</a>, <a href="breeds.html#founder-only">breeds &sect; founder-only</a>. Checklist <a href="verification.html#epigenetics">&sect;0-AE</a>.</p>
+<p>Owner-driven, and the largest single change to the genetics model so far. Design: <a href="genetics-model.html#epigenetics">the genetics model</a>, <a href="breeding.html#drift">breeding &sect; drift</a>, <a href="breeds.html#founder-only">breeds &sect; founder-only</a>. Checklist <a href="gene-cutie-mark.html#epigenetics">&sect;0-AE</a>.</p>
 
 <ul>
 <li><strong>A seed is not a number a player can tinker with, and that was the whole complaint.</strong> An allele copy carried one opaque <code>long</code>, and every gene recovered its numbers by replaying a PRNG off it in a documented <em>draw order</em>. &ldquo;How much jump does this copy add&rdquo; could only be answered by running the gene. A copy now carries <strong>named literal values</strong> declared by the gene in <code>Gene.epiSchema()</code> &mdash; <code>delta:0.34215</code>, <code>cover:0.4113</code> &mdash; stored as text, read by name. The cost is size and it is not small: an epigenome code went from roughly 4500 characters to about 8300, even after dropping the ~25 genes that turn out to store nothing at all. The owner accepted that explicitly in exchange for a genotype you can read and edit.</li>
@@ -13405,7 +13406,7 @@ one.</li>
 
 <h3 id="homestead-walk-2026-09-07">Built 2026-09-07, NOT yet looked at: the walk moves to road level and out in front of the steps, and the cowboy learns to open a door.</h3>
 
-<p>Owner-driven, from what he could see in game: the path was in the wrong place, the beds faced the wrong way, and the man could not get into his own barn. Design: <a href="villagers.html#barn">Villagers &sect; the barn</a> and <a href="villagers.html#doors">&sect; he can work a door</a>. Checklist <a href="verification.html#villagers">&sect;0-AC</a>.</p>
+<p>Owner-driven, from what he could see in game: the path was in the wrong place, the beds faced the wrong way, and the man could not get into his own barn. Design: <a href="villagers.html#barn">Villagers &sect; the barn</a> and <a href="villagers.html#doors">&sect; he can work a door</a>. Checklist on <a href="villagers.html#verification">the villagers verification tab</a>.</p>
 
 <ul>
 <li><strong>Layer 0 of a building is not the ground, and that is the whole bug.</strong> It is the course that <em>rests</em> on the ground &mdash; the street's road block is the layer below it, outside the piece &mdash; so the lane laid in layer 0 was a block-high curb you walked over rather than a walk you walked on. A structure cannot have a negative layer, so the piece gained a <strong>ground course</strong>: everything lifts by one and the jigsaw lifts with it, which means nothing about where the homestead lands changes and the new bottom layer falls in the road's own course. Verified by diffing the old and new bakes with the jigsaw as origin &mdash; measured from it, not one block of either building moved.</li>
@@ -13446,7 +13447,7 @@ one.</li>
 
 <h3 id="cowboy-playtest-2026-09-07">Built 2026-09-07, partly looked at: the cowboy gets off the horse, and the barn grows a house.</h3>
 
-<p>A playtest round rather than a build round &mdash; the owner played the villagers and reported what he saw, repeatedly, and most of what follows is deletion. Design: <a href="villagers.html">Villagers &amp; transfer papers</a>. Checklist <a href="verification.html#villagers">&sect;0-AC</a>.</p>
+<p>A playtest round rather than a build round &mdash; the owner played the villagers and reported what he saw, repeatedly, and most of what follows is deletion. Design: <a href="villagers.html">Villagers &amp; transfer papers</a>. Checklist on <a href="villagers.html#verification">the villagers verification tab</a>.</p>
 
 <ul>
 <li><strong>The mounted cowboy is gone, and that is the headline.</strong> Roughly a thousand lines &mdash; <code>CowboyMountGoal</code>, <code>CowboyRemountGoal</code>, <code>CowboyRoutine</code>, <code>CowboyDoors</code>, <code>HerdCollision</code> &mdash; deleted at the owner's call after eight rounds of fixes, each of which exposed the next. He is an ordinary <code>AbstractVillager</code> on foot now; the horses treat him as their herd lead and trail him. The two lessons worth keeping are written up as <a href="villagers.html#verified-no-shelter">gap 55</a> (vanilla navigation will not put a large animal through a two-block door) and <a href="villagers.html#verified-move-flag">gap 59</a> (a goal that stops for no reason its own predicates explain has had a control flag disabled underneath it).</li>
@@ -13480,7 +13481,7 @@ one.</li>
 
 <h3 id="villagers-2026-09-07">Built 2026-09-07, NOT yet looked at: the cowboy rides out &mdash; two villagers, and papers that sell a horse.</h3>
 
-<p>The roadmap&rsquo;s &sect;19 villager, a second character the owner asked for alongside it, and the item that connects them. Design: <a href="villagers.html">Villagers &amp; transfer papers</a>. Checklist <a href="verification.html#villagers">&sect;0-AC</a>.</p>
+<p>The roadmap&rsquo;s &sect;19 villager, a second character the owner asked for alongside it, and the item that connects them. Design: <a href="villagers.html">Villagers &amp; transfer papers</a>. Checklist on <a href="villagers.html#verification">the villagers verification tab</a>.</p>
 
 <ul>
 <li><strong>The cowboy is not a villager profession, and that was the first real decision.</strong> A profession is acquired from a job site by a villager whose brain runs vanilla&rsquo;s daily schedule - and that schedule would dismount him every morning to go and stand at a workstation. Always mounted, home is a barn rather than a bed, stock is a live herd rather than a trade table: every one of those is a fight with that brain. He is his own <code>AbstractVillager</code> instead, which keeps the merchant screen, the villager silhouette and the trading goals and throws away the schedule. The <strong>horseman</strong> is a real profession for the mirror-image reason - a shopkeeper who walks to a workstation and restocks is precisely what that brain is for. One ask, two characters, because one piece of machinery does not fit both.</li>
@@ -13512,7 +13513,7 @@ one.</li>
 
 <h3 id="kit-boosters-2026-09-07">Built 2026-09-07, NOT yet looked at: KIT gains the booster group, and it is the common part of the locus.</h3>
 
-<p>Four new alleles at <a href="gene-kit.html#boosters"><code>KIT</code></a>, taking it from eight to twelve. Checklist <a href="verification.html#kit-boosters">&sect;0-AB</a>.</p>
+<p>Four new alleles at <a href="gene-kit.html#boosters"><code>KIT</code></a>, taking it from eight to twelve. Checklist on <a href="gene-kit.html#verification">KIT&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong><code>W35</code>, <code>W32</code> and <code>W34</code> are the same kind of allele as <code>W20</code></strong> - mild, viable homozygous, ranging from no visible white through frank sabino-like spotting, additive beside anything else at the locus. The mod modelled <code>W20</code> as a one-off special case and filed the rest of the <code>W</code> series as rare founder curiosities. In the one large commercial dataset that measured them, <strong><code>W35</code> is commoner than <code>W20</code></strong> (0.168 against 0.34 in Thoroughbreds but far lower elsewhere), with <code>W32</code> at 0.061 behind it. Between the four they are most of what this locus does to a population, and the mod had one of them.</li>
@@ -13525,7 +13526,7 @@ one.</li>
 
 <h3 id="splash-swap-2026-09-07">Built 2026-09-07, NOT yet looked at: the two splash loci swap roles - the common allele was on the wrong gene.</h3>
 
-<p><a href="gene-mitf.html#sw1"><code>MITF</code></a> and <a href="gene-pax3.html#rare"><code>PAX3</code></a>. Checklist <a href="verification.html#splash">&sect;0-AA</a>.</p>
+<p><a href="gene-mitf.html#sw1"><code>MITF</code></a> and <a href="gene-pax3.html#rare"><code>PAX3</code></a>. Checklist on <a href="gene-mitf.html#verification">MITF&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The two genes were right and the two alleles were the wrong way round.</strong> <code>PAX3</code> carried the mod's near-ubiquitous minimal splash allele - 90% of founders were <code>SW2/N</code> - on the reasoning that a mild splash allele is what gives an ordinary horse its socks and its blaze. The reasoning was right and the allele was wrong. <code>SW1</code> on <code>MITF</code> is the widespread one: a several-hundred-year-old promoter change predating most modern breeds, found across a dozen of them. <code>SW2</code> is a <em>PAX3</em> coding change found chiefly in Quarter Horses and American Paints. So the common-allele job moved next door and <code>PAX3</code> became rare and breed-clustered.</li>
@@ -13536,7 +13537,7 @@ one.</li>
 
 <h3 id="grey-copy-number-2026-09-07">Built 2026-09-07, NOT yet looked at: grey becomes a copy number, and gets four rates instead of one.</h3>
 
-<p><a href="gene-grey.html">Grey</a> - three alleles, and the mod's first coat gene that is also a health gene. Checklist <a href="verification.html#grey">&sect;0-Z</a>.</p>
+<p><a href="gene-grey.html">Grey</a> - three alleles, and the mod's first coat gene that is also a health gene. Checklist on <a href="gene-grey.html#verification">grey&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>Grey is not a point mutation.</strong> It is a copy-number variation in and around intron 6 of <em>STX17</em>, and what varies is how many copies a horse carries: <code>G3</code> a triplication, <code>G2</code> a duplication, <code>N</code> normal. Either makes a horse grey, so grey stays dominant - but dosage (<code>G3</code> counts two, <code>G2</code> one) runs 0 to 4, and <strong>that is the greying rate</strong>.</li>
@@ -13549,7 +13550,7 @@ one.</li>
 
 <h3 id="midtstol-2026-09-07">Built 2026-09-07, NOT yet looked at: dun's mane and tail get the midtstol.</h3>
 
-<p><a href="gene-dun.html#midtstol">Dun</a> - a dark band down the centre of the long hair with pale guard hair either side. Checklist <a href="verification.html#midtstol">&sect;0-Y</a>.</p>
+<p><a href="gene-dun.html#midtstol">Dun</a> - a dark band down the centre of the long hair with pale guard hair either side. Checklist <a href="gene-dun.html#midtstol">&sect;0-Y</a>.</p>
 
 <ul>
 <li>A dun's primitive markings are <strong>one continuous system</strong> - forelock, crest, spine, tail dock - and the mane and tail were the one stretch of it drawn as a flat point. The marking is not breed-specific: every true dun has it, and the Fjord is only famous for it because the breed clips the mane upright so the cross-section is unmissable.</li>
@@ -13561,7 +13562,7 @@ one.</li>
 
 <h3 id="matp-recessives-2026-09-07">Built 2026-09-07, NOT yet looked at: sunshine and snowdrop, two more dilution alleles at MATP.</h3>
 
-<p><a href="gene-matp.html">MATP</a> gains <code>sun</code> and <code>sno</code>. Checklist <a href="verification.html#matp-recessives">&sect;0-X</a>.</p>
+<p><a href="gene-matp.html">MATP</a> gains <code>sun</code> and <code>sno</code>. Checklist on <a href="gene-matp.html#verification">MATP&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li>Both found in 2019, both recessive, both <strong>at the same locus as cream and pearl</strong> - which is the consequential part, because it means they compete for a horse's two slots and can compound with cream.</li>
@@ -13573,7 +13574,7 @@ one.</li>
 
 <h3 id="manchado-2026-09-07">Built 2026-09-07, NOT yet looked at: manchado - white with islands in it, and its own locus.</h3>
 
-<p>The rare Argentine pattern: <a href="gene-manchado.html">broad clean white over the topline with rounded islands of base colour inside it</a>. Checklist <a href="verification.html#manchado">&sect;0-W</a>.</p>
+<p>The rare Argentine pattern: <a href="gene-manchado.html">broad clean white over the topline with rounded islands of base colour inside it</a>. Checklist on <a href="gene-manchado.html#verification">manchado&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>Close to the inverse of a leopard</strong> - a leopard puts dark spots <em>on</em> a white horse; this leaves dark islands <em>in</em> a white field. Head, belly and lower legs stay dark; the tail is mostly white.</li>
@@ -13584,7 +13585,7 @@ one.</li>
 
 <h3 id="rabicano-2026-09-07">Built 2026-09-07, NOT yet looked at: rabicano - dominant to inherit, a roll to see.</h3>
 
-<p><a href="gene-rabicano.html">White ticking from the tail dock and flank forward</a>. Checklist <a href="verification.html#rabicano">&sect;0-V</a>.</p>
+<p><a href="gene-rabicano.html">White ticking from the tail dock and flank forward</a>. Checklist on <a href="gene-rabicano.html#verification">rabicano&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The design is the separation of inheritance from appearance.</strong> Pedigrees behave as if rabicano were a simple autosomal dominant, but no causal variant is identified, there is no test, and expression runs from a few frosted hairs to something that reads almost roan - so a parent can be minimal enough to have been recorded as solid. The allele inherits like a dominant and what it <em>shows</em> is a per-horse roll that can come out at practically nothing. A plain horse throwing a heavily ticked foal is the commonest thing rabicano does, and a locus whose phenotype is fixed by its genotype cannot model it.</li>
@@ -13595,7 +13596,7 @@ one.</li>
 
 <h3 id="pangare-2026-09-07">Built 2026-09-07, NOT yet looked at: pangare, sooty's mirror - and the medial helper gap #51 asked for.</h3>
 
-<p>The pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor or a Fjord. <a href="gene-pangare.html">Pangar&eacute;</a>; checklist <a href="verification.html#pangare">&sect;0-U</a>.</p>
+<p>The pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor or a Fjord. <a href="gene-pangare.html">Pangar&eacute;</a>; checklist on <a href="gene-pangare.html#verification">pangar&eacute;&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>Working on <em>red</em> rather than on lightness is the whole design</strong>, because it makes every base-colour rule in the reference fall out of the arithmetic instead of needing a table: a chestnut shows it brightest, a bay's black points are spared automatically (a point is red 0, black 1 - there is no red on it to take), a black horse shows nothing at all, and a double dilute is visually redundant. None of those is a special case in the gene.</li>
@@ -13605,7 +13606,7 @@ one.</li>
 
 <h3 id="sooty-2026-09-07">Built 2026-09-07, NOT yet looked at: sooty - a dark cape, made by declining to remove pigment.</h3>
 
-<p><a href="gene-sooty.html">Sooty</a>; checklist <a href="verification.html#sooty">&sect;0-T</a>.</p>
+<p><a href="gene-sooty.html">Sooty</a>; checklist on <a href="gene-sooty.html#verification">sooty&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>Phase 1 only ever pushes pigment down</strong>, so a gene that <em>adds</em> black cannot exist here. Sooty adds none: it declines to remove what agouti and the dilutions were about to take, and the painter walks the black level back up toward - never past - the load the texel began with. That is the honest mechanical description and it happens to be what the biology is thought to be, since the region sits beside <em>ASIP</em>, whose job is telling a follicle to stop. The test asserts the ceiling directly, because if it breaks the pipeline's downward-only guarantee goes with it.</li>
@@ -13615,7 +13616,7 @@ one.</li>
 
 <h3 id="flaxen-2026-09-07">Built 2026-09-07, NOT yet looked at: flaxen - a chestnut's pale mane, as a dosage rather than as folklore.</h3>
 
-<p><a href="gene-flaxen.html">Flaxen</a>; checklist <a href="verification.html#flaxen">&sect;0-S</a>.</p>
+<p><a href="gene-flaxen.html">Flaxen</a>; checklist on <a href="gene-flaxen.html#verification">flaxen&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>There is no identified flaxen mutation and no DNA test for it</strong>, and that is the single most important fact about the gene. Breeders have modelled it as a simple recessive for a century on pedigree evidence, which has never been confirmed: there is no demonstrated one-copy-versus-two dose series and the intensity varies far too widely for a two-allele locus. So it is three alleles at 0/1/2, summed - a simulated polygenic modifier that says so in its own description. One strong copy and two mild ones are the same horse, which is what lets two mild carriers throw something paler than either.</li>
@@ -13634,7 +13635,7 @@ one.</li>
 
 <h3 id="dhampir-2026-09-07">Built 2026-09-07, NOT yet looked at: the dhampir, a recessive whose carrier is the advertisement.</h3>
 
-<p><a href="breed-book.html#dhampir">Dhampir</a>; checklist <a href="verification.html#dhampir">&sect;0-R</a>.</p>
+<p><a href="breed-book.html#dhampir">Dhampir</a>; checklist <a href="breed-book.html#dhampir">&sect;0-R</a>.</p>
 
 <ul>
 <li><strong>One copy gives red eyes with glowing scleras and costs nothing at all.</strong> That is the point of the gene: two red-eyed horses in a field are a promise rather than a lottery ticket, and a silent dhampir carrier would be a locus nobody would ever meet. Two copies give the animal - white nose to tail, red eyes, triple health, 1.5&times; speed, double jump, and it cannot be fed.</li>
@@ -13645,7 +13646,7 @@ one.</li>
 
 <h3 id="diet-2026-09-07">Built 2026-09-07, NOT yet looked at: a diet locus - twelve narrow appetites, and a channel other genes override.</h3>
 
-<p><a href="gene-diet.html">Diet</a>; checklist <a href="verification.html#diet">&sect;0-Q</a>.</p>
+<p><a href="gene-diet.html">Diet</a>; checklist on <a href="gene-diet.html#verification">diet&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li>Thirteen alleles: an ordinary wild type and twelve narrow diets. Each needs two identical copies, so two <em>different</em> narrow alleles is an ordinary horse carrying both surprises - the same rule the LUT locus uses. <strong>The trade is breadth for efficiency:</strong> eating anything gains least per item, the single-family diets a hay bale's worth, and cake, potions, lava, one metal and one gem take the horse to full health off one item. Which metal and which gem is a per-horse roll off the expressing copy's seed, fixed for life and inherited with the allele.</li>
@@ -13657,7 +13658,7 @@ one.</li>
 
 <h3 id="bay-shade-2026-09-07">Built 2026-09-07, NOT yet looked at: bay is a shade continuum - blood, bay, liver and seal off one score.</h3>
 
-<p><a href="gene-shade.html">Shade</a>, a new locus that paints nothing; <a href="gene-agouti.html">agouti</a> rewritten. Checklist <a href="verification.html#bay-shade">&sect;0-P</a>.</p>
+<p><a href="gene-shade.html">Shade</a>, a new locus that paints nothing; <a href="gene-agouti.html">agouti</a> rewritten. Checklist on <a href="gene-agouti.html#verification">agouti&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li>Bay used to be one expression whose darkness was a bare uniform roll on the <code>A</code> copy, with a constant body colour - so &ldquo;seal brown&rdquo; meant nothing but &ldquo;the black climbed high&rdquo;, and a liver bay could not be drawn at all.</li>
@@ -13672,7 +13673,7 @@ one.</li>
 
 <h3 id="shadow-pass-2026-09-06">Built 2026-09-06, NOT yet looked at: a shadow pass at the end of phase 3 - nothing magical is painted true black.</h3>
 
-<p>Owner: &ldquo;true black should never be painted on a horse, because then you lose all the painted-on shading, and it just looks bad. This is especially noticeable with the magic zebra gene.&rdquo; <code>ColorField.liftShadows</code>, called after the magical loop; checklist <a href="verification.html#shadow-pass">&sect;0-O</a>, mechanism on <a href="pipeline.html#shadow-pass">Pipeline</a>.</p>
+<p>Owner: &ldquo;true black should never be painted on a horse, because then you lose all the painted-on shading, and it just looks bad. This is especially noticeable with the magic zebra gene.&rdquo; <code>ColorField.liftShadows</code>, called after the magical loop; checklist <a href="pipeline.html#shadow-pass">&sect;0-O</a>, mechanism on <a href="pipeline.html#shadow-pass">Pipeline</a>.</p>
 
 <ul>
 <li><strong>The rule is a floor on the colour, not on the composed pixel.</strong> Phase 4 is a multiply, so flooring the <em>output</em> would have collapsed every shading level below the floor into one value - the opposite of the ask. Flooring the colour before the multiply leaves the multiply small but non-zero, and the template's strand detail comes through proportionally. A texel at or below <code>SHADOW_FLOOR</code> (<code>#151515</code>) in all three channels is scaled so its <em>brightest</em> channel lands on the floor, so hue survives and only a texel with nothing in it at all comes out neutral grey.
@@ -13694,7 +13695,7 @@ one.</li>
 
 <h3 id="dilution-targets-2026-09-06">Built 2026-09-06, NOT yet looked at: four dilutions set to measured restriction targets.</h3>
 
-<p>Owner, now reading numbers straight off the probe: single cream to 20% red / 29% black restricted, classic pearl to 20% / 60%, double dilute to 47% / 95%, champagne to 31% / 80%. Set in <a href="gene-matp.html">MATP</a> and <a href="gene-champagne.html">champagne</a>; checklist <a href="verification.html#dilution-retune">&sect;0-M</a>.</p>
+<p>Owner, now reading numbers straight off the probe: single cream to 20% red / 29% black restricted, classic pearl to 20% / 60%, double dilute to 47% / 95%, champagne to 31% / 80%. Set in <a href="gene-matp.html">MATP</a> and <a href="gene-champagne.html">champagne</a>; checklist on <a href="gene-matp.html#verification">MATP&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The targets are the gene's own constants, not a reading off one horse</strong>, and that is forced rather than chosen: a single pair per outcome cannot describe per-horse levels, which differ by base coat. Verified on a chestnut, where a constant reads back directly because there is no black for the tint term to act on. All four land exactly.
@@ -13716,7 +13717,7 @@ one.</li>
 
 <h3 id="lut-probe-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart can be clicked, and searched by colour.</h3>
 
-<p>Owner: clicking the chart should show &ldquo;the amount of restriction of red and black in that location&rdquo;, and a box to type a colour code into that finds the closest point on the LUT and reports the same thing. Both mark the spot. <a href="gene-lut.html?view=lab#probe">On the lab</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+<p>Owner: clicking the chart should show &ldquo;the amount of restriction of red and black in that location&rdquo;, and a box to type a colour code into that finds the closest point on the LUT and reports the same thing. Both mark the spot. <a href="gene-lut.html?view=lab#probe">On the lab</a>; checklist on <a href="gene-lut.html#verification">the LUT verification tab</a>.</p>
 
 <ul>
 <li><strong>The inverse of the axis mapping went next to the mapping</strong>, not into the page. <code>GradientLut</code> already owned <code>chartX</code>/<code>chartY</code>; it now owns <code>redAtChartX</code>/<code>blackAtChartY</code> as well. Working the inversion out at the call site would have been a second statement of one fact, free to disagree - and it would disagree by <em>mirroring the chart</em>, which is the most plausible way to get this wrong and the hardest to catch, because a mirrored answer is still a plausible number in range. There is now a test for exactly that: more red must be to the left, more black must be downward.
@@ -13736,7 +13737,7 @@ one.</li>
 
 <h3 id="new-default-lut-2026-09-06">Built 2026-09-06, NOT yet looked at: a new default gradient, and the coat palette changed under every gene at once.</h3>
 
-<p>Owner supplied <code>horselut.png</code> and asked for it as the new default LUT. Installed into all three places the chart lives; <a href="known-gaps.html#gap-49">gap #49</a> restated against it. Checklist <a href="verification.html#dilution-retune">&sect;0-M</a>.</p>
+<p>Owner supplied <code>horselut.png</code> and asked for it as the new default LUT. Installed into all three places the chart lives; <a href="known-gaps.html#gap-49">gap #49</a> restated against it. Checklist on <a href="gene-matp.html#verification">MATP&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The chart lives in three places, not two.</strong> The source is <code>common/src/main/resources/.../coat/redblackgradient.png</code>; <code>:web:bakeDesignerAssets</code> copies it to <code>wiki/horse-designer/assets/</code> for the designer, the gene previews and the LUT lab; and <code>:common:bakeCreatorAssets</code> <em>inlines</em> it, downsampled to 256px, as a data URI in <code>wiki/gene-creator/assets/textures.js</code>, because the creator has to work with no network. Miss the third and the creator draws every horse against the old palette while everything else has moved.
@@ -13776,7 +13777,7 @@ one.</li>
 
 <h3 id="lut-footprint-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart shows which part of itself a coat reads.</h3>
 
-<p>Owner, on the lab below: draw on the gradient &ldquo;where it shows what area of the LUT it's pulling from for that specific coat &hellip; that'll also help me tune all the other genes.&rdquo; It does now. <a href="gene-lut.html?view=lab#overlay">The overlay</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+<p>Owner, on the lab below: draw on the gradient &ldquo;where it shows what area of the LUT it's pulling from for that specific coat &hellip; that'll also help me tune all the other genes.&rdquo; It does now. <a href="gene-lut.html?view=lab#overlay">The overlay</a>; checklist on <a href="gene-lut.html#verification">the LUT verification tab</a>.</p>
 
 <ul>
 <li><strong>It had to come from phase 1, and that is the whole design decision.</strong> The obvious implementation &mdash; match each baked pixel back to the nearest colour on the chart &mdash; cannot work, and not merely imprecisely: by the time a texel is a pixel its colour has been <em>multiplied by the hair template</em> and moved again by any phase-3 tint, so the position read back is a position the pipeline never sampled. The pigment pair is the thing phase 2 is actually handed, so the pair is the thing to export.
@@ -13798,7 +13799,7 @@ one.</li>
 
 <h3 id="lut-lab-2026-09-06">Built 2026-09-06, NOT yet looked at: a page for trying a gradient on the real pipeline before shipping it.</h3>
 
-<p>Owner: a page to &ldquo;upload and view different LUTs&rdquo;, with pre-built buttons for the base coats, then the dilutions, then one white gene. <a href="gene-lut.html?view=lab">wiki/gene-lut.html?view=lab</a>, plus the widget under <code>wiki/lut-lab/</code>. Checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+<p>Owner: a page to &ldquo;upload and view different LUTs&rdquo;, with pre-built buttons for the base coats, then the dilutions, then one white gene. <a href="gene-lut.html?view=lab">wiki/gene-lut.html?view=lab</a>, plus the widget under <code>wiki/lut-lab/</code>. Checklist on <a href="gene-lut.html#verification">the LUT verification tab</a>.</p>
 
 <ul>
 <li><strong>It is the answer to a bug from earlier the same day.</strong> The near-black regression below was an art edit to the gradient silently switching off a rendering rule, and the only way to have caught it was to launch the game and go looking at a bay. The lab makes that loop a page refresh: <code>DesignerApi.setGradient</code> already existed for boot, nothing caches a baked coat, so pointing it at a file off the reader's disk redraws every horse on the page against the new chart. That is the entire mechanism &mdash; one export, already exported.
@@ -13820,7 +13821,7 @@ one.</li>
 
 <h3 id="stripes-2026-09-06">Built 2026-09-06, NOT yet looked at: two striped genes stopped sharing a painter, and a third one was written.</h3>
 
-<p>Owner: the zebra and brindle genes &ldquo;shouldn&rsquo;t use the same painter, and they both currently look awful.&rdquo; Both true, and the two halves are the same fact. <a href="gene-brindle.html">Brindle</a> is white now; <a href="gene-magic-zebra.html">magic zebra</a> reads a real zebra&rsquo;s body map; and the natural counterpart it had been promising since 2026-09-02, <a href="gene-natural-zebra.html">zebra striping</a>, exists. Checklists <a href="verification.html#natural-zebra">&sect;0-Z</a> and <a href="verification.html#brindle">&sect;0-G</a>.</p>
+<p>Owner: the zebra and brindle genes &ldquo;shouldn&rsquo;t use the same painter, and they both currently look awful.&rdquo; Both true, and the two halves are the same fact. <a href="gene-brindle.html">Brindle</a> is white now; <a href="gene-magic-zebra.html">magic zebra</a> reads a real zebra&rsquo;s body map; and the natural counterpart it had been promising since 2026-09-02, <a href="gene-natural-zebra.html">zebra striping</a>, exists. Checklists on <a href="gene-natural-zebra.html#verification">zebra striping&rsquo;s</a> and <a href="gene-brindle.html#verification">brindle&rsquo;s</a> verification tabs.</p>
 
 <ul>
 <li><strong>&ldquo;Generic&rdquo; was the bug.</strong> <code>BodyStripes</code> is one function of X for the whole animal, and both genes used it because both wanted &ldquo;stripes&rdquo;. Run a zebra through it and you get vertical bars across the rump and up the face &mdash; the two things every field guide names as what a zebra does <em>not</em> have &mdash; because a zebra&rsquo;s pattern is a <em>body map</em>: the same machinery landing on differently-shaped anatomy, so the direction changes with the region. Run brindle through it and you get a horse whose two sides match, which is the one thing brindle structurally cannot be. The field was reusable and neither gene wanted what it did.
@@ -13856,7 +13857,7 @@ one.</li>
 
 <h3 id="near-black-2026-09-06">Built 2026-09-06, NOT yet looked at: an art edit switched off a rendering rule, and every bay went dead black.</h3>
 
-<p>Owner: &ldquo;the black markings on bay are pure black when they shouldn&rsquo;t be, they should be dark but not <code>#000000</code>.&rdquo; True, and nothing to do with <a href="gene-agouti.html">agouti</a> &mdash; it was the same session&rsquo;s LUT edit reaching a place nobody would look. Fixed in <a href="pipeline.html#near-black"><code>CoatTextureComposer</code></a>; <code>coat-golden.txt</code> regenerated, wasm re-baked. Checklist <a href="verification.html#dun">&sect;0-D</a>.</p>
+<p>Owner: &ldquo;the black markings on bay are pure black when they shouldn&rsquo;t be, they should be dark but not <code>#000000</code>.&rdquo; True, and nothing to do with <a href="gene-agouti.html">agouti</a> &mdash; it was the same session&rsquo;s LUT edit reaching a place nobody would look. Fixed in <a href="pipeline.html#near-black"><code>CoatTextureComposer</code></a>; <code>coat-golden.txt</code> regenerated, wasm re-baked. Checklist on <a href="gene-dun.html#verification">dun&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The composer softens black on purpose.</strong> The composite onto the white template is a <em>multiply</em>, so a fully opaque black texel scales the template to nothing and the coat loses its hair shading exactly where the horse is darkest &mdash; a flat void. <code>PURE_BLACK_ALPHA</code> composites black at 80% instead, letting a fifth of the template through, and that is the whole of why a black horse renders as <code>#2C2C2C</code> / <code>#262626</code> / <code>#292929</code> strand detail rather than one <code>#000000</code> slab.
@@ -13875,7 +13876,7 @@ one.</li>
 
 <h3 id="dun-2026-09-06">Built 2026-09-06, NOT yet looked at: dun re-derived from a field guide &mdash; grullo goes blue, and the leg bars stop being bracelets.</h3>
 
-<p>Owner handed over a reference write-up and two specific complaints: the leg markings did not look correct, and dun on black should be grulla, a grey-blue. Both were real and both had the same root. The whole locus is rebuilt around <a href="gene-dun.html#one-mask">one dilution and one mask</a>; <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity green against freshly baked fixtures, <code>coat-golden.txt</code> regenerated, creator and designer assets re-baked. Closes the dun row on <a href="known-gaps.html#gap-292">roadmap &sect;1</a>; checklist <a href="verification.html#dun">&sect;0-D</a>.</p>
+<p>Owner handed over a reference write-up and two specific complaints: the leg markings did not look correct, and dun on black should be grulla, a grey-blue. Both were real and both had the same root. The whole locus is rebuilt around <a href="gene-dun.html#one-mask">one dilution and one mask</a>; <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity green against freshly baked fixtures, <code>coat-golden.txt</code> regenerated, creator and designer assets re-baked. Closes the dun row on <a href="known-gaps.html#gap-292">roadmap &sect;1</a>; checklist on <a href="gene-dun.html#verification">dun&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>Grullo was a mouse-<em>brown</em>, and it is the same bug as the whiten one above, seen from the other side.</strong> A black horse stores <code>(red 1, black 1)</code> &mdash; pheomelanin the eumelanin masks. Scale both pigments together and the black comes off <em>first</em>, unmasking that red on the way out and walking the sample down the chart&rsquo;s gold diagonal. <a href="pipeline.html"><code>PigmentField.diluteNeutral</code></a> is the fix and the deliberate opposite of the existing <code>dilute()</code>: scale the <em>visible</em> red (<code>red &times; (1 - black)</code>) and only then the black, so a black base slides down the neutral column instead. Same invariant <code>whiten</code> keeps, with the two pigments free to move separately.
@@ -13903,7 +13904,7 @@ one.</li>
 
 <h3 id="whiten-2026-09-06">Built 2026-09-06, NOT yet looked at: white fading through both pigments was browning every marking on a black horse.</h3>
 
-<p>Owner: &ldquo;it&rsquo;s fading through both black and red pigments, leading to brown edges on otherwise black horses &hellip; if we&rsquo;re doing edging on a black marking, it removes ALL red pigment to do the edging, so the edges should be shades of grey.&rdquo; That is now <a href="pipeline.html#whiten"><code>PigmentField.whiten</code></a>, one verb every white marking goes through, plus a <code>WHITEN</code> op so data-driven genes get it too. <code>:common:test</code> green (470), <code>:neoforge-26.1.2:build</code> green, parity green against freshly baked fixtures, <code>coat-golden.txt</code> regenerated (66 rows), wasm re-baked. Closes the &ldquo;odd 1px gold fleck&rdquo; line on <a href="known-gaps.html">known gaps</a>; checklist <a href="verification.html#roans">&sect;0-F3</a>.</p>
+<p>Owner: &ldquo;it&rsquo;s fading through both black and red pigments, leading to brown edges on otherwise black horses &hellip; if we&rsquo;re doing edging on a black marking, it removes ALL red pigment to do the edging, so the edges should be shades of grey.&rdquo; That is now <a href="pipeline.html#whiten"><code>PigmentField.whiten</code></a>, one verb every white marking goes through, plus a <code>WHITEN</code> op so data-driven genes get it too. <code>:common:test</code> green (470), <code>:neoforge-26.1.2:build</code> green, parity green against freshly baked fixtures, <code>coat-golden.txt</code> regenerated (66 rows), wasm re-baked. Closes the &ldquo;odd 1px gold fleck&rdquo; line on <a href="known-gaps.html">known gaps</a>; checklist on <a href="gene-roan.html#verification">roan&rsquo;s verification tab</a>.</p>
 
 <ul>
 <li><strong>The bug is that a black horse stores red it is not showing.</strong> Its pigment pair is <code>(red = 1, black = 1)</code> &mdash; a full load of pheomelanin that the eumelanin <em>masks</em>. The gradient&rsquo;s whole bottom row is <code>#000000</code>, so <code>black = 1</code> is the only place a red level is invisible. Scale both channels toward zero together and the red is unmasked on the way out, straight down the chart&rsquo;s gold diagonal: <code>#5F330B</code> at a quarter white, <code>#885517</code> at three eighths. Chocolate and tan, around the edge of every marking on a jet-black horse.

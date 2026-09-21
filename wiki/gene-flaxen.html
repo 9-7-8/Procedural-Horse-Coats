@@ -132,7 +132,7 @@
     <p>
         Covered by <code>FlaxenGeneTest</code> and the golden file, and the range has
         been eyeballed as baked sheets. Not seen in a game. See
-        <a href="verification.html#flaxen">verification &sect;0-S</a>.
+        <a href="#verification">the verification tab</a>.
     </p>
 </div>
 
@@ -312,6 +312,54 @@
     could reason about.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Flaxen's root-to-tip fade hides four faults a still render cannot show: <strong>a reversed axis still looks like a gradient</strong>, an identically two-toned field means the epigenetic depth is not read per allele, the barrel must stay untouched, and a <code>Fl2/Fl2</code> bay must look exactly as it did before.</p>
+</div>
+
+<h3 id="flaxen-root-tip-0917">Flaxen fades from root to tip (2026-09-17, NOT played)</h3>
+
+<p>
+    <a href="gene-flaxen.html">Flaxen</a> drew one flat score per part; the mane and tail now
+    keep more of their colour at the root and lighten toward the ends. Measured offline &mdash;
+    the root band really does hold more red than the tip band &mdash; but a still render cannot
+    show the population, which is where the risk is.
+</p>
+<ul>
+    <li><strong>The dark is at the root, not the tip.</strong> The gradient is easy to get
+        backwards and a reversed one still looks like a gradient in a screenshot. On a strong
+        flaxen chestnut the hair should be deepest where it meets the crest and palest at the
+        ends. <strong>A mane that is pale at the crest and dark at the ends means the axis is
+        inverted</strong>, and the same fault would hit the tail.</li>
+    <li><strong>Depth varies between horses, and some have none.</strong> It is an epigenetic
+        value on the allele, so a field of flaxen chestnuts must not all wear the same two-tone
+        mane. A horse at zero draws the old flat mane, which is correct and not a bug. If every
+        flaxen horse is identically two-toned the value is not being read per allele.</li>
+    <li><strong>It inherits.</strong> Breed two strongly graded flaxens and confirm the foals
+        trend that way; the depth rides on the copy.</li>
+    <li><strong>The body is untouched.</strong> Flaxen is long-hair only, so nothing outside
+        the mane, tail and forelock may lighten. A chestnut whose barrel has paled is the
+        gradient escaping its parts.</li>
+    <li><strong>It still only shows on a chestnut.</strong> A black or bay carrying
+        <code>Fl2/Fl2</code> must look exactly as it did before &mdash; the gradient must not
+        make flaxen visible where the gene has no red to act on.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the fade reads
+        as hair rather than as a band or a seam, and whether a Haflinger-style strong flaxen
+        still reads as the hard contrast it is known for now that the root is darker.</li>
+</ul>
+
+
+<h3 id="open-older-gene-flaxen">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Flaxen never touches a bay or black</strong> (bake golden). Bays that differ only in flaxen bake one texture, and a flaxen chestnut's body, legs and face match a plain chestnut's.</li>
+    <li><strong>Flaxen and W4.</strong> A Haflinger herd is chestnut with pale manes that vary, blond rather than dirty grey (<a href="known-gaps.html#gap-49">gap 49</a>). Mane and tail differ a little, with darker hairs mixed in, and a flaxen palomino still reads as a horse. A <code>W4</code> Morgan looks like a <code>W22</code> dominant white.</li>
+</ul>
 </section>
 
 <div class="page-foot">

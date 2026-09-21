@@ -165,6 +165,51 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Seven bands that used to measure from the base coat now compound, moving <strong>38% of the horse</strong> and reading greener; the open question is whether the hypsometric ramp still says &ldquo;contour map&rdquo; on a real animal or wants its six colours re-picked.</p>
+</div>
+
+<h3 id="open-older-gene-contour">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong><a href="gene-contour.html">Contour</a>'s palette.</strong> Is the saturated elevation map too much, and how often does the coloured form come out nearly monochrome (<code>inkHue</code> and <code>highHue</code> are independent draws)?</li>
+</ul>
+
+<h3 id="over-payoff-0917">Contour stops faking it with subtraction (2026-09-17, NOT played)</h3>
+
+<p>
+    Eleven genes that were hand-written <em>disjoint</em> because the format could not say
+    &ldquo;paint over&rdquo; now say it: dorsal wing, contour, starburst, corolla, agate eye,
+    taper flame, barred wing, uraniid, trillium, foxglove and ooze drip
+    (<a href="known-gaps.html#gap-169">gap 169</a>). Each dropped the inverted copies of the
+    shapes its later layers paint, which is why a 9&nbsp;KB SVG or a second <code>SPOTS</code>
+    field comes off several layers apiece. Measured per pixel against the pre-change icons,
+    corolla, taper flame, barred wing, uraniid, trillium, ooze drip, foxglove, starburst and
+    agate eye are settled &mdash; <strong>none of those is worth looking for a difference
+    in</strong>, and contour is the one left to look at.
+</p>
+
+<ul>
+    <li><strong>Contour is the one that genuinely changed, and it is the thing to look at.</strong>
+        Its seven bands paint at <code>strength</code> 93, so stacking them <em>compounds</em>
+        &mdash; each band now keeps a little of the one beneath instead of measuring from the
+        coat the gene started on &mdash; and about <strong>38% of the horse moves</strong>. It
+        reads greener. That was taken deliberately over reverting it, on the argument that
+        stacking is what the layers always meant; <strong>the open question is whether the
+        hypsometric ramp still reads as a contour map on a real horse</strong>, or whether the
+        six band colours want re-picking now that they compound. <code>Ct/Ct</code> and
+        <code>Cx/Cx</code> both.</li>
+    <li><strong>Contour's drawn line.</strong> It keeps its
+        <code>0.56</code> cut so it cannot paint over the summit bands above it. The line should
+        still be a line at one level, not a wash across the high ground.</li>
+</ul>
+
+</section>
+
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>

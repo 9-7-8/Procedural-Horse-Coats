@@ -30,7 +30,7 @@
     <strong>Derived from AstikorCarts / NiftyCarts / UsefulCarts, MIT</strong>
     &mdash; full lineage <a href="#licence">below</a>.
     <strong>Not play-tested</strong>; checklist in
-    <a href="verification.html#carts-0918">verification</a>.
+    <a href="carts.html#carts-0918">verification</a>.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -335,7 +335,7 @@
     The box seat did nothing at all until this was wired up &mdash; the wagon was
     the one vehicle that never spawned the hidden rider, while its tooltip
     claimed otherwise. It is code that has never been played. First thing to
-    check in <a href="verification.html#carts-0918">verification</a>.
+    check in <a href="carts.html#carts-0918">verification</a>.
 </p>
 <h3>Passengers you did not invite</h3>
 <p>
@@ -872,12 +872,120 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Six vehicles, 68 ported classes and seven new mixins have never been run in a game, and the port was never compiled against the game jars upstream either, so start with <code>runServer</code> reaching &ldquo;Done (&rdquo; &mdash; then whether the draught modifier fires at all, and whether it leaks back on unhitch.</p>
+</div>
+
+<h3 id="carts-0918">Horse-drawn carts (2026-09-18, NOT played, nothing here has been seen)</h3>
+
+<p>
+    Six vehicles, 68 ported classes, seven new mixins and a new draught model, and
+    <strong>not one of it has been run in a game</strong>. The upstream port it came from had
+    never been compiled against the game jars either, so the whole thing is
+    build-green-only. <a href="carts.html">Carts</a> is the page.
+    Start at the top &mdash; if the first two fail nothing below them is testable.
+</p>
+
+<ul>
+    <li><strong>The game starts.</strong> Seven mixins were added to
+        <code>horsegenetics.mixins.json</code>, and it grew a <code>"client"</code> block
+        for the first time. A mixin apply failure or a client class on the server is a hard
+        crash at mod load, so <strong><code>runServer</code> to <q>Done (</q> before
+        anything else</strong>.</li>
+    <li><strong>85 items in a Horse Carts creative tab.</strong> Twelve woods &times; six
+        vehicles, plus the cart wheel. Any purple icon is a missing model.</li>
+    <li><strong>A placed cart is the right wood.</strong> No cart texture ships &mdash; each
+        is stitched from that wood&rsquo;s block sprites at resource-reload time. A
+        purple-black cart means the assembler did not run; a cart that is the wrong wood
+        means the sprite table is wrong. Check a nether one (crimson is a <em>stem</em>) and
+        bamboo (a <em>block</em>), which are the irregular rows.</li>
+    <li><strong>Hitch and unhitch.</strong> Place a supply cart, ride a saddled horse near
+        it, press <strong>R</strong>: attach sound, and the horse pulls it. R again to
+        detach.</li>
+    <li><strong>A strong horse is visibly faster than a weak one on the same cart.</strong>
+        This is the whole feature. Two horses with clearly different pull scores, the same
+        wagon, the same stretch of ground. If they look the same, <code>applyDraught</code>
+        is not firing &mdash; check the horse&rsquo;s movement-speed modifiers.</li>
+    <li><strong>A fast weak horse and a slow strong one are close, and a balanced one beats
+        both.</strong> The design claim, and the one worth measuring rather than eyeballing.
+        The unit test pins the arithmetic; this checks the arithmetic was wired to the
+        right numbers.</li>
+    <li><strong>Detaching gives the speed back.</strong> The modifier is transient and
+        removed on unhitch. A horse that stays slow after unhitching is a leak, and it
+        compounds every re-attach.</li>
+    <li><strong>Two riders on a pull-6 horse, and only one below it.</strong> Both the
+        threshold and the seating &mdash; the pillion offset is a number picked to look
+        right on vanilla&rsquo;s model, never measured, so the second rider may well be
+        inside the first.</li>
+    <li><strong>The wagon&rsquo;s box seat drives the horse.</strong> <strong>Wired on
+        2026-09-19 and never run</strong> &mdash; until then the wagon was the one vehicle
+        that never spawned a postilion, so the seat did nothing at all while the tooltip
+        said it drove. The animal cart and the reaper have always had the same three lines,
+        so if those two steer and the wagon does not, the difference is the wagon&rsquo;s
+        four seats: it is the first passenger who drives, and a wagon boarded by an animal
+        first may hand the reins to nobody. This is also the path most likely to fight this
+        mod&rsquo;s own six <code>AbstractHorse</code> mixins. While you are there: <strong>does a horse still fly, swim and cross
+        lava?</strong> <code>CartHorseMixin</code> overrides <code>travel</code>, and the
+        argument that it does not break <code>HorseFlightMixin</code> is an argument, not an
+        observation.</li>
+    <li><strong>The plow tills, the seed drill plants, the reaper harvests.</strong> Tools
+        go inside the plow; the reaper needs a player sitting on it.
+        <strong>Craft the reaper first and confirm it is there at all</strong> &mdash; its
+        recipe had a two-wide row in a three-wide pattern, so the game threw out all twelve
+        woods' files at datapack load and it has been uncraftable since it shipped. Fixed in
+        v0.5.014 and the twelve files now parse on a server boot, but no reaper has been made
+        in a grid.</li>
+    <li><strong>Wagon storage grows with chests, and five carpets make a roof.</strong>
+        9&times;4 &rarr; 9&times;8 &rarr; 12&times;9. Contents must survive a relog.</li>
+    <li><strong>A loaded cart is slower than an empty one, and it changes while you
+        stand there.</strong> New on 2026-09-19 and the whole point of the cargo rule.
+        Hitch an empty supply cart to a horse, note the pace, then fill it from a chest
+        <em>without unhitching</em>: within a second it should be visibly harder work, and
+        emptying it should give the pace back. The same for a wagon as chests go on, and for
+        the animal cart as a second cow climbs in. If nothing changes,
+        <code>refreshDraught</code> is not being reached &mdash; it runs from
+        <code>pulledTick</code>, so a cart that is standing still may simply never be asked.
+        <strong>A plow must <em>not</em> change</strong> when you rack three tools in it.</li>
+    <li><strong>A train of carts costs what its parts cost.</strong> Hitch a cart behind a
+        cart behind a horse and load the back one. The horse should slow for cargo it is not
+        touching; if it does not, <code>currentLoad</code> is not walking the
+        <code>drawn</code> chain and a trailer is a free ride.</li>
+    <li><strong>The info screen&rsquo;s two wagon lines differ.</strong> Overview &rarr;
+        Draught now shows what the horse keeps empty <em>and</em> loaded to the roof. Two
+        identical percentages mean the screen is reading the bare load twice.</li>
+    <li><strong>The cart tooltip shows two numbers on a carrying vehicle and one on an
+        implement.</strong> Shift on a supply cart, a wagon and an animal cart: empty and
+        full. Shift on a plow, reaper or seed drill: one line only, because their load does
+        not move.</li>
+    <li><strong>The supply cart shows its cargo</strong>, and a banner flies from a supply
+        cart, animal cart or wagon.</li>
+    <li><strong>&ldquo;Hauled&rdquo; climbs on the info screen</strong> and is still there
+        after a relog. It is a synced attachment, so a figure that reads zero on the client
+        while the horse has clearly worked is a sync fault rather than a counting one.</li>
+    <li><strong>Recipes appear in the recipe book</strong>, and the cart wheel is
+        <code>cart_wheel</code>, not <code>wheel</code>.</li>
+    <li><strong>A dedicated server plus a client.</strong> Carts sync, and no client-only
+        class on the server.</li>
+</ul>
+
+<p>
+    <strong>Modded woods are a separate session and need another mod installed</strong>
+    &mdash; see <a href="known-gaps.html">gap 277</a>, which is the one that could crash
+    rather than merely look wrong, and gap 276 for the oak inventory icon that is expected.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-pull.html">Pulling ability</a>
         <a href="horse-body.html">The horse's body</a>
         <a href="compatibility.html#horse-powered">Compatibility &mdash; horse-powered machinery</a>
-        <a href="verification.html#carts-0918">To be verified</a>
+        <a href="carts.html#carts-0918">To be verified</a>
     </div>
     Source: <code>common/cart/</code>, <code>neoforge-26.1.2/{carts,compat,server}/</code>
 </div>

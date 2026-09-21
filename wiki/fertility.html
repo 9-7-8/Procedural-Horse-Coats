@@ -258,7 +258,7 @@
     jar bench and more. Each pen is registered with
     <code>DebugWorldWatch.watchBreeding</code>, so its horses' breeding states are in the log. Test
     kit batch 1 is for the two things the yard cannot do: a birth while unloaded, and a reload.
-    The audit, in order, is <a href="verification.html#fertility">verification &sect;0-DV</a>. Every attempt, loss and
+    The audit, in order, is <a href="fertility.html#fertility">verification &sect;0-DV</a>. Every attempt, loss and
     birth writes an <code>ActionTrace</code> line under <code>fertility</code>, and carrot
     folds are under <code>carrot</code>.
 </p>
@@ -301,7 +301,7 @@
     lost fight did the same to any horse. It is now a fraction,
     <code>ReproRules.COVER_HEALTH</code>, tested by <code>ReproRulesTest</code> at exactly the health a
     miscarriage leaves her; and the refusal now logs once a minute per mare, naming her health.
-    <em>Not played yet</em> &mdash; <a href="verification.html#fertility">&sect;0-DV</a>.
+    <em>Not played yet</em> &mdash; <a href="fertility.html#fertility">&sect;0-DV</a>.
 </p>
 
 <p id="verified-cover-reach">
@@ -725,6 +725,154 @@
         also gives.</li>
 </ul>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>One twin pregnancy in ten is now a single genome drawn once, epigenetics included, and no pair has been compared side by side; ranking above it is gap 258&rsquo;s silence &mdash; a mare who loses a pregnancy must be covered again, and the old failure was a pen that simply went quiet for the rest of the run.</p>
+</div>
+
+<h3 id="identical-twins-0917">One twin pregnancy in ten is identical (2026-09-17, NOT played)</h3>
+
+<p>
+    Twins used to be two independent draws every time, so every pair was fraternal. About one
+    pair in ten is now a single genome drawn once &mdash; true clones, epigenetics included.
+    The rate is unit-tested; what is unplayed is whether an identical pair actually
+    <em>looks</em> identical in the world.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>An identical pair is indistinguishable.</strong> Breed a <code>tw/tw</code> mare
+        repeatedly until twins arrive, and compare the two foals side by side.
+        <strong>Pass:</strong> roughly one pair in ten matches in every respect &mdash; same
+        sex, same colour, and the same markings down to the individual streaks and patches.
+        <strong>Fail:</strong> a pair that is obviously the same colour but has different white
+        markings, which would mean the epigenome is being redrawn rather than shared.</li>
+    <li><strong>An identical pair is never a colt and a filly.</strong> Sex is a locus like any
+        other, so it comes along with the rest. <strong>Pass:</strong> every matched pair is
+        two colts or two fillies. A mixed pair that otherwise looks identical is a failure.</li>
+    <li><strong>Most pairs are still fraternal.</strong> <strong>Pass:</strong> the other nine
+        pairs in ten differ the way any two siblings do &mdash; often different sexes and
+        plainly different coats.</li>
+</ul>
+
+
+<h3 id="fertility">Breeding and fertility: the audit (built 2026-09-13, NOT played)</h3>
+
+<p>
+    Everything about breeding in one walk: fertility, pregnancy, natural breeding, gelding, the
+    vet's kit, and tonight's gap fixes. <strong>The yard does most of it</strong>, in rows
+    <strong>O and P</strong> past the carrot pens, plus MET NATURAL in row R (<a href="horse-dimension.html#test-yard">the
+    table</a>). Every pen is one claim, and its sign says what should happen. With
+    <code>debug.tools</code> on (the dev default), a heat and a pregnancy each last one real minute.
+    The logic is unit-tested: <code>ReproRulesTest</code>, <code>NaturalCoverTest</code>,
+    <code>ReproTextTest</code>, <code>ConceivableTest</code>, <code>GeldingListingTest</code>,
+    <code>FertilityGeneTest</code>. The yard pens ran three times on 2026-09-14; what is left below
+    mostly needs your hands.
+</p>
+<p>
+    <strong>What the log gives you:</strong> every fertility pen is watched, so
+    <code>[watch]</code> lines carry <code>breeding:</code> with each horse's state (in heat,
+    pregnant, nursing, covers today) whenever one changes, and at every census.
+    <code>[fertility]</code> lines are covers, conceptions, losses and births; <code>[carrot]</code>
+    lines are carrot folds. <code>/testkit census</code> prints every pen at once.
+</p>
+
+<h4 id="fertility-yard">In the yard, in this order</h4>
+<ol>
+    <li><strong>Walk in and check the log first.</strong> Expect <code>fertility pens built
+        (rows O-P, and MET NATURAL in R)</code>, and <em>no</em> <code>could not make ... pregnant as promised</code>. That
+        warning means the maternity pen came up empty, usually because <code>health.mode</code>
+        is not FULL.</li>
+    <li><strong>A mare who loses a pregnancy is covered again (2026-09-16, gap 258, NOT played).</strong>
+        This is the one to do first, because until now she never was. Stand at <strong>row W</strong>'s
+        ratio pens (RATIO KIT W5, RATIO MITF SW3, RATIO MILK CLASH) and leave them. Each loses
+        pregnancies by design. <em>Pass:</em> <code>early loss</code> lines keep being followed by fresh
+        <code>natural cover</code> lines for the same mare all run &mdash; MILK CLASH should conceive and
+        lose over and over, never stall. <em>Fail, the old behaviour:</em> one loss and that pen goes
+        quiet for the rest of the run while her readout still says <em>In heat</em>. Worth a census an
+        hour in: row W should now be building a real sample for
+        <a href="known-gaps.html#gap-225">gap 225</a>'s ratios.</li>
+    <li><strong>A badly hurt mare is refused, and says so (2026-09-16, NOT played).</strong> Hurt a mare
+        in heat below 90% health with a stallion beside her. Expect a
+        <code>not covered: hurt, N/N health</code> line, once a minute, not silence &mdash; that silence
+        is what hid gap 258. Then let her heal and she should be covered normally. A scratch (a point or
+        two) must <em>not</em> stop her at all.</li>
+    <li><strong>Every pen has water now (2026-09-16, NOT played).</strong> A water cauldron is sunk flush
+        into the floor of each pen's corner, from <code>DebugTestYard.fencedPlot</code>, so a hurt horse
+        can heal anywhere in the yard. <em>Check:</em> no animal uses one as a step to leave its pen
+        (the failure gap 247 found with <em>raised</em> cauldrons), and the splice pens in the carrot
+        rows have one in <strong>both</strong> halves. The WATERBORN and death-fluid pens overwrite their
+        interiors after the pen is built, so they will not have one &mdash; that is expected.</li>
+    <li><strong>Row O east, MATERNITY, what needs your hands.</strong> The kit's readings are
+        <a href="fertility.html#verified-vet-readings">verified from the log</a>. Still for a person: TWINS'
+        info screen's Breeding line should only say <em>Pregnant</em>. The chat lines should be a gold one naming the foal, a grey &ldquo;did not carry&rdquo; for
+        the loss, and &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
+        TWINS' Speed on the info screen is 15% lower (the slowdown itself is
+        <a href="fertility.html#verified-late-pregnancy">verified</a>; what is left is that the screen shows it).</li>
+    <li><strong>Row O west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
+        covers start within seconds. Each birth adds a horse back, so the pen settles again.</li>
+    <li><strong>Row P east, GOLD ANY HEAT, is <a href="fertility.html#verified-gold-any-heat">verified</a>.</strong>
+        Row P west, the jar stud, is on
+        <a href="item-seed-jars.html#fertility-jar-stud">seed jars</a>.</li>
+    <li><strong>Leave the yard running</strong> and read the census in the morning: every fertility
+        pen prints its breeding readout.</li>
+</ol>
+
+<h4 id="fertility-overworld">Outside the yard (test kit batch 1)</h4>
+<ul>
+    <li><strong>Plain golden carrots are still instant</strong> for two ordinary tamed horses.</li>
+    <li><strong>Birth while away.</strong> Get a mare pregnant, ride far enough that her chunk
+        unloads for more than a minute, come back: she foals within two seconds of loading.
+        Leaving the horse dimension tears the yard down, which is why this is not a pen.</li>
+    <li><strong>Save and reload mid-pregnancy.</strong> The Breeding line still says
+        <em>Pregnant</em>, and she still foals.</li>
+    <li><strong>A pregnant mare refuses golden carrots, with no flicker.</strong> Gap 226's fix syncs
+        the pregnancy to the client, so there should be no mount or eat animation before the yellow
+        line.</li>
+    <li><strong>A seed jar or a clock on a horse never starts you mounting it</strong>, on a
+        dedicated server and in single-player. The server decides; the client only cancels
+        (<a href="known-gaps.html#gap-231">gap 231</a>). An adult stallion clicked with the clock
+        says &ldquo;Only a mare has a cycle to step&rdquo;.</li>
+    <li><strong>The horse browser (H) and a gelding:</strong> he is not in the breeding picker's
+        stallion list, the <code>gelding</code> filter finds him, and <code>stallion</code> does
+        not.</li>
+    <li><strong>A cowboy's string</strong> shows some geldings, a little cheaper than his
+        stallions.</li>
+    <li><strong>Wild bands</strong> foal over a few days of play, and never grow past eight around a
+        mare.</li>
+    <li><strong>Looking at it (last):</strong> the Breeding line's wording in each state; a mare in
+        heat and a stallion walking together; a gelding keeping company like a mare.</li>
+</ul>
+
+<h3 id="mutation-0917-twins">The two twin checklist boxes (2026-09-17, NOT played)</h3>
+
+<p>
+    Two checklist entries went in alongside the mutation change of 2026-09-17 &mdash;
+    <em>Breed fraternal twins</em> and <em>Breed identical twins</em>. Which pair is which,
+    and the exclusivity between them, are unit-tested; what no test can show is that the box
+    ticks in a real game.
+</p>
+
+<h4>Nothing here needs looking at to judge</h4>
+
+<ul>
+    <li><strong>The twin boxes tick, and tick the right one.</strong> This is the reachable
+        half of that change &mdash; the mutation box
+        (<a href="breeding.html#mutation-0917">breeding</a>) is not something to sit and wait
+        for, but this is: breed a <code>tw/tw</code> mare until twins are born alive.
+        <strong>Pass:</strong> <em>Breed fraternal twins</em> ticks for an ordinary pair, and
+        <em>Breed identical twins</em> ticks &mdash; and only that one &mdash; for a matched
+        pair. They are deliberately exclusive: an identical pair must not tick the fraternal
+        box. Neither ticks unless <strong>both</strong> foals are born alive. Who gets
+        credited is checked with the mutation box, on
+        <a href="breeding.html#mutation-0917">breeding</a>.</li>
+</ul>
 </section>
 
 <div class="page-foot">

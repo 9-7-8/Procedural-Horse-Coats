@@ -377,6 +377,44 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Golden carrot seeds carry this mod's <strong>first block tint</strong>, and every way they fail is quiet &mdash; a crop frozen at age 0 because <code>randomTicks</code> never took, a gold item dropping where nothing gold should, or a tint that misses the model so the crop just grows orange and looks like a loot-table bug.</p>
+</div>
+
+<h3 id="goldencarrot-0918">Golden carrot seeds (2026-09-18, NOT played)</h3>
+
+<ul>
+    <li><strong>The crop is gold, not orange.</strong> It is vanilla's carrot sheets under a
+        block tint, and this mod's first block tint - if the tint does not reach it, it grows
+        as plain carrots and looks like a bug in the loot table rather than in the model. The
+        seed icon should be gold too, by a different mechanism.</li>
+    <li><strong>It grows at all.</strong> Plant on farmland, wait, or bone-meal it. A crop
+        that sits at age 0 forever means the <code>randomTicks</code> property did not take.</li>
+    <li><strong>Breaking it early returns the seed</strong>, and a mature one gives one golden
+        carrot and two seeds. <strong>Nothing gold ever drops.</strong></li>
+    <li><strong>The seed will not plant on anything but farmland</strong>, and a golden carrot
+        still will not plant at all.</li>
+    <li><strong>The supplier sells them at rank 5</strong>, 38 emeralds, twice. Level him up
+        and look. He has four other rank-5 trades and rolls three of the five.</li>
+    <li><strong>They turn up in dungeon chests</strong> - 7%, so this needs a lot of chests
+        or a creative check of the loot modifier.</li>
+    <li><strong>The two checklist boxes tick</strong> - plant one, harvest one.</li>
+</ul>
+
+
+<h3 id="open-older-items">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Two item models.</strong> The research shelf is a bookshelf in hand and in the inventory, and an unattached signed transfer paper (creative) looks like a blank transfer paper, not nothing.</li>
+    <li><strong>The Recipes tab.</strong> The category dropdown (Everything else / Gene carrots) keeps a search inside its category; shapeless recipes read sensibly; the two <code>#minecraft:fences</code> cells show a real fence; hovering a cell gives its tooltip; the longest blurb (unknown epigenetic splice) fits the 210px panel.</li>
+    <li><strong>The Horse Genetics creative tab.</strong> Every item has a readable name and its own icon, with no lang keys or missing textures.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="carrots.html">The carrot family &amp; gene database</a>

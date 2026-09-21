@@ -343,6 +343,78 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Nothing here has been opened since the last designer bake, and the egg and the browser are supposed to be <strong>one screen in two places</strong> &mdash; so the quiet failures are a spawned horse that differs from its own preview, a newly added gene landing on an allele that does nothing, and the right column collapsing at GUI scale 4.</p>
+</div>
+
+<h3 id="after-1057-designer-bake">The designer re-bake of 2026-09-15 (NOT yet looked at)</h3>
+
+<p>
+    <strong>This is in the 16:11 run of 2026-09-15</strong>, which was built and launched after the ward-pen fix, so it is
+    the first run that carries every change of the day. What is left below is looking at it.
+</p>
+<ul>
+    <li><strong>The designer was re-baked at 15:36</strong> with all of today's <code>common/</code> changes.
+        <code>check-designer-boots.mjs</code> was run at 16:03 and passes &mdash; the designer publishes itself, the wasm
+        bridge is there, the overlay draws from a real genome and the console is clean. (It drives headless Chrome, which
+        the owner had asked to skip; it was run without knowing that, and cost seconds.) <strong>Still worth your own
+        look once</strong>, since a page that boots is not a page that draws the right horse:
+        open <a href="horse-designer/">the designer</a>.</li>
+</ul>
+
+<h3 id="herd-shape-0915-clear">Clear rerolls the epigenome in the browser too (2026-09-15, NOT played)</h3>
+
+<p>
+    Shipped alongside the <a href="breeds.html#herd-shape-0915">herd shape</a> work of 2026-09-15, and
+    not played since.
+</p>
+
+<ul>
+    <li><strong>The custom spawn egg's Clear now rerolls the epigenome in the browser too</strong>, which it has always
+        done in game. <strong>Pass:</strong> in the designer, Clear changes the epigenetic fingerprint under the genome
+        line, and the two editors do the same thing on the same button.</li>
+</ul>
+
+<h3 id="jumps-0920-breed-eggs">Breed eggs get a creative tab of their own (2026-09-20, NOT played)</h3>
+
+<p>
+    Shipped alongside the <a href="item-jumps.html#jumps-0920">jump</a> work on 2026-09-20, and
+    not played since.
+</p>
+
+<ul>
+    <li><strong>Breed eggs have their own creative tab</strong>, and this mod's three read
+        Horse Genetics, Horse Breeds, Horse Carts in that order.</li>
+</ul>
+
+<h3 id="open-older-item-spawn-eggs">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Make egg, at GUI scale 4 and 2</strong> (tester guide, <em>The custom horse spawn egg</em>). <strong>Pass:</strong> it says <em>wrote this horse into a preset spawn egg</em> and the egg lands in the first free slot, and the half-width <strong>Clear</strong> still clears. At some small window the log warns <code>[Custom Horse] the right column does not fit this window</code> instead of the button silently eating clicks.</li>
+    <li><strong>Breed spawn eggs, by hand.</strong> A filled egg per <code>spawn_egg</code> breed in both the mod's creative tab and vanilla's Spawn Eggs tab, a blank one in neither; used on the ground it makes a foundation horse of that breed and is consumed outside creative, and its tooltip names breed, natural/magical and commonness. Also say whether a breed egg (~7% of a dungeon chest; the scientist at Journeyman, Expert, Master) feels like a find or clutter.</li>
+    <li><strong>The custom spawn egg, where it was blind.</strong> Right-clicking a horse with it opens the editor rather than mounting, as do the ground and open air. In survival everything works except a greyed <em>Spawn (creative only)</em> that explains itself on hover. The third-party report is <a href="known-gaps.html#gap-70">gap 70</a>.</li>
+    <li><strong>The egg's Breed dropdown</strong> scrolls every breed plus Feral Mixed, a pick rolls that breed into the editor, and clicking off it closes it.</li>
+    <li><strong>Designer to egg.</strong> Export a horse from <a href="horse-designer/">the horse designer</a> and <b>Paste</b> it into the custom egg: the same horse, name and coat.</li>
+    <li><strong>The custom spawn egg spawns what it previewed.</strong> Set up a non-deterministic coat, spawn it, and check the horse in the world is identical to the preview, with the same genotype on its information screen, age and sex as toggled. Copy code, Clear genes, Paste code returns the same horse with only off-baseline loci as rows. In survival Spawn is greyed and does nothing.</li>
+    <li><strong>A newly added gene lands on the allele that does something.</strong> Champagne as <code>Ch/Ch</code>; KIT on its first homozygote that can occur, never a nonviable pair; MET heterozygous. <code>web/HorseEditor</code> mirrors the screen, so a unit test there covers both.</li>
+    <li><strong>The horse designer's right column matches the spawn screen's</strong> (hard rule 5): six rows, with Make egg and a half-width Clear sharing one, copied by value into <code>js/gui.js</code>.</li>
+    <li><strong>The gene search box, both editors</strong> (tester guide, <em>The horse designer</em>). Typing <kbd>w</kbd><kbd>a</kbd><kbd>s</kbd><kbd>d</kbd> into the designer's canvas box does not walk the horse. Esc clears it, and clicking elsewhere lets go. Is half a row enough for the family menu's button, now that long family names truncate?</li>
+    <li><strong>The designer matches the game.</strong> A horse rolled in the <a href="horse-designer/">horse designer</a> from a genotype code matches one spawned in game from the same code.</li>
+    <li><strong>The designer's twins of the spawn screen.</strong> In the <a href="horse-designer/">horse designer</a>, Reroll name sits where the screen has Spawn, and the gene hover panel draws as on the screen. Its gene list is the quick place to read many blurbs.</li>
+    <li><strong>Horse designer: export, import and the fixed genes.</strong> Export, Randomize, Import restores name, sex, breed, coat and epigenome through the real file picker and download; extension, agouti and shade are on from the start with no <code>x</code> and survive <b>Clear genes</b>; struck-through rows (abilities and stats) still add to the export.</li>
+    <li><strong>Designer failures without toasts.</strong> A failed mod load holds the boot overlay up with a reason, and an unreadable horse file raises a dialog.</li>
+    <li><strong>A gene with no picture</strong> (the eye loci, the health genes) shows text only in the custom spawn egg's hover, not a purple-and-black square (<a href="item-spawn-eggs.html#verified-hover-picture">the picture itself is verified</a>).</li>
+    <li><strong>The custom spawn screen at GUI scale 4</strong> (<a href="known-gaps.html#gap-139">gap 139</a>). Nothing overlaps, the 22-longer gene list scrolls, Spawn under the preview reads as the action, its greyed &ldquo;Spawn (creative only)&rdquo; label fits out of creative, and the 128px right column fits the breed label.</li>
+    <li><strong>The gene hover panel on the spawn screen.</strong> A long blurb near the bottom of the list rides up rather than being cut; it does not flicker or lag the list; a few of the newer blurbs (tiger eye, leopard, PATN1/2, shadowcreature, the magic utility loci) read well at panel size.</li>
+    <li><strong>The spawn egg screen.</strong> Real gene names, alphabetical, legible when scaled, and the last gene reachable by scrolling. Many-allele genes open a dropdown that stays on screen, and a particle gene's motes show the right colour inside the panel.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-designer/index.html">The horse designer</a>

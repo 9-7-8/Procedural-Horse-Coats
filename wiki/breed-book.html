@@ -1038,6 +1038,299 @@
     backstory, and the first is worth more.
 </p>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Four batches of breeds and the flying Cloudtouched have never existed in a world, so the risk is a founder pool that loads but does not hold &mdash; a grey Konik, a bay Kladruber, the Paint&rsquo;s <strong>quadrupled HYPP rate</strong> &mdash; rather than a horse that merely looks wrong.</p>
+</div>
+
+<h3 id="cloudtouched-0918">Cloudtouched, a flying breed (2026-09-18, NOT played)</h3>
+
+<p>
+    A second magical breed, <a href="breed-book.html#cloudtouched">Cloudtouched</a>, is
+    registered and bakes clean, and <strong>not one has ever existed in a world</strong>.
+    It is the first breed to pin <a href="gene-flying.html">flying</a>, the first to pin
+    <a href="gene-bird-boned.html">bird-boned</a>, and the first to pin the weather loci,
+    so several of these checks are the first time that code has met a breed pool at all.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>It spawns at all.</strong> <code>very_rare</code> is 0.75 against a
+        <code>moderate</code> breed's 6.0, and weight is a share <em>within one biome</em>,
+        not an absolute rate. The thinnest biome it lists is
+        <code>cherry_grove</code> (two other breeds), which is where one should turn up
+        soonest; <code>meadow</code> has ninety and is where it should be near-invisible.
+        A breed egg is the honest way to check the <em>horse</em>, but it proves nothing
+        about the spawn weight &mdash; those want a real world and patience, or
+        <code>DebugAnnounce</code>.</li>
+    <li><strong>No founder is a true flier.</strong> The pool seeds no
+        <code>Tf/Tf</code>. Roll a pen of them and check the genotype column: about two in
+        three should read <code>El/n</code> or <code>El/Tf</code>, the rest
+        <code>Tf/n</code>, and <em>none</em> <code>Tf/Tf</code>. If a wild one flies
+        properly rather than gliding, the pool is wrong.</li>
+    <li><strong>Two of them throw a true flier.</strong> The whole point of the breed.
+        About one foal in thirteen from two random Cloudtouched, one in four from two
+        known <code>El/Tf</code> gliders. This is the check that says the breed does what
+        it was built for, and it is a breeding project, not a look.</li>
+    <li><strong>Bird-boned is roughly one in ten, not one in two.</strong> It is the only
+        place in the game where a wild horse expresses it.</li>
+</ul>
+
+<h4>Then the things that can only be wrong in the air</h4>
+
+<ul>
+    <li><strong>A glider actually glides, on a breed horse.</strong> Gliding was broken for
+        three test sessions by the <code>abilityDose</code> bug and is fixed, but it has
+        only ever been checked on a hand-built genome. Ride one off a peak.</li>
+    <li><strong>Speed 8 in the air is fast but not absurd.</strong> Airspeed is
+        <code>MOVEMENT_SPEED</code> &times; 1.1 to 2.5, so this should cruise around 30
+        blocks a second at full ramp &mdash; quick, and meant to stay under a
+        rocket-boosted elytra. If it feels like more than that, the statline is wrong and
+        not the flight code.</li>
+    <li><strong>The stall is survivable only for the one in ten.</strong> A glider that
+        runs out of height and speed should die unless it is also
+        <code>Brd/Brd</code>. If every Cloudtouched walks away from a stall, the two genes
+        have been wired together somewhere they should not be.</li>
+    <li><strong>Health 4 and pull 2 read as a real cost.</strong> It should feel fragile.
+        A breed this strong in the air is only balanced if the ground game is genuinely
+        worse.</li>
+    <li><strong>Storm affinity does something.</strong> Both weather loci lean
+        <code>T+</code>/<code>R+</code>. Wait for thunder and see whether it is noticeably
+        quicker; this is the one locus in the mod you cannot check on demand.</li>
+    <li><strong>The old crash.</strong> <q>Flying through fresh chunks does not crash the
+        server</q> (the <code>DistanceManager.runAllUpdates</code> NPE,
+        <a href="known-gaps.html#gap-31">gap 31</a>) is still open below, and a spawnable
+        flying breed is now the most likely way to meet it. Fly one a long way over
+        unloaded ground.</li>
+</ul>
+
+<h3 id="new-breeds-0915d">Fourteen more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h3>
+
+<p>
+    <strong>Posavac, Debao Pony, D&oslash;lahest, Fell Pony, Finnhorse, Florida Cracker Horse,
+    Gelderlander, Gotland Pony, Baise Horse, Guoxia, Henson Horse, Hequ, Highland Pony, Hucul
+    Pony</strong> &mdash; the batch that took the shipped count to 79. Green on the bench:
+    <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>,
+    <code>BreedSpecParserTest</code>, <code>check-links</code>, <code>build-search-index</code> and
+    the designer boot check. <code>everyShippedFileLoadsWithNoErrorsAndNoWarnings</code> is the one
+    that matters and it passed, so no allele token was <em>warned and dropped</em> &mdash; a breed
+    can otherwise load quietly missing a locus with every test still green.
+    <strong>None of these fourteen has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The three tiny breeds are the first thing to look at, because the size curve is the
+        thing that has shipped wrong before.</strong> The Guoxia (8.2&ndash;9.3&nbsp;hh) and Debao
+        Pony (9.1&ndash;10.1&nbsp;hh) sit between the Falabella and the American Miniature, and the
+        Baise Horse (11.0&ndash;11.2&nbsp;hh) just above. Stand one next to a Shetland and a
+        Falabella and confirm the ordering reads correctly &mdash; and that a horse that small is
+        still <em>rideable and mountable</em>, which nothing in the test suite checks.</li>
+    <li><strong>The Gelderlander is the tall end of the same check</strong>, at
+        15.2&ndash;17.0&nbsp;hh with a top scale of <code>1.238</code>. It should stand exactly as
+        tall as an Irish Draught and no taller; if it towers, the above-1.0 gamma was applied twice
+        somewhere.</li>
+    <li><strong>Hequ is the first breed whose strains are a colour cline, and strains are
+        lightly exercised.</strong> Spawn a good number and confirm you get visibly different grey
+        rates &mdash; Jiaode should grey out far more often than Suoke or Kesheng &mdash; rather than
+        one pooled average. If all three look alike, strain weighting is not reaching the founder.</li>
+    <li><strong>The Gotland's cream is a deliberate near-miss and worth confirming.</strong> No
+        founder should ever be cremello or perlino, because <code>Cr/Cr</code> is absent from the
+        pool while <code>Cr/N</code> is in it. Breeding two cream carriers together <em>should</em>
+        still produce one. Both halves need checking; the first is the unusual one.</li>
+    <li><strong>The Henson should be bay dun every single time</strong>, with a dorsal stripe on
+        every animal &mdash; fixed <code>E</code>, fixed <code>A</code>, and <code>D</code> on every
+        founder. A single red dun or grullo means the fixed pools are not holding. It is also the
+        breed most likely to look <em>wrong</em> rather than broken: pangare was deliberately not
+        named despite its Fjord foundation, so compare one side-by-side with a Fjord and say whether
+        it reads too flat.</li>
+    <li><strong>The Fell should be overwhelmingly black</strong> and the Finnhorse overwhelmingly
+        chestnut-with-flaxen (past 90%). Both are strong phenotype targets, so both fail visibly and
+        cheaply &mdash; but the Finnhorse's <em>minorities</em> are the interesting find: a black
+        Finnhorse is about one in eighty.</li>
+    <li><strong>The Posavac keeps its wild herds where the Croatian Coldblood does not.</strong>
+        Both are Croatian lowland breeds in overlapping biomes, and only one should ever head a wild
+        herd. Finding a loose Coldblood, or never finding a loose Posavac, is the failure.</li>
+    <li><strong>The Hucul's dun is deliberately a minority</strong> (about a quarter), against a
+        reputation that calls it the signature. If it looks too plain in a herd, that is the call to
+        revisit &mdash; it is a recorded decision, not a bug.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> the Highland Pony's dun
+        vocabulary and independent grey stacking, the Florida Cracker's dark skew, and whether the
+        Guoxia's absent dun leaves it looking too plain for a breed whose sources all mention
+        primitive markings.</li>
+</ul>
+
+<h3 id="new-breeds-0915e">Fifteen more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h3>
+
+<p>
+    <strong>Jutland, Kaimanawa, Karabair, Karakachan Horse, Kentucky Mountain Saddle Horse, Kiso Horse,
+    Kladruber, Konik, Mangalarga Marchador, Medimurje Horse, Misaki Horse, Missouri Fox Trotter,
+    Mongolian Horse, Montenegrin Domestic Hilly Horse, Murgese</strong> &mdash; the batch that took the
+    shipped count to 94. Green on the bench: <code>:neoforge-26.1.2:build</code>,
+    <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>, <code>check-parity</code>,
+    <code>check-links</code>, <code>build-search-index</code> and the designer boot check.
+    <strong>None of these fifteen has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The Kentucky Mountain Saddle Horse has the widest height band in the mod</strong>
+        (11.0&ndash;16.0&nbsp;hh), because the registry's two classes are one gene pool. That is the
+        size-curve check this time: the small end must still be <em>rideable and mountable</em>, which
+        nothing in the test suite covers, and the tall end must not tower. Stand one of each beside a
+        Welsh Pony and an Irish Draught.</li>
+    <li><strong>The Kiso's dorsal stripes are the batch's most deliberate call and the one most likely
+        to look wrong.</strong> Roughly two thirds of a herd should wear a stripe while only about one
+        in twenty-five is actually dun-diluted &mdash; stripes without body dilution, carried by
+        <code>d1</code>. If the striped horses are also visibly paler, <code>d1</code> is diluting when
+        it should not; if almost nothing is striped, the pool is not reaching the founder.</li>
+    <li><strong>Two breeds must be one colour and will fail visibly if they are not.</strong> Every
+        Konik should be blue dun with a dorsal stripe &mdash; a single bay, chestnut or grey one means a
+        fixed pool is not holding. Every Murgese should be raven black, with about one in fifty a blue
+        roan; <strong>a grey Murgese or a greying Konik is the specific failure to watch for</strong>,
+        since both breeds' traditional colour names ("iron grey", "mouse grey") are the exact trap the
+        files avoid.</li>
+    <li><strong>The Kladruber is a strain check with a visible answer.</strong> Spawn a good number:
+        about half should be black for life and about half grey, and <em>the greys should be born dark
+        and whiten</em>. Both halves are black underneath, so a bay or chestnut Kladruber means the
+        fixed base is not holding, and an even split that never whitens means strains are reaching the
+        founder but grey is not.</li>
+    <li><strong>The Kaimanawa's strains are geographic and should be obvious in bulk.</strong> Grey
+        should be near absent in one strain and near universal in the other, not averaged across the
+        herd. This is the second test of strain weighting after Hequ, and the first where the
+        difference is unmistakable at a glance.</li>
+    <li><strong>The Missouri Fox Trotter is a lethal-white breed and the Mangalarga Marchador is
+        deliberately not.</strong> Breeding two frame carriers together should be able to go wrong in
+        the Fox Trotter, exactly as it does in an American Paint herd, and should be <em>impossible</em>
+        in the Marchador. Both halves are worth confirming; the second is the deliberate one.</li>
+    <li><strong>Five of the fifteen must never head a wild herd</strong> &mdash; Jutland, Kiso,
+        Kladruber, Medimurje and Murgese. The Misaki is the odd one out in the other direction: it has
+        wild herds but <strong>no cowboy</strong>, so it should never appear in a trader's offers while
+        still turning up on a coast.</li>
+    <li><strong>The Jutland should read as flaxen chestnut, never palomino.</strong> Cream is forced
+        wild, so a pale-maned Jutland is always a red horse with a light mane; anything that looks
+        golden-bodied is cream leaking in from somewhere.</li>
+    <li><strong>The Karakachan is the most visually unified natural breed in the mod</strong> &mdash;
+        almost every founder bay or brown. A chestnut or black one is roughly a one-in-two-hundred
+        event, so several in a herd means the near-fixed pools are not holding.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the Mongolian's dun-heavy
+        steppe pool reads as varied rather than muddy; whether the Montenegrin and the Domestic Mountain
+        Pony are actually distinguishable side by side (grey is the only difference, and that may not be
+        enough); and whether the Mangalarga Marchador's heavy grey plus pinto pool is too loud in a herd.</li>
+</ul>
+
+<h3 id="new-breeds-0915f">Fourteen more breeds out of <code>intake/</code>, and a changed American Paint (2026-09-15, NOT played)</h3>
+
+<p>
+    <strong>American Saddlebred, Newfoundland Pony, Nokota, Nonius, Novooleksandrivsky Heavy Draught,
+    Oldenburg, Orlov Trotter, Pindos, Pony of the Americas, Riwoche Horse, Rocky Mountain Horse, Sanhe,
+    Selle Fran&ccedil;ais, Sorraia.</strong> Green on the bench: <code>:neoforge-26.1.2:build</code>,
+    <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>, <code>check-links</code>,
+    <code>build-search-index</code> and the designer boot check.
+    <strong>None of these fourteen has been seen in a world, and neither has the changed Paint.</strong>
+</p>
+<ul>
+    <li><strong>Confirm no Oldenburg or Selle Fran&ccedil;ais carries Friesian dwarfism &mdash; and that
+        both now DO carry WFFS.</strong> The premise of this check was wrong and has been corrected
+        (2026-09-17): this mod&rsquo;s <a href="gene-plod1.html"><code>PLOD1</code></a> <em>is</em>
+        warmblood fragile foal syndrome, and Friesian dwarfism is
+        <a href="gene-b4galt7.html"><code>B4GALT7</code></a> &mdash; so the two drafts naming
+        <code>PLOD1</code> were right all along, and the warning against it was the error. Both breeds
+        now carry a deliberate <code>PLOD1</code> pool (Oldenburg 15.53%, Selle Fran&ccedil;ais 6%).
+        Check a spread of founder genomes: <code>b4galt7</code> must read clear on every one, while
+        <code>plod1</code> carriers should appear at roughly those rates. Then breed two
+        <code>PLOD1</code> carriers repeatedly and confirm a fragile-foal death does eventually
+        appear &mdash; and that <b>no dwarf foal ever does</b>.</li>
+    <li><strong>The American Paint's HYPP rate moved and it is the one change to a breed that already
+        existed.</strong> It went from the generic 1.2% carrier figure to the study's 0.025 allele
+        frequency &mdash; roughly 4.9% of founders, about four times as many. <a href="gene-scn4a.html">HYPP</a>
+        is dominant, so every carrier is affected and visible: a Paint herd should now contain
+        noticeably more unwell horses than before. <strong>If it does not, the pool is not reaching the
+        founder</strong>; if it contains far more than one in twenty, something is reading the weight as
+        a percentage of the wrong total. This is the single most likely thing in the batch to be wrong
+        in a way nobody would think to look at.</li>
+    <li><strong>Five must never head a wild herd</strong> &mdash; Nonius, Novooleksandrivsky Heavy
+        Draught, Oldenburg, Orlov Trotter and Selle Fran&ccedil;ais, all managed studbook breeds with a
+        <code>spawn</code> checklist. <strong>Three more have wild herds but no cowboy</strong> &mdash;
+        Newfoundland Pony, Pindos and Sanhe, plus the Sorraia: they should turn up in the world but never
+        in a trader's offers. That is eight source checklists, the most in any batch so far.</li>
+    <li><strong>Every Pony of the Americas must be spotted, with no exceptions at all.</strong> It is the
+        first breed in the mod where <code>LP</code> is fixed &mdash; no founder is ever
+        <code>lp/lp</code>. Spawn a large number: a single solid, unspotted POA means a fixed pool is not
+        holding, which is the same failure class as a bay Kladruber. Both strains should be visible in
+        bulk, bold blankets and leopards against subtler varnish and snowflake.</li>
+    <li><strong>A pure POA must also never be pinto, and that is a separate failure.</strong> The registry
+        bars it, so tobiano, sabino, frame, splash and dominant white are all forced wild. A nearly white
+        few-spot POA is correct and is <em>not</em> a pinto; a POA with smooth rounded patches crossing
+        the topline is a bug. The two are easy to confuse by eye, which is why it is written down.</li>
+    <li><strong>The Nokota is a lethal-white breed and must never throw tobiano.</strong> Breeding two
+        frame carriers should be able to go wrong, exactly as in an American Paint herd. Tobiano is the
+        opposite check: the Conservancy's own line is that it only enters by crossbreeding, so a tobiano
+        Nokota out of two pure parents means a forced-wild locus is leaking.</li>
+    <li><strong>The Saddlebred's gait locus is intermediate, not near-fixed, and that is deliberate.</strong>
+        Every other gaited breed here sits near 90% <code>A/A</code>; this one should be about a quarter
+        <code>A/A</code>, half <code>A/C</code> and a quarter <code>C/C</code>, because only some
+        Saddlebreds are five-gaited. Check the genotype spread rather than the animation, which does not
+        exist.</li>
+    <li><strong>The Sorraia and the Riwoche Horse must be dun every time, and must never grey.</strong>
+        Both fix <code>D</code> in every founder, joining the Henson and the Konik. Both also force grey
+        wild for the Konik's reason &mdash; their colour is called "mouse grey" in the old language and
+        <code>STX17</code> would whiten the one thing either looks like. A greying Sorraia is the
+        specific failure. The Sorraia should be mostly mouse dun and grullo with a bay-dun minority; the
+        Riwoche almost entirely bay dun.</li>
+    <li><strong>The size curve, checked at both ends this time.</strong> The Pony of the Americas is the
+        tidiest case in the mod because its registry states the band in inches &mdash; 46 to 56, so no
+        founder should fall outside roughly 11.2 to 14 hands. At the other end the Oldenburg and the
+        Selle Fran&ccedil;ais are among the tallest riding horses in the book: stand one of each beside a
+        Hanoverian and a Shire and confirm they land between them and not past the Shire.</li>
+    <li><strong>The Rocky Mountain Horse's chocolate must be silver on black, not flaxen on chestnut.</strong>
+        A black-based horse carrying <code>Z</code> should read as dark chocolate with a pale mane and
+        tail; a flaxen chestnut is a different horse and must not be mistaken for it, and a chestnut
+        carrying <code>Z</code> should show almost nothing. Silver is at its highest rate of any breed
+        here, so the batch will produce plenty of both to compare. <strong>MCOA is now modelled and
+        dosed</strong> (2026-09-17): a <code>Z/Z</code> horse should name the ocular anomalies and have
+        two fewer hearts, and a <code>Z/z</code> horse should name ocular cysts and lose <em>nothing</em>.
+        Roughly one Rocky Mountain founder in eight is <code>Z/Z</code>, so the impaired ones should be
+        easy to find &mdash; and if a <code>Z/z</code> horse is short a heart, the dose split is
+        broken.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the Nokota's blue roan
+        actually reads as smoke with a dark head rather than as a washed-out black; whether the Nonius's
+        dark-skewed shade pool makes a visibly darker herd than an ordinary bay breed, since that pool is
+        standing in for a band the format does not have; whether the Riwoche and the Sorraia are
+        distinguishable from the Konik at a glance, all three being fixed-dun primitives; and whether the
+        Saddlebred's "any colour" pool reads as varied rather than incoherent.</li>
+</ul>
+
+<h3 id="new-breeds-0915g">The deferred fourteen, now baked and tested (2026-09-15, NOT played)</h3>
+
+<p>
+    <strong>Spotted Saddle Horse, Swedish Warmblood, Tarpan, Tersk, Trottatore Italiano, Ukrainian
+    Riding Horse, Vyatka, Walkaloosa, Wielkopolski, Yakutian Horse, Yili, Yonaguni Horse,
+    Yugoslavian Trotter, Zangersheide.</strong> These were committed unbaked on purpose &mdash; the
+    owner had more breeds coming and wanted one bake after them &mdash; and the bake was run when she
+    called for it. <strong>Green on the bench now</strong>: <code>:common:bakeBreedFiles</code>,
+    every <code>*Breed*Test</code> class plus <code>ConceivableTest</code>,
+    <code>DietGeneTest</code> and <code>ReproRulesTest</code>, <code>:web:bakeDesignerAssets</code>,
+    the designer boot check, <code>:neoforge-26.1.2:build</code> and <code>check-links</code>.
+</p>
+<p>
+    <strong>What the bake actually found was trivial, and that is itself the useful result</strong>:
+    it rewrote three files &mdash; the Tersk, the Trottatore Italiano and the Ukrainian Riding Horse
+    &mdash; and every change was <code>1.0</code> becoming <code>1</code> in a <code>size</code>
+    band, which is <code>BreedSpecWriter</code>'s number formatting disagreeing with hand-written
+    JSON. Nothing was warned-and-dropped at load, so the hand-checked allele tokens held up.
+    <code>index.json</code> needed no change and still matches the folder exactly.
+    The designer bundle was the visible casualty of the wait and is now current again.
+</p>
+<p>
+    <strong>None of the fourteen has been seen in a world</strong>, and this section has no
+    per-breed checklist of the kind &sect;0-EJ and &sect;0-EI carry &mdash; nobody has sat down with
+    these files to work out what each one should look like in a herd. That write-up is the
+    outstanding work here, not the build.
+</p>
+
+</section>
+
 </article>
 </main>
 </body>

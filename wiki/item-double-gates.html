@@ -413,11 +413,156 @@
 <p class="muted">
     Still unseen: the item names, their placement in the Building Blocks tab, the in-wall
     variants, redstone on a pair, and the stall step ticking. See
-    <a href="verification.html#double-gates-0917">verification</a>.
+    <a href="item-double-gates.html#double-gates-0917">verification</a>.
     <strong>A gate for a modded wood has never been drawn at all</strong> &mdash; not in a
     world, not in a slot, and not against a real third-party mod, only a synthetic test one
-    (<a href="verification.html#compat-0918">&sect;0-FK</a>).
+    (<a href="compatibility.html#compat-0918">&sect;0-FK</a>).
 </p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Placement is the half that felt broken and every fix for it is unseen: each click with room must lay both halves at once, a refusal must leave nothing standing and say why while staying quiet on ordinary misclicks, and another mod&rsquo;s wood must draw rather than a <strong>purple chequerboard</strong> this layer logs nothing about.</p>
+</div>
+
+<h3 id="compat-0918-gates">A gate in another mod's wood draws (2026-09-18, nothing drawn)</h3>
+
+<p>
+    The mod reads every other mod's jar at startup and generates a
+    <a href="item-double-gates.html#modded-woods">double gate</a> per wood they added, into a
+    pack at <code>.minecraft/phc/generated/</code>. It works against a <strong>synthetic</strong>
+    test mod on a <strong>dedicated server</strong>, where nothing draws &mdash; so none of the
+    drawing below has ever been seen. It needs a mod that adds a wood installed in
+    <code>neoforge-26.1.2/run/mods/</code>;
+    <a href="compatibility.html#compat-0918">the compatibility page's checklist</a> covers
+    picking one, the scan, the generated pack and the recipes.
+</p>
+
+<ul>
+    <li><strong>A modded gate draws.</strong> Place one. <strong>Pass:</strong> it looks like
+        the vanilla twelve do, in that mod's wood, both halves, open and shut and in a wall.
+        <strong>Fail:</strong> a purple-and-black chequerboard &mdash;
+        <a href="item-double-gates.html#generated-drift">the signature silent failure of this
+        layer</a>, which logs nothing whatever, and which means
+        <code>bake-double-gates.mjs</code> and <code>compat/GeneratedGates</code> have drifted
+        apart. If it happens, say <em>which</em> is purple: the block, the held item, or the
+        inventory icon, because those are three different files.</li>
+    <li><strong>Its inventory icon draws, and its name is right.</strong>
+        <strong>Pass:</strong> the left half's model in the slot, and &ldquo;&lt;Wood&gt; Double
+        Fence Gate&rdquo; with the wood capitalised properly (a <code>blue_oak</code> reads
+        &ldquo;Blue Oak&rdquo;). <strong>Fail:</strong> a raw translation key
+        <code>block.horsegenetics....</code> means the merged lang file did not land.</li>
+</ul>
+
+<h3 id="double-gates-0917">What the double gates still need looking at (2026-09-17, NOT played)</h3>
+
+<p>
+    The <a href="item-double-gates.html">double gates</a> were played on the day they were built
+    and the pair itself is confirmed &mdash; both halves down, several woods, &ldquo;they look
+    fine&hellip; once both are placed, they look GREAT&rdquo;. Everything below was found
+    <em>by</em> that session and fixed <em>after</em> it. Two of those fixes &mdash; the bamboo
+    texture, and working the gate as fast as a player can click &mdash; were confirmed in the
+    same sitting and now live on
+    <a href="item-double-gates.html#verified">the gate's own page</a>; nothing still listed here
+    has been seen working. <strong>The first item is the one that matters</strong>, because it is
+    the one that made the gates feel broken to place rather than merely wrong to look at.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>One click places both halves, wherever you are standing.</strong> Place gates
+        along a wall, into a corner, and out in the open, facing each way in turn.
+        <strong>Pass:</strong> every click that has room for two blocks places two blocks &mdash;
+        never a click that does nothing followed by a second click on the neighbouring block.
+        The partner now takes whichever side is free rather than always the same one.</li>
+    <li><strong>The first half of a new pair is visible immediately.</strong> Place a gate on
+        open ground and do not touch anything else. <strong>Pass:</strong> both blocks are drawn
+        the instant it is placed, with no need to walk away and back or re-log. It used to delete
+        itself client-side before its partner existed.</li>
+    <li><strong>They are named.</strong> Open the Horse Genetics creative tab and hover them.
+        <strong>Pass:</strong> &ldquo;Oak Double Fence Gate&rdquo;, &ldquo;Oak Double Farm
+        Gate&rdquo; and so on for all twelve woods &mdash; not a raw
+        <code>item.horsegenetics.&hellip;</code> key. <code>BlockItem</code> does not defer to its
+        block's name in 26.1.2; the items now ask for the block prefix explicitly.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A double gate crafts from two vanilla gates and nothing else.</strong> Put two
+        oak fence gates in the grid. <strong>Pass:</strong> an Oak Double Fence Gate comes out,
+        with no horse hair anywhere in the recipe. Then check a
+        <a href="compatibility.html#generated">modded wood</a> the same way if you have one
+        installed &mdash; that recipe is written at run time by a
+        <a href="item-double-gates.html#generated-drift">separate generator</a> and drifts
+        silently.</li>
+
+    <li><strong>Breaking one in creative gives you nothing.</strong> In <em>creative</em>, break a
+        double gate &mdash; once striking each half, since they are not symmetric.
+        <strong>Pass:</strong> both blocks go and no item drops either time.
+        <a href="item-double-gates.html#one-item-out">The survival case is covered by a test</a>
+        and drops exactly one; this half of that fix is
+        <code>playerWillDestroy</code>, which the test cannot reach because it breaks blocks with
+        no player. Before it, breaking the <em>right</em> half in creative gave you a free gate
+        out of the partner's removal.</li>
+
+    <li><strong>Placement refuses cleanly with no room, and says why.</strong> Try to place one
+        into a one-block gap. <strong>Pass:</strong> nothing is placed, the item stays in your
+        hand &mdash; never a single half left standing &mdash; and you are told
+        &ldquo;No room for a gate two blocks wide&hellip;&rdquo;. <strong>Also check it stays
+        quiet when it should:</strong> clicking the <em>face</em> of a solid block, or
+        somewhere out of reach, must produce no message at all. The refusal is told apart from
+        every ordinary placement failure by asking whether the clicked position itself could
+        have been replaced, and a message on all of them would be noise.</li>
+</ul>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li><strong>The in-wall variants sit right.</strong> Put a double gate in a line of
+        <em>walls</em> rather than fences, both styles. <strong>Pass:</strong> it drops to the
+        lower position the way a vanilla gate does, on both halves, at every facing.</li>
+    <li><strong>They are filed beside the vanilla gates.</strong> Open the vanilla
+        <strong>Building Blocks</strong> tab. <strong>Pass:</strong> each double gate sits
+        directly after the single gate of its own wood, all twelve of them, and they are still
+        findable by searching too.</li>
+</ul>
+
+<p>
+    Two more things that session left open live on the pages they belong to: shutting a stall
+    with a double gate is on
+    <a href="item-stall-signs.html#double-gates-0917-stall">the stall signs page</a>, and the
+    deleted hair chain on
+    <a href="item-horse-hair.html#double-gates-0917-hair">the horse hair page</a> and
+    <a href="villagers.html#double-gates-0917-trades">the villagers page</a>.
+</p>
+
+<h3 id="join-and-tab-0918">A creative tab, on a real client (2026-09-18, NOT played)</h3>
+
+<p>
+    v0.5.014 shipped two faults that <strong>singleplayer cannot show</strong>: Building Blocks
+    was silently emptied for anyone whose pack made the mod's gate anchor miss, and &mdash; the
+    other half, checked on <a href="architecture.html#join-and-tab-0918-server-join">architecture</a>
+    &mdash; every client was kicked during login by an unencodable recipe. Both are fixed in
+    v0.5.015 and both now have a headless test that fails on the old code. <strong>Neither has
+    been seen from a client seat</strong>, which is the whole category of thing that let them out.
+</p>
+
+<ul>
+    <li><strong>The fallback path has never run.</strong> When the anchor is missing the gate is
+        now appended to the end of the tab instead of being dropped. Nothing installed here
+        makes the anchor miss, so that branch is argued rather than observed &mdash; a pack with
+        Regions Unexplored would settle it, and the warning line it logs is the thing to look
+        for.</li>
+    <li><strong>Open Building Blocks and find a double gate directly after its vanilla gate.</strong>
+        The gametest asserts the tab is not empty and holds all twelve, but it cannot see
+        <em>order</em>, and order is the entire reason the insert is done the hard way.</li>
+</ul>
 
 </section>
 

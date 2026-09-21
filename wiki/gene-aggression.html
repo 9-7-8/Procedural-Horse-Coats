@@ -248,6 +248,36 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Day temper inverts the night locus and exists only in unit tests &mdash; a <code>Flp/Flp</code> horse should run from you at noon and let you ride it at midnight; the older questions are whether <code>Aah/Aah</code> holds its ground instead of chasing, and whether <code>Aap/Aap</code> really throws its rider.</p>
+</div>
+
+<h3 id="evening-0913-day-temper">The day temper locus (built the evening of 2026-09-13, NOT played)</h3>
+
+<p>
+    This has not been in a game; it is covered by unit tests on the genetics side only.
+    <strong>Test kit batch 3</strong> is the day loci, one egg per locus. The day watch half is on
+    <a href="gene-magic-day-watch.html#evening-0913-day-watch">the day watch page</a>.
+</p>
+<ul>
+    <li><strong>With the custom spawn egg, a <code>magic_day_temper=Flp/Flp</code> horse should run
+        from you at noon and let you ride it at midnight</strong> &mdash; the night locus inverted.</li>
+</ul>
+
+<h3 id="open-older-gene-aggression">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Feel: the fighters.</strong> <a href="gene-aggression.html">Aggression</a> and <a href="gene-guardian.html">guardian</a> hold a radius and never chase. If they still die a lot in play, the radius is wrong, not the rule.</li>
+    <li><strong>The aggression locus holds its ground</strong> (yard: an <code>Aah/Aah</code> horse with two husks &mdash; the kick pen, renamed from KICK GLADIATOR). <strong>Pass:</strong> it kills what walks in, turns on the second one, and never leaves the pen chasing. This is the machinery <a href="gene-aggression.html#verified-swing-rate">two older records</a> already tested, on a locus that did not exist when they were taken, so it is a regression check rather than a new question.</li>
+    <li><strong>A rider-hunting horse bucks you off</strong> (yard or creative: tame an <code>Aap/Aap</code> horse, mount it). <strong>Pass:</strong> you are ejected within a beat and it comes for you. <strong>Known half-failure:</strong> a horse aggressive toward anything <em>else</em> will not walk to its target while you are aboard &mdash; see <a href="known-gaps.html#gap-268">gap 268</a>. Do not read that as the gene being broken.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-skittish.html">Skittishness</a>

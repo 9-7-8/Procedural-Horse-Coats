@@ -191,6 +191,23 @@ public static Sex sexOf(String code) { ... }</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Two cheap checks: the &#9792;/&#9794; nameplate glyphs must render pink and blue rather than as boxes, and a mare and a stallion of one genome must look <strong>identical</strong>, sharing a baked texture &mdash; with the spawn egg's Mare/Stallion button working while sex is absent from the gene list.</p>
+</div>
+
+<h3 id="open-older-gene-sex">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Sex symbols on nameplates</strong> render as &#9792; pink and &#9794; blue glyphs, not boxes (<code>nameplate.sexSymbol</code> turns them off).</li>
+    <li><strong>A mare and a stallion of one genome look identical</strong> (they share a baked texture), and the spawn egg's Mare/Stallion button works with sex absent from the gene list.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="genetics-model.html">The genetics model</a>

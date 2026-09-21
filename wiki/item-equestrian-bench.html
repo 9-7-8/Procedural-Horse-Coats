@@ -421,6 +421,175 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Before anything horse-shaped, put on a leather chestplate &mdash; the override rewrites <code>equipment/leather.json</code>, which every leather item in the game reads, and a changed player armour is worse than anything else here &mdash; then grid-dye a horse armour, recolour only its trim at the bench, and check the grid colour <strong>survives</strong>.</p>
+</div>
+
+<h3 id="dyeable-armour-0916">Dyeable leather horse armour (2026-09-16, NOT played)</h3>
+
+<div class="note warn">
+    <span class="label">Check the player&rsquo;s leather armour first, before anything horse-shaped</span>
+    <p>
+        <strong>There is no <code>leather_horse_armor.json</code>.</strong> The asset is
+        <code>equipment/leather.json</code>, and that one file carries
+        <code>horse_body</code>, <code>humanoid</code>, <code>humanoid_baby</code> and
+        <code>humanoid_leggings</code> together &mdash; leather horse armour and every
+        leather chestplate, helmet, legging and boot in the game read it. Our override
+        rewrites <code>horse_body</code> only and copies the other three verbatim, the way
+        <code>saddle.json</code> leaves camels and striders alone. <strong>So put on a
+        leather chestplate, dye one in a crafting grid, and confirm both look exactly as
+        they always have.</strong> If the player&rsquo;s armour changed, the override reached
+        further than intended and that is far more serious than anything below.
+    </p>
+</div>
+
+<p>
+    <strong>The bench now takes leather horse armour as well as a saddle</strong>, and the
+    three row labels change with it &mdash; <em>Seat / Bridle / Fittings</em> for a saddle,
+    <em>Blanket / Trim / Fittings</em> for armour, and the saddle&rsquo;s words when the slot
+    is empty. Shift-clicking either from the inventory should land it in the top-left slot.
+    Check the labels actually swap when you drop armour in, since an empty bench shows the
+    saddle&rsquo;s wording and the swap is the easy thing to get wrong.
+</p>
+
+<p>
+    <strong>Vanilla&rsquo;s crafting-grid dye must still work, and must still colour only the
+    blanket.</strong> This is the one that could quietly get <em>worse</em> than vanilla
+    rather than merely broken: vanilla reads a stack&rsquo;s dye once and hands it to every
+    dyeable layer, so our two extra layers would take it too and a grid-dyed armour would go
+    one flat colour over trim and buckles alike. Those two layers are pinned to their own
+    undyed constants when no bench tint is present. <strong>Dye an armour in a grid and
+    confirm the straps stay brown and the hardware stays grey.</strong> Check the icon too
+    &mdash; a grid-dyed piece should still show its colour in the hotbar.
+</p>
+
+<p>
+    <strong>Then the two together, in that order, which is the check most likely to catch
+    something.</strong> Dye an armour in a crafting grid, take <em>that</em> piece to the
+    bench, and recolour <em>only the trim</em>. The blanket must keep its grid colour. This
+    was a real defect found by reading the committed code rather than by playing: the bench
+    assumed any armour without its own tint was plain brown, so editing one row wrote the
+    blanket back to leather and destroyed the player&rsquo;s dye silently. It now seeds the
+    blanket from <code>dyed_color</code>. Worth confirming precisely because the failure is
+    invisible &mdash; you get a result, it just is not the one you asked for.
+</p>
+
+<p>
+    <strong>An undyed leather horse armour must be indistinguishable from before.</strong>
+    Same guarantee as the saddle and the same arithmetic behind it: vanilla&rsquo;s
+    <code>leather_overlay.png</code> was split three ways &mdash; 417 texels of brown trim,
+    79 of metal, 92 of near-black shadow that is deliberately <em>not</em> dyeable &mdash;
+    and the bake asserts zero orphans, no clamping and a worst round-trip error of 1. The
+    shadow stays untinted on purpose: it reads as depth rather than as material, and tinting
+    it is how dyed tack starts looking like a flat sticker.
+</p>
+
+<p class="muted">
+    The split was measured, not reasoned, and two guesses died on the way: that the dark
+    greys were outlines (they are not &mdash; the bag outlines are dark <em>brown</em>), and
+    that hardware was grey above <code>0x3E</code> (that threshold cuts each metal bar in
+    half). The boundary is <code>0x20</code>, where thresholds plateau and every bar comes
+    out solid.
+</p>
+
+<p>
+    <strong>Two more fittings have never been rendered either:</strong> lapis lazuli, which
+    fills the blue the wheel completely lacked, and coal for a true black &mdash; netherite
+    is the darkest of the old set but is really a warm plum, so check the two read as
+    different materials rather than as one.
+</p>
+
+
+<h3 id="compat-0918-bench">The fittings slot, with another mod's metal in it (2026-09-18, nothing drawn)</h3>
+
+<p>
+    The mod reads every other mod's jar at startup and treats each ingot or gem they add as a
+    fittings material. It has only ever been exercised against a <strong>synthetic</strong>
+    test mod on a <strong>dedicated server</strong>, where nothing draws. This needs a real mod
+    with an ingot in it installed &mdash;
+    <a href="compatibility.html#compat-0918">the compatibility page's checklist</a> covers
+    picking one and reading the run out of the log.
+</p>
+
+<ul>
+    <li><strong>The bench takes their ingot.</strong> Put a modded ingot or gem in the fittings
+        slot. <strong>Pass:</strong> it is accepted, the saddle's hardware comes out in that
+        metal's colour, and the tooltip names the <em>material</em> (&ldquo;tin&rdquo;) rather
+        than the item. <strong>Also worth a look:</strong> whether two of that pack's metals
+        come out looking the same on a horse &mdash; the
+        <a href="item-equestrian-bench.html#modded-fittings">fifteen were pulled apart by hand
+        and a generated one is just the average of its own picture</a>.</li>
+</ul>
+
+<h3 id="dyeable-saddle-0916">A dyeable saddle: what is still unseen (2026-09-16)</h3>
+
+<p>
+    <strong>What has been checked already:</strong> a dedicated server boots clean on this
+    work &mdash; <code>Done (0.289s)</code>, no errors or exceptions, 194 genes and 122
+    breeds registered. That matters because the names drop-in runs from the mod constructor,
+    which is the one place a change fails only at load. It also caught a real bug, a warning
+    about our own README that would have appeared on every boot. What a server boot cannot
+    tell you is anything below, because none of it is rendering.
+</p>
+
+<p>
+    <strong>The saddle is dyeable now, and an undyed one should be indistinguishable from
+    before.</strong> That is the part worth checking hardest, because it is what keeps every
+    other mob looking untouched: the textures are derived from vanilla by dividing out the
+    leather tint, and both the worn saddle and the inventory icon were verified to recompose
+    to vanilla with <em>zero</em> differing pixels. So a plain saddle on a donkey, a mule, a
+    skeleton horse or a zombie horse should look exactly as it always has. If any of them
+    looks pale, washed out or grey, the tint is not being applied and the base texture is
+    showing raw &mdash; that is the failure mode to watch for.
+</p>
+
+<p>
+    <strong>Camels, pigs, striders and nautiluses were deliberately left alone.</strong> Our
+    equipment asset carries vanilla's entry verbatim for those five layer types, so they
+    should be untouched. Worth a glance at a strider or a saddled pig to confirm the override
+    did not reach further than intended.
+</p>
+
+<p>
+    <strong>There is a crafting route now, and it is the whole point:</strong> the
+    <a href="item-equestrian-bench.html">Tack Dyeing Bench</a>. Craft one, or find the one
+    standing at a cowboy&rsquo;s homestead past the <a href="item-equestrian-posts.html">four
+    posts</a> &mdash; the
+    generated one has never been seen, so confirm it is actually there and not buried in a
+    wall or floating. Then dye a saddle&rsquo;s seat, bridle and fittings in turn and check
+    all three survive on the horse independently.
+</p>
+
+<p>
+    <strong>The bench itself is confirmed and has moved to
+    <a href="item-equestrian-bench.html#verified">its own page</a></strong> &mdash; colours
+    apply, the three zones are independent, the window, the name field, the tooltip and the
+    icon tint all work, and the brightened dyes were checked against vanilla&rsquo;s dyed
+    leather. What is left here is only what has never been looked at.
+</p>
+
+<p>
+    <strong>Five fittings have never been rendered:</strong> redstone, ender pearl, basalt,
+    bone and prismarine. The three worth actually comparing side by side are the pairs that
+    were deliberately pulled apart rather than set to their material&rsquo;s own colour
+    &mdash; <strong>basalt against netherite</strong>, <strong>bone against quartz</strong>,
+    and <strong>prismarine against ender pearl</strong>. If either half of a pair is not
+    obviously its own colour on the horse, the separation was not enough and the constant
+    should move further, not the material be dropped. Note also that the fittings tooltip
+    now consults the materials before the dyes, so redstone must read
+    &ldquo;Fittings: redstone&rdquo; and never &ldquo;Fittings: red&rdquo;.
+</p>
+
+<p>
+    The trade that sells a dyed saddle is on
+    <a href="villagers.html#dyeable-saddle-0916-trade">the villagers page</a>.
+</p>
+</section>
+
 </article>
 </main>
 </body>

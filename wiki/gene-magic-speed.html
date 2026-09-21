@@ -251,8 +251,26 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <p id="verified-stat-pens">
     <strong>The multiplier lands on the attribute</strong> (2026-09-14, the yard&rsquo;s MAGIC SPEED pen, read
     all day): movement speed 0.226 and 0.233 against the wild-type 0.1875, about 22% faster. Not verified: how it feels in play, the mirror allele, the config switch and
-    inheritance (<a href="verification.html#body-stats">verification &sect;0d</a>).
+    inheritance (<a href="horse-body.html#verification">the body stats verification tab</a>).
 </p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Past whether <code>Swift/Swift</code> simply feels a fifth faster, the quiet failures are <strong>multiplicative stacking</strong> with <code>mstn=C/C</code> &mdash; a ratio, not a flat bonus &mdash; and whether two carriers throw about a quarter homozygous, faster than either parent.</p>
+</div>
+
+<h3 id="open-older-gene-magic-speed">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Riding the magic stats.</strong> <code>magic_speed=Swift/Swift</code> feels about a fifth faster than an ordinary horse; <code>magic_jump=Springy/Springy</code> clears a higher wall and <code>Leaden/Leaden</code> struggles at one block; <code>magic_health=Hardy/Hardy</code> shows more hearts in the mounted GUI; and a wild herd reads as a spread without any one horse feeling wrong. <a href="gene-magic-speed.html">Magic speed</a>.</li>
+    <li><strong>Magic speed multiplies.</strong> A <code>Swift/Swift</code> + <code>mstn=C/C</code> horse is faster than <code>Swift/Swift</code> alone by the ratio, not a flat amount. Readable from a stat pen's attribute line.</li>
+    <li><strong>Magic stats inherit.</strong> Two <code>Swift/n</code> carriers throw about a quarter <code>Swift/Swift</code>, faster than either parent, carrying the parent's percentage. A ratio pen, like row U's RATIO SIZE.</li>
+</ul>
 
 </section>
 

@@ -183,7 +183,7 @@
         and normal gravity. A horse carrying the size alleles, or one of the
         magical jump genes that reaches gravity, may clear something other than
         what the screen prints. Unmeasured &mdash; see
-        <a href="verification.html#body-stats">verification</a>.
+        <a href="#verification">the verification tab</a>.
     </p>
 </div>
 
@@ -839,7 +839,7 @@ public interface GeneEpigenetics {
     &ldquo;Foals dying right after birth also works.&rdquo;). The first part of the trait, size and
     health layer confirmed in play; it had carried &ldquo;not play-tested&rdquo; since 2026-09-04. The
     yard repeated it on 2026-09-14 (<a href="gene-ednrb.html#verified">EDNRB</a>). Still unseen: an adult
-    homozygote living (<a href="verification.html#body">the checklist</a>).
+    homozygote living (<a href="for-testers.html#body">the checklist</a>).
 </p>
 
 <p id="verified-death-message">
@@ -857,6 +857,147 @@ public interface GeneEpigenetics {
     early losses each logged their cause (<a href="fertility.html#verified-yard-0914">fertility</a>). The cause line
     still reads so on 2026-09-15, e.g. <code>[Breeding] miscarriage: Nonviable KIT (white spotting) (W5/W5)</code>.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Nobody has ever raced the horse screen&rsquo;s new metre readout &mdash; ride a measured run and build a pillar to the printed jump height, because the <code>&times;43.17</code> constant behind it is unproven and the fit assumes body scale 1.0 &mdash; and a pregnancy lost to a lethal pairing must never name the gene in chat.</p>
+</div>
+
+<h3 id="stat-units-0918">Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h3>
+
+<p>
+    The information screen printed the raw attributes &mdash; <code>0.188</code> and
+    <code>0.50</code> &mdash; which mean nothing to a player. It now prints
+    <strong>m/s</strong> and <strong>the height the horse can get onto</strong>, converted by
+    <code>common/trait/HorseUnits</code>. <code>HorseUnitsTest</code> pins the curves against
+    every metre figure already quoted elsewhere in the mod, so what is left to check is whether
+    the numbers describe the animal in front of you.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+<ul>
+    <li><strong>An ordinary horse reads about 8&nbsp;m/s and 1.6&nbsp;m.</strong> A
+        wild-caught one should land somewhere in 7.4&ndash;13.5&nbsp;m/s and 1.4&ndash;3.0&nbsp;m
+        (this model's wild range, not vanilla's wider roll).</li>
+    <li><strong>Neither ever reads negative or zero</strong> on a horse you can ride, including
+        a deliberately awful bred one. Jump is clamped at zero; if you see a horse whose jump
+        reads <code>0.0&nbsp;m</code>, check it genuinely cannot hop before calling it a bug.</li>
+    <li><strong>The numbers move when the horse does.</strong> Hitch a cart: the speed line
+        should drop by about a third under a wagon, and come back on unhitch. This is the same
+        modifier <a href="carts.html#carts-0918">the cart checks</a> are about, now readable in a unit
+        that makes the drop obvious.</li>
+</ul>
+
+<h4>In the game, with your hands &mdash; the part the test cannot do</h4>
+<ul>
+    <li><strong>Race the readout.</strong> Ride a horse along a measured run of blocks on flat
+        ground and time it. If the screen says 8&nbsp;m/s it should cover roughly eight blocks a
+        second. This is the one check that proves the <code>&times;43.17</code> constant rather
+        than the arithmetic around it, and it has never been done.</li>
+    <li><strong>Jump the printed height.</strong> Build a pillar to exactly the height the
+        screen claims and see whether the horse gets onto it &mdash; then one block higher, and
+        see that it cannot. <b>The fit assumes body scale 1.0 and normal gravity</b>, so do this
+        twice: once on an ordinary horse, once on a
+        <a href="horse-body.html#body-size">visibly large or small</a> one. If the big horse
+        clears more than its screen says, the conversion needs the scale attribute in it and
+        <a href="horse-body.html#units">the warning on horse-body</a> becomes a real gap.</li>
+    <li><strong>A flying breed.</strong> Cloudtouched horses reach gravity; check the jump line
+        is not nonsense on one, and say so either way.</li>
+</ul>
+
+
+<h3 id="health-loci-0917">Four health loci, ACAN D5, and silver's MCOA dosed (2026-09-17, NOT played)</h3>
+
+<p>
+    <a href="gene-slc5a3.html">SLC5A3</a> (FIS), <a href="gene-lamc2.html">LAMC2</a> and
+    <a href="gene-lama3.html">LAMA3</a> (JEB), <a href="gene-ryr1.html">RYR1</a> (malignant
+    hyperthermia), a <code>D5</code> allele on <a href="gene-acan.html">ACAN</a>, and
+    <a href="gene-silver.html">silver</a>&rsquo;s MCOA split by dose. Twelve breed files
+    changed. <strong>None of it has been seen in a world.</strong> The quickest way in is the
+    custom spawn egg: adding a health gene defaults it to the affected genotype. Each locus
+    carries its own checks on its own page; the one that spans all of them is here.
+</p>
+<ul>
+    <li><strong>Carrier rates do not leak into the wild generally.</strong> All four new loci
+        are rare outside their breeds (0.8&ndash;1%), so an unaffiliated wild horse carrying one
+        should be uncommon and carrying two should never happen.</li>
+</ul>
+
+<h3 id="jumps-0920-meter">The jump rewrite: instant leap, the draining meter, and gliding (2026-09-20, confirmed in play)</h3>
+
+<p>
+    How a ridden horse jumps at all was rewritten the same day the
+    <a href="item-jumps.html#jumps-0920">jump blocks</a> landed: the charge-up is gone. Both
+    halves were played on 2026-09-20 &mdash; <strong>do not re-test</strong>.
+</p>
+
+<ul>
+    <li><strong>Instant jump and the draining meter.</strong> Press to leap at full height,
+        cooldown drains over about a second. Owner: &ldquo;the jump meter decays and everything
+        looks perfect&rdquo;.</li>
+    <li><strong>Gliding still works</strong> with the new jump system, and feels good &mdash; the
+        one thing the charge removal was most likely to break, since the
+        <a href="gene-flying.html">glide</a> allele is launched by a jump.</li>
+</ul>
+
+<h3 id="open-older-horse-body">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>A pregnancy lost to a lethal pairing says what it looked like, never the gene.</strong> Breed two <a href="gene-met.html">MET</a> carriers until one loses a pregnancy. The chat line must not say MET or embryonic lethal, though <code>[Breeding] miscarriage</code> in the log does. Do the same with <a href="gene-milk.html">milk</a> <code>Watr/Lava</code>: its line reads differently.</li>
+    <li><strong>A wild horse born unwell.</strong> Find a wild PSSM1 horse: its panel names the condition and it is a few hearts down. If nothing wild is ever sick, the dominant founder tables are not reached. The frequency is parked with the rest (<a href="known-gaps.html#gap-214">gap 214</a>).</li>
+    <li><strong>A floored horse outruns a zombie.</strong> Ride a horse whose panel reads <code>0.113</code> on flat ground with a zombie behind: it pulls away. If not, raise the floor in <code>HorseSpeedFloor.floor()</code>. Ordinary horses should still feel different from each other.</li>
+    <li><strong>Very big and very small horses.</strong> Spawn <code>body_size=Big/Big</code>, <code>Small/Small</code>, <code>hmga2=p/p</code>, <code>lcorl=L/L</code> and an <code>acan=D2/D3</code> dwarf: each is visibly its size, you can hit and mount it, the rider sits right, and a dwarf pony is smaller than either alone. <a href="horse-body.html">Horse body</a>.</li>
+    <li><strong><code>health.mode</code></strong> in <code>run/phc/server.toml</code>: <code>NO_DEATHS</code> lets a lethal foal live on few hearts and a MET pairing foal; <code>OFF</code> gives a dwarf full size and hearts and shows no conditions, while a <code>Hardy/Hardy</code> horse keeps its extra hearts. The genetic code is identical in all three modes. <a href="horse-body.html">Horse body</a>.</li>
+    <li><strong>Riding in water feels right.</strong> <code>HorseWaterRidingHandler</code>'s speed cap (0.09 blocks a tick) and submerged lift are first guesses.</li>
+    <li><strong>Disorders off really is off</strong> (unit test or yard). With health genetics switched off in the server config, no founder carries HYPP or PSSM1, the two dominants that affect founders.</li>
+    <li><strong>The floor is on the attribute only</strong> (unit test plus a yard log line). A very slow genotype resolves under <code>0.1125</code> in <code>common/</code>, and the family tree and designer show that true number. The live attribute and the info panel never read below <code>0.113</code>.</li>
+    <li><strong>The health floor.</strong> <code>Frail/Frail</code> stacked with <code>b4galt7</code> keeps at least half a heart and does not die on spawn (<code>MIN_HEALTH</code>).</li>
+    <li><strong>The Health tab and the breeding preview read as explanations.</strong> Each gene's own <code>+0.020</code> or <code>&times;1.42</code> reads as why the horse is fast; an <a href="gene-hmga2.html">HMGA2</a> horse appears under all four headings. Sixteen health loci on a carrier-heavy horse do not overflow. The preview's trait blocks, with <code>PATN</code> indented under LP, read as grouped, and All loci turns a readable page into a long one.</li>
+    <li><strong>Scaled horses walk right</strong>: a large and a small horse plant their feet rather than sliding, an ordinary horse is unchanged, and the egg's preview resizes with a <code>size</code> readout (and <code>(preview capped)</code> past 2.5&times;) that frames well at both ends.</li>
+</ul>
+
+<h3 id="tuning-moved-0917">The animations at scale (2026-09-17, NOT played)</h3>
+
+<p>
+    One of five tuning and balance questions moved off <a href="roadmap.html">the roadmap</a>
+    on 2026-09-17. None of them is unbuilt, which is why none of them belongs on the roadmap
+    any more &mdash; each is a number or a shape already in the game that only a person
+    looking at it can judge, and each therefore ranks <strong>below</strong> every
+    behavioural check, because it announces itself the moment anybody looks. The other four
+    are on <a href="carrots.html#tuning-moved-0917-splice">carrots</a>,
+    <a href="body-space.html#tuning-moved-0917-foal-scale">body space</a>,
+    <a href="eye-colour.html#tuning-moved-0917-eye-wedges">eye colour</a> and
+    <a href="gene-leopard.html#tuning-moved-0917-leopard">leopard complex</a>.
+</p>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li><strong>The animations at scale.</strong> The walk cycle was partly addressed
+        (<code>GeneticHorseRenderer.stretchGaitToSize</code> divides
+        <code>walkAnimationPos</code> by the scale, so a bigger horse takes proportionally
+        longer strides); rear, eat, buck, the tail swish and the seat position have not
+        been looked at at all. Walk through each on a <code>p/p</code> pony and a
+        Percheron. That armour, leads and the rider offset do not follow
+        <code>Attributes.SCALE</code> is known and is <em>work</em> &mdash;
+        <a href="known-gaps.html#gap-294">gap 294</a>; the saddle half of it
+        <a href="items.html#tack-fit">is fixed and confirmed</a> &mdash; not a check.</li>
+</ul>
+
+<p>
+    Several roadmap entries were <em>deleted</em> in that same pass rather than moved,
+    because the check already existed elsewhere: the browser's untested tabs
+    (<a href="known-gaps.html#gap-37">gap 37</a> and
+    <a href="breeding.html#open-older">&sect;0-EB</a>), breed pool rates and world horse
+    density (<a href="known-gaps.html#gap-31">gap 31</a>), the unplayed health layer
+    (<a href="horse-body.html#health-loci-0917">&sect;0-EP</a>), and founder and wild-spawn
+    frequency, which the owner parked outright
+    (<a href="known-gaps.html#gap-214">gap 214</a>).
+</p>
+</section>
 
 <div class="page-foot">
     <div class="seealso">

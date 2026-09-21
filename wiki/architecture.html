@@ -327,9 +327,9 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     <code>runClient</code> classpath without folding it into the jar, and the 0.0.1 jar
     therefore shipped with no genetics classes at all. Everything added since is
     resources, which fail the same way. Install the built jar into a real NeoForge
-    instance before calling a release good &mdash;
-    <a href="verification.html#jar-0-2-0">&sect;0-AQ</a> is the checklist. The cheap half
-    of it needs no game at all: <code>unzip -l</code> the jar and confirm
+    instance before calling a release good; the builds themselves are listed on
+    <a href="releases.html">the release history</a>. The cheap half
+    of that check needs no game at all: <code>unzip -l</code> the jar and confirm
     <code>horsegenetics/genes/</code>, <code>horsegenetics/breeds/</code>,
     <code>horsegenetics/names/</code>, <code>data/horsegenetics/structure/</code> and
     <code>com/example/horsegenetics/common/</code> are all in it, and that a gene renamed
@@ -415,6 +415,92 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     lines for a client closed normally, and 59 <code>(left over from a previous run)</code> lines for one that was killed.
     <code>run/saves/</code> holds only the running world.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Two v0.5.014 faults that singleplayer could not show &mdash; a login kick and an emptied Building Blocks tab &mdash; are fixed and have still never been seen from a client seat; unproven alongside them are a production jar booting with the gametest registry attached, and a jar carrying no <code>*Tool</code> classes.</p>
+</div>
+
+<h3 id="join-and-tab-0918-server-join">A join on a real client (2026-09-18, NOT played)</h3>
+
+<p>
+    v0.5.014 shipped two faults that <strong>singleplayer cannot show</strong>: every client was
+    kicked during login by an unencodable recipe, and &mdash; the other half, checked on
+    <a href="item-double-gates.html#join-and-tab-0918">double gates</a> &mdash; Building Blocks
+    was silently emptied for anyone whose pack made the mod's gate anchor miss. Both are fixed in
+    v0.5.015 and both now have a headless test that fails on the old code. <strong>Neither has
+    been seen from a client seat</strong>, which is the whole category of thing that let them out.
+</p>
+
+<ul>
+    <li><strong>Join a dedicated server with a client and load terrain.</strong> The one check
+        that would have caught the kick. A dev <code>runServer</code> plus a dev client is
+        enough; it does not need the tester's pack.</li>
+</ul>
+
+<h3 id="open-older-architecture">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The jar carries no wiki tooling</strong>. <code>build.gradle</code> excludes <code>**/*Tool.class</code> and <code>horsegenetics/example-genes/**</code>. Check with <code>jar tf</code> on the built jar, and confirm no log names a missing <code>*Tool</code> class.</li>
+</ul>
+
+<h3 id="phone-0918-designer-boot">The breed designer's boot, on an actual phone (2026-09-18, checked in emulation only)</h3>
+
+<p>
+    One of three phone reports fixed or explained this session, and like the rest of them it was
+    verified in <strong>headless Chrome at 390&times;844 with touch emulation</strong>, which is
+    not a phone. What emulation cannot see: a real fingertip, iOS&rsquo;s keyboard behaviour, and
+    a real mobile connection.
+</p>
+
+<ul>
+    <li><strong>The breed designer boots, and says what it is doing.</strong> It should show a
+        list of seven stages with ticks, a bar, and a byte count climbing on the stage it is
+        on. It was never frozen &mdash; on a 200&nbsp;kbit/s throttled connection against the
+        published site it boots and the counts climb the whole way &mdash; so what is being
+        checked here is that the <em>reassurance</em> works, not the load.</li>
+</ul>
+
+<h3 id="unattended-0918">What the overnight run of 2026-09-18 left unplayed</h3>
+
+<p>
+    An unattended night settled several things by log rather than by eye &mdash; those are gone
+    from <a href="verification.html">verification</a> and from
+    <a href="known-gaps.html">known gaps</a>, and live on the pages that own
+    them (<a href="horse-care.html#verified-closekin">closeKin</a>,
+    <a href="item-double-gates.html#verified-redstone">the gates' redstone rule</a>). What is
+    below is what the night <em>added</em> and could not finish; the rest of it is on
+    <a href="gene-lycan.html#unattended-0918-lycan">the lycan gene</a> and
+    <a href="horse-dimension.html#unattended-0918-yard">the horse dimension</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The in-game tests have never run in a production jar.</strong> They register a
+        function into <code>minecraft:test_function</code>, a vanilla registry this mod had not
+        touched before. A dev <code>runServer</code> boots clean to <code>Done (0.357s)</code>
+        with the registry at its usual 332 segments, and in production
+        <code>GameTestHooks.isGametestEnabled()</code> is false so the test <em>instances</em>
+        are never registered at all &mdash; but the <code>DeferredRegister</code> still attaches.
+        <strong>Pass:</strong> a real (non-dev) server or client loads 0.5.009 and reaches the
+        main menu with no registry complaint. Cheap, and worth doing before the jar goes to
+        anyone outside.</li>
+    <li><strong>The gametest run is real and no longer nearly empty.</strong>
+        <code>./gradlew :neoforge-26.1.2:runGameTest</code> runs five tests headless in well
+        under a minute. Two of them were added after v0.5.014 shipped two bugs that
+        <em>only</em> a client talking to a server could see, and they are the template for the
+        rest: <code>every_recipe_encodes</code> and <code>building_blocks_survives</code> both
+        fail on the old code and both need neither a client nor a player. Every check anywhere
+        on this wiki whose evidence is a block state rather than a picture is still a candidate
+        to move in &mdash; the stall-detector geometry, the suntouched light cleanup, blight
+        eating grass but not crops. None of that is written yet.</li>
+</ul>
+
+</section>
 
 </article>
 </main>

@@ -204,6 +204,53 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Ordinary markings get a locus at priority 65 &mdash; <strong>the highest-consequence visual change so far</strong> &mdash; so the rates come first: whether founders get any white at all, whether per-leg sock rolls vary, and whether a horse marks identically across a reload.</p>
+</div>
+
+<h3 id="markings-0917">Ordinary markings get a locus (2026-09-17, NOT played)</h3>
+
+<p>
+    Markings ships at priority 65, and in the same change
+    <a href="gene-mitf.html"><code>SW1</code></a> falls from <strong>55% of founders to
+    6%</strong>. <strong>This changes what a large fraction of horses look like</strong>,
+    so it is the highest-consequence visual change in the project so far &mdash; but most of
+    what can go wrong here is still invisible, so the looking comes last.
+</p>
+<ul>
+    <li><strong>Markings reaches founders at all.</strong> Spawn a large batch of wild horses.
+        Most should carry <em>some</em> white &mdash; a star, a coronet, a sock. A herd of
+        entirely clean-faced horses means the locus is registered but its founder table is not
+        reaching the draw.</li>
+    <li><strong>Sock counts vary.</strong> Each leg rolls independently against a threshold, so
+        three socks and one clean leg should be common. <strong>If every marked horse has
+        exactly four matching socks, or exactly none, the per-leg threshold is broken</strong>
+        and the leg rolls are not being read per leg.</li>
+    <li><strong>The same horse marks identically every time.</strong> The gene consumes no
+        <code>nextFloat()</code> &mdash; every decision is stored epigenetics. Note a marked
+        horse, leave and rejoin the world, and confirm the markings are identical. A horse whose
+        blaze moves between reloads means something is rolling at paint time.</li>
+    <li><strong>Pattern genes stack rather than fight.</strong> Spawn
+        <code>markings=M2/M2</code> with <code>kit=SB1/N</code>: the sabino should <em>widen</em>
+        an existing blaze, not overwrite or double-draw it. Same with
+        <code>mitf=SW1/N</code> beside it. Both are in the coat golden now, so a mismatch here
+        means the game and the golden disagree.</li>
+    <li><strong>Foals inherit the tendency.</strong> Breed two heavily marked horses and confirm
+        the foals trend marked, and that two clean <code>m/m</code> parents never throw a marked
+        foal at all.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether a broad blaze and
+        high stockings actually read as a normal marked riding horse rather than as a pinto, and
+        whether a markings blaze is distinguishable from a minimally-expressed sabino &mdash;
+        which it deliberately is <em>not</em>, so the test is really &ldquo;does it look
+        plausible&rdquo;, not &ldquo;can I tell them apart&rdquo;.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-mitf.html">MITF (splash)</a>

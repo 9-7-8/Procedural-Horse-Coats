@@ -278,6 +278,53 @@ f.whiten(px, py, (float) w);</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Corn spots are new and deliberately a minority trait: check first that clean roans clearly outnumber spotted ones &mdash; <strong>every roan spotted means the propensity roll is being ignored</strong> &mdash; then that the spots are crisp islands, inherit with the <code>Rn</code> copy, and never stray onto head or legs.</p>
+</div>
+
+<h3 id="roan-corn-spots-0917">Roan grows corn spots (2026-09-17, NOT played)</h3>
+
+<p>
+    <a href="gene-roan.html">Roan</a> now leaves <strong>corn spots</strong> &mdash; islands
+    of solid base colour inside the roan field, made by suppressing the whitening rather than
+    painting anything over it. A <em>minority</em> trait by design: the propensity is rolled
+    on the copy the way the forehead white is, so most roans have none.
+</p>
+<ul>
+    <li><strong>Most roans still have none.</strong> This is the claim most likely to be
+        wrong and the cheapest to check: spawn a batch of roans and confirm that clean ones
+        clearly outnumber spotted ones. <strong>If every roan is spotted the propensity roll
+        is being ignored</strong>, and the horse you get is a much rarer animal than the one
+        intended.</li>
+    <li><strong>The spots are islands, not thinning.</strong> A corn spot is base coat at
+        full strength with a definite edge, not a patch where the roaning merely fades. A
+        roan with soft pale-grey blotches instead of crisp coloured islands means the
+        suppression is partial where it should be total.</li>
+    <li><strong>They inherit.</strong> The lattice seed and the propensity sit on the
+        <code>Rn</code> copy, so a spotted roan's foals that inherit that copy should be
+        spotted too, in the same places. A foal whose spots are unrelated to its parent's
+        means the values are being re-rolled rather than passed on.</li>
+    <li><strong>They do not appear off the roan field.</strong> Corn spots only exist where
+        roan was going to put white, so the dark head, the solid mane and tail and the dark
+        lower legs must be unaffected &mdash; a "spot" on the head is the mask being applied
+        outside its region.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the spots read
+        as the real thing at riding distance rather than as damage or as holes in the
+        texture, and whether their size looks right against the horse.</li>
+</ul>
+
+
+<h3 id="open-older-gene-roan">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>The two roans</strong> (<code>roan=Rn/rn</code>, <code>leopard=LP/LP</code>). Classic roan is even from shoulder to hip, a blue roan is slate not grey, a black-based roan or varnish has no brown cast while a strawberry or bay roan stays warm; the inverted V reads as a point; the head is a dark mask with only a few white hairs; varnish shows shaded shields over shoulder, hip, joints and cheekbones; the two look like different patterns, together do not go white, and a roan foal keeps dark legs. <a href="gene-roan.html">Roan</a>.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-tobiano.html">Tobiano</a>

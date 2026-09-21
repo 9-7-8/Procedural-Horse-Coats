@@ -432,8 +432,45 @@ bit 2   bit 3        lower left   lower right</code></pre>
     <strong>Every eye locus looks right</strong> (owner-confirmed on sight, 2026-09-10): placement,
     sectors, glows and the third eye. What looking cannot settle &mdash; chaos eyes staying stable
     per horse, the splash blue-eye rates, blue eyes carried through a generation &mdash; is on
-    <a href="verification.html#eye-loci">verification &sect;0-BU</a>.
+    on <a href="#verification">the verification tab</a>.
 </p>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Chaos eyes have to survive a save and reload and blue has to keep beating amber, but the question with no visible tell is whether <code>MBl</code> carriers really hand blue eyes to a later generation of foals that carry no splash at all; the twelve wedge masks are a purely visual last.</p>
+</div>
+
+<h3 id="open-older-eye-colour">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>A chaos-eyed horse keeps its colour across save and reload</strong> (tester guide, <em>Hoofprints, particles and eyes</em>). That two chaos horses never match is unit-tested (<code>EyeColorTest.chaosDrawsItsColourFromItsOwnAlleleCopy</code>). A splashed horse's genotype screen shows <code>MBl/MBl</code> (<a href="eye-colour.html">eye colour</a>).</li>
+    <li><strong>Splash blue-eye rates and blue eyes carried through a generation</strong> (unit test, <code>EyeColorTest</code>; <a href="eye-colour.html">eye colour</a>). A splashed white horse has two blue eyes usually, one sometimes and a wedge rarely. A blue-eyed splash bred to a plain horse throws <code>MBl</code> carriers, and blue eyes reappear a generation later on foals with no splash.</li>
+    <li><strong>Eyes.</strong> A foal's eye whites read like its dam's, including under a dominant white or broad magic zebra and on a blue-eyed foal; the sclera stays white rather than a coloured block; a plain sabino has dark eyes; blue beats amber. <a href="eye-colour.html">Eye colour</a>.</li>
+</ul>
+
+<h3 id="tuning-moved-0917-eye-wedges">The eye wedges may be too fine (2026-09-17, NOT played)</h3>
+
+<p>
+    A tuning question moved off <a href="roadmap.html">the roadmap</a> on 2026-09-17: not
+    unbuilt, just a shape already in the game that only a person looking at it can judge. It
+    therefore ranks <strong>below</strong> every behavioural check &mdash; it announces itself
+    the moment anybody looks.
+</p>
+
+<h4>Visual, and therefore last</h4>
+
+<ul>
+    <li><strong>The eye wedges may be too fine.</strong> Twelve masks over four texels
+        include single corners and three-corner shapes. <strong>Pass:</strong> a wedge
+        reads as sectoral heterochromia at riding distance rather than as a stray pixel.
+        If it does not, restricting <code>EyePatch.WEDGES</code> to the four halves is a
+        one-line retreat.</li>
+</ul>
+
+</section>
 
 </article>
 </main>

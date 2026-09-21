@@ -3648,7 +3648,7 @@ public final class YourMod {
     and that count matches <code>the genotype code has 318 segments</code> two lines earlier (08:40 launch: 08:40:52.944,
     then the freeze at 08:40:53.158). So the queued task runs, and the freeze lands after the shipped genes are in.
     <em>Still unrun</em>, because it takes a throwaway second mod: a real listener being called, its gene sorting into
-    place, and the refusal of a bad key (<a href="verification.html#gene-api">verification &sect;0-CM</a>).
+    place, and the refusal of a bad key (<a href="#verification">the verification tab</a>).
 </p>
 
 <h2>Walkthrough 1 &mdash; a natural gene</h2>
@@ -4435,6 +4435,7 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 </tbody>
 </table>
 </div>
+
 
 <div class="page-foot">
     <div class="seealso">
@@ -5282,7 +5283,7 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     correct.&rdquo; A general look at the live page rather than an item-by-item walk, which settles three
     things: the page loads (the <code>expresses</code> <code>ReferenceError</code> is gone), the parity
     line reads green, and the 3D preview reads as a horse instead of a pile of bounding boxes. The
-    interactive parts are open: <a href="verification.html#creator">verification &sect;0-H</a>.
+    interactive parts are open: <a href="#verification">the verification tab</a>.
 </p>
 
 <h2 id="tools">What to build it with</h2>
@@ -5298,6 +5299,155 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     it, the next tab is a prompt that hands the whole job to Claude.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Both new authoring features are engine-proven by parity yet <strong>never drawn on a screen</strong>: the colour ops' <code>regions</code> control nests a whole stop-list editor inside one op row, and <code>over</code> must vanish from the export when unticked rather than write <code>false</code> &mdash; and a third-party gene has still never been registered from another mod.</p>
+</div>
+
+<h3 id="regions-0917">A colour op can paint a different colour per region (2026-09-17, NOT played)</h3>
+
+<p>
+    <strong>All four colour ops</strong> take a <code>regions</code> list &mdash;
+    <a href="making-a-gene.html#regions">the format page</a> has the shape. Each entry names
+    <code>parts</code> and the colour they take, so one layer paints the legs paler than the
+    barrel where it used to take two. On <code>RAMP</code> and <code>PALETTE</code>, added
+    later the same day, an entry carries a whole colour <em>source</em> &mdash; its own stops,
+    its own swept hue, or one flat colour &mdash; while the op keeps the axis, span, seed and
+    scale, so the regions recolour one shared sweep rather than each running one of their own.
+</p>
+
+<div class="note good">
+    <span class="label">The engine half is settled by measurement &mdash; do not spend eyes on it</span>
+    <p>
+        <strong>No shipped gene uses the field</strong>, so both coat goldens and
+        <code>dead-layers.txt</code> came through <em>untouched</em>: nothing moved a pixel,
+        nothing died, and nothing on the ratchet came alive. Parity is green at
+        7&nbsp;173 checks and was <em>proved</em> to see the new field rather than assumed to,
+        on both halves. On <code>TOWARD</code>/<code>FLAT</code>: regressing the region lookup
+        fails 480 checks, and regressing only the lightness inside a region fails 138. On
+        <code>RAMP</code>/<code>PALETTE</code>: ignoring the region lookup fails
+        <strong>496</strong>, and regressing only a region&rsquo;s own <code>hueSpan</code>
+        fails <strong>108</strong> &mdash; so the per-region span is compared and not just the
+        fact that a region is there.
+    </p>
+    <p>
+        Worth knowing <em>why</em> that was measured twice rather than trusted: the second
+        change moved the parity count by <strong>two</strong>, from 7&nbsp;171 to 7&nbsp;173,
+        which is the schema table&rsquo;s two new entries and nothing else. That is also
+        exactly what a fixture which never looks at the new code path would report.
+    </p>
+</div>
+
+<ul>
+    <li><strong>The creator&rsquo;s Regions control has never been on a screen.</strong> It
+        passes <code>check-colour-control.mjs</code> (22 checks, which read back the
+        <em>spec</em> after each gesture rather than the picture), and the row renders in the
+        right place &mdash; <code>["Layer name", "parts", "Effect", "Colour", "Regions",
+        "strength", "opacity"]</code>. But nobody has <em>looked</em> at it. The risk is
+        layout rather than logic: each entry stacks a parts-chip grid, a colour fork and a
+        remove button inside a single op row, which is more than any other op parameter puts
+        there. Same shape as <a href="known-gaps.html#gap-98">gap 98</a>.
+        <strong>And it got worse on <code>RAMP</code> and <code>PALETTE</code></strong>, where
+        the fork has <em>three</em> modes (its own stops / its own swept hue / one flat colour)
+        and the first of them nests a whole <b>stop-list editor</b> &mdash; add, remove and
+        reorder colours &mdash; inside that same row. Nothing has rendered it. The mode switch
+        also has to <em>delete</em> the keys of the mode it left, because the parser refuses an
+        entry naming two colour sources, so a leftover key would read in the creator as the
+        switch being broken; that path is unexercised too.</li>
+    <li><strong>Nothing in the game draws one yet</strong>, and that is the honest state
+        rather than an oversight: the first real test is authoring a gene that uses it. The
+        example gene <code>prismatic.json</code> carries three &mdash; paler legs with a mane in
+        the horse&rsquo;s own hue, a ramp whose tail, legs and muzzle each take a different
+        source, and a palette that swaps on the mane &mdash; and all are visible in the
+        creator, but <code>example-genes/</code> does not ship in the mod, so the horse
+        dimension has nothing to show.</li>
+    <li><strong>The four load errors have tests but have never been read by a person.</strong>
+        A region naming no parts, a region carrying no colour, <strong>a region naming two
+        colour sources</strong>, and a part claimed by two entries are each refused at load,
+        the last with a message naming the part in dispute. So is a key the op does not have
+        &mdash; <code>hueSpan</code> on a <code>TOWARD</code> region &mdash; and a one-entry
+        <code>colors</code> list, which is refused pointing at <code>color</code> instead.
+        Worth one deliberately broken file in <code>run/phc/genes/</code> to watch the message
+        arrive, since the failure these guard against is the silent no-op.</li>
+</ul>
+
+<h3 id="over-flag-0917">A layer can paint over the ones above it (2026-09-17, NOT played)</h3>
+
+<p>
+    <code>"over": true</code> on a layer makes it measure against the coat as its own gene
+    has painted it so far, rather than against the colour the gene started at &mdash; so it
+    <em>stacks</em> instead of summing. It is the root cause behind
+    <a href="known-gaps.html#gap-169">gap 169</a>, and is written up on
+    <a href="making-a-gene.html#over">the format page</a>.
+</p>
+
+<p>
+    <strong>Nothing in a world should look different.</strong> The flag is opt-in, no
+    shipped gene sets it, and both coat goldens are unchanged &mdash; that half is settled
+    by test rather than by eye, and is not worth a minute of anybody's session. What no
+    test can see is the creator's new control, and what no gene yet exercises is the flag
+    itself.
+</p>
+
+<ul>
+    <li><strong>The <em>paints over</em> box round-trips</strong>
+        (<a href="gene-creator/index.html">the gene creator</a>, on a magical gene). Tick
+        it under <strong>Stacking</strong> on a layer that overlaps the one above it: the
+        preview should redraw with that layer's own colour instead of a sum. Export and the
+        file carries <code>"over": true</code> on that layer and nothing on the others;
+        load the export back and the box is still ticked. <strong>Untick it and the key
+        must disappear entirely</strong> rather than export as <code>"over": false</code>
+        &mdash; the exporter drops defaults, and a layer nobody touched has to come out
+        byte-identical to what it was before the flag existed.</li>
+    <li><strong>Both refusals name the reason.</strong> Put <code>over</code> on a
+        <code>FLAT</code> layer, and on a natural gene. The creator should lint each before
+        the loader ever sees it, and a drop-in file carrying either should be refused at
+        load with the file, the layer and the fix named.</li>
+    <li><strong>The example gene grew a layer, on purpose.</strong>
+        <code>example-genes/prismatic.json</code> now ends in an <code>over</code> wash
+        across the barrel &mdash; that is what gives the parity fixtures a case which
+        reaches the flag, proven by breaking the creator's port and watching parity go red
+        on 124 checks. It is deliberately crude: dropped into <code>phc/genes/</code> it
+        will read as a flat orange band over everything else on the barrel. That is
+        correct, not a bug.</li>
+    <li><strong>All eleven candidates now use it.</strong> Dorsal wing, contour, starburst and
+        the eight nested genes of the 2026-09-10 intake were converted the same day
+        (<a href="known-gaps.html#gap-169">gap 169</a>), so the flag is exercised by real genes
+        rather than by <code>prismatic</code> alone. What is worth looking at, and what is
+        already settled by measurement, is on <a href="gene-contour.html#verification">contour&rsquo;s verification tab</a>.</li>
+</ul>
+
+
+<h3 id="open-older-making-a-gene">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>An attribute modifier comes off again.</strong> No shipped gene uses the <code>attribute</code> verb behind a condition any more (<a href="gene-magic-swim-speed.html#verified-swim">swim speed scales the push instead</a>), so drop in a gene with an <code>attribute</code> effect gated on <code>in_water</code>. <strong>Pass:</strong> out of the water the horse is back to normal speed, and a second gene moving the same attribute is not stripped (<code>GeneAbilityHandler.clearAttributes</code> has never run).</li>
+    <li><strong>The <code>scale</code> effect verb obeys <code>body.size</code>.</strong> With a drop-in gene carrying an <a href="making-a-gene.html#attribute"><code>attribute</code></a> effect on <code>scale</code>: inert with <code>body.size = false</code>, and a modifier already on the horse comes <em>off</em> on the next reconcile. The toggle itself is the tester guide's <a href="for-testers.html">body size test</a>.</li>
+    <li><strong>A third-party gene, end to end</strong> (<code>runServer</code> with a throwaway second mod: a <code>@Mod</code>, one <code>RegisterHorseGenesEvent</code> listener, one <code>AbstractNaturalGene</code>; <a href="making-a-gene.html">making a gene</a>). <strong>Pass:</strong> the listener runs, the gene sorts into the order rather than after the built-ins, and a wild horse carries it. Removing the mod refuses the saved horses without a crash. A bad key (no dot, capitals) is refused with the mod and the key named. The <code>common/</code> half is <code>GeneApiTest</code>.</li>
+    <li><strong>Which coat each gene page's preview opens on</strong> (read the <code>:common:bakeGeneWikiPages</code> / preview bake output). <strong>Pass:</strong> only <a href="gene-fielded.html">fielded</a>, <a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a> open on the tobiano; every other page opens on bay.</li>
+    <li><strong>A broken or removed drop-in gene fails loudly.</strong> A stray comma in a <code>phc/genes/</code> file: the server still boots, logs the file name, and loads the rest. Removing a file that saved horses used: they fail to load with a clear error rather than corrupting anything. A <code>runServer</code> with the test kit's drop-ins answers both.</li>
+    <li><strong>Drawing a dialled <code>PATH</code> in the <a href="gene-creator/index.html">gene creator</a></strong>: add a range knob, tick <strong>dial</strong>, press <strong>Minimal</strong> and drag the slider. Is the seeded shrink a useful start? Is the dashed ghost of the other shape readable on the 310px canvas? Does twinning points across both shapes get in the way (<a href="making-a-gene.html#pointsmin">pointsMin</a>)?</li>
+    <li><strong>The <code>PATH</code> canvas is pleasant to draw on</strong>. Its 41 mechanics are checked headlessly; this is feel. Does the box silhouette read as a horse? Draw a real shape (a feather, a laced edge) with <code>curve</code> and <code>fill</code>. Is 310px wide enough, and does the 0.01 snap help? Are the letterboxed <code>top</code>/<code>front</code> planes big enough for a girth band? Does a foal preview keep the shape in <code>body</code> space?</li>
+    <li><strong>The gene creator's <code>SVG</code> mask.</strong> Add one to a fresh gene: the preview draws the starting teardrop, the note says &ldquo;points in N subpaths&rdquo;, unticking <code>fill</code> exports <code>"fill": false</code>, and the boot-time parity self-check stays green.</li>
+    <li><strong><a href="making-a-gene.html">Making a gene</a>'s eight tabs.</strong> The tab bar wraps rather than overflowing at a narrow window (three-tab gene pages unchanged); it opens on Start here from the sidebar and from a bare URL; the accent is coding purple; cross-tab links (Start here &rarr; The file, &rarr; In Java, Effects &rarr; horse-traits) switch tabs; it is in the sidebar under Coding only.</li>
+    <li><strong>The gene creator's <code>PATH</code> fill and <code>SPOTS</code> mirror.</strong> Load <strong>Prismatic</strong>: the filled crescent keeps its notch (no inverted row of texels, the even-odd edge case <code>PathMaskTest</code> only sweeps on a diamond and a chevron), and a half-typed line in <em>the numbers</em> textarea does not wipe the shape. On a <code>SPOTS</code> mask, leaving <code>mirror</code> unticked exports <strong>no</strong> <code>mirror</code> key, not <code>"mirror": false</code>.</li>
+    <li><strong>The creator's <code>FRACTAL</code> form.</strong> A freshly added <code>FRACTAL</code> left alone exports exactly <code>{"type": "FRACTAL"}</code> (a leaked default means <code>schema.js</code> and the Java disagree); <code>shape</code> is a dropdown defaulting to <code>fbm</code>, and <code>ridged</code> turns outlines into the marking; dragging <code>octaves</code> changes detail but not how much of the horse is covered, and the preview stays responsive at <code>octaves: 6</code> with <code>warp</code> above zero.</li>
+    <li><strong>The creator's <code>space</code> dropdown</strong> offers <code>local</code> as a fourth option on AXIS, WAVES and RAMP, and picking it draws (parity only proves the engine).</li>
+    <li><strong>The gene creator agrees with the designer.</strong> A creator bay, blood bay and liver bay match the designer's (<code>base-coats.js</code> is a hand-port); the creator's inlined chart is the current gradient; and a creator layer that subtracts to black previews with the shadow floor, as the game does.</li>
+    <li><strong>The gene preview window.</strong> Bay / Black / Chestnut change the coat but not the white patches, which only the dice moves; scroll over the horse zooms while scroll beside it scrolls the page; genes with several looks (<a href="gene-kit.html">KIT</a>, <a href="gene-light.html">light</a>) get a button group; <a href="gene-leopard.html">leopard</a>'s PATN1 / PATN2 strip reaches each pattern in its table; a gene invisible on one base reads as informative; <a href="gene-ednrb.html">EDNRB</a> shows its condition chip.</li>
+    <li><strong>Gene pages and lists.</strong> Every gene page's preview opens on a bay, so a dark marking (Voided, Goth, magic zebra) shows at once; the generated sidebar and landing lists hold every gene page, grouped by <code>GeneFamily</code>, and read well.</li>
+    <li><strong>Gene creator by hand</strong> (<a href="gene-creator/index.html">the creator</a>): walk steps 1 to 8 and reload to land on the same step, <em>Show everything</em> restores the columns; typing keeps the caret in Display name, blurb and a layer name; Gameplay fields left at default stay out of the export.</li>
+    <li><strong>Gene creator effects and picking.</strong> Every effect verb adds, <code>interval</code> grows a ticks box and <code>on_interact</code> an item box, &ldquo;Only when&rdquo; builds flags, and loading <a href="gene-waterborn.html">Waterborn</a> or <a href="gene-suntouched.html">Suntouched</a> keeps its effects; clicking a leg or the barrel names that part; Age: Foal re-frames with the foal on the grid; with no connection it falls back to the flat sheet.</li>
+    <li><strong>The gene creator off <code>file://</code>.</strong> Opened straight off disk as well as served: the 3D horse orbits, clicking it reports a part and a body-space point, &ldquo;show area&rdquo; highlights exactly that layer's texels, and with three.js blocked the flat sheet still bakes.</li>
+    <li><strong>The 0.4.1 masks on a horse.</strong> Moonwing's <code>SVG</code> wing: not upside down, not mirrored, gold band on the fill's edge. <code>FAN</code> (Morpho Wing, Gill Bloom): bars widen away from the pivot. <code>NORMAL</code> (Carapace Sheen): no banding at shoulder and hip. <code>CRACKLE</code> centroid (Iris Bloom Diamonds, Nacre, Tidefoam Sash): cores sit inside cells.</li>
+    <li><strong>The mask-parts fix</strong> (<a href="making-a-gene.html#verified-mask-parts">making a gene</a>). <a href="gene-webbed.html">Webbed</a>, <a href="gene-elytra-veins.html">elytra veins</a>, <a href="gene-iridescent-jewel.html">iridescent jewel</a> and <a href="gene-opal-wing-veins.html">opal wing veins</a> now paint only barrel and neck, where they covered the whole horse; say if any was liked the old way. Smaller moves: <a href="gene-moth-mantle.html">moth mantle</a>, <a href="gene-lace.html">lace</a>, <a href="gene-fracture.html">fracture</a>, <a href="gene-koi.html">koi</a>; gained coverage: <a href="gene-masked.html">masked</a> (ears), <a href="gene-ehretia.html">ehretia</a> (tail), <a href="gene-peafowl.html">peafowl</a>, <a href="gene-snow-cloud.html">snow cloud</a>, <a href="gene-war-mask.html">war mask</a>.</li>
+    <li><strong>The mask-union fix, fifteen genes</strong> whose second region used to be dropped: <a href="gene-panda.html">panda</a>'s hindquarter patch, and <code>brindlelace</code>, <code>cleave</code>, <code>cosmic</code>, <code>dutch</code>, <code>emitola</code>, <code>flametouched</code>, <code>fracture</code>, <code>imperial</code>, <code>marble_tobiano</code>, <code>patina</code>, <code>quarter</code>, <code>stardust</code>, <code>yalia</code>. Also the four painters: <code>WAVES</code> lobes even (cleave's teeth, angler's strings), <code>CRACKLE</code> panels straight with corners meeting three at a time (<a href="gene-qular.html">qular</a>), and <a href="gene-valentine-appaloosa.html">valentine</a>'s four-texel hearts reading as hearts; plus the moved genes (brindle thinner; collar, cosmic, emitola, masked, nimbus, opossum, quazars, shark, yalia extended).</li>
+</ul>
 </section>
 
 <div class="page-foot">

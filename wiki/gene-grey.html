@@ -103,7 +103,7 @@
         The three-allele rework replaced a two-allele <code>G</code>/<code>g</code>
         grey with one flat progression roll. It compiles, is unit-tested and in the
         golden file, but no grey of any dosage has been looked at in a game &mdash;
-        the checklist is on <a href="verification.html#grey">To be verified</a>.
+        the checklist is on <a href="#verification">the verification tab</a>.
     </p>
 </div>
 
@@ -525,13 +525,29 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Grey is the broadest single sweep on this index: <strong>four dosages</strong> from <code>G2/N</code> to <code>G3/G3</code> must read as steel, dapple, light and near-white, the face must grey first, foals must be born their base colour, Lipizzan herds must show no repeating dapple grid, and the melanoma line must dock no hearts.</p>
+</div>
+
+<h3 id="open-older-gene-grey">Still open from before 2026-09-13 (NOT played)</h3>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<ul>
+    <li><strong>Grey's four dosages.</strong> Bays at <code>G2/N</code>, <code>G3/N</code>, <code>G2/G3</code> and <code>G3/G3</code> read as steel, dapple, light and near white. The face greys first, and slow greys keep dark lower legs. Manes differ from the body and are paler at the root. A chubari is a big rounded white patch on light greys, and a bloody shoulder a soft base-colour stain. Lipizzan and Camargue herds show no repeating dapple grid, and a grey foal is its base colour until it grows. The melanoma line reads &ldquo;highest&rdquo; on a black <code>G3/G3</code> and &ldquo;raised&rdquo; on a chestnut <code>G2/N</code>, and docks no hearts.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="body-space.html">BodyNoise</a>
         <a href="pipeline.html">The gradient and the neutral column</a>
         <a href="gene-agouti.html">Agouti</a>
         <a href="horse-body.html">Conditions and health</a>
-        <a href="verification.html#grey">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/GreyGene.java</code>,
     <code>common/coat/pattern/GreyCoat.java</code>
