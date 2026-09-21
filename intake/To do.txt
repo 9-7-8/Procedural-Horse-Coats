@@ -1,5 +1,7 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
 
+The goal of this mod is to improve horses in Minecraft as much as possible, while keeping vanilla mechanics intact and unchanged, and only using a carrot not stick incentive system for all systems added by the mod. The mod should only add one new major system, and that's the genetic and breeding system. All other systems added should either be in service of that system, or minor enough that they're only two or three levels of depth. Everything in this mod must directly relate to horses. This mod is the procedural horses mod, and thus the core philosophy is emergent gameplay through player-driven procedural generation. 
+
 Adding ender chests to horses. Improving the look go chested hordes in general, and adding support for more kinds of chests on horses from other mods
 
 Adding new genes for zombie and skeleton horses, and then having them spawn as any breed except they have those new genes. Skeleton horses have a recessive skeleton gene that makes them heal without needing to eat (and indeed, they cannot eat) while looking like a skeleton. Skeleton horses are aggressive but can be permanently passified by feeding them a bone. Zombie horses have a gene that makes them literally have twice as many hearts, but at a big speed penalty. They are obligate carnivores and they are all aggressive and can only be temporarily passified with raw meat, until they're tamed. Need to overhaul ho zombie and skeleton horses spawn, so they can spawn as any breed, but with these genes. 
@@ -135,3 +137,6 @@ We should see if this has anything we should adapt to our mod.
 
 https://modrinth.com/mod/horsebuff
 If we don't already have these QOL tweaks. 
+
+https://modrinth.com/mod/horseman
+See if this adds anything. 
