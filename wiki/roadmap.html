@@ -1688,7 +1688,11 @@
         own: <em>whose</em> ender inventory, the owner's or the rider's.</li>
     <li><strong>Chests from other mods must work.</strong> Not a hardcoded list of chest items
         &mdash; the same rule the rest of the compat layer follows. A chest is whatever carries
-        the right tag, and its capacity and its look come from what it is.</li>
+        the right tag, and its look comes from what it is. <em>Its</em> size is the container's
+        own business and should not be confused with the horse's: the bullet below is the
+        ceiling the animal imposes, and a roomy modded chest does not raise it. Which of the
+        two binds &mdash; and whether a big chest on a weak horse is refused or simply
+        part-filled &mdash; wants deciding once rather than per chest.</li>
     <li><strong>The look of a chested horse is its own complaint, and a fair one.</strong>
         Vanilla's chested donkey is two boxes clipped to its flanks. Since this mod already
         re-renders the horse and <a href="#accessories-geometry">is proposing to derive
@@ -1696,10 +1700,18 @@
         animal are the same feature as everything else in
         <a href="#accessories">the accessories system</a> and should be built with it, not
         before it.</li>
-    <li><strong>Capacity should read the horse's <code>size</code></strong>, which is already an
-        attribute the body genes write &mdash; a draught carrying more than a Falabella is the
-        kind of thing this mod is for, and it makes storage a reason to breed rather than an
-        item you buy once.</li>
+    <li><strong>Capacity is a function of <em>pulling ability</em>, not size</strong> (owner).
+        That stat already exists and is already resolved from the genome: a 1&ndash;10 score
+        read as <code>HorseTraits.pull()</code>, reached through
+        <code>HorseDraft.pullOf</code>, falling back to <code>HorseTraits.BASE_PULL</code> for a
+        horse with no genome of ours. So there is nothing to derive &mdash; the number a
+        saddlebag should read is the number <a href="carts.html">the carts</a> already read.
+        <strong>Size would have been the wrong proxy</strong>, and cheaply wrong: it measures
+        how big a horse is rather than what it can shift, so a tall light horse would out-carry
+        a cob that plainly should win. Pull is the honest stat, and using it means
+        <em>one</em> axis of strength runs through carts and storage both, so a horse bred to
+        haul a wagon is the horse that carries the most &mdash; rather than two parallel
+        breeding goals that happen to look alike.</li>
     <li><strong>Still undecided:</strong> whether the chest is a vanilla chest right-clicked
         onto the horse or an item of our own; whether it survives a transfer of ownership and
         what happens to the contents if it does not; and whether it appears beside the saddle in
