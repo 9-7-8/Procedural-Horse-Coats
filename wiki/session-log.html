@@ -27,6 +27,114 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-21-verification">2026-09-21, after the gear work &mdash; the verification page is dismantled, and becomes a generated index</h2>
+
+<p>
+    <a href="verification.html">To be verified</a> had reached <strong>3&nbsp;734 lines and
+    sixty <code>&lt;h2&gt;</code> sections</strong>. The owner's instruction was to move all of
+    it onto the page for the thing each section tested, and to rebuild the page itself as
+    nothing but a collector. Both halves shipped, and the rule behind them is now
+    <a href="decisions.html#settled-verification-generated">settled</a> and is hard rule 9 in
+    <code>CLAUDE.md</code>.
+</p>
+
+<h3>The rule, in the owner's words</h3>
+
+<p>
+    <strong>Verification data goes on the item's page. Nothing is ever hand-written onto the
+    verification page.</strong> That page exists to do one thing: collect the pages that have
+    an open Verification tab. And <strong>a verified item is not ticked, it moves</strong>
+    &mdash; off the Verification tab and onto the <strong>Coding</strong> tab beside it, as
+    what was seen, when, and on what evidence. A page whose last check is confirmed loses the
+    tab and drops off the index by itself, which is the property that makes the list
+    genuinely only shrink.
+</p>
+
+<p>
+    <strong>Why it had to change.</strong> A checklist kept beside the thing it tests is read
+    by whoever opens that page and deleted by whoever confirms it. Gathered into one document
+    it is read by nobody and deleted by nobody, and its entries outlive the memory of what
+    they were about. The measurable form of that rot: <strong>sixty-seven of the page's
+    anchors were empty <code>&lt;span id&gt;</code> stubs</strong>, left behind by sections
+    deleted months earlier, and eighty-nine links elsewhere in the wiki still pointed at
+    them. Every one of those links resolved. Every one of them told the reader nothing. This
+    is the third document to fail this way after <code>CLAUDE.md</code> and the roadmap.
+</p>
+
+<h3>What was actually moved</h3>
+
+<p>
+    Thirty-six sections had a single owner and moved whole. The other twenty-four were
+    grab-bags &mdash; &ldquo;still open after 2026-09-13&rdquo;, &ldquo;what the overnight run
+    left unplayed&rdquo;, &ldquo;tuning and balance, moved off the roadmap&rdquo; &mdash; and
+    the owner's call was to <strong>split them bullet by bullet</strong> rather than park each
+    on a nearest page, on the grounds that a cross-cutting list on a page it is only half
+    about is exactly the wall this change exists to remove. The largest,
+    <em>Still open from before 2026-09-13</em>, was <strong>273 bullets across four ordered
+    groups</strong>, and fanned out to <strong>92 pages</strong>; it was done by script with a
+    reconciliation that proved every <code>&lt;li&gt;</code> appears byte-for-byte exactly
+    once in the output.
+</p>
+
+<p>
+    The end state: <strong>122 pages carry a Verification tab</strong>, 83 of them gene pages
+    and 15 item pages. The original section ids travelled with the bulk of each section, so
+    <code>verification.html#jumps-0920</code> became
+    <code>item-jumps.html#jumps-0920</code> and <strong>81 inbound links were re-pointed
+    mechanically</strong> by looking up where each id had actually landed rather than from a
+    typed table.
+</p>
+
+<h3>The page is now generated, and refuses to be wrong</h3>
+
+<p>
+    <code>wiki/tools/bake-verification-index.mjs</code> scans <code>wiki/</code> for a
+    <code>verification</code> panel, harvests the <strong>one sentence</strong> each opens
+    with in a <code>note verify-summary</code> box, and writes an alphabetical index between
+    generated markers. A page joins the list <em>by growing the tab</em>, the same way a gene
+    joins the census by existing. The per-row check count is the panel's own
+    <code>&lt;li&gt;</code> tally computed at bake time, so it is never a stale number
+    somebody typed.
+</p>
+
+<p>
+    <strong>It hard-fails rather than write a wrong index</strong> &mdash; a panel with no
+    summary box, two of either, or a summary box loose on a page each fail it by name. That
+    is deliberate: an index that quietly omits a page is worse than no index, because it is
+    trusted. The one thing it does tolerate is a page that only <em>mentions</em> the
+    attribute in prose, which is why <a href="known-gaps.html">known gaps</a> writes it
+    escaped.
+</p>
+
+<h3>What the writing pass found, as it always does</h3>
+
+<p>
+    One real defect: on <a href="making-a-gene.html">making a gene</a> the new panel had been
+    inserted <em>inside</em> the &ldquo;In Java&rdquo; tab rather than beside it, because that
+    page carries a <code>page-foot</code> div within a panel and the insertion point looked
+    for the first one. A validator now confirms every verification panel is a direct child of
+    <code>article.doc</code> and that every page's <code>&lt;section&gt;</code> tags balance.
+    The 122 summary sentences also turned up several checks whose bullets were about a
+    different gene entirely &mdash; those were split as they were written.
+</p>
+
+<p>
+    <strong>Checked in a browser, not just in the markup</strong> (headless Chrome, over
+    <code>file://</code>, through <code>wiki/tools/chrome.mjs</code>): the index renders 122
+    rows each with its sentence, the first row's href resolves to a real panel, the
+    Verification button appears in the tab bar on a gene page, an untabbed page such as
+    <a href="villagers.html">villagers</a> builds a tab bar rather than hiding its new
+    content, and the repaired <a href="making-a-gene.html">making a gene</a> panel is now the
+    last top-level panel on the page.
+</p>
+
+<p>
+    <strong>Not done, and deliberately:</strong> no Java changed this session, so
+    <code>:neoforge-26.1.2:build</code> was not re-run &mdash; and a dedicated server the
+    owner started at 02:01 was holding <code>run/</code> throughout, so nothing was launched
+    against it.
+</p>
+
 <h2 id="d2026-09-21-gear">2026-09-21, last of all &mdash; two tack slots become nineteen, and two documentation conventions fall out of it</h2>
 
 <p>
