@@ -96,7 +96,7 @@
         they are two items competing for one slot rather than two slots. This
         reverses an earlier plan that gave them a slot each; the distinction
         survives intact, it just lives in the items. What having a halter lets
-        you <em>do</em> is <a href="roadmap.html#ground-work">ground work</a>,
+        you <em>do</em> is <a href="horse-care.html#ground-work">ground work</a>,
         still on the main roadmap because it is a riding mechanic rather than a
         piece of gear.
     </p>
@@ -312,7 +312,17 @@
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Everything still planned for horse gear">
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the
+        whole accessories system is the plan: derived models rather than drawn ones, a
+        tack bench, dye and pattern, enchanted tack, shoes, native tack, horse chests and
+        the saddle pad &mdash; with the armour materials the one piece that is only data.
+    </p>
+</div>
 
 <p class="lede">
     <strong>Every gear plan, in one place.</strong> These sections used to be
@@ -320,10 +330,10 @@
     whole, so that the accessories system, the shoes, the native-tack art
     research, the saddlebags and the saddle pad are read together rather than
     found one at a time. The main roadmap keeps what is <em>next to</em> gear
-    without being gear: <a href="roadmap.html#ground-work">ground work</a>, the
-    <a href="roadmap.html#cart-bench">cart and jump bench</a>,
-    <a href="roadmap.html#tack-aware">a gene that reads what the horse is
-    wearing</a>, and <a href="roadmap.html#rider-comfort">rider comfort</a>.
+    without being gear: <a href="horse-care.html#ground-work">ground work</a>, the
+    <a href="cart-bench.html#cart-bench">cart and jump bench</a>,
+    <a href="magical-genes.html#tack-aware">a gene that reads what the horse is
+    wearing</a>, and <a href="rider-comfort.html#rider-comfort">rider comfort</a>.
 </p>
 
 <div class="note"><span class="label">Some of this has now shipped</span>
@@ -380,7 +390,7 @@
 <thead><tr><th>Slot</th><th>Notes</th></tr></thead>
 <tbody>
 <tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. <strong>The bridle is the minimum tack required to control a horse</strong> &mdash; which is a real gameplay rule and not a slot, and it has to reckon with <code>BarebackSteeringHandler</code>'s phantom saddle, which writes the saddle slot every tick.</td></tr>
-<tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="roadmap.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
+<tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="horse-care.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
 <tr><td><strong>Saddle pad</strong></td><td>Designed already &mdash; <a href="#equestrian-bench">the banner-cut pad</a>.</td></tr>
 <tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
@@ -455,7 +465,7 @@
     <li><strong>It removes the recipe-collision problem entirely.</strong> A bench recipe is in
         our own menu type and cannot collide with vanilla's crafting table or with another mod's
         &mdash; which is the standing worry that <code>check-recipes.mjs</code> and
-        <a href="roadmap.html#bhar-recipes">the BHAR check</a> exist to manage.</li>
+        <a href="compatibility.html#bhar-recipes">the BHAR check</a> exist to manage.</li>
     <li><strong>It is one switch.</strong> Disable the bench in config and horse armour cannot
         be crafted, with no per-recipe gating anywhere.</li>
     <li><strong>It takes a formula, not a list.</strong> The bench generates its recipes from a
@@ -468,7 +478,7 @@
 <p>
     Saddles and bridles are made here too, so the bench is the single place tack comes from.
     Note it is a <em>third</em> bench: <a href="item-equestrian-bench.html">the dyeing bench</a>
-    ships and <a href="roadmap.html#cart-bench">the cart and jump bench</a> is proposed, and three benches
+    ships and <a href="cart-bench.html#cart-bench">the cart and jump bench</a> is proposed, and three benches
     with overlapping jobs wants a deliberate answer about what distinguishes them before the
     second one is built.
 </p>
@@ -590,7 +600,7 @@
 </p>
 <ul>
     <li><strong>Right-click opens a screen</strong> with scale, wood and paint (through
-        <a href="roadmap.html#cart-bench">the same wood-and-paint system</a> the carts and jumps use), and a
+        <a href="cart-bench.html#cart-bench">the same wood-and-paint system</a> the carts and jumps use), and a
         <strong>pose</strong> chosen as a frozen frame of any animation a horse actually has
         &mdash; which is the one genuinely novel piece, since it means sampling the animation
         state machine at an arbitrary point rather than playing it.</li>

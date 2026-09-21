@@ -85,7 +85,7 @@
 
 <ul>
     <li>The synthetic sire record still uses the stored UUID as its pedigree edge, and its
-        generation is 0; see <a href="roadmap.html#ivf">the roadmap</a>.</li>
+        generation is 0; see <a href="#ivf">the roadmap tab</a>.</li>
 </ul>
 
 <h3 id="verified">Verified</h3>
@@ -98,6 +98,74 @@
     data, fixed 2026-09-03 and not re-checked. The breeding-mode gate and impregnation are unverified
     (<a href="#verification">the verification tab</a>).
 </p>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A <code>collectedFrom</code> marker is what the scientist&rsquo;s two missing trade rows wait
+        on &mdash; selling a rolled genotype, buying a player-made one back &mdash; and behind it sit
+        embryo extraction, screening, splicing and cloning, with <strong>cross-species a project
+        rather than a tier</strong>.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for assisted reproduction, in one place.</strong> This section
+    used to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so that
+    what the jar does, how it is built and what is still planned for it are read together. The
+    carrot effects a jar would carry into an impregnation are planned on
+    <a href="carrots.html#carrot-content">breeding carrots</a>.
+</p>
+
+<hr>
+
+<h2 id="ivf">Assisted reproduction: the rest of the seed jar, and the later tiers</h2>
+
+<h3 id="seed-jar-rest">Finishing the seed jar</h3>
+
+<p>
+    The cut-down flow is built and written up on <a href="breeding.html">breeding</a>. What is
+    left:
+</p>
+
+<ul>
+    <li>A <code>collectedFrom</code> marker (player-made vs villager-sold) and the &ldquo;no
+        Known Gene Splice carrot on a jar&rdquo; recipe restriction.</li>
+    <li><strong>This is what the <a href="villagers.html#equestrians">scientist</a> is
+        missing.</strong> His trade table shipped without the two rows that wanted a vial
+        &mdash; selling a random rolled genotype, and buying a player-made one back &mdash;
+        because both need <code>collectedFrom</code> and a vial worth rolling. His buy row
+        takes a stallion seed jar at every tier instead. Adding the rows later is two JSON
+        files and, for the buy-back, a <code>components</code> predicate on the
+        <code>wants</code> block, which the trade format already supports.</li>
+</ul>
+
+<h3 id="ivf-tiers">The later tiers</h3>
+
+<p>
+    Embryo extraction, gene screening, gene splicing, cloning, cross-species. Each is a block
+    with an inventory and a screen, and each is endgame by intent. Three notes that change how
+    they should be scoped:
+</p>
+
+<ul>
+    <li><strong>The gene sequencer is not new work</strong> &mdash; it is
+        <a href="horse-browser.html#browser">the browser</a> or the family-tree screen pointed at a vial or an
+        embryo. Build it as a <em>view</em>, not a machine with its own UI.</li>
+    <li><strong>Gene splicing is the first thing in the mod that writes an arbitrary genotype
+        in survival.</strong> It needs the same validity predicate the creative spawner needs
+        &mdash; is this allele pair legal, does this locus exist &mdash; and that predicate
+        should be written once and shared.</li>
+    <li><strong>Cross-species is much larger than its row.</strong> Donkeys and mules are
+        separate vanilla entity types, mules are sterile by design, and neither carries any of
+        this mod's genetics. Extending the genome to another species is a project, not a tier.
+        <strong>Scope it separately or cut it.</strong></li>
+</ul>
 
 </section>
 

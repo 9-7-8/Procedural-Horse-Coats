@@ -972,7 +972,7 @@
 <ul>
     <li><strong>Its copper horn overlaps our <a href="item-whistles.html">whistles</a>,</strong>
         and the roadmap wants to take that further still
-        (<a href="roadmap.html#callable-horses">callable horses</a>). Not a conflict &mdash;
+        (<a href="item-whistles.html#callable-horses">callable horses</a>). Not a conflict &mdash;
         two items that both recall a horse is redundancy, not breakage &mdash; but if a
         patch is ever written the right move is to bind the two to one notion of
         &ldquo;your horse&rdquo; rather than have each keep its own.</li>
@@ -985,8 +985,8 @@
     <strong>It also already ships three of the tweaks we harvested</strong> from the
     quality-of-life cluster &mdash; the reduced mining penalty while mounted, horse/player
     inventory switching, and horses in boats. That is an argument for reading
-    <a href="roadmap.html#rider-comfort">rider comfort</a> and
-    <a href="roadmap.html#mod-survey">the HorseInBoat row</a> against this mod before building
+    <a href="rider-comfort.html#rider-comfort">rider comfort</a> and
+    <a href="#mod-survey">the HorseInBoat row</a> against this mod before building
     any of them: a player running Horseman would get each behaviour twice, and the cheapest
     version of some of these may be a recommendation rather than an implementation.
 </p>
@@ -1031,7 +1031,7 @@
 
 <p>
     That makes this an unusually close call rather than a refusal, because
-    <a href="roadmap.html#horsemanship">horsemanship</a> is <em>this mod answering the same
+    <a href="horsemanship.html#horsemanship">horsemanship</a> is <em>this mod answering the same
     question</em>: both say riding should make a horse perform above its raw numbers. The
     difference is where the gain lives. Superb Steeds writes it to the animal, so the horse is
     permanently better and carries it when sold; ours belongs to the pairing of one rider with one
@@ -1042,7 +1042,7 @@
 
 <p>
     <strong>Planned: detect it and say so</strong>, the way
-    <a href="roadmap.html#rhg-detection">Realistic Horse Genetics detection</a> is planned. The
+    <a href="#rhg-detection">Realistic Horse Genetics detection</a> is planned. The
     bad outcome here is silent &mdash; a player sees stars climbing on a horse whose genome says
     otherwise, and has no way to know which mod is talking. A line at load naming both mods costs
     almost nothing and is worth more than any patch.
@@ -1514,7 +1514,7 @@
     reimplemented freely and <strong>not one texture may be copied</strong> &mdash; and the
     art is the reason the mod is popular. Whether to build tack natively instead is a
     roadmap question, not a compatibility one: see
-    <a href="roadmap.html#mod-patches">the roadmap</a>.
+    <a href="#mod-patches">the roadmap tab</a>.
 </p>
 <p>
     <strong>Their source was read in full on 2026-09-15, and there is no code in it.</strong>
@@ -1680,6 +1680,190 @@
         but 167 metals at two values is a lot of sameness, and nobody has played with it to
         say whether it reads as boring or as unobtrusive.</li>
 </ul>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Two small patches &mdash; a load-time warning when <strong>Realistic Horse
+        Genetics</strong> is installed, and <code>check-recipes.mjs</code> pointed at
+        BHAR&rsquo;s recipe ids &mdash; plus a survey backlog that is reading work rather than
+        build work: mods nobody has opened yet.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned about other people&rsquo;s mods, in one place.</strong>
+    These sections used to live on the main <a href="roadmap.html">roadmap</a> and were moved
+    here whole, so that how this mod gets along with another, what a patch would cost and what
+    is still planned for it are read together. The tack half of the old patch list grew into
+    <a href="horse-gear.html#accessories">the accessories system</a> and lives on that page
+    instead.
+</p>
+
+<hr>
+
+<h2 id="mod-patches">Mod patches</h2>
+
+<p>
+    What is left after the compatibility pass. Most of the patches that were asked for turned
+    out to need no patch at all; the detail is the mod-by-mod body of this page, from
+    <a href="#patches">supporting another mod deliberately</a> onward, and is not repeated
+    here. The third one &mdash; <a href="horse-gear.html#native-tack">native tack</a> &mdash;
+    grew into <a href="horse-gear.html#accessories">the accessories system</a> and has moved
+    there.
+</p>
+
+<h3 id="rhg-detection">Detect Realistic Horse Genetics and say so</h3>
+
+<p>
+    Not a patch &mdash; the two mods both replace the horse and both own coat generation, so
+    whoever registers last wins. The useful version is a load-time check that logs &ldquo;these
+    two mods both replace the horse; run one&rdquo; rather than letting a player discover it as
+    a half-broken world.
+</p>
+
+<p>
+    <strong>It is a handful of lines in a place that exists.</strong>
+    <code>neoforge-26.1.2/.../neoforge/compat/</code> already walks
+    <code>ModList.get().getModFiles()</code> in the mod constructor and already knows how to
+    fail soft on somebody else's jar &mdash; see
+    <a href="#generated">the compat layer</a>. What is undecided is only where
+    the warning goes: a log line is the minimum, but a player who reads logs is not the player
+    this protects.
+</p>
+
+<h3 id="bhar-recipes">A recipe-collision check against BHAR</h3>
+
+<p>
+    <a href="#bhar">BHAR</a> adds crafting recipes for the vanilla saddle and
+    all four horse armours. This mod adds none <em>for vanilla's</em> items, so there is no
+    collision today, and the armours it generates are in its own namespace with modded-ingot
+    inputs, deliberately outside the collision space.
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> already answers the question
+    mechanically and would need only to be pointed at their recipe ids &mdash; a check that
+    would catch it if that ever stopped being true. Note the licence: their custom terms forbid
+    redistributing any part, so the check may not embed a copy of their files.
+</p>
+
+<h2 id="mod-survey">The survey backlog &mdash; mods to read before building</h2>
+
+<p>
+    <strong>None of these is a planned feature yet.</strong> Each is a mod the owner has named
+    with a question attached, and the work is to read it and answer the question &mdash; after
+    which the row either becomes a plan on the Roadmap tab of whichever page owns the subject, a
+    compatibility row in this page&rsquo;s own body, or a deletion. They are listed together
+    because the failure mode is doing one twice, and nothing else records which have been asked.
+</p>
+
+<div class="note">
+    <span class="label">Attribution is part of the work, not a courtesy afterwards</span>
+    <p>
+        <strong>Any mod that gives this one an idea gets named on the coding tab of the page for
+        whatever it inspired</strong> &mdash; not only the mods whose code or art is used, which
+        is a licence matter and settled separately. Inspiration counts. (Owner, in the intake
+        note that produced this section.) Recorded as a call on
+        <a href="decisions.html#settled-attribution">design decisions</a>.
+    </p>
+</div>
+
+<p class="muted">
+    Five have already been read and are <em>not</em> repeated here &mdash;
+    <a href="#swem">SWEM</a>,
+    <a href="#icys">Icy&rsquo;s Better Horses</a>,
+    <a href="#horseman">Horseman</a>,
+    <a href="#horse-tack">Horse Tack</a> and
+    <a href="#resource-packs">Fresh Animations</a>. Two more,
+    <a href="#realistic-horse-genetics">Realistic Horse Genetics</a> and
+    <a href="#bhar">BHAR</a>, were read for <em>conflict</em> and not for
+    harvest, which is a different question and is why they appear below anyway.
+</p>
+
+<p class="muted">
+    <strong><a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply
+    Equine</a> was read exhaustively on 2026-09-21 and its row is gone.</strong> It is an
+    abandoned Minecraft 1.15.2 mod that never shipped a horse entity &mdash; 197 items, three
+    blocks, no recipes, and a &ldquo;grooming system&rdquo; that is one particle call behind one
+    of the 197 &mdash; so it needs no compatibility row and the harvest is ideas only. What was
+    taken: <a href="horse-care.html#grooming-tool">the grooming tool</a>,
+    <a href="horse-care.html#ground-work">ground work</a>,
+    <a href="item-stall-bars.html#stall-bars">stall bars</a> and the halter
+    on <a href="horse-gear.html#accessories-slots">the slot roster</a>. What was rejected is recorded in each,
+    except the <strong>stable-mucking loop</strong> &mdash; muck rake, layered shavings block,
+    thatch block &mdash; which was skipped outright on the same grounds as the six-tool grooming
+    roster: upkeep chores are the husbandry <a href="philosophy.html">philosophy</a> rules out,
+    and we already have grazing, hay bales and pens. The rosettes went to
+    <a href="decisions.html#out-of-scope-competitions">out of scope</a>.
+</p>
+
+<p class="muted">
+    <strong>The quality-of-life cluster was read as one batch on 2026-09-21 and its row is
+    gone.</strong> Two of the six names were not what the row thought they were, so
+    <strong>the cluster is five mods</strong>. The <em>Horse Buff</em> listed at 9minecraft is a
+    fabricated repost &mdash; it advertises builds for Minecraft 26.2 and 26.3 that exist nowhere
+    upstream, drops three of the real mod's features and invents one (see-through mount armour)
+    &mdash; so it was dropped rather than read. The real
+    <a href="https://modrinth.com/mod/horsebuff">Horse Buff</a> is archived on both GitHub and
+    Modrinth and its own README names <a href="#horseman">Horseman</a> as its
+    successor, which we had already read. <em>Horse Upgrades</em> is <strong>two unrelated mods
+    sharing a name</strong>: the CurseForge link is a Minecraft 1.8 mod from 2016 whose carrots
+    granted permanent stat gains, and the Modrinth one is horseshoes forged on an anvil, which
+    <a href="horse-gear.html#horse-shoes">this page already owns</a>. What was taken went to
+    <a href="horsemanship.html#horsemanship">horsemanship</a>,
+    <a href="rider-comfort.html#rider-comfort">rider comfort</a>,
+    <a href="horse-care.html#bond-roadmap">bond</a> and
+    <a href="horse-gear.html#accessories-enchanting">enchanted tack</a>; the one
+    live compatibility question went to
+    <a href="#superb-steeds">Superb Steeds</a>. What was refused is recorded in
+    each.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mod</th><th>The question asked of it</th><th>Where the answer goes</th></tr></thead>
+<tbody>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a></td><td>Troughs and salt licks are already lifted out as <a href="troughs.html#troughs">their own section</a>. What is left: anything else that applies to horses, and <em>whether it adds a cart we could add to the roster</em>. Keep to carrot-not-stick &mdash; Animania's husbandry is the sort that punishes.</td><td>This page / <a href="carts.html">carts</a></td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/realistic-horse-genetics">Realistic Horse Genetics</a></td><td><strong>Read for harvest, not for conflict.</strong> <a href="#realistic-horse-genetics">It has been read once</a>, to establish that it is a competitor and to borrow its namespace-scoped texture override. The unasked question is what it offers <em>besides</em> bespoke-versus-procedural coats.</td><td>This page &mdash; <a href="#realistic-horse-genetics">its row</a>, then here</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/genetic-animals">Genetic Animals</a></td><td>The other genetics mod. Same question, and the same caution: what it does that is not coats.</td><td>This page</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/bukkit-plugins/zhorse">zHorse</a></td><td><strong>Inverted question, and a good one:</strong> which of its features do we <em>not</em> already integrate in some form? A management plugin, so expect ownership, naming, teleport, protection and stabling &mdash; four of which exist here.</td><td>This page</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/bukkit-plugins/stables">Stables</a> (plugin)</td><td>The virtual-stable concept is lifted out to <a href="virtual-stables.html#virtual-stables">its own section</a>. What else is in there.</td><td>This page</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/stables">Stables</a> (mod)</td><td>Could it improve <a href="villagers.html">the villagers this mod adds</a> &mdash; the cowboy, the horseman, the equestrians?</td><td><a href="villagers.html">Villagers</a></td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/sullys-mod">Sully&rsquo;s Mod</a> and <a href="https://www.planetminecraft.com/mod/minecraft-upgraded-mod/">Minecraft Upgraded</a></td><td>Any horse features worth integrating. Both are broad mods where horses are a corner, so expect one or two ideas each rather than a system.</td><td>This page</td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/horse-statistics-mod/">Horse Statistics</a> and <a href="https://www.9minecraft.net/ridehud-mod/">RideHUD</a></td><td>RideHUD is wanted <strong>integrated</strong> rather than assessed &mdash; see <a href="horse-browser.html#horse-menu">the horse menu</a>. Horse Statistics gets the narrower question: anything it shows that we do not.</td><td><a href="horse-browser.html#horse-menu">The horse menu</a></td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology Dictionary</a></td><td><strong>Its UI, not its content.</strong> Explicitly <em>not committed to</em>: possibly an alternative style for the horse menu rather than a replacement. Recorded so the idea is not lost, and flagged so nobody builds it as a decision that was made.</td><td><a href="horse-browser.html#horse-menu">The horse menu</a></td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/better-animations-collection">Better Animations Collection</a></td><td>Two questions. <strong>Does it work with this mod out of the box?</strong> &mdash; if so it becomes a recommended mod. And can we fire its mouth-opening animation when a horse eats, which would be the first animation this mod drives in someone else&rsquo;s renderer.</td><td>This page</td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/punchy-fpa-mod/">Punchy (FPA)</a>, <a href="https://www.9minecraft.net/horse-armor-n-stuff-x-fresh-animations-resource-pack/">Horse Armor n Stuff &times; Fresh Animations</a>, <a href="https://www.9minecraft.net/immersive-horse-riding-mod/">Immersive Horse Riding</a></td><td><strong>The animation cluster.</strong> Whether each runs alongside us, and which riding or horse animations can be adapted. Note <a href="#resource-packs">the Fresh Animations seam</a> is already analysed and neither half is built, so this lands on existing work rather than new.</td><td>This page</td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/equestrian-canvas-expanded-mod/">Equestrian Canvas Expanded</a></td><td>Tack and decoration to fold into <a href="horse-gear.html#accessories">the accessories system</a> &mdash; read it before the decoration screen is designed, not after.</td><td><a href="horse-gear.html#accessories">Accessories</a></td></tr>
+
+<tr><td><a href="https://www.minecraft.net/en-us/marketplace/pdp/everbloom-games/horse-school/549b09b7-3915-42c2-99ba-0787e2dd727b">Horse School</a></td><td>What can be adapted, <strong>read specifically against the new tack system</strong>. A Bedrock marketplace title, so this is ideas only &mdash; there is no source and nothing may be copied.</td><td><a href="horse-gear.html#accessories">Accessories</a></td></tr>
+
+<tr><td><a href="https://www.planetminecraft.com/mod/farm-creatures-addon-1-0-2-bedrock-1-21/">Farm Creatures</a>, <a href="https://www.9minecraft.net/hoof-addon-mcpe/">Hoof Addon</a>, <a href="https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/">Beyond Vanilla Equestria</a>, <a href="https://www.planetminecraft.com/mod/undead-horses-plus-addon-1-20/">Undead Horses Plus</a></td><td><strong>The Bedrock addon cluster &mdash; ideas and shapes only.</strong> None is installable beside this mod and none has source to read, so the output is design notes. <em>Undead Horses Plus</em> has a specific destination: <a href="undead-horses.html#undead-horses">the undead overhaul</a>, before it is built.</td><td>This page / <a href="undead-horses.html#undead-horses">Undead</a></td></tr>
+
+<tr><td><a href="https://modrinth.com/mod/trotting-wagons">Trotting Wagons</a></td><td>More carts for the roster. <code>CartKind</code> takes a new entry cheaply; the art does not.</td><td><a href="carts.html">Carts</a></td></tr>
+
+<tr><td><a href="https://modrinth.com/mod/horseinboat">HorseInBoat</a></td><td><strong>Not a survey &mdash; a feature.</strong> &ldquo;Add horses to boats.&rdquo; Vanilla refuses to let a horse board a boat; this is a small, self-contained, obviously useful change and it is the cheapest row on this page. Watch one thing: <a href="known-gaps.html#gap-73">gap 73</a> records that a horse in a boat is already an untested case for the lycanthropy shift. <strong>A second implementation to read:</strong> Horse Buff did this too, and put the horse in a <em>raft</em> rather than a boat, on the grounds that a boat breaks easily when ridden-while-riding &mdash; worth knowing before picking the entity.</td><td>This page, once scoped</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/icy-better-horses">Icy&rsquo;s Better Horses</a></td><td><a href="#icys">Read once</a> and found to overlap heavily &mdash; bond, breeds, gendered breeding, stat inheritance, spawning. Asked again, for <em>adaptation</em> rather than compatibility: what does it do better.</td><td>This page</td></tr>
+
+</tbody>
+</table>
+</div>
+
+</section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">

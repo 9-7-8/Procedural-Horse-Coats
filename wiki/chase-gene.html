@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The chase gene &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>The chase gene</h1>
+<p class="lede">
+    <strong>A locus deciding how long a horse you have provoked keeps coming after you</strong>
+    &mdash; a few seconds, until it loses sight of you, across a fixed distance, never at all,
+    or forever. It was asked for, and researched before it was deferred; the research found
+    most of the machinery already in the mod, because horses can already fight and a wild one
+    already gives up when it loses its target. What is missing is the locus that turns the
+    giving-up rule into a heritable number. <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Six alleles &mdash; <code>timed</code>, <code>distance</code>, <code>sight</code>,
+        <code>never</code>, <code>infinite</code> and wild-type &mdash; generalising
+        <code>WildHorseForgetTargetGoal</code> into a Java gene whose chase duration is
+        inherited and drifts, with vanilla&rsquo;s panic goal to out-argue for
+        <code>Flag.MOVE</code> first.
+    </p>
+</div>
+
+<h2 id="chase-gene">A gene for how long an aggravated horse gives chase</h2>
+
+<p>
+    Alleles <code>n</code>, <code>timed</code>, <code>distance</code>, <code>sight</code>,
+    <code>never</code>, <code>infinite</code>. <code>n</code> is whatever the behaviour is now,
+    and every natural breed is <code>n</code> unless stated &mdash; which costs nothing, because
+    <code>BreedFounder</code> already forces <strong>every magical gene</strong> to wild for any
+    breed that does not name it. A breed is exactly its breed sheet.
+</p>
+<ul>
+    <li><strong>The substrate exists.</strong> <code>HorseAggroHandler</code> already gives every
+        horse an attack-damage attribute and a melee goal, and
+        <code>WildHorseForgetTargetGoal</code> already clears a wild horse's target after a fixed
+        interval without line of sight. That goal is very nearly <code>sight</code> and
+        <code>timed</code> already; this gene generalises it.</li>
+    <li><strong>It needs Java, not just JSON.</strong> A duration in ticks or a distance in
+        blocks that runs in families means per-allele epigenetics, and a JSON gene's knobs are
+        for painting, not effects. Subclass <code>AbstractAbilityGene</code>, override
+        <code>epiSchema()</code>, read it in <code>abilitiesWhenExpressed(EpiValues)</code>
+        &mdash; <code>IntimidatingGene</code> is the template, and it is a behaviour gene whose
+        radius is inherited and drifts.</li>
+    <li><strong>Watch the goal-priority trap.</strong> The comment in
+        <code>HorseAggroHandler</code> records that vanilla's panic goal sits at priority one and
+        the melee goal at three, both holding <code>Flag.MOVE</code>, so the first hit a fighting
+        horse took handed movement to panic and the fight starved. A chase that must outlast
+        being hurt lands in exactly that fight.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="gene-aggression.html">Aggression</a>
+        <a href="gene-intimidating.html">Intimidating &mdash; the template to copy</a>
+        <a href="behaviour-hierarchy.html">The behaviour hierarchy</a>
+    </div>
+    The thing to settle before a line of this is written is the priority fight already recorded
+    in <code>HorseAggroHandler</code>: a chase that has to outlast being hurt is asking for the
+    same movement flag panic holds, and no allele can be tested until that is answered.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

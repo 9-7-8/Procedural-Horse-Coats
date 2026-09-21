@@ -5301,6 +5301,159 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
 
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        <strong>Retire the creator&rsquo;s hand-written JS port</strong> behind a
+        <code>@JSExport</code> that bakes an unsaved spec, so its preview can show a glow;
+        then an unspecified usability pass, and four mask additions the intakes asked for
+        &mdash; <code>RAMP</code> <code>angle</code>, a per-cell <code>FAN</code>, a
+        wrapping <code>SVG</code> plane, a <code>FRACTAL</code> grain.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the gene creator and the mask vocabulary, in one
+    place.</strong> These sections used to live on the main
+    <a href="roadmap.html">roadmap</a> and were moved here whole, so that what the creator
+    does, what <a href="#contract-mask">a new mask costs</a> and what is still planned for
+    both are read together rather than found one at a time. The genes waiting to be
+    <em>written</em> with this vocabulary are elsewhere &mdash;
+    <a href="genetics-model.html#natural-genes">the natural ones</a> and
+    <a href="magical-genes.html#magical-genes">the magical ones</a>.
+</p>
+
+<hr>
+
+<h2 id="designer">The gene creator: a preview that runs the real pipeline, and a usability pass</h2>
+
+<h3 id="creator-wasm">Move the creator's preview onto the wasm</h3>
+
+<p>
+    <strong>The creator is the one tool whose preview never touches the real pipeline.</strong>
+    The <a href="horse-designer/">horse designer</a>, the <a href="breed-designer/">breed
+    designer</a> and every <code>gene-*.html</code> preview run <code>common/</code> compiled
+    to WebAssembly; the creator runs the hand-written JS port, which has no emissive pass and
+    <a href="../CLAUDE.md">is not getting one</a>. So it cannot show a glow, and it is not to
+    be extended to fake one.
+</p>
+
+<p>
+    Closing this means a <code>@JSExport</code> that bakes an <em>unsaved</em> spec, so the
+    creator previews through <code>DesignerApi</code> like everything else. That would also
+    end the port's reason to exist and change what
+    <code>wiki/gene-creator/tools/check-parity.mjs</code> is comparing, which is why it is a
+    job of its own rather than a finish to the last one.
+</p>
+
+<div class="note warn">
+    <span class="label">&ldquo;Covered by parity&rdquo; has to be demonstrated, not assumed</span>
+    <p>
+        Anything the editor previews, it previews through the port, or it will show a horse
+        the game will not breed, convincingly. <code>pointsMin</code> is the case that proved
+        the probe cases are not enough on their own: with a minimal shape on
+        <code>prismatic</code>'s crescent and nothing else, <strong>reversing the blend in the
+        creator left parity green</strong> &mdash; a drawing on a flank is a few dozen texels
+        and the fixtures sample four per part. The way that was established was to break the
+        port on purpose and watch the check stay quiet. <strong>Do that with the next one
+        too.</strong>
+    </p>
+</div>
+
+<h3 id="creator-ux">A usability pass on the creator</h3>
+
+<p>
+    The tool is <em>correct</em>: it loads, it previews a horse, it writes every part of the
+    format, and it proves its own engine against the game's on boot. What it has never had is
+    a pass for whether it is pleasant to use. <strong>Nothing here is specified, deliberately</strong>
+    &mdash; the point of the pass is to look at it with fresh eyes rather than to implement a
+    list written in advance. Known rough edges to start from:
+</p>
+
+<ul>
+    <li><strong>Effects and layers look alike.</strong> They share the <code>.layer</code>
+        card, which is honest about them being peers but makes the right column read as one
+        long undifferentiated stack.</li>
+    <li><strong>The forms are flat.</strong> Every parameter of every mask, op and effect is
+        always visible at the same weight; nothing is folded away behind
+        &ldquo;advanced&rdquo;, and the common case is not faster than the rare one.</li>
+    <li><strong>Errors are a list at the bottom.</strong> The validator names the problem well
+        but does not point at the field that caused it.</li>
+    <li><strong>No undo</strong>, and no warning before &ldquo;New gene&rdquo; discards what
+        you have.</li>
+</ul>
+
+<p class="muted">
+    The constraint that does not move: it has to keep working from <code>file://</code>. That
+    is why every script is a classic one and every asset is inlined &mdash; see
+    <a href="making-a-gene.html#the-shape">the format</a>. A UI framework that needs a bundler
+    or a dev server is out.
+</p>
+
+<h2 id="intake-tool-gaps">Mask parameters the intakes asked for</h2>
+
+<p>
+    All four arrived as <a href="making-a-gene.html#prompt">tool gaps</a> in the authoring
+    notes, each read after the approximation had been seen on a horse, and each describing a
+    shortfall that is really there. All but one are a new parameter on an existing mask,
+    defaulting to today's behaviour, so <strong>no shipped gene moves</strong> &mdash; but each
+    is still <a href="making-a-gene.html#contract-mask">the mask contract</a>: the painter,
+    <code>SpecSchema</code>, the creator's twin, both tables, a <code>prismatic</code> case,
+    fixtures and parity.
+</p>
+
+<ul>
+    <li><strong><code>RAMP</code> <code>angle</code></strong> (degrees, default 0, read only
+        when <code>axis</code> is X, Y or Z): rotate the sweep within the plane of the named
+        axis and the next one round (X&rarr;Y&rarr;Z&rarr;X), so <code>angle: 90</code> on X
+        is Y. The coverage is the dot product of the position with the rotated unit vector,
+        normalised through <code>from</code>/<code>to</code> as now. What it buys: an SVG's
+        <code>&lt;linearGradient&gt;</code> runs at an arbitrary angle and today can only be
+        collapsed to one flat tone per band or one sweep along the horse's length &mdash;
+        <a href="gene-tidewave.html">tidewave</a> ships with the latter, and its swells lose
+        the sense of each being separately lit.</li>
+    <li><strong><code>FAN</code> <code>origin: "cell"</code></strong> (with <code>scale</code>,
+        <code>seed</code>, and <code>vary</code> as a per-cell rotation of the fan's zero):
+        walk the same lattice <code>SPOTS</code> uses and measure the angle and radius from the
+        texel's own cell centre instead of from <code>originU</code>/<code>originV</code>, so a
+        field of independent sprays is one layer. Multiplying one <code>FAN</code> by
+        <code>SPOTS</code> cannot do it &mdash; that clips one global fan into cell-shaped
+        pieces that all point at the same pivot. <a href="gene-opal-fire.html">Opal fire</a>
+        ships with two hand-placed fans that land in the same two spots on every horse. Note
+        <a href="known-gaps.html#gap-182">gap 182</a> before building it: a per-cell pivot on a
+        3D lattice will mostly sit off the skin, so this probably wants the same
+        snap-to-surface option as the centre marks.</li>
+    <li><strong><code>SVG</code> / <code>PATH</code> <code>plane: "wrap"</code></strong> (with
+        <code>wrapAxis</code>, default X, and <code>from</code>, the part whose cross-section
+        is walked): <code>u</code> is the body X as <code>top</code> already gives it, and
+        <code>v</code> is <b>signed arc length</b> in body units around the part's box
+        perimeter in the YZ cross-section, measured from the top-face centreline. This is the
+        one entry that is a new <code>plane</code> value rather than a parameter. What it buys:
+        a drawing that lies over the back and continues down both flanks as one unbroken
+        picture. Every plane today is a straight projection, so a face parallel to the
+        projection axis takes one line of the drawing smeared down it &mdash;
+        <a href="gene-endless-knot.html">the endless knot</a> ships that way, with vertical
+        bars under whichever arms cross the barrel's edge and its outer unit each side never
+        drawn at all. Swapping planes cannot fix it: what is missing is a measurement, distance
+        travelled <em>around</em> the cross-section, and neither <code>NORMAL</code> nor
+        <code>EDGE</code> reports it.</li>
+    <li><strong><code>FRACTAL</code> <code>stretch</code> / <code>axis</code> /
+        <code>tilt</code></strong> (default 1, X, 0 &mdash; today's behaviour): divide the
+        sample point along the tilted axis before the octave sum, so a continuous noise field
+        gets a <b>grain</b>. What it buys: veins, currents and weather that all run one way.
+        <code>FRACTAL</code> samples isotropic noise, so no threshold, warp or octave count
+        gives it a direction &mdash; <a href="gene-stormvein.html">stormvein</a>'s veins fork
+        and wander correctly but run every way at once, where the drawing they came from
+        streams diagonally. <code>SPOTS</code> has exactly this pair already and gets ovals
+        from it; the reason it cannot stand in is that it elongates countable marks and cannot
+        draw a web whose ridges also bound the pools.</li>
+</ul>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 

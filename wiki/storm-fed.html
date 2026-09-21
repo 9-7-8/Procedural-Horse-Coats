@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm fed &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Storm fed</h1>
+<p class="lede">
+    <strong>A locus that fills a reservoir inside the horse and spends none of it.</strong>
+    Standing in a storm, in rain, in snow, in water or in lava tops the horse up; being struck
+    by lightning fills it in one burst. Then nothing happens, on purpose &mdash; it is written
+    to be drunk from by a second gene. It was asked for, and researched before it was deferred,
+    and the research is mostly about the awkward order that half a gene forces.
+    <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A recessive locus filling an internal reservoir from storms, rain, snow, lightning,
+        water or lava and spending none of it &mdash; deliberately half a gene, waiting on the
+        mod&rsquo;s first per-horse attachment and on a second gene written to consume what it
+        stores.
+    </p>
+</div>
+
+<h2 id="storm-fed">Storm fed &mdash; a gene that stores power and spends none</h2>
+
+<p>
+    A locus that <strong>builds an internal reservoir</strong> while some condition holds, and
+    does nothing whatever with it. Known as stormfed only because storms were the first allele
+    found: the shipped set would be Storm, Rain, Snow, Lightning (a burst on being struck, and no
+    lightning damage), Water and Lava. All alleles homozygous recessive. The rates of accrual and
+    decay live in the epigenetics of each copy, so two horses with the same allele fill at
+    different speeds.
+</p>
+<p>
+    <strong>The point is that it is half a gene on purpose.</strong> It is designed to be
+    <em>consumed</em>: other genes read the reservoir and spend it, which is the mod's first
+    deliberately polygenic pair. That makes the ordering awkward and worth naming now &mdash; a
+    gene that only stores is untestable by looking at a horse, and a gene that only spends has
+    nothing to spend until this exists. Build them together or build the spender first against a
+    stubbed reservoir.
+</p>
+<p>
+    <strong>What it needs that does not exist:</strong> per-horse mutable state that is not a
+    genotype and not an epigenetic constant &mdash; a number that changes every tick. The
+    epigenome is the wrong home (it is inherited and drifts, not a running total) and so is the
+    genotype. This is an attachment, and the first gene to want one.
+</p>
+<p>
+    It is not the only plan waiting on that attachment.
+    <a href="momentum-sprint.html#momentum-sprint">Momentum sprint</a> wants a per-tick number on
+    the horse for the same reason, so whichever of the two is built first should put the
+    attachment somewhere the other can use rather than growing a second one beside it.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="momentum-sprint.html">Momentum sprint &mdash; wants the same attachment</a>
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    This page exists so that the first deliberately polygenic pair in the mod is designed as a
+    pair, rather than discovered as a gene nobody can test and a gene with nothing to spend.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

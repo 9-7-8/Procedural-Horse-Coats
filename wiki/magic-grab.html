@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic grab &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Magic grab</h1>
+<p class="lede">
+    <strong>A horse that takes hold of something in its teeth and hauls it away</strong>, with
+    the allele naming the largest thing it can lift &mdash; nothing, something smaller than
+    itself, something its own size, or something larger. It was asked for, and researched
+    before it was deferred; the research is mostly about what the mod already has, because the
+    dosage arithmetic exists and the verb does not. <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Four alleles naming the largest mob a horse can pick up and drag, with drag speed and
+        damage tolerance in the epigenetics &mdash; needing a new <code>AbilityType</code>, whose
+        contract is <strong>five files</strong>, and mob groups resolved through entity type tags
+        rather than a vanilla list.
+    </p>
+</div>
+
+<h2 id="magic-grab">Magic Grab &mdash; a horse that drags what it bites</h2>
+
+<p>
+    Alleles <code>n</code>, <code>smaller</code>, <code>same size</code>, <code>larger</code>,
+    naming the largest thing the horse can pick up. Epigenetics carry drag speed and the damage
+    the horse will absorb before dropping its prey short of wherever it was taking it. Simulates
+    a horse grabbing someone by the teeth and hauling them off &mdash; uncommon in life, common
+    enough in fiction to deserve a locus.
+</p>
+<ul>
+    <li><strong>The dosage pattern already exists</strong> and should be copied rather than
+        reinvented: <code>AbstractMagicFactorGene</code> sums a signed per-copy epigenetic value
+        so that <code>n</code>/weak is weakest and doubled-strong is strongest, with six outcomes
+        falling out of one comparison. <code>MagicFighterGene</code> is the two-value variant of
+        the same shape.</li>
+    <li><strong>There is no existing verb for carrying a mob.</strong> The <code>effects</code>
+        vocabulary has <code>temper</code>, <code>mob_aura</code>, <code>summon</code> and
+        <code>teleport</code>, none of which pick anything up, so this is a new
+        <code>AbilityType</code> &mdash; and that contract is <strong>five files</strong>: the
+        record on <code>GeneAbility</code>, the registration in <code>AbilityType</code>, the
+        translator case, the creator's <code>schema.js</code> mirror (which
+        <code>check-parity.mjs</code> compares against the real Java), and the Effects tab.</li>
+    <li><strong>Mob groups must resolve through entity type tags</strong>, never a hardcoded
+        vanilla list &mdash; a hardcoded list makes every modded creature invisible to the gene
+        and fails silently.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="making-a-gene.html#contracts">The four contracts a new verb touches</a>
+        <a href="gene-magic-fighter.html">Magic fighter &mdash; the dosage shape</a>
+        <a href="compatibility.html">Living beside other mods</a>
+    </div>
+    Nothing here is hard on its own; the cost is the new <code>AbilityType</code>, and the way
+    to pay it is to walk the five-file contract in one change rather than discover the fifth
+    file when the creator and the game quietly disagree.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

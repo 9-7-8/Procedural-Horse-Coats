@@ -343,6 +343,42 @@
 
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A <strong>per-copy epigenetics editor</strong> on the custom spawn egg: every allele
+        copy&rsquo;s priority and seed shown individually with a type-it-in field, so that
+        which copy is expressing can be asked without reading a log &mdash; eighty fields that
+        want a per-gene expander rather than a flat list.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the spawn eggs, in one place.</strong> This section
+    used to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so
+    that what the eggs do, how they are built and what is still planned for them are read
+    together.
+</p>
+
+<hr>
+
+<h2 id="dimension">The creative spawner: a per-copy epigenetics editor</h2>
+
+<p>
+    The spawner's whole-genome <em>Rnd epigen.</em> covers the creative use; the
+    <strong>per-copy view is the debugging one</strong> &mdash; each allele copy's priority and
+    seed shown individually, with a type-it-in field for an exact value. It is the only way to
+    ask &ldquo;which copy is expressing, and what does <em>that</em> seed do&rdquo; without
+    reading a log. Two things to design around: at forty-odd genes that is eighty fields, so it
+    wants a per-gene expander rather than a flat list, and a hand-typed seed has to survive
+    <code>Epigenome.parse</code> or be rejected visibly.
+</p>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 

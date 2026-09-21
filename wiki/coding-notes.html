@@ -1075,7 +1075,7 @@ done</code></pre>
     count. When one is written, re-run <code>node wiki/tools/sync-page-views.mjs</code>,
     <code>node wiki/tools/build-search-index.mjs</code> and
     <code>node wiki/tools/check-links.mjs</code>. Which tabs are still thin is on
-    <a href="roadmap.html#science-tabs">the roadmap</a>.
+    <a href="#science-tabs">the roadmap tab</a>.
 </p>
 
 <h2 id="verified">Verified</h2>
@@ -1138,7 +1138,7 @@ done</code></pre>
     were magical genes, where none is correct; 25 natural pages were missing one, and all 25 were written from
     owner-supplied sources rather than stubbed. <code>check-gene-tabs.mjs</code> now holds an empty allowlist, so a new
     natural page without one fails. The contradictions those tabs found are <a href="known-gaps.html#gap-134">gap 134</a>;
-    the older stub tabs are on <a href="roadmap.html#science-tabs">the roadmap</a>.
+    the older stub tabs are on <a href="#science-tabs">the roadmap tab</a>.
 </p>
 
 <p id="verified-page-filename">
@@ -1156,6 +1156,172 @@ done</code></pre>
     individually and the horse tick keeps an owner index. Both hazards had been written down in advance on the gene's own
     page; only reading the finished code against them found the bugs.
 </p>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        The thin science tabs are blocked on <strong>owner-supplied sources</strong> rather than
+        on anyone getting to them &mdash; silver&rsquo;s absent MCOA section, MITF&rsquo;s SW1, a
+        fifth of the natural tabs naming no breed at all &mdash; and the wiki has no checklist
+        idiom and no item art.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the wiki itself, in one place.</strong> These sections
+    used to live on the main <a href="roadmap.html">roadmap</a> and were moved here whole, so that
+    <a href="#science-tab">the method for writing a science tab</a>, the rule that none of it is
+    ever written from memory, and the list of tabs still waiting on a source are read together.
+</p>
+
+<hr>
+
+<h2 id="science-tabs">Deepen the thin science tabs</h2>
+
+<p>
+    Every natural gene page has a science tab, and
+    <code>wiki/tools/check-gene-tabs.mjs</code> runs with an <em>empty</em> exempt list, so a new
+    natural gene page without one fails immediately. The work is no longer absence but depth: the
+    tabs written in the big pass run to a shape &mdash; the locus and the variant with
+    coordinates, the mechanism, the real inheritance table, breed-by-breed frequency where anyone
+    has measured it, an established / inferred / unsupported split, and an explicit statement of
+    where the mod departs from the literature &mdash; and the tabs that predate it are mostly a
+    single heading and a paragraph.
+</p>
+
+<div class="note">
+    <span class="label">Four are written &mdash; and the source is the bottleneck, not the writing</span>
+    <p>
+        <a href="gene-extension.html?view=science">Extension</a>,
+        <a href="gene-agouti.html?view=science">agouti</a>,
+        <a href="gene-ednrb.html?view=science">EDNRB</a> and
+        <a href="gene-kit.html?view=science">KIT</a> were written from owner-supplied source
+        files and are off the lists below. <strong>That is the whole method</strong>: each was
+        blocked on having a source rather than on anybody getting to it, and none of the
+        remaining ones can be done without the same. The three departures the four turned up are
+        <a href="known-gaps.html#gap-297">gaps 297&ndash;299</a>.
+    </p>
+</div>
+
+<p class="muted">
+    Magical genes are excluded throughout: they have no real-world counterpart, so having no
+    science to write is correct rather than a gap. The method &mdash; and the rule that none of
+    this is ever written from memory &mdash; is
+    <a href="#science-tab">elsewhere on this page</a>.
+</p>
+
+<h3 id="science-tabs-cited">First &mdash; cited by the newer tabs and unable to answer</h3>
+
+<p>
+    These are the worst, and not because of their length. <strong>Each is named as background by
+    one or more of the newer pages</strong>, so a reader follows a link expecting the story and
+    finds two sentences.
+</p>
+
+<ul>
+    <li><strong><a href="gene-silver.html?view=science">Silver</a></strong> &mdash; cited three
+        times for multiple congenital ocular anomalies, and has no MCOA section at all.
+        <em>PMEL</em>, the homozygote severity, and why a champagne-plus-silver horse gets its eye
+        risk from the silver.</li>
+    <li><strong><a href="gene-mitf.html?view=science">MITF</a></strong> &mdash; SW1, the
+        <em>common</em>, centuries-old, minimally-expressed splash allele. Its
+        <a href="gene-pax3.html?view=science">PAX3 twin</a> carries the full SW1&ndash;SW10 table,
+        and the asymmetry between the two alleles is the whole point of having two loci. This one
+        is close to writable from the PAX3 page alone.</li>
+    <li><strong><a href="gene-grey.html?view=science">Grey</a></strong> &mdash; <em>STX17</em>,
+        the duplication, and the age-related melanoma risk that
+        <a href="gene-matp.html#health">the MATP comparison table</a> lists and grey's own page
+        does not discuss.</li>
+    <li><strong><a href="gene-leopard.html?view=science">Leopard complex</a></strong> &mdash;
+        <em>TRPM1</em> and congenital stationary night blindness in homozygotes, cited twice and
+        absent here. Also the obvious place for Appaloosa, Knabstrupper and POA.</li>
+    <li><strong><a href="gene-roan.html?view=science">Roan</a></strong> &mdash;
+        <a href="gene-rabicano.html#vs-lookalikes">rabicano's tab</a> contrasts the two at length
+        and roan's own page does not reciprocate. The honest content is that roan's causal variant
+        is <em>also</em> unsettled, which is worth a reader knowing.</li>
+</ul>
+
+<h3 id="science-tabs-foundational">Then &mdash; foundational loci carrying a paragraph</h3>
+
+<ul>
+    <li><strong><a href="gene-lcorl.html?view=science">LCORL</a></strong>, for the major height
+        locus. <a href="gene-hmga2.html#size">HMGA2</a> and
+        <a href="gene-dun.html#not-build">dun</a> both cite the ECA3 region against it.</li>
+    <li><strong><a href="gene-acan.html?view=science">ACAN</a></strong>,
+        <strong><a href="gene-megaesophagus.html?view=science">megaesophagus</a></strong> and
+        <strong><a href="gene-cvm.html?view=science">CVM</a></strong> &mdash; the three health
+        loci that were <em>not</em> in the intake batch, so they are the only disorder pages
+        without the full treatment their neighbours have.</li>
+    <li><strong><a href="gene-ryr2.html?view=science">RYR2</a></strong> and
+        <strong><a href="gene-pdk4.html?view=science">PDK4</a></strong>. PDK4 especially:
+        <a href="gene-ckm.html#verdict">CKM's tab</a> ends by saying the same
+        marker-in-a-cluster caution applies to PDK4 with less force, and PDK4's own page does not
+        say what that caution is.</li>
+    <li><strong><a href="gene-brindle.html?view=science">Brindle</a></strong> and
+        <strong><a href="gene-manchado.html?view=science">manchado</a></strong> &mdash; both
+        genuinely under-researched patterns, which is itself the content;
+        <a href="gene-rabicano.html">rabicano's tab</a> is the template for writing a pattern
+        whose gene nobody has found.</li>
+</ul>
+
+<h3 id="science-tabs-breeds">The breed problem, which is separate</h3>
+
+<p>
+    <strong>A fifth of the natural science tabs name no breed at all.</strong> For some that is
+    correct &mdash; <a href="gene-extension.html">extension</a>,
+    <a href="gene-agouti.html">agouti</a>, <a href="gene-shade.html">shade</a> and
+    <a href="gene-sex.html">sex</a> are universal loci. For the rest it is a real hole, because
+    &ldquo;which breed do I look in&rdquo; is one of the two questions a reader brings to a
+    genetics page, and the mod has <a href="breeds.html">a breed system</a> that could act on the
+    answer:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>page</th><th>the breed story it is missing</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-leopard.html">leopard complex</a></td><td>Appaloosa, Knabstrupper, Pony of the Americas, Noriker</td></tr>
+<tr><td><a href="gene-acan.html">ACAN</a></td><td>Miniature Horse dwarfism</td></tr>
+<tr><td><a href="gene-megaesophagus.html">megaesophagus</a></td><td>Friesian</td></tr>
+<tr><td><a href="gene-silver.html">silver</a></td><td>Rocky Mountain Horse, Icelandic, Shetland &mdash; and the MCOA link is breed-concentrated</td></tr>
+<tr><td><a href="gene-manchado.html">manchado</a></td><td>the Argentine breeds it was described in</td></tr>
+<tr><td><a href="gene-lcorl.html">LCORL</a></td><td>the draught-versus-pony spread that makes it a size locus at all</td></tr>
+<tr><td><a href="gene-mitf.html">MITF</a></td><td>SW1's cross-breed distribution &mdash; the entire contrast with SW2</td></tr>
+<tr><td><a href="gene-roan.html">roan</a>, <a href="gene-grey.html">grey</a>, <a href="gene-brindle.html">brindle</a>, <a href="gene-cvm.html">CVM</a>, <a href="gene-ryr2.html">RYR2</a>, <a href="gene-pdk4.html">PDK4</a>, <a href="gene-natural-zebra.html">natural zebra</a></td><td>varies; check each against a source before asserting one</td></tr>
+</tbody>
+</table>
+</div>
+
+<p class="muted">
+    <strong>Leave the short-but-finished ones alone</strong> &mdash;
+    <a href="gene-shade.html?view=science">shade</a>,
+    <a href="gene-natural-zebra.html?view=science">natural zebra</a>,
+    <a href="gene-sex.html?view=science">sex</a>,
+    <a href="gene-flaxen.html?view=science">flaxen</a>,
+    <a href="gene-sooty.html?view=science">sooty</a> and
+    <a href="gene-pangare.html?view=science">pangar&eacute;</a> are short because they are
+    complete arguments rather than surveys. Padding a finished argument to match a word count is
+    the opposite of the point.
+</p>
+
+<h2 id="wiki-item-art">A checklist idiom and item art, for the wiki</h2>
+
+<p>
+    The in-game half ships as <a href="progression.html">the progression page</a>. What is left
+    is the <em>wiki</em> side of the same request. The wiki has <em>no</em> checklist idiom
+    &mdash; no checkbox markup and no CSS for one anywhere &mdash; so a wiki walkthrough either
+    invents one in <code>styles.css</code> or reuses the tester-procedure block from
+    <code>for-testers.html</code>, whose styles are page-local. And the wiki has no item icons:
+    the only images it has are baked gene icons, and the in-game page draws items live on
+    purpose so nothing goes stale when a texture changes. Putting item art on the wiki therefore
+    means deciding to export it for the first time, and owning the staleness that the in-game
+    page was built to avoid.
+</p>
+
+</section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">

@@ -425,7 +425,7 @@ public Expression expressionOf(AllelePair pair) {
     &Dagger; <strong>Sex was the first gene that never paints</strong>, and is no
     longer the only one. Both its outcomes are wild types, so it costs the catalogue
     nothing and is left out of the texture key; it is registered at priority 1 so a
-    future <a href="roadmap.html#sex-linked">sex-linked gene</a> can read a sex that
+    future <a href="#sex-linked-plans">sex-linked gene</a> can read a sex that
     is already resolved, and so a foal&rsquo;s sex is <em>inherited</em> rather
     than rolled. See <a href="gene-sex.html">its page</a>.
 </p>
@@ -902,6 +902,79 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     family-tree fallback now &mdash; foals and adults alike are fully generated
     through the <a href="pipeline.html">coat pipeline</a>.
 </p>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Nothing is <code>Y_LINKED</code> yet, and <strong>no punnett square anywhere draws
+        a sex-linked gene</strong> &mdash; brindle&rsquo;s is drawn wrong rather than
+        refused, pairing a stallion&rsquo;s reserved <code>Y</code> as an ordinary allele
+        &mdash; while the <code>naturalgeneref.md</code> roster audit stays a standing task.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the genetics model itself, in one place.</strong>
+    These sections used to live on the main <a href="roadmap.html">roadmap</a> and were
+    moved here whole, so that what the model is, how it is built and what is still planned
+    for it are read together. Plans for an <em>individual</em> gene live on that gene&rsquo;s
+    own page instead &mdash; <a href="curly-coat.html#curly">curly coat</a> and
+    <a href="phenotype-naming.html#phenotype-naming">base-aware phenotype naming</a> are
+    the two the last roster audit turned up.
+</p>
+
+<hr>
+
+<h2 id="sex-linked-plans">Sex-linked inheritance &mdash; a Y-linked gene, and a square that can draw one</h2>
+
+<p>
+    The scaffolding ships and <a href="gene-brindle.html">brindle</a> proves it. What is
+    planned on top:
+</p>
+
+<ul>
+    <li><strong>Nothing is Y-linked yet.</strong> The mirror case is built and tested through
+        <code>Inheritance.Y_LINKED</code> &mdash; a mare's pair is two reserved <code>X</code>
+        placeholders &mdash; and is waiting for a gene that wants it. A Y-linked locus travels
+        down the male line untouched by any mare, which is a different and equally legible
+        pedigree shape.</li>
+    <li><strong>A punnett square for a sex-linked gene is a different square</strong>, and
+        neither of the two that exist draws one. The wiki's
+        (<code>wiki/gene-inheritance/</code>, on every gene page) pairs the two copies of each
+        parent as though both were autosomal, so brindle's square is drawn wrong rather than
+        refused &mdash; it needs the sire's reserved <code>Y</code> slot and a foal's own sex
+        on one of the axes. The browser's Breeding preview tab has the same hole.</li>
+</ul>
+
+<h2 id="natural-genes">Natural genes</h2>
+
+<p>
+    Finished genes are not listed on this tab &mdash; they are rostered in
+    <a href="#registry">this page&rsquo;s gene registry</a> with a page each, and any
+    residual tuning lives on the gene's own page. Natural genes all exist in real life, so
+    they belong in the 0&ndash;99 priority band and run before any magical gene; the
+    scientific allele names are legal tokens as written.
+</p>
+
+<div class="note">
+    <span class="label">The <code>naturalgeneref.md</code> audit &mdash; a standing task</span>
+    <p>
+        <code>naturalgeneref.md</code> in the repo root is a cleaned extract of another horse
+        game's natural-genetics guide, and it is the reference the natural side should be
+        complete against. It already carries a level of game-ready abstraction, which is why
+        it is worth diffing against rather than primary sources. <strong>Standing task: read
+        it end to end, diff it against the registered genes, and turn each gap into an entry
+        here.</strong> Every base colour and dilute in it is modelled at least in mechanism.
+        What the last pass turned up has pages of its own now:
+        <a href="curly-coat.html#curly">curly coat</a> and
+        <a href="phenotype-naming.html#phenotype-naming">base-aware phenotype naming</a>.
+    </p>
+</div>
+
+</section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">

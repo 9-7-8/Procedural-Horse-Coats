@@ -690,7 +690,7 @@
 <p>
     The sheet asks for genes and features this mod does not have. None were built
     in this pass; each is recorded in the breed&rsquo;s <code>notes()</code> and
-    collected in <a href="roadmap.html">the roadmap</a>:
+    collected on <a href="#roadmap">this page&rsquo;s roadmap tab</a>:
 </p>
 <ul>
     <li><s><strong>Leopard complex</strong> (<code>Lp</code> + <code>PATN1</code>)</s> &mdash; <strong>built 2026-09-06</strong> as <a href="gene-leopard.html">three loci</a>. Appaloosa / Knabstrupper roll it heavily, Kiger / Mustang / Shetland lightly. Striped hooves and white sclera are drawn; <em>mottled skin</em> is not (no skin layer).</li>
@@ -951,6 +951,130 @@
     mod's, so the old <code>config/horsegenetics/</code> location is not written.
 </p>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        The unbuilt work here is spawning and the render layer: an opt-in weather field that
+        would be the breed parser&rsquo;s <strong>first cross-field validation</strong>, horses
+        that may never spawn in chunks already explored, flowing manes and lower-leg feathering,
+        and a herd flood-fill that can still split a pack streaming in over several ticks.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the breed machinery, in one place.</strong> These
+    sections used to live on the main <a href="roadmap.html">roadmap</a> and were moved here
+    whole, so that what a breed does, how it is built and what is still planned for it are read
+    together. The breeds that do not ship &mdash; the shopping list, and the ones that came in
+    with a source attached &mdash; are catalogue rather than machinery and live on
+    <a href="breed-book.html#roadmap">the breed book</a>.
+</p>
+
+<hr>
+
+<h2 id="breeds">Breeds</h2>
+
+<h3 id="breed-cosmetics">Cosmetics that are not genetics</h3>
+
+<ul>
+    <li><strong>Mane shape</strong> &mdash; Przewalski's upright with no forelock, the long
+        flowing manes of the Andalusian / Friesian / Gypsy. Render-layer and model work. The
+        Fjord's <em>colour</em> is off this list: the
+        <a href="gene-dun.html#midtstol">midtstol</a> is drawn by dun, and the erect clip that
+        shows it off is grooming rather than a mesh the horse is born with.</li>
+    <li><strong>Lower-leg feathering</strong> &mdash; Clydesdale, Shire, Friesian, Gypsy
+        Vanner, Dales, Dartmoor. A render-layer overlay on the lower legs; the sheared look is
+        the precedent, and both want the same layer.</li>
+</ul>
+
+<h3 id="breed-followups">Breed-system follow-ups</h3>
+
+<ul>
+    <li><strong>More fictional breeds wanted.</strong> The shipped catalogue is real-world; the
+        mod also wants a batch of invented ones &mdash; a werewolf breed built on
+        <a href="gene-lycan.html">LYCAN</a> is possible &mdash; as gene suites. That is partly
+        what would make a polygenic cutie mark worth doing. <strong>This is cheap</strong>: a
+        breed is a <a href="breed-format.html">JSON file</a> and
+        <a href="breed-designer/index.html">the designer</a> writes it, so an invented breed
+        costs no Java at all. Nobody has written one yet, which is the whole of what is left
+        here.</li>
+    <li><strong>Traditional-band foals spawn at vanilla's ~5%</strong> instead of the intended
+        &ldquo;up to 3&rdquo;. The <code>SpawnGroupData</code> route is unusable &mdash;
+        <code>Horse.finalizeSpawn</code> replaces it per member &mdash; so this needs a direct
+        <code>setAge(-24000)</code> on a herd member, or a mixin.</li>
+    <li><strong>Herd formation is proximity-only.</strong> A clump flood-fill with a
+        deterministic lowest-UUID lead handles the ordinary case, but a pack that streams in
+        over several ticks, or scatters further than the flood-fill hop, can still split.</li>
+    <li><strong>Wild aggro is all-or-nothing</strong>: flat damage, no
+        <code>ATTACK_DAMAGE</code> scaling by breed or size, and a fixed forget-on-line-of-sight
+        timer. Horses are neutral until hit, deliberately, like a wolf.</li>
+</ul>
+
+<h2 id="breed-spawning-plans">Spawning</h2>
+
+<h3 id="weather-spawning">Breeds that only spawn in certain weather</h3>
+
+<p>
+    An <strong>opt-in</strong> line in the breed file, left out entirely unless it is something
+    other than &ldquo;any weather&rdquo;, and <strong>never back-applied</strong> to the breeds
+    that ship. The owner was explicit on both points.
+</p>
+
+<ul>
+    <li><strong>The format contract is five or six files, not one.</strong>
+        <code>BreedSpecParser.KEYS</code> (anything not listed is a hard error),
+        <code>BreedSpecWriter</code> (which omits a field at its default, deliberately, so an
+        absent line keeps meaning &ldquo;not chosen&rdquo;), the <code>Breed</code> record
+        header and its builder, and <strong><code>BreedSpawnSettings.copy()</code>, which
+        enumerates every record component positionally &mdash; a new field missed there is
+        silently dropped for every shipped breed</strong>. Then
+        <code>breed-format.html</code>, and <code>:common:bakeBreedFiles</code>.</li>
+    <li><strong>The enforcement point is one method.</strong>
+        <code>Breeds.wildCandidates(biomeId, dark)</code> is the single chokepoint the wild path
+        goes through; <code>BreedSpawnHandler.onFinalizeSpawn</code> currently passes exactly one
+        runtime condition (<code>isDarkOutside</code>) and would pass weather too, with
+        <code>HerdManager.pickWildBreed</code> and <code>BreedSpawningConfig</code>
+        following.</li>
+    <li><strong>Snow is not weather.</strong> The precedent already exists in
+        <code>GeneAbilityHandler</code>: <code>snowing</code> is
+        <code>level.isRaining() &amp;&amp; biome.coldEnoughToSnow(pos)</code>, because Minecraft
+        has no snow state &mdash; it is rain in a cold biome. Any weather field must resolve the
+        same way or it will simply never fire.</li>
+    <li><strong>The validation the owner asked for is the interesting part.</strong> A breed
+        that names a weather <em>and</em> biomes must have at least one biome where that weather
+        can occur &mdash; it never rains in a desert, so a rainy desert breed spawns never and
+        says nothing. That check belongs in the parser (so it warns for a drop-in file too) and
+        is surfaced in the breed designer, which already validates through the real parser
+        compiled to WebAssembly. Note the parser has <em>no</em> cross-field spawn validation
+        today, so this would be the first.</li>
+</ul>
+
+<h3 id="visited-chunks">Horses spawning in chunks already visited</h3>
+
+<p>
+    <strong>The premise needs checking before the work does.</strong> Wild spawning is entirely
+    vanilla's <code>NaturalSpawner</code>, fed by two biome modifiers
+    (<code>add_horse_herds</code>, a herd in listed biomes, and <code>add_horse_loners</code>, a
+    single horse anywhere overworld). Vanilla consumes those from <em>both</em> chunk generation
+    and the ongoing per-tick pass around players, and <code>BreedSpawnHandler</code> accepts
+    <code>NATURAL</code>, <code>CHUNK_GENERATION</code> and <code>SPAWNER</code> identically.
+    <strong>Nothing in this mod keys off a chunk being new</strong> &mdash; no
+    <code>isNewChunk</code>, no <code>ChunkStatus</code> check, no per-chunk attachment.
+</p>
+<p>
+    So horses should already spawn in explored land, and the real cause is likelier to be
+    vanilla's animal rules: <code>CREATURE</code> spawns are weighted heavily toward worldgen,
+    and a night-only breed cannot pass the light check on an existing chunk at all.
+    <strong>Diagnose before building:</strong> if the answer is vanilla's pass rather than ours,
+    the fix is a mod-owned periodic spawner around players, which is a much larger thing than it
+    sounds and wants a config gate.
+</p>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 
@@ -981,7 +1105,7 @@
         more often than a feral population. <strong>Pass:</strong> a visibly patterned pony herd, not a solid one.
         This is the breed most likely to look wrong if the strain weights are off.</li>
     <li><strong>The Bashkir Curly is <em>not</em> curly, on purpose.</strong> There is no hair-texture locus
-        (<a href="roadmap.html#natural-genes">roadmap &sect;11</a>), so it is a hardy saddle horse with the widest
+        (<a href="genetics-model.html#natural-genes">roadmap &sect;11</a>), so it is a hardy saddle horse with the widest
         colour pool of any breed here. <strong>Pass:</strong> a herd that looks assorted &mdash; chestnut, bay,
         grey, dilutes, roan, pinto and the occasional leopard. If it looks uniform, the pool is not being read.</li>
     <li><strong>The Azteca's two strains split about 9 to 1.</strong> Nine founders in ten solid Mexican-standard,

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base-aware phenotype naming &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Base-aware phenotype naming</h1>
+<p class="lede">
+    <strong>This is a surface, not a gene</strong>, and that is the whole point of it: nothing
+    new is inherited, nothing new is painted from scratch. It reads a genotype that already
+    exists &mdash; and the epigenetics riding on it &mdash; and works out what the horse should
+    be <em>called</em>, so that a dilution can be named against the base it is sitting on rather
+    than by its locus. <strong>None of it is built.</strong> It came off the roster audit on
+    <a href="genetics-model.html#natural-genes">natural genes</a>, which is where it was
+    proposed as a gene and turned out not to be one.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        <strong>One base-aware phenotype resolver</strong>, so the info panel, the paper dump
+        and the gene dictionary can say &ldquo;amber champagne&rdquo; or &ldquo;this horse is
+        seal&rdquo; &mdash; and so champagne can read seal off agouti&rsquo;s epigenetics and
+        paint sable rather than amber.
+    </p>
+</div>
+
+<h2 id="phenotype-naming">Base-aware phenotype naming</h2>
+
+<p>
+    It serves three separate gaps. The reference names
+    <strong>gold / amber / sable / classic</strong> champagne and <strong>chestnut / bay /
+    black / cream</strong> pearl as distinct phenotypes <em>by base</em>, and expects
+    cream&times;champagne and cream&times;pearl to read differently again. Separately, it
+    treats <strong>seal bay</strong> as its own base that <em>sable champagne</em> rides on
+    &mdash; but seal has no gene here, it is the top of
+    <a href="gene-agouti.html">agouti</a>'s epigenetic distribution.
+</p>
+
+<p>
+    So the mod needs a way to <strong>resolve and name</strong> &ldquo;this genotype is an
+    amber champagne&rdquo; or &ldquo;this horse is seal&rdquo; for the info panel, the paper
+    dump and the gene dictionary &mdash; and champagne needs to read &ldquo;is this horse
+    seal&rdquo; off the agouti epigenetics to paint sable rather than amber. One base-aware
+    phenotype resolver serves all of it.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="gene-agouti.html">Agouti</a>
+        <a href="gene-champagne.html">Champagne</a>
+        <a href="gene-matp.html">MATP &mdash; cream and pearl</a>
+        <a href="genetics-model.html#natural-genes">Natural genes &mdash; the roster audit</a>
+    </div>
+    The page exists so that the three gaps are read as one job: a resolver that names a
+    phenotype against its base, rather than three separate places each guessing at it.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -26,7 +26,7 @@
     grouping. First slice built 2026-09-02, <strong>not play-tested</strong> &mdash;
     checklist in <a href="verification.html">verification</a>. This page is the
     single source of truth for the machinery; what is still missing is on
-    <a href="roadmap.html#bond">the roadmap</a>.
+    <a href="?view=roadmap#bond-roadmap">the roadmap tab</a>.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -1091,6 +1091,191 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
         among bachelor stallions</a>.</li>
     <li><a href="https://link.springer.com/article/10.1007/s10211-023-00421-9">Acta
         Ethologica (2023)</a>, on ritualised encounters between familiar horses.</li>
+</ul>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A grooming tool that <strong>retires shears on a horse</strong> and at its top tier grooms
+        the whole herd, ground work on a lunge line for foals and horses you never saddle, bond
+        tiers that stop the bucking, and founding bands whose foals are nobody&rsquo;s foals.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for bond, grooming and herds, in one place.</strong> These
+    sections used to live on the main <a href="roadmap.html">roadmap</a> and were moved here whole,
+    so that what horse care does, how it is built and what is still planned for it are read
+    together. The halter itself is a gear slot rather than a mechanic, and is listed on
+    <a href="horse-gear.html#accessories-slots">the accessories roster</a>.
+</p>
+
+<hr>
+
+<h2 id="bond-roadmap">Bond, herds and horse care</h2>
+
+<p>
+    The core ships &mdash; the tier table, gain rates, daily cap and herd rule are on
+    <a href="?view=gameplay#bond">the gameplay tab</a>. What is planned:
+</p>
+
+<h3>More bond sources</h3>
+
+<ul>
+    <li><strong>Sleeping nearby, +1/night</strong> &mdash; the one remaining source from the
+        original design.</li>
+    <li><strong>Being led on a lead counts.</strong> Walking a leashed horse is taking it for a
+        walk &mdash; a small per-tick trickle while <code>isLeashed()</code>, the holder is the
+        owner, and both are moving, capped by the daily limit like everything else.</li>
+    <li><strong>Flavour interactions</strong> &mdash; petting and cleaning. Cheap if
+        animation-only: right-click with an empty hand plays a short interaction and gives a
+        little bond. <strong>Brushing is no longer one of these.</strong> It grew into
+        <a href="#grooming-tool">the grooming tool</a> below, which replaces shears outright
+        rather than sitting beside them; whether grooming also <em>heals</em> a small amount
+        &mdash; a second route through the healing gate, or exempt from it the way hand-feeding
+        is &mdash; is still open and belongs with that section.</li>
+</ul>
+
+<h3 id="bond-behaviours">Two more tier behaviours, both harvested rather than invented</h3>
+
+<p>
+    Both came out of <a href="compatibility.html#mod-survey">the quality-of-life cluster</a>, and both were keyed to
+    something else in their original mods. <strong>Keying them to bond instead is the whole
+    adaptation</strong> &mdash; it is the idiom
+    <a href="horse-care.html#bareback-steering">bareback steering at tier 3</a> already
+    established, it makes them a reward rather than a default, and it leaves a low-bond horse
+    behaving exactly as vanilla does.
+</p>
+
+<ul>
+    <li><strong>A horse that trusts you stops bucking.</strong> Horse Buff removes vanilla's
+        random bucking outright; Superb Steeds keys it to being saddled. Here it is a bond tier:
+        the random interruption fades as the horse comes to trust you.
+        <strong><code>HorseRearFightMixin</code> and the aggro rearing stay untouched</strong>
+        &mdash; a horse that rears because you hit it, or because its herd is fighting, should go
+        on doing so. The point is that rearing stops being noise and starts meaning
+        something.</li>
+    <li><strong>A bonded horse waits where you left it.</strong> Horse Tweaks pins a 16-block home
+        on dismount and clears it with a lead; Horse Buff just stops saddled horses idling away.
+        Here, at a tier, the horse stops wandering when you dismount and waits for you &mdash; no
+        new item, no leash, and a low-bond horse still drifts, which is the thing bond is
+        <em>for</em>. <strong>Note this is adjacent to a separate problem, not the same
+        one</strong> &mdash; <code>setPersistenceRequired</code> is never called on taming or
+        ownership, so whether an owned horse can despawn at all is
+        <a href="known-gaps.html#gap-300">an open question</a>. Keep them apart: a horse that
+        vanishes is a defect and its fix belongs to everybody, while waiting where you left it is
+        a reward and belongs to bond. Fixing the first as a tier of the second would mean a
+        low-bond horse is <em>allowed</em> to disappear.</li>
+</ul>
+
+<h3 id="grooming-tool">A grooming tool, tiered &mdash; and shears stop working on a horse</h3>
+
+<p>
+    Grooming is built, and it is <code>minecraft:shears</code>.
+    <code>server/HorseShearHandler</code> gives an adult horse 1&ndash;3
+    <a href="item-horse-hair.html">horse hair</a> and <strong>+2 bond</strong> once per
+    Minecraft day, with a brush sound, heart particles and a message that already calls it
+    grooming rather than shearing &mdash; the dressing was changed on 2026-09-13, and the
+    mechanic never was shearing. <strong>What is missing is the tool.</strong> The verb reads as
+    care and the item in your hand is a pair of blades.
+</p>
+
+<ul>
+    <li><strong>A grooming tool replaces shears outright</strong> &mdash; not a better path
+        beside them. Shears on a horse do nothing, and the one verb has one item. Anything less
+        leaves the blades in the game as the beginner's grooming tool, which is the thing being
+        fixed.</li>
+    <li><strong>One verb, tiered by material</strong>, the way tack tiers are already scoped
+        rather than the way a six-tool roster would be. A better tool grooms for <strong>more
+        bond and a shorter cooldown</strong>. The hair yield stays 1&ndash;3 at every tier, so
+        grooming never turns into a farming action and the bond stays the reason to do it.</li>
+    <li><strong>The top tier grooms the whole herd at once.</strong> That is the ladder's
+        destination, and it is the only rung that does something the lower ones cannot. It also
+        gives the herd computation a <em>consumer</em> &mdash; the Herds list below records that
+        it has none today, so this closes a listed gap rather than adding a system beside
+        it.</li>
+    <li><strong>The contract is wider than the handler.</strong>
+        <code>ProgressTask.SHEAR_HORSE</code> and its advancement
+        <code>husbandry/shear_horse.json</code> are both named for the old item, so a rename
+        means <code>bake-advancements.mjs</code> and then
+        <code>check-progress-tasks.mjs</code>. The <a href="item-vet-kit.html">vet kit</a>
+        recipe takes shears as an ingredient and is unaffected &mdash; shears keep every use
+        they have that is not a horse.</li>
+</ul>
+
+<p class="muted">
+    The six-tool roster &mdash; dandy brush, body brush, rubber and metal curry combs, hoof
+    pick, sponge &mdash; came from
+    <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a> and
+    was <strong>deliberately not taken</strong>. Six tools only earn their keep against a
+    per-horse condition that decays, and a horse that suffers for going unbrushed is exactly the
+    punishing husbandry <a href="philosophy.html">philosophy</a> rules out. The material ladder
+    is what survived of it.
+</p>
+
+<h3 id="ground-work">Ground work &mdash; a halter, a lead and a lunge line</h3>
+
+<p>
+    <strong>Bond you build without riding.</strong> Clip a lunge line to a haltered horse and it
+    works a circle around you; bond accrues on
+    <a href="horse-care.html">the existing slow tick</a>, capped by the same daily limit as
+    everything else. The point is the horses you cannot or will not ride &mdash; a foal, one
+    carrying a <a href="horse-body.html">disorder</a>, one you have not saddled &mdash; which
+    today have no bond source but proximity, grooming and hand-feeding.
+</p>
+
+<ul>
+    <li><strong>The halter is a slot</strong> and belongs to
+        <a href="horse-gear.html#accessories-slots">the accessories roster</a>, where it is listed. What lives
+        here is what having one lets you do.</li>
+    <li><strong>The lead is vanilla's.</strong> No new item: <code>isLeashed()</code> already
+        drives the walking-bond bullet above, and lungeing is that same relationship held
+        still.</li>
+    <li><strong>The lunge line is the one new item, and the mechanic is the work.</strong> A
+        horse circling a fixed point is movement nothing in the mod does, and it has to yield to
+        being ridden, to fleeing and to the herd goals rather than fight them. That is a
+        priority in the goal selector, so
+        <a href="behaviour-hierarchy.html">the behaviour hierarchy</a> and its bake are part of
+        the contract.</li>
+    <li><strong>Riding crop, lunge whip and driving whip are skipped.</strong> They are
+        implements for striking a horse to make it go, and the care layer is built on the
+        opposite premise. Recorded here so nobody re-proposes them from the same source.</li>
+</ul>
+
+<p class="muted">
+    From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>,
+    which shipped a halter, a lead and a lunge line in sixteen colours each, with no behaviour
+    attached to any of them.
+</p>
+
+<h3 id="herds-planned">Herds</h3>
+
+<ul>
+    <li><strong>Nothing consumes the herd alpha.</strong> Computed on demand, no consumer
+        &mdash; no herd-wide behaviour, no alpha-follows, no display.</li>
+    <li><strong>Herd membership is invisible</strong> outside the inventory panel's
+        &ldquo;&bull; herd&rdquo; flag. The real surface is
+        <a href="horse-browser.html#browser">the browser</a>.</li>
+    <li><strong>Feeding is not dose- or temper-aware</strong>: any <code>isFood</code> stack
+        from the owner is +2, whatever it is.</li>
+    <li><strong>Gated healing has no info-panel line naming what is missing</strong> &mdash; a
+        hurt horse near food but no water shows particles and nothing else.</li>
+    <li><strong>A founding band has no family relations.</strong> A breed can say how many
+        stallions and mares its bands are founded with
+        (<a href="breed-format.html#herd-shape"><code>herd</code></a>), but every member is a
+        parentless founder: <code>HorseRecord.founder</code> leaves mother and father empty,
+        and each genome is rolled independently from the breed sheet. So a foal standing in a
+        band is nobody's foal, and could carry alleles neither adult beside it has. Doing it
+        honestly means founding rolls the foal <em>from</em> the lead and a chosen mare
+        (<code>HorseRecord.bred</code>, a real generation) rather than from the sheet &mdash;
+        a change to what founding <em>is</em>. Stamping the ids without the descent was
+        considered and rejected: the pedigree screen would present a relationship the genetics
+        contradict.</li>
 </ul>
 
 </section>

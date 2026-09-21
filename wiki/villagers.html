@@ -1634,7 +1634,7 @@
 <ul>
     <li><strong>No random genotype vials, and no buying player-made ones back.</strong>
         Both need the assisted-reproduction / <code>collectedFrom</code> work that is
-        <a href="roadmap.html#ivf">still unbuilt</a>. The scientist's buy row is a
+        <a href="item-seed-jars.html#ivf">still unbuilt</a>. The scientist's buy row is a
         <em>stallion seed jar</em> instead, which is a real player-made item today.</li>
     <li><strong>No custom gossip type.</strong> <code>HORSE_TRADER</code> was flagged
         as unverified; all four use vanilla gossip, which costs nothing and works.</li>
@@ -1748,6 +1748,82 @@
     file today names the four posts and nothing else. None of the 33 saved client logs of
     2026-09-14 and 15, nor the one after that, has a <code>Couldn't load tag</code> line.
 </p>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        The cowboy spawns in plains villages and nowhere else &mdash; injecting
+        <code>horsegenetics:cowboy_barn</code> into the other four terminator pools is a
+        handful of lines, but <strong>a barn per village material palette</strong> is the real
+        project, and a plains barn in a desert is why neither is done.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the villagers, in one place.</strong> This section
+    used to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so
+    that who these people are, how they are generated and what is still planned for them are
+    read together. Its closest neighbour is on another page:
+    <a href="stables.html#roadmap">the generated stables backlog</a> is the same
+    NBT-and-JSON pipeline, with the same question open about which building generates where.
+</p>
+
+<div class="note">
+    <span class="label">The cheap route already ships</span>
+    <p>
+        The second bullet below is built, and is documented above rather than here: the
+        <a href="#workstation">Cowboy Hitch</a> is a craftable block, and
+        <code>server/CowboyHitchHandler</code> takes on an unemployed villager beside one. What
+        is unbuilt is putting a hitch in a <em>worldgen</em> pool, so that a village of any
+        style gets a cowboy without a player placing the block themselves.
+    </p>
+</div>
+
+<hr>
+
+<h2 id="cowboy-everywhere">The cowboy in every village, and buildings that fit each one</h2>
+
+<p>
+    <strong>Two asks, and the first is nearly free.</strong>
+</p>
+<ul>
+    <li><strong>He spawns in plains villages and nowhere else.</strong>
+        <code>worldgen/BarnPoolInjector</code> appends <code>horsegenetics:cowboy_barn</code> to
+        <code>minecraft:village/plains/terminators</code> at server start, at weight 3, and
+        injects into no other village type. Desert, savanna, taiga and snowy villages have no
+        cowboy at all. Injecting into the other four terminator pools is a handful of lines in a
+        class that already does exactly this once &mdash; but a plains barn dropped into a desert
+        village is the reason it was not done, which is the second ask.</li>
+    <li><strong>&ldquo;He doesn't need a house, just plop his hitch down&rdquo; is already
+        built</strong>, and is the cheap route to every village type today.
+        <code>block/ModBlocks.COWBOY_HITCH</code> ships and is craftable, and
+        <code>server/CowboyHitchHandler</code> converts any unemployed adult villager within six
+        blocks of one into a cowboy, provided none is already within thirty-two. So a hitch in a
+        worldgen pool &mdash; no building, no jigsaw of our own &mdash; would put a cowboy in a
+        village of any style, immediately, with the art problem deferred rather than
+        solved.</li>
+    <li><strong>Buildings that emulate each village style</strong> is the real project, and the
+        owner has named it as such: a barn per village material palette, so the structure reads
+        as part of the town rather than dropped on it. That is <a href="stables.html#stables">the generated
+        stables backlog</a> wearing a different hat &mdash; same NBT-and-JSON pipeline, no Java
+        &mdash; and it should share whatever answer that section reaches about which building
+        generates where. Note the measurement rig already exists:
+        <code>worldgen/HomesteadCensus</code> took plains placement from 93.2% to 98.9% across
+        265 villages, so the same census answers &ldquo;did the desert one land&rdquo; without
+        anyone flying around looking.</li>
+</ul>
+
+<p class="muted">
+    The <a href="https://www.curseforge.com/minecraft/mc-mods/stables">Stables</a> mod is on
+    <a href="compatibility.html#mod-survey">the survey list</a> with the question of whether it can improve any of
+    <a href="villagers.html">the villagers this mod adds</a> &mdash; read it before the barn
+    variants are designed.
+</p>
+
+</section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">

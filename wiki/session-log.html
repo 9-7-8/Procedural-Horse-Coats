@@ -27,6 +27,111 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-21-roadmap">2026-09-21, after the verification work &mdash; the roadmap is dismantled the same way, and a plan with no page now means a missing page</h2>
+
+<p>
+    Same instruction, same day, the other list. <a href="roadmap.html">The roadmap</a> was
+    <strong>2&nbsp;498 lines</strong> and about fifty sections; it is now <strong>363</strong>,
+    of which everything below the markers is generated. The rule is hard rule 9 in
+    <code>CLAUDE.md</code>, which now covers both indexes in one paragraph because they are
+    one mechanism.
+</p>
+
+<p>
+    <strong>The half that was new.</strong> Verification had it easy: every checklist was
+    <em>about</em> something that exists, so every section had a page to go to. A roadmap does
+    not &mdash; most of what is planned has no page precisely because it is not built. The
+    owner's call closed that: <strong>if an item is partly implemented its plans go on the
+    Roadmap tab of the page for the existing version, and if it is not implemented at all it
+    gets a new page carrying a Roadmap tab and nothing else.</strong> So &ldquo;this plan has
+    nowhere to live&rdquo; stops being a reason to keep a shared backlog and becomes a missing
+    page, and the page is already there to document the thing on when the first piece ships.
+</p>
+
+<h3>Where it went</h3>
+
+<p>
+    <strong>Twenty-four existing pages grew a Roadmap tab</strong> &mdash; the plans for a
+    subject now sit behind the same tab bar as what it does and how it is built, after
+    <a href="horse-gear.html#roadmap">horse gear</a>, which had been the only one.
+    <strong>Twenty new pages were written</strong>, each a single subject with a single tab:
+    <a href="undead-horses.html">undead horses</a>, <a href="horsemanship.html">horsemanship</a>,
+    <a href="horse-browser.html">the horse browser</a>, <a href="cart-bench.html">the cart and
+    jump bench</a>, <a href="model-parts.html">attached model parts</a>,
+    <a href="virtual-stables.html">virtual stables</a>, <a href="troughs.html">troughs</a>,
+    <a href="item-stall-bars.html">stall bars</a>, <a href="config.html">config</a>,
+    <a href="rider-comfort.html">rider comfort</a>,
+    <a href="magical-genes.html">the magical gene backlog</a>,
+    <a href="curly-coat.html">curly coat</a>,
+    <a href="phenotype-naming.html">base-aware phenotype naming</a>, and the seven researched-then-deferred
+    ideas &mdash; <a href="chase-gene.html">chase</a>, <a href="magic-grab.html">magic grab</a>,
+    <a href="storm-fed.html">storm fed</a>, <a href="block-preference.html">block preference</a>,
+    <a href="forced-riding.html">forced riding</a>,
+    <a href="momentum-sprint.html">momentum sprint</a> and <a href="lasso.html">the lasso</a>.
+    They are registered in <code>wiki/pages.js</code> under a <strong>Planned</strong> section
+    of their own rather than among the built pages, and the landing page carries them as a
+    section that starts collapsed &mdash; a reader looking under Items for a block that does
+    not exist is being lied to. When a piece of one ships, its page grows the other tabs and
+    its entry <em>moves</em> to the section it then belongs in.
+</p>
+
+<p>
+    <strong>One section deliberately did not get a Roadmap tab.</strong>
+    <em>Deliberately out of scope</em> &mdash; racing, competitions and the rosettes &mdash; was
+    the old page's single labelled exception, and it was never a plan: each entry was proposed,
+    considered and placed outside the base mod. It went to
+    <a href="decisions.html#out-of-scope">design decisions</a>, which is where an answer lives.
+    With it gone the page has no hand-written body at all, which is the whole point.
+</p>
+
+<h3>The machinery, and the two things it had to be told</h3>
+
+<p>
+    <code>wiki/tools/bake-roadmap-index.mjs</code> is the twin of the verification baker and is
+    deliberately the same shape: it harvests one <code>note roadmap-summary</code> sentence per
+    Roadmap tab, counts the panel's own headings, and <strong>hard-fails rather than write an
+    index that omits a page</strong>. It caught <a href="horse-gear.html#roadmap">horse gear</a>
+    immediately &mdash; that tab predated the contract and had no summary box.
+    The count is <strong>floored at one</strong>, because two pages dissolved their only heading
+    into the <code>&lt;h1&gt;</code> (repeating the page title under it read badly) and
+    &ldquo;0 entries&rdquo; beside a row that exists is simply wrong.
+</p>
+
+<p>
+    <strong>Two ids had to be renamed, and only two.</strong> <code>#sex-linked</code> and
+    <code>#bond</code> already existed on <a href="genetics-model.html">the genetics model</a>
+    and <a href="horse-care.html">horse care</a>, so the moved sections became
+    <code>#sex-linked-plans</code> and <code>#bond-roadmap</code>. Everything else moved with
+    its id intact, which is what let <strong>86 inbound links across 21 pages</strong> be
+    rewritten by one script rather than by hand. Historical mentions inside <code>&lt;code&gt;</code>
+    on this page were left alone: they record what a path <em>was</em>.
+</p>
+
+<h3>What the move exposed, which is the part worth keeping</h3>
+
+<p>
+    Putting a plan next to its subject made two things visible that were invisible while they
+    sat apart, and both are now recorded rather than quietly fixed.
+    <a href="known-gaps.html#gap-301">Gap 301</a>: <strong>seven pages already described the
+    same plan in their own words</strong>, and the two copies disagree &mdash; carrots on
+    whether the Epigenetic Stabilizer has a reason to exist yet, items on whether three or four
+    whistles share a texture, jumps on whether crossrails and the half-height rungs shipped.
+    The older half is usually the stale one, and the fix is a merge each.
+    <a href="known-gaps.html#gap-302">Gap 302</a> is not a move artefact at all:
+    <a href="item-research-papers.html">research papers</a>&rsquo; Gameplay and Coding tabs give
+    <em>opposite</em> answers to what right-clicking a paper does, and it was found only because
+    a third tab moved in beside them.
+</p>
+
+<p class="muted">
+    The move was verbatim on purpose, which left one predictable class of damage: prose saying
+    &ldquo;the table above&rdquo;, &ldquo;the chase gene below&rdquo; or &ldquo;a position this
+    page held twice&rdquo; when the referent was the roadmap. Those were repaired in a separate
+    pass after the move rather than during it, so that the moving could be checked against the
+    source byte for byte first. <code>check-links.mjs</code>, <code>check-gene-tabs.mjs</code>,
+    <code>sync-page-views.mjs</code> and both index bakes are green.
+</p>
+
 <h2 id="d2026-09-21-verification">2026-09-21, after the gear work &mdash; the verification page is dismantled, and becomes a generated index</h2>
 
 <p>
@@ -314,7 +419,7 @@
     really have it, and moves no horse, with <strong>no roadmap entry anywhere</strong> while its
     three expression strings tell the player <em>&ldquo;the gait is not animated yet&rdquo;</em>.
     The owner's call was to keep it planned but not under health, so it is now
-    <a href="roadmap.html#gait">its own section</a>. It is explicitly <em>not</em> bundled with the
+    <a href="gene-dmrt3.html#gait">its own section</a>. It is explicitly <em>not</em> bundled with the
     per-part cut: that one wanted the mod to own the horse model, this one wants new motion on the
     model it already borrows.
 </p>
@@ -361,7 +466,7 @@
 
 <p>
     <strong>No code. The second survey session in a day</strong>, and the one that worked off
-    <a href="roadmap.html#mod-survey">the backlog</a>'s largest row &mdash; the six-mod
+    <a href="compatibility.html#mod-survey">the backlog</a>'s largest row &mdash; the six-mod
     quality-of-life cluster, which the row itself insisted be read &ldquo;as one batch, not
     six&rdquo;. The owner asked for every call to be put to her as a choice rather than decided on
     her behalf, the same brief as the Simply Equine entry below, and the most important answer of
@@ -438,7 +543,7 @@
 <p>
     The owner supplied her own RPG stack and asked which to integrate with. All three were
     unpacked from her server and read as bytecode.
-    <strong><a href="roadmap.html#horsemanship-hook">Pufferfish's Skills</a> is the answer, and it
+    <strong><a href="horsemanship.html#horsemanship-hook">Pufferfish's Skills</a> is the answer, and it
     is not close.</strong>
 </p>
 
@@ -493,13 +598,13 @@
 <h3>What else was taken, and what was refused</h3>
 
 <ul>
-    <li><strong><a href="roadmap.html#rider-comfort">Rider comfort</a></strong> &mdash; the
+    <li><strong><a href="rider-comfort.html#rider-comfort">Rider comfort</a></strong> &mdash; the
         mining-speed debuff while mounted, a keybind for your own inventory while riding, fading
         the horse as you look down, leads returning to your inventory, and right-click-to-equip.
         Two carry warnings written into the section: the fade is the first thing to ask a
         <em>procedural</em> coat to render half-transparent, and right-click-to-equip lands on the
         same interaction as our own <code>i</code> button.</li>
-    <li><strong><a href="roadmap.html#bond-behaviours">Two bond behaviours</a></strong> &mdash; a
+    <li><strong><a href="horse-care.html#bond-behaviours">Two bond behaviours</a></strong> &mdash; a
         trusted horse stops bucking, and a bonded horse waits where you left it. Both were keyed
         to a saddle in their original mods; keying them to bond instead <em>is</em> the
         adaptation, and it keeps a low-bond horse behaving exactly as vanilla does.</li>
@@ -509,7 +614,7 @@
         already, and feather fall is flagged as the one that is a larger change than it
         looks.</li>
     <li><strong>Leave My Bars Alone is folded into
-        <a href="roadmap.html#menu-hud">the RideHUD section</a> rather than rebuilt.</strong> It
+        <a href="horse-browser.html#menu-hud">the RideHUD section</a> rather than rebuilt.</strong> It
         is maintained, MPL-2.0, and two files long, on a branch matching our Minecraft version. We
         design our readout not to add clutter; the vanilla bar problem stays solved by the mod
         that solves it.</li>
@@ -530,7 +635,7 @@
 <p class="muted">
     <strong>Two survey rows closed</strong> &mdash; the quality-of-life cluster, and the
     RPG-skills row, the latter by building the thing it was hedging about. The count of what is
-    left is on <a href="roadmap.html#mod-survey">the table itself</a> and is deliberately not
+    left is on <a href="compatibility.html#mod-survey">the table itself</a> and is deliberately not
     repeated here &mdash; the entry below quoted a count that was already wrong when written, and
     it has been taken out rather than corrected, which is the whole argument against writing a
     derived number into prose.
@@ -550,7 +655,7 @@
 
 <p>
     <strong>No code. A survey session, and the first one to work a row off
-    <a href="roadmap.html#mod-survey">the survey backlog</a>.</strong> The owner picked
+    <a href="compatibility.html#mod-survey">the survey backlog</a>.</strong> The owner picked
     <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a> &mdash;
     the only row asked for exhaustively rather than for highlights &mdash; and asked for every
     choice to be posed as a choice rather than decided on her behalf.
@@ -583,7 +688,7 @@
 <h3>Taken &mdash; three sections, each attributed where it landed</h3>
 
 <p>
-    <strong><a href="roadmap.html#grooming-tool">A grooming tool that replaces shears
+    <strong><a href="horse-care.html#grooming-tool">A grooming tool that replaces shears
     outright.</a></strong> Grooming already ships as <code>minecraft:shears</code>:
     <code>server/HorseShearHandler</code> gives an adult horse 1&ndash;3
     <a href="item-horse-hair.html">horse hair</a> and +2 bond once per Minecraft day, and the
@@ -598,7 +703,7 @@
 </p>
 
 <p>
-    <strong><a href="roadmap.html#ground-work">Ground work</a></strong> &mdash; halter, vanilla
+    <strong><a href="horse-care.html#ground-work">Ground work</a></strong> &mdash; halter, vanilla
     lead, lunge line. Bond you build <em>without riding</em>, for the foals and
     disorder-carrying horses that today have hand-feeding and nothing else. The halter joined
     <a href="horse-gear.html#accessories-slots">the accessories slot roster</a>, taking it from
@@ -610,7 +715,7 @@
 </p>
 
 <p>
-    <strong><a href="roadmap.html#stall-bars">Stall bars</a></strong>, a third per-material
+    <strong><a href="item-stall-bars.html#stall-bars">Stall bars</a></strong>, a third per-material
     block family after the double gates and the jumps. Both its utilities fall out of the same
     physical fact, which is the sign they are the right ones: bars are see-through, so a stalled
     horse keeps its herd where a solid wall would isolate it; and bars are reachable, so you can
@@ -648,7 +753,7 @@
 
 <p>
     The roadmap is planned-features-only and had no way to say &ldquo;considered, and placed
-    outside&rdquo;, so <a href="roadmap.html#out-of-scope">Deliberately out of scope</a> was
+    outside&rdquo;, so <a href="decisions.html#out-of-scope">Deliberately out of scope</a> was
     added as a single labelled exception with the rosettes as its first entry. It exists so the
     next person with the idea finds the verdict rather than the request.
 </p>
@@ -693,16 +798,16 @@
 
 <p>
     Eight more sections came out of the same batch &mdash;
-    <a href="roadmap.html#undead-horses">undead horses</a> (promoted out of &ldquo;asked
+    <a href="undead-horses.html#undead-horses">undead horses</a> (promoted out of &ldquo;asked
     for&rdquo;: it is a design now, not an open question),
-    <a href="roadmap.html#storage">storage</a>,
-    <a href="roadmap.html#cart-bench">the cart and jump bench</a>,
-    <a href="roadmap.html#horse-menu">the horse menu</a>,
-    <a href="roadmap.html#mod-survey">the survey backlog</a>,
-    <a href="roadmap.html#config-everything">config</a>,
-    <a href="roadmap.html#cowboy-everywhere">the cowboy in every village</a>,
-    <a href="roadmap.html#troughs">troughs and salt licks</a> and
-    <a href="roadmap.html#breed-sources">breeds from elsewhere</a>.
+    <a href="virtual-stables.html#storage">storage</a>,
+    <a href="cart-bench.html#cart-bench">the cart and jump bench</a>,
+    <a href="horse-browser.html#horse-menu">the horse menu</a>,
+    <a href="compatibility.html#mod-survey">the survey backlog</a>,
+    <a href="config.html#config-everything">config</a>,
+    <a href="villagers.html#cowboy-everywhere">the cowboy in every village</a>,
+    <a href="troughs.html#troughs">troughs and salt licks</a> and
+    <a href="breed-book.html#breed-sources">breeds from elsewhere</a>.
 </p>
 
 <h3>Each written from the code, so the next session does not pay twice</h3>
@@ -3677,7 +3782,7 @@
 <h2 id="d2026-09-17-glow-preview">2026-09-17, after the regions work &mdash; A glow can be seen without starting the game</h2>
 
 <p>
-    <a href="roadmap.html#designer">&sect;10</a>&rsquo;s last entry was &ldquo;the creator
+    <a href="making-a-gene.html#designer">&sect;10</a>&rsquo;s last entry was &ldquo;the creator
     cannot show a glow&rdquo;, and the roadmap framed the fix as <em>shading in the
     preview</em>. Asked for it across the horse designer, the breed designer, the custom
     spawn egg and the gene pages, two of those four turned out not to be the job described.
@@ -3782,7 +3887,7 @@
 
 <p>
     The entry below left <code>RAMP</code> and <code>PALETTE</code> out, and that remainder
-    was all of <a href="roadmap.html#designer">&sect;10</a> still standing. This finished it.
+    was all of <a href="making-a-gene.html#designer">&sect;10</a> still standing. This finished it.
 </p>
 
 <h3>What does a region even mean on an op that generates its colour?</h3>
@@ -3969,7 +4074,7 @@
         bypass <code>solidColour</code> for a colour source of their own &mdash; a stop list
         walked along an axis, a colour drawn per cell &mdash; so scoping them is a second
         change rather than the same one. It is the remainder of
-        <a href="roadmap.html#designer">&sect;10</a> now.
+        <a href="making-a-gene.html#designer">&sect;10</a> now.
         (<em>Built the same day &mdash; <a href="#d2026-09-17-ramp-regions">the next entry
         up</a>.</em>)</li>
     <li><strong><a href="known-gaps.html#gap-164">Gap 164</a>&rsquo;s <code>hueOffset</code>
@@ -3991,7 +4096,7 @@
 <h2 id="d2026-09-17-colour-control">2026-09-17, later &mdash; A colour control, and the preview that had been lying about ranges</h2>
 
 <p>
-    The session began as <a href="roadmap.html#designer">&sect;10</a>&rsquo;s last bullet
+    The session began as <a href="making-a-gene.html#designer">&sect;10</a>&rsquo;s last bullet
     &mdash; &ldquo;per-region colour ranges and gradients&rdquo;, with the roadmap asking
     whether a colour should become a <code>Value</code>. <strong>The answer is no, and
     two thirds of the bullet was already built.</strong> Gradients are <code>RAMP</code>,
@@ -5563,7 +5668,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     must ride on an attachment. The blocker is that the saddle already renders at vanilla
     scale over a genetically resized body, so tack would be visibly broken on arrival;
     fixing <code>state.scale</code> inheritance is a prerequisite. Written up at
-    <a href="roadmap.html#mod-patches">&sect;23</a>, with the honest note that shipping tack
+    <a href="compatibility.html#mod-patches">&sect;23</a>, with the honest note that shipping tack
     contradicts the compatibility page's current claim that tack is what this mod leaves to
     other people.
 </p>
@@ -5666,7 +5771,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
 <p>
     Neither file was a breed draft. One was a breed-count-by-country table, marked INCOMPLETE by its
     author; the other a long list of registries sorted by <em>how a horse gets into them</em>. Both were
-    read, mined into <a href="roadmap.html#breed-coverage">a roadmap entry</a> and deleted.
+    read, mined into <a href="breed-book.html#breed-coverage">a roadmap entry</a> and deleted.
 </p>
 
 <p>
@@ -6414,7 +6519,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         in a push and is the authority: the Lipizzan is filed under <strong>Austria</strong> (I had Slovenia) and the
         Arabian under <strong>Saudi Arabia</strong> (I had a region token). The other 47 already agreed.</li>
     <li><strong>Three genes these breeds need do not exist, and went to
-        <a href="roadmap.html#natural-genes">the roadmap</a></strong> rather than known-gaps (owner's call): the
+        <a href="genetics-model.html#natural-genes">the roadmap</a></strong> rather than known-gaps (owner's call): the
         <strong>curly coat</strong> (<code>KRT25</code>/<code>SP6</code>) &mdash; which is the <em>whole</em> of the
         American Bashkir Curly, so it ships with the colour pool and no curl &mdash; plus ACAN <code>D5</code> and
         RYR1. What stayed a gap is a format limit: a strain can override gene pools but not <code>stats</code>, so the
@@ -6466,7 +6571,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
         is what lets every member agree on who is a stallion without talking to each other. Precedence when it cannot
         have everything: the stallion range, then the mare maximum, then the mare minimum.</li>
     <li><strong>Family relations were left out on purpose</strong>
-        (<a href="roadmap.html#bond">roadmap &sect;15</a>). Doing them honestly means founding rolls a foal
+        (<a href="horse-care.html#bond-roadmap">roadmap &sect;15</a>). Doing them honestly means founding rolls a foal
         <em>from</em> the lead and a mare rather than independently from the sheet; stamping mother and father ids
         without the descent was offered and rejected, because the pedigree screen would then assert a relationship the
         genetics contradict.</li>
@@ -7097,7 +7202,7 @@ a bay&#39;s absolute point (0, 1)   room = 0   &rarr; red never written</code></
     <li><strong>Found on the way:</strong> impossible KIT / MITF / PAX3 genotypes may be
         breedable (<a href="known-gaps.html#gap-225">gap 225</a>, a code read only).</li>
     <li><strong>Deliberately not built:</strong> wild band breeding (its own slice, on
-        <a href="roadmap.html#ivf">the roadmap</a>), body condition, seasons, a stallion
+        <a href="item-seed-jars.html#ivf">the roadmap</a>), body condition, seasons, a stallion
         covers line on the info screen, and revealing twins before birth.</li>
 </ul>
 
@@ -8134,7 +8239,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 <h2 id="d2026-09-12">2026-09-12 &mdash; three quarters of &sect;10, three genes that use it, and one word that had to be neither of the obvious two</h2>
 
 <p>
-    Three of the four things left in <a href="roadmap.html#designer">&sect;10</a> shipped:
+    Three of the four things left in <a href="making-a-gene.html#designer">&sect;10</a> shipped:
     erase-down, the expression preview, and glow intensity. The first two turned out to be
     <strong>one feature seen from two ends</strong>, which is why they are one commit. What
     remains of the section is per-region colour ranges.
@@ -8655,7 +8760,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     <li><strong>The family tree runs both ways</strong> - Ancestors, Descendants, Overview,
         with Back and Home, on data the client was already being sent.</li>
     <li><strong>A gene carrot names two alleles</strong>, which is stage one of the
-        <a href="roadmap.html#allele-papers">allele-paper design</a> and fixes a limitation
+        <a href="item-research-papers.html#allele-papers">allele-paper design</a> and fixes a limitation
         nothing had recorded: the pair came from <code>alleles().get(0)</code>, so the
         forty-allele particle locus could only ever be spliced to dust.</li>
     <li><strong>Horses come to food, and run for their favourite</strong> - the only way the
@@ -9294,7 +9399,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 <ul>
     <li><strong>The two tool gaps</strong> (<code>RAMP</code> <code>angle</code>,
         <code>FAN</code> <code>origin: "cell"</code>) are real and are on
-        <a href="roadmap.html#intake-tool-gaps">the roadmap</a>. Tidewave and opal fire ship
+        <a href="making-a-gene.html#intake-tool-gaps">the roadmap</a>. Tidewave and opal fire ship
         with the authors' approximations.</li>
     <li><strong>Ringwork, the fourteen <code>Y/X</code> <code>WAVES</code> genes and the
         seven mis-filed coat genes</strong> are all shipped work and were not re-done. Each
@@ -11430,7 +11535,7 @@ something else</h4>
     </p>
 </div>
 
-<p>The other half of <a href="roadmap.html#designer">&sect;10</a>, and the piece the drawing
+<p>The other half of <a href="making-a-gene.html#designer">&sect;10</a>, and the piece the drawing
 tools have to be written against. Every other mask in the vocabulary says what a shape is
 <em>made of</em> &mdash; a lattice of spots, a band of this width, noise at that scale &mdash;
 and lets the geometry and the horse's own numbers decide where it lands. That is the right
@@ -11531,7 +11636,7 @@ defect.</p>
 
 <h4>The <code>FRACTAL</code> mask</h4>
 
-<p>With &sect;1 closed the owner picked <a href="roadmap.html#designer">&sect;10, the visual
+<p>With &sect;1 closed the owner picked <a href="making-a-gene.html#designer">&sect;10, the visual
 marking designer</a>, and within it the fractal masks before the drawing tools &mdash; the
 roadmap names them as what <strong>peacock and laced tobiano both want</strong>, they live
 in <code>common/</code>, and the drawing tools sit on top of the mask vocabulary rather
@@ -11753,7 +11858,7 @@ name no breed at all; some correctly, but
 <a href="gene-leopard.html">leopard complex</a> without Appaloosa and
 <a href="gene-acan.html">ACAN</a> without the Miniature Horse are the same hole one level
 down. It is written up, tiered by which pages the new tabs cite and cannot get an answer
-from, on <a href="roadmap.html#science-tabs">the roadmap</a>.</p>
+from, on <a href="coding-notes.html#science-tabs">the roadmap</a>.</p>
 
 <p>The other half of the audit was the tabs that already existed. Measured against the new
 ones, which run 1,200&ndash;2,300 words, <strong>the older science tabs are thin</strong>:
@@ -13322,7 +13427,7 @@ one.</li>
 
 <h3 id="stables-2026-09-07">Built 2026-09-07, NOT yet looked at: three stables that generate with rare horses already in them.</h3>
 
-<p>Owner-driven, one request with three buildings attached. Design and <strong>attribution</strong>: <a href="stables.html">generated stables</a>. Checklist <a href="roadmap.html#stables">&sect;0-AK</a>. Gaps <a href="known-gaps.html#gap-80">80</a>&ndash;<a href="known-gaps.html#gap-82">82</a>.</p>
+<p>Owner-driven, one request with three buildings attached. Design and <strong>attribution</strong>: <a href="stables.html">generated stables</a>. Checklist <a href="stables.html#stables">&sect;0-AK</a>. Gaps <a href="known-gaps.html#gap-80">80</a>&ndash;<a href="known-gaps.html#gap-82">82</a>.</p>
 
 <ul>
 <li><strong>None of the three files was a Minecraft structure, and that was most of the work.</strong> Two are Sponge Schematic v2 and one is a legacy MCEdit <code>.schematic</code> carrying numeric 1.12 block ids with no block names in it at all. <code>tools/stables/bake-stables.py</code> converts both. <strong>The trick that made it affordable is the DataVersion</strong>: the output claims to be 1.13.2 rather than current, because the game runs every structure it loads through the DataFixer against the file's own version - so <code>grass_path</code> becoming <code>dirt_path</code>, and every other rename in twelve years of Minecraft, is done by the game rather than by a hand-written table that would be subtly wrong. The legacy id table therefore only has to reach 1.13, and it stops there on purpose.</li>
@@ -13357,7 +13462,7 @@ one.</li>
 <p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="item-breeding-carrots.html">items</a>. Checklist on <a href="item-splice-carrots.html#verification">the splice carrots&rsquo; verification tab</a>.</p>
 
 <ul>
-<li><strong>They are one field, not five carrots.</strong> <code>CarrotEffect.GeneSplice</code> gained a <code>SpliceCategory</code>, and everything downstream &mdash; the token, the fold, the combine recipe, the feed handler &mdash; carried on working. That was the point of the check: if adding five carrots had needed five <code>CarrotEffect</code> cases and five <code>fold</code> branches, the abstraction the <a href="roadmap.html#carrot-content">roadmap</a> claimed was cheap would not have been.</li>
+<li><strong>They are one field, not five carrots.</strong> <code>CarrotEffect.GeneSplice</code> gained a <code>SpliceCategory</code>, and everything downstream &mdash; the token, the fold, the combine recipe, the feed handler &mdash; carried on working. That was the point of the check: if adding five carrots had needed five <code>CarrotEffect</code> cases and five <code>fold</code> branches, the abstraction the <a href="carrots.html#carrot-content">roadmap</a> claimed was cheap would not have been.</li>
 
 <li><strong>Every themed pool is a subset of the safe pool, and that is the whole safety story.</strong> Each theme starts from <code>SpliceSafety.pool()</code> and removes from it, so the existing blacklist covers all six random carrots at once and a health gene registered tomorrow is out of every one of them the moment it exists. There is a test asserting the subset property rather than a comment claiming it, because the failure mode is a dead foal in somebody's world.</li>
 
@@ -13374,12 +13479,12 @@ one.</li>
 
 <h3 id="h-menu-2026-09-07">Built 2026-09-07, NOT yet looked at: the stable as a table, and an information screen you can read.</h3>
 
-<p>Owner-driven, ten requests in one pass. Design: <a href="roadmap.html#browser">roadmap &sect; the horse browser</a>, <a href="breeding.html#H">breeding &sect; client sync</a>. Checklist on <a href="breeding.html#verification">breeding&rsquo;s verification tab</a>. Gaps <a href="known-gaps.html#gap-76">76</a>, <a href="known-gaps.html#gap-77">77</a>.</p>
+<p>Owner-driven, ten requests in one pass. Design: <a href="horse-browser.html#browser">roadmap &sect; the horse browser</a>, <a href="breeding.html#H">breeding &sect; client sync</a>. Checklist on <a href="breeding.html#verification">breeding&rsquo;s verification tab</a>. Gaps <a href="known-gaps.html#gap-76">76</a>, <a href="known-gaps.html#gap-77">77</a>.</p>
 
 <ul>
 <li><strong>Two screens were painting over their own widgets, and it explains the request that opened the session.</strong> &ldquo;Make the barn name box more obvious as a box you can type in&rdquo; &mdash; it was not a styling problem. <code>Screen.extractRenderState</code> draws the widgets and <em>then</em> hands over, which is right for a screen with a background and wrong for one that fills the window with a 94%-opaque panel: the <code>EditBox</code> was drawn, and then buried. Same cause on the browser, where <code>extractLabels</code> runs after both the widget and the slot passes and the Crafting tab's own button sits inside the panel it draws. Both now put the chrome down first. Worth writing down because <strong>the bug was legible in the source from the day it was written and nobody had a reason to read that far</strong> &mdash; it took a cosmetic complaint to find it, and the honest lesson is about untested GUIs rather than about draw order.</li>
 
-<li><strong>The horse list ships, and it ships against the roadmap's own advice.</strong> <a href="roadmap.html#browser">&sect;18</a> says the expensive part is a per-player owned-horse index and that sort and filter belong <strong>server-side, paginated</strong> &mdash; &ldquo;do not sync every horse's genome to the client to filter it there&rdquo;. This does. The reason it was still the right call: the <a href="#horse-info-2026-09-07">breeding preview</a> was <em>already</em> sending exactly those rows, with exactly those genotypes, for exactly those horses, so the tab cost one packet field rather than one packet. Building the index first would have meant a second source of truth for the same list while the first one sat there working. The cap is the whole of the difference and it is <a href="known-gaps.html#gap-76">gap 76</a>.</li>
+<li><strong>The horse list ships, and it ships against the roadmap's own advice.</strong> <a href="horse-browser.html#browser">&sect;18</a> says the expensive part is a per-player owned-horse index and that sort and filter belong <strong>server-side, paginated</strong> &mdash; &ldquo;do not sync every horse's genome to the client to filter it there&rdquo;. This does. The reason it was still the right call: the <a href="#horse-info-2026-09-07">breeding preview</a> was <em>already</em> sending exactly those rows, with exactly those genotypes, for exactly those horses, so the tab cost one packet field rather than one packet. Building the index first would have meant a second source of truth for the same list while the first one sat there working. The cap is the whole of the difference and it is <a href="known-gaps.html#gap-76">gap 76</a>.</li>
 
 <li><strong>One roster, two tabs, so <code>BreedingRoster</code> is <code>HorseRoster</code>.</strong> Keeping a second round trip for the same question would have been two things to keep in step and twice the bytes for the half that overlaps. The entry grew the fields a table needs and a horse's genotype now arrives once for both.</li>
 
@@ -13612,7 +13717,7 @@ one.</li>
 
 <li><strong>The horseman cost almost no code, because 26.1.2 gave the hard part away.</strong> Villager trades are datapack registries now, and a trade&rsquo;s <code>given_item_modifiers</code> are loot functions that run when the offer is <em>generated</em>. That is exactly the &ldquo;roll per restock, not per purchase&rdquo; semantics &sect;19 spent a paragraph arguing for. So the five tiers are JSON and the only Java is one loot function, <code>set_random_gene</code>, whose pool is <em>computed</em> from <code>GeneRarity</code> - a third-party gene joins automatically, and &ldquo;legendary and mythic are never sold&rdquo; is a comparison rather than a blacklist that can go stale.</li>
 
-<li><strong>Deliberately not built:</strong> random genotype vials and buying player-made ones back (both need &sect;<a href="roadmap.html#ivf">17</a>&rsquo;s <code>collectedFrom</code>; tier 5 buys a stallion seed jar instead), the custom <code>HORSE_TRADER</code> gossip type (vanilla gossip works, and it was flagged unverified), and any restocking for the cowboy - his herd is a fixed cast, so a horse he has written a paper for leaves the list for good whether or not that paper is ever redeemed.</li>
+<li><strong>Deliberately not built:</strong> random genotype vials and buying player-made ones back (both need &sect;<a href="item-seed-jars.html#ivf">17</a>&rsquo;s <code>collectedFrom</code>; tier 5 buys a stallion seed jar instead), the custom <code>HORSE_TRADER</code> gossip type (vanilla gossip works, and it was flagged unverified), and any restocking for the cowboy - his herd is a fixed cast, so a horse he has written a paper for leaves the list for good whether or not that paper is ever redeemed.</li>
 
 <li><strong>Placeholder art, all of it flagged.</strong> Both papers reuse the research-paper texture; the Horse Trader&rsquo;s Post wears vanilla&rsquo;s barrel; the cowboy and the horseman share one overlay (the owner&rsquo;s recolour of the farmer hat) over a plains-villager body - shared as a render layer rather than a flattened composite, so there is one file to repaint and no derived copy to go stale.</li>
 

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Troughs and salt licks &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Troughs and salt licks</h1>
+<p class="lede">
+    A feeder a horse walks up to and eats from &mdash; assembled out of planks in whatever square
+    or rectangular footprint the stall wants, in any mod's wood &mdash; and a salt lick beside it
+    that a horse uses over time. <strong>None of it is built</strong>, and no block this mod adds
+    feeds a horse at all today. This page exists so that the plan has a home of its own rather
+    than a section on a shared list, and so that when the first piece of it ships there is
+    already a page to document it on.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows. How a horse feeds itself now is on
+        <a href="horse-care.html">horse care</a>.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A trough a horse actually eats from &mdash; the first block in the mod that feeds one
+        &mdash; buildable in any rectangle out of any mod's wood, plus salt licks that must grant
+        something rather than punish their absence.
+    </p>
+</div>
+
+<h2 id="troughs">Troughs and salt licks</h2>
+
+<p>
+    From <a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a>, and
+    asked for specifically as <strong>a trough built out of the existing modular-wood
+    framework, in any square or rectangular shape</strong>.
+</p>
+<p>
+    <strong>No block of this mod feeds a horse today.</strong> Feeding is grazing and
+    hand-feeding &mdash; <code>HungerFoodGoal</code> walks a horse about ten blocks to the best
+    thing it can reach, with a hay bale as the largest meal &mdash; so a trough is the first
+    <em>place</em> a horse eats from, and that is the feature rather than the block.
+</p>
+<ul>
+    <li><strong>The wood half is genuinely reusable and the paint half is not.</strong>
+        <code>compat/MaterialScan</code> and <code>ModdedMaterials.woods()</code> already serve
+        double gates, jumps and carts from one roster, so &ldquo;a trough in any wood, vanilla or
+        modded&rdquo; is an existing pattern with three precedents. But there is no shared paint
+        system &mdash; jumps, tack and generated armour each tint their own way, and two of them
+        duplicate the same dye-reading lines with a source comment saying <em>&ldquo;if a third
+        place needs dyes, extract it then&rdquo;</em>. A trough plus
+        <a href="cart-bench.html#cart-bench">the cart and jump bench</a> would be the third and fourth places.
+        <strong>That extraction is now due.</strong></li>
+    <li><strong>Multi-block in any rectangle is the genuinely new part.</strong> Nothing in the
+        mod assembles a structure from several placed blocks; the nearest thing is
+        <code>StallDetector</code>, which <em>recognises</em> an enclosure the player built
+        rather than forming one. Worth reading it first &mdash; the answer to &ldquo;what counts
+        as a valid shape, and what happens when someone breaks one block of it&rdquo; is already
+        worked out there.</li>
+    <li><strong>Salt licks</strong> were asked for alongside. They have no mechanism here at all
+        &mdash; a block a horse walks to and uses over time, which is closer to
+        <a href="horse-care.html">care</a> than to feeding. <strong>Keep it carrot-not-stick:</strong>
+        a salt lick that grants something is in keeping; a horse that suffers without one is the
+        husbandry-chore version and is exactly what the owner's note warns against when it says
+        to hold Animania's ideas to this mod's philosophy.</li>
+    <li><strong>Any mod's trough-alike should work</strong>, the way
+        <code>compat/HayBales</code> made every mod's hay bale grazeable with a tag rather than a
+        list. Same trick, same reason.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="horse-care.html">Horse care</a>
+        <a href="cart-bench.html">The cart and jump bench</a>
+        <a href="compatibility.html">Compatibility</a>
+        <a href="philosophy.html">Philosophy</a>
+    </div>
+    A trough is the first place a horse would eat from rather than a decoration that looks like
+    one &mdash; and a salt lick only earns its place if it grants something, never if it punishes
+    its absence.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

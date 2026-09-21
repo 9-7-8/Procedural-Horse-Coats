@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rider comfort &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Rider comfort</h1>
+<p class="lede">
+    Five small things that make riding less irritating, borrowed from other mods that
+    already do them: four are additions nobody would argue with, and one &mdash; fading
+    the horse out as you look down &mdash; touches the coat itself and is the only one
+    with a real unknown in it. None touches genetics, and each is small enough to ship
+    alone. <strong>None of it is built.</strong> This page exists so that the plan has a
+    home of its own rather than a section on a shared list, and so that when the first
+    piece of it ships there is already a page to document it on.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Five small borrowings from other mods, each shippable alone and each wanting a
+        config switch &mdash; no mining-speed debuff while mounted, an inventory keybind,
+        leads that return &mdash; plus <strong>fading the horse out as you look down</strong>,
+        which asks the coat pipeline for a transparency it has never had.
+    </p>
+</div>
+
+<hr>
+
+<p id="rider-comfort">
+    Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster of the
+    survey backlog</a>. None touches genetics, and each is small enough to
+    ship on its own. <strong>Every one of them wants a config switch written with it</strong>, per
+    <a href="config.html#config-everything">the config sweep</a>.
+</p>
+
+<ul>
+    <li><strong>Remove the mining-speed debuff while mounted.</strong> Vanilla gives you a fifth
+        of your mining speed on horseback. Taken from Horse Buff. Worth being honest that this is
+        the one of the five that <em>alters</em> rather than adds, so
+        <a href="philosophy.html#vanilla-intact">vanilla stays intact</a> has a claim on it and
+        the switch matters more here than elsewhere.</li>
+    <li><strong>A keybind to open your own inventory while riding.</strong> Horse Buff binds it to
+        <kbd>ALT</kbd>+<kbd>E</kbd>. We already own <kbd>H</kbd> for the browser through
+        <code>client/HorseBrowserKeyBindings</code>, so the idiom and the registration exist. This
+        one adds a door rather than closing one.</li>
+    <li><strong>Fade the horse out as you look down.</strong> Horse Buff fades the mount for
+        sightlines, with an optional head-pitch offset of up to 45&deg;.
+        <strong>This is the one with a real unknown in it:</strong> we are the only mod here whose
+        coat is generated per horse, and a half-transparent procedural coat is a rendering case
+        nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
+        transparency before designing the feature around it.</li>
+    <li><strong>Leads return to your inventory</strong> instead of dropping on the ground, falling
+        back to a drop when the inventory is full. From Horse Tweaks. Pure annoyance removal and
+        nothing in this mod's design objects.</li>
+    <li><strong>Right-click with a saddle or armour equips it</strong> rather than opening the
+        horse screen. Also Horse Tweaks. <strong>The one most likely to collide with something we
+        ship:</strong> <code>client/HorseScreenHooks</code>, the <code>i</code> button and the
+        <code>right-click to open</code> client option all live on that same interaction, so this
+        needs designing against them rather than beside them.</li>
+</ul>
+
+<p class="muted">
+    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered and
+    declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing it moves
+    a number every other mod's pathing assumes.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="config.html">Config &mdash; the switch each of these wants</a>
+        <a href="pipeline.html">The coat pipeline</a>
+        <a href="compatibility.html">Living beside other mods</a>
+    </div>
+    Four of these are an afternoon each and want nothing settled first; the fade is the one to
+    leave until the coat has actually been drawn half-transparent, because everything about how
+    it would be configured depends on whether it can be drawn at all.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

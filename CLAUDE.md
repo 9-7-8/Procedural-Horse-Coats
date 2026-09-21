@@ -28,7 +28,7 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | How a gene, system or class works | its own wiki page (see the map) |
 | A defect, a gap, or an unchecked assumption | `wiki/known-gaps.html` |
 | Something to go look at in-game | a **Verification tab on that thing's own page** |
-| Work not started yet | `wiki/roadmap.html` |
+| Work not started yet | a **Roadmap tab on that thing's own page** |
 | A design call - made, or still open | `wiki/decisions.html` |
 | An API quirk of this SDK | `wiki/api-notes.html` |
 | **A derived number** (gene counts, catalogue sizes, test counts) | the code that computes it |
@@ -75,19 +75,16 @@ the same change as the code, and never copy it back into here.
 | Living beside other mods | `wiki/compatibility.html` |
 | **What is broken / unproven / half-built** | `wiki/known-gaps.html` |
 | **What is waiting to be looked at** - generated; every page's Verification tab, one sentence each | `wiki/verification.html` |
-| **Planned features**, priority-ordered, and *nothing else* | `wiki/roadmap.html` |
+| **What is planned and not built** - generated; every page's Roadmap tab, one sentence each | `wiki/roadmap.html` |
 | **Design calls** - settled (do not reopen) and still open | `wiki/decisions.html` |
 | **What each session built, and why** | `wiki/session-log.html` |
 
 `README.md` is **user-facing only** - what the mod does, how to play it,
 install, licence. No status, no architecture, no API notes.
-Two rules about the roadmap, both learned the hard way:
-- **Link it by anchor, never by `§` number** (`#health-genes`, `#browser`). It
-  has been renumbered twice; the sections carry no numbers at all now.
-- **Planned features only.** When something ships, *delete* it and write it up on
-  its own page - "marked shipped" is not "moved". A decision goes to
-  `wiki/decisions.html`, a defect to `wiki/known-gaps.html`, a thing to go and look
-  at to that page's Verification tab. It had swallowed all four before.
+**Never link a plan at `roadmap.html#anchor`** - it has none any more; link the
+Roadmap tab that holds it (`undead-horses.html#skeleton-gene`). When something
+ships, *delete* it from that tab and write it up on the same page's Gameplay and
+Coding tabs - "marked shipped" is not "moved".
 
 ---
 ## Hard rules
@@ -144,9 +141,11 @@ Two rules about the roadmap, both learned the hard way:
    `wiki/known-gaps.html` in the same change. No "Closed" entries, no "Confirmed" notes left
    behind - a Verification tab only ever shrinks, and a page with nothing left to check
    loses the tab and leaves the index by itself.
-   Same shape for a roadmap: if a subject has a page, its plans go on a **Roadmap tab
-   there**, and `wiki/roadmap.html` keeps one sentence pointing at it.
-   `wiki/horse-gear.html` is the worked example of all three tabs. (Owner.)
+   **`wiki/roadmap.html` is the same machinery for the other list**: a plan goes on a
+   **Roadmap tab** (`data-tab="roadmap"`, one sentence in a `note roadmap-summary` box),
+   `bake-roadmap-index.mjs` collects them, nothing is hand-written there either, and **a
+   plan whose subject has no page means writing the page** - Roadmap tab only, growing the
+   others as it ships. `wiki/horse-gear.html` is the worked example. (Owner.)
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
 or five files each, and the game and the tools drift silently if you miss one.**
 The four lists are on `wiki/making-a-gene.html#contracts` - read it before you
@@ -188,6 +187,7 @@ node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same i
 node neoforge-26.1.2/tools/check-block-models.mjs # no blockstate points at a model nobody wrote
 node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
 node wiki/tools/bake-verification-index.mjs     # rebuild verification.html from every Verification tab
+node wiki/tools/bake-roadmap-index.mjs          # and roadmap.html from every Roadmap tab
 node neoforge-26.1.2/tools/check-progress-tasks.mjs # every checklist task is hooked, and is an advancement
 ```
 Requires JDK 25 (auto-provisioned). Crash reports: `neoforge-26.1.2/run/crash-reports/`.
@@ -214,7 +214,7 @@ and fails *silently* when stale:
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages) | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
-| **any Verification tab** - added, deleted, or its summary sentence reworded | `node wiki/tools/bake-verification-index.mjs` - it hard-fails on a tab with no summary box rather than write an index that omits a page | `wiki/verification.html` |
+| **any Verification tab, or any Roadmap tab** - added, deleted, or its summary sentence reworded | `node wiki/tools/bake-verification-index.mjs` and `node wiki/tools/bake-roadmap-index.mjs` - each hard-fails on a tab with no summary box rather than write an index that omits a page | `wiki/verification.html`, `wiki/roadmap.html` |
 | **`ProgressTask`** - a checklist task added, deleted or retitled | `node neoforge-26.1.2/tools/bake-advancements.mjs` (a new task needs an icon in its `ICON` map first), then `check-progress-tasks.mjs`. Every task is also an advancement, and the bake is the only thing that makes it one | `neoforge-26.1.2/.../data/horsegenetics/advancement/` |
 | any AI goal added, removed or re-prioritised | `node wiki/tools/bake-behaviour-hierarchy.mjs` | `wiki/behaviour-hierarchy.html` |
 | a wood, or any geometry, of the **double gates** | `node neoforge-26.1.2/tools/bake-double-gates.mjs` - then the recipe row below, since it writes recipes too. **It only writes**: removing a wood means deleting that wood's files and lang keys by hand | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, both `data/minecraft/tags/block/` files **and** the merged `lang/en_us.json` |

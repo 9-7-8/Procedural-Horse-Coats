@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The cart and jump bench &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>The cart and jump bench</h1>
+<p class="lede">
+    A bench you stand at to have a cart or a jump <em>built to order</em> &mdash; a wood and a
+    colour chosen for each piece, the wheels of one timber and the bed of another &mdash; rather
+    than crafting a whole cart from a grid recipe that already knows which wood it is.
+    <strong>None of it is built.</strong> This page exists so that the plan has a home of its own
+    rather than a section on a shared list, and so that when the first piece of it ships there is
+    already a page to document it on.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows. What
+        <a href="carts.html">carts</a> and <a href="item-jumps.html">jumps</a> already do is on
+        their own pages; only the bench is planned.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A bench that builds a cart or a jump piece by piece &mdash; a wood and a paint per wheel,
+        bed and shaft &mdash; which forces cart materials off the registry id onto stack
+        components, and retires the baked per-wood recipes that <code>compat/GeneratedCarts</code>
+        mirrors at run time.
+    </p>
+</div>
+
+<h2 id="cart-bench">The cart and jump bench &mdash; built to order, not crafted from a grid</h2>
+
+<p>
+    <strong>An overhaul of how carts are made, and jumps with it.</strong> Both are built from
+    wood today and both take the wood as a whole; the ask is to make the
+    <em>piece</em> the unit. One bench, two products, because the mechanic is identical and
+    shipping it twice would be two screens that drift.
+</p>
+
+<h3 id="cart-bench-carts">Carts</h3>
+
+<ul>
+    <li><strong>A wood per piece, not a wood per cart &mdash; and this is a real rewrite, not a
+        screen.</strong> Wheels of one wood, bed of another, shafts of a third. The obstacle is
+        that a cart's wood is <em>in its registry id</em> today: <code>oak_wagon</code>,
+        <code>biomesoplenty_maple_plow</code>, one item per (wood &times; kind), and
+        <code>CartWood</code>'s own documentation says that id is permanent once a world uses it.
+        Per-piece materials cannot be an id, so they have to become <strong>components on the
+        stack and data on the entity</strong> &mdash; which is exactly the shape
+        <a href="item-jumps.html">jumps</a> already moved to, going from twelve blocks and
+        thirty-six items down to one item carrying <code>JumpMaterials</code>. <strong>Jumps are
+        the worked precedent for this whole section</strong>, and the cart change is that
+        migration done a second time.</li>
+    <li><strong>Dye or paint the wood</strong>, on top of the choice of wood &mdash; the two are
+        different axes and both were asked for. Nothing in the <code>carts/</code> package tints
+        anything today; a cart's texture is assembled from its wood's three block sprites and
+        that is all.</li>
+    <li><strong>It deletes a duplication rather than deepening one.</strong> Seventy-two shipped
+        recipe JSONs (twelve woods &times; six carts, baked by <code>tools/bake-carts.mjs</code>)
+        are mirrored at run time by <code>compat/GeneratedCarts</code> for modded woods, and the
+        two <em>must agree</em> &mdash; a drift is a modded cart that will not craft and logs
+        nothing. <strong>A bench that composes a cart from materials has no per-wood recipe to
+        bake and no second implementation to keep in step</strong>, which retires that whole
+        hazard. That is the strongest argument for the bench and it is not the one that was made
+        for it; worth weighing before the screen is designed.</li>
+</ul>
+
+<h3 id="cart-bench-jumps">Jumps</h3>
+
+<p class="muted">
+    <strong>Start from what jumps already are</strong>, because it is more than the ask assumes.
+    A jump is one item carrying <code>JumpMaterials</code> &mdash; rails wood, standards wood,
+    <em>rails dye, standards dye</em> and a size &mdash; edited in
+    <code>JumpScreen</code>/<code>JumpMenu</code>, with three cosmetic styles and a ten-step
+    height ladder. <strong>So dye is built, per half, including modded dyes vanilla has no name
+    for.</strong> What is missing from this list is patterns, opacity, flags and depth.
+</p>
+
+<ul>
+    <li><strong>Patterns and an opacity.</strong> Patterns rather than flat colour, and
+        a translucency slider &mdash; which is the only one of these with a rendering cost, since
+        a translucent block leaves the solid render type and has to be sorted. Note the existing
+        dye is <em>consumed irreversibly</em> (a plank swap is reversible, a dye is not); a
+        pattern and an opacity should decide deliberately whether they inherit that, because a
+        slider you cannot slide back is a trap the current design gets away with only because
+        colour is a one-time choice.</li>
+    <li><strong>Little flags on the standards.</strong> Geometry in the existing baker, and the
+        cheapest thing in this section.</li>
+    <li><strong>Two-deep jumps</strong>, which <strong>contradicts a standing rule</strong>:
+        <a href="item-jumps.html#obstacles">the obstacle vocabulary</a> records the owner's own bound that
+        <em>no style is more than one block deep</em>, because a two-block jump stops being a
+        thing you put in a row and becomes a structure. The intake asks for
+        &ldquo;potentially two deep&rdquo;, which reads as reopening it rather than overriding
+        it &mdash; settle that on <a href="decisions.html">design decisions</a> before building,
+        not in the baker.</li>
+    <li><strong>Jump styles that look like real cross-country fences</strong>, from
+        <a href="https://www.planetminecraft.com/mod/simply-cross-country-1-16-5/">Simply Cross
+        Country</a>. That is the same geometry backlog
+        <a href="item-jumps.html#obstacles">already recorded</a> &mdash; logs, brush, ditches, fillers, walls, water
+        &mdash; with a reference to work from, which is what it was missing. Note the three
+        styles that exist (<code>VERTICAL</code>, <code>OXER</code>, <code>CROSSRAILS</code>)
+        collide <em>identically</em> on purpose, so adding a look costs nothing in balance; a
+        cross-country style that jumped differently would be taking that back.</li>
+</ul>
+
+<p class="muted">
+    <strong>Three benches now, and that is the thing to decide first.</strong>
+    <a href="item-equestrian-bench.html">The dyeing bench</a> ships,
+    <a href="horse-gear.html#accessories-bench">a tack bench</a> is proposed, and this is a third. They share a
+    wood-and-paint picker and differ only in what comes out. Either one bench grows tabs or
+    three benches share a widget; picking by accident means three implementations of the
+    colour picker.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="carts.html">Carts</a>
+        <a href="item-jumps.html">Jumps</a>
+        <a href="item-equestrian-bench.html">The equestrian bench</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    Nothing here can be built alone: three benches would share one wood-and-paint picker, and
+    which of them owns it is the call to settle before the first screen is drawn.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

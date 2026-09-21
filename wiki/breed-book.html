@@ -1038,6 +1038,103 @@
     backstory, and the first is worth more.
 </p>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        The catalogue&rsquo;s backlog is a shopping list, not a commitment: a <strong>continental
+        draft cluster</strong> from the Ardennais to the Schleswig Coldblood, the sport-horse
+        books gated on the open-studbook call, and the reindeer mod&rsquo;s breeds, whose wings
+        and horns mean learning to 3D model.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the catalogue, in one place.</strong> These sections
+    used to live on the main <a href="roadmap.html">roadmap</a> and were moved here whole, so
+    that the breeds that exist and the breeds that were wanted are read together. What is
+    planned for the <em>machinery</em> &mdash; spawning, herds, the stat curve, the render
+    layers a mane shape would need &mdash; is on
+    <a href="breeds.html#roadmap">the breeds page</a> instead.
+</p>
+
+<hr>
+
+<h2 id="breed-coverage">Breed coverage &mdash; candidates that do not ship</h2>
+
+<p>
+    <strong>None of these is committed to</strong>; they are a shopping list, and a breed is
+    <a href="breed-format.html">a JSON file</a> so each is cheap. They came out of a registry
+    survey, alongside a breed-count-by-country table that was deliberately <em>not</em>
+    imported as data &mdash; it under-represents the catalogue badly (no row at all for China
+    or the Balkans) and its one real finding is the missing Dutch Warmblood (KWPN), which
+    <a href="breed-book.html">the Gelderland</a> already names in its <code>notes</code> as the
+    book it was folded into.
+</p>
+
+<ul>
+    <li><strong>The continental draft cluster</strong> &mdash; Ardennais, Boulonnais, Breton,
+        Comtois, Auxois, Poitevin Mulassier, Cob Normand, Noriker, South German Coldblood,
+        Rhenish German Coldblood, Black Forest Horse, Schleswig Coldblood. The largest coherent
+        gap in the catalogue, and the one where the existing heavy breeds give the most to copy
+        from.</li>
+    <li><strong>Natives</strong> &mdash; M&eacute;rens, Pottok, Landais Pony, Eriskay Pony.</li>
+    <li><strong>Gaited and show breeds</strong> &mdash; Peruvian Paso, Racking Horse, Mountain
+        Pleasure Horse, National Show Horse, Drum Horse.</li>
+    <li><strong>Spotted-pony registries with a breed behind them</strong> &mdash; British
+        Spotted Pony, Australian Spotted Pony, Tiger Horse.</li>
+    <li><strong>Singles</strong> &mdash; Shagya Arabian, Maremmano; and the Russian Don,
+        Russian Trotter and French Trotter beside the Orlov that already ships.</li>
+    <li><strong>The sport-horse books</strong> &mdash; Holsteiner, Westphalian, Rhinelander,
+        Bavarian, W&uuml;rttemberger, Mecklenburg, Brandenburg-Anhalt, the national warmbloods
+        (Danish, Norwegian, Finnish, Swiss, Czech, Slovak, Polish, Hungarian), Belgian BWP and
+        SBS, and the Irish Sport Horse. <strong>These are gated on
+        <a href="decisions.html#open-studbook">the studbook call</a></strong>: they are open,
+        performance-selected books rather than breeding populations, and a pile of them would
+        be a pile of near-identical gene pools.</li>
+</ul>
+
+<p class="muted">
+    <strong>Two shipped files each stand for several registry divisions.</strong> The Welsh
+    sections A&ndash;D are one <code>welsh_pony.json</code>, and the Hackney Horse and Hackney
+    Pony are one <code>hackney.json</code>. A strain per section is the cheap version and it is
+    blocked on <a href="known-gaps.html#gap-256">gap 256</a>, since the sections differ mostly
+    by height and a strain cannot override stats.
+</p>
+
+<h2 id="breed-sources">Breeds and powers from elsewhere</h2>
+
+<p>
+    <a href="#breed-coverage">Breed coverage</a> lists the candidates that do not ship; these
+    are the ones that came in with a source attached and a modelling bill.
+</p>
+<ul>
+    <li><strong><a href="https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2447896-the-reindeer-breed-has-arrived-wings-horns-and">The
+        reindeer-breed mod</a> &mdash; all of its breeds, and the owner has said outright this
+        means learning to 3D model.</strong> That is the honest cost: wings and horns are mesh,
+        and <a href="decisions.html#settled-scope">three breed cosmetics are already deliberately
+        not modelled</a> for exactly this reason. It overlaps
+        <a href="model-parts.html#model-parts">attached model parts</a>, which is where the
+        machinery would live, so that section is the prerequisite and this is content for it.</li>
+    <li><strong>Its unicorn powers, read as candidate genes.</strong> The more valuable half and
+        much the cheaper one &mdash; a power that fits
+        <a href="magical-genes.html#magical-genes">the magical gene family</a> costs a JSON and a
+        founder weight, and needs no mesh at all. Read the mod for abilities first and models
+        second.</li>
+    <li><strong><a href="https://www.9minecraft.net/tensura-unique-monsters-mod/">Tensura Unique
+        Monsters</a> as a breed idea only.</strong> Named with the caveat that its models almost
+        certainly cannot be used &mdash; so this is a note for the
+        <a href="breed-book.html">breed book</a>, not an integration.</li>
+    <li><strong><a href="https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/">Beyond
+        Vanilla Equestria</a></strong> sits in
+        <a href="compatibility.html#mod-survey">the Bedrock cluster</a> &mdash; ideas and shapes,
+        nothing installable.</li>
+</ul>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 

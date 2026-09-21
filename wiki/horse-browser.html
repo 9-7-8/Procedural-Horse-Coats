@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The horse browser &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Gameplay <span class="sep">/</span> partly built</p>
+<h1>The horse browser</h1>
+<p class="lede">
+    The horse browser is the mod&rsquo;s own index of everything you own and everything it
+    knows &mdash; an <kbd>H</kbd>-key screen carrying a list of your horses, a searchable
+    gene database, the recipes, the alleles, the breeds and a breeding preview.
+    <strong>Part of it ships.</strong> This page is, for now, only the plan: the half that
+    exists is written up on <a href="breeding.html">Breeding &amp; pedigree</a>, under
+    <a href="breeding.html#H">client sync, the information screen and the family tree</a>.
+</p>
+
+<div class="note">
+    <span class="label">This page carries a Roadmap tab and nothing else, for now</span>
+    <p>
+        The browser is half built, and the built half is documented on
+        <a href="breeding.html#H">Breeding &amp; pedigree</a> rather than here &mdash; so all
+        this page holds today is the plan, moved whole from the main
+        <a href="roadmap.html">roadmap</a>. When somebody writes the browser up properly it
+        gains a Gameplay and a Coding tab here, and <a href="breeding.html">breeding</a> keeps
+        the breeding half.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A <strong>server-side owned-horse registry</strong> is still owed &mdash; My horses
+        ships on <code>HorseRoster</code> walking the whole ancestry table instead &mdash; and
+        beside it the vial, herd, bonding and crafting-tree tabs, a <strong>Where</strong>
+        column that teleports rather than merely printing, and a roster that refreshes on
+        birth and death.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the browser and for the horse menu, in one
+    place.</strong> These sections used to live on the main <a href="roadmap.html">roadmap</a>
+    and were moved here whole, so that what the browser does, how it is built and what is
+    still planned for it are read together. The bond tiers the bonding tab would surface are
+    planned on <a href="horse-care.html#bond-roadmap">horse care</a>.
+</p>
+
+<hr>
+
+<h2 id="browser">The horse browser</h2>
+
+<p>
+    The <code>H</code>-key screen is a real container menu; the horse list and the gene
+    database are built. The full plan is six tabs, and what is left is the <strong>vial
+    inventory</strong>, the <strong>herd view</strong>, the <strong>bonding view</strong> and a
+    generated <strong>crafting tree</strong>, plus out-of-band actions (teleport a horse to a
+    stall, whistle for bonded horses, recall to a holding pen).
+</p>
+
+<div class="note danger">
+    <span class="label">The owned-horse index is still owed, and the horse list is running without it</span>
+    <p>
+        <strong>The expensive part was never the UI.</strong> A proper per-player owned-horse
+        registry &mdash; updated on tame, breed, death and transfer, holding enough
+        denormalised data (name, sex, age, genotype, bond, herd) that horses in
+        <em>unloaded chunks</em> still appear &mdash; does not exist. The My horses tab ships
+        on <code>HorseRoster</code> instead, which walks the whole ancestry table on request,
+        cuts the result at <code>HorseRosterPayload.MAX_ENTRIES</code> and sends it, and the
+        client sorts and filters what it got. What is owed is the registry, with sort and
+        filter running <strong>server-side</strong> over it, and pagination.
+        <code>HorseQuery</code> is already game-free, so the same predicate can run on the
+        server the day the index exists.
+    </p>
+</div>
+
+<h3 id="bonding-tab">The tab the owner has asked for</h3>
+
+<p>
+    <strong>The bonding tab.</strong> The bond level with each horse, the tier it is at, and
+    <strong>concrete guidance on how to raise it</strong> &mdash; which sources are available,
+    what the daily cap is, how close the next tier is. This is the surface
+    <a href="horse-care.html#bond-roadmap">bond</a> is missing. My horses shows the
+    <em>number</em> and sorts by it, which is not the same thing: it says where you are and not
+    how to move.
+</p>
+
+<h3 id="browser-rest">The rest</h3>
+
+<ul>
+    <li><strong>A row should open the horse.</strong> Clicking a My horses row selects it and
+        fills the footer; it should reach the information screen and the family tree. Both want
+        a <code>HorseRecord</code> and the roster deliberately does not carry one (it carries a
+        <code>HorseListing</code>, a tenth of the bytes), so this needs a fetch-one-record
+        round trip.</li>
+    <li><strong><code>FamilyTreeScreen</code> should <em>become</em> a tab</strong> rather than
+        stay a separate screen. Row portraits exist &mdash; <code>client/HorsePortrait</code>,
+        used by the My horses table and both breeding pickers &mdash; but they are a
+        <em>second</em> copy of the tree's <code>drawHorseModel</code> rather than a shared one
+        (<a href="known-gaps.html#gap-78">gap 78</a>), and merging them is part of this. It is
+        also the working reference for a from-scratch retained-mode screen in this codebase,
+        scissor clipping and entity draw included &mdash; with the standing warning: build the
+        render state from a throwaway client-only <code>Horse</code>, and never touch
+        <code>ClientCoatCache</code>.</li>
+    <li><strong>The crafting-tree tab goes stale on contact with a modded gene.</strong>
+        Generate it from the recipe manager at runtime; do not hard-code the graph.</li>
+    <li><strong>Teleport, recall and whistle</strong> need the stall and pen definitions
+        <a href="item-stall-signs.html#roadmap">above</a>, plus answers for a destination that
+        no longer exists and for whether any of it crosses dimensions.</li>
+    <li><strong>A natural / magical filter on the Breeds tab.</strong>
+        <code>Breed.magical()</code> is already on every breed, so the filter is a toggle beside
+        the list and a clause in <code>HorseBrowserScreen.drawBreedList</code>. Build it with
+        the first magical breed, so it can be seen doing something.</li>
+</ul>
+
+<h2 id="horse-menu">The horse menu &mdash; acting on a horse, not only reading about one</h2>
+
+<p>
+    <a href="#browser">The browser's remaining tabs</a> are a separate and larger job; this is
+    the smaller, sharper set of asks about the screen as it stands. The thread running through
+    all of them: <strong>the menu is a report today, and every one of these turns it into a
+    console.</strong>
+</p>
+
+<h3 id="menu-teleport">Teleport the horse to you, from the Where column</h3>
+
+<p>
+    <strong>The column exists and is inert.</strong> &ldquo;Where&rdquo; is the twelfth column on
+    <em>My horses</em> and already prints <code>overworld 118, 71, -204</code>, built server-side
+    by <code>HorseRoster.where</code>. Clicking it should attempt to bring the horse to you.
+</p>
+<ul>
+    <li><strong>&ldquo;Use <code>/tp</code>&rdquo; was the ask, and the mechanism deserves a
+        second look rather than a literal reading.</strong> The mod already teleports horses
+        properly &mdash; <a href="item-whistles.html#ender">the ender whistle</a> moves a bound
+        horse across dimensions, and <a href="item-tickets.html">tickets</a> send one to a stall.
+        Routing the button through the same code is better than issuing a command: a command
+        needs permissions the player may not have, silently does nothing for them if they do not,
+        and skips every check the whistle makes.</li>
+    <li><strong>It must answer the unloaded case, which is most rows.</strong>
+        <code>HorseRoster.entry()</code> only fills <em>Where</em> for a horse in a loaded chunk;
+        everything else reads <em>not loaded</em>, and those are exactly the horses you would
+        want to summon. <strong><code>data/HorseWhereabouts</code> already exists</strong> as a
+        <code>SavedData</code> of last-seen dimension, position and death, and the roster does
+        not read it &mdash; wiring that in is the prerequisite and improves the column whether or
+        not the button is built.</li>
+    <li><strong>It needs a cost or a gate.</strong> A free summon-any-horse-from-anywhere button
+        makes whistles, tickets and holding pens redundant in one stroke. Whatever gates it
+        &mdash; a bond tier, a cooldown, an item &mdash; should be decided
+        <em>before</em> the button, not retrofitted after players have it.</li>
+</ul>
+
+<h3 id="menu-waypoints">A waypoint column, when a map mod is running</h3>
+
+<p>
+    A checkbox per horse that drops a waypoint on the player's minimap and refreshes it every
+    thirty seconds.
+</p>
+<p>
+    <strong>Nothing in the repo touches any map mod today</strong> &mdash; no Xaero, no
+    JourneyMap, no waypoint code of any kind &mdash; so this is a new integration from zero, and
+    it is the one item here with a third-party API at the end of it. Two things to settle first:
+    <em>which</em> map mods (their waypoint APIs are unrelated to each other, so each is its own
+    integration and the column should appear per-mod rather than as one checkbox), and where the
+    thirty-second refresh runs, since it has to keep updating while the screen is
+    <strong>closed</strong> and therefore cannot live in the screen. The fail-soft rule applies
+    as everywhere else: absent map mod, absent column, no crash and no hard dependency.
+</p>
+
+<h3 id="menu-refresh">Refresh on its own</h3>
+
+<p>
+    <strong>Asked for on three events &mdash; screen opened, a foal born, a horse died.</strong>
+    Today there is a <em>Refresh</em> button and a lazy first fetch:
+    <code>HorseBrowserScreen.init()</code> requests the roster only if the client has never
+    received one, and <code>HorseRoster.sendTo</code> has exactly one caller, the payload handler.
+    So a player who breeds a horse and opens the menu sees the world as it was when they last
+    pressed a button.
+</p>
+<ul>
+    <li><strong>On open is trivial</strong> &mdash; drop the <code>!received()</code> guard, at
+        the cost of a round-trip every time the screen opens.</li>
+    <li><strong>Birth and death are pushes, not pulls, and that is the actual work.</strong> The
+        server has to notice and send, which means a hook in the foaling and death paths and a
+        payload that says <em>what changed</em>. Re-sending the whole roster on every birth in a
+        big stable is the version to avoid; <code>ClientHorseRoster</code> is already a
+        UUID-keyed cache with a version counter, so it is built for a delta rather than a
+        replacement.</li>
+    <li><strong>Transfer and taming belong on the same list</strong>, even though they were not
+        asked for &mdash; they change the roster for exactly the same reason, and adding them
+        later means touching the same code twice.</li>
+</ul>
+
+<h3 id="menu-hud">RideHUD, and stats while you ride</h3>
+
+<p>
+    <strong>Wanted integrated rather than assessed.</strong> The mod has
+    <em>one</em> GUI overlay today &mdash; <code>client/FlightHudLayer</code>, a single line above
+    the hotbar naming the dismount key while flying, and itself unverified at runtime &mdash;
+    plus <code>JumpBarCooldownMixin</code>, which tints a vanilla bar. There is no stats readout
+    anywhere outside a screen you have to open.
+</p>
+<p>
+    That makes this <strong>the first real HUD in the mod</strong>, and the design question is
+    restraint rather than capability: every number already exists on
+    <code>HorseInfoScreen</code>, and the reason to show speed, jump, health and bond while
+    riding is that opening a screen mid-gallop is not a thing anyone does. Keep it to what
+    changes while you ride.
+</p>
+
+<div class="note">
+    <span class="label">Leave My Bars Alone was read, and the call was to fold it in here rather than rebuild it</span>
+    <p>
+        <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars
+        Alone</a> (Fuzs, MPL-2.0) does exactly two things, and it was read from source on
+        2026-09-21 because it is one of the very few mods on this page with a branch targeting
+        <strong>our own Minecraft version</strong>. It re-adds the food bar as an extra stacked
+        GUI layer anchored to <code>VEHICLE_HEALTH</code> &mdash; it does not move the mount's
+        health bar &mdash; and it narrows when vanilla is <em>allowed</em> to swap the XP bar for
+        the jump-charge bar, via one <code>@ModifyVariable</code> into
+        <code>nextContextualInfoState</code>, so XP stays visible unless you are actually
+        mid-charge. Two config booleans, both default on, no keybind, two files in the whole mod.
+    </p>
+    <p>
+        <strong>The owner's call was not to rebuild either half.</strong> We do not touch vanilla
+        bars separately; instead this section is designed so that <em>our</em> readout does not
+        add to the clutter in the first place, and the vanilla bar problem stays solved by a
+        maintained mod that already solves it. <strong>One thing to check when this is built:</strong>
+        <code>JumpBarCooldownMixin</code> already modifies the same vanilla jump bar, so the two
+        want testing together before either is claimed to work.
+    </p>
+</div>
+
+<h3 id="menu-restyle">A different look for the menu &mdash; explicitly not committed</h3>
+
+<p>
+    The owner likes <a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology
+    Dictionary</a>'s UI and raised it as <em>&ldquo;maybe as an option or alternative style&rdquo;</em>,
+    with <em>&ldquo;not a requirement, not committed to&rdquo;</em> said outright.
+    <strong>Recorded here so the idea survives, and flagged so nobody builds it as a decision
+    that was made.</strong> Worth knowing what it would cost before anyone is tempted:
+    <code>HorseBrowserScreen</code> is a single 3,430-line <code>Screen</code> with its layout
+    inline, so a second skin means extracting a layout seam first &mdash; which is real work with
+    no user-visible result, and is the kind of thing that only pays if the restyle is actually
+    wanted.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="breeding.html#H">Breeding &amp; pedigree &mdash; the screens as built</a>
+        <a href="horse-care.html">Bond, herds and care</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    Until the owned-horse registry exists the browser can only report what a round trip
+    happened to fetch, so that is the one thing to settle before any of the remaining tabs
+    are built.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

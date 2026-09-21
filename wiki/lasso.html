@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The lasso &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>The lasso</h1>
+<p class="lede">
+    <strong>A rope that catches a wild horse and holds it while you gentle it</strong>, so that
+    getting a horse is something you do with a tool instead of something you repeat until it
+    works. It was asked for, and researched before it was deferred; the research kept the
+    catching and threw away the multi-day wait the idea arrived with.
+    <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A thrown or held rope that stops a wild horse bolting so a band can be stalked rather
+        than chased &mdash; the first item in the mod to target an entity, with the source
+        mod&rsquo;s two-day taming timer cut as a chore with a progress bar.
+    </p>
+</div>
+
+<h2 id="lasso">A lasso, and catching as something you do</h2>
+
+<p>
+    A thrown or held item that <strong>catches a wild horse</strong> and holds it while it is
+    gentled, so that taming is an activity with a tool rather than a dice roll you repeat.
+</p>
+<p>
+    <strong>The length of it is the problem, not the idea.</strong> The mod this came from ran it
+    as a multi-day break: lasso the horse, it struggles, roughly two days later it is yours.
+    <a href="philosophy.html">Philosophy &sect;8</a> is &ldquo;add texture, do not add
+    chores&rdquo;, and a two-day timer on a horse you have already caught is a chore with a
+    progress bar. What survives the rule is the <em>catching</em> &mdash; a rope that stops a wild
+    horse bolting, so approaching a band is a stalk rather than a chase. The mod already has
+    everything downstream of that: taming by hand is built
+    (<a href="horse-care.html#hand-taming">hand-feeding</a>), and wild bands already flee, guard
+    and hold together.
+</p>
+<p>
+    <strong>It would be the first item in the mod that targets an entity</strong>, which is where
+    the research has to start; everything else acts on a block or on a held stack. Vanilla's own
+    lead is the closest model, and the mod currently only <em>reads</em> <code>isLeashed()</code>
+    to suppress goals. A braided rope item existed once as a crafting intermediate and was removed
+    for pricing a fence line at twelve horse hairs &mdash; if a rope comes back it must not come
+    back as that.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="items.html">The item roster</a>
+        <a href="horse-care.html#hand-taming">Taming by hand</a>
+        <a href="item-horse-hair.html">Horse hair</a>
+    </div>
+    Two things have to be answered before a rope is crafted again: what an entity-targeting item
+    looks like in this mod at all, and what this one costs, given the last rope was withdrawn
+    over its price.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

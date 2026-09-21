@@ -416,6 +416,68 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     <code>run/saves/</code> holds only the running world.
 </p>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A compact binary encoding for the sync payloads comes first &mdash; the genotype code and
+        the fatter epigenome code both grow a segment per locus &mdash; then grouping and
+        scrolling in the info panel, and a <code>:common:test</code> that fails when a wiki
+        page&rsquo;s number disagrees with the accessor that computes it.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the module split and the build, in one place.</strong>
+    This section used to live on the main <a href="roadmap.html">roadmap</a> and was moved here
+    whole, so that what the three modules do, <a href="#data-flow">how the data flows between
+    them</a> and what is still planned for them are read together.
+</p>
+
+<hr>
+
+<h2 id="scale">What breaks at scale</h2>
+
+<p>
+    The gene backlog &mdash; <a href="genetics-model.html#natural-genes">natural</a> and
+    <a href="magical-genes.html#magical-genes">magical</a> &mdash; is not a linear addition to
+    what ships. Three pieces of work fall out of that, and all three are still unbuilt:
+</p>
+
+<ul>
+    <li><strong>A compact binary encoding for the sync payloads.</strong> The genotype code
+        string grows a segment per locus, and everything carrying it grows in step &mdash; the
+        record, both sync payloads, and the epigenome code, which is already the fatter of the
+        two. Worth doing <em>for the payloads</em>; keep the string form for saves and
+        debugging.</li>
+    <li><strong>Display.</strong> The pen sign caps out, and the info panel needs grouping
+        (colour / pattern / performance / health) and probably scrolling. It has already gained
+        two rows and a condition list.</li>
+    <li><strong>A test that greps the wiki for the numbers the code can compute.</strong>
+        <code>api-reference.html</code> hand-transcribes public signatures and each
+        <code>gene-*.html</code> hand-transcribes that gene's constants; neither is generated,
+        so both drift silently the moment a signature or a tuning number changes. The gene
+        creator is the one place this is guarded &mdash; <code>check-parity.mjs</code> compares
+        its schema mirror and its whole preview engine against the real Java, and has already
+        caught a mis-ported <code>nextLong()</code> and four drifted schema defaults. The cheap
+        version elsewhere is a <code>:common:test</code> over the handful of accessors
+        (<code>Genes.codeOrder().size()</code>, <code>GenotypeCatalog.size()</code>,
+        <code>totalGenotypes()</code>) that fails when a page disagrees. <strong>Prose about
+        how a gene works survives a change; a number in prose almost never does.</strong></li>
+</ul>
+
+<p class="muted">
+    Composer cost is not on this list: phase 1 is O(painting genes &times; texels), the
+    non-painting genes cost nothing, and coats are cached per texture key, so it bites only on
+    first bake. Neither is <code>CoatTextureId</code>'s path length &mdash; that turned out not to
+    be a limit, and what it does cost is recorded on
+    <a href="texture-resolution.html">texture resolution</a>.
+</p>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 

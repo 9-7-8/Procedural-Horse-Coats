@@ -97,7 +97,7 @@
 <p>
     <code>item/WhistleItem</code>, one class and a radius per tier. Bond gating and pathing
     instead of teleporting are still open on
-    <a href="roadmap.html#callable-horses">the roadmap</a>.
+    <a href="#callable-horses">the roadmap tab</a>.
 </p>
 
 <h2 id="ender-code">The ender whistle</h2>
@@ -154,6 +154,53 @@
 </ul>
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Six pieces of the callable-horse design are unbuilt: a whistle that
+        <strong>walks a near horse in rather than teleporting it</strong>, a bond tier before
+        binding is allowed, an optional keybind, a texture that tells a bound whistle from an
+        unbound one, and binding for donkeys, mules and llamas.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the whistles, in one place.</strong> This section used
+    to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so that
+    what the whistles do, how they are built and what is still planned for them are read
+    together.
+</p>
+
+<hr>
+
+<h2 id="callable-horses">Callable horses &mdash; what is left after the ender whistle</h2>
+
+<p>
+    Calling one horse from anywhere is built, as the
+    <a href="#ender">ender whistle</a>. What was designed and not built:
+</p>
+
+<ul>
+    <li><strong>Walk if near, teleport if far.</strong> The ender whistle always teleports.
+        Inside <code>BondFollowGoal</code>'s range a walk would be more legible.</li>
+    <li><strong>Bond gating.</strong> Binding needs ownership only, not a bond tier. Which
+        tier, if any, is still an open number.</li>
+    <li><strong>Bound modes on the three area whistles</strong> (loaded chunk / same dimension
+        / any dimension by tier). Superseded by the ender whistle unless someone wants the
+        ladder back.</li>
+    <li><strong>A tooltip naming the horse</strong>, and a texture that tells a bound whistle
+        from an unbound one &mdash; see
+        <a href="#ender-gaps">the known gaps</a>.</li>
+    <li><strong>An optional keybind</strong> to blow the held or first hotbar whistle.</li>
+    <li><strong>Non-horse equines.</strong> Binding refuses donkeys, mules and llamas, because
+        only a <code>Horse</code> carries a genome and an owner check.</li>
+</ul>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 
@@ -208,7 +255,7 @@
     <div class="seealso">
         <a href="horse-care.html">Horse care &mdash; bond &amp; herds</a>
         <a href="item-transfer-papers.html">Transfer papers</a>
-        <a href="roadmap.html#callable-horses">Roadmap &mdash; callable horses</a>
+        <a href="#callable-horses">Roadmap &mdash; callable horses</a>
         <a href="items.html">All items</a>
     </div>
     Item objects in <code>item/ModItems.java</code>.

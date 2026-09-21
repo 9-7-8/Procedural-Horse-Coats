@@ -1493,3 +1493,54 @@ a.card .card-text {
     .verify-index li { grid-template-columns: 1fr; }
     .verify-checks { align-self: start; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Roadmap
+ *
+ * The same mechanism as Verification above, for the other list. A page
+ * with something PLANNED and not built carries a Roadmap tab, and that
+ * tab opens with ONE sentence in a .roadmap-summary box saying what is
+ * coming. wiki/tools/bake-roadmap-index.mjs harvests those sentences
+ * into the .roadmap-index on roadmap.html, so that page is never typed
+ * and a subject joins it by growing the tab.
+ *
+ * Deliberately a different colour from verification's amber: the two
+ * indexes look alike and mean opposite things - amber is "built, go and
+ * look at it", blue is "not built at all".
+ * ------------------------------------------------------------------ */
+
+.note.roadmap-summary { border-left-color: var(--accent); }
+.note.roadmap-summary .label { color: var(--accent); }
+.note.roadmap-summary p { font-size: 1.02rem; line-height: 1.6; }
+
+.roadmap-count { color: var(--text-dim); margin: 0 0 1.4rem 0; }
+
+.roadmap-index { list-style: none; margin: 0 0 1.5rem 0; padding: 0; max-width: 52rem; }
+.roadmap-index li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.9rem;
+    padding: 0.7rem 0 0.75rem 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+.roadmap-index li:last-child { border-bottom: none; }
+.roadmap-index a { font-weight: 600; text-decoration: none; }
+.roadmap-index a:hover { text-decoration: underline; }
+.roadmap-plans {
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    align-self: center;
+}
+.roadmap-what {
+    grid-column: 1 / -1;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+.roadmap-what code { font-size: 0.85em; }
+
+@media (max-width: 700px) {
+    .roadmap-index li { grid-template-columns: 1fr; }
+    .roadmap-plans { align-self: start; }
+}

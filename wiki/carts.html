@@ -872,6 +872,82 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Two or four horses to one wagon on a <strong>whippletree</strong> &mdash; a change to
+        the shape of the cart code rather than an addition beside it, since
+        <code>applyDraught</code> takes a single puller &mdash; and a <strong>vardo</strong>
+        you sleep in, whose respawn point drives away.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the carts, in one place.</strong> These sections used
+    to live on the main <a href="roadmap.html">roadmap</a> and were moved here whole, so that
+    what the six vehicles do, how they are built and what is still planned for them are read
+    together. Both are changes to the <em>vehicle</em>; the largest planned cart change of all
+    lives on a page of its own, and is at the foot of this tab.
+</p>
+
+<hr>
+
+<h2 id="draught-teams">Draught teams &mdash; more than one horse to a vehicle</h2>
+
+<p>
+    Two or four horses harnessed to one wagon, connected by a <strong>whippletree</strong>, with
+    the rider leading from the near horse.
+</p>
+<p>
+    <strong>The carts are built on one animal per vehicle and say so.</strong>
+    <code>AbstractDrawnEntity.applyDraught</code> takes a single puller and applies a single speed
+    modifier, and <a href="carts.html">the carts page</a> states the rule outright. So this is not
+    a feature to add beside the cart code; it is a change to the shape of it. The weight model is
+    the half that already fits &mdash; <code>CartDraft</code> computes a speed ceiling from
+    capacity against load, and two horses is simply more capacity.
+</p>
+<p>
+    <strong>Trains are the thing this is <em>not</em></strong>, and the two get confused. Coupling
+    several vehicles behind one horse is built and shipped
+    (<a href="#hitching">hitching and trains</a>). This is the other axis: several horses
+    in front of one vehicle. A design that does both needs to say what happens when you combine
+    them.
+</p>
+
+<h2 id="vardo">A vardo &mdash; a cart you can sleep in</h2>
+
+<p>
+    A caravan that is a <strong>moving home</strong>: you sleep inside it, and it carries your
+    respawn point with it.
+</p>
+<p>
+    <strong>Nothing in the mod touches sleep or respawn today</strong> &mdash; no
+    <code>startSleeping</code>, no <code>setRespawnPosition</code>, no bed &mdash; so this is the
+    whole of the work, and it is the interesting half rather than the modelling. The wagon it
+    would be built on already exists, already seats riders, already takes chests and already has a
+    dyeable furling roof, so the vehicle is not the question. Sleeping in a thing that moves is.
+</p>
+<p>
+    <strong>The obvious trap is a respawn point that drives away.</strong> A bed sets a fixed
+    position; a vardo's is wherever the cart now is, or wherever it was when you slept, and those
+    differ the moment somebody hitches it up. Decide that before any of it is built, because it
+    decides whether the feature is a mobile base or a novelty bed.
+</p>
+
+<p>
+    <strong>The largest cart change planned is on another page.</strong> Making the
+    <em>piece</em> the unit rather than the vehicle &mdash; wheels of one wood, bed of another,
+    and dye or paint on top of the choice of wood &mdash; is a bench, and it would retire the
+    per-wood recipes this page's <a href="#two-sources">contract that lives twice</a> exists to
+    keep in step. It is written up at
+    <a href="cart-bench.html#cart-bench-carts">the cart and jump bench</a>.
+</p>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 

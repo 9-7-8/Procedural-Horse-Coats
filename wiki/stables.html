@@ -24,7 +24,7 @@
     <strong>each is somebody else&rsquo;s build</strong>, and the attributions below
     are the point of this page as much as the mechanics are.
     <strong>Built 2026-09-07, not play-tested</strong> &mdash; checklist in
-    <a href="roadmap.html#stables">verification &sect;0-AK</a>.
+    <a href="#verification">verification</a>.
 </p>
 
 <div class="note danger">
@@ -386,6 +386,60 @@
     queued as well as when it is filled, ungated by <a href="architecture.html#verified-debug-announce">debug.announce</a>.
     Not yet seen in a world: <a href="known-gaps.html#gap-136">gap 136</a>.
 </p>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        More stables are a <strong>content</strong> backlog rather than a build one &mdash; an
+        NBT and a JSON each &mdash; with three questions open first: nothing decides
+        <em>which</em> stable generates where, a stable has no owner, story or loot, and
+        <strong>nothing stops a player taking the horses</strong>.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for generated stables, in one place.</strong> This section
+    used to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so
+    that what the three stables are, how one is added and what is still planned for them are
+    read together. Its closest neighbour is on another page:
+    <a href="villagers.html#cowboy-everywhere">a barn per village material palette</a> is the
+    same NBT-and-JSON pipeline, and asks the same question about which building generates where.
+</p>
+
+<hr>
+
+<h2 id="stables">More generated stables</h2>
+
+<p>
+    <a href="stables.html">Three ship</a>, and the owner has said more are coming. The
+    machinery is deliberately finished before the content: adding one is an NBT and a JSON,
+    with no Java, so this is a <strong>content</strong> backlog rather than a build one.
+</p>
+
+<ul>
+    <li><strong>Nothing yet decides <em>which</em> stable generates where.</strong> All three
+        share one biome tag, so a snowy plains gets the same buildings as a savanna. A stable
+        could name its own biomes &mdash; a line in its worldgen file and no code &mdash; and
+        probably should once there are enough of them to tell apart.</li>
+    <li><strong>A stable has no owner, no story and no loot.</strong> The buildings have
+        chests, and the bake empties them. A stable that came with an
+        <a href="villagers.html#equestrians">equestrian</a> living in it, or with tack in the
+        chests, is the obvious next thing.</li>
+    <li><strong>Nothing stops a player from simply taking the horses.</strong> They are untamed
+        and unowned, so the whole reward is &ldquo;find building, tame seven rare horses&rdquo;.
+        Whether that wants a cost &mdash; a price, a fight, a locked gate &mdash; is an open
+        design question nobody has asked yet.</li>
+</ul>
+
+<p class="muted">
+    The redistribution licence on the three that ship is a blocker on distribution rather than
+    on building, and is tracked as <a href="known-gaps.html#gap-80">gap 80</a>.
+</p>
+
+</section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">

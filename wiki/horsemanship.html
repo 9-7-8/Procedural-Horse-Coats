@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horsemanship &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Horsemanship</h1>
+<p class="lede">
+    What the <em>rider</em> brings to the ride, as something that can grow. A horse would
+    go a little faster and jump a little higher while you are on its back, by how skilled
+    a rider you are and how well that particular horse knows you &mdash; and for nobody
+    else, because the bonus belongs to the pairing and is thrown away the moment you
+    dismount. <strong>None of it is built.</strong> This page exists so that the plan has
+    a home of its own rather than a section on a shared list, and so that when the first
+    piece of it ships there is already a page to document it on.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A rider-skill curve that moves speed and jump only &mdash; never health &mdash; as
+        an <code>AttributeModifier</code> applied on mount and removed on dismount, with an
+        <strong>uncapped, sharply diminishing</strong> shape, and an optional
+        Pufferfish&rsquo;s Skills tree shipped as pure data.
+    </p>
+</div>
+
+<hr>
+
+<h2 id="horsemanship">Horsemanship &mdash; the rider is half of what a horse can do</h2>
+
+<p>
+    <strong>This reverses a position the roadmap held twice.</strong> A horsemanship skill sat on
+    the survey backlog for months with an objection attached: it would be the first thing in the
+    mod where the <em>player</em> progresses rather than the horse, which cuts against
+    <a href="philosophy.html">breeding being the progression</a> &mdash; the same objection that
+    still stands against <a href="decisions.html#out-of-scope-competitions">a competition ladder</a>. The owner
+    reframed it on 2026-09-21 and the reframing is what makes it buildable:
+    <strong>bonding makes the horse listen, and skill makes you a better rider.</strong> Neither
+    makes the horse a better horse.
+</p>
+
+<div class="note">
+    <span class="label">The bonus belongs to the pairing, and never to the animal</span>
+    <p>
+        <strong>A horse's stored stats are always exactly its genome.</strong> The bonus is an
+        <code>AttributeModifier</code> added when you mount and removed when you dismount,
+        computed from your skill and your bond <em>with that horse</em>. Nothing is ever written
+        to the horse.
+    </p>
+    <p>
+        That is the whole of why this is allowed and
+        <a href="carrots.html#rejected-stat-carrots">a carrot that adds a heart is not</a>. The
+        carrot changes the horse; this changes the ride. It also means
+        <code>HorseInfoScreen</code> keeps telling the truth, a sold horse carries none of your
+        skill with it, and the same horse under a novice performs at its genome exactly as it
+        does today.
+    </p>
+</div>
+
+<h3 id="horsemanship-curve">What it may move, and how far</h3>
+
+<ul>
+    <li><strong>Speed and jump only.</strong> Never health, never size &mdash; those are
+        <a href="horse-body.html#disorder-shapes">health-gene</a> territory, and a rider adding hearts would make a
+        genetically frail horse stop being legible at a glance, which is the whole reason
+        <a href="philosophy.html#care">frailty is expressed as fewer hearts</a>.</li>
+    <li><strong>Uncapped, with sharply diminishing returns.</strong> The owner's call, and it is
+        the part of this section carrying the design risk: with no hard ceiling, the curve is the
+        <em>only</em> thing keeping a well-ridden ordinary horse from overtaking a bred one. Pick
+        the curve against real genome spread &mdash; the gap between a poor and a good horse's
+        resolved speed &mdash; and not in the abstract. Write the chosen shape and the numbers it
+        was measured against on this page, on a Coding tab when it grows one, because a curve nobody can
+        re-derive is a curve the next session will quietly get wrong.</li>
+    <li><strong>Two axes, multiplied.</strong> General skill carries between horses; bond is the
+        per-horse half and <a href="horse-care.html#bond">already exists</a>. A skilled rider on
+        a stranger's horse is competent and not at their best, which is the behaviour worth
+        having.</li>
+</ul>
+
+<h3 id="horsemanship-hook">The hook: Pufferfish&rsquo;s Skills, and a tree that is pure data</h3>
+
+<p>
+    <strong>An optional dependency, never a requirement.</strong> Three skills mods were read from
+    their jars on 2026-09-21 &mdash;
+    <a href="https://modrinth.com/mod/puffish-skills">Pufferfish's Skills</a>,
+    <a href="https://www.curseforge.com/minecraft/mc-mods/rpg-attribute-system">RPG Attribute
+    System</a> and Skill Tree (RPG Series) &mdash; and only the first is a usable seam.
+</p>
+
+<ul>
+    <li><strong>The tree is shipped as data and needs no code at all.</strong> Pufferfish's
+        <code>PackConfigReader</code> scans <em>every</em> namespace for
+        <code>data/&lt;ns&gt;/puffish_skills/config.json</code>, so a category living at
+        <code>data/horsegenetics/puffish_skills/categories/horsemanship/</code> is read when the
+        mod is installed and is inert when it is not. <strong>No registration, no
+        <code>ModList.isLoaded</code> check, no presence probe</strong> &mdash; without the mod
+        the tree simply does not exist. Skill Tree ships its own two categories exactly this way,
+        which makes its jar the schema documentation.</li>
+    <li><strong>The effect needs no branch either.</strong> The built-in
+        <code>puffish_skills:attribute</code> reward applies a real vanilla
+        <code>AttributeModifier</code> to <em>any</em> registered attribute, including one we
+        register unconditionally. Register <code>horsegenetics:horsemanship</code>, read
+        <code>player.getAttributeValue(...)</code> always, and with no skills mod present the
+        value sits at its baseline forever. That is a genuine zero-branch soft dependency, and it
+        is the shape to copy for any future optional integration.</li>
+    <li><strong>Anything the built-in rewards cannot express</strong> &mdash; touching bond or
+        genetics directly &mdash; goes through <code>SkillsAPI.registerReward</code> from a class
+        in the NeoForge module that is only ever loaded behind
+        <code>ModList.get().isLoaded("puffish_skills")</code>, with the mod as a
+        <code>compileOnly</code> dependency. Standard idiom; keep it to the cases that earn
+        it.</li>
+    <li><strong>Reading a level</strong> is
+        <code>SkillsAPI.getCategory(id).map(c -&gt; c.getSpentPoints(player))</code>, or
+        <code>c.getExperience().map(e -&gt; e.getLevel(player))</code>. There are unlock and lock
+        events, on Pufferfish's own pub/sub rather than the NeoForge bus.</li>
+</ul>
+
+<p class="muted">
+    <strong>Why not the other two.</strong> RPG Attribute System has an <code>api</code> package,
+    but its <code>isAvailable()</code> is compiled as a literal <code>return true</code> and is
+    useless as a presence check; it exposes <em>no</em> events, so any integration has to poll
+    <code>RasApi.getLevel(player)</code> on mount; and its eight attributes are fixed with no room
+    for a ninth. It is a reasonable <em>secondary</em> signal &mdash; overall player level gating
+    how deep the tree can be bought into &mdash; and cannot host the tree.
+    <strong>Skill Tree has no <code>api</code> package at all</strong> and hard-requires
+    <code>spell_engine</code> and <code>spell_power</code>; it is content sitting on Pufferfish's,
+    so any level worth reading from it is a Pufferfish query anyway. KubeJS is a real third seam
+    for a server-specific tweak, and not a substitute for something we want to ship in the jar.
+</p>
+
+<h3 id="horsemanship-nomod">Most players have no skills mod, and the feature still exists</h3>
+
+<p>
+    <strong>Bond alone carries it, at a lower ceiling.</strong> Nobody is locked out, and
+    installing a skills mod <em>raises</em> your ceiling rather than switching a feature on. This
+    is also what makes the thing buildable in the first place: the whole system can be written,
+    tuned and tested against bond before any hook exists, and the Pufferfish tree is then additive
+    on top of something already working.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="horse-care.html">Bond, healing and the herd</a>
+        <a href="compatibility.html">Living beside other mods</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    The curve is the thing to settle before any of this is built: with no hard ceiling it is
+    the only thing standing between a well-ridden ordinary horse and a bred one, and it has to
+    be chosen against the real spread of resolved speeds rather than in the abstract.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

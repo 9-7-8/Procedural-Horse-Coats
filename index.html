@@ -311,8 +311,9 @@
         </a>
         <a href="wiki/roadmap.html" class="card">
             <h3>Roadmap</h3>
-            <p>Planned features that are not built, ordered by priority &mdash; the gene wishlist, the
-               gameplay layer, the tack work. Planned features and nothing else.</p>
+            <p>Every page with something planned and not built, alphabetically &mdash; harvested from
+               the Roadmap tab each of them carries. The plans themselves live beside the thing
+               they are about.</p>
             <span class="tag">nothing here is built</span>
         </a>
         <a href="wiki/decisions.html" class="card">
@@ -326,6 +327,138 @@
             <p>The dated record of what each session built and why &mdash; the reasoning behind
                decisions a later session would otherwise re-litigate.</p>
             <span class="tag">newest first</span>
+        </a>
+    </div>
+
+    <!-- Subjects that exist only as a plan: one page each, carrying a Roadmap tab
+         and nothing else. Collapsed by default, the way the health loci are -
+         twenty cards for things nobody can play yet should not sit between the
+         halves people came for. When a piece of one ships, its page grows the
+         other tabs and its card moves up into the section it belongs in. -->
+    <div class="section-head" data-collapsed="true">
+        <h2>Planned</h2>
+        <p>Designed, argued about, not built &mdash; a page each, so the plan has a home to grow into</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/phenotype-naming.html" class="card natural">
+            <h3>Base-aware phenotype naming</h3>
+            <p>A surface, not a gene: one resolver that can say &ldquo;amber champagne&rdquo; or
+               &ldquo;this horse is seal&rdquo;, which three separate gaps all want.</p>
+            <span class="tag">serves three gaps</span>
+        </a>
+        <a href="wiki/block-preference.html" class="card magical">
+            <h3>Block preference</h3>
+            <p>A recessive locus pulling a horse toward water, lava or trees &mdash; an AI goal
+               rather than an effect, so it competes for the horse&rsquo;s attention.</p>
+            <span class="tag">goal, not effect</span>
+        </a>
+        <a href="wiki/cart-bench.html" class="card">
+            <h3>The cart and jump bench</h3>
+            <p>A wood per piece rather than a wood per cart. Jumps already made this migration;
+               doing it for carts retires a drift hazard that logs nothing.</p>
+            <span class="tag">one bench, two products</span>
+        </a>
+        <a href="wiki/chase-gene.html" class="card magical">
+            <h3>The chase gene</h3>
+            <p>How long an aggravated horse gives chase &mdash; timed, by distance, by sight, never
+               or forever. The substrate is already there to generalise.</p>
+            <span class="tag">needs Java, not JSON</span>
+        </a>
+        <a href="wiki/config.html" class="card">
+            <h3>Config</h3>
+            <p>One sweep over a surface that grew option by option &mdash; and the refusal at the
+               heart of it, since a genotype code is positional.</p>
+            <span class="tag">partly built</span>
+        </a>
+        <a href="wiki/curly-coat.html" class="card natural">
+            <h3>Curly coat</h3>
+            <p><code>KRT25</code> and <code>SP6</code>. Blocked on something larger: the pipeline has
+               no coat-structure axis, so there is no value for a painter to write.</p>
+            <span class="tag">needs an axis first</span>
+        </a>
+        <a href="wiki/forced-riding.html" class="card magical">
+            <h3>Forced riding: the kelpie</h3>
+            <p>A horse that lets you mount and will not let you off. A ride-lock state, because
+               intercepting the dismount key would not survive a version port.</p>
+            <span class="tag">the warning beat is the design</span>
+        </a>
+        <a href="wiki/horse-browser.html" class="card">
+            <h3>The horse browser</h3>
+            <p>The <kbd>H</kbd> screen&rsquo;s remaining tabs, and the owned-horse index it is
+               running without. The menu is a report; these make it a console.</p>
+            <span class="tag">partly built</span>
+        </a>
+        <a href="wiki/horsemanship.html" class="card">
+            <h3>Horsemanship</h3>
+            <p>Bonding makes the horse listen; skill makes you a better rider. Neither makes the
+               horse a better horse &mdash; which is why this one is allowed.</p>
+            <span class="tag">never written to the horse</span>
+        </a>
+        <a href="wiki/lasso.html" class="card">
+            <h3>The lasso</h3>
+            <p>Catching a wild horse as something you do. The two-day gentling it came with is a
+               chore with a progress bar; the catching is what survives.</p>
+            <span class="tag">first item to target an entity</span>
+        </a>
+        <a href="wiki/magic-grab.html" class="card magical">
+            <h3>Magic grab</h3>
+            <p>A horse that drags what it bites, sized by allele. No existing verb carries a mob,
+               so this is a new <code>AbilityType</code> and its five files.</p>
+            <span class="tag">mob groups by tag</span>
+        </a>
+        <a href="wiki/magical-genes.html" class="card magical">
+            <h3>Magical genes still to build</h3>
+            <p>The open-ended list: more stamp markings before 1.0, flavour loci a breed file can
+               name, and a gene that reads what the horse is wearing.</p>
+            <span class="tag">add to it freely</span>
+        </a>
+        <a href="wiki/model-parts.html" class="card">
+            <h3>Attached model parts</h3>
+            <p>Horns, spines and wings parented to the horse model &mdash; the mod&rsquo;s first
+               non-texture visual, and a GeckoLib dependency to justify or avoid.</p>
+            <span class="tag">head-parented batch first</span>
+        </a>
+        <a href="wiki/momentum-sprint.html" class="card magical">
+            <h3>Momentum sprint</h3>
+            <p>Speed that builds while you hold a line and drains when you turn. Not a Speed
+               modifier &mdash; a loop the rider can feel and play badly.</p>
+            <span class="tag">wants a tick-mutable attachment</span>
+        </a>
+        <a href="wiki/rider-comfort.html" class="card">
+            <h3>Rider comfort</h3>
+            <p>Five small borrowings, each shippable alone &mdash; and one that asks the coat
+               pipeline for a transparency it has never been asked for.</p>
+            <span class="tag">each wants a config switch</span>
+        </a>
+        <a href="wiki/item-stall-bars.html" class="card">
+            <h3>Stall bars</h3>
+            <p>A third per-material block family. It earns its place twice over from one physical
+               fact: bars are see-through, and bars are reachable.</p>
+            <span class="tag">a consumer for the herd alpha</span>
+        </a>
+        <a href="wiki/storm-fed.html" class="card magical">
+            <h3>Storm fed</h3>
+            <p>A locus that fills a reservoir and spends none of it, on purpose &mdash; half a gene,
+               designed to be consumed by another. The mod&rsquo;s first polygenic pair.</p>
+            <span class="tag">needs per-tick state</span>
+        </a>
+        <a href="wiki/troughs.html" class="card">
+            <h3>Troughs and salt licks</h3>
+            <p>No block of this mod feeds a horse today, so the first <em>place</em> a horse eats
+               from is the feature rather than the block.</p>
+            <span class="tag">multi-block is the new part</span>
+        </a>
+        <a href="wiki/undead-horses.html" class="card">
+            <h3>Undead horses</h3>
+            <p>Not an entity type this mod stands beside: two recessive loci, so a skeleton horse
+               is <em>any breed</em> that carries one. The spawning is the work.</p>
+            <span class="tag">one open call first</span>
+        </a>
+        <a href="wiki/virtual-stables.html" class="card">
+            <h3>Virtual stables</h3>
+            <p>An object that holds a horse you own. Four things in the mod look like this and
+               none of them is it &mdash; and it needs a cost, or it eats the mod.</p>
+            <span class="tag">gap 73 is the trap</span>
         </a>
     </div>
 

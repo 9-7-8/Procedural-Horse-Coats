@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Block preference &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Block preference</h1>
+<p class="lede">
+    <strong>A horse that wants to be somewhere in particular</strong> &mdash; standing in water,
+    standing in lava, submerged, or up a tree &mdash; and will walk itself there given the
+    chance, as hard as its allele says and up to hurting itself when it cannot. It was asked
+    for, and researched before it was deferred; what the research settled is that this is an AI
+    goal and not one of the mod&rsquo;s per-tick effects. <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A recessive locus pulling a horse toward Water, Lava, Underwater or Tree, as hard as the
+        allele&rsquo;s author chooses and up to taking damage when it cannot get there &mdash; an
+        AI goal with a priority in the behaviour hierarchy, not an <code>effects</code> state
+        applied per tick.
+    </p>
+</div>
+
+<h2 id="block-preference">Block preference &mdash; a horse that wants to be somewhere</h2>
+
+<p>
+    A recessive locus pulling a horse toward a kind of block, with the allele's author choosing
+    how hard &mdash; <strong>up to taking damage when it cannot get there</strong>. Ships with
+    Water (stand in it, but never push fences or jump for it), Lava, Underwater (submerge, and
+    drown unless the horse also has water breathing &mdash; intended, and for aquatic breeds
+    only), and Tree (climb the nearest tree, which does almost nothing unless the horse can
+    fly).
+</p>
+<p>
+    <strong>It is an AI goal, not an effect</strong>, which is what makes it different from
+    everything in the <code>effects</code> vocabulary: those apply a state per tick, and this has
+    to compete for the horse's attention against grazing, herding, fleeing and being ridden. That
+    means a priority in the goal selector, so
+    <a href="behaviour-hierarchy.html">the behaviour hierarchy</a> and its bake are part of the
+    contract. Underwater is the one to think hardest about: a gene whose correct behaviour is
+    drowning the horse needs to be unmistakably opt-in at the breed sheet.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="behaviour-hierarchy.html">The behaviour hierarchy</a>
+        <a href="breed-format.html">The breed file format</a>
+        <a href="gene-food-preference.html">Food preference &mdash; the nearest built locus</a>
+    </div>
+    The Underwater allele is what this page is really for: a gene that is working correctly when
+    the horse drowns has to be impossible to give a breed by accident.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

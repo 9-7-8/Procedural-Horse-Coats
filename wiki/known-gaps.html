@@ -59,6 +59,53 @@
 
 <ol>
 
+<li id="gap-302"><strong>Open, found 2026-09-21 while dismantling the roadmap: <a href="item-research-papers.html">research papers</a> contradicts itself about what right-clicking a paper does.</strong>
+    The <strong>Gameplay</strong> tab says a paper grants nothing on reading &mdash; &ldquo;your gene
+    database is now earned only by owning a living horse&rdquo; &mdash; and the <strong>Coding</strong>
+    tab of the same page still says &ldquo;right-click it to add that gene to your gene database and
+    unlock its carrot line&rdquo;. One of the two describes code that no longer exists, and nothing
+    in the wiki says which. <strong>This is not a move artefact</strong>; it was already there and was
+    found because the Roadmap tab moved in beside it. Settle it against
+    <code>ResearchPaperItem</code> and the discovery path, fix the losing tab, and note which way it
+    went &mdash; a player reading the Gameplay tab and a modder reading the Coding tab currently
+    build opposite mental models of how the database is earned.</li>
+
+<li id="gap-301"><strong>Open, found 2026-09-21: moving every plan next to its subject exposed that several pages already carried the same plan in their own words, and the two copies disagree.</strong>
+    The old roadmap and the page for the thing had been written independently for months, so the
+    duplication was invisible while they sat apart. <strong>Each of these is now two descriptions of
+    one plan on one page, and the older half is usually the stale one:</strong>
+    <ul>
+        <li><a href="carrots.html">carrots</a> &mdash; <code>#deferred</code> against
+            <code>#carrot-content</code>. The Deferred list says the Epigenetic Stabilizer carrot is
+            &ldquo;only meaningful once epigenetic drift exists&rdquo;; drift is now the default on
+            every value, which is what makes the carrot worth having at all.</li>
+        <li><a href="items.html">items</a> &mdash; <code>#gaps</code> against <code>#item-art</code>,
+            and they disagree on a count: one says <strong>three</strong> whistles share a texture,
+            the other four. The roster has four.</li>
+        <li><a href="breeds.html">breeds</a> &mdash; &ldquo;Not modelled (yet)&rdquo; against
+            <code>#breed-cosmetics</code>; mane shape and lower-leg feathering appear in both, in
+            nearly the same words.</li>
+        <li><a href="item-jumps.html">jumps</a> &mdash; <code>#not-yet</code> lists crossrails
+            spanning three blocks and the half-height rungs as still waiting, and the page&rsquo;s own
+            <code>#styles</code> and <code>#height</code> sections say both shipped.</li>
+        <li><a href="making-a-gene.html">making a gene</a> &mdash; <code>#tools</code> says the creator
+            previews &ldquo;using the same engine the game runs&rdquo;, while <code>#creator-wasm</code>
+            says it is the one tool whose preview never touches the real pipeline. Both are defensible
+            and the seam is felt by anyone reading both. The <code>pointsMin</code> incident is also
+            told twice, in <code>#creator-wasm</code> and <code>#contract-mask</code>.</li>
+        <li><a href="gene-lut.html">LUT</a> &mdash; the Coding tab&rsquo;s <code>LutGene.VARIANTS</code>
+            paragraph is the fuller and more accurate version of <code>#more-palettes</code>, which
+            says <code>lutResources()</code> instead. Keep the Coding tab&rsquo;s wording on a
+            merge.</li>
+        <li>Smaller: <a href="item-stall-signs.html">stall signs</a> states the stale-record problem
+            three times, and <a href="horse-care.html">horse care</a> now says
+            &ldquo;sleeping nearby, +1/night is not wired&rdquo; on two tabs.</li>
+    </ul>
+    <strong>The fix is a merge each, not a delete.</strong> In every case the plan is the Roadmap
+    tab&rsquo;s and the built behaviour is the Gameplay or Coding tab&rsquo;s, so the question to ask
+    is which sentence is describing something that exists. Doing them one page at a time is fine;
+    doing none of them means the pages go on disagreeing where a reader can see both at once.</li>
+
 <li id="gap-300"><strong>Open, found 2026-09-21 while surveying other mods: nothing in this mod stops an owned horse despawning, and whether vanilla does is unproven.</strong>
     <code>setPersistenceRequired()</code> is called on cowboy stock
     (<code>CowboyHandler</code>, <code>Cowboy</code>), egg-spawned horses
@@ -74,7 +121,7 @@
     chunks unload, and come back &mdash; ideally with one leashed control horse beside it. If it
     survives, this closes with a note on <a href="horse-care.html">horse care</a>; if it does not,
     it is the worst failure a horse mod can have and the fix is one call.
-    Relevant because <a href="roadmap.html#bond-behaviours">a bonded horse waiting where you left
+    Relevant because <a href="horse-care.html#bond-behaviours">a bonded horse waiting where you left
     it</a> is planned and sits right next to this &mdash; but the two are different problems, and
     a despawn fix should not be smuggled in as a bond reward.</li>
 
@@ -646,7 +693,7 @@
     named along.
     <strong>Of the three <em>genes</em> that batch turned out to need, two now ship</strong> &mdash;
     ACAN <code>D5</code> and <a href="gene-ryr1.html">RYR1</a> &mdash; <strong>and only the curly coat
-    is still unbuilt</strong>, on <a href="roadmap.html#natural-genes">the roadmap</a>, which is where
+    is still unbuilt</strong>, on <a href="genetics-model.html#natural-genes">the roadmap</a>, which is where
     unbuilt work belongs (owner, 2026-09-15). The curly coat stays there because it is blocked on a
     coat-structure axis the pipeline does not have, not on anyone writing the gene.</li>
 <li id="gap-255"><strong>Open, found 2026-09-15: two constants that exist on one side of the twin only.</strong> Also from
@@ -825,7 +872,7 @@
     preview is the hand-written JS port, which has no emissive pass and must not be given
     one. So the fix is <em>not</em> a second material, as this entry used to say &mdash; it
     is moving that preview onto the wasm so it can bake an unsaved spec, which is a job of
-    its own (<a href="roadmap.html#designer">roadmap &sect;10</a>) and would end the port's
+    its own (<a href="making-a-gene.html#designer">roadmap &sect;10</a>) and would end the port's
     reason to exist.</li>
 <li id="gap-200"><strong>A third-party Java gene cannot be put back once
     <code>clearLoaded()</code> has dropped it.</strong> Opened 2026-09-11, with the open
@@ -1334,7 +1381,7 @@ three expressions) and <a href="gene-ringwork.html">ringwork</a> (both contour r
 </li>
 <li id="gap-26"><strong>Two magical genes do something a player cannot see.</strong> Milk and verdant both paint nothing, so a lava-bearing horse and a moss-spreading one are indistinguishable from an ordinary horse until you put a bucket under them or watch the floor. That sits badly beside <strong>healer</strong>, which draws a red stripe precisely so the ability is legible, and beside the rule in <code>wiki/making-a-gene.html</code> that an effect must be <em>perceivable</em>. The fix is a marking allele in each locus rather than a mark bolted on beside it, which is why it was not done in passing. <code>wiki/verification.html</code> §0a records it as accepted-for-now rather than as a bug.
 </li>
-<li id="gap-28"><strong>Two body effects a gene declares and no horse performs.</strong> <strong>DMRT3 / gait</strong> is inherited, carried by the right breeds and moves nothing - the animation is <a href="roadmap.html#gait">on the roadmap</a>, and the gene's expression text promises it to the player in three places. <strong><code>TraitRule</code></strong> - two genes that only together trigger an outcome - is still unbuilt (<a href="roadmap.html#trait-rules">group traits</a>).
+<li id="gap-28"><strong>Two body effects a gene declares and no horse performs.</strong> <strong>DMRT3 / gait</strong> is inherited, carried by the right breeds and moves nothing - the animation is <a href="gene-dmrt3.html#gait">on the roadmap</a>, and the gene's expression text promises it to the player in three places. <strong><code>TraitRule</code></strong> - two genes that only together trigger an outcome - is still unbuilt (<a href="horse-traits.html#trait-rules">group traits</a>).
 </li>
 <li id="gap-29"><strong>Medicine hat and the war shield - not being built, and not a gene.</strong> <strong>Closed by the owner 2026-09-09, as a decision rather than a fix.</strong> A medicine hat is a retention rule on a near-white horse: colour kept as a bonnet over the ears and poll, usually with a shield on the chest. The mod gets the first half for free - <code>WhitePattern.sabino</code> never paints the ears, and measured over eight seeds a <code>kit=SB1/SB1</code> horse comes out with <strong>ears 0% white and the rear 30% of the head 0.4%</strong>, so the cap is really there - while the crest and neck behind it go white (mane 99.6%, neck 100%), so on most draws it reads as two dark ears and a smudge rather than a bonnet. That is now the accepted behaviour: <em>&ldquo;it will roll randomly, I do not care if it does or does not&rdquo;</em>, and <em>&ldquo;the hat should not be a unique gene&rdquo;</em>. Nothing rolls for it, nothing retains for it, and there is no chest region. Note <code>W22</code> dominant white and <code>O/O</code> lethal white are <code>masking</code> outcomes that <code>restrictAll</code>, so they take the ears too - correctly; those were never hats.</li>
 <li id="gap-30"><strong>A body-patch jag is sub-texel, and no other painter has been audited for a noise field cut at a constant.</strong>
@@ -1435,7 +1482,7 @@ A threshold on a noise field is only meaningful relative to that field's own dis
 
 <li id="gap-75"><strong>A particle homozygote carries a second look nobody can ever see.</strong> Opened 2026-09-07. Now that the locus expresses only on two variant copies, <code>Rflm/Rflm</code> is the ordinary way to have flames &mdash; and its two copies carry two independent epigenetic draws while only slot 0 emits. So the horse's other flame colour is real, is inherited by half its foals, and is invisible on the horse carrying it. That is consistent with every other homozygous gene in the mod (a <a href="gene-healer.html">healer</a>'s hidden stripe opacity behaves the same way), and it may even be a feature &mdash; a foal's flames changing colour is a surprise with a cause. But it was not chosen, it fell out of the recessive rule, and the alternative was available: emit <em>per expressing copy</em>, so a homozygote trails two flames in two colours from two places. That was rejected because it would make <code>Dst/Dst</code> visibly denser than <code>Dst/Bflm</code> while the two share an expression id, which is a worse inconsistency than this one. Worth revisiting once somebody has actually watched a paddock of them.</li>
 
-<li id="gap-76"><strong>My horses sorts and filters on the client, over a capped roster, and the roadmap said not to.</strong> Opened 2026-09-07. <a href="roadmap.html#browser">&sect;18</a> is explicit: the expensive part is a per-player owned-horse index, sort and filter run <strong>server-side</strong> over it, and the result paginates &mdash; &ldquo;do not sync every horse's genome to the client to filter it there&rdquo;. That is exactly what this does. <code>HorseRoster</code> walks the whole ancestry table on request, cuts it at <code>HorseRosterPayload.MAX_ENTRIES</code>, sends each entry's <em>full genetic code</em>, and the client filters what it got. It was chosen with eyes open &mdash; the breeding preview was already paying that cost for the same rows, the cap is the whole of the difference, and <code>HorseQuery</code> is game-free so the same predicate moves server-side unchanged the day the index exists. <strong>What is actually wrong today</strong>: a player past the cap silently sees only their most recent generations (the footer says so, in small text, which is not the same as it being obvious); a filter cannot find a horse the cap dropped, so &ldquo;no horse carries <code>SB1</code>&rdquo; can be a lie; and the roster is a request/response with no invalidation, so a horse tamed while the screen is open is missing until Refresh. None of that is measured &mdash; nobody has had two hundred horses.</li>
+<li id="gap-76"><strong>My horses sorts and filters on the client, over a capped roster, and the roadmap said not to.</strong> Opened 2026-09-07. <a href="horse-browser.html#browser">&sect;18</a> is explicit: the expensive part is a per-player owned-horse index, sort and filter run <strong>server-side</strong> over it, and the result paginates &mdash; &ldquo;do not sync every horse's genome to the client to filter it there&rdquo;. That is exactly what this does. <code>HorseRoster</code> walks the whole ancestry table on request, cuts it at <code>HorseRosterPayload.MAX_ENTRIES</code>, sends each entry's <em>full genetic code</em>, and the client filters what it got. It was chosen with eyes open &mdash; the breeding preview was already paying that cost for the same rows, the cap is the whole of the difference, and <code>HorseQuery</code> is game-free so the same predicate moves server-side unchanged the day the index exists. <strong>What is actually wrong today</strong>: a player past the cap silently sees only their most recent generations (the footer says so, in small text, which is not the same as it being obvious); a filter cannot find a horse the cap dropped, so &ldquo;no horse carries <code>SB1</code>&rdquo; can be a lie; and the roster is a request/response with no invalidation, so a horse tamed while the screen is open is missing until Refresh. None of that is measured &mdash; nobody has had two hundred horses.</li>
 
 <li id="gap-77"><strong>A horse can be held still by a screen, and the only thing stopping that being permanent is a three-second lease.</strong> Opened 2026-09-07. <code>HorseInspectHold</code> freezes a horse while its information screen is open, and the freeze is real AI suppression: <code>InspectHoldGoal</code> takes <code>MOVE</code>, <code>JUMP</code> and <code>LOOK</code> at priority 0, so panic, stroll, the bond follow and the herd are all not running. The lease is what makes that safe &mdash; the client re-asserts once a second, the hold lapses 60 ticks after the last word &mdash; and the lease is the <em>only</em> thing that makes it safe. Untested: whether a client that stops sending (a lag spike over a second, a dimension change, a paused single-player world where the client still ticks but the server does not) drops the hold and re-takes it visibly, i.e. whether the horse twitches; and what a <em>second</em> player inspecting the same horse does when the first closes their screen. There is also a design question nobody has answered: a held horse still takes damage and can still be pushed off a ledge while unable to path away from it. That is deliberate &mdash; the goal is &ldquo;does not wander off&rdquo;, not &ldquo;is invulnerable&rdquo; &mdash; but it has never been weighed against a player leaving the screen open next to a creeper.</li>
 

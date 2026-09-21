@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stall bars &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Stall bars</h1>
+<p class="lede">
+    A waterloggable bars block that joins up along a stall front, in any wood the game has
+    &mdash; the third block family in the mod to be authored for vanilla's woods and generated
+    for everyone else's. <strong>None of it is built.</strong> This page exists so that the plan
+    has a home of its own rather than a section on a shared list, and so that when the first
+    piece of it ships there is already a page to document it on.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows. The two block families that
+        <em>do</em> work this way are <a href="item-jumps.html">jumps</a> and
+        <a href="item-double-gates.html">the double gates</a>.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A connecting, waterloggable bars block for stall fronts, which has to earn the utility
+        rule: bars are see-through so a stalled horse still counts its herd, and reachable so you
+        can groom, feed and lead through them.
+    </p>
+</div>
+
+<h2 id="stall-bars">Stall bars &mdash; a third per-material block family</h2>
+
+<p>
+    A connecting, waterloggable horizontal-bars block, built the way
+    <a href="item-jumps.html">jumps</a> and the double gates already are: authored for vanilla's
+    woods by a <code>tools/bake-*.mjs</code> script, generated for other mods' materials at run
+    time by a <code>compat/Generated*</code> class, and the two halves kept in step by hand
+    because nothing checks them.
+</p>
+
+<ul>
+    <li><strong>It has to earn its place under the utility rule</strong> &mdash;
+        <a href="philosophy.html#utility-not-decoration">nothing this mod adds may be purely
+        aesthetic except breeding</a> &mdash; and a block that pens a horse no better than a
+        fence does not. Both of its utilities fall out of the same physical fact, which is a
+        good sign they are the right ones. <strong>Bars are see-through</strong>, so a stalled
+        horse still counts its herd and stays settled where a solid wall would isolate it. And
+        <strong>bars are reachable</strong>, so you can groom, feed and lead a horse through
+        them without opening the gate.</li>
+    <li><strong>The herd half is the interesting one.</strong> It is a second consumer for a
+        herd computation that has none, and it makes stable <em>layout</em> matter &mdash; the
+        first time a block this mod adds cares where it sits relative to another.</li>
+    <li><strong>It makes the jump bake cache worth doing.</strong>
+        <code>JumpModel.Unbaked.bake</code> already loops every material once per blockstate
+        variant. A third family on the same pattern is the point at which that stops being
+        wasteful and starts being the cost &mdash; a cache keyed on (model id, rotation), as the
+        <a href="item-jumps.html#obstacles">standards row on the jumps page</a> already argues on its own grounds.</li>
+</ul>
+
+<p class="muted">
+    From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>,
+    whose <code>BlockHorizontalBars</code> is the shape &mdash; connecting, waterloggable, and
+    with no gameplay attached to it whatever.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="items.html#items">The item roster</a>
+        <a href="item-jumps.html">Jumps</a>
+        <a href="item-double-gates.html">Double gates</a>
+        <a href="horse-care.html">Bond &amp; herds</a>
+    </div>
+    The question this page has to answer before a line is written is the utility one: what can a
+    player do through bars that a fence will not let them do.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

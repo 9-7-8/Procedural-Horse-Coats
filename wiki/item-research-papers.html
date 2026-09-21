@@ -113,6 +113,66 @@
 
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Research papers would name an individual <strong>allele</strong> rather than a whole gene,
+        the Equine Research Shelf would bind two of them into one book, and the splice recipes would
+        take that book &mdash; which retires <code>Gene.geneCarrotHomozygous()</code> and the
+        carrot&rsquo;s homozygous-by-default rule.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for research papers, in one place.</strong> This section used
+    to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so that what a
+    paper is, how it is built and what is still planned for it are read together. The rest of the
+    knowledge loop it feeds &mdash; a hand-tuned carrot per gene, and a database check inside the
+    recipe &mdash; is planned on <a href="carrots.html#carrot-content">breeding carrots</a>.
+</p>
+
+<hr>
+
+<h2 id="allele-papers">A research paper names an allele, not a gene</h2>
+
+<p>
+    The wanted end state: <strong>research papers pull out individual alleles</strong> rather
+    than whole genes, the <a href="item-research-shelf.html">equine research shelf</a> lets you
+    <strong>pick two of them</strong> and binds them into one book, and that book is what the
+    carrot recipes take. The crafting recipes themselves do not change. The load-bearing half
+    is built &mdash; a carrot already names exactly the pair it grants. What is left, in the
+    order that keeps the game working at each step:
+</p>
+
+<ul>
+    <li><strong>The paper carries an allele.</strong> <code>RESEARCH_GENE</code> becomes a gene
+        key plus an allele token, and the discovery system that grants papers has to decide
+        <em>which</em> allele a horse teaches you &mdash; presumably the ones it actually
+        carries, which is the same question <code>common/horse/RosterGenetics</code> already
+        answers for the browser's pickers.</li>
+    <li><strong>The shelf binds two into a book.</strong> Its <em>Copy</em> tab already picks
+        one gene and spends blank books; this is that tab taking two allele papers instead.
+        <code>ResearchShelfMenu</code> and <code>ResearchShelfScreen</code>.</li>
+    <li><strong>The recipe takes the book.</strong> <code>KnownGeneSpliceRecipe</code>
+        currently matches a research paper and calls <code>CarrotEffect.defaultSpliceFor</code>
+        to decide the pair; it would read the pair off the book instead, at which point
+        <code>defaultSpliceFor</code> and <code>Gene.geneCarrotHomozygous()</code> both stop
+        being needed and should go.</li>
+    <li><strong>The tooltip.</strong> A Known Gene Splice carrot already <em>carries</em> the
+        right data and has never <em>shown</em> it &mdash; every one of them looks identical in
+        the inventory. That is worth doing whether or not the rest lands.</li>
+</ul>
+
+<p class="muted">
+    Note the interaction: the carrot's homozygous-by-default rule is a stopgap that this design
+    deletes. Once the player picks both alleles there is no default to choose.
+</p>
+
+</section>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">
 

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Config &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> partly built</p>
+<h1>Config</h1>
+<p class="lede">
+    What a server owner or a single player may turn down, turn off or retune without
+    touching the code. Some of it exists already &mdash; a handful of hand-written options
+    and two generated blocks &mdash; but it grew an option at a time wherever one was
+    needed, and the ask is a single sweep that gives the whole thing a shape. This page is
+    that plan, and the place the refusals live: there are things that look like config and
+    cannot be, and the genetics are the sharpest of them.
+</p>
+
+<div class="note">
+    <span class="label">Some config already exists &mdash; this page is its plan, not its reference</span>
+    <p>
+        A config surface is in the game today: a small, scattered set of hand-written
+        options across <code>ServerConfig</code> and <code>ClientConfig</code>, plus two
+        genuinely thorough generated blocks in <code>BreedSpawningConfig</code> and
+        <code>CartsConfig</code>. What follows describes that surface and says what should
+        become of it; it is not a list of the options themselves, and
+        <strong>the option list is not documented anywhere in the wiki yet</strong>. Read
+        the config classes for what is actually there.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        One sweep over a config surface that grew option by option, into a convention for
+        server versus client and generated blocks wherever the roster is data &mdash; plus a
+        refusal: <strong>per-gene config</strong> must mean expression or founder frequency,
+        never registration, since a genotype code is positional.
+    </p>
+</div>
+
+<hr>
+
+<h2 id="config-everything">Config: tune or disable basically everything</h2>
+
+<p>
+    <strong>Asked for as a sweep, and the current surface is smaller than it looks.</strong>
+    Roughly fifteen hand-written options across
+    <code>ServerConfig</code> (health mode, body size, three riding numbers, gestation days, two
+    debug switches) and <code>ClientConfig</code> (scroll bar, sex symbol, tutorial, right-click
+    to open, two coat-rendering numbers), plus two generated blocks that are genuinely thorough
+    &mdash; <code>BreedSpawningConfig</code> writes four options per shipped breed, and
+    <code>CartsConfig</code> a block per <code>CartKind</code>.
+</p>
+<p>
+    <strong>What is not configurable, and each of these is a deliberate gap to reopen rather
+    than an oversight:</strong> the genetics themselves &mdash; every gene is always registered,
+    always occupies its genotype slot and is always inherited, whatever <code>health.mode</code>
+    says &mdash; coat generation, every bond and care number, hunger rates, cowboy and stable and
+    barn spawn rates, herd sizes, whistle radii, ticket behaviour, prices, jump sizes and styles,
+    the armour protection ladder, and everything about the horse menu.
+</p>
+<ul>
+    <li><strong>The genetics are the interesting refusal.</strong> A per-gene disable switch is
+        the most-requested shape of this ask and the most dangerous one here, because a genotype
+        code is positional &mdash; a gene that stops occupying its slot is a save format change
+        and every existing horse reads wrong. If per-gene config is wanted it has to mean
+        <em>expression</em> or <em>founder frequency</em>, never registration. The author-time
+        version of this problem is already settled &mdash; an absence from
+        <code>genes/index.json</code> is a killswitch, which is why that file is never
+        regenerated from the folder (<a href="known-gaps.html#gap-162">gap 162</a>) &mdash; and
+        that is the precedent to read before designing a runtime one.</li>
+    <li><strong>Do it as one pass with a convention, not option by option.</strong> Fifteen
+        scattered scalars is what a config grows into when each is added where it was needed; a
+        sweep is the chance to fix the shape &mdash; one file per concern, generated blocks where
+        the roster is data, and a rule about what may be a server option versus a client
+        one.</li>
+    <li><strong>Every new system on this page should ship its own switch.</strong> Cheapest when
+        written with the feature and near-impossible to retrofit consistently &mdash;
+        <a href="horse-gear.html#accessories-bench">the tack bench</a> is the model, where one switch disabling
+        the bench disables all horse-armour crafting with no per-recipe gating anywhere.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="rider-comfort.html">Rider comfort &mdash; five switches waiting on this</a>
+        <a href="known-gaps.html">Known gaps</a>
+    </div>
+    The thing to settle before the sweep starts is the convention rather than the option list
+    &mdash; what may be a server option, what a client one, and where a roster that is already
+    data gets a generated block instead of another hand-written scalar.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

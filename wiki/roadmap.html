@@ -18,2475 +18,341 @@
 <p class="eyebrow">Project</p>
 <h1>Roadmap</h1>
 <p class="lede">
-    <strong>Planned features that are not built.</strong> Ordered by priority &mdash;
-    foundations before the features that sit on them, content before polish. That is the
-    whole of what this page is; everything else that used to live here has a better home,
-    listed below.
+    Every page of this wiki that has something <strong>planned and not built</strong>,
+    alphabetically, in the one sentence each of those pages says about itself. The plans
+    themselves are <em>not here</em> &mdash; each lives on a <strong>Roadmap tab</strong> of
+    the page for the thing it is about, which is where it is read, where it grows, and where
+    it is deleted from when the thing ships.
 </p>
-
-<div class="note danger">
-    <span class="label">Nothing but planned features lives here</span>
-    <p>
-        Four kinds of writing keep trying to settle on this page, and each has an owner that
-        is not this one:
-    </p>
-    <ul>
-        <li><strong>Something that shipped</strong> &rarr; <em>delete it</em> and write it up
-            on its own page. &ldquo;Marked shipped&rdquo; is not &ldquo;moved&rdquo;, and only
-            moving it keeps one source of truth.</li>
-        <li><strong>A decision</strong>, open or settled &rarr;
-            <a href="decisions.html">Design decisions</a>. Including a decision
-            <em>not</em> to build something: that is an answer, not a backlog item.</li>
-        <li><strong>A defect, a gap or an unchecked assumption</strong> &rarr;
-            <a href="known-gaps.html">Known gaps</a>. A built thing behaving wrongly is not a
-            planned feature.</li>
-        <li><strong>Something to go and look at in-game</strong> &rarr;
-            <a href="verification.html">To be verified</a> &mdash; <em>built, not yet seen</em>,
-            which is a different and much longer list than this one.</li>
-    </ul>
-    <p>
-        Sections are named, never numbered: the page has been reordered twice and will be
-        again. <strong>Link by anchor.</strong>
-    </p>
-</div>
 
 <div class="note rule">
-    <span class="label">If it already has a page, its plans go on that page &mdash; not here</span>
+    <span class="label">Nothing on this page is written by hand</span>
     <p>
-        <strong>This page is for wholly new content only</strong> &mdash; a feature with no
-        home yet. Everything else belongs beside the thing it is about, on a
-        <strong>Roadmap tab of that thing&rsquo;s own page</strong>:
-    </p>
-    <ol>
-        <li>Add a panel to the existing page:
-            <code>&lt;section id="roadmap" class="tab-panel" data-tab="roadmap"
-            data-tab-label="Roadmap" data-tab-hint="&hellip;"&gt;</code>. Page-local tabs are a
-            supported feature of <code>wiki/tabs.js</code> &mdash; they sit after Gameplay,
-            Coding and Science, and are deliberately <em>not</em> a wiki-wide view, so no
-            filter anywhere has to learn about them.</li>
-        <li><strong>Move the sections there whole</strong>, ids and all, so every inbound
-            <code>roadmap.html#anchor</code> becomes <code>that-page.html#anchor</code> and
-            nothing has to be rewritten twice.</li>
-        <li>Fix the inbound links, then run
-            <code>node wiki/tools/build-search-index.mjs</code> and
-            <code>node wiki/tools/check-links.mjs</code> &mdash; the link checker is what
-            proves the move landed.</li>
-        <li>Leave <strong>one mark</strong> here: a single sentence pointing at the new tab.
-            Not a summary, which would be the same content in two places again.</li>
-    </ol>
-    <p>
-        <strong>Why.</strong> A reader who wants to know about a thing should find what it
-        does, how it is built and what is still planned for it in one place, rather than
-        learning two thirds of it on one page and hunting this one for the rest. It also
-        keeps this page to the length of its actual job.
-        <a href="horse-gear.html#roadmap">Horse gear</a> is the worked example &mdash; the
-        accessories system, the slot roster, shoes, native tack, the saddlebags and the saddle
-        pad were all moved onto it in one pass.
+        <code>node wiki/tools/bake-roadmap-index.mjs</code> scans every page in
+        <code>wiki/</code> for a Roadmap tab and harvests the one-sentence summary box each
+        of them opens with. <strong>A subject joins this list by growing that tab, and
+        leaves it by losing it</strong> &mdash; the same way a gene is on the census by
+        existing. The counts beside each row are the panel's own heading tally, computed at
+        bake time, so a list that shrinks as things ship says so without anybody editing
+        this page.
     </p>
     <p>
-        <strong>Still to do.</strong> Every remaining section here that is about something with
-        a page of its own wants the same treatment.
+        <strong>So a plan is written where the thing is documented.</strong> Add a panel to
+        the page, re-run the bake, and the row appears:
     </p>
-</div>
+    <div class="codebox">
+        <div class="filename">wiki/&lt;the thing&gt;.html, before the Verification panel</div>
+        <pre><code class="language-markup">&lt;section id="roadmap" class="tab-panel" data-tab="roadmap"
+         data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built"&gt;
 
-<hr>
-
-<h2>Foundations that unblock the rest</h2>
-
-<h2 id="trait-rules">Group traits, and the rest of the effect architecture</h2>
-
-<h3>Traits that come from a <em>group</em> of genes</h3>
-
-<p>
-    Wanted, and distinct from the cut polygenic idea: <strong>two or more genes, each with
-    their own alleles, that only together trigger an outcome.</strong> This is epistasis /
-    complementation &mdash; still fully Mendelian &mdash; and it needs a home. The
-    <a href="gene-leopard.html">leopard complex</a> got what it needed without one
-    (<code>expressionIn</code> is handed the whole genotype), but that is a single-gene read,
-    not a rule of its own.
-</p>
-
-<ul>
-    <li><strong>It is not a gene</strong>, so it cannot live on the <code>Gene</code>
-        interface. It wants a separately registered <code>TraitRule</code> that declares
-        which gene keys it reads and is handed those pairs.</li>
-    <li><strong>It is still Mendelian.</strong> Each gene inherits normally and
-        independently; the rule only <em>reads</em> the result. No new inheritance code.</li>
-    <li><strong>It may affect the coat</strong> (<a href="decisions.html#settled-pipeline">settled</a>).
-        So a coat-affecting rule needs everything a gene needs: a <strong>phase</strong> and a
-        <strong>priority</strong>. Which argues strongly for modelling it as a
-        <strong>pseudo-gene</strong>: same delta function, same ordering, same determinism
-        rules, differing only in that its inputs are several pairs instead of one. Reusing the
-        gene pipeline wholesale is much cheaper than a parallel one, and the spawner and the
-        coat cache then need no special case.</li>
-    <li>The one thing it cannot inherit: it has no alleles, so it contributes nothing to the
-        genotype code and never appears in an allele lookup. Keep it out of
-        <code>codeOrder()</code>.</li>
-    <li><strong>Determinism</strong>: rules sort like genes, and a rule reading an
-        unregistered gene must fail loudly rather than default.</li>
-    <li><strong>Visibility to the player.</strong> A trait with no single gene behind it is
-        invisible in a genotype code and unguessable in a punnett square. It needs a UI
-        surface of its own, or it will read as randomness &mdash; exactly what
-        <a href="philosophy.html">the philosophy</a> says not to do.</li>
-</ul>
-
-<p class="muted">
-    Cream + pearl <em>looks</em> like this case and is not: they are one physical locus, and
-    <a href="gene-matp.html">MATP</a> merges them rather than writing a rule.
-</p>
-
-<h3>The rest of the effect architecture</h3>
-
-<p>
-    A first slice is built &mdash; <a href="making-a-gene.html#block"><code>effects</code></a>
-    verbs with boolean <code>when</code> conditions, usable from a gene file and from a
-    built-in Java gene through the same vocabulary. What is left is
-    <strong>everything else on <a href="horse-traits.html">the trait &amp; effect
-    architecture</a></strong>, which is the source of truth for the design and carries its
-    own <a href="horse-traits.html#build-order">build order</a>: triggers, selectors, auras,
-    resource pools, goals, trait relations, <code>on_change</code>, and the
-    <strong>0&ndash;1 scalar conditions</strong> the built version approximates as booleans.
-    <strong>The capability interfaces should not be considered final until that lands</strong>
-    &mdash; a modder writing a coat gene is on solid ground today; one writing a behaviour
-    gene is building on something that will move.
-</p>
-
-<hr>
-
-<h2 id="sex-linked">Sex-linked inheritance &mdash; a Y-linked gene, and a square that can draw one</h2>
-
-<p>
-    The scaffolding ships and <a href="gene-brindle.html">brindle</a> proves it. What is
-    planned on top:
-</p>
-
-<ul>
-    <li><strong>Nothing is Y-linked yet.</strong> The mirror case is built and tested through
-        <code>Inheritance.Y_LINKED</code> &mdash; a mare's pair is two reserved <code>X</code>
-        placeholders &mdash; and is waiting for a gene that wants it. A Y-linked locus travels
-        down the male line untouched by any mare, which is a different and equally legible
-        pedigree shape.</li>
-    <li><strong>A punnett square for a sex-linked gene is a different square</strong>, and
-        neither of the two that exist draws one. The wiki's
-        (<code>wiki/gene-inheritance/</code>, on every gene page) pairs the two copies of each
-        parent as though both were autosomal, so brindle's square is drawn wrong rather than
-        refused &mdash; it needs the sire's reserved <code>Y</code> slot and a foal's own sex
-        on one of the axes. The browser's Breeding preview tab has the same hole.</li>
-</ul>
-
-<hr>
-
-<h2 id="designer">The gene creator: a preview that runs the real pipeline, and a usability pass</h2>
-
-<h3 id="creator-wasm">Move the creator's preview onto the wasm</h3>
-
-<p>
-    <strong>The creator is the one tool whose preview never touches the real pipeline.</strong>
-    The <a href="horse-designer/">horse designer</a>, the <a href="breed-designer/">breed
-    designer</a> and every <code>gene-*.html</code> preview run <code>common/</code> compiled
-    to WebAssembly; the creator runs the hand-written JS port, which has no emissive pass and
-    <a href="../CLAUDE.md">is not getting one</a>. So it cannot show a glow, and it is not to
-    be extended to fake one.
-</p>
-
-<p>
-    Closing this means a <code>@JSExport</code> that bakes an <em>unsaved</em> spec, so the
-    creator previews through <code>DesignerApi</code> like everything else. That would also
-    end the port's reason to exist and change what
-    <code>wiki/gene-creator/tools/check-parity.mjs</code> is comparing, which is why it is a
-    job of its own rather than a finish to the last one.
-</p>
-
-<div class="note warn">
-    <span class="label">&ldquo;Covered by parity&rdquo; has to be demonstrated, not assumed</span>
+&lt;div class="note roadmap-summary"&gt;
+    &lt;span class="label"&gt;What is still planned here&lt;/span&gt;
+    &lt;p&gt;One sentence saying what is planned and unbuilt.&lt;/p&gt;
+&lt;/div&gt;
+...
+&lt;/section&gt;</code></pre>
+    </div>
     <p>
-        Anything the editor previews, it previews through the port, or it will show a horse
-        the game will not breed, convincingly. <code>pointsMin</code> is the case that proved
-        the probe cases are not enough on their own: with a minimal shape on
-        <code>prismatic</code>'s crescent and nothing else, <strong>reversing the blend in the
-        creator left parity green</strong> &mdash; a drawing on a flank is a few dozen texels
-        and the fixtures sample four per part. The way that was established was to break the
-        port on purpose and watch the check stay quiet. <strong>Do that with the next one
-        too.</strong>
+        The bake <strong>refuses to write</strong> rather than produce a wrong index: a
+        roadmap tab with no summary box, two of either, or a summary box loose on a page all
+        fail it by name. An index that quietly omits a subject is worse than no index, and
+        is exactly how the old version of this page rotted.
+    </p>
+    <p>
+        <strong>Nothing is ever hand-written onto this page.</strong> Not a plan, not an
+        exception, not &ldquo;just this one, it has no page yet&rdquo;. <strong>If a plan
+        has no page to live on, that is a missing page, not a reason to write it
+        here</strong> &mdash; make the page, give it a Roadmap tab and nothing else, and it
+        becomes the home the thing is documented on when the first piece of it ships.
+        Everything between the markers below is harvested; everything above them is this
+        page's own standing rules.
     </p>
 </div>
-
-<h3 id="creator-ux">A usability pass on the creator</h3>
-
-<p>
-    The tool is <em>correct</em>: it loads, it previews a horse, it writes every part of the
-    format, and it proves its own engine against the game's on boot. What it has never had is
-    a pass for whether it is pleasant to use. <strong>Nothing here is specified, deliberately</strong>
-    &mdash; the point of the pass is to look at it with fresh eyes rather than to implement a
-    list written in advance. Known rough edges to start from:
-</p>
-
-<ul>
-    <li><strong>Effects and layers look alike.</strong> They share the <code>.layer</code>
-        card, which is honest about them being peers but makes the right column read as one
-        long undifferentiated stack.</li>
-    <li><strong>The forms are flat.</strong> Every parameter of every mask, op and effect is
-        always visible at the same weight; nothing is folded away behind
-        &ldquo;advanced&rdquo;, and the common case is not faster than the rare one.</li>
-    <li><strong>Errors are a list at the bottom.</strong> The validator names the problem well
-        but does not point at the field that caused it.</li>
-    <li><strong>No undo</strong>, and no warning before &ldquo;New gene&rdquo; discards what
-        you have.</li>
-</ul>
-
-<p class="muted">
-    The constraint that does not move: it has to keep working from <code>file://</code>. That
-    is why every script is a classic one and every asset is inlined &mdash; see
-    <a href="making-a-gene.html#the-shape">the format</a>. A UI framework that needs a bundler
-    or a dev server is out.
-</p>
-
-<hr>
-
-<h2>Genes still to build</h2>
-
-<p>
-    Finished genes are not listed here &mdash; they are rostered on
-    <a href="genetics-model.html#registry">the genetics model</a> with a page each, and any
-    residual tuning lives on the gene's own page. What follows is only what no gene does yet.
-    Natural genes all exist in real life, so they belong in the 0&ndash;99 priority band and
-    run before any magical gene; the scientific allele names are legal tokens as written.
-</p>
-
-<h2 id="natural-genes">Natural genes</h2>
-
-<div class="note">
-    <span class="label">The <code>naturalgeneref.md</code> audit &mdash; a standing task</span>
-    <p>
-        <code>naturalgeneref.md</code> in the repo root is a cleaned extract of another horse
-        game's natural-genetics guide, and it is the reference the natural side should be
-        complete against. It already carries a level of game-ready abstraction, which is why
-        it is worth diffing against rather than primary sources. <strong>Standing task: read
-        it end to end, diff it against the registered genes, and turn each gap into an entry
-        here.</strong> Every base colour and dilute in it is modelled at least in mechanism;
-        what the last pass turned up is below.
-    </p>
-</div>
-
-<h3 id="curly">Curly coat (<code>KRT25</code>, <code>SP6</code>)</h3>
-
-<p>
-    Two dominant variants curl the coat, mane and tail. <code>KRT25</code> curls <em>and</em>
-    thins the hair (hypotrichosis); <code>SP6</code> curls it without thinning;
-    <code>KRT25</code> is epistatic to <code>SP6</code> for the hair loss, so the plush
-    full-coated curly is the <code>SP6</code>-only horse.
-</p>
-
-<p>
-    <strong>It needs a coat-structure axis before it needs a gene.</strong> Nothing in the
-    pipeline varies hair at all, so there is no value for a painter to write to. Wanted by the
-    <a href="breed-book.html">American Bashkir Curly</a>, whose entire identity it is; that
-    breed ships with the colour pool and no curl, and says so in its notes.
-    <code>horsegenetics.rex</code> is a magical ring marking and is <strong>not</strong> this.
-</p>
-
-<h3 id="phenotype-naming">Base-aware phenotype naming</h3>
-
-<p>
-    A surface, not a gene, and it serves three separate gaps. The reference names
-    <strong>gold / amber / sable / classic</strong> champagne and <strong>chestnut / bay /
-    black / cream</strong> pearl as distinct phenotypes <em>by base</em>, and expects
-    cream&times;champagne and cream&times;pearl to read differently again. Separately, it
-    treats <strong>seal bay</strong> as its own base that <em>sable champagne</em> rides on
-    &mdash; but seal has no gene here, it is the top of
-    <a href="gene-agouti.html">agouti</a>'s epigenetic distribution.
-</p>
-
-<p>
-    So the mod needs a way to <strong>resolve and name</strong> &ldquo;this genotype is an
-    amber champagne&rdquo; or &ldquo;this horse is seal&rdquo; for the info panel, the paper
-    dump and the gene dictionary &mdash; and champagne needs to read &ldquo;is this horse
-    seal&rdquo; off the agouti epigenetics to paint sable rather than amber. One base-aware
-    phenotype resolver serves all of it.
-</p>
-
-<hr>
-
-<h2 id="gait">Gait &mdash; the gene ships, the animation does not</h2>
-
-<p>
-    <a href="gene-dmrt3.html">DMRT3</a> is registered, inherited and carried by the breeds that
-    really have it, and it <strong>changes nothing about how a horse moves</strong>. The locus
-    contributes no trait and every outcome is a wild type, because there is no ambling or
-    pacing animation to switch on. The gene's own expression text says so to the player in
-    three places &mdash; <em>&ldquo;the gait is not animated yet&rdquo;</em> &mdash; so this is
-    a promise already made in game, not a loose idea.
-</p>
-
-<p>
-    What it needs is <strong>animation work on the vanilla horse model</strong>: a four-beat
-    amble and a lateral pace, chosen by copy count, with the two-copy horse losing the
-    diagonal gaits it trades away. That is the whole entry. It is deliberately <em>not</em>
-    bundled with
-    <a href="decisions.html#settled-no-per-part-scaling">the per-part scaling call</a>, which
-    was cut: that one wanted the mod to <em>own</em> the horse model, and this one only wants
-    new motion on the model it already borrows.
-</p>
-
-<hr>
-
-<h2 id="magical-genes">Magical genes</h2>
-
-<p>
-    Invented genes, phase 3, priority <code>100</code>+. <strong>This list has no upstream
-    source to be complete against &mdash; add to it freely.</strong> Each needs a priority, an
-    allele set with <code>n</code> as wild type, a founder distribution and a delta function.
-</p>
-
-<h3>More of what already works</h3>
-
-<ul>
-    <li><strong>More LUT palettes.</strong> The gene is built to take more &mdash;
-        <strong>a new palette is a new allele here, never a new gene</strong> &mdash; each
-        being a <code>lutResources()</code> entry plus an expression row and a founder weight.
-        Wants a batch of hand-authored gradient PNGs. See <a href="gene-lut.html">the LUT
-        locus</a>.</li>
-    <li><strong>More magical marking and &ldquo;stamp&rdquo; genes before 1.0.</strong>
-        Colourful flank and body emblems in the spirit of
-        <a href="gene-cutie-mark.html">cutie marks</a> but simpler &mdash; no item atlas.
-        Open-ended; the owner wants a visible batch of these for the 1.0 look.</li>
-</ul>
-
-<h3 id="breed-flavour-genes">Genes a breed designer can build a character out of</h3>
-
-<p>
-    Asked for as a batch, out of <code>intake/</code>: <strong>more genes whose point is
-    flavour</strong> &mdash; loci a breed file can name to alter what its horses do and what they
-    can do, rather than how they look. The existing behaviour family is the model; what is wanted
-    is more of it, and deliberately open-ended. A breed is
-    <a href="breed-format.html">a JSON file</a>, so every gene added here is a knob the designer
-    gets for free.
-</p>
-
-<h4 id="tack-aware">A gene that reads what the horse is wearing</h4>
-
-<p>
-    Named specifically, and it is the one with a real design problem in it. The ask is a locus
-    that <strong>detects whether a horse is saddled or armoured, and which kind</strong>, and
-    reacts &mdash; an allele that slows the horse dramatically while saddled, another that
-    suppresses every aura while saddled, and so on.
-</p>
-
-<ul>
-    <li><strong>The condition vocabulary has nothing that can see equipment.</strong> The
-        <code>when</code> flags read the world and the horse&rsquo;s own state; none of them reads
-        an equipment slot. So this is a new condition flag before it is a gene, which means
-        <a href="making-a-gene.html#contracts">the condition contract</a> &mdash; the flag, the
-        evaluator, the creator&rsquo;s schema mirror, both tables and a parity fixture.</li>
-    <li><strong>&ldquo;Which kind&rdquo; is the expensive half.</strong> A boolean
-        <em>is saddled</em> is cheap. Distinguishing iron from diamond from a modded armour means
-        the flag carries a value, and the generated-armour layer means the set is open-ended
-        rather than a fixed five &mdash; see <a href="compatibility.html#generated">the compat
-        layer</a>. Decide whether the gene asks &ldquo;armoured at all&rdquo;, &ldquo;armoured in
-        this tag&rdquo;, or a material tier, before writing any of it.</li>
-    <li><strong>Watch the phantom saddle.</strong> <code>BarebackSteeringHandler</code> writes the
-        saddle slot every tick on a horse nobody has saddled, so a naive <em>is saddled</em> check
-        is true for horses the player considers bare. Whatever reads the slot has to exclude a
-        stack carrying <code>PHANTOM_SADDLE</code> or the gene will fire constantly and look
-        broken.</li>
-</ul>
-
-<h4 id="aggression-overhaul">The aggression genes may want an overhaul</h4>
-
-<p>
-    Recorded as asked rather than as specified: the note says only that they <em>may need</em>
-    one, with no statement of what is wrong. <strong>Nothing should be rebuilt off that
-    sentence.</strong> The first piece of work is to say what the complaint is &mdash;
-    <a href="gene-aggression.html">aggression</a> carries the moon-sick allele, and
-    <a href="#chase-gene">the chase gene</a> below would generalise the forget-target goal that
-    sits beside it, so an overhaul may turn out to be that entry plus a tidy rather than a
-    rewrite.
-</p>
-
-<h3 id="intake-tool-gaps">Mask parameters the intakes asked for</h3>
-
-<p>
-    All four arrived as <a href="making-a-gene.html#prompt">tool gaps</a> in the authoring
-    notes, each read after the approximation had been seen on a horse, and each describing a
-    shortfall that is really there. All but one are a new parameter on an existing mask,
-    defaulting to today's behaviour, so <strong>no shipped gene moves</strong> &mdash; but each
-    is still <a href="making-a-gene.html#contract-mask">the mask contract</a>: the painter,
-    <code>SpecSchema</code>, the creator's twin, both tables, a <code>prismatic</code> case,
-    fixtures and parity.
-</p>
-
-<ul>
-    <li><strong><code>RAMP</code> <code>angle</code></strong> (degrees, default 0, read only
-        when <code>axis</code> is X, Y or Z): rotate the sweep within the plane of the named
-        axis and the next one round (X&rarr;Y&rarr;Z&rarr;X), so <code>angle: 90</code> on X
-        is Y. The coverage is the dot product of the position with the rotated unit vector,
-        normalised through <code>from</code>/<code>to</code> as now. What it buys: an SVG's
-        <code>&lt;linearGradient&gt;</code> runs at an arbitrary angle and today can only be
-        collapsed to one flat tone per band or one sweep along the horse's length &mdash;
-        <a href="gene-tidewave.html">tidewave</a> ships with the latter, and its swells lose
-        the sense of each being separately lit.</li>
-    <li><strong><code>FAN</code> <code>origin: "cell"</code></strong> (with <code>scale</code>,
-        <code>seed</code>, and <code>vary</code> as a per-cell rotation of the fan's zero):
-        walk the same lattice <code>SPOTS</code> uses and measure the angle and radius from the
-        texel's own cell centre instead of from <code>originU</code>/<code>originV</code>, so a
-        field of independent sprays is one layer. Multiplying one <code>FAN</code> by
-        <code>SPOTS</code> cannot do it &mdash; that clips one global fan into cell-shaped
-        pieces that all point at the same pivot. <a href="gene-opal-fire.html">Opal fire</a>
-        ships with two hand-placed fans that land in the same two spots on every horse. Note
-        <a href="known-gaps.html#gap-182">gap 182</a> before building it: a per-cell pivot on a
-        3D lattice will mostly sit off the skin, so this probably wants the same
-        snap-to-surface option as the centre marks.</li>
-    <li><strong><code>SVG</code> / <code>PATH</code> <code>plane: "wrap"</code></strong> (with
-        <code>wrapAxis</code>, default X, and <code>from</code>, the part whose cross-section
-        is walked): <code>u</code> is the body X as <code>top</code> already gives it, and
-        <code>v</code> is <b>signed arc length</b> in body units around the part's box
-        perimeter in the YZ cross-section, measured from the top-face centreline. This is the
-        one entry that is a new <code>plane</code> value rather than a parameter. What it buys:
-        a drawing that lies over the back and continues down both flanks as one unbroken
-        picture. Every plane today is a straight projection, so a face parallel to the
-        projection axis takes one line of the drawing smeared down it &mdash;
-        <a href="gene-endless-knot.html">the endless knot</a> ships that way, with vertical
-        bars under whichever arms cross the barrel's edge and its outer unit each side never
-        drawn at all. Swapping planes cannot fix it: what is missing is a measurement, distance
-        travelled <em>around</em> the cross-section, and neither <code>NORMAL</code> nor
-        <code>EDGE</code> reports it.</li>
-    <li><strong><code>FRACTAL</code> <code>stretch</code> / <code>axis</code> /
-        <code>tilt</code></strong> (default 1, X, 0 &mdash; today's behaviour): divide the
-        sample point along the tilted axis before the octave sum, so a continuous noise field
-        gets a <b>grain</b>. What it buys: veins, currents and weather that all run one way.
-        <code>FRACTAL</code> samples isotropic noise, so no threshold, warp or octave count
-        gives it a direction &mdash; <a href="gene-stormvein.html">stormvein</a>'s veins fork
-        and wander correctly but run every way at once, where the drawing they came from
-        streams diagonally. <code>SPOTS</code> has exactly this pair already and gets ovals
-        from it; the reason it cannot stand in is that it elongates countable marks and cannot
-        draw a web whose ridges also bound the pools.</li>
-</ul>
-
-<h3 id="cloud-walking">Cloud-treading</h3>
-
-<p>
-    The <a href="gene-flying.html">flying</a> gene was asked for with three abilities and
-    shipped with two. The third &mdash; an allele that glides <em>and</em> can come to rest on
-    a cloud and walk about on it &mdash; was killswitched so the elytra glide could be got
-    working first, and the allele was removed rather than left in place describing something
-    it no longer did.
-</p>
-
-<p>
-    <strong>The question that would normally sink this is already answered.</strong> Clouds
-    used to be client-only decoration, which would have meant inventing an invisible surface
-    at an arbitrary height and hoping both sides agreed on it. In 26.1.2 they are not:
-    <code>DimensionSpecialEffects</code> is gone and cloud height moved into the
-    <em>common-side</em> <code>EnvironmentAttributes.CLOUD_HEIGHT</code> &mdash; four blocks
-    thick, <code>spatiallyInterpolated</code> and <code>syncable</code> &mdash; and vanilla
-    ships the exact predicate the feature needs, <code>Entity.isInClouds()</code>. So a
-    cloud-treading horse can key off <em>real</em> clouds, on either side, and the horse
-    dimension can set its own cloud height.
-</p>
-
-<p>
-    What is left is design, not discovery: what treading a cloud does to momentum, whether it
-    restores anything, and whether a horse that cannot fly may still be granted it. The
-    <code>cloud_walk</code> flag is already a legal <code>traversal</code> value and is
-    deliberately composed <em>beside</em> <code>flight_glide</code> rather than folded into it,
-    so nothing has to be unpicked to bring it back &mdash; it is an allele, an expression and
-    a founder share, and the share comes back off <code>n/n</code>. One caution worth
-    carrying: the alpha guard in <code>isInClouds()</code> means a dimension whose
-    <code>CLOUD_COLOR</code> is fully transparent has no clouds at all, and the predicate is
-    simply always false there.
-</p>
-
-<h3 id="model-parts">Attached model parts</h3>
-
-<div class="note">
-    <span class="label">The owner wants a batch of these &mdash; &ldquo;a HUGE win for how cool they look&rdquo;</span>
-    <p>
-        Blockbench meshes attached to the horse model, gene- or breed-driven, with no
-        independent animation needed.
-        <strong>High priority:</strong> unicorn horns, spikes / dorsal spines, crystalline
-        growths &mdash; small models, head- or spine-parented, big visual payoff.
-        <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails, hoof
-        feathering (already wanted by the draught breeds), tusks, antlers.
-        <strong>Do a batch of the head-parented ones first</strong> &mdash; one render layer,
-        many models.
-    </p>
-</div>
-
-<ul>
-    <li>This is the mod's <strong>first non-texture visual</strong>. The coat pipeline is
-        texture-only and <code>common/</code> is Minecraft-free, so <code>common/</code> can
-        only declare <em>that</em> a gene wants part <code>X</code>, by id; the renderer
-        resolves it &mdash; the same shape as <code>GradientLut</code> arriving as an
-        <code>int[]</code>.</li>
-    <li>The proposal is GeckoLib plus Blockbench, with an attached layer whose bones are
-        children of the horse's body bone so they inherit every animation.
-        <strong>Check whether a plain render layer parented to the existing model part does the
-        job before taking the dependency</strong> &mdash; animation inheritance is the entire
-        argument for GeckoLib, and a horn does not animate independently of the head.</li>
-    <li>Saddle, armour and third-party tack render at the same time. Layer order and
-        z-fighting are the predictable bugs, and these all need to scale with the horse
-        too.</li>
-</ul>
-
-<hr>
-
-<h2 id="undead-horses">Undead horses &mdash; two genes, and a spawning overhaul</h2>
-
-<p>
-    <strong>This used to be an open question and now it is a design.</strong> The question was
-    how much of the mod an undead horse gets; the answer the owner has given is
-    <em>all of it</em> &mdash; a skeleton horse is <strong>any breed</strong> that happens to
-    carry a skeleton gene, and a zombie horse is any breed carrying a zombie gene. Undeath stops
-    being an entity type this mod stands beside and becomes two loci, which is the answer that
-    costs the least new machinery and the most spawning work.
-</p>
-
-<div class="note warn">
-    <span class="label">One thing to settle before either gene is written</span>
-    <p>
-        Each of these loci bundles several effects, and
-        <a href="philosophy.html#concepts-are-breeds">&ldquo;a concept is a breed, not a
-        gene&rdquo;</a> says an idea needing several effects is a breed rather than a locus. The
-        undead case has two real answers to that &mdash; undeath is arguably one trait with many
-        consequences, the way a lethal is, and the design wants an undead horse of <em>any</em>
-        breed, which a breed cannot express. <strong>It is an
-        <a href="decisions.html#open-undead-locus">open call</a>, not a settled one</strong>, and
-        the shape of both genes depends on which way it goes.
-    </p>
-</div>
-
-<div class="note">
-    <span class="label">Why this is much cheaper than the version it replaces</span>
-    <p>
-        Making undeath a gene means the genome, the coat pipeline, breeding, records, bond and
-        the body stats all reach these horses <em>for free</em>, because they reach every
-        <code>Horse</code>. <strong>The alternative was never small.</strong> Scoping to the
-        concrete <code>Horse</code> class is not one guard in one place &mdash; it is
-        <strong>125 <code>instanceof Horse</code> checks</strong> across the NeoForge module
-        against 22 for <code>AbstractHorse</code>, done in the handlers with plain
-        <code>instanceof</code> rather than in a mixin that could be retargeted. Teaching all of
-        that about two more entity types is the expensive version, and it is now off the table.
-    </p>
-</div>
-
-<h3 id="skeleton-gene">The skeleton gene</h3>
-
-<ul>
-    <li><strong>Recessive.</strong> Which means it is carried invisibly and can surface from two
-        ordinary-looking parents &mdash; the thing the mod is for.</li>
-    <li><strong>It heals without eating, and cannot eat at all.</strong> A clean inversion of
-        the existing feeding loop rather than an addition to it. Note this collides with
-        <a href="horse-care.html">gated healing</a> and with the diet gene, both of which assume
-        food is how a horse recovers; the gene has to turn that off rather than compete with
-        it.</li>
-    <li><strong>It looks like a skeleton.</strong> The one genuinely hard part, because the
-        <a href="pipeline.html">coat pipeline</a> paints a coat and a skeleton is the absence of
-        one. Whether this is a painting gene at extreme priority, a whole-texture override, or a
-        model swap is the open question, and it should be settled before either gene is
-        started.</li>
-    <li><strong>Aggressive, and permanently pacified by a bone.</strong> One bone, once, forever
-        &mdash; which is carrot-not-stick and is also a nice inversion of taming, since the
-        horse is hostile until you give it the thing it is made of.</li>
-</ul>
-
-<h3 id="zombie-gene">The zombie gene</h3>
-
-<ul>
-    <li><strong>Literally twice the hearts, at a large speed penalty.</strong> Both are
-        attributes the body genes already write, so the mechanism exists; the
-        <em>number</em> is the design, and doubling health is the largest single stat effect in
-        the mod by a distance.</li>
-    <li><strong>Obligate carnivore.</strong> Feeding is the loop here rather than a flavour
-        note, and it has to answer what happens when a carnivore is offered the carrots that
-        everything else in the mod runs on &mdash; <a href="carrots.html">breeding carrots</a>
-        especially, which are how a player steers a genome.</li>
-    <li><strong>Aggressive, and only <em>temporarily</em> pacified with raw meat, until
-        tamed.</strong> The deliberate contrast with the skeleton's single bone: one is a
-        permanent bargain, the other is a rope you keep paying out until the horse is
-        yours.</li>
-</ul>
-
-<h3 id="undead-spawning">The spawning overhaul, which is the actual work</h3>
-
-<p>
-    <strong>&ldquo;Spawn as any breed, but with these genes&rdquo; is not how undead horses
-    spawn today</strong> &mdash; vanilla's skeleton horse arrives from a lightning trap and its
-    zombie horse does not spawn naturally at all, and neither is a <code>Horse</code>, so
-    <code>BreedSpawnHandler</code> never sees them. Replacing that means deciding what the
-    vanilla entities become: suppressed and substituted with a gene-carrying
-    <code>minecraft:horse</code>, or left alone beside their genetic counterparts. The first is
-    the version that matches the ask and is also the one that touches another mod's undead
-    horses, so it wants a config gate from the start.
-</p>
-<p>
-    <strong>The founder distribution is the part that decides whether this is fun.</strong>
-    Both genes are recessive, and <a href="breeds.html">the founder table</a> rule is that a
-    recessive particle-style gene puts its <em>expressing</em> combinations into the wild
-    population rather than carriers &mdash; otherwise the gene exists and nobody ever sees one.
-    Which breeds carry it, and at what frequency, is a per-breed-sheet line and is where the
-    flavour lives: an undead Shire and an undead Falabella are different jokes.
-</p>
-
-<p class="muted">
-    <strong>More of the mod already reaches them than the old version of this section
-    said</strong>, and it matters because it is what would become dead code.
-    <code>entity/ModAttributes</code> adds <code>LAVA_MOVEMENT</code> and
-    <code>DRAFT_POWER</code> to a set that names <code>SKELETON_HORSE</code> and
-    <code>ZOMBIE_HORSE</code> explicitly; the replaced saddle asset carries
-    <code>skeleton_horse_saddle</code> and <code>zombie_horse_saddle</code> with the same three
-    dyeable layers as a horse's, so bench-dyed tack renders on them; and
-    <strong>every mixin targeting <code>AbstractHorse</code> reaches them already</strong>
-    &mdash; carts, flight while ridden, instant jump, rearing, regeneration and two riders. If
-    the vanilla entities are suppressed, all of that becomes dead code and should go in the same
-    change. A fourth option named in the old version of this section &mdash; leave them alone
-    and let <a href="breed-book.html#dhampir">the magical breeds</a> be this mod's undead horses
-    &mdash; is superseded by the above, and recorded here only so it is not re-proposed.
-</p>
-
-<p class="muted">
-    <em>Undead Horses Plus</em> (Bedrock addon) is on
-    <a href="#mod-survey">the survey list</a> for ideas to fold in here before any of this is
-    built.
-</p>
-
-<hr>
-
-<h2>The gameplay layer</h2>
-
-<p>
-    A layer sitting <em>on top of</em> the genetics, touching it in only three places &mdash;
-    carrots bias a gamete draw, jars carry a genome, and the database and carrot recipes read
-    gene metadata &mdash; so it can proceed in parallel with the gene work above. The slices
-    that are built are documented on <a href="items.html">items</a>,
-    <a href="carrots.html">carrots and the database</a>,
-    <a href="horse-care.html">bond and herds</a> and <a href="breeding.html">breeding</a>;
-    what follows is the remainder.
-</p>
-
-<h2 id="items">Items, stalls and the objects nobody specified</h2>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Thing</th><th>What is missing</th></tr></thead>
-<tbody>
-<tr><td><strong>Stalls and holding pens</strong><br><span class="muted">built: <a href="item-stall-signs.html">stall signs</a>, <a href="item-tickets.html">tickets</a></span></td><td><strong>Auto-return</strong> &mdash; a horse that takes itself home, rather than one sent by a ticket. Cleanup beyond breaking the exact sign block: rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash, which needs a <code>RenderLevelStageEvent</code> renderer against the changed 26.1.2 pipeline.</td></tr>
-<tr><td><strong>Standards of any solid block</strong><br><span class="muted">built: <a href="item-jumps.html">any wood, per half</a>; the material is already block-entity data</span></td><td><strong>Cobblestone, brick, glass, dirt &mdash; whatever a player wants holding the rails up.</strong> Deferred deliberately: &ldquo;not necessary for the first release&rdquo; (owner, 2026-09-20). Recipe unchanged &mdash; a jump is still crafted from wood &mdash; and <strong>paint stays planks-only</strong>; this is a swap you make after the fact, in the block&rsquo;s own screen.
-    <p>The scoping is done and it is <em>cheaper</em> than it sounds, so it is worth not re-deriving. <strong>No art is generated:</strong> a material costs fifteen three-line models (three styles &times; five connection states) that point at the block&rsquo;s <em>existing</em> texture, exactly as modded woods point at their own mod&rsquo;s plank sheet. Two findings make it cheaper still, both verified against the 26.1.2 artefacts:</p>
-    <ul>
-        <li><strong>The model files are avoidable entirely.</strong> <code>ModelBaker.materials().get(new Material(id), name)</code> resolves any already-atlased texture to a sprite at bake time, and <code>BakedQuad</code> is a <em>record</em> now &mdash; so re-skinning one baked geometry per material is about ten lines of UV remapping (<code>UVPair.pack</code>/<code>unpackU</code>, rebuilt through <code>QuadCollection.Builder</code> into a <code>SimpleModelWrapper</code>). No vanilla or NeoForge sprite-remap helper exists in this version; those ten lines would be ours.</li>
-        <li><strong>The roster need not be curated.</strong> A block&rsquo;s representative texture is reachable generically as its own baked model&rsquo;s particle sprite &mdash; <code>ModelEvent.ModifyBakingResult</code> exposes a mutable <code>BakingResult</code> after baking, and <code>BlockStateModelSet</code> does the same at runtime. So &ldquo;any solid block&rdquo; can be a runtime test rather than a hand-written list. Roughly <strong>270&ndash;355</strong> of vanilla&rsquo;s 1,144 blocks qualify, plus whatever mods add, free.</li>
-    </ul>
-    <p><strong>The one real cost is not the materials.</strong> <code>JumpModel.Unbaked.bake</code> loops every material <em>once per blockstate variant</em> &mdash; ninety-six times over &mdash; which is already wasteful at twelve woods and is what would hurt at three hundred. It wants a bake cache keyed on (model id, rotation), and that is worth doing whether or not this ships.</p></td></tr>
-<tr><td><strong>Obstacles beyond the three styles</strong><br><span class="muted">built: <a href="item-jumps.html">vertical, oxer and crossrails</a>, any wood, crossrails spanning up to three blocks</span></td><td><strong>The rest of the vocabulary</strong>: logs, brush, ditches, fillers, walls, water. Each is geometry in the same baker, so the cost per type is low, and the owner&rsquo;s hard rule bounds it &mdash; <strong>no style is more than one block deep</strong>, because a jump that occupies two blocks stops being a thing you put in a row and starts being a structure. Also unbuilt: <strong>anything that notices a round</strong> &mdash; no timing, no scoring, no knocked rail, no refusal. A jump is scenery with a collision box, and the <a href="item-jumps.html#instrument">measuring-stick argument</a> is the only gameplay it has. Note the three that exist collide <em>identically</em> on purpose, so a stack of three means the same thing whatever it is built from; anything that made a style matter mechanically would be taking that back, and the height ladder is an honest reading of genetics because it does not.</td></tr>
-</tbody>
-</table>
-</div>
-
-<h3 id="stall-bars">Stall bars &mdash; a third per-material block family</h3>
-
-<p>
-    A connecting, waterloggable horizontal-bars block, built the way
-    <a href="item-jumps.html">jumps</a> and the double gates already are: authored for vanilla's
-    woods by a <code>tools/bake-*.mjs</code> script, generated for other mods' materials at run
-    time by a <code>compat/Generated*</code> class, and the two halves kept in step by hand
-    because nothing checks them.
-</p>
-
-<ul>
-    <li><strong>It has to earn its place under the utility rule</strong> &mdash;
-        <a href="philosophy.html#utility-not-decoration">nothing this mod adds may be purely
-        aesthetic except breeding</a> &mdash; and a block that pens a horse no better than a
-        fence does not. Both of its utilities fall out of the same physical fact, which is a
-        good sign they are the right ones. <strong>Bars are see-through</strong>, so a stalled
-        horse still counts its herd and stays settled where a solid wall would isolate it. And
-        <strong>bars are reachable</strong>, so you can groom, feed and lead a horse through
-        them without opening the gate.</li>
-    <li><strong>The herd half is the interesting one.</strong> It is a second consumer for a
-        herd computation that has none, and it makes stable <em>layout</em> matter &mdash; the
-        first time a block this mod adds cares where it sits relative to another.</li>
-    <li><strong>It makes the jump bake cache worth doing.</strong>
-        <code>JumpModel.Unbaked.bake</code> already loops every material once per blockstate
-        variant. A third family on the same pattern is the point at which that stops being
-        wasteful and starts being the cost &mdash; a cache keyed on (model id, rotation), as the
-        standards row in the table above already argues on its own grounds.</li>
-</ul>
-
-<p class="muted">
-    From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>,
-    whose <code>BlockHorizontalBars</code> is the shape &mdash; connecting, waterloggable, and
-    with no gameplay attached to it whatever.
-</p>
-
-<h3 id="callable-horses">Callable horses &mdash; what is left after the ender whistle</h3>
-
-<p>
-    Calling one horse from anywhere is built, as the
-    <a href="item-whistles.html#ender">ender whistle</a>. What was designed and not built:
-</p>
-
-<ul>
-    <li><strong>Walk if near, teleport if far.</strong> The ender whistle always teleports.
-        Inside <code>BondFollowGoal</code>'s range a walk would be more legible.</li>
-    <li><strong>Bond gating.</strong> Binding needs ownership only, not a bond tier. Which
-        tier, if any, is still an open number.</li>
-    <li><strong>Bound modes on the three area whistles</strong> (loaded chunk / same dimension
-        / any dimension by tier). Superseded by the ender whistle unless someone wants the
-        ladder back.</li>
-    <li><strong>A tooltip naming the horse</strong>, and a texture that tells a bound whistle
-        from an unbound one &mdash; see
-        <a href="item-whistles.html#ender-gaps">the whistles page</a>.</li>
-    <li><strong>An optional keybind</strong> to blow the held or first hotbar whistle.</li>
-    <li><strong>Non-horse equines.</strong> Binding refuses donkeys, mules and llamas, because
-        only a <code>Horse</code> carries a genome and an owner check.</li>
-</ul>
-
-<h3 id="item-art">Art and coverage</h3>
-
-<ul>
-    <li><strong>Real textures.</strong> The four tickets share one, the three whistles share
-        one, and both stall signs borrow <code>minecraft:item/oak_sign</code>.</li>
-    <li><strong>Audit <code>item/ModItems</code> against the recipe folder</strong> and make
-        sure every craftable item has a shapeless, at-least-one-modded-input recipe or a
-        deliberate &ldquo;not craftable, obtained by X&rdquo; note. An item with no recipe and
-        no page is invisible to a player who is not reading the source, and that is a 1.0
-        blocker.</li>
-    <li><strong>Keep <a href="items.html">items.html</a> current.</strong> It is hand-written
-        against the recipe JSON; generating it, or checking it in a test, would stop it
-        rotting.</li>
-</ul>
-
-<hr>
-
-<h2 id="bond">Bond, herds and horse care</h2>
-
-<p>
-    The core ships &mdash; the tier table, gain rates, daily cap and herd rule are on
-    <a href="horse-care.html">horse care</a>. What is planned:
-</p>
-
-<h3>More bond sources</h3>
-
-<ul>
-    <li><strong>Sleeping nearby, +1/night</strong> &mdash; the one remaining source from the
-        original design.</li>
-    <li><strong>Being led on a lead counts.</strong> Walking a leashed horse is taking it for a
-        walk &mdash; a small per-tick trickle while <code>isLeashed()</code>, the holder is the
-        owner, and both are moving, capped by the daily limit like everything else.</li>
-    <li><strong>Flavour interactions</strong> &mdash; petting and cleaning. Cheap if
-        animation-only: right-click with an empty hand plays a short interaction and gives a
-        little bond. <strong>Brushing is no longer one of these.</strong> It grew into
-        <a href="#grooming-tool">the grooming tool</a> below, which replaces shears outright
-        rather than sitting beside them; whether grooming also <em>heals</em> a small amount
-        &mdash; a second route through the healing gate, or exempt from it the way hand-feeding
-        is &mdash; is still open and belongs with that section.</li>
-</ul>
-
-<h3 id="bond-behaviours">Two more tier behaviours, both harvested rather than invented</h3>
-
-<p>
-    Both came out of <a href="#mod-survey">the quality-of-life cluster</a>, and both were keyed to
-    something else in their original mods. <strong>Keying them to bond instead is the whole
-    adaptation</strong> &mdash; it is the idiom
-    <a href="horse-care.html#bareback-steering">bareback steering at tier 3</a> already
-    established, it makes them a reward rather than a default, and it leaves a low-bond horse
-    behaving exactly as vanilla does.
-</p>
-
-<ul>
-    <li><strong>A horse that trusts you stops bucking.</strong> Horse Buff removes vanilla's
-        random bucking outright; Superb Steeds keys it to being saddled. Here it is a bond tier:
-        the random interruption fades as the horse comes to trust you.
-        <strong><code>HorseRearFightMixin</code> and the aggro rearing stay untouched</strong>
-        &mdash; a horse that rears because you hit it, or because its herd is fighting, should go
-        on doing so. The point is that rearing stops being noise and starts meaning
-        something.</li>
-    <li><strong>A bonded horse waits where you left it.</strong> Horse Tweaks pins a 16-block home
-        on dismount and clears it with a lead; Horse Buff just stops saddled horses idling away.
-        Here, at a tier, the horse stops wandering when you dismount and waits for you &mdash; no
-        new item, no leash, and a low-bond horse still drifts, which is the thing bond is
-        <em>for</em>. <strong>Note this is adjacent to a separate problem, not the same
-        one</strong> &mdash; <code>setPersistenceRequired</code> is never called on taming or
-        ownership, so whether an owned horse can despawn at all is
-        <a href="known-gaps.html#gap-300">an open question</a>. Keep them apart: a horse that
-        vanishes is a defect and its fix belongs to everybody, while waiting where you left it is
-        a reward and belongs to bond. Fixing the first as a tier of the second would mean a
-        low-bond horse is <em>allowed</em> to disappear.</li>
-</ul>
-
-<h3 id="grooming-tool">A grooming tool, tiered &mdash; and shears stop working on a horse</h3>
-
-<p>
-    Grooming is built, and it is <code>minecraft:shears</code>.
-    <code>server/HorseShearHandler</code> gives an adult horse 1&ndash;3
-    <a href="item-horse-hair.html">horse hair</a> and <strong>+2 bond</strong> once per
-    Minecraft day, with a brush sound, heart particles and a message that already calls it
-    grooming rather than shearing &mdash; the dressing was changed on 2026-09-13, and the
-    mechanic never was shearing. <strong>What is missing is the tool.</strong> The verb reads as
-    care and the item in your hand is a pair of blades.
-</p>
-
-<ul>
-    <li><strong>A grooming tool replaces shears outright</strong> &mdash; not a better path
-        beside them. Shears on a horse do nothing, and the one verb has one item. Anything less
-        leaves the blades in the game as the beginner's grooming tool, which is the thing being
-        fixed.</li>
-    <li><strong>One verb, tiered by material</strong>, the way tack tiers are already scoped
-        rather than the way a six-tool roster would be. A better tool grooms for <strong>more
-        bond and a shorter cooldown</strong>. The hair yield stays 1&ndash;3 at every tier, so
-        grooming never turns into a farming action and the bond stays the reason to do it.</li>
-    <li><strong>The top tier grooms the whole herd at once.</strong> That is the ladder's
-        destination, and it is the only rung that does something the lower ones cannot. It also
-        gives the herd computation a <em>consumer</em> &mdash; the Herds list below records that
-        it has none today, so this closes a listed gap rather than adding a system beside
-        it.</li>
-    <li><strong>The contract is wider than the handler.</strong>
-        <code>ProgressTask.SHEAR_HORSE</code> and its advancement
-        <code>husbandry/shear_horse.json</code> are both named for the old item, so a rename
-        means <code>bake-advancements.mjs</code> and then
-        <code>check-progress-tasks.mjs</code>. The <a href="item-vet-kit.html">vet kit</a>
-        recipe takes shears as an ingredient and is unaffected &mdash; shears keep every use
-        they have that is not a horse.</li>
-</ul>
-
-<p class="muted">
-    The six-tool roster &mdash; dandy brush, body brush, rubber and metal curry combs, hoof
-    pick, sponge &mdash; came from
-    <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a> and
-    was <strong>deliberately not taken</strong>. Six tools only earn their keep against a
-    per-horse condition that decays, and a horse that suffers for going unbrushed is exactly the
-    punishing husbandry <a href="philosophy.html">philosophy</a> rules out. The material ladder
-    is what survived of it.
-</p>
-
-<h3 id="ground-work">Ground work &mdash; a halter, a lead and a lunge line</h3>
-
-<p>
-    <strong>Bond you build without riding.</strong> Clip a lunge line to a haltered horse and it
-    works a circle around you; bond accrues on
-    <a href="horse-care.html">the existing slow tick</a>, capped by the same daily limit as
-    everything else. The point is the horses you cannot or will not ride &mdash; a foal, one
-    carrying a <a href="horse-body.html">disorder</a>, one you have not saddled &mdash; which
-    today have no bond source but hand-feeding.
-</p>
-
-<ul>
-    <li><strong>The halter is a slot</strong> and belongs to
-        <a href="horse-gear.html#accessories-slots">the accessories roster</a>, where it is listed. What lives
-        here is what having one lets you do.</li>
-    <li><strong>The lead is vanilla's.</strong> No new item: <code>isLeashed()</code> already
-        drives the walking-bond bullet above, and lungeing is that same relationship held
-        still.</li>
-    <li><strong>The lunge line is the one new item, and the mechanic is the work.</strong> A
-        horse circling a fixed point is movement nothing in the mod does, and it has to yield to
-        being ridden, to fleeing and to the herd goals rather than fight them. That is a
-        priority in the goal selector, so
-        <a href="behaviour-hierarchy.html">the behaviour hierarchy</a> and its bake are part of
-        the contract.</li>
-    <li><strong>Riding crop, lunge whip and driving whip are skipped.</strong> They are
-        implements for striking a horse to make it go, and the care layer is built on the
-        opposite premise. Recorded here so nobody re-proposes them from the same source.</li>
-</ul>
-
-<p class="muted">
-    From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>,
-    which shipped a halter, a lead and a lunge line in sixteen colours each, with no behaviour
-    attached to any of them.
-</p>
-
-<h3>Herds</h3>
-
-<ul>
-    <li><strong>Nothing consumes the herd alpha.</strong> Computed on demand, no consumer
-        &mdash; no herd-wide behaviour, no alpha-follows, no display.</li>
-    <li><strong>Herd membership is invisible</strong> outside the inventory panel's
-        &ldquo;&bull; herd&rdquo; flag. The real surface is
-        <a href="#browser">the browser</a>.</li>
-    <li><strong>Feeding is not dose- or temper-aware</strong>: any <code>isFood</code> stack
-        from the owner is +2, whatever it is.</li>
-    <li><strong>Gated healing has no info-panel line naming what is missing</strong> &mdash; a
-        hurt horse near food but no water shows particles and nothing else.</li>
-    <li><strong>A founding band has no family relations.</strong> A breed can say how many
-        stallions and mares its bands are founded with
-        (<a href="breed-format.html#herd-shape"><code>herd</code></a>), but every member is a
-        parentless founder: <code>HorseRecord.founder</code> leaves mother and father empty,
-        and each genome is rolled independently from the breed sheet. So a foal standing in a
-        band is nobody's foal, and could carry alleles neither adult beside it has. Doing it
-        honestly means founding rolls the foal <em>from</em> the lead and a chosen mare
-        (<code>HorseRecord.bred</code>, a real generation) rather than from the sheet &mdash;
-        a change to what founding <em>is</em>. Stamping the ids without the descent was
-        considered and rejected: the pedigree screen would present a relationship the genetics
-        contradict.</li>
-</ul>
-
-<h3 id="troughs">Troughs and salt licks</h3>
-
-<p>
-    From <a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a>, and
-    asked for specifically as <strong>a trough built out of the existing modular-wood
-    framework, in any square or rectangular shape</strong>.
-</p>
-<p>
-    <strong>No block of this mod feeds a horse today.</strong> Feeding is grazing and
-    hand-feeding &mdash; <code>HungerFoodGoal</code> walks a horse about ten blocks to the best
-    thing it can reach, with a hay bale as the largest meal &mdash; so a trough is the first
-    <em>place</em> a horse eats from, and that is the feature rather than the block.
-</p>
-<ul>
-    <li><strong>The wood half is genuinely reusable and the paint half is not.</strong>
-        <code>compat/MaterialScan</code> and <code>ModdedMaterials.woods()</code> already serve
-        double gates, jumps and carts from one roster, so &ldquo;a trough in any wood, vanilla or
-        modded&rdquo; is an existing pattern with three precedents. But there is no shared paint
-        system &mdash; jumps, tack and generated armour each tint their own way, and two of them
-        duplicate the same dye-reading lines with a source comment saying <em>&ldquo;if a third
-        place needs dyes, extract it then&rdquo;</em>. A trough plus
-        <a href="#cart-bench">the cart and jump bench</a> would be the third and fourth places.
-        <strong>That extraction is now due.</strong></li>
-    <li><strong>Multi-block in any rectangle is the genuinely new part.</strong> Nothing in the
-        mod assembles a structure from several placed blocks; the nearest thing is
-        <code>StallDetector</code>, which <em>recognises</em> an enclosure the player built
-        rather than forming one. Worth reading it first &mdash; the answer to &ldquo;what counts
-        as a valid shape, and what happens when someone breaks one block of it&rdquo; is already
-        worked out there.</li>
-    <li><strong>Salt licks</strong> were asked for alongside. They have no mechanism here at all
-        &mdash; a block a horse walks to and uses over time, which is closer to
-        <a href="horse-care.html">care</a> than to feeding. <strong>Keep it carrot-not-stick:</strong>
-        a salt lick that grants something is in keeping; a horse that suffers without one is the
-        husbandry-chore version and is exactly what the owner's note warns against when it says
-        to hold Animania's ideas to this mod's philosophy.</li>
-    <li><strong>Any mod's trough-alike should work</strong>, the way
-        <code>compat/HayBales</code> made every mod's hay bale grazeable with a tag rather than a
-        list. Same trick, same reason.</li>
-</ul>
-
-<hr>
-
-<h2 id="allele-papers">A research paper names an allele, not a gene</h2>
-
-<p>
-    The wanted end state: <strong>research papers pull out individual alleles</strong> rather
-    than whole genes, the <a href="items.html">equine research shelf</a> lets you
-    <strong>pick two of them</strong> and binds them into one book, and that book is what the
-    carrot recipes take. The crafting recipes themselves do not change. The load-bearing half
-    is built &mdash; a carrot already names exactly the pair it grants. What is left, in the
-    order that keeps the game working at each step:
-</p>
-
-<ul>
-    <li><strong>The paper carries an allele.</strong> <code>RESEARCH_GENE</code> becomes a gene
-        key plus an allele token, and the discovery system that grants papers has to decide
-        <em>which</em> allele a horse teaches you &mdash; presumably the ones it actually
-        carries, which is the same question <code>common/horse/RosterGenetics</code> already
-        answers for the browser's pickers.</li>
-    <li><strong>The shelf binds two into a book.</strong> Its <em>Copy</em> tab already picks
-        one gene and spends blank books; this is that tab taking two allele papers instead.
-        <code>ResearchShelfMenu</code> and <code>ResearchShelfScreen</code>.</li>
-    <li><strong>The recipe takes the book.</strong> <code>KnownGeneSpliceRecipe</code>
-        currently matches a research paper and calls <code>CarrotEffect.defaultSpliceFor</code>
-        to decide the pair; it would read the pair off the book instead, at which point
-        <code>defaultSpliceFor</code> and <code>Gene.geneCarrotHomozygous()</code> both stop
-        being needed and should go.</li>
-    <li><strong>The tooltip.</strong> A Known Gene Splice carrot already <em>carries</em> the
-        right data and has never <em>shown</em> it &mdash; every one of them looks identical in
-        the inventory. That is worth doing whether or not the rest lands.</li>
-</ul>
-
-<p class="muted">
-    Note the interaction: the carrot's homozygous-by-default rule is a stopgap that this design
-    deletes. Once the player picks both alleles there is no default to choose.
-</p>
-
-<hr>
-
-<h2 id="carrot-content">The carrot content pass</h2>
-
-<p>
-    The <a href="carrots.html">mechanism is complete</a>. What is missing is
-    <strong>content across every registered gene</strong>, not machinery.
-</p>
-
-<div class="note warn">
-    <span class="label">Every built-in gene needs a real carrot, not the minimal fallback</span>
-    <p>
-        The parameterised recipe means a gene <em>can</em> have a carrot; it does not mean the
-        carrot is <em>balanced</em>. Today <strong>every</strong> built-in falls back to the
-        minimal recipe and the uniform splice draw. Each gene wants a hand-tuned
-        <code>carrot</code> block: a <strong>rarity tier</strong> matching how strong the gene
-        is, <strong>flavour ingredients that read as the gene</strong> (a nether wart for
-        <a href="gene-milk.html">lava milk</a>, a glow ink sac for
-        <a href="gene-light.html">light</a>, an amethyst shard for a
-        <a href="gene-lut.html">LUT palette</a>&hellip;), and a <code>splice</code> table
-        producing a sensible outcome rather than a coin-flip on a many-allele locus.
-    </p>
-    <p>
-        Note the recipe currently takes <strong>exactly four items</strong> with no flavour
-        slot, so shipping flavour lists means re-opening the recipe as well as writing the
-        data.
-    </p>
-</div>
-
-<ul>
-    <li><strong>The Epigenetic Stabilizer carrot.</strong> The other end of the dial from the
-        Unknown Epigenetic Splice: it forces the fed parent's passed-on copies to be inherited
-        <em>verbatim</em>, suppressing <a href="breeding.html#drift">drift</a> for one
-        breeding, so a player who wants a near-clone foal can buy that. Now that drift is the
-        default on every value this is the only way to switch it off, which is what makes it
-        worth having.</li>
-    <li><strong>Carrot effects captured on a <a href="item-seed-jars.html">seed jar</a></strong>
-        and applied at impregnation. None are carried today.</li>
-    <li><strong>A database check inside the recipe.</strong> The paper ingredient is the whole
-        gate today, which is <em>probably</em> right &mdash; but it means a paper traded from
-        another player works without the receiver ever discovering the gene. Decide
-        deliberately.</li>
-    <li><strong>New carrots are cheap</strong>, and the
-        <a href="carrots.html#themed">themed splices</a> are the first proof of it: once the
-        <code>GameteBias</code> hook and the <code>carrot_effects</code> component exist, a new
-        carrot is a <code>CarrotEffect</code> case and a <code>fold</code> rule. The list is
-        meant to grow.</li>
-</ul>
-
-<hr>
-
-<h2 id="ivf">Assisted reproduction: the rest of the seed jar, and the later tiers</h2>
-
-<h3>Finishing the seed jar</h3>
-
-<p>
-    The cut-down flow is built and written up on <a href="breeding.html">breeding</a>. What is
-    left:
-</p>
-
-<ul>
-    <li>A <code>collectedFrom</code> marker (player-made vs villager-sold) and the &ldquo;no
-        Known Gene Splice carrot on a jar&rdquo; recipe restriction.</li>
-    <li><strong>This is what the <a href="villagers.html#equestrians">scientist</a> is
-        missing.</strong> His trade table shipped without the two rows that wanted a vial
-        &mdash; selling a random rolled genotype, and buying a player-made one back &mdash;
-        because both need <code>collectedFrom</code> and a vial worth rolling. His buy row
-        takes a stallion seed jar at every tier instead. Adding the rows later is two JSON
-        files and, for the buy-back, a <code>components</code> predicate on the
-        <code>wants</code> block, which the trade format already supports.</li>
-</ul>
-
-<h3>The later tiers</h3>
-
-<p>
-    Embryo extraction, gene screening, gene splicing, cloning, cross-species. Each is a block
-    with an inventory and a screen, and each is endgame by intent. Three notes that change how
-    they should be scoped:
-</p>
-
-<ul>
-    <li><strong>The gene sequencer is not new work</strong> &mdash; it is
-        <a href="#browser">the browser</a> or the family-tree screen pointed at a vial or an
-        embryo. Build it as a <em>view</em>, not a machine with its own UI.</li>
-    <li><strong>Gene splicing is the first thing in the mod that writes an arbitrary genotype
-        in survival.</strong> It needs the same validity predicate the creative spawner needs
-        &mdash; is this allele pair legal, does this locus exist &mdash; and that predicate
-        should be written once and shared.</li>
-    <li><strong>Cross-species is much larger than its row.</strong> Donkeys and mules are
-        separate vanilla entity types, mules are sterile by design, and neither carries any of
-        this mod's genetics. Extending the genome to another species is a project, not a tier.
-        <strong>Scope it separately or cut it.</strong></li>
-</ul>
-
-<hr>
-
-<h2 id="browser">The horse browser</h2>
-
-<p>
-    The <code>H</code>-key screen is a real container menu; the horse list and the gene
-    database are built. The full plan is six tabs, and what is left is the <strong>vial
-    inventory</strong>, the <strong>herd view</strong>, the <strong>bonding view</strong> and a
-    generated <strong>crafting tree</strong>, plus out-of-band actions (teleport a horse to a
-    stall, whistle for bonded horses, recall to a holding pen).
-</p>
 
 <div class="note danger">
-    <span class="label">The owned-horse index is still owed, and the horse list is running without it</span>
-    <p>
-        <strong>The expensive part was never the UI.</strong> A proper per-player owned-horse
-        registry &mdash; updated on tame, breed, death and transfer, holding enough
-        denormalised data (name, sex, age, genotype, bond, herd) that horses in
-        <em>unloaded chunks</em> still appear &mdash; does not exist. The My horses tab ships
-        on <code>HorseRoster</code> instead, which walks the whole ancestry table on request,
-        cuts the result at <code>HorseRosterPayload.MAX_ENTRIES</code> and sends it, and the
-        client sorts and filters what it got. What is owed is the registry, with sort and
-        filter running <strong>server-side</strong> over it, and pagination.
-        <code>HorseQuery</code> is already game-free, so the same predicate can run on the
-        server the day the index exists.
-    </p>
+    <span class="label">Four kinds of writing keep trying to settle here, and each has an owner that is not this page</span>
+    <ul>
+        <li><strong>Something that shipped</strong> &rarr; <em>delete it</em> from the
+            Roadmap tab and write it up on that page's Gameplay and Coding tabs.
+            &ldquo;Marked shipped&rdquo; is not &ldquo;moved&rdquo;, and only moving it
+            keeps one source of truth. A page whose last plan ships loses the tab and drops
+            off this index by itself.</li>
+        <li><strong>A decision</strong>, open or settled &rarr;
+            <a href="decisions.html">Design decisions</a>. Including a decision
+            <em>not</em> to build something: that is an answer, not a backlog item, and the
+            racing and competitions call is the worked example of one that used to sit
+            here.</li>
+        <li><strong>A defect, a gap or an unchecked assumption</strong> &rarr;
+            <a href="known-gaps.html">Known gaps</a>. A built thing behaving wrongly is not
+            a planned feature.</li>
+        <li><strong>Something to go and look at in-game</strong> &rarr;
+            <a href="verification.html">To be verified</a> &mdash; <em>built, not yet
+            seen</em>, which is a different and much longer list than this one, and is kept
+            by the same machinery on a Verification tab of the same page.</li>
+    </ul>
 </div>
-
-<h3>The tab the owner has asked for</h3>
-
-<p>
-    <strong>The bonding tab.</strong> The bond level with each horse, the tier it is at, and
-    <strong>concrete guidance on how to raise it</strong> &mdash; which sources are available,
-    what the daily cap is, how close the next tier is. This is the surface
-    <a href="#bond">bond</a> is missing. My horses shows the <em>number</em> and sorts by it,
-    which is not the same thing: it says where you are and not how to move.
-</p>
-
-<h3>The rest</h3>
-
-<ul>
-    <li><strong>A row should open the horse.</strong> Clicking a My horses row selects it and
-        fills the footer; it should reach the information screen and the family tree. Both want
-        a <code>HorseRecord</code> and the roster deliberately does not carry one (it carries a
-        <code>HorseListing</code>, a tenth of the bytes), so this needs a fetch-one-record
-        round trip.</li>
-    <li><strong><code>FamilyTreeScreen</code> should <em>become</em> a tab</strong> rather than
-        stay a separate screen. Row portraits exist &mdash; <code>client/HorsePortrait</code>,
-        used by the My horses table and both breeding pickers &mdash; but they are a
-        <em>second</em> copy of the tree's <code>drawHorseModel</code> rather than a shared one
-        (<a href="known-gaps.html#gap-78">gap 78</a>), and merging them is part of this. It is
-        also the working reference for a from-scratch retained-mode screen in this codebase,
-        scissor clipping and entity draw included &mdash; with the standing warning: build the
-        render state from a throwaway client-only <code>Horse</code>, and never touch
-        <code>ClientCoatCache</code>.</li>
-    <li><strong>The crafting-tree tab goes stale on contact with a modded gene.</strong>
-        Generate it from the recipe manager at runtime; do not hard-code the graph.</li>
-    <li><strong>Teleport, recall and whistle</strong> need the stall and pen definitions
-        <a href="#items">above</a>, plus answers for a destination that no longer exists and
-        for whether any of it crosses dimensions.</li>
-    <li><strong>A natural / magical filter on the Breeds tab.</strong>
-        <code>Breed.magical()</code> is already on every breed, so the filter is a toggle beside
-        the list and a clause in <code>HorseBrowserScreen.drawBreedList</code>. Build it with
-        the first magical breed, so it can be seen doing something.</li>
-</ul>
-
-<hr>
-
-<h2 id="horse-menu">The horse menu &mdash; acting on a horse, not only reading about one</h2>
-
-<p>
-    <a href="#browser">The browser's remaining tabs</a> are a separate and larger job; this is
-    the smaller, sharper set of asks about the screen as it stands. The thread running through
-    all of them: <strong>the menu is a report today, and every one of these turns it into a
-    console.</strong>
-</p>
-
-<h3 id="menu-teleport">Teleport the horse to you, from the Where column</h3>
-
-<p>
-    <strong>The column exists and is inert.</strong> &ldquo;Where&rdquo; is the twelfth column on
-    <em>My horses</em> and already prints <code>overworld 118, 71, -204</code>, built server-side
-    by <code>HorseRoster.where</code>. Clicking it should attempt to bring the horse to you.
-</p>
-<ul>
-    <li><strong>&ldquo;Use <code>/tp</code>&rdquo; was the ask, and the mechanism deserves a
-        second look rather than a literal reading.</strong> The mod already teleports horses
-        properly &mdash; <a href="item-whistles.html#ender">the ender whistle</a> moves a bound
-        horse across dimensions, and <a href="item-tickets.html">tickets</a> send one to a stall.
-        Routing the button through the same code is better than issuing a command: a command
-        needs permissions the player may not have, silently does nothing for them if they do not,
-        and skips every check the whistle makes.</li>
-    <li><strong>It must answer the unloaded case, which is most rows.</strong>
-        <code>HorseRoster.entry()</code> only fills <em>Where</em> for a horse in a loaded chunk;
-        everything else reads <em>not loaded</em>, and those are exactly the horses you would
-        want to summon. <strong><code>data/HorseWhereabouts</code> already exists</strong> as a
-        <code>SavedData</code> of last-seen dimension, position and death, and the roster does
-        not read it &mdash; wiring that in is the prerequisite and improves the column whether or
-        not the button is built.</li>
-    <li><strong>It needs a cost or a gate.</strong> A free summon-any-horse-from-anywhere button
-        makes whistles, tickets and holding pens redundant in one stroke. Whatever gates it
-        &mdash; a bond tier, a cooldown, an item &mdash; should be decided
-        <em>before</em> the button, not retrofitted after players have it.</li>
-</ul>
-
-<h3 id="menu-waypoints">A waypoint column, when a map mod is running</h3>
-
-<p>
-    A checkbox per horse that drops a waypoint on the player's minimap and refreshes it every
-    thirty seconds.
-</p>
-<p>
-    <strong>Nothing in the repo touches any map mod today</strong> &mdash; no Xaero, no
-    JourneyMap, no waypoint code of any kind &mdash; so this is a new integration from zero, and
-    it is the one item here with a third-party API at the end of it. Two things to settle first:
-    <em>which</em> map mods (their waypoint APIs are unrelated to each other, so each is its own
-    integration and the column should appear per-mod rather than as one checkbox), and where the
-    thirty-second refresh runs, since it has to keep updating while the screen is
-    <strong>closed</strong> and therefore cannot live in the screen. The fail-soft rule applies
-    as everywhere else: absent map mod, absent column, no crash and no hard dependency.
-</p>
-
-<h3 id="menu-refresh">Refresh on its own</h3>
-
-<p>
-    <strong>Asked for on three events &mdash; screen opened, a foal born, a horse died.</strong>
-    Today there is a <em>Refresh</em> button and a lazy first fetch:
-    <code>HorseBrowserScreen.init()</code> requests the roster only if the client has never
-    received one, and <code>HorseRoster.sendTo</code> has exactly one caller, the payload handler.
-    So a player who breeds a horse and opens the menu sees the world as it was when they last
-    pressed a button.
-</p>
-<ul>
-    <li><strong>On open is trivial</strong> &mdash; drop the <code>!received()</code> guard, at
-        the cost of a round-trip every time the screen opens.</li>
-    <li><strong>Birth and death are pushes, not pulls, and that is the actual work.</strong> The
-        server has to notice and send, which means a hook in the foaling and death paths and a
-        payload that says <em>what changed</em>. Re-sending the whole roster on every birth in a
-        big stable is the version to avoid; <code>ClientHorseRoster</code> is already a
-        UUID-keyed cache with a version counter, so it is built for a delta rather than a
-        replacement.</li>
-    <li><strong>Transfer and taming belong on the same list</strong>, even though they were not
-        asked for &mdash; they change the roster for exactly the same reason, and adding them
-        later means touching the same code twice.</li>
-</ul>
-
-<h3 id="menu-hud">RideHUD, and stats while you ride</h3>
-
-<p>
-    <strong>Wanted integrated rather than assessed.</strong> The mod has
-    <em>one</em> GUI overlay today &mdash; <code>client/FlightHudLayer</code>, a single line above
-    the hotbar naming the dismount key while flying, and itself unverified at runtime &mdash;
-    plus <code>JumpBarCooldownMixin</code>, which tints a vanilla bar. There is no stats readout
-    anywhere outside a screen you have to open.
-</p>
-<p>
-    That makes this <strong>the first real HUD in the mod</strong>, and the design question is
-    restraint rather than capability: every number already exists on
-    <code>HorseInfoScreen</code>, and the reason to show speed, jump, health and bond while
-    riding is that opening a screen mid-gallop is not a thing anyone does. Keep it to what
-    changes while you ride.
-</p>
 
 <div class="note">
-    <span class="label">Leave My Bars Alone was read, and the call was to fold it in here rather than rebuild it</span>
+    <span class="label">Why this page was dismantled</span>
     <p>
-        <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars
-        Alone</a> (Fuzs, MPL-2.0) does exactly two things, and it was read from source on
-        2026-09-21 because it is one of the very few mods on this page with a branch targeting
-        <strong>our own Minecraft version</strong>. It re-adds the food bar as an extra stacked
-        GUI layer anchored to <code>VEHICLE_HEALTH</code> &mdash; it does not move the mount's
-        health bar &mdash; and it narrows when vanilla is <em>allowed</em> to swap the XP bar for
-        the jump-charge bar, via one <code>@ModifyVariable</code> into
-        <code>nextContextualInfoState</code>, so XP stays visible unless you are actually
-        mid-charge. Two config booleans, both default on, no keybind, two files in the whole mod.
-    </p>
-    <p>
-        <strong>The owner's call was not to rebuild either half.</strong> We do not touch vanilla
-        bars separately; instead this section is designed so that <em>our</em> readout does not
-        add to the clutter in the first place, and the vanilla bar problem stays solved by a
-        maintained mod that already solves it. <strong>One thing to check when this is built:</strong>
-        <code>JumpBarCooldownMixin</code> already modifies the same vanilla jump bar, so the two
-        want testing together before either is claimed to work.
+        It was two and a half thousand lines, and it had swallowed all four of the above at
+        least once. The cost was not its length: it was that a reader who wanted to know
+        about <em>one thing</em> learned two thirds of it on that thing's own page and had
+        to come here and search for the rest, and that a plan written far from the code it
+        describes goes stale without anybody noticing. <strong>Now a page carries what its
+        subject does, how it is built, what is still planned for it and what needs looking
+        at, in that order, and this page only counts them.</strong>
+        <a href="horse-gear.html#roadmap">Horse gear</a> was the first page moved this way
+        and is still the worked example of all three tabs.
     </p>
 </div>
 
-<h3 id="menu-restyle">A different look for the menu &mdash; explicitly not committed</h3>
+<h2 id="index">What is planned, page by page</h2>
 
-<p>
-    The owner likes <a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology
-    Dictionary</a>'s UI and raised it as <em>&ldquo;maybe as an option or alternative style&rdquo;</em>,
-    with <em>&ldquo;not a requirement, not committed to&rdquo;</em> said outright.
-    <strong>Recorded here so the idea survives, and flagged so nobody builds it as a decision
-    that was made.</strong> Worth knowing what it would cost before anyone is tempted:
-    <code>HorseBrowserScreen</code> is a single 3,430-line <code>Screen</code> with its layout
-    inline, so a second skin means extracting a layout seam first &mdash; which is real work with
-    no user-visible result, and is the kind of thing that only pays if the restyle is actually
-    wanted.
+<!-- BEGIN generated by wiki/tools/bake-roadmap-index.mjs - do not edit between the markers -->
+<p class="roadmap-count">
+    <strong>45</strong> pages carry plans that are not built, <strong>108</strong> entries between them.
 </p>
-
-<hr>
-
-<h2 id="stables">More generated stables</h2>
-
-<p>
-    <a href="stables.html">Three ship</a>, and the owner has said more are coming. The
-    machinery is deliberately finished before the content: adding one is an NBT and a JSON,
-    with no Java, so this is a <strong>content</strong> backlog rather than a build one.
-</p>
-
-<ul>
-    <li><strong>Nothing yet decides <em>which</em> stable generates where.</strong> All three
-        share one biome tag, so a snowy plains gets the same buildings as a savanna. A stable
-        could name its own biomes &mdash; a line in its worldgen file and no code &mdash; and
-        probably should once there are enough of them to tell apart.</li>
-    <li><strong>A stable has no owner, no story and no loot.</strong> The buildings have
-        chests, and the bake empties them. A stable that came with an
-        <a href="villagers.html#equestrians">equestrian</a> living in it, or with tack in the
-        chests, is the obvious next thing.</li>
-    <li><strong>Nothing stops a player from simply taking the horses.</strong> They are untamed
-        and unowned, so the whole reward is &ldquo;find building, tame seven rare horses&rdquo;.
-        Whether that wants a cost &mdash; a price, a fight, a locked gate &mdash; is an open
-        design question nobody has asked yet.</li>
+<ul class="roadmap-index">
+    <li>
+        <a href="gene-aggression.html#roadmap">Aggression</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">An overhaul is <strong>recorded as asked rather than specified</strong>: the note says only that these genes <em>may need</em> one, with no statement of what is wrong, so the first piece of work is saying what the complaint is &mdash; nothing should be rebuilt off that sentence.</span>
+    </li>
+    <li>
+        <a href="architecture.html#roadmap">Architecture &amp; the build</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A compact binary encoding for the sync payloads comes first &mdash; the genotype code and the fatter epigenome code both grow a segment per locus &mdash; then grouping and scrolling in the info panel, and a <code>:common:test</code> that fails when a wiki page&rsquo;s number disagrees with the accessor that computes it.</span>
+    </li>
+    <li>
+        <a href="model-parts.html#roadmap">Attached model parts</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Blockbench meshes parented to the horse model &mdash; unicorn horns, dorsal spines and crystalline growths first, wings and hoof feathering later &mdash; the mod&rsquo;s first non-texture visual, and a GeckoLib dependency to justify or avoid before any of it starts.</span>
+    </li>
+    <li>
+        <a href="phenotype-naming.html#roadmap">Base-aware phenotype naming</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what"><strong>One base-aware phenotype resolver</strong>, so the info panel, the paper dump and the gene dictionary can say &ldquo;amber champagne&rdquo; or &ldquo;this horse is seal&rdquo; &mdash; and so champagne can read seal off agouti&rsquo;s epigenetics and paint sable rather than amber.</span>
+    </li>
+    <li>
+        <a href="block-preference.html#roadmap">Block preference</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A recessive locus pulling a horse toward Water, Lava, Underwater or Tree, as hard as the allele&rsquo;s author chooses and up to taking damage when it cannot get there &mdash; an AI goal with a priority in the behaviour hierarchy, not an <code>effects</code> state applied per tick.</span>
+    </li>
+    <li>
+        <a href="breed-book.html#roadmap">The breed book</a>
+        <span class="roadmap-plans">2 entries</span>
+        <span class="roadmap-what">The catalogue&rsquo;s backlog is a shopping list, not a commitment: a <strong>continental draft cluster</strong> from the Ardennais to the Schleswig Coldblood, the sport-horse books gated on the open-studbook call, and the reindeer mod&rsquo;s breeds, whose wings and horns mean learning to 3D model.</span>
+    </li>
+    <li>
+        <a href="carrots.html#roadmap">Breeding carrots &amp; the gene database</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Every built-in gene falls back to the minimal recipe and a uniform splice draw, so the work left is <strong>content, not machinery</strong>: a hand-tuned <code>carrot</code> block per gene, the Epigenetic Stabilizer carrot, carrot effects on a <a href="item-seed-jars.html">seed jar</a>, and a database check inside the recipe.</span>
+    </li>
+    <li>
+        <a href="breeds.html#roadmap">Breeds</a>
+        <span class="roadmap-plans">6 entries</span>
+        <span class="roadmap-what">The unbuilt work here is spawning and the render layer: an opt-in weather field that would be the breed parser&rsquo;s <strong>first cross-field validation</strong>, horses that may never spawn in chunks already explored, flowing manes and lower-leg feathering, and a herd flood-fill that can still split a pack streaming in over several ticks.</span>
+    </li>
+    <li>
+        <a href="cart-bench.html#roadmap">The cart and jump bench</a>
+        <span class="roadmap-plans">3 entries</span>
+        <span class="roadmap-what">A bench that builds a cart or a jump piece by piece &mdash; a wood and a paint per wheel, bed and shaft &mdash; which forces cart materials off the registry id onto stack components, and retires the baked per-wood recipes that <code>compat/GeneratedCarts</code> mirrors at run time.</span>
+    </li>
+    <li>
+        <a href="carts.html#roadmap">Carts: wagons, plows and what a horse is worth in harness</a>
+        <span class="roadmap-plans">2 entries</span>
+        <span class="roadmap-what">Two or four horses to one wagon on a <strong>whippletree</strong> &mdash; a change to the shape of the cart code rather than an addition beside it, since <code>applyDraught</code> takes a single puller &mdash; and a <strong>vardo</strong> you sleep in, whose respawn point drives away.</span>
+    </li>
+    <li>
+        <a href="chase-gene.html#roadmap">The chase gene</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Six alleles &mdash; <code>timed</code>, <code>distance</code>, <code>sight</code>, <code>never</code>, <code>infinite</code> and wild-type &mdash; generalising <code>WildHorseForgetTargetGoal</code> into a Java gene whose chase duration is inherited and drifts, with vanilla&rsquo;s panic goal to out-argue for <code>Flag.MOVE</code> first.</span>
+    </li>
+    <li>
+        <a href="coding-notes.html#roadmap">Coding notes</a>
+        <span class="roadmap-plans">5 entries</span>
+        <span class="roadmap-what">The thin science tabs are blocked on <strong>owner-supplied sources</strong> rather than on anyone getting to them &mdash; silver&rsquo;s absent MCOA section, MITF&rsquo;s SW1, a fifth of the natural tabs naming no breed at all &mdash; and the wiki has no checklist idiom and no item art.</span>
+    </li>
+    <li>
+        <a href="compatibility.html#roadmap">Compatibility</a>
+        <span class="roadmap-plans">4 entries</span>
+        <span class="roadmap-what">Two small patches &mdash; a load-time warning when <strong>Realistic Horse Genetics</strong> is installed, and <code>check-recipes.mjs</code> pointed at BHAR&rsquo;s recipe ids &mdash; plus a survey backlog that is reading work rather than build work: mods nobody has opened yet.</span>
+    </li>
+    <li>
+        <a href="config.html#roadmap">Config</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">One sweep over a config surface that grew option by option, into a convention for server versus client and generated blocks wherever the roster is data &mdash; plus a refusal: <strong>per-gene config</strong> must mean expression or founder frequency, never registration, since a genotype code is positional.</span>
+    </li>
+    <li>
+        <a href="curly-coat.html#roadmap">Curly coat</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A coat-structure axis the pipeline does not have yet, so that <code>KRT25</code> and <code>SP6</code> can curl and thin hair rather than recolour it &mdash; without one the American Bashkir Curly ships with the right colour pool and <strong>no curl at all</strong>.</span>
+    </li>
+    <li>
+        <a href="gene-dmrt3.html#roadmap">DMRT3 - gait</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">What is left is <strong>animation on the vanilla horse model</strong>: a four-beat amble and a lateral pace chosen by copy count, with the two-copy horse losing the diagonal gaits it trades away &mdash; the promise the gene&rsquo;s own expression text already makes to the player.</span>
+    </li>
+    <li>
+        <a href="gene-flying.html#roadmap">Flying</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">The third flying ability, <strong>cloud-treading</strong> &mdash; an allele that glides <em>and</em> can come to rest on a real cloud &mdash; killswitched so the elytra glide could ship first; the engine research is already done, so what is left is design rather than discovery.</span>
+    </li>
+    <li>
+        <a href="forced-riding.html#roadmap">Forced riding - the kelpie</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A wild horse that lets you mount and will not let you off, carrying you to deep water &mdash; a server-enforced ride-lock rather than an intercepted dismount key, waiting on the warning beat that separates a recognisable monster from a mount with no tell.</span>
+    </li>
+    <li>
+        <a href="stables.html#roadmap">Generated stables</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">More stables are a <strong>content</strong> backlog rather than a build one &mdash; an NBT and a JSON each &mdash; with three questions open first: nothing decides <em>which</em> stable generates where, a stable has no owner, story or loot, and <strong>nothing stops a player taking the horses</strong>.</span>
+    </li>
+    <li>
+        <a href="genetics-model.html#roadmap">The genetics model</a>
+        <span class="roadmap-plans">2 entries</span>
+        <span class="roadmap-what">Nothing is <code>Y_LINKED</code> yet, and <strong>no punnett square anywhere draws a sex-linked gene</strong> &mdash; brindle&rsquo;s is drawn wrong rather than refused, pairing a stallion&rsquo;s reserved <code>Y</code> as an ordinary allele &mdash; while the <code>naturalgeneref.md</code> roster audit stays a standing task.</span>
+    </li>
+    <li>
+        <a href="horse-browser.html#roadmap">The horse browser</a>
+        <span class="roadmap-plans">9 entries</span>
+        <span class="roadmap-what">A <strong>server-side owned-horse registry</strong> is still owed &mdash; My horses ships on <code>HorseRoster</code> walking the whole ancestry table instead &mdash; and beside it the vial, herd, bonding and crafting-tree tabs, a <strong>Where</strong> column that teleports rather than merely printing, and a roster that refreshes on birth and death.</span>
+    </li>
+    <li>
+        <a href="horse-care.html#roadmap">Horse care: gated healing, bond &amp; herds</a>
+        <span class="roadmap-plans">6 entries</span>
+        <span class="roadmap-what">A grooming tool that <strong>retires shears on a horse</strong> and at its top tier grooms the whole herd, ground work on a lunge line for foals and horses you never saddle, bond tiers that stop the bucking, and founding bands whose foals are nobody&rsquo;s foals.</span>
+    </li>
+    <li>
+        <a href="horse-gear.html#roadmap">Horse gear: the nineteen slots</a>
+        <span class="roadmap-plans">15 entries</span>
+        <span class="roadmap-what">Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the whole accessories system is the plan: derived models rather than drawn ones, a tack bench, dye and pattern, enchanted tack, shoes, native tack, horse chests and the saddle pad &mdash; with the armour materials the one piece that is only data.</span>
+    </li>
+    <li>
+        <a href="horsemanship.html#roadmap">Horsemanship</a>
+        <span class="roadmap-plans">4 entries</span>
+        <span class="roadmap-what">A rider-skill curve that moves speed and jump only &mdash; never health &mdash; as an <code>AttributeModifier</code> applied on mount and removed on dismount, with an <strong>uncapped, sharply diminishing</strong> shape, and an optional Pufferfish&rsquo;s Skills tree shipped as pure data.</span>
+    </li>
+    <li>
+        <a href="items.html#roadmap">Items &amp; recipes</a>
+        <span class="roadmap-plans">2 entries</span>
+        <span class="roadmap-what">The roster wants an audit of <code>item/ModItems</code> against the recipe folder &mdash; an item with no recipe and no page is invisible to anyone not reading the source, and a <strong>1.0 blocker</strong> &mdash; plus real textures for the tickets, whistles and stall signs that currently share one.</span>
+    </li>
+    <li>
+        <a href="item-jumps.html#roadmap">Jumps</a>
+        <span class="roadmap-plans">3 entries</span>
+        <span class="roadmap-what">Standards of <strong>any solid block</strong> are scoped and deferred &mdash; <code>ModelBaker.materials()</code> makes the model files avoidable &mdash; while the rest of the vocabulary (logs, brush, ditches, fillers, water) and <strong>anything that notices a round</strong> are unbuilt.</span>
+    </li>
+    <li>
+        <a href="lasso.html#roadmap">The lasso</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A thrown or held rope that stops a wild horse bolting so a band can be stalked rather than chased &mdash; the first item in the mod to target an entity, with the source mod&rsquo;s two-day taming timer cut as a chore with a progress bar.</span>
+    </li>
+    <li>
+        <a href="gene-lut.html#roadmap">LUT</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">More palettes beyond <code>Blupnk</code> and <code>Grnpnk</code> &mdash; <strong>a new palette is a new allele here, never a new gene</strong>, each one a <code>lutResources()</code> entry, an expression row and a founder weight, so what the plan actually waits on is a batch of hand-authored gradient PNGs.</span>
+    </li>
+    <li>
+        <a href="magic-grab.html#roadmap">Magic grab</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Four alleles naming the largest mob a horse can pick up and drag, with drag speed and damage tolerance in the epigenetics &mdash; needing a new <code>AbilityType</code>, whose contract is <strong>five files</strong>, and mob groups resolved through entity type tags rather than a vanilla list.</span>
+    </li>
+    <li>
+        <a href="magical-genes.html#roadmap">Magical genes still to build</a>
+        <span class="roadmap-plans">4 entries</span>
+        <span class="roadmap-what">A batch of magical marking and &ldquo;stamp&rdquo; genes before 1.0, more flavour loci for a breed designer to name in JSON, and a tack-aware locus that needs a new <code>when</code> condition flag able to see an equipment slot before it can exist at all.</span>
+    </li>
+    <li>
+        <a href="making-a-gene.html#roadmap">Making a gene</a>
+        <span class="roadmap-plans">4 entries</span>
+        <span class="roadmap-what"><strong>Retire the creator&rsquo;s hand-written JS port</strong> behind a <code>@JSExport</code> that bakes an unsaved spec, so its preview can show a glow; then an unspecified usability pass, and four mask additions the intakes asked for &mdash; <code>RAMP</code> <code>angle</code>, a per-cell <code>FAN</code>, a wrapping <code>SVG</code> plane, a <code>FRACTAL</code> grain.</span>
+    </li>
+    <li>
+        <a href="momentum-sprint.html#roadmap">Momentum sprint</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Speed that builds while a rider holds a line and drains on braking, hard turns, collisions, leaving the ground or stopping &mdash; a loop the rider can play badly rather than a permanent Speed modifier, and wanting the same per-tick attachment storm fed wants.</span>
+    </li>
+    <li>
+        <a href="item-research-papers.html#roadmap">Research papers</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Research papers would name an individual <strong>allele</strong> rather than a whole gene, the Equine Research Shelf would bind two of them into one book, and the splice recipes would take that book &mdash; which retires <code>Gene.geneCarrotHomozygous()</code> and the carrot&rsquo;s homozygous-by-default rule.</span>
+    </li>
+    <li>
+        <a href="rider-comfort.html#roadmap">Rider comfort</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Five small borrowings from other mods, each shippable alone and each wanting a config switch &mdash; no mining-speed debuff while mounted, an inventory keybind, leads that return &mdash; plus <strong>fading the horse out as you look down</strong>, which asks the coat pipeline for a transparency it has never had.</span>
+    </li>
+    <li>
+        <a href="item-seed-jars.html#roadmap">Seed jars</a>
+        <span class="roadmap-plans">3 entries</span>
+        <span class="roadmap-what">A <code>collectedFrom</code> marker is what the scientist&rsquo;s two missing trade rows wait on &mdash; selling a rolled genotype, buying a player-made one back &mdash; and behind it sit embryo extraction, screening, splicing and cloning, with <strong>cross-species a project rather than a tier</strong>.</span>
+    </li>
+    <li>
+        <a href="item-spawn-eggs.html#roadmap">The spawn eggs</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A <strong>per-copy epigenetics editor</strong> on the custom spawn egg: every allele copy&rsquo;s priority and seed shown individually with a type-it-in field, so that which copy is expressing can be asked without reading a log &mdash; eighty fields that want a per-gene expander rather than a flat list.</span>
+    </li>
+    <li>
+        <a href="item-stall-bars.html#roadmap">Stall bars</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A connecting, waterloggable bars block for stall fronts, which has to earn the utility rule: bars are see-through so a stalled horse still counts its herd, and reachable so you can groom, feed and lead through them.</span>
+    </li>
+    <li>
+        <a href="item-stall-signs.html#roadmap">Stall signs</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what"><strong>Auto-return</strong> &mdash; a horse that takes itself home rather than one sent by a ticket &mdash; is the largest thing missing, alongside holding pens distinct from stalls, a real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>, and a persistent wireframe in place of the F7 flash.</span>
+    </li>
+    <li>
+        <a href="storm-fed.html#roadmap">Storm fed</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A recessive locus filling an internal reservoir from storms, rain, snow, lightning, water or lava and spending none of it &mdash; deliberately half a gene, waiting on the mod&rsquo;s first per-horse attachment and on a second gene written to consume what it stores.</span>
+    </li>
+    <li>
+        <a href="horse-traits.html#roadmap">The trait &amp; effect architecture</a>
+        <span class="roadmap-plans">3 entries</span>
+        <span class="roadmap-what">Two or more genes that only <em>together</em> trigger an outcome, as a separately registered <code>TraitRule</code> modelled as a <strong>pseudo-gene</strong> so it reuses the coat pipeline&rsquo;s phase and priority; behind it the unbuilt rest &mdash; selectors, auras, resource pools, goals, and conditions as <strong>0&ndash;1 scalars</strong> rather than booleans.</span>
+    </li>
+    <li>
+        <a href="troughs.html#roadmap">Troughs and salt licks</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">A trough a horse actually eats from &mdash; the first block in the mod that feeds one &mdash; buildable in any rectangle out of any mod's wood, plus salt licks that must grant something rather than punish their absence.</span>
+    </li>
+    <li>
+        <a href="undead-horses.html#roadmap">Undead horses</a>
+        <span class="roadmap-plans">3 entries</span>
+        <span class="roadmap-what">A recessive skeleton gene that heals without eating and is pacified forever by one bone, a zombie gene with <strong>double hearts</strong> at a heavy speed cost, and the spawning overhaul that suppresses vanilla&rsquo;s two undead entities so that any breed can carry either.</span>
+    </li>
+    <li>
+        <a href="villagers.html#roadmap">Villagers &amp; transfer papers</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">The cowboy spawns in plains villages and nowhere else &mdash; injecting <code>horsegenetics:cowboy_barn</code> into the other four terminator pools is a handful of lines, but <strong>a barn per village material palette</strong> is the real project, and a plains barn in a desert is why neither is done.</span>
+    </li>
+    <li>
+        <a href="virtual-stables.html#roadmap">Virtual stables</a>
+        <span class="roadmap-plans">2 entries</span>
+        <span class="roadmap-what">An object that holds a horse you own &mdash; not a genome sample, a spawn-egg recipe or a ticket that moves a live animal, but the horse itself &mdash; with the open call being whether that is an item or a stall in the horse dimension.</span>
+    </li>
+    <li>
+        <a href="item-whistles.html#roadmap">Whistles</a>
+        <span class="roadmap-plans">1 entry</span>
+        <span class="roadmap-what">Six pieces of the callable-horse design are unbuilt: a whistle that <strong>walks a near horse in rather than teleporting it</strong>, a bond tier before binding is allowed, an optional keybind, a texture that tells a bound whistle from an unbound one, and binding for donkeys, mules and llamas.</span>
+    </li>
 </ul>
-
-<p class="muted">
-    The redistribution licence on the three that ship is a blocker on distribution rather than
-    on building, and is tracked as <a href="known-gaps.html#gap-80">gap 80</a>.
-</p>
-
-<h3 id="cowboy-everywhere">The cowboy in every village, and buildings that fit each one</h3>
-
-<p>
-    <strong>Two asks, and the first is nearly free.</strong>
-</p>
-<ul>
-    <li><strong>He spawns in plains villages and nowhere else.</strong>
-        <code>worldgen/BarnPoolInjector</code> appends <code>horsegenetics:cowboy_barn</code> to
-        <code>minecraft:village/plains/terminators</code> at server start, at weight 3, and
-        injects into no other village type. Desert, savanna, taiga and snowy villages have no
-        cowboy at all. Injecting into the other four terminator pools is a handful of lines in a
-        class that already does exactly this once &mdash; but a plains barn dropped into a desert
-        village is the reason it was not done, which is the second ask.</li>
-    <li><strong>&ldquo;He doesn't need a house, just plop his hitch down&rdquo; is already
-        built</strong>, and is the cheap route to every village type today.
-        <code>block/ModBlocks.COWBOY_HITCH</code> ships and is craftable, and
-        <code>server/CowboyHitchHandler</code> converts any unemployed adult villager within six
-        blocks of one into a cowboy, provided none is already within thirty-two. So a hitch in a
-        worldgen pool &mdash; no building, no jigsaw of our own &mdash; would put a cowboy in a
-        village of any style, immediately, with the art problem deferred rather than
-        solved.</li>
-    <li><strong>Buildings that emulate each village style</strong> is the real project, and the
-        owner has named it as such: a barn per village material palette, so the structure reads
-        as part of the town rather than dropped on it. That is <a href="#stables">the generated
-        stables backlog</a> wearing a different hat &mdash; same NBT-and-JSON pipeline, no Java
-        &mdash; and it should share whatever answer that section reaches about which building
-        generates where. Note the measurement rig already exists:
-        <code>worldgen/HomesteadCensus</code> took plains placement from 93.2% to 98.9% across
-        265 villages, so the same census answers &ldquo;did the desert one land&rdquo; without
-        anyone flying around looking.</li>
-</ul>
-
-<p class="muted">
-    The <a href="https://www.curseforge.com/minecraft/mc-mods/stables">Stables</a> mod is on
-    <a href="#mod-survey">the survey list</a> with the question of whether it can improve any of
-    <a href="villagers.html">the villagers this mod adds</a> &mdash; read it before the barn
-    variants are designed.
-</p>
-
-<hr>
-
-<h2 id="breeds">Breeds</h2>
-
-<h3>Cosmetics that are not genetics</h3>
-
-<ul>
-    <li><strong>Mane shape</strong> &mdash; Przewalski's upright with no forelock, the long
-        flowing manes of the Andalusian / Friesian / Gypsy. Render-layer and model work. The
-        Fjord's <em>colour</em> is off this list: the
-        <a href="gene-dun.html#midtstol">midtstol</a> is drawn by dun, and the erect clip that
-        shows it off is grooming rather than a mesh the horse is born with.</li>
-    <li><strong>Lower-leg feathering</strong> &mdash; Clydesdale, Shire, Friesian, Gypsy
-        Vanner, Dales, Dartmoor. A render-layer overlay on the lower legs; the sheared look is
-        the precedent, and both want the same layer.</li>
-</ul>
-
-<h3>Breed-system follow-ups</h3>
-
-<ul>
-    <li><strong>More fictional breeds wanted.</strong> The shipped catalogue is real-world; the
-        mod also wants a batch of invented ones &mdash; a werewolf breed built on
-        <a href="gene-lycan.html">LYCAN</a> is possible &mdash; as gene suites. That is partly
-        what would make a polygenic cutie mark worth doing. <strong>This is cheap</strong>: a
-        breed is a <a href="breed-format.html">JSON file</a> and
-        <a href="breed-designer/index.html">the designer</a> writes it, so an invented breed
-        costs no Java at all. Nobody has written one yet, which is the whole of what is left
-        here.</li>
-    <li><strong>Traditional-band foals spawn at vanilla's ~5%</strong> instead of the intended
-        &ldquo;up to 3&rdquo;. The <code>SpawnGroupData</code> route is unusable &mdash;
-        <code>Horse.finalizeSpawn</code> replaces it per member &mdash; so this needs a direct
-        <code>setAge(-24000)</code> on a herd member, or a mixin.</li>
-    <li><strong>Herd formation is proximity-only.</strong> A clump flood-fill with a
-        deterministic lowest-UUID lead handles the ordinary case, but a pack that streams in
-        over several ticks, or scatters further than the flood-fill hop, can still split.</li>
-    <li><strong>Wild aggro is all-or-nothing</strong>: flat damage, no
-        <code>ATTACK_DAMAGE</code> scaling by breed or size, and a fixed forget-on-line-of-sight
-        timer. Horses are neutral until hit, deliberately, like a wolf.</li>
-</ul>
-
-<h3 id="breed-coverage">Breed coverage &mdash; candidates that do not ship</h3>
-
-<p>
-    <strong>None of these is committed to</strong>; they are a shopping list, and a breed is
-    <a href="breed-format.html">a JSON file</a> so each is cheap. They came out of a registry
-    survey, alongside a breed-count-by-country table that was deliberately <em>not</em>
-    imported as data &mdash; it under-represents the catalogue badly (no row at all for China
-    or the Balkans) and its one real finding is the missing Dutch Warmblood (KWPN), which
-    <a href="breed-book.html">the Gelderland</a> already names in its <code>notes</code> as the
-    book it was folded into.
-</p>
-
-<ul>
-    <li><strong>The continental draft cluster</strong> &mdash; Ardennais, Boulonnais, Breton,
-        Comtois, Auxois, Poitevin Mulassier, Cob Normand, Noriker, South German Coldblood,
-        Rhenish German Coldblood, Black Forest Horse, Schleswig Coldblood. The largest coherent
-        gap in the catalogue, and the one where the existing heavy breeds give the most to copy
-        from.</li>
-    <li><strong>Natives</strong> &mdash; M&eacute;rens, Pottok, Landais Pony, Eriskay Pony.</li>
-    <li><strong>Gaited and show breeds</strong> &mdash; Peruvian Paso, Racking Horse, Mountain
-        Pleasure Horse, National Show Horse, Drum Horse.</li>
-    <li><strong>Spotted-pony registries with a breed behind them</strong> &mdash; British
-        Spotted Pony, Australian Spotted Pony, Tiger Horse.</li>
-    <li><strong>Singles</strong> &mdash; Shagya Arabian, Maremmano; and the Russian Don,
-        Russian Trotter and French Trotter beside the Orlov that already ships.</li>
-    <li><strong>The sport-horse books</strong> &mdash; Holsteiner, Westphalian, Rhinelander,
-        Bavarian, W&uuml;rttemberger, Mecklenburg, Brandenburg-Anhalt, the national warmbloods
-        (Danish, Norwegian, Finnish, Swiss, Czech, Slovak, Polish, Hungarian), Belgian BWP and
-        SBS, and the Irish Sport Horse. <strong>These are gated on
-        <a href="decisions.html#open-studbook">the studbook call</a></strong>: they are open,
-        performance-selected books rather than breeding populations, and a pile of them would
-        be a pile of near-identical gene pools.</li>
-</ul>
-
-<p class="muted">
-    <strong>Two shipped files each stand for several registry divisions.</strong> The Welsh
-    sections A&ndash;D are one <code>welsh_pony.json</code>, and the Hackney Horse and Hackney
-    Pony are one <code>hackney.json</code>. A strain per section is the cheap version and it is
-    blocked on <a href="known-gaps.html#gap-256">gap 256</a>, since the sections differ mostly
-    by height and a strain cannot override stats.
-</p>
-
-<h3 id="breed-sources">Breeds and powers from elsewhere</h3>
-
-<p>
-    <a href="#breed-coverage">Breed coverage</a> lists the candidates that do not ship; these
-    are the ones that came in with a source attached and a modelling bill.
-</p>
-<ul>
-    <li><strong><a href="https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2447896-the-reindeer-breed-has-arrived-wings-horns-and">The
-        reindeer-breed mod</a> &mdash; all of its breeds, and the owner has said outright this
-        means learning to 3D model.</strong> That is the honest cost: wings and horns are mesh,
-        and <a href="decisions.html#settled-scope">three breed cosmetics are already deliberately
-        not modelled</a> for exactly this reason. It overlaps
-        <a href="#model-parts">attached model parts</a>, which is where the machinery would live,
-        so that section is the prerequisite and this is content for it.</li>
-    <li><strong>Its unicorn powers, read as candidate genes.</strong> The more valuable half and
-        much the cheaper one &mdash; a power that fits
-        <a href="#magical-genes">the magical gene family</a> costs a JSON and a founder weight,
-        and needs no mesh at all. Read the mod for abilities first and models second.</li>
-    <li><strong><a href="https://www.9minecraft.net/tensura-unique-monsters-mod/">Tensura Unique
-        Monsters</a> as a breed idea only.</strong> Named with the caveat that its models almost
-        certainly cannot be used &mdash; so this is a note for the
-        <a href="breed-book.html">breed book</a>, not an integration.</li>
-    <li><strong><a href="https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/">Beyond
-        Vanilla Equestria</a></strong> sits in
-        <a href="#mod-survey">the Bedrock cluster</a> &mdash; ideas and shapes, nothing
-        installable.</li>
-</ul>
-
-<hr>
-
-<h2 id="dimension">The creative spawner: a per-copy epigenetics editor</h2>
-
-<p>
-    The spawner's whole-genome <em>Rnd epigen.</em> covers the creative use; the
-    <strong>per-copy view is the debugging one</strong> &mdash; each allele copy's priority and
-    seed shown individually, with a type-it-in field for an exact value. It is the only way to
-    ask &ldquo;which copy is expressing, and what does <em>that</em> seed do&rdquo; without
-    reading a log. Two things to design around: at forty-odd genes that is eighty fields, so it
-    wants a per-gene expander rather than a flat list, and a hand-typed seed has to survive
-    <code>Epigenome.parse</code> or be rejected visibly.
-</p>
-
-<hr>
-
-<h2>Tack, carts and other mods</h2>
-
-<p>
-    <strong>Everything a horse wears is planned on
-    <a href="horse-gear.html#roadmap">horse gear &mdash; Roadmap</a></strong>, which is
-    the single home for the accessories system, the slot roster, shoes, native tack,
-    the saddlebags and the saddle pad.
-</p>
-
-<h2 id="storage">Carrying things, and carrying horses</h2>
-
-<p>
-    Two asks that sound unrelated and share one question &mdash; <em>what is a horse's inventory
-    and who owns it</em> &mdash; so they are decided together even though they ship apart.
-</p>
-
-<h3 id="virtual-stables">A horse in your pocket &mdash; virtual stables</h3>
-
-<p>
-    From the <em>Stables</em> Bukkit plugin's virtual-stable idea, reshaped for this mod:
-    <strong>an object that holds a horse you own</strong>, so that moving twenty horses is not
-    twenty trips and bringing one along is not a lead across three biomes.
-</p>
-<ul>
-    <li><strong>Four things in the mod look like this and none of them is it</strong>, which is
-        worth stating precisely so nobody builds a fifth by accident. The
-        <a href="carrots.html">seed jar</a> holds a genome <em>sample</em>;
-        <a href="item-spawn-eggs.html">the preset spawn egg</a> holds a genotype, epigenome, sex
-        and age &mdash; a <em>recipe</em> for a horse, with no identity, equipment, name, bond or
-        pedigree edge; <a href="item-tickets.html">tickets</a> and
-        <a href="item-stall-signs.html">pen signs</a> move the live animal to a stall, so it
-        never stops existing; and <a href="item-transfer-papers.html">transfer papers</a> move
-        ownership only. <strong>What none of them does is hold the animal itself</strong>, and
-        that is the entire feature.</li>
-    <li><strong>&ldquo;Pocket dimension&rdquo; is probably the wrong implementation of the right
-        idea.</strong> The horse dimension exists and is a real place, so stabling a horse
-        <em>there</em> and fetching it back is a mechanic with a location in it rather than a
-        serialised entity in an item stack. Worth deciding which before anything is built,
-        because they are different features wearing the same name: one is storage, the other is
-        a place you visit.</li>
-    <li><strong>The trap is the one <a href="known-gaps.html#gap-73">gap 73</a> is
-        about.</strong> Destroying a horse entity and rebuilding it later from saved data is
-        exactly what the lycanthropy shift does, and the thing that can go silently wrong is
-        attachment round-tripping &mdash; a horse that comes back with a fresh record and no
-        pedigree looks fine and is not. Whatever this is built on should reuse that path and fix
-        it once, not open a second one.</li>
-    <li><strong>It needs a limit and a cost, or it eats the mod.</strong> An item that holds any
-        horse instantly makes stalls, pens, tickets, whistles and
-        <a href="#callable-horses">callable horses</a> redundant. That is an argument for
-        tying it to the barn or to an equestrian rather than to a craftable item &mdash; an
-        open design question, and the most important one here.</li>
-</ul>
-
-<hr>
-
-<h2 id="cart-bench">The cart and jump bench &mdash; built to order, not crafted from a grid</h2>
-
-<p>
-    <strong>An overhaul of how carts are made, and jumps with it.</strong> Both are built from
-    wood today and both take the wood as a whole; the ask is to make the
-    <em>piece</em> the unit. One bench, two products, because the mechanic is identical and
-    shipping it twice would be two screens that drift.
-</p>
-
-<h3 id="cart-bench-carts">Carts</h3>
-
-<ul>
-    <li><strong>A wood per piece, not a wood per cart &mdash; and this is a real rewrite, not a
-        screen.</strong> Wheels of one wood, bed of another, shafts of a third. The obstacle is
-        that a cart's wood is <em>in its registry id</em> today: <code>oak_wagon</code>,
-        <code>biomesoplenty_maple_plow</code>, one item per (wood &times; kind), and
-        <code>CartWood</code>'s own documentation says that id is permanent once a world uses it.
-        Per-piece materials cannot be an id, so they have to become <strong>components on the
-        stack and data on the entity</strong> &mdash; which is exactly the shape
-        <a href="item-jumps.html">jumps</a> already moved to, going from twelve blocks and
-        thirty-six items down to one item carrying <code>JumpMaterials</code>. <strong>Jumps are
-        the worked precedent for this whole section</strong>, and the cart change is that
-        migration done a second time.</li>
-    <li><strong>Dye or paint the wood</strong>, on top of the choice of wood &mdash; the two are
-        different axes and both were asked for. Nothing in the <code>carts/</code> package tints
-        anything today; a cart's texture is assembled from its wood's three block sprites and
-        that is all.</li>
-    <li><strong>It deletes a duplication rather than deepening one.</strong> Seventy-two shipped
-        recipe JSONs (twelve woods &times; six carts, baked by <code>tools/bake-carts.mjs</code>)
-        are mirrored at run time by <code>compat/GeneratedCarts</code> for modded woods, and the
-        two <em>must agree</em> &mdash; a drift is a modded cart that will not craft and logs
-        nothing. <strong>A bench that composes a cart from materials has no per-wood recipe to
-        bake and no second implementation to keep in step</strong>, which retires that whole
-        hazard. That is the strongest argument for the bench and it is not the one that was made
-        for it; worth weighing before the screen is designed.</li>
-</ul>
-
-<h3 id="cart-bench-jumps">Jumps</h3>
-
-<p class="muted">
-    <strong>Start from what jumps already are</strong>, because it is more than the ask assumes.
-    A jump is one item carrying <code>JumpMaterials</code> &mdash; rails wood, standards wood,
-    <em>rails dye, standards dye</em> and a size &mdash; edited in
-    <code>JumpScreen</code>/<code>JumpMenu</code>, with three cosmetic styles and a ten-step
-    height ladder. <strong>So dye is built, per half, including modded dyes vanilla has no name
-    for.</strong> What is missing from this list is patterns, opacity, flags and depth.
-</p>
-
-<ul>
-    <li><strong>Patterns and an opacity.</strong> Patterns rather than flat colour, and
-        a translucency slider &mdash; which is the only one of these with a rendering cost, since
-        a translucent block leaves the solid render type and has to be sorted. Note the existing
-        dye is <em>consumed irreversibly</em> (a plank swap is reversible, a dye is not); a
-        pattern and an opacity should decide deliberately whether they inherit that, because a
-        slider you cannot slide back is a trap the current design gets away with only because
-        colour is a one-time choice.</li>
-    <li><strong>Little flags on the standards.</strong> Geometry in the existing baker, and the
-        cheapest thing in this section.</li>
-    <li><strong>Two-deep jumps</strong>, which <strong>contradicts a standing rule</strong>:
-        <a href="#items">the obstacle vocabulary</a> records the owner's own bound that
-        <em>no style is more than one block deep</em>, because a two-block jump stops being a
-        thing you put in a row and becomes a structure. The intake asks for
-        &ldquo;potentially two deep&rdquo;, which reads as reopening it rather than overriding
-        it &mdash; settle that on <a href="decisions.html">design decisions</a> before building,
-        not in the baker.</li>
-    <li><strong>Jump styles that look like real cross-country fences</strong>, from
-        <a href="https://www.planetminecraft.com/mod/simply-cross-country-1-16-5/">Simply Cross
-        Country</a>. That is the same geometry backlog
-        <a href="#items">already recorded</a> &mdash; logs, brush, ditches, fillers, walls, water
-        &mdash; with a reference to work from, which is what it was missing. Note the three
-        styles that exist (<code>VERTICAL</code>, <code>OXER</code>, <code>CROSSRAILS</code>)
-        collide <em>identically</em> on purpose, so adding a look costs nothing in balance; a
-        cross-country style that jumped differently would be taking that back.</li>
-</ul>
-
-<p class="muted">
-    <strong>Three benches now, and that is the thing to decide first.</strong>
-    <a href="item-equestrian-bench.html">The dyeing bench</a> ships,
-    <a href="horse-gear.html#accessories-bench">a tack bench</a> is proposed, and this is a third. They share a
-    wood-and-paint picker and differ only in what comes out. Either one bench grows tabs or
-    three benches share a widget; picking by accident means three implementations of the
-    colour picker.
-</p>
-
-<hr>
-
-<h2 id="mod-patches">Mod patches</h2>
-
-<p>
-    What is left after the compatibility pass. Most of the patches that were asked for turned
-    out to need no patch at all; the detail is on
-    <a href="compatibility.html">Mod compatibility</a> and is not repeated here. The third one
-    &mdash; <a href="horse-gear.html#native-tack">native tack</a> &mdash; grew into
-    <a href="horse-gear.html#accessories">the accessories system</a> and has moved there.
-</p>
-
-<h3 id="rhg-detection">Detect Realistic Horse Genetics and say so</h3>
-
-<p>
-    Not a patch &mdash; the two mods both replace the horse and both own coat generation, so
-    whoever registers last wins. The useful version is a load-time check that logs &ldquo;these
-    two mods both replace the horse; run one&rdquo; rather than letting a player discover it as
-    a half-broken world.
-</p>
-
-<p>
-    <strong>It is a handful of lines in a place that exists.</strong>
-    <code>neoforge-26.1.2/.../neoforge/compat/</code> already walks
-    <code>ModList.get().getModFiles()</code> in the mod constructor and already knows how to
-    fail soft on somebody else's jar &mdash; see
-    <a href="compatibility.html#generated">the compat layer</a>. What is undecided is only where
-    the warning goes: a log line is the minimum, but a player who reads logs is not the player
-    this protects.
-</p>
-
-<h3 id="bhar-recipes">A recipe-collision check against BHAR</h3>
-
-<p>
-    <a href="compatibility.html#bhar">BHAR</a> adds crafting recipes for the vanilla saddle and
-    all four horse armours. This mod adds none <em>for vanilla's</em> items, so there is no
-    collision today, and the armours it generates are in its own namespace with modded-ingot
-    inputs, deliberately outside the collision space.
-    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> already answers the question
-    mechanically and would need only to be pointed at their recipe ids &mdash; a check that
-    would catch it if that ever stopped being true. Note the licence: their custom terms forbid
-    redistributing any part, so the check may not embed a copy of their files.
-</p>
-
-<hr>
-
-<h2 id="horsemanship">Horsemanship &mdash; the rider is half of what a horse can do</h2>
-
-<p>
-    <strong>This reverses a position this page held twice.</strong> A horsemanship skill sat on
-    the survey backlog for months with an objection attached: it would be the first thing in the
-    mod where the <em>player</em> progresses rather than the horse, which cuts against
-    <a href="philosophy.html">breeding being the progression</a> &mdash; the same objection that
-    still stands against <a href="#out-of-scope-competitions">a competition ladder</a>. The owner
-    reframed it on 2026-09-21 and the reframing is what makes it buildable:
-    <strong>bonding makes the horse listen, and skill makes you a better rider.</strong> Neither
-    makes the horse a better horse.
-</p>
-
-<div class="note">
-    <span class="label">The bonus belongs to the pairing, and never to the animal</span>
-    <p>
-        <strong>A horse's stored stats are always exactly its genome.</strong> The bonus is an
-        <code>AttributeModifier</code> added when you mount and removed when you dismount,
-        computed from your skill and your bond <em>with that horse</em>. Nothing is ever written
-        to the horse.
-    </p>
-    <p>
-        That is the whole of why this is allowed and
-        <a href="carrots.html#rejected-stat-carrots">a carrot that adds a heart is not</a>. The
-        carrot changes the horse; this changes the ride. It also means
-        <code>HorseInfoScreen</code> keeps telling the truth, a sold horse carries none of your
-        skill with it, and the same horse under a novice performs at its genome exactly as it
-        does today.
-    </p>
-</div>
-
-<h3 id="horsemanship-curve">What it may move, and how far</h3>
-
-<ul>
-    <li><strong>Speed and jump only.</strong> Never health, never size &mdash; those are
-        <a href="horse-body.html#disorder-shapes">health-gene</a> territory, and a rider adding hearts would make a
-        genetically frail horse stop being legible at a glance, which is the whole reason
-        <a href="philosophy.html#care">frailty is expressed as fewer hearts</a>.</li>
-    <li><strong>Uncapped, with sharply diminishing returns.</strong> The owner's call, and it is
-        the part of this section carrying the design risk: with no hard ceiling, the curve is the
-        <em>only</em> thing keeping a well-ridden ordinary horse from overtaking a bred one. Pick
-        the curve against real genome spread &mdash; the gap between a poor and a good horse's
-        resolved speed &mdash; and not in the abstract. Write the chosen shape and the numbers it
-        was measured against on this page's eventual replacement, because a curve nobody can
-        re-derive is a curve the next session will quietly get wrong.</li>
-    <li><strong>Two axes, multiplied.</strong> General skill carries between horses; bond is the
-        per-horse half and <a href="horse-care.html#bond">already exists</a>. A skilled rider on
-        a stranger's horse is competent and not at their best, which is the behaviour worth
-        having.</li>
-</ul>
-
-<h3 id="horsemanship-hook">The hook: Pufferfish&rsquo;s Skills, and a tree that is pure data</h3>
-
-<p>
-    <strong>An optional dependency, never a requirement.</strong> Three skills mods were read from
-    their jars on 2026-09-21 &mdash;
-    <a href="https://modrinth.com/mod/puffish-skills">Pufferfish's Skills</a>,
-    <a href="https://www.curseforge.com/minecraft/mc-mods/rpg-attribute-system">RPG Attribute
-    System</a> and Skill Tree (RPG Series) &mdash; and only the first is a usable seam.
-</p>
-
-<ul>
-    <li><strong>The tree is shipped as data and needs no code at all.</strong> Pufferfish's
-        <code>PackConfigReader</code> scans <em>every</em> namespace for
-        <code>data/&lt;ns&gt;/puffish_skills/config.json</code>, so a category living at
-        <code>data/horsegenetics/puffish_skills/categories/horsemanship/</code> is read when the
-        mod is installed and is inert when it is not. <strong>No registration, no
-        <code>ModList.isLoaded</code> check, no presence probe</strong> &mdash; without the mod
-        the tree simply does not exist. Skill Tree ships its own two categories exactly this way,
-        which makes its jar the schema documentation.</li>
-    <li><strong>The effect needs no branch either.</strong> The built-in
-        <code>puffish_skills:attribute</code> reward applies a real vanilla
-        <code>AttributeModifier</code> to <em>any</em> registered attribute, including one we
-        register unconditionally. Register <code>horsegenetics:horsemanship</code>, read
-        <code>player.getAttributeValue(...)</code> always, and with no skills mod present the
-        value sits at its baseline forever. That is a genuine zero-branch soft dependency, and it
-        is the shape to copy for any future optional integration.</li>
-    <li><strong>Anything the built-in rewards cannot express</strong> &mdash; touching bond or
-        genetics directly &mdash; goes through <code>SkillsAPI.registerReward</code> from a class
-        in the NeoForge module that is only ever loaded behind
-        <code>ModList.get().isLoaded("puffish_skills")</code>, with the mod as a
-        <code>compileOnly</code> dependency. Standard idiom; keep it to the cases that earn
-        it.</li>
-    <li><strong>Reading a level</strong> is
-        <code>SkillsAPI.getCategory(id).map(c -&gt; c.getSpentPoints(player))</code>, or
-        <code>c.getExperience().map(e -&gt; e.getLevel(player))</code>. There are unlock and lock
-        events, on Pufferfish's own pub/sub rather than the NeoForge bus.</li>
-</ul>
-
-<p class="muted">
-    <strong>Why not the other two.</strong> RPG Attribute System has an <code>api</code> package,
-    but its <code>isAvailable()</code> is compiled as a literal <code>return true</code> and is
-    useless as a presence check; it exposes <em>no</em> events, so any integration has to poll
-    <code>RasApi.getLevel(player)</code> on mount; and its eight attributes are fixed with no room
-    for a ninth. It is a reasonable <em>secondary</em> signal &mdash; overall player level gating
-    how deep the tree can be bought into &mdash; and cannot host the tree.
-    <strong>Skill Tree has no <code>api</code> package at all</strong> and hard-requires
-    <code>spell_engine</code> and <code>spell_power</code>; it is content sitting on Pufferfish's,
-    so any level worth reading from it is a Pufferfish query anyway. KubeJS is a real third seam
-    for a server-specific tweak, and not a substitute for something we want to ship in the jar.
-</p>
-
-<h3 id="horsemanship-nomod">Most players have no skills mod, and the feature still exists</h3>
-
-<p>
-    <strong>Bond alone carries it, at a lower ceiling.</strong> Nobody is locked out, and
-    installing a skills mod <em>raises</em> your ceiling rather than switching a feature on. This
-    is also what makes the thing buildable in the first place: the whole system can be written,
-    tuned and tested against bond before any hook exists, and the Pufferfish tree is then additive
-    on top of something already working.
-</p>
-
-<hr>
-
-<h2 id="rider-comfort">Rider comfort &mdash; four small things, and one that touches the coat</h2>
-
-<p>
-    Harvested from the quality-of-life cluster. None touches genetics, and each is small enough to
-    ship on its own. <strong>Every one of them wants a config switch written with it</strong>, per
-    <a href="#config-everything">the config sweep</a>.
-</p>
-
-<ul>
-    <li><strong>Remove the mining-speed debuff while mounted.</strong> Vanilla gives you a fifth
-        of your mining speed on horseback. Taken from Horse Buff. Worth being honest that this is
-        the one of the four that <em>alters</em> rather than adds, so
-        <a href="philosophy.html#vanilla-intact">vanilla stays intact</a> has a claim on it and
-        the switch matters more here than elsewhere.</li>
-    <li><strong>A keybind to open your own inventory while riding.</strong> Horse Buff binds it to
-        <kbd>ALT</kbd>+<kbd>E</kbd>. We already own <kbd>H</kbd> for the browser through
-        <code>client/HorseBrowserKeyBindings</code>, so the idiom and the registration exist. This
-        one adds a door rather than closing one.</li>
-    <li><strong>Fade the horse out as you look down.</strong> Horse Buff fades the mount for
-        sightlines, with an optional head-pitch offset of up to 45&deg;.
-        <strong>This is the one with a real unknown in it:</strong> we are the only mod here whose
-        coat is generated per horse, and a half-transparent procedural coat is a rendering case
-        nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
-        transparency before designing the feature around it.</li>
-    <li><strong>Leads return to your inventory</strong> instead of dropping on the ground, falling
-        back to a drop when the inventory is full. From Horse Tweaks. Pure annoyance removal and
-        nothing in this mod's design objects.</li>
-    <li><strong>Right-click with a saddle or armour equips it</strong> rather than opening the
-        horse screen. Also Horse Tweaks. <strong>The one most likely to collide with something we
-        ship:</strong> <code>client/HorseScreenHooks</code>, the <code>i</code> button and the
-        <code>right-click to open</code> client option all live on that same interaction, so this
-        needs designing against them rather than beside them.</li>
-</ul>
-
-<p class="muted">
-    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered and
-    declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing it moves
-    a number every other mod's pathing assumes.
-</p>
-
-<hr>
-
-<h2 id="mod-survey">The survey backlog &mdash; mods to read before building</h2>
-
-<p>
-    <strong>None of these is a planned feature yet.</strong> Each is a mod the owner has named
-    with a question attached, and the work is to read it and answer the question &mdash; after
-    which the row either becomes a section on this page, a row on
-    <a href="compatibility.html">mod compatibility</a>, or a deletion. They are listed together
-    because the failure mode is doing one twice: the answers are scattered across three pages
-    today and nothing records which have been asked.
-</p>
-
-<div class="note">
-    <span class="label">Attribution is part of the work, not a courtesy afterwards</span>
-    <p>
-        <strong>Any mod that gives this one an idea gets named on the coding tab of the page for
-        whatever it inspired</strong> &mdash; not only the mods whose code or art is used, which
-        is a licence matter and settled separately. Inspiration counts. (Owner, in the intake
-        note that produced this section.) Recorded as a call on
-        <a href="decisions.html#settled-attribution">design decisions</a>.
-    </p>
-</div>
-
-<p class="muted">
-    Five have already been read and are <em>not</em> repeated here &mdash;
-    <a href="compatibility.html#swem">SWEM</a>,
-    <a href="compatibility.html#icys">Icy&rsquo;s Better Horses</a>,
-    <a href="compatibility.html#horseman">Horseman</a>,
-    <a href="compatibility.html#horse-tack">Horse Tack</a> and
-    <a href="compatibility.html#resource-packs">Fresh Animations</a>. Two more,
-    <a href="compatibility.html#realistic-horse-genetics">Realistic Horse Genetics</a> and
-    <a href="compatibility.html#bhar">BHAR</a>, were read for <em>conflict</em> and not for
-    harvest, which is a different question and is why they appear below anyway.
-</p>
-
-<p class="muted">
-    <strong><a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply
-    Equine</a> was read exhaustively on 2026-09-21 and its row is gone.</strong> It is an
-    abandoned Minecraft 1.15.2 mod that never shipped a horse entity &mdash; 197 items, three
-    blocks, no recipes, and a &ldquo;grooming system&rdquo; that is one particle call behind one
-    of the 197 &mdash; so it needs no compatibility row and the harvest is ideas only. What was
-    taken: <a href="#grooming-tool">the grooming tool</a>,
-    <a href="#ground-work">ground work</a>, <a href="#stall-bars">stall bars</a> and the halter
-    on <a href="horse-gear.html#accessories-slots">the slot roster</a>. What was rejected is recorded in each,
-    except the <strong>stable-mucking loop</strong> &mdash; muck rake, layered shavings block,
-    thatch block &mdash; which was skipped outright on the same grounds as the six-tool grooming
-    roster: upkeep chores are the husbandry <a href="philosophy.html">philosophy</a> rules out,
-    and we already have grazing, hay bales and pens. The rosettes went to
-    <a href="#out-of-scope-competitions">out of scope</a>.
-</p>
-
-<p class="muted">
-    <strong>The quality-of-life cluster was read as one batch on 2026-09-21 and its row is
-    gone.</strong> Two of the six names were not what the row thought they were, so
-    <strong>the cluster is five mods</strong>. The <em>Horse Buff</em> listed at 9minecraft is a
-    fabricated repost &mdash; it advertises builds for Minecraft 26.2 and 26.3 that exist nowhere
-    upstream, drops three of the real mod's features and invents one (see-through mount armour)
-    &mdash; so it was dropped rather than read. The real
-    <a href="https://modrinth.com/mod/horsebuff">Horse Buff</a> is archived on both GitHub and
-    Modrinth and its own README names <a href="compatibility.html#horseman">Horseman</a> as its
-    successor, which we had already read. <em>Horse Upgrades</em> is <strong>two unrelated mods
-    sharing a name</strong>: the CurseForge link is a Minecraft 1.8 mod from 2016 whose carrots
-    granted permanent stat gains, and the Modrinth one is horseshoes forged on an anvil, which
-    <a href="horse-gear.html#horse-shoes">this page already owns</a>. What was taken went to
-    <a href="#horsemanship">horsemanship</a>, <a href="#rider-comfort">rider comfort</a>,
-    <a href="#bond">bond</a> and <a href="horse-gear.html#accessories-enchanting">enchanted tack</a>; the one
-    live compatibility question went to
-    <a href="compatibility.html#superb-steeds">Superb Steeds</a>. What was refused is recorded in
-    each.
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Mod</th><th>The question asked of it</th><th>Where the answer goes</th></tr></thead>
-<tbody>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a></td><td>Troughs and salt licks are already lifted out as <a href="#troughs">their own section</a>. What is left: anything else that applies to horses, and <em>whether it adds a cart we could add to the roster</em>. Keep to carrot-not-stick &mdash; Animania's husbandry is the sort that punishes.</td><td>Here / <a href="carts.html">carts</a></td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/realistic-horse-genetics">Realistic Horse Genetics</a></td><td><strong>Read for harvest, not for conflict.</strong> <a href="compatibility.html#realistic-horse-genetics">It has been read once</a>, to establish that it is a competitor and to borrow its namespace-scoped texture override. The unasked question is what it offers <em>besides</em> bespoke-versus-procedural coats.</td><td><a href="compatibility.html">Compatibility</a>, then here</td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/genetic-animals">Genetic Animals</a></td><td>The other genetics mod. Same question, and the same caution: what it does that is not coats.</td><td>Here</td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/bukkit-plugins/zhorse">zHorse</a></td><td><strong>Inverted question, and a good one:</strong> which of its features do we <em>not</em> already integrate in some form? A management plugin, so expect ownership, naming, teleport, protection and stabling &mdash; four of which exist here.</td><td>Here</td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/bukkit-plugins/stables">Stables</a> (plugin)</td><td>The virtual-stable concept is lifted out to <a href="#virtual-stables">its own section</a>. What else is in there.</td><td>Here</td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/stables">Stables</a> (mod)</td><td>Could it improve <a href="villagers.html">the villagers this mod adds</a> &mdash; the cowboy, the horseman, the equestrians?</td><td><a href="villagers.html">Villagers</a></td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/sullys-mod">Sully&rsquo;s Mod</a> and <a href="https://www.planetminecraft.com/mod/minecraft-upgraded-mod/">Minecraft Upgraded</a></td><td>Any horse features worth integrating. Both are broad mods where horses are a corner, so expect one or two ideas each rather than a system.</td><td>Here</td></tr>
-
-<tr><td><a href="https://www.9minecraft.net/horse-statistics-mod/">Horse Statistics</a> and <a href="https://www.9minecraft.net/ridehud-mod/">RideHUD</a></td><td>RideHUD is wanted <strong>integrated</strong> rather than assessed &mdash; see <a href="#horse-menu">the horse menu</a>. Horse Statistics gets the narrower question: anything it shows that we do not.</td><td><a href="#horse-menu">The horse menu</a></td></tr>
-
-<tr><td><a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology Dictionary</a></td><td><strong>Its UI, not its content.</strong> Explicitly <em>not committed to</em>: possibly an alternative style for the horse menu rather than a replacement. Recorded so the idea is not lost, and flagged so nobody builds it as a decision that was made.</td><td><a href="#horse-menu">The horse menu</a></td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/better-animations-collection">Better Animations Collection</a></td><td>Two questions. <strong>Does it work with this mod out of the box?</strong> &mdash; if so it becomes a recommended mod. And can we fire its mouth-opening animation when a horse eats, which would be the first animation this mod drives in someone else&rsquo;s renderer.</td><td><a href="compatibility.html">Compatibility</a></td></tr>
-
-<tr><td><a href="https://www.9minecraft.net/punchy-fpa-mod/">Punchy (FPA)</a>, <a href="https://www.9minecraft.net/horse-armor-n-stuff-x-fresh-animations-resource-pack/">Horse Armor n Stuff &times; Fresh Animations</a>, <a href="https://www.9minecraft.net/immersive-horse-riding-mod/">Immersive Horse Riding</a></td><td><strong>The animation cluster.</strong> Whether each runs alongside us, and which riding or horse animations can be adapted. Note <a href="compatibility.html#resource-packs">the Fresh Animations seam</a> is already analysed and neither half is built, so this lands on existing work rather than new.</td><td><a href="compatibility.html">Compatibility</a></td></tr>
-
-<tr><td><a href="https://www.9minecraft.net/equestrian-canvas-expanded-mod/">Equestrian Canvas Expanded</a></td><td>Tack and decoration to fold into <a href="horse-gear.html#accessories">the accessories system</a> &mdash; read it before the decoration screen is designed, not after.</td><td><a href="horse-gear.html#accessories">Accessories</a></td></tr>
-
-<tr><td><a href="https://www.minecraft.net/en-us/marketplace/pdp/everbloom-games/horse-school/549b09b7-3915-42c2-99ba-0787e2dd727b">Horse School</a></td><td>What can be adapted, <strong>read specifically against the new tack system</strong>. A Bedrock marketplace title, so this is ideas only &mdash; there is no source and nothing may be copied.</td><td><a href="horse-gear.html#accessories">Accessories</a></td></tr>
-
-<tr><td><a href="https://www.planetminecraft.com/mod/farm-creatures-addon-1-0-2-bedrock-1-21/">Farm Creatures</a>, <a href="https://www.9minecraft.net/hoof-addon-mcpe/">Hoof Addon</a>, <a href="https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/">Beyond Vanilla Equestria</a>, <a href="https://www.planetminecraft.com/mod/undead-horses-plus-addon-1-20/">Undead Horses Plus</a></td><td><strong>The Bedrock addon cluster &mdash; ideas and shapes only.</strong> None is installable beside this mod and none has source to read, so the output is design notes. <em>Undead Horses Plus</em> has a specific destination: <a href="#undead-horses">the undead overhaul</a>, before it is built.</td><td>Here / <a href="#undead-horses">Undead</a></td></tr>
-
-<tr><td><a href="https://modrinth.com/mod/trotting-wagons">Trotting Wagons</a></td><td>More carts for the roster. <code>CartKind</code> takes a new entry cheaply; the art does not.</td><td><a href="carts.html">Carts</a></td></tr>
-
-<tr><td><a href="https://modrinth.com/mod/horseinboat">HorseInBoat</a></td><td><strong>Not a survey &mdash; a feature.</strong> &ldquo;Add horses to boats.&rdquo; Vanilla refuses to let a horse board a boat; this is a small, self-contained, obviously useful change and it is the cheapest row on this page. Watch one thing: <a href="known-gaps.html#gap-73">gap 73</a> records that a horse in a boat is already an untested case for the lycanthropy shift. <strong>A second implementation to read:</strong> Horse Buff did this too, and put the horse in a <em>raft</em> rather than a boat, on the grounds that a boat breaks easily when ridden-while-riding &mdash; worth knowing before picking the entity.</td><td>Here, once scoped</td></tr>
-
-<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/icy-better-horses">Icy&rsquo;s Better Horses</a></td><td><a href="compatibility.html#icys">Read once</a> and found to overlap heavily &mdash; bond, breeds, gendered breeding, stat inheritance, spawning. Asked again, for <em>adaptation</em> rather than compatibility: what does it do better.</td><td>Here</td></tr>
-
-</tbody>
-</table>
-</div>
-
-<hr>
-
-<h2 id="asked-0915">Asked for, and not built</h2>
-
-<p>
-    Each was researched before being deferred, so what follows is <strong>the research</strong>
-    rather than a restatement of the request &mdash; the point is that the next session does not
-    pay for it twice. None of them is started.
-</p>
-
-<h3 id="weather-spawning">Breeds that only spawn in certain weather</h3>
-
-<p>
-    An <strong>opt-in</strong> line in the breed file, left out entirely unless it is something
-    other than &ldquo;any weather&rdquo;, and <strong>never back-applied</strong> to the breeds
-    that ship. The owner was explicit on both points.
-</p>
-
-<ul>
-    <li><strong>The format contract is five or six files, not one.</strong>
-        <code>BreedSpecParser.KEYS</code> (anything not listed is a hard error),
-        <code>BreedSpecWriter</code> (which omits a field at its default, deliberately, so an
-        absent line keeps meaning &ldquo;not chosen&rdquo;), the <code>Breed</code> record
-        header and its builder, and <strong><code>BreedSpawnSettings.copy()</code>, which
-        enumerates every record component positionally &mdash; a new field missed there is
-        silently dropped for every shipped breed</strong>. Then
-        <code>breed-format.html</code>, and <code>:common:bakeBreedFiles</code>.</li>
-    <li><strong>The enforcement point is one method.</strong>
-        <code>Breeds.wildCandidates(biomeId, dark)</code> is the single chokepoint the wild path
-        goes through; <code>BreedSpawnHandler.onFinalizeSpawn</code> currently passes exactly one
-        runtime condition (<code>isDarkOutside</code>) and would pass weather too, with
-        <code>HerdManager.pickWildBreed</code> and <code>BreedSpawningConfig</code>
-        following.</li>
-    <li><strong>Snow is not weather.</strong> The precedent already exists in
-        <code>GeneAbilityHandler</code>: <code>snowing</code> is
-        <code>level.isRaining() &amp;&amp; biome.coldEnoughToSnow(pos)</code>, because Minecraft
-        has no snow state &mdash; it is rain in a cold biome. Any weather field must resolve the
-        same way or it will simply never fire.</li>
-    <li><strong>The validation the owner asked for is the interesting part.</strong> A breed
-        that names a weather <em>and</em> biomes must have at least one biome where that weather
-        can occur &mdash; it never rains in a desert, so a rainy desert breed spawns never and
-        says nothing. That check belongs in the parser (so it warns for a drop-in file too) and
-        is surfaced in the breed designer, which already validates through the real parser
-        compiled to WebAssembly. Note the parser has <em>no</em> cross-field spawn validation
-        today, so this would be the first.</li>
-</ul>
-
-<h3 id="visited-chunks">Horses spawning in chunks already visited</h3>
-
-<p>
-    <strong>The premise needs checking before the work does.</strong> Wild spawning is entirely
-    vanilla's <code>NaturalSpawner</code>, fed by two biome modifiers
-    (<code>add_horse_herds</code>, a herd in listed biomes, and <code>add_horse_loners</code>, a
-    single horse anywhere overworld). Vanilla consumes those from <em>both</em> chunk generation
-    and the ongoing per-tick pass around players, and <code>BreedSpawnHandler</code> accepts
-    <code>NATURAL</code>, <code>CHUNK_GENERATION</code> and <code>SPAWNER</code> identically.
-    <strong>Nothing in this mod keys off a chunk being new</strong> &mdash; no
-    <code>isNewChunk</code>, no <code>ChunkStatus</code> check, no per-chunk attachment.
-</p>
-<p>
-    So horses should already spawn in explored land, and the real cause is likelier to be
-    vanilla's animal rules: <code>CREATURE</code> spawns are weighted heavily toward worldgen,
-    and a night-only breed cannot pass the light check on an existing chunk at all.
-    <strong>Diagnose before building:</strong> if the answer is vanilla's pass rather than ours,
-    the fix is a mod-owned periodic spawner around players, which is a much larger thing than it
-    sounds and wants a config gate.
-</p>
-
-<h3 id="chase-gene">A gene for how long an aggravated horse gives chase</h3>
-
-<p>
-    Alleles <code>n</code>, <code>timed</code>, <code>distance</code>, <code>sight</code>,
-    <code>never</code>, <code>infinite</code>. <code>n</code> is whatever the behaviour is now,
-    and every natural breed is <code>n</code> unless stated &mdash; which costs nothing, because
-    <code>BreedFounder</code> already forces <strong>every magical gene</strong> to wild for any
-    breed that does not name it. A breed is exactly its breed sheet.
-</p>
-<ul>
-    <li><strong>The substrate exists.</strong> <code>HorseAggroHandler</code> already gives every
-        horse an attack-damage attribute and a melee goal, and
-        <code>WildHorseForgetTargetGoal</code> already clears a wild horse's target after a fixed
-        interval without line of sight. That goal is very nearly <code>sight</code> and
-        <code>timed</code> already; this gene generalises it.</li>
-    <li><strong>It needs Java, not just JSON.</strong> A duration in ticks or a distance in
-        blocks that runs in families means per-allele epigenetics, and a JSON gene's knobs are
-        for painting, not effects. Subclass <code>AbstractAbilityGene</code>, override
-        <code>epiSchema()</code>, read it in <code>abilitiesWhenExpressed(EpiValues)</code>
-        &mdash; <code>IntimidatingGene</code> is the template, and it is a behaviour gene whose
-        radius is inherited and drifts.</li>
-    <li><strong>Watch the goal-priority trap.</strong> The comment in
-        <code>HorseAggroHandler</code> records that vanilla's panic goal sits at priority one and
-        the melee goal at three, both holding <code>Flag.MOVE</code>, so the first hit a fighting
-        horse took handed movement to panic and the fight starved. A chase that must outlast
-        being hurt lands in exactly that fight.</li>
-</ul>
-
-<h3 id="magic-grab">Magic Grab &mdash; a horse that drags what it bites</h3>
-
-<p>
-    Alleles <code>n</code>, <code>smaller</code>, <code>same size</code>, <code>larger</code>,
-    naming the largest thing the horse can pick up. Epigenetics carry drag speed and the damage
-    the horse will absorb before dropping its prey short of wherever it was taking it. Simulates
-    a horse grabbing someone by the teeth and hauling them off &mdash; uncommon in life, common
-    enough in fiction to deserve a locus.
-</p>
-<ul>
-    <li><strong>The dosage pattern already exists</strong> and should be copied rather than
-        reinvented: <code>AbstractMagicFactorGene</code> sums a signed per-copy epigenetic value
-        so that <code>n</code>/weak is weakest and doubled-strong is strongest, with six outcomes
-        falling out of one comparison. <code>MagicFighterGene</code> is the two-value variant of
-        the same shape.</li>
-    <li><strong>There is no existing verb for carrying a mob.</strong> The <code>effects</code>
-        vocabulary has <code>temper</code>, <code>mob_aura</code>, <code>summon</code> and
-        <code>teleport</code>, none of which pick anything up, so this is a new
-        <code>AbilityType</code> &mdash; and that contract is <strong>five files</strong>: the
-        record on <code>GeneAbility</code>, the registration in <code>AbilityType</code>, the
-        translator case, the creator's <code>schema.js</code> mirror (which
-        <code>check-parity.mjs</code> compares against the real Java), and the Effects tab.</li>
-    <li><strong>Mob groups must resolve through entity type tags</strong>, never a hardcoded
-        vanilla list &mdash; a hardcoded list makes every modded creature invisible to the gene
-        and fails silently.</li>
-</ul>
-
-<h3 id="wiki-item-art">A checklist idiom and item art, for the wiki</h3>
-
-<p>
-    The in-game half ships as <a href="progression.html">the progression page</a>. What is left
-    is the <em>wiki</em> side of the same request. The wiki has <em>no</em> checklist idiom
-    &mdash; no checkbox markup and no CSS for one anywhere &mdash; so a wiki walkthrough either
-    invents one in <code>styles.css</code> or reuses the tester-procedure block from
-    <code>for-testers.html</code>, whose styles are page-local. And the wiki has no item icons:
-    the only images it has are baked gene icons, and the in-game page draws items live on
-    purpose so nothing goes stale when a texture changes. Putting item art on the wiki therefore
-    means deciding to export it for the first time, and owning the staleness that the in-game
-    page was built to avoid.
-</p>
-
-<h3 id="storm-fed">Storm fed &mdash; a gene that stores power and spends none</h3>
-
-<p>
-    A locus that <strong>builds an internal reservoir</strong> while some condition holds, and
-    does nothing whatever with it. Known as stormfed only because storms were the first allele
-    found: the shipped set would be Storm, Rain, Snow, Lightning (a burst on being struck, and no
-    lightning damage), Water and Lava. All alleles homozygous recessive. The rates of accrual and
-    decay live in the epigenetics of each copy, so two horses with the same allele fill at
-    different speeds.
-</p>
-<p>
-    <strong>The point is that it is half a gene on purpose.</strong> It is designed to be
-    <em>consumed</em>: other genes read the reservoir and spend it, which is the mod's first
-    deliberately polygenic pair. That makes the ordering awkward and worth naming now &mdash; a
-    gene that only stores is untestable by looking at a horse, and a gene that only spends has
-    nothing to spend until this exists. Build them together or build the spender first against a
-    stubbed reservoir.
-</p>
-<p>
-    <strong>What it needs that does not exist:</strong> per-horse mutable state that is not a
-    genotype and not an epigenetic constant &mdash; a number that changes every tick. The
-    epigenome is the wrong home (it is inherited and drifts, not a running total) and so is the
-    genotype. This is an attachment, and the first gene to want one.
-</p>
-
-<h3 id="block-preference">Block preference &mdash; a horse that wants to be somewhere</h3>
-
-<p>
-    A recessive locus pulling a horse toward a kind of block, with the allele's author choosing
-    how hard &mdash; <strong>up to taking damage when it cannot get there</strong>. Ships with
-    Water (stand in it, but never push fences or jump for it), Lava, Underwater (submerge, and
-    drown unless the horse also has water breathing &mdash; intended, and for aquatic breeds
-    only), and Tree (climb the nearest tree, which does almost nothing unless the horse can
-    fly).
-</p>
-<p>
-    <strong>It is an AI goal, not an effect</strong>, which is what makes it different from
-    everything in the <code>effects</code> vocabulary: those apply a state per tick, and this has
-    to compete for the horse's attention against grazing, herding, fleeing and being ridden. That
-    means a priority in the goal selector, so
-    <a href="behaviour-hierarchy.html">the behaviour hierarchy</a> and its bake are part of the
-    contract. Underwater is the one to think hardest about: a gene whose correct behaviour is
-    drowning the horse needs to be unmistakably opt-in at the breed sheet.
-</p>
-
-<h3 id="forced-riding">Forced riding &mdash; the kelpie</h3>
-
-<p>
-    A wild horse that lets you mount and then will not let you off, carrying you to deep water.
-    Researched as a <strong>temporary ride-lock state</strong> rather than an attempt to cancel
-    the dismount key: the horse stays an ordinary rideable entity, and while the state is active
-    the server re-mounts the rider the moment they dismount and drives the horse toward its
-    destination. That is the version that survives a version port, because it leans on normal
-    passenger mechanics plus server enforcement instead of intercepting a client keybind.
-</p>
-<p>
-    Held on the horse as a small state machine &mdash; idle, a warning beat, then the forced ride
-    &mdash; rather than as scattered booleans. <strong>The warning beat is the design
-    question</strong>: without it this is a mount that kills you with no tell, which is a
-    different and worse thing than a monster you can recognise. It also has to agree with the
-    two seats a strong horse already carries &mdash; a forced ride with a pillion aboard is a
-    case the ride-lock has to answer rather than discover.
-</p>
-
-<h3 id="momentum-sprint">Momentum sprint</h3>
-
-<p>
-    For a Chollima-, Arion- or Sleipnir-style ground mount: speed that <strong>builds while you
-    hold a line</strong> and drains when you brake, turn hard, collide, leave the ground or stop,
-    with a short cooldown after an impact.
-</p>
-<p>
-    <strong>Why it is not just a Speed modifier</strong>, which is the whole of the research: a
-    permanent modifier makes a horse that is simply faster, and this makes a loop the rider can
-    feel and play badly &mdash; run straight, watch the top speed climb, lose it on a corner,
-    build it again. It wants the same per-tick mutable state
-    <a href="#storm-fed">storm fed</a> wants, and for the same reason, so whichever is built
-    first should put that attachment somewhere the other can use.
-</p>
-
-<h3 id="lasso">A lasso, and catching as something you do</h3>
-
-<p>
-    A thrown or held item that <strong>catches a wild horse</strong> and holds it while it is
-    gentled, so that taming is an activity with a tool rather than a dice roll you repeat.
-</p>
-<p>
-    <strong>The length of it is the problem, not the idea.</strong> The mod this came from ran it
-    as a multi-day break: lasso the horse, it struggles, roughly two days later it is yours.
-    <a href="philosophy.html">Philosophy &sect;8</a> is &ldquo;add texture, do not add
-    chores&rdquo;, and a two-day timer on a horse you have already caught is a chore with a
-    progress bar. What survives the rule is the <em>catching</em> &mdash; a rope that stops a wild
-    horse bolting, so approaching a band is a stalk rather than a chase. The mod already has
-    everything downstream of that: taming by hand is built
-    (<a href="horse-care.html#hand-taming">hand-feeding</a>), and wild bands already flee, guard
-    and hold together.
-</p>
-<p>
-    <strong>It would be the first item in the mod that targets an entity</strong>, which is where
-    the research has to start; everything else acts on a block or on a held stack. Vanilla's own
-    lead is the closest model, and the mod currently only <em>reads</em> <code>isLeashed()</code>
-    to suppress goals. A braided rope item existed once as a crafting intermediate and was removed
-    for pricing a fence line at twelve horse hairs &mdash; if a rope comes back it must not come
-    back as that.
-</p>
-
-<h3 id="draught-teams">Draught teams &mdash; more than one horse to a vehicle</h3>
-
-<p>
-    Two or four horses harnessed to one wagon, connected by a <strong>whippletree</strong>, with
-    the rider leading from the near horse.
-</p>
-<p>
-    <strong>The carts are built on one animal per vehicle and say so.</strong>
-    <code>AbstractDrawnEntity.applyDraught</code> takes a single puller and applies a single speed
-    modifier, and <a href="carts.html">the carts page</a> states the rule outright. So this is not
-    a feature to add beside the cart code; it is a change to the shape of it. The weight model is
-    the half that already fits &mdash; <code>CartDraft</code> computes a speed ceiling from
-    capacity against load, and two horses is simply more capacity.
-</p>
-<p>
-    <strong>Trains are the thing this is <em>not</em></strong>, and the two get confused. Coupling
-    several vehicles behind one horse is built and shipped
-    (<a href="carts.html#hitching">hitching and trains</a>). This is the other axis: several horses
-    in front of one vehicle. A design that does both needs to say what happens when you combine
-    them.
-</p>
-
-<h3 id="vardo">A vardo &mdash; a cart you can sleep in</h3>
-
-<p>
-    A caravan that is a <strong>moving home</strong>: you sleep inside it, and it carries your
-    respawn point with it.
-</p>
-<p>
-    <strong>Nothing in the mod touches sleep or respawn today</strong> &mdash; no
-    <code>startSleeping</code>, no <code>setRespawnPosition</code>, no bed &mdash; so this is the
-    whole of the work, and it is the interesting half rather than the modelling. The wagon it
-    would be built on already exists, already seats riders, already takes chests and already has a
-    dyeable furling roof, so the vehicle is not the question. Sleeping in a thing that moves is.
-</p>
-<p>
-    <strong>The obvious trap is a respawn point that drives away.</strong> A bed sets a fixed
-    position; a vardo's is wherever the cart now is, or wherever it was when you slept, and those
-    differ the moment somebody hitches it up. Decide that before any of it is built, because it
-    decides whether the feature is a mobile base or a novelty bed.
-</p>
-
-<hr>
-
-<h2 id="config-everything">Config: tune or disable basically everything</h2>
-
-<p>
-    <strong>Asked for as a sweep, and the current surface is smaller than it looks.</strong>
-    Roughly fifteen hand-written options across
-    <code>ServerConfig</code> (health mode, body size, three riding numbers, gestation days, two
-    debug switches) and <code>ClientConfig</code> (scroll bar, sex symbol, tutorial, right-click
-    to open, two coat-rendering numbers), plus two generated blocks that are genuinely thorough
-    &mdash; <code>BreedSpawningConfig</code> writes four options per shipped breed, and
-    <code>CartsConfig</code> a block per <code>CartKind</code>.
-</p>
-<p>
-    <strong>What is not configurable, and each of these is a deliberate gap to reopen rather
-    than an oversight:</strong> the genetics themselves &mdash; every gene is always registered,
-    always occupies its genotype slot and is always inherited, whatever <code>health.mode</code>
-    says &mdash; coat generation, every bond and care number, hunger rates, cowboy and stable and
-    barn spawn rates, herd sizes, whistle radii, ticket behaviour, prices, jump sizes and styles,
-    the armour protection ladder, and everything about the horse menu.
-</p>
-<ul>
-    <li><strong>The genetics are the interesting refusal.</strong> A per-gene disable switch is
-        the most-requested shape of this ask and the most dangerous one here, because a genotype
-        code is positional &mdash; a gene that stops occupying its slot is a save format change
-        and every existing horse reads wrong. If per-gene config is wanted it has to mean
-        <em>expression</em> or <em>founder frequency</em>, never registration. The author-time
-        version of this problem is already settled &mdash; an absence from
-        <code>genes/index.json</code> is a killswitch, which is why that file is never
-        regenerated from the folder (<a href="known-gaps.html#gap-162">gap 162</a>) &mdash; and
-        that is the precedent to read before designing a runtime one.</li>
-    <li><strong>Do it as one pass with a convention, not option by option.</strong> Fifteen
-        scattered scalars is what a config grows into when each is added where it was needed; a
-        sweep is the chance to fix the shape &mdash; one file per concern, generated blocks where
-        the roster is data, and a rule about what may be a server option versus a client
-        one.</li>
-    <li><strong>Every new system on this page should ship its own switch.</strong> Cheapest when
-        written with the feature and near-impossible to retrofit consistently &mdash;
-        <a href="horse-gear.html#accessories-bench">the tack bench</a> is the model, where one switch disabling
-        the bench disables all horse-armour crafting with no per-recipe gating anywhere.</li>
-</ul>
-
-<hr>
-
-<h2>Long range</h2>
-
-<h2 id="scale">What breaks at scale</h2>
-
-<p>
-    The gene backlog above is not a linear addition to what ships. Two pieces of work fall out of
-    that, and both are still unbuilt:
-</p>
-
-<ul>
-    <li><strong>A compact binary encoding for the sync payloads.</strong> The genotype code
-        string grows a segment per locus, and everything carrying it grows in step &mdash; the
-        record, both sync payloads, and the epigenome code, which is already the fatter of the
-        two. Worth doing <em>for the payloads</em>; keep the string form for saves and
-        debugging.</li>
-    <li><strong>Display.</strong> The pen sign caps out, and the info panel needs grouping
-        (colour / pattern / performance / health) and probably scrolling. It has already gained
-        two rows and a condition list.</li>
-    <li><strong>A test that greps the wiki for the numbers the code can compute.</strong>
-        <code>api-reference.html</code> hand-transcribes public signatures and each
-        <code>gene-*.html</code> hand-transcribes that gene's constants; neither is generated,
-        so both drift silently the moment a signature or a tuning number changes. The gene
-        creator is the one place this is guarded &mdash; <code>check-parity.mjs</code> compares
-        its schema mirror and its whole preview engine against the real Java, and has already
-        caught a mis-ported <code>nextLong()</code> and four drifted schema defaults. The cheap
-        version elsewhere is a <code>:common:test</code> over the handful of accessors
-        (<code>Genes.codeOrder().size()</code>, <code>GenotypeCatalog.size()</code>,
-        <code>totalGenotypes()</code>) that fails when a page disagrees. <strong>Prose about
-        how a gene works survives a change; a number in prose almost never does.</strong></li>
-</ul>
-
-<p class="muted">
-    Composer cost is not on this list: phase 1 is O(painting genes &times; texels), the
-    non-painting genes cost nothing, and coats are cached per texture key, so it bites only on
-    first bake. Neither is <code>CoatTextureId</code>'s path length &mdash; that turned out not to
-    be a limit, and what it does cost is recorded on
-    <a href="texture-resolution.html">texture resolution</a>.
-</p>
-
-<hr>
-
-<h2 id="science-tabs">Deepen the thin science tabs</h2>
-
-<p>
-    Every natural gene page has a science tab, and
-    <code>wiki/tools/check-gene-tabs.mjs</code> runs with an <em>empty</em> exempt list, so a new
-    natural gene page without one fails immediately. The work is no longer absence but depth: the
-    tabs written in the big pass run to a shape &mdash; the locus and the variant with
-    coordinates, the mechanism, the real inheritance table, breed-by-breed frequency where anyone
-    has measured it, an established / inferred / unsupported split, and an explicit statement of
-    where the mod departs from the literature &mdash; and the tabs that predate it are mostly a
-    single heading and a paragraph.
-</p>
-
-<div class="note">
-    <span class="label">Four are written &mdash; and the source is the bottleneck, not the writing</span>
-    <p>
-        <a href="gene-extension.html?view=science">Extension</a>,
-        <a href="gene-agouti.html?view=science">agouti</a>,
-        <a href="gene-ednrb.html?view=science">EDNRB</a> and
-        <a href="gene-kit.html?view=science">KIT</a> were written from owner-supplied source
-        files and are off the lists below. <strong>That is the whole method</strong>: each was
-        blocked on having a source rather than on anybody getting to it, and none of the
-        remaining ones can be done without the same. The three departures the four turned up are
-        <a href="known-gaps.html#gap-297">gaps 297&ndash;299</a>.
-    </p>
-</div>
-
-<p class="muted">
-    Magical genes are excluded throughout: they have no real-world counterpart, so having no
-    science to write is correct rather than a gap. The method &mdash; and the rule that none of
-    this is ever written from memory &mdash; is on
-    <a href="coding-notes.html#science-tab">coding notes</a>.
-</p>
-
-<h3>First &mdash; cited by the newer tabs and unable to answer</h3>
-
-<p>
-    These are the worst, and not because of their length. <strong>Each is named as background by
-    one or more of the newer pages</strong>, so a reader follows a link expecting the story and
-    finds two sentences.
-</p>
-
-<ul>
-    <li><strong><a href="gene-silver.html?view=science">Silver</a></strong> &mdash; cited three
-        times for multiple congenital ocular anomalies, and has no MCOA section at all.
-        <em>PMEL</em>, the homozygote severity, and why a champagne-plus-silver horse gets its eye
-        risk from the silver.</li>
-    <li><strong><a href="gene-mitf.html?view=science">MITF</a></strong> &mdash; SW1, the
-        <em>common</em>, centuries-old, minimally-expressed splash allele. Its
-        <a href="gene-pax3.html?view=science">PAX3 twin</a> carries the full SW1&ndash;SW10 table,
-        and the asymmetry between the two alleles is the whole point of having two loci. This one
-        is close to writable from the PAX3 page alone.</li>
-    <li><strong><a href="gene-grey.html?view=science">Grey</a></strong> &mdash; <em>STX17</em>,
-        the duplication, and the age-related melanoma risk that
-        <a href="gene-matp.html#health">the MATP comparison table</a> lists and grey's own page
-        does not discuss.</li>
-    <li><strong><a href="gene-leopard.html?view=science">Leopard complex</a></strong> &mdash;
-        <em>TRPM1</em> and congenital stationary night blindness in homozygotes, cited twice and
-        absent here. Also the obvious place for Appaloosa, Knabstrupper and POA.</li>
-    <li><strong><a href="gene-roan.html?view=science">Roan</a></strong> &mdash;
-        <a href="gene-rabicano.html#vs-lookalikes">rabicano's tab</a> contrasts the two at length
-        and roan's own page does not reciprocate. The honest content is that roan's causal variant
-        is <em>also</em> unsettled, which is worth a reader knowing.</li>
-</ul>
-
-<h3>Then &mdash; foundational loci carrying a paragraph</h3>
-
-<ul>
-    <li><strong><a href="gene-lcorl.html?view=science">LCORL</a></strong>, for the major height
-        locus. <a href="gene-hmga2.html#size">HMGA2</a> and
-        <a href="gene-dun.html#not-build">dun</a> both cite the ECA3 region against it.</li>
-    <li><strong><a href="gene-acan.html?view=science">ACAN</a></strong>,
-        <strong><a href="gene-megaesophagus.html?view=science">megaesophagus</a></strong> and
-        <strong><a href="gene-cvm.html?view=science">CVM</a></strong> &mdash; the three health
-        loci that were <em>not</em> in the intake batch, so they are the only disorder pages
-        without the full treatment their neighbours have.</li>
-    <li><strong><a href="gene-ryr2.html?view=science">RYR2</a></strong> and
-        <strong><a href="gene-pdk4.html?view=science">PDK4</a></strong>. PDK4 especially:
-        <a href="gene-ckm.html#verdict">CKM's tab</a> ends by saying the same
-        marker-in-a-cluster caution applies to PDK4 with less force, and PDK4's own page does not
-        say what that caution is.</li>
-    <li><strong><a href="gene-brindle.html?view=science">Brindle</a></strong> and
-        <strong><a href="gene-manchado.html?view=science">manchado</a></strong> &mdash; both
-        genuinely under-researched patterns, which is itself the content;
-        <a href="gene-rabicano.html">rabicano's tab</a> is the template for writing a pattern
-        whose gene nobody has found.</li>
-</ul>
-
-<h3>The breed problem, which is separate</h3>
-
-<p>
-    <strong>A fifth of the natural science tabs name no breed at all.</strong> For some that is
-    correct &mdash; <a href="gene-extension.html">extension</a>,
-    <a href="gene-agouti.html">agouti</a>, <a href="gene-shade.html">shade</a> and
-    <a href="gene-sex.html">sex</a> are universal loci. For the rest it is a real hole, because
-    &ldquo;which breed do I look in&rdquo; is one of the two questions a reader brings to a
-    genetics page, and the mod has <a href="breeds.html">a breed system</a> that could act on the
-    answer:
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>page</th><th>the breed story it is missing</th></tr></thead>
-<tbody>
-<tr><td><a href="gene-leopard.html">leopard complex</a></td><td>Appaloosa, Knabstrupper, Pony of the Americas, Noriker</td></tr>
-<tr><td><a href="gene-acan.html">ACAN</a></td><td>Miniature Horse dwarfism</td></tr>
-<tr><td><a href="gene-megaesophagus.html">megaesophagus</a></td><td>Friesian</td></tr>
-<tr><td><a href="gene-silver.html">silver</a></td><td>Rocky Mountain Horse, Icelandic, Shetland &mdash; and the MCOA link is breed-concentrated</td></tr>
-<tr><td><a href="gene-manchado.html">manchado</a></td><td>the Argentine breeds it was described in</td></tr>
-<tr><td><a href="gene-lcorl.html">LCORL</a></td><td>the draught-versus-pony spread that makes it a size locus at all</td></tr>
-<tr><td><a href="gene-mitf.html">MITF</a></td><td>SW1's cross-breed distribution &mdash; the entire contrast with SW2</td></tr>
-<tr><td><a href="gene-roan.html">roan</a>, <a href="gene-grey.html">grey</a>, <a href="gene-brindle.html">brindle</a>, <a href="gene-cvm.html">CVM</a>, <a href="gene-ryr2.html">RYR2</a>, <a href="gene-pdk4.html">PDK4</a>, <a href="gene-natural-zebra.html">natural zebra</a></td><td>varies; check each against a source before asserting one</td></tr>
-</tbody>
-</table>
-</div>
-
-<p class="muted">
-    <strong>Leave the short-but-finished ones alone</strong> &mdash;
-    <a href="gene-shade.html?view=science">shade</a>,
-    <a href="gene-natural-zebra.html?view=science">natural zebra</a>,
-    <a href="gene-sex.html?view=science">sex</a>,
-    <a href="gene-flaxen.html?view=science">flaxen</a>,
-    <a href="gene-sooty.html?view=science">sooty</a> and
-    <a href="gene-pangare.html?view=science">pangar&eacute;</a> are short because they are
-    complete arguments rather than surveys. Padding a finished argument to match a word count is
-    the opposite of the point.
-</p>
-
-<hr>
-
-<h2 id="out-of-scope">Deliberately out of scope &mdash; for an add-on, not for this mod</h2>
-
-<p>
-    <strong>This page is planned features and nothing else, so this section is the one exception
-    and is labelled as one.</strong> Each entry was proposed, considered, and placed
-    <em>outside</em> the base mod &mdash; not deferred, not a gap, not waiting on anything. It
-    is here so the next person to have the idea finds the answer instead of re-proposing it, and
-    so a section does not get built by somebody reading the request and not the verdict.
-</p>
-
-<h3 id="out-of-scope-competitions">Racing and competitions</h3>
-
-<p>
-    Shows, races, judging, and the ribbons that come out of them <strong>belong in a separate
-    add-on mod</strong>, attaching to a horse's <a href="breeding.html">pedigree</a> rather than
-    living in the base mod. (Owner, 2026-09-21, deciding what to do with the Simply Equine
-    rosettes.)
-</p>
-
-<ul>
-    <li><strong>The seam it would attach to already exists and is stable.</strong> A horse
-        carries a pedigree, a <a href="breeding.html">horse record</a> and
-        resolved-not-rolled stats; a competition layer reads those and writes a result back.
-        That is a clean boundary, and it is the reason this can be somebody else's jar rather
-        than a fork of ours.</li>
-    <li><strong>Why it is not base.</strong> A competition ladder is progression for the
-        <em>player</em>, and <a href="philosophy.html">breeding is this mod's progression</a>.
-        Building shows in would put a second, louder ladder beside the one the whole design is
-        shaped around &mdash; the same objection that sits on
-        <a href="#mod-survey">the survey row</a> for a horsemanship skill, and it should be
-        answered the same way if that one is ever picked up.</li>
-    <li><strong>What it takes with it.</strong> Simply Equine's twelve rosettes, Champion and
-        Reserve Champion among them. They were the obvious award item, and an award has no
-        utility without something to win it at &mdash; which
-        <a href="philosophy.html#utility-not-decoration">the utility rule</a> does not allow. So
-        they go here rather than onto <a href="#items">the item roster</a>, and an add-on that
-        adds the shows can add the ribbons in the same change.</li>
-</ul>
+<!-- END generated -->
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="verification.html">To be verified &mdash; built, not yet seen</a>
-        <a href="known-gaps.html">Known gaps &mdash; built, and wrong</a>
-        <a href="decisions.html">Design decisions &mdash; the calls</a>
+        <a href="verification.html">To be verified</a>
+        <a href="known-gaps.html">Known gaps</a>
+        <a href="decisions.html">Design decisions</a>
         <a href="philosophy.html">Philosophy &mdash; the why</a>
     </div>
-    When something here ships, write it up on its own page and
-    <strong>delete it from this one</strong>. A section marked shipped is a second description of
-    built behaviour, and it will drift.
+    &ldquo;Not built at all.&rdquo; <a href="verification.html">To be verified</a> is
+    &ldquo;built, not yet seen&rdquo;; <a href="known-gaps.html">known gaps</a> is
+    &ldquo;built, and wrong&rdquo;.
 </div>
 
 </article>

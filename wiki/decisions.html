@@ -21,7 +21,8 @@
     The answers, kept so a later session does not relitigate them &mdash; and the handful of
     questions still open, which change what gets built and so are worth more than a day of
     building around. <strong>Nothing here is work.</strong> Work lives on
-    <a href="roadmap.html">the roadmap</a>, which carries planned features and nothing else;
+    the Roadmap tab of the page for the thing, which <a href="roadmap.html">the roadmap</a>
+    indexes and nothing else;
     defects live in <a href="known-gaps.html">known gaps</a>; the general
     <em>why</em> &mdash; the principles a call is argued from &mdash; is
     <a href="philosophy.html">Philosophy</a>.
@@ -48,8 +49,8 @@
 <table>
 <thead><tr><th>Question</th><th>Where it stands</th></tr></thead>
 <tbody>
-<tr><td><strong>Should <code>Condition</code> gain a severity / onset model?</strong></td><td>The mod&rsquo;s health model is binary: a locus is <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code>, or a flat heart reduction. The <code>naturalgeneref.md</code> disorder table is richer &mdash; each gene carries a <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>, and distinguishes <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em> conditions. HERDA, PSSM1, HYPP and CA (<a href="horse-body.html#disorder-shapes">the health layer</a>) all fit that shape and none fits &ldquo;fewer hearts&rdquo; cleanly. Two ways: <strong>(a)</strong> keep the binary model and render each as a flat heart cost plus a flat speed / jump multiplier &mdash; cheap, loses the &ldquo;flares up under exertion&rdquo; character; <strong>(b)</strong> give <code>Condition</code> a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code> / <code>PROGRESSIVE</code> kind that the health resolve and a future status tick both read. (b) is the reference&rsquo;s model and the natural companion to the effect architecture (<a href="roadmap.html#trait-rules">group traits</a>). <strong>Still not decided &mdash; but all four of those genes have now shipped under (a)</strong>, so the question has changed from &ldquo;which model&rdquo; to &ldquo;is (b) worth a migration&rdquo;. Building them also settled one thing the question did not anticipate: the reference&rsquo;s percentages could not be used as arithmetic at all. Read literally against a 22-health baseline they make an <em>affected but living</em> HYPP horse worse than several of the mod&rsquo;s outright lethals, so every one of the new loci is calibrated against the disorders that already ship and uses the reference only for the <em>ordering</em>. Whatever (b) turns out to be, it does not get to inherit those numbers.</td></tr>
-<tr><td><strong>How is a cutie mark chosen &mdash; and should the gene be polygenic?</strong></td><td><strong>The hook is built</strong> (2026-09-06): <code>CutieMarkContribution</code> lets any gene modify the mark, and <code>markFor</code> folds every implementor over the base emblem in code order &mdash; the <a href="gene-light.html">light</a> locus is the first user and makes the mark glow. What is still open is the <em>content</em>: which genes and breeds should bias the <strong>item pool</strong> (a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons), and whether mark <em>colour</em> is worth having &mdash; a per-instance tint is not renderable through <code>ItemStackRenderState.submit</code>, so it would need a custom render type. Wants more fictional breeds (<a href="roadmap.html#breeds">the breed backlog</a>) to be worth doing.</td></tr>
+<tr><td><strong>Should <code>Condition</code> gain a severity / onset model?</strong></td><td>The mod&rsquo;s health model is binary: a locus is <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code>, or a flat heart reduction. The <code>naturalgeneref.md</code> disorder table is richer &mdash; each gene carries a <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>, and distinguishes <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em> conditions. HERDA, PSSM1, HYPP and CA (<a href="horse-body.html#disorder-shapes">the health layer</a>) all fit that shape and none fits &ldquo;fewer hearts&rdquo; cleanly. Two ways: <strong>(a)</strong> keep the binary model and render each as a flat heart cost plus a flat speed / jump multiplier &mdash; cheap, loses the &ldquo;flares up under exertion&rdquo; character; <strong>(b)</strong> give <code>Condition</code> a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code> / <code>PROGRESSIVE</code> kind that the health resolve and a future status tick both read. (b) is the reference&rsquo;s model and the natural companion to the effect architecture (<a href="horse-traits.html#trait-rules">group traits</a>). <strong>Still not decided &mdash; but all four of those genes have now shipped under (a)</strong>, so the question has changed from &ldquo;which model&rdquo; to &ldquo;is (b) worth a migration&rdquo;. Building them also settled one thing the question did not anticipate: the reference&rsquo;s percentages could not be used as arithmetic at all. Read literally against a 22-health baseline they make an <em>affected but living</em> HYPP horse worse than several of the mod&rsquo;s outright lethals, so every one of the new loci is calibrated against the disorders that already ship and uses the reference only for the <em>ordering</em>. Whatever (b) turns out to be, it does not get to inherit those numbers.</td></tr>
+<tr><td><strong>How is a cutie mark chosen &mdash; and should the gene be polygenic?</strong></td><td><strong>The hook is built</strong> (2026-09-06): <code>CutieMarkContribution</code> lets any gene modify the mark, and <code>markFor</code> folds every implementor over the base emblem in code order &mdash; the <a href="gene-light.html">light</a> locus is the first user and makes the mark glow. What is still open is the <em>content</em>: which genes and breeds should bias the <strong>item pool</strong> (a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons), and whether mark <em>colour</em> is worth having &mdash; a per-instance tint is not renderable through <code>ItemStackRenderState.submit</code>, so it would need a custom render type. Wants more fictional breeds (<a href="breeds.html#breeds">the breed backlog</a>) to be worth doing.</td></tr>
 <tr><td><strong>The 1.12.2 backport.</strong></td><td>Not a question so much as a standing constraint. Everything on <a href="roadmap.html">the roadmap</a> is <code>common/</code>-side except entity scale, gait animation, the health tick handler and the gene registration hook &mdash; those four are the only places the backport goal should shape a design.</td></tr>
 </tbody>
 </table>
@@ -82,7 +83,7 @@
     <a href="breeds.html#strains">strains</a>, itself limited by
     <a href="known-gaps.html#gap-256">gap 256</a>. <strong>Owner&rsquo;s call before any of it
     is built</strong> &mdash; and it gates a batch of the sport-horse books on
-    <a href="roadmap.html#breed-coverage">the roadmap</a>, which are open,
+    <a href="breed-book.html#breed-coverage">the roadmap</a>, which are open,
     performance-selected books rather than breeding populations.
 </p>
 
@@ -102,7 +103,7 @@
 <p>
     <a href="philosophy.html#concepts-are-breeds">&ldquo;A concept is a breed, not a gene&rdquo;</a>
     says a gene does one thing and an idea that needs several is a breed. <a
-    href="roadmap.html#undead-horses">The planned undead overhaul</a> is the opposite shape: one
+    href="undead-horses.html#undead-horses">The planned undead overhaul</a> is the opposite shape: one
     zombie locus carrying double health, a speed penalty, an obligate-carnivore diet, aggression
     and its own taming rule, and a skeleton locus carrying four more. Both cannot be right as
     written.
@@ -266,6 +267,45 @@
         See <a href="#settled-tack">the tack calls</a>, below.</li>
 </ul>
 
+<h3 id="out-of-scope">Deliberately out of scope &mdash; for an add-on, not for this mod</h3>
+
+<p>
+    <strong>A decision not to build something is a decision, and it is kept here with the rest
+    of them.</strong> Each entry was proposed, considered, and placed <em>outside</em> the base
+    mod &mdash; not deferred, not a gap, not waiting on anything. It is here so the next person
+    to have the idea finds the answer instead of re-proposing it, and so a section does not get
+    built by somebody reading the request and not the verdict.
+</p>
+
+<h4 id="out-of-scope-competitions">Racing and competitions</h4>
+
+<p>
+    Shows, races, judging, and the ribbons that come out of them <strong>belong in a separate
+    add-on mod</strong>, attaching to a horse's <a href="breeding.html">pedigree</a> rather than
+    living in the base mod. (Owner, 2026-09-21, deciding what to do with the Simply Equine
+    rosettes.)
+</p>
+
+<ul>
+    <li><strong>The seam it would attach to already exists and is stable.</strong> A horse
+        carries a pedigree, a <a href="breeding.html">horse record</a> and
+        resolved-not-rolled stats; a competition layer reads those and writes a result back.
+        That is a clean boundary, and it is the reason this can be somebody else's jar rather
+        than a fork of ours.</li>
+    <li><strong>Why it is not base.</strong> A competition ladder is progression for the
+        <em>player</em>, and <a href="philosophy.html">breeding is this mod's progression</a>.
+        Building shows in would put a second, louder ladder beside the one the whole design is
+        shaped around &mdash; the same objection that sits on
+        <a href="compatibility.html#mod-survey">the survey row</a> for a horsemanship skill, and
+        it should be answered the same way if that one is ever picked up.</li>
+    <li><strong>What it takes with it.</strong> Simply Equine's twelve rosettes, Champion and
+        Reserve Champion among them. They were the obvious award item, and an award has no
+        utility without something to win it at &mdash; which
+        <a href="philosophy.html#utility-not-decoration">the utility rule</a> does not allow. So
+        they go here rather than onto <a href="items.html#items">the item roster</a>, and an
+        add-on that adds the shows can add the ribbons in the same change.</li>
+</ul>
+
 <h3 id="settled-authoring">Authoring and the tools</h3>
 
 <ul>
@@ -290,6 +330,30 @@
         confirms it; gathered into one document it is read by nobody and deleted by nobody.
         If a check has no page to live on, <em>that is a missing page</em>, not a reason to
         write it on the index.</li>
+    <li id="settled-roadmap-generated"><strong>Plans are written on the page for the thing,
+        <a href="roadmap.html">the roadmap</a> is generated from nothing else, and a plan
+        whose subject has no page means writing the page.</strong> (Owner, 2026-09-21, the
+        same day and the same instruction as the verification call above.) A plan goes on a
+        <strong>Roadmap tab</strong> of the subject's own page, opening with one sentence in
+        a <code>note roadmap-summary</code> box;
+        <code>wiki/tools/bake-roadmap-index.mjs</code> harvests those into an alphabetical
+        index and <strong>nothing is ever hand-written onto that page</strong>. When
+        something ships it comes <em>off</em> the Roadmap tab and is written up on the
+        Gameplay and Coding tabs beside it, so a page whose last plan ships loses the tab and
+        leaves the index by itself.
+        <strong>The part that is genuinely new, and is the reason this is a separate
+        call:</strong> verification could always find a home, because a checklist is about
+        something that exists. Most of a roadmap is not. The rule is that
+        <strong>a partly-built thing puts its plans on the page for the built version, and a
+        thing with nothing built gets a new page carrying a Roadmap tab and nothing
+        else</strong> &mdash; which turns &ldquo;this has nowhere to live&rdquo; from an
+        argument for a shared backlog into a missing page, and means the page already exists
+        to document the thing on when the first piece of it lands. Twenty were written this
+        way in the same pass.
+        <strong>What does not go on a Roadmap tab:</strong> a decision not to build
+        something. That is an answer, and it lives here &mdash;
+        <a href="#out-of-scope">racing and competitions</a> is the worked example, and was the
+        old page's one labelled exception.</li>
     <li><strong><code>AbstractPatternGene</code> will not be written from an entry, only from
         duplication.</strong> It was promised as absorbing &ldquo;the <code>BodyNoise</code>
         boilerplate and the pull-N-knobs-off-the-expressing-copy helper&rdquo;. Neither exists
@@ -321,7 +385,7 @@
         consequence is that it happens while the feature is written, not in a pass afterwards
         &mdash; a session that cannot remember where an idea came from has already lost it.
         Relevant now rather than later: most of
-        <a href="roadmap.html#mod-survey">the survey backlog</a> exists to harvest ideas from
+        <a href="compatibility.html#mod-survey">the survey backlog</a> exists to harvest ideas from
         named mods. (Owner, 2026-09-21.)</li>
 </ul>
 
@@ -355,7 +419,7 @@
         polygenic in reality; each became <strong>one atomic gene</strong> with two
         alleles and an additive weight. Atomic genes are legible &mdash; a player can
         breed <em>for</em> one &mdash; where a hidden sum of anonymous markers reads as a
-        dice roll. Group traits (<a href="roadmap.html#trait-rules">on the roadmap</a>) stay, because they
+        dice roll. Group traits (<a href="horse-traits.html#trait-rules">on the roadmap</a>) stay, because they
         are Mendelian epistasis rather than polygenic weighting.</li>
     <li><strong>Sex is itself a gene</strong> at <strong>priority 1</strong>. A stallion
         carries a real <code>X</code> <em>and</em> a <code>Y</code> (two occupied slots,
@@ -480,7 +544,7 @@
         hearts, which is what ships and is not a gap. If anything of this shape ever happens it
         is on a <em>custom model</em>, never by bending the basegame one &mdash; so the trigger
         to reopen is &ldquo;the mod has its own horse model&rdquo;, not &ldquo;someone has
-        time&rdquo;. <a href="roadmap.html#gait">DMRT3's gait</a> is <em>not</em> cut with
+        time&rdquo;. <a href="gene-dmrt3.html#gait">DMRT3's gait</a> is <em>not</em> cut with
         these two and stays planned: new motion on a borrowed model is not the same ask as
         owning one.</li>
     <li id="settled-no-naked-foal-coat"><strong>The naked-foal coat is not being
@@ -499,14 +563,14 @@
 <ul>
     <li id="settled-rider-skill"><strong>A horsemanship skill is in, and the standing objection
         against it is answered rather than ignored.</strong> This page and
-        <a href="roadmap.html#mod-survey">the survey backlog</a> both held that a player-progression
+        <a href="compatibility.html#mod-survey">the survey backlog</a> both held that a player-progression
         ladder cuts against <a href="philosophy.html">breeding being the progression</a> &mdash;
         the same objection that <em>still stands</em> against
-        <a href="roadmap.html#out-of-scope-competitions">competitions</a>. The owner's reframing
+        <a href="#out-of-scope-competitions">competitions</a>. The owner's reframing
         is what settles it: <strong>bonding makes the horse listen, and skill makes you a better
         rider</strong>. Neither makes the horse a better horse, so no second ladder is built
         beside breeding &mdash; what is built is a reason to ride the horse you bred. See
-        <a href="roadmap.html#horsemanship">horsemanship</a>.</li>
+        <a href="horsemanship.html#horsemanship">horsemanship</a>.</li>
     <li id="settled-pairing-bonus"><strong>The bonus belongs to the pairing and is never written
         to the animal.</strong> It is an <code>AttributeModifier</code> applied on mount and
         removed on dismount, computed from rider skill and bond with <em>that</em> horse. A
@@ -535,7 +599,7 @@
         feature at a lower ceiling</strong>. A player without the mod is never locked out of
         anything &mdash; installing one raises a ceiling rather than switching a feature on. The
         reasoning, and why RPG Attribute System and Skill Tree were not chosen, is on
-        <a href="roadmap.html#horsemanship-hook">the roadmap</a>.</li>
+        <a href="horsemanship.html#horsemanship-hook">the roadmap</a>.</li>
     <li id="settled-qol-licences"><strong>Nothing is ported from the quality-of-life cluster,
         whatever its licence says.</strong> The five mods read on 2026-09-21 are MIT, GPL-3.0,
         MPL-2.0, CC BY-NC-SA and All Rights Reserved; the owner's call was <em>ideas only,

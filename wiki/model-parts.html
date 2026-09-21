@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attached model parts &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1 id="model-parts">Attached model parts</h1>
+<p class="lede">
+    <strong>Blockbench meshes hung on the horse model, driven by a gene or by a breed</strong>
+    &mdash; a unicorn horn, a row of dorsal spines, a pair of wings, feathered hooves. They need
+    no animation of their own, because they would be parented to a part of the horse that is
+    already animated. It would be the mod&rsquo;s <strong>first visual that is not a
+    texture</strong>, which is why this is a page rather than a line on a list.
+    <strong>None of it is built</strong>, and it is the prerequisite for
+    <a href="breed-book.html#breed-sources">the reindeer-breed content</a> in the breed book,
+    which is content for machinery that does not exist yet.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Blockbench meshes parented to the horse model &mdash; unicorn horns, dorsal spines and
+        crystalline growths first, wings and hoof feathering later &mdash; the mod&rsquo;s first
+        non-texture visual, and a GeckoLib dependency to justify or avoid before any of it
+        starts.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The owner wants a batch of these &mdash; &ldquo;a HUGE win for how cool they look&rdquo;</span>
+    <p>
+        Blockbench meshes attached to the horse model, gene- or breed-driven, with no
+        independent animation needed.
+        <strong>High priority:</strong> unicorn horns, spikes / dorsal spines, crystalline
+        growths &mdash; small models, head- or spine-parented, big visual payoff.
+        <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails, hoof
+        feathering (already wanted by the draught breeds), tusks, antlers.
+        <strong>Do a batch of the head-parented ones first</strong> &mdash; one render layer,
+        many models.
+    </p>
+</div>
+
+<ul>
+    <li>This is the mod's <strong>first non-texture visual</strong>. The coat pipeline is
+        texture-only and <code>common/</code> is Minecraft-free, so <code>common/</code> can
+        only declare <em>that</em> a gene wants part <code>X</code>, by id; the renderer
+        resolves it &mdash; the same shape as <code>GradientLut</code> arriving as an
+        <code>int[]</code>.</li>
+    <li>The proposal is GeckoLib plus Blockbench, with an attached layer whose bones are
+        children of the horse's body bone so they inherit every animation.
+        <strong>Check whether a plain render layer parented to the existing model part does the
+        job before taking the dependency</strong> &mdash; animation inheritance is the entire
+        argument for GeckoLib, and a horn does not animate independently of the head.</li>
+    <li>Saddle, armour and third-party tack render at the same time. Layer order and
+        z-fighting are the predictable bugs, and these all need to scale with the horse
+        too.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="body-space.html">Body space &amp; the horse model</a>
+        <a href="horse-gear.html">Horse gear &mdash; what else renders on a horse</a>
+        <a href="breed-book.html">The breed book</a>
+    </div>
+    The one thing to settle before any of this is written is whether a plain render layer on
+    the existing model does the job, because the answer decides whether the mod takes a new
+    dependency or not.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

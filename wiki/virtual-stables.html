@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual stables &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Virtual stables</h1>
+<p class="lede">
+    A way to put a horse you own <em>away</em> &mdash; into an object you carry, or into a stall
+    somewhere you can call it back from &mdash; so that moving a herd is not one lead rope at a
+    time. <strong>None of it is built.</strong> This page exists so that the plan has a home of
+    its own rather than a section on a shared list, and so that when the first piece of it ships
+    there is already a page to document it on. The other half of the same question &mdash; what a
+    horse carries for <em>you</em> &mdash; is
+    <a href="horse-gear.html#horse-chests">horse chests, on the gear page</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        An object that holds a horse you own &mdash; not a genome sample, a spawn-egg recipe or a
+        ticket that moves a live animal, but the horse itself &mdash; with the open call being
+        whether that is an item or a stall in the horse dimension.
+    </p>
+</div>
+
+<h2 id="storage">Carrying things, and carrying horses</h2>
+
+<p>
+    One of two asks that sound unrelated and share one question &mdash; <em>what is a horse's
+    inventory and who owns it</em>. The other,
+    <a href="horse-gear.html#horse-chests">horse chests and saddlebags</a>, is on the gear page;
+    the two are decided together even though they ship apart.
+</p>
+
+<h3 id="virtual-stables">A horse in your pocket &mdash; virtual stables</h3>
+
+<p>
+    From the <em>Stables</em> Bukkit plugin's virtual-stable idea, reshaped for this mod:
+    <strong>an object that holds a horse you own</strong>, so that moving twenty horses is not
+    twenty trips and bringing one along is not a lead across three biomes.
+</p>
+<ul>
+    <li><strong>Four things in the mod look like this and none of them is it</strong>, which is
+        worth stating precisely so nobody builds a fifth by accident. The
+        <a href="carrots.html">seed jar</a> holds a genome <em>sample</em>;
+        <a href="item-spawn-eggs.html">the preset spawn egg</a> holds a genotype, epigenome, sex
+        and age &mdash; a <em>recipe</em> for a horse, with no identity, equipment, name, bond or
+        pedigree edge; <a href="item-tickets.html">tickets</a> and
+        <a href="item-stall-signs.html">pen signs</a> move the live animal to a stall, so it
+        never stops existing; and <a href="item-transfer-papers.html">transfer papers</a> move
+        ownership only. <strong>What none of them does is hold the animal itself</strong>, and
+        that is the entire feature.</li>
+    <li><strong>&ldquo;Pocket dimension&rdquo; is probably the wrong implementation of the right
+        idea.</strong> The horse dimension exists and is a real place, so stabling a horse
+        <em>there</em> and fetching it back is a mechanic with a location in it rather than a
+        serialised entity in an item stack. Worth deciding which before anything is built,
+        because they are different features wearing the same name: one is storage, the other is
+        a place you visit.</li>
+    <li><strong>The trap is the one <a href="known-gaps.html#gap-73">gap 73</a> is
+        about.</strong> Destroying a horse entity and rebuilding it later from saved data is
+        exactly what the lycanthropy shift does, and the thing that can go silently wrong is
+        attachment round-tripping &mdash; a horse that comes back with a fresh record and no
+        pedigree looks fine and is not. Whatever this is built on should reuse that path and fix
+        it once, not open a second one.</li>
+    <li><strong>It needs a limit and a cost, or it eats the mod.</strong> An item that holds any
+        horse instantly makes stalls, pens, tickets, whistles and
+        <a href="item-whistles.html#callable-horses">callable horses</a> redundant. That is an argument for
+        tying it to the barn or to an equestrian rather than to a craftable item &mdash; an
+        open design question, and the most important one here.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="horse-dimension.html">The horse dimension</a>
+        <a href="item-spawn-eggs.html">Spawn eggs</a>
+        <a href="item-transfer-papers.html">Transfer papers</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    The call to make first is whether a virtual stable is a thing you carry or a place you visit
+    &mdash; they are different features wearing the same name.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

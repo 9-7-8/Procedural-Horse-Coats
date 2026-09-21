@@ -637,6 +637,94 @@ Component  -> (Trigger, Condition, Selector, Effect)</code></pre>
 </tbody>
 </table>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Two or more genes that only <em>together</em> trigger an outcome, as a separately
+        registered <code>TraitRule</code> modelled as a <strong>pseudo-gene</strong> so it
+        reuses the coat pipeline&rsquo;s phase and priority; behind it the unbuilt rest
+        &mdash; selectors, auras, resource pools, goals, and conditions as
+        <strong>0&ndash;1 scalars</strong> rather than booleans.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for traits and effects, in one place.</strong> These
+    sections used to live on the main <a href="roadmap.html">roadmap</a> and were moved here
+    whole, so that the design and the plan for reaching it are read together. The design is
+    not repeated below, because this page <em>is</em> it: everything from
+    <a href="#architecture">the full architecture</a> down is unbuilt by definition, and
+    <a href="#build-order">the build order</a> says which step each piece is. What follows is
+    the one thing that design has no home for &mdash; a trait produced by a <em>group</em> of
+    genes rather than by one &mdash; and a standing note on how much of the rest is
+    outstanding.
+</p>
+
+<hr>
+
+<h2 id="trait-rules">Group traits, and the rest of the effect architecture</h2>
+
+<h3 id="group-traits">Traits that come from a <em>group</em> of genes</h3>
+
+<p>
+    Wanted, and distinct from the cut polygenic idea: <strong>two or more genes, each with
+    their own alleles, that only together trigger an outcome.</strong> This is epistasis /
+    complementation &mdash; still fully Mendelian &mdash; and it needs a home. The
+    <a href="gene-leopard.html">leopard complex</a> got what it needed without one
+    (<code>expressionIn</code> is handed the whole genotype), but that is a single-gene read,
+    not a rule of its own.
+</p>
+
+<ul>
+    <li><strong>It is not a gene</strong>, so it cannot live on the <code>Gene</code>
+        interface. It wants a separately registered <code>TraitRule</code> that declares
+        which gene keys it reads and is handed those pairs.</li>
+    <li><strong>It is still Mendelian.</strong> Each gene inherits normally and
+        independently; the rule only <em>reads</em> the result. No new inheritance code.</li>
+    <li><strong>It may affect the coat</strong> (<a href="decisions.html#settled-pipeline">settled</a>).
+        So a coat-affecting rule needs everything a gene needs: a <strong>phase</strong> and a
+        <strong>priority</strong>. Which argues strongly for modelling it as a
+        <strong>pseudo-gene</strong>: same delta function, same ordering, same determinism
+        rules, differing only in that its inputs are several pairs instead of one. Reusing the
+        gene pipeline wholesale is much cheaper than a parallel one, and the spawner and the
+        coat cache then need no special case.</li>
+    <li>The one thing it cannot inherit: it has no alleles, so it contributes nothing to the
+        genotype code and never appears in an allele lookup. Keep it out of
+        <code>codeOrder()</code>.</li>
+    <li><strong>Determinism</strong>: rules sort like genes, and a rule reading an
+        unregistered gene must fail loudly rather than default.</li>
+    <li><strong>Visibility to the player.</strong> A trait with no single gene behind it is
+        invisible in a genotype code and unguessable in a punnett square. It needs a UI
+        surface of its own, or it will read as randomness &mdash; exactly what
+        <a href="philosophy.html">the philosophy</a> says not to do.</li>
+</ul>
+
+<p class="muted">
+    Cream + pearl <em>looks</em> like this case and is not: they are one physical locus, and
+    <a href="gene-matp.html">MATP</a> merges them rather than writing a rule.
+</p>
+
+<h3 id="effect-architecture-rest">The rest of the effect architecture</h3>
+
+<p>
+    A first slice is built &mdash; <a href="making-a-gene.html#block"><code>effects</code></a>
+    verbs with boolean <code>when</code> conditions, usable from a gene file and from a
+    built-in Java gene through the same vocabulary. What is left is
+    <strong>everything else this page sets out for the trait &amp; effect
+    architecture</strong>, which is the source of truth for the design and carries its
+    own <a href="#build-order">build order</a>: triggers, selectors, auras,
+    resource pools, goals, trait relations, <code>on_change</code>, and the
+    <strong>0&ndash;1 scalar conditions</strong> the built version approximates as booleans.
+    <strong>The capability interfaces should not be considered final until that lands</strong>
+    &mdash; a modder writing a coat gene is on solid ground today; one writing a behaviour
+    gene is building on something that will move.
+</p>
+
+</section>
+
 <hr>
 
 <div class="page-foot">

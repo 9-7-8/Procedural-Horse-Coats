@@ -24,7 +24,7 @@
     <a href="#verification">the verification tab</a>. This page is
     the source of truth for the mechanism; the <em>recipes</em> are on
     <a href="item-breeding-carrots.html">items</a>, and what is still missing is on
-    <a href="roadmap.html">the roadmap</a>.
+    <a href="#roadmap">the roadmap tab</a>.
 </p>
 
 <h2 id="rule">The one rule</h2>
@@ -289,7 +289,7 @@
     exactly the four, and per-gene flavour lists are still unwritten &mdash; a
     <code>carrot.flavour</code> block exists in the
     <a href="making-a-gene.html#the-shape">gene format</a> and no built-in fills it. See
-    <a href="roadmap.html">the roadmap</a>.
+    <a href="#carrot-content">the carrot content pass</a> on the roadmap tab.
 </p>
 
 <div class="table-wrap">
@@ -438,7 +438,7 @@
 
 <p>
     The mechanism is complete; what is missing is <strong>content and reach</strong>.
-    All of it is on <a href="roadmap.html">the roadmap</a>:
+    All of it is on <a href="#roadmap">the roadmap tab</a>:
 </p>
 
 <ul>
@@ -485,7 +485,7 @@
     </p>
     <p>
         <strong>The distinction that makes this consistent</strong> with
-        <a href="roadmap.html#horsemanship">horsemanship</a>, which does let a horse outperform
+        <a href="horsemanship.html#horsemanship">horsemanship</a>, which does let a horse outperform
         its genome: that bonus belongs to the <em>pairing</em> of one rider with one horse, exists
         only while you are mounted, and is never written to the animal. The carrot changes the
         horse; riding well changes the ride. A horse sold on carries the carrots and would not
@@ -494,7 +494,7 @@
     <p class="muted">
         Its fifth carrot is the exception and did not come here: an emerald carrot that flips a
         horse between normal, zombie and skeleton. That one lands on
-        <a href="roadmap.html#undead-horses">the undead overhaul</a>, which is unbuilt, and it
+        <a href="undead-horses.html#undead-horses">the undead overhaul</a>, which is unbuilt, and it
         should be read there before those genes are designed rather than refused here.
     </p>
 </div>
@@ -505,6 +505,80 @@
     <strong>The gene previews turn in 3D</strong> (owner-confirmed in play, 2026-09-10, and the
     owner likes them).
 </p>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Every built-in gene falls back to the minimal recipe and a uniform splice draw, so the work
+        left is <strong>content, not machinery</strong>: a hand-tuned <code>carrot</code> block per
+        gene, the Epigenetic Stabilizer carrot, carrot effects on a
+        <a href="item-seed-jars.html">seed jar</a>, and a database check inside the recipe.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for breeding carrots and the gene database, in one
+    place.</strong> This section used to live on the main <a href="roadmap.html">roadmap</a> and
+    was moved here whole, so that what the carrots do, how they are built and what is still
+    planned for them are read together. The other half of the knowledge loop &mdash; papers that
+    name an <em>allele</em> rather than a whole gene, which is what would retire the
+    homozygous-by-default rule in <a href="#known">&sect;Known Gene Splice carrots</a> &mdash; is
+    planned on <a href="item-research-papers.html#allele-papers">research papers</a>.
+</p>
+
+<hr>
+
+<h2 id="carrot-content">The carrot content pass</h2>
+
+<p>
+    The <a href="carrots.html">mechanism is complete</a>. What is missing is
+    <strong>content across every registered gene</strong>, not machinery.
+</p>
+
+<div class="note warn">
+    <span class="label">Every built-in gene needs a real carrot, not the minimal fallback</span>
+    <p>
+        The parameterised recipe means a gene <em>can</em> have a carrot; it does not mean the
+        carrot is <em>balanced</em>. Today <strong>every</strong> built-in falls back to the
+        minimal recipe and the uniform splice draw. Each gene wants a hand-tuned
+        <code>carrot</code> block: a <strong>rarity tier</strong> matching how strong the gene
+        is, <strong>flavour ingredients that read as the gene</strong> (a nether wart for
+        <a href="gene-milk.html">lava milk</a>, a glow ink sac for
+        <a href="gene-light.html">light</a>, an amethyst shard for a
+        <a href="gene-lut.html">LUT palette</a>&hellip;), and a <code>splice</code> table
+        producing a sensible outcome rather than a coin-flip on a many-allele locus.
+    </p>
+    <p>
+        Note the recipe currently takes <strong>exactly four items</strong> with no flavour
+        slot, so shipping flavour lists means re-opening the recipe as well as writing the
+        data.
+    </p>
+</div>
+
+<ul>
+    <li><strong>The Epigenetic Stabilizer carrot.</strong> The other end of the dial from the
+        Unknown Epigenetic Splice: it forces the fed parent's passed-on copies to be inherited
+        <em>verbatim</em>, suppressing <a href="breeding.html#drift">drift</a> for one
+        breeding, so a player who wants a near-clone foal can buy that. Now that drift is the
+        default on every value this is the only way to switch it off, which is what makes it
+        worth having.</li>
+    <li><strong>Carrot effects captured on a <a href="item-seed-jars.html">seed jar</a></strong>
+        and applied at impregnation. None are carried today.</li>
+    <li><strong>A database check inside the recipe.</strong> The paper ingredient is the whole
+        gate today, which is <em>probably</em> right &mdash; but it means a paper traded from
+        another player works without the receiver ever discovering the gene. Decide
+        deliberately.</li>
+    <li><strong>New carrots are cheap</strong>, and the
+        <a href="#themed">themed splices</a> are the first proof of it: once the
+        <code>GameteBias</code> hook and the <code>carrot_effects</code> component exist, a new
+        carrot is a <code>CarrotEffect</code> case and a <code>fold</code> rule. The list is
+        meant to grow.</li>
+</ul>
+
+</section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Built, not yet seen in a game">

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forced riding &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Forced riding &mdash; the kelpie</h1>
+<p class="lede">
+    <strong>A wild horse that lets you mount, and then will not let you off.</strong> It carries
+    the rider to deep water, and the rider&rsquo;s only say in it is whatever warning they were
+    given before they climbed on. It was asked for, and researched before it was deferred; the
+    research went almost entirely into <em>how</em> to hold a rider, because the obvious way
+    &mdash; cancelling the dismount key &mdash; is the way that does not port.
+    <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A wild horse that lets you mount and will not let you off, carrying you to deep water
+        &mdash; a server-enforced ride-lock rather than an intercepted dismount key, waiting on
+        the warning beat that separates a recognisable monster from a mount with no tell.
+    </p>
+</div>
+
+<h2 id="forced-riding">Forced riding &mdash; the kelpie</h2>
+
+<p>
+    A wild horse that lets you mount and then will not let you off, carrying you to deep water.
+    Researched as a <strong>temporary ride-lock state</strong> rather than an attempt to cancel
+    the dismount key: the horse stays an ordinary rideable entity, and while the state is active
+    the server re-mounts the rider the moment they dismount and drives the horse toward its
+    destination. That is the version that survives a version port, because it leans on normal
+    passenger mechanics plus server enforcement instead of intercepting a client keybind.
+</p>
+<p>
+    Held on the horse as a small state machine &mdash; idle, a warning beat, then the forced ride
+    &mdash; rather than as scattered booleans. <strong>The warning beat is the design
+    question</strong>: without it this is a mount that kills you with no tell, which is a
+    different and worse thing than a monster you can recognise. It also has to agree with the
+    two seats a strong horse already carries &mdash; a forced ride with a pillion aboard is a
+    case the ride-lock has to answer rather than discover.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="carts.html">Carts &mdash; where the second seat is documented</a>
+        <a href="horse-care.html">Taming, bond and care</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    The warning beat is the one thing to settle before any of this is written: everything else
+    here is ordinary passenger handling, and the difference between a good monster and a bad
+    trap is entirely in what the horse does before it takes the rider.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

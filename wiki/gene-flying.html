@@ -187,6 +187,64 @@
 
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        The third flying ability, <strong>cloud-treading</strong> &mdash; an allele that
+        glides <em>and</em> can come to rest on a real cloud &mdash; killswitched so the
+        elytra glide could ship first; the engine research is already done, so what is left
+        is design rather than discovery.
+    </p>
+</div>
+
+<p class="lede">
+    <strong>Everything still planned for the flying locus, in one place.</strong> This section
+    used to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so
+    that what the gene does, how it is built and what is still planned for it are read
+    together.
+</p>
+
+<hr>
+
+<h2 id="cloud-walking">Cloud-treading</h2>
+
+<p>
+    The <a href="gene-flying.html">flying</a> gene was asked for with three abilities and
+    shipped with two. The third &mdash; an allele that glides <em>and</em> can come to rest on
+    a cloud and walk about on it &mdash; was killswitched so the elytra glide could be got
+    working first, and the allele was removed rather than left in place describing something
+    it no longer did.
+</p>
+
+<p>
+    <strong>The question that would normally sink this is already answered.</strong> Clouds
+    used to be client-only decoration, which would have meant inventing an invisible surface
+    at an arbitrary height and hoping both sides agreed on it. In 26.1.2 they are not:
+    <code>DimensionSpecialEffects</code> is gone and cloud height moved into the
+    <em>common-side</em> <code>EnvironmentAttributes.CLOUD_HEIGHT</code> &mdash; four blocks
+    thick, <code>spatiallyInterpolated</code> and <code>syncable</code> &mdash; and vanilla
+    ships the exact predicate the feature needs, <code>Entity.isInClouds()</code>. So a
+    cloud-treading horse can key off <em>real</em> clouds, on either side, and the horse
+    dimension can set its own cloud height.
+</p>
+
+<p>
+    What is left is design, not discovery: what treading a cloud does to momentum, whether it
+    restores anything, and whether a horse that cannot fly may still be granted it. The
+    <code>cloud_walk</code> flag is already a legal <code>traversal</code> value and is
+    deliberately composed <em>beside</em> <code>flight_glide</code> rather than folded into it,
+    so nothing has to be unpicked to bring it back &mdash; it is an allele, an expression and
+    a founder share, and the share comes back off <code>n/n</code>. One caution worth
+    carrying: the alpha guard in <code>isInClouds()</code> means a dimension whose
+    <code>CLOUD_COLOR</code> is fully transparent has no clouds at all, and the predicate is
+    simply always false there.
+</p>
+
+</section>
+
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>

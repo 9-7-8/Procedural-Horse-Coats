@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magical genes still to build &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Magical genes still to build</h1>
+<p class="lede">
+    <strong>The invented loci that have been asked for and not yet written.</strong> Three
+    things sit here: more of the marking and &ldquo;stamp&rdquo; genes that already work, the
+    flavour loci a breed designer could name in a JSON file to give a breed a character rather
+    than a colour, and one gene that would read what the horse is wearing. <strong>None of it
+    is built.</strong> The sections were moved here whole from the main
+    <a href="roadmap.html">roadmap</a>, so that the list has a home of its own and can be added
+    to without asking anybody&rsquo;s permission.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it gets
+        <a href="making-a-gene.html">a gene page of its own</a> and comes <em>off</em> this
+        one &mdash; a gene is registered by existing, and its page is baked from it.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A batch of magical marking and &ldquo;stamp&rdquo; genes before 1.0, more flavour loci
+        for a breed designer to name in JSON, and a tack-aware locus that needs a new
+        <code>when</code> condition flag able to see an equipment slot before it can exist at
+        all.
+    </p>
+</div>
+
+<h2 id="magical-genes">Magical genes</h2>
+
+<p>
+    Invented genes, phase 3, priority <code>100</code>+. <strong>This list has no upstream
+    source to be complete against &mdash; add to it freely.</strong> Each needs a priority, an
+    allele set with <code>n</code> as wild type, a founder distribution and a delta function.
+</p>
+
+<h3>More of what already works</h3>
+
+<ul>
+    <li><strong>More magical marking and &ldquo;stamp&rdquo; genes before 1.0.</strong>
+        Colourful flank and body emblems in the spirit of
+        <a href="gene-cutie-mark.html">cutie marks</a> but simpler &mdash; no item atlas.
+        Open-ended; the owner wants a visible batch of these for the 1.0 look.</li>
+</ul>
+
+<p class="muted">
+    More LUT palettes were the other half of this list and now live with
+    <a href="gene-lut.html#more-palettes">the LUT locus</a>, because a new palette is a new
+    allele there rather than a new gene.
+</p>
+
+<h2 id="breed-flavour-genes">Genes a breed designer can build a character out of</h2>
+
+<p>
+    Asked for as a batch, out of <code>intake/</code>: <strong>more genes whose point is
+    flavour</strong> &mdash; loci a breed file can name to alter what its horses do and what they
+    can do, rather than how they look. The existing behaviour family is the model; what is wanted
+    is more of it, and deliberately open-ended. A breed is
+    <a href="breed-format.html">a JSON file</a>, so every gene added here is a knob the designer
+    gets for free.
+</p>
+
+<h3 id="tack-aware">A gene that reads what the horse is wearing</h3>
+
+<p>
+    Named specifically, and it is the one with a real design problem in it. The ask is a locus
+    that <strong>detects whether a horse is saddled or armoured, and which kind</strong>, and
+    reacts &mdash; an allele that slows the horse dramatically while saddled, another that
+    suppresses every aura while saddled, and so on.
+</p>
+
+<ul>
+    <li><strong>The condition vocabulary has nothing that can see equipment.</strong> The
+        <code>when</code> flags read the world and the horse&rsquo;s own state; none of them reads
+        an equipment slot. So this is a new condition flag before it is a gene, which means
+        <a href="making-a-gene.html#contracts">the condition contract</a> &mdash; the flag, the
+        evaluator, the creator&rsquo;s schema mirror, both tables and a parity fixture.</li>
+    <li><strong>&ldquo;Which kind&rdquo; is the expensive half.</strong> A boolean
+        <em>is saddled</em> is cheap. Distinguishing iron from diamond from a modded armour means
+        the flag carries a value, and the generated-armour layer means the set is open-ended
+        rather than a fixed five &mdash; see <a href="compatibility.html#generated">the compat
+        layer</a>. Decide whether the gene asks &ldquo;armoured at all&rdquo;, &ldquo;armoured in
+        this tag&rdquo;, or a material tier, before writing any of it.</li>
+    <li><strong>Watch the phantom saddle.</strong> <code>BarebackSteeringHandler</code> writes the
+        saddle slot every tick on a horse nobody has saddled, so a naive <em>is saddled</em> check
+        is true for horses the player considers bare. Whatever reads the slot has to exclude a
+        stack carrying <code>PHANTOM_SADDLE</code> or the gene will fire constantly and look
+        broken.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="making-a-gene.html">Making a gene</a>
+        <a href="breed-format.html">The breed file format</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    This page is a queue, not a specification: nothing on it is owed a gene, and a gene that
+    ships leaves it for a page of its own.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

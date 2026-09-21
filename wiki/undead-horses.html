@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undead horses &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1 id="undead-horses">Undead horses</h1>
+<p class="lede">
+    <strong>Two genes, and a spawning overhaul.</strong> This used to be an open question
+    and now it is a design. The question was how much of the mod an undead horse gets; the
+    answer the owner has given is <em>all of it</em> &mdash; a skeleton horse is
+    <strong>any breed</strong> that happens to carry a skeleton gene, and a zombie horse is
+    any breed carrying a zombie gene. Undeath stops being an entity type this mod stands
+    beside and becomes two loci, which is the answer that costs the least new machinery and
+    the most spawning work. <strong>None of it is built.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. It was moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
+        rather than a place plans are written. When a piece of this ships, it comes
+        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
+        here &mdash; the page grows tabs as the thing grows.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A recessive skeleton gene that heals without eating and is pacified forever by one
+        bone, a zombie gene with <strong>double hearts</strong> at a heavy speed cost, and the
+        spawning overhaul that suppresses vanilla&rsquo;s two undead entities so that any
+        breed can carry either.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">One thing to settle before either gene is written</span>
+    <p>
+        Each of these loci bundles several effects, and
+        <a href="philosophy.html#concepts-are-breeds">&ldquo;a concept is a breed, not a
+        gene&rdquo;</a> says an idea needing several effects is a breed rather than a locus. The
+        undead case has two real answers to that &mdash; undeath is arguably one trait with many
+        consequences, the way a lethal is, and the design wants an undead horse of <em>any</em>
+        breed, which a breed cannot express. <strong>It is an
+        <a href="decisions.html#open-undead-locus">open call</a>, not a settled one</strong>, and
+        the shape of both genes depends on which way it goes.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Why this is much cheaper than the version it replaces</span>
+    <p>
+        Making undeath a gene means the genome, the coat pipeline, breeding, records, bond and
+        the body stats all reach these horses <em>for free</em>, because they reach every
+        <code>Horse</code>. <strong>The alternative was never small.</strong> Scoping to the
+        concrete <code>Horse</code> class is not one guard in one place &mdash; it is
+        <strong>125 <code>instanceof Horse</code> checks</strong> across the NeoForge module
+        against 22 for <code>AbstractHorse</code>, done in the handlers with plain
+        <code>instanceof</code> rather than in a mixin that could be retargeted. Teaching all of
+        that about two more entity types is the expensive version, and it is now off the table.
+    </p>
+</div>
+
+<h2 id="skeleton-gene">The skeleton gene</h2>
+
+<ul>
+    <li><strong>Recessive.</strong> Which means it is carried invisibly and can surface from two
+        ordinary-looking parents &mdash; the thing the mod is for.</li>
+    <li><strong>It heals without eating, and cannot eat at all.</strong> A clean inversion of
+        the existing feeding loop rather than an addition to it. Note this collides with
+        <a href="horse-care.html">gated healing</a> and with the diet gene, both of which assume
+        food is how a horse recovers; the gene has to turn that off rather than compete with
+        it.</li>
+    <li><strong>It looks like a skeleton.</strong> The one genuinely hard part, because the
+        <a href="pipeline.html">coat pipeline</a> paints a coat and a skeleton is the absence of
+        one. Whether this is a painting gene at extreme priority, a whole-texture override, or a
+        model swap is the open question, and it should be settled before either gene is
+        started.</li>
+    <li><strong>Aggressive, and permanently pacified by a bone.</strong> One bone, once, forever
+        &mdash; which is carrot-not-stick and is also a nice inversion of taming, since the
+        horse is hostile until you give it the thing it is made of.</li>
+</ul>
+
+<h2 id="zombie-gene">The zombie gene</h2>
+
+<ul>
+    <li><strong>Literally twice the hearts, at a large speed penalty.</strong> Both are
+        attributes the body genes already write, so the mechanism exists; the
+        <em>number</em> is the design, and doubling health is the largest single stat effect in
+        the mod by a distance.</li>
+    <li><strong>Obligate carnivore.</strong> Feeding is the loop here rather than a flavour
+        note, and it has to answer what happens when a carnivore is offered the carrots that
+        everything else in the mod runs on &mdash; <a href="carrots.html">breeding carrots</a>
+        especially, which are how a player steers a genome.</li>
+    <li><strong>Aggressive, and only <em>temporarily</em> pacified with raw meat, until
+        tamed.</strong> The deliberate contrast with the skeleton's single bone: one is a
+        permanent bargain, the other is a rope you keep paying out until the horse is
+        yours.</li>
+</ul>
+
+<h2 id="undead-spawning">The spawning overhaul, which is the actual work</h2>
+
+<p>
+    <strong>&ldquo;Spawn as any breed, but with these genes&rdquo; is not how undead horses
+    spawn today</strong> &mdash; vanilla's skeleton horse arrives from a lightning trap and its
+    zombie horse does not spawn naturally at all, and neither is a <code>Horse</code>, so
+    <code>BreedSpawnHandler</code> never sees them. Replacing that means deciding what the
+    vanilla entities become: suppressed and substituted with a gene-carrying
+    <code>minecraft:horse</code>, or left alone beside their genetic counterparts. The first is
+    the version that matches the ask and is also the one that touches another mod's undead
+    horses, so it wants a config gate from the start.
+</p>
+<p>
+    <strong>The founder distribution is the part that decides whether this is fun.</strong>
+    Both genes are recessive, and <a href="breeds.html">the founder table</a> rule is that a
+    recessive particle-style gene puts its <em>expressing</em> combinations into the wild
+    population rather than carriers &mdash; otherwise the gene exists and nobody ever sees one.
+    Which breeds carry it, and at what frequency, is a per-breed-sheet line and is where the
+    flavour lives: an undead Shire and an undead Falabella are different jokes.
+</p>
+
+<p class="muted">
+    <strong>More of the mod already reaches them than the old version of this section
+    said</strong>, and it matters because it is what would become dead code.
+    <code>entity/ModAttributes</code> adds <code>LAVA_MOVEMENT</code> and
+    <code>DRAFT_POWER</code> to a set that names <code>SKELETON_HORSE</code> and
+    <code>ZOMBIE_HORSE</code> explicitly; the replaced saddle asset carries
+    <code>skeleton_horse_saddle</code> and <code>zombie_horse_saddle</code> with the same three
+    dyeable layers as a horse's, so bench-dyed tack renders on them; and
+    <strong>every mixin targeting <code>AbstractHorse</code> reaches them already</strong>
+    &mdash; carts, flight while ridden, instant jump, rearing, regeneration and two riders. If
+    the vanilla entities are suppressed, all of that becomes dead code and should go in the same
+    change. A fourth option named in the old version of this section &mdash; leave them alone
+    and let <a href="breed-book.html#dhampir">the magical breeds</a> be this mod's undead horses
+    &mdash; is superseded by the above, and recorded here only so it is not re-proposed.
+</p>
+
+<p class="muted">
+    <em>Undead Horses Plus</em> (Bedrock addon) is on
+    <a href="compatibility.html#mod-survey">the survey list</a> for ideas to fold in here before
+    any of this is built.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="breeds.html">Breeds &amp; spawning</a>
+        <a href="breed-book.html">The breed book</a>
+        <a href="decisions.html">Design decisions</a>
+    </div>
+    Nothing here can start until the open call on whether undeath is a locus or a breed is
+    settled, and until it is decided how a pipeline that paints a coat paints the absence of
+    one.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
