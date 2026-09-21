@@ -1,3 +1,8 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
 
-Adding ender chests to horses. 
+Adding ender chests to horses. Improving the look go chested hordes in general, and adding support for more kinds of chests on horses from other mods
+
+Adding new genes for zombie and skeleton horses, and then having them spawn as any breed except they have those new genes. Skeleton horses have a recessive skeleton gene that makes them heal without needing to eat (and indeed, they cannot eat) while looking like a skeleton. Skeleton horses are aggressive but can be permanently passified by feeding them a bone. Zombie horses have a gene that makes them literally have twice as many hearts, but at a big speed penalty. They are obligate carnivores and they are all aggressive and can only be temporarily passified with raw meat, until they're tamed. Need to overhaul ho zombie and skeleton horses spawn, so they can spawn as any breed, but with these genes. 
+
+I had a whole bunch more typed but then I closed the tab and lost it all, so now we're doing it again! Ugh. 
+
