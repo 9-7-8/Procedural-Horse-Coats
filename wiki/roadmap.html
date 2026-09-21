@@ -501,6 +501,113 @@
 
 <hr>
 
+<h2 id="undead-horses">Undead horses &mdash; two genes, and a spawning overhaul</h2>
+
+<p>
+    <strong>This used to be an open question and now it is a design.</strong> The question was
+    how much of the mod an undead horse gets; the answer the owner has given is
+    <em>all of it</em> &mdash; a skeleton horse is <strong>any breed</strong> that happens to
+    carry a skeleton gene, and a zombie horse is any breed carrying a zombie gene. Undeath stops
+    being an entity type this mod stands beside and becomes two loci, which is the answer that
+    costs the least new machinery and the most spawning work.
+</p>
+
+<div class="note">
+    <span class="label">Why this is much cheaper than the version it replaces</span>
+    <p>
+        Making undeath a gene means the genome, the coat pipeline, breeding, records, bond and
+        the body stats all reach these horses <em>for free</em>, because they reach every
+        <code>Horse</code>. <strong>The alternative was never small.</strong> Scoping to the
+        concrete <code>Horse</code> class is not one guard in one place &mdash; it is
+        <strong>125 <code>instanceof Horse</code> checks</strong> across the NeoForge module
+        against 22 for <code>AbstractHorse</code>, done in the handlers with plain
+        <code>instanceof</code> rather than in a mixin that could be retargeted. Teaching all of
+        that about two more entity types is the expensive version, and it is now off the table.
+    </p>
+</div>
+
+<h3 id="skeleton-gene">The skeleton gene</h3>
+
+<ul>
+    <li><strong>Recessive.</strong> Which means it is carried invisibly and can surface from two
+        ordinary-looking parents &mdash; the thing the mod is for.</li>
+    <li><strong>It heals without eating, and cannot eat at all.</strong> A clean inversion of
+        the existing feeding loop rather than an addition to it. Note this collides with
+        <a href="horse-care.html">gated healing</a> and with the diet gene, both of which assume
+        food is how a horse recovers; the gene has to turn that off rather than compete with
+        it.</li>
+    <li><strong>It looks like a skeleton.</strong> The one genuinely hard part, because the
+        <a href="pipeline.html">coat pipeline</a> paints a coat and a skeleton is the absence of
+        one. Whether this is a painting gene at extreme priority, a whole-texture override, or a
+        model swap is the open question, and it should be settled before either gene is
+        started.</li>
+    <li><strong>Aggressive, and permanently pacified by a bone.</strong> One bone, once, forever
+        &mdash; which is carrot-not-stick and is also a nice inversion of taming, since the
+        horse is hostile until you give it the thing it is made of.</li>
+</ul>
+
+<h3 id="zombie-gene">The zombie gene</h3>
+
+<ul>
+    <li><strong>Literally twice the hearts, at a large speed penalty.</strong> Both are
+        attributes the body genes already write, so the mechanism exists; the
+        <em>number</em> is the design, and doubling health is the largest single stat effect in
+        the mod by a distance.</li>
+    <li><strong>Obligate carnivore.</strong> Feeding is the loop here rather than a flavour
+        note, and it has to answer what happens when a carnivore is offered the carrots that
+        everything else in the mod runs on &mdash; <a href="carrots.html">breeding carrots</a>
+        especially, which are how a player steers a genome.</li>
+    <li><strong>Aggressive, and only <em>temporarily</em> pacified with raw meat, until
+        tamed.</strong> The deliberate contrast with the skeleton's single bone: one is a
+        permanent bargain, the other is a rope you keep paying out until the horse is
+        yours.</li>
+</ul>
+
+<h3 id="undead-spawning">The spawning overhaul, which is the actual work</h3>
+
+<p>
+    <strong>&ldquo;Spawn as any breed, but with these genes&rdquo; is not how undead horses
+    spawn today</strong> &mdash; vanilla's skeleton horse arrives from a lightning trap and its
+    zombie horse does not spawn naturally at all, and neither is a <code>Horse</code>, so
+    <code>BreedSpawnHandler</code> never sees them. Replacing that means deciding what the
+    vanilla entities become: suppressed and substituted with a gene-carrying
+    <code>minecraft:horse</code>, or left alone beside their genetic counterparts. The first is
+    the version that matches the ask and is also the one that touches another mod's undead
+    horses, so it wants a config gate from the start.
+</p>
+<p>
+    <strong>The founder distribution is the part that decides whether this is fun.</strong>
+    Both genes are recessive, and <a href="breeds.html">the founder table</a> rule is that a
+    recessive particle-style gene puts its <em>expressing</em> combinations into the wild
+    population rather than carriers &mdash; otherwise the gene exists and nobody ever sees one.
+    Which breeds carry it, and at what frequency, is a per-breed-sheet line and is where the
+    flavour lives: an undead Shire and an undead Falabella are different jokes.
+</p>
+
+<p class="muted">
+    <strong>More of the mod already reaches them than the old version of this section
+    said</strong>, and it matters because it is what would become dead code.
+    <code>entity/ModAttributes</code> adds <code>LAVA_MOVEMENT</code> and
+    <code>DRAFT_POWER</code> to a set that names <code>SKELETON_HORSE</code> and
+    <code>ZOMBIE_HORSE</code> explicitly; the replaced saddle asset carries
+    <code>skeleton_horse_saddle</code> and <code>zombie_horse_saddle</code> with the same three
+    dyeable layers as a horse's, so bench-dyed tack renders on them; and
+    <strong>every mixin targeting <code>AbstractHorse</code> reaches them already</strong>
+    &mdash; carts, flight while ridden, instant jump, rearing, regeneration and two riders. If
+    the vanilla entities are suppressed, all of that becomes dead code and should go in the same
+    change. A fourth option named in the old version of this section &mdash; leave them alone
+    and let <a href="breed-book.html#dhampir">the magical breeds</a> be this mod's undead horses
+    &mdash; is superseded by the above, and recorded here only so it is not re-proposed.
+</p>
+
+<p class="muted">
+    <em>Undead Horses Plus</em> (Bedrock addon) is on
+    <a href="#mod-survey">the survey list</a> for ideas to fold in here before any of this is
+    built.
+</p>
+
+<hr>
+
 <h2>The gameplay layer</h2>
 
 <p>
@@ -617,6 +724,46 @@
         a change to what founding <em>is</em>. Stamping the ids without the descent was
         considered and rejected: the pedigree screen would present a relationship the genetics
         contradict.</li>
+</ul>
+
+<h3 id="troughs">Troughs and salt licks</h3>
+
+<p>
+    From <a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a>, and
+    asked for specifically as <strong>a trough built out of the existing modular-wood
+    framework, in any square or rectangular shape</strong>.
+</p>
+<p>
+    <strong>No block of this mod feeds a horse today.</strong> Feeding is grazing and
+    hand-feeding &mdash; <code>HungerFoodGoal</code> walks a horse about ten blocks to the best
+    thing it can reach, with a hay bale as the largest meal &mdash; so a trough is the first
+    <em>place</em> a horse eats from, and that is the feature rather than the block.
+</p>
+<ul>
+    <li><strong>The wood half is genuinely reusable and the paint half is not.</strong>
+        <code>compat/MaterialScan</code> and <code>ModdedMaterials.woods()</code> already serve
+        double gates, jumps and carts from one roster, so &ldquo;a trough in any wood, vanilla or
+        modded&rdquo; is an existing pattern with three precedents. But there is no shared paint
+        system &mdash; jumps, tack and generated armour each tint their own way, and two of them
+        duplicate the same dye-reading lines with a source comment saying <em>&ldquo;if a third
+        place needs dyes, extract it then&rdquo;</em>. A trough plus
+        <a href="#cart-bench">the cart and jump bench</a> would be the third and fourth places.
+        <strong>That extraction is now due.</strong></li>
+    <li><strong>Multi-block in any rectangle is the genuinely new part.</strong> Nothing in the
+        mod assembles a structure from several placed blocks; the nearest thing is
+        <code>StallDetector</code>, which <em>recognises</em> an enclosure the player built
+        rather than forming one. Worth reading it first &mdash; the answer to &ldquo;what counts
+        as a valid shape, and what happens when someone breaks one block of it&rdquo; is already
+        worked out there.</li>
+    <li><strong>Salt licks</strong> were asked for alongside. They have no mechanism here at all
+        &mdash; a block a horse walks to and uses over time, which is closer to
+        <a href="horse-care.html">care</a> than to feeding. <strong>Keep it carrot-not-stick:</strong>
+        a salt lick that grants something is in keeping; a horse that suffers without one is the
+        husbandry-chore version and is exactly what the owner's note warns against when it says
+        to hold Animania's ideas to this mod's philosophy.</li>
+    <li><strong>Any mod's trough-alike should work</strong>, the way
+        <code>compat/HayBales</code> made every mod's hay bale grazeable with a tag rather than a
+        list. Same trick, same reason.</li>
 </ul>
 
 <hr>
@@ -818,6 +965,120 @@
 
 <hr>
 
+<h2 id="horse-menu">The horse menu &mdash; acting on a horse, not only reading about one</h2>
+
+<p>
+    <a href="#browser">The browser's remaining tabs</a> are a separate and larger job; this is
+    the smaller, sharper set of asks about the screen as it stands. The thread running through
+    all of them: <strong>the menu is a report today, and every one of these turns it into a
+    console.</strong>
+</p>
+
+<h3 id="menu-teleport">Teleport the horse to you, from the Where column</h3>
+
+<p>
+    <strong>The column exists and is inert.</strong> &ldquo;Where&rdquo; is the twelfth column on
+    <em>My horses</em> and already prints <code>overworld 118, 71, -204</code>, built server-side
+    by <code>HorseRoster.where</code>. Clicking it should attempt to bring the horse to you.
+</p>
+<ul>
+    <li><strong>&ldquo;Use <code>/tp</code>&rdquo; was the ask, and the mechanism deserves a
+        second look rather than a literal reading.</strong> The mod already teleports horses
+        properly &mdash; <a href="item-whistles.html#ender">the ender whistle</a> moves a bound
+        horse across dimensions, and <a href="item-tickets.html">tickets</a> send one to a stall.
+        Routing the button through the same code is better than issuing a command: a command
+        needs permissions the player may not have, silently does nothing for them if they do not,
+        and skips every check the whistle makes.</li>
+    <li><strong>It must answer the unloaded case, which is most rows.</strong>
+        <code>HorseRoster.entry()</code> only fills <em>Where</em> for a horse in a loaded chunk;
+        everything else reads <em>not loaded</em>, and those are exactly the horses you would
+        want to summon. <strong><code>data/HorseWhereabouts</code> already exists</strong> as a
+        <code>SavedData</code> of last-seen dimension, position and death, and the roster does
+        not read it &mdash; wiring that in is the prerequisite and improves the column whether or
+        not the button is built.</li>
+    <li><strong>It needs a cost or a gate.</strong> A free summon-any-horse-from-anywhere button
+        makes whistles, tickets and holding pens redundant in one stroke. Whatever gates it
+        &mdash; a bond tier, a cooldown, an item &mdash; should be decided
+        <em>before</em> the button, not retrofitted after players have it.</li>
+</ul>
+
+<h3 id="menu-waypoints">A waypoint column, when a map mod is running</h3>
+
+<p>
+    A checkbox per horse that drops a waypoint on the player's minimap and refreshes it every
+    thirty seconds.
+</p>
+<p>
+    <strong>Nothing in the repo touches any map mod today</strong> &mdash; no Xaero, no
+    JourneyMap, no waypoint code of any kind &mdash; so this is a new integration from zero, and
+    it is the one item here with a third-party API at the end of it. Two things to settle first:
+    <em>which</em> map mods (their waypoint APIs are unrelated to each other, so each is its own
+    integration and the column should appear per-mod rather than as one checkbox), and where the
+    thirty-second refresh runs, since it has to keep updating while the screen is
+    <strong>closed</strong> and therefore cannot live in the screen. The fail-soft rule applies
+    as everywhere else: absent map mod, absent column, no crash and no hard dependency.
+</p>
+
+<h3 id="menu-refresh">Refresh on its own</h3>
+
+<p>
+    <strong>Asked for on three events &mdash; screen opened, a foal born, a horse died.</strong>
+    Today there is a <em>Refresh</em> button and a lazy first fetch:
+    <code>HorseBrowserScreen.init()</code> requests the roster only if the client has never
+    received one, and <code>HorseRoster.sendTo</code> has exactly one caller, the payload handler.
+    So a player who breeds a horse and opens the menu sees the world as it was when they last
+    pressed a button.
+</p>
+<ul>
+    <li><strong>On open is trivial</strong> &mdash; drop the <code>!received()</code> guard, at
+        the cost of a round-trip every time the screen opens.</li>
+    <li><strong>Birth and death are pushes, not pulls, and that is the actual work.</strong> The
+        server has to notice and send, which means a hook in the foaling and death paths and a
+        payload that says <em>what changed</em>. Re-sending the whole roster on every birth in a
+        big stable is the version to avoid; <code>ClientHorseRoster</code> is already a
+        UUID-keyed cache with a version counter, so it is built for a delta rather than a
+        replacement.</li>
+    <li><strong>Transfer and taming belong on the same list</strong>, even though they were not
+        asked for &mdash; they change the roster for exactly the same reason, and adding them
+        later means touching the same code twice.</li>
+</ul>
+
+<h3 id="menu-hud">RideHUD, and stats while you ride</h3>
+
+<p>
+    <strong>Wanted integrated rather than assessed.</strong> The mod has
+    <em>one</em> GUI overlay today &mdash; <code>client/FlightHudLayer</code>, a single line above
+    the hotbar naming the dismount key while flying, and itself unverified at runtime &mdash;
+    plus <code>JumpBarCooldownMixin</code>, which tints a vanilla bar. There is no stats readout
+    anywhere outside a screen you have to open.
+</p>
+<p>
+    That makes this <strong>the first real HUD in the mod</strong>, and the design question is
+    restraint rather than capability: every number already exists on
+    <code>HorseInfoScreen</code>, and the reason to show speed, jump, health and bond while
+    riding is that opening a screen mid-gallop is not a thing anyone does. Keep it to what
+    changes while you ride. The related ask &mdash;
+    <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars
+    Alone</a>, an HUD-declutter mod &mdash; points the same way and is on
+    <a href="#mod-survey">the survey list</a>.
+</p>
+
+<h3 id="menu-restyle">A different look for the menu &mdash; explicitly not committed</h3>
+
+<p>
+    The owner likes <a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology
+    Dictionary</a>'s UI and raised it as <em>&ldquo;maybe as an option or alternative style&rdquo;</em>,
+    with <em>&ldquo;not a requirement, not committed to&rdquo;</em> said outright.
+    <strong>Recorded here so the idea survives, and flagged so nobody builds it as a decision
+    that was made.</strong> Worth knowing what it would cost before anyone is tempted:
+    <code>HorseBrowserScreen</code> is a single 3,430-line <code>Screen</code> with its layout
+    inline, so a second skin means extracting a layout seam first &mdash; which is real work with
+    no user-visible result, and is the kind of thing that only pays if the restyle is actually
+    wanted.
+</p>
+
+<hr>
+
 <h2 id="stables">More generated stables</h2>
 
 <p>
@@ -844,6 +1105,45 @@
 <p class="muted">
     The redistribution licence on the three that ship is a blocker on distribution rather than
     on building, and is tracked as <a href="known-gaps.html#gap-80">gap 80</a>.
+</p>
+
+<h3 id="cowboy-everywhere">The cowboy in every village, and buildings that fit each one</h3>
+
+<p>
+    <strong>Two asks, and the first is nearly free.</strong>
+</p>
+<ul>
+    <li><strong>He spawns in plains villages and nowhere else.</strong>
+        <code>worldgen/BarnPoolInjector</code> appends <code>horsegenetics:cowboy_barn</code> to
+        <code>minecraft:village/plains/terminators</code> at server start, at weight 3, and
+        injects into no other village type. Desert, savanna, taiga and snowy villages have no
+        cowboy at all. Injecting into the other four terminator pools is a handful of lines in a
+        class that already does exactly this once &mdash; but a plains barn dropped into a desert
+        village is the reason it was not done, which is the second ask.</li>
+    <li><strong>&ldquo;He doesn't need a house, just plop his hitch down&rdquo; is already
+        built</strong>, and is the cheap route to every village type today.
+        <code>block/ModBlocks.COWBOY_HITCH</code> ships and is craftable, and
+        <code>server/CowboyHitchHandler</code> converts any unemployed adult villager within six
+        blocks of one into a cowboy, provided none is already within thirty-two. So a hitch in a
+        worldgen pool &mdash; no building, no jigsaw of our own &mdash; would put a cowboy in a
+        village of any style, immediately, with the art problem deferred rather than
+        solved.</li>
+    <li><strong>Buildings that emulate each village style</strong> is the real project, and the
+        owner has named it as such: a barn per village material palette, so the structure reads
+        as part of the town rather than dropped on it. That is <a href="#stables">the generated
+        stables backlog</a> wearing a different hat &mdash; same NBT-and-JSON pipeline, no Java
+        &mdash; and it should share whatever answer that section reaches about which building
+        generates where. Note the measurement rig already exists:
+        <code>worldgen/HomesteadCensus</code> took plains placement from 93.2% to 98.9% across
+        265 villages, so the same census answers &ldquo;did the desert one land&rdquo; without
+        anyone flying around looking.</li>
+</ul>
+
+<p class="muted">
+    The <a href="https://www.curseforge.com/minecraft/mc-mods/stables">Stables</a> mod is on
+    <a href="#mod-survey">the survey list</a> with the question of whether it can improve any of
+    <a href="villagers.html">the villagers this mod adds</a> &mdash; read it before the barn
+    variants are designed.
 </p>
 
 <hr>
@@ -928,6 +1228,34 @@
     by height and a strain cannot override stats.
 </p>
 
+<h3 id="breed-sources">Breeds and powers from elsewhere</h3>
+
+<p>
+    <a href="#breed-coverage">Breed coverage</a> lists the candidates that do not ship; these
+    are the ones that came in with a source attached and a modelling bill.
+</p>
+<ul>
+    <li><strong><a href="https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2447896-the-reindeer-breed-has-arrived-wings-horns-and">The
+        reindeer-breed mod</a> &mdash; all of its breeds, and the owner has said outright this
+        means learning to 3D model.</strong> That is the honest cost: wings and horns are mesh,
+        and <a href="decisions.html#settled-scope">three breed cosmetics are already deliberately
+        not modelled</a> for exactly this reason. It overlaps
+        <a href="#model-parts">attached model parts</a>, which is where the machinery would live,
+        so that section is the prerequisite and this is content for it.</li>
+    <li><strong>Its unicorn powers, read as candidate genes.</strong> The more valuable half and
+        much the cheaper one &mdash; a power that fits
+        <a href="#magical-genes">the magical gene family</a> costs a JSON and a founder weight,
+        and needs no mesh at all. Read the mod for abilities first and models second.</li>
+    <li><strong><a href="https://www.9minecraft.net/tensura-unique-monsters-mod/">Tensura Unique
+        Monsters</a> as a breed idea only.</strong> Named with the caveat that its models almost
+        certainly cannot be used &mdash; so this is a note for the
+        <a href="breed-book.html">breed book</a>, not an integration.</li>
+    <li><strong><a href="https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/">Beyond
+        Vanilla Equestria</a></strong> sits in
+        <a href="#mod-survey">the Bedrock cluster</a> &mdash; ideas and shapes, nothing
+        installable.</li>
+</ul>
+
 <hr>
 
 <h2 id="dimension">The creative spawner: a per-copy epigenetics editor</h2>
@@ -946,12 +1274,291 @@
 
 <h2>Tack, carts and other mods</h2>
 
-<h2 id="mod-patches">Mod patches</h2>
+<h2 id="accessories">The accessories system &mdash; everything a horse wears, made one way</h2>
 
 <p>
-    What is left after the compatibility pass. Two of the three patches that were asked for
-    turned out to need no patch at all; the detail is on
-    <a href="compatibility.html">Mod compatibility</a> and is not repeated here.
+    <strong>This is one system, not eight features.</strong> Tack, barding, horse shoes, saddle
+    pads, chests and the enchantments on any of them were asked for separately over several
+    months and kept being scoped separately; each time, the same four questions came back
+    &mdash; where does the piece live if the horse has only two equipment slots, how is it
+    made, how is it decorated, and how is it drawn. <strong>They get one answer here, and
+    the sections below are that answer's parts rather than independent tickets.</strong>
+    Everything already researched for
+    <a href="#native-tack">native tack</a>, <a href="#horse-shoes">shoes</a> and
+    <a href="#equestrian-bench">the saddle pad</a> is folded in and not restated.
+</p>
+
+<div class="note danger">
+    <span class="label">This reverses a settled call &mdash; confirm before building</span>
+    <p>
+        <a href="decisions.html#settled-scope">&ldquo;Tack gets no stats&rdquo;</a> is settled,
+        and it was settled against
+        <a href="philosophy.html">philosophy</a>&rsquo;s &ldquo;add texture, do not add
+        chores&rdquo;. The intake that produced this section says the opposite in as many words
+        &mdash; <em>&ldquo;add all these pieces as light armor&rdquo;</em> and
+        <em>&ldquo;nothing in this mod should be purely aesthetic except breeding: everything
+        else added should provide utility&rdquo;</em> &mdash; which makes armour value, shoe
+        effects and tack enchantments the point of the system rather than a ladder bolted to a
+        cosmetic one. <strong>That is the owner&rsquo;s to reverse and it reads as reversed</strong>,
+        but the decision entry still says the old thing, so nothing here should be built until
+        the two agree. The rest of the section is written on the assumption that it is reversed.
+    </p>
+</div>
+
+<h3 id="accessories-slots">The slot roster</h3>
+
+<p>
+    The screen grows from two slots to <strong>fourteen</strong>. Asked for explicitly, and
+    listed here because the count is what decides the architecture rather than the art:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Slot</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. <strong>The bridle is the minimum tack required to control a horse</strong> &mdash; which is a real gameplay rule and not a slot, and it has to reckon with <code>BarebackSteeringHandler</code>'s phantom saddle, which writes the saddle slot every tick.</td></tr>
+<tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
+<tr><td><strong>Saddle pad</strong></td><td>Designed already &mdash; <a href="#equestrian-bench">the banner-cut pad</a>.</td></tr>
+<tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
+<tr><td><strong>Shoes</strong> &times; 4</td><td>One per hoof, and a different thing from a boot. <a href="#horse-shoes">Research below.</a></td></tr>
+<tr><td><strong>Martingale / collar</strong>, <strong>fly mask</strong></td><td>The two remaining real pieces of tack.</td></tr>
+<tr><td><strong>Chest</strong> &times; 2</td><td><a href="#horse-chests">Storage</a>, which is its own section because a chest is not worn.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>Fourteen slots cannot be fourteen <code>EquipmentSlot</code>s</strong>, and this is
+    the load-bearing constraint the whole system is shaped by:
+    <code>EquipmentSlot</code> has exactly two animal entries, <code>BODY</code> and
+    <code>SADDLE</code>, and <code>EquipmentClientInfo.LayerType</code> is not extensible. So
+    every piece past the second is a <strong>synced data attachment plus a render layer of our
+    own</strong> &mdash; the pattern this mod already has ten instances of &mdash; and the two
+    real slots are spent on whichever two benefit most from vanilla drawing them for free.
+    <a href="#native-tack">Native tack</a> works the alpha-cutout finding out in detail and it
+    applies to every row above.
+</p>
+
+<p>
+    <strong>The seam for this already exists and was built expecting it.</strong>
+    <code>entity/HorseTackSlot</code> is an enum of exactly two constants &mdash;
+    <code>SADDLE</code> and <code>ARMOUR</code> &mdash; whose own documentation says the shape is
+    there for later and names <em>&ldquo;a bridle, a blanket and shoes&rdquo;</em> as the obvious
+    next ones. The screen that draws them is ours rather than vanilla's
+    (<code>HorseInfoScreen.drawTackSlot</code>, reached by the small <strong>i</strong> button
+    <code>HorseScreenHooks</code> adds beside vanilla's horse inventory), and clicks already
+    round-trip through <code>TackSlotPayload</code>. <strong>So the roster is this enum growing
+    by twelve, and the screen it feeds</strong> &mdash; which is a much smaller statement of the
+    work than fourteen new systems, and is the reason to do it as one change.
+</p>
+
+<p>
+    <strong>Per-leg is four times the geometry problem, not one-quarter of it.</strong> Boots
+    and shoes are the only rows that anchor to <em>four</em> animated bones rather than to the
+    body, so they are the ones to prototype first; if four independently-rendered leg pieces do
+    not work, the rest of the roster does not care, and if they do, everything else is easier.
+    <code>CutieMarkLayer</code> is the worked precedent for geometry riding an animated bone.
+</p>
+
+<h3 id="accessories-geometry">Deriving the models instead of drawing them</h3>
+
+<p>
+    The owner's proposal, and it is the difference between this being affordable and not:
+    <strong>clone the existing horse model and erase every part the piece does not touch</strong>,
+    rather than modelling fourteen pieces by hand. That is exactly what the
+    <a href="#native-tack">alpha-cutout finding</a> already establishes for equipment &mdash; a
+    cube whose texels are transparent does not appear, so one mesh is many pieces purely by
+    which part of the sheet is painted &mdash; and generalising it from &ldquo;three pieces off
+    the saddle mesh&rdquo; to &ldquo;a piece is a named subset of the horse's own parts&rdquo; is
+    the actual feature.
+</p>
+<p>
+    <strong>The open question is inflation, not erasure.</strong> A piece derived from
+    <code>HORSE_BODY</code> has to clear the skin or it z-fights, which the saddle-pad research
+    already found the hard way; a per-piece inflation value is probably the whole of what the
+    derivation needs to take as a parameter. Worth proving on one leg boot before any of the
+    roster is committed to.
+</p>
+
+<h3 id="accessories-bench">The tack bench, and what a bench buys</h3>
+
+<p>
+    <strong>All of it is made at a bench of our own, and the reasoning is as much about
+    recipes as about fiction.</strong> The owner's three arguments, which are all good ones:
+</p>
+
+<ul>
+    <li><strong>It removes the recipe-collision problem entirely.</strong> A bench recipe is in
+        our own menu type and cannot collide with vanilla's crafting table or with another mod's
+        &mdash; which is the standing worry that <code>check-recipes.mjs</code> and
+        <a href="#bhar-recipes">the BHAR check</a> exist to manage.</li>
+    <li><strong>It is one switch.</strong> Disable the bench in config and horse armour cannot
+        be crafted, with no per-recipe gating anywhere.</li>
+    <li><strong>It takes a formula, not a list.</strong> The bench generates its recipes from a
+        shape &times; a material, so <em>all</em> horse armour including modded metals is
+        craftable without a file per combination &mdash; which is the same trick
+        <a href="compatibility.html#generated">the generated-materials layer</a> already plays,
+        and should share its material roster rather than build a second one.</li>
+</ul>
+
+<p>
+    Saddles and bridles are made here too, so the bench is the single place tack comes from.
+    Note it is a <em>third</em> bench: <a href="item-equestrian-bench.html">the dyeing bench</a>
+    ships and <a href="#cart-bench">the cart and jump bench</a> is proposed, and three benches
+    with overlapping jobs wants a deliberate answer about what distinguishes them before the
+    second one is built.
+</p>
+
+<h3 id="accessories-decoration">Dye, pattern, banner, and a preview</h3>
+
+<ul>
+    <li><strong>The dyeing bench grows to cover every new piece</strong>, not just the saddle
+        and leather barding it dyes today.</li>
+    <li><strong>Patterns, not just colours</strong> &mdash; stripes and dots were named. That is
+        a second tint layer and a pattern id per piece, which
+        <code>IClientItemExtensions.getArmorLayerTintColor</code> already makes cheap for two
+        colours on one stack (see <a href="#native-tack">native tack</a>), and expensive past
+        that.</li>
+    <li><strong>Banner patterns as an alternative to the mod's own.</strong> Already designed
+        for the saddle pad as <a href="#equestrian-bench">a chosen rectangle of a banner</a>;
+        generalising it to every piece is the ask, and the feasibility question flagged there is
+        unanswered and gates all of it.</li>
+    <li><strong>A 3D preview in the bench, on any horse you own.</strong> The horse browser
+        already renders live horses, so the renderer exists; what does not is a preview that
+        shows an <em>unmade</em> piece, which means the model derivation above has to run
+        client-side on a configuration that no item carries yet.</li>
+</ul>
+
+<h3 id="accessories-enchanting">Enchanted tack &mdash; and which of these are really genes</h3>
+
+<p>
+    <strong>Every piece in the roster is enchantable.</strong> Horse armour enchantments were
+    asked for from <em>Wonderful Enchantments</em>, to be applied &ldquo;with logic&rdquo; to any
+    tack or shoe &mdash; meaning an enchantment has to declare which slots it is legal on, since
+    a fly mask and a shoe do not want the same list.
+</p>
+<p>
+    <strong>The owner's own caveat is the interesting part: some of these are better as
+    genes.</strong> That is a real fork and it should be decided per effect rather than
+    wholesale, because the two are opposites in this mod &mdash; a gene is inherited, breedable
+    and the point of the project; an enchantment is bought with levels and transfers with an
+    item. The rule that falls out: <em>if you would want to breed for it, it is a gene; if you
+    would want to move it between horses, it is an enchantment.</em> Worth writing as a decision
+    before the first one is built.
+</p>
+<p class="muted">
+    <strong>Nothing in this mod is enchantable today, and one near-miss is worth knowing
+    about.</strong> There is no enchantment registered, no <code>enchantable</code> component on
+    any item, and no <code>enchantable/</code> item tag shipped. <code>compat/ModdedArmour</code>
+    does build each generated armour as a real <code>ArmorMaterial</code> carrying iron's
+    <code>enchantmentValue()</code> &mdash; but with no <code>enchantable</code> component
+    <strong>that value is inert</strong>, so a generated barding is not enchantable either. The
+    mod's only enchantment code runs the other way: <code>GeneDeathHandler.enchantedSword()</code>
+    rolls one onto a dropped sword. So the first enchantable piece pays for the whole path.
+</p>
+
+<h3 id="accessories-materials">The armour materials still missing</h3>
+
+<p>
+    Named from two mods and grouped because they are the same work:
+    <strong>netherite</strong> (from
+    <a href="https://modrinth.com/mod/simple-netherite-horse-armor">Simple Netherite Horse
+    Armor</a>) and the <strong>bone, ender, emerald, obsidian and blaze</strong> set (from
+    <a href="https://www.planetminecraft.com/mod/1-16-4-special-armor-amp-tool-sets-bone-ender-emerald-obsidian-blaze-fabric/">Special
+    Armor &amp; Tool Sets</a>).
+</p>
+<p>
+    <strong>Netherite is not an oversight, and that is what makes it a decision rather than a
+    task.</strong> <a href="compatibility.html#generated">The generated-materials layer</a>
+    derives an armour per <em>modded</em> metal or gem from <code>c:ingots/*</code> and
+    <code>c:gems/*</code>, and <code>MaterialScan.collectTagged</code> deliberately skips every
+    tag entry in the <code>minecraft:</code> namespace &mdash; because vanilla's own armours are
+    left to <a href="compatibility.html#bhar">BHAR</a> on purpose. A
+    <code>netherite_horse_armor</code> therefore means crossing that line knowingly. It is a
+    defensible crossing, since vanilla ships no netherite horse armour for BHAR to have a recipe
+    for, but it should be recorded as a call rather than slipped in as a material.
+</p>
+<p>
+    <strong>The other five are outside the scan by shape, not by policy.</strong> Emerald is
+    the near-miss &mdash; it is a gem, so the machinery fits it exactly, and it is excluded only
+    because <code>minecraft:emerald</code> is vanilla; bone, ender, obsidian and blaze are not
+    ingots or gems at all and no <code>c:</code> tag will ever surface them. So this row is
+    really one question asked twice: <em>should the scan be widened to name vanilla materials
+    deliberately</em>, and if so, five or six armours fall out of one change rather than five
+    hand-written ones. Answer that before writing any of them.
+</p>
+
+<h3 id="accessories-stand">The armour stand, and the tack pack</h3>
+
+<p>
+    From <em>Horse Armor Stand</em>, and expanded well past it. A stand that
+    <strong>wears anything a horse can wear</strong> &mdash; which makes it the display case for
+    the roster above and, not incidentally, the test rig for it.
+</p>
+<ul>
+    <li><strong>Right-click opens a screen</strong> with scale, wood and paint (through
+        <a href="#cart-bench">the same wood-and-paint system</a> the carts and jumps use), and a
+        <strong>pose</strong> chosen as a frozen frame of any animation a horse actually has
+        &mdash; which is the one genuinely novel piece, since it means sampling the animation
+        state machine at an arbitrary point rather than playing it.</li>
+    <li><strong>The tack pack</strong> is the part with gameplay in it: right-click the stand to
+        load every piece on it into one bag, right-click a naked horse to dress it, right-click a
+        dressed horse to strip it back into the bag. <em>This is the answer to fourteen slots
+        being tedious</em>, and it is worth building early for that reason rather than late as a
+        convenience &mdash; a fourteen-slot screen without it is a chore, and
+        <a href="philosophy.html">philosophy</a> says not to add those.</li>
+</ul>
+
+<h3 id="accessories-curios">Curios, if it is there &mdash; and never a dependency</h3>
+
+<p>
+    <strong>Wanted, and explicitly not a hard dependency.</strong> The shape that satisfies both:
+    the attachment is the authority and the slots are ours, and a Curios integration is a
+    <em>view</em> onto them registered only when the mod is present &mdash; the same fail-soft
+    pattern <code>neoforge/compat/</code> already uses to read other mods' jars without
+    depending on them.
+</p>
+<p>
+    <strong>Two things to check before promising it.</strong> Curios is built around slots on a
+    <em>player</em>; whether its API models slots on an arbitrary entity on 26.1.2, and whether a
+    Curios-owned slot can be the authority for something a render layer of ours draws, are both
+    unverified here. If the answer is that Curios cannot hold horse slots, the integration
+    inverts &mdash; a rider's Curios slot holding tack for the horse they are on &mdash; which is
+    a different and smaller feature, and should be recognised as a substitute rather than shipped
+    as if it were the thing asked for.
+</p>
+
+<h3 id="horse-shoes">Horse shoes &mdash; craftable, enchantable, equippable</h3>
+
+<p>
+    Shoes as real equipment: crafted from a metal, enchantable like armour, worn on the hooves.
+</p>
+<p>
+    <strong>There is no third slot to put them in.</strong> The horse family has two equipment
+    slots, the saddle and the body, and both are spoken for &mdash; this mod already writes to
+    them (<code>BarebackSteeringHandler</code>'s phantom saddle) and already replaces their
+    assets (<code>assets/minecraft/equipment/saddle.json</code>). So shoes are a data attachment
+    plus a render layer of our own, not an <code>EquipmentSlot</code>, and the enchantable half
+    means a genuine <code>Item</code> carrying enchantments rather than a flag on the horse.
+</p>
+<p>
+    <strong>What they could do</strong> is the part worth deciding first, because it decides
+    whether they are tack or a gimmick: grip on ice, speed or quiet on particular blocks,
+    fall-damage reduction, protection from hot ground &mdash; and, if wear is wanted, a
+    durability that is the first thing in the mod to consume itself. Note the overlap with
+    <a href="#native-tack">native tack</a> and with
+    <a href="#equestrian-bench">the saddle pad</a>: three separate pieces of tack work that
+    should share one answer about how tack is made, decorated and rendered, rather than three.
+</p>
+
+<p class="muted">
+    <strong>That last paragraph is what this whole section is the answer to.</strong> It closed by
+    naming the overlap with native tack and the saddle pad and asking for
+    &ldquo;one answer about how tack is made, decorated and rendered, rather than three&rdquo;.
+    The answer is <a href="#accessories-bench">the bench</a>,
+    <a href="#accessories-decoration">the decoration screen</a> and
+    <a href="#accessories-geometry">derived geometry</a> &mdash; so what is left specific to
+    shoes is only <em>what they do</em>, and four of them per horse.
 </p>
 
 <h3 id="native-tack">Native tack &mdash; cheap in code, expensive in art</h3>
@@ -1026,6 +1633,201 @@
         complementary&rdquo;. Shipping native tack means rewriting that claim in the same
         change.</li>
 </ul>
+
+<hr>
+
+<h2 id="storage">Carrying things, and carrying horses</h2>
+
+<p>
+    Two asks that sound unrelated and share one question &mdash; <em>what is a horse's inventory
+    and who owns it</em> &mdash; so they are decided together even though they ship apart.
+</p>
+
+<h3 id="horse-chests">Horse chests, ender chests, and the look of a loaded horse</h3>
+
+<p>
+    Give a horse saddlebags &mdash; storage that travels with the animal &mdash; in
+    <strong>two slots</strong>, per <a href="#accessories-slots">the roster</a>.
+</p>
+<p>
+    <strong>A horse is deliberately not a chested horse in vanilla.</strong> The chest flag, the
+    extra slots and the screen that shows them all live on
+    <code>AbstractChestedHorse</code> (donkey, mule, llama), and <code>Horse</code> does not
+    extend it &mdash; so there is nothing to switch on, and this is a container of our own or it
+    is nothing.
+</p>
+<p>
+    <strong>That part is well-trodden ground here.</strong> The mod already registers menus
+    (<code>menu/ModMenus</code>, with <code>EquestrianBenchMenu</code> and
+    <code>ResearchShelfMenu</code> as working examples) and already stores per-horse state in a
+    data attachment, which is where a container would live. <strong>It also already runs six
+    containers on the things a horse <em>pulls</em></strong> &mdash;
+    <code>WagonMenu</code> alone is three chests over twelve rows, all backed by
+    <code>carts/util/CartInventory</code> &mdash; so the inventory code is written and only its
+    owner changes. <code>entity/HorseTackSlot</code> draws the line explicitly today:
+    <em>&ldquo;the chest a donkey carries is not one of these and is not here.&rdquo;</em>
+</p>
+
+<ul>
+    <li><strong>An ender chest on a horse</strong> was asked for by name. It is the interesting
+        one because it has no contents of its own &mdash; it is a view onto the player's ender
+        inventory, so it sidesteps every question about what happens to the contents on death or
+        on <a href="item-transfer-papers.html">a transfer of ownership</a>, and raises one of its
+        own: <em>whose</em> ender inventory, the owner's or the rider's.</li>
+    <li><strong>Chests from other mods must work.</strong> Not a hardcoded list of chest items
+        &mdash; the same rule the rest of the compat layer follows. A chest is whatever carries
+        the right tag, and its capacity and its look come from what it is.</li>
+    <li><strong>The look of a chested horse is its own complaint, and a fair one.</strong>
+        Vanilla's chested donkey is two boxes clipped to its flanks. Since this mod already
+        re-renders the horse and <a href="#accessories-geometry">is proposing to derive
+        equipment geometry from the horse's own parts</a>, panniers that actually sit on the
+        animal are the same feature as everything else in
+        <a href="#accessories">the accessories system</a> and should be built with it, not
+        before it.</li>
+    <li><strong>Capacity should read the horse's <code>size</code></strong>, which is already an
+        attribute the body genes write &mdash; a draught carrying more than a Falabella is the
+        kind of thing this mod is for, and it makes storage a reason to breed rather than an
+        item you buy once.</li>
+    <li><strong>Still undecided:</strong> whether the chest is a vanilla chest right-clicked
+        onto the horse or an item of our own; whether it survives a transfer of ownership and
+        what happens to the contents if it does not; and whether it appears beside the saddle in
+        the horse screen or in a screen of its own.</li>
+</ul>
+
+<h3 id="virtual-stables">A horse in your pocket &mdash; virtual stables</h3>
+
+<p>
+    From the <em>Stables</em> Bukkit plugin's virtual-stable idea, reshaped for this mod:
+    <strong>an object that holds a horse you own</strong>, so that moving twenty horses is not
+    twenty trips and bringing one along is not a lead across three biomes.
+</p>
+<ul>
+    <li><strong>Four things in the mod look like this and none of them is it</strong>, which is
+        worth stating precisely so nobody builds a fifth by accident. The
+        <a href="carrots.html">seed jar</a> holds a genome <em>sample</em>;
+        <a href="item-spawn-eggs.html">the preset spawn egg</a> holds a genotype, epigenome, sex
+        and age &mdash; a <em>recipe</em> for a horse, with no identity, equipment, name, bond or
+        pedigree edge; <a href="item-tickets.html">tickets</a> and
+        <a href="item-stall-signs.html">pen signs</a> move the live animal to a stall, so it
+        never stops existing; and <a href="item-transfer-papers.html">transfer papers</a> move
+        ownership only. <strong>What none of them does is hold the animal itself</strong>, and
+        that is the entire feature.</li>
+    <li><strong>&ldquo;Pocket dimension&rdquo; is probably the wrong implementation of the right
+        idea.</strong> The horse dimension exists and is a real place, so stabling a horse
+        <em>there</em> and fetching it back is a mechanic with a location in it rather than a
+        serialised entity in an item stack. Worth deciding which before anything is built,
+        because they are different features wearing the same name: one is storage, the other is
+        a place you visit.</li>
+    <li><strong>The trap is the one <a href="known-gaps.html#gap-73">gap 73</a> is
+        about.</strong> Destroying a horse entity and rebuilding it later from saved data is
+        exactly what the lycanthropy shift does, and the thing that can go silently wrong is
+        attachment round-tripping &mdash; a horse that comes back with a fresh record and no
+        pedigree looks fine and is not. Whatever this is built on should reuse that path and fix
+        it once, not open a second one.</li>
+    <li><strong>It needs a limit and a cost, or it eats the mod.</strong> An item that holds any
+        horse instantly makes stalls, pens, tickets, whistles and
+        <a href="#callable-horses">callable horses</a> redundant. That is an argument for
+        tying it to the barn or to an equestrian rather than to a craftable item &mdash; an
+        open design question, and the most important one here.</li>
+</ul>
+
+<hr>
+
+<h2 id="cart-bench">The cart and jump bench &mdash; built to order, not crafted from a grid</h2>
+
+<p>
+    <strong>An overhaul of how carts are made, and jumps with it.</strong> Both are built from
+    wood today and both take the wood as a whole; the ask is to make the
+    <em>piece</em> the unit. One bench, two products, because the mechanic is identical and
+    shipping it twice would be two screens that drift.
+</p>
+
+<h3 id="cart-bench-carts">Carts</h3>
+
+<ul>
+    <li><strong>A wood per piece, not a wood per cart &mdash; and this is a real rewrite, not a
+        screen.</strong> Wheels of one wood, bed of another, shafts of a third. The obstacle is
+        that a cart's wood is <em>in its registry id</em> today: <code>oak_wagon</code>,
+        <code>biomesoplenty_maple_plow</code>, one item per (wood &times; kind), and
+        <code>CartWood</code>'s own documentation says that id is permanent once a world uses it.
+        Per-piece materials cannot be an id, so they have to become <strong>components on the
+        stack and data on the entity</strong> &mdash; which is exactly the shape
+        <a href="item-jumps.html">jumps</a> already moved to, going from twelve blocks and
+        thirty-six items down to one item carrying <code>JumpMaterials</code>. <strong>Jumps are
+        the worked precedent for this whole section</strong>, and the cart change is that
+        migration done a second time.</li>
+    <li><strong>Dye or paint the wood</strong>, on top of the choice of wood &mdash; the two are
+        different axes and both were asked for. Nothing in the <code>carts/</code> package tints
+        anything today; a cart's texture is assembled from its wood's three block sprites and
+        that is all.</li>
+    <li><strong>It deletes a duplication rather than deepening one.</strong> Seventy-two shipped
+        recipe JSONs (twelve woods &times; six carts, baked by <code>tools/bake-carts.mjs</code>)
+        are mirrored at run time by <code>compat/GeneratedCarts</code> for modded woods, and the
+        two <em>must agree</em> &mdash; a drift is a modded cart that will not craft and logs
+        nothing. <strong>A bench that composes a cart from materials has no per-wood recipe to
+        bake and no second implementation to keep in step</strong>, which retires that whole
+        hazard. That is the strongest argument for the bench and it is not the one that was made
+        for it; worth weighing before the screen is designed.</li>
+</ul>
+
+<h3 id="cart-bench-jumps">Jumps</h3>
+
+<p class="muted">
+    <strong>Start from what jumps already are</strong>, because it is more than the ask assumes.
+    A jump is one item carrying <code>JumpMaterials</code> &mdash; rails wood, standards wood,
+    <em>rails dye, standards dye</em> and a size &mdash; edited in
+    <code>JumpScreen</code>/<code>JumpMenu</code>, with three cosmetic styles and a ten-step
+    height ladder. <strong>So dye is built, per half, including modded dyes vanilla has no name
+    for.</strong> What is missing from this list is patterns, opacity, flags and depth.
+</p>
+
+<ul>
+    <li><strong>Patterns and an opacity.</strong> Patterns rather than flat colour, and
+        a translucency slider &mdash; which is the only one of these with a rendering cost, since
+        a translucent block leaves the solid render type and has to be sorted. Note the existing
+        dye is <em>consumed irreversibly</em> (a plank swap is reversible, a dye is not); a
+        pattern and an opacity should decide deliberately whether they inherit that, because a
+        slider you cannot slide back is a trap the current design gets away with only because
+        colour is a one-time choice.</li>
+    <li><strong>Little flags on the standards.</strong> Geometry in the existing baker, and the
+        cheapest thing in this section.</li>
+    <li><strong>Two-deep jumps</strong>, which <strong>contradicts a standing rule</strong>:
+        <a href="#items">the obstacle vocabulary</a> records the owner's own bound that
+        <em>no style is more than one block deep</em>, because a two-block jump stops being a
+        thing you put in a row and becomes a structure. The intake asks for
+        &ldquo;potentially two deep&rdquo;, which reads as reopening it rather than overriding
+        it &mdash; settle that on <a href="decisions.html">design decisions</a> before building,
+        not in the baker.</li>
+    <li><strong>Jump styles that look like real cross-country fences</strong>, from
+        <a href="https://www.planetminecraft.com/mod/simply-cross-country-1-16-5/">Simply Cross
+        Country</a>. That is the same geometry backlog
+        <a href="#items">already recorded</a> &mdash; logs, brush, ditches, fillers, walls, water
+        &mdash; with a reference to work from, which is what it was missing. Note the three
+        styles that exist (<code>VERTICAL</code>, <code>OXER</code>, <code>CROSSRAILS</code>)
+        collide <em>identically</em> on purpose, so adding a look costs nothing in balance; a
+        cross-country style that jumped differently would be taking that back.</li>
+</ul>
+
+<p class="muted">
+    <strong>Three benches now, and that is the thing to decide first.</strong>
+    <a href="item-equestrian-bench.html">The dyeing bench</a> ships,
+    <a href="#accessories-bench">a tack bench</a> is proposed, and this is a third. They share a
+    wood-and-paint picker and differ only in what comes out. Either one bench grows tabs or
+    three benches share a widget; picking by accident means three implementations of the
+    colour picker.
+</p>
+
+<hr>
+
+<h2 id="mod-patches">Mod patches</h2>
+
+<p>
+    What is left after the compatibility pass. Most of the patches that were asked for turned
+    out to need no patch at all; the detail is on
+    <a href="compatibility.html">Mod compatibility</a> and is not repeated here. The third one
+    &mdash; <a href="#native-tack">native tack</a> &mdash; grew into
+    <a href="#accessories">the accessories system</a> and has moved there.
+</p>
 
 <h3 id="rhg-detection">Detect Realistic Horse Genetics and say so</h3>
 
@@ -1151,6 +1953,91 @@
         tick and its <code>reclaim</code> sweep destroys anything carrying that component in a
         rider's inventory.</li>
 </ul>
+
+<hr>
+
+<h2 id="mod-survey">The survey backlog &mdash; mods to read before building</h2>
+
+<p>
+    <strong>None of these is a planned feature yet.</strong> Each is a mod the owner has named
+    with a question attached, and the work is to read it and answer the question &mdash; after
+    which the row either becomes a section on this page, a row on
+    <a href="compatibility.html">mod compatibility</a>, or a deletion. They are listed together
+    because the failure mode is doing one twice: the answers are scattered across three pages
+    today and nothing records which have been asked.
+</p>
+
+<div class="note">
+    <span class="label">Attribution is part of the work, not a courtesy afterwards</span>
+    <p>
+        <strong>Any mod that gives this one an idea gets named on the coding tab of the page for
+        whatever it inspired</strong> &mdash; not only the mods whose code or art is used, which
+        is a licence matter and settled separately. Inspiration counts. (Owner, in the intake
+        note that produced this section.) Recorded as a call on
+        <a href="decisions.html#settled-attribution">design decisions</a>.
+    </p>
+</div>
+
+<p class="muted">
+    Five have already been read and are <em>not</em> repeated here &mdash;
+    <a href="compatibility.html#swem">SWEM</a>,
+    <a href="compatibility.html#icys">Icy&rsquo;s Better Horses</a>,
+    <a href="compatibility.html#horseman">Horseman</a>,
+    <a href="compatibility.html#horse-tack">Horse Tack</a> and
+    <a href="compatibility.html#resource-packs">Fresh Animations</a>. Two more,
+    <a href="compatibility.html#realistic-horse-genetics">Realistic Horse Genetics</a> and
+    <a href="compatibility.html#bhar">BHAR</a>, were read for <em>conflict</em> and not for
+    harvest, which is a different question and is why they appear below anyway.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mod</th><th>The question asked of it</th><th>Where the answer goes</th></tr></thead>
+<tbody>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a></td><td><strong>Walk through every part of it</strong> and mark each add / adapt / skip. The only one asked for exhaustively rather than for highlights, so it is the biggest single row and probably the most valuable.</td><td>Here, as sections</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/animania">Animania</a></td><td>Troughs and salt licks are already lifted out as <a href="#troughs">their own section</a>. What is left: anything else that applies to horses, and <em>whether it adds a cart we could add to the roster</em>. Keep to carrot-not-stick &mdash; Animania's husbandry is the sort that punishes.</td><td>Here / <a href="carts.html">carts</a></td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/realistic-horse-genetics">Realistic Horse Genetics</a></td><td><strong>Read for harvest, not for conflict.</strong> <a href="compatibility.html#realistic-horse-genetics">It has been read once</a>, to establish that it is a competitor and to borrow its namespace-scoped texture override. The unasked question is what it offers <em>besides</em> bespoke-versus-procedural coats.</td><td><a href="compatibility.html">Compatibility</a>, then here</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/genetic-animals">Genetic Animals</a></td><td>The other genetics mod. Same question, and the same caution: what it does that is not coats.</td><td>Here</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/bukkit-plugins/zhorse">zHorse</a></td><td><strong>Inverted question, and a good one:</strong> which of its features do we <em>not</em> already integrate in some form? A management plugin, so expect ownership, naming, teleport, protection and stabling &mdash; four of which exist here.</td><td>Here</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/bukkit-plugins/stables">Stables</a> (plugin)</td><td>The virtual-stable concept is lifted out to <a href="#virtual-stables">its own section</a>. What else is in there.</td><td>Here</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/stables">Stables</a> (mod)</td><td>Could it improve <a href="villagers.html">the villagers this mod adds</a> &mdash; the cowboy, the horseman, the equestrians?</td><td><a href="villagers.html">Villagers</a></td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/sullys-mod">Sully&rsquo;s Mod</a> and <a href="https://www.planetminecraft.com/mod/minecraft-upgraded-mod/">Minecraft Upgraded</a></td><td>Any horse features worth integrating. Both are broad mods where horses are a corner, so expect one or two ideas each rather than a system.</td><td>Here</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/horse-upgrades">Horse Upgrades</a>, <a href="https://www.9minecraft.net/horse-buff-9minecraft-mod/">Horse Buff</a>, <a href="https://modrinth.com/mod/horsebuff">HorseBuff</a>, <a href="https://www.9minecraft.net/horse-tweaks-mod/">Horse Tweaks</a>, <a href="https://modrinth.com/mod/superb-steeds">Superb Steeds</a>, <a href="https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone">Leave My Bars Alone</a></td><td><strong>The quality-of-life cluster &mdash; read as one batch, not six.</strong> They overlap heavily and the useful output is a single deduplicated list of tweaks measured against what this mod already does, rather than six separate verdicts. <em>Leave My Bars Alone</em> is the odd one out and the most concrete: an HUD-clutter fix worth adapting on its own terms.</td><td>Here, as one list</td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/horse-statistics-mod/">Horse Statistics</a> and <a href="https://www.9minecraft.net/ridehud-mod/">RideHUD</a></td><td>RideHUD is wanted <strong>integrated</strong> rather than assessed &mdash; see <a href="#horse-menu">the horse menu</a>. Horse Statistics gets the narrower question: anything it shows that we do not.</td><td><a href="#horse-menu">The horse menu</a></td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/biology-dictionary-mod/">Biology Dictionary</a></td><td><strong>Its UI, not its content.</strong> Explicitly <em>not committed to</em>: possibly an alternative style for the horse menu rather than a replacement. Recorded so the idea is not lost, and flagged so nobody builds it as a decision that was made.</td><td><a href="#horse-menu">The horse menu</a></td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/better-animations-collection">Better Animations Collection</a></td><td>Two questions. <strong>Does it work with this mod out of the box?</strong> &mdash; if so it becomes a recommended mod. And can we fire its mouth-opening animation when a horse eats, which would be the first animation this mod drives in someone else&rsquo;s renderer.</td><td><a href="compatibility.html">Compatibility</a></td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/punchy-fpa-mod/">Punchy (FPA)</a>, <a href="https://www.9minecraft.net/horse-armor-n-stuff-x-fresh-animations-resource-pack/">Horse Armor n Stuff &times; Fresh Animations</a>, <a href="https://www.9minecraft.net/immersive-horse-riding-mod/">Immersive Horse Riding</a></td><td><strong>The animation cluster.</strong> Whether each runs alongside us, and which riding or horse animations can be adapted. Note <a href="compatibility.html#resource-packs">the Fresh Animations seam</a> is already analysed and neither half is built, so this lands on existing work rather than new.</td><td><a href="compatibility.html">Compatibility</a></td></tr>
+
+<tr><td><a href="https://www.9minecraft.net/equestrian-canvas-expanded-mod/">Equestrian Canvas Expanded</a></td><td>Tack and decoration to fold into <a href="#accessories">the accessories system</a> &mdash; read it before the decoration screen is designed, not after.</td><td><a href="#accessories">Accessories</a></td></tr>
+
+<tr><td><a href="https://www.minecraft.net/en-us/marketplace/pdp/everbloom-games/horse-school/549b09b7-3915-42c2-99ba-0787e2dd727b">Horse School</a></td><td>What can be adapted, <strong>read specifically against the new tack system</strong>. A Bedrock marketplace title, so this is ideas only &mdash; there is no source and nothing may be copied.</td><td><a href="#accessories">Accessories</a></td></tr>
+
+<tr><td><a href="https://www.planetminecraft.com/mod/farm-creatures-addon-1-0-2-bedrock-1-21/">Farm Creatures</a>, <a href="https://www.9minecraft.net/hoof-addon-mcpe/">Hoof Addon</a>, <a href="https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/">Beyond Vanilla Equestria</a>, <a href="https://www.planetminecraft.com/mod/undead-horses-plus-addon-1-20/">Undead Horses Plus</a></td><td><strong>The Bedrock addon cluster &mdash; ideas and shapes only.</strong> None is installable beside this mod and none has source to read, so the output is design notes. <em>Undead Horses Plus</em> has a specific destination: <a href="#undead-horses">the undead overhaul</a>, before it is built.</td><td>Here / <a href="#undead-horses">Undead</a></td></tr>
+
+<tr><td><a href="https://modrinth.com/mod/trotting-wagons">Trotting Wagons</a></td><td>More carts for the roster. <code>CartKind</code> takes a new entry cheaply; the art does not.</td><td><a href="carts.html">Carts</a></td></tr>
+
+<tr><td><a href="https://modrinth.com/mod/horseinboat">HorseInBoat</a></td><td><strong>Not a survey &mdash; a feature.</strong> &ldquo;Add horses to boats.&rdquo; Vanilla refuses to let a horse board a boat; this is a small, self-contained, obviously useful change and it is the cheapest row on this page. Watch one thing: <a href="known-gaps.html#gap-73">gap 73</a> records that a horse in a boat is already an untested case for the lycanthropy shift.</td><td>Here, once scoped</td></tr>
+
+<tr><td>An RPG skills mod <span class="muted">(unnamed &mdash; pick one)</span></td><td>A <strong>horsemanship skill</strong>: taming by mounting gets faster, or wild horses approach you for food. Speculative and named as such. The interesting half is that it is the first thing in the mod where the <em>player</em> progresses rather than the horse, which cuts against <a href="philosophy.html">breeding being the progression</a> &mdash; a design question before an integration one.</td><td><a href="decisions.html">Decisions</a>, first</td></tr>
+
+<tr><td><a href="https://www.curseforge.com/minecraft/mc-mods/icy-better-horses">Icy&rsquo;s Better Horses</a></td><td><a href="compatibility.html#icys">Read once</a> and found to overlap heavily &mdash; bond, breeds, gendered breeding, stat inheritance, spawning. Asked again, for <em>adaptation</em> rather than compatibility: what does it do better.</td><td>Here</td></tr>
+
+</tbody>
+</table>
+</div>
 
 <hr>
 
@@ -1287,84 +2174,6 @@
     purpose so nothing goes stale when a texture changes. Putting item art on the wiki therefore
     means deciding to export it for the first time, and owning the staleness that the in-game
     page was built to avoid.
-</p>
-
-<h3 id="horse-chests">Horse chests</h3>
-
-<p>
-    Give a horse saddlebags &mdash; storage that travels with the animal.
-</p>
-<p>
-    <strong>A horse is deliberately not a chested horse in vanilla.</strong> The chest flag, the
-    extra slots and the screen that shows them all live on
-    <code>AbstractChestedHorse</code> (donkey, mule, llama), and <code>Horse</code> does not
-    extend it &mdash; so there is nothing to switch on, and this is a container of our own or it
-    is nothing.
-</p>
-<p>
-    <strong>That part is well-trodden ground here.</strong> The mod already registers menus
-    (<code>menu/ModMenus</code>, with <code>EquestrianBenchMenu</code> and
-    <code>ResearchShelfMenu</code> as working examples) and already stores per-horse state in a
-    data attachment, which is where a container would live. <strong>The decisions are the design
-    ones</strong>: whether the chest is a vanilla chest right-clicked onto the horse or an item
-    of our own; whether it survives a <a href="item-transfer-papers.html">transfer of
-    ownership</a> and what happens to the contents if it does not; whether it appears beside the
-    saddle in the horse screen or in a screen of its own; and whether capacity should read the
-    horse's <strong>size</strong>, which is already an attribute the body genes write &mdash; a
-    draught carrying more than a Falabella is the kind of thing this mod is for.
-</p>
-
-<h3 id="horse-shoes">Horse shoes &mdash; craftable, enchantable, equippable</h3>
-
-<p>
-    Shoes as real equipment: crafted from a metal, enchantable like armour, worn on the hooves.
-</p>
-<p>
-    <strong>There is no third slot to put them in.</strong> The horse family has two equipment
-    slots, the saddle and the body, and both are spoken for &mdash; this mod already writes to
-    them (<code>BarebackSteeringHandler</code>'s phantom saddle) and already replaces their
-    assets (<code>assets/minecraft/equipment/saddle.json</code>). So shoes are a data attachment
-    plus a render layer of our own, not an <code>EquipmentSlot</code>, and the enchantable half
-    means a genuine <code>Item</code> carrying enchantments rather than a flag on the horse.
-</p>
-<p>
-    <strong>What they could do</strong> is the part worth deciding first, because it decides
-    whether they are tack or a gimmick: grip on ice, speed or quiet on particular blocks,
-    fall-damage reduction, protection from hot ground &mdash; and, if wear is wanted, a
-    durability that is the first thing in the mod to consume itself. Note the overlap with
-    <a href="#native-tack">native tack</a> and with
-    <a href="#equestrian-bench">the saddle pad</a>: three separate pieces of tack work that
-    should share one answer about how tack is made, decorated and rendered, rather than three.
-</p>
-
-<h3 id="undead-horses">Zombie and skeleton horses</h3>
-
-<p>
-    Bring the two undead horses into the mod instead of leaving them as vanilla mobs standing
-    beside it.
-</p>
-<p>
-    <strong>They are already half in, which is easy to miss.</strong>
-    <code>entity/ModAttributes</code> registers this mod's attributes for
-    <code>SKELETON_HORSE</code> and <code>ZOMBIE_HORSE</code> alongside the horse and the donkey,
-    and the dyeable saddle covers them by name &mdash; <code>skeleton_horse_saddle</code> and
-    <code>zombie_horse_saddle</code> both have entries in the replaced equipment asset. So tack
-    and attributes reach them today.
-</p>
-<p>
-    <strong>What does not reach them is all of the genetics</strong>, and on purpose: the genome
-    attachment, the coat pipeline, the renderer, breeding and the horse records are scoped to
-    <code>Horse</code>, which <code>HorseRegenMixin</code> says outright. That makes this a
-    decision rather than a task, and the decision is how much of the mod an undead horse gets.
-    <strong>The specific questions</strong>: do they carry a genotype at all, given neither
-    breeds in vanilla and a gene pool needs a way to mix; does the
-    <a href="pipeline.html">coat pipeline</a> paint a skeleton, whose texture is not a coat and
-    whose whole look is the absence of one; or do they take only the parts that make sense
-    without a coat &mdash; the body stats, <a href="horse-care.html">bond and care</a>, names and
-    pedigree &mdash; and stay visually vanilla. A fourth option worth naming because it is
-    cheaper than it sounds: leave them alone and let
-    <a href="breed-book.html#dhampir">the magical breeds</a> be this mod's undead horses, since
-    they already are.
 </p>
 
 <h3 id="storm-fed">Storm fed &mdash; a gene that stores power and spends none</h3>
@@ -1514,6 +2323,48 @@
     differ the moment somebody hitches it up. Decide that before any of it is built, because it
     decides whether the feature is a mobile base or a novelty bed.
 </p>
+
+<hr>
+
+<h2 id="config-everything">Config: tune or disable basically everything</h2>
+
+<p>
+    <strong>Asked for as a sweep, and the current surface is smaller than it looks.</strong>
+    Roughly fifteen hand-written options across
+    <code>ServerConfig</code> (health mode, body size, three riding numbers, gestation days, two
+    debug switches) and <code>ClientConfig</code> (scroll bar, sex symbol, tutorial, right-click
+    to open, two coat-rendering numbers), plus two generated blocks that are genuinely thorough
+    &mdash; <code>BreedSpawningConfig</code> writes four options per shipped breed, and
+    <code>CartsConfig</code> a block per <code>CartKind</code>.
+</p>
+<p>
+    <strong>What is not configurable, and each of these is a deliberate gap to reopen rather
+    than an oversight:</strong> the genetics themselves &mdash; every gene is always registered,
+    always occupies its genotype slot and is always inherited, whatever <code>health.mode</code>
+    says &mdash; coat generation, every bond and care number, hunger rates, cowboy and stable and
+    barn spawn rates, herd sizes, whistle radii, ticket behaviour, prices, jump sizes and styles,
+    the armour protection ladder, and everything about the horse menu.
+</p>
+<ul>
+    <li><strong>The genetics are the interesting refusal.</strong> A per-gene disable switch is
+        the most-requested shape of this ask and the most dangerous one here, because a genotype
+        code is positional &mdash; a gene that stops occupying its slot is a save format change
+        and every existing horse reads wrong. If per-gene config is wanted it has to mean
+        <em>expression</em> or <em>founder frequency</em>, never registration. The author-time
+        version of this problem is already settled &mdash; an absence from
+        <code>genes/index.json</code> is a killswitch, which is why that file is never
+        regenerated from the folder (<a href="known-gaps.html#gap-162">gap 162</a>) &mdash; and
+        that is the precedent to read before designing a runtime one.</li>
+    <li><strong>Do it as one pass with a convention, not option by option.</strong> Fifteen
+        scattered scalars is what a config grows into when each is added where it was needed; a
+        sweep is the chance to fix the shape &mdash; one file per concern, generated blocks where
+        the roster is data, and a rule about what may be a server option versus a client
+        one.</li>
+    <li><strong>Every new system on this page should ship its own switch.</strong> Cheapest when
+        written with the feature and near-impossible to retrofit consistently &mdash;
+        <a href="#accessories-bench">the tack bench</a> is the model, where one switch disabling
+        the bench disables all horse-armour crafting with no per-recipe gating anywhere.</li>
+</ul>
 
 <hr>
 
