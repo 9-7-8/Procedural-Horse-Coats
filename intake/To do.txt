@@ -1,6 +1,6 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
 
-The goal of this mod is to improve horses in Minecraft as much as possible, while keeping vanilla mechanics intact and unchanged, and only using a carrot not stick incentive system for all systems added by the mod. The mod should only add one new major system, and that's the genetic and breeding system. All other systems added should either be in service of that system, or minor enough that they're only two or three levels of depth. Everything in this mod must directly relate to horses. This mod is the procedural horses mod, and thus the core philosophy is emergent gameplay through player-driven procedural generation. 
+The goal of this mod is to improve horses in Minecraft as much as possible, while keeping vanilla mechanics intact and unchanged, and only using a carrot not stick incentive system for all systems added by the mod. The mod should only add one new major system, and that's the genetic and breeding system. All other systems added should either be in service of that system, or minor enough that they're only two or three levels of depth. Everything in this mod must directly relate to horses. This mod is the procedural horses mod, and thus the core philosophy is emergent gameplay through player-driven procedural generation. I'm aiming to include every quality of life, breeding, and armor change that any horse mod in the last 15 years has had, to create one large unified experience. But still, while swem focuses on horses as pets and riding companions, this mod focuses on horses as genetic projects and mounts with utility. That is the philosophical gap between this mod and swem. Thus nothing in this mod should be purely aesthetic except breeding: everything else added should provide utility. 
 
 Adding ender chests to horses. Improving the look go chested hordes in general, and adding support for more kinds of chests on horses from other mods
 
@@ -142,4 +142,17 @@ https://modrinth.com/mod/horseman
 See if this adds anything.
 
 https://modrinth.com/mod/horse-armor-stand
-Could we implement this? We should just be able to clone the existing horse model in the game, and place armor on top of it. Can you create a UI when you right click it that allows you to change the scale, change the wood and paint with our wood and paint system, and change the pose to a frozen frame of any existing animation horses have? This should be able to display any tack a horse can wear. Let's also create the tack pack, which you can right click on this and it puts all the tack into it, then you right click on a naked horse and it applies a the tack to that horse, and you can right click on a dressed horse and it puts all the tack into the bag. 
+Could we implement this? We should just be able to clone the existing horse model in the game, and place armor on top of it. Can you create a UI when you right click it that allows you to change the scale, change the wood and paint with our wood and paint system, and change the pose to a frozen frame of any existing animation horses have? This should be able to display any tack a horse can wear. Let's also create the tack pack, which you can right click on this and it puts all the tack into it, then you right click on a naked horse and it applies a the tack to that horse, and you can right click on a dressed horse and it puts all the tack into the bag.
+
+ https://modrinth.com/mod/simple-netherite-horse-armor
+If we don't already through generating armor automaticay, we should add netherite armor. 
+
+https://modrinth.com/mod/superb-steeds
+More QOL changes we should consider integrating 
+
+
+https://modrinth.com/mod/trotting-wagons
+More carts to see if we can add. 
+
+https://modrinth.com/mod/horseinboat
+Add horses to boats. 
