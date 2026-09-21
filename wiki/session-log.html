@@ -27,6 +27,113 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-21-simply-equine">2026-09-21, later &mdash; Simply Equine, walked from the jar: three sections harvested, five ideas refused</h2>
+
+<p>
+    <strong>No code. A survey session, and the first one to work a row off
+    <a href="roadmap.html#mod-survey">the survey backlog</a>.</strong> The owner picked
+    <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a> &mdash;
+    the only row asked for exhaustively rather than for highlights &mdash; and asked for every
+    choice to be posed as a choice rather than decided on her behalf.
+</p>
+
+<div class="note">
+    <span class="label">The store page and the jar describe different mods, and the jar is the one to read</span>
+    <p>
+        CurseForge advertises a new horse model, 18 coat textures, animations, jumps, level
+        progression, armour, tack, fencing and stable decor. <strong>The jar is 197 items, 3
+        blocks, 19 classes, zero recipes and no horse entity.</strong> Every item is
+        creative-tab-only; the headline &ldquo;grooming system&rdquo; is
+        <code>util/GroomingTools</code>, which checks whether your main hand holds the
+        <em>black rubber curry comb</em> &mdash; one item out of 197 &mdash; and spawns
+        particles on any entity, with no state and no effect. The layered shavings block is a
+        Forge tutorial with the textures swapped: its config key is still
+        <code>enablePowderLayers</code> and its class is <code>TutorialConfig</code>. The mod is
+        abandoned at Minecraft 1.15.2 and its author joined
+        <a href="compatibility.html#swem">SWEM</a>, which we had already read.
+    </p>
+    <p>
+        So the brief was reported back before any of it was walked: the row asked for an
+        add/adapt/skip pass over a codebase that is mostly a statement of intent, and the honest
+        harvest is <em>ideas</em>. <strong>The row is deleted rather than promoted to a
+        compatibility entry</strong> &mdash; a 1.15.2 mod cannot run beside this one. Sixteen
+        survey rows remain, and each should be read the same way.
+    </p>
+</div>
+
+<h3>Taken &mdash; three sections, each attributed where it landed</h3>
+
+<p>
+    <strong><a href="roadmap.html#grooming-tool">A grooming tool that replaces shears
+    outright.</a></strong> Grooming already ships as <code>minecraft:shears</code>:
+    <code>server/HorseShearHandler</code> gives an adult horse 1&ndash;3
+    <a href="item-horse-hair.html">horse hair</a> and +2 bond once per Minecraft day, and the
+    <em>dressing</em> was renamed to grooming on 2026-09-13. What was missing was the item &mdash;
+    the verb reads as care and the thing in your hand is a pair of blades. One verb tiered by
+    material, where a better tool buys bond and cooldown and never hair, so grooming cannot
+    become a farming action. <strong>The top tier grooms the whole herd</strong>, which is the
+    only rung doing something the others cannot and which finally gives the herd computation a
+    consumer &mdash; a gap listed two paragraphs below it on the same page. Note the contract is
+    wider than the handler: <code>ProgressTask.SHEAR_HORSE</code> and
+    <code>husbandry/shear_horse.json</code> are named for the old item.
+</p>
+
+<p>
+    <strong><a href="roadmap.html#ground-work">Ground work</a></strong> &mdash; halter, vanilla
+    lead, lunge line. Bond you build <em>without riding</em>, for the foals and
+    disorder-carrying horses that today have hand-feeding and nothing else. The halter joined
+    <a href="roadmap.html#accessories-slots">the accessories slot roster</a>, taking it from
+    fourteen slots to fifteen and <code>HorseTackSlot</code>&rsquo;s growth from twelve to
+    thirteen. The lunge line is the one new item and the circling movement is the real work:
+    it has to yield to riding, fleeing and the herd goals, so
+    <a href="behaviour-hierarchy.html">the behaviour hierarchy</a> and its bake are in the
+    contract.
+</p>
+
+<p>
+    <strong><a href="roadmap.html#stall-bars">Stall bars</a></strong>, a third per-material
+    block family after the double gates and the jumps. Both its utilities fall out of the same
+    physical fact, which is the sign they are the right ones: bars are see-through, so a stalled
+    horse keeps its herd where a solid wall would isolate it; and bars are reachable, so you can
+    groom and feed through them. It is also the point at which
+    <code>JumpModel.Unbaked.bake</code>&rsquo;s per-variant loop stops being wasteful and starts
+    being the cost.
+</p>
+
+<h3>Refused &mdash; and the reasoning recorded, so the same source cannot re-propose them</h3>
+
+<ul>
+    <li><strong>The six-tool grooming roster</strong> (dandy brush, body brush, rubber and metal
+        curry combs, hoof pick, sponge) and <strong>the stable-mucking loop</strong> (muck rake,
+        layered shavings, thatch). Both want a per-horse condition that decays, and a horse that
+        suffers for going unbrushed or unmucked is the punishing husbandry
+        <a href="philosophy.html">philosophy</a> rules out.</li>
+    <li><strong>Riding crop, lunge whip, driving whip.</strong> Implements for striking a horse
+        to make it go, against the premise the care layer is built on.</li>
+</ul>
+
+<h3>The rosettes forced a new kind of section</h3>
+
+<p>
+    Twelve show ribbons, Champion and Reserve Champion among them, and the owner&rsquo;s first
+    answer was to take them as cosmetic decor. <strong>That collided with a rule she had settled
+    earlier the same day</strong> &mdash;
+    <a href="philosophy.html#utility-not-decoration">nothing this mod adds may be purely
+    aesthetic except breeding</a>, the reversal that gave tack its stats. Re-asked rather than
+    written through, and the answer went further than the question: <strong>racing and
+    competitions are a separate add-on</strong>, attaching to a horse&rsquo;s
+    <a href="breeding.html">pedigree</a> rather than living in the base mod, because a
+    competition ladder is progression for the <em>player</em> and breeding is this mod&rsquo;s
+    progression.
+</p>
+
+<p>
+    The roadmap is planned-features-only and had no way to say &ldquo;considered, and placed
+    outside&rdquo;, so <a href="roadmap.html#out-of-scope">Deliberately out of scope</a> was
+    added as a single labelled exception with the rosettes as its first entry. It exists so the
+    next person with the idea finds the verdict rather than the request.
+</p>
+
 <h2 id="d2026-09-21-intake">2026-09-21 &mdash; A todo batch becomes nine roadmap sections, and philosophy gains a frame</h2>
 
 <p>
