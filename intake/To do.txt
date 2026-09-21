@@ -111,3 +111,27 @@ Anything from this?
 
 https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/
 Anything from this? 
+
+https://www.9minecraft.net/tensura-unique-monsters-mod/
+We probably can't pull the models from this, but we might be able to add it as an idea for a breed we can eventually make. 
+
+https://www.9minecraft.net/ridehud-mod/
+We should integrate this into ours. 
+
+
+https://www.9minecraft.net/horse-statistics-mod/
+Anything this does that we don't yet do. 
+
+
+https://www.9minecraft.net/biology-dictionary-mod/
+The UI for this is really nice, and it might be worth considering adapting our current h menu UI to be like this. Not a requirement, not committed to, but maybe as an option or alternative style of the menu screen?
+
+
+https://www.9minecraft.net/equestrian-canvas-expanded-mod/
+Might be worth adding this stuff to our own tack expansion. 
+
+https://www.9minecraft.net/icys-better-horses-mod/
+We should see if this has anything we should adapt to our mod. 
+
+https://modrinth.com/mod/horsebuff
+If we don't already have these QOL tweaks. 
