@@ -138,7 +138,7 @@ Two rules about the roadmap, both learned the hard way:
    (`data-tab="verification"`, per `wiki/tabs.js`) - not in `wiki/verification.html`, which
    now holds older entries only. Same for its roadmap: if a subject has a page, its plans go
    on a **Roadmap tab there**, and `wiki/roadmap.html` keeps one sentence pointing at it.
-   `wiki/horse-gear.html` is the worked example of both. (Owner, 2026-09-21.)
+   `wiki/horse-gear.html` is the worked example of both. (Owner.)
    **When something recorded as a gap or as unverified is fixed and verified, delete it**
    from `wiki/known-gaps.html` and `wiki/verification.html` in the same change, and put what
    was verified, when and on what evidence in the **coding tab of that thing's own page**.
