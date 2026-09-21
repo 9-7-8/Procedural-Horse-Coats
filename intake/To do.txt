@@ -33,5 +33,49 @@ The location of the horse on the h menu when you click it should use the /tp com
 The h menu should refresh automatically every time it's opened, a horse birth occurs, or a horse death 
 Occurs. 
 
-https://www.curseforge.com/minecraft/mc-mods/sullys-mod
-Examine this mod and see if there's any horse features worth integrating into ours. 
+https://www.curseforge.com/minecraft/mc-mods/sullys-mod https://www.planetminecraft.com/mod/minecraft-upgraded-mod/ 
+Examine these mods and see if there's any horse features worth integrating into ours. 
+
+https://www.planetminecraft.com/mod/1-16-4-special-armor-amp-tool-sets-bone-ender-emerald-obsidian-blaze-fabric/
+See if it's worth adding the horse armors from this. 
+
+We should add a horse tack crafting bench which allows the creation of horse armor at it. It also means I don't have to worry about recipe collision. It also can be disabled easily (just disable the crafting bench, and now horse armor can't be crafted). This should create recipes along a forma to allow all horse armor including modded to be crafted. This should also be where you make the rest of the tack too, like saddles and bridles. 
+
+A bridle should be the minimum required tack to control a horse. 
+
+Maybe add integration with the RPG skills mod to create a horsemanship skill that let's you tame horses by jumping on their back faster, or makes wild horses approach you for food or something? 
+
+
+https://www.planetminecraft.com/mod/farm-creatures-addon-1-0-2-bedrock-1-21/ 
+See if there's any ideas or models we can snag from this mod. 
+
+https://www.planetminecraft.com/mod/undead-horses-plus-addon-1-20/
+See if there's any ideas from this worth adding to our own overhaul of undead horses. 
+
+Add way more config options to be able to tune or disable basically everything in this mod. 
+
+https://www.curseforge.com/minecraft/mc-mods/simply-equine
+Let's walk through every part of this and see if we can add it directly, adapt it, or skip it. 
+
+
+Might be worth adapting this https://www.curseforge.com/minecraft/mc-mods/leave-my-bars-alone as a QOL change. 
+
+
+https://www.curseforge.com/minecraft/mc-mods/better-animations-collection
+Does this work out of the box with our mod? If it does, let's add it as a recommended mod. And maybe add integration so it fires the mouth opening animation whenever the horse eats. 
+
+
+https://www.curseforge.com/minecraft/mc-mods/stables
+Could we use this to improve any of the villagers we add? 
+
+Also, make the cowboy spawn in every village type. He doesn't need a house, just plop his cowboy hitch down anywhere in a town. Creating buildings that emulate each village style and integrate well enough to have the new villagers spawn in any village biome is now on the todo list. 
+
+https://www.curseforge.com/minecraft/mc-mods/genetic-animals
+Is there anything from this we can add to ours? 
+
+Also, from any mod we even take inspiration from, please give attribution on the coding tab for whatever features are added to or improved by that mod. 
+
+Are there any features form this https://www.curseforge.com/minecraft/bukkit-plugins/zhorse that we do not yet integrate in some way? 
+
+https://www.curseforge.com/minecraft/bukkit-plugins/stables
+I like the concept of virtual stables that this adds, it might be worth creating a pokeball like object which let's you store any horse you own in a pocket dimension? Make it easy to move a lot of horses at once or bring a horse along. See if there's anything else in that mod worth adapting. 
