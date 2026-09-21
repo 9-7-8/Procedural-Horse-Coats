@@ -775,10 +775,13 @@
         on dismount and clears it with a lead; Horse Buff just stops saddled horses idling away.
         Here, at a tier, the horse stops wandering when you dismount and waits for you &mdash; no
         new item, no leash, and a low-bond horse still drifts, which is the thing bond is
-        <em>for</em>. Note this is adjacent to a real gap rather than identical to it:
-        <code>setPersistenceRequired</code> is called today only on cowboy stock, egg-spawned
-        horses and the debug pens, so an owned horse can still despawn. Whether the persistence
-        fix rides along with this or ships separately as a bug is open.</li>
+        <em>for</em>. <strong>Note this is adjacent to a separate problem, not the same
+        one</strong> &mdash; <code>setPersistenceRequired</code> is never called on taming or
+        ownership, so whether an owned horse can despawn at all is
+        <a href="known-gaps.html#gap-300">an open question</a>. Keep them apart: a horse that
+        vanishes is a defect and its fix belongs to everybody, while waiting where you left it is
+        a reward and belongs to bond. Fixing the first as a tier of the second would mean a
+        low-bond horse is <em>allowed</em> to disappear.</li>
 </ul>
 
 <h3 id="grooming-tool">A grooming tool, tiered &mdash; and shears stop working on a horse</h3>

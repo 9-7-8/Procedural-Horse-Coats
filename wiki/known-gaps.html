@@ -58,6 +58,25 @@
 
 <ol>
 
+<li id="gap-300"><strong>Open, found 2026-09-21 while surveying other mods: nothing in this mod stops an owned horse despawning, and whether vanilla does is unproven.</strong>
+    <code>setPersistenceRequired()</code> is called on cowboy stock
+    (<code>CowboyHandler</code>, <code>Cowboy</code>), egg-spawned horses
+    (<code>HorseEggSpawner</code>), stable stock (<code>StablePopulator</code>), lycanthropy
+    victims and the debug pens &mdash; and <strong>never on taming, on binding, or on
+    ownership</strong>. <code>HorseOwnership</code> is the mod&rsquo;s single answer to whose
+    horse it is, and it does not touch persistence.
+    <strong>What is not established is whether that matters.</strong> Vanilla may already protect
+    a tamed horse through <code>AbstractHorse</code>&rsquo;s own despawn rules; this was looked
+    for on 2026-09-21 and the joined Minecraft sources were not to hand, so it is recorded as a
+    question rather than a defect. <strong>The test is cheap:</strong> tame a horse, leave it
+    unleashed and unridden well outside the simulation distance, travel far enough that its
+    chunks unload, and come back &mdash; ideally with one leashed control horse beside it. If it
+    survives, this closes with a note on <a href="horse-care.html">horse care</a>; if it does not,
+    it is the worst failure a horse mod can have and the fix is one call.
+    Relevant because <a href="roadmap.html#bond-behaviours">a bonded horse waiting where you left
+    it</a> is planned and sits right next to this &mdash; but the two are different problems, and
+    a despawn fix should not be smuggled in as a bond reward.</li>
+
 <li id="gap-299"><strong>Open, found 2026-09-20 on intake: frame white &ldquo;never&rdquo; crosses the topline here, and the literature says &ldquo;usually does not&rdquo;.</strong>
     <code>EdnrbGene</code>&rsquo;s <code>TOPLINE_CAP</code> is a <em>hard exclusion</em> &mdash;
     white is capped outright below the spine and the javadoc says so in as many words. The
