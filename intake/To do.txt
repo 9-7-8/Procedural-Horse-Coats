@@ -6,3 +6,16 @@ Adding new genes for zombie and skeleton horses, and then having them spawn as a
 
 I had a whole bunch more typed but then I closed the tab and lost it all, so now we're doing it again! Ugh. 
 
+https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2447896-the-reindeer-breed-has-arrived-wings-horns-and
+Add all the breeds from this to the road map, even though it'll require me to learn to 3D model. See if there's any unicorn powers which are worth adding as genes. See if there's any other content worth integrating. 
+
+https://www.curseforge.com/minecraft/mc-mods/horse-tack
+Add all these pieces as light armor, but do it as an overlay like the saddle (see if we can procedurally generate the model just from cloning the existing horse model and erasing all the parts it doesn't touch). Expand the Equestrian dying table to allow dying these and adding more customization to all of them, like stripes or dots. Expand the armor screen of our horse menu to include slots for all of these different pieces. Integrate with banners to allow their patterns to be used instead. Have a 3D preview of what the piece will look like, and allow you to preview it on any of your horses. 
+
+
+https://www.curseforge.com/minecraft/mc-mods/realistic-horse-genetics
+The main difference between this mod and ours is that they have bespoke coats, rather than procedurally generated ones. But see if there's anything other than that that they offer, that we can integrate into our mod. 
+
+https://www.curseforge.com/minecraft/mc-mods/animania
+I want to implement the troughs from this using my existing framework for modular things made of wood, and allow it to be made in any square/rectangle shape. Also the salt licks. Also imement anything from this which applies to horses. But keep in line with our existing philosophy, especially that of carrot not stick. 
+
