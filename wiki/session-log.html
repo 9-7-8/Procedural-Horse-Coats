@@ -27,6 +27,107 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-21-health-layer">2026-09-21, last &mdash; the health layer leaves the roadmap, and five breed rows were lying about shipped genes</h2>
+
+<p>
+    <strong>No code.</strong> The owner read the roadmap's health-layer section and said, in
+    four lines, that most of it had already happened: the expected-foal display exists in the
+    H menu, so does carrier display, per-part scaling is not worth the effort, and the
+    naked-foal coat is not worth it for a horse that dies at birth. Every one of the four was
+    right, and the section is now gone.
+</p>
+
+<h3>Two were shipped, and the roadmap said the opposite of the code</h3>
+
+<p>
+    The bullet asking for <strong>&ldquo;a punnett square answered about two specific animals,
+    in game&rdquo;</strong> describes the H menu's <em>Breeding preview</em> tab exactly: two
+    pickers over your own tamed horses, then one row per locus reading
+    <code>chance | foal pair | expression name</code>, phrased as <code>1 in 4</code> /
+    <code>3 in 4</code> / <code>always</code>, grouped stat axis &rarr; disorders &rarr; coat
+    &rarr; abilities, with settled loci hidden behind an &ldquo;All loci&rdquo; toggle. It also
+    re-derives which parent is the dam from the sex locus rather than trusting the picker.
+    <code>BreedingPreview</code>'s own class comment argues the owner's framing back at the
+    roadmap &mdash; <em>&ldquo;it does not draw a foal, because a predicted coat is a promise
+    the draw does not make&rdquo;</em>, and the screen says <em>&ldquo;deliberately not &lsquo;what
+    will the foal look like&rsquo;&rdquo;</em>.
+</p>
+
+<p>
+    The <strong>carrier</strong> bullet claimed &ldquo;every disorder declares a carrier sentence
+    and nothing shows it&rdquo;. <code>RecessiveDisorderGene</code> generates that sentence, and
+    it renders under the row on the information screen's <em>Coat</em> and <em>Other genes</em>
+    tabs, and per gene in the H menu's <em>Gene database</em> tab. What is genuinely absent is
+    narrower and was not what the bullet asked for: no surface says <em>&ldquo;this horse of
+    yours is a carrier&rdquo;</em> in prose &mdash; the Genes tab tints the row, and the paper
+    dump carries it only inside the short genetic code.
+</p>
+
+<h3>Two were cut, and cuts are not gaps</h3>
+
+<p>
+    <strong>Per-part scaling</strong> for both dwarfisms and <strong>ST14's naked-foal coat</strong>
+    went to <a href="decisions.html#settled-health-shape">the settled list</a>, not the gaps list.
+    The reopen trigger on the first is written down deliberately: <em>the mod has its own horse
+    model</em>, never &ldquo;someone has time&rdquo;. The second is simpler &mdash; the affected
+    foal dies within seconds of birth, so a bare-skin template buys a few seconds of a horse the
+    player is about to lose. <a href="gene-b4galt7.html">B4GALT7</a>,
+    <a href="gene-st14.html">ST14</a> and <a href="horse-body.html#notbuilt">the body page</a> now
+    say both are the shipped shape <em>by design</em>; <a href="known-gaps.html#gap-28">gap 28</a>
+    kept only what is still really missing, with no &ldquo;closed&rdquo; note left behind.
+</p>
+
+<h3>Gait had no roadmap entry at all, while the game promised it to the player</h3>
+
+<p>
+    Deleting the four left the section empty &mdash; and surfaced that
+    <a href="gene-dmrt3.html">DMRT3</a> is registered, inherited, carried by the breeds that
+    really have it, and moves no horse, with <strong>no roadmap entry anywhere</strong> while its
+    three expression strings tell the player <em>&ldquo;the gait is not animated yet&rdquo;</em>.
+    The owner's call was to keep it planned but not under health, so it is now
+    <a href="roadmap.html#gait">its own section</a>. It is explicitly <em>not</em> bundled with the
+    per-part cut: that one wanted the mod to own the horse model, this one wants new motion on the
+    model it already borrows.
+</p>
+
+<h3>The find: five breed rows advertised three genes as unbuilt, and all three ship</h3>
+
+<div class="note warn">
+    <span class="label">&ldquo;JEB is not built&rdquo; &mdash; linked to a roadmap section that had not mentioned JEB in a long time</span>
+    <p>
+        Chasing what still linked to the doomed anchor turned up five rows in
+        <a href="breeds.html">the breed table</a> claiming <strong>JEB</strong>,
+        <strong>FIS</strong> and <strong>WFFS</strong> were missing features. All three ship
+        (<code>Lama3Gene</code>, <code>Slc5a3Gene</code>, <code>Plod1Gene</code>), and four of the
+        five breeds carry <em>exactly</em> the rates their own row quotes as absent: Fell Pony
+        38% <code>fis/N</code>, Selle Fran&ccedil;ais 6% <code>ffs/N</code>, Swedish Warmblood
+        7.4%, American Saddlebred 5.14% <code>jeb/N</code>. Zangersheide is the one real
+        &ldquo;no&rdquo; and for a different reason &mdash; its draft's rate was a self-labelled
+        proxy and was declined &mdash; so it now says that instead. The body page's
+        &ldquo;No CSNB &mdash; the leopard complex is not built&rdquo; was stale the same way.
+    </p>
+    <p class="muted">
+        The shape to remember: <strong>a stale claim survives because its link still
+        resolves.</strong> Every one of these pointed at a live anchor whose section had long
+        since stopped saying what the sentence promised, so nothing ever failed.
+        <code>check-links.mjs</code> cannot see this, and did not.
+    </p>
+</div>
+
+<h3>Checked</h3>
+
+<ul>
+    <li><code>check-links.mjs</code> green across 378 pages after the anchor was deleted and its
+        twelve inbound links were retargeted &mdash; including four in this log, which were
+        pointed at the genes that have since shipped rather than left dangling.</li>
+    <li>Search index rebuilt; <code>sync-page-views.mjs</code> had nothing to update.</li>
+    <li><code>:neoforge-26.1.2:build</code> up-to-date and <code>check-parity.mjs</code> green
+        (7,163 checks) &mdash; confirmed rather than assumed, though no code changed.</li>
+    <li><strong>Nothing new to play.</strong> Both shipped features were already on
+        <a href="verification.html">the checklist</a> as unverified, so nothing was added or
+        deleted there.</li>
+</ul>
+
 <h2 id="d2026-09-21-qol-cluster">2026-09-21, later still &mdash; the quality-of-life cluster, and a reversal: the rider is half of what a horse can do</h2>
 
 <p>
