@@ -139,4 +139,7 @@ https://modrinth.com/mod/horsebuff
 If we don't already have these QOL tweaks. 
 
 https://modrinth.com/mod/horseman
-See if this adds anything. 
+See if this adds anything.
+
+https://modrinth.com/mod/horse-armor-stand
+Could we implement this? We should just be able to clone the existing horse model in the game, and place armor on top of it. Can you create a UI when you right click it that allows you to change the scale, change the wood and paint with our wood and paint system, and change the pose to a frozen frame of any existing animation horses have? This should be able to display any tack a horse can wear. Let's also create the tack pack, which you can right click on this and it puts all the tack into it, then you right click on a naked horse and it applies a the tack to that horse, and you can right click on a dressed horse and it puts all the tack into the bag. 
