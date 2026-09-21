@@ -1328,7 +1328,7 @@ done</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Diagnostics are the half that can be wrong quietly: a jar install must stay silent in chat where the dev run is not, and F8&rsquo;s highlight must time out rather than crash &mdash; the rest is wiki chrome, including a phone search panel whose close has only ever been proven in emulation.</p>
+    <p>Diagnostics are the half that can be wrong quietly: a jar install must stay silent in chat where the dev run is not, and F8&rsquo;s highlight must time out rather than crash &mdash; the rest is wiki chrome, including a phone search panel whose close has only ever been proven in emulation, and a wiki full of new <strong>Roadmap tabs</strong> that no person has yet looked at.</p>
 </div>
 
 <h3 id="open-older-coding-notes">Still open from before 2026-09-13 (NOT played)</h3>
@@ -1364,6 +1364,37 @@ done</code></pre>
         rather than sitting on &ldquo;Searching&hellip;&rdquo;, which would be a separate and
         genuinely new problem.</li>
 </ol>
+
+<h3 id="roadmap-chrome">The Roadmap tabs, rendered but never looked at</h3>
+
+<p>
+    Deliberately last, because none of it can be wrong invisibly &mdash; a tab that does not
+    draw announces itself the moment anybody opens the page. What has been done: headless
+    Chrome confirmed the button appears in the right place on a sample of pages (Gameplay,
+    Coding, Science, <strong>Roadmap</strong>, Verification), that the landing page&rsquo;s new
+    <em>Planned</em> section holds its twenty cards, starts shut and shows only in the Coding
+    view, and that every link and fragment resolves. <strong>Nobody has looked at any of
+    it.</strong>
+</p>
+
+<ul>
+    <li><strong>The index reads as a list worth scanning.</strong> Open
+        <a href="roadmap.html">the roadmap</a> and read down it. Forty-five one-sentence
+        summaries in a column is the whole product of the change, and the failure is not a
+        broken page &mdash; it is rows that all sound alike, or that say a category rather
+        than the sharp detail. Any row that tells you nothing is a summary box to rewrite on
+        the page it came from, not a fix here.</li>
+    <li><strong>A page with five tabs is still legible at phone width.</strong>
+        <a href="horse-care.html">Horse care</a> and <a href="item-jumps.html">jumps</a> now
+        carry the most buttons in the wiki. Checked at desktop only; the tab bar wrapping
+        badly on a narrow screen is the plausible fault.</li>
+    <li><strong>The twenty new pages look like pages, not like stubs.</strong> Each is one
+        subject with a single Roadmap tab, so the bar has one button on it &mdash;
+        <a href="lasso.html">the lasso</a> is the smallest and
+        <a href="undead-horses.html">undead horses</a> the largest. Worth deciding whether a
+        one-button tab bar reads as deliberate or as broken; if it reads as broken, the fix is
+        in <code>wiki/tabs.js</code> and applies to every single-panel page, not just these.</li>
+</ul>
 
 </section>
 
