@@ -79,3 +79,35 @@ Are there any features form this https://www.curseforge.com/minecraft/bukkit-plu
 
 https://www.curseforge.com/minecraft/bukkit-plugins/stables
 I like the concept of virtual stables that this adds, it might be worth creating a pokeball like object which let's you store any horse you own in a pocket dimension? Make it easy to move a lot of horses at once or bring a horse along. See if there's anything else in that mod worth adapting. 
+
+https://www.minecraft.net/en-us/marketplace/pdp/everbloom-games/horse-school/549b09b7-3915-42c2-99ba-0787e2dd727b
+What can we adapt from this, especially considering the new tack system I'm going for?
+
+https://www.curseforge.com/minecraft/mc-mods/horse-upgrades
+Anything worth adding from this mod? 
+
+https://www.9minecraft.net/horse-buff-9minecraft-mod/
+Anything worth adding from this? 
+
+
+https://www.9minecraft.net/horse-armor-n-stuff-x-fresh-animations-resource-pack/
+Can we adapt any of the animations from this? 
+
+
+https://www.9minecraft.net/horse-tweaks-mod/
+Anything from this? 
+
+
+https://www.9minecraft.net/hoof-addon-mcpe/
+Anything worth adding from this? 
+
+
+https://www.9minecraft.net/punchy-fpa-mod/
+Would this mod work out of the box with ours, and is there any horse animation or horse riding related animation we can adapt? 
+
+
+https://www.9minecraft.net/immersive-horse-riding-mod/
+Anything from this?
+
+https://www.9minecraft.net/beyond-vanilla-equestria-addon-mcpe/
+Anything from this? 
