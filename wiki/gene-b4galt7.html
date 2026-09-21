@@ -34,11 +34,13 @@
 
 <p>
     The real defect hits the long bones and the chest and leaves the skull almost
-    alone. The mod cannot draw that yet: <code>Attributes.SCALE</code> is one number
-    for the whole entity, and per-part scaling would mean owning the horse model
-    rather than borrowing the vanilla one. So it renders as an <strong>overall</strong>
-    three-quarter-size horse, with the ribcage weakness paid for in hearts. The
-    per-part version is logged on <a href="roadmap.html#health-genes">the roadmap</a>.
+    alone. The mod does not draw that, and will not: <code>Attributes.SCALE</code> is
+    one number for the whole entity, and per-part scaling would mean owning the horse
+    model rather than borrowing the vanilla one. So it renders as an
+    <strong>overall</strong> three-quarter-size horse, with the ribcage weakness paid
+    for in hearts. <strong>This is the shipped shape, not a gap</strong> &mdash; the
+    per-part version was <a href="decisions.html#settled-no-per-part-scaling">settled
+    against on 2026-09-21</a> and would only ever come back on a custom horse model.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
@@ -307,9 +309,10 @@
         horse renders at a flat <b>0.75&times;</b> &mdash; a small horse, when the science
         says short-limbed with a normal head. Per-part scaling means owning the horse
         model instead of borrowing the vanilla one. The rib-cage weakness is paid for in
-        hearts instead of geometry. This is the single largest gap between this page and
-        <a href="gene-b4galt7.html#what-is-drawn">what is drawn</a>, and it is logged on
-        <a href="roadmap.html#health-genes">the roadmap</a> rather than approximated.
+        hearts instead of geometry. This is the single largest distance between this page
+        and <a href="gene-b4galt7.html#what-is-drawn">what is drawn</a>, and it is
+        <a href="decisions.html#settled-no-per-part-scaling">deliberate and settled</a>
+        rather than approximated or queued.
     </p>
 </div>
 

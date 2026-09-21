@@ -48,7 +48,7 @@
 <table>
 <thead><tr><th>Question</th><th>Where it stands</th></tr></thead>
 <tbody>
-<tr><td><strong>Should <code>Condition</code> gain a severity / onset model?</strong></td><td>The mod&rsquo;s health model is binary: a locus is <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code>, or a flat heart reduction. The <code>naturalgeneref.md</code> disorder table is richer &mdash; each gene carries a <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>, and distinguishes <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em> conditions. HERDA, PSSM1, HYPP and CA (<a href="roadmap.html#health-genes">the health layer</a>) all fit that shape and none fits &ldquo;fewer hearts&rdquo; cleanly. Two ways: <strong>(a)</strong> keep the binary model and render each as a flat heart cost plus a flat speed / jump multiplier &mdash; cheap, loses the &ldquo;flares up under exertion&rdquo; character; <strong>(b)</strong> give <code>Condition</code> a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code> / <code>PROGRESSIVE</code> kind that the health resolve and a future status tick both read. (b) is the reference&rsquo;s model and the natural companion to the effect architecture (<a href="roadmap.html#trait-rules">group traits</a>). <strong>Still not decided &mdash; but all four of those genes have now shipped under (a)</strong>, so the question has changed from &ldquo;which model&rdquo; to &ldquo;is (b) worth a migration&rdquo;. Building them also settled one thing the question did not anticipate: the reference&rsquo;s percentages could not be used as arithmetic at all. Read literally against a 22-health baseline they make an <em>affected but living</em> HYPP horse worse than several of the mod&rsquo;s outright lethals, so every one of the new loci is calibrated against the disorders that already ship and uses the reference only for the <em>ordering</em>. Whatever (b) turns out to be, it does not get to inherit those numbers.</td></tr>
+<tr><td><strong>Should <code>Condition</code> gain a severity / onset model?</strong></td><td>The mod&rsquo;s health model is binary: a locus is <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code>, or a flat heart reduction. The <code>naturalgeneref.md</code> disorder table is richer &mdash; each gene carries a <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>, and distinguishes <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em> conditions. HERDA, PSSM1, HYPP and CA (<a href="horse-body.html#disorder-shapes">the health layer</a>) all fit that shape and none fits &ldquo;fewer hearts&rdquo; cleanly. Two ways: <strong>(a)</strong> keep the binary model and render each as a flat heart cost plus a flat speed / jump multiplier &mdash; cheap, loses the &ldquo;flares up under exertion&rdquo; character; <strong>(b)</strong> give <code>Condition</code> a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code> / <code>PROGRESSIVE</code> kind that the health resolve and a future status tick both read. (b) is the reference&rsquo;s model and the natural companion to the effect architecture (<a href="roadmap.html#trait-rules">group traits</a>). <strong>Still not decided &mdash; but all four of those genes have now shipped under (a)</strong>, so the question has changed from &ldquo;which model&rdquo; to &ldquo;is (b) worth a migration&rdquo;. Building them also settled one thing the question did not anticipate: the reference&rsquo;s percentages could not be used as arithmetic at all. Read literally against a 22-health baseline they make an <em>affected but living</em> HYPP horse worse than several of the mod&rsquo;s outright lethals, so every one of the new loci is calibrated against the disorders that already ship and uses the reference only for the <em>ordering</em>. Whatever (b) turns out to be, it does not get to inherit those numbers.</td></tr>
 <tr><td><strong>How is a cutie mark chosen &mdash; and should the gene be polygenic?</strong></td><td><strong>The hook is built</strong> (2026-09-06): <code>CutieMarkContribution</code> lets any gene modify the mark, and <code>markFor</code> folds every implementor over the base emblem in code order &mdash; the <a href="gene-light.html">light</a> locus is the first user and makes the mark glow. What is still open is the <em>content</em>: which genes and breeds should bias the <strong>item pool</strong> (a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons), and whether mark <em>colour</em> is worth having &mdash; a per-instance tint is not renderable through <code>ItemStackRenderState.submit</code>, so it would need a custom render type. Wants more fictional breeds (<a href="roadmap.html#breeds">the breed backlog</a>) to be worth doing.</td></tr>
 <tr><td><strong>The 1.12.2 backport.</strong></td><td>Not a question so much as a standing constraint. Everything on <a href="roadmap.html">the roadmap</a> is <code>common/</code>-side except entity scale, gait animation, the health tick handler and the gene registration hook &mdash; those four are the only places the backport goal should shape a design.</td></tr>
 </tbody>
@@ -424,6 +424,38 @@
 
 <h3 id="settled-dated">The dated batches</h3>
 
+<h3 id="settled-health-shape">Settled 2026-09-21 &mdash; the two health items that wanted a horse model are cut</h3>
+
+<p>
+    Both were the last <a href="roadmap.html">roadmap</a> entries in the health layer, and both
+    were asking for geometry the mod does not own. Neither is a deferral.
+</p>
+
+<ul>
+    <li id="settled-no-per-part-scaling"><strong>Per-part scaling for the dwarfisms is not
+        being built.</strong> <a href="gene-b4galt7.html">B4GALT7</a>'s Friesian dwarfism and
+        <a href="gene-acan.html">ACAN</a>'s are both proportion changes, and
+        <code>Attributes.SCALE</code> is one number for the whole entity &mdash; so drawing
+        them honestly means owning the horse model rather than borrowing vanilla's, plus the
+        animation work that follows a model. <strong>The value is not worth that.</strong> Both
+        keep rendering as an overall three-quarter horse with the skeletal weakness paid for in
+        hearts, which is what ships and is not a gap. If anything of this shape ever happens it
+        is on a <em>custom model</em>, never by bending the basegame one &mdash; so the trigger
+        to reopen is &ldquo;the mod has its own horse model&rdquo;, not &ldquo;someone has
+        time&rdquo;. <a href="roadmap.html#gait">DMRT3's gait</a> is <em>not</em> cut with
+        these two and stays planned: new motion on a borrowed model is not the same ask as
+        owning one.</li>
+    <li id="settled-no-naked-foal-coat"><strong>The naked-foal coat is not being
+        drawn.</strong> <a href="gene-st14.html">ST14</a>'s affected foal is
+        <a href="horse-body.html#verified-lethal-at-birth">born and then dies</a>, so a
+        bare-skin template or a real phase-3 pass buys a few seconds of one horse that the
+        player is about to lose. <strong>That is not worth a new pipeline path.</strong> The
+        disorder itself ships and is unaffected: the foal is born, the info panel names it as
+        hairless, and it does not survive. The reason the shortcut was never taken still holds
+        &mdash; phase 1 only <em>removes</em> pigment, and a de-pigmented mane reads as a
+        <em>white</em> mane, a different horse and a worse lie than drawing nothing.</li>
+</ul>
+
 <h3 id="settled-horsemanship">Settled 2026-09-21 &mdash; a rider may outperform a genome, and a carrot may not</h3>
 
 <ul>
@@ -445,7 +477,7 @@
         load-bearing half of the call</strong>, and every future proposal of the same shape should
         be tested against it.</li>
     <li id="settled-skill-stats"><strong>Speed and jump only &mdash; never health, never
-        size.</strong> Those are <a href="roadmap.html#health-genes">health-gene</a> territory,
+        size.</strong> Those are <a href="horse-body.html">health-gene</a> territory,
         and a rider adding hearts would stop a genetically frail horse being legible at a glance,
         which is precisely how <a href="philosophy.html#care">&sect;8</a> chose to express
         frailty.</li>

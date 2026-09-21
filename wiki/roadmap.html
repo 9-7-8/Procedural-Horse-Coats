@@ -268,36 +268,26 @@
 
 <hr>
 
-<h2 id="health-genes">The health layer</h2>
+<h2 id="gait">Gait &mdash; the gene ships, the animation does not</h2>
 
 <p>
-    The disorder loci ship, along with the health system they were blocked on; the machinery
-    is on <a href="horse-body.html">the horse's body</a> and each locus has its own page. What
-    is planned on top:
+    <a href="gene-dmrt3.html">DMRT3</a> is registered, inherited and carried by the breeds that
+    really have it, and it <strong>changes nothing about how a horse moves</strong>. The locus
+    contributes no trait and every outcome is a wild type, because there is no ambling or
+    pacing animation to switch on. The gene's own expression text says so to the player in
+    three places &mdash; <em>&ldquo;the gait is not animated yet&rdquo;</em> &mdash; so this is
+    a promise already made in game, not a loose idea.
 </p>
 
-<ul>
-    <li><strong>An in-game punnett / expected-foal display for two horses you own.</strong>
-        <strong>This is the highest-value item in the section</strong> &mdash; it is what turns
-        two carriers from a nasty surprise into a decision. The <em>reference</em> half exists:
-        every gene page carries a real punnett square with two parent pickers, so a player can
-        look up what a cross can throw. What is missing is the same square answered about two
-        <em>specific animals</em>, in game, with the carrier sentence beside it.</li>
-    <li><strong>Carrier display.</strong> The info panel and the paper dump show a horse's
-        <em>expressed</em> conditions, which was the easy half. Every disorder also declares a
-        <em>carrier</em> sentence explaining what a single copy means, and nothing shows
-        it.</li>
-    <li><strong>Per-part scaling</strong> for both dwarfisms.
-        <a href="gene-b4galt7.html">B4GALT7</a>'s Friesian dwarfism should shorten the limbs
-        and ribs and leave the head, and <a href="gene-acan.html">ACAN</a>'s is a proportion
-        change too, but <code>Attributes.SCALE</code> is one number for the whole entity. Doing
-        it properly means owning the horse model rather than borrowing vanilla's; both render
-        as an overall three-quarter horse today.</li>
-    <li><strong>The naked-foal coat.</strong> <a href="gene-st14.html">ST14</a>'s disorder
-        ships; the coat does not. Phase 1 only <em>removes</em> pigment, and a de-pigmented
-        mane reads as a <em>white</em> mane &mdash; a different horse and a worse lie than
-        drawing nothing. Wants a bare-skin template or a real phase-3 pass.</li>
-</ul>
+<p>
+    What it needs is <strong>animation work on the vanilla horse model</strong>: a four-beat
+    amble and a lateral pace, chosen by copy count, with the two-copy horse losing the
+    diagonal gaits it trades away. That is the whole entry. It is deliberately <em>not</em>
+    bundled with
+    <a href="decisions.html#settled-no-per-part-scaling">the per-part scaling call</a>, which
+    was cut: that one wanted the mod to <em>own</em> the horse model, and this one only wants
+    new motion on the model it already borrows.
+</p>
 
 <hr>
 
@@ -2214,7 +2204,7 @@
 
 <ul>
     <li><strong>Speed and jump only.</strong> Never health, never size &mdash; those are
-        <a href="#health-genes">health-gene</a> territory, and a rider adding hearts would make a
+        <a href="horse-body.html#disorder-shapes">health-gene</a> territory, and a rider adding hearts would make a
         genetically frail horse stop being legible at a glance, which is the whole reason
         <a href="philosophy.html#care">frailty is expressed as fewer hearts</a>.</li>
     <li><strong>Uncapped, with sharply diminishing returns.</strong> The owner's call, and it is

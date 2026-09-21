@@ -812,16 +812,21 @@ public interface GeneEpigenetics {
     <li><strong>Nothing to pull.</strong> <a href="#pull">Pulling ability</a> is
         resolved, inherited and drifted, and no cart, plough or sled reads it &mdash;
         the score is built and its consumer is not.</li>
-    <li><strong>No per-part scaling.</strong> Friesian dwarfism should shorten the
-        limbs and leave the head; <code>SCALE</code> is one number for the whole
-        entity. See <a href="roadmap.html#health-genes">the roadmap</a>.</li>
-    <li><strong>No naked-foal coat.</strong> <a href="gene-st14.html">ST14</a>&rsquo;s
-        hairless foal is reported, not drawn &mdash; phase 1 can only remove pigment,
-        and a de-pigmented mane is a <em>white</em> mane.</li>
-    <li><strong>No gait.</strong> DMRT3 needs animation work and is still on the
-        backlog.</li>
-    <li><strong>No CSNB.</strong> It rides on <code>LP/LP</code>, and the leopard
-        complex is not built.</li>
+    <li><strong>No per-part scaling, and there never will be.</strong> Friesian
+        dwarfism should shorten the limbs and leave the head; <code>SCALE</code> is one
+        number for the whole entity, and drawing it properly means owning the horse
+        model. <a href="decisions.html#settled-no-per-part-scaling">Settled against
+        2026-09-21</a> &mdash; both dwarfisms render as an overall three-quarter horse
+        by design, not by omission.</li>
+    <li><strong>No naked-foal coat, and there never will be.</strong>
+        <a href="gene-st14.html">ST14</a>&rsquo;s hairless foal is reported, not drawn
+        &mdash; phase 1 can only remove pigment, and a de-pigmented mane is a
+        <em>white</em> mane. The foal dies within seconds of birth, so the honest
+        version was <a href="decisions.html#settled-no-naked-foal-coat">judged not worth
+        a pipeline path</a>.</li>
+    <li><strong>No gait.</strong> DMRT3 is inherited and carried by the right breeds and
+        moves no horse; it needs animation work and is
+        <a href="roadmap.html#gait">on the roadmap</a>.</li>
     <li><strong>No group traits.</strong> <code>TraitRule</code> &mdash; two genes
         that only together trigger an outcome &mdash; is still
         <a href="roadmap.html#trait-rules">the roadmap</a>.</li>
