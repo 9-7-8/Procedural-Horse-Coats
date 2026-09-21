@@ -346,6 +346,30 @@ could not find any targets matching 'canAddPassenger' in AbstractHorse</code></p
     them has an owning page.
 </p>
 
+<h3 id="philosophy-numbers">Philosophy&rsquo;s sections are cited by number, in prose, from code</h3>
+
+<p>
+    <a href="philosophy.html">The philosophy page</a> numbers its sections in the heading text
+    &mdash; <em>1. Breeding should be a game of skill</em> &mdash; and the rest of the project
+    refers to them as <strong>&sect;N in running prose</strong>: seven wiki pages and four Java
+    files, including <code>GameteBias</code>, <code>ArcaneStock</code> and
+    <code>HorsePrices</code>, whose comments say things like &ldquo;&sect;4 of the philosophy is
+    that nothing in the model scores a horse&rdquo;.
+</p>
+
+<p>
+    <strong>So inserting or reordering a numbered section silently invalidates eleven
+    references</strong>, in two languages, none of which is a link and none of which any checker
+    can see &mdash; <code>check-links.mjs</code> verifies hrefs and fragments and a
+    <code>&sect;</code> in a sentence is neither. The page now carries an
+    <code>id</code> on every heading (<code>#determinism</code>, <code>#player-goals</code>,
+    &hellip;), so <strong>cite a new reference by anchor and never by number</strong>. If a
+    section genuinely has to be added, add it <em>unnumbered</em> the way
+    <a href="philosophy.html#what-for">&ldquo;What this mod is for&rdquo;</a> was, or accept that
+    renumbering means grepping both the wiki and <code>common/</code> and
+    <code>neoforge-26.1.2/</code> for <code>&sect;</code> and <code>&amp;sect;</code>.
+</p>
+
 <h3 id="cached-derivation">A cache added for the world silently froze every GUI</h3>
 
 <p>
