@@ -965,26 +965,44 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             excludes itself, because its <code>isActive()</code> already asks
             <code>canUseSlot(SADDLE)</code>, which is false for a baby.
         </p></li>
-    <li><strong>A plain right-click opens it, on any horse.</strong> Empty-handed, no
-        sneaking, tamed or not &mdash; <code>HorseInfoInteraction</code> takes the click on
-        the client and cancels it, so the server never sees the interaction at all. It is
-        a <em>client</em> setting, <code>horseScreen.rightClickOpens</code> in
-        <code>client.toml</code>, on by default; turned off, the rule reverts to the
-        original one &mdash; sneak and use, and only on a horse whose inventory you could
-        not open anyway. <strong>Sneak and use is never taken over</strong>, whatever the
-        setting: on a tamed horse that is vanilla's inventory, which has to stay reachable.
+    <li><strong>Sneak and use opens it, on any horse.</strong> Empty-handed, tamed or not
+        &mdash; <code>HorseInfoInteraction</code> takes the click on the client and cancels
+        it, so the server never sees the interaction at all. <strong>The plain right-click
+        is vanilla's</strong>: it mounts.
+
+        <p>
+            It briefly went the other way &mdash; the plain click opened this screen, behind
+            a client setting that defaulted to on &mdash; and the owner rejected it
+            (2026-09-21): that click mounts, mounting is muscle memory, and a window opening
+            where a saddle was expected is wrong every time. The setting went with it; there
+            is one rule now, and it is the gesture vanilla already spends on
+            &ldquo;open this animal's window&rdquo;.
+        </p>
+
+        <p>
+            <strong>That gesture was vanilla's horse inventory on a tamed horse, and this
+            takes it over</strong> &mdash; which costs nothing, because everything that
+            screen holds <em>for a horse</em> is on this one: the saddle and the barding are
+            two of the Gear tab's slots, and a horse has no chest
+            (<code>AbstractHorse.getInventoryColumns()</code> is zero for one). A donkey or
+            a mule, which does have one, never reaches this screen at all &mdash; the mod
+            writes a record only for a <code>Horse</code>, and no record means
+            <code>HorseInfoInteraction</code> lets the click through to vanilla. The vanilla
+            screen is still one <kbd>E</kbd> away from the saddle, and its <strong>i</strong>
+            button still comes back here.
+        </p>
 
         <p>
             <strong>An empty hand only.</strong> Food, a lead, a name tag, a research
             paper and a carrot all mean something specific on a horse, and none of them
-            should open a window instead. That rule is what makes taking the plain click
-            affordable at all.
+            should open a window instead.
         </p>
 
         <p>
-            The click it takes over is the one that <strong>mounts</strong> &mdash; which
-            is also how a wild horse is tamed &mdash; so Overview carries a
-            <strong>Ride</strong> button, sending <code>MountHorsePayload</code>. The
+            Overview also carries a <strong>Ride</strong> button, sending
+            <code>MountHorsePayload</code>. It was the way back to the saddle while the plain
+            click was taken; now that the click mounts again it is a convenience &mdash; you
+            read a wild horse, decide you want it, and get on from where you are. The
             server repeats vanilla's <code>doPlayerRide</code> by hand (stop eating, come
             down off the rear, face the same way, mount): widening that method with an
             access transformer was tried first and broke the <em>Minecraft</em> recompile,
@@ -1388,7 +1406,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Right-click now opens this mod&rsquo;s own screen on every horse, so the check that outranks the rest is that a wild one can still be tamed entirely through the Ride button; under it sit a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
+    <p>Sneak-and-use now opens this mod&rsquo;s own screen on every horse and the plain click mounts again, so the check that outranks the rest is that both gestures do the right thing on a tamed horse as well as a wild one; under it sit a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
 </div>
 
 <h3 id="barn-name-0918">Setting a barn name now shows on the screen that set it (2026-09-18, NOT played)</h3>
@@ -1425,37 +1443,41 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </ul>
 
 
-<h3 id="advancements-0920-menu">The horse menu opens on a click (2026-09-20, NOT played)</h3>
+<h3 id="advancements-0920-menu">The horse menu opens on sneak-and-use (2026-09-21, NOT played)</h3>
 
 <p>
-    A plain right-click on any horse now opens this mod's screen, which has grown saddle and
-    armour slots and a Ride button (<a href="#H">&sect;H</a>). The tack slots themselves are
-    checked on <a href="horse-gear.html#advancements-0920-tack">horse gear</a>. None of this
-    has been in front of a player.
+    Sneak and right-click any horse with an empty hand and this mod's screen opens, which has
+    grown saddle and armour slots and a Ride button (<a href="#H">&sect;H</a>). The plain click
+    mounts, as vanilla's does &mdash; it opened the screen for a day and the owner rejected
+    that. The tack slots themselves are checked on
+    <a href="horse-gear.html#advancements-0920-tack">horse gear</a>. None of this has been in
+    front of a player.
 </p>
 
-<h4>Do these first &mdash; one right-click answers most of it</h4>
+<h4>Do these first &mdash; two clicks answer most of it</h4>
 <ul>
-    <li><strong>Right-click a wild horse with an empty hand.</strong> The information
-        screen should open, and you should <em>not</em> be thrown into the saddle. Then
-        the same on a tamed horse of yours, and on a foal.</li>
+    <li><strong>Right-click a wild horse with an empty hand, not sneaking.</strong> You
+        should be thrown into the saddle and <em>no window should open</em>. That is the
+        whole of what was wrong.</li>
+    <li><strong>Now sneak and right-click it.</strong> The information screen should open.
+        Then the same on a tamed horse of yours, and on a foal &mdash; all three should
+        reach the screen, and the tamed one should <em>not</em> give you vanilla's inventory
+        any more.</li>
+    <li><strong>Nothing is stranded behind that.</strong> On the tamed horse, check the
+        saddle and the barding are on the Gear tab and can be put on and taken off; then
+        press <kbd>E</kbd> while riding and check vanilla's screen still opens with the
+        <strong>i</strong> button on it.</li>
+    <li><strong>A donkey or a mule</strong>, tamed and chested. Sneak-right-click should
+        still open <em>vanilla's</em> inventory, chest and all &mdash; the mod keeps no
+        record for one, so the click goes straight through.</li>
     <li><strong>The Ride button</strong>, top right of Overview. It should close the screen
-        and put you on. On a wild horse it should buck you off exactly as a right-click
-        used to &mdash; <strong>tame one entirely through the button</strong>, because if
-        that does not work the setting has cost the game its taming.</li>
+        and put you on; on a wild horse it should buck you off.</li>
     <li><strong>A horse that is not yours.</strong> Open a cowboy's string, or a stranger's
         horse: the slots should show what it is wearing, be drawn dim, and do nothing on a
         click.</li>
-    <li><strong>Sneak-right-click a tamed horse of yours.</strong> Vanilla's inventory
-        should still open, unchanged, with the <strong>i</strong> button on it. That is the
-        escape hatch and it is deliberately not taken over.</li>
     <li><strong>Something in your hand.</strong> Wheat, a lead, a name tag, a research
-        paper, a golden carrot: every one of them should do what it always did, not open a
-        window.</li>
-    <li><strong><code>horseScreen.rightClickOpens = false</code></strong> in
-        <code>client.toml</code>. Right-click should go back to mounting, and the screen
-        should still be reachable by sneaking on a wild horse and by the
-        <strong>i</strong> button on a tamed one.</li>
+        paper, a golden carrot: every one of them should do what it always did, sneaking or
+        not, and none of them should open a window.</li>
 </ul>
 
 <h3 id="hunger-0914-ratio">What the ratio logging still owes (2026-09-14, built 22:12)</h3>

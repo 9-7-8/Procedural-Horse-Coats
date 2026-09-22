@@ -980,9 +980,11 @@
 <h3 id="advancements-0920-tack">The tack slots move to the Gear tab (2026-09-20, NOT played)</h3>
 
 <p>
-    A plain right-click on any horse now opens this mod's screen
+    Sneak-and-use on any horse now opens this mod's screen
     (<a href="breeding.html#advancements-0920-menu">the menu itself is checked on
     breeding</a>), and the tack slots live on the <em>Gear</em> tab rather than Overview.
+    That gesture is also how vanilla's inventory used to open on a tamed horse, so these
+    slots are now the <em>only</em> saddle and barding a horse you are not riding has.
     Not played.
 </p>
 
@@ -996,7 +998,7 @@
 <h3 id="open-older-horse-gear">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>A tamed foal's inventory.</strong> Shift-right-click a tamed foal: its inventory opens with no saddle or armour slot, and <strong>i</strong> works from it. Holding a breeding carrot, a name tag, a transfer paper or shears, each still does its own thing.</li>
+    <li><strong>A tamed foal's inventory.</strong> Shift-right-click a tamed foal with an empty hand and this mod's screen opens instead (<code>HorseInfoInteraction</code> claims the click first), with no saddle slot on Gear &mdash; a foal cannot be saddled. Vanilla's own inventory for a foal is <code>HorseInteractionHandler.onFoalInventory</code>, which only ever sees a click nothing else wanted &mdash; so on a <em>horse</em> foal it no longer fires, and no longer needs to: it existed to reach the <strong>i</strong> button, and the screen that button opens is now the click itself. A tamed donkey or mule foal still goes through it. Holding a breeding carrot, a name tag, a transfer paper or shears, each still does its own thing.</li>
 </ul>
 </section>
 

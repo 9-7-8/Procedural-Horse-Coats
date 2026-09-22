@@ -11,13 +11,12 @@ import net.minecraft.resources.Identifier;
  * Client -> server: get on this horse, from the <b>Ride</b> button on the horse
  * information screen.
  *
- * <p>It exists because of the config that makes a plain right-click open that
- * screen ({@code ClientConfig.rightClickOpensInfo}). With that on, the click
- * that used to put you in the saddle opens a window instead - and mounting is
- * also how a wild horse is tamed, so without a way back to it that setting
- * would quietly cost the player both riding and taming. The button is that way
- * back, and it does exactly what the right-click did: vanilla's
- * {@code doPlayerRide}, bucking and all.
+ * <p>It was written when a plain right-click opened that screen instead of
+ * mounting, as the way back to the saddle. The screen is on sneak-and-use now
+ * ({@code HorseInfoInteraction}) and the plain click mounts again, so this is
+ * a convenience rather than the only route: you read a wild horse, decide you
+ * want it, and get on from where you are. It does exactly what the click does -
+ * vanilla's {@code doPlayerRide}, bucking and all.
  */
 public record MountHorsePayload(int entityId) implements CustomPacketPayload {
 

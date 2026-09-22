@@ -347,9 +347,12 @@ public final class HorseInfoScreen extends Screen {
         addRenderableWidget(offspringRefreshButton);
 
         // Ride. It is on Overview with the tack because that is the tab about
-        // this horse as an animal rather than as a genotype - and it is here at
-        // all because the right-click that used to mount now opens this screen.
-        // See ClientConfig.rightClickOpensInfo and MountHorsePayload.
+        // this horse as an animal rather than as a genotype. The plain
+        // right-click mounts again (HorseInfoInteraction takes only sneak), so
+        // this is no longer the only way into the saddle - it stays because the
+        // screen is where you decide you want *this* horse, and a wild one you
+        // have just read about is one click from being tamed. See
+        // MountHorsePayload.
         rideButton = Button.builder(Component.literal("Ride"), b -> mount())
                 .bounds(contentRight() - buttonW("Ride"), contentTop() - 2, buttonW("Ride"), 16)
                 .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(

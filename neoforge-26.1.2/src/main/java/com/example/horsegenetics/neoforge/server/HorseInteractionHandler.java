@@ -140,6 +140,14 @@ public final class HorseInteractionHandler {
      * cancels the event when it claims a click, and a cancelled event is not
      * delivered here. So this only ever sees a click nothing else wanted, and
      * adding an interaction later needs no change here.
+     *
+     * <p><b>Which is why a horse foal no longer comes through here at all.</b>
+     * {@code HorseInfoInteraction} takes an empty-handed sneak-and-use on
+     * anything this mod holds a record for - which is every {@code Horse} and
+     * nothing else - and that screen is what the {@code i} button on the foal's
+     * inventory was for. What is left for this is a tamed <i>donkey</i> or
+     * <i>mule</i> foal, which vanilla still refuses and this mod keeps no
+     * record for.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     static void onFoalInventory(PlayerInteractEvent.EntityInteract event) {

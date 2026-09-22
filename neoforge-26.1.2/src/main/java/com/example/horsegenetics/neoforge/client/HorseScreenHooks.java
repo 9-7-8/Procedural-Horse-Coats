@@ -13,9 +13,16 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 
 /**
- * This mod's one addition to the vanilla horse inventory screen (<kbd>E</kbd>
- * while riding, or shift-right-click on a tamed horse): a single <b>i</b>
- * button at the top left of the window, which opens {@link HorseInfoScreen}.
+ * This mod's one addition to the vanilla horse inventory screen: a single
+ * <b>i</b> button at the top left of the window, which opens
+ * {@link HorseInfoScreen}.
+ *
+ * <p><b>How this screen is still reached.</b> <kbd>E</kbd> while riding, and
+ * shift-right-click on a tamed donkey, mule or any other equine this mod keeps
+ * no record for. On a <i>horse</i> that gesture opens {@link HorseInfoScreen}
+ * instead ({@link HorseInfoInteraction}), which carries the saddle and the
+ * barding itself - so this button is mostly for the ridden case now, and for a
+ * horse whose record has not arrived yet.
  *
  * <h2>One button, and nothing else</h2>
  * There used to be a grey vanilla-style panel to the left of the GUI, behind a

@@ -37,23 +37,6 @@ public final class ClientConfig {
     public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
 
     /**
-     * <b>Does a plain right-click on a horse open this mod's screen?</b>
-     *
-     * <p>On (the default), an empty-handed use on any horse - yours, wild, a
-     * stranger's - opens {@code HorseInfoScreen} instead of doing what the
-     * click would otherwise have done. Off, it takes sneak and use, and only on
-     * a horse whose inventory you cannot open anyway, which is what it was
-     * before this setting existed.
-     *
-     * <p>The click it takes over is the one that <b>mounts</b>, which is also
-     * how a wild horse is tamed - so the screen carries a <b>Ride</b> button
-     * whenever this is on. Anything in your hand is left alone either way: food,
-     * a name tag, a lead, a carrot and a research paper all still do their own
-     * thing, because an empty hand is the only click this looks at.
-     */
-    public static final ModConfigSpec.BooleanValue RIGHT_CLICK_OPENS_INFO;
-
-    /**
      * <b>How close a horse must be before it gets a coat of its own.</b> In
      * blocks. Further out it wears a shared stand-in until you approach; a coat
      * already made is kept at any range. See {@code GeneticCoatTextureFactory}.
@@ -104,19 +87,6 @@ public final class ClientConfig {
                         "tab. It does that once, and sets this the first time you leave the tab.",
                         "Set it back to false to be shown the introduction again.")
                 .define("tutorial.seen", false);
-        RIGHT_CLICK_OPENS_INFO = builder
-                .comment("Right-click a horse with an empty hand to open its information",
-                        "screen straight away:",
-                        "  true  - any horse, one click, no sneaking. (default)",
-                        "  false - sneak and use, and only on a horse whose inventory you",
-                        "          cannot open anyway; a tamed horse of yours goes through",
-                        "          the vanilla screen's i button instead.",
-                        "With this on, the click that used to put you in the saddle opens a",
-                        "window - so the screen grows a Ride button, which is also how you",
-                        "get on a wild horse to tame it. Holding anything at all is left",
-                        "alone either way: food, a lead, a name tag and a paper all still",
-                        "do what they did.")
-                .define("horseScreen.rightClickOpens", true);
         COAT_DETAIL_DISTANCE = builder
                 .comment("How close, in blocks, a horse must be before this machine makes its",
                         "own coat texture. Further away it wears a plain stand-in coat until you",
@@ -178,18 +148,6 @@ public final class ClientConfig {
             }
         } catch (IllegalStateException notLoaded) {
             // Config not up yet - it will simply be shown once more.
-        }
-    }
-
-    /**
-     * Safe read - falls back to the default, which is on. Read on every
-     * interaction with a horse, so it must never throw.
-     */
-    public static boolean rightClickOpensInfo() {
-        try {
-            return RIGHT_CLICK_OPENS_INFO.get();
-        } catch (IllegalStateException notLoaded) {
-            return true;
         }
     }
 
