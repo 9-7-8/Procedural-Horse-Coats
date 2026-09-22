@@ -1,1 +1,4 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
+
+https://mcpedl.com/evil-s-better-elytra-texture-pack/
+Can we use this, somehow, directly as wings for horses? Can we just repurpose the existing elytra model as horse wings, so I can grab elytra retextures to use as horse wing textures? 
