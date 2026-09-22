@@ -987,9 +987,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             (<code>AbstractHorse.getInventoryColumns()</code> is zero for one). A donkey or
             a mule, which does have one, never reaches this screen at all &mdash; the mod
             writes a record only for a <code>Horse</code>, and no record means
-            <code>HorseInfoInteraction</code> lets the click through to vanilla. The vanilla
-            screen is still one <kbd>E</kbd> away from the saddle, and its <strong>i</strong>
-            button still comes back here.
+            <code>HorseInfoInteraction</code> lets the click through to vanilla, whose
+            <strong>i</strong> button still comes back here.
         </p>
 
         <p>
@@ -1011,6 +1010,47 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             a horse somebody is already on, and a cowboy's branded string &mdash; and
             offered for an <em>untamed</em> horse on purpose, since being thrown off is
             the point.
+        </p></li>
+    <li><strong><kbd>E</kbd> from the saddle opens it too.</strong> Sneak-and-use is how you
+        read a horse you are standing beside, and there is no comfortable way to perform it
+        on the animal you are sitting on &mdash; so <code>HorseInfoKeyHandler</code> takes
+        the inventory key while you are riding a horse this mod has a record for. On a
+        donkey, a mule, or a horse whose record has not arrived, it does not consume the
+        press and vanilla opens its own screen exactly as before.
+
+        <p>
+            <strong>The key is taken, not the screen swapped.</strong> Letting vanilla open
+            and replacing it on <code>ScreenEvent.Opening</code> would be wrong twice: that
+            screen is a <em>container</em> screen the server opened, so swapping a plain
+            screen in leaves a menu bound to the player with nothing to close it. Taking the
+            key means the server is never asked. It has to happen on
+            <code>ClientTickEvent.Pre</code>, which <code>Minecraft.tick</code> fires before
+            <code>handleKeybinds</code> &mdash; that is the loop whose
+            <code>keyInventory.consumeClick()</code> reaches
+            <code>isServerControlledInventory()</code> and sends
+            <code>ServerboundPlayerCommandPacket.OPEN_INVENTORY</code>. The clicks are
+            drained in a <code>while</code> for vanilla's own reason: two presses in a tick
+            would otherwise leave the second to open vanilla's screen on top of this one.
+        </p></li>
+    <li><strong>Every other horse named on the screen is a link.</strong> A companion or a
+        rival on Overview, a descendant on the Offspring tab &mdash; click one and you get
+        that horse's own copy of this screen, with the one you came from as its parent, so
+        Escape walks back the way you came however far you wandered. The foal's whole
+        portrait-and-name block is the target rather than the caption alone: at forty
+        pixels the picture is what the eye is on.
+
+        <p>
+            <strong>The id travels with the name.</strong> The Social block used to send
+            bare strings; <code>HorseSocialSyncPayload.Companion</code> is a name
+            <em>and</em> an id, because a name you cannot follow is a thing to go and find
+            by hand. The record itself usually needs no round trip &mdash; a horse tracked
+            nearby is already in <code>ClientHorseRecordCache</code>, and the Offspring
+            answer is merged into it on arrival, which is what makes a foal open
+            instantly. When it is genuinely not there (a band-mate two hundred blocks off,
+            a foal sold years ago) the <em>family-tree</em> request fetches it, since that
+            packet already means &ldquo;the record for this id, please&rdquo;, and
+            <code>tick()</code> opens the screen when the answer lands. Three seconds of
+            silence and the click is dropped, which is what a dead link should do.
         </p></li>
     <li><strong>The Gear tab carries the tack</strong>, and Overview now only says how many
         pieces a horse is wearing. It is <strong>nineteen</strong> slots arranged on a
@@ -1443,13 +1483,14 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </ul>
 
 
-<h3 id="advancements-0920-menu">The horse menu opens on sneak-and-use (2026-09-21, NOT played)</h3>
+<h3 id="advancements-0920-menu">The horse menu: how you get in, and where it goes (2026-09-21, NOT played)</h3>
 
 <p>
     Sneak and right-click any horse with an empty hand and this mod's screen opens, which has
     grown saddle and armour slots and a Ride button (<a href="#H">&sect;H</a>). The plain click
     mounts, as vanilla's does &mdash; it opened the screen for a day and the owner rejected
-    that. The tack slots themselves are checked on
+    that. <kbd>E</kbd> from the saddle now opens it as well, and every other horse named on
+    it is a link to that horse's own page. The tack slots themselves are checked on
     <a href="horse-gear.html#advancements-0920-tack">horse gear</a>. None of this has been in
     front of a player.
 </p>
@@ -1464,12 +1505,23 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         reach the screen, and the tamed one should <em>not</em> give you vanilla's inventory
         any more.</li>
     <li><strong>Nothing is stranded behind that.</strong> On the tamed horse, check the
-        saddle and the barding are on the Gear tab and can be put on and taken off; then
-        press <kbd>E</kbd> while riding and check vanilla's screen still opens with the
-        <strong>i</strong> button on it.</li>
+        saddle and the barding are on the Gear tab and can be put on and taken off.</li>
+    <li><strong><kbd>E</kbd> while riding a horse</strong> should open <em>this</em> screen,
+        not vanilla's. Press it twice in quick succession and check vanilla's does not
+        appear over the top. Then press <kbd>E</kbd> again with the screen up &mdash; it
+        should close, once, and not reopen.</li>
     <li><strong>A donkey or a mule</strong>, tamed and chested. Sneak-right-click should
         still open <em>vanilla's</em> inventory, chest and all &mdash; the mod keeps no
-        record for one, so the click goes straight through.</li>
+        record for one, so the click goes straight through &mdash; and <kbd>E</kbd> while
+        riding one should still give you that inventory, chest and all.</li>
+    <li><strong>Follow a link to another horse.</strong> On a tamed horse in a herd,
+        Overview's <em>Companions</em> (and <em>Rival</em>, if it has one) should be
+        coloured, underline on hover, and open that horse's own screen on a click; Escape
+        should come back. Then Refresh the <em>Offspring</em> tab on a horse with foals and
+        click one &mdash; it should open at once, since that record came with the answer.
+        The one worth watching: a companion that is <em>not</em> loaded (walk a few hundred
+        blocks away from the band first) should still open, a heartbeat late, off the
+        family-tree fetch &mdash; or do nothing at all if the server has no record.</li>
     <li><strong>The Ride button</strong>, top right of Overview. It should close the screen
         and put you on; on a wild horse it should buck you off.</li>
     <li><strong>A horse that is not yours.</strong> Open a cowboy's string, or a stranger's

@@ -24,9 +24,18 @@ public final class ClientOffspring {
     private ClientOffspring() {
     }
 
+    /**
+     * The records are also merged into {@link ClientHorseRecordCache} by id.
+     * They are full records - that is the expensive thing about this payload -
+     * so a descendant clicked on the tab opens its own screen straight away
+     * instead of asking the server for what already arrived.
+     */
     public static void accept(OffspringDataPayload payload) {
         rootId = payload.rootId();
         generations = payload.generations();
+        for (OffspringDataPayload.Generation generation : generations) {
+            ClientHorseRecordCache.acceptTreeData(generation.horses());
+        }
     }
 
     /** Whose descendants these are, or {@code null} if nothing has been asked for. */

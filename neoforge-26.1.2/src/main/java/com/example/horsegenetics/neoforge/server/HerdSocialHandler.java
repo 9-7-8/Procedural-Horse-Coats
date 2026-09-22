@@ -387,12 +387,16 @@ public final class HerdSocialHandler {
                     : "outranks " + outranks + " of the " + others + " band-mates nearby";
         }
 
-        List<String> companions = new ArrayList<>();
+        // The id travels with the name so the screen can go to that horse. It
+        // is the relationship's own id either way - a horse with no record left
+        // anywhere still gets one, and the screen finds that out when it asks.
+        List<HorseSocialSyncPayload.Companion> companions = new ArrayList<>();
         for (Relationship r : ledger.companions(3)) {
-            companions.add(nameOf(level, r.other())
-                    + (r.grooming() >= HerdRules.GROOMING_PARTNER ? " (grooming partner)" : ""));
+            companions.add(new HorseSocialSyncPayload.Companion(r.other(), nameOf(level, r.other())
+                    + (r.grooming() >= HerdRules.GROOMING_PARTNER ? " (grooming partner)" : "")));
         }
-        String rival = ledger.rival().map(r -> nameOf(level, r.other())).orElse("");
+        Optional<HorseSocialSyncPayload.Companion> rival = ledger.rival()
+                .map(r -> new HorseSocialSyncPayload.Companion(r.other(), nameOf(level, r.other())));
 
         PacketDistributor.sendToPlayer(player, new HorseSocialSyncPayload(entityId, role.label(),
                 role.description(), standing, companions, rival, ReproHandler.breedingLine(horse)));

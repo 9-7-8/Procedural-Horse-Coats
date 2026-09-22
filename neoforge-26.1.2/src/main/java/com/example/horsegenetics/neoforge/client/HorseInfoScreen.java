@@ -22,6 +22,8 @@ import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.HorseTackSlot;
+import com.example.horsegenetics.neoforge.network.FamilyTreeRequestPayload;
+import com.example.horsegenetics.neoforge.network.HorseSocialSyncPayload;
 import com.example.horsegenetics.neoforge.network.MountHorsePayload;
 import com.example.horsegenetics.neoforge.network.TackSlotPayload;
 import com.example.horsegenetics.neoforge.network.InspectHorsePayload;
@@ -33,6 +35,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <b>The horse information screen</b> - the "i" button at the top left of the
@@ -85,6 +89,11 @@ import java.util.List;
  *   <li><b>Family tree</b> - hands straight off to {@link FamilyTreeScreen},
  *       which comes back here when it closes.</li>
  * </ul>
+ *
+ * <p><b>Every other horse named on it is a link.</b> A companion, a rival, a
+ * descendant: clicking one opens that horse's own copy of this screen, with this
+ * one as the parent, so Escape walks back the way you came. See
+ * {@link #openHorse}.
  *
  * <p>Escape / Done goes back to the horse inventory screen it was opened from,
  * so the button is a detour rather than an exit.
@@ -137,6 +146,9 @@ public final class HorseInfoScreen extends Screen {
     private static final int DIVIDER = 0x18FFFFFF;
     private static final int FIELD_WELL = 0xFF0B0B10;
     private static final int FIELD_EDGE = 0xFF5A6274;
+    /** A horse's name you can click through to. The tab accent, doing its one job. */
+    private static final int LINK = TAB_ACCENT;
+    private static final int LINK_HOVER = 0xFF9ACCF2;
 
     private static final int TAB_TOP = 6;
     private static final int TAB_H = 18;
@@ -221,6 +233,30 @@ public final class HorseInfoScreen extends Screen {
     }
 
     private final List<TackHit> tackHits = new ArrayList<>();
+
+    /**
+     * Where a <b>link to another horse</b> landed this frame - a companion or a
+     * rival on Overview, a descendant on Offspring. Recorded on the way past for
+     * the same reason the tack slots are: the y it was drawn at is the scrolled
+     * one, so working the geometry out a second time on the click is a second
+     * chance to get it wrong.
+     */
+    private record LinkHit(int x0, int y0, int x1, int y1, UUID id) {
+    }
+
+    private final List<LinkHit> linkHits = new ArrayList<>();
+
+    /**
+     * A horse we have asked the server about and mean to open when it arrives -
+     * see {@link #openHorse}. Null the rest of the time.
+     */
+    private @Nullable UUID pendingOpen;
+
+    /** Ticks spent waiting on {@link #pendingOpen}, so a silent server is given up on. */
+    private int pendingTicks;
+
+    /** Three seconds. Long enough for a round trip, short enough not to fire later. */
+    private static final int PENDING_GIVE_UP = 60;
 
     private Button rideButton;
 
@@ -537,6 +573,89 @@ public final class HorseInfoScreen extends Screen {
         if (heldTicks++ % 20 == 0) {
             sendHold(true);
         }
+        if (pendingOpen != null) {
+            HorseRecord arrived = ClientHorseRecordCache.byId(pendingOpen);
+            if (arrived != null) {
+                pendingOpen = null;
+                show(arrived);
+            } else if (++pendingTicks > PENDING_GIVE_UP) {
+                // The server had nothing for it - a horse whose record has been
+                // forgotten, or one this player may not read. Nothing happens,
+                // which is what a click on a dead link should do.
+                pendingOpen = null;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Going to another horse
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Follow a name to the horse it names.</b> Clicking a companion, a rival
+     * or a descendant opens that horse's own copy of this screen, with this one
+     * as the parent - so Escape walks back the way you came, however far you
+     * wandered.
+     *
+     * <p>The record usually comes straight out of
+     * {@link ClientHorseRecordCache}: a horse being tracked nearby is put there
+     * by its sync payload, and a descendant arrives with the Offspring answer.
+     * When it is not there - a band-mate two hundred blocks away, a foal sold
+     * years ago - the family-tree request is what fetches it, since that is
+     * already the packet that means "the record for this id, please", and
+     * {@link #tick()} opens the screen when the answer lands. It is the same
+     * round trip the Family tree tab makes on every click, so this is a
+     * heartbeat's wait at worst.
+     */
+    private void openHorse(@Nullable UUID id) {
+        if (id == null || id.equals(record.id())) {
+            return; // the horse whose screen this already is
+        }
+        HorseRecord known = ClientHorseRecordCache.byId(id);
+        if (known != null) {
+            show(known);
+            return;
+        }
+        pendingOpen = id;
+        pendingTicks = 0;
+        ClientPacketDistributor.sendToServer(new FamilyTreeRequestPayload(id));
+    }
+
+    private void show(HorseRecord other) {
+        Minecraft.getInstance().setScreen(new HorseInfoScreen(other, liveEntity(other.id()), this));
+    }
+
+    /**
+     * The entity for a record, if that horse happens to be loaded. With one, the
+     * screen shows live health, live attributes and the tack slots work; without
+     * one it falls back to what the genotype says, which is what the whole screen
+     * already does for a horse read off a family tree.
+     */
+    private static @Nullable AbstractHorse liveEntity(UUID id) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return null;
+        }
+        for (var entity : mc.level.entitiesForRendering()) {
+            if (entity instanceof AbstractHorse found && found.getUUID().equals(id)) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    /** A click on a horse name or portrait. */
+    private boolean clickLink(double mx, double my) {
+        if (my < pageTop() - 2 || my > panelBottom() - PAD) {
+            return false; // scrolled out from under the page - see the scissor
+        }
+        for (LinkHit hit : linkHits) {
+            if (mx >= hit.x0() && mx < hit.x1() && my >= hit.y0() && my < hit.y1()) {
+                openHorse(hit.id());
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -550,6 +669,35 @@ public final class HorseInfoScreen extends Screen {
         if (horse != null) {
             ClientPacketDistributor.sendToServer(new InspectHorsePayload(horse.getId(), watching));
         }
+    }
+
+    /**
+     * <b>The inventory key closes it, the way it closes vanilla's.</b> This is a
+     * plain {@link Screen} rather than an {@code AbstractContainerScreen}, so it
+     * gets none of that class's key handling for free - and since
+     * {@link HorseInfoKeyHandler} is now what <kbd>E</kbd> opens from the saddle,
+     * a screen that would not close on the same key is a dead end.
+     *
+     * <p>A focused text box owns the keyboard first: without the swallow, typing
+     * a barn name with an "e" in it shuts the window. See
+     * {@code HorseBrowserScreen.keyPressed} for the vanilla trap behind that -
+     * {@code EditBox} returns false for an ordinary letter, because letters
+     * arrive separately through {@code charTyped}, so swallowing the key here
+     * does not cost the letter.
+     */
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
+            return true; // includes Escape, which Screen turns into onClose()
+        }
+        if (barnBox != null && barnBox.isFocused() && barnBox.isActive()) {
+            return true;
+        }
+        if (Minecraft.getInstance().options.keyInventory.matches(event)) {
+            onClose();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -578,6 +726,9 @@ public final class HorseInfoScreen extends Screen {
             return true;
         }
         if (tab == Tab.GEAR && clickTack(event.x(), event.y())) {
+            return true;
+        }
+        if (clickLink(event.x(), event.y())) {
             return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -674,6 +825,7 @@ public final class HorseInfoScreen extends Screen {
         g.enableScissor(pl + 1, top - 2, pr - 1, bottom + 4);
         Cursor c = new Cursor(g, contentLeft(), y0, contentWidth());
         tackHits.clear();
+        linkHits.clear();
         switch (tab) {
             case OVERVIEW -> drawOverview(c, mouseX, mouseY);
             case GEAR -> drawGear(c, mouseX, mouseY);
@@ -851,11 +1003,14 @@ public final class HorseInfoScreen extends Screen {
             if (!social.standing().isEmpty()) {
                 c.pair("Standing", social.standing());
             }
-            c.pair("Companions", social.companions().isEmpty()
-                    ? "none yet" : String.join(", ", social.companions()));
-            if (!social.rival().isEmpty()) {
-                c.pair("Rival", social.rival());
+            // Each name is a way to that horse. A band-mate is the one thing on
+            // this page that is another animal you could be reading instead.
+            if (social.companions().isEmpty()) {
+                c.pair("Companions", "none yet");
+            } else {
+                c.links("Companions", social.companions(), mouseX, mouseY);
             }
+            social.rival().ifPresent(r -> c.links("Rival", List.of(r), mouseX, mouseY));
         }
 
         List<Condition> conditions = traits().conditions();
@@ -1526,6 +1681,36 @@ public final class HorseInfoScreen extends Screen {
             y += lineH();
         }
 
+        /**
+         * A labelled row of <b>horse names you can click</b>, comma-separated in
+         * the value column where {@link #pair} would have put one string. Each
+         * name is measured as it is drawn, so the box recorded for the click is
+         * the box the name is in - a long companion list that runs to the edge
+         * still has every name hittable where it appears.
+         */
+        void links(String label, List<HorseSocialSyncPayload.Companion> items, int mouseX, int mouseY) {
+            g.text(font, Component.literal(label), x, y, LABEL, false);
+            int lx = x + 96;
+            for (int i = 0; i < items.size(); i++) {
+                HorseSocialSyncPayload.Companion item = items.get(i);
+                int w = font.width(item.label());
+                boolean hover = mouseX >= lx && mouseX < lx + w
+                        && mouseY >= y && mouseY < y + lineH();
+                g.text(font, Component.literal(item.label()), lx, y,
+                        hover ? LINK_HOVER : LINK, false);
+                if (hover) {
+                    g.fill(lx, y + font.lineHeight, lx + w, y + font.lineHeight + 1, LINK_HOVER);
+                }
+                linkHits.add(new LinkHit(lx, y, lx + w, y + lineH(), item.id()));
+                lx += w;
+                if (i < items.size() - 1) {
+                    g.text(font, Component.literal(", "), lx, y, DIM_TEXT, false);
+                    lx += font.width(", ");
+                }
+            }
+            y += lineH();
+        }
+
         /** {@code gene name | tokens | outcome} - the three-column gene row. */
         void row(String name, String tokens, String outcome, int outcomeColour) {
             g.text(font, Component.literal(GuiText.clip(name, 28)), x, y, VALUE, false);
@@ -1602,6 +1787,11 @@ public final class HorseInfoScreen extends Screen {
          * A wrapped row of little horses with their names under them. Each is
          * drawn from its own record's coat, so the row is what those horses
          * actually look like rather than a set of icons.
+         *
+         * <p><b>Each one is a link to that horse's own page.</b> The whole
+         * portrait-and-name block is the target rather than the name alone: at
+         * forty pixels the picture is the thing the eye is on, and a player who
+         * has just spotted a foal they like should not have to find the caption.
          */
         void horses(List<HorseRecord> horses, int mouseX, int mouseY) {
             int perRow = Math.max(1, width / (FOAL_W + FOAL_GAP));
@@ -1613,10 +1803,15 @@ public final class HorseInfoScreen extends Screen {
                     y += FOAL_H + nameH + FOAL_GAP;
                 }
                 int hx = x + col * (FOAL_W + FOAL_GAP);
+                int block = FOAL_H + nameH;
+                boolean hover = mouseX >= hx && mouseX < hx + FOAL_W
+                        && mouseY >= y && mouseY < y + block;
                 HorsePortrait.draw(g, coatOf(horse), false, hx, y, FOAL_W, FOAL_H, mouseX, mouseY);
                 HorseInfoScreen.this.drawFitted(g, horse.displayName(), hx, y + FOAL_H + 1, FOAL_W,
-                        horse.sex() == com.example.horsegenetics.common.horse.Sex.FEMALE
-                                ? EXPR_CARRIER : VALUE);
+                        hover ? LINK_HOVER
+                                : horse.sex() == com.example.horsegenetics.common.horse.Sex.FEMALE
+                                        ? EXPR_CARRIER : VALUE);
+                linkHits.add(new LinkHit(hx, y, hx + FOAL_W, y + block, horse.id()));
             }
             y += FOAL_H + nameH + 4;
         }

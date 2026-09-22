@@ -39,9 +39,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  * is zero for one. A donkey or a mule, which does have
  * one, never reaches here at all: this mod writes a record only for a
  * {@link net.minecraft.world.entity.animal.equine.Horse}, and no record means
- * this bails out below and the click goes on to vanilla. The vanilla screen is
- * still one <kbd>E</kbd> away from the saddle, and its {@code i} button
- * ({@link HorseScreenHooks}) still comes back here.
+ * this bails out below and the click goes on to vanilla. <kbd>E</kbd> from the
+ * saddle now opens this screen too ({@link HorseInfoKeyHandler}), so on a horse
+ * the vanilla screen is not reached at all; on the other equines it still is,
+ * and its {@code i} button ({@link HorseScreenHooks}) still comes back here.
  *
  * <p><b>An empty hand only.</b> A name tag, a lead, food, a research paper or a
  * carrot all mean something specific on a horse, and none of them should open a
