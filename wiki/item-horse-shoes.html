@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horse shoes &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Horse gear <span class="sep">/</span> hoof equipment</p>
+<h1>Horse shoes</h1>
+<p class="lede">
+    Horse shoes are the first true <strong>hoof item</strong> in the accessories system: one item per
+    hoof, each with its own material, enchantment and durability, yet all of them living under the
+    same attachment-backed gear model the rest of the horse gear uses. They are not a special case
+    on the horse; they are four independent stacks sharing one shared rule set. Any metal can be used,
+    and the tier of that metal is what decides how much the shoe increases the horse's movement stats.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="what-they-are">What they are</h2>
+<p>
+    A horse shoe is a real piece of gear worn on a hoof rather than a cosmetic shape on the body.
+    This means each hoof can hold its own piece and each piece can hold its own enchantment state,
+    material profile and damage. The point is not that the horse wears four shoes as a set; the point
+    is that a horse can wear one healthy front shoe and one worn hind shoe without the system treating
+    them as one single state.
+</p>
+
+<ul>
+    <li><strong>One shoe per hoof.</strong> Front left, front right, hind left, hind right.</li>
+    <li><strong>Each shoe is independent.</strong> One can break, be enchanted or be removed without
+        changing the others.</li>
+    <li><strong>They are real equipment.</strong> They are in the gear attachment, not in a separate
+        horse-only container, and they are not a flag on the horse.</li>
+    <li><strong>All shoes walk on powered snow.</strong> Even a plain shoe grants the horse the ability to
+        move across powered snow without sinking or losing traction.</li>
+</ul>
+
+<h2 id="metal-tiers">Metal tiers and stat bonuses</h2>
+<p>
+    Horse shoes are made from a metal material, and the metal's tier determines the baseline stat boost.
+    Higher-tier metals add more flat bonus to <strong>speed</strong> and <strong>jump</strong> than lower-tier
+    ones, while the actual value is derived from the material configuration rather than from a hardcoded
+    switch on a single item. The point is that a common metal makes a modest improvement, while a rare or
+    superior metal gives a larger, recognizably better hoof profile.
+</p>
+
+<p>
+    The stat bonus is intentionally a <strong>flat bonus</strong>, not a percentage multiplier. That keeps the
+    system readable and easy to balance: a tier 1 metal gives a small bump to speed and jump, a tier 2 or 3
+    metal gives a larger bump, and the horse's existing movement stats remain easy to compare from one shoe to
+    the next. Because the bonus is flat, the design is also easier to tune around breeding, load and terrain.
+</p>
+
+<ul>
+    <li><strong>Tiered material bonus.</strong> Material tier determines the flat increase to jump and speed.</li>
+    <li><strong>Any metal qualifies.</strong> The system should accept any material with a valid metal tier,
+        not only a fixed shortlist of named metals.</li>
+    <li><strong>Enchantments add special abilities.</strong> Some enchantments grant effects such as traction,
+        impact reduction, or terrain-specific movement, while the core tier bonus remains the steady rule.</li>
+</ul>
+
+<h2 id="why-they-are-different">Why they are different from boots</h2>
+<p>
+    Boots are a leg item and therefore sit in a broader leg slot model. Shoes are a hoof item and they
+    need a different render target, a different effect scope, and a different durability profile.
+    The important difference is that a boot is about the leg as a whole and a shoe is about the ground
+    interaction at the hoof. The horse-side math therefore belongs on the hoof slot rather than the leg
+    slot, even though they share the same equipment system.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="shared-architecture">Shared architecture</h2>
+<p>
+    The shoe system should sit directly on top of the gear model already built in
+    <a href="horse-gear.html">Horse gear: the nineteen slots</a>. The horse stores four worn stacks in
+    the same attachment-backed pattern; the slot roster names the four hoof slots; the item stack holds
+    the material and enchantments; and a horse-side effect manager aggregates the four shoe states into a
+    single effective result. This keeps the logic parallel to the rest of the mod instead of inventing a
+    separate inventory toy that is only valid for shoes.
+</p>
+
+<h3 id="slot-layer">Slot layer</h3>
+<p>
+    The slot layer is the first part of the implementation. Add the four shoe slot keys to
+    <code>HorseTackSlot</code> as their own entries, each with its own item tag and its own hoof anchor on
+    the paper doll. That is the part that decides the horse can accept a real shoe item and refuses all
+    other gear; it is not the effect system itself.
+</p>
+
+<h3 id="item-layer">Item layer</h3>
+<p>
+    Each shoe should be a genuine item stack carrying a material identity and enchantments. The horse
+    attachment stores the stack only for the one hoof slot, and any effect calculations read the item from
+    that stack rather than from a hidden shoe state elsewhere. This gives the system the correct shape for
+    item-level enchantments and keeps the worn item as the source of truth.
+</p>
+
+<h3 id="effect-layer">Effect layer</h3>
+<p>
+    The effect layer should aggregate the four shoe stacks into a single readout for the horse. It should ask:
+    which shoes are present, what material are they, which enchantments are on them, and what is the total
+    effect at this moment? The calculation must be additive but bounded: one shoe should not silently turn off
+    the other three, and one enchantment should not overwrite the effect profile of another simply because it was
+    the last shoe to be read.
+</p>
+
+<h3 id="render-layer">Render layer</h3>
+<p>
+    A shoe should render from the underside of the hoof, with four independent render roots. It should be slightly
+    larger than the horse model's hoof so the rim is visible, and it should extend down into the ground by a small,
+    deliberate amount. That intersection is part of the silhouette: the shoe should read as weight-bearing hardware
+    seated under the foot, not as a floating ring or a plate pasted over the hoof. This is not a body-layer feature.
+    The first pass should prove one front shoe and one hind shoe before adding the full set, because the hoof scale,
+    ground intersection and body overlap are the parts most likely to look wrong in a way that is easy to miss in code review.
+</p>
+
+<h2 id="enchanting">Enchanting rules</h2>
+<p>
+    This is the design call I would make explicit before the first shoe item ships: each shoe is enchantable as an
+    item, and the enchantment belongs to that item rather than to the horse as a whole. One front left shoe can be
+    enchanted for grip while the right front shoe remains plain, and the horse-side logic sums what the actual worn
+    stacks say. That means the shoe effect model is read from the item stacks themselves, while the material tier
+    continues to provide the base motion bonus. Some enchantments are purely special abilities layered on top of the
+    basic speed/jump bonus, while others may modify the effect profile of the shoe around a specific terrain or
+    use case.
+</p>
+
+<ul>
+    <li><strong>Enchantments are per shoe.</strong> A horse has four separate shoe stacks, and each stack can be
+        different.</li>
+    <li><strong>Effect legality must be slot-aware.</strong> Not every enchantment should be legal on every hoof, and
+        not every enchantment should be legal on every material.</li>
+    <li><strong>Enchantments survive reloads.</strong> A shoe is data-bound to the horse attachment, not to a one-shot
+        state flag, so the item stack remains the source of truth after a save and reload.</li>
+    <li><strong>Powered-snow behavior is universal.</strong> The powered-snow walk trait is a base feature of all shoes,
+        regardless of metal or enchantment, so even a plain shoe is useful and not only a stat stick.</li>
+</ul>
+
+<h2 id="effects">First effects to implement</h2>
+<p>
+    I would start with a very small, mechanically clear set and not build a giant pencil-box of abilities in the same
+    pass. The first systems worth shipping are:
+</p>
+
+<ul>
+    <li><strong>Base movement tier bonus.</strong> Each shoe grants a flat jump and speed bonus based on the metal tier,
+        with the material profile defining the exact value.</li>
+    <li><strong>Grip on slick ground.</strong> The first real utility effect for a shoe: it gives a safe traction path on
+        wet, icy or muddy ground without making every ride a friction puzzle.</li>
+    <li><strong>Reduced slipping.</strong> A modest horse-side effect that lowers slide and stabilizes footing on the
+        same terrain families the mod already reasons about.</li>
+    <li><strong>Durability cost.</strong> Shoes are consumable gear, not free decorations. The effect should be felt in the
+        wear profile the same way armour or equipment wear is felt elsewhere in the mod.</li>
+</ul>
+
+<p>
+    This leaves space for a later expansion to stronger effect roots such as hot-ground protection, quiet movement,
+    or a more explicit jumping / movement bonus if the project ever wants that level of mechanical complexity.
+    In practice, the material tier already provides the base jump and speed boost, and enchantments layer on the
+    special-case abilities without replacing the universal metal bonus.
+</p>
+
+<h2 id="bench">Bench and crafting path</h2>
+<p>
+    Shoe crafting should ride the same material-generation pipeline as the other tack items rather than be a separate
+    one-off recipe list. The bench determines the material shape and style, the material scan decides what is legal,
+    and the shoe item stack carries the result. That keeps shoe creation inside the same system as the rest of the
+    gear architecture instead of making it a disconnected feature that only the horseshoe page understands.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="implementation" data-tab-label="Suggested implementation"
+         data-tab-hint="Copilot's complete build proposal">
+
+<div class="note">
+    <span class="label">Suggested implementation, not built</span>
+    <p>
+        This is my complete proposal for adding horse shoes to the existing gear system. The central
+        rule is to keep four real <code>ItemStack</code>s in the existing horse-gear attachment, then
+        derive all bonuses and abilities from those stacks. Nothing shoe-specific should become a second
+        inventory, a horse-level boolean, or a special replacement for the shared tack plumbing.
+    </p>
+</div>
+
+<h2 id="implementation-contract">The implementation contract</h2>
+<p>
+    A shoe is an item made from a metal material. A horse can wear one in each of four hoof slots:
+    <code>shoe_front_left</code>, <code>shoe_front_right</code>, <code>shoe_hind_left</code> and
+    <code>shoe_hind_right</code>. Every occupied slot contains an independent stack. The stack is the
+    source of truth for material tier, durability, enchantments and appearance; the horse attachment is
+    the source of truth for which stack is currently worn.
+</p>
+
+<p>
+    <strong>Compatibility requirement:</strong> shoes must leverage the existing generated-horse-armour
+    engine, not introduce a shoe-only list of materials. The same <code>ModdedMaterials</code> and
+    <code>MaterialScan</code> path that discovers and generates armour for metals supplied by other mods
+    must discover those metals for shoes too. When a modpack adds a new metal, including a metal the
+    base mod has never named, the shoe item family, material profile, tier lookup, bench output and
+    render tint should become available through that existing generated-material path.
+</p>
+
+<p>
+    The effective result is calculated from the four worn stacks whenever horse movement or jump values
+    are queried. Each shoe contributes its material's flat speed and jump bonus. Each shoe also grants
+    powered-snow walking while present. Enchantments contribute additional abilities from the same stack,
+    so one enchanted shoe never changes the enchantment state of its three partners.
+</p>
+
+<h2 id="implementation-order">Build order</h2>
+<ol>
+    <li><strong>Extend the slot registry.</strong> Add four constants to
+        <code>HorseTackSlot</code>, each with a hoof zone, paper-doll anchor and dedicated item tag.
+        Keep the tags separate even if the first item is identical in all four slots; separate keys make
+        the data model, UI, validation and future left/right rules explicit.</li>
+    <li><strong>Reuse the generated armour material engine.</strong> Add the shoe item family to the
+        existing <code>ModdedMaterials.armourMetals()</code> / <code>MaterialScan</code> flow that
+        discovers metal materials for generated horse armour. A modpack-added metal must automatically
+        receive a shoe variant without a new Java class, manually registered item, or hand-written
+        recipe. The shared profile should expose at least metal tier, durability, render material and
+        the flat speed/jump contribution. Preserve the existing material-id collapse and load-order
+        rules so two mods contributing the same metal do not create duplicate shoe registrations.</li>
+    <li><strong>Use the existing attachment without mirroring it.</strong> Store each worn stack through
+        <code>HorseGear.with(slotName, stack)</code> and <code>ModAttachments.HORSE_GEAR</code>. Reuse
+        <code>HorseTackSlot.set</code> and the existing <code>TackSlotPayload</code> server path for
+        equip and remove operations. The server must validate ownership, distance, adult status, slot
+        acceptance and the held stack before changing the attachment.</li>
+    <li><strong>Make the item tags the acceptance gate.</strong> A shoe is accepted only by its matching
+        hoof slot. The tags must reject ordinary metal ingots, boots and shoes intended for another slot.
+        If the design later decides that one shoe item can move between hooves, keep that choice in the
+        validation helper rather than weakening the attachment or packet rules.</li>
+    <li><strong>Define the material-tier formula once.</strong> Add a common material profile or resolver
+        that maps tier to flat speed and jump values. The horse stat integration should sum the four
+        worn contributions, clamp the result according to the project's normal stat rules, and remove
+        the contribution immediately when a shoe is removed or broken. Do not bake the bonus into the
+        horse's genetics or permanently mutate its base stats.</li>
+    <li><strong>Hook powered snow into the horse movement check.</strong> Add one horse-side predicate
+        such as <code>HorseGearEffects.canWalkOnPoweredSnow(horse)</code> that returns true when at
+        least one required shoe condition is met according to the final gameplay rule. For the current
+        proposal, any worn shoe grants the trait. Keep this separate from the stat resolver so powered
+        snow remains unconditional across metal tiers and enchantments.</li>
+    <li><strong>Read enchantments from each worn stack.</strong> Do not copy enchantments into
+        <code>HorseGear</code> or a horse capability. Register shoe enchantments as item enchantments,
+        restrict them with item/slot predicates, and let an effect resolver inspect each stack in turn.
+        Combine compatible effects deterministically; reject or define conflicts explicitly rather than
+        allowing the last shoe processed to win.</li>
+    <li><strong>Render each stack from its hoof anchor.</strong> Add four entries to the shared gear
+        render registry and use the horse model's hoof bones or equivalent transforms. Place the shoe
+        under the hoof, scale it slightly larger than the model, and lower it just enough to clip into
+        the ground naturally instead of floating above it. The renderer receives the slot and stack, so
+        metal appearance, damage state and decoration are read from the same item that gameplay reads.
+        First prove one front and one hind hoof, then enable all four.</li>
+    <li><strong>Share the item's material and enchantment appearance.</strong> The shoe model should use
+        the generated metal's tint and surface treatment, matching the material colour and metallic
+        shine used by the corresponding item. If the worn stack is enchanted, apply the same enchantment
+        glint or equivalent animated shine that the item renderer uses; do not replace it with a generic
+        blue shoe texture. The render layer should therefore consume a shared item appearance/material
+        resolver so an item's inventory icon, dropped form and worn form cannot disagree.</li>
+    <li><strong>Route crafting through the generated-material bench.</strong> Generate a shoe from a
+        discovered metal material and the shoe shape through the existing bench/material pipeline. The
+        output stack must preserve the material profile and be enchantable before it is equipped. Avoid
+        a recipe file for every metal and avoid treating an ingot alone as a valid worn shoe; the same
+        compatibility path that makes generated armour work in a modpack must make generated shoes work.</li>
+    <li><strong>Add UI and feedback last.</strong> The existing Gear tab should discover the four slots
+        from <code>HorseTackSlot</code>. Show the shoe's material tier, flat speed/jump contribution,
+        powered-snow trait and enchantments through normal item tooltips or the gear screen; do not put
+        a second editable shoe inventory in the screen.</li>
+</ol>
+
+<h2 id="implementation-shape">Suggested code shape</h2>
+<pre><code class="language-java">public record HorseShoeProfile(int metalTier, double speedBonus,
+        double jumpBonus, boolean poweredSnow) {
+    public static HorseShoeProfile from(ItemStack stack) {
+        return HorseMaterials.shoeProfile(stack);
+    }
+}
+
+public final class HorseGearEffects {
+    public static HorseShoeTotals shoes(AbstractHorse horse) {
+        HorseShoeTotals total = HorseShoeTotals.ZERO;
+        for (HorseTackSlot slot : HorseTackSlot.HOOF_SLOTS) {
+            ItemStack stack = slot.on(horse);
+            if (!stack.isEmpty()) {
+                total = total.add(HorseShoeEffects.from(stack));
+            }
+        }
+        return total;
+    }
+}</code></pre>
+
+<p>
+    The names above are deliberately illustrative rather than a demand for those exact classes. The
+    important boundary is that one resolver reads the existing attachment and returns derived effects;
+    it must not mutate the horse record or duplicate item state. The concrete stat hooks should follow
+    the existing horse-body/stat architecture once the owning attribute path is confirmed.
+</p>
+
+<h3 id="render-code">Integration code for the worn shoes</h3>
+<p>
+    The existing renderer already gives this feature the correct extension points: register a custom
+    <code>RenderLayer</code> in <code>GeneticHorseRenderer</code>, copy the attachment-backed stacks
+    during <code>extractRenderState</code>, and submit each stack through the same
+    <code>ItemModelResolver</code> / <code>ItemStackRenderState</code> path used by
+    <code>CutieMarkLayer</code>. Because the resolver receives the actual enchanted stack, its normal
+    item tint and enchantment glint remain available to the worn shoe.
+</p>
+
+<pre><code class="language-java">// GeneticHorseRenderState.java
+public final ItemStack[] shoeStacks = {
+        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY
+};
+
+// GeneticHorseRenderer.extractRenderState(...), inside the GeneticHorseRenderState branch
+HorseTackSlot[] shoeSlots = {
+        HorseTackSlot.SHOE_FRONT_LEFT,
+        HorseTackSlot.SHOE_FRONT_RIGHT,
+        HorseTackSlot.SHOE_HIND_LEFT,
+        HorseTackSlot.SHOE_HIND_RIGHT
+};
+for (int i = 0; i &lt; shoeSlots.length; i++) {
+    geneticState.shoeStacks[i] = shoeSlots[i].on(horse).copy();
+}</code></pre>
+
+<pre><code class="language-java">// GeneticHorseRenderer constructor
+this.addLayer(new HorseShoeLayer(this));
+
+// HorseShoeLayer.java - the model part names and local offsets are the only
+// values that need tuning against HdHorseModel/HdBabyHorseModel.
+public final class HorseShoeLayer extends RenderLayer&lt;HorseRenderState, HorseModel&gt; {
+    private static final float SHOE_SCALE = 1.08f;
+    private static final float GROUND_CLIP = 0.025f;
+    private static final float SHOE_LIFT = -0.015f;
+
+    private final ItemStackRenderState[] itemStates = {
+            new ItemStackRenderState(), new ItemStackRenderState(),
+            new ItemStackRenderState(), new ItemStackRenderState()
+    };
+
+    public HorseShoeLayer(RenderLayerParent&lt;HorseRenderState, HorseModel&gt; renderer) {
+        super(renderer);
+    }
+
+    @Override
+    public void submit(PoseStack poseStack, SubmitNodeCollector collector, int light,
+                       HorseRenderState state, float yRot, float xRot) {
+        if (state.isInvisible || !(state instanceof GeneticHorseRenderState genetic)) {
+            return;
+        }
+
+        HorseTackSlot[] slots = {
+                HorseTackSlot.SHOE_FRONT_LEFT, HorseTackSlot.SHOE_FRONT_RIGHT,
+                HorseTackSlot.SHOE_HIND_LEFT, HorseTackSlot.SHOE_HIND_RIGHT
+        };
+        ItemModelResolver resolver = Minecraft.getInstance().getItemModelResolver();
+        Level level = Minecraft.getInstance().level;
+
+        for (int i = 0; i &lt; slots.length; i++) {
+            ItemStack stack = genetic.shoeStacks[i];
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            resolver.updateForTopItem(itemStates[i], stack, ItemDisplayContext.FIXED,
+                    level, null, i);
+            ModelPart hoof = HorseShoePlacement.hoof(getParentModel(), slots[i]);
+
+            poseStack.pushPose();
+            hoof.translateAndRotate(poseStack);
+            poseStack.translate(0.0f, SHOE_LIFT - GROUND_CLIP, 0.0f);
+            poseStack.scale(SHOE_SCALE, SHOE_SCALE, SHOE_SCALE);
+            poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
+            itemStates[i].submit(poseStack, collector, light,
+                    OverlayTexture.NO_OVERLAY, state.outlineColor);
+            poseStack.popPose();
+        }
+    }
+}</code></pre>
+
+<p>
+    <code>HorseShoePlacement.hoof(...)</code> should be the only model-specific helper. It should map
+    the four slot constants to the corresponding front/hind and left/right hoof parts, apply the
+    underside orientation, and keep adult and baby model offsets together. The negative
+    <code>GROUND_CLIP</code> is intentional: it lowers the shoe slightly into the floor, while
+    <code>SHOE_SCALE</code> makes the rim visibly larger than the hoof. These values should be tuned
+    from screenshots or an in-game test horse rather than guessed independently in four render branches.
+</p>
+
+<p>
+    No separate enchanted texture should be baked for this. The stack passed to
+    <code>ItemModelResolver</code> already contains the metal identity and enchantments, so the normal
+    generated-metal tint supplies the base colour and the normal item glint supplies the enchanted shine.
+    If the shoe model needs a custom material pass for metal reflectivity, that pass should consume the
+    same <code>ModdedMaterials.Metal.colour()</code> / item tint resolver used by generated armour; it
+    must not maintain a second metal-colour table.
+</p>
+
+<h2 id="implementation-tests">Required checks before calling it complete</h2>
+<ul>
+    <li>Equip four different metal tiers and verify each stack contributes its own flat speed and jump bonus.</li>
+    <li>Remove or break one shoe and verify the other three bonuses and enchantments remain unchanged.</li>
+    <li>Equip one plain shoe and verify powered-snow walking works without an enchantment.</li>
+    <li>Put different enchantments on all four shoes and verify effects remain attached to their own stacks after save/reload.</li>
+    <li>Reject wrong-slot items, ordinary ingots, foals, distant horses and unauthorized horses on both client and server paths.</li>
+    <li>Verify the Gear tab, item drops, ownership transfer and full-inventory removal do not lose or duplicate a shoe.</li>
+    <li>Render front and hind shoes at adult, juvenile and varied horse-scale poses, confirming underside placement,
+        slight oversizing, intentional ground clipping, metal tint, metallic shine and enchanted glint without
+        z-fighting or left/right transposition.</li>
+</ul>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="design-reasoning">Design reasoning</h2>
+<p>
+    Shoes are a good fit for the mod because they are a piece of utility gear that is real and visible but still
+    anchored to the horse rather than to a chest or a ride mode. They also create a clean dividing line between
+    purely cosmetic tack and useful wearable items: a shoe is not decoration, it changes how the horse interacts with
+    the world. That matches the mod's utility-over-decoration rule and keeps the shoe system from collapsing into a
+    gimmick whose only value is a texture change.
+</p>
+
+<p>
+    The real concurrency risk is not the art, it is the state model. The design should keep each shoe as a separate
+    stack with a separate enchantment profile and a separate render root, because the horse body is too rich to treat
+    footwear as a single global flag. That is the core rule to keep when this page is expanded later.
+</p>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Horse shoes are planned as four independent metal item stacks: each shoe contributes a flat
+        speed and jump bonus from its metal tier, every shoe grants powered-snow walking, and
+        enchantments add special abilities without becoming shared horse state.
+    </p>
+</div>
+
+<h2 id="implementation-plan">Implementation plan</h2>
+<ol>
+    <li><strong>Model four distinct hoof slots.</strong> Add front-left, front-right, hind-left and
+        hind-right entries to <code>HorseTackSlot</code>, each with its own item tag and hoof anchor.
+        The slots must remain separate so an individual shoe can be equipped, removed, damaged or
+        enchanted without changing the other three.</li>
+    <li><strong>Accept any tagged metal.</strong> The shoe item should be generated or configured from
+        any material with a valid metal tier, not from a hardcoded list of named metals. The material
+        profile should supply durability, appearance and tier rather than creating a separate Java item
+        class for every metal.</li>
+    <li><strong>Apply the tier as a flat stat bonus.</strong> Each worn shoe contributes a flat bonus to
+        horse speed and jump based on its metal tier. The values should be defined by the material
+        configuration and aggregated from the four actual worn stacks, not stored as one horse-level
+        boolean or percentage multiplier.</li>
+    <li><strong>Make every shoe a genuine item stack.</strong> The stack carries the metal identity,
+        durability and enchantments. <code>HorseGear</code> stores the worn stack for that hoof and
+        remains the attachment-backed authority for equipment state.</li>
+    <li><strong>Grant powered-snow walking unconditionally.</strong> The ability to walk on powered
+        snow is a base shoe trait, so it must apply to every worn shoe regardless of metal tier,
+        enchantment or durability. It should not be implemented as a special enchantment that a plain
+        shoe can lack.</li>
+    <li><strong>Enchant each shoe independently.</strong> Enchantments belong to the individual item
+        stack. A horse may have one enchanted shoe and three plain shoes, or four different enchanted
+        shoes, and the effect manager must read and combine those four stacks without overwriting one
+        with another. Enchantment legality should be item- and slot-aware.</li>
+    <li><strong>Layer special abilities over the base rules.</strong> Enchantments can add traction,
+        reduced slipping, impact protection, quiet movement or other special abilities, but they do not
+        replace the metal-tier speed/jump bonus or the universal powered-snow trait.</li>
+    <li><strong>Use the shared render and bench systems.</strong> Render each shoe from the correct hoof
+        bone, route crafting through the equestrian bench and material scan, and reuse the shared gear
+        attachment, validation, networking and decoration paths. The shoe system should not become a
+        separate inventory or recipe architecture.</li>
+    <li><strong>Verify independent behavior.</strong> Test mixed metal tiers, four different enchantment
+        profiles, powered-snow walking with plain shoes, one shoe breaking without the others, save and
+        reload, ownership checks, and full-inventory removal without item loss.</li>
+</ol>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-gear.html">Horse gear</a>
+        <a href="item-equestrian-bench.html">Tack Dyeing Bench</a>
+        <a href="items.html">Items &amp; recipes</a>
+    </div>
+    Source: gear system, attachment-backed equipment, and the hoof slot architecture.
+</div>
+
+</article>
+</main>
+</body>
+</html>

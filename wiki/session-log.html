@@ -27,6 +27,26 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-22-horse-shoes">2026-09-22 &mdash; horse shoes get their own implementation plan</h2>
+
+<p>
+    This session was documentation-only. The horse-shoe material was moved out of the shared
+    <a href="horse-gear.html">horse gear</a> roadmap and given its own
+    <a href="item-horse-shoes.html">Horse shoes</a> page with Gameplay, Coding, Science,
+    Roadmap and a page-local <strong>Suggested implementation</strong> tab. The proposal defines
+    four independent attachment-backed shoe stacks, metal-tier flat speed and jump bonuses, universal
+    powered-snow walking, per-shoe enchantments, and generated variants for metals supplied by mods in
+    a modpack through the existing <code>ModdedMaterials</code> and <code>MaterialScan</code> path.
+</p>
+
+<p>
+    The implementation tab also includes integration-shaped Java sketches for copying worn stacks into
+    <code>GeneticHorseRenderState</code>, registering a custom <code>HorseShoeLayer</code> beside
+    <code>CutieMarkLayer</code>, and rendering each shoe under its hoof with deliberate oversizing,
+    ground intersection, generated-metal tint and the item's enchantment glint. No runtime code was
+    changed; the page records the suggested path for a later implementation session.
+</p>
+
 <h2 id="d2026-09-21-menu-gesture">2026-09-21, last &mdash; the horse menu goes back to sneak-and-use, and 0.5.022 ships</h2>
 
 <p>
@@ -670,7 +690,7 @@
         <strong><em>Horse Upgrades</em> is two unrelated mods sharing a name.</strong> The
         CurseForge link in the row is Lothrazar's 2016 Minecraft 1.8 mod, whose whole design is
         carrots granting permanent stats. The Modrinth mod of the same name is horseshoes forged
-        on an anvil &mdash; which <a href="horse-gear.html#horse-shoes">the roadmap already owns</a>
+        on an anvil &mdash; which <a href="item-horse-shoes.html">the horse-shoe roadmap already owns</a>
         as its own section. Both were read; they went to opposite places.
     </p>
     <p class="muted">

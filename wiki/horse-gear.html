@@ -85,8 +85,9 @@
         <td>A martingale or a collar, across the chest.</td></tr>
     <tr><td><strong>Legs</strong></td><td>Boot &times; 4</td>
         <td>One per leg.</td></tr>
-    <tr><td><strong>Hooves</strong></td><td>Shoe &times; 4</td>
-        <td>One per hoof, and a different thing from a boot.</td></tr>
+    <tr><td><strong>Hooves</strong></td><td>Hoof equipment &times; 4</td>
+        <td>Four independent hoof slots. See the <a href="item-horse-shoes.html">horse-shoe page</a>
+            for the first planned occupant.</td></tr>
     <tr><td><strong>Storage</strong></td><td>Bag &times; 2</td>
         <td>Saddlebags, near side and off side.</td></tr>
 </table>
@@ -107,9 +108,9 @@
 
 <div class="note"><span class="label">Four legs and four hooves, not a set of four</span>
     <p>
-        A horse can throw a single shoe and wear unevenly, and a roster that
-        could only say &ldquo;shoes: yes&rdquo; could never say which. Eight
-        slots is the price of being able to.
+        A horse can wear unevenly, and a roster that could only say
+        &ldquo;hoof equipment: yes&rdquo; could never say which hoof is occupied. Eight
+        leg and hoof slots is the price of being able to.
     </p>
 </div>
 
@@ -150,7 +151,7 @@
     <p>
         Cosmetic-only equipment is the thing this mod does not add. Breeding is
         the one place pure aesthetics are allowed; everything else must provide
-        utility, so tack, barding and shoes carry real effects. That includes the
+        utility, so tack, barding and hoof equipment carry real effects. That includes the
         mane and tail slots: whatever eventually goes in them has to
         <em>do</em> something, not merely look like a braid. The rule is
         <a href="philosophy.html#utility-not-decoration">philosophy &sect; utility, not
@@ -198,8 +199,8 @@
 <p>
     Every gear slot reads an item tag named for it &mdash;
     <code>horsegenetics:gear/mane</code>,
-    <code>horsegenetics:gear/shoe_front_left</code>, and so on, seventeen of
-    them. <strong>All seventeen are empty.</strong> A slot whose tag is empty
+    one tag per non-vanilla slot, seventeen of them. <strong>All seventeen are empty.</strong>
+    A slot whose tag is empty
     correctly refuses everything rather than accepting dirt, which is exactly the
     behaviour wanted while the pieces do not exist. Shipping a piece means adding
     it to its tag, and a datapack can do the same without touching Java.
@@ -322,7 +323,7 @@
     <p>
         Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the
         whole accessories system is the plan: derived models rather than drawn ones, a
-        tack bench, dye and pattern, enchanted tack, shoes, native tack, horse chests and
+        tack bench, dye and pattern, enchanted tack, hoof equipment, native tack, horse chests and
         the saddle pad &mdash; with the armour materials the one piece that is only data.
     </p>
 </div>
@@ -330,7 +331,7 @@
 <p class="lede">
     <strong>Every gear plan, in one place.</strong> These sections used to be
     spread across the main <a href="roadmap.html">roadmap</a> and were moved here
-    whole, so that the accessories system, the shoes, the native-tack art
+    whole, so that the accessories system, hoof equipment, the native-tack art
     research, the saddlebags and the saddle pad are read together rather than
     found one at a time. The main roadmap keeps what is <em>next to</em> gear
     without being gear: <a href="horse-care.html#ground-work">ground work</a>, the
@@ -349,20 +350,186 @@
     </p>
 </div>
 
+<div class="note"><span class="label">Suggested implementation plan</span>
+    <p>
+        I would build the gear roadmap in this order, because the largest risk is not missing a
+        single item but building the shared plumbing wrong before the roster grows. The right order
+        is: <strong>shared slot data + network + render plumbing</strong>, then <strong>one native
+        tack item</strong>, then <strong>the bench and decoration pipeline</strong>, then
+        <strong>utility gear</strong> (enchantments, chests and other non-vanilla equipment), and only then the broader
+        catalog of art variants. The code structure that owns each slice is the same one the
+        project already uses: a data attachment as the authority, an item tag for valid contents,
+        a render layer for any piece that is not vanilla, and a menu or data-model object for the
+        final craft and tint details.
+    </p>
+    <ul>
+        <li><strong>Phase 1: shared tack core.</strong> Add the missing slot entries to
+            <code>HorseTackSlot</code>, keep the two vanilla slots as-is, and build the item-tag
+            gate for each new slot in <code>accepts()</code> and <code>usableOn()</code>. Then
+            extend <code>HorseGear</code> with the new names, serialization and copy-on-death
+            behaviour, and make the <code>TackSlotPayload</code> path update the attachment through
+            one authoritative call rather than a mirrored container.</li>
+        <li><strong>Phase 2: render abstraction.</strong> Add a shared <code>HorseGearRenderLayer</code>
+            or equivalent that consumes one slot + one item stack and derives a visible mesh from
+            the horse's own bones. I would build this against the saddle-pad and boot proof
+            before the full roster is opened, because the first render pass has to prove the ghosted
+            layer approach works without z-fighting.</li>
+        <li><strong>Phase 3: one real tack item, then one bench.</strong> I would land a halter or
+            saddle pad first, not a whole catalogue. That means a new item class, one tag entry, one
+            render layer and one recipe in the equestrian bench. The bench should generate recipes
+            from material + shape rather than from object-by-object JSON so the same material scan
+            can power horse armour and tack without a second registry.</li>
+        <li><strong>Phase 4: decoration pipeline.</strong> I would add a <code>HorseGearPattern</code>
+            / <code>HorseGearDye</code> data object, persist it on the item stack, and feed the
+            preview and render tint through the same values. The bench screen should preview the
+            item live on a horse and the actual render layer should use the same pattern data, not a
+            second copy stored only on the client.</li>
+        <li><strong>Phase 5: utility gear.</strong> I would implement enchanted tack, hoof equipment and horse
+            chests as a second tier of features after the shared plumbing is proven. Hoof equipment should be
+            a real item with an enchantment slot and a horse-side effect system; horse chests should
+            be attachment-backed storage with a horse-side menu rather than a widened container; both
+            should share the same schema for validation and ownership rules.</li>
+    </ul>
+</div>
+
+<div class="note"><span class="label">Suggested code in the repo's style</span>
+    <p>
+        I would keep the first concrete code sketch extremely small and repo-shaped, following the
+        existing <code>HorseTackSlot</code>, <code>HorseGear</code>, <code>ModAttachments</code>
+        and <code>ModNetworking</code> patterns rather than inventing a second architecture. The
+        point is to prove the design against the code the mod already relies on, before the item
+        catalog grows.
+    </p>
+
+    <pre><code class="language-java">public enum HorseTackSlot {
+    // Head
+    HALTER(null, Zone.HEAD, "Halter", "A halter to lead it.", 0.12f, 0.12f),
+    BRIDLE(null, Zone.HEAD, "Bridle", "A bridle to steer it.", 0.12f, 0.24f),
+
+    // Body / storage
+    SADDLE_PAD(null, Zone.BODY, "Pad", "The pad beneath the saddle.", 0.32f, 0.12f),
+    SADDLE(EquipmentSlot.SADDLE, Zone.BODY, "Saddle", "Put a saddle on it.", 0.42f, 0.12f),
+    BARDING(EquipmentSlot.BODY, Zone.BODY, "Barding", "Leather or iron barding.", 0.56f, 0.12f),
+    BLANKET(null, Zone.BODY, "Blanket", "A warm blanket.", 0.70f, 0.12f),
+
+    // Leg / hoof
+    BOOT_FRONT_LEFT(null, Zone.LEGS, "Boot", "A boot, near fore.", 0.22f, 0.72f),
+    HOOF_FRONT_LEFT(null, Zone.HOOVES, "Hoof", "Hoof equipment, near fore.", 0.22f, 0.88f);
+
+    private final @Nullable EquipmentSlot slot;
+    private final Zone zone;
+    private final TagKey&lt;Item&gt; tag;
+
+    HorseTackSlot(@Nullable EquipmentSlot slot, Zone zone, String label, String hint,
+                 float anchorX, float anchorY) {
+        this.slot = slot;
+        this.zone = zone;
+        this.tag = TagKey.create(Registries.ITEM,
+                Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "gear/" + name().toLowerCase(Locale.ROOT)));
+    }
+
+    public boolean accepts(AbstractHorse horse, ItemStack stack) {
+        if (stack.isEmpty() || !usableOn(horse)) {
+            return false;
+        }
+        if (slot != null) {
+            return horse.isEquippableInSlot(stack, slot);
+        }
+        return stack.is(tag);
+    }
+}</code></pre>
+
+    <pre><code class="language-java">public record HorseGearStyle(int baseColor, int trimColor, String pattern, int patternScaleX,
+        int patternScaleY, boolean mirrorX, boolean mirrorY) {
+    public static final Codec&lt;HorseGearStyle&gt; CODEC = RecordCodecBuilder.create(instance -&gt;
+        instance.group(
+            Codec.INT.fieldOf("base_color").forGetter(HorseGearStyle::baseColor),
+            Codec.INT.fieldOf("trim_color").forGetter(HorseGearStyle::trimColor),
+            Codec.STRING.optionalFieldOf("pattern", "plain").forGetter(HorseGearStyle::pattern),
+            Codec.INT.optionalFieldOf("pattern_scale_x", 1).forGetter(HorseGearStyle::patternScaleX),
+            Codec.INT.optionalFieldOf("pattern_scale_y", 1).forGetter(HorseGearStyle::patternScaleY),
+            Codec.BOOL.optionalFieldOf("mirror_x", false).forGetter(HorseGearStyle::mirrorX),
+            Codec.BOOL.optionalFieldOf("mirror_y", false).forGetter(HorseGearStyle::mirrorY)
+        ).apply(instance, HorseGearStyle::new));
+}
+
+public record HorseGearRenderSpec(String mesh, String sourcePart, float inflation,
+        boolean alphaCutout, boolean hideBelowBody) {
+}</code></pre>
+
+    <pre><code class="language-java">public final class HorseGearRenderer {
+    public static void render(AbstractHorse horse, HorseTackSlot slot, ItemStack stack, PoseStack pose) {
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        HorseGearStyle style = HorseGearStyleCodec.read(stack);
+        HorseGearRenderSpec spec = HorseGearRegistry.specFor(slot, stack);
+
+        pose.pushPose();
+        pose.translate(spec.sourcePart().equals("body") ? 0.0 : 0.1, 0.0, 0.0);
+        pose.scale(spec.inflation(), spec.inflation(), spec.inflation());
+
+        // Reuse the horse's own mesh and hide transparent texels.
+        renderAlphaCutout(spec.mesh(), style, pose);
+        pose.popPose();
+    }
+}</code></pre>
+
+    <pre><code class="language-java">public final class EquestrianBenchMenu extends AbstractContainerMenu {
+    public static final int MATERIAL_SLOT = 0;
+    public static final int SHAPE_SLOT = 1;
+    public static final int OUTPUT_SLOT = 2;
+
+    public boolean stillValid(Player player) {
+        return true;
+    }
+
+    public void craft() {
+        ItemStack material = this.slots.getItem(MATERIAL_SLOT);
+        ItemStack shape = this.slots.getItem(SHAPE_SLOT);
+        if (material.isEmpty() || shape.isEmpty()) {
+            return;
+        }
+
+        ItemStack output = HorseGearRecipeFactory.build(material, shape, HorseGearRecipeType.BARDING);
+        if (!output.isEmpty()) {
+            this.slots.set(OUTPUT_SLOT, output);
+        }
+    }
+}</code></pre>
+
+    <pre><code class="language-java">public final class ModAttachments {
+    public static final Supplier&lt;AttachmentType&lt;HorseGear&gt;&gt; HORSE_GEAR =
+        ATTACHMENT_TYPES.register("horse_gear", () -&gt; AttachmentType
+            .builder(HorseGear::empty)
+            .serialize(HorseGear.MAP_CODEC)
+            .sync(HorseGear.STREAM_CODEC)
+            .copyOnDeath()
+            .build());
+
+    public static final Supplier&lt;AttachmentType&lt;HorseGearStyle&gt;&gt; HORSE_GEAR_STYLE =
+        ATTACHMENT_TYPES.register("horse_gear_style", () -&gt; AttachmentType
+            .builder(() -&gt; HorseGearStyle.DEFAULT)
+            .serialize(HorseGearStyle.CODEC.fieldOf("style"))
+            .sync(HorseGearStyle.STREAM_CODEC)
+            .build());
+}</code></pre>
+</div>
 
 <hr>
 
 <h2 id="accessories">The accessories system &mdash; everything a horse wears, made one way</h2>
 
 <p>
-    <strong>This is one system, not eight features.</strong> Tack, barding, horse shoes, saddle
+    <strong>This is one system, not eight features.</strong> Tack, barding, hoof equipment, saddle
     pads, chests and the enchantments on any of them were asked for separately over several
     months and kept being scoped separately; each time, the same four questions came back
     &mdash; where does the piece live if the horse has only two equipment slots, how is it
     made, how is it decorated, and how is it drawn. <strong>They get one answer here, and
     the sections below are that answer's parts rather than independent tickets.</strong>
     Everything already researched for
-    <a href="#native-tack">native tack</a>, <a href="#horse-shoes">shoes</a> and
+    <a href="#native-tack">native tack</a>, <a href="item-horse-shoes.html">hoof equipment</a> and
     <a href="#equestrian-bench">the saddle pad</a> is folded in and not restated.
 </p>
 
@@ -374,7 +541,7 @@
         chores&rdquo;. <strong>The owner reversed it on 2026-09-21</strong> and replaced the
         reasoning: <em>nothing this mod adds may be purely aesthetic except breeding &mdash;
         everything else must provide utility</em>, which makes cosmetic-only tack the thing to
-        avoid rather than the thing to ship. Armour value, shoe effects and tack enchantments are
+        avoid rather than the thing to ship. Armour value, equipment effects and tack enchantments are
         therefore the point of this system rather than a ladder bolted onto a cosmetic one. The
         record is <a href="decisions.html#settled-tack-stats">on design decisions</a> and the
         rule is <a href="philosophy.html#utility-not-decoration">on philosophy</a>.
@@ -382,6 +549,17 @@
 </div>
 
 <h3 id="accessories-slots">The slot roster</h3>
+
+<p>
+    <strong>Suggested code for this section:</strong> add the missing slot constants in
+    <code>HorseTackSlot</code>, then extend the item tag roster in
+    <code>horsegenetics:gear/*</code> so each slot accepts only the item families that belong to
+    it. The implementation should be intentionally boring and data-driven: each slot owns a
+    <code>zone</code>, a <code>label</code>, a hit-box anchor and a validity tag, with the
+    <code>horseInfoScreen</code> just reading that enum rather than learning about each item one
+    by one. This keeps the page-layout change small and makes the next gear piece a one-line slot
+    addition rather than a UI rewrite.
+</p>
 
 <p>
     The screen grows from two slots to <strong>fifteen</strong>. Asked for explicitly, and
@@ -397,7 +575,7 @@
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
 <tr><td><strong>Saddle pad</strong></td><td>Designed already &mdash; <a href="#equestrian-bench">the banner-cut pad</a>.</td></tr>
 <tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
-<tr><td><strong>Shoes</strong> &times; 4</td><td>One per hoof, and a different thing from a boot. <a href="#horse-shoes">Research below.</a></td></tr>
+<tr><td><strong>Hoof equipment</strong> &times; 4</td><td>One per hoof, and a different thing from a boot. <a href="item-horse-shoes.html">See the dedicated page.</a></td></tr>
 <tr><td><strong>Martingale / collar</strong>, <strong>fly mask</strong></td><td>The two remaining real pieces of tack.</td></tr>
 <tr><td><strong>Chest</strong> &times; 2</td><td><a href="#horse-chests">Storage</a>, which is its own section because a chest is not worn.</td></tr>
 </tbody>
@@ -420,7 +598,7 @@
     <strong>The seam for this already exists and was built expecting it.</strong>
     <code>entity/HorseTackSlot</code> is an enum of exactly two constants &mdash;
     <code>SADDLE</code> and <code>ARMOUR</code> &mdash; whose own documentation says the shape is
-    there for later and names <em>&ldquo;a bridle, a blanket and shoes&rdquo;</em> as the obvious
+    there for later and names <em>&ldquo;a bridle, a blanket and hoof equipment&rdquo;</em> as the obvious
     next ones &mdash; and a halter is a bridle's near neighbour. The screen that draws them is ours rather than vanilla's
     (<code>HorseInfoScreen.drawTackSlot</code>, reached by the small <strong>i</strong> button
     <code>HorseScreenHooks</code> adds beside vanilla's horse inventory), and clicks already
@@ -431,7 +609,7 @@
 
 <p>
     <strong>Per-leg is four times the geometry problem, not one-quarter of it.</strong> Boots
-    and shoes are the only rows that anchor to <em>four</em> animated bones rather than to the
+    and hoof equipment are the only rows that anchor to <em>four</em> animated bones rather than to the
     body, so they are the ones to prototype first; if four independently-rendered leg pieces do
     not work, the rest of the roster does not care, and if they do, everything else is easier.
     <code>CutieMarkLayer</code> is the worked precedent for geometry riding an animated bone.
@@ -439,6 +617,16 @@
 
 <h3 id="accessories-geometry">Deriving the models instead of drawing them</h3>
 
+<p>
+    <strong>Suggested implementation:</strong> create a single shared geometry helper that takes a
+    named piece, a source model and an inflation value, then returns a renderable subset of the
+    horse body or saddle mesh. The first proof should be one leg boot or one saddle pad on a
+    single horse pose; once that passes, the rest of the roster is a table of model names and
+    inflation values rather than a new file per item. In code terms, this should live near the
+    existing render-layer plumbing rather than in the item classes themselves: a utility such as
+    <code>HorseGearGeometry.fromHorsePart()</code> with a tiny material list and a preserve-alpha
+    rule is the right shape.
+</p>
 <p>
     The owner's proposal, and it is the difference between this being affordable and not:
     <strong>clone the existing horse model and erase every part the piece does not touch</strong>,
@@ -458,6 +646,16 @@
 </p>
 
 <h3 id="accessories-bench">The tack bench, and what a bench buys</h3>
+
+<p>
+    <strong>Suggested implementation:</strong> put a new menu class beside the existing
+    equestrian-bench work, with a recipe factory that takes a <code>material</code>, a
+    <code>shape</code> and a <code>slot</code> and emits the output item stack. This should be the
+    one-and-only place that crafts horse armour, bridles, halters and saddle pads; the item tags
+    stay as the final gate for what can be worn, while the bench owns the creation path. A good
+    first proof is a single leather barding and a single hoof item, because each one exercises a
+    different branch: vanilla materials, modded materials and a non-standard slot.
+</p>
 
 <p>
     <strong>All of it is made at a bench of our own, and the reasoning is as much about
@@ -488,6 +686,16 @@
 
 <h3 id="accessories-decoration">Dye, pattern, banner, and a preview</h3>
 
+<p>
+    <strong>Suggested implementation:</strong> add a small data object such as
+    <code>HorseGearStyle</code> carrying <code>baseColor</code>, <code>trimColor</code>,
+    <code>patternId</code>, and a <code>bannerSeed</code> or transform state. Store it on the
+    item stack or on the attachment, and have both the bench preview and the render layer read the
+    same object; do not let the client preview create a second source of truth. The first pass is
+    a single pattern on the saddle pad and one trim colour on one boot, because those prove the
+    layered tint and transform path without the full catalog of item families.
+</p>
+
 <ul>
     <li><strong>The dyeing bench grows to cover every new piece</strong>, not just the saddle
         and leather barding it dyes today.</li>
@@ -511,8 +719,8 @@
 <p>
     <strong>Every piece in the roster is enchantable.</strong> Horse armour enchantments were
     asked for from <em>Wonderful Enchantments</em>, to be applied &ldquo;with logic&rdquo; to any
-    tack or shoe &mdash; meaning an enchantment has to declare which slots it is legal on, since
-    a fly mask and a shoe do not want the same list.
+    tack or hoof item &mdash; meaning an enchantment has to declare which slots it is legal on, since
+    a fly mask and a hoof item do not want the same list.
 </p>
 <p>
     <strong>The owner's own caveat is the interesting part: some of these are better as
@@ -634,41 +842,24 @@
     as if it were the thing asked for.
 </p>
 
-<h3 id="horse-shoes">Horse shoes &mdash; craftable, enchantable, equippable</h3>
-
-<p>
-    Shoes as real equipment: crafted from a metal, enchantable like armour, worn on the hooves.
-</p>
-<p>
-    <strong>There is no third slot to put them in.</strong> The horse family has two equipment
-    slots, the saddle and the body, and both are spoken for &mdash; this mod already writes to
-    them (<code>BarebackSteeringHandler</code>'s phantom saddle) and already replaces their
-    assets (<code>assets/minecraft/equipment/saddle.json</code>). So shoes are a data attachment
-    plus a render layer of our own, not an <code>EquipmentSlot</code>, and the enchantable half
-    means a genuine <code>Item</code> carrying enchantments rather than a flag on the horse.
-</p>
-<p>
-    <strong>What they could do</strong> is the part worth deciding first, because it decides
-    whether they are tack or a gimmick: grip on ice, speed or quiet on particular blocks,
-    fall-damage reduction, protection from hot ground &mdash; and, if wear is wanted, a
-    durability that is the first thing in the mod to consume itself. Note the overlap with
-    <a href="#native-tack">native tack</a> and with
-    <a href="#equestrian-bench">the saddle pad</a>: three separate pieces of tack work that
-    should share one answer about how tack is made, decorated and rendered, rather than three.
-</p>
-
-<p class="muted">
-    <strong>That last paragraph is what this whole section is the answer to.</strong> It closed by
-    naming the overlap with native tack and the saddle pad and asking for
-    &ldquo;one answer about how tack is made, decorated and rendered, rather than three&rdquo;.
-    The answer is <a href="#accessories-bench">the bench</a>,
-    <a href="#accessories-decoration">the decoration screen</a> and
-    <a href="#accessories-geometry">derived geometry</a> &mdash; so what is left specific to
-    shoes is only <em>what they do</em>, and four of them per horse.
+<p class="note">
+    Hoof equipment has its own page because the material tier, stat bonuses, powered-snow trait,
+    independent item stacks and enchantment rules are specific to that equipment family. The shared
+    slot, attachment, rendering and bench architecture remains documented here; the shoe-specific
+    plan is on <a href="item-horse-shoes.html">Horse shoes</a>.
 </p>
 
 <h3 id="native-tack">Native tack &mdash; cheap in code, expensive in art</h3>
 
+<p>
+    <strong>Suggested implementation:</strong> land the smallest possible native-tack slice first:
+    a single halter or blanket item built from an existing horse mesh with alpha-cutout geometry,
+    one item tag, one render layer and one networked attachment entry. That proves the rule
+    <em>the horse's own mesh is the art source</em> without forcing the team to author a four-piece
+    harness set or to rework the rest of the gear system in the same pass. After that, the broader
+    pack (bridle, blanket, western and racing variants) is a material-effort problem, not a code
+    architecture problem.
+</p>
 <p>
     Assessed against this codebase rather than in the abstract. Every seam already exists:
     <code>CutieMarkLayer</code> is a worked precedent for geometry anchored to an animated bone
@@ -745,6 +936,15 @@
 <h2 id="horse-chests">Horse chests, ender chests, and the look of a loaded horse</h2>
 
 <p>
+    <strong>Suggested implementation:</strong> model this as attachment-backed storage rather than
+    a widened horse container. Create a small <code>HorseChestInventory</code> or similar data
+    object, register it under <code>ModAttachments</code>, and add a menu that opens from the
+    gear screen or a right-click action. The first version should be a single bag capacity tied to
+    <code>HorseTraits.pull()</code>, with a pure item-based chest and no cross-inventory ender
+    carry; that keeps the gameplay rule stable while the code proves storage and transfer logic
+    without entangling it with a more sprawling inventory feature.
+</p>
+<p>
     Give a horse saddlebags &mdash; storage that travels with the animal &mdash; in
     <strong>two slots</strong>, per <a href="#accessories-slots">the roster</a>.
 </p>
@@ -809,6 +1009,15 @@
 
 <h2 id="equestrian-bench">The saddle pad, and cutting a banner into one</h2>
 
+<p>
+    <strong>Suggested implementation:</strong> build the pad as a tiny, self-contained feature set:
+    a pad item stored on the horse via the attachment, one render layer over the body mesh, a
+    three- or four-field style component for banner placement, and a bench screen that stores a
+    chosen crop rectangle rather than re-computing UVs from the live horse. The first draft should
+    ignore live 3D preview complexity and instead preview the crop in the bench GUI, because that
+    proves the data model and recipe path before the more expensive client-side transform work is
+    added.
+</p>
 <p>
     The <a href="item-equestrian-bench.html">Tack Dyeing Bench</a> ships its dyeing half. The
     unbuilt half is the <strong>saddle pad</strong>: a pad fitted to the horse, whose design is
@@ -948,7 +1157,7 @@
         positioned from fractions of the doll box and the hit test is recorded on the way
         past, so a slot whose tooltip names one thing while the click swaps another is the
         bug to watch for. Hover each and check the tooltip names the slot you are over
-        &mdash; particularly the four boots and the four shoes, which are the rows most
+        &mdash; particularly the four boots and the four hoof slots, which are the rows most
         easily transposed.</li>
     <li><strong>Scroll the page and click again.</strong> The hit boxes are recorded at the
         scrolled y; if that is wrong the slots stay clickable at their unscrolled
