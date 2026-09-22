@@ -769,6 +769,25 @@ public final class HorseInfoScreen extends Screen {
     private void drawOverview(Cursor c, int mouseX, int mouseY) {
         boolean adult = horse == null || !horse.isBaby();
 
+        // Tack used to be a row here. It moved to the Gear tab when the roster
+        // went from two slots to nineteen - a row that wide would have pushed
+        // the rest of Overview off the page, and nineteen slots want to be
+        // arranged on a horse rather than in a line. What stays is a count, so
+        // a player reading Overview still learns the horse is wearing
+        // something and where to go for it. It sits at the very top because it
+        // is the line most likely to be wrong at a glance - what the horse has
+        // on is the thing you came to check, and everything below it is a fact
+        // about the animal that will not have changed since you last looked.
+        if (horse != null) {
+            c.label("Tack");
+            int worn = wornCount();
+            c.wrapped(worn == 0
+                    ? "Wearing nothing. The Gear tab is where you dress it."
+                    : "Wearing " + worn + (worn == 1 ? " piece" : " pieces")
+                            + ". The Gear tab has the slots.", DESC, 0);
+            c.rule();
+        }
+
         c.pair("Sex", live().sexLabel(adult));
         c.pair("Generation", Integer.toString(live().generation()));
         c.pair("Breed", live().lineage().displayName());
@@ -814,24 +833,11 @@ public final class HorseInfoScreen extends Screen {
 
         drawDraught(c);
 
-        // Tack used to be a row here. It moved to the Gear tab when the roster
-        // went from two slots to nineteen - a row that wide would have pushed
-        // the rest of Overview off the page, and nineteen slots want to be
-        // arranged on a horse rather than in a line. What stays is a count, so
-        // a player reading Overview still learns the horse is wearing
-        // something and where to go for it.
-        if (horse != null) {
-            c.rule();
-            c.label("Tack");
-            int worn = wornCount();
-            c.wrapped(worn == 0
-                    ? "Wearing nothing. The Gear tab is where you dress it."
-                    : "Wearing " + worn + (worn == 1 ? " piece" : " pieces")
-                            + ". The Gear tab has the slots.", DESC, 0);
-        }
-
+        // Bond used to hang off the bottom of the tack block; with that block
+        // gone to the top it needs its own rule, or it reads as a Draught row.
         ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
         if (care != null) {
+            c.rule();
             c.pair("Bond", care.bond() + "  " + bondTierLabel(care.bond())
                     + (care.inHerd() ? "   • in a herd" : ""));
         }
