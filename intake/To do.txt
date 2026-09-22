@@ -7,3 +7,13 @@ Tuning stuff, from using this in my heavily modded server:
 - when a stallion is in a pen with mares, he should always attempt to cover them if the conditions are right (ie theyre in heat). If a cover fails because there's too many horses, print it to the chat for that player. 
 - Up the number of horses allowed within a 1 chunk radius of any given horse up to 50, because right now it's way too restrictive. Also, this should be controlled by the config, and server-authoratative
 - stallions should ALWAYS cover every day as much as they can, if they don't have any kind of negative fertility gene. 
+- there should be no mechanic that inherently stops incest (aka line breeding) even in wild bands
+
+Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
+
+Bugs:
+Another issue: sneak-right-click now flashes our horse menu, then goes to the vanilla menu. It should just go straight to our menu. 
+The saddle a horse is wearing should be at the very very very top of overview, in a column between the name of the horse and the "Ride" button. 
+There's still no way to set the barn name. 
+A high bond horse should not attempt to follow or watch their bond if there is no direct path to them-- line of sight is not enough, they must be able to find a path to their bond. If they're in an enclosed area, they act like a normal horse. Right now, a high bond horse is ignoring breeding in preference of watching their bonded owner. 
+
