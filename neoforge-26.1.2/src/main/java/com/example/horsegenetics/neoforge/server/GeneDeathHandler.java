@@ -41,9 +41,9 @@ import java.util.List;
  *
  * <p><b>Not verified in-game.</b> Written against 26.1.2 sources.
  *
- * <p>Nothing here fires in the read-only gallery dimension, for the same reason
- * the glow light block and the ground spread do not: a debug pen is for looking
- * at horses, and a horse that craters one is a bug report about the debug pen.
+ * <p><b>Both halves used to switch themselves off in the horse dimension</b>,
+ * which is the only place anybody kills a horse on purpose. Removed 2026-09-13;
+ * {@link #onHorseDeath} carries the full account of why.
  */
 @EventBusSubscriber
 public final class GeneDeathHandler {

@@ -35,8 +35,8 @@ import java.util.Map;
  * <i>contact sheet</i> it is the only way to look at eighty genes without
  * launching the game eighty times - and the coat pipeline has a long history of
  * measurements that agreed with a horse nobody had actually looked at (see
- * {@code wiki/verification.html}). Bake, open the folder, and the gene that
- * paints nothing is obvious in a second.
+ * {@code wiki/body-space.html#verification}). Bake, open the folder, and the
+ * gene that paints nothing is obvious in a second.
  *
  * <p>The projection is deliberately simple: every texel whose face points at
  * the viewer, placed on the <b>posed</b> mesh - the cuboids the game actually

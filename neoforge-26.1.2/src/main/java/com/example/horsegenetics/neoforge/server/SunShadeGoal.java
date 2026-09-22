@@ -30,7 +30,7 @@ import java.util.EnumSet;
  * with a real range, so a strong one clears a fence and a Falabella does not -
  * which is the correct answer to "up to and including jumping fences if they
  * can". It is an approximation of intent, not a pathfinder, and it is flagged
- * as such in {@code wiki/verification.html}.
+ * as such in {@code wiki/gene-sun-sensitivity.html#verification}.
  */
 public final class SunShadeGoal extends Goal {
 

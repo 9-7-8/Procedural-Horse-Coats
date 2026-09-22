@@ -36,7 +36,8 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  * genome once, lazily, which is the {@code HorsePanicGoal} pattern.
  *
  * <p>Shade-seeking was confirmed in-game on the dhampir (2026-09-13); the split
- * into its own locus is <b>not play-tested</b> - see {@code wiki/verification.html}.
+ * into its own locus is <b>not play-tested</b> - see
+ * {@code wiki/gene-sun-sensitivity.html#verification}.
  */
 @EventBusSubscriber
 public final class SunSensitivityHandler {

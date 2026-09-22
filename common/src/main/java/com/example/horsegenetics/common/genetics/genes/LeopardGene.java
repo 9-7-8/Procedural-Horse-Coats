@@ -78,8 +78,9 @@ import java.util.List;
  *
  * <p><b>Placement is a first guess.</b> Spot sizes, blanket coverage, roaning
  * strength and the hoof-stripe frequency are all eyeballed and want a play
- * session - {@code wiki/verification.html} §0. Mottled skin (the third member
- * of the characteristics triad) is not drawn; the coat has no skin layer.
+ * session - {@code wiki/gene-leopard.html#verification}. Mottled skin (the
+ * third member of the characteristics triad) is not drawn; the coat has no
+ * skin layer.
  *
  * <p>See {@code wiki/gene-leopard.html}.
  */

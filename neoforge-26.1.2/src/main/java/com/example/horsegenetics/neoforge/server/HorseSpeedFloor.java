@@ -46,7 +46,8 @@ import net.minecraft.world.entity.animal.equine.AbstractHorse;
  *
  * <p><b>Retuning</b> is one expression in {@link #floor()}. If a floored horse
  * turns out not to actually escape a zombie, multiply it up; the in-game check
- * is on {@code wiki/verification.html} and it is literally "race one".
+ * is on {@code wiki/horse-body.html#verification} and it is literally
+ * "race one".
  *
  * <p>Kept on the Minecraft side and off {@code common/} for the same reason
  * {@link HorsePrices} and {@code RarityItems} are: it is a playability decision

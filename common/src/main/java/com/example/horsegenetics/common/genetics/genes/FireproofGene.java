@@ -52,11 +52,14 @@ public final class FireproofGene extends AbstractAbilityGene {
      * of, and {@code known-gaps.html} gap 179 is the record of it.
      *
      * <p>{@value #MIN_LAVA_SPEED} is five times vanilla and lands near an
-     * ordinary walk, which is the <b>founder floor</b>: a wild fireproof horse
-     * caught in the world already crosses lava at a sensible pace, because a
-     * gene whose headline is "lava stops being a detour" should not need a
-     * breeding programme before it is true at all. {@value #MAX_LAVA_SPEED} is
-     * twenty times vanilla, and that is what there is to breed <i>for</i>.
+     * ordinary walk, which is the <b>floor every copy starts above</b>. The
+     * founders are {@link Founders#CARRIERS_ONLY}, so no wild horse expresses
+     * this at all and the floor is not about one caught in the world: it is
+     * about the <i>first</i> horse a player breeds. A gene whose headline is
+     * "lava stops being a detour" should be true the day the homozygote exists,
+     * not after an epigenetic breeding programme on top of the Mendelian one.
+     * {@value #MAX_LAVA_SPEED} is twenty times vanilla, and that is what there
+     * is to breed <i>for</i>.
      */
     public static final double MIN_LAVA_SPEED = 0.10;
     public static final double MAX_LAVA_SPEED = 0.40;

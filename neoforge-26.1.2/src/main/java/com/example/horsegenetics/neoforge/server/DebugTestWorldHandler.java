@@ -391,8 +391,10 @@ public final class DebugTestWorldHandler {
     private static final double TARGET_RANGE = 12.0;
 
     /**
-     * <b>The test kit - aimed at what is waiting on {@code wiki/verification.html}
-     * right now, and meant to be re-aimed every time that list changes</b>
+     * <b>The test kit - aimed at whatever the index of unverified work
+     * ({@code wiki/verification.html}, generated from every page's Verification
+     * tab) is pointing at right now, and meant to be re-aimed every time it
+     * changes</b>
      * (owner's standing request, 2026-09-10: "each time you do some kind of
      * debug, change what's in my inventory ... to make it as easy as possible to
      * test each new part"). Preset eggs are the lever: a horse built for one
@@ -430,11 +432,13 @@ public final class DebugTestWorldHandler {
      * dimension tears the yard down, so neither can happen in it.
      *
      * <p>Batches 2 and 3 are 2026-09-13 evening's unplayed work
-     * ({@code wiki/verification.html} 0-DT and 0-R): the ender whistle and band
-     * life, then the Dhampir's loci and the day loci. They are eggs and items
-     * rather than pens because every one of those tests is about the horse
-     * reacting to <i>you</i> - binding, calling across dimensions, biting the
-     * nearest thing that is not you - and a pen cannot stand in for the player.
+     * ({@code wiki/item-whistles.html#verification} and
+     * {@code wiki/horse-care.html#verification}, then
+     * {@code wiki/gene-sun-sensitivity.html#verification}): the ender whistle
+     * and band life, then the Dhampir's loci and the day loci. They are eggs
+     * and items rather than pens because every one of those tests is about the
+     * horse reacting to <i>you</i> - binding, calling across dimensions, biting
+     * the nearest thing that is not you - and a pen cannot stand in for the player.
      *
      * <p><b>The four below were four batches, down from six, because the yard took two of them.</b>
      *
@@ -590,9 +594,9 @@ public final class DebugTestWorldHandler {
         // row's last two pens moved into A's west block when oak/birch and bone
         // meal were confirmed, and H had been depth zero since the retinue pen
         // was deleted. The letters are deliberately NOT re-lettered: every sign
-        // in the yard, every open question on wiki/verification.html and a
-        // year of session notes say "row J west", and renaming rows to close a
-        // gap would invalidate all of it to save two characters.
+        // in the yard, every open question on a Verification tab anywhere in
+        // the wiki and a year of session notes say "row J west", and renaming
+        // rows to close a gap would invalidate all of it to save two characters.
         tell(player, Component.literal("Rows A, D, I and K run themselves - walk in, then "
                         + "leave it alone. B and C need your hands, and every chest in them is "
                         + "labelled. (There is no G or H: both were emptied and deleted.)")

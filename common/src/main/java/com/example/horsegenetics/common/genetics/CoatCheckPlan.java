@@ -19,11 +19,12 @@ import java.util.List;
  * <h2>Which genes</h2>
  * A gene is in this plan when its wiki page carries <b>no {@code Verified}
  * block</b> - the convention hard rule 9 sets up, where a confirmed thing is
- * deleted from {@code wiki/verification.html} and written up on its own page's
- * coding tab. So "has somebody looked at this in the game?" is already recorded,
- * once, in the place the answer belongs, and this reads it rather than keeping a
- * second list that would drift. The list is baked to a classpath resource by
- * {@code UnverifiedGeneTool} because the wiki is not in the jar.
+ * deleted from its own page's <b>Verification tab</b> and written up on that
+ * same page's coding tab. So "has somebody looked at this in the game?" is
+ * already recorded, once, in the place the answer belongs, and this reads it
+ * rather than keeping a second list that would drift. The list is baked to a
+ * classpath resource by {@code UnverifiedGeneTool} because the wiki is not in
+ * the jar.
  *
  * <p>Two filters are applied <b>here</b> rather than at bake time, so the
  * resource stays stable while the build it runs in decides what it means:

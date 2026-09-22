@@ -47,8 +47,8 @@ import java.util.function.Consumer;
  *
  * <h2>Fitting a horse in a 16px slot</h2>
  * The three constants below are eyeball numbers and want looking at in game -
- * see {@code wiki/verification.html}. The transform is vanilla's
- * entity-into-the-world sequence ({@code scale(-1, -1, 1)} then the
+ * see {@code wiki/item-transfer-papers.html#verification}. The transform is
+ * vanilla's entity-into-the-world sequence ({@code scale(-1, -1, 1)} then the
  * {@link EntityModel#MODEL_Y_OFFSET} lift) with a fit scale in front of it, so
  * the model stands on the item cube's floor the way an entity stands on the
  * ground, and is then raised to sit in the middle of the slot.

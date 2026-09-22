@@ -84,7 +84,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p><b>Not play-tested.</b> Written against 26.1.2 sources; the entity swap in
  * particular is the most invasive thing in the mod. See
- * {@code wiki/verification.html} and {@code wiki/gene-lycan.html}.
+ * {@code wiki/gene-lycan.html#verification}.
  */
 @EventBusSubscriber
 public final class LycanthropyHandler {

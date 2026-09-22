@@ -35,7 +35,7 @@ import java.util.List;
  * that a horse bred to {@code UL/UL} on both sides has the sector in the same
  * place on both sides. See {@link EyeSector} - and note the flip is derived from
  * the sheet's own documented mirroring rather than from a render, so it is on
- * {@code wiki/verification.html}.
+ * {@code wiki/eye-colour.html#verification}.
  *
  * <h2>Where the old sectoral heterochromia went</h2>
  * A blue wedge in a splashed white horse's eye used to be a roll off

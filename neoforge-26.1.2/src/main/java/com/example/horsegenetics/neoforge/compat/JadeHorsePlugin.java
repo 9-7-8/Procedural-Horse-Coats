@@ -53,7 +53,7 @@ import snownee.jade.api.config.IPluginConfig;
  * fact the client does hold: {@code ModAttachments.PREGNANT} is a synced
  * boolean, so a client-only Jade still says "Pregnant" and stays quiet about
  * the rest. <b>Unverified in either configuration</b> - see
- * {@code wiki/verification.html}.
+ * {@code wiki/compatibility.html#verification}.
  */
 @WailaPlugin
 public class JadeHorsePlugin implements IWailaPlugin {

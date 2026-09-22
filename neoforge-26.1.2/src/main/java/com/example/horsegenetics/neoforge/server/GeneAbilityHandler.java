@@ -1393,8 +1393,10 @@ public final class GeneAbilityHandler {
      * which also makes the edge of a spread ragged instead of a perfect
      * expanding disc.
      *
-     * <p>Skipped in the read-only gallery dimension, for the same reason the
-     * glow light block is: nothing there should be able to rewrite the floor.
+     * <p><b>It used to be skipped in the read-only gallery dimension</b>, for the
+     * same reason the glow light block was - and that made every spreading gene
+     * a silent no-op in the one place built for watching them. The guard is off;
+     * see the note in the body.
      */
     private static void spread(GeneAbility.Spread s, Horse horse, ServerLevel level) {
         int interval = Math.max(1, s.intervalTicks());

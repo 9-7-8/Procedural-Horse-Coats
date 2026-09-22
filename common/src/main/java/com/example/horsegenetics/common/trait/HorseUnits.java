@@ -38,7 +38,8 @@ package com.example.horsegenetics.common.trait;
  * <p><b>Unverified against this mod's own horses.</b> The fit assumes vanilla
  * jump physics at body scale 1.0 and normal gravity. A horse carrying the size
  * genes, or one of the magical jump genes that touches gravity, may clear
- * something different from what this prints - see {@code wiki/verification.html}.
+ * something different from what this prints - see
+ * {@code wiki/horse-body.html#verification}.
  */
 public final class HorseUnits {
 

@@ -40,7 +40,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  *       which can still be sheared for hair.</li>
  *   <li>The sheared <i>look</i> (a client render-layer overlay driven off this
  *       same cooldown stamp, settled &sect;21 as low-fidelity - no coat bake) is
- *       not yet built; see {@code wiki/verification.html}.</li>
+ *       not yet built; it is a gap rather than a check - see
+ *       {@code wiki/known-gaps.html#gap-33}, and the horse hair page.</li>
  * </ul>
  */
 @EventBusSubscriber

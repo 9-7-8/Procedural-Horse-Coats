@@ -42,8 +42,8 @@ public final class HorseNameplateSex {
     /**
      * Mars and Venus. Both are outside ASCII, so they come from Minecraft's
      * unicode fallback font rather than the default sheet - see
-     * {@code wiki/verification.html}, because whether they render as glyphs or
-     * as boxes has not been looked at in game.
+     * {@code wiki/gene-sex.html#verification}, because whether they render as
+     * glyphs or as boxes has not been looked at in game.
      */
     private static final String FEMALE = " ♀";
     private static final String MALE = " ♂";

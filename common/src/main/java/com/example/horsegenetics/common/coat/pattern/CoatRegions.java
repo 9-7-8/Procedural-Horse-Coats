@@ -161,7 +161,7 @@ public final class CoatRegions {
      * tables (head {@code tu,tv} = {@code 0,13} adult, {@code 0,0} foal, at two
      * texels per unit), not from a render, and with nothing on the template to
      * check it against the way the two eye rects could be. On
-     * {@code wiki/verification.html}.
+     * {@code wiki/eye-colour.html#verification}.
      */
     private static final int[] THIRD_EYE_ADULT = {18, 32, 4, 2};
     private static final int[] THIRD_EYE_BABY = {22, 8, 4, 2};

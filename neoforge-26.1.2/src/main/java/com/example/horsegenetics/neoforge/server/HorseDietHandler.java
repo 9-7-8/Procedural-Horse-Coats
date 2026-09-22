@@ -48,7 +48,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  * </ol>
  *
  * <p><b>Not play-tested.</b> Written against 26.1.2 sources; see
- * {@code wiki/verification.html}.
+ * {@code wiki/gene-diet.html#verification}.
  */
 @EventBusSubscriber
 public final class HorseDietHandler {

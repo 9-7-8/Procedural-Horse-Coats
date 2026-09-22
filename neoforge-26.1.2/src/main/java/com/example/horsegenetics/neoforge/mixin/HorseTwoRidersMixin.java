@@ -67,7 +67,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <p><b>Unverified:</b> the threshold works (the server boots and the method is
  * reached), but nothing here has been ridden in-game. The seating offset in
  * particular is a number picked to look right on vanilla's horse model, not one
- * measured - see wiki/verification.html.
+ * measured - see wiki/carts.html#verification.
  */
 @Mixin(AbstractHorse.class)
 public abstract class HorseTwoRidersMixin extends LivingEntity {

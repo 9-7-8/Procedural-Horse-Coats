@@ -55,7 +55,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * </ul>
  *
  * <p>All the placeholder-textured items are listed in
- * {@code wiki/verification.html} as needing art.
+ * {@code wiki/items.html#item-art} as needing art.
  */
 @EventBusSubscriber(modid = HorseGenetics.MOD_ID)
 public final class ModItems {

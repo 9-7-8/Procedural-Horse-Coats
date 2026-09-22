@@ -62,7 +62,7 @@ import java.util.List;
  * render, and unlike the two real eyes there is nothing on the template at that
  * spot to check it against - the third eye is painted absolutely, not tinted,
  * because the forehead is plain white and there is no iris there to colour. It
- * is on {@code wiki/verification.html}.
+ * is on {@code wiki/eye-colour.html#verification}.
  *
  * <p><b>Magical.</b> See {@code wiki/eye-colour.html}.
  */

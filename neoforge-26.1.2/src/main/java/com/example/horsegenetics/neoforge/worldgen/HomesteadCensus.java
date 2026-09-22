@@ -64,7 +64,7 @@ import java.util.Set;
  * homestead this counts is one the generator committed to; whether it then
  * looks right, whether the villagers claim their posts, and whether the terrain
  * under it is somewhere you would want to live are all still a walk. See
- * {@code wiki/verification.html}.
+ * {@code wiki/villagers.html#verification}.
  *
  * <h2>Reading the result</h2>
  * The interesting number is not really the rate. It is the <b>connector

@@ -107,8 +107,9 @@ public final class GeneWikiTool {
                 continue;
             }
             Path page = wiki.resolve(pageOf(gene));
-            String kept = Files.exists(page) ? verifiedBlock(Files.readString(page, StandardCharsets.UTF_8)) : "";
-            Files.writeString(page, genePage(gene, opensOn.get(gene.key()), kept), StandardCharsets.UTF_8);
+            String existing = Files.exists(page) ? Files.readString(page, StandardCharsets.UTF_8) : "";
+            Files.writeString(page, genePage(gene, opensOn.get(gene.key()),
+                    verifiedBlock(existing), keptPanels(existing)), StandardCharsets.UTF_8);
             written++;
         }
         List<String> notBay = new ArrayList<>();
@@ -761,11 +762,59 @@ public final class GeneWikiTool {
         return to < 0 ? "" : page.substring(from, to).trim() + "\n\n";
     }
 
-    private static String genePage(SpecGene gene, String opensOn) {
-        return genePage(gene, opensOn, "");
+    /** The three panels this tool writes. Any other on a generated page is somebody's. */
+    private static final Set<String> GENERATED_TABS = Set.of("gameplay", "coding", "science");
+
+    private static final Pattern PANEL_TAB = Pattern.compile("data-tab=\"([a-z-]+)\"");
+
+    /**
+     * A generated page's <b>page-local tabs</b>, whole and in document order, to carry
+     * across a rebake - each {@code <section>} through its {@code </section>}, or empty.
+     *
+     * <p><b>The same failure as {@link #verifiedBlock}, one tab over, and it happened
+     * twice in one day.</b> The bake of 2026-09-21 silently deleted the <b>Verification</b>
+     * tabs of twenty-four data-driven gene pages and one <b>Roadmap</b> tab - written the day
+     * before, when the wiki's two shared lists were broken up and given to the pages they were
+     * about. The only signs were the verification index dropping from 155 pages to 131 and one
+     * broken fragment in the roadmap index. Hard rules 7 and 9 put a checklist and a plan on
+     * the page for the thing, which for eighty-odd genes is a page this tool owns.
+     *
+     * <p>So this carries <b>any</b> panel whose {@code data-tab} is not one of the three this
+     * tool writes, rather than naming verification and roadmap: the next list to be dismantled
+     * onto its subject's page is carried by having done that, and does not need this method
+     * edited to survive. {@code wiki/tabs.js} gives such a panel its own button, so a carried
+     * one keeps working with no other change.
+     */
+    static String keptPanels(String page) {
+        StringBuilder out = new StringBuilder();
+        int at = 0;
+        while (true) {
+            int from = page.indexOf("<section", at);
+            if (from < 0) {
+                break;
+            }
+            int to = page.indexOf("</section>", from);
+            if (to < 0) {
+                break;
+            }
+            to += "</section>".length();
+            String panel = page.substring(from, to);
+            int head = panel.indexOf('>');
+            Matcher tab = PANEL_TAB.matcher(head < 0 ? panel : panel.substring(0, head));
+            if (panel.contains("tab-panel") && tab.find() && !GENERATED_TABS.contains(tab.group(1))) {
+                out.append(panel.trim()).append("\n\n");
+            }
+            at = to;
+        }
+        return out.toString();
     }
 
-    private static String genePage(SpecGene gene, String opensOn, String verified) {
+    private static String genePage(SpecGene gene, String opensOn) {
+        return genePage(gene, opensOn, "", "");
+    }
+
+    private static String genePage(SpecGene gene, String opensOn, String verified,
+                                   String keptPanels) {
         // The family is the eyebrow's second half and nothing more: it names
         // the sidebar section and the landing-page heading this gene sits
         // under, neither of which is a page one could link to.
@@ -846,6 +895,9 @@ public final class GeneWikiTool {
         sb.append(layers(gene));
         sb.append(verified);   // the hand-written records, kept - see verifiedBlock
         sb.append("</section>\n\n");
+        // The page's own tabs - a checklist, a plan - kept whole and after the three
+        // this tool writes, so the tab bar keeps its order. See keptPanels.
+        sb.append(keptPanels);
         foot(sb);
         return sb.toString();
     }

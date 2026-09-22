@@ -24,10 +24,13 @@ import java.util.stream.Stream;
  * The wiki is not in the jar, and it never will be: it is the documentation, not
  * the mod. But the fact the horse dimension needs - <i>has anybody actually
  * looked at this gene in the game?</i> - is recorded there and nowhere else, by
- * hard rule 9: a thing that is verified is deleted from
- * {@code wiki/verification.html} and written up under {@code <h3 id="verified">}
- * on its own page's coding tab. So this walks the pages at build time and writes
- * the answer where {@code CoatCheckPlan} can read it.
+ * hard rule 9: a checklist lives on the <b>Verification tab of the page for the
+ * thing it tests</b>, and a thing that is verified is deleted from that tab and
+ * written up under {@code <h3 id="verified">} on the same page's coding tab.
+ * ({@code wiki/verification.html} is generated from those tabs and carries no
+ * checklist of its own, so there is nothing on it to read.) So this walks the
+ * gene pages at build time and writes the answer where {@code CoatCheckPlan}
+ * can read it.
  *
  * <p>Writing a <b>second hand-kept list</b> of what is unverified was the
  * alternative and it is the one thing this project keeps proving does not work:

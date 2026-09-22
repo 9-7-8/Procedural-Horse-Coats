@@ -44,9 +44,10 @@ import java.util.List;
  * <h2>What is in it is whatever is still open, and nothing else</h2>
  * A pen for a test that has been answered is the most expensive thing in this
  * project: it spends the one resource that cannot be bought back, which is the
- * owner's time in the game. So the yard is audited against
- * {@code wiki/verification.html} every time that page moves, and a confirmed
- * test's pen is <b>deleted</b> rather than left standing with a tick on it.
+ * owner's time in the game. So the yard is audited against the index of
+ * unverified work ({@code wiki/verification.html}, generated from every page's
+ * Verification tab) every time it moves, and a confirmed test's pen is
+ * <b>deleted</b> rather than left standing with a tick on it.
  * Gone this way already: verdant's three floors, the pack leader's cows, and
  * the spontaneous-breeding field (owner, 2026-09-12: "we're done with those
  * tests").
@@ -1111,7 +1112,7 @@ final class DebugTestYard {
      * ({@code known-gaps.html} gap 180).
      *
      * <p><b>So what is left here is the test that actually mattered</b>, and
-     * {@code wiki/verification.html} &sect;0-BT ranks it above the other:
+     * {@code wiki/gene-holy-ward.html#verification} ranks it above the other:
      * <i>holy ward can break somebody's mob farm without erroring</i>. It hooks
      * a global, high-frequency event shared with every other mod in the pack,
      * and if the allow-list is wrong a spawner stops producing and nothing

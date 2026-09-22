@@ -36,9 +36,10 @@ import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
  * ({@code fancymodloader 11.0.15}), and {@code ModLoader.postEvent} is public
  * and takes exactly this shape of event, but no third-party mod has actually
  * registered a gene through it yet. What to check is on
- * {@code wiki/verification.html}; the log line below is the evidence, and its
- * count should match the one {@link com.example.horsegenetics.neoforge.ModGeneSpecs}
- * prints just before it.
+ * {@code wiki/making-a-gene.html#verification}; the log line below is the
+ * evidence, and its count should match the one
+ * {@link com.example.horsegenetics.neoforge.ModGeneSpecs} prints just before
+ * it.
  */
 public final class GeneRegistration {
 

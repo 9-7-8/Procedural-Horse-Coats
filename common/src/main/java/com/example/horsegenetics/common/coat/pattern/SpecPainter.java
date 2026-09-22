@@ -30,7 +30,7 @@ import java.util.Map;
  * coverage scales the effect rather than gating it, a spec gene's edges are soft
  * by construction - which is the one thing the hand-written genes each had to
  * remember separately, and the reason splash's socks still end in a hard ring
- * (see {@code wiki/verification.html}).
+ * (see {@code wiki/gene-mitf.html#verification}).
  *
  * <p>Pure, like every other pattern class here: same spec + same drawn
  * {@link SpecValues} + same coat in, same field out. All the randomness was
