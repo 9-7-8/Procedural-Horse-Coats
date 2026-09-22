@@ -1993,9 +1993,10 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 
 <p class="note">
     <strong>What has actually been seen in a running game is a fraction of what parses.</strong>
-    Each verb below says whether the translator executes it;
-    <a href="verification.html">verification</a> is the authority on which ones a person
-    has watched work, and is the page to read before claiming any of this runs.
+    Each verb below says whether the translator executes it; the <strong>Verification tab of
+    the gene page that uses it</strong> is the authority on which ones a person has watched
+    work, and <a href="verification.html">to be verified</a> collects those tabs in one list
+    &mdash; read it before claiming any of this runs.
 </p>
 
 <h2 id="how-to-read">How to read this tab</h2>
@@ -4392,8 +4393,11 @@ private static final List&lt;Gene&gt; BUILTINS = List.of(
         <code>common/src/test/resources/coat-golden.txt</code>, run the test, copy
         <code>common/build/coat-golden.txt</code> back &mdash; and say so in the
         commit message.</li>
-    <li><strong>Add an entry to <a href="verification.html">To be verified</a></strong>
-        saying what to look at in-game and where.</li>
+    <li><strong>Give the new gene&rsquo;s own page a Verification tab</strong> saying what to
+        look at in-game and where &mdash; never an entry on
+        <a href="verification.html">to be verified</a>, which is generated from those tabs
+        (hard rule 9). The markup the bake insists on is on that page; re-run
+        <code>node wiki/tools/bake-verification-index.mjs</code> afterwards.</li>
 </ol>
 
 <h2>Testing a gene on its own</h2>
@@ -5197,6 +5201,29 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     code.
 </p>
 
+<div class="note">
+    <span class="label">What you write on a generated page, the bake keeps</span>
+    <p>
+        A data-driven gene&rsquo;s page is rewritten <em>whole</em>, so anything a person adds to
+        one has to be carried across by name. Two things are:
+        the <strong>Verified</strong> records from <code>&lt;h3 id=&quot;verified&quot;&gt;</code> on
+        (<code>GeneWikiTool.verifiedBlock</code>), and <strong>every page-local tab</strong> &mdash;
+        a Verification tab, a Roadmap tab, anything whose <code>data-tab</code> is not one of the
+        three views the tool writes (<code>GeneWikiTool.keptPanels</code>). Everything else on the
+        page comes from the gene file, and editing it there is the only edit that survives.
+    </p>
+    <p>
+        <strong>This is worth knowing because it has been the reason for three silent losses.</strong>
+        A bake in 2026-09-15 emptied thirteen pages&rsquo; Verified sections; the carry written to
+        stop that shipped with no test, so a bake on 2026-09-21 deleted twenty-four Verification
+        tabs and a Roadmap tab instead. Nothing goes red when it happens &mdash; the page is still
+        a valid page &mdash; so the guard is now
+        <code>GeneWikiCarryTest</code>, which asserts that every page the two generated indexes
+        name still carries the tab they name it for, and fails in the other direction too when a
+        tab is added and its index is not re-baked.
+    </p>
+</div>
+
 <h2 id="verified">Verified</h2>
 
 <p id="verified-mask-parts">
@@ -5612,7 +5639,7 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
         <a href="body-space.html">Body space</a>
         <a href="genetics-model.html">The genetics model</a>
         <a href="horse-traits.html">Trait &amp; effect architecture</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/spec/</code>,
     <code>common/coat/pattern/SpecPainter.java</code>,

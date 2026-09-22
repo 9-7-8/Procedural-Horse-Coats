@@ -80,7 +80,7 @@
     <span class="label">Built 2026-09-04, not yet play-tested</span>
     <p>
         The stripe reads correctly in sample bakes. The aura has never been stood
-        next to. Checklist on <a href="verification.html">To be verified</a>.
+        next to. Checklist on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -191,12 +191,81 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Healer&rsquo;s red mane stripe reads in sample bakes but its aura has never been stood
+    next to: a <code>Hlr/Hlr</code> horse should mend every <em>player</em> within three blocks
+    by half a heart every two seconds, while the three half-health horses sharing its pen stay
+    hurt.</p>
+</div>
+
+<h3 id="open-healer">Still open (NOT played)</h3>
+
+<p>
+    The aura is the whole check, and a healing effect is only judgeable against something
+    that must <em>not</em> be healed. Both halves are already in the yard: the
+    <code>INFIRMARY - HEALER</code> pen holds one <code>Hlr/Hlr</code> horse and three
+    horses taken to half health when it was built, and the census prints that pen&rsquo;s
+    <code>max_health</code> range beside every <code>horse hurt</code> and
+    <code>horse healed</code> line. The three hurt horses are the <em>control</em>, not the
+    subject &mdash; the aura is <code>Healing("players", ...)</code>, so a horse mending in
+    that pen means the target field is not being read at all.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The three patients must never mend.</strong> Leave the
+        <code>INFIRMARY - HEALER</code> pen alone for a few censuses with no player in it.
+        <strong>Pass:</strong> no <code>horse healed</code> line for any of them, and the
+        pen&rsquo;s health range still shows three horses short of full. If they heal, the
+        aura is hitting everything alive in range and nothing else here is worth
+        checking.</li>
+    <li><strong>A damaged player in range mends on the beat.</strong> Take damage, stand
+        beside the healer, and count. <strong>Pass:</strong> half a heart every 40 ticks,
+        with one heart particle over you per beat, and <em>nothing</em> once you are back at
+        full health &mdash; a target at full health is skipped before the heal, so a stream
+        of hearts at full health would be a different bug.</li>
+    <li><strong>Three blocks means three blocks.</strong> Damaged, walk out to six blocks
+        and wait through several beats, then walk back in. <strong>Pass:</strong> the
+        healing and the hearts stop outright at range and resume when you return. A player
+        who keeps mending from across the pen is the commonest shape of this failure &mdash;
+        the scan box is a box, and only an explicit distance test makes the aura a
+        sphere.</li>
+    <li><strong>A carrier does nothing at all.</strong> Spawn <code>Hlr/n</code> from the
+        custom horse spawn egg and stand beside it damaged. <strong>Pass:</strong> its gene
+        row reads <code>healer-carrier</code>, there is no stripe, and not one heart.</li>
+    <li><strong>A foal heals with nothing to show for it.</strong> Breed two healers and
+        stand beside the foal before it grows. <strong>Pass:</strong> no stripe, because the
+        foal mesh has no mane, and the same healing as an adult. This is the one case where
+        the mark and the effect come apart, so it is the one case a player could mistake for
+        the gene being dead.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The stripe varies in strength, not in width.</strong> Spawn several
+        <code>Hlr/Hlr</code> horses. <strong>Pass:</strong> a red line straight down the
+        middle of every mane, faint on some horses and vivid on others, and each line the
+        same width &mdash; the epigenetic value is opacity, so a faint stripe that reads as a
+        <em>thinner</em> one means the paint is not walking toward the red.</li>
+    <li><strong>A coloured mane keeps its colour and gains a line.</strong> Add
+        <a href="gene-mane-color.html">mane colour</a> to a healer.
+        <strong>Pass:</strong> the mane is its own colour with the red line on top of it,
+        not under it.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="making-a-gene.html#healing">The healing verb</a>
         <a href="gene-mane-color.html">Mane colour</a>
         <a href="horse-care.html">Horse care &mdash; the non-genetic healing gate</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/HealerGene.java</code>
 </div>

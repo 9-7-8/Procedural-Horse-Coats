@@ -28,14 +28,13 @@
 <section class="tab-panel" data-tab="gameplay">
 
 <div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+    <span class="label">Half seen: it throws you, and it heads for land</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        Both halves were <a href="#verified-throws">confirmed in the yard on 2026-09-13</a> &mdash;
+        it does more than this page originally claimed. What has <strong>not</strong> been
+        watched is everything it must <em>not</em> do: a carrier must still carry you across a
+        river, a ford must not dismount anybody, and the deep-water ejection must not become a
+        drowning. Those are on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -98,14 +97,15 @@
 </div>
 
 <div class="note warn">
-    <span class="label">Half-built: it throws you, it does not flee</span>
+    <span class="label">Both halves are built, and the second was a surprise</span>
     <p>
-        The <code>water_averse</code> flag currently <strong>ejects the rider</strong> in
-        water deep enough to swim in, and stops there. The &ldquo;and then makes for the
-        nearest shore&rdquo; half is not implemented &mdash; the horse stays where it was.
-        Worse, in the middle of a lake it leaves the rider swimming. Treat this locus as
-        incomplete rather than merely unverified; it wants a flee-to-land goal before it
-        is honest about its own page.
+        The <code>water_averse</code> flag <strong>ejects the rider</strong> in water deep
+        enough to swim in, and the horse then <strong>makes for an edge</strong> &mdash;
+        <a href="#verified-throws">owner-confirmed on 2026-09-13</a>, which is also how the
+        fleeing half was discovered, since this box used to say it was not implemented. What
+        still matters is where the rider is <em>left</em>: bucked off in the middle of a lake
+        they are swimming, and that is the open question on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -148,14 +148,56 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Hydrophobic is confirmed throwing its rider, so what is unchecked is everything it must
+    <em>not</em> do: a carrier must still carry you across a river, a ford must not dismount anybody,
+    and the deep-water ejection must not be a drowning.</p>
+</div>
+
+<h3 id="open-gene-hydrophobic">Still open (NOT played)</h3>
+
+<p>
+    The gene is the <code>water_averse</code> traversal flag, and the translator ejects passengers
+    only while the horse is in water deeper than its fluid-jump threshold. The point of the locus is
+    that it is a rare <em>defect</em>: the interesting failures are all on the horses that do not
+    have it, which is the half nothing announces. What has been seen is on the
+    <a href="#verified">Coding tab</a> &mdash; do not re-open it.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A carrier keeps the swimming assist.</strong> Ride a <code>Hyd/n</code> horse from
+        the custom horse spawn egg across a river. <strong>Pass:</strong> it carries you the whole
+        way and never ejects you. This is the claim the recessive decision rests on &mdash;
+        <em>nothing existing changes behaviour</em> &mdash; and a flag that fired on carriers would
+        quietly retire the mod&rsquo;s swimming assist for a fifth of all horses.</li>
+    <li><strong>A ford does not throw you.</strong> Ride an expressing horse through water about a
+        block deep. <strong>Pass:</strong> you stay aboard. The threshold is deliberately set at
+        swimming depth rather than &ldquo;wet&rdquo;, so an over-eager check would make the gene
+        unridable on any shoreline.</li>
+    <li><strong>It does not re-eject in a loop.</strong> Take an expressing horse into the middle of
+        a lake. <strong>Pass:</strong> you are thrown once and can then swim out under your own
+        control &mdash; not held under, and not remounted and thrown again on the next tick.</li>
+    <li><strong>It is findable at about its stated rate.</strong> The founder table puts the
+        expressing pair in the wild. <strong>Pass:</strong> over a lot of wild horses you occasionally
+        meet one that will not be ridden into water, rather than never. A locus whose whole breeding
+        project is removing it has to be encounterable or the project does not exist.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-waterborn.html">Waterborn</a>
         <a href="gene-ocean-born.html">Ocean-born</a>
         <a href="gene-magic-swim-speed.html">Magic swim speed</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/HydrophobicGene.java</code>
+    Source: <code>common/genetics/genes/HydrophobicGene.java</code>
 </div>
 
 </article>

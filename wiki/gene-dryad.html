@@ -360,12 +360,63 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Dryad&rsquo;s planting is the best-confirmed magical effect in the mod, so only the
+    parts no pen has ever exercised are still open: the per-copy <code>interval</code> that
+    <strong>breeding is supposed to be able to hurry, and only so far</strong>, and whether a
+    wild dryad exists at all &mdash; every horse that has ever planted anything here came out
+    of a spawn egg.</p>
+</div>
+
+<h3 id="open-gene-dryad">Still open (NOT played)</h3>
+
+<p>
+    Read the <a href="#verified">Verified in the test yard</a> block on the Coding tab first
+    and do not re-test any of it: the species-per-allele rule, the half-rate mixed pair, dark
+    oak clustering, mushrooms on podzol only, the bone-meal allele refusing crops, the carrier
+    planting nothing and no tree growing through a horse are all settled on real runs. What
+    remains is the <em>epigenetic</em> half of the locus and the wild population, neither of
+    which a test yard full of designed horses can say anything about.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The interval is on the copy, and the two halves of a mixed horse differ.</strong>
+        Each copy carries its own <code>interval</code>, and a mixed horse doubles each
+        separately. <strong>Pass:</strong> in an <code>Oak/Brch</code> pen the oak plantings and
+        the birch plantings come at noticeably different spacings in the log &mdash; not
+        alternating on one beat. Identical spacing means <code>expressed()</code> is being read
+        where <code>copy(0)</code> and <code>copy(1)</code> should be, which would count one
+        allele twice and the other never and would still look like a working gene.</li>
+    <li><strong>Breeding can hurry a line, and cannot run away with it.</strong>
+        <code>MIN_INTERVAL</code> and <code>MAX_INTERVAL</code> bound the drift.
+        <strong>Pass:</strong> select the fastest planter over several generations and the line
+        gets measurably quicker, then stops &mdash; never below <code>MIN_INTERVAL</code>, and
+        the horses still plant roughly a third as often as the nominal rate suggests
+        (<a href="known-gaps.html#gap-208">gap 208</a>, which is a property of the verb and not
+        of the drift). A line that keeps accelerating means the bound is not being applied on
+        inheritance, only on the founder roll.</li>
+    <li><strong>A wild dryad exists, and is almost always mixed.</strong> Nine variants at
+        <code>DryadGene.PER_VARIANT</code> each gives nine matched pairs against thirty-six
+        mixed ones. <strong>Pass:</strong> over a lot of wild horses, dryad expressers turn up
+        at about the rate that arithmetic predicts, the great majority of them carrying two
+        <em>different</em> variants, and a wild-caught matched pair is a genuine find. Nothing
+        has ever confirmed the locus outside a spawn egg, so this also proves the founder table
+        is being drawn from at all.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-hot-blooded.html">Hot blooded</a>
         <a href="gene-verdant.html">Verdant</a>
         <a href="making-a-gene.html#spread">The <code>spread</code> verb</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/DryadGene.java</code>
 </div>

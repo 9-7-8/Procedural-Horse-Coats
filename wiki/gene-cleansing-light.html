@@ -34,8 +34,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -128,14 +128,73 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Cleansing light has never been seen killing anything: it was one of the six genes the horse
+    dimension&rsquo;s own protections made untestable, and the aura, the undead tag filter and the
+    deliberate loss of the drops are all still unconfirmed.</p>
+</div>
+
+<h3 id="open-gene-cleansing-light">Still open (NOT played)</h3>
+
+<p>
+    The gene is one <code>Healing</code> ability with a negative amount, an <code>undead</code>
+    group and a radius carried on the allele copy. It was listed in
+    <code>DebugYardCombat</code> as one of the six genes that could not be tested until the
+    yard stopped deleting monsters and protecting horses, so its arena is new and unread. The undead
+    filter is <code>MobGroups</code>&rsquo; <code>EntityTypeTags.UNDEAD</code> lookup, and the
+    failure it can have is entirely silent &mdash; an aura that simply never matches anything.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The aura kills undead nobody has touched.</strong> Put a <code>Cln/Cln</code> horse
+        in the yard arena with its spawner running, and do not attack anything yourself.
+        <strong>Pass:</strong> zombies near the horse lose health on a beat and die. Nothing else
+        here matters if this does not happen.</li>
+    <li><strong>A carrier does nothing.</strong> The same setup with a <code>Cln/n</code> horse.
+        <strong>Pass:</strong> the zombies are entirely unharmed and reach the horse. This is the
+        control that separates a working recessive from an aura firing on every horse in the
+        world.</li>
+    <li><strong>The filter is the undead tag and not a list of zombies.</strong> Put a skeleton, a
+        drowned and a creeper in range. <strong>Pass:</strong> the skeleton and the drowned burn
+        down, the creeper is untouched. A hardcoded list would pass the zombie test and fail this
+        one, and it would take five genes blind to modded creatures with it.</li>
+    <li><strong>The drops really are lost, and that is the design.</strong> Let the aura finish a
+        zombie with no hit of yours on it. <strong>Pass:</strong> no experience orbs and no
+        player-only drop. Record it as confirmed rather than as a defect &mdash; the
+        &sect;<a href="#loot">loot cost</a> is a settled decision.</li>
+    <li><strong>The beat is slow, and that is why it is cheap.</strong> Watch one zombie&rsquo;s
+        health while it stands in the aura. <strong>Pass:</strong> it loses
+        <code>CleansingLightGene.DAMAGE</code> in discrete steps about two seconds apart, not
+        continuously. Faster than that means the hurt-immunity frames are eating most of the scan
+        the gene is paying for.</li>
+    <li><strong>The cap bounds the scan.</strong> Crowd more undead into range than
+        <code>MAX_TARGETS</code>. <strong>Pass:</strong> only that many are being hurt per beat and
+        the rest wait their turn &mdash; not every mob in the box at once.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The radius reads as a radius.</strong> Two expressing horses at either end of the
+        epigenetic range. <strong>Pass:</strong> the wider one reaches undead the narrower one does
+        not, so breeding for the radius is a thing a player can notice at all.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-fighter.html">Magic fighter</a>
         <a href="gene-healer.html">Healer</a>
         <a href="gene-holy-ward.html">Holy ward</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/CleansingLightGene.java</code>
+    Source: <code>common/genetics/genes/CleansingLightGene.java</code>
 </div>
 
 </article>

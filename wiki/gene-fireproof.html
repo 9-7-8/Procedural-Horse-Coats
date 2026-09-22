@@ -28,14 +28,14 @@
 <section class="tab-panel" data-tab="gameplay">
 
 <div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+    <span class="label">Half seen: immunity yes, the rest no</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        Horse and rider surviving fire was
+        <a href="#verified-rider">owner-confirmed in the 2026-09-10 sessions</a>. What has
+        <strong>not</strong> been watched is what could not be judged from the saddle: that the
+        lava speed is inherited rather than flat, that a carrier still burns, and that
+        <code>LavaTravelMixin</code> did not quietly speed up every other entity in the game.
+        Those are on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -168,14 +168,78 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Fireproof is confirmed on a ridden horse in a lava channel, so what is left is the parts
+    nobody has been able to see from the saddle: that the lava speed is <em>inherited</em>, that a
+    carrier still burns, and that <code>LavaTravelMixin</code> did not quietly speed up every other
+    entity in the game.</p>
+</div>
+
+<h3 id="open-gene-fireproof">Still open (NOT played)</h3>
+
+<p>
+    The immunity and the crossing speed are both confirmed (&sect;<a href="#verified">Verified</a>).
+    Everything below is either a control &mdash; the cases that must <em>not</em> have changed
+    &mdash; or the epigenetic range, which is the only reason to breed two of these together and has
+    never been read.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A carrier burns.</strong> Spawn a <code>Frp/n</code> horse from the custom horse
+        spawn egg and stand it in fire, with you aboard. <strong>Pass:</strong> both of you take
+        fire damage on the usual schedule. The immunity is a damage cancel keyed on the expressing
+        horse, and a cancel that is too wide makes every horse in the world fireproof without
+        saying so.</li>
+    <li><strong>Only fire is cancelled.</strong> Hurt an expressing horse with a sword and with a
+        fall. <strong>Pass:</strong> both land normally. The filter is the
+        <code>minecraft:is_fire</code> damage-type tag, and an invulnerable horse looks like a
+        generous gene rather than a bug.</li>
+    <li><strong>The mixin is per horse and not per world.</strong> Push an ordinary horse, and any
+        other mob, into lava. <strong>Pass:</strong> they move at vanilla&rsquo;s crawl.
+        <code>LavaTravelMixin</code> replaces a hardcoded constant for every entity that swims in
+        lava, and it reading the attribute for all of them would be invisible until somebody noticed
+        a fast zombie.</li>
+    <li><strong>The speed is inherited and drifts.</strong> Breed two expressing horses whose
+        <code>lava_movement</code> readouts differ. <strong>Pass:</strong> the foal&rsquo;s attribute
+        sits inside <code>FireproofGene.MIN_LAVA_SPEED</code>&ndash;<code>MAX_LAVA_SPEED</code>,
+        is not vanilla&rsquo;s value, and is not identical to either parent. This is the one thing
+        the &sect;<a href="#verified-lava-speed">lava-speed record</a> explicitly leaves open.</li>
+    <li><strong>An unridden one floats too.</strong> The buoyancy is a gravity modifier on the
+        horse, but it was built and confirmed under a rider. Drive a riderless expressing horse into
+        a lava pool. <strong>Pass:</strong> it rises and bobs at the surface rather than sinking to
+        the floor and staying there.</li>
+    <li><strong>No wild horse is fireproof.</strong> The founder table is carriers-only.
+        <strong>Pass:</strong> you meet carriers and never a wild horse that swims lava &mdash; the
+        first one is bred. <em>Note the contradiction if it fails the other way:</em>
+        <code>FireproofGene</code>&rsquo;s own comment on the speed floor talks about &ldquo;a wild
+        fireproof horse caught in the world&rdquo;, which the carriers-only table says cannot
+        exist.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A slow one and a fast one look different.</strong> Two expressing horses at either
+        end of the range, across the same lava. <strong>Pass:</strong> the difference is large enough
+        to notice without timing it, which is what makes the epigenetic range worth breeding for
+        rather than a number on a page.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-bird-boned.html">Bird boned</a>
         <a href="gene-ocean-born.html">Ocean-born</a>
         <a href="gene-waterborn.html">Waterborn</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/FireproofGene.java</code>
+    Source: <code>common/genetics/genes/FireproofGene.java</code>
 </div>
 
 </article>

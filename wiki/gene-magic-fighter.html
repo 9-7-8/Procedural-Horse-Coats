@@ -112,7 +112,7 @@
     <p>
         Nothing on this page has been seen in game. The translator was written
         against the 26.1.2 sources and is flagged as unverified in its own
-        comments. Checklist on <a href="verification.html">To be verified</a>.
+        comments. Checklist on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -206,12 +206,65 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Magic fighter has never been in a world and its whole effect is one number, so until somebody reads a horse&rsquo;s <code>ATTACK_DAMAGE</code> a gladiator that writes nothing and a plain horse are <strong>the same animal</strong> &mdash; and nothing has confirmed that a kick lands double on a monster.</p>
+</div>
+
+<h3 id="open-magic-fighter">Still open (NOT played)</h3>
+
+<p>
+    There is no test-yard pen for this locus, so every reading below is a spawn from the custom
+    horse spawn egg and an <code>/attribute &lt;horse&gt; minecraft:attack_damage base get</code>.
+    The failure this orders for is the silent one: the gene emits no ability at all for a wild type,
+    and a translator that never writes the base value leaves every genotype reading the
+    registration default of 3.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A plain horse reads exactly 3.</strong> This is the control, and it comes from
+        <code>HorseAggroHandler</code>&rsquo;s registration rather than from the gene &mdash; a wild
+        type emits no <code>combat</code> ability at all. <strong>Pass:</strong> base value 3.0.</li>
+    <li><strong>A <code>Gld/Gld</code> horse reads higher, and two of them read
+        <em>differently</em>.</strong> Two wild-range gladiator copies are worth between +2 and +6.
+        <strong>Pass:</strong> base value above 3.0 on both, and not the same number on both &mdash;
+        equal numbers would mean the percentage is not coming off the allele copy.</li>
+    <li><strong>A <code>Wmp/Wmp</code> horse never reads below 1.</strong> The floor is on the
+        damage, not on the percentage. <strong>Pass:</strong> base value at or above 1.0, never 0
+        &mdash; a horse that cannot attack at all is a different animal from a weak one.</li>
+    <li><strong>A <code>Gld/Wmp</code> horse sits near the baseline.</strong>
+        <strong>Pass:</strong> base value within about a point of 3.0 while the horse&rsquo;s sheet
+        shows it carrying both alleles &mdash; the two percentages are added with opposite signs,
+        and nothing checks for the pair.</li>
+    <li><strong>A kick lands double on a monster and single on a player.</strong> Provoke an
+        untamed plain horse into kicking a zombie. <strong>Pass:</strong> the zombie&rsquo;s 20
+        health goes in <em>four</em> kicks (6 each), not seven (3 each), and the same horse takes
+        exactly a heart and a half off an unarmoured player. If the zombie takes seven, the
+        <code>Enemy</code> multiplier is not firing and every number above is half the story.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A gladiator wins the trade a plain horse barely wins.</strong> Leave a
+        <code>Gld/Gld</code> horse and a plain one, each with a zombie, on Normal.
+        <strong>Pass:</strong> the gladiator finishes its zombie with most of its health left and
+        the plain one does not &mdash; that gap is what the locus is for, and it is the only part of
+        it a number cannot show.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-mob-aura.html">Magic mob aura &mdash; what it fights</a>
         <a href="gene-magic-health.html">Magic health</a>
         <a href="horse-body.html">The horse&rsquo;s body</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicFighterGene.java</code>,
     <code>neoforge/server/HorseAggroHandler.java</code>

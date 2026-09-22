@@ -35,8 +35,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -95,10 +95,10 @@
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
-<div class="note danger">
-    <span class="label">Same-kind yields must merge, or the gene silently lies</span>
+<div class="note warn">
+    <span class="label">Same-kind yields merge &mdash; built, and never bottled</span>
     <p>
-        A compound heterozygote carries <em>two</em> <code>yield</code> abilities, both triggered by a glass bottle. Today the first matching yield fires and the second is ignored &mdash; which would hand back a single-effect potion while this page promises two. <strong>The translator needs to merge yields of the same <code>kind</code> into one item before producing it.</strong> This is the one part of the gene that is not already built, and it is the part that will be forgotten.
+        A compound heterozygote carries <em>two</em> <code>yield</code> abilities, both triggered by a glass bottle, and a translator that fired only the first would hand back a single-effect potion while this page promises two. <strong>The merge is built</strong>: <code>GeneYieldHandler</code> collects every yield of one <code>kind</code>, de-duplicates by effect id, logs and skips an unrecognised one, and builds a single <code>PotionContents</code>. <strong>Nobody has bottled a two-effect mare to see it</strong>, which is the one outcome here that can be half delivered without looking wrong &mdash; it is the first check on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -153,14 +153,70 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Potion milk&rsquo;s compound-heterozygote merge is now written &mdash;
+    <code>GeneYieldHandler</code> collects every yield of one kind into one bottle &mdash; and nobody
+    has ever bottled a two-effect mare to see it, which is the one outcome this page promises that
+    can silently be half delivered.</p>
+</div>
+
+<h3 id="open-gene-potion-milk">Still open (NOT played)</h3>
+
+<p>
+    The yard&rsquo;s <em>DAIRY + CLIP</em> pen covers the three refusals, and its stone floor is what
+    keeps the hurt mare hurt long enough to reach them. It does <strong>not</strong> cover the merge:
+    its only compound horse is a stallion, who kicks instead of yielding, so the two-effect bottle
+    needs a mare from the custom horse spawn egg. Note also that a single copy already expresses, so
+    a wild carrier of this locus is a wild <em>producing</em> mare.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A two-effect mare gives one bottle with both in it.</strong> Spawn a tamed adult
+        mare with two different brews &mdash; say <code>Spd/Str</code> &mdash; at full health, and
+        bottle her. <strong>Pass:</strong> one potion carrying <em>both</em> Swiftness and Strength,
+        each at the weak grade. A single-effect potion here is the failure the whole merge exists to
+        prevent, and it looks like a perfectly good potion.</li>
+    <li><strong>A matched pair gives one strong effect, not two weak ones.</strong> Bottle a
+        <code>Spd/Spd</code> mare. <strong>Pass:</strong> a single Swiftness at the stronger grade
+        and roughly double the duration &mdash; not two Swiftness entries stacked in one bottle. The
+        handler de-duplicates by effect id and that de-duplication has never been exercised.</li>
+    <li><strong>The three refusals each say why.</strong> The <em>DAIRY + CLIP</em> pen&rsquo;s hurt
+        mare, stallion and foal, with a bottle. <strong>Pass:</strong> a message every time &mdash;
+        she will not give anything until she has healed, he rears and kicks, the foal has nothing
+        yet. <strong>The message is the evidence.</strong> All three correct behaviours are silence
+        plus no potion, which is indistinguishable from a locus that was never registered at
+        all.</li>
+    <li><strong>A bucket and a bottle do different things on one horse.</strong> Spawn a mare
+        expressing both this locus and <a href="gene-milk.html">milk</a>.
+        <strong>Pass:</strong> the bucket returns milk, the bottle returns a potion, and neither
+        suppresses the other. The container is the only disambiguator, and the two loci are not meant
+        to know about each other.</li>
+    <li><strong>Milk volume governs the cooldown.</strong> Two expressing mares at different
+        <a href="gene-magic-milk-volume.html">milk volume</a> genotypes.
+        <strong>Pass:</strong> the wait between bottles differs. The yield declares
+        <code>kind: milk</code> specifically so this is inherited for free, and &ldquo;for free&rdquo;
+        is exactly the sort of claim that turns out never to have been wired.</li>
+    <li><strong>A wild mare of this locus gives a weak potion.</strong> Incomplete dominance means a
+        single copy expresses, so the founder table&rsquo;s carriers are producers.
+        <strong>Pass:</strong> about one wild mare in ten hands back a weak single-effect potion, and
+        no wild mare ever gives the strong grade or a mixed bottle &mdash; those are bred.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-milk.html">Milk</a>
         <a href="gene-magic-milk-volume.html">Magic milk volume</a>
         <a href="gene-lycan.html">Lycan</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/PotionMilkGene.java</code>
+    Source: <code>common/genetics/genes/PotionMilkGene.java</code>
 </div>
 
 </article>

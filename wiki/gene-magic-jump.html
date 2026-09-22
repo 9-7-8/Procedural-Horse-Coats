@@ -98,8 +98,9 @@
 <div class="note warn">
     <span class="label">Built 2026-09-05, not yet play-tested</span>
     <p>
-        Nothing about a jump-shifted horse has been seen in game. Checklist on
-        <a href="verification.html">To be verified</a>.
+        The upward multiplier has been read off the attribute; the rest of the
+        locus has not. Checklist on the <a href="#verification">Verification
+        tab</a>.
     </p>
 </div>
 
@@ -255,12 +256,64 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Magic jump&rsquo;s upward multiplier has been read off the attribute in the yard, but the <code>Leaden</code> mirror, the <code>Vmp</code> allele&rsquo;s fixed &times;1.5 and &times;2, and whether a jump-strength number is a fence a horse can actually clear have never been in a world.</p>
+</div>
+
+<h3 id="open-magic-jump">Still open (NOT played)</h3>
+
+<p>
+    The MAGIC JUMP pen settled the half that was hardest to see &mdash; the multiplier reaches
+    <code>JUMP_STRENGTH</code>, and two horses read differently, so the magnitude really is per
+    allele copy. What is left is the genotypes that pen does not hold, and the one thing an attribute
+    cannot tell you: how high the horse gets. Readings are
+    <code>/attribute &lt;horse&gt; minecraft:jump_strength base get</code> against a plain horse of
+    the same breed.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The mirror allele takes jump off.</strong> A <code>Leaden/Leaden</code> horse.
+        <strong>Pass:</strong> clearly below the plain control &mdash; about four fifths of it. A
+        <code>Leaden</code> horse reading the same as the control means only the positive direction
+        is wired.</li>
+    <li><strong><code>Vmp</code> is fixed, and the same on every horse.</strong>
+        <code>Vmp/n</code> should be exactly half again the control and <code>Vmp/Vmp</code> exactly
+        twice it. <strong>Pass:</strong> both land on the multiple, and two <code>Vmp/Vmp</code>
+        horses read <em>identically</em> &mdash; unlike two <code>Springy/Springy</code> horses,
+        which must not.</li>
+    <li><strong>The percentage is inherited, not re-rolled.</strong> Breed two
+        <code>Springy/n</code> horses whose own multipliers you have read.
+        <strong>Pass:</strong> a <code>Springy/Springy</code> foal reads close to the sum of its
+        parents&rsquo; two single-copy percentages, and two full siblings carrying the same pair of
+        copies read the same number. A fresh roll per foal makes the breeding project pointless and
+        looks entirely normal from outside.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The number is a height.</strong> Ride a <code>Springy/Springy</code> horse and a
+        plain one at the same wall, one block at a time &mdash; with the default instant jump the
+        press <em>is</em> that horse&rsquo;s maximum, so the answer is not about your thumb.
+        <strong>Pass:</strong> the springy horse
+        clears at least one course of blocks the plain one cannot, and a <code>Vmp/Vmp</code> horse
+        clears several &mdash; a multiplier that lands on the attribute and changes nothing about
+        what the horse can get over is the failure worth catching here.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-body.html">The horse&rsquo;s body</a>
         <a href="gene-body-size.html">Magic body size</a>
         <a href="gene-ryr2.html">RYR2 &mdash; the natural jump locus</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicJumpGene.java</code>,
     <code>common/genetics/genes/AbstractMagicStatGene.java</code>

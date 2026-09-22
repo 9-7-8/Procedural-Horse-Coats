@@ -35,8 +35,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -133,14 +133,86 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Singer&rsquo;s firing rate is measured, so what is left is everything around it: only
+    <code>music_disc.cat</code> has ever been heard out of fifteen disc alleles, the cut-off
+    stop is a packet sent by sound id to every player in the level, and nothing in the code
+    limits a <em>herd</em> of singers the way this page says it does.</p>
+</div>
+
+<h3 id="open-singer">Still open (NOT played)</h3>
+
+<p>
+    The rate is settled &mdash; see the Verified note on the Coding tab &mdash; and every
+    remaining question is about which horses sing, which discs reach the game, and what
+    happens when more than one of them does it at once. The readout for all of that is the
+    census&rsquo;s sound tally, which counts firings per sound id since the last census and
+    then resets, so a herd is arithmetic rather than a matter of taste.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>All fifteen disc alleles actually resolve.</strong> An id this build does not
+        register falls silent after one
+        <code>[genes] effect 'sound:...' is defined but not translated</code> line, and only
+        <code>Cat</code> has ever been seen to fire. Spawn one homozygous horse per allele and
+        leave them a few censuses. <strong>Pass:</strong> no such log line for any of the
+        fifteen, and the census tally names fifteen distinct sound ids. An allele that logs
+        once and is never heard again is exactly the shape of a silent no-op.</li>
+    <li><strong>Two different songs really do cancel.</strong> Spawn <code>Cat/Blks</code>
+        alone in a pen. <strong>Pass:</strong> its gene row says the horse settles on neither
+        song, and its pen contributes <strong>nothing</strong> to the census sound tally over
+        several censuses.</li>
+    <li><strong>What a herd actually costs, since the arbitration this page describes is not
+        in the code.</strong> The only gate is a per-horse, per-gene cooldown of
+        <code>SingerGene.COOLDOWN_TICKS</code>, which is <em>shorter</em> than
+        <code>SingerGene.INTERVAL_TICKS</code> and so can never refuse a firing the interval
+        already allowed; there is no per-area arbitration at all. Put five singers of
+        different discs in one pen. <strong>Pass:</strong> the tally is what the arithmetic
+        predicts &mdash; around five firings per census, scaling with the herd &mdash; and the
+        verdict to record is whether that is bearable, because nothing is stopping it.</li>
+    <li><strong>A stop by sound id does not cut the wrong horse off.</strong> The cut-off is a
+        stop-sound packet naming the disc id, sent to every player in the level, so two horses
+        singing the <em>same</em> disc share one switch. Put two <code>Cat/Cat</code> horses in
+        one pen. <strong>Pass:</strong> each one&rsquo;s excerpt runs its own length. An
+        excerpt that ends the instant the other horse&rsquo;s does is the shared-id stop, and
+        it stays invisible until two horses happen to match.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>It is the opening, and it is cut off.</strong> Stand by a
+        <code>Cat/Cat</code> horse and wait. <strong>Pass:</strong> the record starts from its
+        beginning and stops partway, between three and eleven seconds in depending on the
+        copy &mdash; not at the end of the track, and not left running.</li>
+    <li><strong>Duration and volume differ between horses, and both are inherited.</strong>
+        Spawn several singers of one disc, then breed a pair. <strong>Pass:</strong> the
+        excerpts are audibly different lengths and loudnesses, and a foal is close to a
+        parent rather than a fresh roll.</li>
+    <li><strong>A loud singer is heard further away, not louder nearby.</strong> A volume
+        above 1.0 extends a Minecraft sound&rsquo;s reach rather than its loudness at the
+        source. <strong>Pass:</strong> the loudest singer is the one you can still hear from
+        the far fence.</li>
+    <li><strong>A listener who arrives or leaves mid-track ends up correct.</strong> Walk in
+        while a horse is singing, and out again. <strong>Pass:</strong> no track left playing
+        in your ears after you leave the pen, and nothing stuck on when you come back.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-music-enjoyer.html">Music enjoyer</a>
         <a href="gene-meowing.html">Meowing</a>
         <a href="gene-echolocate.html">Echolocate</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/SingerGene.java</code>
+    Source: <code>common/genetics/genes/SingerGene.java</code>
 </div>
 
 </article>

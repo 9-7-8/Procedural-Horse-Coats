@@ -35,8 +35,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -156,14 +156,62 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Egg layer is confirmed laying and confirmed bounded, but only for one allele and only for the
+    matched pair: nobody has checked that a mismatched pair and a single copy lay <em>nothing</em>,
+    or that an allele other than the egg lays its own item.</p>
+</div>
+
+<h3 id="open-gene-egg-layer">Still open (NOT played)</h3>
+
+<p>
+    What the overnight pens settled is on the <a href="#verified">Coding tab</a>: the horses lay, the
+    despawn timer bounds the eggs, and <code>nearby_cap</code> never has to fire. What they did not
+    test is the <em>locus</em> &mdash; they were four horses of one allele, all expressing. Every
+    check below is about the combinations that must produce nothing, which is the half that fails
+    without telling anybody.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A mismatched pair lays nothing.</strong> Spawn a horse with two <em>different</em>
+        laying alleles &mdash; say egg and leather &mdash; from the custom horse spawn egg, and
+        leave it on a swept floor for an hour of game time. <strong>Pass:</strong> the ground stays
+        empty, and its gene row reads the mismatched expression rather than either allele. This is
+        most crosses between two carriers, so it is the common case and not the corner.</li>
+    <li><strong>One copy lays nothing.</strong> The same, with an <code>Egg/n</code> horse.
+        <strong>Pass:</strong> nothing on the ground and a carrier row.</li>
+    <li><strong>An allele that is not the egg lays its own item.</strong> Spawn a matched pair of
+        one of the other alleles &mdash; leather or slime ball, say &mdash; and wait out one
+        interval. <strong>Pass:</strong> that item appears, not eggs. The item id is resolved
+        against the live registry per allele and only one of the eight has ever been watched
+        working; a wrong id warns once through <code>warnUntranslated</code> and then lays nothing
+        for ever.</li>
+    <li><strong>No wild horse lays.</strong> The founder table for a matched-pair locus puts
+        carriers in the wild and never the pair. <strong>Pass:</strong> over a lot of wild horses you
+        find carriers at roughly <code>EggLayerGene.WILD_CARRIER_PERCENT</code> and never one that
+        drops anything &mdash; the first layer in a world is one somebody bred.</li>
+    <li><strong>Two layers in one pen keep their own clocks.</strong> The interval is written on the
+        allele copy, so two expressing horses should not lay in step.
+        <strong>Pass:</strong> over a night their drops are not simultaneous, and a foal bred from
+        two layers lays at a rate that is neither parent&rsquo;s exactly &mdash; which is the only
+        thing the epigenetic range is for and the only part of it still unread.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-item-drop.html">Magic item drop</a>
         <a href="gene-milk.html">Milk</a>
         <a href="gene-lycan.html">Lycan</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/EggLayerGene.java</code>
+    Source: <code>common/genetics/genes/EggLayerGene.java</code>
 </div>
 
 </article>

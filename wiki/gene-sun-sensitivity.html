@@ -79,7 +79,7 @@
         Burning and running for shade were confirmed in-game on the old dhampir gene on
         2026-09-13, after four rounds of fixes that all still live in
         <code>SunShadeGoal</code>'s comments. The split onto this locus is not
-        play-tested &mdash; see <a href="verification.html">verification</a>.
+        play-tested &mdash; see the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -167,6 +167,83 @@
     horse burn in daylight is fantasy; the mechanism it would need is not.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Sun sensitivity&rsquo;s burning and shade-seeking are confirmed on a spawned
+    <code>Sun/Sun</code> horse, so what is unproven is the <em>locus</em>: a horse that becomes
+    sensitive in a chunk that never reloads still needs to be shown getting
+    <code>SunShadeGoal</code>, founders should carry one silent copy and never two, and the
+    split should have left this locus painting nothing at all.</p>
+</div>
+
+<h3 id="open-sun-sensitivity">Still open (NOT played)</h3>
+
+<p>
+    The behaviour is settled twice over &mdash; alone and in the full white strain &mdash; and
+    the Verified notes on the Coding tab say on what evidence. Nothing below re-opens any of
+    that. What is left is the locus it now lives on: who carries it, how it is inherited on its
+    own, whether the goal reaches a horse that was not sensitive when it joined the level, and
+    whether the coat half really went with <a href="gene-magic-white.html">magic white</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A horse that becomes sensitive after it joins the level still gets the
+        goal.</strong> Named as still unchecked by the Verified note, and the reason the goal
+        now sits on every horse: a horse&rsquo;s record is written a tick <em>after</em> it
+        joins, so the old wiring missed anything that was not already known to be sensitive.
+        No wild founder is homozygous, so the way in is a foal &mdash; breed two
+        <code>Sun/n</code> horses outdoors and keep the chunk loaded from the foal&rsquo;s
+        birth to the next sunrise. <strong>Pass:</strong> the sensitive foal smokes and runs
+        for cover on its <em>first</em> sunrise, with no reload, no rejoin and no reload of the
+        world in between.</li>
+    <li><strong>No wild horse burns, and about three in a hundred carry it.</strong> Founders
+        are carriers only, at <code>SunSensitivityGene.CARRIER_PERCENT</code>.
+        <strong>Pass:</strong> over a lot of wild horses, none ever smokes at sunrise, and the
+        gene database reads <code>sun-sensitivity-carrier</code> on roughly three in a hundred
+        of them. A wild horse that burns means the homozygote is in the founder table, which
+        would have it dying before anyone could catch it.</li>
+    <li><strong>Two carriers give one sensitive foal in four.</strong> Breed
+        <code>Sun/n</code> to <code>Sun/n</code> across a run of foals.
+        <strong>Pass:</strong> about a quarter read <code>sun-sensitive</code>, about a half
+        <code>sun-sensitivity-carrier</code>, and the rest wild type. This is the whole
+        inheritance claim for the new locus and nothing has tested it since the split.</li>
+    <li><strong>A random splice never produces it.</strong> <code>spliceable()</code> is false.
+        <strong>Pass:</strong> over many random splices, the locus never appears &mdash; a
+        gene that can be spliced in by accident is a horse that burns for no reason its owner
+        can trace.</li>
+    <li><strong>The burn completes its checklist task.</strong> A burn calls
+        <code>HorseProgress.completeForWatcher</code> for
+        <code>ProgressTask.SUN_SENSITIVE_SEEN</code>, and every checklist task is also an
+        advancement. <strong>Pass:</strong> the advancement fires the first time you are
+        standing there for a burn, and not before.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The locus paints nothing whatever.</strong> Spawn a <code>Sun/Sun</code> horse
+        and an <code>n/n</code> one with everything else identical.
+        <strong>Pass:</strong> the two coats are indistinguishable. A pale sun-sensitive horse
+        means the white did not go to <a href="gene-magic-white.html">magic white</a> in the
+        split, and this locus is still in the texture key.</li>
+    <li><strong>The fence jump tracks jump strength.</strong> There is no jump-aware
+        pathfinding, so the goal simply presses jump while its path is blocked, which makes
+        clearing a fence a function of the horse&rsquo;s own stat. Pen a sensitive Falabella
+        and a sensitive strong jumper separately, each with shade outside the fence.
+        <strong>Pass:</strong> the strong one gets out and reaches cover; the Falabella does
+        not and burns. Both are correct &mdash; what would be wrong is neither jumping, or
+        both.</li>
+    <li><strong>Ridden or led, it is your problem.</strong> Ride one into the open at midday,
+        then lead one on a rope. <strong>Pass:</strong> it burns and stays with you, and does
+        not bolt out from under you or pull the lead.</li>
+</ul>
 </section>
 
 <div class="page-foot">

@@ -98,8 +98,9 @@
 <div class="note warn">
     <span class="label">Built 2026-09-05, not yet play-tested</span>
     <p>
-        Nothing about a health-shifted horse has been seen in game. Checklist on
-        <a href="verification.html">To be verified</a>.
+        The upward multiplier has been read off the attribute; the rest of the
+        locus has not. Checklist on the <a href="#verification">Verification
+        tab</a>.
     </p>
 </div>
 
@@ -270,12 +271,69 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Magic health&rsquo;s upward multiplier has been read off the attribute in the yard, but the <code>Frail</code> mirror, the <code>Vmp</code> allele&rsquo;s fixed doubling and tripling, and the claim that <code>health.mode&nbsp;=&nbsp;off</code> leaves magical vigour alone have all never been in a world.</p>
+</div>
+
+<h3 id="open-magic-health">Still open (NOT played)</h3>
+
+<p>
+    The MAGIC HEALTH pen settled the half that was hardest to see &mdash; the multiplier reaches
+    <code>MAX_HEALTH</code>, and two horses read differently, so the magnitude really is per allele
+    copy. Everything below is a genotype that pen does not hold, and every verdict is a number:
+    spawn from the custom horse spawn egg and read
+    <code>/attribute &lt;horse&gt; minecraft:max_health base get</code>, always against a plain horse
+    of the same breed, because the natural loci settle the baseline first.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The mirror allele takes hearts off.</strong> A <code>Frail/Frail</code> horse.
+        <strong>Pass:</strong> clearly below the plain control &mdash; about four fifths of it
+        &mdash; and never below half a heart, which is <code>MIN_HEALTH</code>&rsquo;s job. A
+        <code>Frail</code> horse reading the same as the control means only the positive direction
+        is wired.</li>
+    <li><strong><code>Vmp</code> is fixed, and the same on every horse.</strong>
+        <code>Vmp/n</code> should be exactly twice the control and <code>Vmp/Vmp</code> exactly
+        three times it. <strong>Pass:</strong> both numbers land on the multiple, and two
+        <code>Vmp/Vmp</code> horses read <em>identically</em> &mdash; unlike two
+        <code>Hardy/Hardy</code> horses, which must not.</li>
+    <li><strong><code>health.mode = off</code> does not strip it.</strong> Set the server config to
+        <code>off</code>, reload the world &mdash; each horse re-resolves its body once per level
+        load &mdash; and read a <code>Hardy/Hardy</code> horse again.
+        <strong>Pass:</strong> it keeps every extra heart, while a dwarf in the same world loses its
+        disorder. This locus is not a <code>HealthContribution</code>, and the switch turning it off
+        with the disorders is exactly the kind of failure nobody would notice for weeks.</li>
+    <li><strong>The percentage is inherited, not re-rolled.</strong> Breed two
+        <code>Hardy/n</code> horses whose own multipliers you have read.
+        <strong>Pass:</strong> a <code>Hardy/Hardy</code> foal&rsquo;s multiplier is close to the sum
+        of its parents&rsquo; two single-copy ones, and two full siblings that inherited the same
+        pair of copies read the same number. A fresh roll per foal would make the whole breeding
+        project meaningless and would look perfectly healthy.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The horse&rsquo;s own sheet agrees with the attribute.</strong> Open the info screen
+        on a <code>Vmp/Vmp</code> horse. <strong>Pass:</strong> the hearts it shows match the
+        <code>max_health</code> reading, so the display path and the trait path have not diverged
+        &mdash; and then say whether a horse with three times the hearts is one you want in the game
+        at all.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-body.html">The horse&rsquo;s body</a>
         <a href="gene-body-size.html">Magic body size</a>
         <a href="gene-hmga2.html">HMGA2 &mdash; hearts for being a pony</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicHealthGene.java</code>,
     <code>common/genetics/genes/AbstractMagicStatGene.java</code>

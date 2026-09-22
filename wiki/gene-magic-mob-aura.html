@@ -187,12 +187,52 @@ mob.hurtMarked = true;</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Both of magic mob aura&rsquo;s expressing forms are confirmed against controls, which leaves the <code>Wrd/Bai</code> compound heterozygote &mdash; it must behave exactly like the plain control horse &mdash; and whether a ward covers the person <em>riding</em> it as well as the horse.</p>
+</div>
+
+<h3 id="open-magic-mob-aura">Still open (NOT played)</h3>
+
+<p>
+    Ward and bait were measured against their own control pens, so what is left is the third row of
+    the table and the rider. Both of the yard&rsquo;s aura pens already log the distances that settle
+    the first one.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong><code>Wrd/Bai</code> is silent, and silent means <em>exactly</em> the
+        control.</strong> Put one in a pen with three husks the way WARD and WARD CONTROL are set up.
+        <strong>Pass:</strong> the husks end up at WARD CONTROL&rsquo;s distances &mdash; a mean
+        around five blocks, not twelve &mdash; and they will happily target it. The gene emits no
+        ability at all for this pair, so a horse that repels <em>or</em> attracts here means
+        expression is being decided somewhere other than
+        <code>MagicMobAuraGene.abilitiesFor</code>.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A ward covers its rider.</strong> The repel clears a hostile&rsquo;s target if it was
+        the horse <em>or</em> the horse&rsquo;s rider, and only the loose-horse half has been seen.
+        Ride a <code>Wrd/Wrd</code> horse through somewhere hostile after dark.
+        <strong>Pass:</strong> nothing closes on you while you are mounted, and walking twenty blocks
+        away from the horse gets you chased again &mdash; without that second half you have not
+        distinguished a working ward from a quiet night.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-fighter.html">Magic fighter</a>
         <a href="gene-magic-health.html">Magic health</a>
         <a href="making-a-gene.html#block">The effects block</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicMobAuraGene.java</code>,
     <code>neoforge/server/GeneAbilityHandler.java</code>

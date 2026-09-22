@@ -28,14 +28,13 @@
 <section class="tab-panel" data-tab="gameplay">
 
 <div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+    <span class="label">Half seen: the expressing horse, not the carrier</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        A <code>Brd/Brd</code> horse and its rider surviving a fall was
+        <a href="#verified-rider">owner-confirmed in the 2026-09-10 sessions</a>. What has
+        <strong>not</strong> been watched is the other half of the claim &mdash; that a carrier
+        falls exactly as any horse does, and that no wild horse is ever bird boned. Those are
+        on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -140,14 +139,63 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Bird boned&rsquo;s rider immunity is confirmed, but nobody has checked the other half of the
+    claim &mdash; that a <em>carrier</em> still falls to its death exactly as before, and that no
+    wild horse is ever bird-boned.</p>
+</div>
+
+<h3 id="open-gene-bird-boned">Still open (NOT played)</h3>
+
+<p>
+    The rider is covered already (&sect;<a href="#verified-rider">Verified</a>), so what is left is
+    the control side: a damage cancel that fires too widely looks identical to one that fires
+    correctly until you drop something that was <em>supposed</em> to get hurt.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A carrier is not immune.</strong> Spawn a <code>Brd/n</code> horse from the custom
+        horse spawn egg and drop it from twenty blocks, with you aboard.
+        <strong>Pass:</strong> both of you take the ordinary fall damage. The cancel keys on the
+        expressing horse, and &ldquo;every horse in the world stopped taking fall damage&rdquo; is
+        the invisible failure that matters here &mdash; nothing announces it.</li>
+    <li><strong>No wild horse is bird-boned.</strong> The founder table is carriers-only, so the
+        allele is in the population and the homozygote is not. <strong>Pass:</strong> over a lot of
+        wild horses you find carriers and never one that shrugs off a fall; the first immune horse
+        in a world is one somebody bred.</li>
+    <li><strong>Only fall damage is cancelled.</strong> Hurt an expressing horse another way
+        &mdash; a sword, a cactus, drowning. <strong>Pass:</strong> it takes all of it normally. The
+        handler filters on the <code>minecraft:is_fall</code> damage-type tag and a filter that is
+        wrong here makes an invulnerable horse, which reads as a good gene rather than a bug.</li>
+    <li><strong>It removes the damage, not the falling.</strong> Ride one off a cliff into a ravine.
+        <strong>Pass:</strong> you land unhurt at the bottom and are still at the bottom &mdash;
+        nothing catches, slows or floats the horse.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>It pairs with magic jump the way the page claims.</strong> Breed an expressing horse
+        that also carries a high <a href="gene-magic-jump.html">magic jump</a>.
+        <strong>Pass:</strong> you can jump it repeatedly from its own maximum height without ever
+        hurting it, which is the whole argument for the gene existing.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-jump.html">Magic jump</a>
         <a href="gene-fireproof.html">Fireproof</a>
         <a href="gene-ocean-born.html">Ocean-born</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/BirdBonedGene.java</code>
+    Source: <code>common/genetics/genes/BirdBonedGene.java</code>
 </div>
 
 </article>

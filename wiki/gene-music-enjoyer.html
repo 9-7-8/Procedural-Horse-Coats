@@ -34,8 +34,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -121,14 +121,64 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Music enjoyer has never been watched earning a point of bond: it needs a tamed horse, a sampled
+    <code>near_jukebox</code> block search and the shared daily cap all to work at once, and none of
+    the three has been read on this locus.</p>
+</div>
+
+<h3 id="open-gene-music-enjoyer">Still open (NOT played)</h3>
+
+<p>
+    The gene is one <code>Bond</code> ability on an interval, gated on the
+    <code>near_jukebox</code> world flag. Two things in the translator are worth knowing before
+    testing it: <code>maybeBond</code> <strong>returns early on an untamed horse</strong>, and the
+    flag is a sampled block search over roughly eight blocks horizontally and three vertically, which
+    has been permanently stuck off for every gene in the mod once before.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>Bond actually rises.</strong> Tame an <code>Msc/Msc</code> horse, stand it beside a
+        jukebox with a record in it, and read its bond before and after ten minutes.
+        <strong>Pass:</strong> hearts every <code>MusicEnjoyerGene.INTERVAL_TICKS</code> and a bond
+        number that has climbed. Nothing else below is worth checking until this moves.</li>
+    <li><strong>An untamed horse gains nothing.</strong> The same jukebox, an untamed expressing
+        horse. <strong>Pass:</strong> no hearts at all. This is the translator&rsquo;s rule rather
+        than a defect &mdash; bond is a relationship &mdash; but it is not written anywhere a player
+        can see, so confirm it before anybody reports the gene as broken.</li>
+    <li><strong>A carrier gains nothing.</strong> An <code>Msc/n</code> horse beside the same
+        jukebox. <strong>Pass:</strong> no hearts, no bond. The control that separates a working
+        recessive from a bond source every tamed horse in the world has.</li>
+    <li><strong>The daily cap holds.</strong> Leave a tamed expressing horse at a playing jukebox
+        overnight. <strong>Pass:</strong> its bond stops at the day&rsquo;s ceiling rather than
+        arriving at the top tier by morning. An AFK bond source that ignored
+        <code>bondToday</code> would devalue every other way of earning bond, and it fails by
+        <em>working too well</em>, which nobody reports as a bug.</li>
+    <li><strong>Distance matters.</strong> The same horse twelve blocks from the jukebox.
+        <strong>Pass:</strong> nothing. A flag stuck true reads exactly like a gene that
+        works.</li>
+    <li><strong>Does a finished record still count?</strong> The flag tests whether the jukebox
+        <em>holds</em> a record, not whether it is audible, so a single disc left in one may go on
+        paying out for ever. <strong>Pass:</strong> record which it is. If bond keeps rising after the
+        track ends, one disc is an unattended bond source bounded only by the daily cap, and that is a
+        decision for the owner rather than a bug to fix quietly.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-care.html">Bond and horse care</a>
         <a href="gene-food-preference.html">Food preference</a>
         <a href="gene-singer.html">Singer</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/MusicEnjoyerGene.java</code>
+    Source: <code>common/genetics/genes/MusicEnjoyerGene.java</code>
 </div>
 
 </article>

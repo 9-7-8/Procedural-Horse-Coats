@@ -187,12 +187,53 @@ BREATH_DEBT.put(id, owed);</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Magic water breathing&rsquo;s accumulator is confirmed in both directions and every horse still drowns; what is unconfirmed is how it composes with the absolute <code>underwater_breathing</code> flag, whether the per-horse debt is really dropped when a horse surfaces, and that the server&rsquo;s health switch does not govern a short breath.</p>
+</div>
+
+<h3 id="open-magic-water-breathing">Still open (NOT played)</h3>
+
+<p>
+    The BREATH pen settled the hard part: a <code>Shal/Shal</code> horse drowned at tick 40, a plain
+    one at 340 and a <code>Gil/Gil</code> one at 500, and none of the three stepped past the value
+    vanilla drowns at. What it did not exercise is the fractional debt across more than one dive, or
+    this locus standing beside a gene that says the horse cannot drown at all.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The absolute flag wins.</strong> A horse that is both <code>Ocn/Ocn</code>
+        (<a href="gene-ocean-born.html">ocean-born</a>, which refills its air every tick) and
+        <code>Shal/Shal</code>. <strong>Pass:</strong> it never takes drowning damage however long it
+        is held under. The composition is meant to need no special case &mdash; the flag simply
+        refills faster than the extra drain &mdash; and two handlers fighting over one
+        <code>int</code> would show up as a horse that drowns <em>sometimes</em>.</li>
+    <li><strong>The debt does not survive surfacing.</strong> Hold a <code>Gil/Gil</code> horse under,
+        let it up until its air is full, and hold it under again.
+        <strong>Pass:</strong> the second dive lasts as long as the first. <code>BREATH_DEBT</code> is
+        cleared when the horse surfaces and when it leaves the level, and a part-point of stale credit
+        carried across dives is invisible until somebody times two of them.</li>
+    <li><strong><code>health.mode = off</code> does not save a short-breathed horse.</strong> Set the
+        config, reload the world, and re-run the BREATH pen. <strong>Pass:</strong> <code>Shal/Shal</code> still drowns
+        first. A short breath is the rule of this gene rather than a disorder, so the switch that
+        turns the dwarfisms off must not touch it.</li>
+    <li><strong><code>Gil/Shal</code> breathes like a plain horse.</strong> Add one to the pen.
+        <strong>Pass:</strong> it drowns with the plain horse rather than at either extreme &mdash;
+        the sum is signed, and nothing checks for the pair.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-swim-speed.html">Magic swim speed</a>
         <a href="making-a-gene.html#block">The effects block</a>
         <a href="horse-traits.html">The wider trait architecture</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicWaterBreathingGene.java</code>,
     <code>common/genetics/genes/AbstractMagicFactorGene.java</code>

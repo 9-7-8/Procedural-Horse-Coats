@@ -82,8 +82,8 @@
     <p>
         Sample bakes look right &mdash; solid manes read as one colour, bands are
         wobbled rather than ruled, and the heterozygote shows two distinct colours.
-        Nothing has been seen on a 3D horse. Checklist on
-        <a href="verification.html">To be verified</a>.
+        Nothing has been seen on a 3D horse. Checklist on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -214,12 +214,81 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Mane colour has only ever been seen as a baked sheet, and the claim worth its
+    time is not the colour but the <strong>inheritance</strong>: a foal must get its
+    parent&rsquo;s exact shade rather than a fresh roll, and a
+    <code>Mnsld/Mnstrp</code> horse must show <em>two</em> colours rather than one.</p>
+</div>
+
+<h3 id="open-gene-mane-color">Still open (NOT played)</h3>
+
+<p>
+    Three of the four things this gene promises are not judgements about how a mane looks.
+    The colour lives on the allele <em>copy</em>, so it is heritable, and that is testable by
+    a cross. The heterozygote reads both copies separately, and the failure mode
+    (<code>epigeneticsFor</code> instead of <code>epigeneticsForCopy</code>) paints the bands
+    in the base colour &mdash; a horse with no visible stripes, which looks like a
+    <code>solid</code> horse rather than like a bug. And the mane arrives with adulthood,
+    because the foal mesh has no <code>MANE</code> part at all.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The exact shade is inherited, not re-rolled.</strong> Breed a
+        <code>Mnsld/n</code> stallion with a mane colour you can name over an
+        <code>n/n</code> mare. <strong>Pass:</strong> every <code>Mnsld/n</code> foal has the
+        <em>same</em> colour as the sire, not merely a colour. Three foals of three different
+        shades means the epigenetic value is being rolled per horse and the whole
+        breed-a-colour-and-keep-it premise is gone.</li>
+    <li><strong>The heterozygote shows two colours, and the bands are not the base
+        colour.</strong> Spawn <code>Mnsld/Mnstrp</code>. <strong>Pass:</strong> a base
+        colour with bands of a visibly different colour over it. Bands you cannot see means
+        slot 0 was read twice; no bands at all means the striped copy is not painting.</li>
+    <li><strong>A foal shows nothing here and its tail does.</strong> Spawn a foal carrying
+        both <code>Mnsld</code> and a <a href="gene-tail-color.html">tail colour</a> allele.
+        <strong>Pass:</strong> coloured tail, no coloured mane, and no exception in the log
+        from a painter reaching for a part that is not on the mesh. Then let it grow up:
+        <strong>Pass:</strong> the mane arrives, in the colour its genotype always carried.</li>
+    <li><strong>The order either side of it holds.</strong> Priority 112 sits above suit (102)
+        and hood (103) and below <a href="gene-magic-zebra.html">magic zebra</a> (120).
+        <strong>Pass:</strong> a coloured mane wins over a suit&rsquo;s mane, and zebra
+        stripes black a coloured mane out rather than the other way round. Both are deliberate
+        choices, and a priority that drifted would swap them silently.</li>
+    <li><strong>About seven wild horses in a hundred carry it.</strong> <code>Mnsld</code> at
+        2.0% and <code>Mnstrp</code> at 1.5% per allele, and one copy expresses.
+        <strong>Pass:</strong> over a lot of wild horses, roughly that share have a coloured
+        mane, and the <code>solid-striped</code> heterozygote is much rarer than either
+        single.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The mane reads as hair and not as a painted rectangle.</strong> The paint goes
+        88% of the way toward the colour precisely so the strand shading survives.
+        <strong>Pass:</strong> on a 3D horse at riding distance the mane is unmistakably the
+        new colour and still has depth. Flat, dead colour means the <code>TOWARD</code>
+        strength is too high for the mane, whatever the baked sheets suggested.</li>
+    <li><strong>The bands run across the mane and are wobbled, not ruled.</strong>
+        <code>HairPattern.axesBySpan</code> works the axis out from the part&rsquo;s own
+        bounds. <strong>Pass:</strong> bands cross the mane&rsquo;s length rather than running
+        along it, with a <code>BodyNoise</code> wobble on their edges. Bands along the length
+        mean the axis came out the wrong way round on the mane&rsquo;s rest pose.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-tail-color.html">Tail colour</a>
         <a href="gene-healer.html">Healer &mdash; the other mane gene</a>
         <a href="gene-suntouched.html">Suntouched</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/ManeColorGene.java</code>,
     <code>HairColorGene.java</code>, <code>coat/pattern/HairPattern.java</code>

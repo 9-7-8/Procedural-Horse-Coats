@@ -81,8 +81,8 @@
         <code>EyeColorTest</code> &mdash; a bay's black iris comes out
         <code>#C8811E</code> and its sclera stays white. What is unknown is whether a
         two-texel gold iris <em>reads</em> as a gold eye on a horse at riding distance,
-        or whether it needs to be brighter. Checklist on
-        <a href="verification.html">To be verified</a>.
+        or whether it needs to be brighter. Checklist on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -501,6 +501,88 @@
     <em>also</em> splashed white has blue eyes rather than amber &mdash; there is no pigment left
     in a depigmented iris for this gene to colour.</p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Tiger eye no longer paints an iris &mdash; it <em>asks</em> for one, and
+    <code>Eyes.force</code> writes <code>Gld</code> onto the horse &mdash; so the open
+    question is a genotype one: a <code>TE1/TE1</code> horse must read <code>Gld/Gld</code>
+    at both iris loci and must <strong>pass the gold on to foals that carry no tiger eye at
+    all</strong>, and a quarter of Puerto Rican Paso Finos should carry a copy.</p>
+</div>
+
+<h3 id="open-gene-tiger-eye">Still open (NOT played)</h3>
+
+<p>
+    The iris colour itself is asserted through the real pipeline in <code>EyeColorTest</code>,
+    so what is unplayed is the part that lives outside the painter: the allele this gene
+    writes onto the horse, where it then behaves like any other iris allele. That is the whole
+    difference between the old design and this one, and it is entirely readable off a genome
+    display and a ratio.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A tiger-eye horse genuinely carries the gold.</strong> Spawn
+        <code>TE1/TE1</code>. <strong>Pass:</strong> its
+        <code>horsegenetics.eye_colour_right</code> and
+        <code>horsegenetics.eye_colour_left</code> rows both read <code>Gld/Gld</code>. If they
+        read the brown wild type while the eyes still look gold, the gene is painting again
+        rather than requesting, and everything below it fails.</li>
+    <li><strong>It passes the gold on without passing tiger eye on.</strong> Breed that horse
+        to a brown-eyed <code>N/N</code> mare that is <code>Brn/Brn</code> at both iris loci.
+        <strong>Pass:</strong> every foal is <code>Gld/Brn</code> at both iris loci and
+        <em>brown-eyed</em>, because the iris variants are recessive to brown. Then breed two
+        of those foals together: <strong>Pass:</strong> about one foal in four is gold-eyed
+        with no tiger-eye allele anywhere in it. That last result is the point of the whole
+        eye-colour channel and it is the one thing on this page nothing has ever shown.</li>
+    <li><strong>A carrier shows nothing at all.</strong> <code>TE1/N</code> and
+        <code>TE2/N</code>. <strong>Pass:</strong> ordinary dark eyes, ordinary coat, gene row
+        <code>tiger-eye-carrier</code>. The control matters here because a recessive that
+        leaks would make the 1-in-70 wild allele frequency look like a 1-in-35 phenotype.</li>
+    <li><strong>The compound heterozygote is affected.</strong> <code>TE1/TE2</code>.
+        <strong>Pass:</strong> the gene row reads <code>tiger-eye-amber</code>, exactly as
+        <code>TE1/TE1</code> does. <code>expressionOf</code> asks only whether a wild-type
+        copy is present, so a carrier of each variant bred together must be able to throw an
+        affected foal.</li>
+    <li><strong>The two shades are two outcomes and one colour.</strong>
+        <code>TE2/TE2</code> resolves to <code>tiger-eye-yellow</code>, but both shades now map
+        to <code>Gld</code>. <strong>Pass:</strong> the gene dictionary offers two separate,
+        separately breedable entries and the two horses&rsquo; irises are the same gold. This
+        is not a bug to fix but a state to confirm &mdash; if the pale form is worth having it
+        wants an allele at the iris locus, not a constant here.</li>
+    <li><strong>Request order: the white loci win and the dilutions lose.</strong>
+        <strong>Pass:</strong> a splashed white tiger-eye horse reads a blue at its iris loci
+        (and looks it), and a cremello tiger-eye horse reads <code>Gld</code>. Requests merge
+        last-writer-wins on ordinary gene order, so this is what replaced the old rank
+        argument and nothing has watched it resolve.</li>
+    <li><strong>The breed concentration is real.</strong> About 26% of Puerto Rican Paso Finos
+        carry a copy and roughly one in twenty-five has the amber eyes, against roughly one
+        wild horse in five thousand. <strong>Pass:</strong> a batch of Paso Finos turns up
+        carriers at about that rate, and a comparable batch of ordinary wild horses turns up
+        essentially none. The breed is <code>RARE</code> and spawns in jungle, savanna, beach
+        and mangrove swamp, so this is a trip &mdash; but the breed egg makes the carrier rate
+        checkable without one.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>Does a two-texel gold iris read as a gold eye?</strong> The page&rsquo;s own
+        stated unknown. <strong>Pass:</strong> at riding distance on a bay, the eye reads as
+        amber rather than as a light-coloured smudge. If it does not, the answer is a brighter
+        <code>Gld</code> at the iris locus, which changes every gene that requests it.</li>
+    <li><strong>One blue eye and one gold one.</strong> A white locus&rsquo;s request often
+        fails to reach both irises, and the eye it misses keeps the gold.
+        <strong>Pass:</strong> a splashed white tiger-eye horse can come out odd-eyed, or with
+        a blue wedge in a gold iris, and both eyes match the alleles its genome now lists.
+        That is the case where the genotype readout and the render have to agree.</li>
+</ul>
 </section>
 
 </article>

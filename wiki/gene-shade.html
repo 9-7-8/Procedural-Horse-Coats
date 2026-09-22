@@ -83,7 +83,7 @@
         Everything on this page is asserted by <code>BayShadeGeneTest</code> and by
         <code>coat-golden.txt</code>, and the shade range has been eyeballed as
         rendered sheets and side views &mdash; but no shade of bay has been seen in
-        the game yet. See <a href="verification.html">verification</a>.
+        the game yet. Checklist on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -271,6 +271,83 @@
     is the third.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No shade of bay has been seen in a game, and shade is a locus a breeder
+    <em>selects</em> on, so what needs proving is not the colour but the
+    <strong>predictability</strong>: that every <code>Sh/Sh</code> bay is an ordinary bay
+    whatever the two dosage terms do, that the wild population lands near 15 / 61 / 19 / 5,
+    and that breed horses vary in shade rather than sitting shade-neutral.</p>
+</div>
+
+<h3 id="open-gene-shade">Still open (NOT played)</h3>
+
+<p>
+    Read the labels off the right row. <strong>Shade&rsquo;s own row is a wild type in every
+    combination</strong> &mdash; it says &ldquo;carried, and pushing dark&rdquo; or
+    &ldquo;pushing light&rdquo; and nothing more &mdash; while <em>blood bay</em>,
+    <em>bay</em>, <em>liver bay</em> and <em>seal brown</em> appear on the
+    <a href="gene-agouti.html">agouti</a> row, because agouti is the gene that paints. A
+    horse whose shade row looks uninformative is behaving correctly.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>Every <code>Sh/Sh</code> bay is an ordinary bay.</strong> Spawn
+        <code>Sh/Sh</code> with the two dosage terms at maximum &mdash; extension
+        <code>E/E</code> and agouti <code>A/a</code> &mdash; and again with them at minimum.
+        <strong>Pass:</strong> the agouti row reads <strong>Bay</strong> on both. If a dosage
+        term can move a horse out of its band on its own, <code>E/E</code> has become a
+        diagnostic test for liver bay, which is exactly the claim the research does not
+        support and the band edges were placed to prevent.</li>
+    <li><strong>The wild population has the right shape.</strong> <strong>Pass:</strong> over
+        a good number of wild bays, roughly 15% blood bay, 61% bay, 19% liver bay and 5% seal
+        brown. The seal must be the scarce one, and it must need <code>ShD/ShD</code>
+        <em>plus</em> a dosage term &mdash; a world where seal browns are common means the band
+        edges or the founder table moved.</li>
+    <li><strong>Breed horses vary in shade.</strong> <code>Breed.Builder.shadeAny()</code> is
+        called by all three agouti helpers precisely so <code>BreedFounder</code> cannot force
+        the locus wild. <strong>Pass:</strong> hatch several horses of one bay-carrying breed
+        from its breed egg and their shade rows differ. All of them reading <code>Sh/Sh</code>
+        is the silent failure this guard exists for: every breed horse shade-neutral while
+        only feral mixed horses varied, and nothing else in the game would say so.</li>
+    <li><strong>A chestnut line hands a seal brown to a grandfoal.</strong> Shade reaches every
+        founder, chestnut or not. <strong>Pass:</strong> two chestnuts carrying
+        <code>ShD</code> pass it on with nothing to show for it, and a bay grandfoal that ends
+        up <code>ShD/ShD</code> comes out seal brown. If a chestnut&rsquo;s shade row is
+        always the default, the locus is being folded out of the founder roll rather than only
+        out of the chestnut&rsquo;s texture key.</li>
+    <li><strong>Grey hides the coat and not the record.</strong> <strong>Pass:</strong> a horse
+        born a seal brown that greys out still reads <code>ShD/ShD</code> and still reads
+        <strong>Seal brown</strong> on its agouti row years later. Grey paints over; it must
+        not overwrite.</li>
+    <li><strong>A cream over a liver bay is not a cream over a blood bay.</strong> The
+        dilutions run after the shade resolves. <strong>Pass:</strong> two buckskins alike in
+        everything but shade dosage are visibly different buckskins. Identical ones mean the
+        dilution is reading a pre-shade base, which would collapse four bays into one
+        everywhere a dilution is present and show up nowhere else. The same pair is worth
+        spawning for <a href="gene-dun.html">dun</a>,
+        <a href="gene-silver.html">silver</a> and
+        <a href="gene-champagne.html">champagne</a>.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The four bays are four bays on a 3D horse.</strong> They have been eyeballed as
+        rendered sheets and side views, never in a world. <strong>Pass:</strong> stood in a row
+        at riding distance, a blood bay, a bay, a liver bay and a seal brown are four things a
+        player would name differently &mdash; and two horses of the <em>same</em> genotype
+        differ a little without either contradicting the name the gene dictionary gave it. The
+        expression roll is deliberately narrower than a band; if two <code>Sh/Sh</code> horses
+        read as different labels, it is too wide.</li>
+</ul>
 </section>
 
 <div class="page-foot">

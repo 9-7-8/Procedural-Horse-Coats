@@ -80,8 +80,8 @@
     <p>
         Nothing has watched a horse change a floor. The conversion lists in
         particular want a look: the risk is a horse eating something a player built
-        with, and the lists are narrow specifically to avoid that. Checklist on
-        <a href="verification.html">To be verified</a>.
+        with, and the lists are narrow specifically to avoid that. Checklist on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -156,11 +156,93 @@
 </p>
 
 <p>
-    It is skipped entirely in the horse dimension, for the same reason the
-    <a href="gene-light.html">light</a> block is: nothing there should be able to
-    rewrite the floor.
+    <strong>It used to be skipped entirely in the horse dimension</strong>, for the same
+    reason the <a href="gene-light.html">light</a> block was: nothing there should be able
+    to rewrite the floor. That guard made every spreading gene a silent no-op in the one
+    place built for watching them (&ldquo;dryad does not work&rdquo;, owner 2026-09-12), so
+    it is <strong>commented out</strong> in <code>GeneAbilityHandler.spread</code> &mdash;
+    marked <em>RESTORE BEFORE 1.0</em>, and the version that comes back is meant to tell the
+    corridor from the test yard rather than treat the whole dimension as a display case.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Nothing has watched a verdant horse change a floor, and the gene paints nothing at all,
+    so every check here is a block count off a log &mdash; starting with the one the warn box
+    is actually worried about: <strong>moss eats stone, cobblestone and andesite</strong>, which
+    are things players build with, so a moss horse stabled on a cobbled floor may well eat
+    it.</p>
+</div>
+
+<h3 id="open-gene-verdant">Still open (NOT played)</h3>
+
+<p>
+    Verdant has no coat effect whatsoever, so there is almost no &ldquo;does it look right&rdquo;
+    here at all &mdash; the verdict on nearly every item is a count of blocks in a pen. The
+    <a href="gene-dryad.html">dryad</a> pens are the worked example of how to get one: a pen
+    with a known floor, a stated watch list, and an unattended run long enough that
+    <code>SPREAD_CHANCE</code> stops mattering. A verdant row would want the same.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The carrier does nothing, and that is the control.</strong> A
+        <code>mush/moss</code> horse is <code>verdant-carrier</code>: two variants that are
+        mutually recessive, so it is inert and passes both on. Stand one on its own ground for
+        hours. <strong>Pass:</strong> not one block converted. This is the check that tells a
+        working gene from one that never runs, because a gene that converts nothing looks
+        identical either way.</li>
+    <li><strong>A moss horse on a cobblestone floor &mdash; the one worth doing first.</strong>
+        <code>moss</code>&rsquo;s list is stone, cobblestone, andesite, gravel, dirt, coarse
+        dirt and grass block. <strong>Pass, as the page claims it:</strong> nothing a player
+        built with is eaten. <strong>What the code will actually do:</strong> convert the floor,
+        because cobblestone and stone are on the list. Stable a <code>moss/moss</code> horse on
+        a cobbled floor for an hour and count the moss blocks. If it eats the floor, the list is
+        what is wrong, not the horse &mdash; and this page&rsquo;s claim that &ldquo;nothing on
+        the lists is a block anyone builds with&rdquo; needs correcting either way.</li>
+    <li><strong>Each cover eats only its own list.</strong> Give three matched pairs a floor
+        that is half something on their list and half something that is not.
+        <strong>Pass:</strong> <code>mush/mush</code> takes podzol and rooted dirt;
+        <code>grass/grass</code> takes dirt, coarse dirt and rooted dirt and leaves
+        <em>podzol alone</em>; neither touches stone. The podzol split between mycelium and
+        grass is the sharpest pair, because the two lists differ on exactly that block.</li>
+    <li><strong>It is one block a beat and it stays a patch.</strong>
+        <code>SPREAD_RADIUS</code> 2, <code>SPREAD_INTERVAL_TICKS</code> 60,
+        <code>SPREAD_CHANCE</code> 0.35, and at most one conversion per beat.
+        <strong>Pass:</strong> a horse left in a field for a real session leaves a patch a few
+        blocks across, not a new biome, and the count over a measured hour comes out well under
+        the theoretical ceiling &mdash; the way <a href="known-gaps.html#gap-208">gap 208</a>
+        predicts for every spreading gene.</li>
+    <li><strong>About one wild horse in a hundred and fifty spreads grass.</strong>
+        <code>grass</code> is the commonest variant at 8% per allele, and a matched pair is what
+        it takes. <strong>Pass:</strong> the gene row reads <code>grass</code>,
+        <code>moss</code> or <code>mycelium</code> at roughly that rate over a lot of wild
+        horses, and <code>verdant-carrier</code> far more often &mdash; carriers look exactly
+        like everything else, so the row is the only way to see them.</li>
+    <li><strong>It spreads in the horse dimension now the guard is off.</strong> The dimension
+        check in <code>GeneAbilityHandler.spread</code> is commented out (<em>RESTORE BEFORE
+        1.0</em>), which is what made <a href="gene-dryad.html">dryad</a> visible there on
+        2026-09-13 &mdash; but no <em>verdant</em> horse has been stood in the gallery since.
+        <strong>Pass:</strong> a <code>moss/moss</code> horse rewrites the floor it stands on,
+        the same as it would in the overworld. <strong>Fail:</strong> nothing happens, which
+        means the spreading genes differ in a way nothing in the code says they should.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The edge is ragged, not a disc.</strong> The translator picks a random candidate
+        near the horse rather than the nearest one, specifically so a spread does not expand as
+        a perfect circle. <strong>Pass:</strong> a patch a horse has been standing in for a
+        while has an uneven edge. A clean disc means the candidate pick is sorted rather than
+        random, which nothing else would show.</li>
+</ul>
 </section>
 
 <div class="page-foot">
@@ -168,7 +250,7 @@
         <a href="making-a-gene.html#spread">The spread verb</a>
         <a href="gene-milk.html">Milk &mdash; the other mutually-recessive locus</a>
         <a href="gene-healer.html">Healer &mdash; a magical effect you can see</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/VerdantGene.java</code>
 </div>

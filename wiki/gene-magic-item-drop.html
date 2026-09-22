@@ -111,7 +111,7 @@
     <code>Egg/Egg</code> horse dropped one <code>horsegenetics:preset_horse_spawn_egg</code>, and a <code>Swd/Swd</code>
     horse one enchanted <code>minecraft:iron_sword</code>; neither dropped leather. <em>Still a tester's check:</em>
     that the egg's horse is a true clone, with the same coat, numbers and epigenome
-    (<a href="verification.html">To be verified</a>).
+    (<a href="#verification">the Verification tab</a>).
 </p>
 
 <h2 id="replace">Replace, except meat</h2>
@@ -188,12 +188,60 @@ if (replace) {
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>All three of magic item drop&rsquo;s drops have been seen replacing the leather, so what is left is whether the egg puts back a <strong>clone</strong> &mdash; the same coat, the same numbers, the same epigenome &mdash; and whether a two-variant horse really is silent.</p>
+</div>
+
+<h3 id="open-magic-item-drop">Still open (NOT played)</h3>
+
+<p>
+    The yard&rsquo;s DEATH ITEMS pen answered what lands on the ground. What it cannot answer is what
+    is <em>inside</em> the egg: an egg holding the right alleles but a fresh epigenome would look
+    perfectly correct on the ground and produce a different horse, which is the only way this locus
+    can be quietly wrong.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The egg&rsquo;s horse is the same horse, not a horse with the same alleles.</strong>
+        Note an <code>Egg/Egg</code> horse&rsquo;s genetic code <em>and</em> its epigenome code, kill
+        it, and place the egg it leaves. <strong>Pass:</strong> both codes on the new horse are
+        identical to the dead one&rsquo;s. The epigenome is the half that can silently be re-rolled,
+        and it is every per-copy percentage the horse was bred for.</li>
+    <li><strong>The clone&rsquo;s body numbers match.</strong> Read <code>max_health</code>,
+        <code>jump_strength</code> and <code>movement_speed</code> on both.
+        <strong>Pass:</strong> the same numbers, which is what a matching epigenome must mean
+        downstream.</li>
+    <li><strong>Two variants together drop the ordinary leather.</strong> A <code>Dia/Egg</code>
+        horse. <strong>Pass:</strong> leather and nothing else &mdash; no diamonds, no egg. The
+        compound heterozygote is stated as silent rather than as &ldquo;whichever the loop reached
+        first&rdquo;, and a loop that reaches one anyway would look like a feature.</li>
+    <li><strong>The sword is rolled per death, not fixed by the gene.</strong> Kill two
+        <code>Swd/Swd</code> horses of the same genotype. <strong>Pass:</strong> each sword carries
+        exactly one enchantment, and the two are not reliably the same one.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The clone looks like the same horse.</strong> Stand the re-spawned horse where the
+        dead one stood. <strong>Pass:</strong> coat, markings, mane and any particle colour are
+        indistinguishable &mdash; the codes matching says it should be, and this is the cheap
+        confirmation that the coat pipeline agrees.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-on-death.html">Magic on death &mdash; the other half</a>
         <a href="gene-magic-meat.html">Magic meat</a>
         <a href="item-spawn-eggs.html">Spawn eggs, incl. the preset horse egg</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicItemDropGene.java</code>,
     <code>neoforge/server/GeneDeathHandler.java</code>

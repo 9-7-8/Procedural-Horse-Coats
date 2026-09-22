@@ -59,6 +59,32 @@
 
 <ol>
 
+<li id="gap-304"><strong>Open, found 2026-09-21 while writing the weather loci's checklists: a gene&rsquo;s two allele copies cannot both move the same attribute &mdash; the second silently replaces the first.</strong>
+    <code>AbstractWeatherGene.abilitiesFor</code> deliberately emits <strong>one conditioned
+    <code>AttributeMod</code> per copy</strong> rather than summing them, because each copy carries its
+    own weather condition. But <code>GeneAbilityHandler.attributeModifierId</code> names a modifier
+    <code>gene/&lt;geneKey&gt;/&lt;attribute&gt;</code> &mdash; one id per gene <em>and attribute</em>, with no
+    room for a second copy &mdash; and <code>addOrUpdateTransientModifier</code> then overwrites. So a
+    horse whose both copies are live carries <strong>one</strong> of them, not their sum, and which one
+    depends on emission order. Both <a href="gene-weather-speed.html">weather speed</a> and
+    <a href="gene-weather-jump.html">weather jump</a> promise on their own pages that two copies add.
+    <strong>A thunderstorm makes this reachable with one horse</strong>: vanilla raises
+    <code>isRaining()</code> <em>and</em> <code>isThundering()</code> in a storm, so an
+    <code>R+/Tv</code> horse has two conditions holding and one modifier slot &mdash; which also
+    falsifies both pages&rsquo; claim that the two conditions can never hold at once. Unproven in
+    game, and invisible when it happens: the horse simply moves by one percentage instead of two.
+    The fix is an id that includes the copy, which <code>clearAttributes</code> must then agree with.
+    Checks on <a href="gene-weather-speed.html#verification">weather speed</a> and
+    <a href="gene-weather-jump.html#verification">weather jump</a>.</li>
+
+<li id="gap-303"><strong>Open, found 2026-09-21: <a href="gene-singer.html">singer</a> promises an arbitration that is not in the code.</strong>
+    The page&rsquo;s danger note says &ldquo;one at a time per area, with a cooldown &mdash; the
+    arbitration is part of the gene&rdquo;. There is <strong>no per-area limiting at all</strong>: the
+    only gate is a per-horse, per-gene cooldown, and <code>SingerGene.COOLDOWN_TICKS</code> (900) is
+    <em>shorter</em> than <code>INTERVAL_TICKS</code> (1200), so it can never refuse a firing the
+    interval already allowed. A herd of singers is therefore a herd of singers. Either the note is
+    wrong or the feature is missing, and the page does not say which.</li>
+
 <li id="gap-302"><strong>Open, found 2026-09-21 while dismantling the roadmap: <a href="item-research-papers.html">research papers</a> contradicts itself about what right-clicking a paper does.</strong>
     The <strong>Gameplay</strong> tab says a paper grants nothing on reading &mdash; &ldquo;your gene
     database is now earned only by owning a living horse&rdquo; &mdash; and the <strong>Coding</strong>
@@ -289,7 +315,7 @@
     imagined. <strong>The cheapest next step is the 0.5.014 launch log from that same pack</strong>
     &mdash; the <code>compat:</code> lines and the uncraftable warnings, from a boot that finally
     gets past mod loading, would settle a dozen of these at once.
-    <code>wiki/verification.html</code> &sect;0-FK.</li>
+    <a href="compatibility.html#verification">The compatibility checklist</a> carries it.</li>
 
 <li id="gap-288"><strong>Open, found 2026-09-20 in play: a painted jump shows a visible seam
     where one block meets the next.</strong> Owner, on the finished dyeing system: the dyeing
@@ -429,7 +455,9 @@
     silent</a>: a model or item definition pointing at something nobody wrote draws a purple
     chequerboard and logs nothing at all. Two files have to agree for a modded gate to draw
     (<code>bake-double-gates.mjs</code> and <code>compat/GeneratedGates</code>, one contract in
-    two languages) and nothing checks that they do. <code>wiki/verification.html</code> &sect;0-FK.</li>
+    two languages) and nothing checks that they do.
+    <a href="item-double-gates.html#compat-0918-gates">The gates&rsquo; own checklist</a> is where
+    a modded wood gets drawn.</li>
 
 <li id="gap-274"><strong>Open, corrected 2026-09-18: two mods that both add a &ldquo;maple&rdquo; give you two gates with the same name.</strong>
     A generated gate is labelled from the wood alone &mdash; &ldquo;Maple Double Fence
@@ -1158,7 +1186,7 @@
 
 <li id="gap-115"><strong><code>:common:bakeGeneWikiPages</code> never deletes the page of a gene that stopped existing, and the search index goes on serving it.</strong> Opened 2026-09-08. The bake writes a page for every registered gene and rewrites the generated spans of <code>pages.js</code> and <code>index.html</code> from the registry, so a deleted gene drops out of the sidebar and the landing page correctly - but its <code>wiki/gene-*.html</code> and its <code>wiki/assets/gene-icons/*.png</code> are simply left on disk. Renaming <code>collar.json</code> to <code>suit.json</code> and folding <code>waves.json</code> into <a href="gene-cleave.html">Cleave</a> left <code>gene-collar.html</code> and <code>gene-waves.html</code> behind, unreachable from any nav and still indexed by <code>build-search-index.mjs</code>, so the wiki&rsquo;s own search returned a full page describing a gene the mod no longer has. Both were found by hand while cutting 0.2.0, not by any check. The bake knows the registry and owns the directory, so it can sweep it: any <code>gene-*.html</code> or icon with no gene behind it should be deleted by the task that writes the rest of them, and until it is, a gene rename leaves a lie in the search results.</li>
 
-<li id="gap-121"><strong>Six new effect verbs and the newly-wired <code>attribute</code> verb have never run in a game.</strong> Opened 2026-09-08. <code>charges</code>, <code>breath</code>, <code>on_death</code>, <code>item_drop</code>, <code>mob_aura</code> and <code>combat</code> were written against the 26.1.2 sources in one sitting, and so was the <code>attribute</code> translator that had been logged-once-and-ignored since it was written. <em>Since run (2026-09-15, the yard's rows AB-AD):</em> <code>on_death</code>, <code>item_drop</code> and <code>mob_aura</code> work; see their gene pages. Magic swim speed turned out to do nothing, and now works another way (<a href="gene-magic-swim-speed.html#verified-swim">its page</a>). <em>Still unrun:</em> <code>charges</code>, <code>combat</code>, and whether <code>clearAttributes</code> strips a modifier when its condition goes false. (The air accumulator has since run: <a href="gene-magic-water-breathing.html#verified-breath">water breathing</a>.) <a href="verification.html">To be verified</a> has the checklist.</li>
+<li id="gap-121"><strong>Six new effect verbs and the newly-wired <code>attribute</code> verb have never run in a game.</strong> Opened 2026-09-08. <code>charges</code>, <code>breath</code>, <code>on_death</code>, <code>item_drop</code>, <code>mob_aura</code> and <code>combat</code> were written against the 26.1.2 sources in one sitting, and so was the <code>attribute</code> translator that had been logged-once-and-ignored since it was written. <em>Since run (2026-09-15, the yard's rows AB-AD):</em> <code>on_death</code>, <code>item_drop</code> and <code>mob_aura</code> work; see their gene pages. Magic swim speed turned out to do nothing, and now works another way (<a href="gene-magic-swim-speed.html#verified-swim">its page</a>). <em>Still unrun:</em> <code>charges</code>, <code>combat</code>, and whether <code>clearAttributes</code> strips a modifier when its condition goes false. (The air accumulator has since run: <a href="gene-magic-water-breathing.html#verified-breath">water breathing</a>.) The checks for the two unrun verbs are on the pages that use them: <a href="gene-magic-milk-volume.html#verification">magic milk volume</a> for <code>charges</code>, <a href="gene-magic-fighter.html#verification">magic fighter</a> for <code>combat</code>.</li>
 
 <li id="gap-122"><strong>The white-seeking genes were moved onto <code>LUMA</code>; the black-seeking ones were not.</strong> Opened 2026-09-08. The point of the <code>LUMA</code> mask is that &ldquo;black&rdquo; and &ldquo;white&rdquo; are facts about the colour the <em>gradient chart</em> produced and not about the pigment behind it &mdash; the <a href="gene-lut.html">LUT locus</a> can hand a horse a chart whose black corner is violet, and that horse has identical pigment and is not black anywhere. <a href="gene-fielded.html">Fielded</a>, <a href="gene-yalia.html">yalia</a>, <a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a>&rsquo;s white side now ask the chart. <a href="gene-integration.html">Integration</a>, opalized&rsquo;s dark side and <a href="gene-striped-mane-tail.html">striped mane and tail</a> still ask the pigment through <code>PIGMENT</code>&rsquo;s <code>black</code> and <code>darkness</code> channels, so on an alternate LUT they find &ldquo;black&rdquo; where the horse plainly is not. Only the white half was asked for, and moving the rest shifts shipped coats for no stated reason &mdash; but the inconsistency is now a real one rather than a latent one, and the thresholds are already measured (black 0.807, bay 0.782, chestnut 0.599 on <code>dark</code>) if someone wants to close it.</li>
 
@@ -1180,7 +1208,7 @@
 <li id="gap-94"><strong>No data-driven gene can set an eye colour.</strong> Eleven of the imported magical genes say in their own description that they set or match the eyes - Angler, Aurorae, Glow, Lantern, Kintsugi, Peafowl, Flametouched, Fawn and Element Dusted want the iris in the gene’s own colour, Qhada wants no pupil, Laciano wants a white sclera. A <code>GeneSpec</code> has no hook into <code>EyeColor</code> at all: the eye pipeline is driven by hand-written genes implementing <code>EyeContribution</code>, and nothing in the format reaches it, so all eleven ship with ordinary eyes. The shape of the fix is probably an <code>eyes</code> block on an expression beside <code>effects</code> - a rank, a colour or hue knob, and whether it takes the iris, the sclera or both. It is the largest single hole in the bulk import.</li>
 <li id="gap-95"><strong>A gene cannot read another gene’s epigenetics.</strong> Eight imported markings are defined in terms of “the speckling colour” - Rex draws its circles in it, Qhada fills the gaps between its ribbons with it, Panark outlines every stripe in it, Emitola works it through the flames. Each means <em>the colour this horse’s Speckling locus drew</em>, and a spec gene cannot ask another gene what it drew, so each carries its own hue knob and two of them on one horse disagree. Knobs are already stored per allele copy and addressed by gene key, so the read is not the hard part; deciding what happens when the gene being read is <em>absent</em> is - falling back to the reader’s own knob would make the dependency invisible, which is worse than not having it.</li>
 <li id="gap-96"><strong>The <code>inverting</code> markings only go one way.</strong> Seven loci from the akkadorian source are flagged as inverting: over a pale region they should render dark and over a dark one pale. No op is conditional on what is underneath, so all seven paint pale and the polarity never flips. <strong>War Mask shows the fix</strong> - it needs the same behaviour (near-black on a light coat, grey on a black one) and gets it with two layers whose <code>PIGMENT</code> masks are inverses of each other. That works for any of the seven and costs one extra layer each; it was left for time, not for a reason.</li>
-<li id="gap-98"><strong>The two editors&rsquo; new controls have never been on a screen.</strong> The randomize menu, the padlocks, the family filter and the clipboard/file horse format were all driven from Node against the compiled wasm and from a harness against the editor model, and all of that passes &mdash; but nothing has been <em>looked at</em>, in the browser or in game. The risk is layout, not logic: the padlock takes ten pixels off every gene name, the right column gained two split buttons, and the family filter sits in the eight pixels between the header band and the list. See <a href="verification.html">the checklist</a>.</li>
+<li id="gap-98"><strong>The two editors&rsquo; new controls have never been on a screen.</strong> The randomize menu, the padlocks, the family filter and the clipboard/file horse format were all driven from Node against the compiled wasm and from a harness against the editor model, and all of that passes &mdash; but nothing has been <em>looked at</em>, in the browser or in game. The risk is layout, not logic: the padlock takes ten pixels off every gene name, the right column gained two split buttons, and the family filter sits in the eight pixels between the header band and the list. See <a href="item-spawn-eggs.html#verification">the spawn egg screen&rsquo;s checklist</a>.</li>
 
 <li id="gap-99"><strong>A copied horse is about 28&nbsp;000 characters.</strong> Almost all of it is the epigenome code, which stores literal values on both allele copies of every gene that has an epigenetic schema, and there are a hundred and seventy genes now. The clipboard takes it and the parse is fast, so nothing is broken; it is simply not a thing you can paste into a chat message, which the old genotype code was. If it matters, the lever is the epigenome code, not the horse file &mdash; the file is a dozen fields around two strings.</li>
 

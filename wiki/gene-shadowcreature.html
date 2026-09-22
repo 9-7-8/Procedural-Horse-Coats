@@ -71,7 +71,7 @@
 <h2 id="wild">What you can catch</h2>
 
 <p>
-    Recessive, and a single copy shows nothing at all. A twentieth of a percent
+    Recessive, and a single copy shows nothing at all. Four hundredths of a percent
     of wild horses are the doubled form &mdash; and no carriers, so the first one
     you see is the real thing rather than a hint.
 </p>
@@ -107,7 +107,7 @@
     <p>
         Nothing on this page has been seen in game. The translator was written
         against the 26.1.2 sources and is flagged as unverified in its own
-        comments. Checklist on <a href="verification.html">To be verified</a>.
+        comments. Checklist on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -207,12 +207,90 @@ double k = (1.0 - BodyStripes.smoothstep(half, half + 0.3, d)) * fade;</code></p
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No shadowcreature has ever been in a world: a <code>Shc/Shc</code> horse should have a
+    flat black head and neck whatever else it carries, a whole-eye gold that survives the
+    bake&rsquo;s eye redraw, and a <code>minecraft:light</code> block trailing it that is taken
+    back off the world when it stops glowing or dies.</p>
+</div>
+
+<h3 id="open-shadowcreature">Still open (NOT played)</h3>
+
+<p>
+    Three of the four halves of this gene look wrong loudly if they are wrong, and the fourth
+    does not. The glow is a real <code>minecraft:light</code> block placed in the world and
+    moved as the horse walks, so it is the half that can damage a save while looking perfect
+    &mdash; and the comment on <code>reconcileGlow</code> notes the dimension guard that kept
+    light blocks out of the read-only gallery is currently switched off with the rest of them.
+    Spawn from the custom horse spawn egg; a wild one is roughly one horse in two and a half
+    thousand.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>One light block, following the horse, and only one.</strong> Spawn a
+        <code>Shc/Shc</code> horse, lead it thirty blocks, then look behind it with F3 on.
+        <strong>Pass:</strong> exactly one <code>minecraft:light</code> at level 5 near the
+        horse and none along the path it walked. A trail of light blocks is the failure, and
+        it is permanent.</li>
+    <li><strong>The light is taken back when the horse is gone.</strong> Kill it, or ride it
+        out of the chunk and unload it. <strong>Pass:</strong> no <code>minecraft:light</code>
+        left anywhere it stood.</li>
+    <li><strong>The light never eats a block somebody placed.</strong> Walk the horse through
+        a stable, along a fence line, and into a room with a floor, chests and torches.
+        <strong>Pass:</strong> nothing of yours is replaced or destroyed &mdash; the light has
+        to find its own air to sit in.</li>
+    <li><strong>No shadowcreature carrier exists in the wild.</strong> The founder table lists
+        <code>Shc/Shc</code> and the plain horse and nothing between them, so the first one
+        you meet is the real thing rather than a hint. <strong>Pass:</strong> over a lot of
+        wild horses, every genotype code reads <code>Shc/Shc</code> or <code>n/n</code> at
+        this locus and never <code>Shc/n</code>. A wild heterozygote means the founder table
+        is not the one being rolled.</li>
+    <li><strong>A foal inherits its parent&rsquo;s shoulder, not a fresh roll.</strong> The
+        four tentacle numbers &mdash; reach, spacing, width and the field seed &mdash; sit on
+        the allele copy. Breed two shadowcreatures and read the foal&rsquo;s epigenome against
+        both parents&rsquo;. <strong>Pass:</strong> each inherited copy&rsquo;s four values
+        match the parent copy they came from, to within the drift breeding applies. If they
+        are unrelated numbers, the values are being rolled per horse and the page&rsquo;s
+        whole claim about inherited shoulders is false.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The eyes are gold all the way to the rim.</strong> <strong>Pass:</strong> the
+        whole eye is gold with no white ring left round it, and it burns in the dark. A normal
+        white-and-dark eye means the overlay pass never ran and the bake&rsquo;s own eye
+        redraw won; a gold iris inside a white ring means <code>tintIris</code> is being
+        called instead of <code>shadeEyes</code>.</li>
+    <li><strong>The black does not care what the horse is underneath.</strong> Spawn a
+        palomino, a black and a cremello shadowcreature, and one on an alternate
+        <a href="gene-lut.html">LUT</a>. <strong>Pass:</strong> all four heads are the same
+        flat colour. Any of them showing a lighter or warmer head means the black is being
+        composited rather than set, which is the failure the phase-3 argument exists to
+        prevent.</li>
+    <li><strong>It has the last word, and Tron still beats it.</strong> Spawn one carrying a
+        broad face marking, and one carrying <a href="gene-tron.html">Tron</a>.
+        <strong>Pass:</strong> no face marking shows through the black, and the neon does.</li>
+    <li><strong>The tentacles run out rather than stop.</strong> <strong>Pass:</strong> they
+        taper and fade over the shoulder with no straight edge anywhere the black meets the
+        barrel, and they differ between two horses. A hard line across the shoulder means the
+        distance falloff is not being applied; identical shoulders on two horses is the same
+        failure as the foal check above, seen from the front.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-light.html">Light &mdash; the other gold eyes</a>
         <a href="gene-nyxborn.html">Nyxborn</a>
         <a href="eye-colour.html">Eye colour and the two hooks</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/ShadowcreatureGene.java</code>
 </div>

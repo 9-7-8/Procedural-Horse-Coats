@@ -284,7 +284,8 @@ could not find any targets matching 'canAddPassenger' in AbstractHorse</code></p
         compiled. So a wrong target, a wrong descriptor, a wrong injection point and a
         <code>@Shadow</code> on a field that does not exist are all <strong>invisible to the
         entire check suite</strong> and fatal at startup. This is the concrete reason
-        <a href="verification.html">the routine</a> says boot a server before tagging &mdash;
+        <a href="#static-order">a release is not tagged without a <code>runServer</code>
+        boot</a> &mdash;
         it is not a formality, it is the only test that runs the mixins at all.
     </p>
 </div>

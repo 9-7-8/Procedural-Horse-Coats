@@ -34,8 +34,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -124,14 +124,73 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Base alarm has never been heard firing: its whinny is vanilla&rsquo;s own
+    <code>entity.horse.angry</code>, so only the census&rsquo;s sound count can tell a working
+    alarm from a silent one, and nobody has read that number yet.</p>
+</div>
+
+<h3 id="open-gene-base-alarm">Still open (NOT played)</h3>
+
+<p>
+    The gene is one <code>Sound</code> ability gated on the <code>hostile_near</code> world flag,
+    sampled every <code>BaseAlarmGene.CHECK_TICKS</code> with a
+    <code>COOLDOWN_TICKS</code> under it. The yard&rsquo;s <em>BASE ALARM</em> pen is one pen from
+    the ward spawner precisely because that is the only place the condition can ever be true
+    &mdash; and <code>DebugWorldWatch.notePlayedSound</code> tallies every gene sound by id into
+    the census line, which is the evidence here. <strong>Do not try to judge this by ear:</strong>
+    the sound it plays is the noise an ordinary annoyed horse makes anyway.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The alarm fires at all.</strong> Stand at the yard&rsquo;s <em>BASE ALARM</em> pen
+        until the neighbouring spawner is running. <strong>Pass:</strong> the census line
+        &ldquo;gene sounds since the last census&rdquo; names
+        <code>minecraft:entity.horse.angry</code> with a non-zero count. A zero there is the whole
+        gene failing, and nothing else below is worth checking until it moves.</li>
+    <li><strong>It is silent with nothing hostile about.</strong> Put an expressing horse in a
+        lit, walled pen with no mobs and leave it for a census or two.
+        <strong>Pass:</strong> that sound id is absent from the census entirely. This is the
+        control that separates &ldquo;the flag works&rdquo; from &ldquo;the flag is stuck
+        true&rdquo;, and the sampled world flags have been stuck-off for every gene in the mod
+        once already.</li>
+    <li><strong>The radius is measured from the horse.</strong> Two expressing horses, one within
+        sixteen blocks of a spawner and one well outside it. <strong>Pass:</strong> the count rises
+        while only the near one can see anything; move the far one in and the rate goes up.</li>
+    <li><strong>One copy is enough.</strong> Spawn an <code>Alm/n</code> horse from the custom
+        horse spawn egg. <strong>Pass:</strong> its gene row reads the Alarm expression and not a
+        carrier, and it contributes to the count beside an <code>Alm/Alm</code> horse.</li>
+    <li><strong>The cooldown holds in a herd.</strong> Four expressing horses around one spawner
+        for ten minutes. <strong>Pass:</strong> the census count is bounded by roughly one whinny
+        per horse per <code>COOLDOWN_TICKS</code> &mdash; about sixty each over that span. A count
+        several times higher means the cooldown is not per horse, which is the failure dominance
+        makes likely here.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>It is bearable.</strong> Stand in that paddock of four alarm horses while the
+        spawner runs. <strong>Pass:</strong> you can work there. The cooldown was chosen by
+        arithmetic and never heard, and &ldquo;a dominant gene several horses in one stable
+        have&rdquo; is the normal case rather than the edge case.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-meowing.html">Meowing</a>
         <a href="gene-holy-ward.html">Holy ward</a>
         <a href="gene-singer.html">Singer</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/BaseAlarmGene.java</code>
+    Source: <code>common/genetics/genes/BaseAlarmGene.java</code>
 </div>
 
 </article>

@@ -108,8 +108,8 @@
     <span class="label">Built 2026-09-04, not yet play-tested</span>
     <p>
         Nothing about a scaled horse has been seen: not the model, not the
-        hitbox, not the rider position. Checklist on
-        <a href="verification.html">To be verified</a>.
+        hitbox, not the rider position. Checklist on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -314,12 +314,89 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No scaled horse has ever been in a world, so magic body size is unproven on all four
+    of the things that can be wrong without anybody noticing: the 1:2:1 ratio, that no wild
+    horse is ever born doubled, that <code>body.size</code> false holds the entity at
+    1.0&times; <em>without</em> switching the gene off, and that a 2&times; horse does not
+    suffocate in an ordinary stable.</p>
+</div>
+
+<h3 id="open-gene-body-size">Still open (NOT played)</h3>
+
+<p>
+    The gene is codominant and every one of its six combinations is a different number, so
+    almost everything here is read off an attribute or a gene row rather than looked at. The
+    one item that is genuinely a hazard rather than a check is the hitbox: vanilla scales it
+    from the model, and a doubled horse is over three blocks tall.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The ratio pen agrees.</strong> The yard&rsquo;s <em>RATIO SIZE</em> pen runs
+        <code>Big/n</code> over <code>Big/n</code> all day. <strong>Pass:</strong> about
+        1&nbsp;<code>Big/Big</code> to 2&nbsp;<code>Big/n</code> to 1&nbsp;<code>n/n</code>
+        among the foals, and every <code>Big/Big</code> born alive.</li>
+    <li><strong>No wild horse is ever born doubled.</strong> The founder table lists
+        <code>Big/n</code>, <code>Small/n</code> and <code>n/n</code> and nothing else, so
+        <code>double-giant</code>, <code>double-tiny</code> and <code>balanced</code> are
+        bred-only outcomes. <strong>Pass:</strong> over a lot of wild-caught horses, not one
+        body-size row reads any of those three. A single one means the founder table is not
+        the thing being drawn from, which would also mean the wild size spread is wrong.</li>
+    <li><strong>It moves size and nothing else.</strong> Spawn a <code>Big/Big</code> and an
+        <code>n/n</code> horse with the same everything else from the custom horse spawn egg.
+        <strong>Pass:</strong> their speed, health, jump and pull readouts match; only
+        <code>Attributes.SCALE</code> differs. A big horse that is also a faster horse is the
+        failure this locus was deliberately built to avoid.</li>
+    <li><strong>Two good copies get past the natural clamp.</strong>
+        <code>HorseTraits.MAX_SCALE</code> is 1.75 and this gene applies its factor after it.
+        <strong>Pass:</strong> a <code>Big/Big</code> horse can read a scale above 1.75 &mdash;
+        which no stack of natural loci can reach &mdash; and no horse anywhere reads anything
+        near <code>MAGICAL_MAX_SCALE</code>. If nothing ever gets past 1.75, the unclamped
+        path is not being taken and the whole point of making the gene codominant is lost.</li>
+    <li><strong><code>body.size</code> false stops the entity, not the gene.</strong> Set it
+        false and rejoin. <strong>Pass:</strong> every horse&rsquo;s scale reads exactly 1.0,
+        <em>and</em> a doubled horse&rsquo;s gene row still reads <code>double-giant</code> and
+        still passes its copies to its foals. A switch that silently takes the gene away
+        along with the scale is the failure mode. Then set it back true and note <em>when</em>
+        the sizes come back &mdash; immediately, or only once the horses reload.
+        <code>HorseRecords</code> writes the base attribute rather than a modifier, so which
+        of the two it is has never been established and is worth writing down either way.</li>
+    <li><strong>A doubled horse does not suffocate in a stable.</strong> Put a horse of about
+        2&times; in a three-high pen and leave it for a while. <strong>Pass:</strong> not one
+        <code>inWall</code> damage line in the log, and the horse can still be led through the
+        doors the yard actually has. This is the one that costs a horse rather than a
+        screenshot, which is why it is here and not below.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The gait does not slide.</strong> <code>stretchGaitToSize</code> divides
+        <code>walkAnimationPos</code> by the render scale. <strong>Pass:</strong> a big horse
+        takes longer, slower strides and a tiny one quick short ones, with its feet planted in
+        both cases. Watch a <code>double-giant</code> and a <code>double-tiny</code> walk past
+        each other.</li>
+    <li><strong>The rider sits on the saddle at both extremes.</strong> Ride a
+        <code>double-giant</code> and a <code>double-tiny</code>. <strong>Pass:</strong> the
+        rider is on the horse&rsquo;s back, not inside it and not floating over it. Worth
+        checking with two riders on a strong big horse as well: the pillion offset in
+        <code>HorseTwoRidersMixin</code> is a flat 0.55 blocks and is <em>not</em> multiplied
+        by scale, so on a doubled horse the second rider may land inside the first.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-body.html">The horse&rsquo;s body</a>
         <a href="gene-lcorl.html">LCORL &mdash; the natural height locus</a>
         <a href="gene-hmga2.html">HMGA2 &mdash; the pony locus</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicSizeGene.java</code>,
     <code>common/trait/GeneEpigenetics.java</code>

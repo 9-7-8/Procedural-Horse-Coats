@@ -35,8 +35,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -157,14 +157,77 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Leader of the pack has been measured as cheap but never watched working: nobody has confirmed
+    that a retinue actually forms, that a mismatched pair produces none, or that the followers are
+    released when the horse is gone.</p>
+</div>
+
+<h3 id="open-gene-pack-leader">Still open (NOT played)</h3>
+
+<p>
+    The gene is <code>mob_aura</code> in <code>follow</code> mode, and the translator issues the
+    follower a <em>path</em> per beat rather than adding a goal to it. That matters twice: a
+    pathfinder beats a velocity nudge, which is why the mirror-image repel aura had to be rewritten
+    after three unattended hours proved a shove does nothing; and a path expires by itself, which is
+    the whole argument that this cannot be left behind on another mod&rsquo;s mob. Neither has been
+    seen here. The cost question is already answered &mdash; see
+    &sect;<a href="#verified-retinue-cost">Verified</a>.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A retinue forms.</strong> Spawn a matched pair for a mob you can put in a pen
+        &mdash; cows are the case the cost pen already used &mdash; with several of them inside
+        sixteen blocks, then ride or lead the horse away.
+        <strong>Pass:</strong> they walk after it, and give up once it is well outside the radius.
+        Nothing else here matters if they do not move.</li>
+    <li><strong>A mismatched pair leads nothing.</strong> Two <em>different</em> following alleles,
+        with both mobs in range. <strong>Pass:</strong> neither species follows, and the gene row
+        reads the mismatched expression. This is most crosses between two carriers, so it is the
+        normal outcome and not the corner case.</li>
+    <li><strong>It does not create them.</strong> Take an expressing horse somewhere with none of
+        its mob at all. <strong>Pass:</strong> nothing happens &mdash; and record it as the gene
+        working. The allele description says this outright because it is the single most likely
+        reason to file the locus as broken.</li>
+    <li><strong>The cap bounds the pathfinding.</strong> Put more of the mob in range than
+        <code>PackLeaderGene.MAX_TARGETS</code>. <strong>Pass:</strong> only that many trail the
+        horse per beat and the rest carry on grazing. The cap is the design rather than tuning, and a
+        cap that is not applied shows up as tick time long before it shows up as a wrong-looking
+        retinue.</li>
+    <li><strong>Nothing is left behind.</strong> Kill or remove the horse while a retinue is
+        following it. <strong>Pass:</strong> the followers go back to wandering at once, and no mob
+        keeps walking toward where the horse was. A leak here is the exact lifecycle failure the
+        stateless design exists to prevent, and it would only ever be noticed as mobs behaving oddly
+        long afterwards.</li>
+    <li><strong>No wild horse leads anything.</strong> The founder table for a matched-pair locus
+        puts only carriers in the wild. <strong>Pass:</strong> you find carriers at roughly
+        <code>WILD_CARRIER_PERCENT</code> and never a wild horse with a retinue.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>It reads as a retinue rather than a tow rope.</strong> Ride one at speed with a
+        following pack. <strong>Pass:</strong> they trail behind and drift, plainly untamed and
+        plainly not commanded &mdash; the tone the page promises. A pack that moves in lockstep with
+        the horse is the wrong feeling even when the mechanism is right.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-lycan.html">Lycan</a>
         <a href="gene-magic-mob-aura.html">Magic mob aura</a>
         <a href="gene-spawner.html">Spawner</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/PackLeaderGene.java</code>
+    Source: <code>common/genetics/genes/PackLeaderGene.java</code>
 </div>
 
 </article>

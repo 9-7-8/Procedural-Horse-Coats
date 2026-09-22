@@ -116,8 +116,8 @@
         No horse carrying this has been rendered in a running client. What is worth
         looking at first is the <em>edge</em>: a magical marking stopping at a tobiano
         boundary should read as a hard cut, and if the two disagree about where the
-        boundary is it will show as a one-texel fringe. Checklist on
-        <a href="verification.html">To be verified</a>.
+        boundary is it will show as a one-texel fringe. Checklist on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -175,6 +175,79 @@
     and it is also the point: the stack is not where this gene lives.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No horse carrying extreme white dominant has ever been rendered in a running client, so
+    the two ways this gene fails are both open: doing <strong>nothing</strong> (the mask is
+    never built, and it looks exactly like an ordinary horse) and doing <strong>too much</strong>
+    (it eats the eye colour, or deletes a magical marking off an already-white horse).</p>
+</div>
+
+<h3 id="open-gene-extreme-white-dominant">Still open (NOT played)</h3>
+
+<p>
+    This gene paints nothing, so there is no &ldquo;does it look right&rdquo; for the gene
+    itself &mdash; only for the <em>boundary</em> between two other genes, and for whether the
+    mask was built at all. Everything below is a pair: the same horse with
+    <code>EWD/n</code> and with <code>n/n</code>, spawned back to back from the custom horse
+    spawn egg. The pair is the test; a single horse tells you nothing here.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>On a horse with no white it changes nothing.</strong> Spawn a solid coat with a
+        loud magical marking, twice, once with <code>EWD/n</code>. <strong>Pass:</strong> the
+        two horses are indistinguishable. A difference here means the seed pass is locking
+        pigmented texels, not white ones.</li>
+    <li><strong>On a horse with white but nothing magical it changes nothing.</strong> A
+        tobiano or a splash, with and without <code>EWD/n</code>. <strong>Pass:</strong>
+        indistinguishable again. Between this and the item above, the gene must be inert on
+        every horse that has only one of the two ingredients.</li>
+    <li><strong>The two do not share a cached texture.</strong> <code>white-dominant</code> is
+        a <code>marker()</code>, so it stays in <code>Genotype.coatCode()</code> and an
+        <code>EWD/n</code> horse and its <code>n/n</code> twin are two cache entries.
+        <strong>Pass:</strong> on a horse that carries both white and magic, the pair differs.
+        If the second horse wears the first&rsquo;s coat, the marker is not reaching the code
+        and every check above it has been comparing one texture with itself.</li>
+    <li><strong>The wild frequency is about one horse in a hundred and sixty.</strong>
+        <code>WILD_EWD_ONE_IN</code> is per allele and one copy expresses.
+        <strong>Pass:</strong> over a lot of wild horses, the gene row reads
+        <code>white-dominant</code> at roughly that rate &mdash; on horses that mostly look
+        entirely ordinary, because most of them have no white and no magic to argue about.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The pay-off, and the whole gene.</strong> A tobiano or four stockings plus a
+        loud magical marking, with and without <code>EWD/n</code>. <strong>Pass:</strong>
+        without it the magic covers the white and the horse reads as the magical thing alone;
+        with it the white patches stand exactly where the melanin genes drew them and the
+        magical marking fills in around them. If both horses look the same, the mask is being
+        built and then not read.</li>
+    <li><strong>A splashed white horse keeps its blue eyes.</strong> The eye rectangles are cut
+        back out of the seed and never added again. <strong>Pass:</strong> a heavily white
+        <code>EWD/n</code> horse still has whatever colour its eye genes gave it &mdash; not a
+        blank white patch where the eyes should be. This is the one exemption in the gene and
+        the only place it can go wrong.</li>
+    <li><strong>An almost-entirely-white horse loses almost all of its magic.</strong> That is
+        what the rule says, and it has never been seen: a double cream or a dominant white
+        carrying <code>EWD/n</code> and something loud should come out nearly blank.
+        <strong>Pass:</strong> it does, and the result reads as a deliberately white horse
+        rather than as a broken one. If it does not read that way, the honest answer is a
+        design call and not a bug &mdash; say so rather than patching the mask.</li>
+    <li><strong>The boundary is a hard cut and not a fringe.</strong> Where the magical marking
+        stops against the natural white, at close range. <strong>Pass:</strong> one clean edge.
+        A one-texel line of neither colour means the seed&rsquo;s
+        <code>TRANSPARENT_EPS</code> test and the marking&rsquo;s own edge disagree about where
+        white begins.</li>
+</ul>
 </section>
 
 </article>

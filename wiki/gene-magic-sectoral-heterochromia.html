@@ -82,7 +82,7 @@
         <code>EyeColorTest</code>. What is unknown is whether a four-texel iris split in
         two <em>reads</em> as heterochromia on a horse at riding distance, or whether the
         single-corner and three-corner wedges are too fine and it should be halves only.
-        Checklist on <a href="verification.html">To be verified</a>.
+        Checklist on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -210,6 +210,88 @@
     chaos allele. So changing one allele never shifts the other copy's shape.
 </p>
 
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Magic sectoral heterochromia is the mod&rsquo;s only gene whose
+    <strong>heterozygote</strong> is the expressing combination, so the checks that matter are
+    the ones that prove that shape holds in play: two expressing parents must throw half a
+    litter of foals showing <em>nothing</em>, and a matched or carrier pair must leave the
+    horse&rsquo;s own eye colour completely alone.</p>
+</div>
+
+<h3 id="open-gene-magic-sectoral-heterochromia">Still open (NOT played)</h3>
+
+<p>
+    The two colours and the two shapes are asserted through the real pipeline in
+    <code>EyeColorTest</code>. What is not proven is the breeding arithmetic, which runs
+    backwards from every other locus here, and the three ways the gene can reach an eye it
+    should not have touched: a carrier, a matched pair, and a horse whose eye colour came from
+    somewhere else entirely.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>Two expressing parents throw half a litter of nothing.</strong> Breed
+        <code>green/gold</code> to <code>green/gold</code>. <strong>Pass:</strong> about one
+        foal in four is <code>green/green</code> and one in four <code>gold/gold</code>, both
+        showing <strong>no sector at all</strong>, and only the <code>green/gold</code> half
+        expresses. This is the gene&rsquo;s entire premise and the result a player will refuse
+        to believe: it is right, and it is the first thing worth confirming.</li>
+    <li><strong>You cannot get there by doubling up.</strong> <strong>Pass:</strong> breeding an
+        expressing horse to itself, or a <code>gold/n</code> carrier to another
+        <code>gold/n</code>, never produces a sectoral foal. Every other locus in the mod gets
+        easier once you own one good animal; if this one does too, something is treating a
+        matched pair as expressing.</li>
+    <li><strong>A carrier and a matched pair do not touch the horse&rsquo;s own eye
+        colour.</strong> Spawn a <a href="gene-champagne.html">champagne</a> horse carrying
+        <code>gold/gold</code>, and a splashed white one carrying <code>blue/n</code>.
+        <strong>Pass:</strong> the champagne keeps its champagne eye and the splashed white
+        keeps its blue &mdash; neither gets a wild-type dark eye handed to it. A
+        non-expressing combination must contribute <em>nothing</em>, not a claim on the iris,
+        and this is the only test that tells the two apart.</li>
+    <li><strong>An expressing horse keeps its own colour outside the sectors.</strong> A
+        splashed white horse carrying two <em>different</em> colour alleles.
+        <strong>Pass:</strong> it shows the two colours in the wedges and its blue everywhere
+        else &mdash; <code>EyePatchContribution</code> paints over the eye-colour channel
+        rather than competing with it.</li>
+    <li><strong>The gene row names the pair, not the gene.</strong> <strong>Pass:</strong> an
+        expressing horse&rsquo;s row reads <code>sectoral-green-gold</code> (or whichever of
+        the fifteen pairs it is), not one blanket <code>sectoral-heterochromia</code>. The
+        fifteen outcomes are fifteen breeding targets, and everything downstream &mdash; the
+        in-game dictionary, the preview, the catalogue &mdash; reads the outcome list.</li>
+    <li><strong>A wild expresser is a genuine find, and never a matched one.</strong>
+        <code>WILD_ONE_IN</code> per colour allele, across six colours. <strong>Pass:</strong>
+        over a lot of wild horses, sectoral eyes turn up rarely, carriers turn up much more
+        often, and no wild horse showing a sector has two copies of the same colour.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>Does a four-texel iris split in two read as heterochromia?</strong> The
+        page&rsquo;s own stated unknown, and the reason the whole design could still be wrong.
+        <strong>Pass:</strong> at riding distance the eye reads as two colours rather than as a
+        dirty single colour. If only the halves work and the single-corner and three-corner
+        wedges read as stray pixels, the answer is to cut <code>EyePatch.WEDGES</code> back to
+        halves &mdash; a design call, not a fix.</li>
+    <li><strong>The two eyes never match, and two siblings never match either.</strong> Each
+        eye&rsquo;s wedge comes off one allele copy, and
+        <code>EyePatch.differentWedge</code> guarantees the left eye is not the right
+        eye&rsquo;s shape. <strong>Pass:</strong> across a good number of expressing horses,
+        not one has the same wedge in both eyes, the leading colour swaps between the two eyes,
+        and two <code>green/gold</code> siblings have different shapes. Twelve shapes means a
+        matched pair would otherwise turn up about one horse in twelve and read as a bug.</li>
+    <li><strong>Chaos stays a colour.</strong> <strong>Pass:</strong> a chaos sector is a
+        recognisable hue rather than a near-black or near-white smudge at four texels, no two
+        chaos horses agree, and <code>chaos/chaos</code> still shows nothing even though its two
+        copies rolled different colours.</li>
+</ul>
 </section>
 
 </article>

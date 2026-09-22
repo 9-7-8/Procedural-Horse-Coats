@@ -35,8 +35,8 @@
         the test suite; the translator that turns it into behaviour was written
         against the 26.1.2 sources and is flagged unverified in its own comments.
         <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        What to look at, and what is most likely to be wrong, is on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -195,14 +195,96 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Rain is measured to move <code>movement_speed</code> on weather sensitive (speed), but
+    only one of its three weathers: the storm and snowfall pairs have never been read, and
+    nothing has yet shown that <strong>two copies add</strong> rather than one quietly replacing
+    the other.</p>
+</div>
+
+<h3 id="open-weather-speed">Still open (NOT played)</h3>
+
+<p>
+    Every check here is a number, not a feeling, and this page says so itself: this is the locus
+    where the gene database is easier than observation. The method is the one the Verified note
+    used &mdash; point the census&rsquo;s attribute readout at the pen, read
+    <code>movement_speed</code>, change the weather, read it again. <strong>Take a dry reading
+    first, every time</strong>: the owner&rsquo;s first report of this family was &ldquo;it
+    doesn&rsquo;t work&rdquo;, the horses agreed with her, and the real fault was a test biome
+    carrying <code>"has_precipitation": false</code>. A dry reading that is not identical across
+    the pen means a modifier is stuck on and nothing below can be trusted.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>Two copies add.</strong> This is the page&rsquo;s central claim and the thing
+        most likely to be wrong: the gene emits one modifier <em>per allele copy</em>, and the
+        attribute path names its modifier <code>gene/&lt;gene key&gt;/&lt;attribute&gt;</code>
+        &mdash; one id per gene per attribute. Spawn an <code>R+/R+</code> horse and an
+        <code>R+/n</code> horse in one watched pen and read the range in rain.
+        <strong>Pass:</strong> the homozygote&rsquo;s value is about twice as far off the dry
+        baseline as the heterozygote&rsquo;s. Two readings that differ only by the per-copy roll
+        mean one copy is overwriting the other, and &ldquo;both percentages, added&rdquo; is
+        fiction.</li>
+    <li><strong>A storm is not just rain again.</strong> <code>raining</code> reads
+        <code>isRaining</code> and <code>thundering</code> reads <code>isThundering</code>, and
+        a Minecraft thunderstorm <em>is</em> raining &mdash; so the claim that a compound
+        heterozygote&rsquo;s two halves never both apply needs testing rather than believing.
+        Spawn <code>T+/T+</code> and <code>R+/Tv</code> horses and read the pen dry, under
+        <code>/weather rain</code>, and under <code>/weather thunder</code>.
+        <strong>Pass:</strong> the <code>T+/T+</code> horse is at baseline in plain rain and
+        raised in a storm; the compound horse is faster in rain and slower in a storm. A
+        compound horse whose storm reading equals its rain reading is both conditions holding at
+        once with one modifier id between them.</li>
+    <li><strong>The snowfall pair works at all.</strong> <code>snowing</code> is not a weather
+        flag &mdash; it is raining <em>and</em> the biome cold enough to snow at the
+        horse&rsquo;s height, sampled on an interval and cached, and every world-sampled flag
+        was once silently switched off for a day by a sentinel-arithmetic bug. Nothing has ever
+        read this pair. Put an <code>S+/S+</code> horse in a snowy biome and another in a warm
+        one, and make it rain over both. <strong>Pass:</strong> the cold one is raised and the
+        warm one is at baseline. Both at baseline means the flag is off again, and it would log
+        nothing.</li>
+    <li><strong>The modifier comes back off.</strong> <code>/weather clear</code> after each
+        reading. <strong>Pass:</strong> the pen returns to <em>exactly</em> its dry baseline. A
+        rain bonus left standing in sunshine is the failure the &ldquo;removal is already
+        handled&rdquo; note calls impossible, and only a second dry reading disproves it.</li>
+    <li><strong>The founder frequency is what the table says.</strong> About a fifth of founders
+        carry one weather-speed allele, spread across all six variants, and none carry two.
+        <strong>Pass:</strong> over a lot of wild horses the genotype codes show roughly that
+        share, all six tokens turn up, and no horse is homozygous. <code>Rv</code> and its
+        siblings are worth looking for specifically: a &ldquo;suffers in&rdquo; allele used to
+        write a genotype code its own parser could not read back, and that bug needed a founder
+        to actually roll one before anything noticed.</li>
+    <li><strong>The two loci really are unlinked.</strong> Separate genes, separate founder
+        tables. <strong>Pass:</strong> across wild horses, what a horse carries here predicts
+        nothing about what it carries on
+        <a href="gene-weather-jump.html">weather sensitive (jump)</a>.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>Is the magnitude noticeable at all?</strong> The percentages are a first guess,
+        and this is the only part of the locus a number cannot settle. Ride an
+        <code>R+/R+</code> horse over a measured stretch dry, then in rain.
+        <strong>Pass:</strong> you can tell which weather you are in without reading the
+        attribute. If you cannot, the mean delta is too small, and that is the finding.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-weather-jump.html">Weather sensitive (jump)</a>
         <a href="gene-magic-swim-speed.html">Magic swim speed</a>
         <a href="gene-eyesight.html">Eyesight locus</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/WeatherSpeedGene.java</code>
+    Source: <code>common/genetics/genes/WeatherSpeedGene.java</code>
 </div>
 
 </article>

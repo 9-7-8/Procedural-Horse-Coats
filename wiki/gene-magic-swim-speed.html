@@ -83,7 +83,7 @@
     <div><dt>Gene key</dt><dd><code>horsegenetics.magic_swim_speed</code></dd></div>
     <div><dt>Alleles</dt><dd><code>Otr</code> otterlike, <code>Stne</code> stonelike, <code>n</code></dd></div>
     <div><dt>Priority</dt><dd>144 &mdash; the magical body-stat band</dd></div>
-    <div><dt>Reaches the game as</dt><dd>an <code>attribute</code> effect on <code>water_movement_efficiency</code></dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>Swim</code> ability &mdash; a scale on the horse&rsquo;s own push through water, applied by <code>mixin/HorseSwimMixin</code>. It was an <code>attribute</code> effect on <code>water_movement_efficiency</code> until 2026-09-15, when that read 0.000 on every genotype (<a href="#verified-swim">below</a>)</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
@@ -148,8 +148,10 @@
 <div class="filename">common/genetics/genes/MagicSwimSpeedGene.java</div>
 <pre><code class="language-java">@Override
 protected List&lt;GeneAbility&gt; abilitiesFor(double factor) {
-    return List.of(new GeneAbility.AttributeMod(ATTRIBUTE, "multiply_total", factor - 1.0,
-            GeneAbility.Condition.ALWAYS, 1));
+    // A swim nudge, not an attribute (owner, 2026-09-15, gap 249). The attribute this
+    // multiplied, water_movement_efficiency, has a base of 0 - the yard's SWIM SPEED pen
+    // read 0.000 on every genotype, so no horse ever swam faster or slower.
+    return List.of(new GeneAbility.Swim(factor, GeneAbility.Condition.ALWAYS, 1));
 }</code></pre>
 </div>
 
@@ -159,7 +161,10 @@ protected List&lt;GeneAbility&gt; abilitiesFor(double factor) {
     However much the name suggests itself, vanilla has no such attribute. What
     it has is <code>water_movement_efficiency</code> &mdash; the share of its
     land speed a mob keeps in water, which is Depth Strider&rsquo;s attribute
-    and is exactly what &ldquo;how fast does this horse swim&rdquo; means.
+    and <em>sounds</em> like exactly what &ldquo;how fast does this horse
+    swim&rdquo; means. <strong>It is not</strong>, on a horse: its base is 0, so
+    multiplying it multiplies nothing, which is why this gene no longer uses it
+    (<a href="#verified-swim">Verified</a>).
 </p>
 
 <p>
@@ -172,6 +177,12 @@ protected List&lt;GeneAbility&gt; abilitiesFor(double factor) {
 </p>
 
 <h2 id="removal">Taking the modifier off again</h2>
+
+<p class="muted">
+    This is how the <code>attribute</code> path works generally &mdash; it is no longer
+    this gene&rsquo;s path, but it is the machinery every attribute gene beside it uses,
+    and the removal half is the part that is easy to get wrong.
+</p>
 
 <p>
     The modifier is transient and its id is derived from the gene and the
@@ -223,12 +234,61 @@ protected List&lt;GeneAbility&gt; abilitiesFor(double factor) {
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Magic swim speed is measured on loose horses steered by their own AI; the <strong>ridden</strong> path is not, and there the factor comes off the <em>client&rsquo;s</em> record cache and falls back to 1.0 for any horse whose record has not arrived &mdash; which looks exactly like a horse with no gene.</p>
+</div>
+
+<h3 id="open-magic-swim-speed">Still open (NOT played)</h3>
+
+<p>
+    Vanilla runs <code>travelInWater</code> on whichever side moves the horse, so a ridden horse is
+    scaled on its rider&rsquo;s client by <code>ClientSwimHandler</code>, which reads
+    <code>ClientHorseRecordCache</code> and returns 1.0 for a horse it has no record for. That is the
+    one path the SWIM SPEED pen cannot exercise, and its failure mode is silence. The pen&rsquo;s own
+    lap log is the yardstick for everything below: a plain horse covered 2.90 blocks in five seconds,
+    <code>Stne/Stne</code> 1.83 and <code>Otr/Otr</code> 21.87.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong><code>Otr/Stne</code> cancels.</strong> Put one in the SWIM SPEED pen&rsquo;s channel
+        and read the lap log. <strong>Pass:</strong> its blocks-per-lap sits with the plain
+        horse&rsquo;s, not with either extreme &mdash; the sum is signed, so a horse carrying both
+        should swim ordinarily while throwing both.</li>
+    <li><strong>The pen&rsquo;s Otter overshoot has an explanation.</strong> <code>Otr/Otr</code>
+        covered about 7.5 times the plain distance on a factor of 1.56, which the Verified note
+        ascribes to an AI-steered plain horse barely pushing at all &mdash; stated there as an
+        inference, not a measurement. <strong>Pass:</strong> under a rider, whose push is far larger,
+        the same pair of horses comes out near the <em>factor</em> rather than near 7&times;. If the
+        ratio stays at 7&times; when both are pushing hard, the mixin is amplifying something other
+        than the push.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A ridden otter horse outswims a ridden plain one.</strong> Same start, same stretch of
+        deep water, both ridden. <strong>Pass:</strong> the otter horse is clearly ahead. If the two
+        are identical, the client had no record for the horse and every ridden horse in the world
+        swims like a plain one.</li>
+    <li><strong>It survives a reload.</strong> Leave the world, come back, and ride the same
+        <code>Otr/Otr</code> horse straight into the water. <strong>Pass:</strong> the same speed as
+        before &mdash; the record has to have reached the client again before it matters, and a
+        one-off first-dive failure here is the kind of thing that reads as imagination.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-water-breathing.html">Magic water breathing</a>
         <a href="gene-magic-speed.html">Magic speed &mdash; the land one</a>
         <a href="making-a-gene.html#block">The effects block</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicSwimSpeedGene.java</code>,
     <code>common/genetics/genes/AbstractMagicFactorGene.java</code>

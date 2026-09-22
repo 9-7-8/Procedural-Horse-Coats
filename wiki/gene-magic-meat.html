@@ -88,7 +88,7 @@
     <p>
         Nothing on this page has been seen in game. The translator was written
         against the 26.1.2 sources and is flagged as unverified in its own
-        comments. Checklist on <a href="verification.html">To be verified</a>.
+        comments. Checklist on the <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -157,12 +157,53 @@ return List.of(new GeneAbility.ItemDrop("meat", count, count,
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No meaty horse has died in a world: magic meat is the one <code>item_drop</code> value that <strong>adds</strong> rather than replaces, so the beef has to land <em>beside</em> the leather, and its count has to be the average of the two copies&rsquo; yields rather than their sum.</p>
+</div>
+
+<h3 id="open-magic-meat">Still open (NOT played)</h3>
+
+<p>
+    Its siblings on the <code>item_drop</code> verb have been seen &mdash; diamonds, an egg and a
+    sword each replaced the leather in the yard&rsquo;s death pens &mdash; and this locus is the
+    exception to that rule, which is exactly the branch none of those deaths exercised. Horse meat
+    arrives as <code>minecraft:beef</code>.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The beef is added, not substituted.</strong> Kill a <code>Mty/Mty</code> horse.
+        <strong>Pass:</strong> beef <em>and</em> the horse&rsquo;s usual leather on the ground. Beef
+        alone means the meat took the replace branch with the other three values, which is a
+        one-character difference nobody would see without looking for the leather.</li>
+    <li><strong>A carrier drops nothing extra.</strong> Kill a <code>Mty/n</code> horse as the
+        control. <strong>Pass:</strong> leather only, no beef &mdash; the locus is recessive and the
+        carrier is meant to be indistinguishable.</li>
+    <li><strong>It stacks with the treasure locus.</strong> Kill a horse that is both
+        <code>Mty/Mty</code> and <code>Dia/Dia</code>. <strong>Pass:</strong> diamonds and beef, no
+        leather &mdash; the diamonds replace, the meat still lands. That cross is the whole reason
+        the two are separate genes.</li>
+    <li><strong>The two copies are averaged, not summed.</strong> Breed two horses that each dropped
+        about four beef and kill a <code>Mty/Mty</code> foal of theirs.
+        <strong>Pass:</strong> it drops about four, not about eight. Summing would make every
+        homozygote better than both its parents for a reason that is arithmetic rather than
+        biological, and the number would look plausible all the way up.</li>
+    <li><strong>Never zero.</strong> <strong>Pass:</strong> a meaty horse always drops at least one
+        beef, however low the yield numbers on its copies drifted.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-item-drop.html">Magic item drop</a>
         <a href="gene-magic-milk-volume.html">Magic milk volume</a>
         <a href="making-a-gene.html#block">The effects block</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicMeatGene.java</code>,
     <code>neoforge/server/GeneDeathHandler.java</code>

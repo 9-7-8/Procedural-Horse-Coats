@@ -149,10 +149,14 @@ if (existing.isAir() || existing.canBeReplaced()
 </div>
 
 <p>
-    Nothing here fires in the read-only gallery dimension, for the same reason
-    the glow light block and the ground spread do not: a debug pen is for
-    looking at horses, and a horse that craters one is a bug report about the
-    debug pen.
+    <strong>This used to switch itself off in the horse dimension, and that was the reason it
+    appeared to do nothing.</strong> The guard was defensible when written &mdash; a horse
+    dimension full of lava springs and explosions eats itself &mdash; but the yard now has a pen
+    whose entire purpose is killing six horses to see what they leave behind, floored in stone
+    for exactly that. It was removed on 2026-09-13 after the report &ldquo;drops a sword on death
+    did not drop anything&rdquo;, from a pen built that morning which could not have worked for
+    one second. It was the <strong>seventh</strong> protection in that dimension to turn out to be
+    the reason a gene did nothing.
 </p>
 
 </section>
@@ -189,12 +193,49 @@ if (existing.isAir() || existing.canBeReplaced()
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>All three of magic on death&rsquo;s deaths are confirmed on a built floor, which leaves the mixed pairs &mdash; a <code>Lav/Wat</code> horse must do <strong>nothing at all</strong> &mdash; whether anything standing inside a volatile horse&rsquo;s three-block blast is actually hurt by it, and the founder rule that no feral horse can ever leave a crater.</p>
+</div>
+
+<h3 id="open-magic-on-death">Still open (NOT played)</h3>
+
+<p>
+    The yard&rsquo;s row AD kills one horse of each expressing kind and logs what it left, so the
+    remaining questions are the rows that are supposed to do nothing and the blast radius nothing was
+    standing in: the logged witness horse was 6.2 blocks away, and
+    <code>GeneDeathHandler.EXPLOSION_RADIUS</code> is three.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>A mixed pair does nothing.</strong> Kill a <code>Lav/Wat</code> horse (and a
+        <code>Lav/Xpl</code> one) on the same stone floor.
+        <strong>Pass:</strong> no fluid, no crater, and the ordinary leather &mdash; the locus states
+        that two contradictory answers are silent rather than picking a winner, and picking a winner
+        anyway would read as correct behaviour to anyone who had not read the page.</li>
+    <li><strong>The explosion hurts what is inside it.</strong> Stand a cow within two blocks of an
+        <code>Xpl/Xpl</code> horse and kill the horse. <strong>Pass:</strong> the cow takes damage and
+        the ground is opened. A blast that logs its block count and harms nothing close to it is a
+        cosmetic explosion, which is not what the gene claims.</li>
+    <li><strong>No feral horse carries two copies.</strong> This is the one locus whose founder table
+        is carriers only. <strong>Pass:</strong> across a large wild sample every on-death allele you
+        find sits opposite an <code>n</code> &mdash; a single wild <code>Xpl/Xpl</code> horse is a
+        failure of the founder table, not bad luck, and the first evidence of it would be a stable
+        somebody lost.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-item-drop.html">Magic item drop &mdash; the other half</a>
         <a href="gene-milk.html">Milk &mdash; the other lava/water locus</a>
         <a href="making-a-gene.html#block">The effects block</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicOnDeathGene.java</code>,
     <code>neoforge/server/GeneDeathHandler.java</code>

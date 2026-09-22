@@ -79,8 +79,8 @@
 <div class="note warn">
     <span class="label">Built 2026-09-04, not yet play-tested</span>
     <p>
-        Same status as its twin. Checklist on
-        <a href="verification.html">To be verified</a>.
+        Same status as its twin. Checklist on the
+        <a href="#verification">Verification tab</a>.
     </p>
 </div>
 
@@ -136,11 +136,72 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in a game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Tail colour shares <a href="gene-mane-color.html">mane colour</a>&rsquo;s
+    implementation and its unplayed status, so only its three differences need checking
+    here: that it shows on a <strong>foal</strong> where the mane does not, that the two
+    loci really are independent (a red mane over a blue tail), and that one painter got
+    the tail&rsquo;s short fat axis right.</p>
+</div>
+
+<h3 id="open-gene-tail-color">Still open (NOT played)</h3>
+
+<p>
+    Everything mechanical this gene has &mdash; the combination table, the per-copy colour,
+    <code>epigeneticsForCopy</code>, the <code>TOWARD</code> paint &mdash; is
+    <a href="gene-mane-color.html#verification">checked on the mane page</a> and does not
+    need testing twice. What is different is the mesh it paints on and the fact that there
+    are two loci and not one.
+</p>
+
+<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
+
+<ul>
+    <li><strong>The two loci are independent.</strong> Spawn a horse with
+        <code>Tlsld</code> and <code>Mnsld</code> both present. <strong>Pass:</strong> the
+        mane colour and the tail colour are two unrelated colours, because they are two
+        separate per-copy epigenetic values at two separate loci. Matching colours on every
+        such horse would mean one value is being read for both, which would quietly delete
+        the whole reason the family is two genes.</li>
+    <li><strong>A foal has a coloured tail from birth.</strong> The foal mesh carries a
+        <code>TAIL</code> part and no <code>MANE</code> part. <strong>Pass:</strong> a
+        <code>Tlsld/n</code> foal&rsquo;s tail is coloured the moment it is born, and it is
+        still that exact colour as an adult &mdash; the value is on the copy, so growing up
+        must not re-roll it.</li>
+    <li><strong>The exact shade is inherited.</strong> Breed a <code>Tlsld/n</code> parent
+        with a nameable tail colour over an <code>n/n</code> mate. <strong>Pass:</strong>
+        every <code>Tlsld/n</code> foal has the same colour as that parent, not a fresh one.
+        This is the same claim the mane makes, and it is worth testing on the tail as well
+        because the tail is the half a player can read off a young horse.</li>
+    <li><strong>About seven wild horses in a hundred carry it.</strong> <code>Tlsld</code> at
+        2.0% and <code>Tlstrp</code> at 1.5% per allele, one copy expressing.
+        <strong>Pass:</strong> roughly that share of wild horses have a coloured tail, and a
+        wild horse with both a coloured mane and a coloured tail is rare enough to be a find
+        &mdash; two independent loci at those frequencies.</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The bands run across the tail, not down it.</strong> One painter serves both
+        loci and works the axis out from the part&rsquo;s own bounds, and a tail is a short
+        fat box rotated out of the world axes by its rest pose. <strong>Pass:</strong> a
+        <code>Tlstrp</code> tail is banded across its length, the way the mane is. Stripes
+        running the length of the tail mean <code>HairPattern.axesBySpan</code> picked the
+        wrong span on the fatter of the two parts &mdash; which is exactly the case the mane
+        cannot catch.</li>
+</ul>
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-mane-color.html">Mane colour &mdash; the full mechanics</a>
         <a href="body-space.html">Body space &amp; regions</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/TailColorGene.java</code>,
     <code>HairColorGene.java</code>
