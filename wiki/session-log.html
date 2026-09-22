@@ -27,6 +27,120 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-21-fold">2026-09-21, after the roadmap work &mdash; the last eighty-eight links to &ldquo;To be verified&rdquo; are folded in, and the bake that had been eating the tabs is caught</h2>
+
+<p>
+    One instruction: fold <em>To be verified</em> into the structure that replaced it. The two
+    dismantles moved the content; what they left behind was <strong>eighty-eight pages still
+    saying &ldquo;Checklist on <a href="verification.html">To be verified</a>&rdquo;</strong> and
+    linking a page that is now an index with no checklist on it. That is precisely the failure
+    the dismantle existed to remove &mdash; a link that resolves and tells the reader nothing
+    &mdash; so it had survived the fix for it.
+</p>
+
+<p>
+    <strong>Forty-nine of those pages already had a Verification tab</strong> and simply pointed
+    at the wrong place; they now link <code>#verification</code> on themselves, which
+    <code>wiki/tabs.js</code> opens as a tab switch, and their <em>See also</em> rows read
+    &ldquo;What to check in-game&rdquo; like every other gene page's. <strong>Thirty-three gene
+    pages promised a checklist that lived nowhere at all</strong>, and each got a real one,
+    written from what the page itself claims is unproven and ordered by the owner's rule: what
+    can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last, every item with
+    a pass condition somebody can judge without asking what was meant. The index is
+    <strong>155 pages and 913 checks</strong>, from 122 and 713.
+</p>
+
+<p>
+    <strong>The pointers that named deleted sections were the worst of it</strong>, because they
+    resolved: <a href="releases.html">releases</a>' &ldquo;&sect;0-FJ and &sect;0-FK&rdquo; and
+    &ldquo;&sect;0-AT&rdquo;, two <code>&sect;0-FK</code> code references in
+    <a href="known-gaps.html">known gaps</a>, gaps 121 and 98, and
+    <a href="coding-notes.html#static-order">coding notes</a>' &ldquo;the routine says boot a
+    server before tagging&rdquo; &mdash; a routine that, after the dismantle, existed nowhere,
+    although that page states the rule itself. Each now names the page that owns the check.
+    <a href="making-a-gene.html">Making a gene</a>'s own recipe still told an author to
+    &ldquo;add an entry to To be verified&rdquo;, which hard rule 9 forbids; it says give the new
+    gene's page a Verification tab and re-run the bake. Twenty-seven <strong>Javadoc</strong>
+    comments pointed at the old page too, three naming dead sections, and they are re-aimed the
+    same way &mdash; except the test kit's and the yard audit's, which really do mean the whole
+    wiki, and say so.
+</p>
+
+<h3>The bake had been eating this work, and today it ate twenty-four tabs</h3>
+
+<p>
+    <code>:common:bakeGeneWikiPages</code> rewrites a data-driven gene's page <em>whole</em>, so
+    anything a person adds has to be carried across by name. <code>verifiedBlock</code> carries
+    the <strong>Verified</strong> records &mdash; written on 2026-09-15 after a bake emptied
+    thirteen pages' &mdash; but <strong>it shipped with no test</strong>, so a routine re-bake
+    this session silently deleted the <strong>Verification tabs of twenty-four gene pages and one
+    Roadmap tab</strong>, all written the day before. Nothing went red. The pages are still valid
+    pages, the build was still green, and the only evidence was the verification index dropping
+    from 155 rows to 131 and one broken <code>#fragment</code> in the roadmap index.
+</p>
+
+<p>
+    The 24 were restored from <code>HEAD</code>, and <code>GeneWikiTool.keptPanels</code> now
+    carries <strong>any</strong> panel whose <code>data-tab</code> is not one of the three views
+    the tool writes, rather than naming verification and roadmap &mdash; so the next list broken
+    up onto its subject's page survives by having done that, with no edit to that method. A
+    re-bake reproduces all 24 byte-identically.
+    <strong><code>GeneWikiCarryTest</code> is the guard the first fix lacked</strong>, and it
+    asserts the thing that actually broke rather than the extractor: every page the two generated
+    indexes name still carries the tab they name it for, and it fails in the other direction too
+    when a tab is added and its index is not re-baked. It was demonstrated to fail by stripping
+    one page's tab, because a test nobody has seen fail is a test nobody has tested. The contract
+    is written up on <a href="making-a-gene.html#contract-genefile">making a gene</a>.
+</p>
+
+<h3>Writing thirty-three checklists audited the code, as it always does</h3>
+
+<p>
+    <a href="known-gaps.html#gap-304">Gap 304</a> is the real one, and it is confirmed in the
+    source rather than suspected: <strong>a gene's two allele copies cannot both move one
+    attribute</strong>. <code>AbstractWeatherGene</code> deliberately emits one conditioned
+    <code>AttributeMod</code> per copy instead of summing them, because each carries its own
+    weather condition &mdash; but <code>GeneAbilityHandler</code> names a modifier
+    <code>gene/&lt;key&gt;/&lt;attribute&gt;</code>, one slot, and
+    <code>addOrUpdateTransientModifier</code> overwrites. Both weather pages promise that two
+    copies add. A thunderstorm reaches it with a single horse, since vanilla raises
+    <code>isRaining()</code> <em>and</em> <code>isThundering()</code> &mdash; which also falsifies
+    those pages' argument that the two conditions can never hold at once.
+    <a href="known-gaps.html#gap-303">Gap 303</a>: <a href="gene-singer.html">singer</a> promises
+    a per-area arbitration that does not exist, and its cooldown (900 ticks) is shorter than its
+    interval (1200), so it can never refuse a firing the interval allowed.
+</p>
+
+<p>
+    The rest were stale claims, fixed in place. <strong>Six warn boxes said nothing had been
+    watched</strong> on pages carrying an owner-confirmed <em>Verified</em> block &mdash; bird
+    boned, fireproof, hydrophobic, magic health, magic jump, and
+    <a href="gene-potion-milk.html">potion milk</a>, whose &ldquo;the merge is the one part not
+    built&rdquo; is built, in <code>GeneYieldHandler</code>.
+    <a href="gene-magic-swim-speed.html">Magic swim speed</a>'s spec row and codebox still
+    described the <code>water_movement_efficiency</code> attribute its own Verified block records
+    being abandoned, because that attribute reads 0 on a horse.
+    <a href="gene-verdant.html">Verdant</a> and <a href="gene-magic-on-death.html">magic on
+    death</a> both claimed a horse-dimension guard removed on 2026-09-13 &mdash; as did two
+    Javadocs &mdash; and <a href="gene-dryad.html">dryad</a>'s freshly-written &ldquo;does it run
+    there?&rdquo; check was already answered by its own yard rows, so it was deleted rather than
+    re-asked. Twenty-four pages said <em>Planned source:</em> beside a class that exists.
+    <code>FireproofGene</code> justified its lava-speed floor by &ldquo;a wild fireproof horse
+    caught in the world&rdquo;, which <code>Founders.CARRIERS_ONLY</code> makes impossible.
+</p>
+
+<p class="muted">
+    Green: <code>:neoforge-26.1.2:build</code>, creator parity (7&nbsp;163 checks),
+    <code>check-links</code>, <code>check-gene-tabs</code>, <code>sync-page-views</code>, both
+    index bakes, and the carry test. Headless Chrome confirmed on every changed gene page that
+    the Verification button builds after the three views, the summary box is there, and a
+    <code>#verification</code> link opens the tab. <code>web.wasm</code> was deliberately
+    <em>not</em> rebuilt: nothing TeaVM reaches changed, and its output is not reproducible.
+    <strong>Nothing here has been in a game</strong> &mdash; the 913 checks are the point of the
+    session, not evidence about them, and gap 304 is the one worth a horse's time because it is
+    a live defect rather than an unlooked-at feature.
+</p>
+
 <h2 id="d2026-09-21-roadmap">2026-09-21, after the verification work &mdash; the roadmap is dismantled the same way, and a plan with no page now means a missing page</h2>
 
 <p>
