@@ -27,6 +27,66 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-21-menu-gesture">2026-09-21, last &mdash; the horse menu goes back to sneak-and-use, and 0.5.022 ships</h2>
+
+<p>
+    One bug report, in the owner's words: &ldquo;when the player right clicks the horse to
+    mount it, it brings up the menu. It should only bring up the menu when shift right click,
+    like the vanilla behavior.&rdquo; That was
+    <a href="#d2026-09-20-advancements">yesterday's</a> change, made deliberately and behind a
+    setting that defaulted to on, and it is <strong>reverted without the setting</strong>:
+    <code>HorseInfoInteraction</code> takes only sneak-and-use, the plain click mounts, and
+    <code>horseScreen.rightClickOpens</code> is deleted rather than flipped. A toggle whose
+    <em>on</em> state is the thing the owner rejected is not a choice worth carrying.
+</p>
+
+<p>
+    The one real question was the <strong>tamed</strong> horse, where sneak-and-use is
+    vanilla's inventory. Put to the owner as two options &mdash; leave vanilla that gesture, or
+    take it &mdash; the answer was <strong>take it</strong>. The recommendation had been the
+    other way, on the grounds that a chested donkey or mule would lose its only way in, and
+    <em>that reasoning was wrong</em>: reading
+    <code>AbstractHorse.openCustomInventoryScreen</code> and
+    <code>getInventoryColumns()</code> out of the decompiled sources showed a
+    <code>Horse</code> has no chest at all, and a donkey never reaches this screen because the
+    mod writes a record only for a <code>Horse</code> &mdash; no record, and the click falls
+    through to vanilla untouched. So the <strong>Inventory</strong> button that option had
+    promised was written and then deleted before it shipped: nothing was stranded to route
+    around. The lesson is the plain one &mdash; the cost of an option is worth checking in the
+    source before it is quoted in the question.
+</p>
+
+<p>
+    Fallout, all of it documentation: <code>HorseInteractionHandler.onFoalInventory</code>
+    exists for a tamed foal and now only ever fires for a <em>donkey or mule</em> foal, since a
+    horse foal's empty-handed sneak is claimed first &mdash; it says so rather than being
+    deleted, because that is still behaviour vanilla refuses. <a href="breeding.html">Breeding</a>,
+    <a href="horse-gear.html">horse gear</a> and <a href="for-testers.html">for testers</a> carry
+    the new rule, and breeding's Verification tab now leads with the two clicks that settle it.
+</p>
+
+<h3>And the release: 0.5.022</h3>
+
+<p>
+    <strong>The boot check earned its place again.</strong> The first
+    <code>runServer</code> reported <code>BUILD SUCCESSFUL</code> and exit 0 while the server
+    inside it had <em>crashed</em> &mdash; <code>FAILED TO BIND TO PORT</code>, because the
+    owner's own dedicated server is up on 25565. Gradle's exit code says nothing about the game
+    it launched, which is the whole reason the routine greps the log rather than trusting the
+    build. The dev run was moved to a free port (<code>run/server.properties</code> is
+    git-ignored, and it was put back afterwards) and the second boot reached <code>Done</code>
+    with <strong>zero</strong> <code>ERROR</code> or <code>FATAL</code> lines.
+</p>
+
+<p>
+    The tag range back to 0.5.021 is thirty-four commits and mostly documentation &mdash; the
+    two verification and roadmap dismantles, the gene-page bake fix, the philosophy frame, the
+    Simply Equine survey, the intake. What a <em>player</em> gets is two things: the
+    <a href="horse-gear.html">Gear tab</a>'s nineteen slots (two of them working) and this
+    session's gesture. <a href="releases.html#v0-5-022">The release note</a> says exactly that,
+    including that seventeen slots accept nothing yet.
+</p>
+
 <h2 id="d2026-09-21-fold">2026-09-21, after the roadmap work &mdash; the last eighty-eight links to &ldquo;To be verified&rdquo; are folded in, and the bake that had been eating the tabs is caught</h2>
 
 <p>

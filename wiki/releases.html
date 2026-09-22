@@ -58,6 +58,67 @@
     </p>
 </div>
 
+<h2 id="v0-5-022">0.5.022 &mdash; the Gear tab, and the menu goes back to sneak</h2>
+
+<p>
+    <strong>A horse now has nineteen tack slots, on a <em>Gear</em> tab of its own.</strong>
+    They are laid out on a portrait of the horse rather than in a row: headstall, mask, mane,
+    tail, chest, pad, saddle, barding, blanket, two saddlebags, four boots and four shoes.
+    <strong>Two of them work today</strong> &mdash; the saddle and the barding, which is what
+    a horse could wear before. The other seventeen accept nothing and say so on the slot,
+    because the gear that fills them has not been made yet and a slot that quietly refuses
+    reads as broken rather than unfinished. Full page:
+    <a href="horse-gear.html">horse gear</a>.
+</p>
+
+<p>
+    <strong>And right-click puts you in the saddle again.</strong> 0.5.021 gave the plain
+    click to this mod's information screen; that was wrong, and it is reverted. The screen is
+    on <strong>sneak and right-click</strong> now &mdash; empty-handed, on any horse, wild or
+    tamed, yours or not.
+</p>
+
+<h3>What a player gets</h3>
+
+<ul>
+    <li><strong>The Gear tab.</strong> Hold a saddle or a set of barding and click its slot;
+        click it empty-handed to take it back. Seventeen slots wait on gear that does not
+        exist yet &mdash; what each one will accept is an item tag named for it, so a piece
+        added later joins by being tagged, with no new screen.</li>
+    <li><strong>Right-click mounts, as it always did.</strong> No window, no surprise.</li>
+    <li><strong>Sneak-right-click with an empty hand opens the horse menu</strong> &mdash;
+        on a tamed horse too, which is new. That gesture used to open vanilla's inventory,
+        and everything it held for a horse is on this screen: the saddle and the barding are
+        two of the Gear slots, and a horse has no chest. Vanilla's screen is still there on
+        <kbd>E</kbd> while you are riding, with the <strong>i</strong> button on it to come
+        back. A donkey or a mule, which <em>does</em> have a chest, is untouched &mdash; this
+        mod keeps no record for one, so the click goes straight through to vanilla.</li>
+    <li><strong><code>horseScreen.rightClickOpens</code> is gone.</strong> There is one rule
+        now. If you set it to <code>false</code> in <code>client.toml</code> on 0.5.021, the
+        line is simply ignored; you already have what it was asking for.</li>
+    <li><strong>Ride</strong> stays at the top right of Overview. It is no longer the only
+        way into the saddle &mdash; it is the one for when you have just read a wild horse
+        and decided you want it.</li>
+</ul>
+
+<p>
+    <strong>Not played.</strong> A dedicated server boots clean &mdash; <code>Done</code>,
+    and not one <code>ERROR</code> line in the log. No client has opened the Gear tab, and
+    nothing above has been in front of a player:
+    <a href="breeding.html#advancements-0920-menu">the menu's checklist</a> starts with the
+    two clicks that settle the gesture, and
+    <a href="horse-gear.html#advancements-0920-tack">the gear tab's</a> starts with the
+    saddle still going on and coming off through its new write path. Known bugs carry over
+    unchanged from 0.5.021 below.
+</p>
+
+<p>
+    For testers there is also a <strong>wiki that has stopped keeping two big shared
+    lists</strong>: what is waiting to be checked, and what is planned, now live on the page
+    for the thing they are about, and <a href="verification.html">to be verified</a> and
+    <a href="roadmap.html">the roadmap</a> are generated indexes of those pages.
+</p>
+
 <h2 id="v0-5-021">0.5.021 &mdash; advancements, and the horse menu on a click</h2>
 
 <p>
