@@ -16,4 +16,16 @@ Another issue: sneak-right-click now flashes our horse menu, then goes to the va
 The saddle a horse is wearing should be at the very very very top of overview, in a column between the name of the horse and the "Ride" button. 
 There's still no way to set the barn name. 
 A high bond horse should not attempt to follow or watch their bond if there is no direct path to them-- line of sight is not enough, they must be able to find a path to their bond. If they're in an enclosed area, they act like a normal horse. Right now, a high bond horse is ignoring breeding in preference of watching their bonded owner. 
+Queue: horses should eat food dropped on the ground near them, if it's in their diet.
+
+- Horses should eat food dropped on the ground near them when the food is part of their diet.
+
+- All the horses are pushing against the pasture edge where the fence separates them from the farm/crops.
+
+- Horses that have been sold should remain in the family tree, but appear greyed out rather than being removed.
+
+- When an owned horse takes damage, only its owner should receive a chat message with the horse name, damage source, and, when applicable, how to cure or prevent it. This should be configurable and on by default.
+- When an owned horse dies, post a server-wide death message. This should be configurable and on by default.
+
+- When a horse reaches 20% health (threshold configurable), it should buck off its owner, jump fences, and do whatever it can to escape damage and avoid dying.
 

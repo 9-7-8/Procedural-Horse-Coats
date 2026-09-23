@@ -1,0 +1,446 @@
+Implementation advice for intake/To do.txt
+
+Purpose
+=======
+This is an implementation plan, not a claim that every TODO item is currently
+broken. Several items appear to be present already or partly addressed. Verify
+those first in the game and avoid duplicating behavior that already exists.
+
+Recommended order
+=================
+1. Fix or verify breeding and server rules.
+2. Fix bond decay and bond pathing.
+3. Verify the interaction, overview, and barn UI items.
+4. Verify dropped-food eating, then improve only if the existing goal misses a
+   case.
+5. Treat wings as a separate client rendering project.
+
+1. Elytra wings for horses
+==========================
+Use the existing flight behavior as the starting point, but do not assume the
+vanilla elytra renderer can simply be attached to a horse. The elytra model is
+an armor/entity layer with player-specific body transforms; a horse needs its
+own anchor, scale, rotation, visibility rule, and likely a separate render
+layer.
+
+Likely code:
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/HorseFlight.java
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/mixin/HorseFlightMixin.java
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/mixin/HorseFlightRiddenMixin.java
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/client/GeneticHorseRenderer.java
+
+Suggested implementation:
+- Add a horse-wing capability/flag to the server-side horse state, with a clear
+  rule for which horses have wings.
+- Add a client render layer that uses the vanilla elytra texture/model data
+  only where its geometry is compatible. If the vanilla model is not reusable,
+  copy its geometry into a horse-specific model rather than coupling the horse
+  renderer to player transforms.
+- Anchor both wings to the horse body and test standing, walking, jumping,
+  gliding, saddled, and different horse sizes.
+- Reuse elytra texture paths as texture inputs, but document the accepted UV
+  layout. An arbitrary texture-pack elytra may not fit a horse-shaped wing
+  without a conversion or a documented texture contract.
+- Keep flight physics separate from rendering. The existing HorseFlight path
+  should remain the authority for whether a horse can fly.
+
+Validation: launch a client and inspect wing placement at each animation state,
+then test at least one elytra retexture. Do not promise compatibility with every
+elytra resource pack until its UV assumptions are tested.
+
+2. Stallions should cover every eligible mare
+==============================================
+The natural breeding decision is already concentrated in the common module.
+
+Likely code:
+- common/src/main/java/com/example/horsegenetics/common/repro/NaturalCover.java
+  (`decide`)
+- common/src/main/java/com/example/horsegenetics/common/repro/ReproRules.java
+  (`mayTryNaturally`, `FREE_COVERS_PER_DAY`)
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/NaturalBreedingHandler.java
+  (`onTick`, `cover`)
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/ReproHandler.java
+  (`tryConceive`)
+- common/src/main/java/com/example/horsegenetics/common/genetics/genes/FertilityGene.java
+
+Recommended rule shape:
+- Let the stallion scan all nearby eligible mares in heat, rather than choosing
+  only one target or stopping after the first successful cover.
+- Keep fertility restrictions in the common decision rules. “No negative
+  fertility gene” should mean the resolved fertility result is eligible, not a
+  second NeoForge-only check.
+- Separate attempts from outcomes: a stallion can attempt each eligible mare,
+  while conception can still fail because of fertility, timing, capacity, or
+  other explicit rules.
+- Remove or replace the current once-per-heat and three-covers-per-day limits
+  only after deciding whether “every day” means one attempt per mare per day or
+  unlimited repeated attempts. The former is safer and matches the request
+  without creating an accidental tick-rate exploit.
+- Preserve cooldowns or per-day attempt markers so a 20 TPS loop cannot produce
+  hundreds of attempts.
+
+Tests: extend NaturalCoverTest and ReproRulesTest for multiple mares, daily
+retry, negative fertility, and one-attempt-per-mare-per-day behavior.
+
+3. Report crowding failures to the player
+=========================================
+The current crowding path reportedly reaches ActionTrace, which is debug log
+output rather than player chat.
+
+Suggested implementation:
+- Return a typed failure reason from the common decision layer, such as
+  TOO_MANY_HORSES, rather than making the common module know about players.
+- In NaturalBreedingHandler, when a server-side attempt is rejected for the cap,
+  identify players who should receive the message. Prefer the owner/player
+  involved in the interaction, or players tracking the horse, instead of
+  broadcasting every AI diagnostic to the whole server.
+- Add a short translated message and throttle it per horse/player/day or per
+  breeding attempt window. Otherwise a full pen can spam chat every tick.
+- Keep ActionTrace as optional debug logging, not the user-facing notification.
+
+Validation: stand near a full pen, confirm one useful chat message appears, and
+confirm an unattended server does not generate chat spam.
+
+4. Raise the nearby-horse cap and make it server-authoritative
+===============================================================
+The current cap is ReproRules.NATURAL_CAP and the count is made by the server in
+NaturalBreedingHandler.onTick. Move the value to ServerConfig rather than
+hard-coding a common constant.
+
+Likely code:
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/ServerConfig.java
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/HorseGenetics.java
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/NaturalBreedingHandler.java
+- common/src/main/java/com/example/horsegenetics/common/repro/ReproRules.java
+
+Implementation:
+- Add a bounded server config value for the natural-breeding population cap,
+  with the requested default of 50 and a sensible maximum.
+- Pass the configured value into the common decision function or keep counting
+  in the server adapter and pass the result in. Do not read client config for
+  permission to breed.
+- Keep the radius configurable only if that is desired separately; the request
+  changes the cap, not necessarily the radius.
+- Replace tests that encode the old literal with a parameterized/configured cap
+  test. The test name should not preserve an obsolete number.
+
+Validation: run NaturalCoverTest and confirm changing the server config changes
+behavior for connected clients without requiring a client-side setting.
+
+5. Incest and line breeding
+===========================
+Do not add an ancestry rejection rule. The current conception path appears not
+to reject parent/child or sibling matches, which already satisfies this request.
+
+Check before closing the item:
+- ReproHandler.tryConceive and Conception.Mating have no ancestry gate.
+- Natural breeding, player-triggered breeding, and any special breeding item all
+  use the same conception rule or intentionally document exceptions.
+- No future “safety” check is hidden in HorseAncestryData or BreedLineage.
+
+If tests are added, assert that a known related pair can still reach conception
+when all ordinary fertility conditions pass. Record this as a deliberate design
+rule, not as an untested accident.
+
+6. Bond decay to a positive floor
+=================================
+Bond state is in HorseCareAttachment, and the shared tick is in
+HorseCareHandler.onHorseTick. HorseSocialAttachment.lastDecay is a different
+social-ledger mechanic and should not be reused casually.
+
+Implementation:
+- Add a server-side last-bond-decay day/tick marker to HorseCareAttachment, or
+  use a persisted timestamp that survives chunk unloads and restarts.
+- Once per in-game day, reduce bond by one tier/level until a configured minimum
+  above zero. Do not decay every entity tick.
+- Make the floor an explicit named constant or server config value. Ensure a
+  newly bonded horse, an offline horse, and a horse crossing a day boundary all
+  behave deterministically.
+- Decide whether active care resets the decay timer. A straightforward rule is
+  that awarding bond also records recent care and prevents an immediate decay.
+
+Tests: add a focused HorseCareAttachment/HorseCareHandler test for daily decay,
+minimum floor, persistence, and no multiple decay in one day. Verify the result
+in a real day-cycle test as well.
+
+7. Sneak-right-click menu flash
+===============================
+The intended interception is already in HorseInfoInteraction.onInteract, while
+HorseInteractionHandler handles server-side fallback and foal behavior.
+
+Likely code:
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/client/HorseInfoInteraction.java
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/HorseInteractionHandler.java
+
+Debug in this order:
+- Confirm the client event is actually cancelling the vanilla interaction at
+  the highest applicable priority.
+- Confirm the same input is not being sent twice, once through client prediction
+  and once through the server handler.
+- Confirm the custom screen opens only after the client has accepted the event,
+  and that the server handler does not open a second menu.
+- Check empty hand, occupied hand, mounted horse, foal, and dedicated-server
+  client cases separately.
+
+Do not fix this in HorseInfoScreen; the flash is most likely event ordering or
+cancellation. Add a focused regression test if the event framework permits one,
+otherwise verify it in a client run with debug logging around both handlers.
+
+8. Saddle at the top of Overview
+================================
+The screen owner is HorseInfoScreen. Inspect drawOverviewHeader,
+drawOverview, drawTackSlot, and drawGear before editing because the TODO may be
+partly stale.
+
+Desired layout:
+- horse name
+- a dedicated saddle row/column
+- Ride button
+
+Use the existing HorseTackSlot.SADDLE data source. Do not create a second saddle
+state for the overview. If the saddle is currently drawn in both Overview and
+Gear, make the overview the summary and leave the Gear tab as the editing slot,
+with no duplicated click target or conflicting tooltip.
+
+Validation: inspect an unsaddled horse, a saddled horse, narrow window scale, and
+both mouse and keyboard focus. Confirm the saddle item cannot overlap the Ride
+button or the horse name.
+
+9. Barn name
+============
+This appears to already have the required pieces:
+- HorseInfoScreen.init and submitBarnName
+- SetBarnNamePayload and its ModNetworking handler
+- HorseRecord.barnName and HorseRecord.MAX_BARN_NAME
+
+Verify the complete round trip before changing it: edit, submit, server validate,
+persist, reopen the screen, and reconnect. Check permission/ownership and name
+length/invalid-character handling. If one step fails, fix that boundary rather
+than adding another field. Add a regression test around the payload validation
+and persistence where practical.
+
+10. Bond follow/watch must require a path
+=========================================
+BondFollowGoal is the correct owner. Its canUse, canContinueToUse, and tick
+currently use navigation, but the tier-1 watch behavior may still directly look
+at the owner without requiring a path.
+
+Implementation:
+- For movement/follow tiers, require a usable navigation path to the bond target
+  before starting or continuing the goal. Prefer navigation/path APIs and the
+  boolean result of moveTo over line-of-sight checks.
+- Recompute or invalidate the path when the target moves, the path is blocked,
+  or the horse is enclosed. Stop the goal when navigation cannot reach the
+  target; let ordinary horse goals and breeding resume.
+- Decide explicitly whether “watch” is allowed through a wall. The request says
+  no direct path, so the safest interpretation is that watch also requires a
+  reachable position, not merely look control from the current position.
+- Preserve goal priorities: breeding and hunger should not be starved by a bond
+  goal that cannot make progress.
+
+Validation: test an open pen, a solid enclosed stall, a fence/wall separation,
+a reachable owner behind a gate, and an unreachable owner. Confirm the horse
+returns to normal behavior and can breed when no path exists.
+
+11. Eat dropped food that is in the horse's diet
+================================================
+There is already a likely implementation:
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/HungerFoodGoal.java
+  (`search`, `tick`, `eatItem`)
+- neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/DietFoods.java
+- HorseCareHandler.onHorseJoin for goal registration
+- common/src/main/java/com/example/horsegenetics/common/genetics/HorseDiet.java
+  and Diet-related classes for the resolved diet
+
+Verify before changing:
+- Drop a food item within range that is in the horse's resolved diet.
+- Drop a food item that is not in the diet and confirm it is ignored.
+- Test an item stack, multiple nearby entities, an unreachable item, and a food
+  item behind an obstruction.
+- Confirm the goal consumes only the correct amount and that it does not bypass
+  hunger/fullness rules.
+- Confirm its priority beats BondFollowGoal when the horse can eat, but does not
+  permanently starve breeding or other essential goals.
+
+If it fails, keep diet classification in DietFoods/common HorseDiet and fix the
+entity goal's search/path/eat handoff. Do not hard-code a second list of edible
+items in HungerFoodGoal. Add a focused game test for accepted and rejected
+ItemEntity drops.
+
+12. Horses crowd the pasture fence beside the farm
+==================================================
+Treat this as an AI target-selection and path-progress bug before changing
+collision or fence geometry. If every horse chooses the same boundary, an
+attraction goal, crop-seeking behavior, or a wander target that is technically
+valid but unreachable is probably winning repeatedly. The fence then prevents
+progress, so the horses keep pushing into it instead of dispersing.
+
+Investigate the horse goal registration and any goal that searches for crops,
+food, owners, herd members, or random destinations. For each candidate target:
+- require a reachable navigation path, not just line of sight or a nearby block;
+- reject positions on the far side of a fence, inside farmland, or in the farm
+  when the horse is assigned to the pasture;
+- reject a target after repeated failed movement or no meaningful reduction in
+  distance, then add a cooldown before selecting it again;
+- score open pasture positions positively and add a small separation penalty for
+  other horses so the herd does not select one fence-adjacent block together.
+
+Do not solve this by disabling entity pushing globally. The horses still need
+ordinary collision behavior, but their movement goals must stop asking them to
+walk into an unreachable boundary. If crop attraction is intentional for the
+new dropped-food behavior, distinguish edible ItemEntity targets from growing
+crops: a horse may path to food on the pasture floor, but should not path toward
+farm crops through a fence.
+
+Likely implementation shape:
+- add a `HorsePastureNavigation`/boundary predicate or equivalent helper owned by
+  the server AI layer;
+- use it from wander, food, bond, and any herd-follow goal that can select a
+  destination near the fence;
+- keep the predicate server-side and derive the allowed pasture area from the
+  actual pen/fence boundary where possible, rather than hard-coding world
+  coordinates;
+- add a stuck-target cooldown and choose a new random point inside the allowed
+  area when navigation fails.
+
+Validation: reproduce with crops immediately outside one fence side, then with
+empty land outside it. Confirm horses distribute through the pasture, do not
+press against the crop-side fence, can still reach valid dropped food, and can
+be led or ridden normally. Also test an irregular pen, a gate, multiple pens,
+and a horse whose only valid food is near the boundary.
+
+13. Sold horses remain in the family tree, but appear greyed out
+=================================================================
+Treat sale status as historical relationship data, not as a deletion or a
+family-tree filter. The horse record should retain its identity, parents,
+offspring, and pedigree links after sale, with a persisted ownership/lifecycle
+state such as `SOLD` and, if useful, the sale timestamp or destination.
+
+Implementation:
+- when a horse is sold, update its lifecycle/ownership state and preserve the
+  existing record and entity id used by pedigree links;
+- make family-tree queries return sold records exactly like other ancestors and
+  descendants, rather than filtering on current ownership;
+- have the tree view render a sold node with reduced opacity or a neutral grey
+  palette, plus a small sold status marker/tooltip so it is clear the horse was
+  intentionally retained;
+- keep the node clickable if its record/details are still available, but disable
+  actions that require the horse to be present in the current stable;
+- ensure save/load and roster refreshes do not rebuild the tree from only the
+  currently owned horses.
+
+Do not infer “sold” from a missing entity or an absent stable entry: unloaded,
+dead, transferred, and sold are different states. Add a focused regression test
+that sells a parent, reloads the data, and confirms the parent still appears in
+the family tree with the sold presentation while the child keeps its pedigree
+link.
+
+14. Damage alerts for owners and death messages for the server
+===============================================================
+Implement these as server-side entity event handling, with two independent
+server config toggles enabled by default:
+- `ownedHorseDamageMessages = true`: send damage alerts only to the horse owner;
+- `ownedHorseDeathMessages = true`: broadcast owned-horse deaths to the server.
+
+Damage alerts:
+- hook the horse's actual server-side hurt/damage event after the damage is
+  accepted, so blocked, zero, or invulnerable damage does not produce a false
+  alert;
+- resolve the horse's persisted owner UUID and send the message only to that
+  online player; never broadcast this event and do not rely on who is nearby;
+- include the horse's current name, the damage source's readable translated
+  name, and the amount if that is already available in the event;
+- append a cure/prevention hint when the source maps to a known condition, such
+  as fire protection, a gene-related vulnerability, fall damage, drowning, or
+  a hostile attacker. For unknown sources, omit the hint rather than inventing
+  one;
+- translate the message through lang keys and sanitize/escape horse names so a
+  custom name cannot corrupt chat formatting;
+- throttle or coalesce repeated damage messages from a single hit sequence if
+  the damage system can fire multiple events for one gameplay action. Do not
+  hide separate meaningful hits unless the existing combat UX requires it.
+
+Death messages:
+- hook the server-side death path once, after the horse is confirmed dead;
+- identify an owned horse from its persisted owner UUID, not merely from a
+  nearby player or current chunk roster;
+- broadcast a translated message containing the horse's name and a readable
+  damage source. If the horse has no owner, emit no owned-horse death message;
+- make sure the message is emitted once even if entity removal, death animation,
+  or chunk unload causes multiple callbacks;
+- decide and document whether a horse sold/transferred before death is owned by
+  the new owner for notification purposes. The lifecycle state should be read
+  consistently with the family-tree sold state.
+
+Config and tests:
+- put both toggles in the server config, with true defaults, and evaluate them
+  on the server. A client must not be able to suppress another player's server
+  death broadcast or enable private damage alerts for itself;
+- add focused tests for owner-only routing, unowned horses, each toggle, a
+  blocked/zero-damage event, repeated callbacks, and death-source formatting;
+- verify in a dedicated server with two players: only the owner sees damage,
+  both players see an owned-horse death when enabled, and neither sees the
+  corresponding message when its toggle is disabled.
+
+15. Low-health panic and escape behavior
+========================================
+Add a server-authoritative emergency behavior with a configurable health
+threshold. Use `0.20` (20 percent of max health) as the default, and clamp the
+configured value to a sensible range below 1.0 and above 0.0. Compare current
+health against the horse's resolved max health, not a hard-coded heart count.
+
+When the threshold is crossed:
+- stop ordinary low-priority goals that would keep the horse in place;
+- buck off its current rider once, using the normal server-side dismount path;
+- activate a high-priority panic/escape goal that searches for reachable safe
+  positions away from the active damage source, attackers, fire, lava, water,
+  and other known hazards;
+- permit fence jumping as an escape action, but only when the landing position
+  is navigable, non-lethal, and inside a reasonable escape search radius;
+- prevent the goal from repeatedly selecting the same blocked fence or hazard;
+- allow the horse to stop panicking when it is healed above a recovery margin,
+  rather than exactly at the trigger threshold, to prevent rapid toggling.
+
+The behavior should mean “survive if possible,” not “ignore all gameplay rules.”
+Do not teleport, phase through blocks, destroy fences, or force a jump into an
+unverified landing space. Preserve owner and server permissions, and ensure the
+horse cannot use the panic goal to escape a deliberately sealed or protected
+area unless that is an explicit design choice.
+
+Implementation shape:
+- add a dedicated `HorseLowHealthPanicGoal` or extend the existing panic goal;
+- register it at a higher priority than bond watching, wandering, and ordinary
+  breeding, while leaving unavoidable damage and explicit player commands to
+  the normal game rules;
+- record the damage source and a short-lived hazard position when the damage
+  event fires, so the goal can flee from the actual threat rather than merely
+  wander randomly;
+- expose config values for the trigger threshold, recovery margin, escape
+  radius, and whether fence jumping is allowed. The threshold and behavior must
+  be read from server config, never client config;
+- ensure a rider is not repeatedly ejected every tick and that a horse already
+  in panic does not reinitialize its escape state on every damage event.
+
+Validation:
+- test exactly at 20 percent, just above it, and just below it;
+- test different max-health horses and a changed server threshold;
+- verify a rider is bucked once and the horse can still be remounted after
+  recovery;
+- test hostile attacks, fire, fall damage, drowning, and a fenced pasture;
+- verify fence jumps land safely, do not cross impossible geometry, and stop
+  once the horse recovers or no safe route exists;
+- test that healing above the recovery margin cancels panic and that death,
+  damage alerts, ownership, and server-wide death messages remain correct.
+
+Suggested completion checklist
+==============================
+- First run the existing focused tests: NaturalCoverTest, ReproRulesTest, and
+  FertilityGeneTest.
+- Use the existing DebugYardFertility, DebugYardHunger, and
+  DebugYardUnattended scenarios as the starting point for game verification.
+- Add tests only where behavior is genuinely absent or ambiguous; several TODO
+  entries look like old reports for features now present.
+- Keep gameplay rules in common where possible and keep NeoForge responsible for
+  config, entities, chat, screens, navigation, and rendering.
+- Update the relevant wiki page and Verification tab after implementation,
+  rather than treating this intake note as the long-term source of truth.
