@@ -358,7 +358,9 @@
         is: <strong>shared slot data + network + render plumbing</strong>, then <strong>one native
         tack item</strong>, then <strong>the bench and decoration pipeline</strong>, then
         <strong>utility gear</strong> (enchantments, chests and other non-vanilla equipment), and only then the broader
-        catalog of art variants. The code structure that owns each slice is the same one the
+        catalog of art variants. Add the player inventory and bulk equip controls to the menu
+        before the catalogue grows, so players can actually move equipment into the horse.
+        The code structure that owns each slice is the same one the
         project already uses: a data attachment as the authority, an item tag for valid contents,
         a render layer for any piece that is not vanilla, and a menu or data-model object for the
         final craft and tint details.
@@ -369,7 +371,9 @@
             gate for each new slot in <code>accepts()</code> and <code>usableOn()</code>. Then
             extend <code>HorseGear</code> with the new names, serialization and copy-on-death
             behaviour, and make the <code>TackSlotPayload</code> path update the attachment through
-            one authoritative call rather than a mirrored container.</li>
+            one authoritative call rather than a mirrored container. The gear tab must also show
+            the player inventory in its normal location, with the horse slots rearranged around
+            it so the player can see and equip available stacks.</li>
         <li><strong>Phase 2: render abstraction.</strong> Add a shared <code>HorseGearRenderLayer</code>
             or equivalent that consumes one slot + one item stack and derives a visible mesh from
             the horse's own bones. I would build this against the saddle-pad and boot proof
@@ -390,6 +394,10 @@
             a real item with an enchantment slot and a horse-side effect system; horse chests should
             be attachment-backed storage with a horse-side menu rather than a widened container; both
             should share the same schema for validation and ownership rules.</li>
+        <li><strong>Phase 6: equipment actions.</strong> Add equip-all and unequip-all actions for
+            every tack and equipment slot, using the same server-side acceptance checks as a single
+            slot transfer. The operation should be deterministic, report slots that could not be
+            filled, and never silently move an item that the slot would reject.</li>
     </ul>
 </div>
 

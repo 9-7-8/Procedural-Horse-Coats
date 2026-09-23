@@ -48,7 +48,8 @@
         ships on <code>HorseRoster</code> walking the whole ancestry table instead &mdash; and
         beside it the vial, herd, bonding and crafting-tree tabs, a <strong>Where</strong>
         column that teleports rather than merely printing, and a roster that refreshes on
-        birth and death.
+        birth and death, plus a chronological <strong>Log</strong> tab and horizontal tab
+        scrolling for the growing menu.
     </p>
 </div>
 
@@ -67,9 +68,10 @@
 <p>
     The <code>H</code>-key screen is a real container menu; the horse list and the gene
     database are built. The full plan is six tabs, and what is left is the <strong>vial
-    inventory</strong>, the <strong>herd view</strong>, the <strong>bonding view</strong> and a
-    generated <strong>crafting tree</strong>, plus out-of-band actions (teleport a horse to a
-    stall, whistle for bonded horses, recall to a holding pen).
+    inventory</strong>, the <strong>herd view</strong>, the <strong>bonding view</strong>, the
+    generated <strong>crafting tree</strong> and an event <strong>Log</strong> tab, plus
+    out-of-band actions (teleport a horse to a stall, whistle for bonded horses, recall to a
+    holding pen).
 </p>
 
 <div class="note danger">
@@ -97,6 +99,37 @@
     <a href="horse-care.html#bond-roadmap">bond</a> is missing. My horses shows the
     <em>number</em> and sorts by it, which is not the same thing: it says where you are and not
     how to move.
+</p>
+
+<h3 id="log-tab">The Log tab</h3>
+
+<p>
+    The Log tab is a chronological, newest-first history of the player&rsquo;s horse events:
+    every successful or failed cover, birth, death, taming, purchase, sale, transfer and
+    other ownership-changing action. It is a record of events, not a second horse roster, so
+    each row carries the event time, event type, horse identity and the useful reason or result.
+</p>
+<ul>
+    <li><strong>Server-backed history.</strong> Record events where the authoritative action
+        happens, keep them across unloaded chunks and reconnects, and send a bounded page or
+        delta to the client. A client-only list would miss natural covers, deaths and purchases
+        that happen while the menu is closed.</li>
+    <li><strong>One filter model.</strong> Filter by event type (coverage, birth, death, taming,
+        purchase, sale, transfer and future event kinds), with an All option and newest-first
+        ordering preserved after filtering. Failed covers must retain their refusal reason.</li>
+    <li><strong>Registry prerequisite.</strong> The event record should reference the same horse
+        identity and ownership state as the owned-horse registry, so sold or dead horses remain
+        understandable instead of becoming anonymous log rows.</li>
+</ul>
+
+<h3 id="tab-layout">Tabs that keep working as the menu grows</h3>
+
+<p>
+    The H menu needs a horizontal scroll bar for its tab strip. The selected tab must remain
+    visible while scrolling, keyboard focus must move through only visible tab buttons, and the
+    scroll position must not change the server-side menu state. This is layout infrastructure,
+    so build it before adding more tabs such as Log, rather than solving overflow separately on
+    each new screen.
 </p>
 
 <h3 id="browser-rest">The rest</h3>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap execution &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> how to turn plans into small shippable slices</p>
+<h1>Roadmap execution</h1>
+<p class="lede">
+    The roadmap says <em>what</em> is not built. This page says how to choose the next
+    slice without making a later session rediscover the dependencies, decisions and checks.
+    It is an execution guide, not a second backlog: the owning page remains the source of
+    truth for each feature.
+</p>
+
+<h2 id="routing">Route every request first</h2>
+<p>
+    The intake file is an inbox, not a plan. Before implementation, give each request one
+    owner and one state. A sentence that describes something already built but wrong belongs
+    in <a href="known-gaps.html">Known gaps</a>. A question whose answer changes the design
+    belongs in <a href="decisions.html">Design decisions</a>. Something built but unseen belongs
+    on the owning page&rsquo;s Verification tab. Only a feature with an agreed shape belongs on
+    that page&rsquo;s Roadmap tab.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Request shape</th><th>Owner</th><th>Next action</th></tr></thead>
+<tbody>
+<tr><td>Built and wrong</td><td><a href="known-gaps.html">Known gaps</a></td><td>Record the observed failure and the cheapest discriminating check.</td></tr>
+<tr><td>Built, not seen</td><td>The feature&rsquo;s Verification tab</td><td>Write a pass condition and where to look in-game.</td></tr>
+<tr><td>Design is unresolved</td><td><a href="decisions.html">Design decisions</a></td><td>Answer the gate before writing implementation code.</td></tr>
+<tr><td>Shape is agreed, work is absent</td><td>The feature&rsquo;s Roadmap tab</td><td>Define prerequisites, a first vertical slice and its acceptance test.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="fixes-first">Fixes and tuning come first</h2>
+<p>
+    Before starting new content, clear the existing behaviour that players already depend on.
+    Each fix gets a reproduction, a focused regression check and an owning page update. Do not
+    hide a defect inside a new system just because the new system touches the same code.
+</p>
+<ol>
+    <li><strong>Interaction and presentation.</strong> Fix the horse menu gesture, put the saddle
+        at the top of the overview, restore the barn-name path, and make existing screens expose
+        the state they already own.</li>
+    <li><strong>Behaviour corrections.</strong> Fix bond-following to require a navigable path,
+        stop horses pushing against pasture boundaries or eating through barriers, and make
+        dropped diet food use the same feeding rules as hand-held food.</li>
+    <li><strong>Breeding feedback and limits.</strong> Make every failed cover report its reason,
+        make stallion coverage and the nearby-horse limit server-authoritative and configurable,
+        and confirm that line breeding is not rejected by an accidental pedigree guard.</li>
+    <li><strong>Ownership and alerts.</strong> Keep sold horses in family history, send owned-horse
+        damage messages only to the owner, send configurable death announcements server-wide,
+        and verify that the low-health escape behaviour does not create a new stuck state.</li>
+    <li><strong>Names and filters.</strong> Remove duplicated default names and make the existing
+        browser and breeding views use one allele-query model before adding new tabs.</li>
+</ol>
+<p>
+    This pass is complete when the reported behaviour is either fixed and verified, or recorded
+    as a deliberate decision or known gap. Only then should a session spend its main effort on
+    new content.
+</p>
+
+<h2 id="slices">New-content vertical slices in dependency order</h2>
+<p>
+    After the fixes pass, these are the recommended clusters from the current intake. Each slice should cross the
+    relevant common model, server behaviour, client surface and tests when those layers apply.
+    Do not build a large foundation without one player-visible proof using it.
+</p>
+
+<h3 id="breeding-behaviour">Breeding and horse behaviour</h3>
+<p>
+    <strong>Owner:</strong> <a href="fertility.html">Fertility &amp; gestation</a> and
+    <a href="horse-care.html">Horse care</a>. Combine stallion coverage, configurable local
+    capacity, breeding failure messages, unrestricted line breeding, path-aware bond following,
+    dropped-food eating and fence/crop avoidance into one behaviour pass. The slice is complete
+    when an owned pen and a wild band both demonstrate the same explicit rules, the capacity is
+    server-authoritative, and every refused cover has a reason visible to the relevant player.
+</p>
+<p>
+    <strong>Gate:</strong> decide whether &ldquo;no incest prevention&rdquo; means no breeding
+    restriction at all or only no automatic rejection; decide whether a full-pen refusal is a
+    failed attempt or a blocked attempt. Test owner interaction, wild behaviour, config changes,
+    unloaded horses and enclosed paths before adding polish.
+</p>
+
+<h3 id="owned-horse-records">Owned horses and records</h3>
+<p>
+    <strong>Owner:</strong> <a href="horse-browser.html">The horse browser</a>, with
+    <a href="villagers.html">Villagers &amp; transfer papers</a> for selling and naming. Build
+    the server-side owned-horse registry first. Then sold horses can remain greyed out, damage
+    and death notices can target the owner, the barn can carry a name, and the browser can refresh
+    on birth, death, taming and transfer without inventing separate ancestry scans. That same
+    registry is the prerequisite for the H-menu Log tab, which records successful and failed
+    covers, births, deaths, taming, purchases, sales and transfers while the menu is closed.
+</p>
+<p>
+    <strong>First proof:</strong> register one horse, sell it, damage it, kill it and breed a new
+    one while its chunk is unloaded. The browser must retain the historical row, show the correct
+    owner-facing notifications and refresh from server state rather than from a client guess.
+</p>
+
+<h3 id="gear-and-attachments">Gear and visual attachments</h3>
+<p>
+    <strong>Owner:</strong> <a href="horse-gear.html">Horse gear</a>, then
+    <a href="model-parts.html">Attached model parts</a> and <a href="gene-flying.html">Flying</a>
+    for wings. Start with one complete attachment: stack data, valid-slot rules, network update,
+    persistence, overview placement and a render layer. The first menu proof must also place the
+    normal player inventory on the gear tab, support scrolling tabs and expose equip-all and
+    unequip-all actions using the same server-side slot validation. Only after that proof should the project
+    add horse wings, more tack, dyed variants or larger loot coverage. Elytra texture reuse is an
+    art and model compatibility question, not a reason to bypass the horse attachment contract.
+</p>
+
+<h3 id="loot-and-acquisition">Loot and acquisition</h3>
+<p>
+    <strong>Owners:</strong> <a href="items.html">Items &amp; recipes</a> and
+    <a href="villagers.html">Villagers &amp; transfer papers</a>. Treat more common gene books,
+    carrots and dyed armour as data-only loot work. Treat obtaining cowboy horses without emeralds
+    as a separate gameplay decision with its own route, cost and ownership transition. This keeps
+    a loot-table tuning pass from silently changing the cowboy economy.
+</p>
+
+<h3 id="discovery-ui">Horse discovery and naming</h3>
+<p>
+    <strong>Owner:</strong> <a href="horse-browser.html">The horse browser</a> and
+    <a href="breeding.html">Breeding &amp; pedigree</a>. Define the query language before the
+    widgets: carries an allele, exact X/X genotype, sex-linked display, and owned, sold or dead
+    status. Then implement server-side filtering and the family-name rule as data resolved once
+    per listing. This makes the H-menu search, breeding pickers and future paper tools share one
+    predicate instead of growing parallel filters.
+</p>
+
+<p>
+    The H-menu additions are one browser slice after the registry: build the tab-strip overflow
+    control, then the newest-first Log tab with event-type filters, then the gear-tab inventory
+    and bulk equipment actions. The acceptance check must cover a successful cover, a failed
+    cover, a birth, a death, taming and purchase while the menu is closed, followed by reconnect,
+    filtering and newest-first ordering.
+</p>
+
+<h2 id="coverage">Every roadmap tab has a lane</h2>
+<p>
+    This is the coverage check for the generated roadmap index. Every roadmap-tab page appears
+    once below. The order column is intentional: <strong>fixes</strong> come before foundations,
+    foundations before new content, and content before optional polish. When a page has several
+    entries, its owning page still describes the individual work; this table only prevents a
+    whole page from disappearing from the execution plan.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Roadmap page</th><th>Execution lane</th><th>Order and dependency</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-aggression.html#roadmap">Aggression</a></td><td>Behaviour</td><td>After the behaviour regression pass; define the player-visible trigger first.</td></tr>
+<tr><td><a href="architecture.html#roadmap">Architecture &amp; the build</a></td><td>Foundation</td><td>First: payload scale, display scale and generated-number checks support every later slice.</td></tr>
+<tr><td><a href="model-parts.html#roadmap">Attached model parts</a></td><td>Gear and rendering</td><td>After the attachment/render proof; model one part before a catalogue.</td></tr>
+<tr><td><a href="phenotype-naming.html#roadmap">Base-aware phenotype naming</a></td><td>Discovery UI</td><td>After one shared phenotype resolver exists for the browser and papers.</td></tr>
+<tr><td><a href="block-preference.html#roadmap">Block preference</a></td><td>Traits and behaviour</td><td>After the effect/goal contract and behaviour priority are settled.</td></tr>
+<tr><td><a href="breed-book.html#roadmap">The breed book</a></td><td>New content</td><td>After the studbook decision; content-only catalogue work.</td></tr>
+<tr><td><a href="carrots.html#roadmap">Breeding carrots &amp; the gene database</a></td><td>Loot and acquisition</td><td>After the fixes pass; tune recipes and database checks separately.</td></tr>
+<tr><td><a href="breeds.html#roadmap">Breeds</a></td><td>New content</td><td>After spawn validation and render behaviour are stable; add breed batches.</td></tr>
+<tr><td><a href="cart-bench.html#roadmap">The cart and jump bench</a></td><td>Foundation</td><td>Before multi-horse draught; migrate materials to components once.</td></tr>
+<tr><td><a href="carts.html#roadmap">Carts: wagons, plows and draught</a></td><td>Vehicles</td><td>After the bench/component migration; teams and the vardo are separate slices.</td></tr>
+<tr><td><a href="chase-gene.html#roadmap">The chase gene</a></td><td>Traits and behaviour</td><td>After goal arbitration and flag ownership are documented.</td></tr>
+<tr><td><a href="coding-notes.html#roadmap">Coding notes</a></td><td>Process</td><td>Continuous maintenance; sources and reusable checklist idioms unblock other pages.</td></tr>
+<tr><td><a href="compatibility.html#roadmap">Compatibility</a></td><td>Foundation</td><td>Run as small compatibility patches and surveys alongside, never inside, feature work.</td></tr>
+<tr><td><a href="config.html#roadmap">Config</a></td><td>Fixes first</td><td>Clarify server/client ownership before exposing the breeding and capacity controls.</td></tr>
+<tr><td><a href="curly-coat.html#roadmap">Curly coat</a></td><td>New content</td><td>After a coat-structure extension is proven independently of recolouring.</td></tr>
+<tr><td><a href="gene-dmrt3.html#roadmap">DMRT3 - gait</a></td><td>Animation</td><td>After horse animation ownership is established; keep genome resolution in common.</td></tr>
+<tr><td><a href="gene-flying.html#roadmap">Flying</a></td><td>Gear and rendering</td><td>After model-part and attachment contracts; cloud-treading remains a separate design slice.</td></tr>
+<tr><td><a href="forced-riding.html#roadmap">Forced riding - the kelpie</a></td><td>Behaviour</td><td>After ride-lock and warning feedback are specified and tested.</td></tr>
+<tr><td><a href="stables.html#roadmap">Generated stables</a></td><td>World content</td><td>After stable ownership, loot and horse protection rules are decided.</td></tr>
+<tr><td><a href="genetics-model.html#roadmap">The genetics model</a></td><td>Foundation</td><td>Resolve sex-linked inheritance before adding any Y-linked gene.</td></tr>
+<tr><td><a href="horse-browser.html#roadmap">The horse browser</a></td><td>Fixes first, then browser</td><td>Registry and stale-row correctness come before scrollable tabs, the filtered event log and other actions.</td></tr>
+<tr><td><a href="horse-care.html#roadmap">Horse care: bond, herds and care</a></td><td>Fixes first</td><td>Fix pathing, feeding and herd-edge behaviour before adding bond rewards.</td></tr>
+<tr><td><a href="horse-gear.html#roadmap">Horse gear</a></td><td>Foundation</td><td>Build one attachment with player inventory, equip-all and unequip-all before opening the remaining slots.</td></tr>
+<tr><td><a href="item-horse-shoes.html#roadmap">Horse shoes</a></td><td>Gear and rendering</td><td>After shared hoof attachment and enchantment plumbing are proven.</td></tr>
+<tr><td><a href="horsemanship.html#roadmap">Horsemanship</a></td><td>New content</td><td>After mounted modifier ownership and rider progression rules are settled.</td></tr>
+<tr><td><a href="items.html#roadmap">Items &amp; recipes</a></td><td>Fixes first</td><td>Audit missing recipes and loot before adding new item families.</td></tr>
+<tr><td><a href="item-jumps.html#roadmap">Jumps</a></td><td>Cart and jump bench</td><td>After material components; standards and round-awareness are separate slices.</td></tr>
+<tr><td><a href="lasso.html#roadmap">The lasso</a></td><td>New content</td><td>After entity-target item interaction and taming-progress feedback are stable.</td></tr>
+<tr><td><a href="gene-lut.html#roadmap">LUT</a></td><td>New content</td><td>Content-only palette batches after the allele/resource contract is unchanged.</td></tr>
+<tr><td><a href="magic-grab.html#roadmap">Magic grab</a></td><td>Traits and behaviour</td><td>After a new ability type and tag-based mob groups have a tested contract.</td></tr>
+<tr><td><a href="magical-genes.html#roadmap">Magical genes still to build</a></td><td>New content</td><td>After effect and equipment-condition foundations; add one gene at a time.</td></tr>
+<tr><td><a href="making-a-gene.html#roadmap">Making a gene</a></td><td>Tooling</td><td>Keep creator-port retirement separate from mask additions; parity is the gate.</td></tr>
+<tr><td><a href="momentum-sprint.html#roadmap">Momentum sprint</a></td><td>Behaviour</td><td>After per-tick horse attachments and rider input ownership are established.</td></tr>
+<tr><td><a href="item-research-papers.html#roadmap">Research papers</a></td><td>Discovery UI</td><td>After the database discovery decision; then move from gene to allele records.</td></tr>
+<tr><td><a href="rider-comfort.html#roadmap">Rider comfort</a></td><td>New content</td><td>Small independent settings first; transparency waits for coat-pipeline support.</td></tr>
+<tr><td><a href="saddle-pads.html#roadmap">Saddle pads</a></td><td>Gear and rendering</td><td>After the shared render layer; editor and reusable designs follow one proof item.</td></tr>
+<tr><td><a href="item-seed-jars.html#roadmap">Seed jars</a></td><td>Breeding and records</td><td>After owned records and reproduction state are stable; extraction precedes cloning.</td></tr>
+<tr><td><a href="item-spawn-eggs.html#roadmap">The spawn eggs</a></td><td>Tooling</td><td>After per-copy epigenome serialization is stable and inspectable.</td></tr>
+<tr><td><a href="item-stall-bars.html#roadmap">Stall bars</a></td><td>World content</td><td>After stall reachability and herd visibility rules are tested.</td></tr>
+<tr><td><a href="item-stall-signs.html#roadmap">Stall signs</a></td><td>Ownership and records</td><td>After stale-name and auto-return rules are resolved against the registry.</td></tr>
+<tr><td><a href="storm-fed.html#roadmap">Storm fed</a></td><td>Traits and behaviour</td><td>After per-horse resource attachments and a consuming gene exist.</td></tr>
+<tr><td><a href="horse-traits.html#roadmap">The trait &amp; effect architecture</a></td><td>Foundation</td><td>Decision gate for selectors, resources, goals, auras and scalar conditions.</td></tr>
+<tr><td><a href="troughs.html#roadmap">Troughs and salt licks</a></td><td>Horse care</td><td>After feeding rules are fixed; build the trough as the first world feeding block.</td></tr>
+<tr><td><a href="undead-horses.html#roadmap">Undead horses</a></td><td>Decision gate</td><td>Resolve the gene-versus-bundle call before writing either locus.</td></tr>
+<tr><td><a href="villagers.html#roadmap">Villagers &amp; transfer papers</a></td><td>Ownership and acquisition</td><td>After barn placement and ownership transitions are explicit.</td></tr>
+<tr><td><a href="virtual-stables.html#roadmap">Virtual stables</a></td><td>Ownership and records</td><td>After the registry and cross-dimension identity rules; item versus stall is the gate.</td></tr>
+<tr><td><a href="item-whistles.html#roadmap">Whistles</a></td><td>Ownership and behaviour</td><td>After bond gating, whereabouts and non-teleport movement are reliable.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="gates">Foundations and decision gates</h2>
+<p>
+    Several roadmap pages are not good starting points because their shared foundation is still
+    unsettled. Resolve these in order:
+</p>
+<ol>
+    <li><strong>Owned-horse registry</strong> before browser actions, historical rows, notifications or teleport.</li>
+    <li><strong>Gear attachment and render contract</strong> before a catalogue of tack, wings or model parts.</li>
+    <li><strong>Trait/effect shape</strong> before storm-fed, magic-grab and other long-lived per-horse abilities.</li>
+    <li><strong>Cart bench components</strong> before multi-horse draught, because the latter changes the vehicle shape rather than adding a new vehicle.</li>
+    <li><strong>Undead gene decision</strong> on <a href="decisions.html#open-undead-locus">the decisions page</a> before either undead gene is written.</li>
+</ol>
+<p>
+    A gate is finished only when its answer is written on the decision page or the owning page,
+    and the losing alternatives are removed from the implementation plan. Otherwise the next
+    session will spend its first hour reopening the same question.
+</p>
+
+<h2 id="session-loop">The execution loop</h2>
+<ol>
+    <li><strong>Choose one slice.</strong> Name the player-visible outcome and its owning page.</li>
+    <li><strong>Read the gate.</strong> Check decisions, known gaps and nearby Verification items before touching code.</li>
+    <li><strong>Find the narrowest owner.</strong> Put rules in <code>common/</code> when they are game-free; keep NeoForge as translation and orchestration.</li>
+    <li><strong>Make the smallest end-to-end edit.</strong> Prefer one real item, one query, one notification or one behaviour over an empty framework.</li>
+    <li><strong>Run the cheapest falsifying check immediately.</strong> Use a focused test, fixture, parity check or narrow build before expanding the slice.</li>
+    <li><strong>Regenerate every derived artefact.</strong> Follow <a href="../CLAUDE.md">the build table</a>, especially golden coats, WASM, generated wiki pages and search indexes.</li>
+    <li><strong>Update the owning page.</strong> Move shipped work off Roadmap, record what was seen on Coding, and leave only genuinely unbuilt work behind.</li>
+    <li><strong>Stop at a clean boundary.</strong> Record the next blocked gate and the one best next check in the session log.</li>
+</ol>
+
+<h2 id="slice-brief">The slice brief</h2>
+<p>Before implementation, write this compact brief on the owning page or in the session notes:</p>
+<div class="codebox">
+<pre><code class="language-markup">Outcome: one sentence a player can observe.
+Owner: one wiki page and one primary code owner.
+Decision gate: the answer that must already be settled.
+Prerequisites: existing data, attachment, payload or UI contract.
+First proof: the smallest complete path from input to visible result.
+Acceptance: observable pass conditions, including refusal and failure cases.
+Checks: the cheapest focused test, then required regeneration commands.
+Out of scope: adjacent ideas deliberately left for a later slice.</code></pre>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; plans by owning page</a>
+        <a href="decisions.html">Design decisions</a>
+        <a href="known-gaps.html">Known gaps &amp; lessons</a>
+        <a href="session-log.html">Session log</a>
+    </div>
+    The next session should be able to begin from the slice brief, run its first focused check,
+    and know which page to update when the work ships.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
