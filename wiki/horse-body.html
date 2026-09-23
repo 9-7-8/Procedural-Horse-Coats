@@ -866,6 +866,18 @@ public interface GeneEpigenetics {
     <p>Nobody has ever raced the horse screen&rsquo;s new metre readout &mdash; ride a measured run and build a pillar to the printed jump height, because the <code>&times;43.17</code> constant behind it is unproven and the fit assumes body scale 1.0 &mdash; and a pregnancy lost to a lethal pairing must never name the gene in chat.</p>
 </div>
 
+<h3 id="open-condition-severity">Condition severity and onset remain unresolved</h3>
+<p>
+    The shipped health model is intentionally binary: a locus is lethal at birth, lethal at
+    conception, or a flat heart reduction. The richer disorder reference distinguishes health,
+    speed and jump effects from episodic, chronic and progressive onset. The open question is
+    whether to migrate <code>Condition</code> to a magnitude plus an
+    <code>EPISODIC</code>, <code>CHRONIC</code> or <code>PROGRESSIVE</code> kind, with a
+    future status tick reading it, or keep the current flat heart and stat multipliers. The
+    four disorders already shipped use the current model; their calibrated values must not be
+    replaced by the reference percentages merely because a richer model is considered.
+</p>
+
 <h3 id="stat-units-0918">Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h3>
 
 <p>

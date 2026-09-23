@@ -241,6 +241,24 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The remaining design check is whether champagne foals should have a distinct blue-green eye before an age transition, or keep the adult colour from birth.</p>
+</div>
+
+<h3 id="open-champagne-foal-eyes">Should a champagne foal be born blue-green?</h3>
+<p>
+    A real champagne foal is born blue-green and matures to amber or hazel. Decide whether to
+    add an <code>adult</code> signal to <code>EyeColorContribution</code> and represent that
+    transition, or keep the current adult colour from birth because aging is out of scope. The
+    current result is intentional until this question is answered.
+</p>
+
+</section>
+
 <section class="tab-panel" data-tab="science">
 
 <h2 id="identity">Genetic identity</h2>

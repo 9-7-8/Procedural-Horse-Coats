@@ -38,6 +38,24 @@
 
 <p>
     The <em>shipped</em> files are inside the jar, so a world changes them another way:
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The meaning of a breed&rsquo;s <code>country</code> token is unresolved because no mechanic currently reads it.</p>
+</div>
+
+<h3 id="open-country">What is a breed&rsquo;s <code>country</code> for?</h3>
+<p>
+    Nearly every breed carries a country and the parser preserves it, but no gameplay mechanic
+    reads it. Decide whether it should key a mechanic before the catalogue grows, or whether it
+    is only descriptive metadata. Until then, the token remains a nation identifier rather than
+    a region, as documented by the format.
+</p>
+
+</section>
+
     <code>.minecraft/phc/breed-spawning.toml</code> overrides each one&rsquo;s biomes,
     weight and hours, or switches it off (<a href="breeds.html#world-settings">breeds</a>).
     It never touches a drop-in breed &mdash; that is already a file you can edit.
