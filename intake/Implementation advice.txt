@@ -1,5 +1,18 @@
 Implementation advice for intake/To do.txt
 
+Fast path for an implementation session
+========================================
+Read wiki/roadmap-execution.html first. Its "Implementation handoff packet"
+names the owning classes, first focused check, stop condition, and the order of
+the hardening stages. Then read only the owning page and the listed classes.
+Do not treat this file as a second roadmap: it is context for routing intake,
+while the wiki page is the execution source of truth.
+
+Before editing, write one sentence for the current hypothesis and one check
+that could disprove it. After the first edit, run that check immediately. If a
+check requires NeoForge runtime state, record the exact manual reproduction on
+the owning Verification tab instead of widening the repository search.
+
 Purpose
 =======
 This should be treated as an implementation plan, not as evidence that every

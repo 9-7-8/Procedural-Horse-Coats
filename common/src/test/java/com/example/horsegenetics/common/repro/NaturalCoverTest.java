@@ -106,6 +106,19 @@ class NaturalCoverTest {
     }
 
     @Test
+    void aCourtshipResetsAfterTheStallionIsMissingTooLong() {
+        java.util.UUID him = new java.util.UUID(1L, 1L);
+        NaturalCover.Courtship courtship = NaturalCover.Courtship.start(him, 1000)
+                .seen(him, 1050)
+                .seen(him, 1050 + NaturalCover.Courtship.MAY_LAPSE + 1);
+
+        assertEquals(1050 + NaturalCover.Courtship.MAY_LAPSE + 1, courtship.since());
+        assertEquals(courtship.since(), courtship.lastSeen());
+        assertEquals(false, courtship.complete(courtship.since()),
+                "a reappearing stallion must start a fresh courtship");
+    }
+
+    @Test
     void outOfReachDoesNotCount() {
         double justOut = (ReproRules.NATURAL_REACH + 0.1) * (ReproRules.NATURAL_REACH + 0.1);
         assertEquals(NaturalCover.Verdict.NO_STALLION,

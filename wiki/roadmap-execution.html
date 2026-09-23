@@ -46,6 +46,171 @@
 </table>
 </div>
 
+<h2 id="handoff">Implementation handoff packet</h2>
+<p>
+    A new implementation session should not rediscover the repository. Read this page, the
+    owning page named below, and only the listed anchors. Form one local hypothesis, run the
+    listed focused check if it already exists, then edit the smallest owning slice. If the
+    check cannot run because the behaviour is NeoForge-only, write the runtime reproduction
+    before searching further.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Stage</th><th>Start with</th><th>First check</th><th>Stop condition</th></tr></thead>
+<tbody>
+<tr><td>Identity</td><td><code>HorseRoster</code>, <code>HorseRecord</code>, <code>ClientHorseRecordCache</code>, <code>HorseQuery</code></td><td><code>:common:test --tests '*HorseQueryTest'</code></td><td>One UUID resolves consistently across listing, record, entity and history.</td></tr>
+<tr><td>Screen routing</td><td><code>HorseBrowserScreen.mouseClicked</code>, <code>HorseInfoScreen.openHorse</code>, <code>HorseInfoInteraction</code>, family-tree request handling</td><td>Existing focused common tests; otherwise reproduce loaded and unloaded row clicks in-game.</td><td>Every entry path either opens the correct record or gives an explicit unavailable result.</td></tr>
+<tr><td>AI arbitration</td><td><code>BondFollowGoal</code>, <code>HorseCareHandler.onHorseJoin</code>, <code>NaturalCover</code></td><td><code>:common:test --tests '*NaturalCoverTest'</code></td><td>A failed route relinquishes movement and breeding/feeding/panic resume.</td></tr>
+<tr><td>Events</td><td><code>HorseWhereabouts</code>, ownership handlers, birth/death hooks, roster refresh</td><td>Existing reproduction tests; then a save/reload and two-player runtime check.</td><td>Events are authoritative, deduplicated, persisted and correctly scoped to owners.</td></tr>
+<tr><td>Gear</td><td><code>HorseGear</code>, <code>HorseTackSlot</code>, <code>TackSlotPayload</code>, gear-tab click handling</td><td><code>:common:test --tests '*HorseQueryTest'</code> for selection/filter regressions; runtime for slots.</td><td>No invalid, duplicate or lost item transfer survives a close, reload or ownership change.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">Token-saving session contract</span>
+    <p>
+        Do not reread every roadmap page, search every occurrence of a concept, or design the
+        whole subsystem before the first focused check. Do not change production code merely to
+        make a test seam convenient. If a required test cannot be written without a NeoForge
+        harness, leave the production path untouched, record the exact runtime reproduction on
+        the owning Verification tab, and continue with the next independently testable slice.
+    </p>
+</div>
+
+<h2 id="symptom-map">Symptom-to-anchor map</h2>
+<p>
+    Start here when a report resembles one of the known failure shapes. The existing gap link is
+    the history and acceptance context; the files are the narrow implementation surface. Do not
+    search the whole repository before reading this row.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Observed symptom</th><th>Read first</th><th>Existing context</th></tr></thead>
+<tbody>
+<tr><td>H-menu row or portrait does not open horse info</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/client/HorseBrowserScreen.java</code>, <code>HorseInfoScreen.java</code>, <code>HorseRecordSyncPayload.java</code>, <code>FamilyTreeRequestPayload.java</code></td><td><a href="known-gaps.html#gap-76">gap 76</a>, <a href="known-gaps.html#gap-198">gap 198</a></td></tr>
+<tr><td>Horse menu flashes, opens vanilla, or differs by gesture</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/client/HorseInfoInteraction.java</code>, <code>HorseInteractionHandler.java</code>, <code>HorseInfoKeyHandler.java</code>, <code>HorseScreenHooks.java</code></td><td><a href="known-gaps.html#gap-231">gap 231</a></td></tr>
+<tr><td>Bonded horse stares, stalls, or ignores breeding/food</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/BondFollowGoal.java</code>, <code>HorseCareHandler.java</code>, <code>InspectHoldGoal.java</code></td><td><a href="horse-care.html#bond-behaviours">bond behaviour plan</a>, <a href="known-gaps.html#gap-197">gap 197</a></td></tr>
+<tr><td>Natural cover is missing, repeated, or reports the wrong reason</td><td><code>common/src/main/java/com/example/horsegenetics/common/repro/NaturalCover.java</code>, <code>ReproRules.java</code>, <code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/NaturalBreedingHandler.java</code>, <code>ReproHandler.java</code></td><td><a href="fertility.html#natural">natural breeding</a>, <a href="horse-care.html#bond-roadmap">care and behaviour roadmap</a></td></tr>
+<tr><td>Allele or exact-genotype filter disagrees with the stable</td><td><code>common/src/main/java/com/example/horsegenetics/common/horse/HorseQuery.java</code>, <code>HorseListing.java</code>, <code>common/src/test/java/com/example/horsegenetics/common/horse/HorseQueryTest.java</code></td><td><a href="known-gaps.html#gap-198">gap 198</a></td></tr>
+<tr><td>Horse gear action equips the wrong item or loses a stack</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/data/HorseGear.java</code>, <code>entity/HorseTackSlot.java</code>, <code>network/TackSlotPayload.java</code>, <code>client/HorseInfoScreen.java</code></td><td><a href="horse-gear.html#roadmap">gear roadmap</a>, <a href="known-gaps.html#gap-294">gap 294</a></td></tr>
+<tr><td>Sold, dead, or transferred horse vanishes or has stale history</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/HorseRoster.java</code>, <code>HorseOwnership.java</code>, <code>HorseWhereabouts.java</code>, <code>TransferPaperHandler.java</code></td><td><a href="known-gaps.html#gap-300">gap 300</a>, <a href="known-gaps.html#gap-283">gap 283</a></td></tr>
+<tr><td>Owned-horse damage/death message duplicates or reaches the wrong player</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/ActionTrace.java</code>, <code>HorseWhereaboutsHandler.java</code>, damage/death handlers, <code>ServerConfig.java</code></td><td><a href="horse-browser.html#log-tab">browser log plan</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="gap-routing">Open-gap routing audit</h2>
+<p>
+    The Known gaps page contains several kinds of records. Fixed or built-but-unverified records
+    stay on their owning Verification tab; accepted, deferred and design records stay on
+    Decisions or their subject page. The active records below, plus the one older actionable
+    inert-item record, are the ones implementation sessions must route through this plan. Each
+    appears once, so an open gap cannot sit outside the execution order unnoticed.
+</p>
+
+<h3>Identity, interaction and ownership</h3>
+<ul>
+    <li><a href="known-gaps.html#gap-300">gap 300</a> owned-horse persistence and despawn</li>
+    <li><a href="known-gaps.html#gap-295">gap 295</a> hemizygous display</li>
+    <li><a href="known-gaps.html#gap-293">gap 293</a> first-tick wild rendering</li>
+    <li><a href="known-gaps.html#gap-283">gap 283</a> stale stall-sign names</li>
+    <li><a href="known-gaps.html#gap-259">gap 259</a> neighbouring-pen watch data</li>
+</ul>
+
+<h3>AI, movement and events</h3>
+<ul>
+    <li><a href="known-gaps.html#gap-304">gap 304</a> per-copy attribute modifier replacement</li>
+    <li><a href="known-gaps.html#gap-303">gap 303</a> singer arbitration</li>
+    <li><a href="known-gaps.html#gap-268">gap 268</a> aggressive rider target path</li>
+    <li><a href="known-gaps.html#gap-264">gap 264</a> dhampir damage attribution</li>
+    <li><a href="known-gaps.html#gap-250">gap 250</a> blood-only attack frequency</li>
+    <li><a href="known-gaps.html#gap-243">gap 243</a> lycan death in the horse dimension</li>
+</ul>
+
+<h3>Genetics, coats and breed data</h3>
+<ul>
+    <li><a href="known-gaps.html#gap-299">gap 299</a> frame-white topline rule</li>
+    <li><a href="known-gaps.html#gap-298">gap 298</a> W22/W20 breeding relationship</li>
+    <li><a href="known-gaps.html#gap-297">gap 297</a> Extension <code>e<sup>a</sup></code> source decision</li>
+    <li><a href="known-gaps.html#gap-292">gap 292</a> leopard/sabino coat stacking</li>
+    <li><a href="known-gaps.html#gap-278">gap 278</a> breed stat range truncation</li>
+    <li><a href="known-gaps.html#gap-267">gap 267</a> custom wild-type outcomes</li>
+    <li><a href="known-gaps.html#gap-256">gap 256</a> strain-specific size bands</li>
+    <li><a href="known-gaps.html#gap-245">gap 245</a> lethal-ratio test spread</li>
+</ul>
+
+<h3>Gear, carts and world interaction</h3>
+<ul>
+    <li><a href="known-gaps.html#gap-294">gap 294</a> resized horse gear and rider placement</li>
+    <li><a href="known-gaps.html#gap-288">gap 288</a> painted-jump seam</li>
+    <li><a href="known-gaps.html#gap-287">gap 287</a> Anglo-Arabian jump height</li>
+    <li><a href="known-gaps.html#gap-286">gap 286</a> reaper crop safety check</li>
+    <li><a href="known-gaps.html#gap-285">gap 285</a> supply-cart seat opening</li>
+    <li><a href="known-gaps.html#gap-284">gap 284</a> orphaned glow light block</li>
+    <li><a href="known-gaps.html#gap-17">gap 17</a> inert tickets and provisional item art</li>
+</ul>
+
+<h3>Compatibility and generated assets</h3>
+<ul>
+    <li><a href="known-gaps.html#gap-271">gap 271</a> compatibility survey</li>
+    <li><a href="known-gaps.html#gap-282">gap 282</a> modded ingot valuation</li>
+    <li><a href="known-gaps.html#gap-272">gap 272</a> generated recipe parsing</li>
+    <li><a href="known-gaps.html#gap-273">gap 273</a> generated model rendering</li>
+    <li><a href="known-gaps.html#gap-274">gap 274</a> duplicate modded wood names</li>
+    <li><a href="known-gaps.html#gap-279">gap 279</a> modded cart icons</li>
+    <li><a href="known-gaps.html#gap-280">gap 280</a> cart atlas assumptions</li>
+    <li><a href="known-gaps.html#gap-281">gap 281</a> incomplete Horse Powered compatibility</li>
+    <li><a href="known-gaps.html#gap-275">gap 275</a> generated armour naming convention</li>
+</ul>
+
+<h3>Tooling, parity and documentation</h3>
+<ul>
+    <li><a href="known-gaps.html#gap-302">gap 302</a> research-paper behaviour contradiction</li>
+    <li><a href="known-gaps.html#gap-301">gap 301</a> duplicated and disagreeing plans</li>
+    <li><a href="known-gaps.html#gap-296">gap 296</a> stale roadmap and section references</li>
+    <li><a href="known-gaps.html#gap-276">gap 276</a> AI dialog close action</li>
+    <li><a href="known-gaps.html#gap-261">gap 261</a> non-reproducible designer WASM</li>
+    <li><a href="known-gaps.html#gap-265">gap 265</a> duplicated bare-string identity</li>
+    <li><a href="known-gaps.html#gap-266">gap 266</a> wild-herd and healing prose mismatch</li>
+    <li><a href="known-gaps.html#gap-254">gap 254</a> JavaScript/Java GUI mirrors</li>
+    <li><a href="known-gaps.html#gap-255">gap 255</a> constants present on only one twin</li>
+    <li><a href="known-gaps.html#gap-143">gap 143</a> unplaced research shelf</li>
+</ul>
+
+<p>
+    The remaining gap records are intentionally not copied into this list: they are already
+    fixed, accepted, deferred, or waiting for an in-game Verification check. When one changes
+    state, delete it from the appropriate list above or move it to the owning page; never leave a
+    second implementation description here.
+</p>
+
+<h2 id="session-packet">Session start and closeout packet</h2>
+<p>
+    Copy this small packet into the session notes before implementation. It is deliberately
+    shorter than a design document: its job is to preserve routing and evidence between sessions.
+</p>
+<div class="codebox">
+<pre><code class="language-markup">Slice:
+Owner page:
+Production anchors:
+Hypothesis:
+Disconfirming check:
+First edit:
+Focused result:
+Tests added or run:
+Generated artefacts updated:
+Runtime checks still needed:
+Next blocked gate:</code></pre>
+</div>
+<p>
+    Closeout is complete when the focused result is recorded, the owning page says what is now
+    true, generated artefacts are current, and the next session can begin from the named blocked
+    gate without rereading the whole project. A session that found only that the report was stale
+    should record that result and stop; it should not invent a replacement feature.
+</p>
+
 <h2 id="fixes-first">Fixes and tuning come first</h2>
 <p>
     Before starting new content, clear the existing behaviour that players already depend on.
@@ -250,55 +415,55 @@
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Roadmap page</th><th>Execution lane</th><th>Order and dependency</th></tr></thead>
+<thead><tr><th>Roadmap page</th><th>Execution lane</th><th>Order and dependency</th><th>Owning file</th></tr></thead>
 <tbody>
-<tr><td><a href="gene-aggression.html#roadmap">Aggression</a></td><td>Behaviour</td><td>After the behaviour regression pass; define the player-visible trigger first.</td></tr>
-<tr><td><a href="architecture.html#roadmap">Architecture &amp; the build</a></td><td>Foundation</td><td>First: payload scale, display scale and generated-number checks support every later slice.</td></tr>
-<tr><td><a href="model-parts.html#roadmap">Attached model parts</a></td><td>Gear and rendering</td><td>After the attachment/render proof; model one part before a catalogue.</td></tr>
-<tr><td><a href="phenotype-naming.html#roadmap">Base-aware phenotype naming</a></td><td>Discovery UI</td><td>After one shared phenotype resolver exists for the browser and papers.</td></tr>
-<tr><td><a href="block-preference.html#roadmap">Block preference</a></td><td>Traits and behaviour</td><td>After the effect/goal contract and behaviour priority are settled.</td></tr>
-<tr><td><a href="breed-book.html#roadmap">The breed book</a></td><td>New content</td><td>After the studbook decision; content-only catalogue work.</td></tr>
-<tr><td><a href="carrots.html#roadmap">Breeding carrots &amp; the gene database</a></td><td>Loot and acquisition</td><td>After the fixes pass; tune recipes and database checks separately.</td></tr>
-<tr><td><a href="breeds.html#roadmap">Breeds</a></td><td>New content</td><td>After spawn validation and render behaviour are stable; add breed batches.</td></tr>
-<tr><td><a href="cart-bench.html#roadmap">The cart and jump bench</a></td><td>Foundation</td><td>Before multi-horse draught; migrate materials to components once.</td></tr>
-<tr><td><a href="carts.html#roadmap">Carts: wagons, plows and draught</a></td><td>Vehicles</td><td>After the bench/component migration; teams and the vardo are separate slices.</td></tr>
-<tr><td><a href="chase-gene.html#roadmap">The chase gene</a></td><td>Traits and behaviour</td><td>After goal arbitration and flag ownership are documented.</td></tr>
-<tr><td><a href="coding-notes.html#roadmap">Coding notes</a></td><td>Process</td><td>Continuous maintenance; sources and reusable checklist idioms unblock other pages.</td></tr>
-<tr><td><a href="compatibility.html#roadmap">Compatibility</a></td><td>Foundation</td><td>Run as small compatibility patches and surveys alongside, never inside, feature work.</td></tr>
-<tr><td><a href="config.html#roadmap">Config</a></td><td>Fixes first</td><td>Clarify server/client ownership before exposing the breeding and capacity controls.</td></tr>
-<tr><td><a href="curly-coat.html#roadmap">Curly coat</a></td><td>New content</td><td>After a coat-structure extension is proven independently of recolouring.</td></tr>
-<tr><td><a href="gene-dmrt3.html#roadmap">DMRT3 - gait</a></td><td>Animation</td><td>After horse animation ownership is established; keep genome resolution in common.</td></tr>
-<tr><td><a href="gene-flying.html#roadmap">Flying</a></td><td>Gear and rendering</td><td>After model-part and attachment contracts; cloud-treading remains a separate design slice.</td></tr>
-<tr><td><a href="forced-riding.html#roadmap">Forced riding - the kelpie</a></td><td>Behaviour</td><td>After ride-lock and warning feedback are specified and tested.</td></tr>
-<tr><td><a href="stables.html#roadmap">Generated stables</a></td><td>World content</td><td>After stable ownership, loot and horse protection rules are decided.</td></tr>
-<tr><td><a href="genetics-model.html#roadmap">The genetics model</a></td><td>Foundation</td><td>Resolve sex-linked inheritance before adding any Y-linked gene.</td></tr>
-<tr><td><a href="horse-browser.html#roadmap">The horse browser</a></td><td>Fixes first, then browser</td><td>Registry and stale-row correctness come before scrollable tabs, the filtered event log and other actions.</td></tr>
-<tr><td><a href="horse-care.html#roadmap">Horse care: bond, herds and care</a></td><td>Fixes first</td><td>Fix pathing, feeding and herd-edge behaviour before adding bond rewards.</td></tr>
-<tr><td><a href="horse-gear.html#roadmap">Horse gear</a></td><td>Foundation</td><td>Build one attachment with player inventory, equip-all and unequip-all before opening the remaining slots.</td></tr>
-<tr><td><a href="item-horse-shoes.html#roadmap">Horse shoes</a></td><td>Gear and rendering</td><td>After shared hoof attachment and enchantment plumbing are proven.</td></tr>
-<tr><td><a href="horsemanship.html#roadmap">Horsemanship</a></td><td>New content</td><td>After mounted modifier ownership and rider progression rules are settled.</td></tr>
-<tr><td><a href="items.html#roadmap">Items &amp; recipes</a></td><td>Fixes first</td><td>Audit missing recipes and loot before adding new item families.</td></tr>
-<tr><td><a href="item-jumps.html#roadmap">Jumps</a></td><td>Cart and jump bench</td><td>After material components; standards and round-awareness are separate slices.</td></tr>
-<tr><td><a href="lasso.html#roadmap">The lasso</a></td><td>New content</td><td>After entity-target item interaction and taming-progress feedback are stable.</td></tr>
-<tr><td><a href="gene-lut.html#roadmap">LUT</a></td><td>New content</td><td>Content-only palette batches after the allele/resource contract is unchanged.</td></tr>
-<tr><td><a href="magic-grab.html#roadmap">Magic grab</a></td><td>Traits and behaviour</td><td>After a new ability type and tag-based mob groups have a tested contract.</td></tr>
-<tr><td><a href="magical-genes.html#roadmap">Magical genes still to build</a></td><td>New content</td><td>After effect and equipment-condition foundations; add one gene at a time.</td></tr>
-<tr><td><a href="making-a-gene.html#roadmap">Making a gene</a></td><td>Tooling</td><td>Keep creator-port retirement separate from mask additions; parity is the gate.</td></tr>
-<tr><td><a href="momentum-sprint.html#roadmap">Momentum sprint</a></td><td>Behaviour</td><td>After per-tick horse attachments and rider input ownership are established.</td></tr>
-<tr><td><a href="item-research-papers.html#roadmap">Research papers</a></td><td>Discovery UI</td><td>After the database discovery decision; then move from gene to allele records.</td></tr>
-<tr><td><a href="rider-comfort.html#roadmap">Rider comfort</a></td><td>New content</td><td>Small independent settings first; transparency waits for coat-pipeline support.</td></tr>
-<tr><td><a href="saddle-pads.html#roadmap">Saddle pads</a></td><td>Gear and rendering</td><td>After the shared render layer; editor and reusable designs follow one proof item.</td></tr>
-<tr><td><a href="item-seed-jars.html#roadmap">Seed jars</a></td><td>Breeding and records</td><td>After owned records and reproduction state are stable; extraction precedes cloning.</td></tr>
-<tr><td><a href="item-spawn-eggs.html#roadmap">The spawn eggs</a></td><td>Tooling</td><td>After per-copy epigenome serialization is stable and inspectable.</td></tr>
-<tr><td><a href="item-stall-bars.html#roadmap">Stall bars</a></td><td>World content</td><td>After stall reachability and herd visibility rules are tested.</td></tr>
-<tr><td><a href="item-stall-signs.html#roadmap">Stall signs</a></td><td>Ownership and records</td><td>After stale-name and auto-return rules are resolved against the registry.</td></tr>
-<tr><td><a href="storm-fed.html#roadmap">Storm fed</a></td><td>Traits and behaviour</td><td>After per-horse resource attachments and a consuming gene exist.</td></tr>
-<tr><td><a href="horse-traits.html#roadmap">The trait &amp; effect architecture</a></td><td>Foundation</td><td>Decision gate for selectors, resources, goals, auras and scalar conditions.</td></tr>
-<tr><td><a href="troughs.html#roadmap">Troughs and salt licks</a></td><td>Horse care</td><td>After feeding rules are fixed; build the trough as the first world feeding block.</td></tr>
-<tr><td><a href="undead-horses.html#roadmap">Undead horses</a></td><td>Decision gate</td><td>Resolve the gene-versus-bundle call before writing either locus.</td></tr>
-<tr><td><a href="villagers.html#roadmap">Villagers &amp; transfer papers</a></td><td>Ownership and acquisition</td><td>After barn placement and ownership transitions are explicit.</td></tr>
-<tr><td><a href="virtual-stables.html#roadmap">Virtual stables</a></td><td>Ownership and records</td><td>After the registry and cross-dimension identity rules; item versus stall is the gate.</td></tr>
-<tr><td><a href="item-whistles.html#roadmap">Whistles</a></td><td>Ownership and behaviour</td><td>After bond gating, whereabouts and non-teleport movement are reliable.</td></tr>
+<tr><td><a href="gene-aggression.html#roadmap">Aggression</a></td><td>Behaviour</td><td>After the behaviour regression pass; define the player-visible trigger first.</td><td><code>wiki/gene-aggression.html</code></td></tr>
+<tr><td><a href="architecture.html#roadmap">Architecture &amp; the build</a></td><td>Foundation</td><td>First: payload scale, display scale and generated-number checks support every later slice.</td><td><code>wiki/architecture.html</code></td></tr>
+<tr><td><a href="model-parts.html#roadmap">Attached model parts</a></td><td>Gear and rendering</td><td>After the attachment/render proof; model one part before a catalogue.</td><td><code>wiki/model-parts.html</code></td></tr>
+<tr><td><a href="phenotype-naming.html#roadmap">Base-aware phenotype naming</a></td><td>Discovery UI</td><td>After one shared phenotype resolver exists for the browser and papers.</td><td><code>wiki/phenotype-naming.html</code></td></tr>
+<tr><td><a href="block-preference.html#roadmap">Block preference</a></td><td>Traits and behaviour</td><td>After the effect/goal contract and behaviour priority are settled.</td><td><code>wiki/block-preference.html</code></td></tr>
+<tr><td><a href="breed-book.html#roadmap">The breed book</a></td><td>New content</td><td>After the studbook decision; content-only catalogue work.</td><td><code>wiki/breed-book.html</code></td></tr>
+<tr><td><a href="carrots.html#roadmap">Breeding carrots &amp; the gene database</a></td><td>Loot and acquisition</td><td>After the fixes pass; tune recipes and database checks separately.</td><td><code>wiki/carrots.html</code></td></tr>
+<tr><td><a href="breeds.html#roadmap">Breeds</a></td><td>New content</td><td>After spawn validation and render behaviour are stable; add breed batches.</td><td><code>wiki/breeds.html</code></td></tr>
+<tr><td><a href="cart-bench.html#roadmap">The cart and jump bench</a></td><td>Foundation</td><td>Before multi-horse draught; migrate materials to components once.</td><td><code>wiki/cart-bench.html</code></td></tr>
+<tr><td><a href="carts.html#roadmap">Carts: wagons, plows and draught</a></td><td>Vehicles</td><td>After the bench/component migration; teams and the vardo are separate slices.</td><td><code>wiki/carts.html</code></td></tr>
+<tr><td><a href="chase-gene.html#roadmap">The chase gene</a></td><td>Traits and behaviour</td><td>After goal arbitration and flag ownership are documented.</td><td><code>wiki/chase-gene.html</code></td></tr>
+<tr><td><a href="coding-notes.html#roadmap">Coding notes</a></td><td>Process</td><td>Continuous maintenance; sources and reusable checklist idioms unblock other pages.</td><td><code>wiki/coding-notes.html</code></td></tr>
+<tr><td><a href="compatibility.html#roadmap">Compatibility</a></td><td>Foundation</td><td>Run as small compatibility patches and surveys alongside, never inside, feature work.</td><td><code>wiki/compatibility.html</code></td></tr>
+<tr><td><a href="config.html#roadmap">Config</a></td><td>Fixes first</td><td>Clarify server/client ownership before exposing the breeding and capacity controls.</td><td><code>wiki/config.html</code></td></tr>
+<tr><td><a href="curly-coat.html#roadmap">Curly coat</a></td><td>New content</td><td>After a coat-structure extension is proven independently of recolouring.</td><td><code>wiki/curly-coat.html</code></td></tr>
+<tr><td><a href="gene-dmrt3.html#roadmap">DMRT3 - gait</a></td><td>Animation</td><td>After horse animation ownership is established; keep genome resolution in common.</td><td><code>wiki/gene-dmrt3.html</code></td></tr>
+<tr><td><a href="gene-flying.html#roadmap">Flying</a></td><td>Gear and rendering</td><td>After model-part and attachment contracts; cloud-treading remains a separate design slice.</td><td><code>wiki/gene-flying.html</code></td></tr>
+<tr><td><a href="forced-riding.html#roadmap">Forced riding - the kelpie</a></td><td>Behaviour</td><td>After ride-lock and warning feedback are specified and tested.</td><td><code>wiki/forced-riding.html</code></td></tr>
+<tr><td><a href="stables.html#roadmap">Generated stables</a></td><td>World content</td><td>After stable ownership, loot and horse protection rules are decided.</td><td><code>wiki/stables.html</code></td></tr>
+<tr><td><a href="genetics-model.html#roadmap">The genetics model</a></td><td>Foundation</td><td>Resolve sex-linked inheritance before adding any Y-linked gene.</td><td><code>wiki/genetics-model.html</code></td></tr>
+<tr><td><a href="horse-browser.html#roadmap">The horse browser</a></td><td>Fixes first, then browser</td><td>Registry and stale-row correctness come before scrollable tabs, the filtered event log and other actions.</td><td><code>wiki/horse-browser.html</code></td></tr>
+<tr><td><a href="horse-care.html#roadmap">Horse care: bond, herds and care</a></td><td>Fixes first</td><td>Fix pathing, feeding and herd-edge behaviour before adding bond rewards.</td><td><code>wiki/horse-care.html</code></td></tr>
+<tr><td><a href="horse-gear.html#roadmap">Horse gear</a></td><td>Foundation</td><td>Build one attachment with player inventory, equip-all and unequip-all before opening the remaining slots.</td><td><code>wiki/horse-gear.html</code></td></tr>
+<tr><td><a href="item-horse-shoes.html#roadmap">Horse shoes</a></td><td>Gear and rendering</td><td>After shared hoof attachment and enchantment plumbing are proven.</td><td><code>wiki/item-horse-shoes.html</code></td></tr>
+<tr><td><a href="horsemanship.html#roadmap">Horsemanship</a></td><td>New content</td><td>After mounted modifier ownership and rider progression rules are settled.</td><td><code>wiki/horsemanship.html</code></td></tr>
+<tr><td><a href="items.html#roadmap">Items &amp; recipes</a></td><td>Fixes first</td><td>Audit missing recipes and loot before adding new item families.</td><td><code>wiki/items.html</code></td></tr>
+<tr><td><a href="item-jumps.html#roadmap">Jumps</a></td><td>Cart and jump bench</td><td>After material components; standards and round-awareness are separate slices.</td><td><code>wiki/item-jumps.html</code></td></tr>
+<tr><td><a href="lasso.html#roadmap">The lasso</a></td><td>New content</td><td>After entity-target item interaction and taming-progress feedback are stable.</td><td><code>wiki/lasso.html</code></td></tr>
+<tr><td><a href="gene-lut.html#roadmap">LUT</a></td><td>New content</td><td>Content-only palette batches after the allele/resource contract is unchanged.</td><td><code>wiki/gene-lut.html</code></td></tr>
+<tr><td><a href="magic-grab.html#roadmap">Magic grab</a></td><td>Traits and behaviour</td><td>After a new ability type and tag-based mob groups have a tested contract.</td><td><code>wiki/magic-grab.html</code></td></tr>
+<tr><td><a href="magical-genes.html#roadmap">Magical genes still to build</a></td><td>New content</td><td>After effect and equipment-condition foundations; add one gene at a time.</td><td><code>wiki/magical-genes.html</code></td></tr>
+<tr><td><a href="making-a-gene.html#roadmap">Making a gene</a></td><td>Tooling</td><td>Keep creator-port retirement separate from mask additions; parity is the gate.</td><td><code>wiki/making-a-gene.html</code></td></tr>
+<tr><td><a href="momentum-sprint.html#roadmap">Momentum sprint</a></td><td>Behaviour</td><td>After per-tick horse attachments and rider input ownership are established.</td><td><code>wiki/momentum-sprint.html</code></td></tr>
+<tr><td><a href="item-research-papers.html#roadmap">Research papers</a></td><td>Discovery UI</td><td>After the database discovery decision; then move from gene to allele records.</td><td><code>wiki/item-research-papers.html</code></td></tr>
+<tr><td><a href="rider-comfort.html#roadmap">Rider comfort</a></td><td>New content</td><td>Small independent settings first; transparency waits for coat-pipeline support.</td><td><code>wiki/rider-comfort.html</code></td></tr>
+<tr><td><a href="saddle-pads.html#roadmap">Saddle pads</a></td><td>Gear and rendering</td><td>After the shared render layer; editor and reusable designs follow one proof item.</td><td><code>wiki/saddle-pads.html</code></td></tr>
+<tr><td><a href="item-seed-jars.html#roadmap">Seed jars</a></td><td>Breeding and records</td><td>After owned records and reproduction state are stable; extraction precedes cloning.</td><td><code>wiki/item-seed-jars.html</code></td></tr>
+<tr><td><a href="item-spawn-eggs.html#roadmap">The spawn eggs</a></td><td>Tooling</td><td>After per-copy epigenome serialization is stable and inspectable.</td><td><code>wiki/item-spawn-eggs.html</code></td></tr>
+<tr><td><a href="item-stall-bars.html#roadmap">Stall bars</a></td><td>World content</td><td>After stall reachability and herd visibility rules are tested.</td><td><code>wiki/item-stall-bars.html</code></td></tr>
+<tr><td><a href="item-stall-signs.html#roadmap">Stall signs</a></td><td>Ownership and records</td><td>After stale-name and auto-return rules are resolved against the registry.</td><td><code>wiki/item-stall-signs.html</code></td></tr>
+<tr><td><a href="storm-fed.html#roadmap">Storm fed</a></td><td>Traits and behaviour</td><td>After per-horse resource attachments and a consuming gene exist.</td><td><code>wiki/storm-fed.html</code></td></tr>
+<tr><td><a href="horse-traits.html#roadmap">The trait &amp; effect architecture</a></td><td>Foundation</td><td>Decision gate for selectors, resources, goals, auras and scalar conditions.</td><td><code>wiki/horse-traits.html</code></td></tr>
+<tr><td><a href="troughs.html#roadmap">Troughs and salt licks</a></td><td>Horse care</td><td>After feeding rules are fixed; build the trough as the first world feeding block.</td><td><code>wiki/troughs.html</code></td></tr>
+<tr><td><a href="undead-horses.html#roadmap">Undead horses</a></td><td>Decision gate</td><td>Resolve the gene-versus-bundle call before writing either locus.</td><td><code>wiki/undead-horses.html</code></td></tr>
+<tr><td><a href="villagers.html#roadmap">Villagers &amp; transfer papers</a></td><td>Ownership and acquisition</td><td>After barn placement and ownership transitions are explicit.</td><td><code>wiki/villagers.html</code></td></tr>
+<tr><td><a href="virtual-stables.html#roadmap">Virtual stables</a></td><td>Ownership and records</td><td>After the registry and cross-dimension identity rules; item versus stall is the gate.</td><td><code>wiki/virtual-stables.html</code></td></tr>
+<tr><td><a href="item-whistles.html#roadmap">Whistles</a></td><td>Ownership and behaviour</td><td>After bond gating, whereabouts and non-teleport movement are reliable.</td><td><code>wiki/item-whistles.html</code></td></tr>
 </tbody>
 </table>
 </div>

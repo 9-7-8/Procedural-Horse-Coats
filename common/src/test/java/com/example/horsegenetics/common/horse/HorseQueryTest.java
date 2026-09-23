@@ -179,6 +179,15 @@ class HorseQueryTest {
     }
 
     @Test
+    void filteringAndSortingDoNotReorderTheRosterSource() {
+        List<HorseListing> source = stable();
+
+        HorseQuery.apply(source, "adult", HorseQuery.Sort.NAME, true);
+
+        assertEquals(List.of("Amber", "Boyd", "Cinder"), names(source));
+    }
+
+    @Test
     void everySortColumnOrdersWithoutThrowing() {
         for (HorseQuery.Sort sort : HorseQuery.Sort.values()) {
             assertEquals(3, HorseQuery.apply(stable(), "", sort, false).size(), sort.name());
