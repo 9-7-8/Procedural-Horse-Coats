@@ -49,29 +49,116 @@
 <h2 id="fixes-first">Fixes and tuning come first</h2>
 <p>
     Before starting new content, clear the existing behaviour that players already depend on.
-    Each fix gets a reproduction, a focused regression check and an owning page update. Do not
-    hide a defect inside a new system just because the new system touches the same code.
+    The order below is by breadth of impact, not by how visible the symptom is. Each stage gets
+    unit tests at its owning boundary and a small in-game matrix afterward. Do not hide a defect
+    inside a new system just because the new system touches the same code.
 </p>
-<ol>
-    <li><strong>Interaction and presentation.</strong> Fix the horse menu gesture, put the saddle
-        at the top of the overview, restore the barn-name path, and make existing screens expose
-        the state they already own.</li>
-    <li><strong>Behaviour corrections.</strong> Fix bond-following to require a navigable path,
-        stop horses pushing against pasture boundaries or eating through barriers, and make
-        dropped diet food use the same feeding rules as hand-held food.</li>
-    <li><strong>Breeding feedback and limits.</strong> Make every failed cover report its reason,
-        make stallion coverage and the nearby-horse limit server-authoritative and configurable,
-        and confirm that line breeding is not rejected by an accidental pedigree guard.</li>
-    <li><strong>Ownership and alerts.</strong> Keep sold horses in family history, send owned-horse
-        damage messages only to the owner, send configurable death announcements server-wide,
-        and verify that the low-health escape behaviour does not create a new stuck state.</li>
-    <li><strong>Names and filters.</strong> Remove duplicated default names and make the existing
-        browser and breeding views use one allele-query model before adding new tabs.</li>
-</ol>
+<h3 id="identity-first">1. Persistent identity and record retrieval</h3>
 <p>
-    This pass is complete when the reported behaviour is either fixed and verified, or recorded
-    as a deliberate decision or known gap. Only then should a session spend its main effort on
-    new content.
+    Fix the widest shared seam first: a browser listing, a live entity, a client record and an
+    ancestry record must all resolve to the same horse UUID. Add an explicit server request for a
+    horse record by UUID. Do not reuse an entity-id request or assume that a family-tree request
+    can answer for an unrelated horse. Make cache misses, unloaded horses, sold horses, dead
+    horses, transfers and entity-id reuse deliberate states rather than silent no-ops.
+</p>
+<p>
+    <strong>Unit tests:</strong> record lookup by UUID, cache hit and miss, stale entity-id
+    rejection, transfer ownership, sold/dead historical rows, roster pagination, roster version
+    refresh and filters over a horse beyond the old roster cap. The common query tests must cover
+    gelding, exact genotype, carrier, sold, dead, unloaded and owner predicates.
+</p>
+
+<h3 id="interaction-first">2. Interaction routing and screen lifecycle</h3>
+<p>
+    Route every way into the information screen through one tested decision: H-menu row or
+    portrait, family-tree link, breeding-picker row, vanilla inventory button, sneak-and-use,
+    and the inventory key. A My Horses row must fetch its full record before opening, including
+    when the horse is not loaded. Define the fallback when the record is unavailable. Then test
+    the parent-screen stack, Escape, the inventory key, pending requests, disconnects, stale
+    selections and the inspect-hold lease.
+</p>
+<p>
+    <strong>Unit tests:</strong> <code>HorseBrowserNavigationTest</code>,
+    <code>HorseInfoInteractionTest</code>, <code>HorseRecordRequestTest</code> and
+    <code>HorseScreenLifecycleTest</code>. Their cases must cover plain click versus sneak-click,
+    empty hand versus named items, main hand versus offhand, tamed versus wild horse, horse versus
+    donkey/mule, branded horse, missing client cache, and singleplayer versus dedicated server.
+</p>
+
+<h3 id="ai-arbitration-first">3. Navigation failure and AI arbitration</h3>
+<p>
+    Make a failed bond path release <code>MOVE</code> rather than leaving the goal active while
+    the horse stands still. Re-check <code>canUse</code> and <code>canContinueToUse</code> when the
+    owner is behind a door or fence, outside follow range, offline, in another dimension, dead,
+    or outside simulation distance. Then make the priority contract explicit for bond following,
+    breeding, feeding, dropped-food pickup, herd movement, panic, low-health escape and fence
+    avoidance. A horse that cannot reach its owner must resume normal behaviour.
+</p>
+<p>
+    <strong>Unit tests:</strong> fake-navigation tests for route found, route refused and route
+    lost mid-follow; goal arbitration tests for food versus taming, bond versus breeding, panic
+    versus bond, and escape versus every other movement goal; and threshold tests for follow
+    range, stop distance, healing back above the low-health threshold and dimension changes.
+</p>
+
+<h3 id="behaviour-fixes">4. Breeding, food and boundary corrections</h3>
+<p>
+    Fix dropped diet food, crop eating through barriers, pasture-edge pushing and low-health
+    escape as one movement/feeding pass. For breeding, make stallion coverage server-authoritative,
+    configurable and repeatable each day; preserve line breeding; and report every refusal once
+    per meaningful attempt rather than once per tick. Test two stallions racing for one mare,
+    full capacity, changing capacity, pregnancy beginning, ownership changing, unload/reload and
+    natural versus manual breeding.
+</p>
+<p>
+    <strong>Unit tests:</strong> cover decision outcomes and refusal reasons, capacity and config
+    authority, line-breeding acceptance, food-tag matching, barrier visibility, crop reachability,
+    boundary steering and low-health panic transitions. Add a regression test that a failed cover
+    cannot spam the same player indefinitely.
+</p>
+
+<h3 id="records-and-events">5. Ownership events, alerts and history</h3>
+<p>
+    Build the event path only after identity is stable. Record births, successful and failed
+    covers, deaths, taming, purchases, sales and transfers at the server authority, with a stable
+    horse UUID, timestamp, event type, result and refusal reason. Deduplicate damage/death hooks,
+    target damage messages only to the owner, keep death announcements configurable, and retain
+    sold/dead rows in family history. Persist enough history for reconnect and bound its size.
+</p>
+<p>
+    <strong>Unit tests:</strong> event construction, ordering ties, deduplication, persistence,
+    bounded retention, owner-only damage routing, server-wide death routing, transfer attribution,
+    offline owner lookup and log filters. Include save/reload tests, not just an in-memory list.
+</p>
+
+<h3 id="ui-and-gear-fixes">6. UI and equipment actions</h3>
+<p>
+    Only after record retrieval and server actions are reliable, fix saddle placement, barn-name
+    editing, duplicated naming, allele and exact-genotype filters, the H-menu row action, the
+    horizontal tab strip, player inventory placement, and equip-all/unequip-all. Every action
+    must resolve a UUID on the server, validate ownership and slot acceptance, and report a full
+    inventory or rejected slot without deleting or duplicating items.
+</p>
+<p>
+    <strong>Unit tests:</strong> layout bounds at narrow and wide GUI scales, tab hit testing and
+    keyboard focus, filter parsing, family-name selection, slot acceptance, atomic equipment
+    swaps, partial equip results, full-inventory handling, close-during-transfer and entity-id
+    reuse. Re-test resized horses and all vanilla saddle/barding paths alongside custom tack.
+</p>
+
+<h3 id="hardening-matrix">The required hardening matrix</h3>
+<p>
+    Each stage is incomplete until its tests pass across these states: loaded and unloaded;
+    tracked and untracked; alive, dead and sold; owned, transferred and unowned; owner online and
+    offline; one horse and many horses; success and refusal; menu open and menu closed; save/reload
+    between actions; singleplayer and dedicated server. The same matrix should be used for the H
+    menu, the info screen, breeding, notifications and equipment rather than inventing a new
+    partial checklist for each feature.
+</p>
+<p>
+    This pass is complete when every stage has a focused unit-test class, its integration matrix
+    has been played, and any remaining behaviour is recorded as a deliberate decision or known
+    gap. Only then should a session spend its main effort on new content.
 </p>
 
 <h2 id="slices">New-content vertical slices in dependency order</h2>
