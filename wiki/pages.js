@@ -143,6 +143,7 @@ window.HG.pages = {
                 { href: "momentum-sprint.html", text: "Momentum sprint", kind: "magical", views: ["coding"] },
                 { href: "rider-comfort.html", text: "Rider comfort", kind: "core", views: ["coding"] },
                 { href: "item-stall-bars.html", text: "Stall bars", kind: "core", views: ["coding"] },
+                { href: "saddle-pads.html", text: "Saddle pads", kind: "core", views: ["coding"] },
                 { href: "storm-fed.html", text: "Storm fed", kind: "magical", views: ["coding"] },
                 { href: "troughs.html", text: "Troughs and salt licks", kind: "core", views: ["coding"] },
                 { href: "undead-horses.html", text: "Undead horses", kind: "core", views: ["coding"] },

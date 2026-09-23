@@ -332,8 +332,9 @@
     <strong>Every gear plan, in one place.</strong> These sections used to be
     spread across the main <a href="roadmap.html">roadmap</a> and were moved here
     whole, so that the accessories system, hoof equipment, the native-tack art
-    research, the saddlebags and the saddle pad are read together rather than
-    found one at a time. The main roadmap keeps what is <em>next to</em> gear
+    research and the saddlebags are read together rather than found one at a
+    time. The dedicated <a href="saddle-pads.html">saddle-pad page</a> owns the
+    pad design plan. The main roadmap keeps what is <em>next to</em> gear
     without being gear: <a href="horse-care.html#ground-work">ground work</a>, the
     <a href="cart-bench.html#cart-bench">cart and jump bench</a>,
     <a href="magical-genes.html#tack-aware">a gene that reads what the horse is
@@ -529,8 +530,9 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
     made, how is it decorated, and how is it drawn. <strong>They get one answer here, and
     the sections below are that answer's parts rather than independent tickets.</strong>
     Everything already researched for
-    <a href="#native-tack">native tack</a>, <a href="item-horse-shoes.html">hoof equipment</a> and
-    <a href="#equestrian-bench">the saddle pad</a> is folded in and not restated.
+    <a href="#native-tack">native tack</a> and <a href="item-horse-shoes.html">hoof equipment</a>
+    is folded in and not restated. The saddle-pad design has its own
+    <a href="saddle-pads.html">page</a>.
 </p>
 
 <div class="note">
@@ -573,7 +575,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. <strong>The bridle is the minimum tack required to control a horse</strong> &mdash; which is a real gameplay rule and not a slot, and it has to reckon with <code>BarebackSteeringHandler</code>'s phantom saddle, which writes the saddle slot every tick.</td></tr>
 <tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="horse-care.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
-<tr><td><strong>Saddle pad</strong></td><td>Designed already &mdash; <a href="#equestrian-bench">the banner-cut pad</a>.</td></tr>
+<tr><td><strong>Saddle pad</strong></td><td>See the dedicated <a href="saddle-pads.html">saddle-pad roadmap</a>.</td></tr>
 <tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
 <tr><td><strong>Hoof equipment</strong> &times; 4</td><td>One per hoof, and a different thing from a boot. <a href="item-horse-shoes.html">See the dedicated page.</a></td></tr>
 <tr><td><strong>Martingale / collar</strong>, <strong>fly mask</strong></td><td>The two remaining real pieces of tack.</td></tr>
@@ -705,7 +707,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         colours on one stack (see <a href="#native-tack">native tack</a>), and expensive past
         that.</li>
     <li><strong>Banner patterns as an alternative to the mod's own.</strong> Already designed
-        for the saddle pad as <a href="#equestrian-bench">a chosen rectangle of a banner</a>;
+        for the saddle pad as <a href="saddle-pads.html#editor">a banner-to-saddlepad editor</a>;
         generalising it to every piece is the ask, and the feasibility question flagged there is
         unanswered and gates all of it.</li>
     <li><strong>A 3D preview in the bench, on any horse you own.</strong> The horse browser
@@ -1007,105 +1009,6 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 
 <hr>
 
-<h2 id="equestrian-bench">The saddle pad, and cutting a banner into one</h2>
-
-<p>
-    <strong>Suggested implementation:</strong> build the pad as a tiny, self-contained feature set:
-    a pad item stored on the horse via the attachment, one render layer over the body mesh, a
-    three- or four-field style component for banner placement, and a bench screen that stores a
-    chosen crop rectangle rather than re-computing UVs from the live horse. The first draft should
-    ignore live 3D preview complexity and instead preview the crop in the bench GUI, because that
-    proves the data model and recipe path before the more expensive client-side transform work is
-    added.
-</p>
-<p>
-    The <a href="item-equestrian-bench.html">Tack Dyeing Bench</a> ships its dyeing half. The
-    unbuilt half is the <strong>saddle pad</strong>: a pad fitted to the horse, whose design is
-    a <strong>chosen rectangle of a banner</strong> placed on it. Written as design and risks
-    rather than as a plan, because one feasibility question is still open.
-</p>
-
-<h3>The design</h3>
-
-<ul>
-    <li><strong>The pad rides its own attachment, not an equipment slot.</strong> There are only
-        two animal slots and horse armour holds one, so a slot-based pad would mean riding
-        unarmoured. An attachment plus a render layer costs roughly 150 lines and buys armour
-        <em>and</em> pad together. It needs no modeling: the layer can bake vanilla's
-        <code>HORSE_ARMOR</code> mesh, which already covers the body.</li>
-    <li><strong>The pad is authored at maximum coverage and cut down by the player.</strong>
-        The texture is drawn as the largest sheet the body can carry, and the bench lets the
-        player scale it freely in every direction &mdash; so &ldquo;saddle pad&rdquo; and
-        &ldquo;full caparison&rdquo; are the same item at two settings rather than two items.
-        The extent is part of the design, stored with it.</li>
-    <li><strong>The banner is placed, not merely cropped.</strong> Under the pad the player
-        moves, scales, squashes, stretches and tiles the banner image freely; the crop rectangle
-        is the start of it, not the whole of it. Mechanically that is a 2D transform &mdash;
-        offset, scale per axis, tile on or off &mdash; carried on the component beside the
-        pattern list, which is cheap to store and cheap to apply.</li>
-    <li><strong>The layout is the player's choice too.</strong> Once per flank, continuous
-        across the whole sheet, tiled, or flanks-with-a-plain-ground: all four are settings at
-        the bench.</li>
-    <li><strong>The banner is consumed, and a pad is washable.</strong> Making a pad spends the
-        banner; washing strips the design back to a blank pad and loses it. Mistakes stay cheap
-        without making the banner free.</li>
-    <li><strong>The pad is fitted from a third slot in the horse's own inventory</strong>,
-        beside saddle and armour &mdash; the place a player already looks for tack. This is the
-        most discoverable option and the most dangerous one; see below.</li>
-    <li><strong>No pads on foals.</strong> A foal's UV layout is completely different from an
-        adult's, so a foal pad is a second set of art drawn from scratch for something worn
-        briefly. Vanilla renders no equipment on a foal either.</li>
-</ul>
-
-<h3>The risks</h3>
-
-<ul>
-    <li><strong>The live 3D preview is the open one.</strong> A horse that re-bakes while the
-        player drags is precisely the shape of the incident recorded in
-        <code>GeneticCoatTextureFactory</code>, where unbudgeted per-frame baking froze the
-        owner's machine. It must be designed around rather than discovered: bake on release
-        rather than per frame, or preview the transform as a UV change on an already-baked
-        sheet and only re-composite when the pattern set itself changes. The existing texel
-        budget, cache and reload invalidation are the right machinery; they have to be wired in
-        from the start.</li>
-    <li><strong>Rasterising a banner is answered and is not a risk.</strong> A pattern layer
-        resolves to an ordinary resource PNG under <code>textures/entity/banner/</code>, all
-        64&times;64, and the composite is <code>base &times; baseColour</code> then alpha-over
-        each <code>pattern &times; layerColour</code>. The coat engine's loader,
-        <code>NativeImage</code> compositor and <code>DynamicTexture</code> upload all apply
-        unchanged. The banner's own front face is a clean 20&times;40 texel rectangle at origin
-        (1,1), so a crop has real coordinates to work in. The in-GUI preview is free: vanilla
-        renders a live <code>BannerPatternLayers</code> into a GUI rect already, which is how
-        the loom does it.</li>
-    <li><strong>The third slot: the danger is not where it looked.</strong> NeoForge offers
-        <em>no</em> hook, so a slot beside the saddle means a mixin on
-        <code>HorseInventoryMenu</code>, or our own separate screen. <strong>No screen mixin is
-        needed</strong> &mdash; a supported render event can draw the empty-slot hole, which
-        avoids putting a client-only mixin in a config that has no <code>"client"</code> section
-        and would crash a dedicated server.</li>
-    <li><strong>The real risk is <code>quickMoveStack</code>, not the slot.</strong>
-        <code>AbstractMountInventoryMenu.quickMoveStack</code> is shared with donkeys, mules,
-        llamas and nautiluses, and computes every shift-click range from hardcoded
-        <code>0</code>, <code>1</code>, <code>2</code> and
-        <code>2 + mountContainer.getContainerSize()</code>. A third slot invalidates that
-        arithmetic wherever it is inserted, and a mis-ranged <code>moveItemStackTo</code> is how
-        items duplicate or vanish. It is also the failure that looks fine until somebody
-        shift-clicks with a chest on the horse. Secondary: the client builds its own menu from
-        the open packet, so the mod must stay network-required on both sides or every slot index
-        is off by one.</li>
-    <li><strong>Storing the pad in an attachment is blessed, not a hack.</strong> The saddle and
-        armour slots are not backed by the horse's container either &mdash;
-        <code>Mob.createEquipmentSlotContainer</code> fronts the equipment array with a
-        <code>ContainerSingleItem</code> view that owns no storage. A pad slot reading an
-        attachment is the same shape. Keep one authority (never mirror it into a container),
-        store <code>stack.copy()</code> and write back through <code>setData</code>, and it
-        stays out of hopper reach, which a widened container would not.</li>
-    <li><strong>Two hazards from <a href="known-gaps.html">gap 156</a>.</strong> Do not build
-        the pad on <code>EquipmentSlot.SADDLE</code>, and never let a pad item carry
-        <code>PHANTOM_SADDLE</code>: <code>BarebackSteeringHandler</code> writes that slot every
-        tick and its <code>reclaim</code> sweep destroys anything carrying that component in a
-        rider's inventory.</li>
-</ul>
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"

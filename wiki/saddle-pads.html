@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saddle pads &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> horse gear</p>
+<h1>Saddle pads</h1>
+<p class="lede">
+    A fitted pad beneath the saddle whose surface the player designs from a banner. The
+    planned editor should control not only the pattern but <strong>how much of the horse the
+    pad covers</strong>, then let the player zoom, centre and tile a banner across that area.
+    None of this page is built yet; it is the single home for the saddle-pad plan.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        This page was separated from <a href="horse-gear.html">horse gear</a> so the equipment
+        page can describe the shared slots and storage without also owning the pad's design
+        tool. When the first part ships, it comes off this Roadmap tab and the page gains the
+        Gameplay and Coding tabs that describe the thing as it exists.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A fitted saddle pad with a banner-to-saddlepad editor that controls coverage, zoom,
+        centring and tiling, then saves reusable designs to apply across a player's horses.
+    </p>
+</div>
+
+<h2 id="pad">The pad</h2>
+<p>
+    The pad rides its own horse-gear attachment rather than consuming an equipment slot. Vanilla
+    gives an animal only <code>BODY</code> and <code>SADDLE</code>, and armour already needs one of
+    those, so the pad must coexist with armour without replacing it. It gets one render layer over
+    the horse body and does not need a hand-modelled mesh: the first proof can reuse the coverage
+    and alpha-cutout approach of the vanilla horse-armour layer.
+</p>
+<p>
+    Author the pad at maximum coverage, then store the chosen bounds with the design. A small
+    saddle pad and a full caparison are therefore the same item at different coverage settings,
+    rather than two unrelated item types. Foals do not wear pads until an adult layout exists;
+    their UV layout is different and should not be quietly stretched from the adult one.
+</p>
+
+<h2 id="editor">The banner-to-saddlepad editor</h2>
+<p>
+    The planned UI is a dedicated editor opened from the equestrian bench or the pad itself. Its
+    main preview is the pad's banner area, with controls that make the result legible before it
+    is applied to a horse:
+</p>
+<ul>
+    <li><strong>Shape and coverage:</strong> choose the pad's outline and resize it in each
+        direction to decide whether it covers only the saddle area, extends down the flank, or
+        becomes a larger caparison.</li>
+    <li><strong>Zoom:</strong> magnify or reduce the banner beneath that outline without changing
+        the pad's coverage.</li>
+    <li><strong>Centre and position:</strong> move the banner horizontally and vertically so the
+        chosen motif lands where the player intends on the pad.</li>
+    <li><strong>Tile:</strong> repeat the banner across the pad when one crop is not enough,
+        independently of the pad's shape and size.</li>
+    <li><strong>Apply and reuse:</strong> save the finished design as a named, portable design
+        that can be duplicated across all of the player's horses, rather than rebuilding the
+        same pad one horse at a time.</li>
+</ul>
+<p>
+    The saved design needs to contain the pad shape and coverage, the banner source, its two-axis
+    offset and scale, and the tiling choice. It should be an ordinary serializable design value,
+    not client-only GUI state. Applying it to another horse copies the design data; it does not
+    make the horses share mutable state, so editing one horse's pad cannot unexpectedly repaint
+    every other horse.
+</p>
+
+<h2 id="pipeline">Making and rendering it</h2>
+<p>
+    The <a href="item-equestrian-bench.html">Tack Dyeing Bench</a> already owns the dyeing half;
+    the pad editor is the unbuilt half. The banner pattern should resolve to the same ordinary
+    resource image used by the existing banner rendering path, then composite as
+    <code>base &times; base colour</code> followed by each pattern layer and colour. The editor
+    preview and the horse render must consume the same saved values, so a design cannot look one
+    way in the bench and another way on the horse.
+</p>
+<p>
+    The first implementation should preview the transformed banner in the editor before tackling
+    a live 3D horse preview. If a horse preview is added, dragging must not rebake a genetic coat
+    every frame: preview the transform over an existing sheet and bake on release, or only
+    re-composite when the pattern set changes. The existing texture cache, texel budget and
+    reload invalidation are the machinery to connect rather than a second rendering pipeline.
+</p>
+
+<h2 id="storage">Attachment, slot and failure edges</h2>
+<ul>
+    <li>Keep the pad in the horse gear attachment as the authority and copy item/design data on
+        every write. Do not mirror it into a widened horse container where hoppers or shared
+        <code>quickMoveStack</code> ranges could reach it.</li>
+    <li>Expose it beside saddle and armour where players already look for tack, but do not put it
+        on <code>EquipmentSlot.SADDLE</code>. The bareback steering path writes that slot and can
+        reclaim stacks carrying its phantom-saddle marker.</li>
+    <li>Consume the source banner when making a design. Washing a pad may return it to a blank
+        design, but it should not silently make the banner free.</li>
+    <li>Keep saved designs portable between a player's horses while retaining each horse's own
+        copied instance, and reject adult pads on foals until a foal-specific layout is designed.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="horse-gear.html">Horse gear &mdash; the shared equipment slots</a>
+        <a href="item-equestrian-bench.html">Tack Dyeing Bench</a>
+    </div>
+    A pad should be quick to make, easy to revise, and reusable across a whole stable.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
