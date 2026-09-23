@@ -33,9 +33,8 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | An API quirk of this SDK | `wiki/api-notes.html` |
 | **A derived number** (gene counts, catalogue sizes, test counts) | the code that computes it |
 
-**That last row is a repeat offender** - three sessions running found stale ones
-by hand (`wiki/known-gaps.html#gap-13`). Name the accessor
-(`Genes.codeOrder().size()`), never quote its value.
+**That last row is a repeat offender** (`wiki/known-gaps.html#gap-13`) - name the
+accessor (`Genes.codeOrder().size()`), never quote its value.
 **When you add a line here, look for one to delete.** If this file grows past
 300 lines, that is the signal to move a section out, not to let it ride.
 
@@ -85,6 +84,10 @@ install, licence. No status, no architecture, no API notes.
 Roadmap tab that holds it (`undead-horses.html#skeleton-gene`). When something
 ships, *delete* it from that tab and write it up on the same page's Gameplay and
 Coding tabs - "marked shipped" is not "moved".
+**Look things up in `wiki/text/`, not `wiki/*.html`.** Same prose, markup
+stripped, one file per page or tab, plus `wiki/text/index.txt` (heading to
+`file#anchor`), baked by `bake-agent-text.mjs`. Open the `.html` only to edit
+it, or for `session-log.html`, `releases.html`, `making-a-gene.html` (not baked).
 
 ---
 ## Hard rules
@@ -149,15 +152,13 @@ Coding tabs - "marked shipped" is not "moved".
    plan whose subject has no page means writing the page** - Roadmap tab only, growing the
    others as it ships. `wiki/horse-gear.html` is the worked example. (Owner.)
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
-or five files each, and the game and the tools drift silently if you miss one.**
-The four lists are on `wiki/making-a-gene.html#contracts` - read it before you
-start, not after.
+or five files each and drifts silently if you miss one** - the four lists are
+on `wiki/making-a-gene.html#contracts`, read it before you start, not after.
 **A per-wood block family's asset shape is written twice** - double gates and
 jumps both: `tools/bake-*.mjs` for vanilla's woods at author time,
-`compat/Generated*` for other mods' woods at run time. Change one, change the
-other - a drift shows as a modded block that is a purple cube while every
-vanilla one is fine, and logs nothing. `check-block-models.mjs` catches only
-the author-time half.
+`compat/Generated*` for other mods' at run time. Change one, change the other -
+a drift shows as a modded block that is a purple cube, and logs nothing.
+`check-block-models.mjs` catches only the author-time half.
 - **A gene or item page is three tabs** - `<section class="tab-panel"
   data-tab="gameplay|coding|science">` inside `article.doc`, per
   `wiki/tabs.js`. Gameplay is the default, is written for a player who does not
@@ -188,19 +189,18 @@ node wiki/tools/check-links.mjs                # every href, #fragment and id in
 node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
 node neoforge-26.1.2/tools/check-block-models.mjs # no blockstate points at a model nobody wrote
 node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
-node wiki/tools/bake-verification-index.mjs     # rebuild verification.html from every Verification tab
-node wiki/tools/bake-roadmap-index.mjs          # and roadmap.html from every Roadmap tab
+node wiki/tools/bake-verification-index.mjs && node wiki/tools/bake-roadmap-index.mjs # rebuild verification.html and roadmap.html
 node neoforge-26.1.2/tools/check-progress-tasks.mjs # every checklist task is hooked, and is an advancement
 ```
-Requires JDK 25 (auto-provisioned). Crash reports: `neoforge-26.1.2/run/crash-reports/`.
-**Never run the full `:common:test` unless the owner asks.** It is ten minutes and
-they will not wait through it; run one class with `--tests` instead, and say in the
-summary what a full run would still need to check. (Owner's rule, stated outright.)
+Requires JDK 25 (auto-provisioned); crash reports land in `neoforge-26.1.2/run/crash-reports/`.
+**Never run the full `:common:test` suite unless the owner asks** - it is ten
+minutes and they will not wait through it; use `--tests` and say in the summary
+what a full run would still need to check. (Owner's rule.)
 **The owner's last play session is on disk - read it rather than asking.**
 `neoforge-26.1.2/run/logs/latest.log`, and `debug.log` beside it for more.
 A bug report of the shape "it still doesn't work" is usually answerable from
-there directly, and `server/DebugAnnounce` writes this mod's own diagnostics to
-both the log and chat so they survive the chat scrolling away.
+there directly; `server/DebugAnnounce` writes this mod's own diagnostics to
+the log and chat so they survive the chat scrolling away.
 **Regenerate what you invalidate.** Every artefact below is derived, checked in,
 and fails *silently* when stale:
 
@@ -214,7 +214,7 @@ and fails *silently* when stale:
 | a gene's layers or masks | `*DeadLayerTest` (seconds) - a layer that paints nothing fails it; fix the gene, then **delete its line** | `common/src/test/resources/dead-layers.txt` |
 | **any file in `horsegenetics/genes/`, or any gene page's `<h1>`, tabs, or `Verified` block** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages`, `:common:bakeMarkingFacts`, `:common:bakeGeneCensus`, `:common:bakeUnverifiedGenes`, then `node wiki/tools/bake-gene-timeline.mjs` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html`, `wiki/timeline-of-genes.html`, `wiki/gene-census.html` (**every** gene's alleles, not only data-driven ones - a new gene is on it by existing, but only after the bake), `wiki/breed-designer/assets/marking-facts.json`, `common/.../horsegenetics/unverified-genes.txt` (the horse dimension's coat column - a stale one shows pens for confirmed genes and hides the rest) **and the generated spans of `wiki/pages.js` and `index.html`** |
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
-| **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages) | `wiki/search-index.js` |
+| **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages), then `node wiki/tools/bake-agent-text.mjs` | `wiki/search-index.js`, `wiki/text/` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | **any Verification tab, or any Roadmap tab** - added, deleted, or its summary sentence reworded | `node wiki/tools/bake-verification-index.mjs` and `node wiki/tools/bake-roadmap-index.mjs` - each hard-fails on a tab with no summary box rather than write an index that omits a page | `wiki/verification.html`, `wiki/roadmap.html` |
 | **`ProgressTask`** - a checklist task added, deleted or retitled | `node neoforge-26.1.2/tools/bake-advancements.mjs` (a new task needs an icon in its `ICON` map first), then `check-progress-tasks.mjs`. Every task is also an advancement, and the bake is the only thing that makes it one | `neoforge-26.1.2/.../data/horsegenetics/advancement/` |
@@ -242,14 +242,13 @@ Pointers only - the numbers live in the code, the detail on a page.
 - **`common/`** compiles, the suite is green, **`neoforge-26.1.2/`** assembles,
   **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
 - **What has actually been seen in-game is a small fraction of what is built.**
-  `wiki/verification.html` is the authority on which is which, and is the first
-  thing to read before claiming something works.
+  `wiki/verification.html` is the authority on which is which - read it first.
 
 ---
 ## Ending a session
-The routine for **"end the session"** / "wrap up" / "we're done for today". It
-is a fixed order - the docs pass comes *after* the code is pushed, so it reviews
-where the session actually landed rather than narrating it mid-change.
+The routine for **"end the session"** / "wrap up" / "we're done for today" - a
+fixed order, since the docs pass comes *after* the code is pushed and reviews
+where the session landed rather than narrating it mid-change.
 1. **Regenerate what the session invalidated** (the table under Build & test),
    then **fix the twin** if `CustomHorseSpawnScreen` or the designer changed
    (hard rule 5).
@@ -264,9 +263,9 @@ where the session actually landed rather than narrating it mid-change.
    `wiki/session-log.html` (a new dated entry at the top),
    the **Verification tab of each page the session built on** (what is newly
    unplayed *and where to look*; delete only what the owner confirmed in-game,
-   then re-bake the index), `wiki/known-gaps.html` (delete what
-   closed, add what was discovered), plus any gene or system page the session
-   moved, and `wiki/nav.js` if a page was added.
+   then re-bake the index), `wiki/known-gaps.html` (delete what closed, add
+   what was discovered), plus any gene or system page the session moved, and
+   `wiki/nav.js` if a page was added.
 5. **Audit this file and put it back under budget.** Not "did I add anything" -
    that is too easy to answer *no* to without looking. Actually run it:
 
@@ -274,8 +273,7 @@ where the session actually landed rather than narrating it mid-change.
    wc -l CLAUDE.md                            # must be <= 300
    git diff HEAD~1 -- CLAUDE.md               # what did this session add?
    grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|[0-9]{3,}' CLAUDE.md   # dates + derived numbers
-   ```
-   Then run **every line the session added here** through the test and the
+   ```   Then run **every line the session added here** through the test and the
    routing table at the top, and move what fails: a date means session-log
    material, a long number a derived value that should be an accessor name.
    Over 300 lines is the signal to **move a whole section out**, not to trim
