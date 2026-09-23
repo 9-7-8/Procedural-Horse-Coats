@@ -886,14 +886,28 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 </div>
 
 <p class="lede">
-    <strong>Everything still planned for the carts, in one place.</strong> These sections used
-    to live on the main <a href="roadmap.html">roadmap</a> and were moved here whole, so that
-    what the six vehicles do, how they are built and what is still planned for them are read
-    together. Both are changes to the <em>vehicle</em>; the largest planned cart change of all
-    lives on a page of its own, and is at the foot of this tab.
+    <strong>Everything still planned for the carts, in one place.</strong> The main roadmap was
+    split up; this tab keeps the vehicle work together. The biggest planned change is a shared
+    cart-and-jump bench, followed by draught teams and a vardo.
 </p>
 
 <hr>
+
+<h2 id="bench">Cart and jump bench &mdash; piece-by-piece materials</h2>
+
+<p>
+    Build each cart or jump from its own materials: a wood per part, then paint or dye layered on
+    top. This matches the jump model already in place, where a single item carries a material set,
+    and it removes the baked per-wood cart recipes that currently have to stay in sync with
+    <code>compat/GeneratedCarts</code>.
+</p>
+<p>
+    The current cart model is locked to a registry id (<code>oak_wagon</code>,
+    <code>biomesoplenty_maple_plow</code>, one item per wood and kind), so a piece-by-piece design
+    has to move those values onto <strong>stack components and entity data</strong> rather than a
+    permanent item id. The full plan remains on
+    <a href="cart-bench.html#cart-bench-carts">the cart and jump bench</a>.
+</p>
 
 <h2 id="draught-teams">Draught teams &mdash; more than one horse to a vehicle</h2>
 
