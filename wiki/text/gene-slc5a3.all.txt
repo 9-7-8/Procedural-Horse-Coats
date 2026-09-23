@@ -1,0 +1,5 @@
+SLC5A3 (foal immunodeficiency syndrome)
+(Natural gene / health)
+A recessive lethal that gives you nothing to see. The foal is born looking perfectly healthy, runs with its dam for weeks, and then fails as the antibodies it borrowed from her run out and its own never arrive.
+
+Natural gene / health SLC5A3 (foal immunodeficiency syndrome) A recessive lethal that gives you nothing to see. The foal is born looking perfectly healthy, runs with its dam for weeks, and then fails as the antibodies it borrowed from her run out and its own never arrive. PLOD1 (WFFS) PRKDC (SCID) The trait system Source: common/genetics/genes/Slc5a3Gene.java

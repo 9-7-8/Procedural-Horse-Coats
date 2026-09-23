@@ -1,0 +1,5 @@
+Tack Dyeing Bench
+(Block / tack)
+A saddler’s bench. It dyes a saddle’s seat , its bridle and its metal fittings separately, does the same three-way job on leather horse armour , and one day will cut a banner into a saddle pad. Two horses need not look alike.
+
+Block / tack Tack Dyeing Bench A saddler’s bench. It dyes a saddle’s seat , its bridle and its metal fittings separately, does the same three-way job on leather horse armour , and one day will cut a banner into a saddle pad. Two horses need not look alike. It used to be called the Equestrian Bench Renamed on 2026-09-18, because the old name said nothing about what the block does. Only the name changed. The id is still horsegenetics:equestrian_bench — and so are the class names, the recipe, the loot table and this page’s own filename — so benches already placed in a world, and anything pointing at the id, carry on working. Renaming the id would have meant re-baking the barn structure NBT and the recipe reference for a change players see as one word, which was not worth it.

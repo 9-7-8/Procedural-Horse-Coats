@@ -1,0 +1,5 @@
+Potion milk
+(Magical gene / no coat effect)
+A mare who can be milked into a glass bottle rather than a bucket, and hands back a potion. One allele per effect. It does not touch the ordinary milk locus — a horse can have both, and which you get depends on what you are holding.
+
+Magical gene / no coat effect Potion milk A mare who can be milked into a glass bottle rather than a bucket, and hands back a potion. One allele per effect. It does not touch the ordinary milk locus — a horse can have both, and which you get depends on what you are holding. Milk Magic milk volume Lycan What to check in-game Source: common/genetics/genes/PotionMilkGene.java

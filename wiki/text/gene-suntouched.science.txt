@@ -1,0 +1,5 @@
+Suntouched
+(Magical gene / phase 3 + effects)
+A horse lit from within — molten-gold mane and tail that stay bright in the dark, and a body that casts light like a torch. It sheds a slow drift of gold sparks as it stands or moves. Suntouched is a data-driven gene — a JSON file, not a Java class — and it is the worked example for the glow effect verb .
+
+Not modelled yet One gold, one strength; no per-horse variation and no allelic series (rose-gold / white-gold / ember). The dynamic light is a trailing minecraft:light block, not a proper moving light source — it lags a fast gallop and can’t light a spot already occupied by a block. A mixin-based light would be smoother. The glow is on all the time. A when: { flag: "night" } or { flag: "sky_visible" } gate would make it a day/night trait — the light block clears within a tick of when going false. The gene creator cannot edit an effects block — this one was hand-written.

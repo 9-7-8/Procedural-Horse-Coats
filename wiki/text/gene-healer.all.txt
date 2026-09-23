@@ -1,0 +1,5 @@
+Healer
+(Magical gene / phase 3)
+A horse that mends the people standing next to it, and carries a red stripe down the middle of its mane that says so. Recessive, so about one wild horse in a hundred and twenty is one — and the sixth of the population carrying a single copy looks like every other horse.
+
+Magical gene / phase 3 Healer A horse that mends the people standing next to it, and carries a red stripe down the middle of its mane that says so. Recessive, so about one wild horse in a hundred and twenty is one — and the sixth of the population carrying a single copy looks like every other horse. The healing verb Mane colour Horse care — the non-genetic healing gate What to check in-game Source: common/genetics/genes/HealerGene.java

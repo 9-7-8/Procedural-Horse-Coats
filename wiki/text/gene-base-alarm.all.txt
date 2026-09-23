@@ -1,0 +1,5 @@
+Base alarm
+(Magical gene / no coat effect)
+It whinnies when something hostile comes near. Not near your base — near the horse , which is why where you stable one is the whole of how you use it.
+
+Magical gene / no coat effect Base alarm It whinnies when something hostile comes near. Not near your base — near the horse , which is why where you stable one is the whole of how you use it. Meowing Holy ward Singer What to check in-game Source: common/genetics/genes/BaseAlarmGene.java

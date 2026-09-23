@@ -1,0 +1,5 @@
+Magic day watch
+(Magical gene / no coat effect)
+What the horse does about you while the sun is up — the daylight twin of magic night watch . The same five-rung ladder from staring through walls to standing directly behind you, and the same silence on its feet. After dark it is an ordinary horse.
+
+Gene key horsegenetics.magic_day_watch Alleles the night watch's five tokens, plus n Priority MagicDayWatchGene.PRIORITY — the magical behaviour band Reaches the game as a day_watch effect In the wild carriers only, WILD_EACH_PERCENT each; the rest n/n Coat effect none, ever Newly built, not yet play-tested It reuses NightWatchGoal unchanged — the goal never knew it was night, only which ability the handler gave it. Checklist on the Verification tab .

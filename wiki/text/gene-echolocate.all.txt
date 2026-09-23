@@ -1,0 +1,5 @@
+Echolocate
+(Magical gene / no coat effect)
+Every so often the horse makes a sound no horse should make, and for a moment you can see everything alive around you — through the walls, through the dark, out to a radius written on the allele copy.
+
+Magical gene / no coat effect Echolocate Every so often the horse makes a sound no horse should make, and for a moment you can see everything alive around you — through the walls, through the dark, out to a radius written on the allele copy. Meowing Singer Eyesight locus What to check in-game Source: common/genetics/genes/EcholocateGene.java

@@ -1,0 +1,5 @@
+Egg layer
+(Magical gene / no coat effect)
+The horse lays. An egg, at first — but the locus is built to take an allele for any item in the game, and the egg is only the one everybody thinks of first. It drops on the ground where the horse is standing, on a timer.
+
+Magical gene / no coat effect Egg layer The horse lays. An egg, at first — but the locus is built to take an allele for any item in the game, and the egg is only the one everybody thinks of first. It drops on the ground where the horse is standing, on a timer. Magic item drop Milk Lycan What to check in-game Source: common/genetics/genes/EggLayerGene.java

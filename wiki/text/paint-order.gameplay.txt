@@ -1,0 +1,5 @@
+The paint order
+(Reference / what covers what)
+Every gene that paints a coat, stacked in the order the composer applies it — the last thing painted at the top . Scroll down and you are working back through the horse: the modifiers that read what is already there, then the markings, then the white, then the pigment underneath all of it, ending at Agouti. A gene higher up this page covers a gene lower down.
+
+The stack Each entry is the gene as the icon baker photographs it, its priority number, and which phase it paints in. Click one for its page.

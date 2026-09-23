@@ -1,0 +1,5 @@
+Diet — what the horse will eat
+(Natural gene / paints nothing)
+A wild type that eats what any horse eats, and a set of narrow diets — raw meat, fish, wheat, cake, potions, lava, one metal, one gem, and blood — each needing two identical copies to show. A narrow diet refuses almost everything, and what it does accept feeds it far better: a single gold bar takes a metal-eater to full health however hurt it was.
+
+Natural gene / paints nothing Diet — what the horse will eat A wild type that eats what any horse eats, and a set of narrow diets — raw meat, fish, wheat, cake, potions, lava, one metal, one gem, and blood — each needing two identical copies to show. A narrow diet refuses almost everything, and what it does accept feeds it far better: a single gold bar takes a metal-eater to full health however hurt it was. Horse care — gated healing and bond Items Carrots & splices The genetics model Source: common/genetics/genes/DietGene.java , common/genetics/Diet.java , common/genetics/HorseDiet.java , neoforge/server/DietFoods.java , neoforge/server/HorseDietHandler.java

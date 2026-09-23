@@ -1,0 +1,5 @@
+Hydrophobic
+(Magical gene / no coat effect)
+It will not be ridden into water. Take one in past its knees and it throws you and makes for the nearest shore — which is what every horse in vanilla Minecraft does, and which this mod otherwise quietly fixed for you.
+
+Magical gene / no coat effect Hydrophobic It will not be ridden into water. Take one in past its knees and it throws you and makes for the nearest shore — which is what every horse in vanilla Minecraft does, and which this mod otherwise quietly fixed for you. Waterborn Ocean-born Magic swim speed What to check in-game Source: common/genetics/genes/HydrophobicGene.java

@@ -1,0 +1,5 @@
+LUT
+(Magical gene / swaps the colour LUT)
+A horse that resolves its colours against an unnatural gradient . Every melanin gene does exactly what it always does — but instead of the warm red/orange/brown lookup, a horse homozygous for a variant allele reads its pigment off a different palette entirely. There are two: Blupnk is blue and pink, Grnpnk green through pink. Dreamier coat colours from the same genotype — and a horse needs two copies of the same one , so a Blupnk beside a Grnpnk is an ordinary horse.
+
+Crossing two of them Two of the same, or nothing A LUT allele only does anything when the horse carries two identical copies of it. One copy is a carrier and shows nothing. When there is more than one variant, two different variant alleles will also be silent — a mixed pair is not “half of each palette”, it is the natural gradient. This is what makes an unnatural coat a breeding project rather than a lucky catch, and it is the same shape the milk, healer and magic body-stat loci use. Its gene carrot

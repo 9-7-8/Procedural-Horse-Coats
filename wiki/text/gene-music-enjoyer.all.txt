@@ -1,0 +1,5 @@
+Music enjoyer
+(Magical gene / no coat effect)
+Play a record near this horse and it will stand there giving off hearts and slowly deciding it likes you. One of the few ways to build bond that does not involve feeding, riding or waiting.
+
+Magical gene / no coat effect Music enjoyer Play a record near this horse and it will stand there giving off hearts and slowly deciding it likes you. One of the few ways to build bond that does not involve feeding, riding or waiting. Bond and horse care Food preference Singer What to check in-game Source: common/genetics/genes/MusicEnjoyerGene.java

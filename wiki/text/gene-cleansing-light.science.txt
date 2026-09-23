@@ -1,0 +1,5 @@
+Cleansing light
+(Magical gene / no coat effect)
+An aura that burns the undead. Zombies, skeletons, drowned and anything else that counts take steady damage while they stand near the horse, out to a radius written on the allele copy.
+
+A gene that wins fights and loses value The loot cost is what stops this being simply the best combat gene. It draws a real line between the horse that keeps you alive and the horse that makes you rich, and forces a choice about which one you are riding today — which is more interesting than an aura that does both.

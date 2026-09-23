@@ -1,0 +1,5 @@
+Dun
+(Natural gene / phase 1)
+Real-horse TBX3 , and the mod’s second three-allele locus. Two effects that come apart: a body dilution that thins black pigment and leaves red almost alone, and primitive markings — a dorsal stripe into the tail, plus leg bars, a shoulder bar and a face mask on the horses that draw them — that read dark because everything around them got lighter. The third allele is the one that carries the markings without the dilution.
+
+Natural gene / phase 1 Dun Real-horse TBX3 , and the mod’s second three-allele locus. Two effects that come apart: a body dilution that thins black pigment and leaves red almost alone, and primitive markings — a dorsal stripe into the tail, plus leg bars, a shoulder bar and a face mask on the horses that draw them — that read dark because everything around them got lighter. The third allele is the one that carries the markings without the dilution. MATP Agouti Grey Body space & regions The coat pipeline Source: common/genetics/genes/DunGene.java , common/coat/pattern/CoatRegions.java

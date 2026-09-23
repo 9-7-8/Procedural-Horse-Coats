@@ -1,0 +1,5 @@
+Fertility — how readily a horse breeds
+(Natural gene / paints nothing)
+Three alleles. n is ordinary. Two copies of sf make every breeding half as likely to take. tw makes a pregnancy more likely to be twins. Every copy also carries a small number that nudges a mare’s odds. What a pregnancy is, and when a mare can have one, is on fertility & gestation .
+
+Natural gene / paints nothing Fertility — how readily a horse breeds Three alleles. n is ordinary. Two copies of sf make every breeding half as likely to take. tw makes a pregnancy more likely to be twins. Every copy also carries a small number that nudges a mare’s odds. What a pregnancy is, and when a mare can have one, is on fertility & gestation . Fertility & gestation Breeding & pedigree Diet Source: common/genetics/genes/FertilityGene.java .

@@ -1,0 +1,5 @@
+The spawn eggs
+(Item group / creative)
+Three eggs: one opens a full genome editor, one gives you a foundation horse of a chosen breed, and one holds an exact horse you built earlier.
+
+Item group / creative The spawn eggs Three eggs: one opens a full genome editor, one gives you a foundation horse of a chosen breed, and one holds an exact horse you built earlier. The horse designer Breeds All items client/CustomHorseSpawnScreen , data/loot/AddBreedSpawnEggModifier , item/ModCreativeTabs .

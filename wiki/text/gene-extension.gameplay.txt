@@ -1,0 +1,5 @@
+Extension
+(Natural gene / phase 1)
+Can this horse make black pigment at all? E says yes and does nothing. ee restricts black to zero everywhere, and the horse is a chestnut. It is the first gene in naturalOrder() because it decides which pigment the rest of the pipeline has to work with.
+
+Crossing two of them What it does E_ — the horse can make eumelanin. No coat effect at all; isVisible returns false , so the gene is skipped entirely. ee — black is set to 0 on every texel . Only red pheomelanin survives, so every subsequent gene samples the gradient’s left edge and the horse is a chestnut. common/genetics/genes/ExtensionGene.java @Override public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) { if (!isChestnut(pair)) { return null; } PigmentField f = coat.mutableCopy(); CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> field.setBlack(px, py, 0f)); return f; } Its gene carrot

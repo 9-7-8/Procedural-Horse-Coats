@@ -1,0 +1,5 @@
+B4GALT7 (Friesian dwarfism)
+(Natural gene / health)
+Friesian dwarfism — and the one disorder in the mod a horse lives a full life with. Short, splayed limbs and a weak ribcage on a normal-sized head.
+
+Natural gene / health B4GALT7 (Friesian dwarfism) Friesian dwarfism — and the one disorder in the mod a horse lives a full life with. Short, splayed limbs and a weak ribcage on a normal-sized head. ACAN HMGA2 (pony) The trait system Source: common/genetics/genes/B4galt7Gene.java

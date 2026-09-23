@@ -1,0 +1,5 @@
+Transfer papers
+(Item / trading)
+How a horse changes hands. Sign a paper against a horse you own and whoever holds the paper can claim that horse — and the paper is drawn as the horse itself, so you can see which one it is.
+
+Item / trading Transfer papers How a horse changes hands. Sign a paper against a horse you own and whoever holds the paper can claim that horse — and the paper is drawn as the horse itself, so you can see which one it is. Villagers & transfer papers All items client/TransferDeedRenderer ; components paper_bearer and horse_deed .

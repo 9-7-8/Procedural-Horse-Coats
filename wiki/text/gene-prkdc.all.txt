@@ -1,0 +1,5 @@
+PRKDC (SCID)
+(Natural gene / health)
+Severe combined immunodeficiency. An affected foal is born with no adaptive immune system at all.
+
+Natural gene / health PRKDC (SCID) Severe combined immunodeficiency. An affected foal is born with no adaptive immune system at all. PLOD1 MET The trait system Source: common/genetics/genes/PrkdcGene.java

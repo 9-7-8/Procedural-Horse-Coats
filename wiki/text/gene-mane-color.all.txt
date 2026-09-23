@@ -1,0 +1,5 @@
+Mane colour
+(Magical gene / phase 3)
+A mane in any colour there is — solid, or banded, or both at once in two different colours . The colour is not a property of the allele but of the allele copy , drawn from a continuous hue circle, so it travels with the copy and a foal inherits its parent’s exact shade.
+
+Magical gene / phase 3 Mane colour A mane in any colour there is — solid, or banded, or both at once in two different colours . The colour is not a property of the allele but of the allele copy , drawn from a continuous hue circle, so it travels with the copy and a foal inherits its parent’s exact shade. Tail colour Healer — the other mane gene Suntouched What to check in-game Source: common/genetics/genes/ManeColorGene.java , HairColorGene.java , coat/pattern/HairPattern.java

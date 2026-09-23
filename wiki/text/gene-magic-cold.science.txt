@@ -1,0 +1,5 @@
+Magic cold tolerance
+(Magical gene / no coat effect)
+Better or worse in a cold biome. A tolerant allele, a sensitive allele and a neutral wild type; how much each copy is worth, and whether it goes to speed, jump or both, is written on the copy. Its twin is magic heat tolerance .
+
+What it stands for Breeds made in hard winters show it. Icelandic horses, Fjords, Shetlands and Exmoors grow a dense double coat, and the Exmoor adds a hooded brow and a fan of hair at the root of the tail that turns snow and rain. They are compact, which keeps heat in, and they are easy keepers that hold condition on poor winter forage. Przewalski's horse lives through Mongolian winters far below freezing. The Thoroughbred, fine-coated and thin-skinned, is the usual example of a horse that needs a rug. As with heat, real cold tolerance is coat, body shape and metabolism, not one gene. The mod makes it one magical locus so it can be bred for, with breed shares that follow each breed's history ( the breeds page ). The magnitude and the speed/jump split are game choices.

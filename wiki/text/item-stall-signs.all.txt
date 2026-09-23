@@ -1,0 +1,5 @@
+Stall signs
+(Item / stabling)
+A sign you bind to one horse and then hang on a wall, which marks the room behind that wall as that horse’s stall.
+
+Item / stabling Stall signs A sign you bind to one horse and then hang on a wall, which marks the room behind that wall as that horse’s stall. Tickets The horse dimension & pens All items item/StallSignItem , server/StallDetector , data/StallData .

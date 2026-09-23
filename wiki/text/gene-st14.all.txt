@@ -1,0 +1,5 @@
+ST14 (naked foal syndrome)
+(Natural gene / health)
+Naked foal syndrome — the one health gene that is supposed to be a coat gene as well. An affected foal is born near-hairless.
+
+Natural gene / health ST14 (naked foal syndrome) Naked foal syndrome — the one health gene that is supposed to be a coat gene as well. An affected foal is born near-hairless. PLOD1 The coat pipeline Why the coat is not drawn Source: common/genetics/genes/St14Gene.java

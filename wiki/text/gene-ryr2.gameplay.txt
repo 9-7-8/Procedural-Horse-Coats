@@ -1,0 +1,5 @@
+RYR2 (jumping)
+(Natural gene / performance)
+Jumping ability — the locus that moves a stat nothing in this mod tracked before. Each J copy is worth 0.09 jump strength on a baseline of 0.50 .
+
+What it does What it does: makes the horse jump higher, and nothing else. It is the only gene that touches jump. Two copies are worth noticeably more than one, so it is worth breeding to fix. Crossing two of them Its gene carrot

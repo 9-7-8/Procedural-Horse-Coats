@@ -1,0 +1,5 @@
+MSTN (myostatin)
+(Natural gene / performance)
+The speed gene, and the first gene in this mod with no coat effect at all . Codominant: each C copy buys movement speed and pays for it in hearts, so the heterozygote is genuinely the midpoint of the two homozygotes rather than a copy of one of them.
+
+Natural gene / performance MSTN (myostatin) The speed gene, and the first gene in this mod with no coat effect at all . Codominant: each C copy buys movement speed and pays for it in hearts, so the heterozygote is genuinely the midpoint of the two homozygotes rather than a copy of one of them. PDK4 CKM The trait system Source: common/genetics/genes/MstnGene.java

@@ -1,0 +1,5 @@
+PLOD1 (fragile foal syndrome)
+(Natural gene / health)
+Fragile foal syndrome (FFS1), a collagen defect: the skin tears at a touch and the joints will not hold. The foal is born alive and does not survive it.
+
+Natural gene / health PLOD1 (fragile foal syndrome) Fragile foal syndrome (FFS1), a collagen defect: the skin tears at a touch and the joints will not hold. The foal is born alive and does not survive it. MET EDNRB (lethal white) The trait system Source: common/genetics/genes/Plod1Gene.java

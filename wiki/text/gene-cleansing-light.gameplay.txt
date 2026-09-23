@@ -1,0 +1,5 @@
+Cleansing light
+(Magical gene / no coat effect)
+An aura that burns the undead. Zombies, skeletons, drowned and anything else that counts take steady damage while they stand near the horse, out to a radius written on the allele copy.
+
+Built, and not yet seen in game The gene, its inheritance and its founder table exist and are covered by the test suite; the translator that turns it into behaviour was written against the 26.1.2 sources and is flagged unverified in its own comments. Nothing on this page has been watched happening to a horse. What to look at, and what is most likely to be wrong, is on the Verification tab . What it does Combination Outcome Cln/Cln undead within the radius take damage on a slow beat anything else nothing It costs you the drops This is the important part and it is deliberate. A mob killed by the horse’s aura was not killed by you, so you get no experience and none of the drops that only fall to a player kill. Ride into a group of zombies with this gene and you will win, and you will come away with nothing. It is a defensive gene, not a farming one. If you want the loot, hit them yourself first. Health None to the horse.

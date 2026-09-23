@@ -1,0 +1,5 @@
+Milk
+(Magical gene / no coat effect)
+What comes out when you put a bucket under the horse. Ordinarily milk, from a mare, as everywhere else in the game — but two copies of one magical allele and any grown horse fills the bucket with water , and two of the other and it fills with lava . One of each and there is no foal at all.
+
+Magical gene / no coat effect Milk What comes out when you put a bucket under the horse. Ordinarily milk, from a mare, as everywhere else in the game — but two copies of one magical allele and any grown horse fills the bucket with water , and two of the other and it fills with lava . One of each and there is no foal at all. MET — the other embryonic lethal The yield verb Verdant — the other three-recessive locus What to check in-game Source: common/genetics/genes/MilkGene.java

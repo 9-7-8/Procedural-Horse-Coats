@@ -1,0 +1,5 @@
+Magic body size
+(Magical gene / no coat effect)
+The magical version of LCORL and HMGA2 , and the first of the five magical body-stat genes — size, speed , health , jump and pull . Most horses in the world carry it , with one copy, worth about a tenth either way — enough that a paddock has a visible range of sizes and no single horse looks odd. Two copies of the same kind add , and no wild horse is ever born with two.
+
+Magical gene / no coat effect Magic body size The magical version of LCORL and HMGA2 , and the first of the five magical body-stat genes — size, speed , health , jump and pull . Most horses in the world carry it , with one copy, worth about a tenth either way — enough that a paddock has a visible range of sizes and no single horse looks odd. Two copies of the same kind add , and no wild horse is ever born with two. The horse’s body LCORL — the natural height locus HMGA2 — the pony locus What to check in-game Source: common/genetics/genes/MagicSizeGene.java , common/trait/GeneEpigenetics.java

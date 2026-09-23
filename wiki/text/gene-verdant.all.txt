@@ -1,0 +1,5 @@
+Verdant
+(Magical gene / no coat effect)
+A horse that changes the ground it walks on: mycelium, moss or grass, creeping outward from wherever it stands. Three variants at one locus, every one of them needing two of itself — so a mycelium copy beside a moss copy is not half of each, it is nothing at all.
+
+Magical gene / no coat effect Verdant A horse that changes the ground it walks on: mycelium, moss or grass, creeping outward from wherever it stands. Three variants at one locus, every one of them needing two of itself — so a mycelium copy beside a moss copy is not half of each, it is nothing at all. The spread verb Milk — the other mutually-recessive locus Healer — a magical effect you can see What to check in-game Source: common/genetics/genes/VerdantGene.java

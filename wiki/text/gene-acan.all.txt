@@ -1,0 +1,5 @@
+ACAN (chondrodysplastic dwarfism)
+(Natural gene / health)
+Chondrodysplastic dwarfism — six alleles, twenty-one combinations, and the gene that proves the combination table was worth building. A horse is affected when it has no working copy left , which is not the same statement as “it is homozygous”.
+
+Natural gene / health ACAN (chondrodysplastic dwarfism) Chondrodysplastic dwarfism — six alleles, twenty-one combinations, and the gene that proves the combination table was worth building. A horse is affected when it has no working copy left , which is not the same statement as “it is homozygous”. B4GALT7 The genetics model The trait system Source: common/genetics/genes/AcanGene.java

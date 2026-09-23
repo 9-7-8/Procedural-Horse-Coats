@@ -1,0 +1,5 @@
+PPIB (HERDA)
+(Natural gene / health)
+HERDA — hereditary equine regional dermal asthenia. The collagen holding the skin to the horse is faulty, so it splits and scars where a saddle sits. The horse lives; it is just never sound.
+
+Crossing two of them Its gene carrot There is none. A disorder locus sets hasGeneCarrot() false — forcing one onto somebody’s line is hostile — and SpliceSafety keeps it out of the random splice as well, derived from the fact that it declares a non-informational Condition rather than from any hand-written list.

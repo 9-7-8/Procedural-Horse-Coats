@@ -1,0 +1,5 @@
+Food preference
+(Magical gene / no coat effect)
+Every horse with this gene has one food it would rather have than anything else. Feed it that, and you get a short buff and a great deal more bond than the food deserves. It may be a food the horse’s own diet forbids — and the preference wins.
+
+Magical gene / no coat effect Food preference Every horse with this gene has one food it would rather have than anything else. Feed it that, and you get a short buff and a great deal more bond than the food deserves. It may be a food the horse’s own diet forbids — and the preference wins. Diet Bond and horse care Breeds What to check in-game Source: common/genetics/genes/FoodPreferenceGene.java

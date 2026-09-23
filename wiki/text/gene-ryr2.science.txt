@@ -1,0 +1,5 @@
+RYR2 (jumping)
+(Natural gene / performance)
+Jumping ability — the locus that moves a stat nothing in this mod tracked before. Each J copy is worth 0.09 jump strength on a baseline of 0.50 .
+
+Why jump strength exists now and did not before Jump strength was on the “not tracked yet” list for as long as the stats were a random roll off the parents, because there was nothing sensible to roll it from . With the body resolved out of the genotype it costs one gene and one attribute write, and it gives a breeding programme a third axis to trade against speed. The two size loci nudge it in both directions as well — a tall horse clears more and a pony clears less — so the range across the whole model runs about 0.46 to 0.72 , inside vanilla’s 0.4 – 0.8 .

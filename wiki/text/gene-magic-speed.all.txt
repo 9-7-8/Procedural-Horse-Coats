@@ -1,0 +1,5 @@
+Magic speed
+(Magical gene / no coat effect)
+The magical version of the three natural speed loci — MSTN , PDK4 and CKM . One of the five magical body-stat genes — size , speed , health , jump and pull — and like the other three multipliers, most wild horses carry a copy , worth about a tenth either way. Two copies of the same kind add , and no wild horse is ever born with two. (Pull is the odd one out: an additive score rather than a multiplier, and with no vampiric allele.)
+
+Magical gene / no coat effect Magic speed The magical version of the three natural speed loci — MSTN , PDK4 and CKM . One of the five magical body-stat genes — size , speed , health , jump and pull — and like the other three multipliers, most wild horses carry a copy , worth about a tenth either way. Two copies of the same kind add , and no wild horse is ever born with two. (Pull is the odd one out: an additive score rather than a multiplier, and with no vampiric allele.) The horse’s body Magic body size MSTN — the natural speed trade What to check in-game Source: common/genetics/genes/MagicSpeedGene.java , common/genetics/genes/AbstractMagicStatGene.java

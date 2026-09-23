@@ -1,0 +1,5 @@
+Champagne
+(Natural gene / phase 1)
+One outcome for both variant combinations — it does not read its own dose : it cuts black hard, barely touches red, and feeds part of the removed black back in as red. Because it reads the current pigment rather than a colour name, one rule gives gold, classic and amber champagne for free. It is also the simplest gene in the mod — a good first read.
+
+Natural gene / phase 1 Champagne One outcome for both variant combinations — it does not read its own dose : it cuts black hard, barely touches red, and feeds part of the removed black back in as red. Because it reads the current pigment rather than a colour name, one rule gives gold, classic and amber champagne for free. It is also the simplest gene in the mod — a good first read. MATP (cream / pearl) Agouti Writing a gene Why dilute() exists Source: common/genetics/genes/ChampagneGene.java

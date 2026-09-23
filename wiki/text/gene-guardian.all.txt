@@ -1,0 +1,5 @@
+Guardian
+(Magical gene / no coat effect)
+It does not start anything. But whatever hurts you, within sixteen blocks, has a horse to deal with — and it holds its ground rather than chasing.
+
+Magical gene / no coat effect Guardian It does not start anything. But whatever hurts you, within sixteen blocks, has a horse to deal with — and it holds its ground rather than chasing. Aggression Ender echo Bond and horse care What to check in-game Source: common/genetics/genes/GuardianGene.java

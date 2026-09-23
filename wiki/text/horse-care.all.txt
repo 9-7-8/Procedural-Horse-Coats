@@ -1,0 +1,5 @@
+Horse care: gated healing, bond & herds
+(Gameplay / non-genetic)
+Three non-genetic systems that apply to every horse and share one slow tick ( server/HorseCareHandler ): an invisible hunger that pays for healing beside water, a per-horse bond number that changes how a horse behaves toward its owner, and an emergent herd grouping. First slice built 2026-09-02, not play-tested — checklist in the Verification tab . This page is the single source of truth for the machinery; what is still missing is on the roadmap tab .
+
+Gameplay / non-genetic Horse care: gated healing, bond & herds Three non-genetic systems that apply to every horse and share one slow tick ( server/HorseCareHandler ): an invisible hunger that pays for healing beside water, a per-horse bond number that changes how a horse behaves toward its owner, and an emergent herd grouping. First slice built 2026-09-02, not play-tested — checklist in the Verification tab . This page is the single source of truth for the machinery; what is still missing is on the roadmap tab . Breeds — bands Breeding & pedigree What to check in-game Source: neoforge-26.1.2/{data,server}/

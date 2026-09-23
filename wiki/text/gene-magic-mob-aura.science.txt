@@ -1,0 +1,5 @@
+Magic mob aura
+(Magical gene / no coat effect)
+How everything else in the world feels about the horse. A warding horse keeps mobs outside about ten blocks; a baiting one makes every hostile that can see it pick it over anything else in range, including its rider. Both take two copies, and one of each cancels outright .
+
+Why both alleles are on one locus They could have been two genes, and then a horse could be both, and being both means nothing. Putting them at one locus makes them alternatives — a herd has a warding line and a baiting line and they are in competition — and it gives the mod a compound heterozygote that says something true instead of something arbitrary. A gene that is worse for the horse Baiting is the clearest case in the mod of a gene bred for the owner’s benefit at the horse’s expense, and it is the reason the locus is worth having beside health and fighting : on its own it is a way to lose a horse, and it only becomes a strategy when three loci are bred together.

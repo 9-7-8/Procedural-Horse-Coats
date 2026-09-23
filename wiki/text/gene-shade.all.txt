@@ -1,0 +1,5 @@
+Shade — how far black spreads over a bay
+(Natural gene / paints nothing itself)
+The regulatory locus beside agouti. It draws no pixel of its own and every horse carries it, but on a bay its dosage — plus whether extension is E / E and whether agouti is A / a — decides whether that bay is a blood bay , an ordinary bay , a liver bay or a seal brown .
+
+Natural gene / paints nothing itself Shade — how far black spreads over a bay The regulatory locus beside agouti. It draws no pixel of its own and every horse carries it, but on a bay its dosage — plus whether extension is E / E and whether agouti is A / a — decides whether that bay is a blood bay , an ordinary bay , a liver bay or a seal brown . Agouti — the four bays it decides between Extension Leopard complex — the other modifier loci The genetics model Source: common/genetics/genes/ShadeGene.java , common/genetics/BayShade.java

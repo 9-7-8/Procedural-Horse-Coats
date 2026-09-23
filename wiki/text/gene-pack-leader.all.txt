@@ -1,0 +1,5 @@
+Leader of the pack
+(Magical gene / no coat effect)
+Something follows this horse. Which something depends on the allele — there is one for every non-hostile mob in the game — and they trail it within sixteen blocks wherever it goes. Two copies of the same allele or nothing .
+
+Magical gene / no coat effect Leader of the pack Something follows this horse. Which something depends on the allele — there is one for every non-hostile mob in the game — and they trail it within sixteen blocks wherever it goes. Two copies of the same allele or nothing . Lycan Magic mob aura Spawner What to check in-game Source: common/genetics/genes/PackLeaderGene.java

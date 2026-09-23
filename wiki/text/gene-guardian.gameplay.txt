@@ -1,0 +1,5 @@
+Guardian
+(Magical gene / no coat effect)
+It does not start anything. But whatever hurts you, within sixteen blocks, has a horse to deal with — and it holds its ground rather than chasing.
+
+Built, and not yet seen in game The gene, its inheritance and its founder table exist and are covered by the test suite; the translator that turns it into behaviour was written against the 26.1.2 sources and is flagged unverified in its own comments. Nothing on this page has been watched happening to a horse. What to look at, and what is most likely to be wrong, is on the Verification tab . What it does Combination Outcome Grd/Grd , tamed attacks whatever damaged its owner, within 16 blocks Grd/Grd , untamed nothing — it has no owner to defend anything else nothing How it differs from a gladiator Aggression attacks anything hostile that comes close, whether or not it concerns you, and stops when you mount. This attacks only what has actually hurt you , and works while you are riding. One is a guard dog; this is a bodyguard. Health It fights on your behalf, so it takes damage on your behalf. The same pairing with magic health applies.

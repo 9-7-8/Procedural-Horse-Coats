@@ -1,0 +1,5 @@
+The leopard complex (appaloosa)
+(Natural gene / phase 1 + overlay)
+Real-horse TRPM1 ( LP ) plus two modifier loci, PATN1 and PATN2 , and the only gene in the model that reads other loci to decide what it paints . LP alone gives the appaloosa characteristics — roaning that spares the bony parts, a scatter of white spots, striped hooves, a white-rimmed eye. The bold patterns — leopard, fewspot, spotted blanket, snowcap — come from the modifiers, which mean nothing on a horse with no LP .
+
+Natural gene / phase 1 + overlay The leopard complex (appaloosa) Real-horse TRPM1 ( LP ) plus two modifier loci, PATN1 and PATN2 , and the only gene in the model that reads other loci to decide what it paints . LP alone gives the appaloosa characteristics — roaning that spares the bony parts, a scatter of white spots, striped hooves, a white-rimmed eye. The bold patterns — leopard, fewspot, spotted blanket, snowcap — come from the modifiers, which mean nothing on a horse with no LP . KIT (white spotting) EDNRB (frame overo) Tobiano Roan Genetics model Source: common/genetics/genes/LeopardGene.java , Patn1Gene.java , Patn2Gene.java , AppaloosaModifierGene.java

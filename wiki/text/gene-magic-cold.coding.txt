@@ -1,0 +1,5 @@
+Magic cold tolerance
+(Magical gene / no coat effect)
+Better or worse in a cold biome. A tolerant allele, a sensitive allele and a neutral wild type; how much each copy is worth, and whether it goes to speed, jump or both, is written on the copy. Its twin is magic heat tolerance .
+
+Gene key horsegenetics.magic_cold Alleles Ctol Csen n Inheritance codominant; both copies add, Csen counting negative Epigenetic, per copy delta (the amount) and speed_share (1 all speed, 0 all jump) Condition the cold_biome world flag Class MagicColdGene , on AbstractClimateGene How it reaches the game The same shape as heat tolerance , gated on cold_biome instead. That flag is Biome.coldEnoughToSnow at the horse's own position, the game's own "snow falls here" test, which is why a snowy peak in a temperate biome counts. The existing snowing flag is the same test with isRaining added. The API use was type-checked against the running client, not run.

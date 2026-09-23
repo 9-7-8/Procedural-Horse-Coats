@@ -1,0 +1,5 @@
+B4GALT7 (Friesian dwarfism)
+(Natural gene / health)
+Friesian dwarfism — and the one disorder in the mod a horse lives a full life with. Short, splayed limbs and a weak ribcage on a normal-sized head.
+
+Crossing two of them What is drawn, and what is not The real defect hits the long bones and the chest and leaves the skull almost alone. The mod does not draw that, and will not: Attributes.SCALE is one number for the whole entity, and per-part scaling would mean owning the horse model rather than borrowing the vanilla one. So it renders as an overall three-quarter-size horse, with the ribcage weakness paid for in hearts. This is the shipped shape, not a gap — the per-part version was settled against on 2026-09-21 and would only ever come back on a custom horse model. Its gene carrot A server may switch the resizing off This locus is one of the ones that moves a horse’s size , and vanilla scales the hitbox from the model — so a world that would rather have tack and hitboxes sit exactly where vanilla puts them can set body.size false. The gene is still inherited, still reported and still worth breeding for; only the entity is held at 1.0×.

@@ -1,0 +1,5 @@
+Holy ward
+(Magical gene / no coat effect)
+Hostile mobs do not appear near this horse. Not pushed away — they never spawn in the first place, out to a radius written on the allele copy, at least eight blocks and never more than sixteen.
+
+Magical gene / no coat effect Holy ward Hostile mobs do not appear near this horse. Not pushed away — they never spawn in the first place, out to a radius written on the allele copy, at least eight blocks and never more than sixteen. Intimidating Spawner Cleansing light What to check in-game Source: common/genetics/genes/HolyWardGene.java

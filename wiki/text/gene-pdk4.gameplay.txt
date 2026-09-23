@@ -1,0 +1,5 @@
+PDK4
+(Natural gene / performance)
+Racing performance, as one atomic gene . Each A copy is worth 0.018 movement speed, and nothing else.
+
+What it does What it does: makes the horse faster, and nothing else. It changes no part of how the horse looks. It is one of three speed genes, so a genuinely fast horse wants all of them. Crossing two of them Its gene carrot

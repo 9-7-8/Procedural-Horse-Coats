@@ -1,0 +1,5 @@
+LCORL / NCAPG (height)
+(Natural gene / body size)
+Body height — the larger of the two size loci, and the first gene in this mod that changes how big a horse is without touching a pixel of its coat.
+
+Why it also moves speed and jump A taller horse covers more ground per stride and clears more. Those side effects are what stop the size loci being pure decoration, and they are what makes HMGA2 ’s pony allele a real trade rather than a strict downgrade. Between this and HMGA2 the healthy size range runs from about 0.88 to 1.10 of a vanilla horse. The dwarfism loci reach further down by multiplying rather than subtracting — see the trait system for why that composition matters.

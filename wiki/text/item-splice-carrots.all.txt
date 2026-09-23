@@ -1,0 +1,5 @@
+The splice carrots
+(Item group / breeding)
+Carrots that add a gene to a foal. One targets a gene you have researched; the others roll one at random, either from the whole pool or from one themed slice of it.
+
+Item group / breeding The splice carrots Carrots that add a gene to a foal. One targets a gene you have researched; the others roll one at random, either from the whole pool or from one themed slice of it. The carrot family & gene database Breeding carrots Research papers All items server/recipe/KnownGeneSpliceRecipe , common/genetics/SpliceSafety.java .

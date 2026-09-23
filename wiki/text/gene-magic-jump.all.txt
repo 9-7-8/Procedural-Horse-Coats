@@ -1,0 +1,5 @@
+Magic jump
+(Magical gene / no coat effect)
+The magical version of the natural jump locus, RYR2 . One of the five magical body-stat genes — size , speed , health , jump and pull — and like the other three multipliers, most wild horses carry a copy , worth about a tenth either way. Two copies of the same kind add , and no wild horse is ever born with two. (Pull is the odd one out: an additive score rather than a multiplier, and with no vampiric allele.)
+
+Magical gene / no coat effect Magic jump The magical version of the natural jump locus, RYR2 . One of the five magical body-stat genes — size , speed , health , jump and pull — and like the other three multipliers, most wild horses carry a copy , worth about a tenth either way. Two copies of the same kind add , and no wild horse is ever born with two. (Pull is the odd one out: an additive score rather than a multiplier, and with no vampiric allele.) The horse’s body Magic body size RYR2 — the natural jump locus What to check in-game Source: common/genetics/genes/MagicJumpGene.java , common/genetics/genes/AbstractMagicStatGene.java

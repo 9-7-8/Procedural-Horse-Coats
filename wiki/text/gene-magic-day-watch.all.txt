@@ -1,0 +1,5 @@
+Magic day watch
+(Magical gene / no coat effect)
+What the horse does about you while the sun is up — the daylight twin of magic night watch . The same five-rung ladder from staring through walls to standing directly behind you, and the same silence on its feet. After dark it is an ordinary horse.
+
+Magical gene / no coat effect Magic day watch What the horse does about you while the sun is up — the daylight twin of magic night watch . The same five-rung ladder from staring through walls to standing directly behind you, and the same silence on its feet. After dark it is an ordinary horse. Magic night watch Aggression The day_watch verb Source: common/genetics/genes/MagicDayWatchGene.java , neoforge/server/NightWatchGoal.java

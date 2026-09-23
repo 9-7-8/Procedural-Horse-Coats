@@ -1,0 +1,5 @@
+Skittishness
+(Magical gene / no coat effect)
+What a horse runs from, and when. The mirror of aggression , allele for allele — and being ridden makes no difference to it at all.
+
+Magical gene / no coat effect Skittishness What a horse runs from, and when. The mirror of aggression , allele for allele — and being ridden makes no difference to it at all. Aggression Passification Magic night watch What to check in-game Source: common/genetics/genes/SkittishGene.java

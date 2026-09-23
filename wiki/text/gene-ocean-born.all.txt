@@ -1,0 +1,5 @@
+Ocean-born
+(Magical gene / no coat effect)
+Neither the horse nor its rider can drown. That is all it does, and it is deliberately all it does — the four other water loci are staying separate, and this is the one piece none of them covered.
+
+Magical gene / no coat effect Ocean-born Neither the horse nor its rider can drown. That is all it does, and it is deliberately all it does — the four other water loci are staying separate, and this is the one piece none of them covered. Waterborn Magic water breathing Magic swim speed What to check in-game Source: common/genetics/genes/OceanBornGene.java

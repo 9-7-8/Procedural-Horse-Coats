@@ -1,0 +1,5 @@
+Fireproof
+(Magical gene / no coat effect)
+A horse that does not burn, and neither do you while you are on it. It swims through lava rather than walking on top of it — submerged, slow, and entirely unbothered.
+
+Magical gene / no coat effect Fireproof A horse that does not burn, and neither do you while you are on it. It swims through lava rather than walking on top of it — submerged, slow, and entirely unbothered. Bird boned Ocean-born Waterborn What to check in-game Source: common/genetics/genes/FireproofGene.java

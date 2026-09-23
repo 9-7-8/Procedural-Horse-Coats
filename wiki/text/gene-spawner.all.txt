@@ -1,0 +1,5 @@
+Spawner
+(Magical gene / a faint head and mane tint)
+Feed the horse anything it eats and two of a particular creature appear nearby — every meal. Which creature depends on the allele, and there is one for every mob in the game. The only outward sign is a pink tinge through the head and mane.
+
+Magical gene / a faint head and mane tint Spawner Feed the horse anything it eats and two of a particular creature appear nearby — every meal. Which creature depends on the allele, and there is one for every mob in the game. The only outward sign is a pink tinge through the head and mane. Lycan Leader of the pack Holy ward What to check in-game Source: common/genetics/genes/SpawnerGene.java

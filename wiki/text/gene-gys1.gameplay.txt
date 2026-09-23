@@ -1,0 +1,5 @@
+GYS1 (PSSM1)
+(Natural gene / health)
+Type 1 polysaccharide storage myopathy. The muscle stores sugar it cannot burn and ties up under work. Neither combination is lethal.
+
+Crossing two of them Its gene carrot There is none. A disorder locus sets hasGeneCarrot() false — forcing one onto somebody’s line is hostile — and SpliceSafety keeps it out of the random splice as well, derived from the fact that it declares a non-informational Condition rather than from any hand-written list.

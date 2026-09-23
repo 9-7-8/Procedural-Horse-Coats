@@ -1,0 +1,5 @@
+Tickets
+(Item / stabling)
+A ticket sends a horse home. Right-click one of your horses with one and it goes to its stall ; the ticket is spent. The tier decides how far apart the two are allowed to be.
+
+Item / stabling Tickets A ticket sends a horse home. Right-click one of your horses with one and it goes to its stall ; the ticket is spent. The tier decides how far apart the two are allowed to be. Stall signs Whistles All items item/TicketItem.java , server/TicketHandler.java .

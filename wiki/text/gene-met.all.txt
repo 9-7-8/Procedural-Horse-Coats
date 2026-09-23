@@ -1,0 +1,5 @@
+MET (embryonic lethal)
+(Natural gene / health)
+The mod’s embryonic lethal . Two non-functional copies and the embryo never develops, so the pairing simply produces no foal.
+
+Natural gene / health MET (embryonic lethal) The mod’s embryonic lethal . Two non-functional copies and the embryo never develops, so the pairing simply produces no foal. EDNRB (lethal white) Breeding & pedigree The trait system Source: common/genetics/genes/MetGene.java

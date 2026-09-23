@@ -1,0 +1,5 @@
+Light
+(Magical gene / phase 3 + overlay)
+Gold hooves, a gold mane, gold eyes — and a horse that lights a stable like a torch. Three variant alleles, each dominant to the wild type and to none of each other , so a horse shows everything it carries. It is the clearest demonstration in the mod of why this model has no dominance property.
+
+Not modelled yet One gold, no per-horse variation. An epigenetic colour is the obvious extension — mane colour already does exactly that — but it runs straight into a question the game cannot answer: vanilla light has no hue, so a blue-glowing horse would still cast plain white light. That is a real limitation rather than an oversight, and it is why the gene commits to one colour for now.

@@ -1,0 +1,5 @@
+RYR2 (jumping)
+(Natural gene / performance)
+Jumping ability — the locus that moves a stat nothing in this mod tracked before. Each J copy is worth 0.09 jump strength on a baseline of 0.50 .
+
+Natural gene / performance RYR2 (jumping) Jumping ability — the locus that moves a stat nothing in this mod tracked before. Each J copy is worth 0.09 jump strength on a baseline of 0.50 . LCORL / NCAPG HMGA2 The trait system Source: common/genetics/genes/Ryr2Gene.java

@@ -1,0 +1,5 @@
+Manchado — white with islands in it
+(Natural gene / phase 1)
+The rare Argentine pattern: broad, clean white over the topline with smooth rounded islands of the base colour left inside it , a mostly white tail, and a head, belly and lower legs that stay dark. Close to the inverse of a leopard — a leopard puts dark spots on a white horse; this leaves dark islands in a white field.
+
+Natural gene / phase 1 Manchado — white with islands in it The rare Argentine pattern: broad, clean white over the topline with smooth rounded islands of the base colour left inside it , a mostly white tail, and a head, belly and lower legs that stay dark. Close to the inverse of a leopard — a leopard puts dark spots on a white horse; this leaves dark islands in a white field. Tobiano Leopard complex KIT (sabino / dominant white) Rabicano Source: common/genetics/genes/ManchadoGene.java

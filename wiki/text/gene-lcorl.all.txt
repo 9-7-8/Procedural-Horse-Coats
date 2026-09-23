@@ -1,0 +1,5 @@
+LCORL / NCAPG (height)
+(Natural gene / body size)
+Body height — the larger of the two size loci, and the first gene in this mod that changes how big a horse is without touching a pixel of its coat.
+
+Natural gene / body size LCORL / NCAPG (height) Body height — the larger of the two size loci, and the first gene in this mod that changes how big a horse is without touching a pixel of its coat. HMGA2 (pony) ACAN The trait system Source: common/genetics/genes/LcorlGene.java

@@ -1,0 +1,5 @@
+Mushroom
+(Natural gene / phase 1)
+The mirror of silver dapple : it dilutes pheomelanin only , and only when homozygous . On a chestnut the red body walks to a flat sepia-khaki — the “mushroom” colour. A black or bay horse carries it with almost nothing to show.
+
+Natural gene / phase 1 Mushroom The mirror of silver dapple : it dilutes pheomelanin only , and only when homozygous . On a chestnut the red body walks to a flat sepia-khaki — the “mushroom” colour. A black or bay horse carries it with almost nothing to show. Silver dapple Champagne Extension Source: common/genetics/genes/MushroomGene.java

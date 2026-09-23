@@ -1,0 +1,5 @@
+HMGA2 (pony)
+(Natural gene / body size)
+The pony locus — the second size gene, and the one that pulls the other way. Smaller, slower, lower-jumping, and hardier .
+
+Natural gene / body size HMGA2 (pony) The pony locus — the second size gene, and the one that pulls the other way. Smaller, slower, lower-jumping, and hardier . LCORL / NCAPG B4GALT7 The trait system Source: common/genetics/genes/Hmga2Gene.java

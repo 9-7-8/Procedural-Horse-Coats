@@ -1,0 +1,5 @@
+Horse shoes
+(Horse gear / hoof equipment)
+Horse shoes are the first true hoof item in the accessories system: one item per hoof, each with its own material, enchantment and durability, yet all of them living under the same attachment-backed gear model the rest of the horse gear uses. They are not a special case on the horse; they are four independent stacks sharing one shared rule set. Any metal can be used, and the tier of that metal is what decides how much the shoe increases the horse's movement stats.
+
+Horse gear / hoof equipment Horse shoes Horse shoes are the first true hoof item in the accessories system: one item per hoof, each with its own material, enchantment and durability, yet all of them living under the same attachment-backed gear model the rest of the horse gear uses. They are not a special case on the horse; they are four independent stacks sharing one shared rule set. Any metal can be used, and the tier of that metal is what decides how much the shoe increases the horse's movement stats. Horse gear Tack Dyeing Bench Items & recipes Source: gear system, attachment-backed equipment, and the hoof slot architecture.

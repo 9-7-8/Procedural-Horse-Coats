@@ -1,0 +1,5 @@
+TOE1 (cerebellar abiotrophy)
+(Natural gene / health)
+Cerebellar abiotrophy. The cells governing balance die off after birth, and the horse is left with no sense of where its own feet are.
+
+Natural gene / health TOE1 (cerebellar abiotrophy) Cerebellar abiotrophy. The cells governing balance die off after birth, and the horse is left with no sense of where its own feet are. PLOD1 MET The trait system Source: common/genetics/genes/Toe1Gene.java

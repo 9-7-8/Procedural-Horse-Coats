@@ -1,0 +1,5 @@
+LAMC2 (junctional epidermolysis bullosa, draft)
+(Natural gene / health)
+A recessive lethal in the draft breeds. The layer that anchors skin to the body never forms, so the two shear apart wherever the foal takes weight — and the hoof capsules come away with it.
+
+Natural gene / health LAMC2 (junctional epidermolysis bullosa, draft) A recessive lethal in the draft breeds. The layer that anchors skin to the body never forms, so the two shear apart wherever the foal takes weight — and the hoof capsules come away with it. LAMA3 (JEB, Saddlebred) GYS1 (PSSM1) The trait system Source: common/genetics/genes/Lamc2Gene.java

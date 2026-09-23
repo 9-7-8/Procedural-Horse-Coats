@@ -1,0 +1,5 @@
+Magic milk volume
+(Magical gene / no coat effect)
+How many times a day the horse can be filled from. Wild type is once. The milky allele is worth one to three more, codominant , and the copies add — and because it governs a yield kind rather than a gene, it reaches milk ’s milk, water and lava all three.
+
+Magical gene / no coat effect Magic milk volume How many times a day the horse can be filled from. Wild type is once. The milky allele is worth one to three more, codominant , and the copies add — and because it governs a yield kind rather than a gene, it reaches milk ’s milk, water and lava all three. Milk — what it governs Magic meat The effects block What to check in-game Source: common/genetics/genes/MagicMilkVolumeGene.java , neoforge/server/GeneYieldHandler.java

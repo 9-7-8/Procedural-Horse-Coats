@@ -1,0 +1,5 @@
+Suntouched
+(Magical gene / phase 3 + effects)
+A horse lit from within — molten-gold mane and tail that stay bright in the dark, and a body that casts light like a torch. It sheds a slow drift of gold sparks as it stands or moves. Suntouched is a data-driven gene — a JSON file, not a Java class — and it is the worked example for the glow effect verb .
+
+Magical gene / phase 3 + effects Suntouched A horse lit from within — molten-gold mane and tail that stay bright in the dark, and a body that casts light like a torch. It sheds a slow drift of gold sparks as it stands or moves. Suntouched is a data-driven gene — a JSON file, not a Java class — and it is the worked example for the glow effect verb . glow verb reference Waterborn (the other shipped gene) Trait & effect architecture The gene file format What to check in-game Source: common/src/main/resources/horsegenetics/example-genes/suntouched.json (and the shipped copy under neoforge-26.1.2/…/resources/horsegenetics/genes/ )

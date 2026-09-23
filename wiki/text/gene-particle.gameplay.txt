@@ -1,0 +1,5 @@
+Particle
+(Magical recessive / no coat effect)
+A horse that trails something as it moves — flames, souls, snow, hearts, portal motes, a shrieker’s mark. Forty variant alleles at one locus , which makes it by a wide margin the largest gene in the mod, and the reason it is one locus rather than forty genes is the whole design: a horse has two copies of the chromosome, so it shows at most two , ever, and choosing which two is the game. The whole locus is recessive to its own wild type — one copy of n and the horse trails nothing at all.
+
+Crossing two of them It paints nothing All 87 outcomes are wild types, so affectsCoat() is false, the locus is out of the texture key, and GenotypeCatalog collapses all 861 combinations to a single entry — forty alleles for no catalogue growth at all , the trick sex , milk and verdant already use. Unlike those two, though, there is no visibility gap here: the whole gene is the thing you can see. It is the answer to the complaint milk and verdant both attract — an effect a player can watch without having to test for it. Its gene carrot

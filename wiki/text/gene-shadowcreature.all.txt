@@ -1,0 +1,5 @@
+Shadowcreature
+(Magical gene / magical coat gene)
+A gene that takes the front third of the horse away. The head, the muzzle, the ears and the whole neck go flat black; the eyes burn gold with no white around them; and where the black meets the barrel it does not stop in a line but runs out into tapering tentacles over the shoulder.
+
+Magical gene / magical coat gene Shadowcreature A gene that takes the front third of the horse away. The head, the muzzle, the ears and the whole neck go flat black; the eyes burn gold with no white around them; and where the black meets the barrel it does not stop in a line but runs out into tapering tentacles over the shoulder. Light — the other gold eyes Nyxborn Eye colour and the two hooks What to check in-game Source: common/genetics/genes/ShadowcreatureGene.java

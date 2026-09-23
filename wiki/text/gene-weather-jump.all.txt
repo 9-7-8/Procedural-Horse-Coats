@@ -1,0 +1,5 @@
+Weather sensitive (jump)
+(Magical gene / no coat effect)
+The same idea as the speed locus and a completely separate gene: a positive and a negative allele per weather type, moving how high the horse jumps while that weather holds. Unlinked — inheriting one tells you nothing about the other.
+
+Magical gene / no coat effect Weather sensitive (jump) The same idea as the speed locus and a completely separate gene: a positive and a negative allele per weather type, moving how high the horse jumps while that weather holds. Unlinked — inheriting one tells you nothing about the other. Weather sensitive (speed) Magic jump What to check in-game Source: common/genetics/genes/WeatherJumpGene.java

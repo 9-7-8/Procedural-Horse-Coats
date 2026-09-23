@@ -1,0 +1,5 @@
+Research papers
+(Item / knowledge)
+A paper naming one gene. Reading it adds that gene to your gene database and unlocks its targeted splice carrot — which is the only way to breed for a specific gene on purpose.
+
+Item / knowledge Research papers A paper naming one gene. Reading it adds that gene to your gene database and unlocks its targeted splice carrot — which is the only way to breed for a specific gene on purpose. The gene database Splice carrots All items data/loot/AddResearchPaperModifier , menu/HorseBrowserRecipes .

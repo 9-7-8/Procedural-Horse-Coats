@@ -1,0 +1,5 @@
+RYR1 (malignant hyperthermia)
+(Natural gene / health)
+The only disorder in this mod that costs an affected horse nothing. One copy is enough to have it, and a horse that has it is a completely ordinary horse until something triggers an episode — and nothing in this game can.
+
+Natural gene / health RYR1 (malignant hyperthermia) The only disorder in this mod that costs an affected horse nothing. One copy is enough to have it, and a horse that has it is a completely ordinary horse until something triggers an episode — and nothing in this game can. SCN4A (HYPP) GYS1 (PSSM1) The trait system Source: common/genetics/genes/Ryr1Gene.java

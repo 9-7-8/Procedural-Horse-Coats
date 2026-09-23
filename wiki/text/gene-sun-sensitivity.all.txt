@@ -1,0 +1,5 @@
+Sun sensitivity
+(Magical gene / behaviour)
+Two copies and daylight burns the horse. Caught under open sky by day it runs for the nearest deep cover or water — jumping a fence if it can — and stays there until dark. One copy shows nothing at all.
+
+Magical gene / behaviour Sun sensitivity Two copies and daylight burns the horse. Caught under open sky by day it runs for the nearest deep cover or water — jumping a fence if it can — and stays there until dark. One copy shows nothing at all. Magic white Blood diet The Dhampir Horse care Source: common/genetics/genes/SunSensitivityGene.java , neoforge/server/SunSensitivityHandler.java , neoforge/server/SunShadeGoal.java

@@ -1,0 +1,5 @@
+Magic meat
+(Magical gene / no coat effect)
+How much meat the horse leaves. Additive , unlike magic item drop — a meaty horse still drops whatever that locus says, and the meat is on top of it. How much is a number written on the allele copy rather than on the allele.
+
+Magical gene / no coat effect Magic meat How much meat the horse leaves. Additive , unlike magic item drop — a meaty horse still drops whatever that locus says, and the meat is on top of it. How much is a number written on the allele copy rather than on the allele. Magic item drop Magic milk volume The effects block What to check in-game Source: common/genetics/genes/MagicMeatGene.java , neoforge/server/GeneDeathHandler.java

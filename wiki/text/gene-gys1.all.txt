@@ -1,0 +1,5 @@
+GYS1 (PSSM1)
+(Natural gene / health)
+Type 1 polysaccharide storage myopathy. The muscle stores sugar it cannot burn and ties up under work. Neither combination is lethal.
+
+Natural gene / health GYS1 (PSSM1) Type 1 polysaccharide storage myopathy. The muscle stores sugar it cannot burn and ties up under work. Neither combination is lethal. SCN4A (HYPP) Breeds The trait system Source: common/genetics/genes/Gys1Gene.java

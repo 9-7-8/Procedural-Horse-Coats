@@ -1,0 +1,5 @@
+Silver dapple
+(Natural gene / phase 1)
+Real-horse PMEL17 . Silver dilutes eumelanin only — it walks black toward chocolate, and the mane and tail most of the way to flaxen, while leaving red pigment completely alone. A chestnut that carries it looks identical to one that doesn’t: it has no black for silver to act on.
+
+Natural gene / phase 1 Silver dapple Real-horse PMEL17 . Silver dilutes eumelanin only — it walks black toward chocolate, and the mane and tail most of the way to flaxen, while leaving red pigment completely alone. A chestnut that carries it looks identical to one that doesn’t: it has no black for silver to act on. Mushroom Agouti Champagne Why dilute() exists Source: common/genetics/genes/SilverGene.java

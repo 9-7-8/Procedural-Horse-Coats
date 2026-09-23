@@ -1,0 +1,5 @@
+Intimidating
+(Magical gene / no coat effect)
+Nothing wants to be near it. Passive animals and hostile mobs alike keep outside a radius written on the allele copy — at least eight blocks, often more. Standing next to one is the quietest place in the world.
+
+Keeping the cost It would have been easy to make this repel only hostiles and become a straightforwardly good gene. The passive half is kept because a magical locus with a real, concrete, everyday cost is rarer in this mod than one without, and “you cannot pasture this horse with your animals” is a cost a player meets on the first day rather than in a spreadsheet.

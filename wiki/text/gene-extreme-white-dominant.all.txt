@@ -1,0 +1,5 @@
+Extreme white dominant
+(Magical gene / changes a rule, paints nothing)
+The only gene in the mod that changes a coat without painting a single pixel. While it is present, a white texel is final : every other gene still runs, in the ordinary order, and every one of them is thrown away wherever the horse is already white. On a horse with no white it does nothing at all. On a horse carrying both a white marking and something magical, it swaps which of the two is on top.
+
+Magical gene / changes a rule, paints nothing Extreme white dominant The only gene in the mod that changes a coat without painting a single pixel. While it is present, a white texel is final : every other gene still runs, in the ordinary order, and every one of them is thrown away wherever the horse is already white. On a horse with no white it does nothing at all. On a horse carrying both a white marking and something magical, it swaps which of the two is on top.

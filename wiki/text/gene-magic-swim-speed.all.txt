@@ -1,0 +1,5 @@
+Magic swim speed
+(Magical gene / no coat effect)
+How fast the horse moves in water , and nothing else. It is unrelated to magic speed — not related-but-separate, unrelated — so a horse can be the slowest thing in the paddock and still cross a river faster than a boat.
+
+Magical gene / no coat effect Magic swim speed How fast the horse moves in water , and nothing else. It is unrelated to magic speed — not related-but-separate, unrelated — so a horse can be the slowest thing in the paddock and still cross a river faster than a boat. Magic water breathing Magic speed — the land one The effects block What to check in-game Source: common/genetics/genes/MagicSwimSpeedGene.java , common/genetics/genes/AbstractMagicFactorGene.java

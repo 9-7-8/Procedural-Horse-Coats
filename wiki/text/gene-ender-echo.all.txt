@@ -1,0 +1,5 @@
+Ender echo
+(Magical gene / no coat effect)
+Shoot at it and it is not there any more. The horse blinks about eight blocks away from an incoming projectile, carrying whoever is riding it — which is either the best thing about it or the worst, depending on what is eight blocks away.
+
+Magical gene / no coat effect Ender echo Shoot at it and it is not there any more. The horse blinks about eight blocks away from an incoming projectile, carrying whoever is riding it — which is either the best thing about it or the worst, depending on what is eight blocks away. Guardian Magic fighter API notes What to check in-game Source: common/genetics/genes/EnderEchoGene.java

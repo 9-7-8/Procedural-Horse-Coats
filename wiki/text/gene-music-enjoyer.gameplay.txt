@@ -1,0 +1,5 @@
+Music enjoyer
+(Magical gene / no coat effect)
+Play a record near this horse and it will stand there giving off hearts and slowly deciding it likes you. One of the few ways to build bond that does not involve feeding, riding or waiting.
+
+Built, and not yet seen in game The gene, its inheritance and its founder table exist and are covered by the test suite; the translator that turns it into behaviour was written against the 26.1.2 sources and is flagged unverified in its own comments. Nothing on this page has been watched happening to a horse. What to look at, and what is most likely to be wrong, is on the Verification tab . What it does Combination Outcome Msc/Msc bond rises near a playing jukebox, with hearts anything else nothing It still respects the daily limit Bond has a cap per day, and this counts against it like every other source. Leaving a jukebox running overnight will not hand you a tier-three horse by morning — it will hand you the same day’s worth of bond you could have earned another way, for less effort. Health None.

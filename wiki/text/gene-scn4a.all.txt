@@ -1,0 +1,5 @@
+SCN4A (HYPP)
+(Natural gene / health)
+Hyperkalaemic periodic paralysis — a sodium-channel defect that leaves the muscle liable to lock up. One copy is enough, and two are fatal.
+
+Natural gene / health SCN4A (HYPP) Hyperkalaemic periodic paralysis — a sodium-channel defect that leaves the muscle liable to lock up. One copy is enough, and two are fatal. GYS1 (PSSM1) PLOD1 The trait system Source: common/genetics/genes/Scn4aGene.java

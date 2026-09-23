@@ -1,0 +1,5 @@
+Weather sensitive (jump)
+(Magical gene / no coat effect)
+The same idea as the speed locus and a completely separate gene: a positive and a negative allele per weather type, moving how high the horse jumps while that weather holds. Unlinked — inheriting one tells you nothing about the other.
+
+Two loci rather than one gene with two effects A single weather locus moving both stats would make “good in the rain” a single thing to breed for, and one selection pressure produces one kind of horse. Two independent loci give four corners — fast and springy in a storm, fast and flat, and so on — which is four lines a breeder can keep apart.

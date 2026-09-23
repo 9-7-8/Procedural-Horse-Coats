@@ -1,0 +1,5 @@
+MET (embryonic lethal)
+(Natural gene / health)
+The mod’s embryonic lethal . Two non-functional copies and the embryo never develops, so the pairing simply produces no foal.
+
+Crossing two of them What it reads like in play A pairing that keeps refusing: two horses that will breed with anything else and never with each other. The chat line naming the cause is what turns that from a bug report into a clue. No founder is ever affected The founder table lists only the clear horse and the carrier. A wild-caught horse is an adult that survived, so it can carry this and never have it, and the homozygote’s weight is simply absent from the table. The only way to produce an affected foal is to breed two carriers — which is the whole design: it is what makes a pedigree worth keeping, and what turns the carrier wording in the info panel from decoration into the difference between a breeding programme and a lottery. Its gene carrot

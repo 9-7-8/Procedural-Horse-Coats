@@ -1,0 +1,5 @@
+Weather sensitive (speed)
+(Magical gene / no coat effect)
+How the sky changes what the horse can do. A positive and a negative allele for each kind of weather, incompletely dominant, with the size of the effect written on each allele copy. Unlinked to the jump locus — a horse can love the rain and be no better at fences in it.
+
+Magical gene / no coat effect Weather sensitive (speed) How the sky changes what the horse can do. A positive and a negative allele for each kind of weather, incompletely dominant, with the size of the effect written on each allele copy. Unlinked to the jump locus — a horse can love the rain and be no better at fences in it. Weather sensitive (jump) Magic swim speed Eyesight locus What to check in-game Source: common/genetics/genes/WeatherSpeedGene.java

@@ -1,0 +1,5 @@
+Meowing
+(Magical gene / no coat effect)
+The horse meows. Not often, not loudly, and with no explanation available anywhere in the genome — but creepers hear it and keep their distance, which turns out to be worth a great deal.
+
+Built, and not yet seen in game The gene, its inheritance and its founder table exist and are covered by the test suite; the translator that turns it into behaviour was written against the 26.1.2 sources and is flagged unverified in its own comments. Nothing on this page has been watched happening to a horse. What to look at, and what is most likely to be wrong, is on the Verification tab . What it does Combination Outcome Mew/Mew meows occasionally; creepers stay outside the radius anything else nothing Why it matters more than it sounds Creepers are the mob that costs you a horse. A meowing horse you leave in a pasture is a horse that is still there in the morning, and the radius is epigenetic so a line can be bred wider. Health None. It is protection, and it costs nothing.

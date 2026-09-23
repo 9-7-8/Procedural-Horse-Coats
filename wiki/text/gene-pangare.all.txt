@@ -1,0 +1,5 @@
+Pangar — the pale underside
+(Natural gene / phase 1)
+Also called mealy . The pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor pony, a Fjord or a Haflinger: the soft parts of the horse go cream and the topline does not.
+
+Natural gene / phase 1 Pangar — the pale underside Also called mealy . The pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor pony, a Fjord or a Haflinger: the soft parts of the horse go cream and the topline does not. Sooty — the other half of countershading Dun The seal brown’s soft points Body space & regions Source: common/genetics/genes/PangareGene.java , common/coat/pattern/CoatRegions.medial

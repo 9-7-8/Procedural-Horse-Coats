@@ -1,0 +1,5 @@
+Tail colour
+(Magical gene / phase 3)
+Mane colour ’s twin, one locus over: the same three alleles, the same combination table, the same per-copy colour — pointed at the tail. Two separate loci, because a horse with a red mane and a blue tail is exactly the kind of horse this family of genes exists to produce.
+
+Magical gene / phase 3 Tail colour Mane colour ’s twin, one locus over: the same three alleles, the same combination table, the same per-copy colour — pointed at the tail. Two separate loci, because a horse with a red mane and a blue tail is exactly the kind of horse this family of genes exists to produce. Mane colour — the full mechanics Body space & regions What to check in-game Source: common/genetics/genes/TailColorGene.java , HairColorGene.java

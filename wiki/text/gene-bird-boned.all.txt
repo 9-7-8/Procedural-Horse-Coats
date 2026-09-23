@@ -1,0 +1,5 @@
+Bird boned
+(Magical gene / no coat effect)
+Hollow-boned and light with it. Neither the horse nor its rider takes falling damage, from any height. The cheapest possible description of a gene that changes how you use the terrain.
+
+Magical gene / no coat effect Bird boned Hollow-boned and light with it. Neither the horse nor its rider takes falling damage, from any height. The cheapest possible description of a gene that changes how you use the terrain. Magic jump Fireproof Ocean-born What to check in-game Source: common/genetics/genes/BirdBonedGene.java

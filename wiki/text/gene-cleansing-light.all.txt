@@ -1,0 +1,5 @@
+Cleansing light
+(Magical gene / no coat effect)
+An aura that burns the undead. Zombies, skeletons, drowned and anything else that counts take steady damage while they stand near the horse, out to a radius written on the allele copy.
+
+Magical gene / no coat effect Cleansing light An aura that burns the undead. Zombies, skeletons, drowned and anything else that counts take steady damage while they stand near the horse, out to a radius written on the allele copy. Magic fighter Healer Holy ward What to check in-game Source: common/genetics/genes/CleansingLightGene.java

@@ -1,0 +1,5 @@
+Healer
+(Magical gene / phase 3)
+A horse that mends the people standing next to it, and carries a red stripe down the middle of its mane that says so. Recessive, so about one wild horse in a hundred and twenty is one — and the sixth of the population carrying a single copy looks like every other horse.
+
+Why it runs after mane colour Priority 116 puts it after mane colour (112) so the red sits on top of a coloured mane rather than under it, and before magic zebra (120) so stripes still black everything out. A horse carrying both a solid mane and this gene shows the colour with a red line down it, which is exactly what you would want to see.

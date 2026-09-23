@@ -1,0 +1,5 @@
+Rainbow dust
+(Magical recessive / no coat effect)
+Coloured dust off all four hooves as the horse walks, fading from one colour into the next and working its way round the whole rainbow before it starts again. The smallest gene in the mod that anybody will actually want.
+
+Crossing two of them It paints nothing All three outcomes are wild types, so affectsCoat() is false, the locus stays out of a horse’s texture key, and the genotype gallery collapses it to a single entry — the same trick particle , milk and verdant use. Its gene carrot

@@ -1,0 +1,5 @@
+Milk
+(Magical gene / no coat effect)
+What comes out when you put a bucket under the horse. Ordinarily milk, from a mare, as everywhere else in the game — but two copies of one magical allele and any grown horse fills the bucket with water , and two of the other and it fills with lava . One of each and there is no foal at all.
+
+Crossing two of them It paints nothing Every one of the five outcomes is a wildType , which in this model means “changes nothing about the coat ” — the same trick the thirteen non-coat loci and sex use. So affectsCoat() is false, the locus is left out of a horse’s texture key, and the genotype gallery collapses it to a single entry. Three alleles, no growth in the catalogue at all. The cost is that a lava horse is indistinguishable from an ordinary one until somebody puts a bucket under it. That is a real gap and it is logged as one — a marking allele would be the fix, and would want to be part of the locus rather than bolted on. Its gene carrot

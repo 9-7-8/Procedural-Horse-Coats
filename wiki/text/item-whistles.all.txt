@@ -1,0 +1,5 @@
+Whistles
+(Item / tool)
+Three area whistles call every tamed horse you own nearby, each reaching further than the last. The fourth, the ender whistle , is bound to one horse for good and brings it to you from anywhere — even another dimension.
+
+Item / tool Whistles Three area whistles call every tamed horse you own nearby, each reaching further than the last. The fourth, the ender whistle , is bound to one horse for good and brings it to you from anywhere — even another dimension. Horse care — bond & herds Transfer papers Roadmap — callable horses All items Item objects in item/ModItems.java .

@@ -1,0 +1,5 @@
+Meowing
+(Magical gene / no coat effect)
+The horse meows. Not often, not loudly, and with no explanation available anywhere in the genome — but creepers hear it and keep their distance, which turns out to be worth a great deal.
+
+Magical gene / no coat effect Meowing The horse meows. Not often, not loudly, and with no explanation available anywhere in the genome — but creepers hear it and keep their distance, which turns out to be worth a great deal. Intimidating Singer Base alarm What to check in-game Source: common/genetics/genes/MeowingGene.java

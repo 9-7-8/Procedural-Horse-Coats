@@ -1,0 +1,5 @@
+Magic item drop
+(Magical gene / no coat effect)
+What the horse leaves behind — diamonds, a spawn egg that puts this horse back, or an enchanted sword. Every variant takes two copies and none of them shows on the living animal, which is the point: it is worth breeding a line for and impossible to spot in a field.
+
+Magical gene / no coat effect Magic item drop What the horse leaves behind — diamonds, a spawn egg that puts this horse back, or an enchanted sword. Every variant takes two copies and none of them shows on the living animal, which is the point: it is worth breeding a line for and impossible to spot in a field. Magic on death — the other half Magic meat Spawn eggs, incl. the preset horse egg What to check in-game Source: common/genetics/genes/MagicItemDropGene.java , neoforge/server/GeneDeathHandler.java

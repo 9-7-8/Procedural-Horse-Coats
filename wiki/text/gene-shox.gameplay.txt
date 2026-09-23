@@ -1,0 +1,5 @@
+SHOX (skeletal atavism)
+(Natural gene / health)
+A deletion in the pseudoautosomal SHOX region. The splint bones grow out to their full ancestral length, the limbs come out malformed, and the foal cannot stand on them.
+
+What it does What it is: a fatal skeletal disorder. The foal's limbs come out malformed and it cannot stand. Breeding around it: only a foal that inherits a bad copy from both parents is affected. Carriers are healthy and indistinguishable from any other horse. Crossing two of them Its gene carrot A server may switch the resizing off This locus is one of the ones that moves a horse’s size , and vanilla scales the hitbox from the model — so a world that would rather have tack and hitboxes sit exactly where vanilla puts them can set body.size false. The gene is still inherited, still reported and still worth breeding for; only the entity is held at 1.0×.

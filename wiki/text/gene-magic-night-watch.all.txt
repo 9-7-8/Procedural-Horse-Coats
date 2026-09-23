@@ -1,0 +1,5 @@
+Magic night watch
+(Magical gene / no coat effect)
+What the horse does about you after dark. Five variants, and they are a progression rather than a list — each one is a little closer and a little worse. A horse homozygous for any of them makes no footstep sound at night .
+
+Magical gene / no coat effect Magic night watch What the horse does about you after dark. Five variants, and they are a progression rather than a list — each one is a little closer and a little worse. A horse homozygous for any of them makes no footstep sound at night . Aggression The effects block Bond, herds and horse care What to check in-game Source: common/genetics/genes/MagicNightWatchGene.java , neoforge/server/NightWatchGoal.java , neoforge/server/NightBehaviourHandler.java

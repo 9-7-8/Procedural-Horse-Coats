@@ -1,0 +1,5 @@
+Molten hooves
+(Magical gene / an emission, no coat effect)
+Hoofprints lie on the ground behind the horse as it moves, and fade as they cool. Four kinds: white, black, one colour, or several. The colours are written on the allele copy and inherited with it, so a line breeds true to its own fire. It is light and particles only — nothing it runs over catches.
+
+Magical gene / an emission, no coat effect Molten hooves Hoofprints lie on the ground behind the horse as it moves, and fade as they cool. Four kinds: white, black, one colour, or several. The colours are written on the allele copy and inherited with it, so a line breeds true to its own fire. It is light and particles only — nothing it runs over catches. Particle Rainbow dust The effects block What to check in-game Source: common/genetics/genes/MoltenHoovesGene.java

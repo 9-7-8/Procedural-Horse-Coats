@@ -1,0 +1,5 @@
+Hot blooded
+(Magical gene / no coat effect)
+Snow will not lie near it and ice does not last. A hot-blooded horse leaves a thawed circle wherever it stands, which is charming in a paddock and a genuine nuisance on a frozen lake.
+
+Built, and not yet seen in game The gene, its inheritance and its founder table exist and are covered by the test suite; the translator that turns it into behaviour was written against the 26.1.2 sources and is flagged unverified in its own comments. Nothing on this page has been watched happening to a horse. What to look at, and what is most likely to be wrong, is on the Verification tab . What it does Combination Outcome Hot/Hot melts snow and ice within a short radius anything else nothing On a frozen lake It melts the ice it is standing on, and then it is in the water. This is funny rather than broken, and it is the reason a hot-blooded horse is a liability in exactly one biome. Health None directly — but see above, and note that it does not make the horse immune to anything cold.

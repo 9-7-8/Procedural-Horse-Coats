@@ -1,0 +1,5 @@
+Potion milk
+(Magical gene / no coat effect)
+A mare who can be milked into a glass bottle rather than a bucket, and hands back a potion. One allele per effect. It does not touch the ordinary milk locus — a horse can have both, and which you get depends on what you are holding.
+
+Incomplete dominance without an expression language This locus is the clearest demonstration of what minDose is for. A gene file has no way to write “if homozygous”, so the format gives every effect a minimum dose instead: the weak potion declares 1 , the strong one declares 2 , and the horse’s own genotype decides which is active. No expression language, no per-gene Java, and the same trick is available to anyone writing a gene file.

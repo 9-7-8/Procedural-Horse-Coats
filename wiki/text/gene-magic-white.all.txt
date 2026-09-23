@@ -1,0 +1,5 @@
+Magic white
+(Magical gene / phase 3)
+Two copies paint the whole horse white , over whatever coat it really has. One copy shows nothing. The white is painted low in the magical order, so any marking the horse also carries still draws on top of it.
+
+Magical gene / phase 3 Magic white Two copies paint the whole horse white , over whatever coat it really has. One copy shows nothing. The white is painted low in the magical order, so any marking the horse also carries still draws on top of it. Sun sensitivity The Dhampir KIT — the real whites Paint order Source: common/genetics/genes/MagicWhiteGene.java

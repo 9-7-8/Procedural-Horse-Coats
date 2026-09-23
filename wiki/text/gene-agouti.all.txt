@@ -1,0 +1,5 @@
+Agouti — the four bays
+(Natural gene / phase 1)
+A restricts black toward the points . How far it restricts is the shade locus’s business, and that is what makes one A -carrying horse a bright blood bay and the next a near-black seal brown . Two alleles here; four bays out.
+
+Natural gene / phase 1 Agouti — the four bays A restricts black toward the points . How far it restricts is the shade locus’s business, and that is what makes one A -carrying horse a bright blood bay and the next a near-black seal brown . Two alleles here; four bays out. Shade — which bay this is Extension MATP (cream / pearl) Champagne Body space & regions Source: common/genetics/genes/AgoutiGene.java , common/coat/pattern/BayCoat.java , common/genetics/BayShade.java

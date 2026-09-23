@@ -1,0 +1,5 @@
+Horse hair
+(Item / material)
+Horse hair is the base material for almost everything the mod adds, and the only one — there is nothing you refine it into first. You get it by shearing a horse, and nearly every other item on the wiki takes it directly.
+
+Item / material Horse hair Horse hair is the base material for almost everything the mod adds, and the only one — there is nothing you refine it into first. You get it by shearing a horse, and nearly every other item on the wiki takes it directly. All items Horse care — bond & herds Roadmap Recipes in data/horsegenetics/recipe/ ; shearing in server/HorseShearHandler .

@@ -1,0 +1,5 @@
+Rabicano — the coon tail
+(Natural gene / phase 1)
+White ticking that starts at the tail dock and the flank and works forward: a frosted, banded tail, a scatter of white hairs over the rear barrel and belly, and at full strength a set of broken vertical rib bars . It is not classic roan and the tail is how you tell.
+
+Natural gene / phase 1 Rabicano — the coon tail White ticking that starts at the tail dock and the flank and works forward: a frosted, banded tail, a scatter of white hairs over the rear barrel and belly, and at full strength a set of broken vertical rib bars . It is not classic roan and the tail is how you tell. Classic roan — the one it is mistaken for KIT (sabino) Leopard complex (varnish roan) PigmentField.whiten Source: common/genetics/genes/RabicanoGene.java

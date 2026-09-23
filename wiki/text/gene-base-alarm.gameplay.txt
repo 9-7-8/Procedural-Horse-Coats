@@ -1,0 +1,5 @@
+Base alarm
+(Magical gene / no coat effect)
+It whinnies when something hostile comes near. Not near your base — near the horse , which is why where you stable one is the whole of how you use it.
+
+Built, and not yet seen in game The gene, its inheritance and its founder table exist and are covered by the test suite; the translator that turns it into behaviour was written against the 26.1.2 sources and is flagged unverified in its own comments. Nothing on this page has been watched happening to a horse. What to look at, and what is most likely to be wrong, is on the Verification tab . What it does Combination Outcome one or two copies whinnies when a hostile enters about 16 blocks n/n nothing Dominant , so it spreads readily and a stable will end up with several. Put it by the door The radius is measured from the horse, so an alarm horse is a thing you place. One in the paddock by the entrance warns you about the entrance; one you ride warns you about wherever you are. Health None. It announces the danger; it does nothing about it.

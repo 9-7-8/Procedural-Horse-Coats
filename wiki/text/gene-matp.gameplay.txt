@@ -1,0 +1,5 @@
+MATP — cream and pearl
+(Natural gene / phase 1)
+One locus, three alleles , six combinations and four outcomes. Cream and pearl are the same physical gene in a real horse ( SLC45A2 / MATP ); this mod modelled them as two two-allele genes with a shared resolver until the combination-table rewrite, which is what made a single multi-allele locus expressible at all.
+
+What it does What to look for: this is the palomino and buckskin gene. One copy dilutes a chestnut to palomino and a bay to buckskin ; two copies wash the horse out to a very pale cream with pink skin and blue eyes. It carries a second, rarer version as well, which gives the pearl coats, and one of each together produces something different again. The table above is the whole set — there are more outcomes here than most people expect from one gene. Crossing two of them Its gene carrot

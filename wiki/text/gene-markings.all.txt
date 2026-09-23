@@ -1,0 +1,5 @@
+Markings — the star and the sock
+(Natural gene / phase 1)
+The ordinary white a horse can have without carrying any pattern gene at all: a star, a stripe, a snip, a coronet, a sock, a stocking. Most marked horses in life are marked by this and not by splash or sabino, and until now the mod had no way to say so.
+
+Natural gene / phase 1 Markings — the star and the sock The ordinary white a horse can have without carrying any pattern gene at all: a star, a stripe, a snip, a coronet, a sock, a stocking. Most marked horses in life are marked by this and not by splash or sabino, and until now the mod had no way to say so. MITF (splash) KIT (sabino) Sooty The coat pipeline Source: common/genetics/genes/MarkingsGene.java

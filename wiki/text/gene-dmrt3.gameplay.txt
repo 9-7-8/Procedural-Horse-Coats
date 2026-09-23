@@ -1,0 +1,5 @@
+DMRT3 — gait
+(Natural gene / no coat effect)
+The “gait keeper”: the gene that lets a horse amble and pace. The locus, its inheritance and every breed’s share are in; the gait itself is not animated yet, so for now it is a fact about a horse’s breeding rather than something you can ride.
+
+It changes nothing about movement yet A gaited horse walks, trots and canters like any other until gait animation is built. What it does now is show on the information screen and pass on properly, so a gaited line bred today is gaited when the gaits arrive. What it does Combination What it means two gait copies Gaited — can amble and pace, the smoothest four-beat gaits one gait copy a better running walk than most, but does not pace, and keeps a good trot and canter none walk, trot and canter: the ordinary horse Who carries it Every Paso Fino (both breeds) and Standardbred is gaited, the Tennessee Walking Horse nearly always, and most Icelandic horses. A few Morgans carry it, a very few Quarter Horses and Arabians, and Thoroughbreds and Przewalski’s horses never do. A Feral Mixed horse carries a copy now and then. Health None.

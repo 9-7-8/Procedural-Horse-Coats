@@ -1,0 +1,5 @@
+The four posts
+(Blocks / villagers)
+The four equestrians ’ workstations. Put one down near an unemployed villager and you get that trade, and only that trade — which is why there are four of them and not one.
+
+Blocks / villagers The four posts The four equestrians ’ workstations. Put one down near an unemployed villager and you get that trade, and only that trade — which is why there are four of them and not one. Villagers & transfer papers Horse hair Tack Dyeing Bench All items Block and POI registration in the NeoForge module's block/ and village/ packages.

@@ -1,0 +1,5 @@
+Waterborn
+(Magical gene / phase 3 + effects)
+Neon-blue streaks through the mane and tail, and a horse that walks on the surface of water instead of wading. It leaves a trail of blue sparks where it treads, and a tamed mare can be milked with an empty bucket for a bucket of water. Waterborn is the mod’s first data-driven gene to ship and the first to carry an effects block — it is a JSON file, not a Java class.
+
+Not modelled yet One stripe colour and one strength; no per-horse colour variation. An allelic series (teal / indigo / white-water) would make it the first shipped data-driven gene with more than two alleles. The walk_on_lava sibling flag exists in the format but the translator does not wire it; an ember-born counterpart is the obvious pair. The gene creator cannot edit an effects block yet — Waterborn’s was hand-written.

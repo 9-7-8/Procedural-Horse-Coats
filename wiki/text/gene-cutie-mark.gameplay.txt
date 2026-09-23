@@ -1,0 +1,5 @@
+Cutie mark
+(Magical gene / recessive / paints nothing in the pipeline)
+A horse that wears a little emblem of one to three items , stamped on both flanks , drawn on top of every other coat gene — white patterns included. Which items, how many, whether they sit in a row or a triangle, and how big they are, are all epigenetic and inherited with the allele.
+
+Crossing two of them It paints nothing in the pipeline Like particle , all three outcomes are wild types : the baked coat texture is unchanged, so two horses that differ only here share one baked coat. The emblem is a client render layer ( CutieMarkLayer , a twin of the glow emissive layer) that reads the gene straight off the genotype and draws item models on the flanks, after the coat and after every white pattern. That is also why the priority is only a code-order slot: the layer draws last regardless of where the gene sorts. Its gene carrot

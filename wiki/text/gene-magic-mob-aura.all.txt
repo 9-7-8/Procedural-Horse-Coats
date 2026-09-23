@@ -1,0 +1,5 @@
+Magic mob aura
+(Magical gene / no coat effect)
+How everything else in the world feels about the horse. A warding horse keeps mobs outside about ten blocks; a baiting one makes every hostile that can see it pick it over anything else in range, including its rider. Both take two copies, and one of each cancels outright .
+
+Magical gene / no coat effect Magic mob aura How everything else in the world feels about the horse. A warding horse keeps mobs outside about ten blocks; a baiting one makes every hostile that can see it pick it over anything else in range, including its rider. Both take two copies, and one of each cancels outright . Magic fighter Magic health The effects block What to check in-game Source: common/genetics/genes/MagicMobAuraGene.java , neoforge/server/GeneAbilityHandler.java

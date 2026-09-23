@@ -1,0 +1,5 @@
+Roan
+(Natural gene / phase 1)
+Classic or true roan: an even salt-and-pepper of white hairs through the whole trunk, over a base colour it does not change. Black plus white hairs is a blue roan , chestnut plus white a strawberry , bay plus white a bay roan . The leopard complex's varnish roan shares the word and almost nothing else.
+
+Natural gene / phase 1 Roan Classic or true roan: an even salt-and-pepper of white hairs through the whole trunk, over a base colour it does not change. Black plus white hairs is a blue roan , chestnut plus white a strawberry , bay plus white a bay roan . The leopard complex's varnish roan shares the word and almost nothing else. Tobiano EDNRB (frame overo) KIT (white spotting) BodyNoise Source: common/genetics/genes/RoanGene.java

@@ -1,0 +1,5 @@
+Vet’s kit
+(Item / breeding)
+Geld a stallion so he never breeds, or examine a horse: where a mare is in her heat, and whether she is carrying twins.
+
+Where it lives ModItems.VET_KIT , a plain Item with durability(64) . The model borrows vanilla’s bundle texture as a placeholder. server/VetKitHandler handles PlayerInteractEvent.EntityInteract and cancels on both sides. Sneaking gelds: male, not already gelded, tamed, and HorseOwnership.isOwner , then HorseRecords.apply(horse, record.withGelded(true)) , which syncs the record to tracking clients. A plain use prints ReproHandler.vetReport . The flag is HorseRecord.gelded (codec field gelded ), and HorseRecord.entire() is the stallion test. HorseRecord.sexLabel is the display word. Recipe data/horsegenetics/recipe/vet_kit.json ; trade villager_trade/equestrian_scientist/level_1/sell_vet_kit.json — 4 emeralds at Novice, three uses. Known gaps A few stallion checks still read sex alone; see gap 229 . The texture is a placeholder.

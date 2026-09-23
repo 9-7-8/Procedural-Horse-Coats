@@ -20,90 +20,15 @@
  *
  *     node wiki/tools/build-search-index.mjs
  */
-import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
-import { join, dirname, basename } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const WIKI = dirname(dirname(fileURLToPath(import.meta.url)));
-const ROOT = dirname(WIKI);
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { WIKI, htmlFiles as sharedHtmlFiles, text, panels, headings, frontMatter, articleBody } from "./wiki-parse.mjs";
 
 /** Pages that are tools with their own chrome, or generated - not prose. */
 const SKIP = new Set(["nav.js"]);
 
 function htmlFiles() {
-    const out = [{ path: join(ROOT, "index.html"), href: "index.html" }];
-    for (const name of readdirSync(WIKI).sort()) {
-        if (!name.endsWith(".html") || SKIP.has(name)) continue;
-        if (!statSync(join(WIKI, name)).isFile()) continue;
-        out.push({ path: join(WIKI, name), href: "wiki/" + name });
-    }
-    return out;
-}
-
-/** Everything that is not prose: scripts, styles, comments, inline svg. */
-function strip(html) {
-    return html
-        .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
-        .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
-        .replace(/<svg\b[\s\S]*?<\/svg>/gi, " ")
-        .replace(/<!--[\s\S]*?-->/g, " ");
-}
-
-const ENTITIES = {
-    amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
-    mdash: "—", ndash: "–", hellip: "…", middot: "·",
-    rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”",
-    times: "×", minus: "−", deg: "°", sect: "§",
-    times2: "×", frac12: "½", hearts: "♥", check: "✓"
-};
-
-function text(html) {
-    return strip(html)
-        .replace(/<[^>]+>/g, " ")
-        .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(+d))
-        .replace(/&([a-zA-Z][a-zA-Z0-9]*);/g, (m, name) =>
-            Object.prototype.hasOwnProperty.call(ENTITIES, name) ? ENTITIES[name] : " ")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-/**
- * Split a page body into { tab -> html }. "all" is everything outside a panel.
- * Counts <section> depth so a panel that contains one still closes correctly.
- */
-function panels(html) {
-    const open = /<section\b[^>]*class="[^"]*\btab-panel\b[^"]*"[^>]*>/gi;
-    const out = { all: "" };
-    let cursor = 0, m;
-    while ((m = open.exec(html)) !== null) {
-        out.all += html.slice(cursor, m.index);
-        const tab = (/data-tab="([^"]+)"/i.exec(m[0]) || [, "gameplay"])[1];
-        // Walk forward balancing <section> ... </section>.
-        const tag = /<section\b|<\/section\s*>/gi;
-        tag.lastIndex = open.lastIndex;
-        let depth = 1, end = html.length, t;
-        while ((t = tag.exec(html)) !== null) {
-            if (t[0][1] === "/") { depth--; } else { depth++; }
-            if (depth === 0) { end = t.index; break; }
-        }
-        out[tab] = (out[tab] || "") + html.slice(open.lastIndex, end);
-        cursor = tag.lastIndex || end;
-        open.lastIndex = cursor;
-    }
-    out.all += html.slice(cursor);
-    return out;
-}
-
-/** Headings with an id, so a hit can link to the section rather than the page. */
-function headings(html) {
-    const out = [];
-    const re = /<h([2-4])\b([^>]*)>([\s\S]*?)<\/h\1>/gi;
-    let m;
-    while ((m = re.exec(html)) !== null) {
-        const id = (/id="([^"]+)"/i.exec(m[2]) || [, ""])[1];
-        out.push({ id, level: +m[1], title: text(m[3]), at: m.index });
-    }
-    return out;
+    return sharedHtmlFiles(SKIP);
 }
 
 /**
@@ -126,15 +51,8 @@ function chunks(tab, html) {
 const pages = [];
 for (const file of htmlFiles()) {
     const raw = readFileSync(file.path, "utf8");
-    const title = text((/<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(raw) || [, ""])[1])
-        || text((/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(raw) || [, ""])[1])
-             .replace(/\s*·.*$/, "");
-    const eyebrow = text((/<p class="eyebrow[^"]*"[^>]*>([\s\S]*?)<\/p>/i.exec(raw) || [, ""])[1]);
-    const kindMatch = /<p class="eyebrow ([a-z]+)"/i.exec(raw);
-
-    const body = (/<article class="doc"[^>]*>([\s\S]*)<\/article>/i.exec(raw)
-        || /<main\b[^>]*>([\s\S]*)<\/main>/i.exec(raw)
-        || [, raw])[1];
+    const { title, eyebrow, kind } = frontMatter(raw);
+    const body = articleBody(raw);
 
     const split = panels(body);
     const tabs = ["gameplay", "coding", "science"].filter((t) => split[t] && text(split[t]));
@@ -148,7 +66,7 @@ for (const file of htmlFiles()) {
         href: file.href,
         title,
         eyebrow,
-        kind: kindMatch ? kindMatch[1] : "core",
+        kind,
         tabs,
         chunks: recs
     });

@@ -1,0 +1,5 @@
+The breeding carrots
+(Item group / breeding)
+Four carrots you feed to a horse before breeding it. Each one changes what that horse passes on to the foal — not what the horse itself is. Feed one to each parent and both effects apply.
+
+Item group / breeding The breeding carrots Four carrots you feed to a horse before breeding it. Each one changes what that horse passes on to the foal — not what the horse itself is. Feed one to each parent and both effects apply. The carrot family & gene database Splice carrots Breeding & pedigree All items Effects in common/genetics/CarrotEffect.java ; recipes in data/horsegenetics/recipe/ .

@@ -1,0 +1,5 @@
+RAPGEF5 (EFIH)
+(Natural gene / health)
+Equine familial isolated hypoparathyroidism. An affected foal develops no parathyroid glands at all and cannot regulate its own calcium.
+
+Natural gene / health RAPGEF5 (EFIH) Equine familial isolated hypoparathyroidism. An affected foal develops no parathyroid glands at all and cannot regulate its own calcium. PLOD1 ST14 The trait system Source: common/genetics/genes/Rapgef5Gene.java

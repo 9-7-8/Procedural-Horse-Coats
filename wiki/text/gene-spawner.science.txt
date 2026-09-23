@@ -1,0 +1,5 @@
+Spawner
+(Magical gene / a faint head and mane tint)
+Feed the horse anything it eats and two of a particular creature appear nearby — every meal. Which creature depends on the allele, and there is one for every mob in the game. The only outward sign is a pink tinge through the head and mane.
+
+From self-limiting to paid-for Almost every design for a spawning gene is a lag machine, because almost every design counts time and not population . The first version answered that by topping up to a fixed local number, so a horse in a stocked field did nothing at all. Moving the trigger from a clock to a meal changed the question: a firing now costs the player something every time, so the limit can be the cost rather than the count. That is why the cap came off — and why "it ate" has to be checked rather than assumed, because a trigger that is uncapped and free is the lag machine again. The one behaviour gene that paints Everything else in this family is invisible. This one carries a faint pink tint on the head and mane, and it should: a horse that manufactures creatures on demand is the one case where a player deserves a warning they can see before they buy it.

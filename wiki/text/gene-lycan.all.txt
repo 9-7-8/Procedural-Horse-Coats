@@ -1,0 +1,5 @@
+LYCAN — the werewolf locus
+(Magical recessive / no coat effect)
+A horse with two matching copies stops being a horse at nightfall . Not a horse wearing a wolf: a real wolf, which breeds with wolves, is tamed with bones, and is a horse again at dawn with the same name and the same pedigree. Thirty-seven shapes share the locus, and every one of them is recessive to the wild type and to each other.
+
+Magical recessive / no coat effect LYCAN — the werewolf locus A horse with two matching copies stops being a horse at nightfall . Not a horse wearing a wolf: a real wolf, which breeds with wolves, is tamed with bones, and is a horse again at dawn with the same name and the same pedigree. Thirty-seven shapes share the locus, and every one of them is recessive to the wild type and to each other. Sun sensitivity — the other gene that is only behaviour The particle locus Rainbow dust What is unproven about this What to check in-game Source: common/genetics/genes/LycanGene.java , neoforge/server/LycanthropyHandler.java

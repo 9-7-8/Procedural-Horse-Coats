@@ -1,0 +1,5 @@
+Rainbow dust
+(Magical recessive / no coat effect)
+Coloured dust off all four hooves as the horse walks, fading from one colour into the next and working its way round the whole rainbow before it starts again. The smallest gene in the mod that anybody will actually want.
+
+Magical recessive / no coat effect Rainbow dust Coloured dust off all four hooves as the horse walks, fading from one colour into the next and working its way round the whole rainbow before it starts again. The smallest gene in the mod that anybody will actually want. The particle locus The emitter verb LYCAN — the other new particle-carrying gene What to check in-game Source: common/genetics/genes/RainbowDustGene.java

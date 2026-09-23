@@ -1,0 +1,5 @@
+PDK4
+(Natural gene / performance)
+Racing performance, as one atomic gene . Each A copy is worth 0.018 movement speed, and nothing else.
+
+Natural gene / performance PDK4 Racing performance, as one atomic gene . Each A copy is worth 0.018 movement speed, and nothing else. MSTN CKM The trait system Source: common/genetics/genes/Pdk4Gene.java

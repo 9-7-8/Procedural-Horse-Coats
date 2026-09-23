@@ -1,0 +1,5 @@
+Guardian
+(Magical gene / no coat effect)
+It does not start anything. But whatever hurts you, within sixteen blocks, has a horse to deal with — and it holds its ground rather than chasing.
+
+The gene most likely to be somebody’s favourite Of everything in the behaviour family, this is the one that reads least like a mechanic and most like a relationship — and it is the only locus in the mod whose trigger is something that happens to the player . It is worth the new trigger for that alone.

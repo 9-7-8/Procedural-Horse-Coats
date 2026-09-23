@@ -1,0 +1,5 @@
+Flaxen — the chestnut’s pale mane
+(Natural gene / phase 1)
+A graded lightening of the mane, tail and forelock on a chestnut horse, from a few gold strands to a near-white fall of hair over a red body. It touches nothing else, and it is completely invisible on any horse that makes black hair — which carries it and hands it on regardless.
+
+Natural gene / phase 1 Flaxen — the chestnut’s pale mane A graded lightening of the mane, tail and forelock on a chestnut horse, from a few gold strands to a near-white fall of hair over a red body. It touches nothing else, and it is completely invisible on any horse that makes black hair — which carries it and hands it on regardless. Extension — what makes a chestnut Silver dapple MATP (cream / pearl) Shade — the same shape, on bays Source: common/genetics/genes/FlaxenGene.java

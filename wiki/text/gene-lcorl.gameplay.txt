@@ -1,0 +1,5 @@
+LCORL / NCAPG (height)
+(Natural gene / body size)
+Body height — the larger of the two size loci, and the first gene in this mod that changes how big a horse is without touching a pixel of its coat.
+
+What it does What it does: makes the horse taller. It is the larger of the two size genes and it changes nothing about the coat — a tall horse and a short one can be identical in colour. Pair it against HMGA2 , the pony gene, which pulls the other way. Crossing two of them Its gene carrot A server may switch the resizing off This locus is one of the ones that moves a horse’s size , and vanilla scales the hitbox from the model — so a world that would rather have tack and hitboxes sit exactly where vanilla puts them can set body.size false. The gene is still inherited, still reported and still worth breeding for; only the entity is held at 1.0×.

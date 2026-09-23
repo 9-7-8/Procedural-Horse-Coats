@@ -1,0 +1,5 @@
+MITF (splash white)
+(Natural gene / phase 1)
+The first of the two splash white loci, carrying SW1 , SW3 and SW5 . Splash is caused by variants in two different genes — this one and PAX3 — and that is the whole reason the old single horsegenetics.splash gene had to go. SW1 is the widespread splash allele and the one that hides in plain sight : one copy is usually a star and a sock, and occasionally a blue-eyed splash, on the same genotype.
+
+Why splash is two genes A gene has two slots. If SW1 and SW2 were alleles of one gene, they would compete for those slots — and a horse could not carry both. In life a horse carries N/SW1 at MITF and N/SW2 at PAX3 , and comes out with markedly more face, leg and belly white than either alone. One gene cannot express that genotype at all. Two MITF variants can still meet — SW1/SW3 is a real compound heterozygote — and that is what this locus’s own table is for.

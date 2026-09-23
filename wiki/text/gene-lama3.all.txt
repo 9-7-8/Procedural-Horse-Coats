@@ -1,0 +1,5 @@
+LAMA3 (junctional epidermolysis bullosa, Saddlebred)
+(Natural gene / health)
+The same disorder as LAMC2 , in a different gene and a different breed — and the best-measured disorder frequency in this mod.
+
+Natural gene / health LAMA3 (junctional epidermolysis bullosa, Saddlebred) The same disorder as LAMC2 , in a different gene and a different breed — and the best-measured disorder frequency in this mod. LAMC2 (JEB, draft) SLC5A3 (FIS) The trait system Source: common/genetics/genes/Lama3Gene.java

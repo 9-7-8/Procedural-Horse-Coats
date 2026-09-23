@@ -1,0 +1,5 @@
+Breeding & pedigree
+(Start here)
+The single source of truth for the breeding, horse-record, pedigree and stat-inheritance system. Layer 1 ( common/ , pure Java) owns the rules; layer 2 ( neoforge-26.1.2/ ) only translates — it never decides how codes combine, what an ancestor is, or the band a foal’s stats come from.
+
+Start here Breeding & pedigree The single source of truth for the breeding, horse-record, pedigree and stat-inheritance system. Layer 1 ( common/ , pure Java) owns the rules; layer 2 ( neoforge-26.1.2/ ) only translates — it never decides how codes combine, what an ancestor is, or the band a foal’s stats come from. The genetics model Three-phase pipeline What to check in-game The horse’s body Source: common/genetics/ , common/horse/ , common/name/ , neoforge-26.1.2/{data,server,client,network}/

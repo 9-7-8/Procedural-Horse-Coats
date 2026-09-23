@@ -1,0 +1,5 @@
+Eyesight locus
+(Magical gene / no coat effect)
+Whether the horse was built for the dark or for the daylight. A caveborn horse moves better in the gloom and worse in the light; a daywalker is the opposite; the wild type does not care. It reads the actual light level , so a cave at noon counts — and so do your own torches.
+
+Magical gene / no coat effect Eyesight locus Whether the horse was built for the dark or for the daylight. A caveborn horse moves better in the gloom and worse in the light; a daywalker is the opposite; the wild type does not care. It reads the actual light level , so a cave at noon counts — and so do your own torches. Magic speed Weather sensitive (speed) The effects block What to check in-game Source: common/genetics/genes/EyesightGene.java

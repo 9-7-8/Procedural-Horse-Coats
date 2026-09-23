@@ -1,0 +1,5 @@
+MYO5A (lavender foal syndrome)
+(Natural gene / health)
+Lavender foal syndrome, the coat colour dilution lethal: a neurological defect that arrives alongside a pale, silvery coat. The foal cannot stand.
+
+Natural gene / health MYO5A (lavender foal syndrome) Lavender foal syndrome, the coat colour dilution lethal: a neurological defect that arrives alongside a pale, silvery coat. The foal cannot stand. PLOD1 MET The trait system Source: common/genetics/genes/Myo5aGene.java

@@ -1,0 +1,5 @@
+Food preference
+(Magical gene / no coat effect)
+Every horse with this gene has one food it would rather have than anything else. Feed it that, and you get a short buff and a great deal more bond than the food deserves. It may be a food the horse’s own diet forbids — and the preference wins.
+
+The most breed-defining invisible gene in the batch A breed is temperament and husbandry far more than it is statistics, and “this line will do anything for apples” is the kind of detail that makes a breed feel like one. It is also cheap for a breed author to use: a preference allele is a single line in a breed file and it changes how the animal is kept.

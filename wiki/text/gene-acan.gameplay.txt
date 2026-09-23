@@ -1,0 +1,5 @@
+ACAN (chondrodysplastic dwarfism)
+(Natural gene / health)
+Chondrodysplastic dwarfism — six alleles, twenty-one combinations, and the gene that proves the combination table was worth building. A horse is affected when it has no working copy left , which is not the same statement as “it is homozygous”.
+
+What it does What to look for: a foal that is stunted and badly proportioned rather than merely small. This is a disorder, not the pony gene — if you want small horses, that is HMGA2 . Breeding it away: the horse is affected when it has no working copy left, which is not the same as "both copies the same". Several different broken versions exist and any two of them together will do it, so two healthy-looking parents can still produce an affected foal. Crossing two of them Its gene carrot A server may switch the resizing off This locus is one of the ones that moves a horse’s size , and vanilla scales the hitbox from the model — so a world that would rather have tack and hitboxes sit exactly where vanilla puts them can set body.size false. The gene is still inherited, still reported and still worth breeding for; only the entity is held at 1.0×.

@@ -1,0 +1,5 @@
+Magic water breathing
+(Magical gene / no coat effect)
+How long the horse lasts under water before it starts to drown. The graded counterpart of the underwater_breathing traversal flag, which is absolute — and independent of magic swim speed , because crossing a river quickly and surviving the bottom of a lake are different problems.
+
+Magical gene / no coat effect Magic water breathing How long the horse lasts under water before it starts to drown. The graded counterpart of the underwater_breathing traversal flag, which is absolute — and independent of magic swim speed , because crossing a river quickly and surviving the bottom of a lake are different problems. Magic swim speed The effects block The wider trait architecture What to check in-game Source: common/genetics/genes/MagicWaterBreathingGene.java , common/genetics/genes/AbstractMagicFactorGene.java

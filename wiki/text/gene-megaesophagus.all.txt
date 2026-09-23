@@ -1,0 +1,5 @@
+Megaesophagus
+(Natural gene / health)
+A slack gullet that will not push milk down. The foal chokes on what it swallows and inhales the rest.
+
+Natural gene / health Megaesophagus A slack gullet that will not push milk down. The foal chokes on what it swallows and inhales the rest. PLOD1 MET The trait system Source: common/genetics/genes/MegaesophagusGene.java

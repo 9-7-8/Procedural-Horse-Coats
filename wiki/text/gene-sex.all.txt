@@ -1,0 +1,5 @@
+Sex
+(Natural gene / no coat phase)
+The sex chromosome pair, registered as an ordinary locus. A mare is X/X , a stallion is X/Y — a real X and a real Y , both slots occupied. It is the first gene in the order and the only gene that paints nothing .
+
+Natural gene / no coat phase Sex The sex chromosome pair, registered as an ordinary locus. A mare is X/X , a stallion is X/Y — a real X and a real Y , both slots occupied. It is the first gene in the order and the only gene that paints nothing . The genetics model Breeding & pedigree Sex-linked genes — still to build Source: common/genetics/genes/SexGene.java

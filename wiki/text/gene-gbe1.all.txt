@@ -1,0 +1,5 @@
+GBE1 (GBED)
+(Natural gene / health)
+Glycogen branching enzyme deficiency. The foal cannot store sugar in a form it can get back out again, so it has nothing to draw on from the moment it is born.
+
+Natural gene / health GBE1 (GBED) Glycogen branching enzyme deficiency. The foal cannot store sugar in a form it can get back out again, so it has nothing to draw on from the moment it is born. PLOD1 MET The trait system Source: common/genetics/genes/Gbe1Gene.java

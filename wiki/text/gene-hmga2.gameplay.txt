@@ -1,0 +1,5 @@
+HMGA2 (pony)
+(Natural gene / body size)
+The pony locus — the second size gene, and the one that pulls the other way. Smaller, slower, lower-jumping, and hardier .
+
+What it does What it does: makes ponies. A horse with it is smaller, slower and jumps lower — but is hardier , which is the trade. It pulls the opposite way to LCORL , the height gene, so a horse carrying both lands somewhere in the middle. Crossing two of them Its gene carrot A server may switch the resizing off This locus is one of the ones that moves a horse’s size , and vanilla scales the hitbox from the model — so a world that would rather have tack and hitboxes sit exactly where vanilla puts them can set body.size false. The gene is still inherited, still reported and still worth breeding for; only the entity is held at 1.0×.

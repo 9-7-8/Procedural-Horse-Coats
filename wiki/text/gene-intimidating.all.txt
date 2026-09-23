@@ -1,0 +1,5 @@
+Intimidating
+(Magical gene / no coat effect)
+Nothing wants to be near it. Passive animals and hostile mobs alike keep outside a radius written on the allele copy — at least eight blocks, often more. Standing next to one is the quietest place in the world.
+
+Magical gene / no coat effect Intimidating Nothing wants to be near it. Passive animals and hostile mobs alike keep outside a radius written on the allele copy — at least eight blocks, often more. Standing next to one is the quietest place in the world. Holy ward Magic mob aura Meowing What to check in-game Source: common/genetics/genes/IntimidatingGene.java

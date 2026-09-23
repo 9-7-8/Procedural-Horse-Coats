@@ -1,0 +1,5 @@
+CVM (cervical vertebral malformation)
+(Natural gene / health)
+The neck vertebrae form crooked and pinch the spinal cord passing through them — the “wobbler” presentation, modelled here in its severe early-lethal form.
+
+Natural gene / health CVM (cervical vertebral malformation) The neck vertebrae form crooked and pinch the spinal cord passing through them — the “wobbler” presentation, modelled here in its severe early-lethal form. PLOD1 MET The trait system Source: common/genetics/genes/CvmGene.java

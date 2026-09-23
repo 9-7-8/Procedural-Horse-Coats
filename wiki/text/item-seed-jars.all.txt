@@ -1,0 +1,5 @@
+Seed jars
+(Item / breeding)
+A jar that stores a stallion’s genetics so you can breed a mare with him later — from anywhere, and without him being there.
+
+Item / breeding Seed jars A jar that stores a stallion’s genetics so you can breed a mare with him later — from anywhere, and without him being there. Breeding & pedigree All items stored_genome data component; breeding through ReproHandler.breed .

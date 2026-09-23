@@ -1,0 +1,5 @@
+PPIB (HERDA)
+(Natural gene / health)
+HERDA — hereditary equine regional dermal asthenia. The collagen holding the skin to the horse is faulty, so it splits and scars where a saddle sits. The horse lives; it is just never sound.
+
+Natural gene / health PPIB (HERDA) HERDA — hereditary equine regional dermal asthenia. The collagen holding the skin to the horse is faulty, so it splits and scars where a saddle sits. The horse lives; it is just never sound. PLOD1 MET The trait system Source: common/genetics/genes/PpibGene.java

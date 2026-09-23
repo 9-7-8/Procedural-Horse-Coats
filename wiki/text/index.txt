@@ -1,0 +1,3022 @@
+wiki/ai-setup.html#github	all	Bug reports and GitHub
+wiki/ai-setup.html#how	all	How it is built
+wiki/ai-setup.html#local	all	A model on your own computer
+wiki/ai-setup.html#openrouter	all	A free key from OpenRouter
+wiki/ai-setup.html#privacy	all	What gets sent where
+wiki/ai-setup.html#providers	all	Using another provider
+wiki/ai-setup.html#settings	all	Your key
+wiki/ai-setup.html#what	all	What it does
+wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
+wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
+wiki/api-notes.html#verified	all	Verified
+wiki/architecture.html#boot-progress	all	What happens when a browser loads the mod
+wiki/architecture.html#build	all	Build & test, in full
+wiki/architecture.html#compat-flow	all	The other data flow: other mods' jars a pack on disk
+wiki/architecture.html#data-flow	all	Data flow: server client pixels
+wiki/architecture.html#gradle	all	Build setup notes
+wiki/architecture.html#hd-models	all	The HD horse models
+wiki/architecture.html#modules	all	Three modules, split deliberately
+wiki/architecture.html#releasing	all	Cutting a release
+wiki/architecture.html#running	all	Running the game
+wiki/architecture.html#the-spawn-test-horse-world-button-cleans-up-after-itself	all	The "Spawn Test Horse World" button cleans up after itself
+wiki/architecture.html#verified	all	Verified
+wiki/architecture.html#water-riding	all	Riding through water
+wiki/body-space.html#local-frame	all	Asking a part what shape it is
+wiki/body-space.html#stripe-fields	all	Three stripe fields, and why they are three
+wiki/body-space.html#vanilla-model	all	The vanilla model underneath
+wiki/body-space.html#verified	all	Verified
+wiki/breed-book.html#cold	all	The cold country
+wiki/breed-book.html#desert	all	The dry country
+wiki/breed-book.html#entries	all	The breeds
+wiki/breed-book.html#hills	all	The high and windswept country
+wiki/breed-book.html#night	all	The night country
+wiki/breed-book.html#not-native	all	Nothing here is native
+wiki/breed-book.html#plains	all	The open country
+wiki/breed-book.html#reading	all	Reading the book against the game
+wiki/breed-book.html#sky	all	The high country
+wiki/breed-book.html#the-horse-people	all	The cowboy and the equestrians
+wiki/breed-book.html#the-leftovers	all	The things that still work
+wiki/breed-book.html#wet	all	The wet and wooded country
+wiki/breed-book.html#what-you-meet	all	What you actually meet
+wiki/breed-format.html#herd-shape	all	The shape of a founded herd
+wiki/breed-format.html#pull	all	Pull
+wiki/breed-format.html#size	all	Size
+wiki/breed-format.html#strain-stats	all	A strain that scores its own stats
+wiki/breed-format.html#where	all	Where a breed may come from
+wiki/breeding.html#H	coding	H. Client sync, the information screen, family tree
+wiki/breeding.html#breeding-debug	coding	Every draw, written down (dev builds)
+wiki/breeding.html#drift	coding	Genetic drift
+wiki/breeding.html#miscarriage	coding	The miscarriage — and why it does not name the gene
+wiki/breeding.html#play	gameplay	Breeding, as a player sees it
+wiki/breeding.html#rename	coding	D. Name-tag rename
+wiki/breeding.html#science-cycle	science	How horses actually reproduce
+wiki/breeding.html#science-foaling	science	Pregnancy, foal heat and nursing
+wiki/breeding.html#science-game	science	The problem with putting this in a game
+wiki/breeding.html#science-mares	science	Mares: a 21-day cycle, in season
+wiki/breeding.html#science-sources	science	Sources
+wiki/breeding.html#science-stallions	science	Stallions: no cycle
+wiki/breeding.html#verified	coding	Verified
+wiki/breeds.html#aggro	all	Wild horses aggro like wolves
+wiki/breeds.html#bands	all	Traditional bands and bachelor bands
+wiki/breeds.html#bands-epi	all	Epigenetic bands: “deeply black”, not merely “black”
+wiki/breeds.html#climate	all	Heat and cold
+wiki/breeds.html#commonness	all	Every breed
+wiki/breeds.html#crosses	all	Breeding: crosses and mixes
+wiki/breeds.html#feral	all	Feral Mixed is absorbing
+wiki/breeds.html#founder-only	all	A breed shapes its founders and then lets go
+wiki/breeds.html#herd	all	Herd or loner
+wiki/breeds.html#magic	all	Where magic comes from
+wiki/breeds.html#magical-herds	all	Magical herds: Magical (Breed)
+wiki/breeds.html#regions	all	Where in the world it is from
+wiki/breeds.html#sources	all	Where a breed may come from
+wiki/breeds.html#spliced	all	Spliced lines
+wiki/breeds.html#stats	all	Stats: the score multiplier curve
+wiki/breeds.html#strains	all	Strains: either this, or that
+wiki/breeds.html#verified	all	Verified
+wiki/breeds.html#world-settings	all	A world's own ecology: breed-spawning.toml
+wiki/carrots.html#blacklist	all	The Unknown Gene Splice blacklist
+wiki/carrots.html#book-on-horse	all	A book on a horse
+wiki/carrots.html#combine	all	Combining carrots
+wiki/carrots.html#database	all	The gene database & research papers
+wiki/carrots.html#deferred	all	Deferred
+wiki/carrots.html#four	all	The four breeding carrots
+wiki/carrots.html#known	all	Known Gene Splice carrots
+wiki/carrots.html#metadata	all	The gene metadata it all reads
+wiki/carrots.html#rejected-stat-carrots	all	Refused: a carrot that makes the horse better
+wiki/carrots.html#rule	all	The one rule
+wiki/carrots.html#spliced	all	A splice that lands marks the foal for good
+wiki/carrots.html#themed	all	The five themed splices
+wiki/carrots.html#verified	all	Verified
+wiki/carrots.html#window	all	A carrot waits on the horse
+wiki/carts.html#animals	gameplay	10. The animal cart
+wiki/carts.html#banners	gameplay	11. Banners, damage, and what drops
+wiki/carts.html#building	gameplay	2. Building one
+wiki/carts.html#cargo	coding	20. Why the load is polled and not pushed
+wiki/carts.html#drill	gameplay	8. The seed drill
+wiki/carts.html#dropped	coding	27. What was not ported
+wiki/carts.html#hitching	gameplay	3. Hitching, unhitching, and trains
+wiki/carts.html#hook	coding	19. The one hook
+wiki/carts.html#licence	coding	26. Licence and provenance
+wiki/carts.html#machines	gameplay	16. Horse-powered machinery
+wiki/carts.html#mixins	coding	24. Mixins, and the horse ones in particular
+wiki/carts.html#plow	gameplay	6. The plow
+wiki/carts.html#progress	gameplay	17. What the game asks of you
+wiki/carts.html#reaper	gameplay	7. The reaper
+wiki/carts.html#registration	coding	21. Why the carts use RegisterEvent
+wiki/carts.html#screen	gameplay	13. Reading it on the horse
+wiki/carts.html#speed	gameplay	12. Why your horse matters
+wiki/carts.html#split	coding	18. Where the code is
+wiki/carts.html#supply	gameplay	9. The supply cart
+wiki/carts.html#test	coding	25. The test
+wiki/carts.html#textures	coding	23. No cart texture is shipped
+wiki/carts.html#two-riders	gameplay	14. Two riders
+wiki/carts.html#two-sources	coding	22. The contract that lives twice
+wiki/carts.html#vehicles	gameplay	1. The six vehicles
+wiki/carts.html#wagon	gameplay	5. The wagon
+wiki/carts.html#weight	gameplay	4. Weight: what a full cart costs
+wiki/carts.html#woods	gameplay	15. Every wood, including modded ones
+wiki/coding-notes.html#between	all	Traps in the gaps between pages
+wiki/coding-notes.html#black	all	“As black as possible” is #151515
+wiki/coding-notes.html#cached-derivation	all	A cache added for the world silently froze every GUI
+wiki/coding-notes.html#git-status-overreports	all	A post-bake git status is not evidence of staleness
+wiki/coding-notes.html#goldens	all	Two goldens, and only one of them is affordable
+wiki/coding-notes.html#green	all	A green check is not evidence until you have watched it go red
+wiki/coding-notes.html#ground	all	A ground can be the only thing separating two alleles
+wiki/coding-notes.html#headless	all	Drive the browser tools; do not read them
+wiki/coding-notes.html#hidden-attribute	all	The hidden attribute loses to any display: you write
+wiki/coding-notes.html#lattice	all	Every layer of one compound element must share its stretch
+wiki/coding-notes.html#luma	all	What the chart actually reads — measured, not assumed
+wiki/coding-notes.html#measure	all	Measure it; do not reason about it
+wiki/coding-notes.html#mirrors	all	The mirrors, and how much of each is actually gated
+wiki/coding-notes.html#missing-models	all	A green boot is not a clean boot — grep for missing models, not errors
+wiki/coding-notes.html#mixin-inherited	all	A mixin cannot inject into a method the target class does not declare
+wiki/coding-notes.html#philosophy-numbers	all	Philosophy’s sections are cited by number, in prose, from code
+wiki/coding-notes.html#portability	all	The two hard portability rules now enforce themselves
+wiki/coding-notes.html#position	all	A mask's meaning depends on its position in the list
+wiki/coding-notes.html#rebuild-under-client	all	A ClassNotFoundException for our own class is almost never real
+wiki/coding-notes.html#refusals	all	Scan the corpus before adding a refusal
+wiki/coding-notes.html#regen	all	Check that a regeneration actually regenerated
+wiki/coding-notes.html#science-tab	all	Writing a gene’s science tab
+wiki/coding-notes.html#scope	all	What goes here, and what does not
+wiki/coding-notes.html#shell	all	Shell heredocs lie to you in two different ways
+wiki/coding-notes.html#sources-lie	all	The decompiled sources jar is not the API — javap the real one
+wiki/coding-notes.html#static-order	all	A field used by a static block must be declared above it
+wiki/coding-notes.html#subtexel	all	Sub-texel features are arithmetically present and invisible
+wiki/coding-notes.html#tripwires	all	Tests that are supposed to fail eventually
+wiki/coding-notes.html#verified	all	Verified
+wiki/coding-notes.html#working	all	Working the build
+wiki/compatibility.html#ai	all	AI goals and interactions
+wiki/compatibility.html#armour	all	Mods that only change horse armour
+wiki/compatibility.html#astikorcarts	all	AstikorCarts
+wiki/compatibility.html#attributes	all	Attributes: we overwrite, and that is deliberate
+wiki/compatibility.html#bales	all	Bale mods — a horse eats any hay bale
+wiki/compatibility.html#bales-tag-trap	all	Why a tag was not enough on its own
+wiki/compatibility.html#bhar	all	BHAR — Balanced Horse Armor Recipes
+wiki/compatibility.html#bridle	all	Bridle
+wiki/compatibility.html#combat-controls	all	Horse Combat Controls
+wiki/compatibility.html#companions	all	Worth running beside this mod
+wiki/compatibility.html#components-not-bound	all	Why it is not cleverer than that — and cannot be
+wiki/compatibility.html#customfence	all	Custom Fences and Walls
+wiki/compatibility.html#decision	all	The decision: attachments, not a custom entity
+wiki/compatibility.html#draft-power	all	Our half of the patch is built
+wiki/compatibility.html#gaits	all	Gaits, for models with real legs
+wiki/compatibility.html#generated	all	The other direction: we read your other mods and build for them
+wiki/compatibility.html#generated-bench	all	And the bench takes the new materials
+wiki/compatibility.html#generated-colour	all	An ingot’s colour is the average of its own picture
+wiki/compatibility.html#generated-declared	all	A tag entry is a declaration, not a promise
+wiki/compatibility.html#generated-gate-promise	all	…and neither is a fence gate
+wiki/compatibility.html#generated-naming	all	Six mods, one steel
+wiki/compatibility.html#generated-order	all	Load order can never matter
+wiki/compatibility.html#generated-pack	all	Where it lands: a pack on disk, served to both repositories
+wiki/compatibility.html#generated-seam	all	The seam is files , not registries — and it has to be
+wiki/compatibility.html#generated-strength	all	How strong a generated armour is
+wiki/compatibility.html#generated-trades	all	The metalsmith’s trades are rewritten, not appended to
+wiki/compatibility.html#generated-what	all	What gets generated
+wiki/compatibility.html#horse-powered	all	Horse Powered
+wiki/compatibility.html#horse-tack	all	Horse Tack
+wiki/compatibility.html#horseman	all	Horseman
+wiki/compatibility.html#icys	all	Icy’s Better Horses
+wiki/compatibility.html#jade	all	Jade — and the rule this one breaks
+wiki/compatibility.html#jade-detail	all	Why it says a word and not a sentence
+wiki/compatibility.html#jade-server	all	With Jade on the client only
+wiki/compatibility.html#known	all	Known-good and known-bad
+wiki/compatibility.html#patches	all	Supporting another mod deliberately
+wiki/compatibility.html#realistic-horse-genetics	all	Realistic Horse Genetics
+wiki/compatibility.html#remaps	all	User-written model remaps
+wiki/compatibility.html#renderer	all	The renderer is the real conflict
+wiki/compatibility.html#resource-packs	all	Resource packs, Fresh Animations, and EMF / ETF
+wiki/compatibility.html#spawning	all	Spawning stacks
+wiki/compatibility.html#superb-steeds	all	Superb Steeds — a second answer to a question we are also answering
+wiki/compatibility.html#surface	all	What this mod actually touches
+wiki/compatibility.html#swem	all	SWEM and SWEM Lite
+wiki/compatibility.html#third-party-genes	all	Third-party genes are supported, and are the right seam
+wiki/compatibility.html#unverified	all	Unverified
+wiki/compatibility.html#unverified-generated	all	What the generated content has and has not been shown to do
+wiki/decisions.html#compatibility-anchors	all	Former anchors
+wiki/decisions.html#decisions	all	Current owners
+wiki/decisions.html#settled	all	Settled owners
+wiki/eye-colour.html#cache	all	What it costs the coat cache
+wiki/eye-colour.html#forehead	all	Where it is drawn
+wiki/eye-colour.html#glow	all	The glows
+wiki/eye-colour.html#hues	all	The colour vocabulary
+wiki/eye-colour.html#loci	all	The thirteen loci
+wiki/eye-colour.html#magical	all	The magical genes that still paint eyes directly
+wiki/eye-colour.html#not-modelled	all	What is deliberately not modelled
+wiki/eye-colour.html#painting	all	The iris is the dark texels, the sclera the light ones
+wiki/eye-colour.html#request-order	all	When two genes both ask
+wiki/eye-colour.html#requests	all	Requests: how a coat gene gets the eyes it implies
+wiki/eye-colour.html#sectors	all	Four quadrants, ten named sectors
+wiki/eye-colour.html#spread	all	One blue eye, and the blue wedge
+wiki/eye-colour.html#third-eye	all	The third eye
+wiki/eye-colour.html#two-loci	all	Left and right are separate genes
+wiki/eye-colour.html#verified	all	Verified
+wiki/eye-colour.html#white-score	all	The “broadly white however it got there” rule
+wiki/eye-colour.html#why	all	Why the eyes are loci and not a channel
+wiki/eye-colour.html#wild-sclera	all	The white sclera paints nothing
+wiki/eye-colour.html#writing	all	Writing a gene that has something to say about eyes
+wiki/fertility.html#after	gameplay	After the birth
+wiki/fertility.html#choices	science	Why it is built this way
+wiki/fertility.html#compression	science	Compressing 340 days
+wiki/fertility.html#compression-alternatives	science	Calendars considered and not built
+wiki/fertility.html#compression-clock	science	Which clock, and what sleep does
+wiki/fertility.html#compression-floor	science	What the mod does: one-day floors, stages that nest
+wiki/fertility.html#gelding	gameplay	Geldings and the vet’s kit
+wiki/fertility.html#heat	gameplay	Heat
+wiki/fertility.html#hooks	coding	The hooks
+wiki/fertility.html#left-out	science	What the model leaves out
+wiki/fertility.html#natural	gameplay	A stallion left with mares
+wiki/fertility.html#odds	gameplay	Will it take?
+wiki/fertility.html#odds-reference	science	The odds, against the reference
+wiki/fertility.html#pregnant	gameplay	Pregnancy
+wiki/fertility.html#real-cycle	science	A seasonal 21-day cycle
+wiki/fertility.html#real-foal-heat	science	Foal heat, and why breeders often skip it
+wiki/fertility.html#real-heat-signs	science	What heat looks like
+wiki/fertility.html#real-horses	science	What real mares do
+wiki/fertility.html#real-nursing	science	Nursing does not stop conception
+wiki/fertility.html#real-pregnancy	science	Pregnancy and twins
+wiki/fertility.html#real-stallions	science	Stallions: no heat cycle
+wiki/fertility.html#setting	gameplay	The setting
+wiki/fertility.html#settled	coding	Settled
+wiki/fertility.html#sources	science	Sources
+wiki/fertility.html#state	coding	State is derived, never stepped
+wiki/fertility.html#testing	coding	Testing it
+wiki/fertility.html#two-kinds	gameplay	Two kinds of breeding
+wiki/fertility.html#vanilla	science	Why golden carrots stay instant
+wiki/fertility.html#verified	coding	Verified in the test yard
+wiki/fertility.html#where	coding	Where it lives
+wiki/for-testers.html#basics	all	Things the tests assume you know
+wiki/for-testers.html#before	all	Before you start
+wiki/for-testers.html#body	all	8. Size, speed and health
+wiki/for-testers.html#breeding	all	2. Breeding
+wiki/for-testers.html#care	all	3. Looking after horses
+wiki/for-testers.html#genes	all	7. Special horses
+wiki/for-testers.html#items	all	4. Items
+wiki/for-testers.html#looks	all	12. How things look (last)
+wiki/for-testers.html#menus	all	5. The horse browser and information screen
+wiki/for-testers.html#need	all	What you need
+wiki/for-testers.html#performance	all	9. Performance
+wiki/for-testers.html#reporting	all	How to report a problem
+wiki/for-testers.html#safety	all	1. Crashes and save safety (most important)
+wiki/for-testers.html#servers	all	10. Servers, settings and other mods
+wiki/for-testers.html#villages	all	6. Villages, stables and the hay portal
+wiki/for-testers.html#wiki-tools	all	11. The wiki's tools
+wiki/gene-acan.html#carrot	gameplay	Its gene carrot
+wiki/gene-acan.html#inheritance	gameplay	Crossing two of them
+wiki/gene-acan.html#what-it-does	gameplay	What it does
+wiki/gene-accretion-field.html#carrot	gameplay	Its gene carrot
+wiki/gene-accretion-field.html#file	coding	The file
+wiki/gene-accretion-field.html#finding	gameplay	Finding one
+wiki/gene-accretion-field.html#inheritance	gameplay	Crossing two of them
+wiki/gene-accretion-field.html#layers	coding	What it paints
+wiki/gene-accretion-field.html#outcomes	gameplay	What it can come out as
+wiki/gene-accretion.html#carrot	gameplay	Its gene carrot
+wiki/gene-accretion.html#file	coding	The file
+wiki/gene-accretion.html#finding	gameplay	Finding one
+wiki/gene-accretion.html#inheritance	gameplay	Crossing two of them
+wiki/gene-accretion.html#layers	coding	What it paints
+wiki/gene-accretion.html#outcomes	gameplay	What it can come out as
+wiki/gene-agate-eye.html#about	coding	Why it is built this way
+wiki/gene-agate-eye.html#carrot	gameplay	Its gene carrot
+wiki/gene-agate-eye.html#file	coding	The file
+wiki/gene-agate-eye.html#finding	gameplay	Finding one
+wiki/gene-agate-eye.html#inheritance	gameplay	Crossing two of them
+wiki/gene-agate-eye.html#layers	coding	What it paints
+wiki/gene-agate-eye.html#outcomes	gameplay	What it can come out as
+wiki/gene-agate-eye.html#verified	coding	Verified
+wiki/gene-agate.html#about	coding	Why it is built this way
+wiki/gene-agate.html#carrot	gameplay	Its gene carrot
+wiki/gene-agate.html#file	coding	The file
+wiki/gene-agate.html#finding	gameplay	Finding one
+wiki/gene-agate.html#inheritance	gameplay	Crossing two of them
+wiki/gene-agate.html#layers	coding	What it paints
+wiki/gene-agate.html#outcomes	gameplay	What it can come out as
+wiki/gene-agatebound.html#about	coding	Why it is built this way
+wiki/gene-agatebound.html#carrot	gameplay	Its gene carrot
+wiki/gene-agatebound.html#file	coding	The file
+wiki/gene-agatebound.html#finding	gameplay	Finding one
+wiki/gene-agatebound.html#inheritance	gameplay	Crossing two of them
+wiki/gene-agatebound.html#layers	coding	What it paints
+wiki/gene-agatebound.html#outcomes	gameplay	What it can come out as
+wiki/gene-aggression.html#health	gameplay	Health
+wiki/gene-aggression.html#inheritance	gameplay	Two copies of the same allele, or nothing
+wiki/gene-aggression.html#ridden	gameplay	What happens if you are on it
+wiki/gene-aggression.html#split	science	Why aggression and fear are two loci
+wiki/gene-aggression.html#taming	gameplay	If it hunts riders, you may not be able to keep it
+wiki/gene-aggression.html#total	science	Why the change is total rather than gradual
+wiki/gene-aggression.html#verb	coding	The time of day is a condition, not a verb
+wiki/gene-aggression.html#verified	coding	Verified
+wiki/gene-aggression.html#what	gameplay	The grid
+wiki/gene-aggression.html#why	science	Why a grid, and not a switch
+wiki/gene-aggression.html#wild	coding	Some of it can be caught
+wiki/gene-agouti.html#absolute	coding	Bay sets pigment absolutely — and why that matters
+wiki/gene-agouti.html#alleles	science	Two alleles, and what the test really says
+wiki/gene-agouti.html#carrot	gameplay	Its gene carrot
+wiki/gene-agouti.html#dark-bay-population	science	A population where dark bay is the majority class
+wiki/gene-agouti.html#departs	science	Where the mod departs
+wiki/gene-agouti.html#four	science	Why four outcomes and not one
+wiki/gene-agouti.html#identity	science	Genetic identity
+wiki/gene-agouti.html#inheritance	gameplay	Crossing two of them
+wiki/gene-agouti.html#mechanism	science	What ASIP actually does
+wiki/gene-agouti.html#mismatch	science	Genotype does not always predict phenotype
+wiki/gene-agouti.html#not-a-series	science	Why A+ and At were proposed, and why they failed
+wiki/gene-agouti.html#settled	science	What is settled, and what is not
+wiki/gene-agouti.html#soft	coding	The soft points — what makes a seal a seal
+wiki/gene-agouti.html#spread	coding	What the shade score paints
+wiki/gene-agouti.html#what-it-does	gameplay	What it does
+wiki/gene-angler.html#carrot	gameplay	Its gene carrot
+wiki/gene-angler.html#file	coding	The file
+wiki/gene-angler.html#finding	gameplay	Finding one
+wiki/gene-angler.html#inheritance	gameplay	Crossing two of them
+wiki/gene-angler.html#layers	coding	What it paints
+wiki/gene-angler.html#outcomes	gameplay	What it can come out as
+wiki/gene-auroraband.html#carrot	gameplay	Its gene carrot
+wiki/gene-auroraband.html#file	coding	The file
+wiki/gene-auroraband.html#finding	gameplay	Finding one
+wiki/gene-auroraband.html#inheritance	gameplay	Crossing two of them
+wiki/gene-auroraband.html#layers	coding	What it paints
+wiki/gene-auroraband.html#outcomes	gameplay	What it can come out as
+wiki/gene-aurorae.html#carrot	gameplay	Its gene carrot
+wiki/gene-aurorae.html#file	coding	The file
+wiki/gene-aurorae.html#finding	gameplay	Finding one
+wiki/gene-aurorae.html#inheritance	gameplay	Crossing two of them
+wiki/gene-aurorae.html#layers	coding	What it paints
+wiki/gene-aurorae.html#outcomes	gameplay	What it can come out as
+wiki/gene-b4galt7.html#body	science	Coat, build, and what “dwarfism” actually means here
+wiki/gene-b4galt7.html#breeds	science	Breeds and frequency
+wiki/gene-b4galt7.html#carrot	gameplay	Its gene carrot
+wiki/gene-b4galt7.html#inheritance	gameplay	Crossing two of them
+wiki/gene-b4galt7.html#locus	science	The locus
+wiki/gene-b4galt7.html#mechanism	science	What the enzyme does, and what the variant costs
+wiki/gene-b4galt7.html#performance	science	Speed, jumping and the carrier question
+wiki/gene-b4galt7.html#real-inheritance	science	Inheritance in a real population
+wiki/gene-b4galt7.html#settled	science	What is settled, and what is not
+wiki/gene-b4galt7.html#what-is-drawn	gameplay	What is drawn, and what is not
+wiki/gene-banded-socks.html#about	coding	Why it is built this way
+wiki/gene-banded-socks.html#carrot	gameplay	Its gene carrot
+wiki/gene-banded-socks.html#file	coding	The file
+wiki/gene-banded-socks.html#finding	gameplay	Finding one
+wiki/gene-banded-socks.html#inheritance	gameplay	Crossing two of them
+wiki/gene-banded-socks.html#layers	coding	What it paints
+wiki/gene-banded-socks.html#outcomes	gameplay	What it can come out as
+wiki/gene-bargello.html#about	coding	Why it is built this way
+wiki/gene-bargello.html#carrot	gameplay	Its gene carrot
+wiki/gene-bargello.html#file	coding	The file
+wiki/gene-bargello.html#finding	gameplay	Finding one
+wiki/gene-bargello.html#inheritance	gameplay	Crossing two of them
+wiki/gene-bargello.html#layers	coding	What it paints
+wiki/gene-bargello.html#outcomes	gameplay	What it can come out as
+wiki/gene-barred-wing.html#about	coding	Why it is built this way
+wiki/gene-barred-wing.html#carrot	gameplay	Its gene carrot
+wiki/gene-barred-wing.html#file	coding	The file
+wiki/gene-barred-wing.html#finding	gameplay	Finding one
+wiki/gene-barred-wing.html#inheritance	gameplay	Crossing two of them
+wiki/gene-barred-wing.html#layers	coding	What it paints
+wiki/gene-barred-wing.html#outcomes	gameplay	What it can come out as
+wiki/gene-barred-wing.html#verified	coding	Verified
+wiki/gene-base-alarm.html#dominant	science	Dominant on purpose
+wiki/gene-base-alarm.html#from	coding	Measured from the horse
+wiki/gene-base-alarm.html#health	gameplay	Health
+wiki/gene-base-alarm.html#place	gameplay	Put it by the door
+wiki/gene-base-alarm.html#what	gameplay	What it does
+wiki/gene-beadscale.html#about	coding	Why it is built this way
+wiki/gene-beadscale.html#carrot	gameplay	Its gene carrot
+wiki/gene-beadscale.html#file	coding	The file
+wiki/gene-beadscale.html#finding	gameplay	Finding one
+wiki/gene-beadscale.html#inheritance	gameplay	Crossing two of them
+wiki/gene-beadscale.html#layers	coding	What it paints
+wiki/gene-beadscale.html#outcomes	gameplay	What it can come out as
+wiki/gene-beetle-pearl.html#about	coding	Why it is built this way
+wiki/gene-beetle-pearl.html#carrot	gameplay	Its gene carrot
+wiki/gene-beetle-pearl.html#file	coding	The file
+wiki/gene-beetle-pearl.html#finding	gameplay	Finding one
+wiki/gene-beetle-pearl.html#inheritance	gameplay	Crossing two of them
+wiki/gene-beetle-pearl.html#layers	coding	What it paints
+wiki/gene-beetle-pearl.html#outcomes	gameplay	What it can come out as
+wiki/gene-bird-boned.html#cheap	coding	Nearly nothing to build
+wiki/gene-bird-boned.html#enabler	science	A gene whose value is entirely in another locus
+wiki/gene-bird-boned.html#health	gameplay	Health
+wiki/gene-bird-boned.html#use	gameplay	What it changes
+wiki/gene-bird-boned.html#verified	coding	Verified
+wiki/gene-bird-boned.html#what	gameplay	What it does
+wiki/gene-black-holes.html#carrot	gameplay	Its gene carrot
+wiki/gene-black-holes.html#file	coding	The file
+wiki/gene-black-holes.html#finding	gameplay	Finding one
+wiki/gene-black-holes.html#inheritance	gameplay	Crossing two of them
+wiki/gene-black-holes.html#layers	coding	What it paints
+wiki/gene-black-holes.html#outcomes	gameplay	What it can come out as
+wiki/gene-blackwork.html#about	coding	Why it is built this way
+wiki/gene-blackwork.html#carrot	gameplay	Its gene carrot
+wiki/gene-blackwork.html#file	coding	The file
+wiki/gene-blackwork.html#finding	gameplay	Finding one
+wiki/gene-blackwork.html#inheritance	gameplay	Crossing two of them
+wiki/gene-blackwork.html#layers	coding	What it paints
+wiki/gene-blackwork.html#outcomes	gameplay	What it can come out as
+wiki/gene-blight.html#about	coding	Why it is built this way
+wiki/gene-blight.html#carrot	gameplay	Its gene carrot
+wiki/gene-blight.html#file	coding	The file
+wiki/gene-blight.html#finding	gameplay	Finding one
+wiki/gene-blight.html#inheritance	gameplay	Crossing two of them
+wiki/gene-blight.html#layers	coding	What it paints
+wiki/gene-blight.html#outcomes	gameplay	What it can come out as
+wiki/gene-bloodstained.html#carrot	gameplay	Its gene carrot
+wiki/gene-bloodstained.html#file	coding	The file
+wiki/gene-bloodstained.html#finding	gameplay	Finding one
+wiki/gene-bloodstained.html#inheritance	gameplay	Crossing two of them
+wiki/gene-bloodstained.html#layers	coding	What it paints
+wiki/gene-bloodstained.html#outcomes	gameplay	What it can come out as
+wiki/gene-body-size.html#carrot	gameplay	Its gene carrot
+wiki/gene-body-size.html#clamp	coding	Past the natural clamp, on purpose
+wiki/gene-body-size.html#codominant	coding	The percentages add
+wiki/gene-body-size.html#copies	coding	It needs both copies' epigenetics
+wiki/gene-body-size.html#distribution	coding	A normal distribution, centred on a tenth
+wiki/gene-body-size.html#gait	coding	It needed a rendering fix
+wiki/gene-body-size.html#inheritance	gameplay	Crossing two of them
+wiki/gene-body-size.html#only-size	coding	Deliberately size only
+wiki/gene-body-size.html#table	coding	The combination table
+wiki/gene-body-size.html#wild	gameplay	Only heterozygotes are born wild
+wiki/gene-bracket.html#carrot	gameplay	Its gene carrot
+wiki/gene-bracket.html#file	coding	The file
+wiki/gene-bracket.html#finding	gameplay	Finding one
+wiki/gene-bracket.html#inheritance	gameplay	Crossing two of them
+wiki/gene-bracket.html#layers	coding	What it paints
+wiki/gene-bracket.html#outcomes	gameplay	What it can come out as
+wiki/gene-bracketed.html#about	coding	Why it is built this way
+wiki/gene-bracketed.html#carrot	gameplay	Its gene carrot
+wiki/gene-bracketed.html#file	coding	The file
+wiki/gene-bracketed.html#finding	gameplay	Finding one
+wiki/gene-bracketed.html#inheritance	gameplay	Crossing two of them
+wiki/gene-bracketed.html#layers	coding	What it paints
+wiki/gene-bracketed.html#outcomes	gameplay	What it can come out as
+wiki/gene-brindle.html#biology	coding	The biology, and what is deliberately left out
+wiki/gene-brindle.html#blaschko	coding	Blaschko lines, and the shape they make
+wiki/gene-brindle.html#carrot	gameplay	Its gene carrot
+wiki/gene-brindle.html#crosses	coding	The crosses — this is the whole appeal
+wiki/gene-brindle.html#draw	coding	What it paints
+wiki/gene-brindle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-brindle.html#knobs	coding	The knobs, and the one that bites
+wiki/gene-brindle.html#mosaic	coding	The asymmetry is the gene, not a garnish
+wiki/gene-brindle.html#not	science	Not modelled
+wiki/gene-brindle.html#own-field	coding	Why it does not share the zebra field
+wiki/gene-brindle.html#population	coding	In the wild: mares only
+wiki/gene-brindle.html#scaffolding	coding	The scaffolding it proves
+wiki/gene-brindle.html#storage	coding	How a hemizygous horse is stored
+wiki/gene-brindle.html#table	coding	The combination table
+wiki/gene-brindle.html#verified	coding	Verified in the test yard
+wiki/gene-brindle.html#what-it-does	gameplay	What it does
+wiki/gene-brindlelace.html#carrot	gameplay	Its gene carrot
+wiki/gene-brindlelace.html#file	coding	The file
+wiki/gene-brindlelace.html#finding	gameplay	Finding one
+wiki/gene-brindlelace.html#inheritance	gameplay	Crossing two of them
+wiki/gene-brindlelace.html#layers	coding	What it paints
+wiki/gene-brindlelace.html#outcomes	gameplay	What it can come out as
+wiki/gene-burn.html#carrot	gameplay	Its gene carrot
+wiki/gene-burn.html#file	coding	The file
+wiki/gene-burn.html#finding	gameplay	Finding one
+wiki/gene-burn.html#inheritance	gameplay	Crossing two of them
+wiki/gene-burn.html#layers	coding	What it paints
+wiki/gene-burn.html#outcomes	gameplay	What it can come out as
+wiki/gene-candelabra.html#about	coding	Why it is built this way
+wiki/gene-candelabra.html#carrot	gameplay	Its gene carrot
+wiki/gene-candelabra.html#file	coding	The file
+wiki/gene-candelabra.html#finding	gameplay	Finding one
+wiki/gene-candelabra.html#inheritance	gameplay	Crossing two of them
+wiki/gene-candelabra.html#layers	coding	What it paints
+wiki/gene-candelabra.html#outcomes	gameplay	What it can come out as
+wiki/gene-carapace-sheen.html#about	coding	Why it is built this way
+wiki/gene-carapace-sheen.html#carrot	gameplay	Its gene carrot
+wiki/gene-carapace-sheen.html#file	coding	The file
+wiki/gene-carapace-sheen.html#finding	gameplay	Finding one
+wiki/gene-carapace-sheen.html#inheritance	gameplay	Crossing two of them
+wiki/gene-carapace-sheen.html#layers	coding	What it paints
+wiki/gene-carapace-sheen.html#outcomes	gameplay	What it can come out as
+wiki/gene-champagne.html#both-pigments	science	It dilutes both pigments, which is the unusual part
+wiki/gene-champagne.html#breeds	science	Breeds and frequency
+wiki/gene-champagne.html#carrot	gameplay	Its gene carrot
+wiki/gene-champagne.html#eye	coding	The eye is the one thing about it that varies
+wiki/gene-champagne.html#health	science	Health, build, performance
+wiki/gene-champagne.html#identity	science	Genetic identity
+wiki/gene-champagne.html#inheritance	gameplay	Crossing two of them
+wiki/gene-champagne.html#mechanism	science	What the protein does, and where the proof runs out
+wiki/gene-champagne.html#real-inheritance	science	Inheritance and dosage
+wiki/gene-champagne.html#skin-eyes	science	Skin and eyes — often more diagnostic than the hair
+wiki/gene-champagne.html#tint	coding	The tint is what makes amber champagne work
+wiki/gene-circuit.html#carrot	gameplay	Its gene carrot
+wiki/gene-circuit.html#file	coding	The file
+wiki/gene-circuit.html#finding	gameplay	Finding one
+wiki/gene-circuit.html#inheritance	gameplay	Crossing two of them
+wiki/gene-circuit.html#layers	coding	What it paints
+wiki/gene-circuit.html#outcomes	gameplay	What it can come out as
+wiki/gene-ckm.html#breeds	science	Breeds and frequency
+wiki/gene-ckm.html#carrot	gameplay	Its gene carrot
+wiki/gene-ckm.html#health	science	Health
+wiki/gene-ckm.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ckm.html#jump	science	Jumping
+wiki/gene-ckm.html#not-coat-not-size	science	Not a coat gene, not a size gene
+wiki/gene-ckm.html#real-inheritance	science	Inheritance
+wiki/gene-ckm.html#speed	science	Speed — the claim, and what happened to it
+wiki/gene-ckm.html#verdict	science	What this means for the gene as implemented
+wiki/gene-ckm.html#what-ckm-is	science	What CKM is
+wiki/gene-ckm.html#what-it-does	gameplay	What it does
+wiki/gene-ckm.html#which-speed	science	If it did anything, it would be this kind of speed
+wiki/gene-cleansing-light.html#cost	science	A gene that wins fights and loses value
+wiki/gene-cleansing-light.html#health	gameplay	Health
+wiki/gene-cleansing-light.html#loot	gameplay	It costs you the drops
+wiki/gene-cleansing-light.html#negative	coding	A healing aura with the sign flipped
+wiki/gene-cleansing-light.html#what	gameplay	What it does
+wiki/gene-cleave-side.html#about	coding	Why it is built this way
+wiki/gene-cleave-side.html#carrot	gameplay	Its gene carrot
+wiki/gene-cleave-side.html#file	coding	The file
+wiki/gene-cleave-side.html#finding	gameplay	Finding one
+wiki/gene-cleave-side.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cleave-side.html#layers	coding	What it paints
+wiki/gene-cleave-side.html#outcomes	gameplay	What it can come out as
+wiki/gene-cleave.html#about	coding	Why it is built this way
+wiki/gene-cleave.html#carrot	gameplay	Its gene carrot
+wiki/gene-cleave.html#file	coding	The file
+wiki/gene-cleave.html#finding	gameplay	Finding one
+wiki/gene-cleave.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cleave.html#layers	coding	What it paints
+wiki/gene-cleave.html#outcomes	gameplay	What it can come out as
+wiki/gene-coastline.html#about	coding	Why it is built this way
+wiki/gene-coastline.html#carrot	gameplay	Its gene carrot
+wiki/gene-coastline.html#file	coding	The file
+wiki/gene-coastline.html#finding	gameplay	Finding one
+wiki/gene-coastline.html#inheritance	gameplay	Crossing two of them
+wiki/gene-coastline.html#layers	coding	What it paints
+wiki/gene-coastline.html#outcomes	gameplay	What it can come out as
+wiki/gene-coccinella.html#about	coding	Why it is built this way
+wiki/gene-coccinella.html#carrot	gameplay	Its gene carrot
+wiki/gene-coccinella.html#file	coding	The file
+wiki/gene-coccinella.html#finding	gameplay	Finding one
+wiki/gene-coccinella.html#inheritance	gameplay	Crossing two of them
+wiki/gene-coccinella.html#layers	coding	What it paints
+wiki/gene-coccinella.html#outcomes	gameplay	What it can come out as
+wiki/gene-concentric-eyespots.html#about	coding	Why it is built this way
+wiki/gene-concentric-eyespots.html#carrot	gameplay	Its gene carrot
+wiki/gene-concentric-eyespots.html#file	coding	The file
+wiki/gene-concentric-eyespots.html#finding	gameplay	Finding one
+wiki/gene-concentric-eyespots.html#inheritance	gameplay	Crossing two of them
+wiki/gene-concentric-eyespots.html#layers	coding	What it paints
+wiki/gene-concentric-eyespots.html#outcomes	gameplay	What it can come out as
+wiki/gene-contour-cells.html#about	coding	Why it is built this way
+wiki/gene-contour-cells.html#carrot	gameplay	Its gene carrot
+wiki/gene-contour-cells.html#file	coding	The file
+wiki/gene-contour-cells.html#finding	gameplay	Finding one
+wiki/gene-contour-cells.html#inheritance	gameplay	Crossing two of them
+wiki/gene-contour-cells.html#layers	coding	What it paints
+wiki/gene-contour-cells.html#outcomes	gameplay	What it can come out as
+wiki/gene-contour.html#about	coding	Why it is built this way
+wiki/gene-contour.html#carrot	gameplay	Its gene carrot
+wiki/gene-contour.html#file	coding	The file
+wiki/gene-contour.html#finding	gameplay	Finding one
+wiki/gene-contour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-contour.html#layers	coding	What it paints
+wiki/gene-contour.html#outcomes	gameplay	What it can come out as
+wiki/gene-coral-bloom.html#about	coding	Why it is built this way
+wiki/gene-coral-bloom.html#carrot	gameplay	Its gene carrot
+wiki/gene-coral-bloom.html#file	coding	The file
+wiki/gene-coral-bloom.html#finding	gameplay	Finding one
+wiki/gene-coral-bloom.html#inheritance	gameplay	Crossing two of them
+wiki/gene-coral-bloom.html#layers	coding	What it paints
+wiki/gene-coral-bloom.html#outcomes	gameplay	What it can come out as
+wiki/gene-corolla.html#about	coding	Why it is built this way
+wiki/gene-corolla.html#carrot	gameplay	Its gene carrot
+wiki/gene-corolla.html#file	coding	The file
+wiki/gene-corolla.html#finding	gameplay	Finding one
+wiki/gene-corolla.html#inheritance	gameplay	Crossing two of them
+wiki/gene-corolla.html#layers	coding	What it paints
+wiki/gene-corolla.html#outcomes	gameplay	What it can come out as
+wiki/gene-corolla.html#verified	coding	Verified
+wiki/gene-coronal.html#about	coding	Why it is built this way
+wiki/gene-coronal.html#carrot	gameplay	Its gene carrot
+wiki/gene-coronal.html#file	coding	The file
+wiki/gene-coronal.html#finding	gameplay	Finding one
+wiki/gene-coronal.html#inheritance	gameplay	Crossing two of them
+wiki/gene-coronal.html#layers	coding	What it paints
+wiki/gene-coronal.html#outcomes	gameplay	What it can come out as
+wiki/gene-corvid.html#carrot	gameplay	Its gene carrot
+wiki/gene-corvid.html#file	coding	The file
+wiki/gene-corvid.html#finding	gameplay	Finding one
+wiki/gene-corvid.html#inheritance	gameplay	Crossing two of them
+wiki/gene-corvid.html#layers	coding	What it paints
+wiki/gene-corvid.html#outcomes	gameplay	What it can come out as
+wiki/gene-cosmic.html#carrot	gameplay	Its gene carrot
+wiki/gene-cosmic.html#file	coding	The file
+wiki/gene-cosmic.html#finding	gameplay	Finding one
+wiki/gene-cosmic.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cosmic.html#layers	coding	What it paints
+wiki/gene-cosmic.html#outcomes	gameplay	What it can come out as
+wiki/gene-cracked-porcelain.html#about	coding	Why it is built this way
+wiki/gene-cracked-porcelain.html#carrot	gameplay	Its gene carrot
+wiki/gene-cracked-porcelain.html#file	coding	The file
+wiki/gene-cracked-porcelain.html#finding	gameplay	Finding one
+wiki/gene-cracked-porcelain.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cracked-porcelain.html#layers	coding	What it paints
+wiki/gene-cracked-porcelain.html#outcomes	gameplay	What it can come out as
+wiki/gene-crazework.html#about	coding	Why it is built this way
+wiki/gene-crazework.html#carrot	gameplay	Its gene carrot
+wiki/gene-crazework.html#file	coding	The file
+wiki/gene-crazework.html#finding	gameplay	Finding one
+wiki/gene-crazework.html#inheritance	gameplay	Crossing two of them
+wiki/gene-crazework.html#layers	coding	What it paints
+wiki/gene-crazework.html#outcomes	gameplay	What it can come out as
+wiki/gene-crescents.html#carrot	gameplay	Its gene carrot
+wiki/gene-crescents.html#file	coding	The file
+wiki/gene-crescents.html#finding	gameplay	Finding one
+wiki/gene-crescents.html#inheritance	gameplay	Crossing two of them
+wiki/gene-crescents.html#layers	coding	What it paints
+wiki/gene-crescents.html#outcomes	gameplay	What it can come out as
+wiki/gene-cutie-mark.html#carrot	gameplay	Its gene carrot
+wiki/gene-cutie-mark.html#epigenetics	coding	Everything about the emblem is epigenetic
+wiki/gene-cutie-mark.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cutie-mark.html#items	coding	The item pool
+wiki/gene-cutie-mark.html#modifiers	coding	Other genes can modify the mark
+wiki/gene-cutie-mark.html#pipeline	gameplay	It paints nothing in the pipeline
+wiki/gene-cutie-mark.html#table	coding	The combination table
+wiki/gene-cvm.html#carrot	gameplay	Its gene carrot
+wiki/gene-cvm.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cvm.html#no-variant	science	This one has no confirmed causal variant, and says so
+wiki/gene-datarain.html#about	coding	Why it is built this way
+wiki/gene-datarain.html#carrot	gameplay	Its gene carrot
+wiki/gene-datarain.html#file	coding	The file
+wiki/gene-datarain.html#finding	gameplay	Finding one
+wiki/gene-datarain.html#inheritance	gameplay	Crossing two of them
+wiki/gene-datarain.html#layers	coding	What it paints
+wiki/gene-datarain.html#outcomes	gameplay	What it can come out as
+wiki/gene-diamond-scutes.html#about	coding	Why it is built this way
+wiki/gene-diamond-scutes.html#carrot	gameplay	Its gene carrot
+wiki/gene-diamond-scutes.html#file	coding	The file
+wiki/gene-diamond-scutes.html#finding	gameplay	Finding one
+wiki/gene-diamond-scutes.html#inheritance	gameplay	Crossing two of them
+wiki/gene-diamond-scutes.html#layers	coding	What it paints
+wiki/gene-diamond-scutes.html#outcomes	gameplay	What it can come out as
+wiki/gene-diet.html#blood	gameplay	Blood diet
+wiki/gene-diet.html#breed	science	Does breed change the diet?
+wiki/gene-diet.html#carrot	gameplay	Its gene carrot
+wiki/gene-diet.html#heritable	science	Is dietary preference actually heritable?
+wiki/gene-diet.html#inheritance	gameplay	Crossing two of them
+wiki/gene-diet.html#meat	science	Can a horse eat meat?
+wiki/gene-diet.html#override	coding	Early on purpose, so it can be overridden
+wiki/gene-diet.html#the-list	science	The Minecraft food list, judged as horse feed
+wiki/gene-diet.html#verified	coding	Verified
+wiki/gene-diet.html#what-horses-eat	science	What a horse is built to eat
+wiki/gene-diet.html#which	coding	Which metal, which gem
+wiki/gene-diet.html#wild	coding	Feral only, and never a carrier
+wiki/gene-dmrt3.html#breed-pools	coding	The breed pools
+wiki/gene-dmrt3.html#breeds	gameplay	Who carries it
+wiki/gene-dmrt3.html#health	gameplay	Health
+wiki/gene-dmrt3.html#variant	science	A stop codon in the spinal cord
+wiki/gene-dmrt3.html#what	gameplay	What it does
+wiki/gene-dorsal-shield.html#about	coding	Why it is built this way
+wiki/gene-dorsal-shield.html#carrot	gameplay	Its gene carrot
+wiki/gene-dorsal-shield.html#file	coding	The file
+wiki/gene-dorsal-shield.html#finding	gameplay	Finding one
+wiki/gene-dorsal-shield.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dorsal-shield.html#layers	coding	What it paints
+wiki/gene-dorsal-shield.html#outcomes	gameplay	What it can come out as
+wiki/gene-dorsal-wing.html#about	coding	Why it is built this way
+wiki/gene-dorsal-wing.html#carrot	gameplay	Its gene carrot
+wiki/gene-dorsal-wing.html#file	coding	The file
+wiki/gene-dorsal-wing.html#finding	gameplay	Finding one
+wiki/gene-dorsal-wing.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dorsal-wing.html#layers	coding	What it paints
+wiki/gene-dorsal-wing.html#outcomes	gameplay	What it can come out as
+wiki/gene-dragon-shroud.html#about	coding	Why it is built this way
+wiki/gene-dragon-shroud.html#carrot	gameplay	Its gene carrot
+wiki/gene-dragon-shroud.html#file	coding	The file
+wiki/gene-dragon-shroud.html#finding	gameplay	Finding one
+wiki/gene-dragon-shroud.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dragon-shroud.html#layers	coding	What it paints
+wiki/gene-dragon-shroud.html#outcomes	gameplay	What it can come out as
+wiki/gene-dripwork.html#about	coding	Why it is built this way
+wiki/gene-dripwork.html#carrot	gameplay	Its gene carrot
+wiki/gene-dripwork.html#file	coding	The file
+wiki/gene-dripwork.html#finding	gameplay	Finding one
+wiki/gene-dripwork.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dripwork.html#layers	coding	What it paints
+wiki/gene-dripwork.html#outcomes	gameplay	What it can come out as
+wiki/gene-dryad.html#alleles	gameplay	The nine things a dryad can leave
+wiki/gene-dryad.html#frequency	coding	Nine variants makes the arithmetic do something interesting
+wiki/gene-dryad.html#health	gameplay	Health
+wiki/gene-dryad.html#incomplete	science	Why this locus is incompletely dominant when the others are not
+wiki/gene-dryad.html#mixed	gameplay	Two different alleles is not nothing, and it is not double
+wiki/gene-dryad.html#rate	gameplay	The rate is epigenetic
+wiki/gene-dryad.html#rejected	science	What was considered and not done
+wiki/gene-dryad.html#slow	science	A gene you notice a week later
+wiki/gene-dryad.html#verified	coding	Verified in the test yard
+wiki/gene-dryad.html#what	gameplay	What it does
+wiki/gene-dun.html#alleles	science	Three alleles, one dominance order
+wiki/gene-dun.html#asymmetry	coding	Dun takes black off. It barely touches red.
+wiki/gene-dun.html#bars	coding	Leg bars: strokes, not bracelets
+wiki/gene-dun.html#bases	science	What it looks like on each base
+wiki/gene-dun.html#breeds	science	Breeds and frequency
+wiki/gene-dun.html#carrot	gameplay	Its gene carrot
+wiki/gene-dun.html#d1	coding	d1 : a marking with no dilution
+wiki/gene-dun.html#d1-accessories	coding	It draws the bars and the shoulder bar too
+wiki/gene-dun.html#evolution	science	Evolution, and the open questions
+wiki/gene-dun.html#grullo	coding	Grullo, and the order the two pigments come off in
+wiki/gene-dun.html#health	science	Health, jumping, speed
+wiki/gene-dun.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dun.html#locus	science	The gene, and two different things near it
+wiki/gene-dun.html#markings	coding	The marking checklist, region by region
+wiki/gene-dun.html#mechanism	science	The mechanism, which is inside the hair
+wiki/gene-dun.html#midtstol	coding	The midtstol : why the mane is not a flat point
+wiki/gene-dun.html#not-build	science	What the coat locus does not do
+wiki/gene-dun.html#one-mask	coding	One dilution and one mask
+wiki/gene-dun.html#points	coding	The points, and how a bay dun keeps them
+wiki/gene-dun.html#rolls	coding	The markings are incomplete on purpose
+wiki/gene-duskfall-speckle.html#about	coding	Why it is built this way
+wiki/gene-duskfall-speckle.html#carrot	gameplay	Its gene carrot
+wiki/gene-duskfall-speckle.html#file	coding	The file
+wiki/gene-duskfall-speckle.html#finding	gameplay	Finding one
+wiki/gene-duskfall-speckle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-duskfall-speckle.html#layers	coding	What it paints
+wiki/gene-duskfall-speckle.html#outcomes	gameplay	What it can come out as
+wiki/gene-duskwing-bands.html#about	coding	Why it is built this way
+wiki/gene-duskwing-bands.html#carrot	gameplay	Its gene carrot
+wiki/gene-duskwing-bands.html#file	coding	The file
+wiki/gene-duskwing-bands.html#finding	gameplay	Finding one
+wiki/gene-duskwing-bands.html#inheritance	gameplay	Crossing two of them
+wiki/gene-duskwing-bands.html#layers	coding	What it paints
+wiki/gene-duskwing-bands.html#outcomes	gameplay	What it can come out as
+wiki/gene-dust.html#about	coding	Why it is built this way
+wiki/gene-dust.html#carrot	gameplay	Its gene carrot
+wiki/gene-dust.html#file	coding	The file
+wiki/gene-dust.html#finding	gameplay	Finding one
+wiki/gene-dust.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dust.html#layers	coding	What it paints
+wiki/gene-dust.html#outcomes	gameplay	What it can come out as
+wiki/gene-dustfall.html#about	coding	Why it is built this way
+wiki/gene-dustfall.html#carrot	gameplay	Its gene carrot
+wiki/gene-dustfall.html#file	coding	The file
+wiki/gene-dustfall.html#finding	gameplay	Finding one
+wiki/gene-dustfall.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dustfall.html#layers	coding	What it paints
+wiki/gene-dustfall.html#outcomes	gameplay	What it can come out as
+wiki/gene-dutch.html#about	coding	Why it is built this way
+wiki/gene-dutch.html#carrot	gameplay	Its gene carrot
+wiki/gene-dutch.html#file	coding	The file
+wiki/gene-dutch.html#finding	gameplay	Finding one
+wiki/gene-dutch.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dutch.html#layers	coding	What it paints
+wiki/gene-dutch.html#outcomes	gameplay	What it can come out as
+wiki/gene-echolocate.html#health	gameplay	Health
+wiki/gene-echolocate.html#sense	science	A gene that changes what the player can see
+wiki/gene-echolocate.html#shared	coding	Two shared pieces, nothing of its own
+wiki/gene-echolocate.html#use	gameplay	What it is for
+wiki/gene-echolocate.html#what	gameplay	What it does
+wiki/gene-ednrb.html#breeds	science	Breeds and frequency
+wiki/gene-ednrb.html#carrot	gameplay	Its gene carrot
+wiki/gene-ednrb.html#departs	science	Where the mod departs
+wiki/gene-ednrb.html#health	science	Health, and what deafness actually means here
+wiki/gene-ednrb.html#identity	science	Genetic identity
+wiki/gene-ednrb.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ednrb.html#overo	science	“Overo” is not one allele
+wiki/gene-ednrb.html#paints	coding	How frame overo paints
+wiki/gene-ednrb.html#quantile	coding	The threshold is a quantile, not a constant
+wiki/gene-ednrb.html#removes	science	It removes pigment cells; it does not dilute
+wiki/gene-ednrb.html#sci-inheritance	science	Inheritance, and the breeding rule
+wiki/gene-ednrb.html#settled	science	What is settled, and what is not
+wiki/gene-ednrb.html#topline	coding	Measured against the topline, not the horse
+wiki/gene-ednrb.html#variable	science	A carrier does not have to look like one
+wiki/gene-ednrb.html#verified	coding	Verified in the test yard
+wiki/gene-ednrb.html#why-lethal	science	Why white hair and a fatal gut disease are the same gene
+wiki/gene-ednrb.html#why-own-locus	science	Why frame has a locus to itself
+wiki/gene-egg-layer.html#ground	coding	On the ground, not into a chest
+wiki/gene-egg-layer.html#health	gameplay	Health
+wiki/gene-egg-layer.html#open	science	Opening the vocabulary
+wiki/gene-egg-layer.html#third	gameplay	The third way a horse gives you something
+wiki/gene-egg-layer.html#verb	coding	The new verb, and why it is shaped like this
+wiki/gene-egg-layer.html#verified	coding	Verified in the test yard
+wiki/gene-egg-layer.html#what	gameplay	What it does
+wiki/gene-ehretia.html#about	coding	Why it is built this way
+wiki/gene-ehretia.html#carrot	gameplay	Its gene carrot
+wiki/gene-ehretia.html#file	coding	The file
+wiki/gene-ehretia.html#finding	gameplay	Finding one
+wiki/gene-ehretia.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ehretia.html#layers	coding	What it paints
+wiki/gene-ehretia.html#outcomes	gameplay	What it can come out as
+wiki/gene-element-dusted.html#carrot	gameplay	Its gene carrot
+wiki/gene-element-dusted.html#file	coding	The file
+wiki/gene-element-dusted.html#finding	gameplay	Finding one
+wiki/gene-element-dusted.html#inheritance	gameplay	Crossing two of them
+wiki/gene-element-dusted.html#layers	coding	What it paints
+wiki/gene-element-dusted.html#outcomes	gameplay	What it can come out as
+wiki/gene-elytra-veins.html#about	coding	Why it is built this way
+wiki/gene-elytra-veins.html#carrot	gameplay	Its gene carrot
+wiki/gene-elytra-veins.html#file	coding	The file
+wiki/gene-elytra-veins.html#finding	gameplay	Finding one
+wiki/gene-elytra-veins.html#inheritance	gameplay	Crossing two of them
+wiki/gene-elytra-veins.html#layers	coding	What it paints
+wiki/gene-elytra-veins.html#outcomes	gameplay	What it can come out as
+wiki/gene-emberveins.html#about	coding	Why it is built this way
+wiki/gene-emberveins.html#carrot	gameplay	Its gene carrot
+wiki/gene-emberveins.html#file	coding	The file
+wiki/gene-emberveins.html#finding	gameplay	Finding one
+wiki/gene-emberveins.html#inheritance	gameplay	Crossing two of them
+wiki/gene-emberveins.html#layers	coding	What it paints
+wiki/gene-emberveins.html#outcomes	gameplay	What it can come out as
+wiki/gene-emitola.html#carrot	gameplay	Its gene carrot
+wiki/gene-emitola.html#file	coding	The file
+wiki/gene-emitola.html#finding	gameplay	Finding one
+wiki/gene-emitola.html#inheritance	gameplay	Crossing two of them
+wiki/gene-emitola.html#layers	coding	What it paints
+wiki/gene-emitola.html#outcomes	gameplay	What it can come out as
+wiki/gene-ender-echo.html#health	gameplay	Health
+wiki/gene-ender-echo.html#ride	gameplay	It takes you with it
+wiki/gene-ender-echo.html#trigger	coding	Why a trigger and not a condition
+wiki/gene-ender-echo.html#verified	coding	Verified
+wiki/gene-ender-echo.html#what	gameplay	What it does
+wiki/gene-ender-echo.html#wild	science	A survival trait, borrowed
+wiki/gene-endless-knot.html#about	coding	Why it is built this way
+wiki/gene-endless-knot.html#carrot	gameplay	Its gene carrot
+wiki/gene-endless-knot.html#file	coding	The file
+wiki/gene-endless-knot.html#finding	gameplay	Finding one
+wiki/gene-endless-knot.html#inheritance	gameplay	Crossing two of them
+wiki/gene-endless-knot.html#layers	coding	What it paints
+wiki/gene-endless-knot.html#outcomes	gameplay	What it can come out as
+wiki/gene-extension.html#alleles	science	Three alleles, one dominance order
+wiki/gene-extension.html#breeds	science	Breeds and frequency
+wiki/gene-extension.html#carrot	gameplay	Its gene carrot
+wiki/gene-extension.html#departs	science	Where the mod departs
+wiki/gene-extension.html#ea-testing	science	The e a problem is a testing problem
+wiki/gene-extension.html#identity	science	Genetic identity
+wiki/gene-extension.html#inheritance	gameplay	Crossing two of them
+wiki/gene-extension.html#mechanism	science	What the locus actually decides
+wiki/gene-extension.html#not-shade	science	Extension does not explain shade
+wiki/gene-extension.html#red-based	science	What a red-based horse hides
+wiki/gene-extension.html#settled	science	What is settled, and what is not
+wiki/gene-extreme-white-dominant.html#capability	coding	Why it is a capability, not a priority
+wiki/gene-extreme-white-dominant.html#carrot	gameplay	Its gene carrot
+wiki/gene-extreme-white-dominant.html#eyes	gameplay	The eyes are the one exception
+wiki/gene-extreme-white-dominant.html#finding	gameplay	Finding one
+wiki/gene-extreme-white-dominant.html#inheritance	gameplay	Crossing two of them
+wiki/gene-extreme-white-dominant.html#mask	coding	How the mask is built
+wiki/gene-extreme-white-dominant.html#order	coding	Its place on the paint order page
+wiki/gene-extreme-white-dominant.html#what	gameplay	What it does to a horse
+wiki/gene-eyesight.html#cancel	science	Cancelling as a statement
+wiki/gene-eyesight.html#cheap	coding	The cheapest gene on the behaviour list
+wiki/gene-eyesight.html#health	gameplay	Health
+wiki/gene-eyesight.html#light	coding	Why light level and not the clock
+wiki/gene-eyesight.html#torches	gameplay	Your torches slow your caveborn horse down
+wiki/gene-eyesight.html#tradeoff	science	A locus with no wrong answer
+wiki/gene-eyesight.html#verified	coding	Verified
+wiki/gene-eyesight.html#what	gameplay	What it does
+wiki/gene-fade.html#carrot	gameplay	Its gene carrot
+wiki/gene-fade.html#file	coding	The file
+wiki/gene-fade.html#finding	gameplay	Finding one
+wiki/gene-fade.html#inheritance	gameplay	Crossing two of them
+wiki/gene-fade.html#layers	coding	What it paints
+wiki/gene-fade.html#outcomes	gameplay	What it can come out as
+wiki/gene-fawn.html#about	coding	Why it is built this way
+wiki/gene-fawn.html#carrot	gameplay	Its gene carrot
+wiki/gene-fawn.html#file	coding	The file
+wiki/gene-fawn.html#finding	gameplay	Finding one
+wiki/gene-fawn.html#inheritance	gameplay	Crossing two of them
+wiki/gene-fawn.html#layers	coding	What it paints
+wiki/gene-fawn.html#outcomes	gameplay	What it can come out as
+wiki/gene-fertility.html#alleles	gameplay	What each combination does
+wiki/gene-fertility.html#class	coding	The class
+wiki/gene-fertility.html#inheritance	gameplay	Crossing two of them
+wiki/gene-fertility.html#not-one-locus	science	There is no fertility locus
+wiki/gene-fertility.html#subfertility	science	Subfertility
+wiki/gene-fertility.html#twins	science	Twins in real horses
+wiki/gene-fertility.html#wild	gameplay	Where it turns up
+wiki/gene-fielded.html#about	coding	Why it is built this way
+wiki/gene-fielded.html#carrot	gameplay	Its gene carrot
+wiki/gene-fielded.html#file	coding	The file
+wiki/gene-fielded.html#finding	gameplay	Finding one
+wiki/gene-fielded.html#inheritance	gameplay	Crossing two of them
+wiki/gene-fielded.html#layers	coding	What it paints
+wiki/gene-fielded.html#outcomes	gameplay	What it can come out as
+wiki/gene-filigree.html#about	coding	Why it is built this way
+wiki/gene-filigree.html#carrot	gameplay	Its gene carrot
+wiki/gene-filigree.html#file	coding	The file
+wiki/gene-filigree.html#finding	gameplay	Finding one
+wiki/gene-filigree.html#inheritance	gameplay	Crossing two of them
+wiki/gene-filigree.html#layers	coding	What it paints
+wiki/gene-filigree.html#outcomes	gameplay	What it can come out as
+wiki/gene-fireproof.html#health	gameplay	Health
+wiki/gene-fireproof.html#lava	gameplay	Lava is a route, not a wall
+wiki/gene-fireproof.html#pair	science	Why it is not two loci
+wiki/gene-fireproof.html#shared	coding	One shared change, three genes
+wiki/gene-fireproof.html#swim	coding	Swimming, not walking
+wiki/gene-fireproof.html#verified	coding	Verified
+wiki/gene-fireproof.html#what	gameplay	What it does
+wiki/gene-fish-scales.html#about	coding	Why it is built this way
+wiki/gene-fish-scales.html#carrot	gameplay	Its gene carrot
+wiki/gene-fish-scales.html#file	coding	The file
+wiki/gene-fish-scales.html#finding	gameplay	Finding one
+wiki/gene-fish-scales.html#inheritance	gameplay	Crossing two of them
+wiki/gene-fish-scales.html#layers	coding	What it paints
+wiki/gene-fish-scales.html#outcomes	gameplay	What it can come out as
+wiki/gene-flametouched.html#carrot	gameplay	Its gene carrot
+wiki/gene-flametouched.html#file	coding	The file
+wiki/gene-flametouched.html#finding	gameplay	Finding one
+wiki/gene-flametouched.html#inheritance	gameplay	Crossing two of them
+wiki/gene-flametouched.html#layers	coding	What it paints
+wiki/gene-flametouched.html#outcomes	gameplay	What it can come out as
+wiki/gene-flaxen.html#carrot	gameplay	Its gene carrot
+wiki/gene-flaxen.html#chestnut	coding	Chestnut only, and carried by everything
+wiki/gene-flaxen.html#dosage	coding	The dosage
+wiki/gene-flaxen.html#inheritance	gameplay	Crossing two of them
+wiki/gene-flaxen.html#lookalikes	gameplay	Not the look-alikes
+wiki/gene-flaxen.html#paint	coding	How it paints
+wiki/gene-flaxen.html#phenotype	science	It is a phenotype, and this is a simulation of one
+wiki/gene-flaxen.html#root-to-tip	coding	Root to tip
+wiki/gene-flying.html#about	coding	Why it is built this way
+wiki/gene-flying.html#carrot	gameplay	Its gene carrot
+wiki/gene-flying.html#file	coding	The file
+wiki/gene-flying.html#finding	gameplay	Finding one
+wiki/gene-flying.html#inheritance	gameplay	Crossing two of them
+wiki/gene-flying.html#layers	coding	What it paints
+wiki/gene-flying.html#outcomes	gameplay	What it can come out as
+wiki/gene-flying.html#verified	coding	Verified
+wiki/gene-foamed.html#about	coding	Why it is built this way
+wiki/gene-foamed.html#carrot	gameplay	Its gene carrot
+wiki/gene-foamed.html#file	coding	The file
+wiki/gene-foamed.html#finding	gameplay	Finding one
+wiki/gene-foamed.html#inheritance	gameplay	Crossing two of them
+wiki/gene-foamed.html#layers	coding	What it paints
+wiki/gene-foamed.html#outcomes	gameplay	What it can come out as
+wiki/gene-food-preference.html#breed	science	The most breed-defining invisible gene in the batch
+wiki/gene-food-preference.html#contradiction	gameplay	A carnivore that loves carrots
+wiki/gene-food-preference.html#health	gameplay	Health
+wiki/gene-food-preference.html#order	coding	Which locus is asked first
+wiki/gene-food-preference.html#what	gameplay	What it does
+wiki/gene-foxglove.html#about	coding	Why it is built this way
+wiki/gene-foxglove.html#carrot	gameplay	Its gene carrot
+wiki/gene-foxglove.html#file	coding	The file
+wiki/gene-foxglove.html#finding	gameplay	Finding one
+wiki/gene-foxglove.html#inheritance	gameplay	Crossing two of them
+wiki/gene-foxglove.html#layers	coding	What it paints
+wiki/gene-foxglove.html#outcomes	gameplay	What it can come out as
+wiki/gene-foxglove.html#verified	coding	Verified
+wiki/gene-fracture.html#about	coding	Why it is built this way
+wiki/gene-fracture.html#carrot	gameplay	Its gene carrot
+wiki/gene-fracture.html#file	coding	The file
+wiki/gene-fracture.html#finding	gameplay	Finding one
+wiki/gene-fracture.html#inheritance	gameplay	Crossing two of them
+wiki/gene-fracture.html#layers	coding	What it paints
+wiki/gene-fracture.html#outcomes	gameplay	What it can come out as
+wiki/gene-frostfall.html#carrot	gameplay	Its gene carrot
+wiki/gene-frostfall.html#file	coding	The file
+wiki/gene-frostfall.html#finding	gameplay	Finding one
+wiki/gene-frostfall.html#inheritance	gameplay	Crossing two of them
+wiki/gene-frostfall.html#layers	coding	What it paints
+wiki/gene-frostfall.html#outcomes	gameplay	What it can come out as
+wiki/gene-galaxy.html#carrot	gameplay	Its gene carrot
+wiki/gene-galaxy.html#file	coding	The file
+wiki/gene-galaxy.html#finding	gameplay	Finding one
+wiki/gene-galaxy.html#inheritance	gameplay	Crossing two of them
+wiki/gene-galaxy.html#layers	coding	What it paints
+wiki/gene-galaxy.html#outcomes	gameplay	What it can come out as
+wiki/gene-gamma.html#carrot	gameplay	Its gene carrot
+wiki/gene-gamma.html#file	coding	The file
+wiki/gene-gamma.html#finding	gameplay	Finding one
+wiki/gene-gamma.html#inheritance	gameplay	Crossing two of them
+wiki/gene-gamma.html#layers	coding	What it paints
+wiki/gene-gamma.html#outcomes	gameplay	What it can come out as
+wiki/gene-gamma.html#verified	coding	Verified
+wiki/gene-gbe1.html#affected	science	What happens to an affected foal
+wiki/gene-gbe1.html#breeds	science	Breeds and frequency
+wiki/gene-gbe1.html#carriers	science	Carriers are clinically normal
+wiki/gene-gbe1.html#carrot	gameplay	Its gene carrot
+wiki/gene-gbe1.html#inheritance	gameplay	Crossing two of them
+wiki/gene-gbe1.html#not-a-performance-gene	science	Not a coat, build or performance gene
+wiki/gene-gbe1.html#real-inheritance	science	Inheritance in a real population
+wiki/gene-gbe1.html#settled	science	What is settled, and what is not
+wiki/gene-gbe1.html#variant	science	The variant
+wiki/gene-gbe1.html#what-gbe1-does	science	What the enzyme does
+wiki/gene-geode.html#about	coding	Why it is built this way
+wiki/gene-geode.html#carrot	gameplay	Its gene carrot
+wiki/gene-geode.html#file	coding	The file
+wiki/gene-geode.html#finding	gameplay	Finding one
+wiki/gene-geode.html#inheritance	gameplay	Crossing two of them
+wiki/gene-geode.html#layers	coding	What it paints
+wiki/gene-geode.html#outcomes	gameplay	What it can come out as
+wiki/gene-gilded-crackle.html#about	coding	Why it is built this way
+wiki/gene-gilded-crackle.html#carrot	gameplay	Its gene carrot
+wiki/gene-gilded-crackle.html#file	coding	The file
+wiki/gene-gilded-crackle.html#finding	gameplay	Finding one
+wiki/gene-gilded-crackle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-gilded-crackle.html#layers	coding	What it paints
+wiki/gene-gilded-crackle.html#outcomes	gameplay	What it can come out as
+wiki/gene-gill-bloom.html#about	coding	Why it is built this way
+wiki/gene-gill-bloom.html#carrot	gameplay	Its gene carrot
+wiki/gene-gill-bloom.html#file	coding	The file
+wiki/gene-gill-bloom.html#finding	gameplay	Finding one
+wiki/gene-gill-bloom.html#inheritance	gameplay	Crossing two of them
+wiki/gene-gill-bloom.html#layers	coding	What it paints
+wiki/gene-gill-bloom.html#outcomes	gameplay	What it can come out as
+wiki/gene-glow.html#carrot	gameplay	Its gene carrot
+wiki/gene-glow.html#file	coding	The file
+wiki/gene-glow.html#finding	gameplay	Finding one
+wiki/gene-glow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-glow.html#layers	coding	What it paints
+wiki/gene-glow.html#outcomes	gameplay	What it can come out as
+wiki/gene-goth.html#carrot	gameplay	Its gene carrot
+wiki/gene-goth.html#file	coding	The file
+wiki/gene-goth.html#finding	gameplay	Finding one
+wiki/gene-goth.html#inheritance	gameplay	Crossing two of them
+wiki/gene-goth.html#layers	coding	What it paints
+wiki/gene-goth.html#outcomes	gameplay	What it can come out as
+wiki/gene-grey.html#alleles	coding	Three alleles, because the locus is a copy number
+wiki/gene-grey.html#breeds	gameplay	Where it is common
+wiki/gene-grey.html#carrot	gameplay	Its gene carrot
+wiki/gene-grey.html#dapples	coding	The dapples
+wiki/gene-grey.html#declined	science	What was in the reference and is not here
+wiki/gene-grey.html#foals	coding	Foals
+wiki/gene-grey.html#inheritance	gameplay	Crossing two of them
+wiki/gene-grey.html#knobs	coding	The nine draws
+wiki/gene-grey.html#melanoma	coding	Melanoma: reported, never simulated
+wiki/gene-grey.html#not	science	What grey is not
+wiki/gene-grey.html#rate	coding	A rate, without a clock
+wiki/gene-grey.html#regions	coding	Regions do not grey together
+wiki/gene-grey.html#remap	coding	Grey is a remap, and that is the whole point
+wiki/gene-grey.html#root	coding	Why the mane greys from the root
+wiki/gene-grey.html#variants	coding	Chubari spots and the bloody shoulder
+wiki/gene-guardian.html#best	science	The gene most likely to be somebody’s favourite
+wiki/gene-guardian.html#difference	gameplay	How it differs from a gladiator
+wiki/gene-guardian.html#health	gameplay	Health
+wiki/gene-guardian.html#owner	coding	Owner, not rider
+wiki/gene-guardian.html#verified	coding	Verified
+wiki/gene-guardian.html#what	gameplay	What it does
+wiki/gene-gudial.html#carrot	gameplay	Its gene carrot
+wiki/gene-gudial.html#file	coding	The file
+wiki/gene-gudial.html#finding	gameplay	Finding one
+wiki/gene-gudial.html#inheritance	gameplay	Crossing two of them
+wiki/gene-gudial.html#layers	coding	What it paints
+wiki/gene-gudial.html#outcomes	gameplay	What it can come out as
+wiki/gene-guppy.html#carrot	gameplay	Its gene carrot
+wiki/gene-guppy.html#file	coding	The file
+wiki/gene-guppy.html#finding	gameplay	Finding one
+wiki/gene-guppy.html#inheritance	gameplay	Crossing two of them
+wiki/gene-guppy.html#layers	coding	What it paints
+wiki/gene-guppy.html#outcomes	gameplay	What it can come out as
+wiki/gene-gys1.html#at-a-glance	science	At a glance
+wiki/gene-gys1.html#breeds	science	Breed distribution and history
+wiki/gene-gys1.html#carrot	gameplay	Its gene carrot
+wiki/gene-gys1.html#coat	science	Coat, build, size
+wiki/gene-gys1.html#frequency	coding	The frequency is the gene
+wiki/gene-gys1.html#health	science	What the disease does
+wiki/gene-gys1.html#inheritance	gameplay	Crossing two of them
+wiki/gene-gys1.html#mutation	science	A brake that will not engage
+wiki/gene-gys1.html#normal-function	science	What the enzyme normally does
+wiki/gene-gys1.html#performance	science	Jumping, speed, and the advantage theory
+wiki/gene-gys1.html#real-inheritance	science	Inheritance and dosage
+wiki/gene-gys1.html#settled	science	What is still open
+wiki/gene-harlequin-shield.html#about	coding	Why it is built this way
+wiki/gene-harlequin-shield.html#carrot	gameplay	Its gene carrot
+wiki/gene-harlequin-shield.html#file	coding	The file
+wiki/gene-harlequin-shield.html#finding	gameplay	Finding one
+wiki/gene-harlequin-shield.html#inheritance	gameplay	Crossing two of them
+wiki/gene-harlequin-shield.html#layers	coding	What it paints
+wiki/gene-harlequin-shield.html#outcomes	gameplay	What it can come out as
+wiki/gene-healer.html#aura	coding	The aura
+wiki/gene-healer.html#carrot	gameplay	Its gene carrot
+wiki/gene-healer.html#foal	coding	A foal heals and shows nothing
+wiki/gene-healer.html#inheritance	gameplay	Crossing two of them
+wiki/gene-healer.html#mark	coding	The mark and the effect are the same fact
+wiki/gene-healer.html#order	science	Why it runs after mane colour
+wiki/gene-healer.html#stripe	coding	Drawing a line down a blade
+wiki/gene-healer.html#what-it-does	gameplay	What it does
+wiki/gene-hmga2.html#breeds	science	Breed distribution
+wiki/gene-hmga2.html#carrot	gameplay	Its gene carrot
+wiki/gene-hmga2.html#health	science	Health — and the one place the mod inverts the sign
+wiki/gene-hmga2.html#inheritance	gameplay	Crossing two of them
+wiki/gene-hmga2.html#locus	science	Gene and locus
+wiki/gene-hmga2.html#performance	science	Coat, speed, jumping
+wiki/gene-hmga2.html#real-inheritance	science	Inheritance
+wiki/gene-hmga2.html#settled	science	What is settled, and what is not
+wiki/gene-hmga2.html#size	science	Size, which is the well-evidenced part
+wiki/gene-hmga2.html#what-it-does	gameplay	What it does
+wiki/gene-holo-flake.html#about	coding	Why it is built this way
+wiki/gene-holo-flake.html#carrot	gameplay	Its gene carrot
+wiki/gene-holo-flake.html#file	coding	The file
+wiki/gene-holo-flake.html#finding	gameplay	Finding one
+wiki/gene-holo-flake.html#inheritance	gameplay	Crossing two of them
+wiki/gene-holo-flake.html#layers	coding	What it paints
+wiki/gene-holo-flake.html#outcomes	gameplay	What it can come out as
+wiki/gene-holy-ward.html#best	science	The gene that justifies the family
+wiki/gene-holy-ward.html#cap	gameplay	Sixteen blocks, and no further
+wiki/gene-holy-ward.html#health	gameplay	Health
+wiki/gene-holy-ward.html#intimidating	gameplay	It is not the same as intimidating
+wiki/gene-holy-ward.html#not-aura	coding	Why this is not a mob_aura mode
+wiki/gene-holy-ward.html#use	gameplay	A camp that walks
+wiki/gene-holy-ward.html#verified	coding	Verified
+wiki/gene-holy-ward.html#what	gameplay	What it does
+wiki/gene-holy-ward.html#where	gameplay	What it actually guards
+wiki/gene-hood.html#carrot	gameplay	Its gene carrot
+wiki/gene-hood.html#file	coding	The file
+wiki/gene-hood.html#finding	gameplay	Finding one
+wiki/gene-hood.html#inheritance	gameplay	Crossing two of them
+wiki/gene-hood.html#layers	coding	What it paints
+wiki/gene-hood.html#outcomes	gameplay	What it can come out as
+wiki/gene-hot-blooded.html#health	gameplay	Health
+wiki/gene-hot-blooded.html#lake	gameplay	On a frozen lake
+wiki/gene-hot-blooded.html#terrain	science	A gene that edits the world
+wiki/gene-hot-blooded.html#verified	coding	Verified
+wiki/gene-hot-blooded.html#what	gameplay	What it does
+wiki/gene-hot-blooded.html#word	coding	One new vocabulary word
+wiki/gene-hued-pangare.html#carrot	gameplay	Its gene carrot
+wiki/gene-hued-pangare.html#file	coding	The class
+wiki/gene-hued-pangare.html#finding	gameplay	Finding one
+wiki/gene-hued-pangare.html#inheritance	gameplay	Crossing two of them
+wiki/gene-hued-pangare.html#layers	coding	What it paints
+wiki/gene-hued-pangare.html#outcomes	gameplay	What it can come out as
+wiki/gene-hued-pangare.html#why-a-class	coding	Why it is not a gene file
+wiki/gene-hydrophobic.html#default	gameplay	Why this is the odd one out
+wiki/gene-hydrophobic.html#defect	science	A defect in the magical family
+wiki/gene-hydrophobic.html#health	gameplay	Health
+wiki/gene-hydrophobic.html#inverted	coding	A gene that removes a feature
+wiki/gene-hydrophobic.html#verified	coding	Verified
+wiki/gene-hydrophobic.html#what	gameplay	What it does
+wiki/gene-imperial.html#about	coding	Why it is built this way
+wiki/gene-imperial.html#carrot	gameplay	Its gene carrot
+wiki/gene-imperial.html#file	coding	The file
+wiki/gene-imperial.html#finding	gameplay	Finding one
+wiki/gene-imperial.html#inheritance	gameplay	Crossing two of them
+wiki/gene-imperial.html#layers	coding	What it paints
+wiki/gene-imperial.html#outcomes	gameplay	What it can come out as
+wiki/gene-ink-scroll.html#about	coding	Why it is built this way
+wiki/gene-ink-scroll.html#carrot	gameplay	Its gene carrot
+wiki/gene-ink-scroll.html#file	coding	The file
+wiki/gene-ink-scroll.html#finding	gameplay	Finding one
+wiki/gene-ink-scroll.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ink-scroll.html#layers	coding	What it paints
+wiki/gene-ink-scroll.html#outcomes	gameplay	What it can come out as
+wiki/gene-inkcoil.html#about	coding	Why it is built this way
+wiki/gene-inkcoil.html#carrot	gameplay	Its gene carrot
+wiki/gene-inkcoil.html#file	coding	The file
+wiki/gene-inkcoil.html#finding	gameplay	Finding one
+wiki/gene-inkcoil.html#inheritance	gameplay	Crossing two of them
+wiki/gene-inkcoil.html#layers	coding	What it paints
+wiki/gene-inkcoil.html#outcomes	gameplay	What it can come out as
+wiki/gene-integration.html#carrot	gameplay	Its gene carrot
+wiki/gene-integration.html#file	coding	The file
+wiki/gene-integration.html#finding	gameplay	Finding one
+wiki/gene-integration.html#inheritance	gameplay	Crossing two of them
+wiki/gene-integration.html#layers	coding	What it paints
+wiki/gene-integration.html#outcomes	gameplay	What it can come out as
+wiki/gene-internal-flow.html#carrot	gameplay	Its gene carrot
+wiki/gene-internal-flow.html#file	coding	The file
+wiki/gene-internal-flow.html#finding	gameplay	Finding one
+wiki/gene-internal-flow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-internal-flow.html#layers	coding	What it paints
+wiki/gene-internal-flow.html#outcomes	gameplay	What it can come out as
+wiki/gene-intimidating.html#cost	gameplay	The catch
+wiki/gene-intimidating.html#drawback	science	Keeping the cost
+wiki/gene-intimidating.html#health	gameplay	Health
+wiki/gene-intimidating.html#scope	coding	Widened from passive-only during design
+wiki/gene-intimidating.html#verified	coding	Verified
+wiki/gene-intimidating.html#ward	gameplay	It is not the same as holy ward
+wiki/gene-intimidating.html#what	gameplay	What it does
+wiki/gene-invert.html#carrot	gameplay	Its gene carrot
+wiki/gene-invert.html#file	coding	The file
+wiki/gene-invert.html#finding	gameplay	Finding one
+wiki/gene-invert.html#inheritance	gameplay	Crossing two of them
+wiki/gene-invert.html#layers	coding	What it paints
+wiki/gene-invert.html#outcomes	gameplay	What it can come out as
+wiki/gene-iridescent-jewel.html#about	coding	Why it is built this way
+wiki/gene-iridescent-jewel.html#carrot	gameplay	Its gene carrot
+wiki/gene-iridescent-jewel.html#file	coding	The file
+wiki/gene-iridescent-jewel.html#finding	gameplay	Finding one
+wiki/gene-iridescent-jewel.html#inheritance	gameplay	Crossing two of them
+wiki/gene-iridescent-jewel.html#layers	coding	What it paints
+wiki/gene-iridescent-jewel.html#outcomes	gameplay	What it can come out as
+wiki/gene-iridescent-rosette.html#about	coding	Why it is built this way
+wiki/gene-iridescent-rosette.html#carrot	gameplay	Its gene carrot
+wiki/gene-iridescent-rosette.html#file	coding	The file
+wiki/gene-iridescent-rosette.html#finding	gameplay	Finding one
+wiki/gene-iridescent-rosette.html#inheritance	gameplay	Crossing two of them
+wiki/gene-iridescent-rosette.html#layers	coding	What it paints
+wiki/gene-iridescent-rosette.html#outcomes	gameplay	What it can come out as
+wiki/gene-iris-bloom-diamonds.html#about	coding	Why it is built this way
+wiki/gene-iris-bloom-diamonds.html#carrot	gameplay	Its gene carrot
+wiki/gene-iris-bloom-diamonds.html#file	coding	The file
+wiki/gene-iris-bloom-diamonds.html#finding	gameplay	Finding one
+wiki/gene-iris-bloom-diamonds.html#inheritance	gameplay	Crossing two of them
+wiki/gene-iris-bloom-diamonds.html#layers	coding	What it paints
+wiki/gene-iris-bloom-diamonds.html#outcomes	gameplay	What it can come out as
+wiki/gene-iuari.html#carrot	gameplay	Its gene carrot
+wiki/gene-iuari.html#file	coding	The file
+wiki/gene-iuari.html#finding	gameplay	Finding one
+wiki/gene-iuari.html#inheritance	gameplay	Crossing two of them
+wiki/gene-iuari.html#layers	coding	What it paints
+wiki/gene-iuari.html#outcomes	gameplay	What it can come out as
+wiki/gene-kintsugi.html#carrot	gameplay	Its gene carrot
+wiki/gene-kintsugi.html#file	coding	The file
+wiki/gene-kintsugi.html#finding	gameplay	Finding one
+wiki/gene-kintsugi.html#inheritance	gameplay	Crossing two of them
+wiki/gene-kintsugi.html#layers	coding	What it paints
+wiki/gene-kintsugi.html#outcomes	gameplay	What it can come out as
+wiki/gene-kit.html#boosters	coding	The boosters are most of what this locus does
+wiki/gene-kit.html#breeds	science	Breeds and frequency
+wiki/gene-kit.html#camarillo	coding	Two all-white alleles, and why they are two outcomes
+wiki/gene-kit.html#carrot	gameplay	Its gene carrot
+wiki/gene-kit.html#departs	science	Where the mod departs
+wiki/gene-kit.html#haplotypes	science	Multi-variant haplotypes, and the two-slot problem
+wiki/gene-kit.html#health	science	Health
+wiki/gene-kit.html#identity	science	Genetic identity
+wiki/gene-kit.html#inheritance	gameplay	Crossing two of them
+wiki/gene-kit.html#lethal-care	science	“Homozygous lethal” needs reading carefully
+wiki/gene-kit.html#mechanism	science	The mechanism is a migration failure
+wiki/gene-kit.html#settled	science	What is settled, and what is not
+wiki/gene-kit.html#variable	science	Why two horses with one genotype look different
+wiki/gene-kit.html#verified	coding	Verified
+wiki/gene-kit.html#w-series	science	The W series is not one mutation with strength levels
+wiki/gene-kit.html#what-is-here	science	What is at this locus, and what only looks like it is
+wiki/gene-kite-bloom.html#about	coding	Why it is built this way
+wiki/gene-kite-bloom.html#carrot	gameplay	Its gene carrot
+wiki/gene-kite-bloom.html#file	coding	The file
+wiki/gene-kite-bloom.html#finding	gameplay	Finding one
+wiki/gene-kite-bloom.html#inheritance	gameplay	Crossing two of them
+wiki/gene-kite-bloom.html#layers	coding	What it paints
+wiki/gene-kite-bloom.html#outcomes	gameplay	What it can come out as
+wiki/gene-koi.html#about	coding	Why it is built this way
+wiki/gene-koi.html#carrot	gameplay	Its gene carrot
+wiki/gene-koi.html#file	coding	The file
+wiki/gene-koi.html#finding	gameplay	Finding one
+wiki/gene-koi.html#inheritance	gameplay	Crossing two of them
+wiki/gene-koi.html#layers	coding	What it paints
+wiki/gene-koi.html#outcomes	gameplay	What it can come out as
+wiki/gene-lace.html#about	coding	Why it is built this way
+wiki/gene-lace.html#carrot	gameplay	Its gene carrot
+wiki/gene-lace.html#file	coding	The file
+wiki/gene-lace.html#finding	gameplay	Finding one
+wiki/gene-lace.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lace.html#layers	coding	What it paints
+wiki/gene-lace.html#outcomes	gameplay	What it can come out as
+wiki/gene-lacevein.html#about	coding	Why it is built this way
+wiki/gene-lacevein.html#carrot	gameplay	Its gene carrot
+wiki/gene-lacevein.html#file	coding	The file
+wiki/gene-lacevein.html#finding	gameplay	Finding one
+wiki/gene-lacevein.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lacevein.html#layers	coding	What it paints
+wiki/gene-lacevein.html#outcomes	gameplay	What it can come out as
+wiki/gene-laciano.html#about	coding	Why it is built this way
+wiki/gene-laciano.html#carrot	gameplay	Its gene carrot
+wiki/gene-laciano.html#file	coding	The file
+wiki/gene-laciano.html#finding	gameplay	Finding one
+wiki/gene-laciano.html#inheritance	gameplay	Crossing two of them
+wiki/gene-laciano.html#layers	coding	What it paints
+wiki/gene-laciano.html#outcomes	gameplay	What it can come out as
+wiki/gene-ladybug-saddle.html#about	coding	Why it is built this way
+wiki/gene-ladybug-saddle.html#carrot	gameplay	Its gene carrot
+wiki/gene-ladybug-saddle.html#file	coding	The file
+wiki/gene-ladybug-saddle.html#finding	gameplay	Finding one
+wiki/gene-ladybug-saddle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ladybug-saddle.html#layers	coding	What it paints
+wiki/gene-ladybug-saddle.html#outcomes	gameplay	What it can come out as
+wiki/gene-lama3.html#at-a-glance	science	At a glance
+wiki/gene-lama3.html#carrot	gameplay	Its gene carrot
+wiki/gene-lama3.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lama3.html#same-trimer	science	The same structure, a different chain
+wiki/gene-lama3.html#testing	science	Why the breed societies test
+wiki/gene-lamc2.html#anchor	science	What breaks
+wiki/gene-lamc2.html#at-a-glance	science	At a glance
+wiki/gene-lamc2.html#breeds	science	Breeds
+wiki/gene-lamc2.html#carrot	gameplay	Its gene carrot
+wiki/gene-lamc2.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lamc2.html#outcome	science	Why it is a lethal rather than a disability
+wiki/gene-lantern.html#about	coding	Why it is built this way
+wiki/gene-lantern.html#carrot	gameplay	Its gene carrot
+wiki/gene-lantern.html#file	coding	The file
+wiki/gene-lantern.html#finding	gameplay	Finding one
+wiki/gene-lantern.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lantern.html#layers	coding	What it paints
+wiki/gene-lantern.html#outcomes	gameplay	What it can come out as
+wiki/gene-lantern.html#verified	coding	Verified
+wiki/gene-lasertae.html#carrot	gameplay	Its gene carrot
+wiki/gene-lasertae.html#file	coding	The file
+wiki/gene-lasertae.html#finding	gameplay	Finding one
+wiki/gene-lasertae.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lasertae.html#layers	coding	What it paints
+wiki/gene-lasertae.html#outcomes	gameplay	What it can come out as
+wiki/gene-lcorl.html#carrot	gameplay	Its gene carrot
+wiki/gene-lcorl.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lcorl.html#what-it-does	gameplay	What it does
+wiki/gene-leopard.html#carrot	gameplay	Its gene carrot
+wiki/gene-leopard.html#inheritance	gameplay	Crossing two of them
+wiki/gene-leopard.html#varnish-marks	coding	Varnish marks — the horse outlined by its own skeleton
+wiki/gene-leopard.html#what-it-does	gameplay	What it does
+wiki/gene-light.html#carrot	gameplay	Its gene carrot
+wiki/gene-light.html#cutie-mark	coding	It lights a cutie mark too
+wiki/gene-light.html#emissive	coding	Emissiveness is not a colour
+wiki/gene-light.html#future	science	Not modelled yet
+wiki/gene-light.html#inheritance	gameplay	Crossing two of them
+wiki/gene-light.html#light	coding	Where the alleles do not differ
+wiki/gene-light.html#phases	coding	Two halves, in two phases
+wiki/gene-light.html#table	coding	The combination table
+wiki/gene-light.html#what-it-does	gameplay	What it does
+wiki/gene-lut.html#carrot	gameplay	Its gene carrot
+wiki/gene-lut.html#homozygous	gameplay	Two of the same, or nothing
+wiki/gene-lut.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lut.html#only-locus	coding	This is the only locus that can change the LUT
+wiki/gene-lut.html#palettes	coding	The palettes
+wiki/gene-lut.html#pipeline	coding	Where it sits in the pipeline
+wiki/gene-lut.html#table	coding	The combination table
+wiki/gene-lut.html#verified	coding	Verified
+wiki/gene-lycan.html#carrot	gameplay	Its gene carrot
+wiki/gene-lycan.html#clock	gameplay	Dusk, dawn, and dimensions with no night
+wiki/gene-lycan.html#cloud	coding	The cloud colour
+wiki/gene-lycan.html#forms	gameplay	The thirty-seven shapes
+wiki/gene-lycan.html#identity	gameplay	Identity survives the night
+wiki/gene-lycan.html#inheritance	gameplay	Crossing two of them
+wiki/gene-lycan.html#night	gameplay	What a shifted animal does that an ordinary one does not
+wiki/gene-lycan.html#rule	gameplay	Two copies of the same allele, or nothing
+wiki/gene-lycan.html#split	coding	What lives where
+wiki/gene-lycan.html#swap	science	Why it swaps the entity instead of drawing a skin
+wiki/gene-lycan.html#verified	coding	Verified
+wiki/gene-lycan.html#verified-flying-revert	gameplay	A flying form comes back without falling
+wiki/gene-lycan.html#water-forms	coding	A water form on land dies, on purpose
+wiki/gene-lycan.html#wild	gameplay	Finding one
+wiki/gene-maelstrom.html#about	coding	Why it is built this way
+wiki/gene-maelstrom.html#carrot	gameplay	Its gene carrot
+wiki/gene-maelstrom.html#file	coding	The file
+wiki/gene-maelstrom.html#finding	gameplay	Finding one
+wiki/gene-maelstrom.html#inheritance	gameplay	Crossing two of them
+wiki/gene-maelstrom.html#layers	coding	What it paints
+wiki/gene-maelstrom.html#outcomes	gameplay	What it can come out as
+wiki/gene-magic-cold.html#breeds	gameplay	Who carries it
+wiki/gene-magic-cold.html#health	gameplay	Health
+wiki/gene-magic-cold.html#real	science	What it stands for
+wiki/gene-magic-cold.html#shape	coding	How it reaches the game
+wiki/gene-magic-cold.html#what	gameplay	What it does
+wiki/gene-magic-day-watch.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-day-watch.html#daylight	science	Why daylight does not make it friendlier
+wiki/gene-magic-day-watch.html#founders	gameplay	Rare in the wild
+wiki/gene-magic-day-watch.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-day-watch.html#what	gameplay	The five
+wiki/gene-magic-fighter.html#baseline	coding	Where the baseline lives
+wiki/gene-magic-fighter.html#cancel	gameplay	A wimp copy cancels a gladiator copy
+wiki/gene-magic-fighter.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-fighter.html#ceiling	gameplay	No ceiling, but nothing to catch
+wiki/gene-magic-fighter.html#codominant	science	Why codominance is the whole design
+wiki/gene-magic-fighter.html#floor	coding	The floor is on the damage, not on the percentage
+wiki/gene-magic-fighter.html#health	gameplay	Health
+wiki/gene-magic-fighter.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-fighter.html#range	science	Why the wild range is +1 to +3
+wiki/gene-magic-fighter.html#two-values	coding	Two epigenetic values, not one
+wiki/gene-magic-fighter.html#what	gameplay	What it does
+wiki/gene-magic-health.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-health.html#copies	coding	It needs both copies’ epigenetics
+wiki/gene-magic-health.html#family	coding	One of a family of five
+wiki/gene-magic-health.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-health.html#multiply	coding	It multiplies, it does not add
+wiki/gene-magic-health.html#not-a-disorder	coding	Not a health disorder
+wiki/gene-magic-health.html#only	coding	Deliberately health only
+wiki/gene-magic-health.html#table	coding	The combination table
+wiki/gene-magic-health.html#vampiric	gameplay	The vampiric allele
+wiki/gene-magic-health.html#verified	coding	Verified
+wiki/gene-magic-health.html#wild	gameplay	Only heterozygotes are born wild
+wiki/gene-magic-heat.html#breeds	gameplay	Who carries it
+wiki/gene-magic-heat.html#health	gameplay	Health
+wiki/gene-magic-heat.html#real	science	What it stands for
+wiki/gene-magic-heat.html#shape	coding	How it reaches the game
+wiki/gene-magic-heat.html#what	gameplay	What it does
+wiki/gene-magic-item-drop.html#beef	coding	Horse meat is beef
+wiki/gene-magic-item-drop.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-item-drop.html#egg	gameplay	The egg is the interesting one
+wiki/gene-magic-item-drop.html#health	gameplay	Health
+wiki/gene-magic-item-drop.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-item-drop.html#invisible	science	A locus that is entirely invisible, on purpose
+wiki/gene-magic-item-drop.html#mutual	science	Why the three cannot combine
+wiki/gene-magic-item-drop.html#replace	coding	Replace, except meat
+wiki/gene-magic-item-drop.html#reuse	coding	The egg is the editor’s egg
+wiki/gene-magic-item-drop.html#sword	gameplay	The sword is a gamble
+wiki/gene-magic-item-drop.html#verified	coding	Verified
+wiki/gene-magic-item-drop.html#what	gameplay	What it does
+wiki/gene-magic-item-drop.html#wild	gameplay	What you can catch
+wiki/gene-magic-jump.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-jump.html#copies	coding	It needs both copies’ epigenetics
+wiki/gene-magic-jump.html#family	coding	One of a family of five
+wiki/gene-magic-jump.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-jump.html#multiply	coding	It multiplies, it does not add
+wiki/gene-magic-jump.html#only	coding	Deliberately jump only
+wiki/gene-magic-jump.html#table	coding	The combination table
+wiki/gene-magic-jump.html#vampiric	gameplay	The vampiric allele
+wiki/gene-magic-jump.html#verified	coding	Verified
+wiki/gene-magic-jump.html#wild	gameplay	Only heterozygotes are born wild
+wiki/gene-magic-meat.html#average	coding	Averaged, not summed
+wiki/gene-magic-meat.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-meat.html#drift	science	A production trait, behaving like one
+wiki/gene-magic-meat.html#health	gameplay	Health
+wiki/gene-magic-meat.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-meat.html#recessive	science	Why the carrier is silent
+wiki/gene-magic-meat.html#stacking	gameplay	It stacks with the other drop locus
+wiki/gene-magic-meat.html#verb	coding	It shares a verb with the treasure locus
+wiki/gene-magic-meat.html#what	gameplay	What it does
+wiki/gene-magic-milk-volume.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-milk-volume.html#codominant	science	Codominant, because a dairy trait is
+wiki/gene-magic-milk-volume.html#divide	coding	Why dividing the cooldown, and not a counter
+wiki/gene-magic-milk-volume.html#everything	gameplay	It governs every kind of filling
+wiki/gene-magic-milk-volume.html#health	gameplay	Health
+wiki/gene-magic-milk-volume.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-milk-volume.html#kind	coding	It governs a kind, not a gene
+wiki/gene-magic-milk-volume.html#rounding	coding	Rounded per copy
+wiki/gene-magic-milk-volume.html#spread	gameplay	Spread across the day, not banked
+wiki/gene-magic-milk-volume.html#visible	science	The one loud recessive-adjacent gene
+wiki/gene-magic-milk-volume.html#what	gameplay	What it does
+wiki/gene-magic-mob-aura.html#bait	science	A gene that is worse for the horse
+wiki/gene-magic-mob-aura.html#capped	coding	Capped, like every radius effect
+wiki/gene-magic-mob-aura.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-mob-aura.html#compound	coding	The compound heterozygote is the interesting row
+wiki/gene-magic-mob-aura.html#health	gameplay	Health
+wiki/gene-magic-mob-aura.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-mob-aura.html#pair	science	Why both alleles are on one locus
+wiki/gene-magic-mob-aura.html#shove	coding	Repel is a shove, not a wall
+wiki/gene-magic-mob-aura.html#uses	gameplay	What each one is for
+wiki/gene-magic-mob-aura.html#verified	coding	Verified
+wiki/gene-magic-mob-aura.html#what	gameplay	What it does
+wiki/gene-magic-mob-aura.html#wild	gameplay	What you can catch
+wiki/gene-magic-night-watch.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-night-watch.html#escape	gameplay	Only one of them can be escaped
+wiki/gene-magic-night-watch.html#founders	gameplay	Every feral horse carries one, and none of them shows it
+wiki/gene-magic-night-watch.html#health	gameplay	Health
+wiki/gene-magic-night-watch.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-night-watch.html#one-goal	coding	Five modes, one goal class
+wiki/gene-magic-night-watch.html#pairing	science	It is half a horse
+wiki/gene-magic-night-watch.html#progression	science	The five are a ladder
+wiki/gene-magic-night-watch.html#quiet	gameplay	It goes quiet
+wiki/gene-magic-night-watch.html#sound	coding	Silencing a footfall, twice over
+wiki/gene-magic-night-watch.html#standing-still	coding	Standing still is a thing the goal has to hold
+wiki/gene-magic-night-watch.html#unseen	coding	“Cannot see it” is a yaw test, not a raycast
+wiki/gene-magic-night-watch.html#verified	coding	Verified
+wiki/gene-magic-night-watch.html#what	gameplay	The five
+wiki/gene-magic-on-death.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-on-death.html#hazard	science	The exception that proves the founder rule
+wiki/gene-magic-on-death.html#health	gameplay	Health
+wiki/gene-magic-on-death.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-on-death.html#placement	coding	The fluids only fill a free block
+wiki/gene-magic-on-death.html#split	coding	Why the ground and the drops are two verbs
+wiki/gene-magic-on-death.html#verified	coding	Verified
+wiki/gene-magic-on-death.html#water	science	The useful one
+wiki/gene-magic-on-death.html#what	gameplay	What it does
+wiki/gene-magic-on-death.html#wild	gameplay	No feral horse explodes
+wiki/gene-magic-pull.html#breeds	coding	A breed’s score reaches its founders
+wiki/gene-magic-pull.html#calibration	coding	Where the numbers come from
+wiki/gene-magic-pull.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-pull.html#dhampir	coding	The Dhampir, and why strains can score stats
+wiki/gene-magic-pull.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-pull.html#only	coding	Deliberately pull only
+wiki/gene-magic-pull.html#scale	gameplay	The scale
+wiki/gene-magic-pull.html#why-not-abstract	coding	Why it is not an AbstractMagicStatGene
+wiki/gene-magic-pull.html#wild	gameplay	Only heterozygotes are born wild
+wiki/gene-magic-sectoral-heterochromia.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-sectoral-heterochromia.html#chaos	coding	Chaos
+wiki/gene-magic-sectoral-heterochromia.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-sectoral-heterochromia.html#natural	coding	It is not the natural heterochromia
+wiki/gene-magic-sectoral-heterochromia.html#shape	coding	The gene is the disagreement, not the colour
+wiki/gene-magic-sectoral-heterochromia.html#silent	coding	It does not overwrite the horse's eye colour
+wiki/gene-magic-sectoral-heterochromia.html#table	coding	The combination table
+wiki/gene-magic-sectoral-heterochromia.html#wedges	science	Where the shapes come from
+wiki/gene-magic-sectoral-heterochromia.html#what-it-does	gameplay	What it does
+wiki/gene-magic-speed.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-speed.html#copies	coding	It needs both copies’ epigenetics
+wiki/gene-magic-speed.html#family	coding	One of a family of five
+wiki/gene-magic-speed.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-speed.html#multiply	coding	It multiplies, it does not add
+wiki/gene-magic-speed.html#only	coding	Deliberately speed only
+wiki/gene-magic-speed.html#table	coding	The combination table
+wiki/gene-magic-speed.html#vampiric	gameplay	The vampiric allele
+wiki/gene-magic-speed.html#verified	coding	Verified
+wiki/gene-magic-speed.html#wild	gameplay	Only heterozygotes are born wild
+wiki/gene-magic-swim-speed.html#attribute	coding	There is no swim_speed attribute
+wiki/gene-magic-swim-speed.html#breeding	science	What it does to breeding
+wiki/gene-magic-swim-speed.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-swim-speed.html#factor	coding	Not a body stat, and deliberately so
+wiki/gene-magic-swim-speed.html#health	gameplay	Health
+wiki/gene-magic-swim-speed.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-swim-speed.html#removal	coding	Taking the modifier off again
+wiki/gene-magic-swim-speed.html#verified	coding	Verified
+wiki/gene-magic-swim-speed.html#what	gameplay	What it does
+wiki/gene-magic-swim-speed.html#why	science	Why land speed and swimming are two loci
+wiki/gene-magic-swim-speed.html#wild	gameplay	What you can catch
+wiki/gene-magic-water-breathing.html#accumulator	coding	One expression, both directions
+wiki/gene-magic-water-breathing.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-water-breathing.html#drift	science	What breeding does to it
+wiki/gene-magic-water-breathing.html#graded	coding	Graded, beside an absolute flag
+wiki/gene-magic-water-breathing.html#health	gameplay	Health
+wiki/gene-magic-water-breathing.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-water-breathing.html#oxygen	coding	Why not the oxygen_bonus attribute
+wiki/gene-magic-water-breathing.html#pair	science	The pair it forms with swim speed
+wiki/gene-magic-water-breathing.html#verified	coding	Verified
+wiki/gene-magic-water-breathing.html#what	gameplay	What it does
+wiki/gene-magic-water-breathing.html#wild	gameplay	What you can catch
+wiki/gene-magic-white.html#backdrop	coding	A backdrop, not a mask
+wiki/gene-magic-white.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-white.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-white.html#real	science	Is there a real recessive white?
+wiki/gene-magic-white.html#verified	coding	Verified
+wiki/gene-magic-white.html#what	gameplay	What it does
+wiki/gene-magic-zebra.html#carrot	gameplay	Its gene carrot
+wiki/gene-magic-zebra.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-zebra.html#negative	science	Why −200%
+wiki/gene-magic-zebra.html#shared	coding	One map, two directions
+wiki/gene-magic-zebra.html#slant	coding	The chevron is load-bearing
+wiki/gene-magic-zebra.html#what-it-does	gameplay	What it does
+wiki/gene-manchado.html#carrot	gameplay	Its gene carrot
+wiki/gene-manchado.html#inheritance	gameplay	Crossing two of them
+wiki/gene-manchado.html#not	science	What it is not
+wiki/gene-manchado.html#own-locus	coding	Its own locus, deliberately
+wiki/gene-manchado.html#shape	coding	The geometry
+wiki/gene-manchado.html#what-it-does	gameplay	What it does
+wiki/gene-mane-color.html#carrot	gameplay	Its gene carrot
+wiki/gene-mane-color.html#colour	coding	Where the colour lives
+wiki/gene-mane-color.html#foal	coding	A foal shows nothing here
+wiki/gene-mane-color.html#future	coding	Three alleles is a starting point
+wiki/gene-mane-color.html#heterozygote	coding	The heterozygote is the interesting one
+wiki/gene-mane-color.html#inheritance	gameplay	Crossing two of them
+wiki/gene-mane-color.html#order	coding	Where it sits in phase 3
+wiki/gene-mane-color.html#painting	coding	Painting toward, not with
+wiki/gene-mane-color.html#table	coding	The combination table
+wiki/gene-mane-color.html#what-it-does	gameplay	What it does
+wiki/gene-marble-tobiano.html#about	coding	Why it is built this way
+wiki/gene-marble-tobiano.html#carrot	gameplay	Its gene carrot
+wiki/gene-marble-tobiano.html#file	coding	The file
+wiki/gene-marble-tobiano.html#finding	gameplay	Finding one
+wiki/gene-marble-tobiano.html#inheritance	gameplay	Crossing two of them
+wiki/gene-marble-tobiano.html#layers	coding	What it paints
+wiki/gene-marble-tobiano.html#outcomes	gameplay	What it can come out as
+wiki/gene-markings.html#at-a-glance	science	At a glance
+wiki/gene-markings.html#carrot	gameplay	Its gene carrot
+wiki/gene-markings.html#inheritance	gameplay	Crossing two of them
+wiki/gene-markings.html#the-confusion	science	The confusion this locus reproduces on purpose
+wiki/gene-markings.html#why	science	Why this is its own thing and not splash
+wiki/gene-masked.html#carrot	gameplay	Its gene carrot
+wiki/gene-masked.html#file	coding	The file
+wiki/gene-masked.html#finding	gameplay	Finding one
+wiki/gene-masked.html#inheritance	gameplay	Crossing two of them
+wiki/gene-masked.html#layers	coding	What it paints
+wiki/gene-masked.html#outcomes	gameplay	What it can come out as
+wiki/gene-matp.html#breed-frequencies	science	Each breed’s MATP
+wiki/gene-matp.html#breeds	science	Breeds and frequency
+wiki/gene-matp.html#carrot	gameplay	Its gene carrot
+wiki/gene-matp.html#cream	science	Cream, which is the one with a dosage effect
+wiki/gene-matp.html#eye	coding	The eye follows the same rows
+wiki/gene-matp.html#four-alleles	coding	Four dilutions at one locus
+wiki/gene-matp.html#frequency-ordering	science	How common each allele is in a wild horse
+wiki/gene-matp.html#health	science	Health
+wiki/gene-matp.html#inheritance	gameplay	Crossing two of them
+wiki/gene-matp.html#locus	science	One gene, four dilution alleles
+wiki/gene-matp.html#new-alleles	science	Sunshine and Snowdrop
+wiki/gene-matp.html#pearl	science	Pearl, and the compound heterozygote that fools everyone
+wiki/gene-matp.html#performance	science	Build, size, jumping, speed
+wiki/gene-matp.html#settled	science	What is settled, and what is not
+wiki/gene-matp.html#skin-eyes	science	Skin and eyes
+wiki/gene-matp.html#what-it-does	gameplay	What it does
+wiki/gene-megaesophagus.html#carrot	gameplay	Its gene carrot
+wiki/gene-megaesophagus.html#inheritance	gameplay	Crossing two of them
+wiki/gene-meowing.html#filter	coding	A narrow filter on a general verb
+wiki/gene-meowing.html#health	gameplay	Health
+wiki/gene-meowing.html#use	gameplay	Why it matters more than it sounds
+wiki/gene-meowing.html#verified	coding	Verified
+wiki/gene-meowing.html#what	gameplay	What it does
+wiki/gene-meowing.html#why	science	A joke that pays rent
+wiki/gene-met.html#breeds	science	Breed and frequency
+wiki/gene-met.html#carriers	science	Carriers
+wiki/gene-met.html#carrot	gameplay	Its gene carrot
+wiki/gene-met.html#evidence	science	Why MET is plausible, and where the proof stops
+wiki/gene-met.html#inheritance	gameplay	Crossing two of them
+wiki/gene-met.html#settled	science	What is settled, and what is not
+wiki/gene-met.html#variant	science	The variant
+wiki/gene-met.html#verified	coding	Verified
+wiki/gene-met.html#what-it-does	science	A gene whose only visible symptom is an absence
+wiki/gene-milk.html#carrot	gameplay	Its gene carrot
+wiki/gene-milk.html#how	coding	How it reaches the game
+wiki/gene-milk.html#inheritance	gameplay	Crossing two of them
+wiki/gene-milk.html#lethal	coding	The lethal
+wiki/gene-milk.html#nothing	gameplay	It paints nothing
+wiki/gene-milk.html#sex	science	Why milk is a mare’s and lava is not
+wiki/gene-milk.html#table	coding	The combination table
+wiki/gene-milk.html#verified	coding	Verified
+wiki/gene-mitf.html#carrot	gameplay	Its gene carrot
+wiki/gene-mitf.html#inheritance	gameplay	Crossing two of them
+wiki/gene-mitf.html#sw1	coding	SW1 is the common one, and it is usually invisible
+wiki/gene-mitf.html#verified	coding	Verified
+wiki/gene-molten-hooves.html#colour	coding	Where the colour lives
+wiki/gene-molten-hooves.html#dominant	science	Why dominant, when almost nothing else is
+wiki/gene-molten-hooves.html#fire	gameplay	It does not set anything on fire
+wiki/gene-molten-hooves.html#health	gameplay	Health
+wiki/gene-molten-hooves.html#honesty	science	A cosmetic gene that admits it
+wiki/gene-molten-hooves.html#hue	coding	A molten horse may burn blue
+wiki/gene-molten-hooves.html#particle	coding	Why it has its own particle
+wiki/gene-molten-hooves.html#verified	coding	Verified
+wiki/gene-molten-hooves.html#what	gameplay	What it does
+wiki/gene-moonwing.html#about	coding	Why it is built this way
+wiki/gene-moonwing.html#carrot	gameplay	Its gene carrot
+wiki/gene-moonwing.html#file	coding	The file
+wiki/gene-moonwing.html#finding	gameplay	Finding one
+wiki/gene-moonwing.html#inheritance	gameplay	Crossing two of them
+wiki/gene-moonwing.html#layers	coding	What it paints
+wiki/gene-moonwing.html#outcomes	gameplay	What it can come out as
+wiki/gene-morpho-wing.html#about	coding	Why it is built this way
+wiki/gene-morpho-wing.html#carrot	gameplay	Its gene carrot
+wiki/gene-morpho-wing.html#file	coding	The file
+wiki/gene-morpho-wing.html#finding	gameplay	Finding one
+wiki/gene-morpho-wing.html#inheritance	gameplay	Crossing two of them
+wiki/gene-morpho-wing.html#layers	coding	What it paints
+wiki/gene-morpho-wing.html#outcomes	gameplay	What it can come out as
+wiki/gene-moth-eyes.html#about	coding	Why it is built this way
+wiki/gene-moth-eyes.html#carrot	gameplay	Its gene carrot
+wiki/gene-moth-eyes.html#file	coding	The file
+wiki/gene-moth-eyes.html#finding	gameplay	Finding one
+wiki/gene-moth-eyes.html#inheritance	gameplay	Crossing two of them
+wiki/gene-moth-eyes.html#layers	coding	What it paints
+wiki/gene-moth-eyes.html#outcomes	gameplay	What it can come out as
+wiki/gene-moth-mantle.html#about	coding	Why it is built this way
+wiki/gene-moth-mantle.html#carrot	gameplay	Its gene carrot
+wiki/gene-moth-mantle.html#file	coding	The file
+wiki/gene-moth-mantle.html#finding	gameplay	Finding one
+wiki/gene-moth-mantle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-moth-mantle.html#layers	coding	What it paints
+wiki/gene-moth-mantle.html#outcomes	gameplay	What it can come out as
+wiki/gene-moth-wings.html#about	coding	Why it is built this way
+wiki/gene-moth-wings.html#carrot	gameplay	Its gene carrot
+wiki/gene-moth-wings.html#file	coding	The file
+wiki/gene-moth-wings.html#finding	gameplay	Finding one
+wiki/gene-moth-wings.html#inheritance	gameplay	Crossing two of them
+wiki/gene-moth-wings.html#layers	coding	What it paints
+wiki/gene-moth-wings.html#outcomes	gameplay	What it can come out as
+wiki/gene-mstn.html#breeds	science	Breeds and frequency
+wiki/gene-mstn.html#build	science	Build, muscle and size
+wiki/gene-mstn.html#carrot	gameplay	Its gene carrot
+wiki/gene-mstn.html#coat	science	Coat
+wiki/gene-mstn.html#health	science	Health and injury
+wiki/gene-mstn.html#inheritance	gameplay	Crossing two of them
+wiki/gene-mstn.html#performance	science	Speed, stamina, jumping
+wiki/gene-mstn.html#real-inheritance	science	Inheritance
+wiki/gene-mstn.html#settled	science	What is settled, and what is not
+wiki/gene-mstn.html#variants	science	The two variants that matter
+wiki/gene-mstn.html#what-mstn-does	science	What myostatin does
+wiki/gene-mushroom.html#bases	science	What it looks like, base by base
+wiki/gene-mushroom.html#breeds	science	Breeds and frequency
+wiki/gene-mushroom.html#carrot	gameplay	Its gene carrot
+wiki/gene-mushroom.html#health	science	Health
+wiki/gene-mushroom.html#identity	science	Genetic identity
+wiki/gene-mushroom.html#inheritance	gameplay	Crossing two of them
+wiki/gene-mushroom.html#mechanism	science	Why it dilutes red and leaves black alone
+wiki/gene-mushroom.html#not	science	Build, size, jumping, speed
+wiki/gene-mushroom.html#real-inheritance	science	Inheritance
+wiki/gene-mushroom.html#settled	science	What is settled, and what is not
+wiki/gene-music-enjoyer.html#cap	gameplay	It still respects the daily limit
+wiki/gene-music-enjoyer.html#care	science	Bond as something a gene can touch
+wiki/gene-music-enjoyer.html#health	gameplay	Health
+wiki/gene-music-enjoyer.html#verb	coding	A small verb with more users than it looks
+wiki/gene-music-enjoyer.html#what	gameplay	What it does
+wiki/gene-myo5a.html#at-a-glance	science	At a glance
+wiki/gene-myo5a.html#breeds	science	Breeds and frequency
+wiki/gene-myo5a.html#carrier	science	Affected foal versus carrier
+wiki/gene-myo5a.html#carrot	gameplay	Its gene carrot
+wiki/gene-myo5a.html#dilution	coding	The dilution is deliberately not painted
+wiki/gene-myo5a.html#inheritance	gameplay	Crossing two of them
+wiki/gene-myo5a.html#motor	science	A motor that carries the wrong cargo nowhere
+wiki/gene-myo5a.html#pleiotropy	science	Why one gene gives both a colour and a seizure
+wiki/gene-myo5a.html#real-inheritance	science	Inheritance and breeding maths
+wiki/gene-myo5a.html#settled	science	What is settled, and what is not
+wiki/gene-nacre-saddle.html#about	coding	Why it is built this way
+wiki/gene-nacre-saddle.html#carrot	gameplay	Its gene carrot
+wiki/gene-nacre-saddle.html#file	coding	The file
+wiki/gene-nacre-saddle.html#finding	gameplay	Finding one
+wiki/gene-nacre-saddle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nacre-saddle.html#layers	coding	What it paints
+wiki/gene-nacre-saddle.html#outcomes	gameplay	What it can come out as
+wiki/gene-nacre.html#about	coding	Why it is built this way
+wiki/gene-nacre.html#carrot	gameplay	Its gene carrot
+wiki/gene-nacre.html#file	coding	The file
+wiki/gene-nacre.html#finding	gameplay	Finding one
+wiki/gene-nacre.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nacre.html#layers	coding	What it paints
+wiki/gene-nacre.html#outcomes	gameplay	What it can come out as
+wiki/gene-natural-zebra.html#arcs	coding	The rump is one lerp, and no special case
+wiki/gene-natural-zebra.html#carrot	gameplay	Its gene carrot
+wiki/gene-natural-zebra.html#chevron	coding	The chevron is load-bearing
+wiki/gene-natural-zebra.html#codominant	coding	Codominant, and the carrier is not invisible
+wiki/gene-natural-zebra.html#direction	science	Which way round a zebra is
+wiki/gene-natural-zebra.html#inheritance	gameplay	Crossing two of them
+wiki/gene-natural-zebra.html#knobs	coding	The five epigenetic knobs
+wiki/gene-natural-zebra.html#map	coding	The stripe map, region by region
+wiki/gene-natural-zebra.html#not	science	Not modelled
+wiki/gene-natural-zebra.html#what-it-does	gameplay	What it does
+wiki/gene-nebula-light.html#carrot	gameplay	Its gene carrot
+wiki/gene-nebula-light.html#file	coding	The file
+wiki/gene-nebula-light.html#finding	gameplay	Finding one
+wiki/gene-nebula-light.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nebula-light.html#layers	coding	What it paints
+wiki/gene-nebula-light.html#outcomes	gameplay	What it can come out as
+wiki/gene-nebula-points.html#about	coding	Why it is built this way
+wiki/gene-nebula-points.html#carrot	gameplay	Its gene carrot
+wiki/gene-nebula-points.html#file	coding	The file
+wiki/gene-nebula-points.html#finding	gameplay	Finding one
+wiki/gene-nebula-points.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nebula-points.html#layers	coding	What it paints
+wiki/gene-nebula-points.html#outcomes	gameplay	What it can come out as
+wiki/gene-nightbloom-shroud.html#about	coding	Why it is built this way
+wiki/gene-nightbloom-shroud.html#carrot	gameplay	Its gene carrot
+wiki/gene-nightbloom-shroud.html#file	coding	The file
+wiki/gene-nightbloom-shroud.html#finding	gameplay	Finding one
+wiki/gene-nightbloom-shroud.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nightbloom-shroud.html#layers	coding	What it paints
+wiki/gene-nightbloom-shroud.html#outcomes	gameplay	What it can come out as
+wiki/gene-nimbus.html#carrot	gameplay	Its gene carrot
+wiki/gene-nimbus.html#file	coding	The file
+wiki/gene-nimbus.html#finding	gameplay	Finding one
+wiki/gene-nimbus.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nimbus.html#layers	coding	What it paints
+wiki/gene-nimbus.html#outcomes	gameplay	What it can come out as
+wiki/gene-nymphaline.html#about	coding	Why it is built this way
+wiki/gene-nymphaline.html#carrot	gameplay	Its gene carrot
+wiki/gene-nymphaline.html#file	coding	The file
+wiki/gene-nymphaline.html#finding	gameplay	Finding one
+wiki/gene-nymphaline.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nymphaline.html#layers	coding	What it paints
+wiki/gene-nymphaline.html#outcomes	gameplay	What it can come out as
+wiki/gene-nyxborn.html#about	coding	Why it is built this way
+wiki/gene-nyxborn.html#carrot	gameplay	Its gene carrot
+wiki/gene-nyxborn.html#file	coding	The file
+wiki/gene-nyxborn.html#finding	gameplay	Finding one
+wiki/gene-nyxborn.html#inheritance	gameplay	Crossing two of them
+wiki/gene-nyxborn.html#layers	coding	What it paints
+wiki/gene-nyxborn.html#outcomes	gameplay	What it can come out as
+wiki/gene-ocean-born.html#family	gameplay	It is one of five, not a replacement for them
+wiki/gene-ocean-born.html#health	gameplay	Health
+wiki/gene-ocean-born.html#only	coding	Why this locus is so small
+wiki/gene-ocean-born.html#split	science	The case for keeping four loci
+wiki/gene-ocean-born.html#what	gameplay	What it does
+wiki/gene-ocular.html#carrot	gameplay	Its gene carrot
+wiki/gene-ocular.html#file	coding	The file
+wiki/gene-ocular.html#finding	gameplay	Finding one
+wiki/gene-ocular.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ocular.html#layers	coding	What it paints
+wiki/gene-ocular.html#outcomes	gameplay	What it can come out as
+wiki/gene-oil-sheen.html#about	coding	Why it is built this way
+wiki/gene-oil-sheen.html#carrot	gameplay	Its gene carrot
+wiki/gene-oil-sheen.html#file	coding	The file
+wiki/gene-oil-sheen.html#finding	gameplay	Finding one
+wiki/gene-oil-sheen.html#inheritance	gameplay	Crossing two of them
+wiki/gene-oil-sheen.html#layers	coding	What it paints
+wiki/gene-oil-sheen.html#outcomes	gameplay	What it can come out as
+wiki/gene-ooze-drip.html#about	coding	Why it is built this way
+wiki/gene-ooze-drip.html#carrot	gameplay	Its gene carrot
+wiki/gene-ooze-drip.html#file	coding	The file
+wiki/gene-ooze-drip.html#finding	gameplay	Finding one
+wiki/gene-ooze-drip.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ooze-drip.html#layers	coding	What it paints
+wiki/gene-ooze-drip.html#outcomes	gameplay	What it can come out as
+wiki/gene-ooze-drip.html#verified	coding	Verified
+wiki/gene-opal-crackle.html#about	coding	Why it is built this way
+wiki/gene-opal-crackle.html#carrot	gameplay	Its gene carrot
+wiki/gene-opal-crackle.html#file	coding	The file
+wiki/gene-opal-crackle.html#finding	gameplay	Finding one
+wiki/gene-opal-crackle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opal-crackle.html#layers	coding	What it paints
+wiki/gene-opal-crackle.html#outcomes	gameplay	What it can come out as
+wiki/gene-opal-fire.html#about	coding	Why it is built this way
+wiki/gene-opal-fire.html#carrot	gameplay	Its gene carrot
+wiki/gene-opal-fire.html#file	coding	The file
+wiki/gene-opal-fire.html#finding	gameplay	Finding one
+wiki/gene-opal-fire.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opal-fire.html#layers	coding	What it paints
+wiki/gene-opal-fire.html#outcomes	gameplay	What it can come out as
+wiki/gene-opal-wing-veins.html#carrot	gameplay	Its gene carrot
+wiki/gene-opal-wing-veins.html#file	coding	The file
+wiki/gene-opal-wing-veins.html#finding	gameplay	Finding one
+wiki/gene-opal-wing-veins.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opal-wing-veins.html#layers	coding	What it paints
+wiki/gene-opal-wing-veins.html#outcomes	gameplay	What it can come out as
+wiki/gene-opaline-zebra.html#about	coding	Why it is built this way
+wiki/gene-opaline-zebra.html#carrot	gameplay	Its gene carrot
+wiki/gene-opaline-zebra.html#file	coding	The file
+wiki/gene-opaline-zebra.html#finding	gameplay	Finding one
+wiki/gene-opaline-zebra.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opaline-zebra.html#layers	coding	What it paints
+wiki/gene-opaline-zebra.html#outcomes	gameplay	What it can come out as
+wiki/gene-opaline.html#about	coding	Why it is built this way
+wiki/gene-opaline.html#carrot	gameplay	Its gene carrot
+wiki/gene-opaline.html#file	coding	The file
+wiki/gene-opaline.html#finding	gameplay	Finding one
+wiki/gene-opaline.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opaline.html#layers	coding	What it paints
+wiki/gene-opaline.html#outcomes	gameplay	What it can come out as
+wiki/gene-opalized.html#carrot	gameplay	Its gene carrot
+wiki/gene-opalized.html#file	coding	The file
+wiki/gene-opalized.html#finding	gameplay	Finding one
+wiki/gene-opalized.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opalized.html#layers	coding	What it paints
+wiki/gene-opalized.html#outcomes	gameplay	What it can come out as
+wiki/gene-opossum.html#about	coding	Why it is built this way
+wiki/gene-opossum.html#carrot	gameplay	Its gene carrot
+wiki/gene-opossum.html#file	coding	The file
+wiki/gene-opossum.html#finding	gameplay	Finding one
+wiki/gene-opossum.html#inheritance	gameplay	Crossing two of them
+wiki/gene-opossum.html#layers	coding	What it paints
+wiki/gene-opossum.html#outcomes	gameplay	What it can come out as
+wiki/gene-orchid-frost.html#about	coding	Why it is built this way
+wiki/gene-orchid-frost.html#carrot	gameplay	Its gene carrot
+wiki/gene-orchid-frost.html#file	coding	The file
+wiki/gene-orchid-frost.html#finding	gameplay	Finding one
+wiki/gene-orchid-frost.html#inheritance	gameplay	Crossing two of them
+wiki/gene-orchid-frost.html#layers	coding	What it paints
+wiki/gene-orchid-frost.html#outcomes	gameplay	What it can come out as
+wiki/gene-oscar.html#carrot	gameplay	Its gene carrot
+wiki/gene-oscar.html#file	coding	The file
+wiki/gene-oscar.html#finding	gameplay	Finding one
+wiki/gene-oscar.html#inheritance	gameplay	Crossing two of them
+wiki/gene-oscar.html#layers	coding	What it paints
+wiki/gene-oscar.html#outcomes	gameplay	What it can come out as
+wiki/gene-overcast.html#about	coding	Why it is built this way
+wiki/gene-overcast.html#carrot	gameplay	Its gene carrot
+wiki/gene-overcast.html#file	coding	The file
+wiki/gene-overcast.html#finding	gameplay	Finding one
+wiki/gene-overcast.html#inheritance	gameplay	Crossing two of them
+wiki/gene-overcast.html#layers	coding	What it paints
+wiki/gene-overcast.html#outcomes	gameplay	What it can come out as
+wiki/gene-pack-leader.html#alleles	gameplay	One allele per mob
+wiki/gene-pack-leader.html#find	gameplay	What you can catch
+wiki/gene-pack-leader.html#health	gameplay	Health
+wiki/gene-pack-leader.html#matched	coding	Why a matched pair
+wiki/gene-pack-leader.html#mode	coding	A third mode, not a new verb
+wiki/gene-pack-leader.html#reuse	science	One allele list, two genes
+wiki/gene-pack-leader.html#verified	coding	Verified
+wiki/gene-pack-leader.html#what	gameplay	What it does
+wiki/gene-painted-lady-wing.html#about	coding	Why it is built this way
+wiki/gene-painted-lady-wing.html#carrot	gameplay	Its gene carrot
+wiki/gene-painted-lady-wing.html#file	coding	The file
+wiki/gene-painted-lady-wing.html#finding	gameplay	Finding one
+wiki/gene-painted-lady-wing.html#inheritance	gameplay	Crossing two of them
+wiki/gene-painted-lady-wing.html#layers	coding	What it paints
+wiki/gene-painted-lady-wing.html#outcomes	gameplay	What it can come out as
+wiki/gene-paisley-spill.html#about	coding	Why it is built this way
+wiki/gene-paisley-spill.html#carrot	gameplay	Its gene carrot
+wiki/gene-paisley-spill.html#file	coding	The file
+wiki/gene-paisley-spill.html#finding	gameplay	Finding one
+wiki/gene-paisley-spill.html#inheritance	gameplay	Crossing two of them
+wiki/gene-paisley-spill.html#layers	coding	What it paints
+wiki/gene-paisley-spill.html#outcomes	gameplay	What it can come out as
+wiki/gene-panark.html#carrot	gameplay	Its gene carrot
+wiki/gene-panark.html#file	coding	The file
+wiki/gene-panark.html#finding	gameplay	Finding one
+wiki/gene-panark.html#inheritance	gameplay	Crossing two of them
+wiki/gene-panark.html#layers	coding	What it paints
+wiki/gene-panark.html#outcomes	gameplay	What it can come out as
+wiki/gene-panda.html#about	coding	Why it is built this way
+wiki/gene-panda.html#carrot	gameplay	Its gene carrot
+wiki/gene-panda.html#file	coding	The file
+wiki/gene-panda.html#finding	gameplay	Finding one
+wiki/gene-panda.html#inheritance	gameplay	Crossing two of them
+wiki/gene-panda.html#layers	coding	What it paints
+wiki/gene-panda.html#outcomes	gameplay	What it can come out as
+wiki/gene-pangare.html#carrot	gameplay	Its gene carrot
+wiki/gene-pangare.html#dosage	coding	The dosage
+wiki/gene-pangare.html#evidence	science	What is actually known
+wiki/gene-pangare.html#inheritance	gameplay	Crossing two of them
+wiki/gene-pangare.html#medial	coding	The inside of a leg — a helper that did not exist
+wiki/gene-pangare.html#mirror	coding	The exact mirror of sooty
+wiki/gene-pangare.html#regions	coding	Where it sits
+wiki/gene-papillon.html#carrot	gameplay	Its gene carrot
+wiki/gene-papillon.html#file	coding	The file
+wiki/gene-papillon.html#finding	gameplay	Finding one
+wiki/gene-papillon.html#inheritance	gameplay	Crossing two of them
+wiki/gene-papillon.html#layers	coding	What it paints
+wiki/gene-papillon.html#outcomes	gameplay	What it can come out as
+wiki/gene-particle.html#alleles	coding	The forty alleles
+wiki/gene-particle.html#carrot	gameplay	Its gene carrot
+wiki/gene-particle.html#codominance	coding	Codominance is by family
+wiki/gene-particle.html#dominance	coding	One copy of n and the locus is silent
+wiki/gene-particle.html#epigenetics	coding	Everything you can see about it is epigenetic
+wiki/gene-particle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-particle.html#invisible	gameplay	It paints nothing
+wiki/gene-particle.html#java	coding	Ten of them are not the particle they were named after
+wiki/gene-particle.html#machinery	coding	The machinery it needed
+wiki/gene-particle.html#one-locus	science	Why one locus and not forty genes
+wiki/gene-particle.html#wild	coding	Every wild horse at this locus is one you can see
+wiki/gene-passification.html#bargain	science	A bargain, not a switch
+wiki/gene-passification.html#dominance	gameplay	One copy is enough, and two different ones stack
+wiki/gene-passification.html#limits	gameplay	What it does not do
+wiki/gene-passification.html#offering	gameplay	What it wants is written on the horse
+wiki/gene-passification.html#perplayer	science	Why the calm is per player
+wiki/gene-passification.html#priority	coding	“Extremely high priority” is not the priority number
+wiki/gene-passification.html#split	coding	Why it is not an effect verb
+wiki/gene-passification.html#what	gameplay	The six ways in
+wiki/gene-passification.html#why	gameplay	What it is for
+wiki/gene-patina.html#carrot	gameplay	Its gene carrot
+wiki/gene-patina.html#file	coding	The file
+wiki/gene-patina.html#finding	gameplay	Finding one
+wiki/gene-patina.html#inheritance	gameplay	Crossing two of them
+wiki/gene-patina.html#layers	coding	What it paints
+wiki/gene-patina.html#outcomes	gameplay	What it can come out as
+wiki/gene-pavonem.html#about	coding	Why it is built this way
+wiki/gene-pavonem.html#carrot	gameplay	Its gene carrot
+wiki/gene-pavonem.html#file	coding	The file
+wiki/gene-pavonem.html#finding	gameplay	Finding one
+wiki/gene-pavonem.html#inheritance	gameplay	Crossing two of them
+wiki/gene-pavonem.html#layers	coding	What it paints
+wiki/gene-pavonem.html#outcomes	gameplay	What it can come out as
+wiki/gene-pax3.html#at-a-glance	science	At a glance
+wiki/gene-pax3.html#breeds	science	Breeds and frequency
+wiki/gene-pax3.html#carrot	gameplay	Its gene carrot
+wiki/gene-pax3.html#coat	science	Coat and eye
+wiki/gene-pax3.html#deafness	science	Deafness
+wiki/gene-pax3.html#homozygote	science	The homozygote, and a hypothesis that did not survive
+wiki/gene-pax3.html#inheritance	gameplay	Crossing two of them
+wiki/gene-pax3.html#not	science	What SW2 is not known to cause
+wiki/gene-pax3.html#rare	coding	SW2 is the rare one — and it used not to be
+wiki/gene-pax3.html#real-inheritance	science	Inheritance
+wiki/gene-pax3.html#settled	science	What is settled, and what is not
+wiki/gene-pax3.html#splash-family	science	SW2 against the rest of the splash family
+wiki/gene-pax3.html#variant	science	The mutation
+wiki/gene-pax3.html#verified	coding	Verified
+wiki/gene-pax3.html#what-pax3-does	science	What PAX3 does
+wiki/gene-pdk4.html#carrot	gameplay	Its gene carrot
+wiki/gene-pdk4.html#inheritance	gameplay	Crossing two of them
+wiki/gene-pdk4.html#what-it-does	gameplay	What it does
+wiki/gene-peafowl.html#carrot	gameplay	Its gene carrot
+wiki/gene-peafowl.html#file	coding	The file
+wiki/gene-peafowl.html#finding	gameplay	Finding one
+wiki/gene-peafowl.html#inheritance	gameplay	Crossing two of them
+wiki/gene-peafowl.html#layers	coding	What it paints
+wiki/gene-peafowl.html#outcomes	gameplay	What it can come out as
+wiki/gene-petaled.html#about	coding	Why it is built this way
+wiki/gene-petaled.html#carrot	gameplay	Its gene carrot
+wiki/gene-petaled.html#file	coding	The file
+wiki/gene-petaled.html#finding	gameplay	Finding one
+wiki/gene-petaled.html#inheritance	gameplay	Crossing two of them
+wiki/gene-petaled.html#layers	coding	What it paints
+wiki/gene-petaled.html#outcomes	gameplay	What it can come out as
+wiki/gene-picasso-marking.html#about	coding	Why it is built this way
+wiki/gene-picasso-marking.html#carrot	gameplay	Its gene carrot
+wiki/gene-picasso-marking.html#file	coding	The file
+wiki/gene-picasso-marking.html#finding	gameplay	Finding one
+wiki/gene-picasso-marking.html#inheritance	gameplay	Crossing two of them
+wiki/gene-picasso-marking.html#layers	coding	What it paints
+wiki/gene-picasso-marking.html#outcomes	gameplay	What it can come out as
+wiki/gene-plod1.html#affected	science	What an affected foal looks like
+wiki/gene-plod1.html#at-a-glance	science	At a glance
+wiki/gene-plod1.html#breeds	science	Breeds and frequency
+wiki/gene-plod1.html#carrier	science	The carrier question, which is where the misinformation lives
+wiki/gene-plod1.html#carrot	gameplay	Its gene carrot
+wiki/gene-plod1.html#collagen	science	What breaks
+wiki/gene-plod1.html#inheritance	gameplay	Crossing two of them
+wiki/gene-plod1.html#origin	science	Where the allele came from — unsolved
+wiki/gene-plod1.html#real-inheritance	science	Inheritance
+wiki/gene-plod1.html#settled	science	What is settled, and what is not
+wiki/gene-polymoon.html#carrot	gameplay	Its gene carrot
+wiki/gene-polymoon.html#file	coding	The file
+wiki/gene-polymoon.html#finding	gameplay	Finding one
+wiki/gene-polymoon.html#inheritance	gameplay	Crossing two of them
+wiki/gene-polymoon.html#layers	coding	What it paints
+wiki/gene-polymoon.html#outcomes	gameplay	What it can come out as
+wiki/gene-potion-milk.html#both	coding	Why the compound gives both
+wiki/gene-potion-milk.html#dose	science	Incomplete dominance without an expression language
+wiki/gene-potion-milk.html#health	gameplay	Health
+wiki/gene-potion-milk.html#separate	coding	Two milk loci, deliberately
+wiki/gene-potion-milk.html#volume	gameplay	How often
+wiki/gene-potion-milk.html#what	gameplay	What it does
+wiki/gene-ppib.html#at-a-glance	science	At a glance
+wiki/gene-ppib.html#beyond-skin	science	Beyond the skin, where the evidence thins
+wiki/gene-ppib.html#breeds	science	Breeds and prevalence
+wiki/gene-ppib.html#carrot	gameplay	Its gene carrot
+wiki/gene-ppib.html#course	science	The course, which is the interesting difference
+wiki/gene-ppib.html#cyclophilin	science	The gene, and the fold it fails to make
+wiki/gene-ppib.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ppib.html#lookalikes	science	What else it might be
+wiki/gene-ppib.html#origin	science	Pedigree history
+wiki/gene-ppib.html#real-inheritance	science	Inheritance
+wiki/gene-ppib.html#settled	science	What is settled, and what is not
+wiki/gene-ppib.html#traits	science	Coat, build, speed, jumping
+wiki/gene-ppib.html#why-skin	science	Why it is the skin, and why it is the saddle
+wiki/gene-prismtail.html#carrot	gameplay	Its gene carrot
+wiki/gene-prismtail.html#file	coding	The file
+wiki/gene-prismtail.html#finding	gameplay	Finding one
+wiki/gene-prismtail.html#inheritance	gameplay	Crossing two of them
+wiki/gene-prismtail.html#layers	coding	What it paints
+wiki/gene-prismtail.html#outcomes	gameplay	What it can come out as
+wiki/gene-prkdc.html#at-a-glance	science	At a glance
+wiki/gene-prkdc.html#breeds	science	Breeds and frequency
+wiki/gene-prkdc.html#carrot	gameplay	Its gene carrot
+wiki/gene-prkdc.html#course	science	Why the foal looks fine, and then does not
+wiki/gene-prkdc.html#diagnosis	science	Diagnosis and treatment
+wiki/gene-prkdc.html#inheritance	gameplay	Crossing two of them
+wiki/gene-prkdc.html#origin	science	Origin
+wiki/gene-prkdc.html#real-inheritance	science	Inheritance
+wiki/gene-prkdc.html#settled	science	What is settled, and what is not
+wiki/gene-prkdc.html#traits	science	Coat, build, size, performance
+wiki/gene-prkdc.html#vdj	science	A DNA-repair gene that the immune system borrows
+wiki/gene-qhada.html#carrot	gameplay	Its gene carrot
+wiki/gene-qhada.html#file	coding	The file
+wiki/gene-qhada.html#finding	gameplay	Finding one
+wiki/gene-qhada.html#inheritance	gameplay	Crossing two of them
+wiki/gene-qhada.html#layers	coding	What it paints
+wiki/gene-qhada.html#outcomes	gameplay	What it can come out as
+wiki/gene-quarter.html#carrot	gameplay	Its gene carrot
+wiki/gene-quarter.html#file	coding	The file
+wiki/gene-quarter.html#finding	gameplay	Finding one
+wiki/gene-quarter.html#inheritance	gameplay	Crossing two of them
+wiki/gene-quarter.html#layers	coding	What it paints
+wiki/gene-quarter.html#outcomes	gameplay	What it can come out as
+wiki/gene-quazars.html#about	coding	Why it is built this way
+wiki/gene-quazars.html#carrot	gameplay	Its gene carrot
+wiki/gene-quazars.html#file	coding	The file
+wiki/gene-quazars.html#finding	gameplay	Finding one
+wiki/gene-quazars.html#inheritance	gameplay	Crossing two of them
+wiki/gene-quazars.html#layers	coding	What it paints
+wiki/gene-quazars.html#outcomes	gameplay	What it can come out as
+wiki/gene-qular.html#about	coding	Why it is built this way
+wiki/gene-qular.html#carrot	gameplay	Its gene carrot
+wiki/gene-qular.html#file	coding	The file
+wiki/gene-qular.html#finding	gameplay	Finding one
+wiki/gene-qular.html#inheritance	gameplay	Crossing two of them
+wiki/gene-qular.html#layers	coding	What it paints
+wiki/gene-qular.html#outcomes	gameplay	What it can come out as
+wiki/gene-rabicano.html#body	science	Build, size, health, performance
+wiki/gene-rabicano.html#breeding	science	How a breeder is actually told to handle it
+wiki/gene-rabicano.html#breeds	science	Breeds and frequency
+wiki/gene-rabicano.html#carrot	gameplay	Its gene carrot
+wiki/gene-rabicano.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rabicano.html#inheritance-real	science	Inheritance: familial, probably dominant, not settled
+wiki/gene-rabicano.html#kitlg	science	The best current lead: ECA28, near KITLG
+wiki/gene-rabicano.html#model	coding	Inheritance and appearance are two different things
+wiki/gene-rabicano.html#not-roan	coding	Not classic roan
+wiki/gene-rabicano.html#phenotype	science	What it does to the coat
+wiki/gene-rabicano.html#shape	coding	The four layers
+wiki/gene-rabicano.html#vs-lookalikes	science	Why it gets confused with everything else
+wiki/gene-rainbow-drip.html#about	coding	Why it is built this way
+wiki/gene-rainbow-drip.html#carrot	gameplay	Its gene carrot
+wiki/gene-rainbow-drip.html#file	coding	The file
+wiki/gene-rainbow-drip.html#finding	gameplay	Finding one
+wiki/gene-rainbow-drip.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rainbow-drip.html#layers	coding	What it paints
+wiki/gene-rainbow-drip.html#outcomes	gameplay	What it can come out as
+wiki/gene-rainbow-dust.html#carrot	gameplay	Its gene carrot
+wiki/gene-rainbow-dust.html#cycle	coding	How the colour turns: the cycle parameter
+wiki/gene-rainbow-dust.html#epigenetics	coding	The one thing that varies
+wiki/gene-rainbow-dust.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rainbow-dust.html#invisible	gameplay	It paints nothing
+wiki/gene-rainbow-dust.html#not-particle	science	Why it is not a forty-first particle allele
+wiki/gene-rainbow-dust.html#recessive	coding	Recessive, with no wild carriers
+wiki/gene-rapgef5.html#at-a-glance	science	At a glance
+wiki/gene-rapgef5.html#breeds	science	Breeds and frequency
+wiki/gene-rapgef5.html#carrot	gameplay	Its gene carrot
+wiki/gene-rapgef5.html#efih	science	What EFIH does to a foal
+wiki/gene-rapgef5.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rapgef5.html#mechanism	science	The gene, and a tail that turns out to matter
+wiki/gene-rapgef5.html#real-inheritance	science	Inheritance
+wiki/gene-rapgef5.html#settled	science	What is settled, and what is not
+wiki/gene-rapgef5.html#traits	science	Coat, build, size, speed, jumping
+wiki/gene-rapgef5.html#what-it-does	gameplay	What it does
+wiki/gene-rex.html#carrot	gameplay	Its gene carrot
+wiki/gene-rex.html#file	coding	The file
+wiki/gene-rex.html#finding	gameplay	Finding one
+wiki/gene-rex.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rex.html#layers	coding	What it paints
+wiki/gene-rex.html#outcomes	gameplay	What it can come out as
+wiki/gene-riblines.html#about	coding	Why it is built this way
+wiki/gene-riblines.html#carrot	gameplay	Its gene carrot
+wiki/gene-riblines.html#file	coding	The file
+wiki/gene-riblines.html#finding	gameplay	Finding one
+wiki/gene-riblines.html#inheritance	gameplay	Crossing two of them
+wiki/gene-riblines.html#layers	coding	What it paints
+wiki/gene-riblines.html#outcomes	gameplay	What it can come out as
+wiki/gene-rime.html#about	coding	Why it is built this way
+wiki/gene-rime.html#carrot	gameplay	Its gene carrot
+wiki/gene-rime.html#file	coding	The file
+wiki/gene-rime.html#finding	gameplay	Finding one
+wiki/gene-rime.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rime.html#layers	coding	What it paints
+wiki/gene-rime.html#outcomes	gameplay	What it can come out as
+wiki/gene-rime.html#verified	coding	Verified
+wiki/gene-ringwork.html#about	coding	Why it is built this way
+wiki/gene-ringwork.html#carrot	gameplay	Its gene carrot
+wiki/gene-ringwork.html#file	coding	The file
+wiki/gene-ringwork.html#finding	gameplay	Finding one
+wiki/gene-ringwork.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ringwork.html#layers	coding	What it paints
+wiki/gene-ringwork.html#outcomes	gameplay	What it can come out as
+wiki/gene-rising-sun.html#about	coding	Why it is built this way
+wiki/gene-rising-sun.html#carrot	gameplay	Its gene carrot
+wiki/gene-rising-sun.html#file	coding	The file
+wiki/gene-rising-sun.html#finding	gameplay	Finding one
+wiki/gene-rising-sun.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rising-sun.html#layers	coding	What it paints
+wiki/gene-rising-sun.html#outcomes	gameplay	What it can come out as
+wiki/gene-roan.html#carrot	gameplay	Its gene carrot
+wiki/gene-roan.html#chevron	coding	The inverted V, and the bug it replaced
+wiki/gene-roan.html#corn-spots	gameplay	Corn spots
+wiki/gene-roan.html#inheritance	gameplay	Crossing two of them
+wiki/gene-roan.html#not-modelled	science	What is not modelled, and is not a gap
+wiki/gene-roan.html#not-varnish	coding	Not varnish roan
+wiki/gene-roan.html#shape	coding	The shape is what identifies it
+wiki/gene-roan.html#what-it-does	gameplay	What it does
+wiki/gene-rosette.html#carrot	gameplay	Its gene carrot
+wiki/gene-rosette.html#file	coding	The file
+wiki/gene-rosette.html#finding	gameplay	Finding one
+wiki/gene-rosette.html#inheritance	gameplay	Crossing two of them
+wiki/gene-rosette.html#layers	coding	What it paints
+wiki/gene-rosette.html#outcomes	gameplay	What it can come out as
+wiki/gene-ryr1.html#at-a-glance	science	At a glance
+wiki/gene-ryr1.html#breeds	science	Breeds
+wiki/gene-ryr1.html#carrot	gameplay	Its gene carrot
+wiki/gene-ryr1.html#channel	science	What breaks
+wiki/gene-ryr1.html#episodic	science	Why “affected” and “unwell” are different words here
+wiki/gene-ryr1.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ryr2.html#carrot	gameplay	Its gene carrot
+wiki/gene-ryr2.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ryr2.html#what-it-does	gameplay	What it does
+wiki/gene-scarab-dapple.html#about	coding	Why it is built this way
+wiki/gene-scarab-dapple.html#carrot	gameplay	Its gene carrot
+wiki/gene-scarab-dapple.html#file	coding	The file
+wiki/gene-scarab-dapple.html#finding	gameplay	Finding one
+wiki/gene-scarab-dapple.html#inheritance	gameplay	Crossing two of them
+wiki/gene-scarab-dapple.html#layers	coding	What it paints
+wiki/gene-scarab-dapple.html#outcomes	gameplay	What it can come out as
+wiki/gene-scn4a.html#breeds	science	Breeds and frequency
+wiki/gene-scn4a.html#carrot	gameplay	Its gene carrot
+wiki/gene-scn4a.html#channel	science	What the channel does, and what the mutation stops it doing
+wiki/gene-scn4a.html#clinical	science	The clinical picture
+wiki/gene-scn4a.html#combination-table	coding	The combination table
+wiki/gene-scn4a.html#core	science	Core facts
+wiki/gene-scn4a.html#hh	science	The homozygote, and what the mod does with it
+wiki/gene-scn4a.html#inheritance	gameplay	Crossing two of them
+wiki/gene-scn4a.html#management	science	Management
+wiki/gene-scn4a.html#numbers	coding	The numbers are a rendering, not arithmetic
+wiki/gene-scn4a.html#real-inheritance	science	Inheritance
+wiki/gene-scn4a.html#traits	science	Coat, build, size, performance
+wiki/gene-scn4a.html#verified	coding	Verified in the test yard
+wiki/gene-scratches.html#carrot	gameplay	Its gene carrot
+wiki/gene-scratches.html#file	coding	The file
+wiki/gene-scratches.html#finding	gameplay	Finding one
+wiki/gene-scratches.html#inheritance	gameplay	Crossing two of them
+wiki/gene-scratches.html#layers	coding	What it paints
+wiki/gene-scratches.html#outcomes	gameplay	What it can come out as
+wiki/gene-scuted.html#about	coding	Why it is built this way
+wiki/gene-scuted.html#carrot	gameplay	Its gene carrot
+wiki/gene-scuted.html#file	coding	The file
+wiki/gene-scuted.html#finding	gameplay	Finding one
+wiki/gene-scuted.html#inheritance	gameplay	Crossing two of them
+wiki/gene-scuted.html#layers	coding	What it paints
+wiki/gene-scuted.html#outcomes	gameplay	What it can come out as
+wiki/gene-serpentine.html#about	coding	Why it is built this way
+wiki/gene-serpentine.html#carrot	gameplay	Its gene carrot
+wiki/gene-serpentine.html#file	coding	The file
+wiki/gene-serpentine.html#finding	gameplay	Finding one
+wiki/gene-serpentine.html#inheritance	gameplay	Crossing two of them
+wiki/gene-serpentine.html#layers	coding	What it paints
+wiki/gene-serpentine.html#outcomes	gameplay	What it can come out as
+wiki/gene-sex.html#carrot	gameplay	Its gene carrot
+wiki/gene-sex.html#inheritance	gameplay	Crossing two of them
+wiki/gene-sex.html#verified	coding	Verified
+wiki/gene-shade.html#carrot	gameplay	Its gene carrot
+wiki/gene-shade.html#inheritance	gameplay	Crossing two of them
+wiki/gene-shade.html#not-at	science	Why there is no At
+wiki/gene-shade.html#score	coding	The shade score
+wiki/gene-shade.html#silent	coding	Silent, and carried by everyone
+wiki/gene-shade.html#what-it-does	gameplay	What it does
+wiki/gene-shadowcreature.html#carrot	gameplay	Its gene carrot
+wiki/gene-shadowcreature.html#colour	science	Why the black is a colour and not a pigment
+wiki/gene-shadowcreature.html#health	gameplay	Health
+wiki/gene-shadowcreature.html#inheritance	gameplay	Crossing two of them
+wiki/gene-shadowcreature.html#late	science	Why it paints so late
+wiki/gene-shadowcreature.html#phases	coding	Three things, three phases
+wiki/gene-shadowcreature.html#sclera	coding	shadeEyes, not tintIris
+wiki/gene-shadowcreature.html#strokes	coding	The tentacles are the STROKES shape
+wiki/gene-shadowcreature.html#tentacles	gameplay	The join
+wiki/gene-shadowcreature.html#what	gameplay	What it looks like
+wiki/gene-shadowcreature.html#wild	gameplay	What you can catch
+wiki/gene-shallows.html#about	coding	Why it is built this way
+wiki/gene-shallows.html#carrot	gameplay	Its gene carrot
+wiki/gene-shallows.html#file	coding	The file
+wiki/gene-shallows.html#finding	gameplay	Finding one
+wiki/gene-shallows.html#inheritance	gameplay	Crossing two of them
+wiki/gene-shallows.html#layers	coding	What it paints
+wiki/gene-shallows.html#outcomes	gameplay	What it can come out as
+wiki/gene-shark.html#about	coding	Why it is built this way
+wiki/gene-shark.html#carrot	gameplay	Its gene carrot
+wiki/gene-shark.html#file	coding	The file
+wiki/gene-shark.html#finding	gameplay	Finding one
+wiki/gene-shark.html#inheritance	gameplay	Crossing two of them
+wiki/gene-shark.html#layers	coding	What it paints
+wiki/gene-shark.html#outcomes	gameplay	What it can come out as
+wiki/gene-shieldback.html#about	coding	Why it is built this way
+wiki/gene-shieldback.html#carrot	gameplay	Its gene carrot
+wiki/gene-shieldback.html#file	coding	The file
+wiki/gene-shieldback.html#finding	gameplay	Finding one
+wiki/gene-shieldback.html#inheritance	gameplay	Crossing two of them
+wiki/gene-shieldback.html#layers	coding	What it paints
+wiki/gene-shieldback.html#outcomes	gameplay	What it can come out as
+wiki/gene-shox.html#affected	science	What an affected horse looks like
+wiki/gene-shox.html#breeds	science	Breeds and frequency
+wiki/gene-shox.html#carriers	science	Carriers: nothing detected, which is not nothing found
+wiki/gene-shox.html#carrot	gameplay	Its gene carrot
+wiki/gene-shox.html#coat	science	Coat
+wiki/gene-shox.html#crlf2	science	CRLF2, the unresolved passenger
+wiki/gene-shox.html#inheritance	gameplay	Crossing two of them
+wiki/gene-shox.html#par	science	Why a sex-chromosome locus inherits like an autosome
+wiki/gene-shox.html#performance	science	Jumping and speed
+wiki/gene-shox.html#real-inheritance	science	Inheritance
+wiki/gene-shox.html#settled	science	What is settled, and what is not
+wiki/gene-shox.html#variants	science	Two deletions, not one allele
+wiki/gene-shox.html#what-it-does	gameplay	What it does
+wiki/gene-shox.html#what-shox-does	science	What SHOX does, and why “atavism” is a description not a mechanism
+wiki/gene-silver.html#carrot	gameplay	Its gene carrot
+wiki/gene-silver.html#inheritance	gameplay	Crossing two of them
+wiki/gene-singer.html#health	gameplay	Health
+wiki/gene-singer.html#limit	coding	An engine limit written into the design
+wiki/gene-singer.html#silly	science	Deliberately frivolous
+wiki/gene-singer.html#verified	coding	Verified
+wiki/gene-singer.html#what	gameplay	What it does
+wiki/gene-singer.html#why-opening	gameplay	Why only the opening
+wiki/gene-skittish.html#common	science	Shy is commoner than dangerous
+wiki/gene-skittish.html#health	gameplay	Health
+wiki/gene-skittish.html#path	coding	There is no vanilla avoid-goal to borrow
+wiki/gene-skittish.html#riding	gameplay	It does not stop when you get on
+wiki/gene-skittish.html#split	science	Fear is not negative aggression
+wiki/gene-skittish.html#verified	coding	Verified
+wiki/gene-skittish.html#what	gameplay	The grid
+wiki/gene-skittish.html#worst	gameplay	The one that is genuinely hard to keep
+wiki/gene-sky-shadow.html#carrot	gameplay	Its gene carrot
+wiki/gene-sky-shadow.html#file	coding	The file
+wiki/gene-sky-shadow.html#finding	gameplay	Finding one
+wiki/gene-sky-shadow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-sky-shadow.html#layers	coding	What it paints
+wiki/gene-sky-shadow.html#outcomes	gameplay	What it can come out as
+wiki/gene-slc5a3.html#at-a-glance	science	At a glance
+wiki/gene-slc5a3.html#carrot	gameplay	Its gene carrot
+wiki/gene-slc5a3.html#inheritance	gameplay	Crossing two of them
+wiki/gene-slc5a3.html#what-breaks	science	What breaks
+wiki/gene-slc5a3.html#why-common	science	Why a fatal recessive is this common
+wiki/gene-smoke-scroll.html#about	coding	Why it is built this way
+wiki/gene-smoke-scroll.html#carrot	gameplay	Its gene carrot
+wiki/gene-smoke-scroll.html#file	coding	The file
+wiki/gene-smoke-scroll.html#finding	gameplay	Finding one
+wiki/gene-smoke-scroll.html#inheritance	gameplay	Crossing two of them
+wiki/gene-smoke-scroll.html#layers	coding	What it paints
+wiki/gene-smoke-scroll.html#outcomes	gameplay	What it can come out as
+wiki/gene-snow-cloud.html#about	coding	Why it is built this way
+wiki/gene-snow-cloud.html#carrot	gameplay	Its gene carrot
+wiki/gene-snow-cloud.html#file	coding	The file
+wiki/gene-snow-cloud.html#finding	gameplay	Finding one
+wiki/gene-snow-cloud.html#inheritance	gameplay	Crossing two of them
+wiki/gene-snow-cloud.html#layers	coding	What it paints
+wiki/gene-snow-cloud.html#outcomes	gameplay	What it can come out as
+wiki/gene-sooty.html#bases	coding	The same score looks different on every base
+wiki/gene-sooty.html#carrot	gameplay	Its gene carrot
+wiki/gene-sooty.html#dosage	coding	The dosage
+wiki/gene-sooty.html#evidence	science	What is actually known
+wiki/gene-sooty.html#inheritance	gameplay	Crossing two of them
+wiki/gene-sooty.html#mechanism	coding	Sooty is a failure to restrict
+wiki/gene-sooty.html#not-shade	science	Why it is not the shade locus, given they are the same paper
+wiki/gene-sooty.html#shape	coding	Where it sits
+wiki/gene-sooty.html#what-it-does	gameplay	What it does
+wiki/gene-spawner.html#cap	science	From self-limiting to paid-for
+wiki/gene-spawner.html#colour	gameplay	The colour of what it makes
+wiki/gene-spawner.html#findable	coding	A locus almost nobody will find by accident
+wiki/gene-spawner.html#health	gameplay	Health
+wiki/gene-spawner.html#hostile	gameplay	Some of the alleles are not friendly
+wiki/gene-spawner.html#two	gameplay	Two per meal, and the food is the limit
+wiki/gene-spawner.html#verb	coding	The only genuinely new verb in its group
+wiki/gene-spawner.html#verified	coding	Verified
+wiki/gene-spawner.html#visible	science	The one behaviour gene that paints
+wiki/gene-spawner.html#what	gameplay	What it does
+wiki/gene-speckling.html#carrot	gameplay	Its gene carrot
+wiki/gene-speckling.html#file	coding	The file
+wiki/gene-speckling.html#finding	gameplay	Finding one
+wiki/gene-speckling.html#inheritance	gameplay	Crossing two of them
+wiki/gene-speckling.html#layers	coding	What it paints
+wiki/gene-speckling.html#outcomes	gameplay	What it can come out as
+wiki/gene-spectrum-light.html#carrot	gameplay	Its gene carrot
+wiki/gene-spectrum-light.html#file	coding	The file
+wiki/gene-spectrum-light.html#finding	gameplay	Finding one
+wiki/gene-spectrum-light.html#inheritance	gameplay	Crossing two of them
+wiki/gene-spectrum-light.html#layers	coding	What it paints
+wiki/gene-spectrum-light.html#outcomes	gameplay	What it can come out as
+wiki/gene-sporefall.html#about	coding	Why it is built this way
+wiki/gene-sporefall.html#carrot	gameplay	Its gene carrot
+wiki/gene-sporefall.html#file	coding	The file
+wiki/gene-sporefall.html#finding	gameplay	Finding one
+wiki/gene-sporefall.html#inheritance	gameplay	Crossing two of them
+wiki/gene-sporefall.html#layers	coding	What it paints
+wiki/gene-sporefall.html#outcomes	gameplay	What it can come out as
+wiki/gene-squiggle.html#about	coding	Why it is built this way
+wiki/gene-squiggle.html#carrot	gameplay	Its gene carrot
+wiki/gene-squiggle.html#file	coding	The file
+wiki/gene-squiggle.html#finding	gameplay	Finding one
+wiki/gene-squiggle.html#inheritance	gameplay	Crossing two of them
+wiki/gene-squiggle.html#layers	coding	What it paints
+wiki/gene-squiggle.html#outcomes	gameplay	What it can come out as
+wiki/gene-st14.html#affected	science	What “naked” actually means
+wiki/gene-st14.html#breeds	science	Breed and frequency
+wiki/gene-st14.html#build	science	Build, movement, performance
+wiki/gene-st14.html#carrot	gameplay	Its gene carrot
+wiki/gene-st14.html#colour	science	Coat colour versus coat growth
+wiki/gene-st14.html#inheritance	gameplay	Crossing two of them
+wiki/gene-st14.html#locus	science	Locus and inheritance
+wiki/gene-st14.html#settled	science	What is settled, and what is not
+wiki/gene-st14.html#survival	science	Health and survival
+wiki/gene-st14.html#variant	science	The variant, and the protein it removes
+wiki/gene-st14.html#what-it-does	gameplay	What it does
+wiki/gene-stained-glass.html#about	coding	Why it is built this way
+wiki/gene-stained-glass.html#carrot	gameplay	Its gene carrot
+wiki/gene-stained-glass.html#file	coding	The file
+wiki/gene-stained-glass.html#finding	gameplay	Finding one
+wiki/gene-stained-glass.html#inheritance	gameplay	Crossing two of them
+wiki/gene-stained-glass.html#layers	coding	What it paints
+wiki/gene-stained-glass.html#outcomes	gameplay	What it can come out as
+wiki/gene-starburst.html#about	coding	Why it is built this way
+wiki/gene-starburst.html#carrot	gameplay	Its gene carrot
+wiki/gene-starburst.html#file	coding	The file
+wiki/gene-starburst.html#finding	gameplay	Finding one
+wiki/gene-starburst.html#inheritance	gameplay	Crossing two of them
+wiki/gene-starburst.html#layers	coding	What it paints
+wiki/gene-starburst.html#outcomes	gameplay	What it can come out as
+wiki/gene-starburst.html#verified	coding	Verified
+wiki/gene-stardust.html#carrot	gameplay	Its gene carrot
+wiki/gene-stardust.html#file	coding	The file
+wiki/gene-stardust.html#finding	gameplay	Finding one
+wiki/gene-stardust.html#inheritance	gameplay	Crossing two of them
+wiki/gene-stardust.html#layers	coding	What it paints
+wiki/gene-stardust.html#outcomes	gameplay	What it can come out as
+wiki/gene-stars.html#carrot	gameplay	Its gene carrot
+wiki/gene-stars.html#file	coding	The file
+wiki/gene-stars.html#finding	gameplay	Finding one
+wiki/gene-stars.html#inheritance	gameplay	Crossing two of them
+wiki/gene-stars.html#layers	coding	What it paints
+wiki/gene-stars.html#outcomes	gameplay	What it can come out as
+wiki/gene-stellar.html#carrot	gameplay	Its gene carrot
+wiki/gene-stellar.html#file	coding	The file
+wiki/gene-stellar.html#finding	gameplay	Finding one
+wiki/gene-stellar.html#inheritance	gameplay	Crossing two of them
+wiki/gene-stellar.html#layers	coding	What it paints
+wiki/gene-stellar.html#outcomes	gameplay	What it can come out as
+wiki/gene-stormvein.html#about	coding	Why it is built this way
+wiki/gene-stormvein.html#carrot	gameplay	Its gene carrot
+wiki/gene-stormvein.html#file	coding	The file
+wiki/gene-stormvein.html#finding	gameplay	Finding one
+wiki/gene-stormvein.html#inheritance	gameplay	Crossing two of them
+wiki/gene-stormvein.html#layers	coding	What it paints
+wiki/gene-stormvein.html#outcomes	gameplay	What it can come out as
+wiki/gene-striped-mane-tail.html#carrot	gameplay	Its gene carrot
+wiki/gene-striped-mane-tail.html#file	coding	The file
+wiki/gene-striped-mane-tail.html#finding	gameplay	Finding one
+wiki/gene-striped-mane-tail.html#inheritance	gameplay	Crossing two of them
+wiki/gene-striped-mane-tail.html#layers	coding	What it paints
+wiki/gene-striped-mane-tail.html#outcomes	gameplay	What it can come out as
+wiki/gene-suit.html#about	coding	Why it is built this way
+wiki/gene-suit.html#carrot	gameplay	Its gene carrot
+wiki/gene-suit.html#file	coding	The file
+wiki/gene-suit.html#finding	gameplay	Finding one
+wiki/gene-suit.html#inheritance	gameplay	Crossing two of them
+wiki/gene-suit.html#layers	coding	What it paints
+wiki/gene-suit.html#outcomes	gameplay	What it can come out as
+wiki/gene-sun-sensitivity.html#carrot	gameplay	Its gene carrot
+wiki/gene-sun-sensitivity.html#handler	coding	The handler and its goal
+wiki/gene-sun-sensitivity.html#inheritance	gameplay	Crossing two of them
+wiki/gene-sun-sensitivity.html#photosensitivity	science	Horses really do burn
+wiki/gene-sun-sensitivity.html#verified	coding	Verified
+wiki/gene-sun-sensitivity.html#what	gameplay	What happens to the horse
+wiki/gene-sunspiral.html#about	coding	Why it is built this way
+wiki/gene-sunspiral.html#carrot	gameplay	Its gene carrot
+wiki/gene-sunspiral.html#file	coding	The file
+wiki/gene-sunspiral.html#finding	gameplay	Finding one
+wiki/gene-sunspiral.html#inheritance	gameplay	Crossing two of them
+wiki/gene-sunspiral.html#layers	coding	What it paints
+wiki/gene-sunspiral.html#outcomes	gameplay	What it can come out as
+wiki/gene-suntouched.html#coat	coding	The coat: a molten-gold mane and tail
+wiki/gene-suntouched.html#effects	gameplay	The effects
+wiki/gene-suntouched.html#shipping	coding	Ships as a file, like Waterborn
+wiki/gene-suntouched.html#verified	coding	Verified
+wiki/gene-synort.html#carrot	gameplay	Its gene carrot
+wiki/gene-synort.html#file	coding	The file
+wiki/gene-synort.html#finding	gameplay	Finding one
+wiki/gene-synort.html#inheritance	gameplay	Crossing two of them
+wiki/gene-synort.html#layers	coding	What it paints
+wiki/gene-synort.html#outcomes	gameplay	What it can come out as
+wiki/gene-tail-color.html#carrot	gameplay	Its gene carrot
+wiki/gene-tail-color.html#foal	coding	It shows on a foal, and the mane does not
+wiki/gene-tail-color.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tail-color.html#shape	coding	The tail is a different shape, and the painter knows
+wiki/gene-tail-color.html#shared	coding	Everything mechanical is on the mane page
+wiki/gene-tail-color.html#what-it-does	gameplay	What it does
+wiki/gene-tail-color.html#why-separate	science	Why it is a separate locus
+wiki/gene-taper-flame.html#about	coding	Why it is built this way
+wiki/gene-taper-flame.html#carrot	gameplay	Its gene carrot
+wiki/gene-taper-flame.html#file	coding	The file
+wiki/gene-taper-flame.html#finding	gameplay	Finding one
+wiki/gene-taper-flame.html#inheritance	gameplay	Crossing two of them
+wiki/gene-taper-flame.html#layers	coding	What it paints
+wiki/gene-taper-flame.html#outcomes	gameplay	What it can come out as
+wiki/gene-taper-flame.html#verified	coding	Verified
+wiki/gene-teardrop.html#about	coding	Why it is built this way
+wiki/gene-teardrop.html#carrot	gameplay	Its gene carrot
+wiki/gene-teardrop.html#file	coding	The file
+wiki/gene-teardrop.html#finding	gameplay	Finding one
+wiki/gene-teardrop.html#inheritance	gameplay	Crossing two of them
+wiki/gene-teardrop.html#layers	coding	What it paints
+wiki/gene-teardrop.html#outcomes	gameplay	What it can come out as
+wiki/gene-tidefoam-sash.html#about	coding	Why it is built this way
+wiki/gene-tidefoam-sash.html#carrot	gameplay	Its gene carrot
+wiki/gene-tidefoam-sash.html#file	coding	The file
+wiki/gene-tidefoam-sash.html#finding	gameplay	Finding one
+wiki/gene-tidefoam-sash.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tidefoam-sash.html#layers	coding	What it paints
+wiki/gene-tidefoam-sash.html#outcomes	gameplay	What it can come out as
+wiki/gene-tidemark.html#about	coding	Why it is built this way
+wiki/gene-tidemark.html#carrot	gameplay	Its gene carrot
+wiki/gene-tidemark.html#file	coding	The file
+wiki/gene-tidemark.html#finding	gameplay	Finding one
+wiki/gene-tidemark.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tidemark.html#layers	coding	What it paints
+wiki/gene-tidemark.html#outcomes	gameplay	What it can come out as
+wiki/gene-tidewave.html#about	coding	Why it is built this way
+wiki/gene-tidewave.html#carrot	gameplay	Its gene carrot
+wiki/gene-tidewave.html#file	coding	The file
+wiki/gene-tidewave.html#finding	gameplay	Finding one
+wiki/gene-tidewave.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tidewave.html#layers	coding	What it paints
+wiki/gene-tidewave.html#outcomes	gameplay	What it can come out as
+wiki/gene-tiger-eye.html#alleles	science	Two alleles, one of them barely characterised
+wiki/gene-tiger-eye.html#breed	gameplay	Where to find it
+wiki/gene-tiger-eye.html#breeds	science	Breed and frequency
+wiki/gene-tiger-eye.html#carrot	gameplay	Its gene carrot
+wiki/gene-tiger-eye.html#channel	coding	The eye-colour channel
+wiki/gene-tiger-eye.html#gene	science	The gene
+wiki/gene-tiger-eye.html#health	science	Health and vision
+wiki/gene-tiger-eye.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tiger-eye.html#iris	science	The iris, which is the whole of the established effect
+wiki/gene-tiger-eye.html#not-a-pattern	coding	It is not a coat pattern
+wiki/gene-tiger-eye.html#performance	science	Build, size, speed, jumping
+wiki/gene-tiger-eye.html#real-inheritance	science	Inheritance
+wiki/gene-tiger-eye.html#settled	science	What is settled, and what is not
+wiki/gene-tiger-eye.html#table	coding	The combination table
+wiki/gene-tiger-eye.html#te2	science	The TE2 homozygote, and what the mod asserts about it
+wiki/gene-tobiano.html#breeds	science	Breeds and frequency
+wiki/gene-tobiano.html#carrot	gameplay	Its gene carrot
+wiki/gene-tobiano.html#effects	science	Coat effects versus body effects
+wiki/gene-tobiano.html#health	science	Health
+wiki/gene-tobiano.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tobiano.html#performance	science	Speed, jumping, gait, athletic ability
+wiki/gene-tobiano.html#quantile	coding	The threshold is a quantile, not a constant
+wiki/gene-tobiano.html#real-inheritance	science	Inheritance
+wiki/gene-tobiano.html#settled	science	What is settled, and what is not
+wiki/gene-tobiano.html#variant	science	The causal variant, and why “the KIT gene” is imprecise
+wiki/gene-tobiano.html#verified	coding	Verified
+wiki/gene-tobiano.html#what-it-does	gameplay	What it does
+wiki/gene-tobiano.html#what-it-is	science	What tobiano is
+wiki/gene-toe1.html#abiotrophy	science	What abiotrophy means
+wiki/gene-toe1.html#breeds	science	Breeds and frequency
+wiki/gene-toe1.html#carrot	gameplay	Its gene carrot
+wiki/gene-toe1.html#inheritance	gameplay	Crossing two of them
+wiki/gene-toe1.html#jump-penalty	coding	The heaviest jump penalty in the mod
+wiki/gene-toe1.html#nuance	science	Why “the TOE1 gene” is a slight shortcut
+wiki/gene-toe1.html#pathology	science	The lesion
+wiki/gene-toe1.html#performance	science	Speed, jumping, athletic use
+wiki/gene-toe1.html#real-inheritance	science	Inheritance
+wiki/gene-toe1.html#settled	science	What is settled, and what is not
+wiki/gene-toe1.html#signs	science	Clinical signs
+wiki/gene-toe1.html#traits	science	Coat, build, size
+wiki/gene-toe1.html#variant	science	Gene, variant, locus
+wiki/gene-tribal-claw.html#about	coding	Why it is built this way
+wiki/gene-tribal-claw.html#carrot	gameplay	Its gene carrot
+wiki/gene-tribal-claw.html#file	coding	The file
+wiki/gene-tribal-claw.html#finding	gameplay	Finding one
+wiki/gene-tribal-claw.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tribal-claw.html#layers	coding	What it paints
+wiki/gene-tribal-claw.html#outcomes	gameplay	What it can come out as
+wiki/gene-tribal-ward.html#about	coding	Why it is built this way
+wiki/gene-tribal-ward.html#carrot	gameplay	Its gene carrot
+wiki/gene-tribal-ward.html#file	coding	The file
+wiki/gene-tribal-ward.html#finding	gameplay	Finding one
+wiki/gene-tribal-ward.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tribal-ward.html#layers	coding	What it paints
+wiki/gene-tribal-ward.html#outcomes	gameplay	What it can come out as
+wiki/gene-trillium.html#about	coding	Why it is built this way
+wiki/gene-trillium.html#carrot	gameplay	Its gene carrot
+wiki/gene-trillium.html#file	coding	The file
+wiki/gene-trillium.html#finding	gameplay	Finding one
+wiki/gene-trillium.html#inheritance	gameplay	Crossing two of them
+wiki/gene-trillium.html#layers	coding	What it paints
+wiki/gene-trillium.html#outcomes	gameplay	What it can come out as
+wiki/gene-trillium.html#verified	coding	Verified
+wiki/gene-tron.html#about	coding	Why it is built this way
+wiki/gene-tron.html#carrot	gameplay	Its gene carrot
+wiki/gene-tron.html#file	coding	The file
+wiki/gene-tron.html#finding	gameplay	Finding one
+wiki/gene-tron.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tron.html#layers	coding	What it paints
+wiki/gene-tron.html#outcomes	gameplay	What it can come out as
+wiki/gene-tron.html#verified	coding	Verified
+wiki/gene-uraniid.html#about	coding	Why it is built this way
+wiki/gene-uraniid.html#carrot	gameplay	Its gene carrot
+wiki/gene-uraniid.html#file	coding	The file
+wiki/gene-uraniid.html#finding	gameplay	Finding one
+wiki/gene-uraniid.html#inheritance	gameplay	Crossing two of them
+wiki/gene-uraniid.html#layers	coding	What it paints
+wiki/gene-uraniid.html#outcomes	gameplay	What it can come out as
+wiki/gene-uraniid.html#verified	coding	Verified
+wiki/gene-valentine-appaloosa.html#carrot	gameplay	Its gene carrot
+wiki/gene-valentine-appaloosa.html#file	coding	The file
+wiki/gene-valentine-appaloosa.html#finding	gameplay	Finding one
+wiki/gene-valentine-appaloosa.html#inheritance	gameplay	Crossing two of them
+wiki/gene-valentine-appaloosa.html#layers	coding	What it paints
+wiki/gene-valentine-appaloosa.html#outcomes	gameplay	What it can come out as
+wiki/gene-verdant.html#carrot	gameplay	Its gene carrot
+wiki/gene-verdant.html#cover	coding	A cover, not a block id
+wiki/gene-verdant.html#inheritance	gameplay	Crossing two of them
+wiki/gene-verdant.html#invisible	gameplay	It paints nothing, and that is a gap
+wiki/gene-verdant.html#rate	coding	One block a beat, on purpose
+wiki/gene-verdant.html#recessive	coding	Three recessives at one locus
+wiki/gene-verdant.html#table	coding	The combination table
+wiki/gene-voided.html#carrot	gameplay	Its gene carrot
+wiki/gene-voided.html#file	coding	The file
+wiki/gene-voided.html#finding	gameplay	Finding one
+wiki/gene-voided.html#inheritance	gameplay	Crossing two of them
+wiki/gene-voided.html#layers	coding	What it paints
+wiki/gene-voided.html#outcomes	gameplay	What it can come out as
+wiki/gene-vortex.html#carrot	gameplay	Its gene carrot
+wiki/gene-vortex.html#file	coding	The file
+wiki/gene-vortex.html#finding	gameplay	Finding one
+wiki/gene-vortex.html#inheritance	gameplay	Crossing two of them
+wiki/gene-vortex.html#layers	coding	What it paints
+wiki/gene-vortex.html#outcomes	gameplay	What it can come out as
+wiki/gene-war-mask.html#carrot	gameplay	Its gene carrot
+wiki/gene-war-mask.html#file	coding	The file
+wiki/gene-war-mask.html#finding	gameplay	Finding one
+wiki/gene-war-mask.html#inheritance	gameplay	Crossing two of them
+wiki/gene-war-mask.html#layers	coding	What it paints
+wiki/gene-war-mask.html#outcomes	gameplay	What it can come out as
+wiki/gene-waterborn.html#coat	coding	The coat: neon streaks in the mane and tail
+wiki/gene-waterborn.html#effects	gameplay	The effects
+wiki/gene-waterborn.html#shipping	coding	The first gene that ships as a file
+wiki/gene-waterborn.html#verified	coding	Verified
+wiki/gene-weather-jump.html#feel	gameplay	What it is like to own
+wiki/gene-weather-jump.html#health	gameplay	Health
+wiki/gene-weather-jump.html#same	coding	Built as a copy, on purpose
+wiki/gene-weather-jump.html#shape	coding	So what it actually needs
+wiki/gene-weather-jump.html#verified	coding	Verified
+wiki/gene-weather-jump.html#what	gameplay	What it does
+wiki/gene-weather-jump.html#why-two	science	Two loci rather than one gene with two effects
+wiki/gene-weather-speed.html#feel	gameplay	What it is like to own
+wiki/gene-weather-speed.html#health	gameplay	Health
+wiki/gene-weather-speed.html#invisible	science	A locus you cannot look at
+wiki/gene-weather-speed.html#shape	coding	So what it actually needs
+wiki/gene-weather-speed.html#twin	coding	The two weather loci are deliberately unlinked
+wiki/gene-weather-speed.html#verified	coding	Verified
+wiki/gene-weather-speed.html#what	gameplay	What it does
+wiki/gene-webbed.html#about	coding	Why it is built this way
+wiki/gene-webbed.html#carrot	gameplay	Its gene carrot
+wiki/gene-webbed.html#file	coding	The file
+wiki/gene-webbed.html#finding	gameplay	Finding one
+wiki/gene-webbed.html#inheritance	gameplay	Crossing two of them
+wiki/gene-webbed.html#layers	coding	What it paints
+wiki/gene-webbed.html#outcomes	gameplay	What it can come out as
+wiki/gene-wing-cloak.html#about	gameplay	About this gene
+wiki/gene-wing-cloak.html#carrot	gameplay	Its gene carrot
+wiki/gene-wing-cloak.html#file	coding	The file
+wiki/gene-wing-cloak.html#finding	gameplay	Finding one
+wiki/gene-wing-cloak.html#inheritance	gameplay	Crossing two of them
+wiki/gene-wing-cloak.html#layers	coding	What it paints
+wiki/gene-wing-cloak.html#outcomes	gameplay	What it can come out as
+wiki/gene-winged.html#carrot	gameplay	Its gene carrot
+wiki/gene-winged.html#file	coding	The file
+wiki/gene-winged.html#finding	gameplay	Finding one
+wiki/gene-winged.html#inheritance	gameplay	Crossing two of them
+wiki/gene-winged.html#layers	coding	What it paints
+wiki/gene-winged.html#outcomes	gameplay	What it can come out as
+wiki/gene-wingmargin.html#about	coding	Why it is built this way
+wiki/gene-wingmargin.html#carrot	gameplay	Its gene carrot
+wiki/gene-wingmargin.html#file	coding	The file
+wiki/gene-wingmargin.html#finding	gameplay	Finding one
+wiki/gene-wingmargin.html#inheritance	gameplay	Crossing two of them
+wiki/gene-wingmargin.html#layers	coding	What it paints
+wiki/gene-wingmargin.html#outcomes	gameplay	What it can come out as
+wiki/gene-wishstar.html#about	coding	Why it is built this way
+wiki/gene-wishstar.html#carrot	gameplay	Its gene carrot
+wiki/gene-wishstar.html#file	coding	The file
+wiki/gene-wishstar.html#finding	gameplay	Finding one
+wiki/gene-wishstar.html#inheritance	gameplay	Crossing two of them
+wiki/gene-wishstar.html#layers	coding	What it paints
+wiki/gene-wishstar.html#outcomes	gameplay	What it can come out as
+wiki/gene-witchfire.html#about	coding	Why it is built this way
+wiki/gene-witchfire.html#carrot	gameplay	Its gene carrot
+wiki/gene-witchfire.html#file	coding	The file
+wiki/gene-witchfire.html#finding	gameplay	Finding one
+wiki/gene-witchfire.html#inheritance	gameplay	Crossing two of them
+wiki/gene-witchfire.html#layers	coding	What it paints
+wiki/gene-witchfire.html#outcomes	gameplay	What it can come out as
+wiki/gene-wormholes.html#carrot	gameplay	Its gene carrot
+wiki/gene-wormholes.html#file	coding	The file
+wiki/gene-wormholes.html#finding	gameplay	Finding one
+wiki/gene-wormholes.html#inheritance	gameplay	Crossing two of them
+wiki/gene-wormholes.html#layers	coding	What it paints
+wiki/gene-wormholes.html#outcomes	gameplay	What it can come out as
+wiki/gene-wyrmwood-sigils.html#about	coding	Why it is built this way
+wiki/gene-wyrmwood-sigils.html#carrot	gameplay	Its gene carrot
+wiki/gene-wyrmwood-sigils.html#file	coding	The file
+wiki/gene-wyrmwood-sigils.html#finding	gameplay	Finding one
+wiki/gene-wyrmwood-sigils.html#inheritance	gameplay	Crossing two of them
+wiki/gene-wyrmwood-sigils.html#layers	coding	What it paints
+wiki/gene-wyrmwood-sigils.html#outcomes	gameplay	What it can come out as
+wiki/gene-xuke.html#carrot	gameplay	Its gene carrot
+wiki/gene-xuke.html#file	coding	The file
+wiki/gene-xuke.html#finding	gameplay	Finding one
+wiki/gene-xuke.html#inheritance	gameplay	Crossing two of them
+wiki/gene-xuke.html#layers	coding	What it paints
+wiki/gene-xuke.html#outcomes	gameplay	What it can come out as
+wiki/gene-yalia.html#about	coding	Why it is built this way
+wiki/gene-yalia.html#carrot	gameplay	Its gene carrot
+wiki/gene-yalia.html#file	coding	The file
+wiki/gene-yalia.html#finding	gameplay	Finding one
+wiki/gene-yalia.html#inheritance	gameplay	Crossing two of them
+wiki/gene-yalia.html#layers	coding	What it paints
+wiki/gene-yalia.html#outcomes	gameplay	What it can come out as
+wiki/gene-zebras-coat.html#carrot	gameplay	Its gene carrot
+wiki/gene-zebras-coat.html#file	coding	The file
+wiki/gene-zebras-coat.html#finding	gameplay	Finding one
+wiki/gene-zebras-coat.html#inheritance	gameplay	Crossing two of them
+wiki/gene-zebras-coat.html#layers	coding	What it paints
+wiki/gene-zebras-coat.html#outcomes	gameplay	What it can come out as
+wiki/genetics-model.html#catalogue	all	The genotype catalogue
+wiki/genetics-model.html#combinations	all	Alleles, combinations and expressions
+wiki/genetics-model.html#epigenetics	all	Epigenetics ride on the allele, not on the horse
+wiki/genetics-model.html#founders	all	Founder frequency, per combination
+wiki/genetics-model.html#gene-priority	all	Gene priority and the derived orderings
+wiki/genetics-model.html#non-coat	all	The thirteen that never paint
+wiki/genetics-model.html#noncoat	all	Genes that never paint
+wiki/genetics-model.html#registry	all	The forty-eight registered genes
+wiki/genetics-model.html#sex-linked	all	Sex-linked inheritance
+wiki/genetics-model.html#verified	all	Verified
+wiki/horse-body.html#attributes	all	Reaching the game
+wiki/horse-body.html#baselines	all	The baselines
+wiki/horse-body.html#body-size	all	body.size — may the size loci resize the horse?
+wiki/horse-body.html#breed-targets	all	There is deliberately no breed here
+wiki/horse-body.html#conditions	all	Conditions
+wiki/horse-body.html#config	all	The server settings
+wiki/horse-body.html#contributing	all	How a gene contributes
+wiki/horse-body.html#disorder-shapes	all	The two shapes a disorder comes in
+wiki/horse-body.html#epigenetic	all	The per-horse twin 2026-09-04
+wiki/horse-body.html#invisible	all	The non-coat genes cost the coat nothing
+wiki/horse-body.html#lethals	all	The two kinds of lethal
+wiki/horse-body.html#magical-scale	all	Scale has two stages, and only one is clamped
+wiki/horse-body.html#notbuilt	all	What this is not
+wiki/horse-body.html#pull	all	Pulling ability, the one that is a score
+wiki/horse-body.html#reference-numbers	all	Why the reference’s percentages are not the numbers
+wiki/horse-body.html#resolve	all	One walk, one record
+wiki/horse-body.html#units	all	What those numbers are in metres
+wiki/horse-body.html#verified	all	Verified
+wiki/horse-care.html#band-code	coding	Band life
+wiki/horse-care.html#bands	gameplay	3. Wild bands
+wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the top tier is for
+wiki/horse-care.html#bond	gameplay	2. Bond
+wiki/horse-care.html#bond-command	coding	Setting bond for testing — /bond
+wiki/horse-care.html#changes	gameplay	How bands change
+wiki/horse-care.html#food-tempt	gameplay	Horses come to food — and run for their favourite
+wiki/horse-care.html#hand-taming	gameplay	Taming by hand
+wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
+wiki/horse-care.html#kept-herds	gameplay	Tamed herds
+wiki/horse-care.html#roles	gameplay	Who is who
+wiki/horse-care.html#science-bachelors	science	Bachelor bands and how a stallion gets mares
+wiki/horse-care.html#science-bands	science	How free-roaming horses actually live
+wiki/horse-care.html#science-between-bands	science	When bands meet
+wiki/horse-care.html#science-bout	science	How a bout unfolds
+wiki/horse-care.html#science-day	science	A day in a band’s life
+wiki/horse-care.html#science-dispersal	science	Growing up and leaving
+wiki/horse-care.html#science-family	science	Family bands
+wiki/horse-care.html#science-management	science	How BLM management shapes all of it
+wiki/horse-care.html#science-mares	science	Mares are the social core
+wiki/horse-care.html#science-model	science	Design reference: what a simulation should take from this, and what this mod does
+wiki/horse-care.html#science-paternity	science	Breeding, foaling and paternity
+wiki/horse-care.html#science-range	science	Home range, not territory
+wiki/horse-care.html#science-rank	science	Rank is pairwise, not an alpha
+wiki/horse-care.html#science-resources	science	Food and water
+wiki/horse-care.html#science-sources	science	Sources
+wiki/horse-care.html#science-spar-elements	science	What a bout is made of
+wiki/horse-care.html#science-spar-kinds	science	Play, rank-testing and a real fight
+wiki/horse-care.html#science-spar-mustangs	science	Sparring among mustangs
+wiki/horse-care.html#science-spar-signs	science	Reading the intensity
+wiki/horse-care.html#science-spar-why	science	Why horses spar
+wiki/horse-care.html#science-sparring	science	Sparring is not fighting
+wiki/horse-care.html#science-stallion	science	What the band stallion actually does
+wiki/horse-care.html#verified	coding	Verified in the test yard
+wiki/horse-care.html#what-they-do	gameplay	What you will see
+wiki/horse-dimension.html#breed-book	all	Left: every breed, alphabetically
+wiki/horse-dimension.html#catalogue	all	The genotype catalogue, and why the corridor stopped using it
+wiki/horse-dimension.html#coat-check	all	Right: every marking nobody has confirmed
+wiki/horse-dimension.html#constants	all	The constants, by name
+wiki/horse-dimension.html#layout	all	Layout
+wiki/horse-dimension.html#limits	all	Known limitations
+wiki/horse-dimension.html#pens	all	What is in the pens
+wiki/horse-dimension.html#plots	all	One private plot per visit
+wiki/horse-dimension.html#portals	all	Hay-bale portals
+wiki/horse-dimension.html#rest-stops	all	A way out every twenty-five pens
+wiki/horse-dimension.html#test-yard	all	The test yard
+wiki/horse-dimension.html#the-watch	all	The watch — DebugWorldWatch
+wiki/horse-dimension.html#verified	all	Verified
+wiki/horse-gear.html#attachment	coding	Why an attachment and not a container
+wiki/horse-gear.html#ceiling	coding	The two-slot ceiling
+wiki/horse-gear.html#click	coding	The click path
+wiki/horse-gear.html#doll	coding	The paper doll
+wiki/horse-gear.html#roster	coding	The roster is the layout
+wiki/horse-gear.html#slots	gameplay	The nineteen slots
+wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
+wiki/horse-gear.html#using	gameplay	Putting something on
+wiki/horse-gear.html#verify	coding	The roster checks itself at boot
+wiki/horse-gear.html#where	gameplay	Where it is
+wiki/horse-traits.html#ability	all	11. Ability
+wiki/horse-traits.html#aura	all	5. Aura
+wiki/horse-traits.html#build-order	all	Build order
+wiki/horse-traits.html#discovery	all	Trait discovery
+wiki/horse-traits.html#divergences	all	Divergences from the spec
+wiki/horse-traits.html#effects	all	What a gene can do today: the effects block
+wiki/horse-traits.html#excluded	all	Deliberately excluded
+wiki/horse-traits.html#goals	all	13. Goal set
+wiki/horse-traits.html#invariants	all	Invariants
+wiki/horse-traits.html#locator	all	10. Locator
+wiki/horse-traits.html#memory	all	9. Memory
+wiki/horse-traits.html#pools	all	8. Resource pools
+wiki/horse-traits.html#scaling	all	Trait scaling
+wiki/horse-traits.html#selectors	all	3. Selector
+wiki/horse-traits.html#sound	all	Structured sound signalling
+wiki/horse-traits.html#split	all	Where the work lives
+wiki/horse-traits.html#state	all	16. State
+wiki/horse-traits.html#variants	all	Variants and spawn rules
+wiki/horse-traits.html#waterborn	all	Waterborn — the worked example
+wiki/item-breeding-carrots.html#combine	gameplay	Combining them
+wiki/item-breeding-carrots.html#effects	coding	The gamete effects
+wiki/item-breeding-carrots.html#recipes	gameplay	Recipes
+wiki/item-breeding-carrots.html#rule	gameplay	The one rule
+wiki/item-breeding-carrots.html#what	gameplay	What each one does
+wiki/item-double-gates.html#assets	coding	The assets are generated, and one wood is irregular
+wiki/item-double-gates.html#either-side	coding	The partner takes whichever side is free
+wiki/item-double-gates.html#flip	coding	Opening can flip FACING , and that swaps which side the partner is on
+wiki/item-double-gates.html#generated-drift	coding	The same contract is now written twice, and it can drift
+wiki/item-double-gates.html#modded-woods	gameplay	And one per wood any other mod brought
+wiki/item-double-gates.html#one-item-out	coding	One item out, and the loot table is what enforces it
+wiki/item-double-gates.html#opening	gameplay	Opening it
+wiki/item-double-gates.html#origin	coding	Where it came from, and the style that is not here
+wiki/item-double-gates.html#pair-write	coding	The two writes must not be observed separately
+wiki/item-double-gates.html#pairing	coding	Which half is which
+wiki/item-double-gates.html#placement-order	coding	And the first half is re-asserted after the second exists
+wiki/item-double-gates.html#placing	gameplay	Placing and breaking
+wiki/item-double-gates.html#use	gameplay	What it is for
+wiki/item-double-gates.html#verified	coding	Verified
+wiki/item-double-gates.html#why-subclass	coding	It extends FenceGateBlock on purpose
+wiki/item-double-gates.html#woods	gameplay	One per wood, filed beside its own gate
+wiki/item-equestrian-bench.html#armour	gameplay	It does leather horse armour too
+wiki/item-equestrian-bench.html#armour-vanilla	gameplay	The crafting-grid recipe still works, and still does only the blanket
+wiki/item-equestrian-bench.html#cost	gameplay	What it costs
+wiki/item-equestrian-bench.html#fittings	gameplay	The fifteen hand-picked fittings
+wiki/item-equestrian-bench.html#modded-fittings	gameplay	And whatever your other mods brought
+wiki/item-equestrian-bench.html#name	gameplay	Naming a saddle
+wiki/item-equestrian-bench.html#reading	gameplay	Reading a saddle you already own
+wiki/item-equestrian-bench.html#shape	coding	Loom-shaped, not furnace-shaped
+wiki/item-equestrian-bench.html#slot-filters	coding	What a slot accepts is now a question, not a table lookup
+wiki/item-equestrian-bench.html#three-colours	coding	Three colours on one item
+wiki/item-equestrian-bench.html#undyed	gameplay	An undyed saddle is exactly the saddle you know
+wiki/item-equestrian-bench.html#use	gameplay	What it does
+wiki/item-equestrian-bench.html#verified	coding	Verified
+wiki/item-equestrian-posts.html#four	coding	Why four blocks and not one
+wiki/item-equestrian-posts.html#loot	coding	Loot tables
+wiki/item-equestrian-posts.html#poi	coding	They are POIs and nothing else
+wiki/item-equestrian-posts.html#use	gameplay	What they are for
+wiki/item-horse-hair.html#chain	gameplay	There is no chain — hair goes in raw
+wiki/item-horse-hair.html#get	gameplay	How you get it
+wiki/item-horse-hair.html#removal	coding	The bundle, the rope and the cloth were removed
+wiki/item-horse-hair.html#shearing	coding	Shearing
+wiki/item-horse-hair.html#uses	gameplay	What needs hair
+wiki/item-horse-hair.html#verified	coding	Verified
+wiki/item-horse-shoes.html#bench	coding	Bench and crafting path
+wiki/item-horse-shoes.html#design-reasoning	science	Design reasoning
+wiki/item-horse-shoes.html#effect-layer	coding	Effect layer
+wiki/item-horse-shoes.html#effects	coding	First effects to implement
+wiki/item-horse-shoes.html#enchanting	coding	Enchanting rules
+wiki/item-horse-shoes.html#item-layer	coding	Item layer
+wiki/item-horse-shoes.html#metal-tiers	gameplay	Metal tiers and stat bonuses
+wiki/item-horse-shoes.html#render-layer	coding	Render layer
+wiki/item-horse-shoes.html#shared-architecture	coding	Shared architecture
+wiki/item-horse-shoes.html#slot-layer	coding	Slot layer
+wiki/item-horse-shoes.html#what-they-are	gameplay	What they are
+wiki/item-horse-shoes.html#why-they-are-different	gameplay	Why they are different from boots
+wiki/item-jumps.html#art	science	Why the art is ours
+wiki/item-jumps.html#building	gameplay	Building a course
+wiki/item-jumps.html#classes	coding	Where it lives
+wiki/item-jumps.html#collision	coding	The collision box is taller than the model
+wiki/item-jumps.html#connection	coding	Left, right, and the suffix that was wrong
+wiki/item-jumps.html#health	gameplay	Is it dangerous?
+wiki/item-jumps.html#height	gameplay	Height is a measuring stick
+wiki/item-jumps.html#instrument	science	What a stack can actually measure
+wiki/item-jumps.html#menu-data	coding	The screen reads the block, because a ContainerData is 16 bits
+wiki/item-jumps.html#not-yet	gameplay	What it is not, yet
+wiki/item-jumps.html#paint	coding	Paint is a tint, and here that is the right tool
+wiki/item-jumps.html#stacking-vs-screen	coding	Stacking beats the screen, and that needed an override
+wiki/item-jumps.html#styles	gameplay	Three styles, two woods and two coats of paint
+wiki/item-jumps.html#tags	coding	The axe tag is shared, so it merges
+wiki/item-jumps.html#three-copies	coding	The geometry is written three times
+wiki/item-jumps.html#two-woods	coding	The woods are data, and the item carries two components
+wiki/item-jumps.html#unverified	coding	Unverified
+wiki/item-jumps.html#use	gameplay	What it is for
+wiki/item-jumps.html#uvlock	coding	The crossrails are not UV-locked
+wiki/item-jumps.html#why-cosmetic	science	Why style is cosmetic
+wiki/item-jumps.html#why-stacking	science	Stacking, and the height that was added beside it
+wiki/item-research-papers.html#component	coding	The component and the routes
+wiki/item-research-papers.html#gaps	coding	Known gaps
+wiki/item-research-papers.html#get	gameplay	Four ways to get one
+wiki/item-research-papers.html#use	gameplay	What it does
+wiki/item-research-papers.html#verified	coding	Verified
+wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
+wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
+wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
+wiki/item-research-shelf.html#storage	coding	Real slots, one paper per gene
+wiki/item-research-shelf.html#use	gameplay	What it does
+wiki/item-research-shelf.html#verified	coding	Verified
+wiki/item-seed-jars.html#gaps	coding	Known gaps
+wiki/item-seed-jars.html#storage	coding	What the jar stores
+wiki/item-seed-jars.html#use	gameplay	How to use one
+wiki/item-seed-jars.html#verified	coding	Verified
+wiki/item-spawn-eggs.html#breed	gameplay	Breed spawn eggs
+wiki/item-spawn-eggs.html#breed-egg	coding	Breed spawn eggs
+wiki/item-spawn-eggs.html#custom	gameplay	The custom horse spawn egg
+wiki/item-spawn-eggs.html#egg	coding	The custom horse spawn egg
+wiki/item-spawn-eggs.html#preset	gameplay	Preset horse spawn eggs
+wiki/item-spawn-eggs.html#preset-2	coding	Preset horse spawn eggs
+wiki/item-spawn-eggs.html#randomize-menu	gameplay	What the Randomize arrow offers
+wiki/item-spawn-eggs.html#tab	coding	The creative tab
+wiki/item-spawn-eggs.html#verified	coding	Verified
+wiki/item-splice-carrots.html#blacklist	coding	The blacklist, and why it is derived
+wiki/item-splice-carrots.html#item	coding	One item, many genes
+wiki/item-splice-carrots.html#known	gameplay	Known Gene Splice — the targeted one
+wiki/item-splice-carrots.html#mark	gameplay	A splice that lands marks the foal
+wiki/item-splice-carrots.html#random	gameplay	Unknown Gene Splice — the random one
+wiki/item-splice-carrots.html#recipe-type	coding	The Known Gene Splice is a custom recipe type
+wiki/item-splice-carrots.html#themed	gameplay	The five themed splices
+wiki/item-splice-carrots.html#verified	coding	Verified
+wiki/item-stall-signs.html#detector	coding	The detector measures, it does not judge
+wiki/item-stall-signs.html#gaps	coding	Known gaps
+wiki/item-stall-signs.html#get	gameplay	How to get one
+wiki/item-stall-signs.html#how	coding	The two steps
+wiki/item-stall-signs.html#use	gameplay	How to use one
+wiki/item-stall-signs.html#verified	coding	Verified
+wiki/item-tickets.html#classes	coding	Where it lives
+wiki/item-tickets.html#gaps	coding	Known gaps
+wiki/item-tickets.html#holding-pen	gameplay	The holding pen ticket, and its sign
+wiki/item-tickets.html#tiers	gameplay	The four tiers
+wiki/item-tickets.html#using	gameplay	Using one
+wiki/item-tickets.html#verified	coding	Verified
+wiki/item-transfer-papers.html#components	coding	What each one carries
+wiki/item-transfer-papers.html#gaps	coding	Known gaps
+wiki/item-transfer-papers.html#rules	gameplay	Things worth knowing
+wiki/item-transfer-papers.html#use	gameplay	How they work
+wiki/item-vet-kit.html#code	coding	Where it lives
+wiki/item-vet-kit.html#gaps	coding	Known gaps
+wiki/item-vet-kit.html#gelding	gameplay	What gelding does
+wiki/item-vet-kit.html#use	gameplay	How to use it
+wiki/item-whistles.html#call	coding	How a call finds a horse
+wiki/item-whistles.html#ender	gameplay	The ender whistle
+wiki/item-whistles.html#ender-code	coding	The ender whistle
+wiki/item-whistles.html#ender-gaps	coding	Known gaps
+wiki/item-whistles.html#reading	coding	The area whistles
+wiki/item-whistles.html#tiers	gameplay	The four whistles
+wiki/item-whistles.html#use	gameplay	What happens when you blow an area whistle
+wiki/items.html#adding	coding	Adding an item
+wiki/items.html#gaps	coding	Known gaps, across the roster
+wiki/items.html#gate-exception	gameplay	The double gates are outside the modded-ingredient rule
+wiki/items.html#golden-carrot-seeds	gameplay	Golden carrot seeds — a crop, and not a gold farm
+wiki/items.html#notworking	gameplay	What does not work yet
+wiki/items.html#roster	gameplay	The items
+wiki/items.html#rules	gameplay	House rules for every recipe
+wiki/items.html#tab	coding	The creative tab
+wiki/items.html#tack	gameplay	Tack: the saddle is dyeable
+wiki/items.html#tack-derived	gameplay	The textures are derived, not drawn
+wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
+wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
+wiki/known-gaps.html#migrated	all	Migrated open checks
+wiki/paint-order.html#exception	coding	The one gene the order does not describe
+wiki/paint-order.html#icons	coding	Where the pictures come from
+wiki/paint-order.html#one-order	coding	There is one order, and it is derived
+wiki/paint-order.html#stack	gameplay	The stack
+wiki/paint-order.html#why-it-matters	coding	What the number decides
+wiki/philosophy.html#abstraction	all	5. Abstraction is a feature, and we say so out loud
+wiki/philosophy.html#breeding-skill	all	1. Breeding should be a game of skill, not a slot machine
+wiki/philosophy.html#care	all	8. The horse is something you look after
+wiki/philosophy.html#carrot-not-stick	all	Carrot, not stick
+wiki/philosophy.html#concepts-are-breeds	all	A concept is a breed, not a gene
+wiki/philosophy.html#conflicts	all	When these conflict
+wiki/philosophy.html#contract-forbids	all	What the contract forbids
+wiki/philosophy.html#determinism	all	2. Determinism is the load-bearing wall
+wiki/philosophy.html#determinism-tests	all	How it gets checked
+wiki/philosophy.html#extensible	all	7. Other people should be able to add to this
+wiki/philosophy.html#horses-only	all	Everything must directly relate to horses
+wiki/philosophy.html#infinite-coats	all	3. The coat should have functionally infinite outcomes
+wiki/philosophy.html#one-system	all	One major system, and everything else in service of it
+wiki/philosophy.html#player-goals	all	4. “Interesting” is the player’s word, not ours
+wiki/philosophy.html#positioning	all	What this mod is, next to the other one
+wiki/philosophy.html#randomness	all	Where randomness is allowed to happen at all
+wiki/philosophy.html#real-magical	all	6. Real and magical, clearly separated
+wiki/philosophy.html#sex-linkage	all	The one exception: sex linkage
+wiki/philosophy.html#utility-not-decoration	all	Utility, not decoration — breeding is the exception
+wiki/philosophy.html#vanilla-intact	all	Vanilla mechanics stay intact
+wiki/philosophy.html#what-for	all	What this mod is for
+wiki/pipeline.html#bake-budget	all	When a coat is baked, and how many at once
+wiki/pipeline.html#dilute	all	Why dilute exists, and why restrictBlack was not enough
+wiki/pipeline.html#eye-colour	all	Eye colour — a channel with ranked claims
+wiki/pipeline.html#face-markings	all	Face markings: star, stripe, snip
+wiki/pipeline.html#golden	all	The golden test
+wiki/pipeline.html#near-black	all	Transparency and near black
+wiki/pipeline.html#overlay	all	Phase 6 — the overlay
+wiki/pipeline.html#phase2	all	Phase 2 — resolve through the gradient
+wiki/pipeline.html#shadow-pass	all	The shadow pass — nothing phase 3 paints is true black
+wiki/pipeline.html#topline	all	How high white climbs: the topline reference
+wiki/pipeline.html#verified	all	Verified
+wiki/pipeline.html#white-finds-white	all	White finds white
+wiki/pipeline.html#white-lock	all	The white lock — the one gene that changes the rule
+wiki/pipeline.html#whiten	all	Why whiten exists, and why scaling both channels was not enough
+wiki/progression.html#advancement-bake	coding	One trigger, and a hundred baked advancements
+wiki/progression.html#advancements	gameplay	Every task is also an advancement
+wiki/progression.html#alleles	gameplay	The collection
+wiki/progression.html#checklist	gameplay	The checklist
+wiki/progression.html#collection-storage	coding	The collection is a second set, on purpose
+wiki/progression.html#tasks	coding	Tasks are an enum in common/
+wiki/progression.html#verified	coding	Verified
+wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
+wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
+wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour
+wiki/roadmap-execution.html#coverage	all	Every roadmap tab has a lane
+wiki/roadmap-execution.html#discovery-ui	all	Horse discovery and naming
+wiki/roadmap-execution.html#fixes-first	all	Fixes and tuning come first
+wiki/roadmap-execution.html#gap-routing	all	Open-gap routing audit
+wiki/roadmap-execution.html#gates	all	Foundations and decision gates
+wiki/roadmap-execution.html#gear-and-attachments	all	Gear and visual attachments
+wiki/roadmap-execution.html#handoff	all	Implementation handoff packet
+wiki/roadmap-execution.html#hardening-matrix	all	The required hardening matrix
+wiki/roadmap-execution.html#identity-first	all	1. Persistent identity and record retrieval
+wiki/roadmap-execution.html#interaction-first	all	2. Interaction routing and screen lifecycle
+wiki/roadmap-execution.html#loot-and-acquisition	all	Loot and acquisition
+wiki/roadmap-execution.html#owned-horse-records	all	Owned horses and records
+wiki/roadmap-execution.html#records-and-events	all	5. Ownership events, alerts and history
+wiki/roadmap-execution.html#routing	all	Route every request first
+wiki/roadmap-execution.html#session-loop	all	The execution loop
+wiki/roadmap-execution.html#session-packet	all	Session start and closeout packet
+wiki/roadmap-execution.html#slice-brief	all	The slice brief
+wiki/roadmap-execution.html#slices	all	New-content vertical slices in dependency order
+wiki/roadmap-execution.html#symptom-map	all	Symptom-to-anchor map
+wiki/roadmap-execution.html#ui-and-gear-fixes	all	6. UI and equipment actions
+wiki/stables.html#adding	all	Adding one: two files and no Java
+wiki/stables.html#debug-announce	all	Turning the commentary on
+wiki/stables.html#rarity	all	How often they generate
+wiki/stables.html#safety	all	What a stable may never do
+wiki/stables.html#stalls	all	How it finds the stalls
+wiki/stables.html#the-three	all	The three
+wiki/stables.html#verified	all	Verified
+wiki/stables.html#when	all	When the horses arrive
+wiki/stables.html#who-lives-there	all	Who lives in each
+wiki/texture-resolution.html#absolute	all	What is written in texels, and would break
+wiki/texture-resolution.html#backport	all	26.1.2 versus the 1.12.2 backport
+wiki/texture-resolution.html#cost	all	Memory, frame time and storage
+wiki/texture-resolution.html#drawers	all	Re-tooling the drawers
+wiki/texture-resolution.html#free	all	What already scales for free
+wiki/texture-resolution.html#genes	all	Which genes use absolute references
+wiki/texture-resolution.html#optifine	all	Does any of this need OptiFine?
+wiki/texture-resolution.html#pack-template	all	Planned: paint on the player’s own resource pack
+wiki/texture-resolution.html#scales	all	Scale by scale
+wiki/texture-resolution.html#today	all	What 128 actually is
+wiki/texture-resolution.html#unverified	all	Unverified
+wiki/villagers.html#arcane	all	The arcane dealer
+wiki/villagers.html#arcane-pools	all	The pools are generated, never listed
+wiki/villagers.html#arcane-quiet	all	He does not stock the genes that make a noise
+wiki/villagers.html#arcane-wandering	all	He is also out on the road
+wiki/villagers.html#barn	all	The barn, and how it lands on the outskirts
+wiki/villagers.html#bearer	all	Why redemption is a walk, not a click
+wiki/villagers.html#bred-by	all	What a transfer never changes
+wiki/villagers.html#breed-eggs	all	Breed eggs, and the region filter
+wiki/villagers.html#connector-height	all	And all three at y=0
+wiki/villagers.html#cowboy	all	The cowboy
+wiki/villagers.html#doors	all	They can work a door, in daylight, with both hands
+wiki/villagers.html#entity-in-structure	all	The cowboy comes with the building
+wiki/villagers.html#equestrians	all	The four equestrians
+wiki/villagers.html#family-names	all	One family per village
+wiki/villagers.html#founding	all	Where they set up
+wiki/villagers.html#herd	all	Their herd
+wiki/villagers.html#homozygous	all	The carrot that breeds true
+wiki/villagers.html#house	all	They keep vanilla's brain, and get a house
+wiki/villagers.html#jigsaw	all	Terminators are the edge of the village
+wiki/villagers.html#measured	all	How often it actually appears — counted
+wiki/villagers.html#metalsmith-modded	all	What fills him out: other mods' metals
+wiki/villagers.html#nights	all	They do not go indoors, and does not need to
+wiki/villagers.html#not-a-profession	all	Why they are not a villager profession
+wiki/villagers.html#not-built	all	What the roadmap asked for and this does not do
+wiki/villagers.html#one-per-village	all	One cowboy per village
+wiki/villagers.html#papers	all	Transfer papers
+wiki/villagers.html#pool-injection	all	Why the pool is edited in code
+wiki/villagers.html#post-at-the-barn	all	All five stand at the house
+wiki/villagers.html#random-trades	all	A random carrot, without a custom listing
+wiki/villagers.html#reading-a-horse	all	Reading a horse you do not own
+wiki/villagers.html#rebaking	all	Re-baking the piece
+wiki/villagers.html#restock	all	Restocking and rotation
+wiki/villagers.html#routine	all	Their day
+wiki/villagers.html#tack-tint	all	Dyed tack, on a ladder you can see
+wiki/villagers.html#three-connectors	all	Why three, and what one was costing
+wiki/villagers.html#trade-filter	all	The filter box, on every cowboy's window
+wiki/villagers.html#trade-table	all	The four trade tables
+wiki/villagers.html#trades	all	What they sell
+wiki/villagers.html#verified	all	Verified
+wiki/villagers.html#workstation	all	Five posts, one texture

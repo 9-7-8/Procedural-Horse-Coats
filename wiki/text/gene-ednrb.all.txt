@@ -1,0 +1,5 @@
+EDNRB (frame overo)
+(Natural gene / phase 1)
+Frame overo, and the model’s first genuine lethal . Bold jagged-edged white on the flanks that never crosses the topline — and, when two carriers meet, an all-white foal that in life does not survive its first days. This is what used to be horsegenetics.frame , renamed to its locus alongside KIT , MITF and PAX3 .
+
+Natural gene / phase 1 EDNRB (frame overo) Frame overo, and the model’s first genuine lethal . Bold jagged-edged white on the flanks that never crosses the topline — and, when two carriers meet, an all-white foal that in life does not survive its first days. This is what used to be horsegenetics.frame , renamed to its locus alongside KIT , MITF and PAX3 . KIT (white spotting) MITF (splash white) PAX3 (splash white) Tobiano Source: common/genetics/genes/EdnrbGene.java

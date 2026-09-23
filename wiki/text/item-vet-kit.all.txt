@@ -1,0 +1,5 @@
+Vet’s kit
+(Item / breeding)
+Geld a stallion so he never breeds, or examine a horse: where a mare is in her heat, and whether she is carrying twins.
+
+Item / breeding Vet’s kit Geld a stallion so he never breeds, or examine a horse: where a mare is in her heat, and whether she is carrying twins. Fertility & gestation Seed jars All items server/VetKitHandler ; the flag on HorseRecord .

@@ -1,0 +1,5 @@
+Hot blooded
+(Magical gene / no coat effect)
+Snow will not lie near it and ice does not last. A hot-blooded horse leaves a thawed circle wherever it stands, which is charming in a paddock and a genuine nuisance on a frozen lake.
+
+Magical gene / no coat effect Hot blooded Snow will not lie near it and ice does not last. A hot-blooded horse leaves a thawed circle wherever it stands, which is charming in a paddock and a genuine nuisance on a frozen lake. Dryad Verdant Fireproof What to check in-game Source: common/genetics/genes/HotBloodedGene.java

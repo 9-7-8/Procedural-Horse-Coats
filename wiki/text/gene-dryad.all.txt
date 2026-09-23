@@ -1,0 +1,5 @@
+Dryad
+(Magical gene / no coat effect)
+Every so often the horse leaves something growing where it has been, and what it leaves is written on the allele. Nine of them: six trees, mushrooms, flowers, and one that plants nothing at all and hurries along whatever is already there. Left in one place long enough, a dryad makes the place its own — one block at a time and entirely without hurrying.
+
+Magical gene / no coat effect Dryad Every so often the horse leaves something growing where it has been, and what it leaves is written on the allele. Nine of them: six trees, mushrooms, flowers, and one that plants nothing at all and hurries along whatever is already there. Left in one place long enough, a dryad makes the place its own — one block at a time and entirely without hurrying. Hot blooded Verdant The spread verb What to check in-game Source: common/genetics/genes/DryadGene.java

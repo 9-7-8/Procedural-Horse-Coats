@@ -1,0 +1,5 @@
+Verdant
+(Magical gene / no coat effect)
+A horse that changes the ground it walks on: mycelium, moss or grass, creeping outward from wherever it stands. Three variants at one locus, every one of them needing two of itself — so a mycelium copy beside a moss copy is not half of each, it is nothing at all.
+
+Crossing two of them It paints nothing, and that is a gap All five outcomes are wild types, so affectsCoat() is false, the locus is out of the texture key, and the gallery collapses it to one entry — four alleles for no catalogue growth at all, the same trick sex and the non-coat loci use. The cost is real, and it is the same one milk has: a verdant horse is indistinguishable from an ordinary one until you watch the floor. It sits awkwardly beside healer , which draws a stripe precisely so a player can see what it does. A marking would be the fix, and it would want to be part of the locus rather than bolted on. Its gene carrot

@@ -1,0 +1,5 @@
+Fertility & gestation
+(Start here / breeding)
+Mares come into heat, and breeding through this mod’s own tools makes a pregnancy . The foal arrives when it ends, not the moment the pair is bred. Plain golden carrots still give a foal at once, exactly as in vanilla. Fertility is inherited: the fertility gene decides how readily a horse breeds and how often a mare carries twins.
+
+Start here / breeding Fertility & gestation Mares come into heat, and breeding through this mod’s own tools makes a pregnancy . The foal arrives when it ends, not the moment the pair is bred. Plain golden carrots still give a foal at once, exactly as in vanilla. Fertility is inherited: the fertility gene decides how readily a horse breeds and how often a mare carries twins. The fertility gene Breeding & pedigree Breeding carrots Seed jars Source: common/repro/ , neoforge/server/ReproHandler .

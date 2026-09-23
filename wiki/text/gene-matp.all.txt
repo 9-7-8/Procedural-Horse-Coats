@@ -1,0 +1,5 @@
+MATP — cream and pearl
+(Natural gene / phase 1)
+One locus, three alleles , six combinations and four outcomes. Cream and pearl are the same physical gene in a real horse ( SLC45A2 / MATP ); this mod modelled them as two two-allele genes with a shared resolver until the combination-table rewrite, which is what made a single multi-allele locus expressible at all.
+
+Natural gene / phase 1 MATP — cream and pearl One locus, three alleles , six combinations and four outcomes. Cream and pearl are the same physical gene in a real horse ( SLC45A2 / MATP ); this mod modelled them as two two-allele genes with a shared resolver until the combination-table rewrite, which is what made a single multi-allele locus expressible at all. Alleles, combinations and expressions Champagne Silver dapple The coat pipeline Cream and pearl used to have a page each; both are this locus now.

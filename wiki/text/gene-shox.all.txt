@@ -1,0 +1,5 @@
+SHOX (skeletal atavism)
+(Natural gene / health)
+A deletion in the pseudoautosomal SHOX region. The splint bones grow out to their full ancestral length, the limbs come out malformed, and the foal cannot stand on them.
+
+Natural gene / health SHOX (skeletal atavism) A deletion in the pseudoautosomal SHOX region. The splint bones grow out to their full ancestral length, the limbs come out malformed, and the foal cannot stand on them. Sex (X / Y) PLOD1 Roadmap — sex-linked genes Source: common/genetics/genes/ShoxGene.java

@@ -1,0 +1,5 @@
+Weather sensitive (speed)
+(Magical gene / no coat effect)
+How the sky changes what the horse can do. A positive and a negative allele for each kind of weather, incompletely dominant, with the size of the effect written on each allele copy. Unlinked to the jump locus — a horse can love the rain and be no better at fences in it.
+
+A locus you cannot look at Every other performance gene can be measured whenever you like. This one can only be measured when the weather agrees, which makes it the first locus in the mod where the gene database is genuinely easier than observation. That is the point of it: it gives the testing layer something to be better at than looking.

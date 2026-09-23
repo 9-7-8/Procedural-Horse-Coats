@@ -1,0 +1,5 @@
+Eyesight locus
+(Magical gene / no coat effect)
+Whether the horse was built for the dark or for the daylight. A caveborn horse moves better in the gloom and worse in the light; a daywalker is the opposite; the wild type does not care. It reads the actual light level , so a cave at noon counts — and so do your own torches.
+
+A locus with no wrong answer Most magical loci are ladders: one allele is better and the breeding project is to find it. This one has two alleles that are each better somewhere, so the question a breeder faces is not “which is stronger” but “what is this horse for ”. The mod has very few of those and wants more. Cancelling as a statement A Cav/Day horse is not a broken horse or a compromise horse. It is a horse whose two answers to the same question happen to sum to the wild type — which is what a real incompletely-dominant pair of opposite-effect alleles does, and it costs nothing to represent honestly.

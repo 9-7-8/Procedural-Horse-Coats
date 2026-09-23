@@ -1,0 +1,5 @@
+Waterborn
+(Magical gene / phase 3 + effects)
+Neon-blue streaks through the mane and tail, and a horse that walks on the surface of water instead of wading. It leaves a trail of blue sparks where it treads, and a tamed mare can be milked with an empty bucket for a bucket of water. Waterborn is the mod’s first data-driven gene to ship and the first to carry an effects block — it is a JSON file, not a Java class.
+
+Magical gene / phase 3 + effects Waterborn Neon-blue streaks through the mane and tail, and a horse that walks on the surface of water instead of wading. It leaves a trail of blue sparks where it treads, and a tamed mare can be milked with an empty bucket for a bucket of water. Waterborn is the mod’s first data-driven gene to ship and the first to carry an effects block — it is a JSON file, not a Java class. Gene effects reference Trait & effect architecture Mane colour (the TOWARD move) The gene file format What to check in-game Source: common/src/main/resources/horsegenetics/example-genes/waterborn.json (and the shipped copy under neoforge-26.1.2/…/resources/horsegenetics/genes/ )

@@ -1,0 +1,5 @@
+Hydrophobic
+(Magical gene / no coat effect)
+It will not be ridden into water. Take one in past its knees and it throws you and makes for the nearest shore — which is what every horse in vanilla Minecraft does, and which this mod otherwise quietly fixed for you.
+
+Half seen: it throws you, and it heads for land Both halves were confirmed in the yard on 2026-09-13 — it does more than this page originally claimed. What has not been watched is everything it must not do: a carrier must still carry you across a river, a ford must not dismount anybody, and the deep-water ejection must not become a drowning. Those are on the Verification tab . What it does Combination Outcome Hyd/Hyd bucks its rider in water and heads for land anything else nothing — it swims like any other horse here Why this is the odd one out In this mod a tamed horse gets a swimming assist and will carry you across a river. That is a deliberate improvement on vanilla. This gene takes it away again for the horses that have it — so it is a defect to breed out rather than a trait to breed for. Health None to the horse. Being thrown into deep water is a hazard to you.

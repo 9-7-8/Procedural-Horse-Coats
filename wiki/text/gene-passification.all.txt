@@ -1,0 +1,5 @@
+Passification
+(Magical gene / no coat effect)
+The way in to a horse that would otherwise kill you. It adds no aggression of its own — it says what you can offer the animal to make it stop, and while the bargain holds it will not target you for any reason.
+
+Magical gene / no coat effect Passification The way in to a horse that would otherwise kill you. It adds no aggression of its own — it says what you can offer the animal to make it stop, and while the bargain holds it will not target you for any reason. Aggression Skittishness Epigenetics What to check in-game Source: common/genetics/genes/PassificationGene.java

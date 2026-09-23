@@ -1,0 +1,5 @@
+CKM
+(Natural gene / performance)
+Creatine kinase — the third speed locus, and deliberately the smallest and second-rarest of the three. The last few hundredths of a horse’s speed should be the hardest to find.
+
+Natural gene / performance CKM Creatine kinase — the third speed locus, and deliberately the smallest and second-rarest of the three. The last few hundredths of a horse’s speed should be the hardest to find. MSTN PDK4 The trait system Source: common/genetics/genes/CkmGene.java
