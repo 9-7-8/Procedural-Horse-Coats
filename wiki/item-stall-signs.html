@@ -321,7 +321,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -403,6 +403,20 @@
         log.</li>
 </ul>
 
+
+<h3 id="gap-283" data-check-kind="open-gap">Open check 283</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: a stall sign keeps the name the horse had when it
+    was hung.</strong> Sign text is written once at placement from the bound name
+    (<code>item/StallSignItem</code>), and <code>StallRecord</code> stores that string rather
+    than reading it back off the horse. Give a horse a barn name <em>after</em> its sign is up
+    and the sign, and the stall's entry in <code>StallData</code>, keep the old one for good.
+    The sign is a plain unwaxed oak wall sign, so a player can edit it by hand and the block
+    will be right while the record stays wrong &mdash; which is worse than either alone. The
+    fix is for the barn-name path to walk that horse's stall and rewrite both, and it is not
+    written. Found while tracing "there doesn't seem to be a way to change the barn name";
+    the barn name itself works.
+</div>
 </section>
 
 <div class="page-foot">

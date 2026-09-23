@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Writes the index of wiki/verification.html: one row per wiki page that
 // carries a Verification tab, alphabetical, with that tab's own one-sentence
-// summary.
+// summary. Verification tabs are the single home for open runtime, defect,
+// design, documentation and compatibility checks.
 //
 //   node wiki/tools/bake-verification-index.mjs
 //
@@ -11,11 +12,11 @@
 //
 //   <section id="verification" class="tab-panel" data-tab="verification"
 //            data-tab-label="Verification"
-//            data-tab-hint="Built, not yet seen in a game">
+//            data-tab-hint="Open checks">
 //
 //   <div class="note verify-summary">
-//       <span class="label">What needs verifying here</span>
-//       <p>One sentence saying what is built and unconfirmed.</p>
+//       <span class="label">Open checks here</span>
+//       <p>One sentence describing the checks still open on this page.</p>
 //   </div>
 //
 // The sentence is the row. The count beside it is the panel's own <li> tally,
@@ -114,7 +115,7 @@ rows.sort((a, b) => key(a.title).localeCompare(key(b.title)));
 const out = [BEGIN];
 out.push(`<p class="verify-count">`);
 out.push(`    <strong>${rows.length}</strong> ${rows.length === 1 ? "page has" : "pages have"} `
-    + `something built and not yet confirmed, `
+    + `open checks, `
     + `<strong>${rows.reduce((n, r) => n + r.checks, 0)}</strong> checks `
     + `${rows.length === 1 ? "on it" : "between them"}.`);
 out.push(`</p>`);

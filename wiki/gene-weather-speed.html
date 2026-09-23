@@ -196,7 +196,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -275,6 +275,27 @@
         <strong>Pass:</strong> you can tell which weather you are in without reading the
         attribute. If you cannot, the mean delta is too small, and that is the finding.</li>
 </ul>
+
+<h3 id="gap-304" data-check-kind="open-gap">Open check 304</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-21 while writing the weather loci's checklists: a gene&rsquo;s two allele copies cannot both move the same attribute &mdash; the second silently replaces the first.</strong>
+    <code>AbstractWeatherGene.abilitiesFor</code> deliberately emits <strong>one conditioned
+    <code>AttributeMod</code> per copy</strong> rather than summing them, because each copy carries its
+    own weather condition. But <code>GeneAbilityHandler.attributeModifierId</code> names a modifier
+    <code>gene/&lt;geneKey&gt;/&lt;attribute&gt;</code> &mdash; one id per gene <em>and attribute</em>, with no
+    room for a second copy &mdash; and <code>addOrUpdateTransientModifier</code> then overwrites. So a
+    horse whose both copies are live carries <strong>one</strong> of them, not their sum, and which one
+    depends on emission order. Both <a href="gene-weather-speed.html">weather speed</a> and
+    <a href="gene-weather-jump.html">weather jump</a> promise on their own pages that two copies add.
+    <strong>A thunderstorm makes this reachable with one horse</strong>: vanilla raises
+    <code>isRaining()</code> <em>and</em> <code>isThundering()</code> in a storm, so an
+    <code>R+/Tv</code> horse has two conditions holding and one modifier slot &mdash; which also
+    falsifies both pages&rsquo; claim that the two conditions can never hold at once. Unproven in
+    game, and invisible when it happens: the horse simply moves by one percentage instead of two.
+    The fix is an id that includes the copy, which <code>clearAttributes</code> must then agree with.
+    Checks on <a href="gene-weather-speed.html#verification">weather speed</a> and
+    <a href="gene-weather-jump.html#verification">weather jump</a>.
+</div>
 </section>
 
 <div class="page-foot">

@@ -479,7 +479,7 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -562,6 +562,34 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
         eating grass but not crops. None of that is written yet.</li>
 </ul>
 
+
+<h3 id="gap-254" data-check-kind="open-gap">Open check 254</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-15: three strings in <code>gui.js</code> mirror Java by hand, and one of them is a
+    category list.</strong> Found auditing the designer against <code>CustomHorseSpawnScreen</code> (hard rule 5). Almost
+    everything the browser draws is derived - genes, families, randomize modes, add scopes and breeds all come across from
+    <code>DesignerApi</code> - but three literals do not, and none of them would announce a drift:
+    <ul>
+        <li><strong>The worst of the three.</strong> <code>gui.js</code>'s <code>viewable()</code> reads
+            <code>gene.shows !== "ability" &amp;&amp; gene.shows !== "stats"</code> - two of the five categories
+            <code>DesignerApi.showsAs</code> can return. Add a sixth and the browser silently treats it as drawable and
+            draws nothing, which is the exact failure the struck-through "not shown here" row exists to prevent.
+            <code>showsAs</code>'s own comment is about not keeping a list like this.</li>
+        <li><code>"Feral Mixed"</code> as a fallback breed name, where the screen takes it from
+            <code>Breeds.FERAL_MIXED.name()</code>. Dead today (the breeds list always fills index 0), so a rename would
+            go unnoticed here rather than wrong.</li>
+        <li><code>"(wild type)"</code> for an empty short form, which the screen has no counterpart for at all.
+</div>
+
+<h3 id="gap-255" data-check-kind="open-gap">Open check 255</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-15: two constants that exist on one side of the twin only.</strong> Also from
+    the rule 5 audit. <code>CustomHorseSpawnScreen</code> appends <code>" (preview capped)"</code> to its size readout past
+    <code>PREVIEW_SCALE_CAP</code>; the browser has neither the suffix nor the constant, so a very large horse reads there
+    as though the number it shows is the size being drawn. And <code>SPAWN_BAND = 22</code> is dead in the screen - nothing
+    reads it, the band is the literal <code>30</code> further down, and the browser's <code>vh - 30</code> agrees with the
+    literal rather than the constant. The live values match; it is the constants that lie.
+</div>
 </section>
 
 </article>

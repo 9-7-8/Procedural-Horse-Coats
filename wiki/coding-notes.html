@@ -1325,7 +1325,7 @@ done</code></pre>
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1397,6 +1397,81 @@ done</code></pre>
         in <code>wiki/tabs.js</code> and applies to every single-panel page, not just these.</li>
 </ul>
 
+
+<h3 id="gap-267" data-check-kind="open-gap">Open check 267</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-17: three genes name an outcome &ldquo;Wild type&rdquo; while giving it a custom id, so it survives a cull aimed at exactly that.</strong>
+    <code>ryr2</code>'s <code>jumper-plain</code>, <code>lcorl</code>'s
+    <code>lcorl-plain</code> and <code>hmga2</code>'s <code>hmga2-plain</code> (as they render:
+    &ldquo;Wild type&rdquo;) are the do-nothing outcome of a gene that paints nothing, which is
+    the category <a href="gene-census.html">the census</a> now drops. They are kept because the
+    rule tests <code>Expression#id()</code> against the conventional <code>"wild"</code> id
+    rather than the display name &mdash; deliberately, since an id is stable identity and a
+    display name is prose that a later edit can change, and keying a deletion rule to prose is
+    how a rename silently removes rows. So the rule is right and these three genes are
+    inconsistent with their siblings.
+    <strong>The fix belongs in the genes, not the tool</strong>: give the outcome the
+    conventional id, or give it a display name that says what it is rather than
+    &ldquo;Wild type&rdquo;. Either way re-run <code>:common:bakeGeneCensus</code>.
+    Two further rows carry the label legitimately and must not be swept up with these &mdash;
+    <code>patn1</code> and <code>patn2</code> each declare a single unnamed expression covering
+    every pair, so their only row <em>is</em> the baseline and deleting it would take the locus
+    off the page entirely; the tool rescues them on purpose.
+</div>
+
+<h3 id="gap-296" data-check-kind="open-gap">Open check 296</h3>
+<div class="open-check">
+<strong>Open, moved here 2026-09-20: six Java comments and a handful of wiki sentences point at roadmap anchors and section numbers that no longer exist.</strong>
+    The roadmap was cut back to planned features only, and the decisions moved to
+    <a href="decisions.html">their own page</a>. The wiki links were re-pointed in the same
+    change; <strong>the Java ones were not</strong>, because that session was wiki-only.
+    <code>CutieMarkContribution</code> and <code>ReproRules</code> still cite
+    <code>roadmap.html#settled</code> (now <code>decisions.html#settled</code>), and
+    <code>PpibGene</code> and <code>Scn4aGene</code> still cite &ldquo;roadmap &sect;3&rdquo;
+    for the severity-model question (now
+    <a href="decisions.html#decisions">decisions &sect; open calls</a>).
+    <code>HorseCareHandler</code> cites &ldquo;roadmap &sect;12&rdquo; and &ldquo;&sect;13&rdquo;
+    for shearing and the sleeping bond source, and the roadmap has carried no section numbers
+    since. <code>SpliceSafety</code>&rsquo;s <code>roadmap.html#sex-linked</code> still
+    resolves.
+    <strong>Nothing checks these:</strong> <code>wiki/tools/check-links.mjs</code> walks the
+    wiki and does not read Java, so a comment pointing at a dead anchor is invisible until
+    somebody follows it. The fix is a one-line edit in each of the five files.
+</div>
+
+<h3 id="gap-301" data-check-kind="open-gap">Open check 301</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-21: moving every plan next to its subject exposed that several pages already carried the same plan in their own words, and the two copies disagree.</strong>
+    The old roadmap and the page for the thing had been written independently for months, so the
+    duplication was invisible while they sat apart. <strong>Each of these is now two descriptions of
+    one plan on one page, and the older half is usually the stale one:</strong>
+    <ul>
+        <li><a href="carrots.html">carrots</a> &mdash; <code>#deferred</code> against
+            <code>#carrot-content</code>. The Deferred list says the Epigenetic Stabilizer carrot is
+            &ldquo;only meaningful once epigenetic drift exists&rdquo;; drift is now the default on
+            every value, which is what makes the carrot worth having at all.</li>
+        <li><a href="items.html">items</a> &mdash; <code>#gaps</code> against <code>#item-art</code>,
+            and they disagree on a count: one says <strong>three</strong> whistles share a texture,
+            the other four. The roster has four.</li>
+        <li><a href="breeds.html">breeds</a> &mdash; &ldquo;Not modelled (yet)&rdquo; against
+            <code>#breed-cosmetics</code>; mane shape and lower-leg feathering appear in both, in
+            nearly the same words.</li>
+        <li><a href="item-jumps.html">jumps</a> &mdash; <code>#not-yet</code> lists crossrails
+            spanning three blocks and the half-height rungs as still waiting, and the page&rsquo;s own
+            <code>#styles</code> and <code>#height</code> sections say both shipped.</li>
+        <li><a href="making-a-gene.html">making a gene</a> &mdash; <code>#tools</code> says the creator
+            previews &ldquo;using the same engine the game runs&rdquo;, while <code>#creator-wasm</code>
+            says it is the one tool whose preview never touches the real pipeline. Both are defensible
+            and the seam is felt by anyone reading both. The <code>pointsMin</code> incident is also
+            told twice, in <code>#creator-wasm</code> and <code>#contract-mask</code>.</li>
+        <li><a href="gene-lut.html">LUT</a> &mdash; the Coding tab&rsquo;s <code>LutGene.VARIANTS</code>
+            paragraph is the fuller and more accurate version of <code>#more-palettes</code>, which
+            says <code>lutResources()</code> instead. Keep the Coding tab&rsquo;s wording on a
+            merge.</li>
+        <li>Smaller: <a href="item-stall-signs.html">stall signs</a> states the stale-record problem
+            three times, and <a href="horse-care.html">horse care</a> now says
+            &ldquo;sleeping nearby, +1/night is not wired&rdquo; on two tabs.
+</div>
 </section>
 
 </article>

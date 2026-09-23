@@ -1136,7 +1136,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1426,6 +1426,23 @@
     outstanding work here, not the build.
 </p>
 
+
+<h3 id="gap-278" data-check-kind="open-gap">Open check 278</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: a breed's <code>jump</code> and <code>health</code> silently discard the top of a range.</strong>
+    <code>BreedSpecParser</code> reads all five stat axes, but only <code>speed</code>, <code>size</code> and
+    <code>pull</code> keep both ends of a <code>[lo, hi]</code> range. <code>jump</code> and <code>health</code> parse the
+    range and then take <code>[0]</code>, so a hand-written <code>"jump": [4, 6]</code> becomes a flat <code>4</code> with
+    no warning. A <em>strain's</em> stats block does not have this bug &mdash; it keeps both ends for all five &mdash; so the
+    two halves of the same file disagree with each other. <code>wiki/breed-format.html</code> documents the range as working
+    for all four scored axes, which makes the page wrong rather than the code obviously wrong.
+    <strong>Nothing catches it:</strong> the writer re-emits the collapsed single value, so the parser/writer round-trip in
+    <code>BreedFilesTest</code> passes by construction, and no shipped breed currently writes a range on either axis except
+    <code>welsh_pony</code>, which writes one on <code>speed</code> &mdash; the axis that works. Found while balancing
+    <a href="breed-book.html#cloudtouched">Cloudtouched</a>, not by a test. The fix is three lines and a decision about
+    whether the range was ever meant to be there; the risk in fixing it is that any breed later written with a jump or
+    health range would change behaviour the first time someone repaired it.
+</div>
 </section>
 
 </article>

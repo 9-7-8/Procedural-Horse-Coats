@@ -422,7 +422,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -564,6 +564,24 @@
         <em>order</em>, and order is the entire reason the insert is done the hard way.</li>
 </ul>
 
+
+<h3 id="gap-273" data-check-kind="open-gap">Open check 273</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: nothing the compat layer generates has ever been drawn.</strong>
+    Not a modded double gate in a world, not a tinted horse armour on a horse, not its inventory
+    icon, not a trade window with one in it. The runs that confirmed the pack generates were
+    <strong>dedicated-server</strong> runs, which by construction draw nothing. The greyscale
+    plate <code>tools/tack/bake-plate-armor-textures.ps1</code> bakes was <em>measured</em> &mdash;
+    and never looked at, so &ldquo;the numbers are right&rdquo; is all that is known about it.
+    This matters more than an ordinary unseen feature because
+    <a href="item-double-gates.html#generated-drift">this layer's signature failure is
+    silent</a>: a model or item definition pointing at something nobody wrote draws a purple
+    chequerboard and logs nothing at all. Two files have to agree for a modded gate to draw
+    (<code>bake-double-gates.mjs</code> and <code>compat/GeneratedGates</code>, one contract in
+    two languages) and nothing checks that they do.
+    <a href="item-double-gates.html#compat-0918-gates">The gates&rsquo; own checklist</a> is where
+    a modded wood gets drawn.
+</div>
 </section>
 
 </article>

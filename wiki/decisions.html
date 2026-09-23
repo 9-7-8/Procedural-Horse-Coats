@@ -57,6 +57,35 @@
 </div>
 
 
+<h3 id="migrated-gaps">Design calls moved out of known gaps</h3>
+
+<p>
+    These are not defects or fixed-bug notes. They are the decisions that change what the mod
+    does, and they were moved here from the old backlog so the backlog can stop being a live
+    design log.
+</p>
+
+<ul>
+    <li id="decision-body-size-setting"><strong>Body-size toggle is a design choice, not a bug.</strong>
+        The tradeoff is whether a breed-height toggle should flatten the scale range to 1.0 or
+        compress it toward 1.0 while preserving a recognisable Falabella/Shire contrast. See the
+        original gap 132 and the <a href="#open-studbook">studbook discussion</a> for the surrounding
+        reasoning.</li>
+    <li id="decision-preview-sync"><strong>Preview scaling and server truth must agree, or the UI must say it is a model preview.</strong>
+        This is the design call behind gap 133: either sync the body-size flag to the server before
+        drawing, or keep the preview as a genotype-only view and label it as such.</li>
+    <li id="decision-science-contradictions"><strong>Contradictions between a gene page and the science tab are design calls, not accidental defects.</strong>
+        This is the reasoning behind gap 134: the current mod intentionally keeps a cliff for HYPP,
+        keeps an additive HMGA2 reading despite its health risk, and accepts a non-significant CKM
+        speed claim because the question is whether to keep those decisions or correct them.</li>
+    <li id="decision-splice-policy"><strong>The splice carrot is a deterministic parent-to-foal promise, not a flat 25% roll.</strong>
+        This is the policy call behind gap 145: a splice may intentionally guarantee the fed parent’s
+        allele arrives, with the uncertainty left only in whether the other parent makes it visible.</li>
+    <li id="decision-research-shelf-policy"><strong>Whether an undiscovered gene may be filed on a shelf is a policy decision.</strong>
+        Gap 144 is not a defect in the shelf logic; it asks whether a shelf should permit the handoff of
+        a gene the player has not discovered, or whether discovery should gate filing.</li>
+</ul>
+
 <h3 id="open-eyes">Should a champagne foal be born blue-green?</h3>
 
 <p>

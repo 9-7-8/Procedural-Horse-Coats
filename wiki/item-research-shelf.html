@@ -173,7 +173,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -188,6 +188,11 @@
     <li><strong>The <a href="item-research-shelf.html">research shelf</a>, what is not yet seen.</strong> Filing works (<a href="item-research-shelf.html#verified-stores-papers">verified</a>). Still: pull the book out mid-copy and progress resets to zero; take a filed original back and the gene leaves the list; save and reload and the filed genes are still there; on the Store tab, click where the book and result slots would be and nothing goes in; two players at one shelf each copy their own gene.</li>
 </ul>
 
+
+<h3 id="gap-143" data-check-kind="open-gap">Open check 143</h3>
+<div class="open-check">
+<strong>The Equine Research Shelf has never been placed.</strong> Opened 2026-09-09 with the block. A new block, block entity, container menu, screen and two payloads, all written in one pass and none of it run: the model is a cube of vanilla bookshelf textures nobody has looked at, the two-tab screen's coordinates are arithmetic rather than measurement, and the whole storage layer - file, withdraw, copy, drop-on-break, save and reload - is unexercised. <strong>The parts most likely to be wrong are the ones a compiler cannot see</strong>: whether <code>Slot.isActive()</code> really does gate hit-testing as well as drawing on this version (the tabs depend on it entirely, and a live slot under an invisible one would let a player put a book into the filing slot); whether <code>PlayerContainerEvent.Open</code> fires late enough for <code>ShelfOpenSync</code>'s push to arrive; and whether <code>affectNeighborsAfterRemoval</code> is the right hook for dropping the books, since it is the successor to a method that changed name across recent versions. A save-and-reload is the single most valuable thing to try: the contents are a gene-key set on the block entity, written through <code>ValueOutput.store</code>, and nothing has round-tripped it.
+</div>
 </section>
 
 </article>

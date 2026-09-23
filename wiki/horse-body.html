@@ -859,7 +859,7 @@ public interface GeneEpigenetics {
 </p>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -997,6 +997,75 @@ public interface GeneEpigenetics {
     frequency, which the owner parked outright
     (<a href="known-gaps.html#gap-214">gap 214</a>).
 </p>
+
+<h3 id="gap-250" data-check-kind="open-gap">Open check 250</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-15: a blood-only horse went a whole game day without biting the cow beside it.</strong>
+    In the yard's 08:47 run, BLOOD ONLY (<code>diet=Dbld/Dbld</code>, hurt to half, hunger full) shared a pen with one cow,
+    which the watch counted there all day. It logged no <code>[trace] blood</code> line at all. HUNT ORDER, an identical
+    <code>Dbld/Dbld</code> horse in the next row, bit its own cow at tick 54. The 09:09 run rebuilt the same pen and BLOOD
+    ONLY bit its cow at tick 111. <code>BloodHuntGoal.canUse</code>'s conditions (a blood diet, hurt, not ridden or leashed,
+    the sun check, a search every second) all held for both horses, so the difference is in <code>findPrey</code> or in
+    reaching the cow. <em>The owner's call: log and keep watching.</em> <code>BloodHuntGoal</code> now logs, once a minute per
+    hurt blood-drinker, the prey it is hunting, or how many living things were in range and why each was ruled out (not
+    prey, or bitten today). Once per pursuit it logs a refused path. Since then BLOOD ONLY has bitten promptly in both
+    runs: its cow at tick 111 (09:09 run) and at tick 60 (09:40 run). The next time it goes a day without a bite, the log
+    will say which half failed.
+    <strong>It went about five game days without one in the 16:11 run, and the log says <em>neither</em> half.</strong>
+    In 98 minutes the pen's horse logged nothing at all: no bite, no refused path, no ruled-out tally, no
+    <code>horse hurt</code> and no <code>horse healed</code> line. Its label appears exactly once in the whole run, on the
+    pen's own sign. The pen is not empty - its census reads <code>horses 1 ... other creatures 1</code> throughout, so the
+    horse is alive with its cow beside it - and the goal itself is plainly working, because DHAMPIR FULL and HUNT ORDER
+    logged 119 blood traces between them over the same run, bites included. Since the once-a-minute diagnostic only fires
+    for a <em>hurt</em> blood-drinker, the failure is upstream of both <code>findPrey</code> and pathing: the horse was
+    never hurt, so <code>BloodHuntGoal.canUse</code> never ran at all. That inverts what this gap has assumed since it was
+    opened. <em>Next:</em> check whether <code>DebugYardDhampir.state()</code> ran for that pen at all - the 15:36 run's
+    BLOOD ONLY was hurt, healed and bit twice, so it is not a permanent fault - and have the census print the horse's
+    health, so an inert pen cannot look like a patient one again.
+    <em>(A grep trap worth keeping: <code>"BLOOD ONLY" bit</code> matches the pen's sign, which quotes the line it is
+    waiting for. Counting bites that way reports one when there are none.)</em>
+</div>
+
+<h3 id="gap-264" data-check-kind="open-gap">Open check 264</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-17: a dhampir biting you also ticks <em>Get kicked by a wild horse</em>, and the two are indistinguishable where it is credited.</strong>
+    The task is credited from the incoming-damage event rather than from
+    <code>HorseMeleeGoal</code>, and that was the right call of the two available: the goal knows it
+    <em>swung</em>, not that it connected, so crediting there would tick the box for a kick at a
+    creative player who took nothing. The price is this one. <code>BloodHuntGoal</code>'s bite is
+    also a <code>mob_attack</code> from an untamed horse, carries no marker of its own, and so
+    reaches the same handler looking identical. It is arguably not even false &mdash; a wild horse
+    did hurt you &mdash; which is why it was recorded rather than bodged, and the horse that does it
+    is rare. The fix is a damage source (or a tag on the existing one) for the bite, which would
+    also let <em>Watch a horse drink blood</em> be credited off the damage instead of from inside
+    the goal. Until then one event can tick two boxes.
+</div>
+
+<h3 id="gap-265" data-check-kind="open-gap">Open check 265</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-17: the dhampir is identified by a bare string, spelled out in two separate files, with no constant anywhere in Java.</strong>
+    Two checklist hooks test <code>lineage().components().contains("dhampir")</code> &mdash; one on
+    <code>HorseCareHandler</code>'s slow tick, one in <code>GeneDiscoveryHandler</code>'s tame
+    handler &mdash; because there is no Java constant for the breed to use: it exists as
+    <code>breeds/dhampir.json</code> and as a literal in <code>DhampirBreedTest</code>, and nowhere
+    else. Rename that breed file and both hooks stop firing with nothing going red, because
+    <code>check-progress-tasks.mjs</code> proves only that a task is <em>reachable</em>, never that
+    its condition can become true (<a href="known-gaps.html#gap-148">gap 148</a>) &mdash; so the two boxes would
+    simply never tick again and would read as "I have not found one yet". No shared home was
+    invented for the constant when the hooks were written, on the grounds that guessing where a
+    breed id belongs is worse than recording it; a comment at each site names the breed file. The
+    equivalent test for magical herds is safe, because it goes through
+    <code>BreedLineage.isMagical()</code> rather than a spelling.
+</div>
+
+<h3 id="gap-293" data-check-kind="open-gap">Open check 293</h3>
+<div class="open-check">
+<strong>Open, moved here 2026-09-20: a wild horse renders as a default black horse with vanilla attributes for about one tick.</strong>
+    Before <code>HerdManager</code> founds it. Not perceptible in play, but it is a frame of
+    wrong, and it is the visible edge of the deferred-join design rather than a stray bug: the
+    genome is assigned after the entity exists, so there is a window in which the renderer has
+    nothing to read. Worth knowing about before anything else is hung off the join.
+</div>
 </section>
 
 <div class="page-foot">

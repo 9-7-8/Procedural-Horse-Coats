@@ -275,7 +275,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -332,6 +332,21 @@
 <ul>
     <li><strong>Suntouched's light is cleaned up.</strong> Kill the horse, or ride far enough to unload it: the <code>minecraft:light</code> block goes with it. Gallop and check the light never fills a spot that has a block in it. <a href="gene-suntouched.html">Suntouched</a>.</li>
 </ul>
+
+<h3 id="gap-284" data-check-kind="open-gap">Open check 284</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: a glow light block is orphaned when its chunk
+    unloads first.</strong> <code>EntityLeaveLevelEvent</code> cannot read blocks &mdash; it runs
+    inside <code>DistanceManager.runAllUpdates</code> and any <code>getBlockState</code> there
+    re-enters that pass &mdash; so the clear is queued for the next server tick. But the event
+    almost always fires <em>because</em> the chunk is unloading, and by then
+    <code>hasChunkAt</code> is false and <code>drainPendingLightClears</code> drops it. The
+    block stays lit in the saved chunk for good. Self-limiting rather than harmless: the
+    placement fix of the same day counts an existing light block as a free spot, so an orphan
+    is reclaimed by the next glowing horse to stand there instead of blocking it. A real fix
+    needs either a chunk-load ticket held over the clear or the light moved onto chunk data,
+    and both are bigger than the symptom. <a href="gene-suntouched.html">Suntouched</a>.
+</div>
 </section>
 
 <div class="page-foot">

@@ -5482,7 +5482,7 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -5628,6 +5628,24 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     <li><strong>The mask-parts fix</strong> (<a href="making-a-gene.html#verified-mask-parts">making a gene</a>). <a href="gene-webbed.html">Webbed</a>, <a href="gene-elytra-veins.html">elytra veins</a>, <a href="gene-iridescent-jewel.html">iridescent jewel</a> and <a href="gene-opal-wing-veins.html">opal wing veins</a> now paint only barrel and neck, where they covered the whole horse; say if any was liked the old way. Smaller moves: <a href="gene-moth-mantle.html">moth mantle</a>, <a href="gene-lace.html">lace</a>, <a href="gene-fracture.html">fracture</a>, <a href="gene-koi.html">koi</a>; gained coverage: <a href="gene-masked.html">masked</a> (ears), <a href="gene-ehretia.html">ehretia</a> (tail), <a href="gene-peafowl.html">peafowl</a>, <a href="gene-snow-cloud.html">snow cloud</a>, <a href="gene-war-mask.html">war mask</a>.</li>
     <li><strong>The mask-union fix, fifteen genes</strong> whose second region used to be dropped: <a href="gene-panda.html">panda</a>'s hindquarter patch, and <code>brindlelace</code>, <code>cleave</code>, <code>cosmic</code>, <code>dutch</code>, <code>emitola</code>, <code>flametouched</code>, <code>fracture</code>, <code>imperial</code>, <code>marble_tobiano</code>, <code>patina</code>, <code>quarter</code>, <code>stardust</code>, <code>yalia</code>. Also the four painters: <code>WAVES</code> lobes even (cleave's teeth, angler's strings), <code>CRACKLE</code> panels straight with corners meeting three at a time (<a href="gene-qular.html">qular</a>), and <a href="gene-valentine-appaloosa.html">valentine</a>'s four-texel hearts reading as hearts; plus the moved genes (brindle thinner; collar, cosmic, emitola, masked, nimbus, opossum, quazars, shark, yalia extended).</li>
 </ul>
+
+<h3 id="gap-261" data-check-kind="open-gap">Open check 261</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-15: the designer&rsquo;s wasm is not reproducible, so &ldquo;the wasm moved&rdquo; is not evidence of anything.</strong>
+    Found running the deferred breed bake. <code>:web:bakeDesignerAssets --rerun-tasks</code> was run twice over a tree
+    that differed only in three breed JSON files, and the two runs produced <em>different binaries at identical
+    size</em> &mdash; <code>sha1 e1bba2e5&hellip;</code> and <code>3a614a1d&hellip;</code>, against the committed
+    <code>5754548e&hellip;</code>. No <code>common/src/main/java</code> commit exists since the wasm was last baked, so
+    this is the toolchain varying, not a source change. <strong>The rule in <code>CLAUDE.md</code> still holds in the
+    direction it is written</strong> &mdash; <code>common/</code> changed with the wasm unchanged does mean the designer
+    is running yesterday&rsquo;s mod &mdash; but <strong>the converse does not</strong>: a moved wasm is not evidence
+    that anything changed, and committing one spends a 2&nbsp;MB binary diff on nothing while camouflaging a real one.
+    The rebuild was reverted here, since a data-only bake should leave it alone. <strong>Nobody has diffed the two
+    binaries</strong>, so which part varies &mdash; TeaVM&rsquo;s ordering, an embedded timestamp, the JDK &mdash; is
+    unknown, and that is the first thing to find out if this is ever worth fixing. Until then the working rule is: when
+    a bake chain changed only data, revert the wasm; when <code>common/</code> genuinely moved, commit it and accept
+    that the diff is mostly noise.
+</div>
 </section>
 
 <div class="page-foot">

@@ -1281,7 +1281,7 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1413,6 +1413,44 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <li><strong>Wild horses aggro like wolves.</strong> Hit one: it and its herd-mates within 24 blocks turn and kick you, and calm down about three seconds after you are out of sight. Tamed horses never do.</li>
     <li><strong>Bond tiers change behaviour.</strong> At 31-60 a dismounted horse turns to face you within 10 blocks, at 61-80 it walks to you, at 81-100 it follows round fences and stops about three blocks off; none of it while leashed or ridden. And two horses kept within 10 blocks for ten minutes show <code>&bull; in a herd</code> on the information screen, which clears ten minutes after they are parted. <a href="horse-care.html">Horse care</a>.</li>
 </ul>
+
+<h3 id="gap-259" data-check-kind="open-gap">Open check 259</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-15: a pen's watch line lists the neighbouring pen's mare, all run, in the birth and splice rows.</strong>
+    <a href="horse-care.html#herd-yard">&sect;0-DW</a>'s pass for packing the yard is that no pen's
+    <code>[watch]</code> line ever lists a horse from the pen next door, and it records one known failure - a ratio
+    stud wandering in row U. The 16:11 run shows it is wider than that and it is not a horse wandering.
+    <strong>SPLICE WHITE's line carried SPLICE DILUTION MARE in 278 censuses</strong>, complete with her breeding
+    state, while SPLICE DILUTION's own line went on counting her too; <strong>CROSS SAME's carried BOND MARE 643
+    times</strong>, the same way. Both pens read one horse over their stocked number for the whole run
+    (<code>horses 3</code> where two were stocked). Since each mare is counted in <em>both</em> pens at once and
+    neither pen lost a horse, this is the watch box overlapping its neighbour rather than an animal leaving its pen
+    - the same generous box that <a href="gene-spawner.html#verified-ground">the spawner pens</a> found searching 34
+    blocks. It is a reporting fault, not a gameplay one, but it makes a pen's roster untrustworthy exactly where the
+    yard is packed tightest, and a reader counting foals off a watch line will double-count.
+</div>
+
+<h3 id="gap-300" data-check-kind="open-gap">Open check 300</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-21 while surveying other mods: nothing in this mod stops an owned horse despawning, and whether vanilla does is unproven.</strong>
+    <code>setPersistenceRequired()</code> is called on cowboy stock
+    (<code>CowboyHandler</code>, <code>Cowboy</code>), egg-spawned horses
+    (<code>HorseEggSpawner</code>), stable stock (<code>StablePopulator</code>), lycanthropy
+    victims and the debug pens &mdash; and <strong>never on taming, on binding, or on
+    ownership</strong>. <code>HorseOwnership</code> is the mod&rsquo;s single answer to whose
+    horse it is, and it does not touch persistence.
+    <strong>What is not established is whether that matters.</strong> Vanilla may already protect
+    a tamed horse through <code>AbstractHorse</code>&rsquo;s own despawn rules; this was looked
+    for on 2026-09-21 and the joined Minecraft sources were not to hand, so it is recorded as a
+    question rather than a defect. <strong>The test is cheap:</strong> tame a horse, leave it
+    unleashed and unridden well outside the simulation distance, travel far enough that its
+    chunks unload, and come back &mdash; ideally with one leashed control horse beside it. If it
+    survives, this closes with a note on <a href="horse-care.html">horse care</a>; if it does not,
+    it is the worst failure a horse mod can have and the fix is one call.
+    Relevant because <a href="horse-care.html#bond-behaviours">a bonded horse waiting where you left
+    it</a> is planned and sits right next to this &mdash; but the two are different problems, and
+    a despawn fix should not be smuggled in as a bond reward.
+</div>
 </section>
 
 <div class="page-foot">

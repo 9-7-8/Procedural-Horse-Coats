@@ -174,7 +174,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -187,6 +187,20 @@
     <li><strong>Compact gene code</strong> (<code>GeneCodeDisplay.shortForm</code>) on the paper dump's <code>genetic code:</code> line, wrapped sensibly.</li>
 </ul>
 
+
+<h3 id="gap-302" data-check-kind="open-gap">Open check 302</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-21 while dismantling the roadmap: <a href="item-research-papers.html">research papers</a> contradicts itself about what right-clicking a paper does.</strong>
+    The <strong>Gameplay</strong> tab says a paper grants nothing on reading &mdash; &ldquo;your gene
+    database is now earned only by owning a living horse&rdquo; &mdash; and the <strong>Coding</strong>
+    tab of the same page still says &ldquo;right-click it to add that gene to your gene database and
+    unlock its carrot line&rdquo;. One of the two describes code that no longer exists, and nothing
+    in the wiki says which. <strong>This is not a move artefact</strong>; it was already there and was
+    found because the Roadmap tab moved in beside it. Settle it against
+    <code>ResearchPaperItem</code> and the discovery path, fix the losing tab, and note which way it
+    went &mdash; a player reading the Gameplay tab and a modder reading the Coding tab currently
+    build opposite mental models of how the database is earned.
+</div>
 </section>
 
 <div class="page-foot">

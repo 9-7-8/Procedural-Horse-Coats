@@ -475,7 +475,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -525,6 +525,17 @@
 <ul>
     <li><strong>No <code>Brn/Brn</code> stallion from the custom egg.</strong> Add brindle, set Stallion, cycle both allele buttons: the second slot must never hold a real copy (<code>enforceSexLinkage</code>). <a href="gene-brindle.html">Brindle</a>.</li>
 </ul>
+
+<h3 id="gap-295" data-check-kind="open-gap">Open check 295</h3>
+<div class="open-check">
+<strong>Open, moved here 2026-09-20: a stallion&rsquo;s hemizygous locus prints as a pair in two places.</strong>
+    The genotype short form prints <code>X-Brn</code>, which is the intended form. The
+    gene-inspect popup and the paper dump still print the pair as-is, so a stallion&rsquo;s
+    <a href="gene-brindle.html">brindle</a> locus reads
+    <code>Brn / No copy (Y chromosome)</code> there. Cosmetic, and it is the only place the
+    reserved-slot representation leaks to a player. Was carried as backlog on the roadmap,
+    which is the wrong list &mdash; the display is built and is wrong, not missing.
+</div>
 </section>
 
 </article>

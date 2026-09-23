@@ -963,7 +963,7 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1068,6 +1068,32 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
     rather than merely look wrong, and gap 276 for the oak inventory icon that is expected.
 </p>
 
+
+<h3 id="gap-285" data-check-kind="open-gap">Open check 285</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-19: the supply cart's &ldquo;open from the seat&rdquo;
+    packet is registered and never sent.</strong> <code>OpenSupplyCartPayload</code> has a
+    server handler wired up in <code>HorseCarts.onRegisterPayloads</code> and no sender anywhere
+    in the client &mdash; upstream's key binding for it was not ported, so a player sitting on a
+    supply cart cannot open it without dismounting. Harmless as it stands (a dead payload type
+    costs a registry entry), and the choice is between wiring the inventory key to it or
+    deleting the class. Whichever, do not leave it as the third thing that half exists.
+    <a href="carts.html#supply">Carts &sect;9</a>.
+</div>
+
+<h3 id="gap-286" data-check-kind="open-gap">Open check 286</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-19: the reaper does not check whether a crop is
+    ripe.</strong> <code>ReaperCartEntity.harvest</code> tests the block against
+    <code>horsegenetics:reaper_harvestable</code>, which includes
+    <code>#minecraft:crops</code> &mdash; a tag on the block, with nothing in it about age. So a
+    reaper drawn over a field planted this morning destroys the seedlings and drops one seed
+    each, and the item tooltip's &ldquo;harvests mature crops&rdquo; is wrong. The fix is a
+    <code>CropBlock.isMaxAge</code> test before the break, with the non-crop entries of the tag
+    (grass, flowers, saplings) exempt from it since they have no age to be at. It was left alone
+    in the sitting that found it because the tag is shared with the plow's clearing lists and
+    the change wants its own look. <a href="carts.html#reaper">Carts &sect;7</a>.
+</div>
 </section>
 
 <div class="page-foot">

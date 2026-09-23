@@ -1866,7 +1866,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -2162,6 +2162,155 @@
     <a href="villagers.html#compat-0918-metalsmith">the villagers page</a>, and the fittings
     slot on <a href="item-equestrian-bench.html#compat-0918-bench">the bench's</a>.
 </p>
+
+<h3 id="gap-271" data-check-kind="open-gap">Open check 271</h3>
+<div class="open-check">
+<strong>Open, narrowed 2026-09-18: the compat layer has now met 319 real mods, and what it found there it has only been told about.</strong>
+    This used to say the <a href="compatibility.html#generated">whole compat layer</a> had never
+    met a real third-party mod, having only ever been run against the <strong>synthetic</strong>
+    jar <code>tools/compat/build-test-mod.mjs</code> writes. An outside tester has now put it on
+    a 319-jar pack, and the headline finding was a crash that a jar written to be found could
+    never have produced: an armour id built from the material name alone, colliding six ways on
+    <code>steel</code>. That is <a href="compatibility.html#generated-naming">fixed and
+    released</a> in v0.5.013, and the two single-mod shapes of it are in the synthetic jar now.
+    The 0.5.013 launch log came back as well, and named a second blocker one event later
+    &mdash; <a href="compatibility.html#components-not-bound">reading another mod's components at
+    a moment nothing is bound</a>, fixed in v0.5.014.
+    <strong>What is still open is everything those runs could not tell us.</strong> The scan
+    reported 40 woods, 167 metals and 3 dyes and then the mod died in its constructor, so those
+    counts are the <em>only</em> evidence from real jars: nobody has seen a modded gate, a
+    tinted armour or a bench fitting that came out of one, and the per-file assumptions are
+    still assumptions &mdash; that a wood ships a <code>&lt;name&gt;_planks.png</code> at the
+    usual path, that an item model names its texture in <code>layer0</code>, that an ingot's art
+    is in the jar that declared the tag. Each has a fallback and no fallback has been exercised.
+    The failure is quiet: a wood that is simply not found looks exactly like a wood the player
+    imagined. <strong>The cheapest next step is the 0.5.014 launch log from that same pack</strong>
+    &mdash; the <code>compat:</code> lines and the uncraftable warnings, from a boot that finally
+    gets past mod loading, would settle a dozen of these at once.
+    <a href="compatibility.html#verification">The compatibility checklist</a> carries it.
+</div>
+
+<h3 id="gap-272" data-check-kind="open-gap">Open check 272</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: no generated recipe has ever successfully parsed.</strong>
+    What the test run verified is the <em>skip</em>, not the recipe. The synthetic test mod
+    declares items in its tags that it never registers &mdash; which is how the missing-item bug
+    was found in the first place &mdash; so every generated recipe in every run so far has taken
+    the <code>ModdedMaterials.itemExists</code> branch and not been written. The recipe
+    <em>shape</em> is the same shapeless JSON as the twelve shipped double-gate recipes, which do
+    work, and that is the only reason to expect it to; nobody has seen one in a crafting grid,
+    and nobody has seen a generated recipe load without the skip in front of it. A test mod that
+    actually registers its declared items would close this without a play session.
+    <strong>v0.5.013 made this worse rather than better:</strong> armour recipes are now written
+    <em>per ingot</em> rather than per armour, so that all six of a collapsed
+    <a href="compatibility.html#generated-naming">steel</a>'s ingots can forge it &mdash; which
+    means a new filename shape (<code>&lt;id&gt;_from_&lt;ns&gt;_&lt;path&gt;.json</code>) and a
+    new loop, and the 0.5.013 server boot confirmed only that they write nothing when nothing is
+    registered. The several-recipes-one-output shape is ordinary and
+    <code>tools/check-recipes.mjs</code> does not object to it, but no generated armour recipe
+    has still ever been parsed by the game.
+</div>
+
+<h3 id="gap-274" data-check-kind="open-gap">Open check 274</h3>
+<div class="open-check">
+<strong>Open, corrected 2026-09-18: two mods that both add a &ldquo;maple&rdquo; give you two gates with the same name.</strong>
+    A generated gate is labelled from the wood alone &mdash; &ldquo;Maple Double Fence
+    Gate&rdquo; &mdash; so two wood mods are ambiguous to the eye in a creative search or a
+    recipe book. Leaving the mod's name out is deliberate and the alternative is worse for the
+    far commoner case where there is only one maple, so this is a <strong>known consequence
+    rather than a defect to fix blind</strong>: what is missing is anyone having seen how bad it
+    looks with two wood mods installed. If it does need fixing, the cheap version is to
+    disambiguate only on a clash rather than always.
+    <br><strong>This entry used to say &ldquo;the ids differ, so nothing is ambiguous to the
+    <em>game</em>&rdquo;, and for armour that was simply false.</strong> A gate id carries its
+    namespace and an armour id did not, so the armour case was not a cosmetic clash at all
+    &mdash; it was a duplicate registration that stopped the mod loading, and it shipped. The
+    lesson worth keeping is that this page said the right words about the wrong half of a
+    feature: the sentence was checked against gates and then written as though it covered both.
+    Armour is <a href="compatibility.html#generated-naming">fixed by collapsing the ids</a>;
+    gates keep the label clash described above.
+</div>
+
+<h3 id="gap-275" data-check-kind="open-gap">Open check 275</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: a generated armour's strength reads a <code>&lt;material&gt;_chestplate</code> by name, which is a convention and not a contract.</strong>
+    <code>ModdedArmour.fromTheirChestplate</code> asks the item registry for
+    <code>&lt;their namespace&gt;:&lt;material&gt;_chestplate</code> and, if it finds one, gives
+    the horse armour the horse-body value of whichever vanilla material has the nearest
+    chestplate. Nothing makes a mod name its armour after its ingot; almost every mod does. When
+    one does not, the <a href="compatibility.html#generated-strength">ladder</a> answers instead
+    &mdash; which is the right failure rather than a wrong guess &mdash; but neither branch has
+    been seen taken against a real mod, so it is not known how often the name actually resolves.
+    The ladder itself is the weaker half and says so in its own comment: <strong>where an ore
+    generates is not readable from a jar</strong>, so it is a guess from the two weakest signals
+    there are (which common tag, and the item's <code>Rarity</code>) and it will sometimes put a
+    mod's endgame metal at Novice or its starter metal at Master.
+    <br><strong>Since v0.5.013 one mod also answers for several.</strong> Where six mods added a
+    steel, their armours <a href="compatibility.html#generated-naming">collapse to one</a>, and
+    the chestplate consulted is the winner's &mdash; the lowest item id. So one mod's opinion of
+    what steel is worth now stands for all of them. That is a smaller error than it sounds like,
+    given the six are all describing the same metal, but it is a real one and it is unmeasured:
+    nobody has compared what six mods' steel chestplates actually give.
+</div>
+
+<h3 id="gap-279" data-check-kind="open-gap">Open check 279</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: a modded wood&rsquo;s carts wear the oak icon in the inventory.</strong>
+    Seventy-two painted cart icons ship in the jar, one per vanilla wood per vehicle, and there
+    is nothing to paint a thirteenth wood&rsquo;s from. <code>GeneratedCarts</code> therefore
+    points every modded cart&rsquo;s item model at <code>oak_&lt;cart&gt;</code>. The cart itself is
+    correct the moment it is placed &mdash; entity textures are stitched from the wood&rsquo;s own
+    block sprites at load time and never shipped at all &mdash; so this is the inventory slot only.
+    The fix is the one <code>MetalTintSource</code> already demonstrates for generated armour: a
+    tint source keyed on the item id, colouring the oak icon by that wood&rsquo;s average plank
+    colour. It needs a colour on <code>ModdedMaterials.Wood</code>, which that record does not
+    carry &mdash; adding one moves the compat fingerprint format and
+    <code>MaterialScanTest</code> with it, which is why it was not done in the same sitting as
+    the port.
+</div>
+
+<h3 id="gap-280" data-check-kind="open-gap">Open check 280</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: the cart system&rsquo;s &ldquo;is this sprite real&rdquo; check is an assumption about the atlas, and every modded cart depends on it.</strong>
+    <code>CartModelManagerMixin.hasSprite</code> decides whether a modded wood has a usable log
+    texture by resolving the sprite and comparing its own name against the id asked for &mdash;
+    which only works if <code>AtlasManager.get</code> answers an unknown id with the
+    missing-texture sprite rather than throwing. That is vanilla&rsquo;s long-standing behaviour
+    and it is wrapped in a <code>catch (RuntimeException)</code> as a belt, but <strong>it has
+    never been run with a wood-adding mod installed</strong>, which is the only case that
+    exercises it. If the assumption is wrong <em>and</em> the throw is not a
+    <code>RuntimeException</code>, the symptom is a crash at every resource reload rather than a
+    plain-looking cart. The <a href="compatibility.html">synthetic test mod</a> is the way to
+    settle it without shipping a dependency.
+</div>
+
+<h3 id="gap-281" data-check-kind="open-gap">Open check 281</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: the Horse Powered patch is only half a patch, and the half that is missing is theirs.</strong>
+    Every horse now carries <code>horsegenetics:draft_power</code>, a work-rate multiplier built
+    from pulling ability and speed, and <strong>nothing in the game reads it</strong>. That is the
+    honest state: this mod has never been built against Horse Powered&rsquo;s jar, its
+    block-entity and field names are not known here, and a reflective patch against guessed names
+    would fail silently the first time they renamed anything. What would close this is either
+    their mod multiplying by the attribute, or a small addon written against their real API with
+    the jar in hand. The mod ids <code>HorsePoweredCompat</code> watches for are also guesses
+    &mdash; see <a href="compatibility.html#draft-power">compatibility</a>.
+</div>
+
+<h3 id="gap-282" data-check-kind="open-gap">Open check 282</h3>
+<div class="open-check">
+<strong>Open, accepted 2026-09-18: every modded ingot is worth exactly iron and
+    every modded gem exactly diamond.</strong> A mod's endgame alloy and its tier-one metal now
+    give a horse the same protection, because
+    <a href="compatibility.html#components-not-bound">nothing that distinguishes them is readable
+    at any moment the mod can still answer</a>. This is a closed technical question and an open
+    design one: 167 metals at two values is a lot of sameness, and nobody has played a pack with
+    it to say whether that reads as boring or as unobtrusive. The signals that <em>are</em>
+    readable in time are all presence-not-value &mdash; whether the mod registered a
+    <code>&lt;material&gt;_chestplate</code> or a full tool set at all &mdash; so a nudge from
+    those is possible and would be a guess on a guess. Not worth inventing before somebody has
+    noticed the flatness.
+</div>
 </section>
 
 </article>

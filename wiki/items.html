@@ -428,7 +428,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -463,6 +463,12 @@
     <li><strong>The Recipes tab.</strong> The category dropdown (Everything else / Gene carrots) keeps a search inside its category; shapeless recipes read sensibly; the two <code>#minecraft:fences</code> cells show a real fence; hovering a cell gives its tooltip; the longest blurb (unknown epigenetic splice) fits the 210px panel.</li>
     <li><strong>The Horse Genetics creative tab.</strong> Every item has a readable name and its own icon, with no lang keys or missing textures.</li>
 </ul>
+
+<h3 id="gap-17" data-check-kind="open-gap">Open check 17</h3>
+<div class="open-check">
+<strong>The tickets are the last inert item, and the art is provisional.</strong> Everything else in <code>item/ModItems</code> now does something - seed jars, whistles, stall signs, shearing to get <code>horse_hair</code>, all five carrots, research papers. <strong>The four tickets craft and do nothing</strong>: owner's intent is that a ticket teleports its bound horse back to its stall, which is now possible (stalls exist - <code>StallData</code> / <code>StallRecord.center()</code>), it's just not built. The <code>known_gene_splice_carrot</code> is still <strong>one generic item</strong> parameterised by a component, so every gene's carrot looks the same in the inventory. Art: tickets share one texture, whistles share one, and stall signs borrow <code>oak_sign</code>. Full roster + every recipe: <strong><code>wiki/items.html</code></strong>; art follow-up <code>wiki/verification.html</code> §15.
+
+</div>
 </section>
 
 <div class="page-foot">

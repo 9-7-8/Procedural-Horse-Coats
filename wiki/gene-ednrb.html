@@ -571,7 +571,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -584,6 +584,25 @@
     <li><strong>Frame overo</strong> (<code>ednrb=O/N</code>). The back stays dark; white is two or three patches mid-barrel with colour above and below, never a dipped horse; neck white with a dark crest; the odd coronet, no tall stockings; flanks sometimes differ; cryptic horses read as lightly marked and bold ones as paints; with splash or sabino it gets louder without going white. <a href="gene-ednrb.html">EDNRB</a>.</li>
 </ul>
 
+
+<h3 id="gap-299" data-check-kind="open-gap">Open check 299</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-20 on intake: frame white &ldquo;never&rdquo; crosses the topline here, and the literature says &ldquo;usually does not&rdquo;.</strong>
+    <code>EdnrbGene</code>&rsquo;s <code>TOPLINE_CAP</code> is a <em>hard exclusion</em> &mdash;
+    white is capped outright below the spine and the javadoc says so in as many words. The
+    source describes classic frame as white that &ldquo;often does not cross the topline
+    <em>in a simple frame-only presentation</em>&rdquo;, which is a tendency with exceptions
+    rather than a rule.
+    <strong>The practical cost is small and worth naming anyway:</strong> a frame horse that
+    also carries <a href="gene-tobiano.html">tobiano</a> gets topline white from tobiano, painted
+    separately, so the stacked case &mdash; which is most of the loud overos in life &mdash; comes
+    out right. What cannot happen here is the occasional frame-<em>only</em> horse whose white
+    breaks the rule. Whether to soften the cap into a strong bias is a design call nobody has
+    made; it would move <code>coat-golden.txt</code>. Stated on
+    <a href="gene-ednrb.html?view=science#departs">the science tab</a>, so it will not be
+    &ldquo;corrected&rdquo; by someone who has read only one side &mdash; the same reasoning as
+    <a href="known-gaps.html#gap-134">gap 134</a>.
+</div>
 </section>
 
 <div class="page-foot">

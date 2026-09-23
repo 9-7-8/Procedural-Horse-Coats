@@ -1020,7 +1020,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1124,6 +1124,20 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <ul>
     <li><strong>A tamed foal's inventory.</strong> Shift-right-click a tamed foal with an empty hand and this mod's screen opens instead (<code>HorseInfoInteraction</code> claims the click first), with no saddle slot on Gear &mdash; a foal cannot be saddled. Vanilla's own inventory for a foal is <code>HorseInteractionHandler.onFoalInventory</code>, which only ever sees a click nothing else wanted &mdash; so on a <em>horse</em> foal it no longer fires, and no longer needs to: it existed to reach the <strong>i</strong> button, and the screen that button opens is now the click itself. A tamed donkey or mule foal still goes through it. Holding a breeding carrot, a name tag, a transfer paper or shears, each still does its own thing.</li>
 </ul>
+
+<h3 id="gap-294" data-check-kind="open-gap">Open check 294</h3>
+<div class="open-check">
+<strong>Open, moved here 2026-09-20: armour, leads and third-party tack do not follow a resized horse, and the rider sits wrong.</strong>
+    The saddle was the same bug and <a href="items.html#tack-fit">is fixed and verified</a>
+    &mdash; a missing <code>MeshTransformer.scaling(1.1F)</code> on the HD body layer &mdash;
+    but the rest of the equipment stack was never re-checked against that fix, and
+    <strong>the mount offset is a vanilla constant regardless</strong>, so a rider on a very
+    large or very small horse sits in the wrong place. None of it is game-breaking; all of it
+    is cosmetic or feel, and all of it wants a pass before 1.0. Related to bareback steering.
+    <strong>Check the armour and lead cases against the saddle fix first</strong> &mdash; the
+    recorded diagnosis for the saddle was wrong twice before the real cause was found, and
+    these may already have come along with it.
+</div>
 </section>
 
 <div class="page-foot">

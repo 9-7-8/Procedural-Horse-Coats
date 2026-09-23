@@ -269,7 +269,7 @@
 </p>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -329,6 +329,27 @@
         does nothing at all, and whether the <strong>keyboard was up</strong> when you tapped.</li>
 </ul>
 
+
+<h3 id="gap-276" data-check-kind="open-gap">Open check 276</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-18: the &times; on the AI draft dialog was reported as not closing it on a phone, and the cause was never found.</strong>
+    Reported alongside the search panel that genuinely would not close
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/commit/8f60b638">fixed</a>: a
+    <code>display: flex</code> outranking the browser&rsquo;s <code>[hidden]</code>), so the two
+    looked like one bug &mdash; but they are not. The draft dialog&rsquo;s <code>close()</code>
+    does <code>overlay.remove()</code>, which cannot half-work, and under Chrome touch emulation
+    at 390&times;844 it closes cleanly by the &times; <em>and</em> by a backdrop tap, both before
+    and after that fix. So the report stands and the mechanism does not.
+    <strong>The leading theory is the tap target</strong>: <code>.phc-ai-icon</code> was a
+    22&times;22 box against the ~44 a fingertip lands on, and a miss hits the dialog behind it
+    and does nothing. It is 44 on a touch screen now &mdash; but that is a plausible fix, not a
+    diagnosis, and nobody has confirmed it on the phone that saw the problem.
+    <strong>The other candidate is iOS</strong>, where the first tap after a focused text field
+    is eaten dismissing the keyboard; the dialog has a textarea directly above the &times;.
+    What would settle it: whether the dialog <em>flickers</em> or does nothing at all, and
+    whether the keyboard was up. Emulation cannot answer either.
+
+</div>
 </section>
 
 </article>

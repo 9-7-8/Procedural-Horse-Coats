@@ -134,7 +134,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -203,6 +203,17 @@
         while a horse is singing, and out again. <strong>Pass:</strong> no track left playing
         in your ears after you leave the pen, and nothing stuck on when you come back.</li>
 </ul>
+
+<h3 id="gap-303" data-check-kind="open-gap">Open check 303</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-21: <a href="gene-singer.html">singer</a> promises an arbitration that is not in the code.</strong>
+    The page&rsquo;s danger note says &ldquo;one at a time per area, with a cooldown &mdash; the
+    arbitration is part of the gene&rdquo;. There is <strong>no per-area limiting at all</strong>: the
+    only gate is a per-horse, per-gene cooldown, and <code>SingerGene.COOLDOWN_TICKS</code> (900) is
+    <em>shorter</em> than <code>INTERVAL_TICKS</code> (1200), so it can never refuse a firing the
+    interval already allowed. A herd of singers is therefore a herd of singers. Either the note is
+    wrong or the feature is missing, and the page does not say which.
+</div>
 </section>
 
 <div class="page-foot">

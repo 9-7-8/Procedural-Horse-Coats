@@ -1076,7 +1076,7 @@
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1359,6 +1359,64 @@
         founded pack always looked fine &mdash; which is why this wants a long-played
         world.</li>
 </ul>
+
+<h3 id="gap-256" data-check-kind="open-gap">Open check 256</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-15: three breeds whose strains differ by size still carry one size band spanning both types.</strong>
+    <strong>The mechanism this gap asked for now exists</strong> (2026-09-18): a <code>Strain</code>
+    carries its own optional <code>stats</code> block, overlaid on the breed&rsquo;s axis by axis, and
+    the founder roll picks the strain before it reads any band &mdash; including the size band, which is
+    drawn first because it decides how many copies of the size allele the founder gets. Format on
+    <a href="breed-format.html">the breed file format</a>. It was built for
+    <a href="gene-magic-pull.html#dhampir">the dhampir&rsquo;s pull scores</a>, not for this, which is
+    why <strong>what remains is the three breed files, and a caveat</strong>: the overlay is exercised
+    end to end for <code>pull</code> only, so the <em>size</em> path is the same code with nothing
+    using it. A breed adopting it is also the test of it.
+    <p>The three, and what each is still losing:</p>
+    <code>Breed.Strain</code> used to carry a name, a weight and gene pools, and nothing else. The
+    <a href="breed-book.html">Chincoteague Pony</a>'s two strains are the stocky island type and the taller
+    privately-bred sport type &mdash; and the height is half of what makes them different, so the file can only
+    say the <em>white</em> differs and both come out the same size. The breed's notes say so rather than leaving
+    it to be noticed.
+    <strong>A second breed now wants it (2026-09-15).</strong> The <a href="breed-book.html#plains">Budyonny</a>'s
+    three historical types &mdash; Massive, Eastern and Middle &mdash; differ in size and substance and in
+    essentially nothing else, so they are not strains here either: the file carries one size band spanning all
+    three and a note saying why. That is two breeds losing the same thing, which was the stated condition.
+    <strong>A third, and the clearest yet (2026-09-15).</strong> The <a href="breed-book.html#desert">Nokota</a>
+    ships with the Conservancy's two registry-recognised types as strains, and those types are defined first of all
+    by <em>size</em>: the National Park Traditional is about 14 to 15 hands and the National Park Ranch runs to 17.
+    Three hands is not a nuance. The strains carry the colour difference alone and one size band spans both, so a
+    Traditional founder can come out the height of a Ranch one, which is the one thing the registry would never do.
+    Chincoteague and Budyonny each lost a shade of meaning to this; the Nokota loses the axis its own types are
+    named along.
+    <strong>Of the three <em>genes</em> that batch turned out to need, two now ship</strong> &mdash;
+    ACAN <code>D5</code> and <a href="gene-ryr1.html">RYR1</a> &mdash; <strong>and only the curly coat
+    is still unbuilt</strong>, on <a href="genetics-model.html#natural-genes">the roadmap</a>, which is where
+    unbuilt work belongs (owner, 2026-09-15). The curly coat stays there because it is blocked on a
+    coat-structure axis the pipeline does not have, not on anyone writing the gene.
+</div>
+
+<h3 id="gap-266" data-check-kind="open-gap">Open check 266</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-17: two pages describe wild-herd and healing behaviour that the code does not do, and one of them contradicts itself.</strong>
+    Found by writing the Getting started wild chapter from the source rather than from the wiki,
+    which is why the tutorial does not inherit any of it.
+    <a href="breeds.html">Breeds</a> says a herd's founder <em>is the lead stallion</em>, where
+    <code>HerdManager</code> elects the <strong>lowest-UUID member</strong> and seeds the band's
+    breed off that member so every joiner agrees; it calls the band type a "70/30 coin" where the
+    code uses the breed's own <code>bachelorChance()</code>; it puts the wild kick at
+    <em>4 damage</em> where the baseline is <code>MagicFighterGene.BASELINE_DAMAGE</code> &mdash; 3,
+    a zombie's hit &mdash; with a &times;2 multiplier that applies only against <code>Enemy</code>
+    mobs and not against players; and it claims generated stables add their own extra magic on top
+    of the breeds they place, which has no corresponding match anywhere in
+    <code>StablePopulator</code>. <a href="horse-care.html">Horse care</a>'s "Tamed herds" still
+    describes the pre-hunger model (&ldquo;+2 per scan instead of +1 when the water/food gate is
+    met&rdquo;) while &sect;1 of the same page carries the current rule of a health point a second
+    and two in a herd, so the page disagrees with itself depending on where you start reading.
+    Smaller, same shape: <code>HerdGoals.java:32</code> says <em>five goals</em> over a table of
+    six. None of this is a code defect. All of it is the kind of claim that gets copied forward
+    into something a player reads.
+</div>
 </section>
 
 </article>

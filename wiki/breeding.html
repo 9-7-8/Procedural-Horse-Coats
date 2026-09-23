@@ -1442,7 +1442,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Built, not yet seen in a game">
+         data-tab-hint="Open checks">
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
@@ -1624,6 +1624,42 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         and <kbd>Esc</kbd> both close it and spend no tag. It was drawing its panel over
         its own widgets, so the whole window read as dead.</li>
 </ul>
+
+<h3 id="gap-245" data-check-kind="open-gap">Open check 245</h3>
+<div class="open-check">
+<strong>Open, found 2026-09-14: the lethal ratio pens draw far too few, then far too many, homozygous foals, one run at a time.</strong>
+    RATIO HYPP and RATIO LETHAL WHITE are carrier-by-carrier crosses and should throw one lethal foal in four. The
+    17:36 run threw too many (HYPP 10 <code>H/H</code> in 20). By 20:08 the 19:08 run had thrown <strong>none in
+    35</strong> across both pens, which chance gives about 4 times in 100&nbsp;000. The conception log agrees:
+    every HYPP embryo that run was <code>IMPAIRING</code> (one copy) or had no condition, never "two copies".
+    <em>Ruled out:</em> the parents (every run's stud and mare were the pen's own <code>H/N</code> and
+    <code>O/N</code> founders, and every foal's <code>father</code> is the pen's stud); the tallies (they equal the
+    <code>foaled</code> lines); early losses (none in either pen, either run); carrot bias (none armed, and an
+    empty list folds to <code>GameteBias.NONE</code>); the birth path (<code>bornFromPregnancy</code> carries the
+    stored embryo straight through); a stuck sire coin (foal sex ratios are not consistently skewed); and the draw
+    and generator offline. 40&nbsp;000 draws a case through the real <code>Genome.breedWith</code> on the yard's
+    founders gave 25&nbsp;:&nbsp;50&nbsp;:&nbsp;25 from one stream and after a passing conception roll at chances
+    from 0.46 to 0.85. 400 simulated runs with the generator jumped a fixed distance between conceptions spread
+    exactly as binomial. The game's entity random is <code>LegacyRandomSource</code>, the same generator.
+    <em>So the same code on the same generator is fair offline and not in the pens.</em> <em>Next, needs a build:</em>
+    log each ratio-pen conception's game tick, chance and drawn pair, and draw one pen's embryos from an independent
+    generator seeded off the level random, to see whether the skew follows the mare's entity random.
+    <strong>Two instrumented runs, both clean, and the skew has not come back.</strong> Every ratio-pen conception
+    logs the pairs as drawn, the embryo and a shadow draw from an independent generator. The first night
+    (2026-09-14 22:45 to 09-15 01:14) read HYPP 13&nbsp;:&nbsp;23&nbsp;:&nbsp;7 (n&nbsp;43), lethal white
+    13&nbsp;:&nbsp;29&nbsp;:&nbsp;14 (n&nbsp;56) and size 11&nbsp;:&nbsp;19&nbsp;:&nbsp;13 (n&nbsp;43), largest
+    chi-square 1.9. The 16:11 run of 2026-09-15 ran six hours and roughly doubled that: HYPP 23&nbsp;:&nbsp;48&nbsp;:&nbsp;24
+    over 95 foals, lethal white 22&nbsp;:&nbsp;47&nbsp;:&nbsp;28 over 97, size 20&nbsp;:&nbsp;58&nbsp;:&nbsp;24 over 102,
+    every lethal homozygote dead and every shadow agreeing, with no mare sharing a random source with her stud. The
+    numbers are recorded on <a href="breeding.html#verified-ratio-1-2-1">breeding</a>. <strong>So the ratios
+    themselves are verified and this entry is now only the unexplained history:</strong> the 19:08 run's 0
+    <code>H/H</code> in 35, which chance gives about 4 times in 100&nbsp;000 and which has never recurred with the
+    instrument on. <em>Ruled out along the way:</em> a never-seeded generator - every entity gets
+    <code>random = RandomSource.create()</code>, seeded from a uniquifier XOR <code>System.nanoTime()</code> at
+    creation and at every chunk load, and no mod code reseeds it.
+    <strong>The owner's call:</strong> close this if a third long run is clean, or keep the shadow logging until
+    something explains the 0 in 35.
+</div>
 </section>
 
 <div class="page-foot">
