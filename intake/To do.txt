@@ -29,3 +29,19 @@ Queue: horses should eat food dropped on the ground near them, if it's in their 
 
 - When a horse reaches 20% health (threshold configurable), it should buck off its owner, jump fences, and do whatever it can to escape damage and avoid dying.
 
+- Horses are eating crops through a fence or wall.
+
+- Attacking a cowboy makes his horses aggro and the cowboy flee, but killing him makes the horses wild and tamable. Add a way to obtain cowboy horses without buying them with emeralds.
+
+- Golden carrot seeds and gene books should be much more common as loot. Add all horse armor types, dyed saddles, and dyed leather horse armor to all loot tables.
+
+- If a breeding attempt does not go through for any reason, print the failure to the horse's owner in chat.
+
+- The H menu should support searching by allele combinations, if it does not already.
+
+- The breeding overview should sort/filter both mares and stallions to show only horses carrying an allele, or only horses with an exact X/X allele combination.
+
+- Horse names are too duplicated. Default naming should give daughters their mother's last name and sons their father's last name, with random first names. Make the first/last-name choice and parent source configurable per player for their own horses, even on a server.
+
+- Dyed leather horse armor should be very common in loot tables, and should appear in loot tables that contain normal human leather armor.
+
