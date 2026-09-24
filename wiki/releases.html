@@ -61,6 +61,133 @@
     </p>
 </div>
 
+<h2 id="v0-5-023">0.5.023 &mdash; the mod tells you what happened, and a horse stops dying quietly</h2>
+
+<p>
+    <strong>This is the release that came out of playing on a real server.</strong> Nearly
+    everything in it is a report from a modded survival world rather than a plan: horses
+    leaning on a fence forever, a paddock that had silently stopped breeding, a barn-name box
+    nobody could see, a foal called the same thing as its three sisters. Two days of those,
+    one at a time.
+</p>
+
+<p>
+    <strong>Your horses now talk to you in chat.</strong> When one is hurt you are told what
+    hurt it and what to do about that; when one dies the server is told whose it was and what
+    killed it; and when a mare is <em>not</em> covered, her owner is told why &mdash; the
+    crowding cap with both numbers, a hurt or ridden or led mare, and whether a cover took.
+    All three are settings, all three default on.
+</p>
+
+<p>
+    <strong>And a horse is much harder to lose.</strong> A blow that would take one to zero
+    takes it to half a heart instead, with six seconds of real immunity to get clear &mdash;
+    then the save is spent until the horse has healed all the way back. Under a fifth health a
+    horse takes itself over and <em>runs</em>, carrying its rider out rather than throwing
+    them, faster and jumping higher than anyone could steer it. Full page:
+    <a href="horse-care.html">horse care</a>.
+</p>
+
+<h3>What a player gets</h3>
+
+<ul>
+    <li><strong>Three kinds of chat notice.</strong> Hurt: names the horse, the cause, and the
+        prevention &mdash; shade for one burning in the sun, a wall for one being blown up
+        &mdash; plus the cure once it is down to a quarter health. Only the owner, only in the
+        same world, never when you are the one swinging, at most one line per horse per five
+        seconds. Death: one grey line for everybody, red in the owner&rsquo;s own chat. Breeding:
+        why she was not covered, once every five minutes per reason.</li>
+    <li><strong>Last stand.</strong> Nothing kills a horse in one blow while
+        <code>behaviour.last_stand</code> is on. It never applies to a genetic defect &mdash; a
+        lethal foal still dies &mdash; nor to <code>/kill</code> or the void.</li>
+    <li><strong>A bolting horse.</strong> At or below a fifth of its own maximum it drops any
+        fight, stops answering the reins, and runs from whatever hurt it, jumping a fence when
+        the way out needs one. The jump boost is sized so the <em>weakest</em> jumper clears a
+        fence, so this is a horse escaping rather than a good horse escaping.</li>
+    <li><strong>Horses stop shoving the fence.</strong> A hungry horse now checks it can
+        actually walk to food before setting off, and falls back to the grass under its feet
+        when the farm across the rail is unreachable. It also no longer eats a crop
+        <em>through</em> a fence: it walks the way round it already proved exists.</li>
+    <li><strong>A dropped carrot is food.</strong> Anything the horse would walk over to eat
+        counts when it is lying on the ground too &mdash; crops, fruit, vegetables, berries,
+        mushrooms &mdash; taking another mod&rsquo;s produce with it by tag. A narrow diet is
+        untouched.</li>
+    <li><strong>A bonded horse has to be able to reach you.</strong> Staring through the rails
+        no longer counts as following, and no longer locks the horse out of sparring, grooming
+        and heat attraction while it does it.</li>
+    <li><strong>A family overview: every horse in the world on one chart.</strong> One row per
+        generation, founders on top, a line from each horse down to every foal it got. Drag,
+        scroll to zoom, <em>Fit</em> to reset, and a click isolates one horse with its foals and
+        whoever it had them by. Reached from the family tree&rsquo;s <em>Everyone</em> button.</li>
+    <li><strong>A horse you sold is greyed out, not gone.</strong> Any box on the tree owned by
+        someone else draws dim and reads &ldquo;sold &mdash; by X&rdquo;. Still clickable, still
+        in place.</li>
+    <li><strong>The barn-name box is visible again.</strong> It had been hidden from every
+        player, its owner included, since it was added on 2026-09-07 &mdash; the screen was
+        asking the entity who owned the horse, which is a question only the server can answer.</li>
+    <li><strong><kbd>E</kbd> from the saddle opens this mod&rsquo;s menu</strong> rather than
+        vanilla&rsquo;s horse inventory, and closes it again. A donkey, a mule or a horse with no
+        record is untouched. <strong>Every other horse named on a screen is a link</strong> &mdash;
+        companions, the rival, descendants &mdash; so you can walk a pedigree by clicking it.</li>
+    <li><strong>Search by an allele pair.</strong> <code>genotype:E/e</code> on <em>My horses</em>
+        is the question <code>gene:</code> could not ask: carriers only, not every horse with a
+        red copy. Case is now significant in an allele token and nowhere else, which is what had
+        been quietly making <code>gene:e</code> match every horse alive.</li>
+    <li><strong>The breeding pickers filter and sort</strong> like <em>My horses</em> does &mdash;
+        one box for both lists, since a mating has two sides &mdash; and the heading says
+        &ldquo;(4 of 19)&rdquo; while a filter is on.</li>
+    <li><strong>A stallion attempts every mare in heat he is left with.</strong> Three covers a
+        day was a hard stop on the natural path, so the fourth mare in a paddock saw no stallion
+        at all and nothing was said about it. It is a taper now: past three his odds halve, and
+        a mare prefers a rested stallion over a tired one at any distance within reach.</li>
+    <li><strong>Foal names stop colliding.</strong> A foal keeps one half of its name from a
+        parent and rolls the other, always &mdash; by default the surname, down the same-sex
+        line, so a filly carries her dam&rsquo;s and a colt his sire&rsquo;s. Each player sets
+        their own rule in <code>client.toml</code>; nobody&rsquo;s reaches another
+        player&rsquo;s herd.</li>
+    <li><strong>Tack in chests, and far more of the rest.</strong> Golden carrot seeds went from
+        7% over eight named vanilla tables to 20% over <em>every</em> chest table any mod adds;
+        research papers 18% to 30% the same way. New: a piece of horse tack per hit &mdash;
+        saddles and leather armour dyed through this mod&rsquo;s own three-zone tint, fittings
+        from workaday metals and never gems.</li>
+    <li><strong>The cowboy&rsquo;s string defends him.</strong> Killing a cowboy clears the brand
+        off his herd, and it used to cost nothing while six horses watched. They rally on
+        whoever hit him now &mdash; and stand down the moment he falls, rather than chasing the
+        player who came to free them.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Ten new settings</span>
+    <p>
+        In <code>server.toml</code>: <code>notices.owned_horse_damage</code>,
+        <code>notices.owned_horse_death</code> and <code>notices.owned_horse_breeding</code>
+        (all <code>true</code>); <code>behaviour.escape_health_fraction</code>
+        (<code>0.2</code>, and <code>0</code> turns bolting off);
+        <code>behaviour.last_stand</code> (<code>true</code>),
+        <code>behaviour.last_stand_health</code> (<code>1.0</code>),
+        <code>behaviour.last_stand_immunity_ticks</code> (<code>120</code>) and
+        <code>behaviour.last_stand_rearm_fraction</code> (<code>1.0</code>) &mdash; setting
+        <code>behaviour.last_stand = false</code> restores vanilla death exactly.
+    </p>
+    <p>
+        In <code>client.toml</code>: <code>naming.inheritedHalf</code> (<code>LAST</code>) and
+        <code>naming.parentSource</code> (<code>BY_SEX</code>), which are yours alone and are
+        suggested to the server on login so a foal born while you are offline still follows
+        your rule.
+    </p>
+</div>
+
+<p>
+    <strong>Not played.</strong> A dedicated server boots clean &mdash; <code>Done</code>, and
+    not one <code>ERROR</code> or <code>FATAL</code> line in the log &mdash; and the creator
+    parity check is green. None of the above has been in front of a player.
+    <a href="verification.html">To be verified</a> is the honest list, and it is long after two
+    days of this: the notices want two players on a dedicated server to prove &ldquo;only the
+    owner&rdquo;, the last stand and the bolt want a horse taken to a sliver deliberately, and
+    the feeding fixes want the pasture that reported them. Known bugs carry over unchanged from
+    0.5.022 below.
+</p>
+
 <h2 id="v0-5-022">0.5.022 &mdash; the Gear tab, and the menu goes back to sneak</h2>
 
 <p>
