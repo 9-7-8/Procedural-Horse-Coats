@@ -1,0 +1,77 @@
+2026-09-24, after the pasture-edge fix — a horse you sold is greyed out, not gone
+
+    One bullet, the first in the Bugs section of intake/To do.txt, in the owner's words:
+
+        Horses that have been sold should remain in the family tree, but appear greyed out
+        rather than being removed.
+
+    Dated first, as START HERE says to. The bullet went into To do.txt on 2026-09-23
+    (27cd45aa) and nothing since had touched selling or the tree, so it was open — but
+    "open" turned out to mean something different from what the bullet says.
+
+The premise is already true, and that is the finding
+
+    Nothing removes a sold horse from a pedigree, and nothing ever did. A transfer paper
+    sets the new owner, clears the brand and touches nothing else — TransferPaperHandler
+    says so in its own class doc, "ownership is the only thing that moves". The cowboy sells
+    a signed paper, not a horse. HorseOwnerTrackingHandler mirrors the new owner onto the
+    record, which is a rewrite, never a delete. The only caller of
+    HorseAncestryData.forget in the repository is the debug pen cleaner. A sold horse is in
+    the tree, in its place, with its coat and its parents.
+
+    So the defect was not the removal. It was that the chart said nothing: FamilyTreeScreen
+    had exactly two box states, "record present" and "record absent", and a stable you had
+    sold half of looked exactly like one you had sold none of. The owner read an absence of
+    evidence as an absence of the horse, which is a fair reading of a screen that will not
+    say. That is worth keeping: the ask named a removal that does not happen, and the fix it
+    asked for was still the right fix.
+
+What changed
+
+    A third box state. A horse owned by somebody who is not the viewer draws dim — panel,
+    border, name, attribution — and a scrim goes over the inside of the box. The scrim is
+    there because the coat is drawn by an entity renderer that takes no tint from the
+    screen; without it the horse sits bright inside a grey frame and reads as a rendering
+    bug. The box keeps its place and stays clickable, since a sold horse is still a horse
+    you want to re-root on.
+
+    Two new predicates, both in common/ so the backport carries them:
+
+        HorseRecord.ownedByAnother(viewer) — an owner is recorded and it is not you.
+        Deliberately not !ownedBy(viewer). A founder, a wild ancestor and any horse whose
+        owner was never mirrored are owned by nobody, and treating those as somebody
+        else's would grey out most of a pedigree — the failure mode this predicate exists
+        to avoid, and the one to look for if a tree ever comes up mostly grey.
+
+        HorseRecord.soldOnBy(viewerName, viewer) — credited to you and owned by somebody
+        else, which is the narrower claim the word "sold" makes. A stallion borrowed for
+        one covering is another player's horse that was never yours to sell. It only
+        decides the "sold - by" prefix on the second line.
+
+    Ownership is a UUID and attribution (bredBy, else tamedBy) is a username, so the two
+    comparisons are made on different things by necessity: two players can share a display
+    name, and only one of them owns the horse.
+
+Scope
+
+    The family overview — the whole-world chart from the Everyone button — dims nothing.
+    PopulationDataPayload carries a name, a sex, a generation and two parent ids and no
+    owner, and on a chart of every horse a world has ever bred most boxes are somebody
+    else's or nobody's, so the marking would be noise rather than information. Left alone
+    deliberately; noted on breeding.html#sold-greyed rather than left as a surprise.
+
+    HorseRoster still lists a horse you sold under My horses, because it keeps anything
+    tamedBy you. That is the same "history is not current ownership" principle from the
+    other side and was not touched.
+
+Not played
+
+    Two unit tests on the predicates (HorseRecordTest — anotherPlayersHorseIsNotTheSameAsAnUnownedOne,
+    soldOnMeansItWasYoursAndIsNot); the drawing itself is a screen and has none. The checks
+    are on breeding.html#sold-greyed-0924 and need two players to see at all, since a sold
+    horse means somebody to sell it to. The one that catches an overshoot is "nothing else
+    greys": founders, wild ancestors and horses you still own must look untouched.
+
+    A sold horse whose owner was never mirrored — nobody has loaded it since
+    HorseOwnerTrackingHandler existed — has no ownerId and will not dim. It fails to the
+    old appearance rather than to a wrong one, which is the right way round.

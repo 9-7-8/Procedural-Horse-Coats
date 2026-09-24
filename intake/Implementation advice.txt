@@ -117,9 +117,6 @@ Likely code:
 - horse damage and death hooks
 
 Implementation:
-- Treat sold status as historical relationship data, not as a deletion or a
-  family-tree filter. Sold horses should remain in pedigree graphs with a sold
-  presentation.
 - Choose a deliberate ownership transition for cowboy horses instead of letting
   “cowboy died” silently revert to vanilla wild behavior. Preserve the record and
   pedigree while moving into a rescue, claim, or stable-transfer path.
@@ -128,8 +125,6 @@ Implementation:
   that toggle is enabled.
 
 Validation:
-- Sell a horse, reload data, and confirm the family tree keeps the sold node and
-  its pedigree link.
 - Test cowboy defeat and recovery paths, death notifications, and owner-only
   routing in a two-player dedicated server setup.
 

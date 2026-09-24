@@ -64,7 +64,9 @@
         dam&rsquo;s first name and the sire&rsquo;s last; later foals drift toward fresh
         names.</li>
     <li><strong>Everything is remembered.</strong> The family tree shows great-grandparents
-        with their coats, and the Offspring tab reads the pedigree downward.</li>
+        with their coats, and the Offspring tab reads the pedigree downward. Selling a horse
+        does not take it out of the family: it stays where it was, <strong>greyed out</strong>,
+        marked <em>sold</em> if it was one of yours, and still clickable.</li>
     <li><strong>A foal of your tamed mare is yours</strong>, tamed to you and starting at
         a quarter of her bond.</li>
 </ul>
@@ -1219,6 +1221,40 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         looking at a pedigree is standing. See below.</li>
 </ul>
 
+<div class="note rule" id="sold-greyed">
+    <span class="label">A horse you sold is greyed out, not gone</span>
+    <p>
+        Selling has never removed a horse from a pedigree, and no code path ever did:
+        a transfer paper sets the new owner and clears the brand, the cowboy's trade
+        hands over a signed paper, and the record itself is only <em>rewritten</em> with
+        a new <code>ownerId</code>. The one caller of
+        <code>HorseAncestryData.forget</code> is the debug pen cleaner. What was missing
+        was any sign of it on the chart, so a stable you had sold out of looked exactly
+        like one you had not.
+    </p>
+    <p>
+        A box whose horse is owned by somebody who is not you now draws dim &mdash;
+        darker panel, dim border, and a scrim over the inside of the box, because the
+        coat comes from an entity renderer that takes no tint and would otherwise sit
+        bright inside a grey frame. It keeps its place and stays clickable. The
+        attribution line reads <code>sold - by &lt;you&gt;</code> when the horse is
+        credited to you and owned by someone else.
+    </p>
+    <p>
+        The test is <code>HorseRecord.ownedByAnother</code>, and it is deliberately
+        <strong>not</strong> <code>!ownedBy</code>: a founder, a wild ancestor and any
+        horse whose owner was never mirrored are owned by nobody, and reading those as
+        another player's would grey out most of a pedigree.
+        <code>HorseRecord.soldOnBy</code> is the narrower question &mdash; bred or tamed
+        by the viewer, owned by somebody else &mdash; since a stallion borrowed for one
+        covering was never yours to sell. Ownership is a UUID and attribution is a
+        username, so the two comparisons are made on different things by necessity.
+        <strong>The family overview does not dim anything</strong>:
+        <code>PopulationDataPayload</code> carries no owner, and on a chart of every
+        horse in the world most boxes are somebody else's or nobody's.
+    </p>
+</div>
+
 <h3 id="family-overview">The family overview &mdash; every horse at once</h3>
 <p>
     One row per generation, founders along the top, a line from every horse down to every
@@ -1538,7 +1574,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo;; under it sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
+    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
 </div>
 
 <h3 id="barn-name-0918">The barn-name box is visible at all (2026-09-24, NOT played)</h3>
@@ -1643,6 +1679,37 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <li><strong>Something in your hand.</strong> Wheat, a lead, a name tag, a research
         paper, a golden carrot: every one of them should do what it always did, sneaking or
         not, and none of them should open a window.</li>
+</ul>
+
+<h3 id="sold-greyed-0924">A sold horse greyed out in the tree (2026-09-24, NOT played)</h3>
+
+<p>
+    Boxes on the family tree now draw dim when the horse is owned by somebody who is not
+    you, and the attribution line reads <code>sold - by &lt;you&gt;</code> for a horse you
+    bred or tamed and no longer own (<a href="#sold-greyed">&sect;a horse you sold is greyed
+    out</a>). Nothing about this needs two players in the same room to break, but it needs
+    two players to <em>see</em>, which is why it is here.
+</p>
+<ul>
+    <li><strong>Sell one and look at it.</strong> Hand a horse you bred to another player on
+        a signed transfer paper, then open any tree it appears in. It should still be in
+        exactly the place it was, dim &mdash; panel, border, name and the coat itself
+        &mdash; and reading <em>sold - by</em> your name.</li>
+    <li><strong>It is still a horse, not a gap.</strong> Clicking it should re-root the
+        chart on it the way it always did; the blank <code>&mdash;</code> box is a different
+        state and means the record is genuinely absent.</li>
+    <li><strong>Nothing else greys.</strong> Founders, wild ancestors and every horse you
+        still own must look untouched. If a pedigree comes up mostly grey, the test has
+        fallen back to &ldquo;not owned by me&rdquo; and the distinction has been lost.</li>
+    <li><strong>A horse bought from a cowboy.</strong> Redeem one, and it should read
+        <em>by</em> the cowboy's name and <strong>not</strong> be dim &mdash; you own it now,
+        and it was never yours to sell.</li>
+    <li><strong>Another player's horse in your tree.</strong> A mare covered by a stallion
+        that is not yours: the stallion should be dim but must <em>not</em> say
+        <em>sold</em>.</li>
+    <li><strong>The owner mirror has to have run.</strong> A horse nobody has loaded since
+        the mirror existed has no <code>ownerId</code>, and will not dim however it changed
+        hands. If a sold horse looks normal, check it has been in a loaded chunk since.</li>
 </ul>
 
 <h3 id="family-overview-0924">The family overview (2026-09-24, NOT played)</h3>
