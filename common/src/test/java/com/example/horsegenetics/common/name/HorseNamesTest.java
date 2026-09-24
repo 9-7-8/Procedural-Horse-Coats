@@ -1,6 +1,9 @@
 package com.example.horsegenetics.common.name;
 
+import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
+import com.example.horsegenetics.common.name.NamingPolicy.InheritedHalf;
+import com.example.horsegenetics.common.name.NamingPolicy.ParentSource;
 import com.example.horsegenetics.common.testutil.FakeRng;
 import org.junit.jupiter.api.Test;
 
@@ -17,68 +20,80 @@ class HorseNamesTest {
     private static final HorseNameGenerator GEN =
             new HorseNameGenerator(List.of("Rolled"), List.of("Random"));
 
-    @Test
-    void firstFromDamMeansLastFromSire() {
-        // breed() draws one boolean: true = first half comes from the dam
-        NameParts child = HorseNames.breed(DAM, SIRE, new FakeRng().booleans(true));
-        assertEquals("Bright", child.first());
-        assertEquals("Ridge", child.last());
+    private static NameParts foal(Sex sex, NamingPolicy policy) {
+        return HorseNames.foal(DAM, SIRE, sex, policy, GEN, new FakeRng().ints(0, 0));
     }
 
-    @Test
-    void firstFromSireMeansLastFromDam() {
-        NameParts child = HorseNames.breed(DAM, SIRE, new FakeRng().booleans(false));
-        assertEquals("Dark", child.first());
-        assertEquals("Meadow", child.last());
-    }
+    // --- the default: surname down the same-sex line, first name rolled ---
 
     @Test
-    void neverBothHalvesFromOneParent() {
-        NameParts a = HorseNames.breed(DAM, SIRE, new FakeRng().booleans(true));
-        NameParts b = HorseNames.breed(DAM, SIRE, new FakeRng().booleans(false));
-        // exactly one half of each child matches the dam
-        assertEquals(1, halvesFrom(a, DAM));
-        assertEquals(1, halvesFrom(b, DAM));
-    }
-
-    private static int halvesFrom(NameParts child, NameParts parent) {
-        int n = 0;
-        if (child.first().equals(parent.first())) n++;
-        if (child.last().equals(parent.last())) n++;
-        return n;
-    }
-
-    // --- breedNth: foal-count-varied naming ---
-
-    @Test
-    void firstFoalIsDamFirstSireLast() {
-        NameParts c = HorseNames.breedNth(DAM, SIRE, 0, GEN, new FakeRng());
-        assertEquals("Bright", c.first());
-        assertEquals("Ridge", c.last());
-    }
-
-    @Test
-    void secondFoalIsTheOtherCombo() {
-        NameParts c = HorseNames.breedNth(DAM, SIRE, 1, GEN, new FakeRng());
-        assertEquals("Dark", c.first());
+    void fillyTakesHerDamsLastName() {
+        NameParts c = foal(Sex.FEMALE, NamingPolicy.DEFAULT);
         assertEquals("Meadow", c.last());
-    }
-
-    @Test
-    void foalsThreeThroughSixKeepOneParentHalfPlusRandom() {
-        // generateParts() draws two ints; then a parent pick, then a half pick
-        NameParts c = HorseNames.breedNth(DAM, SIRE, 2, GEN,
-                new FakeRng().ints(0, 0).booleans(true, true));
-        assertEquals("Bright", c.first());  // dam's first name kept
-        assertEquals("Random", c.last());   // last name rolled
-    }
-
-    @Test
-    void seventhFoalOnwardIsFullyRandom() {
-        NameParts c = HorseNames.breedNth(DAM, SIRE, 6, GEN, new FakeRng().ints(0, 0));
         assertEquals("Rolled", c.first());
-        assertEquals("Random", c.last());
-        assertNotEquals(DAM.first(), c.first());
-        assertNotEquals(SIRE.last(), c.last());
+    }
+
+    @Test
+    void coltTakesHisSiresLastName() {
+        NameParts c = foal(Sex.MALE, NamingPolicy.DEFAULT);
+        assertEquals("Ridge", c.last());
+        assertEquals("Rolled", c.first());
+    }
+
+    @Test
+    void theFirstNameIsNeverInheritedByDefault() {
+        assertNotEquals(DAM.first(), foal(Sex.FEMALE, NamingPolicy.DEFAULT).first());
+        assertNotEquals(SIRE.first(), foal(Sex.MALE, NamingPolicy.DEFAULT).first());
+    }
+
+    // --- the parent source ---
+
+    @Test
+    void damSourceIgnoresTheFoalsSex() {
+        NamingPolicy fromDam = new NamingPolicy(InheritedHalf.LAST, ParentSource.DAM);
+        assertEquals("Meadow", foal(Sex.MALE, fromDam).last());
+        assertEquals("Meadow", foal(Sex.FEMALE, fromDam).last());
+    }
+
+    @Test
+    void sireSourceIgnoresTheFoalsSex() {
+        NamingPolicy fromSire = new NamingPolicy(InheritedHalf.LAST, ParentSource.SIRE);
+        assertEquals("Ridge", foal(Sex.MALE, fromSire).last());
+        assertEquals("Ridge", foal(Sex.FEMALE, fromSire).last());
+    }
+
+    // --- the inherited half ---
+
+    @Test
+    void firstHalfPolicyInheritsTheFirstNameAndRollsTheLast() {
+        NamingPolicy firstNames = new NamingPolicy(InheritedHalf.FIRST, ParentSource.BY_SEX);
+        NameParts filly = foal(Sex.FEMALE, firstNames);
+        assertEquals("Bright", filly.first());
+        assertEquals("Random", filly.last());
+        NameParts colt = foal(Sex.MALE, firstNames);
+        assertEquals("Dark", colt.first());
+        assertEquals("Random", colt.last());
+    }
+
+    // --- exactly one half is ever inherited ---
+
+    @Test
+    void exactlyOneHalfComesFromAParent() {
+        for (Sex sex : Sex.values()) {
+            for (InheritedHalf half : InheritedHalf.values()) {
+                for (ParentSource source : ParentSource.values()) {
+                    NameParts c = foal(sex, new NamingPolicy(half, source));
+                    assertEquals(1, halvesFromParents(c),
+                            sex + " " + half + " " + source);
+                }
+            }
+        }
+    }
+
+    private static int halvesFromParents(NameParts child) {
+        int n = 0;
+        if (child.first().equals(DAM.first()) || child.first().equals(SIRE.first())) n++;
+        if (child.last().equals(DAM.last()) || child.last().equals(SIRE.last())) n++;
+        return n;
     }
 }

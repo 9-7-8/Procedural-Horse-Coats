@@ -1,0 +1,114 @@
+2026-09-24, after the genotype filter — the breeding pickers get a filter and a sort
+
+    One bullet, the next in the Bugs section of intake/To do.txt, in the owner's words:
+
+        The breeding overview should sort/filter both mares and stallions to show only
+        horses carrying an allele, or only horses with an exact X/X allele combination.
+
+    Retired. The previous session's log already named this one as next and set it up:
+    genotype: and a case-exact carries() went into common/ then, so this bullet was
+    almost entirely a UI question.
+
+Dated first
+
+    The phrase went into To do.txt on 2026-09-23 (de4cde82), in the same batch of sixteen
+    lines the last several sessions have been working top-down. One day old. The previous
+    session (0c753f96, this morning) explicitly did NOT touch it — its commit message says
+    so — because "the breeding overview" is the Breeding preview tab and the bullet it did
+    retire was about the My horses box. Two bullets, two tabs.
+
+The state it was in
+
+    HorseBrowserScreen's Tab.BREEDING_PREVIEW draws two pickers stacked down the left
+    column — mares above, stallions below — and the Punnett squares down the right. The
+    lists had no control of any kind: drawPicker() called ClientHorseRoster.of(sex) inline
+    and drew it in arrival order. layoutGeneButtons() gates horseFilterBox, genePickButton
+    and allelePickButton to the My horses tab, so nothing on this tab could narrow
+    anything.
+
+    So "which of my mares and which of my stallions carry SB1" — the question this tab
+    exists to answer — could not be asked of a stable big enough to need asking.
+
+What the owner chose
+
+    Two decisions, put as options with previews rather than guessed:
+
+    One filter box for both lists, not one per picker. A mating has two sides and the
+    question is asked of both at once; two boxes would also have cost each list about
+    two-thirds of a row out of a column that is 150px wide at its narrowest and needed the
+    picker geometry reworked. The left column already left sixteen bare pixels between the
+    Refresh row (contentTop()-1, 18 high) and the Mares heading (listTop() =
+    contentTop()+34), which is exactly an EditBox, so the box cost nothing.
+
+    Sorting on the headings rather than a button. The heading line carried "Mares  (12)"
+    and nothing else across the full column width, so the order label fits right-aligned
+    beside it and costs no space at all. A "Sort: Name v" button would have eaten ~70px of
+    that 150.
+
+The change — all of it in HorseBrowserScreen
+
+    breedingFilterBox, a second EditBox, static-backed by breedingFilter the way
+    horseFilterBox is by horseFilter (so it survives a window resize rebuilding the
+    screen). Its own field, not the My horses box moved: one box serving two tabs that ask
+    about different things reads as a bug the first time it appears to clear itself — the
+    same reasoning already written on searchBox at drawChrome.
+
+    pickerList(Sex) is the new single source. It returns
+    HorseQuery.apply(ClientHorseRoster.of(sex), breedingFilter, pickerSort,
+    pickerDescending), cached against the roster version, the query and the sort. Three
+    call sites moved onto it: drawPicker(), horseAt() (the click hit-test) and the wheel
+    branch of mouseScrolled(). That is the part that mattered — ClientHorseRoster.of()'s
+    own javadoc says the gelding cut is made there "because the click lookup and the drawn
+    list must index the same list", and a filter is exactly what makes two such lists able
+    to differ by a row. A click landing on the mare below the one pointed at is not a bug
+    a player can diagnose.
+
+    The cache is not an optimisation for its own sake: a gene: term walks every locus of
+    every horse, and pickerList is asked on every draw AND every wheel notch.
+    rebuildPickerLists() also clamps mareScroll and stallionScroll, since a filter that
+    shrinks a list can otherwise leave it scrolled past its end.
+
+    pickerHeadingClicked() cycles PICKER_SORTS — nine of HorseQuery.Sort's twelve. Where
+    and Bond are left out because a picker row draws a portrait, a name and "g<n>  <coat>"
+    and nothing else, and a list that reorders for no visible reason is worse than no sort.
+    A plain click takes the next order at defaultDescending()'s direction for it, the same
+    call the My horses columns make; shift-click turns the current one round.
+
+    The heading now reads "(4 of 19)" while a filter is on, so a short list is never read
+    as a stable that has lost horses, and the empty note says "no mare matches that filter"
+    instead of "no tamed mares on record".
+
+    typingInABox() gained the new box, or the inventory key would close the screen on an
+    "e" — the vanilla trap the class already documents at length.
+
+An API note
+
+    Screen.hasShiftDown() does not exist in 26.1.2; it is Minecraft.hasShiftDown(). The
+    compile caught it. CartsClient already works around the same move, so it is a known
+    one rather than a new find.
+
+What was not done, and why
+
+    No wasm re-bake: nothing in common/ or web/ changed. HorseQuery was left exactly as the
+    previous session left it — this bullet was a consumer of it, not a change to it.
+
+    No new unit test. The language is already pinned by HorseQueryTest and nothing was
+    added to it; what is new is a screen, and there is no screen harness here.
+
+Verification
+
+    wiki/breeding.html gained a Coding-tab section, "The breeding pickers speak the same
+    language" (#picker-filter), and a Verification entry, #picker-filter-0924. The check
+    that matters is the third one: with a filter on, scroll a picker, click a row part-way
+    down, and confirm the horse that lands in the pair pane is the one drawn.
+
+    Nothing here has been seen in game.
+
+Next
+
+    The next bullet in the Bugs section is horse names being too duplicated: daughters take
+    their mother's last name and sons their father's, random first names, and the
+    first/last-name choice and the parent source configurable per player even on a server.
+    HorseNames in common/ is the owning class and is already unit-tested; the per-player
+    configurable half is the part that needs a home, since a client config cannot decide it
+    on a server.

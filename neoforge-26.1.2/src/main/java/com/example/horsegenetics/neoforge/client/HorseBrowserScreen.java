@@ -499,6 +499,25 @@ public final class HorseBrowserScreen extends Screen {
     /** Recomputed only when the pair or the toggle changes - the walk is not free. */
     private List<BreedingPreview.Group> preview = List.of();
     private int previewRosterVersion = -1;
+
+    /**
+     * The pickers' filter - the same {@link HorseQuery} language the My horses
+     * box speaks, and its own box, because the two tabs are asking about
+     * different things and a shared box that empties itself on a tab change
+     * reads as a bug. Static, like {@link #horseFilter}, so it survives the
+     * screen being rebuilt on a window resize.
+     */
+    private static String breedingFilter = "";
+    private static HorseQuery.Sort pickerSort = HorseQuery.Sort.NAME;
+    private static boolean pickerDescending = false;
+    private EditBox breedingFilterBox;
+    /** Both sides, filtered and sorted. Cached against everything that can move them. */
+    private List<HorseListing> mareRows = List.of();
+    private List<HorseListing> stallionRows = List.of();
+    private int pickerRowsVersion = -1;
+    private String pickerRowsQuery = null;
+    private HorseQuery.Sort pickerRowsSort;
+    private boolean pickerRowsDescending;
     private final List<Gene> allGenes;
     private List<Gene> filtered = List.of();
 
@@ -671,6 +690,15 @@ public final class HorseBrowserScreen extends Screen {
         horseFilterBox.setHint(Component.literal("mare  gen>2  genotype:E/e  -lethal"));
         horseFilterBox.setValue(horseFilter);
         addRenderableWidget(horseFilterBox);
+
+        // The left column already left sixteen pixels bare between the Refresh
+        // row and the Mares heading, so this box costs neither picker a row.
+        breedingFilterBox = new EditBox(this.font, listX() + 1, contentTop() + 18, listW() - 2, 16,
+                Component.literal("Filter"));
+        breedingFilterBox.setMaxLength(96);
+        breedingFilterBox.setHint(Component.literal("gene:SB1  genotype:E/e"));
+        breedingFilterBox.setValue(breedingFilter);
+        addRenderableWidget(breedingFilterBox);
 
         int pickX = horseFilterBox.getX() + horseFilterBox.getWidth() + 4;
         genePickButton = Button.builder(Component.literal("Gene..."), b -> {
@@ -1002,6 +1030,14 @@ public final class HorseBrowserScreen extends Screen {
                 horseFilterBox.setFocused(false);
             }
         }
+        if (breedingFilterBox != null) {
+            breedingFilterBox.visible = breeding;
+            breedingFilterBox.active = breeding;
+            breedingFilterBox.setRectangle(listW() - 2, 16, listX() + 1, contentTop() + 18);
+            if (!breeding) {
+                breedingFilterBox.setFocused(false);
+            }
+        }
     }
 
     /**
@@ -1038,7 +1074,9 @@ public final class HorseBrowserScreen extends Screen {
     /** Is a text field focused, i.e. is the player mid-word? */
     private boolean typingInABox() {
         return (searchBox != null && searchBox.isFocused() && searchBox.isActive())
-                || (horseFilterBox != null && horseFilterBox.isFocused() && horseFilterBox.isActive());
+                || (horseFilterBox != null && horseFilterBox.isFocused() && horseFilterBox.isActive())
+                || (breedingFilterBox != null && breedingFilterBox.isFocused()
+                        && breedingFilterBox.isActive());
     }
 
     private void applyFilter() {
@@ -1152,6 +1190,9 @@ public final class HorseBrowserScreen extends Screen {
             return super.mouseClicked(event, doubleClick);
         }
         if (tab == Tab.BREEDING_PREVIEW) {
+            if (pickerHeadingClicked(event.x(), event.y())) {
+                return true;
+            }
             HorseListing mare = horseAt(event.x(), event.y(), Sex.FEMALE);
             if (mare != null) {
                 damId = mare.id().equals(damId) ? null : mare.id();
@@ -1326,7 +1367,7 @@ public final class HorseBrowserScreen extends Screen {
         if (tab == Tab.BREEDING_PREVIEW) {
             if (mx >= listX() && mx <= listX() + listW()) {
                 boolean upper = my < pickerSplit();
-                List<HorseListing> list = ClientHorseRoster.of(upper ? Sex.FEMALE : Sex.MALE);
+                List<HorseListing> list = pickerList(upper ? Sex.FEMALE : Sex.MALE);
                 int visible = pickerRows(upper);
                 int max = Math.max(0, list.size() - visible);
                 if (upper) {
@@ -1404,6 +1445,11 @@ public final class HorseBrowserScreen extends Screen {
         if (horseFilterBox != null && !horseFilterBox.getValue().equals(horseFilter)) {
             horseFilter = horseFilterBox.getValue();
             horseScroll = 0;
+        }
+        if (breedingFilterBox != null && !breedingFilterBox.getValue().equals(breedingFilter)) {
+            breedingFilter = breedingFilterBox.getValue();
+            mareScroll = 0;
+            stallionScroll = 0;
         }
         layoutGeneButtons();
 
@@ -3152,6 +3198,12 @@ public final class HorseBrowserScreen extends Screen {
     // and how often", which is the question a beginner actually has, and
     // deliberately not "what will the foal look like": a predicted coat is a
     // promise the draw does not make.
+    //
+    // One filter box above the pair of them, not one each: the question this
+    // tab is for is "which of my horses can throw this", and both sides of a
+    // mating are asked it at once. It is the HorseQuery language My horses
+    // speaks, so gene:SB1 and genotype:E/e mean the same here as there.
+    // Clicking either heading cycles the order both lists take.
 
     /** The y at which the mare list ends and the stallion list begins. */
     private int pickerSplit() {
@@ -3194,6 +3246,87 @@ public final class HorseBrowserScreen extends Screen {
         return mares ? mareScroll : stallionScroll;
     }
 
+    /**
+     * The orders the two headings cycle through. A subset of
+     * {@link HorseQuery.Sort}: the picker draws a name, a generation and a coat
+     * and nothing else, and offering it a sort by a column it does not show
+     * (Where, Bond) is a list that reorders for no visible reason.
+     */
+    private static final List<HorseQuery.Sort> PICKER_SORTS = List.of(
+            HorseQuery.Sort.NAME, HorseQuery.Sort.GENERATION, HorseQuery.Sort.AGE,
+            HorseQuery.Sort.COAT, HorseQuery.Sort.BREED, HorseQuery.Sort.SPEED,
+            HorseQuery.Sort.HEALTH, HorseQuery.Sort.JUMP, HorseQuery.Sort.SIZE);
+
+    /**
+     * <b>One side, filtered and sorted</b> - and the single list both the draw
+     * and the click read, the way {@link ClientHorseRoster#of} was that list
+     * before there was a filter. Two lists that disagree by one row is a player
+     * clicking a mare and selecting the one below her.
+     *
+     * <p>Cached against the roster version, the query and the sort, for the
+     * reason {@link #rebuildHorseRows} gives: a {@code gene:} term walks every
+     * locus of every horse, which is nothing once and far too much per frame,
+     * and this is asked for on every wheel notch as well as every draw.
+     */
+    private List<HorseListing> pickerList(Sex sex) {
+        if (pickerRowsVersion != ClientHorseRoster.version()
+                || !breedingFilter.equals(pickerRowsQuery)
+                || pickerSort != pickerRowsSort
+                || pickerDescending != pickerRowsDescending) {
+            rebuildPickerLists();
+        }
+        return sex == Sex.FEMALE ? mareRows : stallionRows;
+    }
+
+    private void rebuildPickerLists() {
+        mareRows = HorseQuery.apply(ClientHorseRoster.of(Sex.FEMALE), breedingFilter,
+                pickerSort, pickerDescending);
+        stallionRows = HorseQuery.apply(ClientHorseRoster.of(Sex.MALE), breedingFilter,
+                pickerSort, pickerDescending);
+        pickerRowsVersion = ClientHorseRoster.version();
+        pickerRowsQuery = breedingFilter;
+        pickerRowsSort = pickerSort;
+        pickerRowsDescending = pickerDescending;
+        // A filter that shrinks a list must not leave it scrolled past its end.
+        mareScroll = Math.max(0, Math.min(mareScroll, Math.max(0, mareRows.size() - pickerRows(true))));
+        stallionScroll = Math.max(0, Math.min(stallionScroll,
+                Math.max(0, stallionRows.size() - pickerRows(false))));
+    }
+
+    /** What a heading says about the order, e.g. {@code by Gen ^}. */
+    private String pickerSortLabel() {
+        return "by " + pickerSort.label() + (pickerDescending ? " v" : " ^");
+    }
+
+    /**
+     * A click on either heading. The plain click steps to the next order and
+     * takes that order's natural direction - fastest first for a number, A to Z
+     * for a word, the same call {@link #defaultDescending} makes for the My
+     * horses columns. Shift turns the current one round instead, which is the
+     * rarer half of the question and so is the one behind a modifier.
+     */
+    private boolean pickerHeadingClicked(double mx, double my) {
+        if (mx < listX() || mx > listX() + listW()) {
+            return false;
+        }
+        boolean mares = my >= listTop() && my < listTop() + ROW_H;
+        boolean stallions = my >= pickerSplit() && my < pickerSplit() + ROW_H;
+        if (!mares && !stallions) {
+            return false;
+        }
+        // Minecraft.hasShiftDown(), not Screen.hasShiftDown() - the static on
+        // Screen is gone in 26.1.2, the same move CartsClient already works
+        // around.
+        if (minecraft != null && minecraft.hasShiftDown()) {
+            pickerDescending = !pickerDescending;
+        } else {
+            int at = PICKER_SORTS.indexOf(pickerSort);
+            pickerSort = PICKER_SORTS.get((at + 1) % PICKER_SORTS.size());
+            pickerDescending = defaultDescending(pickerSort);
+        }
+        return true;
+    }
+
     /** The roster row under the cursor in one of the two pickers, or null. */
     private HorseListing horseAt(double mx, double my, Sex sex) {
         boolean mares = sex == Sex.FEMALE;
@@ -3201,7 +3334,7 @@ public final class HorseBrowserScreen extends Screen {
                 || my < pickerTop(mares) || my >= pickerBottom(mares)) {
             return null;
         }
-        List<HorseListing> list = ClientHorseRoster.of(sex);
+        List<HorseListing> list = pickerList(sex);
         int i = pickerScroll(mares) + (int) ((my - pickerTop(mares)) / HORSE_ROW_H);
         return i >= 0 && i < list.size() ? list.get(i) : null;
     }
@@ -3247,7 +3380,7 @@ public final class HorseBrowserScreen extends Screen {
 
     private void drawPicker(GuiGraphicsExtractor g, int mouseX, int mouseY, Sex sex) {
         boolean mares = sex == Sex.FEMALE;
-        List<HorseListing> list = ClientHorseRoster.of(sex);
+        List<HorseListing> list = pickerList(sex);
         int l = listX();
         int w = listW();
         int headY = mares ? listTop() : pickerSplit();
@@ -3255,8 +3388,14 @@ public final class HorseBrowserScreen extends Screen {
         int bottom = pickerBottom(mares);
         UUID chosen = mares ? damId : sireId;
 
-        g.text(this.font, Component.literal((mares ? "Mares" : "Stallions") + "  (" + list.size() + ")"),
+        // "(4 of 19)" while a filter is on, so a short list is never mistaken
+        // for a stable that has lost horses.
+        int total = ClientHorseRoster.of(sex).size();
+        String count = list.size() == total ? "(" + total + ")" : "(" + list.size() + " of " + total + ")";
+        g.text(this.font, Component.literal((mares ? "Mares" : "Stallions") + "  " + count),
                 l, headY, LABEL, false);
+        String order = pickerSortLabel();
+        drawFitted(g, order, l + w - this.font.width(order), headY, this.font.width(order) + 1, TAG);
 
         g.fill(l - 2, top - 2, l + w + 2, bottom + 2, PANEL_SOFT);
         g.enableScissor(l, top, l + w, bottom);
@@ -3288,7 +3427,9 @@ public final class HorseBrowserScreen extends Screen {
         if (list.isEmpty()) {
             String note = !ClientHorseRoster.received()
                     ? "asking the server..."
-                    : "no tamed " + (mares ? "mares" : "stallions") + " on record";
+                    : !breedingFilter.trim().isEmpty()
+                            ? "no " + (mares ? "mare" : "stallion") + " matches that filter"
+                            : "no tamed " + (mares ? "mares" : "stallions") + " on record";
             g.text(this.font, Component.literal(note), l + 4, top + 2, EXPR_OFF, false);
         }
 

@@ -20,6 +20,8 @@ import com.example.horsegenetics.common.trait.Viability;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.common.name.HorseNames;
+import com.example.horsegenetics.common.name.NamingPolicy;
+import com.example.horsegenetics.neoforge.data.HorseNamingData;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.common.repro.Conception;
@@ -51,8 +53,9 @@ import java.util.UUID;
  *       the parents - Mendelian alleles, each one carrying the priority and
  *       epigenetic seed of the exact parent copy it came from, so a foal that
  *       inherits its dam's {@code A} inherits her bay point heights too;</li>
- *   <li>its name takes the first name of one parent and the last name of the
- *       other ({@link HorseNames#breedNth});</li>
+ *   <li>its <b>name</b> keeps one half from a parent and rolls the other, to
+ *       the dam's owner's own {@link NamingPolicy} - by default a filly carries
+ *       her dam's last name and a colt his sire's ({@link HorseNames#foal});</li>
  *   <li>its generation is {@code 1 + max(dam, sire)};</li>
  *   <li>its <b>body</b> - speed, max health, jump strength and size - is
  *       resolved from the genome it just inherited
@@ -272,11 +275,15 @@ public final class HorseBreedingHandler {
         tickBreedingTasks(breeder, childGenome.genotype());
 
         int childGeneration = 1 + Math.max(damRecord.generation(), sireGeneration);
-        int priorFoals = HorseRecords.offspringCount(child, damRecord.id(), sireId);
-        NameParts childName = HorseNames.breedNth(
+        // Whose horses these are decides how the foal is named; a wild birth has
+        // nobody and gets the default. The foal's sex comes out of the same
+        // Mendelian draw as everything else, so the surname line is genetic too.
+        NameParts childName = HorseNames.foal(
                 new NameParts(damRecord.firstName(), damRecord.lastName()),
                 new NameParts(sireFirstName, sireLastName),
-                priorFoals, HorseRecords.names(), rng);
+                childGenome.sex(),
+                namingPolicyFor(damHorse, breeder),
+                HorseRecords.names(), rng);
 
         // What the parents' bodies were, so the UI can say whether this foal came
         // out above both of them, between, or below.
@@ -338,6 +345,33 @@ public final class HorseBreedingHandler {
         if (childTraits.viability() == Viability.LETHAL_AT_BIRTH) {
             LethalFoalHandler.announceLethalBirth(child, childRecord, childTraits, breeder);
         }
+    }
+
+    /**
+     * Whose naming policy this foal is named under.
+     *
+     * <p><b>The dam's owner, not the breeder</b>, and the two are not always the
+     * same player: a foal is born where its dam is, to whoever owns her, and
+     * that is whose herd the name has to sit in. The breeder is the fallback for
+     * the case where the dam has no owner but a player made the pairing happen
+     * anyway - a tamed stallion put to a wild mare. A wild birth has neither and
+     * gets {@link NamingPolicy#DEFAULT}.
+     *
+     * <p>The dam's owner is looked up by UUID rather than as an entity, because
+     * a pregnancy comes due on its own schedule and its owner is frequently
+     * offline when it does - which is the whole reason the policy lives in a
+     * SavedData and not on the player.
+     */
+    private static NamingPolicy namingPolicyFor(Horse damHorse, @Nullable Player breeder) {
+        var server = damHorse.level().getServer();
+        if (server == null) {
+            return NamingPolicy.DEFAULT;
+        }
+        UUID owner = HorseOwnership.ownerId(damHorse);
+        if (owner == null && breeder != null) {
+            owner = breeder.getUUID();
+        }
+        return HorseNamingData.get(server).policyFor(owner);
     }
 
 

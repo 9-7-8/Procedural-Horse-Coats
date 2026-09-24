@@ -617,9 +617,11 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <p>
     Scans every stored record for one whose two parents are exactly <code>a</code> and
-    <code>b</code>, order-independent. It feeds the foal-name schedule, so it must
-    count <em>prior</em> foals only &mdash; which holds because a foal&rsquo;s own
-    record is not stored until after its name is chosen.
+    <code>b</code>, order-independent. It fed the old foal-name schedule and is now a
+    plain query on the database: nothing in the mod calls it, and the
+    <code>HorseRecords</code> wrapper that existed only to reach it is gone with the
+    schedule. It stays on <code>HorseDatabase</code> because &ldquo;how many foals has
+    this pair had&rdquo; is a question the browser and the papers will want asked.
 </p>
 
 <h4><code>forget(id)</code></h4>
@@ -706,7 +708,6 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <tr><td><code>newFounder(horse, rng, genome)</code></td><td>Founder record on a fixed <strong>genome</strong> &mdash; epigenome included, so nothing is rolled but the name. The custom spawn egg is the caller: its editor previews a live 3D horse, and a preview the spawn then re-rolls is not a preview.</td></tr>
 <tr><td><code>traitsOf(horse)</code> / <code>traitsOf(record)</code></td><td>Resolve the body from the genotype, honouring the server&rsquo;s <code>health.mode</code>. See <a href="horse-body.html">the horse&rsquo;s body</a>.</td></tr>
 <tr><td><code>applyTraitsToEntity(horse, traits, fullHeal)</code></td><td>Push the resolved body onto four attribute <em>base</em> values: <code>MOVEMENT_SPEED</code>, <code>MAX_HEALTH</code>, <code>JUMP_STRENGTH</code> and <code>SCALE</code>. <code>fullHeal</code> sets current HP to the new max (newborn); otherwise HP is only clamped <em>down</em>, so nothing is healed for free on a reload.</td></tr>
-<tr><td><code>offspringCount(contextHorse, damId, sireId)</code></td><td>From the server-global ancestry data, else <code>0</code>.</td></tr>
 <tr><td><code>rename</code> / <code>setBarnName</code> / <code>setTamedBy</code></td><td>Copy-and-apply helpers.</td></tr>
 <tr><td><code>rng(horse)</code> / <code>names()</code></td><td>Small utilities. (<code>randomSex</code> is gone &mdash; the founder draw rolls the sex locus.)</td></tr>
 </tbody>
@@ -822,30 +823,70 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <a href="fertility.html">fertility &amp; gestation</a>.
 </p>
 
-<h4>The foal-name schedule</h4>
+<h4 id="foal-name">The foal&rsquo;s name</h4>
 
 <p>
-    <code>HorseNames.breedNth(dam, sire, priorFoals, generator, rng)</code>, where
-    <code>priorFoals</code> counts how many foals <em>this exact pairing</em> has
-    already produced (from the server-global ancestry data, so it survives reloads).
-    The point is to stop a pairing churning out the same two names forever:
+    <code>HorseNames.foal(dam, sire, foalSex, policy, generator, rng)</code>. A foal
+    keeps <strong>one half of its name from a parent and rolls the other</strong>,
+    every time. The default <code>NamingPolicy</code> inherits the <em>last</em> name
+    and takes it <em>down the same-sex line</em> &mdash; a filly carries her dam&rsquo;s,
+    a colt his sire&rsquo;s &mdash; so the surname reads as a family while the rolled
+    first name is what keeps two foals of one pairing apart. The foal&rsquo;s sex comes
+    out of the same Mendelian draw as everything else, so the surname line is genetic
+    too.
 </p>
 
-<div class="table-wrap">
-<table>
-<thead><tr><th>Foal</th><th>Name</th></tr></thead>
-<tbody>
-<tr><td>1</td><td><code>dam.first + sire.last</code></td></tr>
-<tr><td>2</td><td><code>sire.first + dam.last</code> &mdash; the other combo</td></tr>
-<tr><td>3&ndash;6</td><td>One half kept from a parent (either parent, either half), the other a fresh random word</td></tr>
-<tr><td>7+</td><td>A fully random <code>generateParts</code> name</td></tr>
-</tbody>
-</table>
-</div>
+<p>
+    This replaced a schedule keyed on how many foals a pairing had already produced:
+    foal 1 took <code>dam.first + sire.last</code>, foal 2 the other combination,
+    foals 3&ndash;6 one parent half plus a rolled word, and foal 7 onward a wholly
+    rolled name. It read well for a single pair and was wrong for a herd &mdash; the
+    first two foals of <em>every</em> pairing are built only out of words already in
+    use, so names collided constantly on the owner&rsquo;s server and a surname meant
+    nothing. Rolling one half every time puts the whole of one word table (the files
+    <code>HorseNameGenerator.fromResources()</code> reads) between two full siblings,
+    and leaves the inherited half to do the one job it is good at.
+</p>
+
+<h4 id="naming-policy">Whose rule, and where it lives</h4>
 
 <p>
-    <code>HorseNames.breed</code> &mdash; the old 50/50 one-half-each &mdash; stays for
-    callers and tests that do not track a foal count.
+    <code>NamingPolicy</code> is two choices &mdash; which half is inherited
+    (<code>LAST</code>, <code>FIRST</code>) and which parent supplies it
+    (<code>BY_SEX</code>, <code>DAM</code>, <code>SIRE</code>) &mdash; and it belongs
+    to a <strong>player</strong>, not to a world. Two constraints fix where it can be
+    stored, and between them they rule out both obvious homes:
+</p>
+
+<ul>
+    <li><strong>Not a server config.</strong> On a shared server each player names
+        their own horses their own way, and a server config holds one answer for
+        everybody.</li>
+    <li><strong>Not applied on the client.</strong> A foal is named on the server, at
+        a due date that routinely arrives while its owner is offline and their client
+        is not running.</li>
+</ul>
+
+<p>
+    So the client <em>suggests</em> and the server <em>decides</em>. The player sets
+    <code>naming.inheritedHalf</code> and <code>naming.parentSource</code> in
+    <code>phc/client.toml</code>; <code>ClientLifecycleHandler</code> sends both on
+    every login as <code>NamingPolicyPayload</code> (enum <em>names</em>, not
+    ordinals, so reordering an enum cannot relabel somebody&rsquo;s setting);
+    <code>HorseNamingData</code>, a server-global <code>SavedData</code> keyed by
+    player UUID, files it. Nothing else names a foal. An unknown player is not an
+    error anywhere on that path &mdash; <code>policyFor(null)</code>, a player who has
+    never sent one, and an unreadable enum name all answer
+    <code>NamingPolicy.DEFAULT</code>, because naming a foal must not be a path that
+    can fail.
+</p>
+
+<p>
+    The policy applied is the <strong>dam owner&rsquo;s</strong>, not the
+    breeder&rsquo;s, and the two are not always the same player: a foal is born where
+    its dam is, to whoever owns her, and that is whose herd the name has to sit in.
+    The breeder is the fallback for a tamed stallion put to an unowned mare; a wild
+    birth has neither and gets the default.
 </p>
 
 <h3>C. Paper inspector</h3>
@@ -1425,6 +1466,55 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     not an option.
 </p>
 
+<h3 id="picker-filter">The breeding pickers speak the same language (2026-09-24)</h3>
+
+<p>
+    The <em>Breeding preview</em> tab&rsquo;s two pickers &mdash; mares stacked above stallions down the left
+    column &mdash; listed the roster in arrival order with no control of any kind on them, which made
+    &ldquo;which of my mares and which of my stallions carry <code>SB1</code>&rdquo; a question the tab
+    exists to answer and could not be asked. Both lists now run through the same
+    <code>HorseQuery</code> as <a href="#my-horses-filter">My horses</a>, so every key, flag and negation
+    above means here exactly what it means there.
+</p>
+
+<p>
+    <strong>One box for both lists, not one each.</strong> A mating has two sides and the breeder&rsquo;s
+    question is asked of both at once; two boxes would also cost each picker a row of a column that is
+    150&nbsp;px wide at its narrowest. It sits in the sixteen pixels the left column already left bare
+    between the <em>Refresh</em> row and the <em>Mares</em> heading, so neither list lost height to it.
+    The box is its own field, not <em>My horses</em>&rsquo; box moved: one box serving two tabs that ask
+    about different things reads as a bug the first time it appears to clear itself.
+</p>
+
+<p>
+    <strong>Sorting is on the headings</strong>, which had spare width and no behaviour. A click steps to
+    the next order and takes that order&rsquo;s natural direction &mdash; the same
+    <code>defaultDescending()</code> the <em>My horses</em> columns use, so a number comes fastest-first
+    and a word A to Z &mdash; and shift-click turns the current one round. The cycle is nine of
+    <code>HorseQuery.Sort</code>&rsquo;s twelve: <em>Where</em> and <em>Bond</em> are not drawn on a
+    picker row, and a list that reorders for no visible reason is worse than no sort at all. Both
+    headings drive one shared order, and each says what it is &mdash; <em>by Gen&nbsp;^</em>.
+</p>
+
+<p>
+    <strong>One list, read three ways.</strong> <code>pickerList(Sex)</code> is now the single list the
+    draw, the click hit-test and the wheel all index, replacing three separate
+    <code>ClientHorseRoster.of(sex)</code> calls. That class&rsquo; own note already said why the
+    gelding-off-the-stallion-side cut happens in one place; a filter is precisely what makes two such
+    lists able to differ by a row, and a click that lands on the mare below the one pointed at is not a
+    bug a player can diagnose. It is cached against the roster version, the query and the sort, for the
+    reason <code>rebuildHorseRows()</code> gives: a <code>gene:</code> term walks every locus of every
+    horse, which is nothing once and far too much sixty times a second &mdash; and the wheel asks for it
+    too, not only the draw. A filter that shrinks a list also clamps that list&rsquo;s scroll.
+</p>
+
+<p>
+    The heading reads <em>(4 of 19)</em> while a filter is on, so a short list is never read as a stable
+    that has lost horses, and an empty one says <em>no mare matches that filter</em> rather than
+    <em>no tamed mares on record</em>. A dam or sire already chosen stays chosen when the filter hides
+    her: the pair pane is about the pair, not about the list.
+</p>
+
 <h3 id="verified">Verified</h3>
 
 <p id="verified-drift">
@@ -1448,18 +1538,18 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </p>
 
 <p id="verified-foal-names">
-    <strong>A pair's foals are named in the documented order</strong> (2026-09-15). <code>HorseNames</code> is
-    unit-tested; what was unproven was the live <code>offspringCount(dam, sire)</code> that picks the rule. In the yard's
-    08:47 run, CROSS SAME's pair "Racing Judas" &times; "Herald of the Nicodemus" had nine foals:
-    <ol>
-        <li>Racing Nicodemus: the dam's first half and the sire's second (the parent combo);</li>
-        <li>Herald of the Judas: the other combo;</li>
-        <li>to 6: Racing Milk, Racing Drifter, Racing Ben and Diamond Judas, one parent's half plus a new word;</li>
-        <li>to 9: Popping Lemon, Erudite Eye and Seeking Jesus, fully random.</li>
-    </ol>
-    No two names repeated. STARBURST DRIFT's pair ("Dreaming Cipher" &times; "Peach Armor") followed the same order
-    through its six foals: Dreaming Armor, Peach Cipher, then Ruined Armor, Slithering Cipher, West of the Cipher and
-    Peach Halo.
+    <strong>The foal-count schedule worked exactly as documented, and was removed anyway</strong>
+    (verified 2026-09-15, withdrawn 2026-09-24). Worth keeping as a record, because it is the
+    clearest case in the repo of a feature that passed every check it was given and was still
+    wrong. The yard's 08:47 run watched two pairs through fifteen foals and every one landed in
+    its documented slot &mdash; CROSS SAME's "Racing Judas" &times; "Herald of the Nicodemus" gave
+    Racing Nicodemus, then Herald of the Judas, then four one-parent-half names, then three fully
+    random ones, with no two names repeating; STARBURST DRIFT's pair followed the same order
+    through six. What neither pen could show is the thing that actually mattered: the schedule was
+    checked <em>a pairing at a time</em>, and its defect only exists <em>across</em> pairings,
+    where every pair's first two foals are assembled out of words already in the herd. The
+    owner's own server is where that surfaced. See <a href="#foal-name">the foal's name</a> for
+    what replaced it.
 </p>
 
 <p id="verified-family-tree">
@@ -1619,7 +1709,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, a <em>My horses</em> filter whose allele tokens just became case-sensitive so that <code>genotype:E/e</code> could exist at all &mdash; the one change here that will look like a regression if it is wrong &mdash; and a long unplayed browser list.</p>
+    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, a <em>My horses</em> filter whose allele tokens just became case-sensitive so that <code>genotype:E/e</code> could exist at all &mdash; the one change here that will look like a regression if it is wrong &mdash; the same language newly driving the breeding pickers, where the thing to watch is that a clicked row is still the row drawn, a foal-naming rule that is now one policy <em>per player</em> and can only really be judged on a second client and on a birth that happens while its owner is logged out, and a long unplayed browser list.</p>
 </div>
 
 <h3 id="barn-name-0918">The barn-name box is visible at all (2026-09-24, NOT played)</h3>
@@ -1819,6 +1909,80 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <li><strong>The Allele&hellip; picker still writes a working term.</strong> It writes
         <code>gene:&lt;token&gt;</code> with the token's real case, which is now load-bearing; pick an
         allele and confirm the rows it leaves are the right ones.</li>
+</ul>
+
+<h3 id="picker-filter-0924">Filtering and sorting the breeding pickers (2026-09-24, NOT played)</h3>
+<p>
+    The <em>Breeding preview</em> pickers gained a filter box and a sortable heading; the mechanism is on
+    <a href="#picker-filter">the Coding tab</a>. The query language itself is pinned by
+    <code>HorseQueryTest</code> and is checked separately
+    <a href="#genotype-filter-0924">above</a> &mdash; what is unproven here is the screen: a widget in
+    sixteen pixels that were previously bare, and three call sites that must keep indexing one list.
+</p>
+<ul>
+    <li><strong>The box is there and is not sitting on anything.</strong> Open Breeding preview: a filter
+        box spans the left column between the <em>Refresh</em> row and the <em>Mares</em> heading. Check
+        at GUI scale 2 and 3 and at a narrow window that it does not overlap the <em>Refresh</em> or
+        <em>Only what varies</em> buttons above it or the heading below it, and that the hint
+        <code>gene:SB1&nbsp;&nbsp;genotype:E/e</code> is not clipped.</li>
+    <li><strong>Both lists narrow together.</strong> Type <code>gene:SB1</code>: mares and stallions both
+        shrink to carriers, and each heading reads <em>(n of m)</em>.</li>
+    <li><strong>The row you click is the row you get.</strong> This is the one that matters. With a
+        filter on, scroll a picker, click a row part-way down and confirm the horse that lands in the
+        pair pane is the one drawn, not its neighbour. Do it on both sides.</li>
+    <li><strong>Typing does not close the screen.</strong> Type <code>e</code> and <code>speed</code>
+        into the box &mdash; the inventory key must not fire, the way it must not in the
+        <em>My horses</em> box.</li>
+    <li><strong>The heading sorts.</strong> Click <em>Mares</em>: the order advances through Name, Gen,
+        Age, Coat, Breed, Speed, Health, Jump, Hands and the heading says which. Both lists change
+        together. Shift-click turns the arrow round and the list with it. A number should arrive
+        largest-first, a word A to Z.</li>
+    <li><strong>Scroll survives a shrinking list.</strong> Scroll to the bottom of a long list, then type
+        a filter that leaves two horses &mdash; the list must show them, not an empty box scrolled past
+        its end.</li>
+    <li><strong>A chosen pair survives being filtered out.</strong> Pick a dam and sire, then type a
+        filter that excludes them: the Punnett squares should stay.</li>
+    <li><strong>The empty state.</strong> With a filter that matches nothing, each side says
+        <em>no mare / no stallion matches that filter</em>; with the box empty and no horses, it still
+        says <em>no tamed mares on record</em>.</li>
+    <li><strong>It does not leak onto the other tabs.</strong> Switch to My horses and back: the box
+        disappears there, the two filters keep their own text, and neither clears the other.</li>
+</ul>
+
+<h3 id="foal-naming-0924">Foal names, and one policy per player (2026-09-24, NOT played)</h3>
+<p>
+    The foal-count schedule is gone; a foal now keeps one half from a parent and rolls the
+    other, by default the last name down the same-sex line. The rule itself is
+    <code>HorseNamesTest</code>'s and needs no game. <strong>Two things here do</strong>, and
+    neither can be seen in a single-player test of one pairing: that the policy reaching the
+    naming call is the <em>dam owner's</em>, and that two players on one server keep different
+    ones. The mechanism is on <a href="#naming-policy">the Coding tab</a>.
+</p>
+<ul>
+    <li><strong>The default, read off a herd rather than a pair.</strong> Breed one pair three
+        or four times over. Every filly should carry her dam's last name and every colt his
+        sire's, and <em>no two foals should share a full name</em> &mdash; that second half is
+        the whole point of the change, and it is what the old schedule failed at only once a
+        herd existed.</li>
+    <li><strong>Both settings do what they say.</strong> In <code>phc/client.toml</code> set
+        <code>naming.parentSource = DAM</code>, rejoin, breed: colts now take the dam's last
+        name too. Then <code>naming.inheritedHalf = FIRST</code>: the foal keeps the parent's
+        <em>first</em> name and the last name is rolled.</li>
+    <li><strong>It has to be a rejoin.</strong> Editing the file mid-session must change
+        nothing &mdash; the server holds the copy that names foals and is only told on login.
+        If a live edit takes effect, the policy is being read on the wrong side.</li>
+    <li><strong>Two players, two policies.</strong> The real check, and it needs a second
+        client on a dedicated server. Give each player a different
+        <code>naming.parentSource</code> and let both breed their own mares at once: each
+        player's foals follow that player's setting, and neither setting touches the other's
+        herd.</li>
+    <li><strong>Born while the owner is offline.</strong> Put a mare in foal with a breeding
+        carrot, log out, let the gestation come due, log back in. The foal should be named to
+        the owner's policy, not the default &mdash; this is the case that the whole
+        <code>HorseNamingData</code> detour exists for, and the one a client-side setting would
+        silently get wrong.</li>
+    <li><strong>A wild birth still gets a name.</strong> A foal born to an unowned mare in a
+        wild band takes the default policy and nothing throws.</li>
 </ul>
 
 <h3 id="breeding-preview-0924">The mare picker's missing row (2026-09-24, NOT played)</h3>

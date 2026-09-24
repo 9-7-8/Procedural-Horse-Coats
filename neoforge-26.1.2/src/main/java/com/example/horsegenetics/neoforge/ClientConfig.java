@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge;
 
+import com.example.horsegenetics.common.name.NamingPolicy;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
@@ -11,6 +12,18 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * {@link ServerConfig} is that <b>nothing about the world changes</b> - two
  * players on one server can disagree about any of these and still be looking
  * at the same horses.
+ *
+ * <h2>The two naming settings are the exception, and how</h2>
+ * {@link #NAMING_INHERITED_HALF} and {@link #NAMING_PARENT_SOURCE} <i>do</i>
+ * change the world: they decide what a foal is called, and a name is stored.
+ * They sit here anyway because the thing being configured is a <b>player's</b>
+ * preference for their <b>own</b> horses, and a server config has no way to
+ * hold one answer per player. So the client does not apply them - it
+ * <i>suggests</i> them, sending both to the server on login
+ * ({@code NamingPolicyPayload}), which files them under that player's UUID in
+ * {@code HorseNamingData} and is the only thing that ever names a foal. Two
+ * players on one server therefore get their own naming policy, and neither can
+ * name the other's horses.
  */
 public final class ClientConfig {
 
@@ -64,6 +77,19 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
 
+    /**
+     * <b>Which half of its name a foal inherits from a parent</b>; the other
+     * half is rolled from the word tables. Suggested to the server on login -
+     * see the class note.
+     */
+    public static final ModConfigSpec.EnumValue<NamingPolicy.InheritedHalf> NAMING_INHERITED_HALF;
+
+    /**
+     * <b>Which parent that inherited half comes from.</b> Suggested to the
+     * server on login - see the class note.
+     */
+    public static final ModConfigSpec.EnumValue<NamingPolicy.ParentSource> NAMING_PARENT_SOURCE;
+
     private static final int DEFAULT_COAT_DETAIL_DISTANCE = 32;
     private static final int DEFAULT_COAT_BAKE_BUDGET_MS = 4;
 
@@ -109,6 +135,25 @@ public final class ClientConfig {
                         "is for. The two keys also need the server to allow them:",
                         "see debug.tools in server.toml.")
                 .define("debug.tools", !production());
+        NAMING_INHERITED_HALF = builder
+                .comment("Which half of its name a foal born to YOUR horses keeps from a",
+                        "parent. The other half is rolled from the name tables, which is what",
+                        "keeps two foals of the same pair from sharing a name.",
+                        "  LAST  - the foal keeps the parent's last name, e.g. a filly out of",
+                        "          \"Bright Meadow\" is \"Swift Meadow\". A surname line. (default)",
+                        "  FIRST - the foal keeps the parent's first name and rolls the last.",
+                        "Sent to the server when you join; it is stored against your name and",
+                        "applies only to horses you own, so other players on the server are",
+                        "unaffected and keep their own setting.")
+                .defineEnum("naming.inheritedHalf", NamingPolicy.InheritedHalf.LAST);
+        NAMING_PARENT_SOURCE = builder
+                .comment("Which parent that inherited half comes from.",
+                        "  BY_SEX - a filly takes it from her dam, a colt from his sire.",
+                        "           (default)",
+                        "  DAM    - always the dam, whatever the foal is.",
+                        "  SIRE   - always the sire, whatever the foal is.",
+                        "Sent to the server when you join; see naming.inheritedHalf.")
+                .defineEnum("naming.parentSource", NamingPolicy.ParentSource.BY_SEX);
         SPEC = builder.build();
     }
 
@@ -166,6 +211,18 @@ public final class ClientConfig {
             return COAT_BAKE_BUDGET_MS.get();
         } catch (IllegalStateException notLoaded) {
             return DEFAULT_COAT_BAKE_BUDGET_MS;
+        }
+    }
+
+    /**
+     * This client's suggested naming policy, to send to the server on login.
+     * Safe read - the mod's default if the config isn't loaded yet.
+     */
+    public static NamingPolicy namingPolicy() {
+        try {
+            return new NamingPolicy(NAMING_INHERITED_HALF.get(), NAMING_PARENT_SOURCE.get());
+        } catch (IllegalStateException notLoaded) {
+            return NamingPolicy.DEFAULT;
         }
     }
 

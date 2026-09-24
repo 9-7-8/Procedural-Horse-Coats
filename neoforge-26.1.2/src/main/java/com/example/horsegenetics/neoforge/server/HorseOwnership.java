@@ -28,11 +28,21 @@ public final class HorseOwnership {
 
     /** Tamed, and tamed by {@code playerId}. */
     public static boolean isOwner(Horse horse, UUID playerId) {
+        UUID owner = ownerId(horse);
+        return owner != null && owner.equals(playerId);
+    }
+
+    /**
+     * Who owns this horse, or {@code null} if nobody does. By UUID, so it
+     * answers for an owner who is offline - the caller need not be able to find
+     * the player entity.
+     */
+    public static @Nullable UUID ownerId(Horse horse) {
         if (!horse.isTamed()) {
-            return false;
+            return null;
         }
         var owner = horse.getOwnerReference();
-        return owner != null && playerId.equals(owner.getUUID());
+        return owner == null ? null : owner.getUUID();
     }
 
     /**
