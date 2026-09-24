@@ -523,6 +523,17 @@ public final class ModGameTests {
         float max = horse.getMaxHealth();
         horse.setHealth(max / 2.0F);
 
+        // ASK FOR THE HUNGER, SO THERE IS ONE TO SAVE. A NeoForge attachment is
+        // materialised on first access, and HorseCareHandler is the thing that
+        // usually asks - on a slow tick phased by entity id, which by tick ten
+        // may or may not have come round. Without this the horse is sometimes
+        // snapshotted with no hunger attachment at all, StasisCare.putHunger
+        // then refuses to invent one (correctly - inventing it is healing for
+        // free), and the healing assertion below fails on one run in several
+        // with nothing wrong with the bank. Every horse the bank ever really
+        // meets has been ticked for far longer than ten ticks.
+        horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get());
+
         com.example.horsegenetics.neoforge.data.StasisSnapshot snapshot =
                 com.example.horsegenetics.neoforge.server.HorseStasisHandler.snapshot(horse, "Tripwire");
         net.minecraft.nbt.CompoundTag tag = snapshot.horse();
@@ -557,7 +568,10 @@ public final class ModGameTests {
                 com.example.horsegenetics.common.horse.StasisUpkeep.WATER_PER_BUCKET);
         if (turn == null || turn.healed() <= 0.0) {
             throw new GameTestAssertException(Component.literal(
-                    "one turn of bank upkeep on a hurt, fed, watered horse healed nothing"), 0);
+                    "one turn of bank upkeep on a hurt, fed, watered horse healed nothing"
+                            + " (result " + turn + ", attachments "
+                            + tag.getCompoundOrEmpty(net.neoforged.neoforge.attachment.AttachmentHolder
+                                    .ATTACHMENTS_NBT_KEY).keySet() + ")"), 0);
         }
         float after = snapshotHealth(chamber);
         if (after <= max / 2.0F) {
@@ -565,10 +579,101 @@ public final class ModGameTests {
                     "the upkeep reported healing " + turn.healed() + " but the chamber still holds a"
                             + " horse on " + after + " health - the mended tag was not written back"), 0);
         }
+        stasisAgeIsReadable(horse);
+
+        // The horse goes first, because the last half of this releases a horse
+        // out of that same tag - and a tag remembers its UUID, so letting it out
+        // while the original is still standing there is the one thing
+        // addFreshEntity refuses. That refusal is not a bug, it is
+        // HorseStasisHandler.alreadyLoose's whole reason for existing.
         horse.discard();
+        stasisReproSurvivesTheChamber(helper, snapshot);
+
         HorseGenetics.LOGGER.info("[gametest] a stored horse reads back: max {}, hunger {}, and healed to {}",
                 readMax, hunger, after);
         helper.succeed();
+    }
+
+    /**
+     * <b>The drop buffer's half of the tripwire.</b> A stored horse's age is the
+     * one field {@code StasisCare} names as a bare literal - {@code AgeableMob}
+     * writes {@code "Age"} and exports no constant for it - and a produce
+     * ability gated on {@code adult} reads it. A rename would not throw: every
+     * shelved foal would simply start laying eggs, quietly.
+     */
+    private static void stasisAgeIsReadable(net.minecraft.world.entity.animal.equine.Horse horse) {
+        net.minecraft.nbt.CompoundTag grown =
+                com.example.horsegenetics.neoforge.server.HorseStasisHandler.snapshot(horse, "Tripwire").horse();
+        if (StasisCare.isBaby(grown)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a grown horse's saved tag reads as a foal - StasisCare.isBaby has the wrong key,"
+                            + " and every produce ability gated on 'adult' now refuses in a bank"), 0);
+        }
+        horse.setBaby(true);
+        try {
+            net.minecraft.nbt.CompoundTag young =
+                    com.example.horsegenetics.neoforge.server.HorseStasisHandler.snapshot(horse, "Tripwire").horse();
+            if (!StasisCare.isBaby(young)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a foal's saved tag reads as an adult - StasisCare.isBaby has the wrong key,"
+                                + " and a shelved foal would produce as if it were grown."
+                                + " Check AgeableMob's 'Age' field in 26.1.2."), 0);
+            }
+        } finally {
+            horse.setBaby(false);
+        }
+    }
+
+    /**
+     * <b>In-bank breeding's half of the tripwire.</b> The bank conceives a
+     * pregnancy into a stored mare's tag and she is released to foal days later,
+     * so the round trip has to survive a write, a save and a real
+     * {@code Horse.load}. Every step of it fails silently: a wrong attachment id
+     * writes into nowhere, a broken codec parses to a default, and either way
+     * the mare comes out of the chamber empty and nobody is told she lost
+     * anything.
+     */
+    private static void stasisReproSurvivesTheChamber(
+            GameTestHelper helper, com.example.horsegenetics.neoforge.data.StasisSnapshot snapshot) {
+        net.minecraft.nbt.CompoundTag tag = snapshot.horse().copy();
+
+        com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment cooldowns =
+                StasisCare.cooldowns(tag).stamp("stasis_tripwire", 1234L);
+        if (!StasisCare.putCooldowns(tag, cooldowns) || StasisCare.cooldowns(tag).last("stasis_tripwire") != 1234L) {
+            throw new GameTestAssertException(Component.literal(
+                    "a cooldown stamp does not survive a round trip through a stored horse's tag -"
+                            + " the drop buffer would produce on every single turn, forever"), 0);
+        }
+
+        com.example.horsegenetics.common.repro.Reproduction bred =
+                StasisCare.repro(tag, snapshot.horseId()).withNaturalTry(4321L);
+        if (!StasisCare.putRepro(tag, bred) || StasisCare.repro(tag, snapshot.horseId()).lastNaturalTry() != 4321L) {
+            throw new GameTestAssertException(Component.literal(
+                    "a mare's reproductive record does not survive a round trip through a stored"
+                            + " horse's tag - a bank would cover her again every turn of her heat."
+                            + " Check the HORSE_REPRO attachment id and ReproCodecs in StasisCare."), 0);
+        }
+
+        // ...and the half no amount of tag-reading proves: that the game itself
+        // reads it back. This is the call the bank makes when a mare is due.
+        net.minecraft.world.entity.animal.equine.Horse released =
+                com.example.horsegenetics.neoforge.server.HorseStasisHandler.release(
+                        helper.getLevel(), helper.absoluteVec(net.minecraft.world.phys.Vec3.ZERO), 0.0F,
+                        new com.example.horsegenetics.neoforge.data.StasisSnapshot(
+                                snapshot.horseName(), snapshot.horseId(), tag));
+        if (released == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse written back by StasisCare would not load - the bank cannot release a"
+                            + " mare to foal, and she would sit in her chamber past her due date"), 0);
+        }
+        long readBack = com.example.horsegenetics.neoforge.server.ReproHandler.of(released).lastNaturalTry();
+        released.discard();
+        if (readBack != 4321L) {
+            throw new GameTestAssertException(Component.literal(
+                    "a mare released from a chamber has lost the breeding the bank wrote onto her:"
+                            + " expected lastNaturalTry 4321 and the live horse says " + readBack
+                            + ". A bank-bred pregnancy would vanish the moment she came out."), 0);
+        }
     }
 
     /** The health in the chamber's snapshot, for the assertion above. */

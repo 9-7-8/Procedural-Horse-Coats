@@ -73,6 +73,13 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     private EditBox filterBox;
     private int scroll;
 
+    /**
+     * What the last click on a row had to say - "a Basic chamber cannot be put
+     * to stud" and the like. Cleared by the next thing the player does, because
+     * a refusal that stays up outlives the question that caused it.
+     */
+    private String note = "";
+
     /** Every horse in the bank, and the subset the filter leaves showing. */
     private List<StasisBrowseRow> rows = List.of();
     private List<StasisBrowseRow> shown = List.of();
@@ -129,6 +136,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
                 tab = hit;
                 lastTab = hit;
                 scroll = 0;
+                note = "";
                 applyTab();
                 if (hit == HorseStasisBankMenu.Tab.BROWSE) {
                     requestRoster();
@@ -136,7 +144,36 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             }
             return true;
         }
+        if (tab == HorseStasisBankMenu.Tab.BROWSE) {
+            int row = rowAt(event.x(), event.y());
+            if (row >= 0) {
+                toggleStud(shown.get(row));
+                return true;
+            }
+        }
         return super.mouseClicked(event, doubleClick);
+    }
+
+    /**
+     * <b>A click on a row turns that horse out at stud, or brings it back in.</b>
+     *
+     * <p>The server is the one that decides - it re-checks the tier and the horse
+     * on the other end of {@code clickMenuButton} - so this only refuses the
+     * cases it can see, and says which, rather than sending a click it knows will
+     * be dropped. A row that does nothing and explains nothing is the failure
+     * this whole tab was written to avoid.
+     */
+    private void toggleStud(StasisBrowseRow row) {
+        if (!row.mayStud()) {
+            note = row.tier() == null
+                    ? "That chamber cannot be put to stud."
+                    : "A " + row.tier().id() + " chamber cannot be put to stud - a spacer can.";
+            return;
+        }
+        note = "";
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, row.slot());
+        }
     }
 
     @Override
@@ -223,8 +260,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         if (contents != builtFrom || version != builtVersion) {
             List<StasisBrowseRow> built = new ArrayList<>();
             for (HorseStasisBankMenu.Stored stored : this.menu.stored()) {
-                built.add(new StasisBrowseRow(stored.snapshot().horseName(), stored.tier(),
-                        ClientHorseRoster.byId(stored.snapshot().horseId())));
+                built.add(new StasisBrowseRow(stored.slot(), stored.snapshot().horseName(), stored.tier(),
+                        ClientHorseRoster.byId(stored.snapshot().horseId()), stored.atStud()));
             }
             rows = List.copyOf(built);
         }
@@ -244,6 +281,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         for (HorseStasisBankMenu.Stored stored : this.menu.stored()) {
             hash = hash * 31 + stored.snapshot().horseId().hashCode();
             hash = hash * 31 + stored.tier().ordinal();
+            hash = hash * 31 + stored.slot();
+            hash = hash * 31 + (stored.atStud() ? 1 : 0);
         }
         return hash;
     }
@@ -331,18 +370,43 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
                 0xFF3F3F3F);
 
         String[] captions = {"Feed", "Water", "Empties"};
-        for (int i = 0; i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
-            int sx = leftPos + HorseStasisBankMenu.SUPPLY_X + i * HorseStasisBankMenu.SUPPLY_GAP;
-            VanillaPanel.slot(g, sx, topPos + HorseStasisBankMenu.SUPPLY_Y);
+        for (int i = 0; i < HorseStasisBankBlockEntity.FIRST_DROP_SLOT; i++) {
+            int sx = leftPos + HorseStasisBankMenu.supplyX(i);
+            VanillaPanel.slot(g, sx, topPos + HorseStasisBankMenu.supplyY(i));
             int w = this.font.width(captions[i]);
             g.text(this.font, Component.literal(captions[i]), sx + 8 - w / 2,
                     topPos + HorseStasisBankMenu.SUPPLY_Y + 20, 0xFF4A4A4A, false);
         }
 
-        drawFitted(g, waterLine(), l + 1, topPos + HorseStasisBankMenu.SUPPLY_Y + 36,
+        drawFitted(g, waterLine(), l + 1, topPos + HorseStasisBankMenu.SUPPLY_Y + 34,
                 HorseStasisBankMenu.LIST_W, 0xFF202020);
-        drawFitted(g, supplyLine(), l + 1, topPos + HorseStasisBankMenu.SUPPLY_Y + 36 + LINE_H,
+        drawFitted(g, supplyLine(), l + 1, topPos + HorseStasisBankMenu.SUPPLY_Y + 34 + LINE_H,
                 HorseStasisBankMenu.LIST_W, 0xFF3F3F3F);
+
+        // The drop buffer, on the chamber grid's own pitch so the two rows of
+        // the window line up. Captioned with what is in it rather than what it
+        // is for: an empty buffer under a bank of Basic chambers is not broken,
+        // and dropsLine() is what says so.
+        int caption = topPos + HorseStasisBankMenu.DROPS_Y - LINE_H;
+        drawFitted(g, dropsLine(), l + 1, caption, HorseStasisBankMenu.LIST_W - 26, 0xFF3F3F3F);
+        drawRight(g, this.menu.dropsHeld() + "/" + HorseStasisBankBlockEntity.DROP_SLOTS,
+                l + HorseStasisBankMenu.LIST_W - 1, caption, 0xFF4A4A4A);
+        for (int i = HorseStasisBankBlockEntity.FIRST_DROP_SLOT;
+                i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
+            VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.supplyX(i),
+                    topPos + HorseStasisBankMenu.supplyY(i));
+        }
+    }
+
+    /** What the drop buffer is doing, in the order a player would fix it. */
+    private String dropsLine() {
+        if (this.menu.dropsHeld() >= HorseStasisBankBlockEntity.DROP_SLOTS) {
+            return "Collected - full, so nothing more is made.";
+        }
+        if (!this.menu.anyCollecting()) {
+            return "Collected - an advanced chamber fills this.";
+        }
+        return "Collected from the horses filed here.";
     }
 
     /**
@@ -359,6 +423,12 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     /** Why nothing is happening, or what is - in the order a player would fix it. */
     private String supplyLine() {
+        // A mare who cannot be put down is the loudest of these: it is the one
+        // thing here that is about the room rather than about the slots, and it
+        // is the one a player would never work out from looking at the bank.
+        if (this.menu.foalingBlocked()) {
+            return "A mare is due - clear a space beside the bank.";
+        }
         if (this.menu.occupied() == 0) {
             return "No horses filed here to look after.";
         }
@@ -407,20 +477,27 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
                 g.fill(l, ry, l + w, ry + HorseStasisBankMenu.ROW_H, VanillaPanel.HOVER);
             }
             StasisBrowseRow row = shown.get(i);
-            int rightW = drawRight(g, capitalise(row.tier().id()), l + w - 4, ry + 3, 0xFF4A4A4A);
+            // A row at stud is necessarily a Spacer, so saying so costs no
+            // information: the one word the corner had is implied by the one it
+            // has instead.
+            boolean stud = row.atStud() && row.mayStud();
+            int rightW = drawRight(g, stud ? "at stud" : capitalise(row.tier().id()),
+                    l + w - 4, ry + 3, stud ? 0xFF2F5F2F : 0xFF4A4A4A);
             drawFitted(g, row.displayName(), l + 3, ry + 3, w - 10 - rightW, 0xFF202020);
             rightW = drawRight(g, row.origin(), l + w - 4, ry + 3 + LINE_H, 0xFF4A4A4A);
             drawFitted(g, row.detail(), l + 3, ry + 3 + LINE_H, w - 10 - rightW, 0xFF3F3F3F);
         }
 
-        // The rows a query cannot reach, in the first empty row rather than in a
-        // line of its own - a horse dropping out of the list unexplained is the
-        // thing this tab must not do.
+        // One spare row's worth of explanation, in the first empty row rather
+        // than in a line of its own - a horse dropping out of the list
+        // unexplained is the thing this tab must not do, and a click that
+        // appears to do nothing is the second.
         int drawn = Math.min(shown.size() - scroll, HorseStasisBankMenu.LIST_ROWS);
-        if (drawn < HorseStasisBankMenu.LIST_ROWS && StasisBrowseRow.locked(rows) > 0
-                && !builtQuery.trim().isEmpty()) {
-            drawFitted(g, lockedLine(), l + 3, t + drawn * HorseStasisBankMenu.ROW_H + 3,
-                    w - 6, 0xFF4A4A4A);
+        if (drawn < HorseStasisBankMenu.LIST_ROWS) {
+            String spare = spareLine();
+            if (!spare.isEmpty()) {
+                drawFitted(g, spare, l + 3, t + drawn * HorseStasisBankMenu.ROW_H + 3, w - 6, 0xFF4A4A4A);
+            }
         }
 
         if (maxScroll() > 0) {
@@ -430,6 +507,48 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             g.fill(x1, t, x1 + 3, t + h, VanillaPanel.SHADOW);
             g.fill(x1, thumbY, x1 + 3, thumbY + thumbH, VanillaPanel.FACE);
         }
+    }
+
+    /**
+     * <b>The one line the list has room for</b>, and what wins it: the last
+     * refusal, then the rows a query could not reach, then what putting a horse
+     * to stud is for.
+     *
+     * <p>The order is the order of what the player just did. A refusal answers a
+     * click they made a second ago; the locked count answers a query they typed;
+     * the stud line answers neither and is there to be read when nothing else is
+     * going on, which is exactly when a player discovers that these rows are
+     * clickable at all.
+     */
+    private String spareLine() {
+        if (!note.isEmpty()) {
+            return note;
+        }
+        if (StasisBrowseRow.locked(rows) > 0 && !builtQuery.trim().isEmpty()) {
+            return lockedLine();
+        }
+        return studLine();
+    }
+
+    /** What the bank's own paddock is doing, or how to start one. */
+    private String studLine() {
+        int stud = StasisBrowseRow.atStud(rows);
+        if (stud == 0) {
+            return anySpacer() ? "Click a spacer row to put that horse to stud." : "";
+        }
+        if (stud == 1) {
+            return "1 at stud - a mare and a stallion both, to breed.";
+        }
+        return stud + " at stud - covered once a heat, as in a field.";
+    }
+
+    private boolean anySpacer() {
+        for (StasisBrowseRow row : rows) {
+            if (row.mayStud()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Why the list is shorter than the bank: the rows no query can reach. */

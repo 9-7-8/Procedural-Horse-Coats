@@ -14,20 +14,28 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
  * shelving of a live animal is not a thing anybody asked for, and the cheapest
  * way not to have it is not to expose the grid.
  *
- * <p>The <b>supply slots</b> are the opposite case (owner, 2026-09-24). Feed and
- * water are bulk goods that run out, and keeping a stud farm's bank topped up by
- * hand is exactly the chore automation exists for - so this registers an item
- * handler over {@link HorseStasisBankBlockEntity#supplies()} and nothing else.
- * A hopper, a dropper or another mod's pipework can push hay and water buckets
- * in and pull the empty buckets out; none of it can see a chamber, because the
- * chamber grid is not part of the handler at all.
+ * <p>The <b>goods container</b> is the opposite case (owner, 2026-09-24). Feed
+ * and water are bulk goods that run out, and keeping a stud farm's bank topped
+ * up by hand is exactly the chore automation exists for - so this registers an
+ * item handler over {@link HorseStasisBankBlockEntity#supplies()} and nothing
+ * else. A hopper, a dropper or another mod's pipework can push hay and water
+ * buckets in, pull the empty buckets out, and empty the drop buffer; none of it
+ * can see a chamber, because the chamber grid is not part of the handler at all.
+ *
+ * <p>That the buffer comes with it for free is why the drop slots live in the
+ * <i>same</i> container as the supply row rather than beside it. A second
+ * container would have needed a second capability registration, a way to join
+ * the two, and a second copy of the slot rules; nine more slots on the one
+ * container needed none of that, and a hopper under the bank now works without
+ * this file changing at all.
  *
  * <h2>What the slots refuse is enforced once</h2>
  * NeoForge's {@link VanillaContainerWrapper} asks
  * {@code Container.canPlaceItem} before it inserts, so the per-slot rules the
  * block entity already writes for the menu are the same rules a pipe obeys -
  * feed in the feed slot, water in the water slot, and nothing at all into the
- * empties, which is an output. There is no second copy of that list to drift.
+ * empties or the buffer, which are outputs. There is no second copy of that
+ * list to drift.
  *
  * <h2>API note - 26.1.2 has no {@code IItemHandler}</h2>
  * <b>Not verified in a running game.</b> Written against the 26.1.2 sources: the

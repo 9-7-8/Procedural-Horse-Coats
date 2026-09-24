@@ -45,12 +45,12 @@ class StasisBrowseTest {
     /** A bank: a mare and a stallion in Intermediates, a mare in a Basic. */
     private static List<StasisBrowseRow> bank() {
         List<StasisBrowseRow> rows = new ArrayList<>();
-        rows.add(new StasisBrowseRow("Amber Testcase", StasisTier.INTERMEDIATE,
-                listing("Amber", "Arabian", chestnutMare(), 3)));
-        rows.add(new StasisBrowseRow("Boyd Testcase", StasisTier.SPACER,
-                listing("Boyd", "Shire", bayStallion(), 1)));
-        rows.add(new StasisBrowseRow("Cinder Testcase", StasisTier.BASIC,
-                listing("Cinder", "Arabian", chestnutMare(), 2)));
+        rows.add(new StasisBrowseRow(0, "Amber Testcase", StasisTier.INTERMEDIATE,
+                listing("Amber", "Arabian", chestnutMare(), 3), false));
+        rows.add(new StasisBrowseRow(1, "Boyd Testcase", StasisTier.SPACER,
+                listing("Boyd", "Shire", bayStallion(), 1), true));
+        rows.add(new StasisBrowseRow(2, "Cinder Testcase", StasisTier.BASIC,
+                listing("Cinder", "Arabian", chestnutMare(), 2), false));
         return rows;
     }
 
@@ -87,7 +87,7 @@ class StasisBrowseTest {
     @Test
     void aHorseWithNoPapersIsNeverSearchedEither() {
         List<StasisBrowseRow> rows = new ArrayList<>(bank());
-        rows.add(new StasisBrowseRow("Stranger", StasisTier.SPACER, null));
+        rows.add(new StasisBrowseRow(3, "Stranger", StasisTier.SPACER, null, false));
         assertEquals(4, StasisBrowseRow.filter(rows, "").size());
         assertFalse(names(StasisBrowseRow.filter(rows, "stranger")).contains("Stranger"));
         assertEquals(2, StasisBrowseRow.locked(rows));
@@ -97,8 +97,8 @@ class StasisBrowseTest {
     void theRowsAQueryCannotReachAreCounted() {
         assertEquals(1, StasisBrowseRow.locked(bank()));
         assertEquals(0, StasisBrowseRow.locked(List.of(
-                new StasisBrowseRow("Boyd Testcase", StasisTier.SPACER,
-                        listing("Boyd", "Shire", bayStallion(), 1)))));
+                new StasisBrowseRow(1, "Boyd Testcase", StasisTier.SPACER,
+                        listing("Boyd", "Shire", bayStallion(), 1), false))));
     }
 
     @Test
@@ -112,11 +112,31 @@ class StasisBrowseTest {
         assertFalse(basic.searchable());
         assertTrue(basic.detail().contains("basic"));
 
-        StasisBrowseRow stranger = new StasisBrowseRow("Stranger", StasisTier.SPACER, null);
+        StasisBrowseRow stranger = new StasisBrowseRow(3, "Stranger", StasisTier.SPACER, null, false);
         assertFalse(stranger.searchable());
         assertEquals("Stranger", stranger.displayName());
         assertTrue(stranger.detail().contains("No stable record"));
         assertEquals("", stranger.origin());
+    }
+
+    /**
+     * <b>Only the top rung may be put to stud</b>, and a mark on anything else
+     * does not count. The mark rides on the chamber item, so a player who
+     * marked a Spacer, downgraded nothing and swapped the horse into an
+     * Intermediate must not find the bank still breeding it.
+     */
+    @Test
+    void onlyASpacerCountsAsAtStud() {
+        List<StasisBrowseRow> rows = bank();
+        assertTrue(rows.get(1).mayStud());
+        assertFalse(rows.get(0).mayStud());
+        assertFalse(rows.get(2).mayStud());
+        assertEquals(1, StasisBrowseRow.atStud(rows));
+
+        // The same mark, on a tier that does not buy it: not at stud.
+        assertEquals(0, StasisBrowseRow.atStud(List.of(
+                new StasisBrowseRow(0, "Amber Testcase", StasisTier.INTERMEDIATE,
+                        listing("Amber", "Arabian", chestnutMare(), 3), true))));
     }
 
     /** A half-typed term filters to nothing rather than throwing into a render loop. */

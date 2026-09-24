@@ -2,8 +2,10 @@ package com.example.horsegenetics.neoforge.menu;
 
 import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.StasisSnapshot;
 import com.example.horsegenetics.neoforge.item.StasisChamberItem;
+import com.example.horsegenetics.neoforge.server.StasisStud;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -81,9 +83,15 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     public static final int LIST_H = LIST_ROWS * ROW_H;
 
     /** Supply tab: three slots in a row, with room above for a line of text. */
-    public static final int SUPPLY_Y = 40;
+    public static final int SUPPLY_Y = 32;
     public static final int SUPPLY_GAP = 32;
     public static final int SUPPLY_X = MARGIN + 16;
+
+    /**
+     * The drop buffer, under the supply row: a row of nine, on the chamber
+     * grid's own column pitch so the two read as the same window.
+     */
+    public static final int DROPS_Y = 96;
 
     public static final int INV_LABEL_Y = 128;
     public static final int INV_Y = 140;
@@ -143,7 +151,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
             addSlot(new ChamberSlot(chambers, i, MARGIN + (i % 9) * 18, GRID_Y + (i / 9) * 18));
         }
         for (int i = 0; i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
-            addSlot(new SupplySlot(supplies, i, SUPPLY_X + i * SUPPLY_GAP, SUPPLY_Y));
+            addSlot(new SupplySlot(supplies, i, supplyX(i), supplyY(i)));
         }
 
         for (int row = 0; row < 3; row++) {
@@ -184,6 +192,21 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         public boolean isActive() {
             return activeOnTab(Tab.CHAMBERS);
         }
+    }
+
+    /**
+     * Where the goods container's slot {@code i} sits - the supply row, then
+     * the drop buffer under it. <b>The screen reads these too</b>, so the sunken
+     * wells it draws cannot drift from the slots they are drawn behind.
+     */
+    public static int supplyX(int i) {
+        return i < HorseStasisBankBlockEntity.FIRST_DROP_SLOT
+                ? SUPPLY_X + i * SUPPLY_GAP
+                : MARGIN + (i - HorseStasisBankBlockEntity.FIRST_DROP_SLOT) * 18;
+    }
+
+    public static int supplyY(int i) {
+        return i < HorseStasisBankBlockEntity.FIRST_DROP_SLOT ? SUPPLY_Y : DROPS_Y;
     }
 
     /**
@@ -249,9 +272,35 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         return HorseStasisBankBlockEntity.anyHealable(chambers);
     }
 
+    /** Is there a horse in here whose drops the bank collects? */
+    public boolean anyCollecting() {
+        return HorseStasisBankBlockEntity.anyCollecting(chambers);
+    }
+
     /** What is in the feed slot, for the line that says whether it is enough. */
     public ItemStack feed() {
         return supplies.getItem(HorseStasisBankBlockEntity.FEED_SLOT);
+    }
+
+    /**
+     * <b>Is a mare waiting to foal with nowhere to stand?</b> The bank's second
+     * {@code ContainerData} value, and the second thing that genuinely has to be
+     * synced: it is a fact about the room round the block, which the client
+     * cannot read off a slot.
+     */
+    public boolean foalingBlocked() {
+        return data.get(HorseStasisBankBlockEntity.DATA_FOALING) != 0;
+    }
+
+    /** How many of the nine buffer slots have something in them. */
+    public int dropsHeld() {
+        int n = 0;
+        for (int i = 0; i < HorseStasisBankBlockEntity.DROP_SLOTS; i++) {
+            if (!supplies.getItem(HorseStasisBankBlockEntity.FIRST_DROP_SLOT + i).isEmpty()) {
+                n++;
+            }
+        }
+        return n;
     }
 
     // ------------------------------------------------------------------
@@ -265,7 +314,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
      * tab may say about that horse - {@link StasisTier#searchable()} and the two
      * flags above it, never a tier compared by name.
      */
-    public record Stored(StasisTier tier, StasisSnapshot snapshot) {
+    public record Stored(int slot, StasisTier tier, StasisSnapshot snapshot, boolean atStud) {
     }
 
     /**
@@ -285,7 +334,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
             if (stack.getItem() instanceof StasisChamberItem chamber) {
                 StasisSnapshot snapshot = StasisChamberItem.snapshotOf(stack);
                 if (snapshot != null) {
-                    out.add(new Stored(chamber.tier(), snapshot));
+                    out.add(new Stored(i, chamber.tier(), snapshot, StasisStud.atStud(stack)));
                 }
             }
         }
@@ -348,6 +397,45 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
             slot.setChanged();
         }
         return original;
+    }
+
+    /**
+     * <b>Turn a chamber out at stud, or bring it back in.</b> The button id is
+     * the chamber slot the player clicked on the Browse tab - nothing else needs
+     * to travel, because the mark itself lives on the item and syncs with the
+     * slot.
+     *
+     * <p>{@code clickMenuButton} rather than a payload of its own, which is the
+     * rule {@code BenchNamePayload}'s comment states from the other side: an
+     * int fits here and a string does not. The screen only offers the click on a
+     * row it can see, and the server checks the tier and the horse again anyway
+     * - a menu button is a packet, and a packet is whatever somebody sent.
+     */
+    @Override
+    public boolean clickMenuButton(Player who, int id) {
+        if (who.level().isClientSide()) {
+            return true;
+        }
+        if (id < 0 || id >= HorseStasisBankBlockEntity.SLOTS) {
+            return false;
+        }
+        ItemStack chamber = chambers.getItem(id);
+        StasisTier tier = HorseStasisBankBlockEntity.tierOf(chamber);
+        if (tier == null || !tier.breedsInBank() || StasisChamberItem.snapshotOf(chamber) == null) {
+            // An empty chamber, or a rung that did not buy this. Refused rather
+            // than marked: a mark that does nothing is worse than no mark.
+            return false;
+        }
+        if (StasisStud.atStud(chamber)) {
+            chamber.remove(ModDataComponents.STASIS_AT_STUD.get());
+        } else {
+            chamber.set(ModDataComponents.STASIS_AT_STUD.get(), Boolean.TRUE);
+        }
+        // Through the container, so the block's tick gate is recomputed: a bank
+        // whose only work is a pair at stud must start ticking when they are
+        // marked and stop when they are not.
+        chambers.setChanged();
+        return true;
     }
 
     /** Close if the bank is gone or the player walked off - 8 blocks, the shelf's reach. */

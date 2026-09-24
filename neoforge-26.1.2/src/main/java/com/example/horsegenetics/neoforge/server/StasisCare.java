@@ -6,10 +6,13 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.HorseDiet;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.StasisUpkeep;
+import com.example.horsegenetics.common.repro.Reproduction;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.compat.HayBales;
+import com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment;
 import com.example.horsegenetics.neoforge.data.HorseRecordCodecs;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.neoforge.data.ReproCodecs;
 import com.example.horsegenetics.neoforge.data.StasisSnapshot;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,6 +26,8 @@ import net.neoforged.neoforge.attachment.AttachmentHolder;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jspecify.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * <b>Reading and mending a horse without waking it up.</b>
@@ -63,6 +68,14 @@ import org.jspecify.annotations.Nullable;
  * of the tag on the turn it is used and written straight back; the bank caches
  * none of it. A chamber whose tag this cannot make sense of is left exactly as
  * it was - the same rule {@code release} follows when a horse will not load.
+ *
+ * <h2>It owns the field names; the other two own the jobs</h2>
+ * {@link StasisDrops} (the drop buffer) and {@link StasisStud} (in-bank
+ * breeding) both reach into a stored horse as well, and both do it through the
+ * readers and writers below rather than naming a key of their own. That is the
+ * point of this class and the reason it grew rather than splitting: <b>every
+ * string that has to match something Minecraft or NeoForge wrote is in this
+ * file</b>, where one gametest can walk the lot of them.
  */
 public final class StasisCare {
 
@@ -70,6 +83,17 @@ public final class StasisCare {
     }
 
     private static final String MAX_HEALTH_ID = Attributes.MAX_HEALTH.getRegisteredName();
+
+    /**
+     * Vanilla's age field on a saved {@code AgeableMob} - negative is a foal.
+     *
+     * <p><b>Unverified against the 26.1.2 sources and deliberately flagged.</b>
+     * There is no constant to import for it: {@code AgeableMob} writes the
+     * literal. A rename would not throw, it would quietly make every stored
+     * foal read as an adult, which is why {@code stasis_tag_is_readable} checks
+     * it against a real saved foal rather than trusting this comment.
+     */
+    private static final String AGE_KEY = "Age";
 
     // ------------------------------------------------------------------
     // One turn
@@ -233,6 +257,109 @@ public final class StasisCare {
         } catch (RuntimeException bad) {
             return HorseDiet.NORMAL;
         }
+    }
+
+    /** The health in a stored horse's tag, as the chamber holds it. */
+    public static float health(CompoundTag horse) {
+        return horse.getFloatOr(LivingEntity.TAG_HEALTH, 0.0F);
+    }
+
+    /**
+     * Is the horse in this tag still a foal? A shelved one does not grow up -
+     * it does not tick - so this is whatever it was on the day it went in.
+     */
+    public static boolean isBaby(CompoundTag horse) {
+        return horse.getIntOr(AGE_KEY, 0) < 0;
+    }
+
+    /** This horse's cooldown stamps, or an empty set for a tag that carries none. */
+    public static HorseCooldownsAttachment cooldowns(CompoundTag horse) {
+        CompoundTag stored = attachment(horse, ModAttachments.HORSE_COOLDOWNS.get());
+        if (stored == null) {
+            return HorseCooldownsAttachment.DEFAULT;
+        }
+        try {
+            return HorseCooldownsAttachment.CODEC.parse(NbtOps.INSTANCE, stored)
+                    .result().orElse(HorseCooldownsAttachment.DEFAULT);
+        } catch (RuntimeException bad) {
+            return HorseCooldownsAttachment.DEFAULT;
+        }
+    }
+
+    /**
+     * This mare's reproductive record - her cycle, what she is carrying, when
+     * she last foaled.
+     *
+     * <p>A horse that has never been bred carries no attachment and is
+     * <b>not</b> given one: {@link Reproduction#fresh} takes her cycle phase
+     * from her id, which is the same answer {@code ReproHandler.of} gives a live
+     * horse and for the same reason. Her heat is therefore in exactly the phase
+     * it would have been in had she spent the week in a field, because every
+     * time in that record is an absolute game tick and the state is derived from
+     * them rather than ticked into being.
+     */
+    public static Reproduction repro(CompoundTag horse, UUID id) {
+        CompoundTag stored = attachment(horse, ModAttachments.HORSE_REPRO.get());
+        if (stored == null) {
+            return Reproduction.fresh(id);
+        }
+        try {
+            return ReproCodecs.MAP_CODEC.codec().parse(NbtOps.INSTANCE, stored)
+                    .result().orElseGet(() -> Reproduction.fresh(id));
+        } catch (RuntimeException bad) {
+            return Reproduction.fresh(id);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Writing back
+    // ------------------------------------------------------------------
+
+    /** Stamp a cooldown onto a stored horse. {@code false} if it could not be written. */
+    public static boolean putCooldowns(CompoundTag horse, HorseCooldownsAttachment value) {
+        return putAttachment(horse, ModAttachments.HORSE_COOLDOWNS.get(),
+                HorseCooldownsAttachment.CODEC, value);
+    }
+
+    /** Write a mare's reproductive record back. {@code false} if it could not be written. */
+    public static boolean putRepro(CompoundTag horse, Reproduction value) {
+        return putAttachment(horse, ModAttachments.HORSE_REPRO.get(),
+                ReproCodecs.MAP_CODEC.codec(), value);
+    }
+
+    /**
+     * <b>Put an attachment into a stored horse's tag, making room for it if it
+     * has none.</b>
+     *
+     * <p>Deliberately unlike {@link #putHunger}, which refuses to invent one.
+     * Hunger's absence means the horse was never charged for its healing, so
+     * writing one would be healing it for free; a missing cooldown or
+     * reproductive record means only that nothing has happened to this horse
+     * yet, and the bank is about to be the thing that happens. The attachments
+     * compound itself is created if the tag has none - a horse saved before it
+     * ever carried one.
+     */
+    private static <T> boolean putAttachment(CompoundTag horse, AttachmentType<?> type,
+                                             com.mojang.serialization.Codec<T> codec, T value) {
+        String key = idOf(type);
+        if (key == null) {
+            return false;
+        }
+        Tag encoded = codec.encodeStart(NbtOps.INSTANCE, value).result().orElse(null);
+        if (!(encoded instanceof CompoundTag written)) {
+            HorseGenetics.LOGGER.warn("[stasis] {} would not encode for a stored horse", key);
+            return false;
+        }
+        Tag existing = horse.get(AttachmentHolder.ATTACHMENTS_NBT_KEY);
+        CompoundTag all;
+        if (existing instanceof CompoundTag present) {
+            all = present;
+        } else {
+            all = new CompoundTag();
+            horse.put(AttachmentHolder.ATTACHMENTS_NBT_KEY, all);
+        }
+        all.put(key, written);
+        return true;
     }
 
     // ------------------------------------------------------------------

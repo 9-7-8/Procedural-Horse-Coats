@@ -240,6 +240,29 @@ public final class ModDataComponents {
                     .networkSynchronized(StasisSnapshot.STREAM_CODEC)
                     .build());
 
+    /**
+     * <b>This chamber is turned out into the Horse Stasis Bank's paddock.</b>
+     * Present and true, the bank may breed the horse inside it against another
+     * marked chamber; absent, it may not.
+     *
+     * <p><b>On the item rather than on the block</b>, which is the same call
+     * {@link #STASIS_SNAPSHOT} makes and for the same three reasons: it syncs to
+     * the client for free with the ordinary slot sync, so the Browse tab can
+     * draw the mark without a packet of its own; it survives being taken out of
+     * one bank and put into another, which is what a player moving a breeding
+     * pair expects; and there is no second copy on a block entity to drift out
+     * of step with the chamber it describes.
+     *
+     * <p>The mark alone is not permission - {@code StasisStud.atStud} asks the
+     * chamber's tier as well, because an upgrade recipe copies components and a
+     * mark can therefore outlive the rung that bought it.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> STASIS_AT_STUD =
+            TYPES.register("stasis_at_stud", () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

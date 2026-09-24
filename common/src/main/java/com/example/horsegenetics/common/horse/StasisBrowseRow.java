@@ -30,11 +30,21 @@ import java.util.UUID;
  * short. That row keeps its name and says it has no papers rather than
  * pretending the chamber is empty.
  *
+ * <h2>The row is also where a horse is put to stud</h2>
+ * {@link #atStud} is the chamber's own {@code stasis_at_stud} component, not
+ * anything the bank remembers: the mark rides on the item the way the horse
+ * does, so it survives being taken out and put back, needs no syncing of its
+ * own, and cannot drift from the chamber it describes. {@link #slot} is which
+ * chamber slot the row came from, which is the whole of what a click on it has
+ * to tell the server. Only a tier that {@link StasisTier#breedsInBank()} may be
+ * marked - {@link #mayStud()} - and the screen says so rather than ignoring the
+ * click.
+ *
  * <p>Pure Java, and the reason the Browse tab has almost no logic of its own:
  * the gating and the filtering are testable without a game, which is where
  * {@code StasisBrowseTest} works.
  */
-public record StasisBrowseRow(String name, StasisTier tier, HorseListing listing) {
+public record StasisBrowseRow(int slot, String name, StasisTier tier, HorseListing listing, boolean atStud) {
 
     public StasisBrowseRow {
         name = name == null ? "" : name;
@@ -43,6 +53,22 @@ public record StasisBrowseRow(String name, StasisTier tier, HorseListing listing
     /** May a query reach this row? Both halves are needed: a tier and a record. */
     public boolean searchable() {
         return tier != null && tier.searchable() && listing != null;
+    }
+
+    /** May this chamber be put to stud at all? The top rung, and only the top rung. */
+    public boolean mayStud() {
+        return tier != null && tier.breedsInBank();
+    }
+
+    /** How many of {@code rows} are turned out into the bank's paddock. */
+    public static int atStud(List<StasisBrowseRow> rows) {
+        int n = 0;
+        for (StasisBrowseRow row : rows) {
+            if (row.atStud() && row.mayStud()) {
+                n++;
+            }
+        }
+        return n;
     }
 
     /** The horse's written name - the stable's spelling if there is one, else the chamber's. */
