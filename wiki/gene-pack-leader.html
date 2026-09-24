@@ -54,10 +54,17 @@
 <h2 id="alleles">One allele per mob</h2>
 
 <p>
-    The list is exactly <a href="gene-lycan.html">lycan</a>'s: every vanilla mob
-    in a non-hostile spawn category, minus the horse family. That is a
-    mechanical rule rather than a taste, which is why it contains a pufferfish
-    and a wandering trader without anyone having to defend either.
+    Every vanilla mob in a non-hostile spawn category, minus the horse family
+    &mdash; the shared roster's peaceful half, whole. That is a mechanical rule
+    rather than a taste, which is why it contains a pufferfish and a wandering
+    trader without anyone having to defend either.
+</p>
+
+<p>
+    It is <em>wider</em> than <a href="gene-lycan.html#ground-only">lycan</a>'s, which
+    is the same list with everything that swims or flies taken out. The difference is
+    which way round the horse and the animal stand: a squid that follows a horse about
+    is a fine thing to breed for, and a horse shut <em>inside</em> a squid drowns.
 </p>
 
 <h2 id="find">What you can catch</h2>
@@ -104,7 +111,7 @@
 <div class="note good">
     <span class="label">The allele set is free</span>
     <p>
-        <a href="gene-lycan.html">Lycan</a> already derives this exact list from spawn categories, with mob ids as plain strings resolved against the live registry. Reuse the derivation rather than writing a second list that will drift from it.
+        <code>MobRoster</code> already holds this list &mdash; token, mob id, label and habitat per entry, with the ids as plain strings resolved against the live registry. Read the roster rather than writing a second list that will drift from it. This locus takes <code>peaceful()</code> whole; <a href="gene-lycan.html">lycan</a> takes only <code>ground()</code>.
     </p>
 </div>
 

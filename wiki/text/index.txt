@@ -1328,7 +1328,8 @@ wiki/gene-lut.html#verified	coding	Verified
 wiki/gene-lycan.html#carrot	gameplay	Its gene carrot
 wiki/gene-lycan.html#clock	gameplay	Dusk, dawn, and dimensions with no night
 wiki/gene-lycan.html#cloud	coding	The cloud colour
-wiki/gene-lycan.html#forms	gameplay	The thirty-seven shapes
+wiki/gene-lycan.html#forms	gameplay	The shapes
+wiki/gene-lycan.html#ground-only	gameplay	Nothing that swims, nothing that flies, nothing hostile
 wiki/gene-lycan.html#identity	gameplay	Identity survives the night
 wiki/gene-lycan.html#inheritance	gameplay	Crossing two of them
 wiki/gene-lycan.html#night	gameplay	What a shifted animal does that an ordinary one does not
@@ -1336,8 +1337,7 @@ wiki/gene-lycan.html#rule	gameplay	Two copies of the same allele, or nothing
 wiki/gene-lycan.html#split	coding	What lives where
 wiki/gene-lycan.html#swap	science	Why it swaps the entity instead of drawing a skin
 wiki/gene-lycan.html#verified	coding	Verified
-wiki/gene-lycan.html#verified-flying-revert	gameplay	A flying form comes back without falling
-wiki/gene-lycan.html#water-forms	coding	A water form on land dies, on purpose
+wiki/gene-lycan.html#water-forms	coding	The locus is ground-dwellers only (2026-09-24)
 wiki/gene-lycan.html#wild	gameplay	Finding one
 wiki/gene-maelstrom.html#about	coding	Why it is built this way
 wiki/gene-maelstrom.html#carrot	gameplay	Its gene carrot

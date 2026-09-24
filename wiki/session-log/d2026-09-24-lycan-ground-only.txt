@@ -1,0 +1,89 @@
+2026-09-24 — lycan keeps only the animals a horse can be found in again
+
+    One intake bullet, the next one in the "Magical loci and modded content" group: "LYCAN's mob
+    list currently includes aquatic mobs (water creature/water ambient/axolotl/underground water
+    creature) and other categories that read as flying or hostile. Remove aquatic mobs, hostile
+    mobs, and flying mobs from LycanGene's allele set and blacklist those categories/ids so they
+    can't come back in."
+
+    Step 1 of the intake routine first: the session log and the verification index were searched
+    for the bullet's keywords, and the bullet is newer than everything they hold. The mob list was
+    exactly as described — thirty-seven hand-written form(...) calls, alphabetical, with a
+    pufferfish and a happy ghast on it.
+
+Why the rule is different for this locus than for the other two
+
+    Three genes have an allele per creature. Pack leader makes the mob follow the horse and the
+    spawner makes the horse produce them — in both, the animal turns up beside the horse, and a
+    squid or a bee is a perfectly good thing to breed for. Lycan replaces the horse. That is the
+    whole difference, and it is why the same roster cannot serve all three unfiltered: a were-cod
+    is a horse drowning in air on a hillside, and a were-bat is over the treeline two seconds
+    after dusk with somebody's mare inside it. Both were observed, not imagined — the 2026-09-14
+    log has two pufferfish forms drowning on land, and the 2026-09-15 investigation found three
+    horses that fell out of the world as bats and a parrot.
+
+    Fifteen shapes went: axolotl, cod, dolphin, glow squid, nautilus, pufferfish, salmon, squid,
+    tadpole and tropical fish for swimming; allay, bat, bee, parrot and happy ghast for flying.
+    Nothing hostile was ever on the locus. Frog, turtle and strider stayed — all three walk, and
+    none of them suffocates on land.
+
+The blacklist is a tag on the roster, not a list in the gene
+
+    MobRoster.Entry gained a Habitat (GROUND / WATER / AIR) and LycanGene now derives its forms
+    from MobRoster.ground(), which is the migration MobRoster's own javadoc had been putting off
+    since the class was written: "Lycan has not been migrated ... its allele order is baked into
+    the genotype code and into two checked-in goldens - moving it is a real change with a real
+    diff, not a tidy-up." The allele set was moving anyway, so the real diff was already being
+    paid for. The two copies of the list that were warned about can no longer drift, and a mob
+    added to the roster as WATER or AIR is kept off the locus by existing rather than by anyone
+    remembering the rule. The article ("a wolf", "an ocelot") is read off the label's first letter
+    now instead of being a hand-written column, since the roster does not carry one.
+
+    The second enforcement is LycanthropyHandler.isWearable, and it is the one that will still
+    hold when the roster is derived from the live registry (the next bullet in the same group). At
+    dusk the resolved entity type is asked whether it swims (the four water spawn categories),
+    flies (AMBIENT, FlyingAnimal, a FlyingPathNavigation or a FlyingMoveControl) or is hostile
+    (Enemy or MONSTER, through MobGroups.isHostile, the same broad test the aura genes use), and a
+    body that fails refuses the shift and logs once. AMBIENT is in the flying list because
+    vanilla's bat flies without a flying navigation or the interface to show for it — flagged in
+    the comment as unverified in game, and the safe direction to be wrong in.
+
+    That supersedes a settled call, which is worth saying out loud: on 2026-09-13 the owner
+    overruled a guard that refused an aquatic shift on land — "It should absolutely still shift
+    and then just die." The guard is back, and it is not a reversal of that reasoning: the fish
+    alleles no longer exist, so what it now catches is only a body that reached the locus by
+    mistake.
+
+What it cost elsewhere
+
+    Two goldens were the whole risk and only one moved: coat-bake-golden.txt lost exactly the
+    fifteen rows, and the pipeline golden did not move at all, because the locus paints nothing
+    and stays out of the texture key. Genotype codes are a different length at that locus, which
+    is a save-breaking change the mod's own rules permit and which nothing was written to
+    soften.
+
+    The test yard lost LYCAN BAT. It had been put in the LYCAN ROUND TRIP pen on 2026-09-18 as the
+    yard's only flying shifter, to exercise the dawn branch that has to put a horse back on the
+    ground from the air — and that branch can no longer be reached by breeding at all. Open check
+    243 closed with it: the set-down guard stays, because a walking animal still finds ledges,
+    boats and a floor mined out from under it overnight, but the flying cause of it is gone. The
+    record moved onto the gene's Coding tab, keeping the #gap-243 anchor the old known-gaps index
+    still points at.
+
+    Pack leader's page said its allele set "is exactly lycan's"; it is not any more, and now says
+    which way it is wider and why. The tester script's were-cod step is gone. A new Verification
+    entry says what has never been played: no shifter has been caught in the wild since the
+    change, the runtime refusal has no way to fire in a vanilla game, and nobody has checked what
+    a horse carrying one of the fifteen deleted alleles does when its world is loaded.
+
+    Re-baked: the six gene tasks, bake-gene-timeline (no change), the designer wasm (common
+    changed, so it is a real rebuild rather than a data-only one), the verification and roadmap
+    indexes, the search index, agent text and check-links. :neoforge-26.1.2:build green,
+    check-parity green, LycanGeneTest and both goldens green. sync-page-views found nothing.
+
+What is left in the same intake group
+
+    The runtime-registry rebuild of the list (lycan first, then EggLayerGene and
+    MagicItemDropGene) is untouched and is the next bullet. The habitat tag added here is the
+    thing that derivation will have to reproduce from MobCategory and navigation, and the
+    id-to-allele-index stability question the bullet raises is still open.

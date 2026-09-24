@@ -23,8 +23,8 @@
     A horse with two matching copies <strong>stops being a horse at nightfall</strong>.
     Not a horse wearing a wolf: a real wolf, which breeds with wolves, is tamed with
     bones, and is a horse again at dawn with the same name and the same pedigree.
-    Thirty-seven shapes share the locus, and every one of them is recessive to the
-    wild type <em>and</em> to each other.
+    Every peaceful land animal in the game is a shape on this locus, and every one
+    of them is recessive to the wild type <em>and</em> to each other.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -46,8 +46,8 @@
 
 <p>
     That is what makes a locus this wide worth breeding rather than a slot machine. If
-    any one of thirty-seven alleles showed, a shifter would be common and which animal
-    you got would be luck. Requiring the <em>same</em> allele twice makes it a search
+    any one of its many alleles showed, a shifter would be common and which animal you
+    got would be luck. Requiring the <em>same</em> allele twice makes it a search
     with a target: two wild shifters caught in different biomes are probably different
     animals, and their foals are horses. The disappointment is the game.
 </p>
@@ -68,26 +68,34 @@
     two different lines at once.
 </p>
 
-<h2 id="verified-flying-revert">A flying form comes back without falling</h2>
+<h2 id="ground-only">Nothing that swims, nothing that flies, nothing hostile</h2>
+
+<div class="note rule">
+    <span class="label">The rule, since 2026-09-24</span>
+    <p>
+        A shape is only on this locus if it is a <strong>peaceful animal that walks on
+        land</strong>. The fish, the squids, the axolotl, the bat, the bee, the parrot,
+        the allay and the happy ghast were all shapes once, and are not any more.
+    </p>
+</div>
 
 <p>
-    <strong>Verified 2026-09-18, unattended.</strong> For as long as the test yard has had
-    lycans, every shifter in it was a wolf or a cow &mdash; so the branch that has to put a horse
-    back on the ground <em>from the air</em> had never run once, and the entry asking about it
-    could only say that nothing had died. A bat now stands in the LYCAN ROUND TRIP pen, and
-    across one dusk and dawn it was the only one of six shifters that needed the branch at all:
+    The other two per-mob loci &mdash; <a href="gene-pack-leader.html">leader of the
+    pack</a> and <a href="gene-spawner.html">the spawner</a> &mdash; are happy to name a
+    squid or a bee, because there the animal turns up <em>beside</em> the horse. This
+    one <strong>replaces</strong> the horse, and a body is not a costume. A were-cod
+    left a horse drowning in air on a hillside; a were-bat was over the treeline two
+    seconds after dusk with somebody's mare inside it. Each of the three is the same
+    complaint in the end: the owner cannot get their horse back.
 </p>
 
-<pre><code>"LYCAN BAT" came back from a minecraft:bat inside blocks - moved -1, 0, 1 to 17, 129, 456
-"LYCAN BAT" back from a minecraft:bat at dawn | ... | round trip SAME</code></pre>
-
 <p>
-    So the revert detects an unsafe position and displaces the horse to a free one, and the
-    identity round trip is unaffected by it. Nothing died of <code>outOfWorld</code>; the single
-    death that night was LYCAN DOOMED's wolf, which is that pen's whole purpose. What is
-    <em>still</em> unexercised is the case the code calls <code>set down at</code> &mdash;
-    reverting over genuinely open air rather than inside a pen's blocks. The bat never leaves a
-    floored pen, so seeding one over the corridor is what would reach it.
+    It is enforced twice. The allele set is the roster's ground-dwelling half, so the
+    alleles do not exist to be bred; and the shift itself asks the animal the game hands
+    it &mdash; its spawn category, its navigation, whether it is marked hostile &mdash;
+    and refuses a body that swims, flies or hunts. The second check is the one that will
+    still hold when the roster is built from the live registry and starts naming mobs
+    from other people's mods.
 </p>
 
 <h2 id="identity">Identity survives the night</h2>
@@ -146,28 +154,28 @@
     The grudge is one goal rather than the usual melee-plus-target pair, because
     <strong>the forms have no attack</strong>: a chicken has no
     <code>ATTACK_DAMAGE</code> attribute at all, so the vanilla melee goal has nothing
-    to read. Adding the attribute to thirty-seven vanilla mob types would hand every
-    sheep, cod and wandering trader in the world an attack stat it never had, for the
+    to read. Adding the attribute to every mob type the locus can name would hand every
+    sheep, rabbit and wandering trader in the world an attack stat it never had, for the
     sake of the one in ten thousand that is secretly a horse. Dealing a flat three
     points by hand touches nothing that is not already ours.
 </p>
 
-<h2 id="forms">The thirty-seven shapes</h2>
+<h2 id="forms">The shapes</h2>
 
 <p>
-    Every vanilla mob in a <strong>non-hostile spawn category</strong> &mdash;
-    creature, ambient, water creature, water ambient, axolotl, underground water
-    creature &mdash; minus the horse family, because a horse that turns into a horse at
+    Every vanilla mob that is both <strong>non-hostile</strong> and <strong>walks on
+    land</strong>, minus the horse family, because a horse that turns into a horse at
     night is not a gene.
 </p>
 
 <div class="note rule">
     <span class="label">A mechanical rule, not a taste</span>
     <p>
-        That is why the list contains a pufferfish and a wandering trader without
-        anybody having to defend either, and it is why the two golems, the villager,
-        the copper golem and the mannequin are out &mdash; they are
-        <code>MobCategory.MISC</code>.
+        That is why the list contains a strider and a wandering trader without anybody
+        having to defend either, and it is why the two golems, the villager, the copper
+        golem and the mannequin are out &mdash; they are
+        <code>MobCategory.MISC</code>. The frog and the turtle stay: both walk, and
+        neither drowns in air. The tadpole does, and does not.
     </p>
     <p>
         The mob ids are <em>strings</em>, because <code>common/</code> may not import
@@ -180,18 +188,13 @@
 <table class="data">
     <thead><tr><th>Allele</th><th>Shape</th><th>Allele</th><th>Shape</th><th>Allele</th><th>Shape</th></tr></thead>
     <tbody>
-        <tr><td><code>Aly</code></td><td>Allay</td><td><code>Arma</code></td><td>Armadillo</td><td><code>Axo</code></td><td>Axolotl</td></tr>
-        <tr><td><code>Bat</code></td><td>Bat</td><td><code>Bee</code></td><td>Bee</td><td><code>Cml</code></td><td>Camel</td></tr>
-        <tr><td><code>Cat</code></td><td>Cat</td><td><code>Chk</code></td><td>Chicken</td><td><code>Cod</code></td><td>Cod</td></tr>
-        <tr><td><code>Cow</code></td><td>Cow</td><td><code>Dol</code></td><td>Dolphin</td><td><code>Fox</code></td><td>Fox</td></tr>
-        <tr><td><code>Frg</code></td><td>Frog</td><td><code>Glsq</code></td><td>Glow squid</td><td><code>Gt</code></td><td>Goat</td></tr>
-        <tr><td><code>Ghst</code></td><td>Happy ghast</td><td><code>Lma</code></td><td>Llama</td><td><code>Mshr</code></td><td>Mooshroom</td></tr>
-        <tr><td><code>Ntls</code></td><td>Nautilus</td><td><code>Oce</code></td><td>Ocelot</td><td><code>Pnd</code></td><td>Panda</td></tr>
-        <tr><td><code>Prt</code></td><td>Parrot</td><td><code>Pig</code></td><td>Pig</td><td><code>Plr</code></td><td>Polar bear</td></tr>
-        <tr><td><code>Pff</code></td><td>Pufferfish</td><td><code>Rbt</code></td><td>Rabbit</td><td><code>Slm</code></td><td>Salmon</td></tr>
-        <tr><td><code>Shp</code></td><td>Sheep</td><td><code>Snf</code></td><td>Sniffer</td><td><code>Sqd</code></td><td>Squid</td></tr>
-        <tr><td><code>Strd</code></td><td>Strider</td><td><code>Tdp</code></td><td>Tadpole</td><td><code>Tlma</code></td><td>Trader llama</td></tr>
-        <tr><td><code>Trpf</code></td><td>Tropical fish</td><td><code>Trt</code></td><td>Turtle</td><td><code>Wtr</code></td><td>Wandering trader</td></tr>
+        <tr><td><code>Arma</code></td><td>Armadillo</td><td><code>Cml</code></td><td>Camel</td><td><code>Cat</code></td><td>Cat</td></tr>
+        <tr><td><code>Chk</code></td><td>Chicken</td><td><code>Cow</code></td><td>Cow</td><td><code>Fox</code></td><td>Fox</td></tr>
+        <tr><td><code>Frg</code></td><td>Frog</td><td><code>Gt</code></td><td>Goat</td><td><code>Lma</code></td><td>Llama</td></tr>
+        <tr><td><code>Mshr</code></td><td>Mooshroom</td><td><code>Oce</code></td><td>Ocelot</td><td><code>Pnd</code></td><td>Panda</td></tr>
+        <tr><td><code>Pig</code></td><td>Pig</td><td><code>Plr</code></td><td>Polar bear</td><td><code>Rbt</code></td><td>Rabbit</td></tr>
+        <tr><td><code>Shp</code></td><td>Sheep</td><td><code>Snf</code></td><td>Sniffer</td><td><code>Strd</code></td><td>Strider</td></tr>
+        <tr><td><code>Tlma</code></td><td>Trader llama</td><td><code>Trt</code></td><td>Turtle</td><td><code>Wtr</code></td><td>Wandering trader</td></tr>
         <tr><td><code>Wlf</code></td><td>Wolf</td><td colspan="4">&mdash;</td></tr>
     </tbody>
 </table>
@@ -207,10 +210,11 @@
 </p>
 
 <p>
-    So about <strong>one wild horse in ninety</strong> shifts at night, and any one
-    particular animal is roughly one horse in three thousand three hundred. Every
-    shifter you meet in the world is one you can watch shift; every carrier in the
-    world is one somebody bred.
+    So the chance of meeting <em>a</em> shifter moves with the length of the table above,
+    while the chance of meeting a were-wolf in particular does not &mdash; which is the
+    right way round, since the one animal you are hunting for should not get rarer
+    because the game added a mob. Every shifter you meet in the world is one you can
+    watch shift; every carrier in the world is one somebody bred.
 </p>
 
 <h2 id="clock">Dusk, dawn, and dimensions with no night</h2>
@@ -228,10 +232,11 @@
     <strong>Dawn sets a horse down on solid ground.</strong> The horse comes back where its
     animal is, unless there is nothing under the animal: no solid block or water within three
     blocks below. Then it comes back where the animal last stood on the ground, or, if that is
-    not known, where it changed at dusk. A bat, parrot, allay, bee or happy ghast can fly anywhere
-    in the night. Until 2026-09-15 a horse could wake up in mid-air over the void and fall out of
-    the world (<a href="known-gaps.html#gap-243">gap 243</a>). An animal that <em>dies</em> in the
-    night still takes its horse with it, wherever it is.
+    not known, where it changed at dusk. This was written for the flying forms &mdash; until
+    2026-09-15 a were-bat could wake up in mid-air over the void and fall out of the world
+    (<a href="known-gaps.html#gap-243">gap 243</a>) &mdash; and it stays now that they are gone,
+    because a walking animal still finds ledges, boats and a floor somebody mined out overnight.
+    An animal that <em>dies</em> in the night still takes its horse with it, wherever it is.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
@@ -251,11 +256,11 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.lycan</dd></div>
     <div><dt>Priority</dt><dd>152 &mdash; after <a href="gene-rainbow-dust.html">rainbow dust</a>; a code-order slot only</dd></div>
-    <div><dt>Alleles</dt><dd>37 shapes + <span class="allele wild">n</span> &mdash; see <a href="#forms">the table</a></dd></div>
+    <div><dt>Alleles</dt><dd>one per peaceful land animal + <span class="allele wild">n</span> &mdash; see <a href="#forms">the table</a></dd></div>
     <div><dt>Outcomes</dt><dd>wild, carrier, mismatched, and one per shape</dd></div>
     <div><dt>Shows when</dt><dd><strong>two copies of the <em>same</em> allele</strong></dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>0.03% per shape &mdash; about 1.1% of founders shift; <strong>no founder is a carrier</strong></dd></div>
+    <div><dt>Wild frequency</dt><dd>0.03% per shape, whatever the shape count &mdash; <strong>no founder is a carrier</strong></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
     <div><dt>Epigenetic</dt><dd>one colour &mdash; the cloud the shifted animal trails</dd></div>
@@ -308,19 +313,57 @@
     </tbody>
 </table>
 
-<h3 id="water-forms">A water form on land dies, on purpose</h3>
+<h3 id="water-forms">The locus is ground-dwellers only (2026-09-24)</h3>
 <p>
-    A lycan horse on dry land can shift into a fish or another water animal, which then drowns, and the horse dies with it.
-    That was gap 238. <strong>The owner's call (2026-09-15): keep the death.</strong> It is consistent with the rule that a
-    were-animal dying is the horse dying, and the form list is not filtered by what is nearby.
+    <strong>Was:</strong> every non-hostile spawn category, fish and bats included. A horse that
+    shifted into a cod on dry land drowned, and the owner's call of 2026-09-15 was to keep that
+    death &mdash; <em>&ldquo;It should absolutely still shift and then just die.&rdquo;</em>
+    <strong>Is:</strong> the allele set is <code>MobRoster.ground()</code>, the peaceful half of the
+    shared roster minus everything tagged <code>WATER</code> or <code>AIR</code>, so the drowning
+    shapes and the flying ones are not alleles any more (owner, 2026-09-24). Fifteen alleles left
+    the locus; every remaining token keeps its spelling, and the genotype code is a different
+    length.
+</p>
+<p>
+    The tag lives on <code>MobRoster.Entry</code> rather than in a list inside the gene, which is
+    what stops the rule decaying: a mob added to the roster as water or air is kept out of this
+    locus by existing, and <a href="gene-pack-leader.html">pack leader</a> and
+    <a href="gene-spawner.html">the spawner</a> still get it, because a companion squid is fine and
+    a horse <em>inside</em> a squid is not.
+</p>
+<p>
+    <code>LycanthropyHandler.isWearable</code> is the second half, and the one that will matter
+    when the roster is derived from the live registry: at dusk the resolved entity type is asked
+    whether it swims (the four water spawn categories), flies (<code>AMBIENT</code>,
+    <code>FlyingAnimal</code>, a <code>FlyingPathNavigation</code> or a
+    <code>FlyingMoveControl</code>) or is hostile (<code>Enemy</code> or <code>MONSTER</code>,
+    through <code>MobGroups.isHostile</code>), and a body that fails refuses the shift and logs
+    once. <code>AMBIENT</code> is in the flying list because vanilla's bat flies without a flying
+    navigation or the interface to show for it &mdash; unverified in game, and the safe direction
+    to be wrong in.
 </p>
 
 <h3 id="verified">Verified</h3>
 
+<p id="gap-243">
+    <strong>A lycan cannot come back in mid-air any more, and the guard that used to catch it
+    stays</strong> (was open check 243; closed 2026-09-24). Wild bat and parrot shifters reverted
+    wherever their animal was &mdash; 49 blocks below the horse dimension's floor in one case
+    &mdash; and fell out of the world. The fix of 2026-09-15 was to set the horse down on the last
+    ground the animal stood on when there is no solid block or water within three blocks below it,
+    and on 2026-09-18 an unattended night showed a <code>LYCAN BAT</code> using the near half of
+    that branch: it came back <code>inside blocks</code>, was displaced to a free spot, and read
+    <code>round trip SAME</code>. The far half &mdash; <code>set down at</code>, a revert over
+    genuinely open air &mdash; never fired, and now cannot be reached by breeding, because nothing
+    on the locus flies. The branch is kept: a walking animal still finds ledges, boats and a floor
+    mined out from under it overnight.
+</p>
+
 <p id="verified-were-death">
     <strong>A were-animal dying is a horse dying</strong> (2026-09-13). <code>LycanthropyHandler.shift</code> discards
     the horse and hangs its saved state on the animal, and nothing handled that animal dying, so two horses left the
-    world as were-salmon on dry land with no body, no drops and no log line. The first fix refused to shift an aquatic
+    world as were-salmon on dry land with no body, no drops and no log line. (Salmon stopped being a
+    shape on 2026-09-24; the death path it uncovered is every form's.) The first fix refused to shift an aquatic
     form on land and the owner overruled it: <em>&ldquo;It should absolutely still shift and then just die.&rdquo;</em>
     What ships: the animal's death rebuilds the horse from its tag where the animal fell and kills it with the same
     damage source, so <code>GeneDeathHandler</code>, <code>ActionTrace</code>, the ancestry database and vanilla's
@@ -333,7 +376,10 @@
     logged <code>creature joined | minecraft:allay [LYCAN]</code>: a horse became an allay, which its stall
     could never have held, since allays fly and a pen wall is one block high. On 2026-09-14 two pufferfish
     forms drowned on land, each logging a <code>[lycan]</code> line and then <code>[trace] horse died</code>
-    from drowning, so the horse dies with its other form rather than disappearing.
+    from drowning, so the horse dies with its other form rather than disappearing. Both of those shapes were
+    taken off the locus on 2026-09-24 &mdash; the flying and the drowning are exactly why &mdash; but what
+    they proved, that the swap happens and that a death in animal form is a death, holds for the shapes that
+    are left.
 </p>
 
 <p id="verified-round-trip">
@@ -424,106 +470,36 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>One narrow branch dominates &mdash; the <code>set down at</code> revert over genuinely open air has never fired, since every shifter tested so far came back over solid ground; behind it sit a bucketed were-cod kept past dawn, a shifted horse across a chunk unload, and what each form refuses.</p>
+    <p>The ground-only allele set of 2026-09-24 has never been played &mdash; no shifter has been caught in the wild since, and the runtime refusal that backs it has no way to fire in a vanilla game; behind it sit a shifted horse across a chunk unload, riders and dimensions, and what each form refuses.</p>
 </div>
 
-<h3 id="hunger-0914-lycan">What the lycan logging still owes (2026-09-14, built 22:12)</h3>
-<p>
-    What is left here reads off <code>latest.log</code> and is not settled yet.
-</p>
+<h3 id="ground-only-0924">Nothing that swims or flies is an allele any more (2026-09-24, not played)</h3>
 <ul>
-    <li><strong>Flying lycans land at dawn</strong> (<a href="known-gaps.html#gap-243">gap 243</a>, fixed
-        2026-09-15). Wild bat and parrot shifters live in the corridor pens and fly off at dusk.
-        <strong>Pass:</strong> no <code>horse died ... from outOfWorld</code> all run, and a
-        <code>[trace] lycan | ... set down at</code> line for any that come back over nothing.
-        <strong>The 16:11 run of 2026-09-15 half-answers this and no more.</strong> Nothing died of
-        <code>outOfWorld</code> in six hours, which is the first half. But every shifter in the yard that run
-        was a wolf or a cow &mdash; 19 round trips each, all reading <code>round trip SAME</code> &mdash; so
-        nothing reverted over open air and <em>not one</em> <code>set down at</code> line was logged. The
-        set-down path itself is still unexercised; it needs a bat or parrot shifter over the corridor.</li>
+    <li><strong>No wild shifter is a fish or a bird.</strong> Catch shifters in the wild across a
+        few nights, or read the yard's <code>[trace] lycan | ... shifted into a</code> lines: every
+        mob named must be a peaceful land animal. A single <code>minecraft:cod</code> or
+        <code>minecraft:bat</code> in that log means a stale genotype is still being parsed
+        somewhere, since the allele no longer exists.</li>
+    <li><strong>The runtime refusal has no way to fire in a vanilla game</strong>, which is the
+        point of it &mdash; the allele set already excludes every body it would refuse. What would
+        exercise it is another mod's peaceful flying or aquatic mob once the roster is
+        registry-derived; until then the only evidence it works is that
+        <code>[lycan] ... swims, flies or is hostile in this build</code> never appears in a log.</li>
+    <li><strong>Existing horses.</strong> Any horse in the owner's world carrying one of the fifteen
+        deleted alleles has a genotype code the parser no longer recognises at that locus. Worth one
+        look at whether such a horse loads at all, or whether its whole record is refused.</li>
 </ul>
 
 <h3 id="open-older-gene-lycan">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>A bucketed were-cod at dawn.</strong> Bucket a <code>lycan=Cod/Cod</code> horse's fish form after dark, keep the bucket past dawn, then empty it. The horse must come back whole, not be lost inside the bucket item. See <a href="gene-lycan.html">lycan</a> and <a href="known-gaps.html#gap-74">gap 74</a>.</li>
     <li><strong>A shifted horse across an unload.</strong> Walk away until a were-animal's chunk unloads overnight, or log out, and come back after dawn: the horse is back with its name and record. Also take the animal a hundred blocks before dawn: the horse wakes where the animal stands.</li>
     <li><strong>Lycans and riders, dimensions and health.</strong> Ride a lycan into dusk: you are thrown, not carried into the tag. In the Nether it never shifts, and one that walks in shifted turns back at once. Hurt it to half at dusk: the animal is at half its own health, and a hurt animal gives back a hurt horse.</li>
-    <li><strong>What a were-animal refuses.</strong> A were-pig with a saddle, a were-camel, a were-strider and a were-happy-ghast all refuse a rider without eating the saddle. A transfer paper, shears, a gene carrot and the <strong>i</strong> button do nothing on any form. A were-sheep shears and a were-cat tames like the real animal.</li>
+    <li><strong>What a were-animal refuses.</strong> A were-pig with a saddle, a were-camel, a were-strider and a were-llama all refuse a rider without eating the saddle. A transfer paper, shears, a gene carrot and the <strong>i</strong> button do nothing on any form. A were-sheep shears and a were-cat tames like the real animal.</li>
     <li><strong>The were-animal's temper.</strong> Hit one and walk away: it follows and strikes for about three points a second, gives up after three seconds out of sight, and forgets at dawn. Hit a were-chicken too, since no form has an attack attribute and the damage is dealt by hand.</li>
-    <li><strong>Lycan and rainbow looks.</strong> A shifted animal's walking dust cloud reads, even on a tadpole or a happy ghast. Two were-wolves are different colours. Rainbow dust reads as a rainbow at the slow end of its cycle, several horses are on different hues at once, and the spawn egg's mote preview cycles too.</li>
+    <li><strong>Lycan and rainbow looks.</strong> A shifted animal's walking dust cloud reads, even on something as small as a rabbit. Two were-wolves are different colours. Rainbow dust reads as a rainbow at the slow end of its cycle, several horses are on different hues at once, and the spawn egg's mote preview cycles too.</li>
 </ul>
 
-<h3 id="unattended-0918-lycan">The open-air revert, left unplayed by the overnight run of 2026-09-18</h3>
-
-<p>
-    An unattended night of 2026-09-18 answered half of the flying revert by log rather than by
-    eye. What is below is the half it could not reach. The rest of what that night left
-    unplayed is on <a href="architecture.html#unattended-0918">architecture</a>.
-</p>
-
-<h4>Nothing here needs looking at to judge</h4>
-
-<ul>
-    <li><strong>The bat lycan's landing is answered; the open-air case is not.</strong> A
-        <code>LYCAN BAT</code> in the LYCAN ROUND TRIP pen came back at dawn
-        <code>inside blocks</code>, was displaced to a free spot, and read
-        <code>round trip SAME</code> &mdash; the only one of six shifters that needed the branch,
-        because it is the only one that flies. Written up on
-        <a href="gene-lycan.html#verified-flying-revert">the gene's page</a>. <strong>What is
-        left:</strong> the <code>set down at</code> case, which is a revert over genuinely open
-        air. A bat in a floored pen never reaches it, so it wants one seeded over the
-        corridor.</li>
-</ul>
-
-
-<h3 id="gap-243" data-check-kind="open-gap">Open check 243</h3>
-<div class="open-check">
-<strong>Open, found 2026-09-14: a lycan horse whose other form is a parrot dies falling out of the horse dimension.</strong>
-    Waxen Maverick, a wild foal born at 3, 129, -6 in the yard, turned into a <code>minecraft:parrot</code> after
-    dark. At 17:33:54 the parrot was at y&nbsp;&minus;65 and took <code>outOfWorld</code> damage, and the
-    <code>[trace] lycan</code> line records the horse dying with it. Nothing in the dimension stops a flying form
-    from going below the floor. Not yet known: whether it flew down or fell through a gap in the yard. The overworld
-    is mostly safe, since bedrock sits between an animal and the void.
-    <em>The death itself ran as designed</em>: <code>LycanthropyHandler.onWereAnimalDeath</code> restored the horse
-    and killed it with the same damage, so it logged, dropped and entered the ancestry database like any death.
-    <em>Whether it should happen is the owner's call, not a code defect.</em> The precedent (2026-09-13) is that a
-    were-fish on dry land "should absolutely still shift and then just die". The difference here is that the void
-    under the pens is the mod's own dimension, not a place a player chose to leave the horse. Left unfixed pending
-    that decision.
-    <strong>Not only lycans (2026-09-14, 19:28).</strong> Elegiac Star, an ordinary wild stallion from the
-    corridor (spawned at 45, 129, 9), was logged joining the world again at 19:28:18 and took
-    <code>outOfWorld</code> damage three seconds later, dying at x 163, z &minus;23, y &minus;200. A second
-    <code>horse-spawn</code> line with nothing between suggests its chunk was loaded back from disk, and it fell
-    from wherever it was saved. Where that was, and whether the corridor has an unfloored stretch there, is not
-    yet known. <strong>A third at 19:48:</strong> Betty Levi, from the same wild herd (spawned beside Elegiac Star
-    at 19:08:48), died of <code>outOfWorld</code> at x 109, z &minus;51, y &minus;235. z &minus;51 is outside the
-    corridor's &minus;Z bedrock wall at z &minus;26, so that herd is finding a way out of the corridor, not just
-    falling through a floor inside it. <strong>Owner's hunch, to check first:</strong> the placement of a hay
-    bale, water cauldron or chest against a wall is giving horses a step up and over. Parked for later
-    (owner, 2026-09-14).
-    <strong>Cause found 2026-09-15: all three are lycans changing back in mid-air.</strong> Elegiac Star and Betty
-    Levi were both <code>lycan=Bat/Bat</code>. At dusk (19:19:10) two bats joined inside their pen at 44 and 46,
-    129, 17. At dawn each came back as a horse wherever its bat was: Elegiac Star at 163, 79, &minus;24, 49 blocks
-    below the floor, dead three seconds later; Betty Levi at 75, 136, &minus;18, seven blocks up, and she survived
-    the fall. The next night she was a bat again at 19:39 and came back at 109, 85, &minus;52, outside the wall and
-    below the floor. <strong>The second <code>horse-spawn</code> line above is that revert, not a chunk loading
-    from disk.</strong> I misread it: <code>ActionTrace</code> logs every horse that joins, and a revert adds a new
-    horse entity. The parrot is the same bug. <code>LycanthropyHandler.restore</code> snaps the horse to the
-    animal's position with no check for ground, and a flying form (bat, parrot, allay, bee, happy ghast) can be
-    anywhere at dawn. <strong>The owner's hunch is ruled out:</strong> the corridor walls stand nine blocks above the
-    floor with no gaps; the cauldron and hay bale are sunk to floor level; there are no corridor chests; and the
-    portal frames top out five blocks short. <em>Also found:</em> <code>LycanthropyHandler</code>'s comment calling
-    this dimension "permanent day" for the gene is stale, since <code>debug_pens</code> now has real nights; and a
-    corridor's unbuilt far end (past the last built segment, x&nbsp;217 or more at first) is open to the void.
-    Nothing has died there yet.
-    <strong>Fixed 2026-09-15, not yet played (owner: "land on solid ground").</strong> At dawn, if there is no
-    solid block or water within three blocks under the animal, the horse is set down where the animal last stood
-    on the ground, or, if that is not known, where it changed at dusk. It logs
-    <code>[trace] lycan | ... came back at dawn with nothing under its ... - set down at ...</code>. The death path is
-    unchanged. <strong>Pass:</strong> no lycan horse dies of <code>outOfWorld</code>, and every flying form that
-    reverts over nothing has a <code>set down at</code> line. The corridor's open far end is still open.
-</div>
 </section>
 
 <div class="page-foot">
