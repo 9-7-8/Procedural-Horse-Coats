@@ -1,0 +1,183 @@
+Horse shoes - implementation treatment
+
+What already exists, so this session does not redo it
+=======================================================
+- wiki/item-horse-shoes.html is already a separate page from wiki/horse-gear.html
+  (hard rule 5 in CLAUDE.md is about the designer/spawn screen, not this - a gear
+  *item* getting its own page is normal, see saddle-pads.html, item-rescuing-braid.html).
+  It already carries Gameplay, Coding, Science, a page-local "Suggested implementation"
+  tab, and a Roadmap tab (data-tab="roadmap") with its own note.roadmap-summary box, so
+  bake-roadmap-index.mjs already lists it. Do not create a second page or duplicate the
+  roadmap tab elsewhere - extend this one and re-run that bake if its summary sentence
+  changes.
+- HorseTackSlot (neoforge-26.1.2/.../entity/HorseTackSlot.java) already declares all four
+  hoof slots: SHOE_FRONT_LEFT, SHOE_FRONT_RIGHT, SHOE_HIND_LEFT, SHOE_HIND_RIGHT, in their
+  own Zone.HOOVES, each with a paper-doll anchor and an item tag
+  (horsegenetics:gear/shoe_front_left etc). BOOT_* leg slots exist the same way. Every one
+  of those eight tags is currently empty - "shipping a piece means adding it to its tag"
+  is already true and is the actual remaining gap, not the slot roster.
+- HorseGear / ModAttachments.HORSE_GEAR / TackSlotPayload / HorseTackSlot.on/set/accepts
+  are already fully generic over all seventeen non-vanilla slots. None of this needs a
+  shoe-specific change - a shoe is just another stack in another named slot.
+So the actual remaining work is: (1) generate real shoe items for every metal a modpack
+brings, the way GeneratedArmour already does for horse armour; (2) put those items in the
+four SHOE_* tags; (3) make a worn shoe do something to the horse; (4) render it.
+
+Existing roadmap items (wiki/item-horse-shoes.html#implementation-plan)
+========================================================================
+Carried over here so this file starts from the same ordering the wiki already commits to,
+not a fresh invention:
+ 1. Model four distinct hoof slots - DONE, see above.
+ 2. Accept any tagged metal - generate the item from any material with a valid metal tier
+    rather than a hardcoded list.
+ 3. Apply the tier as a flat stat bonus (speed + jump), aggregated from the actual worn
+    stacks, not a horse-level boolean/percentage.
+ 4. Make every shoe a genuine ItemStack carrying material identity + enchantments, with
+    HorseGear as the sole attachment-backed authority for what is worn.
+ 5. Grant powered-snow walking unconditionally per worn shoe - not gated behind an
+    enchantment.
+ 6. Enchant each shoe independently; effects read live off the four stacks and combine
+    without one overwriting another.
+ 7. Layer special abilities (traction, impact reduction, quiet movement, terrain effects)
+    over the base rules without replacing them.
+ 8. Use the shared render and bench systems - no second inventory or recipe architecture.
+ 9. Verify independent behaviour: mixed tiers, mixed enchantments, one shoe breaking, save
+    and reload, ownership checks, full-inventory removal.
+The wiki's "Suggested implementation" tab (#implementation-contract onward) already goes
+further than this list with a build order and illustrative code. Treat its class names
+(HorseShoeProfile, HorseGearEffects, HorseShoeLayer, HorseShoePlacement) as illustrative,
+not as things that exist - grep confirms none of them are in the repo yet. The rest of
+this file grounds that proposal in the classes that actually exist today.
+
+Step 1 - the generated item family (compat package)
+====================================================
+Template: GeneratedArmour.java + ModdedArmour.java, both in
+neoforge-26.1.2/.../neoforge/compat/, which already solve "one registered item per
+material name, out of ModdedMaterials.armourMetals()" for horse armour.
+- Add a ModdedShoes.java beside ModdedArmour.java: one DeferredItem<Item> per
+  ModdedMaterials.armourMetals() entry (reuse that method rather than adding a second
+  material-collapse rule - the "one armour per material name" reasoning on
+  ModdedMaterials#armourMetals applies identically to a shoe). id pattern:
+  metal.material() + "_horse_shoe".
+- Add a GeneratedShoes.java beside GeneratedArmour.java, called from
+  GeneratedPack.build() next to the existing four GeneratedX.emit(files, lang) calls.
+  Unlike armour (which is a worn *equipment layer* asset), a shoe is a normal held/dropped
+  item plus a worn render (step 4) - so this only has to emit the item model and the
+  recipe/lang, not an equipment-asset JSON. Reuse the same "one shipped texture, tinted
+  by MetalTintSource" trick GeneratedArmour uses for the icon, rather than baking a PNG
+  per metal.
+- Route crafting through the existing bench/material-scan path (ModdedMaterials,
+  MaterialScan), per the wiki's compatibility requirement - do not hand-write a recipe
+  file per metal (see the roadmap-execution.html generated-content section for why a
+  drift between "what's generated" and "what's baked at author time" is the recurring
+  failure shape in this codebase).
+- Register the four SHOE_* items into each of HorseTackSlot's four gear/shoe_* tags via
+  a datapack tag file (data/horsegenetics/tags/item/gear/shoe_front_left.json etc, one
+  tag per slot) rather than changing HorseTackSlot itself - the enum already reads
+  whatever the tag says.
+
+Step 2 - the stat bonus and the powered-snow trait
+====================================================
+There is no existing "gear effect" translator - GeneAbilityHandler (server package) is
+the closest existing shape, but it is keyed to *gene* abilities
+(HorseAbilities.activeFor(genotype)) and is not the right place to bolt gear onto,
+because a shoe is not a gene and does not have a genotype/epigenome behind it. Build a
+parallel, small handler instead:
+- A new HorseShoeEffects (or similar) in neoforge/server/, ticked the same way
+  GeneAbilityHandler.onHorseTick is (@SubscribeEvent EntityTickEvent.Post, server side
+  only, skip if not AbstractHorse / not alive).
+- Read the four hoof stacks via HorseTackSlot.HOOF_SLOTS (add that convenience array,
+  mirroring the wiki's own suggestion) and derive a total speed/jump bonus from each
+  stack's metal tier. Resolve "what tier is this material" the same way ModdedArmour
+  resolves protectionFor(metal) - off ArmorMaterials at registration time, not by reading
+  a live item's data components after the fact (ModdedArmour's own doc comment explains
+  in detail why reading another mod's item's components crashes before the first
+  datapack load - the same trap applies here if this ever tries to ask the shoe item
+  stack itself "how good are you" at the wrong moment).
+- Apply the total as a single, shoe-owned AttributeModifier per attribute
+  (Attributes.MOVEMENT_SPEED, Attributes.JUMP_STRENGTH) with a fixed, mod-owned id, added
+  or replaced every tick and removed the tick a horse has no shoes left - the same
+  add/replace/remove discipline GeneAbility.AttributeMod + GeneAbilityHandler.applyAttribute
+  already implement for gene-driven attribute modifiers (read that method before writing
+  a second one from scratch; the shape - hold up a modifier while a condition holds, take
+  it off when it stops - is identical here, just keyed by worn stacks instead of by gene).
+- Powered-snow walking is NOT a per-tick attribute and not a traversal flag
+  GeneAbilityHandler already knows how to apply. In this Minecraft version, whether an
+  entity can stand on powder snow without sinking is
+  Entity.canStandOnPowderSnow(), which vanilla implements as
+  "this.getType().is(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)" - an *entity-type* tag,
+  not per-instance state, so tagging horsegenetics:horse into that tag would make every
+  horse walk on powder snow regardless of shoes, which is not what "even a plain shoe
+  grants this" means (it still means *unshod* horses sink). The fix is a mixin override,
+  the same shape HorseFlightRiddenMixin already uses for isFlyingVessel()/
+  isFlyingVehicle() - check first whether canStandOnPowderSnow() is declared on Entity
+  only (likely, given AbstractHorse does not override it) and, if so, add a plain
+  @Override in a HorseTackSlot-aware mixin/class rather than an @Inject, exactly as that
+  file's own doc comment explains injects on Entity-only methods fail. This is the one
+  part of the whole feature with no existing precedent to copy line for line in this
+  codebase and should be the first thing spiked and verified, before spending time on
+  the render layer.
+
+Step 3 - enchantments
+======================
+No custom enchantment exists anywhere in the mod yet (checked: no
+data/horsegenetics/enchantment/ folder). A per-shoe enchantment needs, at minimum:
+- A datapack enchantment definition per effect (data/horsegenetics/enchantment/*.json),
+  with a slot/item predicate that legal-izes it only on the shoe items from step 1 (not
+  on boots, not on ordinary tools) - this is ordinary vanilla enchantment JSON, nothing
+  mod-specific about the format.
+- A read path parallel to step 2: for each worn stack, ask
+  stack.getEnchantments() / EnchantmentHelper and fold each recognised enchantment's
+  contribution into the same per-tick total the tier bonus already computes, rather than
+  writing the enchantment's effect straight onto the horse independently (two code paths
+  computing "the horse's effective bonus" is exactly the kind of drift CLAUDE.md's
+  "regenerate what you invalidate" table exists to catch, and there is no bake to catch
+  this one - it would only show up as a wrong number in play).
+This is the least specified part of the wiki page (it says "define conflicts explicitly"
+without naming which enchantments ship first) - resolve which 1-2 enchantments ship in
+the first pass before writing the JSON, rather than building the generic plumbing for an
+open-ended list nobody has designed yet. The wiki's "First effects to implement" list
+(grip on slick ground, reduced slipping, durability cost) is the candidate set - durability
+cost in particular needs no enchantment at all, it is just not disabling ordinary item
+damage on the shoe stack.
+
+Step 4 - rendering
+====================
+Template: CutieMarkLayer.java (neoforge/client/), the newest RenderLayer<HorseRenderState,
+HorseModel> in the codebase and the best current example of "read something off
+GeneticHorseRenderState, resolve it through ItemModelResolver, submit it with the
+SubmitNodeCollector API" - use it as the line-by-line model in preference to the wiki's
+own sketch, which predates confirming this file exists and gets some details
+(getParentModel().root().getChild(...) for a named model part, the +PI upright-flip on a
+FIXED-context item, the light-coords handling) right in ways worth copying verbatim.
+- Add ItemStack[] shoeStacks (length 4) to GeneticHorseRenderState, next to the existing
+  coatData/breedLabel/coatId/emissiveCoatId fields - all four currently default-empty
+  fields, same pattern.
+- In GeneticHorseRenderer.extractRenderState, copy HorseTackSlot.SHOE_FRONT_LEFT..HIND_RIGHT
+  .on(horse).copy() into those four slots, the same place coatData etc. are already
+  populated for that frame.
+- Add a new HorseShoeLayer beside CutieMarkLayer, registered in GeneticHorseRenderer's
+  layer list. It needs a per-hoof anchor: HorseModel does not expose named hoof
+  ModelParts today (only "body" is used by CutieMarkLayer) - finding or adding those leg/
+  hoof part names against HdHorseModel/HdBabyHorseModel (see wiki/body-space.html) is
+  needed before the layer can place anything, and should be proven on one front and one
+  hind hoof before wiring all four, exactly as the wiki's own caution says.
+- Reuse the existing item-tint/enchant-glint path via ItemModelResolver.updateForTopItem +
+  ItemStackRenderState.submit, the same two calls CutieMarkLayer already makes - a worn
+  shoe's colour and glint should require zero new rendering code beyond placement.
+
+Step 5 - checks before calling it done
+========================================
+Carried from wiki/item-horse-shoes.html#implementation-tests, unchanged - equip mixed
+tiers, remove one shoe and confirm the other three are unaffected, confirm powered-snow
+walking with a plain shoe, confirm per-shoe enchantments survive save/reload, confirm
+wrong-slot/foal/distant-horse/unauthorized-horse rejection on both sides, confirm no item
+loss on ownership transfer or full-inventory removal, and render-check adult/juvenile/
+scaled horses for placement, oversizing, ground-clip, tint and glint.
+
+After it ships
+================
+Regenerate per CLAUDE.md's table: bake-recipe-reference.mjs (new recipe/*.json files),
+check-links.mjs + bake-agent-text.mjs (new wiki prose if the roadmap tab moves to
+Gameplay/Coding), and re-run check-roadmap-execution.mjs since a shipped feature is
+exactly what that check verifies is still routed correctly.
