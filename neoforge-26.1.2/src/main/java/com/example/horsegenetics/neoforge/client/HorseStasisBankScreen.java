@@ -1,37 +1,95 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.horse.StasisBrowseRow;
+import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
 import com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu;
+import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
- * <b>The Horse Stasis Bank's screen.</b> A chest of stasis chambers, and a count
- * of how many of them have a horse in.
+ * <b>The Horse Stasis Bank's screen.</b> Two tabs: <b>Chambers</b>, a chest of
+ * stasis chambers, and <b>Browse</b>, the same chambers read as the horses
+ * inside them.
  *
- * <h2>One tab, and no tab bar</h2>
- * The research shelf draws two tabs above its window; this draws none, because a
- * single-tab tab bar is a control that does nothing. The <b>Browse</b> tab is
- * stage three of the build order on {@code wiki/horse-stasis.html} and brings the
- * bar with it - {@link ResearchShelfScreen}'s {@code Tab} enum, {@code tabAt} and
- * {@code VanillaPanel.tab} are the three pieces to copy at that point, along with
- * the menu's {@code activeOnTab} half.
+ * <h2>Browse is a reading, not a second inventory</h2>
+ * Every row is a chamber the bank already holds, and the whole tab is one
+ * {@link StasisBrowseRow} list rebuilt when the slots, the filter or the stable's
+ * records change - never per frame. The filter box takes the browser's own query
+ * language ({@code HorseQuery}), so {@code mare gen>2 gene:SB1 -lethal} means
+ * here what it means there; teaching the bank a second, smaller search language
+ * would have been a worse feature <i>and</i> more code.
+ *
+ * <h2>The tier is the gate, and it gates per chamber</h2>
+ * A row is searchable only if its own chamber says so
+ * ({@link StasisTier#searchable()}, never a tier compared by name). A Basic
+ * chamber still lists its horse - the item's tooltip names it at every tier, so
+ * hiding it here would make the bank contradict the bottle in your hand - but no
+ * query can reach it, and the list says how many rows a query had to leave out
+ * rather than letting a horse silently vanish from the list.
+ *
+ * <h2>Where the details come from</h2>
+ * A chamber carries the horse's whole entity tag, and decoding fifty-four of
+ * those to draw a list would be the expensive way round. The details come from
+ * the stable's own papers instead - {@link ClientHorseRoster}, the same rows the
+ * browser's <i>My horses</i> table sorts, matched on the {@code UUID} the
+ * chamber remembers - which is free, already written, and always agrees with the
+ * browser. A horse with no row there (somebody else's chamber, or a stable past
+ * the roster's cap) keeps its name and says it has no papers.
  *
  * <h2>It is drawn as a Minecraft window</h2>
  * Face, bevel, sunken slots, dark text - see {@link VanillaPanel}, no texture.
  * Every position comes from {@link HorseStasisBankMenu}'s constants, the same
  * numbers its slots are placed with.
- *
- * <h2>The count is read, not synced</h2>
- * Each chamber carries its whole horse in a data component, so the client already
- * knows which slots are occupied and {@code occupied()} is a loop over the slots
- * rather than anything on the wire.
  */
 public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseStasisBankMenu> {
 
+    private enum Tab {
+        CHAMBERS("Chambers"),
+        BROWSE("Browse");
+
+        final String label;
+
+        Tab(String label) {
+            this.label = label;
+        }
+    }
+
     private static final int TITLE_Y = 6;
+    private static final int TAB_H = 16;
+    private static final int LINE_H = 10;
+
+    /**
+     * The tab the bank opens on: whichever was showing last time, for the rest
+     * of the session - the research shelf's rule, and for its reason. The
+     * question is "what was I doing", not "what was this bank".
+     */
+    private static Tab lastTab = Tab.CHAMBERS;
+
+    private Tab tab = lastTab;
+    private EditBox filterBox;
+    private int scroll;
+
+    /** Every horse in the bank, and the subset the filter leaves showing. */
+    private List<StasisBrowseRow> rows = List.of();
+    private List<StasisBrowseRow> shown = List.of();
+
+    /** What {@link #rows} was built from, so it is rebuilt only when one moves. */
+    private int builtFrom = Integer.MIN_VALUE;
+    private int builtVersion = -1;
+    private String builtQuery = "";
 
     public HorseStasisBankScreen(HorseStasisBankMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, HorseStasisBankMenu.WIDTH, HorseStasisBankMenu.HEIGHT);
@@ -44,17 +102,215 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         this.titleLabelY = TITLE_Y;
         this.inventoryLabelX = HorseStasisBankMenu.MARGIN;
         this.inventoryLabelY = HorseStasisBankMenu.INV_LABEL_Y;
+        this.menu.setChamberTab(tab == Tab.CHAMBERS);
+
+        // Unbordered, like the equestrian bench's name field: the sunken well
+        // drawn behind it is the frame, so the box draws no second one.
+        this.filterBox = new EditBox(this.font,
+                leftPos + HorseStasisBankMenu.MARGIN + 2, topPos + HorseStasisBankMenu.FILTER_Y + 3,
+                HorseStasisBankMenu.LIST_W - 4, HorseStasisBankMenu.FILTER_H - 5,
+                Component.literal("Filter"));
+        this.filterBox.setBordered(false);
+        // Dark text, because this panel is light. An EditBox defaults to the
+        // near-white a dark screen wants, which on a sunken grey well is a
+        // query the player cannot read back.
+        this.filterBox.setTextColor(VanillaPanel.TEXT);
+        this.filterBox.setMaxLength(96);
+        this.filterBox.setHint(Component.literal("mare  gen>2  gene:SB1"));
+        this.addRenderableWidget(this.filterBox);
+        applyTab();
+
+        // The rows are the stable's papers, which this client may never have
+        // asked for - the browser is where they usually arrive. One request on
+        // open, the same one its Refresh button sends.
+        requestRoster();
     }
+
+    // ------------------------------------------------------------------
+    // Input
+    // ------------------------------------------------------------------
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        Tab hit = tabAt(event.x(), event.y());
+        if (hit != null) {
+            if (hit != tab && this.menu.getCarried().isEmpty()) {
+                tab = hit;
+                lastTab = hit;
+                scroll = 0;
+                applyTab();
+                if (hit == Tab.BROWSE) {
+                    requestRoster();
+                }
+            }
+            return true;
+        }
+        return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (tab == Tab.BROWSE && sy != 0 && overList(mx, my)) {
+            scroll = Math.max(0, Math.min(scroll - (int) Math.signum(sy), maxScroll()));
+            return true;
+        }
+        return super.mouseScrolled(mx, my, sx, sy);
+    }
+
+    /**
+     * Let the filter box have the keystroke if it wants one - otherwise the
+     * container screen closes on the inventory key and an "e" cannot be typed
+     * into a query.
+     *
+     * <p><b>Escape is handled first</b>, for the reason the equestrian bench's
+     * own override spells out: {@code canConsumeInput()} is true for every key
+     * once the box has focus, Escape included, so guarding on it alone traps the
+     * player in the window.
+     */
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == InputConstants.KEY_ESCAPE) {
+            if (this.filterBox != null && this.filterBox.isFocused()) {
+                this.filterBox.setFocused(false);
+            }
+            return super.keyPressed(event);
+        }
+        if (this.filterBox != null && this.filterBox.isActive()
+                && (this.filterBox.keyPressed(event) || this.filterBox.canConsumeInput())) {
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    /** The box belongs to one tab, and an invisible box must not eat keystrokes. */
+    private void applyTab() {
+        this.menu.setChamberTab(tab == Tab.CHAMBERS);
+        if (this.filterBox != null) {
+            boolean browsing = tab == Tab.BROWSE;
+            this.filterBox.visible = browsing;
+            this.filterBox.active = browsing;
+            if (!browsing) {
+                this.filterBox.setFocused(false);
+            }
+        }
+    }
+
+    private void requestRoster() {
+        ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
+    }
+
+    private Tab tabAt(double mx, double my) {
+        int tx = leftPos + 4;
+        int ty = topPos - TAB_H;
+        for (Tab t : Tab.values()) {
+            int w = this.font.width(t.label) + 18;
+            if (mx >= tx && mx < tx + w && my >= ty && my < ty + TAB_H) {
+                return t;
+            }
+            tx += w + 2;
+        }
+        return null;
+    }
+
+    // ------------------------------------------------------------------
+    // The rows
+    // ------------------------------------------------------------------
+
+    /**
+     * Rebuild only when something moved: a chamber in or out of the bank, a
+     * roster landing, or a keystroke in the filter. A list redraws every frame
+     * and resolving a horse's coat and disorders is not free, which is what
+     * {@link ClientHorseRoster} already says about doing it per row per frame.
+     */
+    private void refreshRows() {
+        String query = this.filterBox == null ? "" : this.filterBox.getValue();
+        int contents = contentSignature();
+        int version = ClientHorseRoster.version();
+        if (contents == builtFrom && version == builtVersion && query.equals(builtQuery)) {
+            return;
+        }
+        if (contents != builtFrom || version != builtVersion) {
+            List<StasisBrowseRow> built = new ArrayList<>();
+            for (HorseStasisBankMenu.Stored stored : this.menu.stored()) {
+                built.add(new StasisBrowseRow(stored.snapshot().horseName(), stored.tier(),
+                        ClientHorseRoster.byId(stored.snapshot().horseId())));
+            }
+            rows = List.copyOf(built);
+        }
+        shown = StasisBrowseRow.filter(rows, query);
+        builtFrom = contents;
+        builtVersion = version;
+        builtQuery = query;
+        scroll = Math.max(0, Math.min(scroll, maxScroll()));
+    }
+
+    /**
+     * Cheap enough to take every frame: which horse is in which slot, and in
+     * what. No tag is decoded - the id and the tier are all this asks for.
+     */
+    private int contentSignature() {
+        int hash = 1;
+        for (HorseStasisBankMenu.Stored stored : this.menu.stored()) {
+            hash = hash * 31 + stored.snapshot().horseId().hashCode();
+            hash = hash * 31 + stored.tier().ordinal();
+        }
+        return hash;
+    }
+
+    private int maxScroll() {
+        return Math.max(0, shown.size() - HorseStasisBankMenu.LIST_ROWS);
+    }
+
+    private boolean overList(double mx, double my) {
+        int l = leftPos + HorseStasisBankMenu.MARGIN;
+        int t = topPos + HorseStasisBankMenu.LIST_Y;
+        return mx >= l && mx < l + HorseStasisBankMenu.LIST_W
+                && my >= t && my < t + HorseStasisBankMenu.LIST_H;
+    }
+
+    private int rowAt(double mx, double my) {
+        if (!overList(mx, my)) {
+            return -1;
+        }
+        int i = scroll + (int) ((my - (topPos + HorseStasisBankMenu.LIST_Y)) / HorseStasisBankMenu.ROW_H);
+        return i >= 0 && i < shown.size() ? i : -1;
+    }
+
+    // ------------------------------------------------------------------
+    // Drawing
+    // ------------------------------------------------------------------
 
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(g, mouseX, mouseY, partialTick);
+        applyTab();
+        refreshRows();
+
+        // Tabs first, so the window's own bevel draws over the active one's
+        // bottom edge and the two read as joined.
+        int tx = leftPos + 4;
+        for (Tab t : Tab.values()) {
+            int w = this.font.width(t.label) + 18;
+            VanillaPanel.tab(g, tx, topPos - TAB_H, w, TAB_H + 4, t == tab);
+            g.text(this.font, Component.literal(t.label), tx + 9, topPos - TAB_H + 5,
+                    t == tab ? VanillaPanel.TEXT : VanillaPanel.TEXT_DIM, false);
+            tx += w + 2;
+        }
+
         VanillaPanel.window(g, leftPos, topPos, HorseStasisBankMenu.WIDTH, HorseStasisBankMenu.HEIGHT);
 
-        for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
-            VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + (i % 9) * 18,
-                    topPos + HorseStasisBankMenu.GRID_Y + (i / 9) * 18);
+        if (tab == Tab.CHAMBERS) {
+            for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
+                VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + (i % 9) * 18,
+                        topPos + HorseStasisBankMenu.GRID_Y + (i / 9) * 18);
+            }
+        } else {
+            VanillaPanel.well(g, leftPos + HorseStasisBankMenu.MARGIN,
+                    topPos + HorseStasisBankMenu.FILTER_Y,
+                    HorseStasisBankMenu.LIST_W, HorseStasisBankMenu.FILTER_H);
+            drawList(g, mouseX, mouseY);
         }
+
         for (int i = 0; i < 27; i++) {
             VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + (i % 9) * 18,
                     topPos + HorseStasisBankMenu.INV_Y + (i / 9) * 18);
@@ -65,8 +321,119 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         }
     }
 
+    private void drawList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int l = leftPos + HorseStasisBankMenu.MARGIN;
+        int t = topPos + HorseStasisBankMenu.LIST_Y;
+        int w = HorseStasisBankMenu.LIST_W;
+        int h = HorseStasisBankMenu.LIST_H;
+        VanillaPanel.well(g, l - 1, t - 1, w + 2, h + 2);
+
+        if (rows.isEmpty()) {
+            drawFitted(g, "No horses filed here yet.", l + 3, t + 3, w - 6, 0xFF3F3F3F);
+            drawFitted(g, "Chambers with a horse in show up here.",
+                    l + 3, t + 3 + LINE_H, w - 6, 0xFF3F3F3F);
+            return;
+        }
+        if (!ClientHorseRoster.received()) {
+            // Said rather than guessed at: with no roster every row would read
+            // "no stable record", which is a different and much worse claim
+            // than "the papers have not arrived yet".
+            drawFitted(g, "Reading your stable's papers...", l + 3, t + 3, w - 6, 0xFF3F3F3F);
+            return;
+        }
+        if (shown.isEmpty()) {
+            drawFitted(g, "Nothing matches that.", l + 3, t + 3, w - 6, 0xFF3F3F3F);
+            drawFitted(g, lockedLine(), l + 3, t + 3 + LINE_H, w - 6, 0xFF3F3F3F);
+            return;
+        }
+
+        int hovered = rowAt(mouseX, mouseY);
+        for (int i = scroll; i < shown.size() && i < scroll + HorseStasisBankMenu.LIST_ROWS; i++) {
+            int ry = t + (i - scroll) * HorseStasisBankMenu.ROW_H;
+            if (i == hovered) {
+                g.fill(l, ry, l + w, ry + HorseStasisBankMenu.ROW_H, VanillaPanel.HOVER);
+            }
+            StasisBrowseRow row = shown.get(i);
+            int rightW = drawRight(g, capitalise(row.tier().id()), l + w - 4, ry + 3, 0xFF4A4A4A);
+            drawFitted(g, row.displayName(), l + 3, ry + 3, w - 10 - rightW, 0xFF202020);
+            rightW = drawRight(g, row.origin(), l + w - 4, ry + 3 + LINE_H, 0xFF4A4A4A);
+            drawFitted(g, row.detail(), l + 3, ry + 3 + LINE_H, w - 10 - rightW, 0xFF3F3F3F);
+        }
+
+        // The rows a query cannot reach, in the first empty row rather than in a
+        // line of its own - a horse dropping out of the list unexplained is the
+        // thing this tab must not do.
+        int drawn = Math.min(shown.size() - scroll, HorseStasisBankMenu.LIST_ROWS);
+        if (drawn < HorseStasisBankMenu.LIST_ROWS && StasisBrowseRow.locked(rows) > 0
+                && !builtQuery.trim().isEmpty()) {
+            drawFitted(g, lockedLine(), l + 3, t + drawn * HorseStasisBankMenu.ROW_H + 3,
+                    w - 6, 0xFF4A4A4A);
+        }
+
+        if (maxScroll() > 0) {
+            int x1 = l + w - 3;
+            int thumbH = Math.max(6, h * HorseStasisBankMenu.LIST_ROWS / shown.size());
+            int thumbY = t + (h - thumbH) * scroll / maxScroll();
+            g.fill(x1, t, x1 + 3, t + h, VanillaPanel.SHADOW);
+            g.fill(x1, thumbY, x1 + 3, thumbY + thumbH, VanillaPanel.FACE);
+        }
+    }
+
+    /** Why the list is shorter than the bank: the rows no query can reach. */
+    private String lockedLine() {
+        int locked = StasisBrowseRow.locked(rows);
+        if (locked == 0) {
+            return "Every chamber here was searched.";
+        }
+        return locked + (locked == 1 ? " chamber a search" : " chambers a search")
+                + " cannot reach - Basic, or no papers.";
+    }
+
     /**
-     * The two captions vanilla draws, plus the horse count on the title's right.
+     * Right-aligned, never squeezed: these are short words. Returns the width it
+     * took, so the left-hand string knows how much room it has left.
+     */
+    private int drawRight(GuiGraphicsExtractor g, String text, int right, int y, int colour) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        int w = this.font.width(text);
+        g.text(this.font, Component.literal(text), right - w, y, colour, false);
+        return w;
+    }
+
+    /**
+     * Left-aligned, squeezed down (never up) so a long name still fits. The
+     * research shelf's helper, for its reason: this window is
+     * {@link HorseStasisBankMenu#WIDTH} wide and a long name drawn raw runs out
+     * through the frame.
+     */
+    private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int colour) {
+        if (text == null || text.isEmpty() || maxW <= 0) {
+            return;
+        }
+        float w = this.font.width(text);
+        if (w <= maxW || w <= 0) {
+            g.text(this.font, Component.literal(text), x, y, colour, false);
+            return;
+        }
+        var pose = g.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(maxW / w);
+        g.text(this.font, Component.literal(text), 0, 0, colour, false);
+        pose.popMatrix();
+    }
+
+    private static String capitalise(String word) {
+        if (word == null || word.isEmpty()) {
+            return "";
+        }
+        return word.substring(0, 1).toUpperCase(Locale.ROOT) + word.substring(1);
+    }
+
+    /**
+     * The two captions vanilla draws, plus the count on the title's right.
      *
      * <p><b>Window-relative coordinates</b>: the caller has already translated to
      * {@code (leftPos, topPos)}, and adding them again is what threw the research
@@ -87,9 +454,14 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
      * <b>What a glance at the bank should tell you</b>: how many animals are in
      * there. The empties are worth counting separately - a bank with forty spare
      * chambers in it and a bank with forty horses in it look identical otherwise,
-     * since every tier shares one item model.
+     * since every tier shares one item model. With a filter typed, the same
+     * corner answers the question the player is actually asking: how many of them
+     * came back.
      */
     private String countLine() {
+        if (tab == Tab.BROWSE && !builtQuery.trim().isEmpty()) {
+            return shown.size() + " of " + rows.size();
+        }
         int filed = this.menu.filed();
         if (filed == 0) {
             return "empty";

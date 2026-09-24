@@ -1,6 +1,9 @@
 package com.example.horsegenetics.neoforge.menu;
 
+import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
+import com.example.horsegenetics.neoforge.data.StasisSnapshot;
+import com.example.horsegenetics.neoforge.item.StasisChamberItem;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,10 +13,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * <b>The Horse Stasis Bank's menu.</b> One tab, for now: a grid of
+ * <b>The Horse Stasis Bank's menu.</b> Two tabs: a grid of
  * {@link HorseStasisBankBlockEntity#SLOTS} slots that takes stasis chambers and
- * refuses everything else.
+ * refuses everything else, and <b>Browse</b>, which is the same chambers read as
+ * horses rather than as items.
  *
  * <h2>It holds no state of its own</h2>
  * Every slot wraps the block entity's container, exactly as
@@ -21,13 +28,12 @@ import org.jetbrains.annotations.Nullable;
  * client's copy wraps an empty container of the same shape, which the ordinary
  * slot sync fills in.
  *
- * <p><b>No {@code ContainerData} and no tab state.</b> The research shelf needs
- * both because it has a second tab and a clock running on the block; this has
- * neither yet. When the Browse tab arrives (stage three on
- * {@code wiki/horse-stasis.html}) it wants the shelf's
- * {@code setStoreTab}/{@code activeOnTab} pair, which is a client-side field and
- * an {@code isActive()} override on each slot - copy it then, rather than carrying
- * a single-tab tab flag now.
+ * <p><b>Still no {@code ContainerData}.</b> The research shelf needs one because
+ * it has a clock running on the block; nothing here advances, and the Browse tab
+ * is a reading of slots the client already has. The tab state is the shelf's
+ * {@code setStoreTab}/{@code activeOnTab} pair under another name - a
+ * client-side field and an {@code isActive()} override, which is why every slot
+ * stays live on the server and only the client hides the grid.
  *
  * <h2>Every chamber's whole horse is on the wire</h2>
  * A chamber's {@code stasis_snapshot} component carries the entire entity tag,
@@ -55,12 +61,31 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     public static final int HEIGHT = 222;
     public static final int MARGIN = 8;
     public static final int GRID_Y = 18;
+
+    /** Browse tab: the filter field, then the list of horses under it. */
+    public static final int FILTER_Y = 18;
+    public static final int FILTER_H = 14;
+    public static final int LIST_Y = FILTER_Y + FILTER_H + 4;
+    public static final int LIST_W = WIDTH - 2 * MARGIN;
+    /** Two lines a row - a name, and what the horse is - so four fit. */
+    public static final int ROW_H = 22;
+    public static final int LIST_ROWS = 4;
+    public static final int LIST_H = LIST_ROWS * ROW_H;
+
     public static final int INV_LABEL_Y = 128;
     public static final int INV_Y = 140;
     public static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
 
+    private final Player player;
     private final @Nullable HorseStasisBankBlockEntity bank;
     private final Container chambers;
+
+    /**
+     * <b>Which tab the screen is showing</b>, so the chamber grid goes inactive
+     * while the player is reading the Browse tab. Only ever set on the client -
+     * see {@link #activeOnTab}.
+     */
+    private boolean chamberTab = true;
 
     /** Client constructor - {@code MenuType} hands us no block entity. */
     public HorseStasisBankMenu(int containerId, Inventory inventory) {
@@ -70,6 +95,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     public HorseStasisBankMenu(int containerId, Inventory inventory,
                                @Nullable HorseStasisBankBlockEntity bank) {
         super(ModMenus.HORSE_STASIS_BANK.get(), containerId);
+        this.player = inventory.player;
         this.bank = bank;
         this.chambers = bank != null
                 ? bank.chambers()
@@ -97,7 +123,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
      * gene" equivalent - because two chambers are never the same chamber and a
      * rack of spare empties is a reasonable thing to keep beside the full ones.
      */
-    private static final class ChamberSlot extends Slot {
+    private final class ChamberSlot extends Slot {
 
         ChamberSlot(Container container, int index, int x, int y) {
             super(container, index, x, y);
@@ -112,6 +138,63 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         public int getMaxStackSize() {
             return 1;
         }
+
+        @Override
+        public boolean isActive() {
+            return activeOnTab(true);
+        }
+    }
+
+    /**
+     * <b>Every slot is live on the server; the tab only hides them on the
+     * client.</b> The shelf's rule, for the shelf's reason: the server cannot
+     * know which tab the player is looking at, and the client will not send a
+     * click on a slot it is not drawing.
+     */
+    private boolean activeOnTab(boolean tab) {
+        return !player.level().isClientSide() || chamberTab == tab;
+    }
+
+    public void setChamberTab(boolean chambers) {
+        this.chamberTab = chambers;
+    }
+
+    // ------------------------------------------------------------------
+    // What the Browse tab reads
+    // ------------------------------------------------------------------
+
+    /**
+     * One occupied chamber: the tier of the chamber, and the horse inside it.
+     *
+     * <p>The tier travels with the row because it is the gate on what the Browse
+     * tab may say about that horse - {@link StasisTier#searchable()} and the two
+     * flags above it, never a tier compared by name.
+     */
+    public record Stored(StasisTier tier, StasisSnapshot snapshot) {
+    }
+
+    /**
+     * Every horse filed here, in slot order.
+     *
+     * <p>Read off the slots rather than sent, like {@link #occupied()}: each
+     * chamber carries its whole horse in a data component for the creative
+     * pick-block reason {@code StasisSnapshot} spells out, so the client already
+     * has all of this. Empty chambers are not rows - the Browse tab lists
+     * horses, and the count on the title row is where empties are already
+     * accounted for.
+     */
+    public List<Stored> stored() {
+        List<Stored> out = new ArrayList<>();
+        for (int i = 0; i < chambers.getContainerSize(); i++) {
+            ItemStack stack = chambers.getItem(i);
+            if (stack.getItem() instanceof StasisChamberItem chamber) {
+                StasisSnapshot snapshot = StasisChamberItem.snapshotOf(stack);
+                if (snapshot != null) {
+                    out.add(new Stored(chamber.tier(), snapshot));
+                }
+            }
+        }
+        return out;
     }
 
     // ------------------------------------------------------------------
