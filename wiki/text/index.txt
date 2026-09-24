@@ -46,6 +46,7 @@ wiki/breed-format.html#where	all	Where a breed may come from
 wiki/breeding.html#H	coding	H. Client sync, the information screen, family tree
 wiki/breeding.html#breeding-debug	coding	Every draw, written down (dev builds)
 wiki/breeding.html#drift	coding	Genetic drift
+wiki/breeding.html#family-overview	coding	The family overview — every horse at once
 wiki/breeding.html#miscarriage	coding	The miscarriage — and why it does not name the gene
 wiki/breeding.html#play	gameplay	Breeding, as a player sees it
 wiki/breeding.html#rename	coding	D. Name-tag rename
