@@ -48,7 +48,11 @@ public final class HorseRecordCodecs {
             Codec.STRING.optionalFieldOf("bred_by").forGetter(HorseRecord::bredBy),
             Codec.INT.optionalFieldOf("generation", 0).forGetter(HorseRecord::generation),
             PARENT_STATS.optionalFieldOf("parent_stats").forGetter(HorseRecord::parentStats),
-            Codec.BOOL.optionalFieldOf("gelded", false).forGetter(HorseRecord::gelded)
+            Codec.BOOL.optionalFieldOf("gelded", false).forGetter(HorseRecord::gelded),
+            // Vanilla keeps the owner server-side only, so it rides here to reach
+            // the client at all (HorseRecord.ownedBy). Reconciled against
+            // vanilla's owner by HorseOwnerTrackingHandler, which is the authority.
+            UUIDUtil.STRING_CODEC.optionalFieldOf("owner_id").forGetter(HorseRecord::ownerId)
     ).apply(instance, HorseRecord::new));
 
     public static final Codec<HorseRecord> CODEC = MAP_CODEC.codec();

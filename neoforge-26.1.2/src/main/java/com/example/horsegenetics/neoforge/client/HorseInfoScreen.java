@@ -414,13 +414,18 @@ public final class HorseInfoScreen extends Screen {
         return Component.literal(hideBaseline ? "Only what it carries" : "Every locus");
     }
 
+    /** What {@link #ownsHorse()} said when the widgets were last applied. */
+    private boolean lastOwned;
+
     private void applyTabWidgets() {
+        lastOwned = ownsHorse();
+        boolean owned = lastOwned;
         // Naming is for horses you own. The screen opens on anything now (sneak
         // and use - HorseInfoInteraction), so a stranger's horse and the cowboy's
         // stock both reach this, and a box you can type in but not submit is
         // worse than no box. The server refuses it as well; this is the half that
         // stops a player being told "no" only after they have typed a name.
-        boolean overview = tab == Tab.OVERVIEW && ownsHorse();
+        boolean overview = tab == Tab.OVERVIEW && owned;
         if (barnBox != null) {
             barnBox.visible = overview;
             barnBox.active = overview;
@@ -455,20 +460,26 @@ public final class HorseInfoScreen extends Screen {
     }
 
     /**
-     * Whether the viewing player owns this horse - vanilla tame plus owner UUID,
-     * matching {@code HorseOwnership.isOwner} on the server.
+     * Whether the viewing player owns this horse, matching
+     * {@code HorseOwnership.isOwner} on the server.
      *
-     * <p>Read off {@code getOwnerReference()} rather than {@code getOwner()}: the
-     * latter only resolves while the owner entity is loaded, so it reports "not
-     * yours" about your own horse whenever you are not standing next to it.
+     * <p><b>Read off the record, not the entity.</b> The obvious
+     * {@code horse.getOwnerReference()} is always {@code null} here:
+     * {@code AbstractHorse.defineSynchedData} registers one value, the flags
+     * byte behind {@code isTamed()}, and keeps its owner in a plain field that
+     * only ever goes to NBT. So the client sees that a horse is tamed and never
+     * by whom, and asking the entity made this return {@code false} for
+     * everybody - which is why the barn-name box below was invisible to the
+     * owner of the horse as well as to a stranger. The record carries the owner
+     * precisely so that this question has an answer on the client;
+     * {@code HorseOwnerTrackingHandler} keeps it level with vanilla's.
      */
     private boolean ownsHorse() {
         if (horse == null || !horse.isTamed()) {
             return false;
         }
-        var owner = horse.getOwnerReference();
         var viewer = Minecraft.getInstance().player;
-        return owner != null && viewer != null && viewer.getUUID().equals(owner.getUUID());
+        return viewer != null && live().ownedBy(viewer.getUUID());
     }
 
     /**
@@ -572,6 +583,12 @@ public final class HorseInfoScreen extends Screen {
         super.tick();
         if (heldTicks++ % 20 == 0) {
             sendHold(true);
+        }
+        // Ownership arrives with the record, and the record is re-synced while
+        // the screen is open - so a horse tamed or handed over with this screen
+        // up would otherwise keep the naming box hidden until a tab switch.
+        if (ownsHorse() != lastOwned) {
+            applyTabWidgets();
         }
         if (pendingOpen != null) {
             HorseRecord arrived = ClientHorseRecordCache.byId(pendingOpen);

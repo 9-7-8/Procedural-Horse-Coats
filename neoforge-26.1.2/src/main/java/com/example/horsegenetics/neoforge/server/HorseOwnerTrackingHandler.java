@@ -16,6 +16,14 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  * (inside the horse's own tick, after the bucking logic), not during the
  * interact packet. So instead: every couple of seconds, any tamed horse whose
  * record has no {@code tamedBy} yet gets its owner's username recorded.
+ *
+ * <p>The same pass also <b>mirrors vanilla's owner onto the record</b>, which is
+ * the only way a client ever learns who owns a horse: {@code AbstractHorse}
+ * synchronises its flags byte and nothing else, so {@code getOwnerReference()}
+ * is always {@code null} client-side. Unlike {@code tamedBy} - "who tamed it",
+ * written once - this is reconciled on <em>every</em> pass, because ownership
+ * moves: a transfer paper, a cowboy sale, or a horse going wild again all change
+ * it, and a mirror that only fills a blank would keep showing the old owner.
  */
 @EventBusSubscriber
 public final class HorseOwnerTrackingHandler {
@@ -23,9 +31,17 @@ public final class HorseOwnerTrackingHandler {
     @SubscribeEvent
     static void onEntityTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Horse horse)) return;
-        if (horse.level().isClientSide() || !horse.isTamed()) return;
+        if (horse.level().isClientSide()) return;
         if (horse.tickCount % 40 != 0) return;                 // ~ every 2s
         if (!HorseRecords.hasRealRecord(horse)) return;
+
+        // The owner mirror, every pass and regardless of tamed: a horse that has
+        // gone wild again owns nobody, and leaving the old UUID on the record
+        // would keep offering its previous owner the naming box.
+        EntityReference<LivingEntity> ref = horse.isTamed() ? horse.getOwnerReference() : null;
+        HorseRecords.setOwner(horse, ref == null ? null : ref.getUUID());
+
+        if (!horse.isTamed()) return;
         if (HorseRecords.of(horse).tamedBy().isPresent()) return;
 
         String ownerName = resolveOwnerName(horse);

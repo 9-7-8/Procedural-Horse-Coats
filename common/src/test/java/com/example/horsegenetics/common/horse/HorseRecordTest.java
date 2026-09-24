@@ -21,13 +21,16 @@ class HorseRecordTest {
     private static final UUID DAM = UUID.fromString("00000000-0000-0000-0000-0000000000aa");
     private static final UUID SIRE = UUID.fromString("00000000-0000-0000-0000-0000000000bb");
 
+    private static final UUID OWNER = UUID.fromString("00000000-0000-0000-0000-0000000000cc");
+    private static final UUID STRANGER = UUID.fromString("00000000-0000-0000-0000-0000000000dd");
+
     /** A genome standing in for "whatever this horse carries" - these tests are about the record. */
     private static final Genome GENOME = Genome.of(Genotype.wildType(), new SeededRng(7L));
 
     private static HorseRecord raw(UUID id, String first, String last, String code) {
         return new HorseRecord(id, first, last, Optional.empty(), code, GENOME.epigenomeCode(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty(),
-                false);
+                false, Optional.empty());
     }
 
     /**
@@ -124,7 +127,53 @@ class HorseRecordTest {
     @Test
     void negativeGenerationClamped() {
         assertEquals(0, new HorseRecord(ID, "a", "b", null, "EeAa", "",
-                null, null, null, null, null, -9, null, false).generation());
+                null, null, null, null, null, -9, null, false, null).generation());
+    }
+
+    /**
+     * Ownership is carried on the record because vanilla's own answer never
+     * reaches the client - {@code AbstractHorse} synchronises its flags byte and
+     * keeps the owner in an NBT-only field, so a client-side
+     * {@code getOwnerReference()} is always null. The naming box on the horse
+     * screen was invisible to everyone, its owner included, for exactly that
+     * reason.
+     */
+    @Test
+    void ownershipIsCarriedOnTheRecordAndIsViewerSpecific() {
+        HorseRecord wild = raw(ID, "A", "B", "EeAa");
+        assertTrue(wild.ownerId().isEmpty());
+        assertFalse(wild.ownedBy(OWNER), "a horse nobody owns is nobody's");
+
+        HorseRecord owned = wild.withOwner(OWNER);
+        assertTrue(owned.ownedBy(OWNER));
+        assertFalse(owned.ownedBy(STRANGER), "a stranger does not get the naming box");
+        assertFalse(owned.ownedBy(null), "no viewer, no ownership");
+    }
+
+    /**
+     * Ownership moves - a transfer paper, a cowboy sale, a horse going wild
+     * again - so the mirror has to be able to change and to clear, not just fill
+     * a blank the way {@code tamedBy} does.
+     */
+    @Test
+    void ownershipCanBeReassignedAndCleared() {
+        HorseRecord sold = raw(ID, "A", "B", "EeAa").withOwner(OWNER).withOwner(STRANGER);
+        assertFalse(sold.ownedBy(OWNER), "the previous owner keeps nothing");
+        assertTrue(sold.ownedBy(STRANGER));
+
+        HorseRecord feral = sold.withOwner(null);
+        assertTrue(feral.ownerId().isEmpty());
+        assertFalse(feral.ownedBy(STRANGER));
+    }
+
+    /** Ownership rides along with every other edit rather than being dropped by it. */
+    @Test
+    void ownershipSurvivesAnUnrelatedEdit() {
+        HorseRecord renamed = raw(ID, "A", "B", "EeAa")
+                .withOwner(OWNER)
+                .withBarnName(Optional.of("Pip"));
+        assertTrue(renamed.ownedBy(OWNER));
+        assertEquals(Optional.of("Pip"), renamed.barnName());
     }
 
     /**

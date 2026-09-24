@@ -27,6 +27,7 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The Layer-2 boundary. Its only job is translation: build / read
@@ -277,6 +278,18 @@ public final class HorseRecords {
         HorseRecord record = of(horse);
         if (record.tamedBy().isEmpty()) {
             apply(horse, record.withTamedBy(username));
+        }
+    }
+
+    /**
+     * Mirror vanilla's owner onto the record so the client can read it
+     * ({@code HorseRecord.ownedBy}); {@code null} for a horse owned by nobody.
+     * A no-op when it already agrees, so this is safe to call on a tick.
+     */
+    public static void setOwner(Horse horse, UUID owner) {
+        HorseRecord record = of(horse);
+        if (!record.ownerId().equals(Optional.ofNullable(owner))) {
+            apply(horse, record.withOwner(owner));
         }
     }
 

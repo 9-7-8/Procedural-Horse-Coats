@@ -45,6 +45,10 @@ import java.util.UUID;
  * its genome and its breed ({@link Traits}); {@link #traits()} resolves them on
  * demand.
  *
+ * <p>{@code ownerId} mirrors vanilla's owner so the <b>client</b> can know it.
+ * Vanilla syncs a horse's tamed flag but never its owner, so ownership is a
+ * server-only fact unless the mod carries it - see {@link #ownedBy}.
+ *
  * <p>{@code parentStats} is the low/high of the two parents' resolved speed and
  * health at the moment of birth, so the UI can say whether this foal came out
  * above both its parents, between them, or below.
@@ -63,7 +67,8 @@ public record HorseRecord(
         Optional<String> bredBy,
         int generation,
         Optional<ParentStats> parentStats,
-        boolean gelded) {
+        boolean gelded,
+        Optional<UUID> ownerId) {
 
     public static final int MAX_BARN_NAME = 16;
 
@@ -80,6 +85,7 @@ public record HorseRecord(
         tamedBy = tamedBy == null ? Optional.empty() : tamedBy;
         bredBy = bredBy == null ? Optional.empty() : bredBy;
         parentStats = parentStats == null ? Optional.empty() : parentStats;
+        ownerId = ownerId == null ? Optional.empty() : ownerId;
         generation = Math.max(0, generation);
     }
 
@@ -102,7 +108,7 @@ public record HorseRecord(
         return new HorseRecord(id, "", "", Optional.empty(),
                 Genotype.wildType().toCode(), "", Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0,
-                Optional.empty(), false);
+                Optional.empty(), false, Optional.empty());
     }
 
     /**
@@ -115,7 +121,7 @@ public record HorseRecord(
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(), breedToken(breedToken),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty(),
-                false);
+                false, Optional.empty());
     }
 
     /** A foundation horse with no breed identity ({@code "feral_mixed"}). */
@@ -133,7 +139,7 @@ public record HorseRecord(
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(), breedToken(breedToken),
                 Optional.of(motherId), Optional.of(fatherId), Optional.empty(), Optional.empty(), generation,
-                Optional.empty(), false);
+                Optional.empty(), false, Optional.empty());
     }
 
     /** A bred foal with no breed identity carried through - test / legacy convenience. */
@@ -184,7 +190,7 @@ public record HorseRecord(
     public HorseRecord withGenome(Genome genome) {
         return new HorseRecord(id, firstName, lastName, barnName,
                 genome.genotypeCode(), genome.epigenomeCode(), breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded, ownerId);
     }
 
     /**
@@ -197,12 +203,12 @@ public record HorseRecord(
     public HorseRecord withParents(UUID mother, UUID father) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
                 Optional.ofNullable(mother), Optional.ofNullable(father),
-                tamedBy, bredBy, generation, parentStats, gelded);
+                tamedBy, bredBy, generation, parentStats, gelded, ownerId);
     }
 
     public HorseRecord withBreed(String breedToken) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
-                breedToken(breedToken), motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
+                breedToken(breedToken), motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded, ownerId);
     }
 
     /** What to show in-game: the barn name if set, otherwise "first last". */
@@ -238,31 +244,62 @@ public record HorseRecord(
 
     public HorseRecord withNames(String newFirst, String newLast) {
         return new HorseRecord(id, newFirst, newLast, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded, ownerId);
     }
 
     public HorseRecord withBarnName(Optional<String> newBarnName) {
         return new HorseRecord(id, firstName, lastName, newBarnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded, ownerId);
     }
 
     public HorseRecord withTamedBy(String username) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, Optional.of(username), bredBy, generation, parentStats, gelded);
+                motherId, fatherId, Optional.of(username), bredBy, generation, parentStats, gelded, ownerId);
     }
 
     public HorseRecord withBredBy(String username) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, Optional.of(username), generation, parentStats, gelded);
+                motherId, fatherId, tamedBy, Optional.of(username), generation, parentStats, gelded, ownerId);
     }
 
     public HorseRecord withParentStats(ParentStats newParentStats) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, Optional.ofNullable(newParentStats), gelded);
+                motherId, fatherId, tamedBy, bredBy, generation, Optional.ofNullable(newParentStats), gelded,
+                ownerId);
     }
 
     public boolean hasKnownParents() {
         return motherId.isPresent() || fatherId.isPresent();
+    }
+
+    // --- ownership ------------------------------------------------------
+
+    /**
+     * The same horse owned by {@code owner} ({@code null} for a horse that has
+     * gone wild again). Mirrors vanilla's owner rather than replacing it: the
+     * server decides who owns a horse, and this carries that answer to the
+     * client, which cannot otherwise know it - see {@link #ownedBy}.
+     */
+    public HorseRecord withOwner(UUID owner) {
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded,
+                Optional.ofNullable(owner));
+    }
+
+    /**
+     * Whether {@code viewer} owns this horse.
+     *
+     * <p><b>This exists because vanilla's answer is server-only.</b>
+     * {@code AbstractHorse} keeps its owner in a plain field written to NBT, and
+     * defines exactly one synched value - the flags byte behind
+     * {@code isTamed()}. So a client sees that a horse is tamed and never by
+     * whom, and {@code getOwnerReference()} is always {@code null} there. Any
+     * client-side "is this mine" test has to read this field instead; the server
+     * still decides, and {@code HorseOwnership.isOwner} remains the authority
+     * that actually refuses an action.
+     */
+    public boolean ownedBy(UUID viewer) {
+        return viewer != null && ownerId.isPresent() && ownerId.get().equals(viewer);
     }
 
     // --- gelding --------------------------------------------------------
@@ -275,7 +312,7 @@ public record HorseRecord(
      */
     public HorseRecord withGelded(boolean value) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats, value);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, value, ownerId);
     }
 
     /**
