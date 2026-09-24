@@ -45,3 +45,19 @@ Queue: horses should eat food dropped on the ground near them, if it's in their 
 
 - Dyed leather horse armor should be very common in loot tables, and should appear in loot tables that contain normal human leather armor.
 
+Horse cryostasis - a way to store lots of horses without a server-lag cost. Horses in stasis do not tick: no hunger, no growing up, nothing. The whole point is that the cheapest tier must be cheap, so people actually use it instead of just keeping horses loaded.
+
+Four tiers of stasis chamber item, each the previous plus one more ingredient:
+- "Basic Horse Stasis Chamber": glass bottle + wheat + a bucket of water (any modded water container matches) + a horse hair. The bucket is NOT consumed on crafting. This tier stores the horse but makes none of its information searchable.
+- "Intermediate Horse Stasis Chamber": basic chamber + an eye of ender. Makes all the horse's information searchable.
+- "Advanced Horse Stasis Chamber": intermediate + a gold ingot. Also lets the bank passively collect milk/drops from the stored horse.
+- "Spacer Horse Stasis Chamber": advanced + a diamond. Also lets the horse be bred while still inside the bank (the other parent must also be in a Spacer chamber); the foal pops out into the world.
+
+"Horse Stasis Bank" block/structure to hold the chambers: crafted from 5 wood in a U along the bottom row, an ender pearl in the center, an iron ingot in each of the two top corners, and a horse hair in the top center.
+- UI has two tabs like the equine research bench: Storage (put/take stasis chambers) and Browse (look up the horses currently stored).
+- What the Browse tab can show/do depends on the tier of chamber each horse is stored in (see the four tiers above).
+- Milk/drops collected from Advanced+ chambers go into a 9-slot buffer on the bank, collectable by the player.
+- If the bank has a supply of food and water, it slowly heals the horses stored inside it (this is the one exception to "horses don't tick" - healing, not hunger/aging/etc).
+
+"Emergency Horse Stasis Chamber": a basic stasis chamber surrounded by ender pearls (crafting shape TBD). Held or carried passively by the owner, it watches every horse they own and automatically absorbs one into it the instant its health drops below 10% - an automatic life-save, not a manual store. A horse cannot take damage while inside a stasis chamber, so this is a hard stop against a horse dying. Needs a rule for what happens if it triggers while already holding a horse (second emergency chamber needed? refuse and let the horse die? queue the next crisis?).
+

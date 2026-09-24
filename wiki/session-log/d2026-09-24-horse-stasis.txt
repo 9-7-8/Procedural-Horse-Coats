@@ -1,0 +1,55 @@
+2026-09-24 — horse stasis is added to the intake list and given a roadmap page
+
+    No code. The owner described a new system in three passes across the session — the four
+    stasis-chamber tiers and the Horse Stasis Bank first, then the Emergency Horse Stasis
+    Chamber as a queued add-on — and each was written into intake/To do.txt verbatim before
+    anything else happened, per the standing rule that the intake file is never left holding an
+    idea only in chat history.
+
+The system, as specified
+
+    Four tiers of stasis-chamber item, each the last plus one ingredient (Basic: bottle + wheat
+    + a water container, matched by tag so any modded bucket-equivalent works, not consumed on
+    craft + horse hair; Intermediate: + eye of ender; Advanced: + gold ingot; Spacer: + diamond),
+    each tier unlocking one more thing the bank can do with a horse stored in it — nothing
+    searchable, then everything searchable, then milk/drop collection into a 9-slot buffer, then
+    in-bank breeding with the foal popping out. The Horse Stasis Bank itself is a block (5 wood
+    in a U, an ender pearl centre, iron corners, a horse hair top-centre) with a two-tab menu —
+    Storage and Browse — modelled explicitly on the Equine Research Shelf's own tabbed menu. The
+    whole point is server cost: horses in stasis do not tick at all (no hunger, no growing up)
+    except for a slow food/water-gated heal the bank can optionally provide. The Emergency Horse
+    Stasis Chamber (a basic chamber ringed with ender pearls) auto-captures an owned horse the
+    instant its health crosses 10%, since a horse cannot take damage while in any chamber.
+
+Turned into a roadmap page rather than left in the intake file
+
+    wiki/horse-stasis.html was written as a pure Roadmap-tab page, on the pattern
+    undead-horses.html already establishes for a plan with no Gameplay/Coding tabs yet, and
+    registered once in wiki/pages.js's "Planned" section. Research first: none of the mod's
+    existing horse-in-an-item mechanics (transfer papers, breed spawn eggs, the stallion seed
+    jar) freeze and later resume one specific *living* entity with its bond, cooldowns, gear and
+    in-progress pregnancy intact — capture/release of a live entity is genuinely new work, and
+    the page says so up front rather than implying it is UI on an existing primitive. The page
+    lays out which of the horse's several attachments (horse_record, horse_gear, horse_care,
+    horse_social, horse_repro, horse_cooldowns, armed_carrots, passification, cowboy_brand) a
+    snapshot has to carry versus the ones that are legitimately session-only, names the
+    anticipated files by the existing convention (a StasisSnapshot record beside HorseRecord in
+    common/, a block+menu+screen trio modelled on the research shelf's), sketches the
+    capture/release shape in Java, and orders the build so the one new mechanism (capture and
+    release, tested against a single Basic chamber with no block at all) lands and is trusted
+    before the Advanced/Spacer bank behaviours that act on a horse which is not a loaded entity.
+    Two open questions are flagged rather than answered: the water-container recipe needs a
+    remainder that returns the same emptied container rather than always a vanilla bucket, and
+    the emergency chamber's double-trigger case (a second horse crosses 10% while the chamber
+    already holds one) has no chosen behaviour yet.
+
+    Re-baked after the edit: bake-roadmap-index.mjs (this page's Roadmap tab is now one of the
+    forty-eight collected), check-links.mjs, build-search-index.mjs, bake-agent-text.mjs. All
+    green; sync-page-views.mjs found nothing to change.
+
+What is still just the intake paragraph, on the owner's own call
+
+    The user asked mid-session to stop after the page and leave the intake entries in
+    intake/To do.txt as they were, rather than deleting them now that the plan has a home on the
+    wiki — so the to-do file still carries the full spec verbatim, and removing it is a later,
+    explicit decision rather than an automatic consequence of writing the page.

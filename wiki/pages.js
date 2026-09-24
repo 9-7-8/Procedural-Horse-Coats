@@ -135,6 +135,7 @@ window.HG.pages = {
                 { href: "curly-coat.html", text: "Curly coat", kind: "natural", views: ["coding"] },
                 { href: "forced-riding.html", text: "Forced riding: the kelpie", kind: "magical", views: ["coding"] },
                 { href: "horse-browser.html", text: "The horse browser", kind: "core", views: ["coding"] },
+                { href: "horse-stasis.html", text: "Horse stasis: chambers and the bank", kind: "core", views: ["coding"] },
                 { href: "horsemanship.html", text: "Horsemanship", kind: "core", views: ["coding"] },
                 { href: "item-horse-shoes.html", text: "Horse shoes", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "lasso.html", text: "The lasso", kind: "core", views: ["coding"] },
