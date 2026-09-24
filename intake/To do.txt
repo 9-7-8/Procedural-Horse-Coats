@@ -12,7 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-- When an owned horse takes damage, only its owner should receive a chat message with the horse name, damage source, and, when applicable, how to cure or prevent it. This should be configurable and on by default.
 - When an owned horse dies, post a server-wide death message. This should be configurable and on by default.
 
 - When a horse reaches 20% health (threshold configurable), it should buck off its owner, jump fences, and do whatever it can to escape damage and avoid dying.

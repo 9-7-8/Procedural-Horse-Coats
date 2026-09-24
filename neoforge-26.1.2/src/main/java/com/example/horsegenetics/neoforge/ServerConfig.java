@@ -134,6 +134,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue GESTATION_DAYS;
 
     /**
+     * <b>Does an owner hear about their horse being hurt?</b> See
+     * {@code server/HorseHurtNoticeHandler} for who is told and how often.
+     */
+    public static final ModConfigSpec.BooleanValue DAMAGE_NOTICES;
+
+    /**
      * <b>The reproductive day while {@code debug.tools} is on</b> - one real
      * minute instead of twenty. Owner's call, 2026-09-13: a heat, a pregnancy
      * and half a cycle each become a minute, which is long enough to walk
@@ -208,6 +214,15 @@ public final class ServerConfig {
                         "Game time, not the day counter: sleeping and /time set move nothing.")
                 .defineInRange("fertility.gestation_days",
                         com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
+        DAMAGE_NOTICES = builder
+                .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
+                        "The line names the horse, what hurt it, and what to do about that -",
+                        "shade for a horse burning in the sun, a wall for one being blown up.",
+                        "Only the owner is told, only while they are in the same world as the",
+                        "horse, never when they are the one dealing the damage, and at most",
+                        "once every few seconds per horse, so a pen on fire is not a wall of text.",
+                        "Turn it off on a server where players keep hundreds of horses.")
+                .define("notices.owned_horse_damage", true);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -302,6 +317,15 @@ public final class ServerConfig {
     public static com.example.horsegenetics.common.repro.ReproTiming reproTiming() {
         return com.example.horsegenetics.common.repro.ReproTiming.of(gestationDays(),
                 debugTools() ? DEBUG_REPRO_DAY_TICKS : com.example.horsegenetics.common.repro.ReproTiming.DAY_TICKS);
+    }
+
+    /** {@code notices.owned_horse_damage}, safely. */
+    public static boolean damageNotices() {
+        try {
+            return DAMAGE_NOTICES.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
     }
 
     /** Shorthand: may a lethal genotype actually kill a foal, or refuse a pairing? */
