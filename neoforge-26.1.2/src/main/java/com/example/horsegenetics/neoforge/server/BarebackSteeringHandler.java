@@ -45,9 +45,9 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  *       saddle layer an empty stack when the component is present. The mod owns
  *       the horse renderer, so this costs nothing.</li>
  *   <li><b>It is taken back off</b> the moment the rider is gone, the bond
- *       drops, or the rider turns out not to be the owner - checked every tick,
- *       so the window in which a phantom saddle exists without an eligible
- *       rider on it is one tick.</li>
+ *       drops, the rider turns out not to be the owner, or the horse bolts -
+ *       checked every tick, so the window in which a phantom saddle exists
+ *       without an eligible rider on it is one tick.</li>
  *   <li><b>It cannot be kept.</b> A player <i>can</i> open a horse's inventory
  *       while riding it, so {@link #reclaim} sweeps the rider's inventory for
  *       phantom saddles and destroys them. Without that, "ride your best horse
@@ -57,6 +57,16 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  * <p><b>A horse the player has saddled themselves is never touched</b> - the
  * component is the only thing that marks a saddle as ours, and it is set on
  * exactly the stacks this class creates.
+ *
+ * <h2>And it stands down while the horse is bolting</h2>
+ * {@link HorseEscapeGoal} takes a horse's saddle off at low health precisely so
+ * the rider stops steering and the animal's own navigation can carry them out.
+ * This class lends a saddle <b>every tick</b>, so without the
+ * {@link HorseEscapeGoal#bolting} check in {@link #eligibleRider} the reins
+ * would be back in the rider's hands on the next tick - and only for horses at
+ * the top bond tier, which is to say only for the horses a player cares most
+ * about. A bug of that shape would have looked like the escape behaviour working
+ * fine in testing and failing on the one animal anybody rides.
  */
 @EventBusSubscriber
 public final class BarebackSteeringHandler {
@@ -111,7 +121,17 @@ public final class BarebackSteeringHandler {
             return null;
         }
         HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
-        return care.behaviourTier() >= TIER ? rider : null;
+        if (care.behaviourTier() < TIER) {
+            return null;
+        }
+        // AND NOT WHILE IT IS RUNNING FOR ITS LIFE. HorseEscapeGoal takes the
+        // saddle off precisely to stop the rider steering, and this class
+        // re-lends one every tick - so without this the best-bonded horses in
+        // the game, the only ones that get a phantom saddle at all, would be
+        // exactly the ones the escape behaviour never worked for. The check is
+        // last because it is the most expensive one here and the cheap
+        // eligibility tests have already ruled out almost every horse.
+        return HorseEscapeGoal.bolting(horse) ? null : rider;
     }
 
     /**

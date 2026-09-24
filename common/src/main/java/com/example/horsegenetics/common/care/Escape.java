@@ -57,6 +57,29 @@ public final class Escape {
     public static final long THREAT_LINGERS_TICKS = 200L;
 
     /**
+     * <b>How much faster a bolting horse is</b>, as a fraction added to its own
+     * movement speed - thirty percent. It is carrying a rider now rather than
+     * shedding one, and a horse that runs for its life at its walking pace is
+     * not escaping anything; the boost is also what pays for the distance a
+     * frightened animal actually covers.
+     */
+    public static final double SPEED_BOOST = 0.30;
+
+    /**
+     * <b>How much higher a bolting horse jumps</b>, as a fraction added to its
+     * own jump strength - forty percent.
+     *
+     * <p>This is the number that decides whether "jump fences" is true. A fence
+     * is a block and a half, which wants a jump strength of about 0.5; the
+     * weakest horses sit at 0.4 and the strongest at 1.0, so unboosted, roughly
+     * the bottom of the range cannot leave a fenced pen at all. Forty percent
+     * takes 0.4 to 0.56 and clears the rail, which turns the promise from
+     * "a good jumper escapes" into "a horse escapes, and a good one escapes
+     * further". Deliberately not enough to make a Falabella clear a wall.
+     */
+    public static final double JUMP_BOOST = 0.40;
+
+    /**
      * <b>Should this horse start running?</b> {@code threshold} is the
      * configured fraction; zero or less turns the behaviour off entirely, which
      * is what a server that does not want it sets.
@@ -86,5 +109,44 @@ public final class Escape {
      */
     public static boolean threatFresh(long hurtAt, long now) {
         return hurtAt >= 0L && (now < hurtAt || now - hurtAt <= THREAT_LINGERS_TICKS);
+    }
+
+    /**
+     * <b>What became of the saddle</b> when the horse took itself over. The
+     * rider needs to be told which, because two of the three mean they have to
+     * go and get something.
+     */
+    public enum Saddle {
+        /**
+         * There was nothing to take. Either the horse was being ridden bare, or
+         * the only saddle on it was the phantom one that bareback steering lends
+         * - and that one is not the rider's to keep.
+         */
+        NONE,
+        /** Into the rider's own inventory, which is where it belongs. */
+        POCKETED,
+        /** On the ground, because the rider had nowhere to put it. */
+        DROPPED
+    }
+
+    /**
+     * <b>The line the rider reads when the horse stops taking direction.</b>
+     *
+     * <p>It exists because the alternative is a player whose horse has silently
+     * stopped answering the controls, which reads as the mod breaking rather
+     * than as the horse deciding. One line, to the rider alone, and only when
+     * there is a rider - a horse bolting out of an empty paddock says nothing to
+     * anybody.
+     */
+    public static String reinsLost(String horseName, Saddle saddle) {
+        String line = horseName + " has bolted, and will not be steered until it is calm.";
+        switch (saddle) {
+            case POCKETED:
+                return line + " Your saddle is in your pack.";
+            case DROPPED:
+                return line + " Your saddle is on the ground beside you - your pack was full.";
+            default:
+                return line;
+        }
     }
 }

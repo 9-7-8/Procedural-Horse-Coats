@@ -1,4 +1,4 @@
-2026-09-24, after the death notice — a horse close to death bucks its rider and bolts
+2026-09-24, after the death notice — a horse close to death takes itself over and carries its rider out
 
     One bullet, the first one left in the Bugs section of intake/To do.txt, in the
     owner's words:
@@ -41,17 +41,78 @@ Why this could not be a health check inside HorsePanicGoal
     half: damage is instantaneous and flight is not, and a horse that stops the tick
     the zombie stops swinging is standing next to a zombie.
 
-The buck is every tick, which is a deliberate divergence from the advice
+Then the owner amended it, and the buck came out again
 
-    intake/Implementation advice.txt asked for "a single buck-off". It is repeated
-    instead, and the reason is the same sentence that made this a separate goal: a
-    horse carrying somebody is steered by that rider rather than by its navigation, so
-    one buck followed by a remount is the same as the goal not running. Climb back on
-    inside the ten seconds and you come back off.
+    First it bucked, every tick rather than once, on the reasoning that a horse
+    carrying somebody is steered by that rider so one buck plus a remount is the same
+    as the goal not running. The owner's amendment, within the hour:
 
-    That is the call most likely to be wrong about how it feels to play, so it is
-    written as a pass condition on horse-care.html#escape-0924 rather than buried: if
-    the owner would rather ride a bolting horse to safety, the fix is one line.
+        Instead of bucking the rider off, can you have the horse run to safety with
+        the rider, removing the saddle (make sure to know how this interacts with
+        bareback riding) and pathing itself to safety, getting a boost to speed and
+        jump height while it's fleeing?
+
+    and then, separately: the saddle should go into the rider's inventory.
+
+    This is the better feature and it is also cheaper, because ONE ACT DOES BOTH
+    HALVES. Vanilla keeps both answers in the saddle slot: getControllingPassenger()
+    hands control to a player passenger only if isSaddled(), and isImmobile() stops the
+    mob's own AI moving a horse only while it is ridden AND saddled. So taking the
+    saddle off makes the rider a passenger and hands movement to the navigation in the
+    same stroke — no rider-input suppression, no mixin. The buck was a way of reaching
+    that state by throwing the rider away instead of carrying them.
+
+    The saddle goes to rider.getInventory().add, and rider.drop when that fails, which
+    is ModNetworking.handleTackSlot's existing idiom rather than a new one. An unridden
+    horse keeps its tack: removing it is about who is steering. And unsaddle() is called
+    again from tick(), because a rider sitting on a horse can put a saddle back on it —
+    but only start() says anything, or re-saddling would cost a line of chat per tick.
+
+Bareback riding was the right thing to be told to check
+
+    The owner's parenthesis found a bug before it existed. BarebackSteeringHandler
+    implements bareback steering by LENDING THE HORSE A REAL SADDLE carrying
+    ModDataComponents.PHANTOM_SADDLE, and re-lending it every tick. Two separate
+    failures follow, and the naive implementation has both:
+
+    First, a phantom saddle handed to the rider is a free saddle per bolt — the same
+    duplication hole reclaim() exists to close (gap 156), reached from a new direction.
+    So the stack is checked for the component and a phantom is destroyed rather than
+    given, and the rider is told nothing about a saddle they never owned.
+
+    Second, and worse, the lender would put the reins back on the very next tick. That
+    bug has the worst available shape: the escape behaviour would work in every test
+    and fail only on a bond-81+ horse, which is to say only on the best horse on the
+    server and the only kind anybody rides bare. eligibleRider now returns null while
+    HorseEscapeGoal.bolting(horse) holds.
+
+    bolting() is a scan of the goal selector rather than a flag on the horse. A static
+    set keyed by UUID goes stale the moment a bolting horse is unloaded or killed
+    mid-flight, and stop() is not guaranteed to run; a scan cannot. It is asked last in
+    eligibleRider, after the cheap tests have ruled out all but a handful of animals.
+
+The boosts, and why they are on JUMP_STRENGTH rather than the impulse
+
+    Escape.SPEED_BOOST is 0.30 and Escape.JUMP_BOOST is 0.40, both transient
+    ADD_MULTIPLIED_TOTAL modifiers so a boost is a proportion of that animal rather
+    than a flat amount that would be everything to a Falabella and nothing to a Shire.
+
+    The ids live under escape/ and NOT under gene/, deliberately:
+    GeneAbilityHandler.clearAttributes sweeps only ids it owns, which is itself the fix
+    for a pregnant mare who lost repro/late_pregnancy to another system's tick. Outside
+    gene/ nothing else will take these off, so stop() must — and does.
+
+    JUMP_BOOST is the number that decides whether "jump fences" is true at all. A fence
+    is a block and a half, which wants about 0.5 of jump strength, and the weakest
+    horses sit at 0.4; 40% takes 0.4 to 0.56. That turns the earlier promise from "a
+    good jumper escapes" into "a horse escapes, and a good one escapes further", and it
+    is the one line of EscapeTest that is about the game rather than about arithmetic.
+
+    Moving the attribute rather than the jump impulse is also deliberate.
+    HorseInstantJumpMixin refuses to touch the impulse precisely because the
+    information screen reads its metres off the attribute, so an impulse change would
+    make that figure a lie. Boosting the attribute keeps it honest: a bolting horse
+    shows more metres because it really does jump further.
 
 MOVE and not JUMP, although it jumps
 
@@ -91,14 +152,19 @@ Fences are jumped at, not pathed over
 
 Not played
 
-    EscapeTest covers the rules. Nothing about the behaviour is tested because all of
-    it is NeoForge, and the checks are on horse-care.html#escape-0924. Two of them
-    matter more than the rest. The fence one cannot be read off a single horse — a
-    poor jumper failing to leave a pen is the honest outcome and a good one failing is
-    a bug, so it wants two horses with very different jump stats in the same pen. And
-    the water one is the only thing that would show the JUMP-flag reasoning to be
-    wrong: a swimming horse that drowns or stands still means FloatGoal and this goal
-    are fighting after all.
+    EscapeTest covers the rules and the three sentences. Nothing about the behaviour is
+    tested because all of it is NeoForge, and the checks are on
+    horse-care.html#escape-0924, ordered so the cheapest catastrophe is first.
+
+    THE SADDLE DUPLICATOR IS THE ONE TO RUN FIRST: ride a bond-81+ horse bare, hurt it
+    to the threshold, and make sure no saddle lands in the inventory. It is an item
+    exploit rather than a behaviour that looks wrong, and a saddled-horse test passing
+    proves nothing about it — both of the bareback failures are invisible to every test
+    that does not involve a tier-3 horse ridden bare.
+
+    After that: that the boost comes off again (a horse permanently buffed because
+    stop() never ran is a silent, cumulative bug), and the fence with a POOR jumper now
+    rather than a good one, since the boost is sized to have settled that case.
 
 Next
 

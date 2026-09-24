@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.care;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,5 +68,34 @@ class EscapeTest {
     @Test
     void aClockThatWentBackwardsErrsTowardStayingAlive() {
         assertTrue(Escape.threatFresh(1_000L, 40L));
+    }
+
+    @Test
+    void theRiderIsToldWhereTheirSaddleWent() {
+        assertEquals("Ravensong has bolted, and will not be steered until it is calm."
+                        + " Your saddle is in your pack.",
+                Escape.reinsLost("Ravensong", Escape.Saddle.POCKETED));
+        assertEquals("Ravensong has bolted, and will not be steered until it is calm."
+                        + " Your saddle is on the ground beside you - your pack was full.",
+                Escape.reinsLost("Ravensong", Escape.Saddle.DROPPED));
+    }
+
+    @Test
+    void aBarebackRiderIsNotPromisedASaddleTheyNeverHad() {
+        // The phantom saddle bareback steering lends is not the rider's to keep,
+        // so this case must not offer them one to go and pick up.
+        assertEquals("Ravensong has bolted, and will not be steered until it is calm.",
+                Escape.reinsLost("Ravensong", Escape.Saddle.NONE));
+    }
+
+    @Test
+    void theJumpBoostClearsAFenceForTheWeakestHorse() {
+        // The whole justification for the number: a fence is a block and a half,
+        // which wants about 0.5 of jump strength, and the weakest horses sit at
+        // 0.4. If this ever fails, "it jumps fences" has quietly become
+        // "a good jumper jumps fences" again.
+        double weakest = 0.4;
+        assertTrue(weakest * (1.0 + Escape.JUMP_BOOST) >= 0.5,
+                "a boosted 0.4 jump must still clear a fence");
     }
 }

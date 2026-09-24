@@ -1,38 +1,71 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.care.Escape;
+import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 
 /**
- * <b>A horse close to death throws its rider off and runs.</b> Below the
- * configured fraction of its own maximum health it stops being a mount: it
- * bucks whoever is aboard, drops whatever it was fighting, and runs from what
- * hurt it, jumping anything in the way it can clear.
+ * <b>A horse close to death takes itself over and carries its rider out.</b>
+ * Below the configured fraction of its own maximum health it stops answering
+ * the reins - the saddle comes off into the rider's pack, it drops whatever it
+ * was fighting, and it runs faster and jumps higher than it can when anybody is
+ * steering, with the rider still aboard.
  *
- * <p>Owner's ask: <i>"When a horse reaches 20% health (threshold configurable),
- * it should buck off its owner, jump fences, and do whatever it can to escape
- * damage and avoid dying."</i> The threshold is
- * {@code behaviour.escape_health_fraction}; the arithmetic - when it starts,
- * when it is allowed to stop, and how long it outlasts the blow - is
- * {@link Escape}, in the game-free module, where it can be tested.
+ * <p>Owner's ask, as amended: <i>"instead of bucking the rider off, have the
+ * horse run to safety with the rider, removing the saddle, and pathing itself
+ * to safety, getting a boost to speed and jump height while it's fleeing."</i>
+ * The threshold is {@code behaviour.escape_health_fraction}; the arithmetic -
+ * when it starts, when it is allowed to stop, how long it outlasts the blow, and
+ * how much of a boost it gets - is {@link Escape}, in the game-free module,
+ * where it can be tested.
  *
- * <h2>Why this is not just vanilla's panic with a health check</h2>
- * {@code AbstractHorse} already registers {@link net.minecraft.world.entity.ai.goal.PanicGoal}
- * (swapped for {@link HorsePanicGoal} by {@link HorseAggroHandler}), and it
- * already runs from what hits it. It differs from this in all three of the
- * things the owner asked for: it <b>never runs while the horse is ridden</b>,
- * because a mounted horse's movement belongs to its passenger and panic has no
- * business ejecting anybody; it holds ground when the horse has a target, which
- * is right for a gladiator at full health and suicidal at two hearts; and it is
- * not gated on health at all, so it is the same behaviour for a scratch as for
- * a mortal wound. This goal is the mortal-wound case, and it sits <b>above</b>
- * panic so it wins the movement flag while it applies.
+ * <h2>Taking the saddle off <em>is</em> the mechanism, not a flourish</h2>
+ * Vanilla decides who may steer inside
+ * {@code AbstractHorse.getControllingPassenger()}, which hands control to a
+ * player passenger <b>only if {@code isSaddled()}</b>; and
+ * {@code AbstractHorse.isImmobile()} stops the mob's own AI moving a horse only
+ * while it is both ridden <b>and</b> saddled. So one act settles both halves of
+ * what was asked for: with the saddle gone the rider is a passenger, the
+ * navigation moves the animal, and the horse carries them out of trouble. There
+ * is no rider-input suppression to write and no mixin to add - which is the
+ * whole reason the first version of this goal ejected the rider instead, and
+ * that turned out to be the worse trade.
+ *
+ * <h2>How this meets bareback steering, which is the sharp edge</h2>
+ * {@link BarebackSteeringHandler} implements bareback riding by <b>lending the
+ * horse a real saddle</b> carrying {@link ModDataComponents#PHANTOM_SADDLE}, and
+ * it re-lends it every tick. Two consequences, and both would be bugs if this
+ * class did the obvious thing:
+ *
+ * <ul>
+ *   <li><b>A phantom saddle must never reach the rider's inventory.</b> Handing
+ *       one over is a saddle duplicator - the same hole {@code reclaim} exists
+ *       to close. So the stack is checked for the component, and a phantom is
+ *       destroyed rather than given.</li>
+ *   <li><b>The lender has to stand down while the horse is bolting</b>, or it
+ *       puts the reins straight back in the rider's hands on the next tick and
+ *       the whole behaviour is invisible for exactly the best-bonded horses the
+ *       mod is about. {@link #bolting} is what it asks, and it is deliberately
+ *       a scan of the goal selector rather than a flag on the horse: there is
+ *       then no state to leak when a bolting horse is unloaded mid-flight.</li>
+ * </ul>
  *
  * <h2>Priority 0, and the two goals it shares it with</h2>
  * Nothing a horse can be doing outranks not dying, so this is registered at
@@ -57,14 +90,13 @@ import java.util.EnumSet;
  * {@code BLOCKED} to a ground navigator, so no path over one is ever produced.
  * {@link SunShadeGoal} met this first and this does the same honest thing: when
  * the navigator refuses, drive the move control straight at the escape point
- * instead, and press jump while horizontal movement is blocked. A horse's jump
- * strength is a real stat with a real range, so a strong one clears the rail
- * and a Falabella does not. <b>An approximation of intent, not a pathfinder</b>
- * - and the one part of this that wants watching in-game.
+ * instead, and press jump while horizontal movement is blocked. What
+ * {@link Escape#JUMP_BOOST} buys is that this now works for the weak end of the
+ * jump range too, rather than only for a good jumper.
  */
 public final class HorseEscapeGoal extends Goal {
 
-    /** Faster than vanilla's panic, which is 1.2. This one is about dying. */
+    /** How much of its boosted speed the navigation asks for. Vanilla's panic is 1.2. */
     private static final double SPEED = 1.7;
 
     /** How far each leg of the flight runs before it is re-aimed. */
@@ -72,6 +104,17 @@ public final class HorseEscapeGoal extends Goal {
 
     /** Re-aim no more often than this, in ticks. */
     private static final int REPATH_INTERVAL = 20;
+
+    /**
+     * The two modifiers held for the length of the flight. Outside {@code gene/},
+     * deliberately: {@code GeneAbilityHandler.clearAttributes} sweeps only the
+     * ids it owns, and a shared prefix is how a pregnant mare once lost her
+     * speed modifier to another system's tick.
+     */
+    private static final Identifier SPEED_ID =
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "escape/speed");
+    private static final Identifier JUMP_ID =
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "escape/jump");
 
     private final Horse horse;
 
@@ -93,6 +136,25 @@ public final class HorseEscapeGoal extends Goal {
     public HorseEscapeGoal(Horse horse) {
         this.horse = horse;
         setFlags(EnumSet.of(Flag.MOVE));
+    }
+
+    /**
+     * <b>Is this horse running for its life right now?</b> Asked by
+     * {@link BarebackSteeringHandler}, which must not lend it a saddle while it
+     * is - that would hand the reins back on the next tick.
+     *
+     * <p>A scan rather than a flag. The callers that need it have already
+     * narrowed to a horse with an eligible rider aboard, so this runs for a
+     * handful of animals at most, and it cannot go stale the way a static set
+     * keyed by UUID does when a bolting horse is unloaded or killed mid-flight.
+     */
+    static boolean bolting(AbstractHorse horse) {
+        for (WrappedGoal wrapped : horse.goalSelector.getAvailableGoals()) {
+            if (wrapped.isRunning() && wrapped.getGoal() instanceof HorseEscapeGoal) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -119,11 +181,18 @@ public final class HorseEscapeGoal extends Goal {
         // Drop the fight. A horse with an aggression gene at two hearts is
         // holding a target the melee goal would keep it standing next to.
         horse.setTarget(null);
-        boolean carried = horse.isVehicle();
-        buck();
+        Escape.Saddle saddle = unsaddle();
+        if (horse.getFirstPassenger() instanceof Player rider) {
+            // Once, on the tick it takes over. The alternative is a player whose
+            // horse has silently stopped answering the controls, which reads as
+            // the mod breaking rather than as the horse deciding.
+            rider.sendSystemMessage(Component.literal(
+                    Escape.reinsLost(HorseNotices.name(horse), saddle)));
+        }
+        boost();
         ActionTrace.log("escape", ActionTrace.describeShort(horse) + " bolting at "
                 + String.format("%.0f/%.0f", horse.getHealth(), horse.getMaxHealth())
-                + (carried ? " - rider thrown" : "")
+                + " - saddle " + saddle
                 + (horse.getLastHurtByMob() == null ? " - nothing visible hurt it"
                         : " - from " + horse.getLastHurtByMob().getType()
                                 .builtInRegistryHolder().key().identifier()));
@@ -137,6 +206,7 @@ public final class HorseEscapeGoal extends Goal {
         from = null;
         lastDanger = -1L;
         fencedIn = false;
+        unboost();
         horse.getNavigation().stop();
     }
 
@@ -145,11 +215,12 @@ public final class HorseEscapeGoal extends Goal {
         if (inDanger()) {
             lastDanger = horse.level().getGameTime();
         }
-        // EVERY TICK, NOT ONLY AT THE START. A player who remounts a bolting
-        // horse gets thrown again: the owner's word was "buck off its owner",
-        // and a horse carrying somebody is steered by them rather than by this
-        // goal, so a rider aboard is the same as the goal not running.
-        buck();
+        // EVERY TICK, NOT ONLY AT THE START. The rider can re-saddle a horse
+        // they are sitting on, and a saddle back in the slot is the reins back
+        // in their hands - vanilla decides who steers from inside that slot.
+        if (horse.isSaddled()) {
+            unsaddle();
+        }
         if (--repathCooldown <= 0) {
             repathCooldown = REPATH_INTERVAL;
             Vec3 to = aim();
@@ -176,11 +247,73 @@ public final class HorseEscapeGoal extends Goal {
                 || horse.isFreezing();
     }
 
-    /** Off its back, whoever they are. */
-    private void buck() {
-        if (horse.isVehicle()) {
-            horse.ejectPassengers();
+    /**
+     * <b>Take the saddle off, and account for it.</b> Into the rider's own
+     * inventory where there is a rider and room, on the ground where there is
+     * not, and destroyed where it was never theirs - a phantom saddle lent by
+     * {@link BarebackSteeringHandler} is the one stack that must not be handed
+     * over, because handing it over mints a free saddle.
+     *
+     * <p>An unridden horse keeps its tack. Removing it is about who is steering,
+     * and with nobody aboard there is nothing to take control of - a bolting
+     * horse shedding gear across a paddock would be item churn for no gameplay.
+     *
+     * <p>Silent, and called again from {@link #tick} because a rider sitting on
+     * a horse can put a saddle back on it, and a saddle back in the slot is the
+     * reins back in their hands. Only {@link #start} says anything, or a player
+     * re-saddling a bolting horse would get a line a tick.
+     */
+    private Escape.Saddle unsaddle() {
+        ItemStack saddle = horse.getItemBySlot(EquipmentSlot.SADDLE);
+        if (saddle.isEmpty() || !(horse.getFirstPassenger() instanceof Player rider)) {
+            return Escape.Saddle.NONE;      // bare, or nobody to take it from
         }
+        horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
+        if (saddle.has(ModDataComponents.PHANTOM_SADDLE.get())) {
+            return Escape.Saddle.NONE;      // never the rider's; it simply goes
+        }
+        // The same "into the pack, else the floor" as ModNetworking's tack swap,
+        // so a saddle taken off a horse lands in one place whichever way it came
+        // off.
+        ItemStack theirs = saddle.copy();
+        if (rider.getInventory().add(theirs)) {
+            return Escape.Saddle.POCKETED;
+        }
+        rider.drop(theirs, false);
+        return Escape.Saddle.DROPPED;
+    }
+
+    /** Faster and higher, for as long as it is running. */
+    private void boost() {
+        modify(Attributes.MOVEMENT_SPEED, SPEED_ID, Escape.SPEED_BOOST);
+        modify(Attributes.JUMP_STRENGTH, JUMP_ID, Escape.JUMP_BOOST);
+    }
+
+    /** And back to itself. {@code stop} is the only thing that takes these off. */
+    private void unboost() {
+        AttributeInstance speed = horse.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speed != null) {
+            speed.removeModifier(SPEED_ID);
+        }
+        AttributeInstance jump = horse.getAttribute(Attributes.JUMP_STRENGTH);
+        if (jump != null) {
+            jump.removeModifier(JUMP_ID);
+        }
+    }
+
+    /**
+     * Transient and multiplied against the horse's own total, so a boost is a
+     * proportion of what that animal already is rather than a flat amount that
+     * would be everything to a Falabella and nothing to a Shire.
+     */
+    private void modify(net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
+            Identifier id, double amount) {
+        AttributeInstance instance = horse.getAttribute(attribute);
+        if (instance == null) {
+            return;     // no such attribute on this animal; not an error
+        }
+        instance.addOrUpdateTransientModifier(new AttributeModifier(
+                id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
     /**
