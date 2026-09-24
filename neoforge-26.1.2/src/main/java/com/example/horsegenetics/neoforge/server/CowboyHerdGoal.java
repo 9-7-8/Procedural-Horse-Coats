@@ -68,10 +68,24 @@ public final class CowboyHerdGoal extends Goal {
         return entity instanceof Cowboy c && c.isAlive() ? c : null;
     }
 
+    /**
+     * <b>A horse with a target has stopped being part of a string.</b> This goal
+     * and {@link HorseMeleeGoal} are both at priority 3 and both hold
+     * {@link Flag#MOVE}, and equal priority cannot preempt - so whichever takes
+     * movement first keeps it. Without this, a horse rallying to the man's
+     * defence that happened to be strung out behind him would walk to heel
+     * while the melee goal starved, which is the same failure the panic goal
+     * had ({@code HorseAggroHandler.addAggroGoals}). Following resumes by
+     * itself once the target is forgotten.
+     */
+    private boolean fighting() {
+        return horse.getTarget() != null;
+    }
+
     @Override
     public boolean canUse() {
-        if (horse.isTamed() || horse.isVehicle() || horse.isLeashed()) {
-            return false; // sold, or somebody is on it
+        if (horse.isTamed() || horse.isVehicle() || horse.isLeashed() || fighting()) {
+            return false; // sold, somebody is on it, or it is busy
         }
         this.cowboy = resolveCowboy();
         return cowboy != null && needsToMove();
@@ -87,7 +101,7 @@ public final class CowboyHerdGoal extends Goal {
      */
     @Override
     public boolean canContinueToUse() {
-        if (horse.isTamed() || horse.isVehicle() || horse.isLeashed()) {
+        if (horse.isTamed() || horse.isVehicle() || horse.isLeashed() || fighting()) {
             return false;
         }
         return cowboy != null && cowboy.isAlive() && !settled();

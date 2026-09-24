@@ -1,9 +1,12 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.data.CowboyBrand;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.neoforge.entity.Cowboy;
 import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Enemy;
@@ -41,7 +44,10 @@ import java.util.List;
  *       is how a tamed guardian or a tamed dam fights at all.</li>
  *   <li><b>{@link #onHorseHurt}</b> - on damage from a living attacker, the
  *       victim and every herd-mate within {@value #HERD_ALERT_RADIUS} blocks
- *       target the attacker.</li>
+ *       target the attacker. A <b>cowboy's string</b> counts as a herd here,
+ *       though it is held together by a brand rather than by a lead mare.</li>
+ *   <li><b>{@link #onCowboyHurt}</b> - and hitting the <i>man</i> rallies them
+ *       too, which is what makes killing him for his horses cost something.</li>
  * </ul>
  *
  * <p>Tamed horses are never affected. Debug-dimension horses take no damage
@@ -130,8 +136,13 @@ public final class HorseAggroHandler {
         }
 
         aggro(victim, attacker);
+        // A cowboy's string rallies the same way a wild band does, and for the
+        // same reason - it is a herd, it just has a man at the head of it
+        // instead of a mare. It is a different field, though: a branded horse
+        // carries the cowboy's id and is not `inWildHerd`, so the gate below
+        // would have turned six horses standing together into six strangers.
         HorseCareAttachment care = victim.getData(ModAttachments.HORSE_CARE.get());
-        if (!care.inWildHerd()) {
+        if (!care.inWildHerd() && !branded(victim).isBranded()) {
             return;
         }
         List<Horse> herd = victim.level().getEntitiesOfClass(Horse.class,
@@ -139,6 +150,41 @@ public final class HorseAggroHandler {
                 h -> h != victim && !h.isTamed() && sameHerd(h, victim) && YardPens.together(victim, h));
         for (Horse mate : herd) {
             aggro(mate, attacker);
+        }
+    }
+
+    /**
+     * <b>Rob the man and his string turns on you</b> (owner, 2026-09-23).
+     * Killing a cowboy clears the brand off his herd and leaves them there to be
+     * tamed ({@code CowboyHandler.onCowboyDied}), which is the mod's one way to
+     * get one of his horses without emeralds - and until now it cost nothing but
+     * the swings, because he flees on a {@code PanicGoal} and six horses stood
+     * and watched. They are the price of the theft: every branded horse within
+     * {@value #HERD_ALERT_RADIUS} blocks of him takes the attacker as its target,
+     * and forgets it the ordinary way once it has lost sight of them for
+     * {@value WildHorseForgetTargetGoal#FORGET_TICKS} ticks.
+     *
+     * <p>Not restricted to players, though in practice only a player can get
+     * here: {@code CowboySafetyHandler} makes an {@link Enemy} incapable of
+     * targeting him at all.
+     *
+     * <p>{@code liveHerd} covers loaded horses only, which is the right set -
+     * an unloaded one could not have seen it happen.
+     */
+    @SubscribeEvent
+    static void onCowboyHurt(LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Cowboy cowboy)
+                || !(cowboy.level() instanceof ServerLevel level)) {
+            return;
+        }
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker) || attacker == cowboy) {
+            return;
+        }
+        double radiusSqr = HERD_ALERT_RADIUS * HERD_ALERT_RADIUS;
+        for (Horse horse : cowboy.liveHerd(level)) {
+            if (!horse.isTamed() && horse.distanceToSqr(cowboy) <= radiusSqr) {
+                aggro(horse, attacker);
+            }
         }
     }
 
@@ -218,7 +264,24 @@ public final class HorseAggroHandler {
         horse.setLastHurtByMob(target);
     }
 
+    private static CowboyBrand branded(Horse horse) {
+        CowboyBrand brand = horse.getData(ModAttachments.COWBOY_BRAND.get());
+        return brand == null ? CowboyBrand.NONE : brand;
+    }
+
+    /**
+     * Two horses in one string, or two in one wild band. The brand is asked
+     * first and answers on its own: a branded horse's {@code care.herd} holds
+     * the <i>cowboy's</i> id rather than a lead horse's and its
+     * {@code inWildHerd} is false, so the wild-band test below says no to a pair
+     * that plainly belongs together.
+     */
     private static boolean sameHerd(Horse a, Horse b) {
+        CowboyBrand ba = branded(a);
+        CowboyBrand bb = branded(b);
+        if (ba.isBranded() || bb.isBranded()) {
+            return ba.cowboy().equals(bb.cowboy());
+        }
         HorseCareAttachment ca = a.getData(ModAttachments.HORSE_CARE.get());
         HorseCareAttachment cb = b.getData(ModAttachments.HORSE_CARE.get());
         return ca.inWildHerd() && cb.inWildHerd() && ca.herd().equals(cb.herd());

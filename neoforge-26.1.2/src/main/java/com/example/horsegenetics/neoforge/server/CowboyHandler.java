@@ -920,10 +920,22 @@ public final class CowboyHandler {
      * anyone may tame them the hard way. They keep their name as their breeder,
      * because that is a fact about where they came from and not a claim on
      * them.
+     *
+     * <p><b>And they stop fighting</b> (owner, 2026-09-24). Hitting the man
+     * rallies his string against the attacker
+     * ({@code HorseAggroHandler.onCowboyHurt}); with him dead there is nobody
+     * left to defend, and a herd that went on kicking would make the one
+     * emerald-free route to a cowboy's horse a fight you have to win twice -
+     * against the man, and then against the animals you came for. The target is
+     * dropped rather than left to the three-second line-of-sight forget, which
+     * would have the player backing round a corner from the horses they have
+     * just freed.
      */
     public static void onCowboyDied(Cowboy cowboy, ServerLevel level) {
         for (Horse horse : cowboy.liveHerd(level)) {
             clearBrand(horse);
+            horse.setTarget(null);
+            horse.setLastHurtByMob(null);
         }
     }
 }
