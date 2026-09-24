@@ -65,6 +65,19 @@ Body and weather
   penalty is the intended weather identity; do not add a compensating positive
   weather pair.
 
+Watcher suite
+-------------
+- Add the existing `horsegenetics.magic_night_watch` and
+  `horsegenetics.magic_day_watch` genes to the Enderpony breed pool.
+- Any of the existing watcher alleles may show up: `Wst`, `Wnr`, `Wsi`, `Wun`,
+  and `Wbh` on either gene, in any combination the breed generation allows.
+- The breed should not be restricted to a single watcher allele or a single
+  watcher pair; the watch behavior is already in the repo and this breed should
+  simply inherit whichever watcher variant(s) roll from those existing loci.
+- In other words, an Enderpony may spawn with any combination of the existing
+  night/day watcher alleles, and those genes already exist in the codebase
+  rather than needing a bespoke Enderpony-only watcher gene.
+
 Spawn and value
 ---------------
 - Spawn in every biome, but at very rare breed weight.
