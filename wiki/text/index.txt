@@ -2760,6 +2760,8 @@ wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
 wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest, and that is the whole of stage two
 wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank
+wiki/horse-stasis.html#browse-coding	coding	The Browse tab reads the stable's papers, not the chamber
+wiki/horse-stasis.html#browse-gameplay	gameplay	The Browse tab: the bank as a list of horses
 wiki/horse-stasis.html#capture-release	coding	Capture and release: it is the lycanthropy swap
 wiki/horse-stasis.html#chambers	gameplay	The four stasis-chamber tiers
 wiki/horse-stasis.html#files	coding	What is where

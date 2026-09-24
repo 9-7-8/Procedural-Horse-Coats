@@ -19,13 +19,13 @@
 <h1 id="horse-stasis">Horse stasis: chambers and the bank</h1>
 <p class="lede">
     <strong>A cheap way to hold horses without them costing server tick time.</strong>
-    A stasis chamber is an item a horse goes into; a Horse Stasis Bank is a block that will
-    hold many chambers and give them a browsable UI. The whole point is the cheapest tier, so
-    a server with hundreds of horses can put most of them somewhere that costs nothing,
-    instead of every horse being a real, ticking entity forever.
-    <strong>The four chambers are built, and so is the bank as a place to keep them.</strong>
-    What the bank cannot do yet is look inside one &mdash; the Browse tab, and everything that
-    acts on a stored horse, is still planned.
+    A stasis chamber is an item a horse goes into; a Horse Stasis Bank is a block that holds
+    many chambers and lets you read the horses inside them. The whole point is the cheapest
+    tier, so a server with hundreds of horses can put most of them somewhere that costs
+    nothing, instead of every horse being a real, ticking entity forever.
+    <strong>The four chambers are built, the bank keeps them, and its Browse tab reads
+    them.</strong> What is still planned is everything that makes the bank <em>act</em> on a
+    stored horse: passive healing, the drop buffer, in-bank breeding.
 </p>
 
 <section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
@@ -55,15 +55,17 @@
     </p>
 </div>
 <table>
-    <tr><th>Item</th><th>Recipe</th><th>Unlocks (needs the bank's Browse tab, which is not built)</th></tr>
+    <tr><th>Item</th><th>Recipe</th><th>Unlocks, in the bank</th></tr>
     <tr><td><strong>Basic Horse Stasis Chamber</strong></td>
         <td>Glass bottle + wheat + horse hair + a container of water, in any arrangement. Any
             modded water container matches, by tag. <strong>The container is not
             consumed.</strong></td>
-        <td>Storage only &mdash; no searchable information.</td></tr>
+        <td>Storage only. The horse is listed by name on the Browse tab and nothing else
+            about it can be asked for.</td></tr>
     <tr><td><strong>Intermediate Horse Stasis Chamber</strong></td>
         <td>Any chamber + an eye of ender.</td>
-        <td>All of the horse's information becomes searchable.</td></tr>
+        <td>All of the horse's information becomes searchable &mdash; the Browse tab shows
+            what it is and the filter box can find it. <strong>Built.</strong></td></tr>
     <tr><td><strong>Advanced Horse Stasis Chamber</strong></td>
         <td>Intermediate + a gold ingot.</td>
         <td>The bank passively collects the horse's milk/drops into its 9-slot buffer.</td></tr>
@@ -74,10 +76,11 @@
 </table>
 <p>
     <strong>Storage is free at every tier and always will be.</strong> What the upper tiers buy
-    is what the bank may <em>do</em> with a horse, so until the bank's Browse tab exists an empty
-    Basic chamber and an empty Spacer chamber do exactly the same job, and the tooltip says so
-    rather than implying otherwise. <strong>Upgrading an occupied chamber carries the horse
-    across</strong> &mdash; you do not have to let it out first.
+    is what the bank may <em>do</em> with a horse &mdash; today that is the Browse tab's search,
+    which an Intermediate unlocks and a Basic does not, and the two tiers above it are paying
+    for things the bank cannot do yet. <strong>Upgrading an occupied chamber carries the horse
+    across</strong> &mdash; you do not have to let it out first, so a Basic chamber is never a
+    dead end.
 </p>
 
 <h2 id="bank-gameplay">The Horse Stasis Bank</h2>
@@ -88,11 +91,47 @@
     <strong>double chest's worth of slots that take stasis chambers and nothing else</strong>.
 </p>
 <p>
-    That is all it does today, and it is worth having on its own: fifty-four bottles in an
-    ordinary chest are fifty-four identical bottles, and this is where a stud farm's shelved
+    That is the first of its two tabs, and it is worth having on its own: fifty-four bottles in
+    an ordinary chest are fifty-four identical bottles, and this is where a stud farm's shelved
     horses live instead. Chambers of any tier go in, full or empty &mdash; a rack of spare
     empties beside the occupied ones is the obvious way to use one. The title bar counts what is
     in there, so a glance tells you <em>nine horses of twelve</em> rather than nothing at all.
+</p>
+
+<h2 id="browse-gameplay">The Browse tab: the bank as a list of horses</h2>
+<p>
+    The second tab is the same chambers read as <em>animals</em>. Every occupied chamber is a
+    line: the horse's name, what it is &mdash; <em>Mare &ndash; Bay, tobiano</em> &mdash; its
+    breed and generation on the right, and the tier of the chamber it is sitting in. Four fit at
+    a time and the list scrolls.
+</p>
+<p>
+    Above it is a filter box, and <strong>it takes the same query language as the Horse
+    Browser's <em>My horses</em> table</strong> (the <kbd>H</kbd> screen) &mdash; see
+    <a href="horse-browser.html">the browser's own page</a> for the full language.
+    <code>mare</code>, <code>gen&gt;2</code>, <code>gene:SB1</code>, <code>-lethal</code>, a bare
+    word for a name or a breed; terms are ANDed and a <code>-</code> negates one. A bank you can
+    ask <em>which of these fifty-four are mares carrying sabino</em> is the reason the tab
+    exists.
+</p>
+<div class="note">
+    <span class="label">The tier gates each line, not the tab</span>
+    <p>
+        A <strong>Basic</strong> chamber is listed &mdash; with its horse's name, because the
+        chamber's own tooltip already tells you that and a bank that hid it would be arguing
+        with the bottle in your hand &mdash; but it says
+        <em>&ldquo;a basic chamber cannot be looked into&rdquo;</em> where the details go, and
+        <strong>no search will ever return it</strong>. When a filter hides rows, the list says
+        how many it could not reach, so a horse never just vanishes from the bank. An eye of
+        ender is what fixes that, and it upgrades the chamber with the horse still inside.
+    </p>
+</div>
+<p>
+    The details come from <strong>your stable's own papers</strong> rather than from the chamber,
+    which has one visible consequence: a horse the records have nothing on &mdash; a chamber
+    somebody else filled and gave you &mdash; is listed by name and says it has no papers,
+    rather than being hidden or guessed at. With a filter typed, the count in the corner turns
+    into <em>3 of 9</em>.
 </p>
 <div class="note">
     <span class="label">Breaking it gives everything back, and it will not burn</span>
@@ -106,9 +145,9 @@
 <p>
     <strong>It is not a hopper target.</strong> Chambers go in and out by hand only &mdash;
     nothing automates filing a horse, and nothing is meant to. What the bank cannot do yet is
-    <em>look inside</em>: there is no search, no drop collection and no in-bank breeding, which
-    is every one of the things the tiers above Basic pay for. They are on the Roadmap tab, in
-    the order they should be built.
+    <em>act</em> on a horse: there is no passive healing, no drop collection and no in-bank
+    breeding, which is what the two tiers above Intermediate pay for. They are on the Roadmap
+    tab, in the order they should be built.
 </p>
 
 <h2 id="refusals">What it refuses, and why it says so</h2>
@@ -177,6 +216,10 @@
     <tr><td><code>common/&hellip;/horse/StasisTier.java</code></td>
         <td>The four tiers and what each unlocks, as cumulative flags rather than a name the
             UI switches on.</td></tr>
+    <tr><td><code>common/&hellip;/horse/StasisBrowseRow.java</code></td>
+        <td>One line of the Browse tab: the chamber's name, its tier, and the horse's
+            <code>HorseListing</code> if the stable has one. Owns the tier gate, the filter call
+            and the count of rows a query cannot reach. <code>StasisBrowseTest</code>.</td></tr>
     <tr><td><code>neoforge/&hellip;/data/StasisSnapshot.java</code></td>
         <td>Name, id and the horse's whole <code>saveWithoutId</code> tag, with its codec and
             stream codec.</td></tr>
@@ -201,10 +244,11 @@
             read.</td></tr>
     <tr><td><code>neoforge/&hellip;/menu/HorseStasisBankMenu.java</code></td>
         <td>The grid over the player's inventory, the <code>ChamberSlot</code> predicate and
-            shift-click. No <code>ContainerData</code>.</td></tr>
+            shift-click, the <code>activeOnTab</code> pair, and <code>stored()</code> - the
+            occupied chambers as tier-and-snapshot pairs. No <code>ContainerData</code>.</td></tr>
     <tr><td><code>neoforge/&hellip;/client/HorseStasisBankScreen.java</code></td>
-        <td>The window, drawn with <code>VanillaPanel</code> and no texture, plus the horse count
-            on the title row.</td></tr>
+        <td>Both tabs, drawn with <code>VanillaPanel</code> and no texture: the chamber grid, the
+            Browse list and its filter box, and the count on the title row.</td></tr>
 </table>
 
 <h2 id="bank-coding">The bank is a filtered chest, and that is the whole of stage two</h2>
@@ -216,23 +260,18 @@
     stasis is a data component on an item, and the bank moves items.
 </p>
 <p>
-    Three things it deliberately does <em>not</em> have yet, each because the thing that needs it
+    Two things it deliberately does <em>not</em> have yet, each because the thing that needs it
     is a later stage:
 </p>
 <ul>
     <li><strong>No ticker.</strong> Nothing advances with nobody looking. Passive healing (stage
         four) is what will want one, and it will want the research shelf's server-only
         <code>createTickerHelper</code> shape.</li>
-    <li><strong>No <code>ContainerData</code>.</strong> There is no progress and no server-side
-        pick to sync. The horse count on the title row is a loop over the slots the client
-        already has, not a synced number &mdash; every chamber carries its whole horse, so both
-        sides can count for free.</li>
-    <li><strong>No tab bar.</strong> A single-tab tab bar is a control that does nothing. When
-        the Browse tab lands, the three pieces to copy are
-        <code>ResearchShelfScreen</code>'s <code>Tab</code> enum and <code>tabAt</code>,
-        <code>VanillaPanel.tab</code>, and the menu's
-        <code>setStoreTab</code>/<code>activeOnTab</code> pair &mdash; the last of which is why
-        every slot stays live on the server and only the client hides one tab's worth.</li>
+    <li><strong>No <code>ContainerData</code>, the Browse tab included.</strong> There is no
+        progress and no server-side pick to sync. The horse count on the title row, and every
+        row of the Browse list, is a loop over the slots the client already has rather than a
+        synced number &mdash; every chamber carries its whole horse, so both sides can count and
+        read for free.</li>
 </ul>
 <div class="note">
     <span class="label">Two small divergences from the chest it resembles</span>
@@ -258,6 +297,63 @@
     would have inverted the whole ladder, since the bottom rung is the one that has to be worth
     using.
 </p>
+
+<h2 id="browse-coding">The Browse tab reads the stable's papers, not the chamber</h2>
+<p>
+    The design call this tab had to make was where a row's details come from, and the Roadmap
+    tab offered two answers: decode a whole entity tag per rendered row, or cache more fields
+    onto the component at capture time. <strong>It is neither.</strong> A horse in a chamber
+    keeps its <code>UUID</code>, the stable's ancestry records are keyed on exactly that, and
+    <code>ClientHorseRoster</code> already holds every one of those records as a
+    <code>HorseListing</code> &mdash; the same rows the
+    <a href="horse-browser.html">Horse Browser</a>'s <em>My horses</em> table sorts. So a row is
+    a map lookup on an id the chamber has already told the client, and the tab inherits the
+    browser's coat description, sex label, breed, generation and whole query language for free.
+</p>
+<p>
+    That is also why the filter box takes <code>HorseQuery</code> verbatim rather than a smaller
+    search of its own: a second, weaker query language in the same mod would have been more code
+    <em>and</em> a worse feature. The screen opens by sending
+    <code>HorseRosterRequestPayload</code>, the same request the browser's Refresh button sends,
+    because a player may never have opened the browser on this client.
+</p>
+<div class="note">
+    <span class="label">What that choice costs, and why it is the right side of the trade</span>
+    <p>
+        The roster is <em>this player's</em> horses, and it is capped at
+        <code>HorseRosterPayload.MAX_ENTRIES</code>. A chamber somebody else filled and handed
+        over, or a stable past that cap, therefore has no row to match &mdash; so the tab draws
+        that line by name and says it has no papers, and a search never returns it. The
+        alternative, decoding fifty-four entity tags to draw a list, buys those rows at the cost
+        of the one thing the whole feature exists to avoid: doing work per horse that nobody is
+        looking at. <strong>The name is never lost either way</strong>, because
+        <code>StasisSnapshot</code> cached it at capture time for exactly this.
+    </p>
+</div>
+<p>
+    <code>StasisBrowseRow</code> is in <code>common/</code>, and holds the gate: a row is
+    searchable only if its own chamber's <code>StasisTier.searchable()</code> says so
+    <em>and</em> there is a listing behind it, and <code>locked()</code> counts the rows that
+    fail that test so the screen can say how many a query could not reach. Both halves are
+    <code>StasisBrowseTest</code>'s subject, because a horse silently disappearing from a
+    filtered bank is the one failure this tab must not have: the player's next thought is that
+    the bank lost it.
+</p>
+<p>
+    Two things the screen does that are not about stasis at all:
+</p>
+<ul>
+    <li><strong>The list is rebuilt on a change, not per frame.</strong> A signature over which
+        horse is in which slot, and in what tier, is taken each frame &mdash; ids and ordinals,
+        no tag decoded &mdash; and the rows are rebuilt only when that, the roster's version, or
+        the query moves. <code>ClientHorseRoster</code> makes the same point about why a table
+        must not resolve a genotype per row per frame.</li>
+    <li><strong>A text box inside a container screen must handle Escape first.</strong>
+        <code>EditBox.canConsumeInput()</code> is true for every key once the box has focus, so
+        guarding on it alone traps the player in the window with no way out - the equestrian
+        bench's own override says so, having been reported for it, and this copies that shape
+        rather than rediscovering it. See <a href="api-notes.html">api-notes.html</a>.</li>
+</ul>
 
 <h2 id="two-custom-recipes">Why two of these are Java recipes</h2>
 <p>
@@ -331,43 +427,20 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        The bank's tier-gated Browse tab, passive healing from a food and water supply, the
-        Advanced drop buffer, Spacer in-bank breeding, and the Emergency Horse Stasis Chamber
-        that self-triggers below 10% health &mdash; everything, in other words, that needs the
-        bank to <em>act</em> on a horse rather than merely shelve it.
+        Passive healing from a food and water supply, the Advanced drop buffer, Spacer in-bank
+        breeding, and the Emergency Horse Stasis Chamber that self-triggers below 10% health
+        &mdash; everything, in other words, that needs the bank to <em>act</em> on a horse
+        rather than shelve it and show it to you.
     </p>
 </div>
 
 <p>
-    Two stages of the build order below have shipped, both on 2026-09-24: the chambers and the
-    capture/release path everything stands on, and then the bank itself as a place to keep them.
-    What follows is the rest of it, in the order it should be built.
+    Three stages of the build order below have shipped, all on 2026-09-24: the chambers and the
+    capture/release path everything stands on, the bank itself as a place to keep them, and its
+    Browse tab. What follows is the rest of it, in the order it should be built &mdash; and
+    every one of the remaining stages needs the bank to change a horse it is holding, which is
+    the part nothing has done yet.
 </p>
-
-<h2 id="browse-tab">The Browse tab</h2>
-<p>
-    The bank exists and stores &mdash; see the Gameplay and Coding tabs. What it cannot do is
-    look inside a chamber, and the second tab is where all of that goes. It opens beside the
-    existing grid the way the
-    <a href="item-research-shelf.html">Equine Research Shelf</a>'s two tabs already do, which is
-    also where the pieces to copy are named on the Coding tab.
-</p>
-<ul>
-    <li><strong>What it shows</strong> is every horse currently stored, and per horse only what
-        that horse's own chamber tier unlocks: nothing searchable for Basic, full search for
-        Intermediate+, a &ldquo;collect&rdquo; affordance for Advanced+, and a breeding UI for
-        Spacer-in-Spacer pairs. It must read <code>StasisTier.searchable()</code> /
-        <code>collectsDrops()</code> / <code>breedsInBank()</code> rather than switching on the
-        tier by name; <code>StasisTierTest</code> is what makes that safe.</li>
-    <li><strong>Start with Intermediate's search</strong>, since Basic needs none and the other
-        two tiers need the bank to act rather than display.</li>
-    <li><strong>It reads the snapshot, which is a tag.</strong> A stored horse is not an entity,
-        so anything the tab wants to show about one &mdash; age, sex, bond, coat, pedigree &mdash;
-        has to be read out of <code>StasisSnapshot.horse()</code> rather than off a live animal.
-        Whether that means decoding per rendered row or caching more of it onto the component at
-        capture time is the first design call the tab makes; the name and id are already cached
-        for exactly this reason.</li>
-</ul>
 
 <h2 id="passive-healing">Passive healing from food and water</h2>
 <p>
@@ -385,7 +458,11 @@
     Advanced's 9-slot milk/drops buffer lives in the bank beside the chamber grid; Spacer's
     in-bank breeding pairs two Spacer chambers and pops the foal out into the world. Both need
     the bank to act on a horse that is not a loaded entity, which is the hardest problem in the
-    whole feature, and both are worth doing last.
+    whole feature, and both are worth doing last. Both also want an affordance on the
+    <strong>Browse tab</strong>, which exists now and gates per row already &mdash; a
+    &ldquo;collect&rdquo; control on a row whose chamber answers
+    <code>collectsDrops()</code>, and a pairing control on two that answer
+    <code>breedsInBank()</code>.
 </p>
 <div class="note">
     <span class="label">Bandwidth is the bank's problem, not the chamber's</span>
@@ -436,12 +513,12 @@
         purely as passive item data.</li>
 </ul>
 <p>
-    The bank's four files exist; the later stages add to them rather than adding more. The Browse
-    tab is a second panel in <code>HorseStasisBankScreen</code> plus an
-    <code>activeOnTab</code> pair in <code>HorseStasisBankMenu</code>; the drop buffer and the
-    food/water slots are further <code>SimpleContainer</code>s in
+    The bank's four files exist; the later stages add to them rather than adding more. The drop
+    buffer and the food/water slots are further <code>SimpleContainer</code>s in
     <code>HorseStasisBankBlockEntity</code>, appended after the chamber grid; passive healing is
-    a <code>getTicker</code> override on <code>HorseStasisBankBlock</code>. See
+    a <code>getTicker</code> override on <code>HorseStasisBankBlock</code>; both of their
+    controls hang off the Browse list that
+    <code>HorseStasisBankScreen</code> already draws. See
     <a href="#bank-coding">the Coding tab</a> for which piece of the research shelf each one
     copies.
 </p>
@@ -452,8 +529,8 @@
         <strong>1.</strong> <s>Capture/release and the chambers</s> &mdash; shipped 2026-09-24.
         <strong>2.</strong> <s>The bank block/menu/screen as a filtered chest</s> &mdash; shipped
         2026-09-24.
-        <strong>3.</strong> The Browse tab, gated to what each tier already unlocks per the
-        table on the Gameplay tab, starting with Intermediate's search since Basic needs none.
+        <strong>3.</strong> <s>The Browse tab, gated per row to what each chamber's tier
+        unlocks</s> &mdash; shipped 2026-09-24, with Intermediate's search.
         <strong>4.</strong> Passive healing from the bank's food/water slots.
         <strong>5.</strong> Advanced's drop buffer, then Spacer's in-bank breeding, since both
         need the bank to actively act on a horse that is not a loaded entity - the hardest UI
@@ -471,11 +548,12 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        The chambers and the bank both compile, craft and pass the recipe-encoding gametest, but
-        <strong>no horse has yet gone into one in a running game</strong> &mdash; so the whole
-        capture/release round trip, the water-container remainder for a modded bucket, the tier
-        upgrade carrying an occupied chamber, and every one of the bank's slots, drops and sync
-        costs are all unplayed.
+        The chambers, the bank and its Browse tab all compile, craft and pass the
+        recipe-encoding gametest, but <strong>no horse has yet gone into one in a running
+        game</strong> &mdash; so the whole capture/release round trip, the water-container
+        remainder for a modded bucket, the tier upgrade carrying an occupied chamber, every one
+        of the bank's slots, drops and sync costs, and every line the Browse tab draws are all
+        unplayed.
     </p>
 </div>
 
@@ -562,6 +640,41 @@
         bankful of pedigreed horses went with them. Guarded by one
         <code>preRemoveSideEffects</code> override, with nothing testing it and nothing logged if
         it is wrong.</li>
+</ul>
+
+<h3 id="verify-browse">The Browse tab, in one pass (NOT played)</h3>
+<p>
+    Worth doing with a bank holding <em>at least</em> one Basic chamber, two Intermediate or
+    better, and one empty, so every branch of the list is on screen at once.
+</p>
+<ul>
+    <li><strong>The tabs work at all.</strong> Two tabs above the window, clicking switches,
+        the chamber grid disappears on Browse and comes back, and the bank re-opens on whichever
+        tab was showing last. <strong>Fail:</strong> a slot still catching clicks behind the
+        list means <code>activeOnTab</code> is not reaching the slots.</li>
+    <li><strong>Each row says the right thing.</strong> An Intermediate+ row reads
+        <em>name / Mare &ndash; Bay, tobiano / Arabian, gen 3</em>, and the name and colour agree
+        with the Horse Browser's own row for that horse. A Basic row says a basic chamber cannot
+        be looked into. <strong>Fail:</strong> every row saying <em>no stable record</em> means
+        the roster never arrived - the screen asks for it on open, so watch for that.</li>
+    <li><strong>The search is the browser's search.</strong> <code>mare</code>,
+        <code>gen&gt;2</code>, <code>arabian</code>, <code>gene:SB1</code>,
+        <code>-lethal</code> each cut the list the way the <kbd>H</kbd> screen cuts it for the
+        same horses, and the corner count turns into <em>3 of 9</em>.</li>
+    <li><strong>The Basic chamber never comes back from a search</strong>, not even for its own
+        name, and the list says how many rows it could not reach. <strong>Fail:</strong> a Basic
+        horse appearing in a filtered list is the tier ladder not being enforced; a Basic horse
+        vanishing with <em>nothing</em> said is the failure the count line exists to
+        prevent.</li>
+    <li><strong>Typing does not close the window.</strong> Click into the filter box and type
+        <em>e</em>, then <em>mare</em>. <strong>Fail:</strong> the inventory key closing the bank
+        mid-word. Then press <kbd>Esc</kbd> once: it must unfocus, and again must close the
+        window rather than trapping you in it - the bug the equestrian bench had.</li>
+    <li><strong>A horse with no papers.</strong> Have a second player capture one and hand you
+        the chamber. <strong>Pass:</strong> it lists by name, says it has no stable record, and
+        no search returns it. This is the deliberate cost of reading the roster rather than the
+        chamber; if it turns out to be common in play, the answer is a per-bank lookup on the
+        server, not a lossier snapshot.</li>
 </ul>
 
 <h3 id="verify-bank-bandwidth">What fifty-four horses cost on the wire (never measured)</h3>

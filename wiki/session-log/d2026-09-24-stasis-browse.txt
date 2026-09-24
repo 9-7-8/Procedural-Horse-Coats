@@ -1,0 +1,106 @@
+2026-09-24 — the Browse tab: stage three, and the design call the Roadmap tab posed had a
+third answer
+
+    Stage three of the six-stage build order on wiki/horse-stasis.html, one bullet in one
+    context window per intake/START HERE.txt, with the intake file already clear of stasis
+    bullets — the Roadmap tab has been the source since stage one. The bank's second tab:
+    every occupied chamber as a line of a list, a filter box over it, and the tier of each
+    chamber deciding what that line may say.
+
+    Four rows at a time, scrolling. Each one is the horse's name with the chamber's tier dim on
+    the right, and under it what the horse is — "Mare - Bay, tobiano" — with its breed and
+    generation on the right. The filter box takes HorseQuery, which is the Horse Browser's own
+    query language, so "mare gen>2 gene:SB1 -lethal" means in the bank exactly what it means on
+    the H screen.
+
+The design call, and why it went a third way
+
+    The Roadmap tab had framed the first decision as a choice of two: decode
+    StasisSnapshot.horse() per rendered row, or cache more fields onto the data component at
+    capture time. Both are work, and both are ways of asking the chamber.
+
+    Neither was needed. A captured horse keeps its UUID — that is the whole reason stage one
+    used saveWithoutId rather than the record the page originally sketched — and the ancestry
+    database is keyed on exactly that id. ClientHorseRoster already holds every one of the
+    player's records as a HorseListing: the same rows the browser's My horses table sorts, with
+    the coat description, the sex label, the breed, the generation and the disorders already
+    resolved once on arrival. So a Browse row is a map lookup on an id the client has already
+    been told, and the tab inherits the entire browser's vocabulary for nothing.
+
+    That is also why the filter is HorseQuery verbatim. A smaller, bank-only search would have
+    been more code and a worse feature: two query languages in one mod, one of which quietly
+    does less.
+
+    What it costs is stated on the Coding tab rather than hidden: the roster is this player's
+    horses, capped at HorseRosterPayload.MAX_ENTRIES. A chamber somebody else filled and handed
+    over has no row to match, so that line draws by name — the name is cached on the snapshot,
+    which is what it was cached for — and says it has no papers, and no search returns it. The
+    alternative buys those rows by doing per-horse work for horses nobody is looking at, which
+    is the one thing this whole feature exists to avoid.
+
+The gate is per row, and it is counted
+
+    A row is searchable only if its own chamber says so — StasisTier.searchable(), never a tier
+    compared by name — and only if there is a listing behind it. A Basic chamber is still
+    listed, with its horse's name, because the chamber's own tooltip names it at every tier and
+    a bank that hid it would be arguing with the bottle in the player's hand. What Basic does
+    not buy is being able to ask: it never comes back from a query, not even for its own name.
+
+    The thing worth being careful about is what that looks like from the outside. A horse
+    dropping out of a filtered list unexplained reads as the bank having lost it, so the list
+    says how many rows a query could not reach, and the count in the window's corner turns into
+    "3 of 9". StasisBrowseRow.locked() is that number, and it is in common/ with the gate so
+    StasisBrowseTest can pin both without a game: a Basic mare must not come back from "mare",
+    a horse with no papers must not come back from its own name, and neither may disappear
+    uncounted.
+
+What is where
+
+    common/.../horse/StasisBrowseRow.java — new. The row: name, tier, listing-or-null; the
+    gate, the filter call and the locked count. Pure Java, no Minecraft, tested.
+    common/.../horse/StasisBrowseTest.java — new. Six tests, including that no half-typed
+    query ("gen>", "genotype:E/", ":") can throw into a render loop.
+    HorseStasisBankMenu — the tab state, which is the research shelf's activeOnTab pair under
+    another name, plus stored(): the occupied chambers as tier-and-snapshot pairs, read off the
+    slots the client already has. Still no ContainerData.
+    HorseStasisBankScreen — both tabs. The Tab enum, tabAt and VanillaPanel.tab are the three
+    pieces the bank's own Coding tab predicted would be copied from ResearchShelfScreen, and
+    they were, unchanged.
+
+Two things that were not about stasis at all
+
+    A text box inside a container screen has to handle Escape first. EditBox.canConsumeInput()
+    is true for every key once the box has focus, Escape included, so guarding on it alone
+    traps the player in the window with no way out. The equestrian bench was reported for
+    exactly that on 2026-09-16 and its override carries the explanation; this copied the shape
+    rather than rediscovering it. The other half of the same trap is that without any override
+    the inventory key closes the window mid-word, which is what the browser's keyPressed
+    documents.
+
+    The list is rebuilt on a change, not per frame. A signature over which horse is in which
+    slot and in what tier — ids and ordinals, no tag decoded — is taken each frame, and the
+    rows rebuild only when that, the roster's version or the query moves. ClientHorseRoster
+    makes the same point about why a table must not resolve a genotype per row per frame.
+
+What was run
+
+    :common:test --tests '*StasisBrowseTest' --tests '*StasisTierTest' green.
+    :neoforge-26.1.2:build green. :web:bakeDesignerAssets re-run because common/ moved, then
+    check-designer-boots.mjs green — and the wasm reverted afterwards, since the new class is
+    not in the designer's reachable graph and a rebuild of an unchanged tree is not
+    byte-reproducible. check-links.mjs green after fixing items.html, which still linked
+    "unbuilt Browse tab" at an anchor that no longer exists. Verification and roadmap indexes,
+    the search index and wiki/text/ all re-baked.
+
+    Nothing has been played. The bank has still never been placed in a running game, so every
+    line the tab draws is newly on wiki/horse-stasis.html's Verification tab, with a one-pass
+    checklist that wants a bank holding at least one Basic chamber, two Intermediate or better
+    and one empty, so every branch of the list is on screen at once.
+
+Next
+
+    Stage four: passive healing from the bank's own food and water slots — the one exception to
+    "a horse in stasis does not tick", and the stage that gives the block its first
+    BlockEntityTicker, in the research shelf's server-only createTickerHelper shape. It edits
+    health inside a snapshot rather than on an entity, which is the first time anything will
+    write into a stored horse.
