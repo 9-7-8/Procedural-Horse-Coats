@@ -22,6 +22,12 @@ public final class ModBlockEntities {
                     () -> new BlockEntityType<>(EquineResearchShelfBlockEntity::new,
                             ModBlocks.RESEARCH_SHELF.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<HorseStasisBankBlockEntity>> HORSE_STASIS_BANK =
+            BLOCK_ENTITIES.register("horse_stasis_bank",
+                    () -> new BlockEntityType<>(HorseStasisBankBlockEntity::new,
+                            ModBlocks.HORSE_STASIS_BANK.get()));
+
     /**
      * <b>Every jump has one</b>, and it holds nothing but the two woods it is
      * made of. Data only - no ticker, no inventory. See {@link JumpBlockEntity}

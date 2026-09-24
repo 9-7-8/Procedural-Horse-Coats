@@ -863,6 +863,23 @@
       "count": 1
     },
     {
+      "id": "horse_stasis_bank",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:iron_ingot",
+        "horsegenetics:horse_hair",
+        "minecraft:iron_ingot",
+        "#minecraft:planks",
+        "minecraft:ender_pearl",
+        "#minecraft:planks",
+        "#minecraft:planks",
+        "#minecraft:planks",
+        "#minecraft:planks"
+      ],
+      "out": "horsegenetics:horse_stasis_bank",
+      "count": 1
+    },
+    {
       "id": "interdimensional_ticket",
       "kind": "shapeless",
       "in": [

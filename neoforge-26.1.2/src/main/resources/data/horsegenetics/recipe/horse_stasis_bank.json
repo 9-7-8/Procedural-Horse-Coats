@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "e": "minecraft:ender_pearl",
+    "h": "horsegenetics:horse_hair",
+    "i": "minecraft:iron_ingot",
+    "w": "#minecraft:planks"
+  },
+  "pattern": [
+    "ihi",
+    "wew",
+    "www"
+  ],
+  "result": {
+    "count": 1,
+    "id": "horsegenetics:horse_stasis_bank"
+  }
+}

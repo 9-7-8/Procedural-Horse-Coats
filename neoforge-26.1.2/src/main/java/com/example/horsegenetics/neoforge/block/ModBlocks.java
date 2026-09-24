@@ -131,6 +131,18 @@ public final class ModBlocks {
             EquestrianBenchBlock::benchProperties);
 
     /**
+     * The <b>Horse Stasis Bank</b> - a chest that takes stasis chambers and
+     * nothing else, so a farm's shelved horses live somewhere you can walk up to.
+     * See {@link HorseStasisBankBlock}; the Browse tab and everything that acts on
+     * a stored horse are later stages of {@code wiki/horse-stasis.html}'s build
+     * order.
+     */
+    public static final DeferredBlock<HorseStasisBankBlock> HORSE_STASIS_BANK = BLOCKS.registerBlock(
+            "horse_stasis_bank",
+            HorseStasisBankBlock::new,
+            HorseStasisBankBlock::bankProperties);
+
+    /**
      * <b>The one jump block.</b> Every style, every wood, every pair of woods.
      *
      * <p>It replaces twelve per-wood blocks. The wood is

@@ -273,6 +273,11 @@ public final class ModItems {
             registerBlockItem("equine_research_shelf",
                     com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF);
 
+    /** The Horse Stasis Bank, as an item you can carry and place. */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> HORSE_STASIS_BANK =
+            registerBlockItem("horse_stasis_bank",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_STASIS_BANK);
+
     /** The Tack Dyeing Bench, as an item you can carry and place. */
     public static final DeferredItem<net.minecraft.world.item.BlockItem> EQUESTRIAN_BENCH =
             registerBlockItem("equestrian_bench",

@@ -80,6 +80,8 @@ public final class ClientSetup {
                 EquestrianBenchScreen::new);
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.JUMP.get(),
                 JumpScreen::new);
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_STASIS_BANK.get(),
+                HorseStasisBankScreen::new);
     }
 
     /** Molten hooves' glowing prints - see {@link HoofprintParticle}. */

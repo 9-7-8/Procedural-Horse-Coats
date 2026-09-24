@@ -9,7 +9,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * This mod's container menus. Only one: the <b>Equine Research Shelf</b>.
+ * This mod's container menus - one per block you stand in front of and open.
  *
  * <p>The Horse Browser used to be here too and deliberately is not any more -
  * it has no slots, so it is a plain screen with no server menu behind it. A menu
@@ -32,6 +32,16 @@ public final class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<EquestrianBenchMenu>> EQUESTRIAN_BENCH =
             MENUS.register("equestrian_bench",
                     () -> new MenuType<>(EquestrianBenchMenu::new, FeatureFlags.VANILLA_SET));
+
+    /**
+     * The <b>Horse Stasis Bank's</b> - a grid of slots that takes stasis chambers
+     * and nothing else. Shelf-shaped: backed by the block entity's container, so
+     * the menu keeps nothing itself. One tab today; the Browse tab is stage three
+     * on {@code wiki/horse-stasis.html}.
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<HorseStasisBankMenu>> HORSE_STASIS_BANK =
+            MENUS.register("horse_stasis_bank",
+                    () -> new MenuType<>(HorseStasisBankMenu::new, FeatureFlags.VANILLA_SET));
 
     /**
      * <b>A jump's</b> - two slots that take a plank or a dye, and three style
