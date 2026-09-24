@@ -21,7 +21,7 @@
 
 <p class="lede">
     What happens to the <strong>world</strong> where the horse died &mdash; a
-    lava source, a water source, or a creeper-sized explosion. It says nothing
+    lava source or a water source. It says nothing
     at all about items; that is
     <a href="gene-magic-item-drop.html">magic item drop</a>, and the two are
     kept apart on purpose.
@@ -40,43 +40,56 @@
     <tbody>
         <tr><td><code>Lav/Lav</code></td><td>a lava source appears where it was standing</td></tr>
         <tr><td><code>Wat/Wat</code></td><td>a water source appears</td></tr>
-        <tr><td><code>Xpl/Xpl</code></td><td>it goes off like a creeper</td></tr>
         <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
-        <tr><td>two <em>different</em> variants</td><td>nothing</td></tr>
+        <tr><td>one of each &mdash; <code>Lav/Wat</code></td><td>nothing</td></tr>
     </tbody>
 </table>
 
 <p>
-    That last row is not a shrug. The three variants are answers to one question
-    &mdash; what happens here &mdash; and a horse carrying two of them is asking
+    That last row is not a shrug. The two variants are answers to one question
+    &mdash; what happens here &mdash; and a horse carrying one of each is asking
     for two contradictory things. Rather than pick a winner, the locus says the
     pair is silent.
 </p>
 
-<h2 id="wild">No feral horse explodes</h2>
+<h2 id="volatile">There was a third one, and it exploded</h2>
+
+<p>
+    <code>Xpl/Xpl</code> made the horse go off like a creeper when it died.
+    <strong>It was retired on 2026-09-24</strong>, on the owner&rsquo;s call,
+    after the locus had been run on a heavily modded server: the half of this
+    gene worth having is the water source, and an explosion whose carrier looks
+    like every other horse is a stable somebody loses to a pairing they did not
+    know they had made. A horse or a splice carrot that still carries
+    <code>Xpl</code> is covered under
+    <a href="#retired">Coding</a> &mdash; in short, the locus comes back at
+    <code>n/n</code> and the carrot does nothing.
+</p>
+
+<h2 id="wild">No feral horse floods its own field</h2>
 
 <p>
     <strong>This is the one locus in the mod whose founder table is carriers
     only.</strong> Wild horses carry the alleles &mdash; a few percent each
     &mdash; and no wild horse is ever born with two of anything, so a feral
-    animal can never crater the ground it dies on.
+    animal never leaves a lava spring where it fell.
 </p>
 
 <p>
     Every other magical gene here does the opposite, and deliberately: a locus
     whose carrier is invisible puts its <em>expressing</em> combinations in the
     wild, so that what you catch is what you watched it do. This one is a hazard
-    rather than a prize, and a horse that leaves a crater has to be
-    somebody&rsquo;s fault.
+    rather than a prize, and a horse that fills its own stall with lava has to
+    be somebody&rsquo;s fault.
 </p>
 
 <h2 id="health">Health</h2>
 
 <p>
-    None while alive. A volatile horse is an ordinary horse right up until it
-    stops being one, and it is worth knowing that the explosion is a
-    <em>mob</em> explosion &mdash; whatever killed it, and whatever was standing
-    nearby, is inside the radius.
+    None while alive. A <code>Lav/Lav</code> horse is an ordinary horse right up
+    until it stops being one &mdash; and then there is a lava source where it
+    was standing, which is a problem for whatever is standing next to it, the
+    floor, and anything it drops.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
@@ -93,7 +106,7 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd><code>horsegenetics.magic_on_death</code></dd></div>
-    <div><dt>Alleles</dt><dd><code>Lav</code> lava spring, <code>Wat</code> water spring, <code>Xpl</code> volatile, <code>n</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Lav</code> lava spring, <code>Wat</code> water spring, <code>n</code></dd></div>
     <div><dt>Priority</dt><dd>134 &mdash; the magical utility band, beside milk</dd></div>
     <div><dt>Reaches the game as</dt><dd>an <code>on_death</code> effect</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
@@ -102,15 +115,51 @@
 <h3 id="verified">Verified</h3>
 
 <p id="verified-on-death">
-    <strong>All three deaths do what they say, on a floor somebody built</strong> (2026-09-15, part of gap 121). The
+    <strong>Both deaths do what they say, on a floor somebody built</strong> (2026-09-15, part of gap 121). The
     yard's row AD kills a horse of each kind with <code>genericKill</code> and reads the pen two seconds later.
     <code>Lav/Lav</code> left <code>minecraft:lava</code> where it fell, and the stone floor under it was intact.
-    <code>Wat/Wat</code> did the same with water, and its vanilla leather dropped as usual. An <code>Xpl/Xpl</code>
-    horse that was also <code>Dia/Dia</code> logged <code>[watch] EXPLOSION | 224 blocks, 1 entities</code>, blew out
-    part of its pen and dropped 5 diamonds and no leather. Both loci fired, which is the cross the split between them
-    exists for. A witness horse 6.2 blocks away kept all 22 health. The yard's earlier deathbed confirmation predates any
-    log of it; this is the logged one.
+    <code>Wat/Wat</code> did the same with water, and its vanilla leather dropped as usual. The yard's earlier
+    deathbed confirmation predates any log of it; this is the logged one. The same run confirmed the retired third
+    allele, which is written up below.
 </p>
+
+<h3 id="retired">The volatile allele, and what a horse still carrying it does now</h3>
+
+<p>
+    <code>Xpl</code> was deleted on <strong>2026-09-24</strong> (owner, from the modded server: <em>&ldquo;remove the
+    explode allele entirely &mdash; a doubled pair should resolve to wild type instead&rdquo;</em>). It had been
+    verified working nine days earlier: an <code>Xpl/Xpl</code> horse that was also <code>Dia/Dia</code> logged
+    <code>[watch] EXPLOSION | 224 blocks, 1 entities</code>, blew out part of its pen and dropped 5 diamonds and no
+    leather, with a witness horse 6.2 blocks away unhurt. It was removed because it worked, not because it did not.
+</p>
+
+<p>
+    Gone with it: the <code>explode</code> choice on the <code>on_death</code> verb &mdash;
+    in <code>AbilityType</code>, in the creator&rsquo;s <code>schema.js</code>, and in the handler&rsquo;s
+    <code>switch</code> &mdash; so no data-driven gene can ask for one either, and
+    <code>GeneDeathHandler.EXPLOSION_RADIUS</code>. The yard&rsquo;s <strong>DEATH BOOM</strong> pen is now
+    <strong>DEATH DIAMONDS</strong>, which keeps the <code>Dia</code> half nothing else watches and drops the blast,
+    the witness and the rebuild-the-pen-afterwards step.
+</p>
+
+<p>
+    <strong>There is no migration, and none is needed.</strong> Three things could be holding an <code>Xpl</code>:
+</p>
+
+<ul>
+    <li><strong>A saved horse.</strong> Its genotype code goes through
+        <code>Genotype.readableStored</code>, which drops a segment naming an allele this build does not have and logs
+        <code>[genes] a saved horse carried '&hellip;', which this version cannot read - that locus is back at its
+        default</code>. The horse loads as <code>n/n</code> here and is otherwise untouched &mdash; the same route
+        Cleave&rsquo;s retired <code>Clv</code> took in 0.5.000.</li>
+    <li><strong>A splice carrot.</strong> The carrot stores
+        <code>known:horsegenetics.magic_on_death:Xpl:Xpl</code> as text and resolves it at breeding time through
+        <code>alleleOrNull</code>, never <code>fromToken</code>, precisely so a retired allele is inert rather than
+        fatal. The carrot is spent and nothing happens, which <code>KnownGeneSpliceTest</code> pins.</li>
+    <li><strong>A gene database entry.</strong> A collected <code>horsegenetics.magic_on_death|Xpl</code> id simply
+        stops matching anything, and the locus&rsquo;s &ldquo;alleles collected&rdquo; total drops by one. Nothing
+        cleans the dead id out of that set; it is a string in NBT that no longer names anything.</li>
+</ul>
 
 <h2 id="split">Why the ground and the drops are two verbs</h2>
 
@@ -151,8 +200,8 @@ if (existing.isAir() || existing.canBeReplaced()
 <p>
     <strong>This used to switch itself off in the horse dimension, and that was the reason it
     appeared to do nothing.</strong> The guard was defensible when written &mdash; a horse
-    dimension full of lava springs and explosions eats itself &mdash; but the yard now has a pen
-    whose entire purpose is killing six horses to see what they leave behind, floored in stone
+    dimension full of lava springs eats itself &mdash; but the yard now has a pen
+    whose entire purpose is killing horses to see what they leave behind, floored in stone
     for exactly that. It was removed on 2026-09-13 after the report &ldquo;drops a sword on death
     did not drop anything&rdquo;, from a pen built that morning which could not have worked for
     one second. It was the <strong>seventh</strong> protection in that dimension to turn out to be
@@ -175,20 +224,41 @@ if (existing.isAir() || existing.canBeReplaced()
 
 <p>
     That argument assumes the outcome is something you would want to find. Here
-    it is not. A wild population of exploding horses would mean a player who has
-    never heard of this gene loses a stable to it, and the discovery would be an
-    accident in the bad direction. So this locus runs the health loci&rsquo;s
-    rule instead &mdash; carriers only, never affected &mdash; and the
-    interesting horse is one you assembled from two ordinary-looking parents.
+    it is not. A wild population of horses that flood or light the ground they
+    die on would mean a player who has never heard of this gene loses something
+    to it, and the discovery would be an accident in the bad direction. So this
+    locus runs the health loci&rsquo;s rule instead &mdash; carriers only, never
+    affected &mdash; and the interesting horse is one you assembled from two
+    ordinary-looking parents.
 </p>
 
 <h2 id="water">The useful one</h2>
 
 <p>
-    Water is on the same locus as lava and the explosion, which makes the whole
-    thing a gamble worth taking: three recessives sharing a locus means a
-    breeder chasing an infinite water source is also breeding, in the same herd,
-    something that will eventually go off.
+    Water is on the same locus as lava, which makes the whole thing a gamble
+    worth taking: two recessives sharing a locus means a breeder chasing an
+    infinite water source is also breeding, in the same herd, the thing that
+    burns the barn down.
+</p>
+
+<h2 id="why-retired">Why the third one went</h2>
+
+<p>
+    The explosion was the strongest version of that gamble and it was cut anyway
+    (2026-09-24), which is worth being honest about: it was not cut for being
+    broken, or unbalanced, or hard to breed. It was cut because of
+    <em>where the mod is actually played</em>. On a server with other people&rsquo;s
+    builds in blast range, a hazard whose carrier is invisible stops being a
+    gamble the breeder took and becomes one their neighbour took without being
+    asked. Lava is the same shape of hazard held to one block, and one block is
+    the difference.
+</p>
+
+<p>
+    The general rule it leaves behind: a magical locus may cost <em>the horse</em>
+    anything, and may cost the <em>breeder</em> whatever they walked into, but an
+    outcome that reaches somebody who never touched the gene has to be small
+    enough to stand next to.
 </p>
 
 </section>
@@ -198,35 +268,38 @@ if (existing.isAir() || existing.canBeReplaced()
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>All three of magic on death&rsquo;s deaths are confirmed on a built floor, which leaves the mixed pairs &mdash; a <code>Lav/Wat</code> horse must do <strong>nothing at all</strong> &mdash; whether anything standing inside a volatile horse&rsquo;s three-block blast is actually hurt by it, and the founder rule that no feral horse can ever leave a crater.</p>
+    <p>Both of magic on death&rsquo;s deaths are confirmed on a built floor, which leaves the mixed pair &mdash; a <code>Lav/Wat</code> horse must do <strong>nothing at all</strong> &mdash; the founder rule that no feral horse can ever leave a lava spring, and, since 2026-09-24, that a saved horse carrying the retired <code>Xpl</code> loads at <code>n/n</code> instead of taking the world down.</p>
 </div>
 
 <h3 id="open-magic-on-death">Still open (NOT played)</h3>
 
 <p>
     The yard&rsquo;s row AD kills one horse of each expressing kind and logs what it left, so the
-    remaining questions are the rows that are supposed to do nothing and the blast radius nothing was
-    standing in: the logged witness horse was 6.2 blocks away, and
-    <code>GeneDeathHandler.EXPLOSION_RADIUS</code> is three.
+    remaining questions are the row that is supposed to do nothing, the founder rule, and the one
+    thing the retirement introduced.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>A mixed pair does nothing.</strong> Kill a <code>Lav/Wat</code> horse (and a
-        <code>Lav/Xpl</code> one) on the same stone floor.
-        <strong>Pass:</strong> no fluid, no crater, and the ordinary leather &mdash; the locus states
+    <li><strong>A horse saved with <code>Xpl</code> still loads.</strong> This is the only check the
+        retirement added, and it is the one that can cost a world. On a save made before 2026-09-24,
+        load a chunk holding a horse whose code contained <code>Xpl</code>.
+        <strong>Pass:</strong> the horse loads, one
+        <code>[genes] a saved horse carried &hellip; that locus is back at its default</code> line
+        appears in the log, and its magic-on-death locus reads <code>n/n</code> in the H&nbsp;menu.
+        <strong>Fail</strong> is an <code>IllegalArgumentException</code> from inside an entity tick,
+        which is a crash every time that chunk loads &mdash; the exact failure
+        <code>readableStored</code> was written for.</li>
+    <li><strong>A mixed pair does nothing.</strong> Kill a <code>Lav/Wat</code> horse on the same stone
+        floor. <strong>Pass:</strong> no fluid, and the ordinary leather &mdash; the locus states
         that two contradictory answers are silent rather than picking a winner, and picking a winner
         anyway would read as correct behaviour to anyone who had not read the page.</li>
-    <li><strong>The explosion hurts what is inside it.</strong> Stand a cow within two blocks of an
-        <code>Xpl/Xpl</code> horse and kill the horse. <strong>Pass:</strong> the cow takes damage and
-        the ground is opened. A blast that logs its block count and harms nothing close to it is a
-        cosmetic explosion, which is not what the gene claims.</li>
     <li><strong>No feral horse carries two copies.</strong> This is the one locus whose founder table
         is carriers only. <strong>Pass:</strong> across a large wild sample every on-death allele you
-        find sits opposite an <code>n</code> &mdash; a single wild <code>Xpl/Xpl</code> horse is a
-        failure of the founder table, not bad luck, and the first evidence of it would be a stable
-        somebody lost.</li>
+        find sits opposite an <code>n</code> &mdash; a single wild <code>Lav/Lav</code> horse is a
+        failure of the founder table, not bad luck, and the first evidence of it would be a burnt
+        pasture.</li>
 </ul>
 </section>
 

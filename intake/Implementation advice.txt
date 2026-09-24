@@ -158,20 +158,15 @@ Validation:
 - Update the relevant wiki and verification page after implementation, rather
   than relying on this intake note as the long-term source of truth.
 
-6. Magical loci: drop the explode allele, and go runtime-registry for lycan/egg-layer/item-drop
+6. Magical loci: go runtime-registry for lycan/egg-layer/item-drop
 =================================================================================================
 Likely code:
-- common/src/main/java/.../genetics/genes/MagicOnDeathGene.java
 - common/src/main/java/.../genetics/genes/LycanGene.java
 - common/src/main/java/.../genetics/genes/EggLayerGene.java
 - common/src/main/java/.../genetics/genes/MagicItemDropGene.java
 - neoforge-26.1.2/src/main/java/.../server/LycanthropyHandler.java
 
 Implementation:
-- Magic on death: delete the Xpl allele and the EXPLODE expression/ability from
-  MagicOnDeathGene; Xpl/Xpl should resolve to WILD like any other mismatched
-  pair. Decide (Design decisions) what an existing Xpl allele on a saved horse
-  or splice recipe becomes, since there is no back-compat path in this repo.
 - Lycan mob list: LycanGene currently hand-lists vanilla mob ids at compile
   time (form("Aly", "minecraft:allay", ...) etc.), grouped only by "non-hostile
   spawn category". Split that into a category blacklist (aquatic: water
@@ -205,9 +200,6 @@ Validation:
 - A round trip test that a genotype recorded against one registry snapshot
   still resolves correctly after mobs/items are added by a fake "other mod" in
   the test fixture.
-- Confirm MagicOnDeathGene has exactly three real outcomes (wild, lava, water)
-  and that Xpl/Xpl (if constructed directly, e.g. from an old save) degrades to
-  WILD rather than throwing.
 
 Additional intake proposal: research papers as allele-pair books
 =================================================================

@@ -1457,11 +1457,14 @@ wiki/gene-magic-on-death.html#hazard	science	The exception that proves the found
 wiki/gene-magic-on-death.html#health	gameplay	Health
 wiki/gene-magic-on-death.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-on-death.html#placement	coding	The fluids only fill a free block
+wiki/gene-magic-on-death.html#retired	coding	The volatile allele, and what a horse still carrying it does now
 wiki/gene-magic-on-death.html#split	coding	Why the ground and the drops are two verbs
 wiki/gene-magic-on-death.html#verified	coding	Verified
+wiki/gene-magic-on-death.html#volatile	gameplay	There was a third one, and it exploded
 wiki/gene-magic-on-death.html#water	science	The useful one
 wiki/gene-magic-on-death.html#what	gameplay	What it does
-wiki/gene-magic-on-death.html#wild	gameplay	No feral horse explodes
+wiki/gene-magic-on-death.html#why-retired	science	Why the third one went
+wiki/gene-magic-on-death.html#wild	gameplay	No feral horse floods its own field
 wiki/gene-magic-pull.html#breeds	coding	A breed’s score reaches its founders
 wiki/gene-magic-pull.html#calibration	coding	Where the numbers come from
 wiki/gene-magic-pull.html#carrot	gameplay	Its gene carrot

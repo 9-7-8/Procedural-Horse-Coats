@@ -1,0 +1,91 @@
+2026-09-24 — the volatile allele is deleted: a horse may flood the ground it dies on, not crater it
+
+    One intake bullet, the first of the "Magical loci and modded content" group and the next one
+    after the wings question: "Remove the 'explode' allele from Magic on death (MagicOnDeathGene,
+    Xpl/Xpl) entirely - a doubled pair should resolve to wild type instead. Decide what happens to
+    any horse or splice that currently carries Xpl."
+
+    It is a tuning ask on something that was built and verified working. Xpl/Xpl had been
+    confirmed in-game nine days earlier — on 2026-09-15 the yard's DEATH BOOM pen logged
+    "[watch] EXPLOSION | 224 blocks, 1 entities", blew out part of its own pen, dropped 5 diamonds
+    and no leather from the Dia/Dia locus on the same horse, and left a witness horse 6.2 blocks
+    away on full health. It was removed because of where the mod is actually played, not because
+    it failed: on a heavily modded server with other people's builds in blast range, a hazard
+    whose carrier is invisible is a gamble the breeder's neighbour takes without being asked.
+
+What went
+
+    MagicOnDeathGene: the Xpl allele, the EXPLODE expression, WILD_EXPLODE_PERCENT and its founder
+    row, and the explode branch of expressionOf/abilitiesFor. The locus is now Lav, Wat, n — n's
+    order index moved 3 -> 2, which nothing reads (Allele#order is a slot order for AllelePair, and
+    genotype codes are tokens). The founder table's n/n weight absorbs the freed 2%.
+
+    The explode choice on the on_death verb went with it, which was a judgement call the bullet did
+    not spell out: AbilityType.ON_DEATH's choice list, the creator's schema.js twin, and
+    GeneDeathHandler's case "explode" plus EXPLOSION_RADIUS. Leaving the verb choice in place would
+    have meant a data-driven gene could still author an exploding horse, which is the thing being
+    removed. No gene in common/src/main/resources uses on_death at all, and the
+    creator-effects-all-verbs fixture already used "water", so nothing authored needed changing.
+
+    The yard's DEATH BOOM pen became DEATH DIAMONDS: a Dia/Dia horse on the same stone floor,
+    keeping the 2-to-5-diamonds-and-no-leather PASS that nothing else in the yard watches, and
+    dropping the blast, the witness horse and the rebuild-the-pen-afterwards step.
+
+What happens to a horse or a splice that still carries it
+
+    That was the half of the bullet that needed an answer rather than a deletion, and the answer is
+    that the machinery for it already exists, in three different places, each already tested:
+
+    - A saved horse: Genotype.readableStored drops a segment naming an allele this build does not
+      have, logs it through GenomeCodeCodecs, and the locus comes back at n/n. This is the route
+      Cleave's retired Clv took in 0.5.000, written after that allele would otherwise have thrown
+      from inside an entity tick and taken the world down every time its chunk loaded. GenotypeTest
+      pins it.
+    - A splice carrot: the carrot stores "known:horsegenetics.magic_on_death:Xpl:Xpl" as text and
+      resolves it at breeding time through alleleOrNull, never Gene#fromToken, specifically so a
+      retired allele is inert instead of fatal. The carrot is spent and nothing happens;
+      KnownGeneSpliceTest pins that too.
+    - A gene-database entry: a collected "horsegenetics.magic_on_death|Xpl" id stops matching
+      anything and the locus's "alleles collected" total drops by one. Nothing cleans the dead id
+      out of that set — it is a string in NBT that no longer names anything. Harmless, and written
+      down on the gene page rather than fixed.
+
+    So there is no migration and none was written, per hard rule 6.
+
+Re-baked
+
+    coat-bake-golden.txt lost exactly one row (horsegenetics.magic_on_death Xpl) and nothing else
+    moved; CoatPipelineGoldenTest, GenotypeTest and KnownGeneSpliceTest all passed unchanged — the
+    whole-horse goldens name their genotypes explicitly, so the founder-table change did not reach
+    them. bakeSpecFixtures + check-parity green (7163 checks, 60 cases). The gene bake chain moved
+    index.html's allele tag and gene-census.html; pages.js, genes.json, marking-facts.json and
+    unverified-genes.txt came back byte-identical. Designer wasm rebuilt, check-designer-boots
+    green.
+
+Written up
+
+    wiki/gene-magic-on-death.html: the Gameplay table and the founder section lose the third row
+    and gain a short "there was a third one" section; Coding gains #retired, which is where the
+    decision, the three carriers of a dead allele, and the DEATH BOOM -> DEATH DIAMONDS rename are
+    recorded; Science gains #why-retired and the general rule it leaves behind — a magical locus
+    may cost the horse anything and the breeder whatever they walked into, but an outcome that
+    reaches somebody who never touched the gene has to be small enough to stand next to. The
+    Verification tab drops the blast-radius check and gains the only check the retirement added: a
+    pre-2026-09-24 save whose horse carried Xpl must load at n/n with one log line, not throw.
+
+    wiki/horse-dimension.html's yard table and wiki/gene-magic-item-drop.html's verified block both
+    named the old pen; both now say what it is. decisions.html took nothing — it is a
+    compatibility pointer page now, and the call lives on the gene's Coding tab.
+
+Retired from intake
+
+    The bullet is deleted from intake/To do.txt, and the Magic-on-death paragraph and its
+    validation line from section 6 of intake/Implementation advice.txt. Section 6 is now only the
+    runtime-registry work.
+
+    Next bullet is the rest of that group: rebuild LycanGene's mob list off the live entity
+    registry with an aquatic/flying/hostile blacklist, then the same registry-driven treatment for
+    EggLayerGene and MagicItemDropGene. Note also that intake/To do.txt still opens with the horse
+    cryostasis paragraph, which was routed to wiki/horse-stasis.html's Roadmap tab in the same
+    commit that added it (a8a18b38) and has been skipped by every session since — it can be
+    deleted from the file whenever the owner is happy the page has it all.

@@ -1,5 +1,5 @@
 Magic on death
 (Magical gene / no coat effect)
-What happens to the world where the horse died — a lava source, a water source, or a creeper-sized explosion. It says nothing at all about items; that is magic item drop , and the two are kept apart on purpose.
+What happens to the world where the horse died — a lava source or a water source. It says nothing at all about items; that is magic item drop , and the two are kept apart on purpose.
 
-Magical gene / no coat effect Magic on death What happens to the world where the horse died — a lava source, a water source, or a creeper-sized explosion. It says nothing at all about items; that is magic item drop , and the two are kept apart on purpose. Magic item drop — the other half Milk — the other lava/water locus The effects block What to check in-game Source: common/genetics/genes/MagicOnDeathGene.java , neoforge/server/GeneDeathHandler.java
+Magical gene / no coat effect Magic on death What happens to the world where the horse died — a lava source or a water source. It says nothing at all about items; that is magic item drop , and the two are kept apart on purpose. Magic item drop — the other half Milk — the other lava/water locus The effects block What to check in-game Source: common/genetics/genes/MagicOnDeathGene.java , neoforge/server/GeneDeathHandler.java
