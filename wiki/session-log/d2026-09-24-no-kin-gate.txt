@@ -1,0 +1,98 @@
+2026-09-24, after the Log tab — the last kinship rule in the mod is deleted
+
+    The first bullet in the tuning section of intake/To do.txt, once the Bugs section had
+    emptied:
+
+        there should be no mechanic that inherently stops incest (aka line breeding) even
+        in wild bands
+
+    Retired from the file. The owner confirmed mid-session what the bullet already implied:
+    this is to *remove* any kind of incest prohibition, not to tune one.
+
+Dated first, as START HERE says
+
+    A hit straight away, and the shape START HERE warns about. BandLife.closeKin refused a
+    dispersing filly any bachelor suitor who shared her dam or her sire, or who was her
+    sire — shipped 2026-09-15 as gap 234, at the owner's own request ("no suitor sharing a
+    parent"), verified in the unattended run of 2026-09-18, and written up on horse-care as
+    a Verified record.
+
+    So the two dates decide it, and they are unambiguous: the rule is 2026-09-15, the
+    bullet is 2026-09-22 (f4fc3e40). The bullet is newer than the fix, which makes it a
+    reversal and not a stale report. The owner used the mod on her server for a week and
+    changed her mind about the rule she asked for. Nine days of life.
+
+    Nothing else gates on kinship. The conception path — ReproRules, NaturalCover,
+    NaturalBreedingHandler — never reads motherId or fatherId at all, so player breeding was
+    never touched and did not need a change. closeKin was the whole of it.
+
+What went
+
+    BandLife: the !closeKin(horse, h) term out of the dispersing filly's suitor predicate,
+    and the method with it. A comment stands in its place saying what used to be there and
+    why it is not, pointing at breeding.html#no-kin-gate — the next person to read that
+    predicate and think "surely she shouldn't take her brother" needs to find the decision,
+    not re-derive it.
+
+    DebugYardHerd: the LEAVING HOME pen existed to ask this exact question, and the pen's
+    sibling wiring existed only so that closeKin had records to read. Both gone, and the
+    siblings() helper with them — its javadoc said outright that BandLife.closeKin was the
+    only caller that cared. The pen stays, because the dispersal underneath it is still
+    worth watching; its wall labels no longer say "she must NOT take her brother", because
+    now she may, and a test yard that asserts the opposite of the code is worse than no pen.
+
+    TutorialPage: the Grooming and company step told the player the rule in so many words.
+    Rewritten — a filly leaves for another band or for a bachelor who founds one with her,
+    her brother as readily as anyone. Two chapters along, "Line breeding, and what it costs"
+    already said there is no inbreeding penalty and nothing refuses a stallion his own
+    daughter; that was true of player breeding and is now true everywhere, so it needed no
+    change, which is a small piece of evidence that the tutorial was written honestly.
+
+    HorseRecord.withParents: its javadoc named closeKin as the reason it exists. Reworded to
+    what the method is actually for.
+
+What stayed, deliberately
+
+    horse-care.html#verified-closekin is kept, retitled "withdrawn", because three other
+    things link to that anchor and because the record is mostly not about kinship. It is
+    about a test pen that answered the easy half of its question and read exactly like one
+    that answered the whole thing: the colt was staggered three minutes behind his sister,
+    so he had not left when she chose and was never a candidate, and the rule sat unexercised
+    for three days looking verified. That lesson outlives the rule that taught it.
+
+    The horse-care reality table's dispersal row now says "Partly, and deliberately" — the
+    mod models female dispersal but not the inbreeding avoidance it exists for in the wild,
+    and that is a design call rather than a gap. Anyone reading the BLM sources beside the
+    code would otherwise file it as one, repeatedly.
+
+Where the decision lives
+
+    breeding.html#no-kin-gate, on the Known limitations list where "no inbreeding prevention"
+    was already written as a fact about the world. It now says it is a decision, dated, with
+    the withdrawn rule named — decisions.html is a pointer page these days and says on its
+    face not to add decisions to it.
+
+    The horse-care Verification tab lost its "A filly is not recruited by her brother"
+    check outright: not resolved, moot. Its summary sentence ended on that same check and
+    now ends on the thing that is actually still unseen — band life has never run outside
+    the test yard, on real ground, at real distances.
+
+Regenerated
+
+    verification.html, roadmap.html, search-index.js, wiki/text/. check-links green across
+    404 pages, check-roadmap-execution green. :neoforge-26.1.2:build green.
+
+    common/ changed by one javadoc comment, so the designer wasm was deliberately not
+    rebuilt — the build is not reproducible and a comment cannot move the compiled graph.
+
+Not done, and worth knowing
+
+    Nobody has watched a wild filly disperse outside the yard, before this change or after
+    it. That is on the horse-care Verification tab as the one remaining band-life check.
+
+Next bullet
+
+    The second tuning ask: bond should decay down to a set floor above zero, slowly, about
+    one level per day. Implementation advice.txt section 2 names HorseCareAttachment,
+    HorseCareHandler and the persistence question (a last-decay marker that survives an
+    unload) before any code gets written.

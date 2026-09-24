@@ -1386,11 +1386,15 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         thirty generations of anything to see whether a line actually develops
         character at the rate it should. The two numbers to turn are
         <code>EpiDrift.SCALE</code> and <code>EpiDrift.REPLACE_CHANCE</code>.</li>
-    <li><strong>No inbreeding prevention and no generational effects.</strong> Nothing
+    <li id="no-kin-gate"><strong>No inbreeding prevention and no generational effects.</strong> Nothing
         computes how closely two horses are related, nothing warns, and no foal is born
-        weaker for it. The only kinship rule anywhere in the mod is a wild dispersing filly
-        refusing a suitor who shares a parent with her, which never touches player
-        breeding &mdash; so line breeding is a practice, not a mechanic.
+        weaker for it. This is a decision and not an omission (owner, 2026-09-24):
+        <strong>no mechanic anywhere in this mod may stop line breeding</strong>, in a wild
+        band as much as in a paddock. There was one for nine days &mdash; a dispersing filly
+        in <code>BandLife</code> refused a bachelor who shared her dam or her sire, so that
+        her own brother could not recruit her &mdash; and it is gone; she takes the nearest
+        bachelor there is, brother or not. Line breeding is a practice, not a mechanic, and
+        what it costs a breeder is the recessives they did not want, nothing the game adds.
         <strong>Sex-linked inheritance, by contrast, is built</strong>:
         <a href="gene-sex.html">the sex locus</a> and X- and Y-linked transmission both, the
         one exception to independent assortment. What is left there
