@@ -83,6 +83,8 @@ public final class HorseCareHandler {
     private static final int HERD_RADIUS = 10;
     private static final int FEED_BOND = 2;
     private static final int GOAL_PRIORITY = 4;
+    /** Top of the stack: running for its life beats panic (1) and everything under it. */
+    private static final int ESCAPE_GOAL_PRIORITY = 0;
 
     public static final TagKey<Block> HORSE_WATER =
             TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(MOD_ID, "horse_water"));
@@ -106,6 +108,12 @@ public final class HorseCareHandler {
                 return;
             }
         }
+        // ABOVE EVERYTHING, INCLUDING THE HOLD BELOW. A horse under
+        // behaviour.escape_health_fraction bucks its rider and runs; nothing a
+        // horse can be doing outranks not dying. Added BEFORE InspectHoldGoal,
+        // which shares priority 0 and Flag.MOVE, so the tie breaks toward the
+        // horse rather than toward whoever has its screen open.
+        horse.goalSelector.addGoal(ESCAPE_GOAL_PRIORITY, new HorseEscapeGoal(horse));
         horse.goalSelector.addGoal(GOAL_PRIORITY, new BondFollowGoal(horse));
         // Tier 1 is head-turning only, so it goes BELOW every herd goal
         // (HerdGoals runs 3-7): it claims LOOK alone, but a goal of a lower

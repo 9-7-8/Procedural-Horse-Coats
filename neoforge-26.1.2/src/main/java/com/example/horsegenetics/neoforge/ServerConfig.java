@@ -146,6 +146,13 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue DEATH_NOTICES;
 
     /**
+     * <b>How badly hurt a horse has to be before it bucks its rider and runs.</b>
+     * A fraction of its own maximum health; zero turns the behaviour off. See
+     * {@code server/HorseEscapeGoal}.
+     */
+    public static final ModConfigSpec.DoubleValue ESCAPE_HEALTH_FRACTION;
+
+    /**
      * <b>The reproductive day while {@code debug.tools} is on</b> - one real
      * minute instead of twenty. Owner's call, 2026-09-13: a heat, a pregnancy
      * and half a cycle each become a minute, which is long enough to walk
@@ -237,6 +244,20 @@ public final class ServerConfig {
                         "the showDeathMessages game rule is off.",
                         "Turn it off on a server where horses die often enough to be noise.")
                 .define("notices.owned_horse_death", true);
+        ESCAPE_HEALTH_FRACTION = builder
+                .comment("How low a horse's health has to fall before it runs for its life,",
+                        "as a fraction of its own maximum. (default: 0.2, so a fifth)",
+                        "At or below it the horse stops being a mount: it throws off whoever",
+                        "is riding it, drops any fight it had picked, and runs from whatever",
+                        "hurt it - jumping a fence if its jump is good enough to clear one.",
+                        "It keeps running for ten seconds after the last blow, and stops once",
+                        "it has healed clear of the threshold rather than the moment it",
+                        "crosses back over it.",
+                        "This is a horse's own maximum, so a frail one and a Percheron bolt at",
+                        "different numbers of hearts and at the same fraction of themselves.",
+                        "0 turns the whole behaviour off; 1 makes a horse bolt from any blow.")
+                .defineInRange("behaviour.escape_health_fraction",
+                        com.example.horsegenetics.common.care.Escape.DEFAULT_THRESHOLD, 0.0, 1.0);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -348,6 +369,15 @@ public final class ServerConfig {
             return DEATH_NOTICES.get();
         } catch (IllegalStateException notLoaded) {
             return true;
+        }
+    }
+
+    /** {@code behaviour.escape_health_fraction}, safely. */
+    public static double escapeHealthFraction() {
+        try {
+            return ESCAPE_HEALTH_FRACTION.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.Escape.DEFAULT_THRESHOLD;
         }
     }
 
