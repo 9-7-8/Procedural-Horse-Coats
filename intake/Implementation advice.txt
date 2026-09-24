@@ -28,10 +28,9 @@ Recommended order
 =================
 1. Reproduce and fix the breeding and reproduction rules first.
 2. Fix bond decay, AI pathing, and hunger/eating behavior next.
-3. Verify the interaction, overview, and barn UI items after the gameplay logic.
-4. Treat wings as a separate client rendering project, not as part of the core
+3. Treat wings as a separate client rendering project, not as part of the core
    horse AI work.
-5. Finish with search/filtering, naming, loot, and ownership transitions.
+4. Finish with search/filtering, naming, loot, and ownership transitions.
 
 Core principles
 ===============
@@ -113,32 +112,7 @@ Validation:
 - Confirm food goals do not bypass hunger state and that panic goals stop before
   they become an indefinite stuck state.
 
-3. Interaction, overview, and horse UI
-======================================
-Likely code:
-- HorseInfoInteraction
-- HorseInteractionHandler
-- HorseInfoScreen
-- SetBarnNamePayload and its networking handler
-- HorseRecord and its barn-name fields
-
-Implementation:
-- Fix the sneak-right-click flash by checking event cancellation and duplicate
-  server handling before changing the UI itself.
-- Keep the saddle state single-sourced. The overview should summarise saddle
-  state without creating a second editing source or overlapping click targets.
-- Verify the barn name round trip end-to-end: submit, validate, persist, reload,
-  reconnect, and ownership checks.
-- Do not add a second naming state in the UI without a server-side validation
-  path; names are gameplay data, not personal client-only settings.
-
-Validation:
-- Inspect unsaddled and saddled horses across mouse and keyboard focus states.
-- Confirm the barn name survives a save/reload cycle and rejects bad lengths or
-  invalid characters.
-- Reproduce the menu flash and confirm it is event ordering, not rendering.
-
-4. Family history, ownership, and cowboy transitions
+3. Family history, ownership, and cowboy transitions
 ====================================================
 Likely code:
 - family-tree and horse-record ownership data
@@ -162,7 +136,7 @@ Validation:
 - Test cowboy defeat and recovery paths, death notifications, and owner-only
   routing in a two-player dedicated server setup.
 
-5. Search, filters, naming, and loot
+4. Search, filters, naming, and loot
 =====================================
 Likely code:
 - H-menu search and horse-search parsing
@@ -193,7 +167,7 @@ Validation:
 - Enumerate loot tables and verify the horse equipment pool is present, valid,
   and tuned for the intended rarity.
 
-6. Specific implementation checks before closeout
+5. Specific implementation checks before closeout
 ==================================================
 - First run the focused tests already in the project: NaturalCoverTest,
   ReproRulesTest, and FertilityGeneTest.
@@ -206,7 +180,7 @@ Validation:
 - Update the relevant wiki and verification page after implementation, rather
   than relying on this intake note as the long-term source of truth.
 
-7. Wings
+6. Wings
 =========
 This should be a separate client render task, not mixed into the core breeding,
 AI, or UI queue.
@@ -225,7 +199,7 @@ Validation:
 - Verify at least one texture retexture works without assuming every elytra
   resource pack is compatible.
 
-8. Magical loci: drop the explode allele, and go runtime-registry for lycan/egg-layer/item-drop
+7. Magical loci: drop the explode allele, and go runtime-registry for lycan/egg-layer/item-drop
 =================================================================================================
 Likely code:
 - common/src/main/java/.../genetics/genes/MagicOnDeathGene.java

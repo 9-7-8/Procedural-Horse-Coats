@@ -1,0 +1,71 @@
+2026-09-24, last — the barn-name box was invisible to everyone, and why nobody could tell
+
+    The first session run through intake/START HERE.txt, one bullet, as it asks.
+
+    The gate was red before any of it. check-roadmap-execution.mjs, which START
+    HERE says to run before editing, failed on "coverage rows are incomplete:
+    pages=48, rows=47" — wiki/horse-stasis.html got a Roadmap tab earlier the
+    same day and never got its row in roadmap-execution.html's coverage table.
+    Written, and the checker is green again. Worth noting that the check caught
+    it exactly as designed and that nothing else would have: a roadmap page with
+    no lane is invisible rather than wrong.
+
+    Three bug bullets, and the first two were already fixed. Sneak-right-click
+    flashing our menu before vanilla's went in the 09-21 gesture revert; the
+    saddle at the top of Overview shipped this morning. Both are retired from
+    To do.txt. But the dates are the interesting part and they nearly sent this
+    session the wrong way: the owner wrote both bullets on 09-22, *after* both
+    fixes landed. The reading that fits is that she was playing an older jar on
+    her own server — the dev log on disk is a 12KB runServer boot from 09-21, not
+    a play session, so there is no local evidence either way. The menu-flash
+    check is already standing on breeding's Verification tab, which is where
+    START HERE says a landed-but-unconfirmed fix belongs; it stays there.
+
+    The third bullet was real, and it was the same trap in a harder form.
+    "There's still no way to set the barn name." The box was added 2026-09-07.
+    A session on 09-18 had already answered a near-identical report by finding a
+    genuine bug — the screen held its constructor's record and never re-read it,
+    so Set changed the nameplate and nothing on screen — fixed it, and wrote a
+    Verification entry that said, in as many words, "the box and button only
+    appear on the Overview tab for a tamed horse you own ... that is deliberate,
+    not the bug." That sentence was true about the intent and false about the
+    game: nobody had ever seen the box.
+
+    HorseInfoScreen.ownsHorse() asked the entity —
+    AbstractHorse.getOwnerReference(). Reading AbstractHorse out of
+    build/moddev/artifacts/minecraft-patched-26.1.2.100-sources.jar settles it in
+    four lines: defineSynchedData registers exactly one value, DATA_ID_FLAGS, and
+    isTamed() is a bit in it; `owner` is a plain field that goes to NBT in
+    addAdditionalSaveData and comes back in readAdditionalSaveData. It is never
+    synchronised. So on any client, on a server or in single-player,
+    getOwnerReference() is null, ownsHorse() is false for every player including
+    the owner, and the box and its Set button were hidden on every horse in the
+    game for seventeen days.
+
+    The fix carries ownership where the client can see it. HorseRecord gains
+    Optional<UUID> ownerId and ownedBy(viewer); the record already syncs per
+    entity, so the screen has its answer before it draws and needs no round trip.
+    HorseOwnerTrackingHandler — the 2-second pass that already existed because
+    taming resolves a few ticks after the interact packet — mirrors vanilla's
+    owner onto the record. Two deliberate differences from the tamedBy it sits
+    beside: it reconciles on every pass rather than filling a blank once, because
+    ownership moves (a transfer paper, a cowboy sale, a horse going wild again),
+    and it runs for untamed horses too so that going wild clears the field rather
+    than leaving the last owner holding a naming box. The record is a mirror and
+    not a second authority: HorseOwnership.isOwner on the server still refuses
+    the action, and SetBarnNamePayload's handler is untouched.
+
+    Two smaller things fell out. The screen re-applies its widgets when the
+    answer changes, so a horse tamed or handed over with the screen open grows
+    the box without a tab switch. And the generalisation, which is the part worth
+    keeping: any client-side "is this horse mine" test has to read the record,
+    never the entity. There is one other caller, WhistleItem.ownedBy, and it is
+    server-side and correct.
+
+    Three tests on HorseRecord pin it — a stranger gets nothing, reassignment
+    drops the previous owner, an unrelated edit does not lose the field — and the
+    designer wasm rebuilt byte-identical, which says HorseRecord is not in the
+    reachable graph TeaVM compiles. Nothing here has been played. The check that
+    matters is the plain one: open your own tamed horse on Overview and see
+    whether there is a box there at all, and do it on the owner's own server
+    rather than in a dev world.

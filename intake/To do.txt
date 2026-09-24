@@ -12,9 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-Another issue: sneak-right-click now flashes our horse menu, then goes to the vanilla menu. It should just go straight to our menu. 
-The saddle a horse is wearing should be at the very very very top of overview, in a column between the name of the horse and the "Ride" button. 
-There's still no way to set the barn name. 
 A high bond horse should not attempt to follow or watch their bond if there is no direct path to them-- line of sight is not enough, they must be able to find a path to their bond. If they're in an enclosed area, they act like a normal horse. Right now, a high bond horse is ignoring breeding in preference of watching their bonded owner. 
 Queue: horses should eat food dropped on the ground near them, if it's in their diet.
 

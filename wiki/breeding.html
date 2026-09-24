@@ -895,6 +895,44 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     it is what <code>displayName()</code> returns.
 </p>
 
+<p>
+    The box is offered only on <strong>Overview</strong>, and only for a horse you own:
+    a field you can type in but not submit is worse than no field, and the server
+    refuses a stranger's anyway. <strong>That ownership test is why nobody could set a
+    barn name at all until 2026-09-24.</strong> It asked the entity &mdash;
+    <code>AbstractHorse.getOwnerReference()</code> &mdash; and that is a server-only
+    answer: <code>defineSynchedData</code> registers exactly one value on a horse, the
+    flags byte behind <code>isTamed()</code>, and the owner lives in a plain field that
+    only ever goes to NBT. On a client it is always <code>null</code>, so the test
+    returned <em>false</em> for every player including the owner and the box and its
+    button were hidden on every horse in the game. The feature had been built on
+    2026-09-07 and was unreachable for seventeen days, which is why the report against
+    it said &ldquo;still&rdquo;.
+</p>
+
+<p>
+    The fix carries ownership where the client can see it. <code>HorseRecord</code>
+    gained an <code>Optional&lt;UUID&gt; ownerId</code> and a
+    <code>ownedBy(viewer)</code> test; the record already syncs per entity, so the
+    screen has the answer before it draws. <code>HorseOwnerTrackingHandler</code> &mdash;
+    the same 2-second pass that already existed to fill <code>tamedBy</code> late &mdash;
+    mirrors vanilla's owner onto the record, and unlike <code>tamedBy</code> it
+    reconciles on <em>every</em> pass rather than filling a blank once, because
+    ownership moves: a transfer paper, a cowboy sale, or a horse going wild again all
+    change it, and a mirror that only filled a blank would keep showing the old owner.
+    The record stays a mirror, not a second authority &mdash;
+    <code>HorseOwnership.isOwner</code> on the server is still the thing that refuses an
+    action. The screen also re-applies its widgets when the answer changes, so a horse
+    tamed or handed over with the screen already open shows the box without a tab
+    switch.
+</p>
+
+<p>
+    Worth generalising: <strong>any client-side &ldquo;is this horse mine&rdquo; test
+    has to read the record, never the entity.</strong> The one other caller,
+    <code>WhistleItem.ownedBy</code>, is server-side and correct as written.
+</p>
+
 <h3>F. Horse-dimension right-clicks</h3>
 
 <ul>
@@ -1500,29 +1538,50 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Sneak-and-use now opens this mod&rsquo;s own screen on every horse and the plain click mounts again, so the check that outranks the rest is that both gestures do the right thing on a tamed horse as well as a wild one; under it sit a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
+    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo;; under it sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
 </div>
 
-<h3 id="barn-name-0918">Setting a barn name now shows on the screen that set it (2026-09-18, NOT played)</h3>
+<h3 id="barn-name-0918">The barn-name box is visible at all (2026-09-24, NOT played)</h3>
 
 <p>
-    Reported as "there doesn't seem to be a way to change the barn name". There is, and it
-    always worked &mdash; but <code>HorseInfoScreen</code> held the record it was constructed
-    with and never re-read it, so pressing <strong>Set</strong> changed the horse's floating
-    nameplate and nothing on the screen in front of you. Everything a player can change is now
-    read through a <code>live()</code> accessor that prefers the synced record.
+    Reported twice, a week apart, in almost the same words &mdash; "there doesn't seem to be a
+    way to change the barn name", then "there's <em>still</em> no way to set the barn name".
+    The second report is the one that mattered: <strong>the box was invisible to everybody,
+    the horse's owner included</strong>, because the ownership gate in front of it asked the
+    horse entity and a client is never told who owns a horse. The full diagnosis is on the
+    <a href="#H">Coding tab, &sect;E</a>; the short version is that vanilla synchronises a
+    horse's <em>tamed</em> flag and not its <em>owner</em>, so the test returned false for
+    everyone. Ownership now rides on the synced <code>HorseRecord</code> instead.
+</p>
+
+<p>
+    The 2026-09-18 pass is folded in here and is also unplayed: the screen used to hold the
+    record it was constructed with and never re-read it, so pressing <strong>Set</strong>
+    changed the floating nameplate and nothing on the screen in front of you. Everything a
+    player can change now reads through a <code>live()</code> accessor. <strong>Both fixes are
+    on the same click</strong>, so one pass over the checks below settles them together.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 <ul>
+    <li><strong>Open your own tamed horse on Overview and look for the box at all.</strong>
+        This is the whole of the new fix: an edit box and a <strong>Set</strong> button below
+        the header. Before this change there was nothing there on any horse.</li>
     <li><strong>Type a barn name, press Set, and watch the screen.</strong> The header line
         should go from <em>no barn name yet</em> to <em>known around the yard as "&hellip;"</em>
-        immediately, without closing and reopening. That is the whole fix.</li>
+        immediately, without closing and reopening. That is the 09-18 fix.</li>
     <li><strong>Clear it again.</strong> An empty box removes the barn name; the header should
         go back to <em>no barn name yet</em> and the nameplate back to the registered name.</li>
-    <li><strong>It is still gated on ownership.</strong> The box and button only appear on the
-        Overview tab for a tamed horse you own. On someone else's horse, or an untamed one,
-        there should be no box at all &mdash; that is deliberate, not the bug.</li>
+    <li><strong>Check the gate still bites.</strong> On an untamed horse, or one belonging to
+        another player, there should be <em>no box</em>. That is deliberate &mdash; but it is
+        now the interesting half of the test, because it is the same test that was wrongly
+        saying "not yours" about every horse.</li>
+    <li><strong>Tame a wild horse with the screen already open.</strong> The box should appear
+        within about two seconds without a tab switch; the mirror that feeds it runs on a
+        2-second pass, so this is the one check that can fail on timing rather than logic.</li>
+    <li><strong>On a dedicated server, not just single-player.</strong> The bug was in
+        client-side state, so it reproduced everywhere &mdash; but the owner hit it on their
+        own modded server, and that is where the fix should be seen to work.</li>
 </ul>
 
 <h4>The part that is a discoverability problem, not a bug</h4>
