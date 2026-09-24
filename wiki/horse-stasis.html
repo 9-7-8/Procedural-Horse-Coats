@@ -23,9 +23,9 @@
     many chambers and lets you read the horses inside them. The whole point is the cheapest
     tier, so a server with hundreds of horses can put most of them somewhere that costs
     nothing, instead of every horse being a real, ticking entity forever.
-    <strong>The four chambers are built, the bank keeps them, and its Browse tab reads
-    them.</strong> What is still planned is everything that makes the bank <em>act</em> on a
-    stored horse: passive healing, the drop buffer, in-bank breeding.
+    <strong>The four chambers are built, the bank keeps them, its Browse tab reads them, and
+    with feed and water in its supply slots it slowly mends them.</strong> What is still
+    planned is the drop buffer and in-bank breeding.
 </p>
 
 <section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
@@ -64,8 +64,9 @@
             about it can be asked for.</td></tr>
     <tr><td><strong>Intermediate Horse Stasis Chamber</strong></td>
         <td>Any chamber + an eye of ender.</td>
-        <td>All of the horse's information becomes searchable &mdash; the Browse tab shows
-            what it is and the filter box can find it. <strong>Built.</strong></td></tr>
+        <td>The bank can see inside. All of the horse's information becomes searchable &mdash;
+            the Browse tab shows what it is and the filter box can find it &mdash; <em>and</em>
+            the bank will feed and mend it. <strong>Both built.</strong></td></tr>
     <tr><td><strong>Advanced Horse Stasis Chamber</strong></td>
         <td>Intermediate + a gold ingot.</td>
         <td>The bank passively collects the horse's milk/drops into its 9-slot buffer.</td></tr>
@@ -76,12 +77,20 @@
 </table>
 <p>
     <strong>Storage is free at every tier and always will be.</strong> What the upper tiers buy
-    is what the bank may <em>do</em> with a horse &mdash; today that is the Browse tab's search,
-    which an Intermediate unlocks and a Basic does not, and the two tiers above it are paying
-    for things the bank cannot do yet. <strong>Upgrading an occupied chamber carries the horse
-    across</strong> &mdash; you do not have to let it out first, so a Basic chamber is never a
-    dead end.
+    is what the bank may <em>do</em> with a horse. <strong>Upgrading an occupied chamber carries
+    the horse across</strong> &mdash; you do not have to let it out first, so a Basic chamber is
+    never a dead end.
 </p>
+<div class="note">
+    <span class="label">Why one eye of ender buys two things</span>
+    <p>
+        Searching a horse and healing it are the same capability with two uses:
+        <strong>the bank being able to look inside the chamber</strong>. Basic's whole contract
+        is that it cannot, and a bank that cannot look inside cannot know that the horse is
+        hurt, what it eats, or how much of its bar is missing. So Intermediate unlocks both,
+        and nothing above it can search without healing or heal without searching.
+    </p>
+</div>
 
 <h2 id="bank-gameplay">The Horse Stasis Bank</h2>
 <p>
@@ -142,12 +151,49 @@
         a lightning strike and drop them into the fire that did it.
     </p>
 </div>
+<h2 id="supply-gameplay">The Supply tab: feeding and mending what is in there</h2>
 <p>
-    <strong>It is not a hopper target.</strong> Chambers go in and out by hand only &mdash;
-    nothing automates filing a horse, and nothing is meant to. What the bank cannot do yet is
-    <em>act</em> on a horse: there is no passive healing, no drop collection and no in-bank
-    breeding, which is what the two tiers above Intermediate pay for. They are on the Roadmap
-    tab, in the order they should be built.
+    The third tab is three slots &mdash; <strong>feed</strong>, <strong>water</strong>, and the
+    <strong>empties</strong> the water leaves behind. Put hay or wheat in one and a bucket of
+    water in the other and the bank <strong>slowly heals the horses it is holding</strong>.
+    That is the first thing it does <em>to</em> a horse rather than shelving one.
+</p>
+<p>
+    The rule is the one horses already live by out in a field, so there is nothing new to learn:
+    a horse heals if it is hurt, if it eats something a person can hand it, and if there is
+    water &mdash; and healing costs it hunger, which is what eating puts back. All the bank does
+    is supply the two things a shelved horse cannot go and find. A bucket is worth about
+    <strong>fifty hearts</strong> of healing, so one sees off several injured horses; the feed
+    slot takes anything a horse of that diet would eat off the ground, including another mod's
+    horse food, and a hay bale is worth far more than a carrot.
+</p>
+<div class="note">
+    <span class="label">It is a slow hospital, and it gets slower the fuller it is</span>
+    <p>
+        The bank mends <strong>one horse at a time</strong>, in rotation, about a heart and a
+        half every turn. A bank with one hurt horse in it heals that horse at roughly the rate a
+        field would; a bank with fifty gets round to each one far less often. That is the price
+        of the whole feature being cheap &mdash; a bank costs the server the same whether it
+        holds one chamber or fifty-four &mdash; and a horse in no hurry is exactly what a
+        shelved horse is.
+    </p>
+    <p>
+        <strong>A bank with nothing to mend spends nothing.</strong> It will not touch the feed
+        slot or open a bucket for a horse that is not hurt, and if every chamber in it is Basic
+        &mdash; or empty, or holds healthy horses &mdash; it does no work at all. The Supply tab
+        says which of those is the case rather than sitting there looking broken.
+    </p>
+</div>
+<p>
+    <strong>Those three slots are the one part of the bank a hopper can reach.</strong> Feed,
+    water buckets and the empty buckets coming back out can all be piped &mdash; by a hopper, a
+    dropper, or another mod's pipework &mdash; so keeping a stud farm's bank supplied is not a
+    chore you do by hand. <strong>The chambers are not:</strong> nothing outside the bank can
+    file or fetch a horse, and nothing is meant to.
+</p>
+<p>
+    What the bank still cannot do is collect a horse's drops or breed one in place, which is
+    what the two tiers above Intermediate pay for. Both are on the Roadmap tab.
 </p>
 
 <h2 id="refusals">What it refuses, and why it says so</h2>
@@ -215,7 +261,19 @@
     <tr><th>File</th><th>What it does</th></tr>
     <tr><td><code>common/&hellip;/horse/StasisTier.java</code></td>
         <td>The four tiers and what each unlocks, as cumulative flags rather than a name the
-            UI switches on.</td></tr>
+            UI switches on. <code>heals()</code> is both the upkeep's gate and the bank's tick
+            gate.</td></tr>
+    <tr><td><code>common/&hellip;/horse/StasisUpkeep.java</code></td>
+        <td><strong>The bank's whole economy, as arithmetic.</strong> One turn on one horse:
+            what it eats, what it heals, what that cost in hunger and water. No Minecraft in it
+            &mdash; <code>StasisUpkeepTest</code>.</td></tr>
+    <tr><td><code>neoforge/&hellip;/server/StasisCare.java</code></td>
+        <td>The tag surgery: health, maximum health, hunger, record and diet out of a stored
+            horse's NBT, the mended tag back in. The <em>only</em> place that reaches into a
+            snapshot's contents.</td></tr>
+    <tr><td><code>neoforge/&hellip;/block/StasisBankCapability.java</code></td>
+        <td>The item-handler capability over the supply slots, and only those. What makes a
+            hopper work and keeps the chamber grid unreachable.</td></tr>
     <tr><td><code>common/&hellip;/horse/StasisBrowseRow.java</code></td>
         <td>One line of the Browse tab: the chamber's name, its tier, and the horse's
             <code>HorseListing</code> if the stable has one. Owns the tier gate, the filter call
@@ -237,42 +295,44 @@
         <td>All three upgrades, custom so an occupied chamber keeps its horse.</td></tr>
     <tr><td><code>neoforge/&hellip;/block/HorseStasisBankBlock.java</code></td>
         <td>The bank. <code>BaseEntityBlock</code>, no blockstate properties, opens the menu on
-            <code>useWithoutItem</code>. No ticker &mdash; nothing in the bank advances yet.</td></tr>
+            <code>useWithoutItem</code>. A server-only ticker, the research shelf's
+            <code>createTickerHelper</code> shape.</td></tr>
     <tr><td><code>neoforge/&hellip;/block/HorseStasisBankBlockEntity.java</code></td>
-        <td>Fifty-four chamber slots as one <code>SimpleContainer</code>, plus the static
-            <code>isChamber</code> / <code>filed</code> / <code>occupied</code> helpers both sides
-            read.</td></tr>
+        <td>Fifty-four chamber slots and three supply slots as two <code>SimpleContainer</code>s,
+            the water meter and the rotation cursor, the upkeep <code>tick</code> and its cached
+            gate, plus the static <code>isChamber</code> / <code>filed</code> /
+            <code>occupied</code> / <code>anyHealable</code> helpers both sides read.</td></tr>
     <tr><td><code>neoforge/&hellip;/menu/HorseStasisBankMenu.java</code></td>
-        <td>The grid over the player's inventory, the <code>ChamberSlot</code> predicate and
-            shift-click, the <code>activeOnTab</code> pair, and <code>stored()</code> - the
-            occupied chambers as tier-and-snapshot pairs. No <code>ContainerData</code>.</td></tr>
+        <td>The grid and the supply row over the player's inventory, the <code>ChamberSlot</code>
+            and <code>SupplySlot</code> predicates and shift-click, the <code>activeOnTab</code>
+            pair, <code>stored()</code> - the occupied chambers as tier-and-snapshot pairs - and
+            one <code>ContainerData</code> value, the water meter.</td></tr>
     <tr><td><code>neoforge/&hellip;/client/HorseStasisBankScreen.java</code></td>
-        <td>Both tabs, drawn with <code>VanillaPanel</code> and no texture: the chamber grid, the
-            Browse list and its filter box, and the count on the title row.</td></tr>
+        <td>All three tabs, drawn with <code>VanillaPanel</code> and no texture: the chamber
+            grid, the Browse list and its filter box, the supply row and its two status lines,
+            and the count on the title row.</td></tr>
+    <tr><td><code>neoforge/&hellip;/gametest/ModGameTests.java</code></td>
+        <td><code>stasis_tag_is_readable</code> &mdash; the tripwire for every NBT key
+            <code>StasisCare</code> reaches for, since all of them fail silently.</td></tr>
 </table>
 
-<h2 id="bank-coding">The bank is a filtered chest, and that is the whole of stage two</h2>
+<h2 id="bank-coding">The bank is a filtered chest with a clock on it</h2>
 <p>
     It is modelled on <code>EquineResearchShelfBlockEntity</code> down to the
-    <code>setChanged</code> forwarding, because it is the same problem: a
-    <code>SimpleContainer</code> the menu wraps on the server and the ordinary vanilla slot sync
-    fills in on the client. <strong>Nothing here ever unpacks a snapshot.</strong> A horse in
-    stasis is a data component on an item, and the bank moves items.
+    <code>setChanged</code> forwarding and the server-only ticker, because it is the same
+    problem: a <code>SimpleContainer</code> the menu wraps on the server and the ordinary vanilla
+    slot sync fills in on the client, plus one number that advances with nobody looking.
+    <strong>Nothing in the chamber grid ever unpacks a snapshot.</strong> A horse in stasis is a
+    data component on an item, and the grid moves items; only the upkeep reads inside one.
 </p>
 <p>
-    Two things it deliberately does <em>not</em> have yet, each because the thing that needs it
-    is a later stage:
+    The shelf's <code>createTickerHelper</code> shape is copied exactly, and
+    <strong>one <code>ContainerData</code> value</strong> has appeared with it &mdash; the water
+    meter, which is genuinely a number on the block that the screen cannot derive. Everything
+    else on all three tabs is still a loop over slots the client already has: the horse count,
+    every Browse row, what is in the feed slot. Every chamber carries its whole horse, so both
+    sides can count and read for free.
 </p>
-<ul>
-    <li><strong>No ticker.</strong> Nothing advances with nobody looking. Passive healing (stage
-        four) is what will want one, and it will want the research shelf's server-only
-        <code>createTickerHelper</code> shape.</li>
-    <li><strong>No <code>ContainerData</code>, the Browse tab included.</strong> There is no
-        progress and no server-side pick to sync. The horse count on the title row, and every
-        row of the Browse list, is a loop over the slots the client already has rather than a
-        synced number &mdash; every chamber carries its whole horse, so both sides can count and
-        read for free.</li>
-</ul>
 <div class="note">
     <span class="label">Two small divergences from the chest it resembles</span>
     <p>
@@ -283,10 +343,106 @@
         pedigreed horses into the fire that did it.
     </p>
     <p>
-        <strong>It is not a <code>Container</code>.</strong> The block entity holds one rather
-        than implementing one, exactly as the research shelf does, so hoppers and pipes cannot
-        reach it. Automating the filing of a live animal is not a thing anybody asked for, and
-        the cheapest way to not have it is to not expose the inventory.
+        <strong>It is still not a <code>Container</code>.</strong> The block entity holds two
+        rather than implementing one, exactly as the research shelf does, so nothing outside can
+        reach the chamber grid. What <em>is</em> reachable is the supply row, and only because it
+        was asked for by name &mdash; see below.
+    </p>
+</div>
+
+<h2 id="upkeep-coding">The upkeep: four refusals, then one horse</h2>
+<p>
+    <code>HorseStasisBankBlockEntity.tick</code> is deliberately almost all refusal, in cost
+    order, and nothing past a refusal happens:
+</p>
+<ol>
+    <li><strong>Is there anything here worth healing?</strong> A cached <code>boolean</code>,
+        recomputed only when a chamber slot moves. A bank of Basic chambers &mdash; or of empty
+        ones, or an empty bank &mdash; costs one field read a tick and no more. This is the
+        owner's rule, and it is why the ticker may be attached unconditionally: the block has no
+        blockstate properties to pick a ticker by, so the gate has to be the first line of the
+        ticker instead.</li>
+    <li><strong>Is it this tick?</strong> One turn every
+        <code>StasisUpkeep.HEAL_INTERVAL</code>, phase-staggered by block position &mdash; the
+        same interval and the same trick <code>HorseCareHandler</code> uses on live horses, keyed
+        by entity id there and by position here.</li>
+    <li><strong>Whose turn is it?</strong> A saved cursor walks the grid one slot a turn, so the
+        work is one chamber's worth however full the bank is. Saved, or a reloaded bank would
+        restart at slot zero every time and favour the top-left horse.</li>
+    <li><strong>Is that one hurt?</strong> Two cheap field reads, before anything decodes a
+        record or resolves a diet.</li>
+</ol>
+<p>
+    Only past all four does the bank open a bucket or take a mouthful. That ordering is what lets
+    the feature keep its own promise: <strong>a bank must cost less than the horses it
+    replaced</strong>, and it has to hold that at fifty-four chambers as well as at one.
+</p>
+<div class="note">
+    <span class="label">The economy is the field's, which is why it is so small</span>
+    <p>
+        <code>StasisUpkeep</code> invents nothing. A live horse heals if it is hurt, if its diet
+        is one items can feed, and if there is water nearby, paying
+        <code>Hunger.COST_PER_HEALTH</code> a point and never spending below
+        <code>Hunger.STARVING</code> &mdash; and eating is what puts hunger back. The bank
+        applies exactly that and only <em>supplies</em> the food and the pond. The consequences
+        follow for free: a blood-drinker is no more feedable in a chamber than in a field, a
+        starving horse eats first and heals out of the same turn, and food without water is
+        banked rather than wasted. The whole of it is pure Java and unit-tested.
+    </p>
+</div>
+<p>
+    <code>StasisCare</code> is the other half and does the tag surgery, because
+    <strong>rebuilding an entity per turn is precisely the work the feature exists to avoid</strong>.
+    <code>release</code> builds a real <code>Horse</code> and is right to; doing it once a turn
+    for a chamber nobody is looking at would make a full bank cost more than the fifty-four
+    ticking animals it replaced. So the arithmetic runs on four numbers and this class fetches
+    and returns them.
+</p>
+<div class="note warn">
+    <span class="label">A saved horse's <code>attributes</code> list is very often empty</span>
+    <p>
+        <code>AttributeMap</code> materialises an instance <em>on demand</em>, and
+        <code>getValue</code> reads the entity type's supplier without creating one &mdash; so a
+        horse can be saved with a perfectly good maximum health and an <code>attributes</code>
+        list of <code>[]</code>. Reading the bar out of that list alone would have made every
+        bank decide every horse was unhurt and heal nothing, for ever, with nothing logged.
+    </p>
+    <p>
+        So maximum health comes from <strong>the horse's own record</strong>, which is where
+        <code>HorseRecords.applyTraitsToEntity</code> gets it from in the first place; the saved
+        list is the fallback, for an unconverted vanilla horse with no papers of ours. This was
+        not reasoned out &mdash; the <code>stasis_tag_is_readable</code> gametest caught it on
+        its first run, on a 53-health horse whose saved list was empty, which is the entire
+        argument for having written that test at all.
+    </p>
+</div>
+
+<h2 id="pipes">Why the supply slots are on the wire and the chambers are not</h2>
+<p>
+    The bank exposes a NeoForge item-handler capability over the <strong>three supply slots
+    only</strong>. Feed and water are bulk goods that run out, and keeping a stud farm's bank
+    topped up by hand is exactly the chore automation is for (owner, 2026-09-24) &mdash; so a
+    hopper, a dropper or another mod's pipework can push hay and buckets in and pull empties out.
+    The chamber grid is not part of the handler at all, so the original call stands untouched:
+    nothing outside the bank can file or fetch a live animal.
+</p>
+<p>
+    <strong>The slot rules are written once.</strong> NeoForge's
+    <code>VanillaContainerWrapper</code> asks <code>Container.canPlaceItem</code> before it
+    inserts, so the per-slot predicates the block entity already writes for the menu are the same
+    rules a pipe obeys &mdash; feed in the feed slot, water in the water slot, nothing at all
+    into the empties, which is an output. There is no second copy to drift.
+</p>
+<div class="note warn">
+    <span class="label">26.1.2 has no <code>IItemHandler</code></span>
+    <p>
+        <strong>Not verified in a running game.</strong> Written against the 26.1.2 sources: the
+        item capability is <code>Capabilities.Item.BLOCK</code> and its type is
+        <code>ResourceHandler&lt;ItemResource&gt;</code>, NeoForge's newer transfer API, not the
+        <code>IItemHandler</code> every tutorial still shows. The patched
+        <code>HopperBlockEntity</code> falls back to that same capability when the target is not
+        a <code>Container</code>, which is what makes a vanilla hopper work here. See
+        <a href="api-notes.html">api-notes.html</a>.
     </p>
 </div>
 <p>
@@ -427,42 +583,39 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        Passive healing from a food and water supply, the Advanced drop buffer, Spacer in-bank
-        breeding, and the Emergency Horse Stasis Chamber that self-triggers below 10% health
-        &mdash; everything, in other words, that needs the bank to <em>act</em> on a horse
-        rather than shelve it and show it to you.
+        The Advanced drop buffer, Spacer in-bank breeding, and the Emergency Horse Stasis
+        Chamber that self-triggers below 10% health &mdash; everything left that needs the bank
+        to act on a horse in a way the upkeep does not already.
     </p>
 </div>
 
 <p>
-    Three stages of the build order below have shipped, all on 2026-09-24: the chambers and the
-    capture/release path everything stands on, the bank itself as a place to keep them, and its
-    Browse tab. What follows is the rest of it, in the order it should be built &mdash; and
-    every one of the remaining stages needs the bank to change a horse it is holding, which is
-    the part nothing has done yet.
-</p>
-
-<h2 id="passive-healing">Passive healing from food and water</h2>
-<p>
-    If the bank has a supply of food and water &mdash; its own small input slots, separate from
-    the chamber grid &mdash; it slowly heals every horse stored inside it. This is the
-    <em>one</em> exception to &ldquo;a horse in stasis does not tick&rdquo;: healing only, never
-    hunger, growth or ageing. A stored horse is a tag rather than an entity, so this edits health
-    inside the snapshot, and it is the stage that gives the block its first
-    <code>BlockEntityTicker</code> &mdash; the research shelf's server-only
-    <code>createTickerHelper</code> shape is the model.
+    Four stages of the build order below have shipped, all on 2026-09-24: the chambers and the
+    capture/release path everything stands on, the bank itself as a place to keep them, its
+    Browse tab, and the supply slots it feeds and mends them from. The machinery for changing a
+    horse the bank is holding therefore exists now &mdash; <code>StasisCare</code> reads and
+    writes a stored horse's tag, and the block has its ticker and its rotation cursor &mdash; so
+    what follows is mostly a question of what to do with it, not how.
 </p>
 
 <h2 id="drops-and-breeding">The drop buffer, then in-bank breeding</h2>
 <p>
     Advanced's 9-slot milk/drops buffer lives in the bank beside the chamber grid; Spacer's
-    in-bank breeding pairs two Spacer chambers and pops the foal out into the world. Both need
-    the bank to act on a horse that is not a loaded entity, which is the hardest problem in the
-    whole feature, and both are worth doing last. Both also want an affordance on the
-    <strong>Browse tab</strong>, which exists now and gates per row already &mdash; a
-    &ldquo;collect&rdquo; control on a row whose chamber answers
+    in-bank breeding pairs two Spacer chambers and pops the foal out into the world. Both also
+    want an affordance on the <strong>Browse tab</strong>, which exists now and gates per row
+    already &mdash; a &ldquo;collect&rdquo; control on a row whose chamber answers
     <code>collectsDrops()</code>, and a pairing control on two that answer
     <code>breedsInBank()</code>.
+</p>
+<p>
+    <strong>The hard half of both is now built.</strong> These used to be described here as
+    needing &ldquo;the bank to act on a horse that is not a loaded entity, which is the hardest
+    problem in the whole feature&rdquo;. That problem was stage four's, and it has an answer:
+    <code>StasisCare</code> reads and writes a stored horse's tag, the block rotates through its
+    chambers on a gated ticker, and <code>StasisUpkeep</code> is where per-turn arithmetic goes.
+    Breeding is still the harder of the two, because a foal is a <em>new</em> horse and nothing
+    here has yet had to make one from two tags &mdash; but it is no longer the same kind of
+    unknown.
 </p>
 <div class="note">
     <span class="label">Bandwidth is the bank's problem, not the chamber's</span>
@@ -513,12 +666,11 @@
         purely as passive item data.</li>
 </ul>
 <p>
-    The bank's four files exist; the later stages add to them rather than adding more. The drop
-    buffer and the food/water slots are further <code>SimpleContainer</code>s in
-    <code>HorseStasisBankBlockEntity</code>, appended after the chamber grid; passive healing is
-    a <code>getTicker</code> override on <code>HorseStasisBankBlock</code>; both of their
-    controls hang off the Browse list that
-    <code>HorseStasisBankScreen</code> already draws. See
+    The bank's files all exist; what is left adds to them rather than adding more. The drop
+    buffer is a further <code>SimpleContainer</code> in
+    <code>HorseStasisBankBlockEntity</code> alongside the supply row, filled from the same
+    rotation the upkeep already walks; both of the remaining controls hang off the Browse list
+    that <code>HorseStasisBankScreen</code> already draws. See
     <a href="#bank-coding">the Coding tab</a> for which piece of the research shelf each one
     copies.
 </p>
@@ -531,10 +683,11 @@
         2026-09-24.
         <strong>3.</strong> <s>The Browse tab, gated per row to what each chamber's tier
         unlocks</s> &mdash; shipped 2026-09-24, with Intermediate's search.
-        <strong>4.</strong> Passive healing from the bank's food/water slots.
-        <strong>5.</strong> Advanced's drop buffer, then Spacer's in-bank breeding, since both
-        need the bank to actively act on a horse that is not a loaded entity - the hardest UI
-        problem in the whole feature, and worth doing last.
+        <strong>4.</strong> <s>The supply slots and passive healing</s> &mdash; shipped
+        2026-09-24, gated on <code>StasisTier.heals()</code> and pipeable.
+        <strong>5.</strong> Advanced's drop buffer, then Spacer's in-bank breeding. Breeding is
+        still the last of these: a foal is a new horse, and nothing has yet had to make one out
+        of two stored tags.
         <strong>6.</strong> The Emergency Horse Stasis Chamber, once the health-threshold hook
         exists and the double-trigger question above is answered.
     </p>
@@ -548,14 +701,65 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        The chambers, the bank and its Browse tab all compile, craft and pass the
-        recipe-encoding gametest, but <strong>no horse has yet gone into one in a running
-        game</strong> &mdash; so the whole capture/release round trip, the water-container
-        remainder for a modded bucket, the tier upgrade carrying an occupied chamber, every one
-        of the bank's slots, drops and sync costs, and every line the Browse tab draws are all
-        unplayed.
+        The chambers, the bank, its Browse tab and its supply slots all compile, craft and pass
+        the gametests, but <strong>no horse has yet gone into one in a running game</strong>
+        &mdash; so the whole capture/release round trip, the water-container remainder for a
+        modded bucket, the tier upgrade carrying an occupied chamber, every one of the bank's
+        slots, drops and sync costs, every line the Browse tab draws, and the whole of the
+        healing upkeep and its hopper plumbing are all unplayed.
     </p>
 </div>
+
+<h3 id="verify-upkeep">The bank actually mends a horse (NOT played)</h3>
+<p>
+    The gametest proves the tag can be read and written and that one turn moves the health
+    inside a chamber. What it does not prove is any of the rest of the loop.
+</p>
+<ul>
+    <li><strong>It heals at all, in a world.</strong> Hurt a horse, capture it into an
+        Intermediate chamber, file it, put a hay bale and a water bucket in the supply slots and
+        walk away. Come back: is its health up? Release it and check the bar is really higher,
+        not just the number in the tooltip.</li>
+    <li><strong>It stops.</strong> A horse healed to full must stop costing supplies. Leave a
+        bank with one mended horse and a full feed slot overnight and check the feed is
+        untouched.</li>
+    <li><strong>The gate holds.</strong> A bank of nothing but <em>Basic</em> chambers must
+        consume nothing at all and say so on the Supply tab. Upgrade one to Intermediate with
+        the horse inside and check the same bank starts working.</li>
+    <li><strong>The empty bucket comes back</strong>, into the third slot, and a full empties
+        slot stops the bank drinking rather than destroying a bucket.</li>
+    <li><strong>Hunger is really being charged.</strong> Capture a horse, let the bank mend it
+        with <em>no</em> feed in the slot, and it should stall part-way rather than heal to full
+        for free &mdash; that is the whole economy, and free healing would be the failure that
+        looks like success.</li>
+    <li><strong>A special diet.</strong> A horse the feed slot cannot feed &mdash; a
+        blood-drinker &mdash; must not heal, and the bank must not eat hay trying.</li>
+</ul>
+<h3 id="verify-pipes">Hoppers and pipes reach the supply slots and nothing else (NOT played)</h3>
+<p>
+    The capability is written against the 26.1.2 sources and <strong>has never been exercised by
+    a real hopper</strong>. In particular <code>Capabilities.Item.BLOCK</code> being
+    <code>ResourceHandler&lt;ItemResource&gt;</code> rather than <code>IItemHandler</code> is a
+    reading of those sources, not a thing anyone has watched work.
+</p>
+<ul>
+    <li>A hopper pointing into the bank from above feeds hay into the feed slot.</li>
+    <li>A hopper under the bank pulls empty buckets out &mdash; and, worth knowing either way,
+        whether it also pulls the feed back out. That is allowed today; if it turns out to be
+        annoying in practice it is a per-slot extraction rule, not a bug.</li>
+    <li><strong>No hopper can reach a chamber</strong>, in either direction. This is the one
+        that matters: a hopper that can drain a bank of horses is a disaster, not a nuisance.</li>
+    <li>A water bucket cannot be pushed into the feed slot, nor anything at all into the
+        empties.</li>
+</ul>
+<h3 id="verify-supply-screen">The Supply tab reads correctly (NOT played)</h3>
+<p>
+    Three slots, two status lines and a synced water meter, none of it seen. Check the meter
+    counts down as horses are mended and that each of the tab's four explanations &mdash; no
+    horses, Basic only, no feed, fed but dry &mdash; appears in the situation it names. The tab
+    is the only thing that tells a player why a bank is idle, so a wrong line here is worse than
+    no line.
+</p>
 
 <h3 id="verify-round-trip">The round trip, with a horse worth losing (NOT played)</h3>
 <p>
@@ -648,10 +852,11 @@
     better, and one empty, so every branch of the list is on screen at once.
 </p>
 <ul>
-    <li><strong>The tabs work at all.</strong> Two tabs above the window, clicking switches,
-        the chamber grid disappears on Browse and comes back, and the bank re-opens on whichever
-        tab was showing last. <strong>Fail:</strong> a slot still catching clicks behind the
-        list means <code>activeOnTab</code> is not reaching the slots.</li>
+    <li><strong>The tabs work at all.</strong> Three tabs above the window, clicking switches,
+        the chamber grid disappears on Browse and on Supply and comes back, and the bank re-opens
+        on whichever tab was showing last. <strong>Fail:</strong> a slot still catching clicks
+        behind the list means <code>activeOnTab</code> is not reaching the slots &mdash; and with
+        three tabs there are now two ways for that to be half-right.</li>
     <li><strong>Each row says the right thing.</strong> An Intermediate+ row reads
         <em>name / Mare &ndash; Bay, tobiano / Arabian, gen 3</em>, and the name and colour agree
         with the Horse Browser's own row for that horse. A Basic row says a basic chamber cannot
@@ -690,6 +895,11 @@
         <strong>Fail:</strong> a lag spike, or a disconnect, on open. The answer if it is bad is
         <em>not</em> a lossy stream codec, which is how a creative player silently erases a
         horse; it is a smaller grid, or a paged one.</li>
+    <li><strong>And now it is not only on open.</strong> Every heal turn rewrites one chamber's
+        snapshot component, which re-syncs that stack's whole entity tag to anyone with the bank
+        open &mdash; one tag every <code>StasisUpkeep.HEAL_INTERVAL</code> ticks per bank, and
+        only while something is actually being mended. That is small next to opening a full bank,
+        but it is continuous where the other is a one-off, and nobody has watched it.</li>
 </ul>
 
 <h3 id="verify-bank-flammable">That it does not burn (reasoning unverified)</h3>

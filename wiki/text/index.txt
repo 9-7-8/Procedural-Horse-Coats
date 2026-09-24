@@ -8,6 +8,8 @@ wiki/ai-setup.html#settings	all	Your key
 wiki/ai-setup.html#what	all	What it does
 wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
+wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
+wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
 wiki/api-notes.html#verified	all	Verified
 wiki/architecture.html#boot-progress	all	What happens when a browser loads the mod
 wiki/architecture.html#build	all	Build & test, in full
@@ -2758,17 +2760,20 @@ wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
 wiki/horse-gear.html#using	gameplay	Putting something on
 wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
-wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest, and that is the whole of stage two
+wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest with a clock on it
 wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank
 wiki/horse-stasis.html#browse-coding	coding	The Browse tab reads the stable's papers, not the chamber
 wiki/horse-stasis.html#browse-gameplay	gameplay	The Browse tab: the bank as a list of horses
 wiki/horse-stasis.html#capture-release	coding	Capture and release: it is the lycanthropy swap
 wiki/horse-stasis.html#chambers	gameplay	The four stasis-chamber tiers
 wiki/horse-stasis.html#files	coding	What is where
+wiki/horse-stasis.html#pipes	coding	Why the supply slots are on the wire and the chambers are not
 wiki/horse-stasis.html#refusals	gameplay	What it refuses, and why it says so
 wiki/horse-stasis.html#release-details	coding	Small decisions inside release
+wiki/horse-stasis.html#supply-gameplay	gameplay	The Supply tab: feeding and mending what is in there
 wiki/horse-stasis.html#the-component-syncs-whole	coding	The component syncs the whole tag, on purpose
 wiki/horse-stasis.html#two-custom-recipes	coding	Why two of these are Java recipes
+wiki/horse-stasis.html#upkeep-coding	coding	The upkeep: four refusals, then one horse
 wiki/horse-traits.html#ability	all	11. Ability
 wiki/horse-traits.html#aura	all	5. Aura
 wiki/horse-traits.html#build-order	all	Build order

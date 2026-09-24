@@ -1,0 +1,131 @@
+2026-09-24 — stage four: the bank feeds and mends the horses in it, and a gametest caught the bug that would have made it do nothing
+
+    Stage four of the six-stage build order on wiki/horse-stasis.html: three supply slots on
+    the Horse Stasis Bank — feed, water, and the empties the water leaves — and a server-only
+    ticker that slowly heals the horses it is holding. This is the first thing the bank does
+    *to* a horse rather than shelving one and showing it to you, which is what the whole rest
+    of that roadmap is made of. The drop buffer, in-bank breeding and the emergency chamber
+    are still planned and still on that page's Roadmap tab. One bullet, per intake/START
+    HERE.txt.
+
+The economy is the field's, and that is nearly the whole design.
+
+    HorseCareHandler already heals a live horse under three conditions — it is hurt, its diet
+    is one that items can feed at all, and there is water within a few blocks — charging
+    Hunger.COST_PER_HEALTH a point and never spending it below Hunger.STARVING, with eating
+    putting hunger back. The bank changes none of that. It supplies the two things a shelved
+    horse cannot go and find: a mouthful out of the feed slot, and the pond, as a meter topped
+    up from a water bucket.
+
+    Everything else falls out for free, which is the argument for doing it this way rather
+    than inventing a bank-specific number. A blood-drinker is no more feedable in a chamber
+    than it is in a field. A starving horse eats first and gets health out of the same turn.
+    Food without water is banked rather than wasted. A horse that is not hurt costs nothing at
+    all — the bank will not open a bucket or take a mouthful for it — so a bank of fifty well
+    horses is not a standing bill, which was the failure mode worth designing against.
+
+    The arithmetic is common/horse/StasisUpkeep, pure Java, with StasisUpkeepTest pinning
+    every one of those claims. neoforge/server/StasisCare does the tag surgery. The split is
+    the same one StasisTier/StasisSnapshot made in stage one and for the same reason.
+
+Healing is a tier capability, and it is the tick gate. (Owner, mid-session.)
+
+    The first cut healed every chamber alike. The owner's correction was that the bank should
+    only tick when it holds a chamber of sufficiently high type, and otherwise not tick at
+    all. So StasisTier gained heals(), true from INTERMEDIATE up.
+
+    Which rung was the only real design call, and it is not arbitrary: searching and healing
+    are one capability with two uses, namely the bank being able to look inside the chamber.
+    Basic's whole contract is that it cannot, and a bank that cannot look inside cannot know
+    that the horse is hurt, what it eats, or how much of its bar is missing. So one eye of
+    ender buys both, and StasisTierTest now asserts heals() == searchable() for every tier so
+    the two can never drift apart. That test's old "each rung adds exactly one capability"
+    rule had to go with it; the rule now is that each rung adds something.
+
+    The gate itself is a cached boolean on the block entity, recomputed only when a chamber
+    slot moves. A block entity's ticker is chosen per blockstate and this block has none, so
+    the ticker is attached unconditionally and the gate is its first line: a bank of Basic
+    chambers, or of empties, or an empty bank, costs one field read a tick and never scans,
+    reads a tag or touches a supply. Past that gate the tick is three more refusals — is it
+    this tick (one turn every 30, phase-staggered by block position, the same interval
+    HorseCareHandler gives a live horse), whose turn is it (a saved cursor walks the grid one
+    slot a turn), and is that one hurt (two cheap field reads) — before anything decodes a
+    record or spends anything.
+
+    One chamber per turn is also the answer to "fifty-four horses is not free": a bank costs
+    the same whether it holds one chamber or every slot, and what a fuller bank costs is
+    speed, not server time. A bank is a slow hospital and it gets slower the more patients it
+    has, which is a legible rule and the honest one.
+
+The supply slots are pipeable; the chamber grid deliberately is not. (Owner's ask.)
+
+    Stage two chose to have the block *hold* a container rather than *be* one, so nothing
+    outside could file or fetch a horse. That call stands. But feed and water are bulk goods
+    that run out, and keeping a stud farm's bank topped up by hand is exactly the chore
+    automation exists for — so the bank now registers an item-handler capability over the
+    supply container and nothing else. Hoppers, droppers and other mods' pipework can push hay
+    and buckets in and pull empties out; none of it can see a chamber.
+
+    The per-slot rules are written once: NeoForge's VanillaContainerWrapper asks
+    Container.canPlaceItem before inserting, so the predicates already written for the menu are
+    the rules a pipe obeys. Feed in the feed slot, water in the water slot, nothing at all into
+    the empties, which is an output.
+
+    26.1.2 has no IItemHandler. The capability is Capabilities.Item.BLOCK, typed
+    ResourceHandler<ItemResource> — NeoForge's newer transfer API, not the name every tutorial
+    still uses. The patched HopperBlockEntity falls back to that same capability when its
+    target is not a Container, which is what makes a vanilla hopper work. Written up on
+    wiki/api-notes.html#item-capability; unverified against a real hopper.
+
+The gametest earned its place on its first run.
+
+    A stored horse is a saveWithoutId tag on an item, and the upkeep reaches into it by name —
+    Health, the max_health attribute, the hunger and horse_record attachments. Every one of
+    those names fails silently: rename one and the reads return defaults, nothing throws,
+    nothing is logged, and the bank quietly never heals anything again. So stage four shipped
+    with stasis_tag_is_readable, a gametest that takes a real horse, hurts it, snapshots it
+    exactly as a capture would, and asserts both that the numbers come back out and that one
+    turn of upkeep actually moves the health in the tag.
+
+    It failed immediately, on real code that had been reasoned about carefully:
+
+        the entity says 53.0 and its saved tag reads 0.0
+
+    A saved entity's `attributes` list holds only the attribute instances something has
+    actually materialised. AttributeMap.getInstance is a computeIfAbsent, but getValue — which
+    getMaxHealth() goes through — reads the entity type's AttributeSupplier without creating
+    anything. So a horse can be saved with a perfectly good maximum health and an attributes
+    list of []. Reading the bar out of that list alone, which is what the roadmap's sketch
+    implied and what the first implementation did, would have made every bank decide every
+    horse was unhurt and heal nothing, for ever, with nothing in the log and no crash.
+
+    Maximum health now comes from the horse's own record, which is where
+    HorseRecords.applyTraitsToEntity gets it from in the first place; the saved list is the
+    fallback for an unconverted vanilla horse with no papers of ours. The general lesson is on
+    wiki/api-notes.html#saved-attributes: read a value from wherever it was written from, not
+    from the tag.
+
+    Worth saying plainly, because it is the reusable part: this was not found by reasoning, by
+    a code review, or by a green build. Three separate reads of the NeoForge and Minecraft
+    sources went into writing that code and none of them caught it. It was found by a test
+    that put a real horse through the real path, in the first thirty seconds it ran.
+
+    The test also needed a second correction of its own: a horse is founded on a later tick
+    than the one it spawns on (HorseFoundingTickHandler), so snapshotting it immediately was
+    testing a horse with no papers — a case the bank never meets. It now waits ten ticks and
+    fails loudly if the record still is not there, so a broken premise reads as a broken
+    premise rather than as a broken bank.
+
+What is now waiting to be looked at
+
+    All of it. The gametest proves the tag can be read and written and that one turn moves the
+    health inside a chamber; nothing else about stage four has been seen in a running game.
+    The whole healing loop, the Supply tab's four status lines, the water meter counting down,
+    the empty bucket coming back, hunger actually being charged, and every part of the hopper
+    plumbing are on wiki/horse-stasis.html's Verification tab. The one that matters most is
+    that no hopper can reach a chamber in either direction: a hopper that can drain a bank of
+    horses is a disaster rather than a nuisance.
+
+    Two numbers were picked rather than derived and may want tuning once they have been
+    played: one bucket is worth 100 health points, and a hay bale feeds a stored horse the
+    same Hunger.Food.HAY rung it feeds a live one.

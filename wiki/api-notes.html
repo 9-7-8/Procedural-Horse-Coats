@@ -405,6 +405,79 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
         will drift.</li>
 </ul>
 
+<h2 id="saved-attributes">A saved entity&rsquo;s <code>attributes</code> list is often empty</h2>
+
+<p>
+    <code>Entity.saveWithoutId</code> writes an <code>attributes</code> list, and it is tempting
+    to read a mob&rsquo;s maximum health, speed or armour back out of it. <strong>That list holds
+    only the attribute instances something has actually materialised.</strong>
+    <code>AttributeMap.getInstance</code> is a <code>computeIfAbsent</code>, but
+    <code>getValue</code> &mdash; which is what <code>getMaxHealth()</code> and friends go
+    through &mdash; reads the entity type&rsquo;s <code>AttributeSupplier</code> without creating
+    anything. So an entity can be saved with a perfectly good maximum health and an
+    <code>attributes</code> list of <code>[]</code>, and the two facts are not in contradiction.
+</p>
+
+<p>
+    Seen 2026-09-24: a horse reporting <code>getMaxHealth() == 53.0</code> whose saved tag held
+    <code>attributes: []</code>. <strong>The failure mode is silent</strong> &mdash; the read
+    returns a default, nothing throws, nothing is logged, and whatever depended on the number
+    quietly does nothing for ever. Only a test that saved a real entity and read it back caught
+    it.
+</p>
+
+<p>
+    <strong>Read the value from wherever it was written from, not from the tag</strong>, and keep
+    the tag as a fallback for an entity your own code never touched. Calling
+    <code>getAttribute(...)</code> before saving would also populate the list, but that is a side
+    effect to rely on rather than a contract.
+</p>
+
+<h2 id="item-capability">Item handlers: there is no <code>IItemHandler</code> any more</h2>
+
+<p>
+    Every tutorial, and most of the modding internet, says a block exposes an inventory to
+    hoppers and pipes as <code>Capabilities.ItemHandler.BLOCK</code>, typed
+    <code>IItemHandler</code>. <strong>Neither name exists in 26.1.2.</strong> NeoForge has moved
+    to the <code>net.neoforged.neoforge.transfer</code> API, and the capability is:
+</p>
+
+<pre><code>Capabilities.Item.BLOCK   // BlockCapability&lt;ResourceHandler&lt;ItemResource&gt;, @Nullable Direction&gt;</code></pre>
+
+<p>
+    Registered the same way as before, on the <em>mod</em> bus:
+</p>
+
+<pre><code>event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.X.get(),
+        (be, side) -&gt; VanillaContainerWrapper.of(be.someContainer()));</code></pre>
+
+<p>
+    Three things worth knowing before you reach for it:
+</p>
+
+<ul>
+    <li><strong><code>VanillaContainerWrapper.of(Container)</code> is the adapter</strong>, and it
+        is the whole job when what you have is a <code>SimpleContainer</code>. It asks
+        <code>Container.canPlaceItem(slot, stack)</code> before inserting, so
+        <strong>per-slot rules written for a menu are obeyed by pipes for free</strong> &mdash;
+        there is no second list to keep in step. It does <em>not</em> gate extraction, so a
+        handler exposed this way can be pulled from as well as pushed to.</li>
+    <li><strong>A vanilla hopper reaches it.</strong> The patched
+        <code>HopperBlockEntity.getContainerOrHandlerAt</code> tries <code>Container</code>
+        first and then falls back to <code>Capabilities.Item.BLOCK</code>, which is why
+        registering the capability is enough and implementing <code>Container</code> is not
+        required.</li>
+    <li><strong>Exposing one container is not exposing the block.</strong> A block entity can
+        hold several containers and register a handler over exactly one of them &mdash; which is
+        how the stasis bank lets a hopper fill its feed slot while leaving its chamber grid
+        completely unreachable. See <a href="horse-stasis.html#pipes">horse-stasis.html</a>.</li>
+</ul>
+
+<p>
+    <strong>Not verified in a running game.</strong> Read out of the NeoForge sources jar,
+    2026-09-24; no real hopper has yet been pointed at the one block that uses it.
+</p>
+
 <h2 id="at-overrides">An access transformer widens a declaration, not its overrides</h2>
 
 <p>
