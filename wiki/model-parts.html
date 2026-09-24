@@ -47,8 +47,9 @@
     <p>
         Blockbench meshes parented to the horse model &mdash; unicorn horns, dorsal spines and
         crystalline growths first, wings and hoof feathering later &mdash; the mod&rsquo;s first
-        non-texture visual, and a GeckoLib dependency to justify or avoid before any of it
-        starts.
+        non-texture visual; the wings now have a settled route (a plain body-parented layer over
+        a copy of the elytra mesh, so any elytra retexture pack is the art), and that route is
+        the argument against taking a GeckoLib dependency for the rest.
     </p>
 </div>
 
@@ -82,6 +83,137 @@
         too.</li>
 </ul>
 
+<h2 id="elytra-wings">Wings off the elytra &mdash; what transfers and what does not</h2>
+<p>
+    The owner asked whether the vanilla elytra can be repurposed wholesale: its model hung on a
+    horse, so that <strong>any elytra retexture pack becomes a horse-wing texture</strong> for
+    free. The answer splits cleanly in two, and it is worth having written down before the wing
+    part is built, because the half that works is the half that is normally the expensive one.
+    <strong>The texture side transfers completely. The model and layer classes do not
+    transfer at all</strong> &mdash; but the mesh they wrap is a dozen lines, and copying it is
+    what keeps every elytra texture lining up.
+</p>
+
+<div class="note">
+    <span class="label">The elytra texture is no longer a hard-coded path &mdash; and that is what makes this work</span>
+    <p>
+        There is no <code>assets/minecraft/textures/entity/elytra.png</code> in 26.1.2; nothing
+        in the client sources mentions that path any more. The only elytra art in the jar is
+        <code>textures/entity/equipment/wings/elytra.png</code>, reached through the
+        equipment-asset system: <code>assets/minecraft/equipment/elytra.json</code> is just
+        <code>{"layers":{"wings":[{"texture":"minecraft:elytra","use_player_texture":true}]}}</code>,
+        and <code>EquipmentClientInfo.Layer#getTextureLocation</code> assembles the file name
+        from the layer type &mdash;
+        <code>"textures/entity/equipment/" + type.getSerializedName() + "/" + path + ".png"</code>,
+        with <code>LayerType.WINGS</code> serialising to <code>wings</code>.
+    </p>
+    <p>
+        So the wing texture is an ordinary <code>Identifier</code> handed to a render type.
+        Nothing about it is player-specific or elytra-specific, and a wing layer that points at
+        <em>Minecraft's own</em> <code>minecraft:textures/entity/equipment/wings/elytra.png</code>
+        inherits whatever the player has installed over it, automatically, with
+        <strong>no wing art in this mod's jar and so no third-party licence to settle</strong>.
+        That is the cheapest possible version of what was asked for.
+    </p>
+</div>
+
+<ul>
+    <li>A retexture pack built for this era ships
+        <code>assets/minecraft/textures/entity/equipment/wings/&lt;name&gt;.png</code>, at
+        <strong>64&times;32</strong>. It drops in as-is.</li>
+    <li>A pack built for before the equipment-asset move ships
+        <code>assets/minecraft/textures/entity/elytra.png</code> &mdash; the same 64&times;32
+        layout, at the old path. Only the path moved, so such a pack needs a file moved and
+        nothing redrawn.</li>
+    <li>What does <em>not</em> come across is a pack's own <code>equipment/*.json</code>, because
+        a horse-wing layer draws a mod model against a texture id of its own choosing rather than
+        going through an <code>EquipmentAsset</code>. That is a feature, not a limitation: it is
+        what lets a horse's wings be chosen per horse.</li>
+</ul>
+
+<h3 id="elytra-classes">Why the two vanilla classes cannot just be reused</h3>
+<p>
+    Both are typed to the player, not to a generality:
+    <code>ElytraModel</code> (now in <code>net.minecraft.client.model.object.equipment</code>) is
+    an <code>EntityModel&lt;HumanoidRenderState&gt;</code>, and <code>WingsLayer</code> is
+    declared <code>&lt;S extends HumanoidRenderState, M extends EntityModel&lt;S&gt;&gt;</code>.
+    A horse's state is <code>HorseRenderState</code> &rarr; <code>EquineRenderState</code> &rarr;
+    <code>LivingEntityRenderState</code>, which is not a <code>HumanoidRenderState</code>, so
+    neither type will accept it. <code>WingsLayer</code> additionally reads
+    <code>state.chestEquipment</code>, and an <code>EquineRenderState</code> carries only
+    <code>saddle</code> and <code>bodyArmorItem</code>. Both are dead ends by the signature, not
+    by some subtlety.
+</p>
+<p>
+    That costs less than it sounds, because <code>ElytraModel</code>'s animation is no use here
+    either &mdash; <code>setupAnim</code> reads <code>elytraRotX/Y/Z</code> and
+    <code>isCrouching</code> off the humanoid state, none of which a horse has. Wing pose was
+    always going to be ours to write. The server already knows the answer it needs: the glide
+    path sets shared flag 7 (<code>isFallFlying</code>) in <code>GeneAbilityHandler</code>, so
+    the render state needs one boolean plus whatever folded/spread poses we choose.
+</p>
+<p>
+    The part that <em>must</em> be copied verbatim is the mesh, since it is what every elytra
+    texture is drawn against: <code>left_wing</code> and <code>right_wing</code>, 10&times;20&times;2
+    boxes with <code>CubeDeformation(1.0F)</code> at <code>texOffs(22, 0)</code>, the right one
+    mirrored, baked as <code>LayerDefinition.create(mesh, 64, 32)</code>. Copy those UVs and
+    third-party wing art lines up; change them and it does not.
+    <code>ModelLayers.ELYTRA</code> is registered by vanilla whether or not we use its model
+    class, so <code>context.getModelSet().bakeLayer(ModelLayers.ELYTRA)</code> is available for
+    free if the vanilla mesh is wanted unaltered.
+</p>
+
+<h3 id="elytra-hanging">Where it hangs on the horse</h3>
+<p>
+    <code>CutieMarkLayer</code> is already the worked example of a body-parented layer on this
+    renderer: it takes <code>getParentModel().root().getChild("body")</code>, calls
+    <code>body.translateAndRotate(poseStack)</code> to inherit the body's animated transform,
+    and then works in body-local space (x in [-5, 5], y in [-8, 2], z in [-17, 5], front
+    is &minus;z). A wing layer is the same move with a withers-height offset and a mirrored pair.
+</p>
+<div class="note">
+    <span class="label">The wing gets its own layer definition &mdash; it is not folded into the HD mesh</span>
+    <p>
+        <code>HdHorseModel</code> is a 128px, per-part-UV mesh; an elytra texture is 64&times;32.
+        Adding <code>left_wing</code>/<code>right_wing</code> as children of <code>"body"</code>
+        inside <code>createHdBodyMesh</code> would work structurally &mdash; that is how
+        <code>"tail"</code> is attached &mdash; but it would move the mesh the HD coat UVs are
+        baked against, which is the one thing on this renderer that cannot quietly shift.
+        Bake the wing as its own <code>LayerDefinition</code> and render it as a separate layer.
+    </p>
+</div>
+
+<h3 id="elytra-verdict">What this settles for the rest of the page</h3>
+<p>
+    It answers the page's standing question &mdash; <a href="#roadmap">plain render layer or
+    GeckoLib</a> &mdash; in the plain layer's favour, for the case that looked most likely to
+    need an animation engine. A wing that only has to fold and spread, parented to a body part
+    that is already animated, needs a boolean and two poses; it does not need a dependency. If
+    wings do not justify GeckoLib, horns and dorsal spines certainly do not, and the batch of
+    head-parented parts above should be written the same way.
+</p>
+<div class="note warn">
+    <span class="label">Open questions, left open on purpose</span>
+    <p>
+        <strong>What drives the wings.</strong> <a href="gene-flying.html">Flying</a> paints
+        nothing today and a gliding horse is visually identical to any other, so wings are the
+        obvious partner &mdash; but a visible wing that also announces a recessive is a genetics
+        decision, not a rendering one, and a purely cosmetic wing gene or a breed-driven wing is
+        the alternative.
+        <strong>One texture or many.</strong> Pointing at Minecraft's own elytra id gives every
+        winged horse the player's single installed retexture; a mod-side id per allele or per
+        breed instead makes a pack's several wing textures into a variety, at the cost of the
+        player having to place files by our names.
+        <strong>An unverified constraint.</strong> Comments in <code>HorseTackSlot</code> and
+        <code>HorseGear</code> state that <code>EquipmentClientInfo.LayerType</code> is not
+        extensible; in this build it is an <code>IExtensibleEnum</code> whose
+        <code>getExtensionInfo()</code> returns <code>nonExtended</code>, which says only that
+        nothing has extended it here. That is worth re-checking &mdash; but only if wings are
+        ever routed through the equipment system as a real tack slot, which none of the above
+        requires.
+    </p>
+</div>
+
 </section>
 
 <div class="page-foot">
@@ -89,11 +221,13 @@
         <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="body-space.html">Body space &amp; the horse model</a>
         <a href="horse-gear.html">Horse gear &mdash; what else renders on a horse</a>
+        <a href="gene-flying.html">Flying &mdash; the horses that would wear them</a>
         <a href="breed-book.html">The breed book</a>
     </div>
-    The one thing to settle before any of this is written is whether a plain render layer on
-    the existing model does the job, because the answer decides whether the mod takes a new
-    dependency or not.
+    The one thing that had to be settled before any of this was written &mdash; whether a plain
+    render layer on the existing model does the job, or whether the mod takes a new dependency
+    &mdash; is <a href="#elytra-verdict">settled by the wings</a>: the part most likely to need
+    an animation engine turns out to need a boolean and two poses.
 </div>
 
 </article>

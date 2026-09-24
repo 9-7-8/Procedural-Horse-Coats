@@ -28,9 +28,7 @@ Recommended order
 =================
 1. Reproduce and fix the breeding and reproduction rules first.
 2. Fix bond decay, AI pathing, and hunger/eating behavior next.
-3. Treat wings as a separate client rendering project, not as part of the core
-   horse AI work.
-4. Finish with search/filtering, naming, loot, and ownership transitions.
+3. Finish with search/filtering, naming, loot, and ownership transitions.
 
 Core principles
 ===============
@@ -160,26 +158,7 @@ Validation:
 - Update the relevant wiki and verification page after implementation, rather
   than relying on this intake note as the long-term source of truth.
 
-6. Wings
-=========
-This should be a separate client render task, not mixed into the core breeding,
-AI, or UI queue.
-
-Implementation:
-- Start from the existing flight capability, but do not assume the vanilla elytra
-  renderer can be attached directly to a horse.
-- Add a dedicated horse-wing state and a horse-specific render layer or model.
-- Keep flight physics separate from rendering; the server-side flight capability
-  remains the authority for whether a horse can fly.
-- Reuse the elytra texture path only if the UV layout is valid for a horse body;
-  if not, use a documented horse-specific wing texture contract.
-
-Validation:
-- Check standing, walking, jumping, gliding, saddled, and different horse sizes.
-- Verify at least one texture retexture works without assuming every elytra
-  resource pack is compatible.
-
-7. Magical loci: drop the explode allele, and go runtime-registry for lycan/egg-layer/item-drop
+6. Magical loci: drop the explode allele, and go runtime-registry for lycan/egg-layer/item-drop
 =================================================================================================
 Likely code:
 - common/src/main/java/.../genetics/genes/MagicOnDeathGene.java

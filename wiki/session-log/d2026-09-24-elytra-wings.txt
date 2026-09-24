@@ -1,0 +1,79 @@
+2026-09-24 — the wings question is answered: the elytra texture transfers, the elytra classes do not
+
+    No code. One intake bullet, the oldest one left in intake/To do.txt: a link to an elytra
+    retexture pack and the owner's question — "Can we just repurpose the existing elytra model as
+    horse wings, so I can grab elytra retextures to use as horse wing textures?" Per the routing
+    table that is a design question, not an implementation task: the shape only becomes agreed
+    once somebody has gone and looked at what the vanilla classes actually are in 26.1.2. So the
+    session was research, and the result is written on wiki/model-parts.html's Roadmap tab, which
+    already owned "pegasus wings (body-parented)" as a planned part.
+
+The answer splits in two, and the cheap half is the one that works
+
+    The texture side transfers completely. There is no
+    assets/minecraft/textures/entity/elytra.png in this version — the string does not appear
+    anywhere in the client sources. The only elytra art in the jar is
+    textures/entity/equipment/wings/elytra.png, reached through the equipment-asset system:
+    assets/minecraft/equipment/elytra.json is
+    {"layers":{"wings":[{"texture":"minecraft:elytra","use_player_texture":true}]}}, and
+    EquipmentClientInfo.Layer#getTextureLocation builds the filename as
+    "textures/entity/equipment/" + type.getSerializedName() + "/" + path + ".png" with
+    LayerType.WINGS serialising to "wings". That means the wing texture is an ordinary
+    Identifier handed to a render type — nothing about it is player-specific — so a wing layer
+    pointed at Minecraft's own wings/elytra.png inherits whatever retexture pack the player has
+    installed, with no wing art in our jar and therefore no third-party licence to settle. A
+    modern pack drops in as-is at 64x32; a pre-equipment-asset pack is the same 64x32 layout at
+    the old path and needs a file moved, nothing redrawn.
+
+    The model and layer classes do not transfer at all, and not subtly: ElytraModel (now in
+    net.minecraft.client.model.object.equipment) is an EntityModel<HumanoidRenderState>, and
+    WingsLayer is declared <S extends HumanoidRenderState, M extends EntityModel<S>>. A horse is
+    HorseRenderState -> EquineRenderState -> LivingEntityRenderState, so neither type will accept
+    it, and WingsLayer additionally reads state.chestEquipment, which an EquineRenderState does
+    not have. That costs less than it sounds, because ElytraModel's setupAnim reads elytraRotX/Y/Z
+    and isCrouching off the humanoid state — wing pose was always going to be ours to write, and
+    the server already knows the answer, since the glide path sets shared flag 7 (isFallFlying) in
+    GeneAbilityHandler. What must be copied verbatim is the mesh, because it is what every elytra
+    texture is drawn against: left_wing/right_wing, 10x20x2 with CubeDeformation(1.0F) at
+    texOffs(22, 0), right mirrored, LayerDefinition.create(mesh, 64, 32).
+
+Where it hangs, and the one thing not to do
+
+    CutieMarkLayer is already the worked example of a body-parented layer on this renderer —
+    getParentModel().root().getChild("body"), then body.translateAndRotate(poseStack) to inherit
+    the body's animated transform, then body-local space. A wing layer is the same move with a
+    withers offset and a mirrored pair. The thing not to do is fold left_wing/right_wing into
+    HdHorseModel.createHdBodyMesh as children of "body" the way "tail" is attached: it would work
+    structurally, but HdHorseModel is a 128px per-part-UV mesh and the HD coat UVs are baked
+    against it. The wing gets its own 64x32 LayerDefinition.
+
+What it settles for the rest of that page
+
+    model-parts.html has carried one standing question since it was written — whether a plain
+    render layer on the existing model does the job, or whether the mod takes a GeckoLib
+    dependency, since animation inheritance was the entire argument for GeckoLib. Wings were the
+    part most likely to need an animation engine, and they need a boolean and two poses. So the
+    page's footer and Roadmap summary now say the question is answered in the plain layer's
+    favour; if wings do not justify the dependency, horns and dorsal spines certainly do not.
+
+    Three things were left open on purpose rather than decided here: what drives the wings (flying
+    paints nothing today, but a visible wing that announces a recessive is a genetics call, not a
+    rendering one), whether the texture is Minecraft's single elytra id or a mod-side id per
+    allele/breed, and an unverified constraint — comments in HorseTackSlot and HorseGear say
+    EquipmentClientInfo.LayerType is not extensible, while in this build it is an IExtensibleEnum
+    whose getExtensionInfo() returns nonExtended, which says only that nothing has extended it
+    here. That last one matters only if wings are ever routed through the equipment system as a
+    real tack slot, which none of the above requires.
+
+Retired from intake
+
+    The bullet is deleted from intake/To do.txt, and section 6 ("Wings") of
+    intake/Implementation advice.txt with it, since that section concerned only this bullet —
+    including its line in the recommended order. Re-baked after the edit: bake-roadmap-index.mjs,
+    bake-verification-index.mjs, build-search-index.mjs, check-links.mjs, bake-agent-text.mjs, all
+    green; sync-page-views.mjs found nothing to change. No Java changed, so no build was run.
+
+    Next bullet in the file is the magical-loci group: drop the Xpl (explode) allele from
+    MagicOnDeathGene, then the runtime-registry rebuild of LycanGene's mob list with an
+    aquatic/flying/hostile blacklist, and the same treatment for EggLayerGene and
+    MagicItemDropGene.
