@@ -109,6 +109,12 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                NamingPolicyPayload.TYPE,
+                NamingPolicyPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleNamingPolicy(payload, context.player()))
+        );
+
+        registrar.playToServer(
                 RenameHorsePayload.TYPE,
                 RenameHorsePayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleRenameHorse(payload, context.player()))
@@ -587,6 +593,23 @@ public final class ModNetworking {
      * which is what keeps this from being a way to poke at a merchant across the
      * map.
      */
+    /**
+     * File this player's foal-naming preference. Server-authoritative by
+     * construction: the client only ever says what it would like, and the
+     * policy is stored against <i>this</i> player's UUID, so it reaches no
+     * horse but their own.
+     */
+    private static void handleNamingPolicy(NamingPolicyPayload payload,
+                                           net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || serverPlayer.level().getServer() == null) {
+            return;
+        }
+        com.example.horsegenetics.neoforge.data.HorseNamingData
+                .get(serverPlayer.level().getServer())
+                .set(serverPlayer.getUUID(), payload.policy());
+    }
+
     private static void handleCowboyFilter(CowboyFilterPayload payload,
                                            net.minecraft.world.entity.player.Player player) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
