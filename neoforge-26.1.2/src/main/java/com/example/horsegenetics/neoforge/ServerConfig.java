@@ -134,6 +134,14 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue GESTATION_DAYS;
 
     /**
+     * <b>How many horses may stand within a chunk of a mare before nobody covers
+     * her.</b> Server-side and not negotiable from a client: whether a foal exists
+     * has to be one answer for everyone, exactly as {@link #GESTATION_DAYS} is.
+     * See {@code common/repro/NaturalCover.Crowd}, which carries it to the rule.
+     */
+    public static final ModConfigSpec.IntValue NEARBY_HORSE_CAP;
+
+    /**
      * <b>Does an owner hear about their horse being hurt?</b> See
      * {@code server/HorseHurtNoticeHandler} for who is told and how often.
      */
@@ -251,6 +259,18 @@ public final class ServerConfig {
                         "Game time, not the day counter: sleeping and /time set move nothing.")
                 .defineInRange("fertility.gestation_days",
                         com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
+        NEARBY_HORSE_CAP = builder
+                .comment("How many other horses may be within 16 blocks of a mare and still let a",
+                        "stallion cover her. (default: 50)",
+                        "Foals and wild horses count, and only horses she shares a pen with -",
+                        "a herd on the other side of a fence is not her crowd.",
+                        "This is the only brake on a paddock breeding itself flat, so it is",
+                        "deliberately generous rather than absent: past it her owner is told in",
+                        "chat which pen is full, if notices.owned_horse_breeding is on.",
+                        "Server-side: a client cannot raise its own.")
+                .defineInRange("fertility.nearby_horse_cap",
+                        com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP, 1,
+                        com.example.horsegenetics.common.repro.ReproRules.MAX_NATURAL_CAP);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -423,6 +443,18 @@ public final class ServerConfig {
             return GESTATION_DAYS.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS;
+        }
+    }
+
+    /**
+     * <b>How crowded she is allowed to be</b>, for this world, now -
+     * {@code fertility.nearby_horse_cap}, safely.
+     */
+    public static int nearbyHorseCap() {
+        try {
+            return NEARBY_HORSE_CAP.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP;
         }
     }
 

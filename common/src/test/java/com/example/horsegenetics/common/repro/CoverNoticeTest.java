@@ -16,7 +16,7 @@ class CoverNoticeTest {
     @Test
     void everyReasonNamesTheMare() {
         for (CoverNotice.Reason reason : CoverNotice.Reason.values()) {
-            String line = CoverNotice.line("Ravensong", reason, 12);
+            String line = CoverNotice.line("Ravensong", reason, NaturalCover.Crowd.of(12));
             assertTrue(line.contains("Ravensong"), reason + ": " + line);
             assertTrue(line.endsWith("."), reason + ": " + line);
         }
@@ -24,9 +24,9 @@ class CoverNoticeTest {
 
     @Test
     void theCrowdingLineCarriesBothNumbers() {
-        String line = CoverNotice.line("Ravensong", CoverNotice.Reason.CROWDED, 12);
+        String line = CoverNotice.line("Ravensong", CoverNotice.Reason.CROWDED, new NaturalCover.Crowd(12, 8));
         assertTrue(line.contains("12 other horses"), line);
-        assertTrue(line.contains(String.valueOf(ReproRules.NATURAL_CAP)), line);
+        assertTrue(line.contains("the limit is 8"), line);
         assertTrue(line.contains(String.valueOf((int) ReproRules.NATURAL_CAP_RADIUS)), line);
     }
 
@@ -71,7 +71,7 @@ class CoverNoticeTest {
 
     @Test
     void theTwoEmptyRollsReadDifferently() {
-        assertNotEquals(CoverNotice.line("Ravensong", CoverNotice.Reason.DID_NOT_TAKE, 0),
-                CoverNotice.line("Ravensong", CoverNotice.Reason.NOT_RECEPTIVE, 0));
+        assertNotEquals(CoverNotice.line("Ravensong", CoverNotice.Reason.DID_NOT_TAKE, NaturalCover.Crowd.of(0)),
+                CoverNotice.line("Ravensong", CoverNotice.Reason.NOT_RECEPTIVE, NaturalCover.Crowd.of(0)));
     }
 }

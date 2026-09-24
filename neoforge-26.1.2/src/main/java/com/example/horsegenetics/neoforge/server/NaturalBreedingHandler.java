@@ -125,8 +125,10 @@ public final class NaturalBreedingHandler {
             candidates.add(new NaturalCover.Stallion(party(h), h.distanceToSqr(mare),
                     ReproHandler.of(h).coversOn(now, t.dayTicks())));
         }
-        int crowd = level.getEntitiesOfClass(Horse.class,
-                mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS), h -> h != mare && h.isAlive() && YardPens.together(mare, h)).size();
+        NaturalCover.Crowd crowd = new NaturalCover.Crowd(level.getEntitiesOfClass(Horse.class,
+                mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS),
+                h -> h != mare && h.isAlive() && YardPens.together(mare, h)).size(),
+                ServerConfig.nearbyHorseCap());
 
         NaturalCover.Party mareParty = party(mare);
         NaturalCover.Decision decision = NaturalCover.decide(mareParty, r, now, t, candidates, crowd);
@@ -141,7 +143,7 @@ public final class NaturalBreedingHandler {
                         : before.seen(stallion.getUUID(), now);
                 if (courtship.complete(now)) {
                     COURTSHIPS.remove(mare.getUUID());
-                    cover(level, mare, mareRecord, r, stallion, now);
+                    cover(level, mare, mareRecord, r, stallion, crowd, now);
                 } else {
                     COURTSHIPS.put(mare.getUUID(), courtship);
                 }
@@ -159,7 +161,7 @@ public final class NaturalBreedingHandler {
                         wildCappedSince = now;
                     } else if (now - wildCappedSince >= WILD_CAP_SUMMARY_TICKS) {
                         ActionTrace.log("fertility", "crowding cap held back " + WILD_CAPPED.size()
-                                + " wild mares in the last 10 minutes (more than " + ReproRules.NATURAL_CAP
+                                + " wild mares in the last 10 minutes (more than " + crowd.cap()
                                 + " horses within " + (int) ReproRules.NATURAL_CAP_RADIUS + " blocks)");
                         WILD_CAPPED.clear();
                         wildCappedSince = now;
@@ -173,8 +175,8 @@ public final class NaturalBreedingHandler {
                 if (last == null || now - last >= 1_200L) {
                     CROWDED_LOGGED.put(mare.getUUID(), now);
                     ActionTrace.log("fertility", ActionTrace.describeShort(mare) + " not covered: "
-                            + crowd + " other horses within " + (int) ReproRules.NATURAL_CAP_RADIUS
-                            + " blocks, the cap is " + ReproRules.NATURAL_CAP);
+                            + crowd.nearby() + " other horses within " + (int) ReproRules.NATURAL_CAP_RADIUS
+                            + " blocks, the cap is " + crowd.cap());
                 }
             }
             case NOT_A_BREEDING_MARE -> {
@@ -217,7 +219,7 @@ public final class NaturalBreedingHandler {
     }
 
     private static void cover(ServerLevel level, Horse mare, HorseRecord mareRecord, Reproduction r, Horse stallion,
-                              long now) {
+                              NaturalCover.Crowd crowd, long now) {
         // Her one try this heat is spent whatever the roll says.
         ReproHandler.set(mare, r.withNaturalTry(now));
         HorseRecord stallionRecord = HorseRecords.of(stallion);
@@ -234,7 +236,7 @@ public final class NaturalBreedingHandler {
             case CONCEIVED -> CoverNotice.Reason.CONCEIVED;
             case DID_NOT_TAKE -> CoverNotice.Reason.DID_NOT_TAKE;
             case NOT_RECEPTIVE -> CoverNotice.Reason.NOT_RECEPTIVE;
-        }, 0, now);
+        }, crowd, now);
         // Null for a wild mare, which HorseProgress swallows - a cover in a wild
         // band is nobody's achievement.
         HorseProgress.complete(ownerPlayer(mare), ProgressTask.NATURAL_COVER);
@@ -249,7 +251,7 @@ public final class NaturalBreedingHandler {
      * and while {@code notices.owned_horse_breeding} is off. The words and the
      * quiet period are {@link CoverNotice}; this is the translation.
      */
-    private static void tell(Horse mare, CoverNotice.Reason reason, int crowd, long now) {
+    private static void tell(Horse mare, CoverNotice.Reason reason, NaturalCover.Crowd crowd, long now) {
         if (!ServerConfig.breedingNotices() || !(ownerPlayer(mare) instanceof ServerPlayer player)) {
             return;
         }

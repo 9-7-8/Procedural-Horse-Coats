@@ -96,15 +96,16 @@ public final class CoverNotice {
     /**
      * <b>The line the owner reads.</b>
      *
-     * @param othersNearby horses within {@link ReproRules#NATURAL_CAP_RADIUS} of her,
-     *                     for {@link Reason#CROWDED}; ignored by every other reason
+     * @param crowd how many horses are within {@link ReproRules#NATURAL_CAP_RADIUS}
+     *              of her and what this world allows, for {@link Reason#CROWDED};
+     *              ignored by every other reason
      */
-    public static String line(String mareName, Reason reason, int othersNearby) {
+    public static String line(String mareName, Reason reason, NaturalCover.Crowd crowd) {
         switch (reason) {
             case CROWDED:
-                return mareName + " was not covered: " + othersNearby + " other horses within "
+                return mareName + " was not covered: " + crowd.nearby() + " other horses within "
                         + (int) ReproRules.NATURAL_CAP_RADIUS + " blocks of her, and the limit is "
-                        + ReproRules.NATURAL_CAP + ". Move some out of the paddock.";
+                        + crowd.cap() + ". Move some out of the paddock.";
             case HURT:
                 return mareName + " was not covered: she is hurt, and a natural cover needs "
                         + Math.round(ReproRules.COVER_HEALTH * 100.0)

@@ -49,8 +49,25 @@ public final class ReproRules {
 
     /** How close a stallion must be to a mare in heat to cover her. */
     public static final double NATURAL_REACH = 3.0;
-    /** With this many other horses, foals included, within {@link #NATURAL_CAP_RADIUS}, nobody covers. */
-    public static final int NATURAL_CAP = 8;
+    /**
+     * <b>How many other horses, foals included, within {@link #NATURAL_CAP_RADIUS}
+     * stop a cover</b> - unless the world says otherwise. The number a world
+     * actually plays with is {@link NaturalCover.Crowd#cap()}, which the game
+     * module fills from its server config; this is only the default it starts on.
+     *
+     * <p>It was a hard-coded eight, and eight is a hobby paddock (owner,
+     * 2026-09-24: <i>"way too restrictive"</i> on a heavily modded server). The
+     * radius is a chunk, so a barn, a wild band and the stable next door are all
+     * one crowd: fifty is roughly "this pen is genuinely packed" rather than
+     * "you own more than one family".
+     */
+    public static final int DEFAULT_NATURAL_CAP = 50;
+    /**
+     * The highest a server may set the cap to. Not a balance number - an upper
+     * bound on a config value that is also a per-scan entity search radius, so a
+     * typo cannot cost a tick.
+     */
+    public static final int MAX_NATURAL_CAP = 1_000;
     public static final double NATURAL_CAP_RADIUS = 16.0;
 
     /**

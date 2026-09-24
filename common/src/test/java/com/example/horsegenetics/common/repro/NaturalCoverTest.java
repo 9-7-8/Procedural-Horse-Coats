@@ -29,7 +29,7 @@ class NaturalCoverTest {
     }
 
     private static NaturalCover.Decision decide(NaturalCover.Party mare, List<NaturalCover.Stallion> s, int crowd) {
-        return NaturalCover.decide(mare, IN_HEAT, NOW, T, s, crowd);
+        return NaturalCover.decide(mare, IN_HEAT, NOW, T, s, NaturalCover.Crowd.of(crowd));
     }
 
     @Test
@@ -52,16 +52,16 @@ class NaturalCoverTest {
     void onlyOncePerHeat() {
         Reproduction covered = IN_HEAT.withNaturalTry(10);
         assertEquals(NaturalCover.Verdict.NOT_NOW,
-                NaturalCover.decide(MARE, covered, NOW, T, List.of(near(STALLION)), 1).verdict());
+                NaturalCover.decide(MARE, covered, NOW, T, List.of(near(STALLION)), NaturalCover.Crowd.of(1)).verdict());
         assertEquals(NaturalCover.Verdict.COVER,
-                NaturalCover.decide(MARE, covered, T.cycleTicks() + 10, T, List.of(near(STALLION)), 1).verdict(),
+                NaturalCover.decide(MARE, covered, T.cycleTicks() + 10, T, List.of(near(STALLION)), NaturalCover.Crowd.of(1)).verdict(),
                 "her next heat is a new try");
     }
 
     @Test
     void notOutOfHeat() {
         assertEquals(NaturalCover.Verdict.NOT_NOW,
-                NaturalCover.decide(MARE, IN_HEAT, DAY + 10, T, List.of(near(STALLION)), 1).verdict());
+                NaturalCover.decide(MARE, IN_HEAT, DAY + 10, T, List.of(near(STALLION)), NaturalCover.Crowd.of(1)).verdict());
     }
 
     @Test
@@ -186,10 +186,26 @@ class NaturalCoverTest {
     }
 
     @Test
-    void theCapCountsOtherHorsesAndStopsAtEight() {
+    void theCapCountsOtherHorsesAndStopsAtTheDefault() {
         assertEquals(NaturalCover.Verdict.COVER,
-                decide(MARE, List.of(near(STALLION)), ReproRules.NATURAL_CAP - 1).verdict());
+                decide(MARE, List.of(near(STALLION)), ReproRules.DEFAULT_NATURAL_CAP - 1).verdict());
         assertEquals(NaturalCover.Verdict.CROWDED,
-                decide(MARE, List.of(near(STALLION)), ReproRules.NATURAL_CAP).verdict());
+                decide(MARE, List.of(near(STALLION)), ReproRules.DEFAULT_NATURAL_CAP).verdict());
+    }
+
+    /**
+     * <b>The cap is the world's, not the constant's</b> (owner, 2026-09-24: a
+     * heavily modded server wants it far higher, from the config). The same crowd
+     * refuses under a low cap and covers under a high one, so nothing downstream
+     * may go on reading {@link ReproRules#DEFAULT_NATURAL_CAP} directly.
+     */
+    @Test
+    void aWorldMayRaiseOrLowerTheCap() {
+        assertEquals(NaturalCover.Verdict.CROWDED,
+                NaturalCover.decide(MARE, IN_HEAT, NOW, T, List.of(near(STALLION)),
+                        new NaturalCover.Crowd(12, 8)).verdict());
+        assertEquals(NaturalCover.Verdict.COVER,
+                NaturalCover.decide(MARE, IN_HEAT, NOW, T, List.of(near(STALLION)),
+                        new NaturalCover.Crowd(12, ReproRules.MAX_NATURAL_CAP)).verdict());
     }
 }

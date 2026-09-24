@@ -9,8 +9,8 @@ import java.util.List;
  *
  * <p>Owner, 2026-09-13: every horse breeds on its own, tamed or wild, once per
  * heat when they meet. Both at full health, neither ridden nor leashed, cowboy
- * stock exempt, a gelding never covers, and {@link ReproRules#NATURAL_CAP}
- * other horses near her stops it.
+ * stock exempt, a gelding never covers, and a {@link Crowd} at its cap around
+ * her stops it.
  *
  * <p><b>A stallion's day is not capped</b> (owner, 2026-09-24): he attempts
  * every mare in heat he is left with, and past
@@ -92,6 +92,33 @@ public final class NaturalCover {
     public record Stallion(Party party, double distanceSq, int coversToday) {
     }
 
+    /**
+     * <b>How many other horses are around her, and how many this world allows.</b>
+     *
+     * <p>The cap travels with the count rather than being read from a constant,
+     * because it is a <b>server setting</b> now ({@code fertility.nearby_horse_cap},
+     * default {@link ReproRules#DEFAULT_NATURAL_CAP}) and {@code common/} cannot
+     * see a config. The one place that counts the horses is also the one place
+     * that knows the world's answer, so it hands over both - and the sentence the
+     * owner reads quotes the same pair, instead of a number the world stopped
+     * playing with.
+     *
+     * @param nearby horses of any age within {@link ReproRules#NATURAL_CAP_RADIUS},
+     *               not counting her
+     * @param cap    how many that world allows before nobody covers
+     */
+    public record Crowd(int nearby, int cap) {
+
+        /** This many horses around her, on the default cap. */
+        public static Crowd of(int nearby) {
+            return new Crowd(nearby, ReproRules.DEFAULT_NATURAL_CAP);
+        }
+
+        public boolean tooMany() {
+            return nearby >= cap;
+        }
+    }
+
     public enum Verdict {
         /** Cover her, with {@link Decision#stallion()}. */
         COVER,
@@ -117,11 +144,11 @@ public final class NaturalCover {
      * @param candidates         the horses near her; anything that is not an able,
      *                           entire, untired stallion within
      *                           {@link ReproRules#NATURAL_REACH} is ignored
-     * @param othersNearby       horses of any age within
-     *                           {@link ReproRules#NATURAL_CAP_RADIUS}, not counting her
+     * @param crowd              how many horses are around her, and how many this
+     *                           world allows
      */
     public static Decision decide(Party mare, Reproduction record, long now, ReproTiming timing,
-                                  List<Stallion> candidates, int othersNearby) {
+                                  List<Stallion> candidates, Crowd crowd) {
         if (!mare.female() || !mare.ableToBreed()) {
             return Decision.refuse(Verdict.NOT_A_BREEDING_MARE);
         }
@@ -143,7 +170,7 @@ public final class NaturalCover {
         if (best < 0) {
             return Decision.refuse(Verdict.NO_STALLION);
         }
-        if (othersNearby >= ReproRules.NATURAL_CAP) {
+        if (crowd.tooMany()) {
             return Decision.refuse(Verdict.CROWDED);
         }
         return new Decision(Verdict.COVER, best);
