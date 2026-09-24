@@ -1,0 +1,95 @@
+2026-09-24 — the stasis chambers are built, and the plan's hardest piece turned out to exist already
+
+    Stage one of the six-stage build order on wiki/horse-stasis.html: the four stasis-chamber
+    items, their recipes, and the capture/release path every later stage stands on. The bank,
+    the Browse tab, passive healing, the drop buffer, in-bank breeding and the emergency
+    chamber are all still planned and are still on that page's Roadmap tab. Scope was the
+    owner's call at the top of the session, against the page's own ordering.
+
+The plan said capture/release was new work. It was not.
+
+    wiki/horse-stasis.html asserted, in its lede and again in its footer, that freezing and
+    later resuming one specific living horse had "no existing analog anywhere in the mod" —
+    that transfer papers, breed spawn eggs and the stallion seed jar all name or spawn a horse
+    but none of them resume one. That is true of those three, and the conclusion drawn from it
+    was wrong: LycanthropyHandler has carried a whole horse through a night spent inside a
+    wolf since the LYCAN gene shipped, with exactly the two calls stasis needs —
+    horse.saveWithoutId into a CompoundTag then discard(), and EntityType.HORSE.create +
+    horse.load + addFreshEntity coming back. It is proven across chunk unloads, restarts and
+    deaths. So stasis reuses it rather than inventing a second way to freeze a horse, and most
+    of what would have been the expensive stage was reading one file.
+
+    That also settled the snapshot's shape against what the page had sketched. On NeoForge
+    saveWithoutId carries the data attachments and stores the entity's UUID, so a released
+    horse is the same horse down to the id the ancestry database, every pedigree, every stall
+    sign and every transfer deed key on. The sketched alternative — a record enumerating
+    horse_record, horse_gear, horse_care and the rest by hand — would have lost the id, lost
+    every vanilla field nobody thought to list (age, custom name, leash, the vanilla saddle
+    slot), and rotted the first time somebody added a fifteenth attachment. The cost of the
+    tag is that StasisSnapshot cannot live in common/ the way the page wanted, because
+    CompoundTag is a Minecraft type: common/ got StasisTier, the four tiers and their
+    cumulative capability flags, with StasisTierTest pinning the ladder, and the snapshot
+    stayed in the game module. Correct restoration beat portability; the portable half is the
+    half that had something to port.
+
+Two design calls the owner made, and one the session made
+
+    The chamber is reusable — letting a horse out hands the same chamber back, empty. The word
+    "single-use" was in the wiki lede but nowhere in the owner's own words in To do.txt, so it
+    was put to her rather than built on: one chamber holds one horse at a time, and a Spacer
+    chamber is not a diamond you spend twice. She also chose the custom recipe class over a
+    plain tag-matched recipe for the water container, which is why StasisChamberRecipe exists
+    at all.
+
+    The session's own call was that the three tier upgrades must be a Java recipe too. A
+    shapeless JSON recipe builds its result from scratch and copies no components, so upgrading
+    an occupied chamber would have handed back an empty one and deleted the animal — silently,
+    with nothing in the log. StasisUpgradeRecipe copies the stasis_snapshot across. The JSON
+    version of that feature is not a cheaper version of it, it is a data-loss bug with a
+    crafting recipe attached.
+
+The water container is deliberately half-done, and says so
+
+    The recipe matches c:buckets/water (Tags.Items.BUCKETS_WATER), so another mod's container
+    crafts it without being named here, and getRemainingItems returns the input's own declared
+    crafting remainder — which is how a vanilla water bucket comes back as an empty bucket.
+    A modded container that declares no remainder is handed straight back still full, because
+    "not consumed" is the rule that matters and returning nothing would break it. The correct
+    answer is draining it through its fluid capability, which is the same
+    match-by-tag-return-drained-container problem the water troughs on compatibility.html will
+    have to solve, and the page already said to reuse that rather than invent a second
+    remainder rule. The legacy NeoForge FluidUtil that would have done it is
+    @Deprecated(forRemoval) in 26.1.2 and the transfer-API replacement cannot change a stack's
+    Item through ItemAccess.forStack, so building it blind in a recipe path would have been a
+    crash on craft for the sake of a bucket. It waits, and it is on the Verification tab.
+
+Checked, and not checked
+
+    :neoforge-26.1.2:compileJava green; :common:test --tests StasisTierTest and
+    CommonPortabilityTest green. runGameTest ran all eight in 43s and all passed, including
+    every_recipe_encodes — "all 1646 recipes encode for the join packet", which is the cheap
+    version of a real client joining a real dedicated server and the exact failure that
+    shipped in v0.5.014 and kicked everyone on join. Both new serializers use the
+    MapCodec.unit(INSTANCE) value overload sharing one instance with StreamCodec.unit, for
+    that reason.
+
+    Nothing has been played. No horse has gone into a chamber in a running game, so the whole
+    round trip, the modded-bucket branch and upgrading an occupied chamber are unplayed and
+    are written up on horse-stasis.html's new Verification tab, with the specific thing to do:
+    capture a horse that has a bond, a name, tack and a pregnancy, relog, and let it out.
+
+Re-baked, and one thing deliberately not committed
+
+    bake-recipe-reference.mjs (131 recipes, 4 custom), check-recipes.mjs, sync-page-views.mjs
+    (the page gained gameplay + coding views and moved out of pages.js's "Planned" section
+    into "Items"), bake-verification-index.mjs, bake-roadmap-index.mjs, build-search-index.mjs,
+    check-links.mjs, bake-agent-text.mjs, check-roadmap-execution.mjs. All green.
+
+    :web:bakeDesignerAssets was run and check-designer-boots.mjs passed, then web.wasm was
+    reverted: StasisTier is not reachable from DesignerApi so TeaVM never compiles it, and the
+    wasm build is not reproducible, so committing it would have been two megabytes of noise.
+
+    The stasis section of intake/To do.txt was deleted, per START HERE's step 3 — the whole
+    spec now lives on the wiki page, and a bullet that has been intaken is a duplicate
+    description competing with the real record. The previous session had left it in place at
+    the owner's explicit request; this is the later decision that request was waiting for.

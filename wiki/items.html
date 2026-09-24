@@ -88,6 +88,12 @@
 <tr><td><a href="item-spawn-eggs.html"><strong>Spawn eggs</strong></a> &mdash; custom, breed, preset</td>
     <td>Build a horse gene by gene, get a foundation horse of a breed, or keep an exact
         horse in an item.</td></tr>
+<tr><td><a href="horse-stasis.html"><strong>Stasis chambers</strong></a> &mdash; four tiers</td>
+    <td>Put one of your horses inside and it stops being an entity at all &mdash; no ticking,
+        no hunger, no growing up, no cost to the server &mdash; until you let it out again,
+        unchanged. Reusable. The tiers buy what the
+        <a href="horse-stasis.html#bank">unbuilt bank</a> may do with a stored horse, not the
+        storing itself.</td></tr>
 </tbody>
 </table>
 </div>
@@ -496,7 +502,9 @@
 
 <ul>
     <li><strong>Real textures.</strong> The four tickets share one, the three whistles share
-        one, and both stall signs borrow <code>minecraft:item/oak_sign</code>.</li>
+        one, and both stall signs borrow <code>minecraft:item/oak_sign</code>. The four
+        <a href="horse-stasis.html">stasis chambers</a> have a placeholder each &mdash; the
+        same stoppered flask in four tier colours, generated rather than drawn.</li>
     <li><strong>Audit <code>item/ModItems</code> against the recipe folder</strong> and make
         sure every craftable item has a shapeless, at-least-one-modded-input recipe or a
         deliberate &ldquo;not craftable, obtained by X&rdquo; note. An item with no recipe and

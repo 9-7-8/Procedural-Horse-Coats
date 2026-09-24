@@ -59,7 +59,8 @@ window.HG.pages = {
                 { href: "item-tickets.html", text: "Tickets", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-transfer-papers.html", text: "Transfer papers", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-equestrian-posts.html", text: "The four posts", kind: "core", views: ["gameplay","coding"] },
-                { href: "item-spawn-eggs.html", text: "Spawn eggs", kind: "tool", views: ["gameplay","coding"] }
+                { href: "item-spawn-eggs.html", text: "Spawn eggs", kind: "tool", views: ["gameplay","coding"] },
+                { href: "horse-stasis.html", text: "Horse stasis: chambers and the bank", kind: "core", views: ["gameplay","coding"] }
             ]
         },
         {
@@ -135,7 +136,6 @@ window.HG.pages = {
                 { href: "curly-coat.html", text: "Curly coat", kind: "natural", views: ["coding"] },
                 { href: "forced-riding.html", text: "Forced riding: the kelpie", kind: "magical", views: ["coding"] },
                 { href: "horse-browser.html", text: "The horse browser", kind: "core", views: ["gameplay","coding"] },
-                { href: "horse-stasis.html", text: "Horse stasis: chambers and the bank", kind: "core", views: ["coding"] },
                 { href: "horsemanship.html", text: "Horsemanship", kind: "core", views: ["coding"] },
                 { href: "item-horse-shoes.html", text: "Horse shoes", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "lasso.html", text: "The lasso", kind: "core", views: ["coding"] },
