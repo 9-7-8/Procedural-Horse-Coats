@@ -1,0 +1,108 @@
+2026-09-24, after the kin gate — bond fades: one point a Minecraft day, down to 31
+
+    The next bullet in the tuning section of intake/To do.txt, exactly the one the
+    previous session predicted:
+
+        Bond should decay down to a set level (above 0) very slowly over time, at like
+        1 level per day.
+
+    Retired from the file.
+
+Dated first, as START HERE says
+
+    Nothing to date against. No decay exists anywhere: HorseCareHandler's bond block only
+    ever adds, awardBond only ever grants, and the attachment has no marker for a loss.
+    The horse-care Roadmap tab plans more bond *sources* and two more tier behaviours and
+    says nothing about losing any; decisions.txt has no call on it; verification.html has
+    no open check. Built-and-wrong ruled out, so: shape agreed, work absent.
+
+The one number that was hers
+
+    The rate and the floor were asked as options. She took 31 — the bottom of behaviour
+    tier 1 — and both numbers in the config rather than as constants.
+
+    31 is the interesting half. It means the worst neglect can do is take back the tiers
+    where a horse walks to you (61) and steers bareback (81), and it can never take back
+    the one where the horse lifts its head as you walk past. A horse you raised from a
+    foal does not become a stranger. That is the same correction foals-start-at-zero
+    already got, and the punishing-husbandry line in philosophy.html rules out the
+    alternative anyway.
+
+What went in
+
+    common/care/Bond — decayed(bond, days, perDay, floor), and the two defaults. In the
+    game-free module for LastStand's reason: what is left when the level is taken out is
+    two thresholds and a clock, and a clock is the kind of thing that is wrong in a way
+    nobody notices from inside a running game.
+
+    ServerConfig — behaviour.bond_decay_per_day (1, 0 turns it off) and behaviour.bond_floor
+    (31), beside the last-stand keys, with the safe accessors the others use.
+
+    HorseCareHandler — the rollover, in the shared slow tick, before the gain block.
+
+    BondTest — floor, never-raises, a future stamp, the off switch, an overflowing stamp.
+
+Three decisions inside a fifteen-line block
+
+    Elapsed days, not a tick rate. A horse spends most of its life in an unloaded chunk,
+    so anything ticked is a rate on *attention*: the horse nobody visits keeps its bond
+    forever and the one in the pasture you ride through loses it. Charging for every whole
+    day since the stamp is the only version of "over time" that means the same thing to
+    both horses. This is the persistence question Implementation advice.txt section 2
+    raised, and the answer is that the marker already existed — dayStamp, which the daily
+    gain cap rolls over on. Sharing it means whichever of the two moves it first, the other
+    reads that day as already counted.
+
+    A stamp of zero is stamped, not charged. This is the one that would have shipped a
+    disaster. Bond can be written straight onto the attachment without going through
+    awardBond — HorseBreedingHandler.inheritBond (a foal's birthright), /bond, the debug
+    yards — and all of those leave dayStamp at its default of 0. In an established world
+    that reads as hundreds of days owing, so every such horse would have been slammed to
+    the floor on its first tick. An unstamped horse is now stamped with today and charged
+    nothing. It is in the in-game checklist as the check that would be a disaster.
+
+    The floor is asked about before the subtraction. A stamp old enough to overflow
+    days * perDay comes back negative, which reads as bond owed *back*. decayed() compares
+    days against the days-to-floor instead, and BondTest passes Long.MAX_VALUE/2 at it.
+
+Where it is written
+
+    horse-care.html gameplay tab — "And it fades", under the gain table, in a player's
+    words, with the two settings.
+
+    horse-care.html coding tab — "Decay: why it is elapsed days and not a rate", the three
+    decisions above, before the /bond section.
+
+    horse-care.html Verification tab — a new 2026-09-24 block, six checks, none played. The
+    summary sentence gained a clause.
+
+    config.html — its "what is not configurable" list said "every bond and care number",
+    which is no longer true; it now names the two exceptions.
+
+Regenerated
+
+    verification.html, roadmap.html, search-index.js, wiki/text/. check-links green,
+    check-roadmap-execution green. :common:test --tests '*BondTest' green,
+    :neoforge-26.1.2:build green.
+
+    common/ gained a class, so the designer wasm is deliberately not rebuilt: Bond is not
+    reachable from DesignerApi, the wasm build is not reproducible, and a rebuild would be
+    2MB of noise for no change in behaviour.
+
+Not done, and worth knowing
+
+    None of it has been in a world. Everything except the arithmetic is NeoForge — the
+    tick, the stamp, the config — so BondTest proves the rule and nothing proves the
+    plumbing. The two checks that matter most are on the Verification tab: several nights
+    of a loaded /bond 100 horse losing a point a night, and an existing world's bonded
+    horses reading unchanged the instant it loads.
+
+Next bullet
+
+    The rest of intake/To do.txt is unbuilt systems rather than tuning: the elytra-as-wings
+    question, horse cryostasis (four chamber tiers, a bank block, an emergency chamber), and
+    the magical-loci cleanup (drop the Xpl allele, rebuild LYCAN/egg-layer/item-drop off the
+    live registry). START HERE says each gets a Roadmap tab on its own page rather than
+    being built from the paragraph — horse-stasis.html already exists with a lane in the
+    execution table, and the magical-loci work has the most written about it already in
+    Implementation advice.txt section 7.

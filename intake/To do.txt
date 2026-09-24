@@ -5,8 +5,6 @@ Can we use this, somehow, directly as wings for horses? Can we just repurpose th
 
 Tuning stuff, from using this in my heavily modded server:
 
-Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
-
 Horse cryostasis - a way to store lots of horses without a server-lag cost. Horses in stasis do not tick: no hunger, no growing up, nothing. The whole point is that the cheapest tier must be cheap, so people actually use it instead of just keeping horses loaded.
 
 Four tiers of stasis chamber item, each the previous plus one more ingredient:

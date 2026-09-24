@@ -2689,6 +2689,8 @@ wiki/horse-care.html#bands	gameplay	3. Wild bands
 wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the top tier is for
 wiki/horse-care.html#bond	gameplay	2. Bond
 wiki/horse-care.html#bond-command	coding	Setting bond for testing — /bond
+wiki/horse-care.html#bond-decay	gameplay	And it fades — one point a day, down to 31
+wiki/horse-care.html#bond-decay-code	coding	Decay — why it is elapsed days and not a rate
 wiki/horse-care.html#changes	gameplay	How bands change
 wiki/horse-care.html#death-notice	gameplay	5. When one of them dies
 wiki/horse-care.html#death-notice-code	coding	The death notice — why it is not vanilla's sentence
