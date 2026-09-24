@@ -76,4 +76,23 @@ public record HorseCooldownsAttachment(Map<String, Long> lastByKey) {
         next.put(key, now);
         return new HorseCooldownsAttachment(next);
     }
+
+    /**
+     * <b>Forget that {@code key} ever fired</b>, so {@link #ready} answers yes
+     * again whatever the clock says.
+     *
+     * <p>For a gate that is re-opened by something happening rather than by time
+     * passing - {@code "last_stand"}, which a horse earns back by healing to full
+     * (see {@link com.example.horsegenetics.common.care.LastStand}) and not by
+     * waiting. Returns {@code this} unchanged when there was nothing to forget,
+     * so a caller can compare and skip the write.
+     */
+    public HorseCooldownsAttachment clear(String key) {
+        if (!lastByKey.containsKey(key)) {
+            return this;
+        }
+        Map<String, Long> next = new HashMap<>(lastByKey);
+        next.remove(key);
+        return new HorseCooldownsAttachment(next);
+    }
 }

@@ -153,6 +153,24 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue ESCAPE_HEALTH_FRACTION;
 
     /**
+     * <b>Is a horse ever killed by a single blow?</b> Off, it is - vanilla's
+     * rules, unchanged. See {@code server/HorseLastStandHandler}.
+     */
+    public static final ModConfigSpec.BooleanValue LAST_STAND;
+
+    /** The health a horse saved from a killing blow is left standing on. */
+    public static final ModConfigSpec.DoubleValue LAST_STAND_HEALTH;
+
+    /** How long nothing can touch a horse that was just saved, in ticks. */
+    public static final ModConfigSpec.IntValue LAST_STAND_IMMUNITY_TICKS;
+
+    /**
+     * How far back a saved horse must heal, as a fraction of its own maximum,
+     * before it can be saved again.
+     */
+    public static final ModConfigSpec.DoubleValue LAST_STAND_REARM_FRACTION;
+
+    /**
      * <b>The reproductive day while {@code debug.tools} is on</b> - one real
      * minute instead of twenty. Owner's call, 2026-09-13: a heat, a pregnancy
      * and half a cycle each become a minute, which is long enough to walk
@@ -258,6 +276,53 @@ public final class ServerConfig {
                         "0 turns the whole behaviour off; 1 makes a horse bolt from any blow.")
                 .defineInRange("behaviour.escape_health_fraction",
                         com.example.horsegenetics.common.care.Escape.DEFAULT_THRESHOLD, 0.0, 1.0);
+        LAST_STAND = builder
+                .comment("Whether a horse can be killed by a single blow. (default: true, meaning it cannot)",
+                        "On, damage that would take a horse to zero takes it to",
+                        "behaviour.last_stand_health instead, and nothing can touch it for",
+                        "behaviour.last_stand_immunity_ticks afterwards - time to run, which is",
+                        "what a horse at that health does (see behaviour.escape_health_fraction).",
+                        "The save is then SPENT: the next killing blow lands, until the horse has",
+                        "healed back to behaviour.last_stand_rearm_fraction of its maximum.",
+                        "It never applies to a genetic defect - a lethal foal still dies, and the",
+                        "half-heart a mare loses to an embryonic lethal can still be her last -",
+                        "nor to /kill, the void, or anything else that bypasses invulnerability.",
+                        "Off restores vanilla exactly: a horse dies when its health reaches zero,",
+                        "however it got there.")
+                .define("behaviour.last_stand", true);
+        LAST_STAND_HEALTH = builder
+                .comment("The health a horse saved from a killing blow is left on. (default: 1.0, half a heart)",
+                        "Health points, not hearts, and not a fraction: a Falabella and a",
+                        "Percheron are both left on the same sliver, because the point of the",
+                        "number is that it is nearly nothing rather than that it is proportionate.",
+                        "Capped at the horse's own maximum, and never zero - zero is death, which",
+                        "would make the save kill what it rescued.")
+                .defineInRange("behaviour.last_stand_health",
+                        com.example.horsegenetics.common.care.LastStand.DEFAULT_HEALTH_LEFT,
+                        com.example.horsegenetics.common.care.LastStand.MIN_HEALTH_LEFT, 1024.0);
+        LAST_STAND_IMMUNITY_TICKS = builder
+                .comment("How long nothing can touch a horse that was just saved, in ticks (20 = 1 second). (default: 120, so six seconds)",
+                        "Real immunity, not vanilla's hurt cooldown: every source is refused for",
+                        "the whole window, so standing in the fire that nearly killed it costs",
+                        "the horse nothing until the window closes.",
+                        "It is there to buy distance. A horse that is saved and hit again on the",
+                        "next tick was not saved, and six seconds is roughly what a bolting horse",
+                        "needs to get out of a blast radius or off a burning block.",
+                        "0 keeps the save and drops the breathing space.")
+                .defineInRange("behaviour.last_stand_immunity_ticks",
+                        com.example.horsegenetics.common.care.LastStand.DEFAULT_IMMUNITY_TICKS, 0, 1200);
+        LAST_STAND_REARM_FRACTION = builder
+                .comment("How far back a saved horse must heal before it can be saved again,",
+                        "as a fraction of its own maximum health. (default: 1.0, all the way)",
+                        "This is what stops the save being immortality: recovering costs food,",
+                        "water and time, and until it is paid the horse is as mortal as any",
+                        "other animal.",
+                        "Lower it and a horse is rescued again before it has really recovered.",
+                        "Set it low enough to sit under behaviour.last_stand_health and the horse",
+                        "is re-armed by the save itself, which is immortality - deliberately",
+                        "allowed, since a server that types that has asked for it.")
+                .defineInRange("behaviour.last_stand_rearm_fraction",
+                        com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION, 0.0, 1.0);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -378,6 +443,42 @@ public final class ServerConfig {
             return ESCAPE_HEALTH_FRACTION.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.Escape.DEFAULT_THRESHOLD;
+        }
+    }
+
+    /** {@code behaviour.last_stand}, safely. */
+    public static boolean lastStand() {
+        try {
+            return LAST_STAND.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code behaviour.last_stand_health}, safely. */
+    public static double lastStandHealth() {
+        try {
+            return LAST_STAND_HEALTH.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.LastStand.DEFAULT_HEALTH_LEFT;
+        }
+    }
+
+    /** {@code behaviour.last_stand_immunity_ticks}, safely. */
+    public static int lastStandImmunityTicks() {
+        try {
+            return LAST_STAND_IMMUNITY_TICKS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.LastStand.DEFAULT_IMMUNITY_TICKS;
+        }
+    }
+
+    /** {@code behaviour.last_stand_rearm_fraction}, safely. */
+    public static double lastStandRearmFraction() {
+        try {
+            return LAST_STAND_REARM_FRACTION.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION;
         }
     }
 
