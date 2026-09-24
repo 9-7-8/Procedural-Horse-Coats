@@ -390,9 +390,19 @@ public final class FamilyTreeScreen extends Screen {
         boolean present = n.record != null;
         boolean hovered = present && n.col > 0
                 && mouseX >= n.x && mouseX <= n.x + boxW && mouseY >= n.y && mouseY <= n.y + boxH;
+        // Sold, given away, or simply never yours: greyed out, and still here.
+        // Selling a horse has never removed it from the pedigree - nothing but
+        // the debug pen cleaner calls HorseAncestryData.forget - but until now
+        // nothing on the chart said the horse had left, so a stable you had
+        // sold out of looked exactly like one you had not.
+        boolean elsewhere = present && n.record.ownedByAnother(viewerId());
 
-        int bg = present ? (hovered ? 0xFF3A3A48 : 0xFF26262E) : 0xFF1A1A1E;
-        int border = present ? (hovered ? 0xFFFFFFFF : 0xFF505060) : 0xFF303038;
+        int bg = present
+                ? (elsewhere ? (hovered ? 0xFF2C2C34 : 0xFF1F1F25) : (hovered ? 0xFF3A3A48 : 0xFF26262E))
+                : 0xFF1A1A1E;
+        int border = present
+                ? (elsewhere ? (hovered ? 0xFFB8B8C0 : 0xFF3C3C46) : (hovered ? 0xFFFFFFFF : 0xFF505060))
+                : 0xFF303038;
         g.fill(n.x, n.y, n.x + boxW, n.y + boxH, bg);
         g.fill(n.x, n.y, n.x + boxW, n.y + 1, border);
         g.fill(n.x, n.y + boxH - 1, n.x + boxW, n.y + boxH, border);
@@ -403,14 +413,45 @@ public final class FamilyTreeScreen extends Screen {
             HorseRecord r = n.record;
             // model first so the text sits on top of it
             drawHorseModel(g, r, n.x, n.y, mouseX, mouseY);
+            if (elsewhere) {
+                // The coat is drawn by an entity renderer, which takes no tint
+                // from here, so the whole inside of the box goes under one
+                // scrim instead - the horse dims with its box rather than
+                // sitting bright inside a grey frame.
+                g.fill(n.x + 1, n.y + 1, n.x + boxW - 1, n.y + boxH - 1, 0x77101014);
+            }
             int textMaxW = Math.max(20, (boxW - SWATCH) - 8);
             int line2 = n.y + 3 + Math.round(11f * uiScale);
-            drawFitted(g, r.displayName(), n.x + 4, n.y + 3, textMaxW, 0xFFF0F0F0);
+            drawFitted(g, r.displayName(), n.x + 4, n.y + 3, textMaxW,
+                    elsewhere ? 0xFF9A9AA2 : 0xFFF0F0F0);
             String by = r.attribution().map(a -> "by " + a).orElse("wild");
-            drawFitted(g, by, n.x + 4, line2, textMaxW, 0xFF8088A8);
+            if (r.soldOnBy(viewerName(), viewerId())) {
+                by = "sold - " + by;
+            }
+            drawFitted(g, by, n.x + 4, line2, textMaxW, elsewhere ? 0xFF5C627A : 0xFF8088A8);
         } else {
             g.text(this.font, Component.literal(n.col == 0 ? "?" : "—"), n.x + 4, n.y + boxH / 2 - 4, 0xFF606068);
         }
+    }
+
+    /**
+     * Who is looking. The owner mirror on the record is a UUID, so the chart
+     * asks the local player for theirs rather than comparing names - two
+     * players may share a display name, and only one of them owns the horse.
+     */
+    private static @org.jetbrains.annotations.Nullable UUID viewerId() {
+        var player = net.minecraft.client.Minecraft.getInstance().player;
+        return player == null ? null : player.getUUID();
+    }
+
+    /**
+     * The viewer's name as {@code bredBy} / {@code tamedBy} store it - those
+     * two are usernames, not UUIDs, so "did I breed this" is a name question
+     * however much "do I own it" is not.
+     */
+    private static @org.jetbrains.annotations.Nullable String viewerName() {
+        var player = net.minecraft.client.Minecraft.getInstance().player;
+        return player == null ? null : player.getGameProfile().name();
     }
 
     /** Draw {@code text} left-aligned at {@code (x, y)}, scaled down (never up) so the WHOLE string fits {@code maxW}. */

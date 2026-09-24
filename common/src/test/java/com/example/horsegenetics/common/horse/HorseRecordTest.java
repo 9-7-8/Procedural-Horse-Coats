@@ -166,6 +166,46 @@ class HorseRecordTest {
         assertFalse(feral.ownedBy(STRANGER));
     }
 
+    /**
+     * A sold horse stays in the family tree and is drawn greyed out, so the
+     * screen needs to tell "somebody else owns this" from "nobody does". Every
+     * founder and every wild ancestor is unowned, so answering the second with
+     * the first would grey out most of a pedigree.
+     */
+    @Test
+    void anotherPlayersHorseIsNotTheSameAsAnUnownedOne() {
+        HorseRecord wild = raw(ID, "A", "B", "EeAa");
+        assertFalse(wild.ownedByAnother(OWNER), "nobody owns it, so nobody else does either");
+
+        HorseRecord mine = wild.withOwner(OWNER);
+        assertFalse(mine.ownedByAnother(OWNER), "my own horse is not somebody else's");
+        assertTrue(mine.ownedByAnother(STRANGER));
+        assertFalse(mine.ownedByAnother(null), "no viewer, no answer");
+
+        assertFalse(mine.withOwner(null).ownedByAnother(STRANGER), "gone wild is not gone to someone");
+    }
+
+    /**
+     * "Sold" is the narrower claim: the horse is credited to the viewer and
+     * owned by somebody else. A stallion borrowed for one covering is another
+     * player's horse without ever having been the viewer's to sell.
+     */
+    @Test
+    void soldOnMeansItWasYoursAndIsNot() {
+        HorseRecord bred = raw(ID, "A", "B", "EeAa").withBredBy("Ixora");
+
+        assertTrue(bred.withOwner(STRANGER).soldOnBy("Ixora", OWNER), "bred by me, owned by them");
+        assertFalse(bred.withOwner(OWNER).soldOnBy("Ixora", OWNER), "still mine");
+        assertFalse(bred.soldOnBy("Ixora", OWNER), "unowned is not sold");
+        assertFalse(bred.withOwner(OWNER).soldOnBy("Someone", STRANGER),
+                "their horse in my tree was never mine to sell");
+
+        // attribution() prefers bredBy, and falls back to tamedBy.
+        HorseRecord tamed = raw(ID, "A", "B", "EeAa").withTamedBy("Ixora").withOwner(STRANGER);
+        assertTrue(tamed.soldOnBy("Ixora", OWNER), "a horse I tamed and sold on");
+        assertFalse(tamed.soldOnBy(null, OWNER), "no viewer name, no claim");
+    }
+
     /** Ownership rides along with every other edit rather than being dropped by it. */
     @Test
     void ownershipSurvivesAnUnrelatedEdit() {

@@ -302,6 +302,33 @@ public record HorseRecord(
         return viewer != null && ownerId.isPresent() && ownerId.get().equals(viewer);
     }
 
+    /**
+     * <b>Somebody else's horse</b> - the test the family tree greys a box on.
+     *
+     * <p>Deliberately <b>not</b> {@code !ownedBy(viewer)}: a wild horse, a
+     * founder nobody ever tamed and an ancestor whose owner was never mirrored
+     * are owned by no one, and reading those as another player's would grey out
+     * most of a pedigree. Only a horse with an owner who is not the viewer
+     * counts.
+     */
+    public boolean ownedByAnother(UUID viewer) {
+        return viewer != null && ownerId.isPresent() && !ownerId.get().equals(viewer);
+    }
+
+    /**
+     * <b>Sold on</b>: this horse is credited to {@code viewerName} - they bred
+     * it, or tamed it - and somebody else owns it now.
+     *
+     * <p>Selling never removes a horse from anybody's pedigree, so this is only
+     * ever about how the box is drawn. It is a narrower question than
+     * {@link #ownedByAnother}, which is true of any horse another player owns:
+     * a stallion you borrowed for one covering was never yours to sell.
+     */
+    public boolean soldOnBy(String viewerName, UUID viewer) {
+        return ownedByAnother(viewer) && viewerName != null
+                && attribution().map(viewerName::equals).orElse(false);
+    }
+
     // --- gelding --------------------------------------------------------
 
     /**
