@@ -44,11 +44,14 @@ import java.util.Set;
  * <p>Below {@link Hunger#HUNGRY} it looks round for the best food its diet allows, walks to
  * it and eats, one mouthful at a time, until it reaches {@link Hunger#SATED}. Between that and
  * {@link Hunger#GRAZE_BELOW} it only grazes what it is standing on, now and then. What it looks
- * for, best first, is {@link Hunger.Food}'s order:
+ * for, best first, is {@link Hunger.Food}'s order (and a grazing horse takes a dropped
+ * mouthful in reach before the grass, which is the only rung it does not walk to):
  * <ol>
  *   <li>its favourite food, lying on the ground;</li>
- *   <li>any dropped food it can eat - the same test a hand-feeding uses
- *       ({@code GeneAbilityHandler.eats});</li>
+ *   <li>any dropped food it can eat ({@link DietFoods#acceptsFromGround}) - which for an
+ *       ordinary horse is <b>wider</b> than what it takes from a hand, and is the item
+ *       form of the rungs below it, so it does not cross a pen for a planted potato and
+ *       then ignore one lying at its feet;</li>
  *   <li>cake, then hay, then crops, pumpkins, melons and sugar cane;</li>
  *   <li>grass, then moss, then mushrooms, then flowers.</li>
  * </ol>
@@ -97,6 +100,8 @@ public final class HungerFoodGoal extends Goal {
     private static final int IGNORE_TICKS = 1_200;
     /** A grazing horse takes a mouthful about once in this many checks - roughly every two minutes. */
     private static final int GRAZE_CHANCE = 1_200;
+    /** How far a grazing horse takes a dropped mouthful from without walking to it. */
+    private static final double GRAZE_REACH = 2.0;
     private static final float HUNT_DAMAGE = 4.0F;
     private static final int HUNT_SWING = 20;
 
@@ -265,11 +270,18 @@ public final class HungerFoodGoal extends Goal {
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class,
                 horse.getBoundingBox().inflate(SEARCH_RADIUS, SEARCH_UP, SEARCH_RADIUS),
                 e -> e.isAlive() && !e.getItem().isEmpty())) {
-            if (ignored(~(long) e.getId(), now) || !GeneAbilityHandler.eats(horse, e.getItem())) {
+            if (ignored(~(long) e.getId(), now)) {
                 continue;
             }
             boolean fav = favourite != null
                     && favourite.equals(BuiltInRegistries.ITEM.getKey(e.getItem().getItem()).toString());
+            // The diet resolved once for this horse, not GeneAbilityHandler.eats: that
+            // asks HorseDietHandler.dietOf per call, so a pen with a pile of dropped
+            // items parsed one horse's genotype once an item - the cost this class was
+            // rebuilt to avoid - and answered the narrower hand-feeding question anyway.
+            if (!fav && !DietFoods.acceptsFromGround(diet, e.getItem())) {
+                continue;
+            }
             double d = horse.distanceToSqr(e);
             if ((fav && !bestIsFavourite) || (fav == bestIsFavourite && d < bestItemDist)) {
                 bestItem = e;
@@ -399,14 +411,42 @@ public final class HungerFoodGoal extends Goal {
     // Eating
     // ------------------------------------------------------------------
 
-    /** A horse that is not hungry but could eat: the tuft it stands in, or the grass under its feet. */
+    /**
+     * A horse that is not hungry but could eat: food lying at its feet, the tuft it stands
+     * in, or the grass under it. The dropped mouthful is here as well as in {@link #search}
+     * because the owner's ask was "near them", not "when starving" (2026-09-23) - a horse
+     * that has eaten into its reserve and is standing on a dropped carrot should take it
+     * rather than wait to fall below {@link Hunger#HUNGRY}. It costs one entity query on the
+     * same one-in-{@link #GRAZE_CHANCE} roll the grass mouthful already pays for.
+     */
     private void grazeInPlace(ServerLevel level, HorseDiet diet) {
+        if (grazeDropped(level, diet)) {
+            return;
+        }
         BlockPos at = horse.blockPosition();
         if (rungOf(level, at, diet) == Hunger.Food.GRASS) {
             eatBlock(level, at, Hunger.Food.GRASS, true);
         } else if (rungOf(level, at.below(), diet) == Hunger.Food.GRASS) {
             eatBlock(level, at.below(), Hunger.Food.GRASS, true);
         }
+    }
+
+    /** Food within {@link #GRAZE_REACH}, eaten where the horse stands; false if there is none. */
+    private boolean grazeDropped(ServerLevel level, HorseDiet diet) {
+        String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
+        for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class,
+                horse.getBoundingBox().inflate(GRAZE_REACH, 1.0, GRAZE_REACH),
+                e -> e.isAlive() && !e.getItem().isEmpty())) {
+            boolean fav = favourite != null
+                    && favourite.equals(BuiltInRegistries.ITEM.getKey(e.getItem().getItem()).toString());
+            if (!fav && !DietFoods.acceptsFromGround(diet, e.getItem())) {
+                continue;
+            }
+            rung = fav ? Hunger.Food.FAVOURITE : Hunger.Food.DROPPED;
+            eatItem(level, e);
+            return true;
+        }
+        return false;
     }
 
     private void eatItem(ServerLevel level, ItemEntity e) {

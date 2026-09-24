@@ -4,9 +4,11 @@ import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.HorseDiet;
 import com.example.horsegenetics.neoforge.compat.HayBales;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,10 @@ import java.util.Map;
  *   <li>the lists are the whole definition of a diet, with <b>one</b> exception:
  *       {@link Diet#WHEAT} also takes anything in {@code horsegenetics:hay_bales},
  *       because another mod's hay bale is not an item this file could have named.
- *       See {@link HayBales}. Nothing else hides behind a tag or a predicate.</li>
+ *       See {@link HayBales}. Nothing else hides behind a tag or a predicate -
+ *       in {@link #accepts}, which is the hand-feeding question.
+ *       {@link #acceptsFromGround} is the other one, and for an ordinary horse
+ *       it is deliberately wider than any list here.</li>
  * </ul>
  *
  * <p><b>Unverified against a running game.</b> Every item id here is read off
@@ -136,6 +141,58 @@ public final class DietFoods {
                 return items != null && items.contains(stack.getItem());
             }
         }
+    }
+
+    /**
+     * Would this horse eat this <b>off the ground</b>? Broader than
+     * {@link #accepts}, which answers the hand-feeding question and hands an
+     * ordinary horse back to vanilla's {@code #minecraft:horse_food} - eight
+     * items, of which a heavily modded server drops almost none (owner,
+     * 2026-09-23: "horses should eat food dropped on the ground near them, if
+     * it's in their diet").
+     *
+     * <p>The rule is <b>symmetry with what the horse already walks over to eat
+     * as a block</b>: an ordinary or eat-anything horse picks up the item form
+     * of every rung {@code HungerFoodGoal.rungOf} gives it - cake, crops,
+     * mushrooms, flowers - and another mod's grain or fruit with them, by the
+     * common tags, so this file does not have to name it. Before this, a horse
+     * would cross a pen to eat a planted potato and ignore the same potato
+     * lying at its feet.
+     *
+     * <p><b>A narrow diet is untouched</b> and still answers {@link #accepts}:
+     * the whole point of a wheat-eater is that it walks past the rest.
+     */
+    public static boolean acceptsFromGround(HorseDiet diet, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        Diet d = diet.diet();
+        if (d != Diet.NORMAL && d != Diet.ANYTHING) {
+            return accepts(diet, stack);
+        }
+        return accepts(diet, stack) || stack.is(ItemTags.HORSE_FOOD)
+                || HayBales.isBale(stack) || isGrazeable(stack);
+    }
+
+    /**
+     * The item form of what a grazing horse eats out of the world: crops, fruit,
+     * vegetables and berries - vanilla's and any mod's, by the common tags -
+     * then mushrooms, small flowers and cake.
+     *
+     * <p>UNVERIFIED against a running game: that {@code c:crops},
+     * {@code c:foods/fruit}, {@code c:foods/vegetable}, {@code c:foods/berry},
+     * {@code c:mushrooms} and {@code #minecraft:small_flowers} hold what their
+     * names say in 26.1.2. All six keys exist in the 26.1.2 sources; their
+     * contents were not read.
+     */
+    private static boolean isGrazeable(ItemStack stack) {
+        return stack.is(Tags.Items.CROPS)
+                || stack.is(Tags.Items.FOODS_FRUIT)
+                || stack.is(Tags.Items.FOODS_VEGETABLE)
+                || stack.is(Tags.Items.FOODS_BERRY)
+                || stack.is(Tags.Items.MUSHROOMS)
+                || stack.is(ItemTags.SMALL_FLOWERS)
+                || stack.is(Items.CAKE);
     }
 
     /**
