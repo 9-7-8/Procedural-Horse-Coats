@@ -12,7 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-A high bond horse should not attempt to follow or watch their bond if there is no direct path to them-- line of sight is not enough, they must be able to find a path to their bond. If they're in an enclosed area, they act like a normal horse. Right now, a high bond horse is ignoring breeding in preference of watching their bonded owner. 
 Queue: horses should eat food dropped on the ground near them, if it's in their diet.
 
 - Horses should eat food dropped on the ground near them when the food is part of their diet.

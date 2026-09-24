@@ -1,0 +1,70 @@
+2026-09-24, after the barn-name fix — a bonded horse stops staring through the fence, and
+band life gets its movement back
+
+    One bullet, the first in the Bugs section of intake/To do.txt, in the owner's words:
+
+        A high bond horse should not attempt to follow or watch their bond if there is no
+        direct path to them -- line of sight is not enough, they must be able to find a path
+        to their bond. If they're in an enclosed area, they act like a normal horse. Right
+        now, a high bond horse is ignoring breeding in preference of watching their bonded
+        owner.
+
+    Reported from the heavily modded server she actually plays on. Nothing in the session log
+    or on any Verification tab had touched BondFollowGoal since it was written on 2026-09-02,
+    so the bullet was live rather than stale.
+
+Two causes, not one
+
+    The reachability half is the half the bullet names, and it was simply absent: every tier
+    gated on distance alone. A horse shut in a pen could see its owner through the rails at
+    nine blocks, start the goal, and — at tier 3 — re-issue Navigation.moveTo at an
+    unreachable target every ten ticks for as long as the owner stood there, which is both
+    the reported behaviour and a quiet pathfinding cost per horse.
+
+    The cause of the *symptom* she noticed is separate, and is about goal flags rather than
+    pathing. Tier 1 of the bond ladder is head-turning: "turns its head to face the owner
+    within 10 blocks; no movement". But the one goal carried EnumSet.of(MOVE, LOOK) for all
+    three tiers and sat at priority 4, and vanilla's GoalSelector lets a running goal hold a
+    flag against every goal with a higher priority *number* — so a horse doing nothing but
+    looking at its owner locked MOVE away from all six of HerdGoals' band-life goals
+    (Spar 3, DamAndFoal 4, StallionGuard 5, Displace 5, HeatAttraction 6, GroomAndRest 7).
+    Bond 31 is enough. Any tamed horse within ten blocks of its owner had no band life at
+    all, and HeatAttraction — the goal that walks a stallion to a mare in heat — was the
+    most visible casualty. That is "ignoring breeding in preference of watching their
+    bonded owner", exactly.
+
+What changed
+
+    server/BondFollowGoal now covers tiers 2-3 only and keeps MOVE|LOOK at priority 4.
+    Tier 1 moved into BondFollowGoal.Watch, a nested goal claiming LOOK alone, registered by
+    HorseCareHandler at priority 8 — deliberately below every band-life goal, so watching
+    fills the gaps between doing instead of replacing it. Nothing about looking should
+    out-rank anything about doing.
+
+    Both goals gate on a shared ReachCheck: getNavigation().createPath(owner, 0), true only
+    when the path exists and canReach(). A path that stops short at a fence counts as no
+    path. It is a real pathfind, far too expensive for a canUse() that runs every tick for
+    every horse, so the answer is cached for 40 ticks — which is also why opening a gate
+    takes up to two seconds to register, and why that delay is correct rather than a bug.
+    The cheap checks (tamed, tier, owner present, distance) run first, so the pathfind only
+    happens for a horse that would otherwise have started.
+
+    Tier 3's persistence is unchanged in intent but now means something: the route was
+    proved walkable before the goal started, so re-issuing every cycle is persistence rather
+    than spinning on an impossible request.
+
+Not played
+
+    wiki/horse-care.html grew a Verification section (#bond-reach-0924) with four checks: a
+    bond-81 stallion still covering a mare while his owner stands in the pen (the regression
+    that matters), a penned horse ignoring an unreachable owner outside the fence, the gate
+    opening being noticed within a couple of seconds, and tier 1 still turning its head when
+    nothing else is going on. /bond sets the number for testing. The bond table on the same
+    page gained #bond-needs-a-route and the two-goal split; the class list names Watch and
+    ReachCheck.
+
+    Not done here, and worth knowing: the reachability predicate the intake advice asks for
+    ("reuse the same reachability/boundary predicate for pasture crowding, crop eating, and
+    food selection") is still three separate absences — this change only put one in
+    BondFollowGoal. The pasture-edge pushing and eat-through-a-fence bullets are still open
+    in intake/To do.txt and are the natural place for ReachCheck to become shared.

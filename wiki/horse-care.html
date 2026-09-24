@@ -98,9 +98,19 @@
 </tbody>
 </table>
 </div>
-<p>One goal that reads the number and returns false from <code>canUse()</code>
-    below tier 1, rather than adding/removing goals as the number crosses a
-    line. The goal is inert while the horse is leashed or ridden.</p>
+<p id="bond-needs-a-route"><strong>Every tier needs a way to get there &mdash; a
+    sight line is not enough.</strong> Before it looks at or walks toward its
+    owner, the horse asks the navigator for a real path and drops the whole
+    behaviour if there is none, so a horse shut in a pen whose owner is outside
+    the fence behaves like any other horse: it grazes, spars, grooms and answers
+    a mare in heat instead of standing at the rails.</p>
+<p>Two goals rather than one, because <em>what a goal claims</em> matters as
+    much as what it does: tier 1 is head-turning, so it claims <code>LOOK</code>
+    alone and sits <em>below</em> band life, while tiers 2&ndash;3 claim
+    <code>MOVE</code> and sit above it. Both read the number and return false
+    from <code>canUse()</code> below their tier, rather than being added and
+    removed as the number crosses a line, and both are inert while the horse is
+    leashed or ridden.</p>
 
 <h3>Gains &mdash; capped at +15 per Minecraft day</h3>
 <p id="bareback"><strong>Riding bareback bonds exactly as well as riding saddled.</strong>
@@ -349,8 +359,13 @@
         phase-staggered by <code>tickCount + entityId</code>), plus the
         <code>PlayerInteractEvent.EntityInteract</code> hook for feed-bond and
         the <code>EntityJoinLevelEvent</code> hook that adds the goal.</li>
-    <li><code>server/BondFollowGoal</code> &mdash; the one AI goal, added at
-        priority 4 to every <code>Horse</code>, that reads the bond tier.</li>
+    <li><code>server/BondFollowGoal</code> &mdash; the AI goal that reads the
+        bond tier, added at priority 4 to every <code>Horse</code>, with its
+        <code>Watch</code> (tier 1, head-turning, <code>LOOK</code> only) added
+        at priority 8, below all of <a href="#band-code">band life</a>. Its
+        <code>ReachCheck</code> is the shared "can I walk there?" cache
+        &mdash; a real <code>createPath</code> every two seconds, not every
+        tick.</li>
     <li><code>network/HorseCareSyncPayload</code> &rarr;
         <code>client/ClientHorseCareCache</code> &mdash; bond + in-herd flag
         pushed to trackers on change and on start-tracking, shown on the
@@ -1285,8 +1300,43 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Band life has never run outside the yard, and its sharpest question was never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her &mdash; and a draught should now go for food far oftener than a pony.</p>
+    <p>A bonded horse no longer watches its owner through a fence, so the thing to watch for is the behaviour that was being crowded out &mdash; a bonded stallion covering a mare in heat while his owner stands in the paddock; band life has still never run outside the yard, and its sharpest question was never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
+
+<h3 id="bond-reach-0924">Bond behaviour needs a walkable route (2026-09-24, NOT played)</h3>
+
+<p>
+    Reported from the owner&rsquo;s server: <em>a high bond horse is ignoring breeding in
+    preference of watching their bonded owner</em>. Two causes, both fixed. The tier-1
+    head-turn claimed the <code>MOVE</code> flag it never used, at priority 4, which silenced
+    every <a href="#band-code">band-life</a> goal (3&ndash;7) for as long as the owner stood
+    within ten blocks &mdash; sparring, grooming, displacing and heat attraction all included.
+    And no tier asked whether it could actually <em>reach</em> its owner; a sight line through
+    a fence was enough to start staring. Tier 1 is now a <code>LOOK</code>-only goal below band
+    life, and all three tiers drop out when <code>createPath(owner).canReach()</code> is false.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A bonded stallion still covers.</strong> Pen a bond-81+ stallion with a mare in
+        heat (<code>/bond</code> sets the number) and stand in the pen with them.
+        <strong>Pass:</strong> he walks to the mare and breeds while you watch.
+        <strong>Fail:</strong> he faces you and does nothing, which means a goal above heat
+        attraction is still holding <code>MOVE</code>.</li>
+    <li><strong>A penned horse ignores an owner it cannot reach.</strong> Shut a bond-81+ horse
+        in a fully closed pen and stand outside the fence, six blocks away.
+        <strong>Pass:</strong> it grazes and gets on with band life, glancing at you no more
+        than any horse does. <strong>Fail:</strong> it walks the fence line or holds its head
+        on you, which means the reach check is passing when it should not.</li>
+    <li><strong>Opening the gate is enough.</strong> From the state above, open the gate.
+        <strong>Pass:</strong> within a couple of seconds the horse notices and comes &mdash;
+        the answer is cached for 40 ticks, so a short delay is correct, a permanent one is
+        not.</li>
+    <li><strong>Nothing lost at tier 1.</strong> A bond 31&ndash;60 horse with its owner
+        nearby and nothing else to do should still turn its head to follow you around the
+        paddock.</li>
+</ul>
 
 <h3 id="hunger-by-size-0917">A bigger horse gets hungry sooner (2026-09-17, NOT played)</h3>
 

@@ -92,9 +92,6 @@ Implementation:
 - Bond decay should reduce once per in-game day, not every tick, and should stop
   at a positive minimum floor. Persist the last-decay marker or timestamp so it
   survives unloads and restarts.
-- Require a navigable path for bond follow/watch behavior. The goal should not
-  treat “line of sight” or “owner visible” as enough when a wall or fence blocks
-  movement.
 - Keep feeding logic diet-driven rather than maintaining a second hard-coded
   edible-item list. The goal should search for valid dropped food, verify the
   item is in the horse's diet, and confirm the path to it is reachable.
