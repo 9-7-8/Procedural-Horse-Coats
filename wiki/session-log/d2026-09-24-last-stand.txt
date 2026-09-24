@@ -1,0 +1,150 @@
+2026-09-24, after the low-health escape — no horse is killed by a single blow
+
+    Not from intake. The owner asked for it directly, between bullets, in her own
+    words:
+
+        Horses should never be able to be "one shot" and die — any health which
+        would kill them takes them to one health point instead, and they get 120
+        ticks of immunity to damage, then the immunity disables until they heal
+        back to full health again.
+
+    Then, within the turn, an amendment that changed the shape of the work rather
+    than the behaviour:
+
+        This should also be controlled with the config: the duration, the
+        threshold, and disabling it entirely. How I described is just the default
+        settings.
+
+    "The threshold" is ambiguous in that sentence — her description contains two
+    numbers that could be one (the health a saved horse is left on, and the full
+    health it has to climb back to before the save returns). Both were made
+    settings rather than asking, since each is a real knob and she said "settings"
+    plural. Four in the end: behaviour.last_stand, behaviour.last_stand_health,
+    behaviour.last_stand_immunity_ticks, behaviour.last_stand_rearm_fraction.
+
+    The owning page is horse-care.html — the same page as the hurt notice, the
+    death notice and the escape goal, and this is the fourth thing in a row that
+    is about a horse being hurt.
+
+Why it is two events and not one
+
+    The first shape was a single LivingIncomingDamageEvent handler, which is the
+    idiom everywhere else in this mod (HorseAggroHandler, FlightFallGuard, BandLife,
+    GeneAbilityHandler all use it). It is wrong here, and provably so: that event
+    fires BEFORE armour and enchantment reduction, so its amount is not the number
+    that will come off the health. A horse in barding would be judged on a blow it
+    was never going to take in full, and would be "saved" from damage it would have
+    survived — spending the save for nothing.
+
+    So the save is LivingDamageEvent.Pre, whose getNewDamage() is documented in the
+    26.1.2 sources as "the current value to be applied to the entity's health after
+    this event". The immunity window stays on the incoming event, because a cancel
+    there is the only thing that means NO DAMAGE HAPPENED rather than ZERO DAMAGE
+    HAPPENED — and the window is supposed to be real immunity, not vanilla's hurt
+    cooldown, which lets a bigger hit through the difference.
+
+Reading the source rather than guessing at it
+
+    Two assumptions were load-bearing enough to check against the decompiled
+    LivingEntity rather than assert, and both held:
+
+        this.setHealth(this.getHealth() - var10);
+
+    where var10 is the container's newDamage, read back AFTER onLivingDamagePre.
+    So setNewDamage(0) plus a bare setHealth(1.0F) inside Pre leaves the horse on
+    exactly 1.0 at the end of the tick, because the subtract is skipped entirely
+    when the damage is zero. Vanilla's own totem is the same move —
+    checkTotemDeathProtection is literally setHealth(1.0F) — which is also why the
+    particles are TOTEM_OF_UNDYING: it is the effect every player already reads as
+    "that should have killed it".
+
+    The second was the order of what follows. resolveMobResponsibleForDamage and
+    the hurtTime assignment both run after actuallyHurt returns, so a saved horse
+    still gets its lastHurtByMob and its hurtTime — which is exactly what
+    HorseEscapeGoal.inDanger() reads. The save and the bolt are therefore one
+    behaviour by arithmetic rather than by wiring, and Escape.THREAT_LINGERS_TICKS
+    (200) outlasting LastStand.DEFAULT_IMMUNITY_TICKS (120) is what keeps the horse
+    running for the whole window instead of stopping inside it. Neither number was
+    changed for this; they already sat the right way round.
+
+    There is also a Preconditions.checkArgument(!this.dead) inside actuallyHurt,
+    with a comment saying it is invalid to kill an entity during Pre. This handler
+    only ever raises health, so it is not near that line — but it is the reason a
+    "set health to zero and let it die" shape would have been wrong to reach for.
+
+The two exemptions, which are the part that could have broken something
+
+    Neither of these is defensive. Both are existing mechanics this would have
+    silently destroyed.
+
+    horsegenetics:genetic_defect. LethalFoalHandler is deliberately tuned to
+    out-damage the care handler's regeneration — its class comment says so — and a
+    foal rescued to half a heart every six seconds would have been an IMMORTAL
+    lethal foal, which is the exact inverse of the mechanic. The same damage type
+    carries the half-heart a mare loses to an embryonic lethal, which horse-body.html
+    explicitly allows to be her last ("breeding an animal that close to death is a
+    decision, not an accident"). One exemption covers both.
+
+    minecraft:bypasses_invulnerability. /kill, the void, and — the one that took
+    reading to find — LycanthropyHandler.onWereAnimalDeath, which hurts the restored
+    horse for Float.MAX_VALUE and then falls back to damageSources().genericKill()
+    if it is somehow still alive. That fallback was written for gene immunities
+    ("the restored horse may be immune to what killed the animal"), and it covers
+    this one unchanged: the first blow is saved, the horse is alive, the fallback
+    fires, the horse dies. Nothing had to be added there.
+
+No tick, no countdown
+
+    The state is a single stamp — the game tick of the last save — under a new
+    "last_stand" key in the existing HorseCooldownsAttachment. No new attachment:
+    that record is already serialized, already copyOnDeath, and already the mod's
+    answer to "when did this last happen to this horse". It gained a clear(), since
+    this is the first gate in it re-opened by something happening rather than by
+    time passing.
+
+    Re-arming is READ OFF THE HEALTH in the incoming-damage handler rather than
+    ticked anywhere. "Healed back to full" is a fact about the horse, not an event,
+    and the incoming handler is the one place guaranteed to run whenever the answer
+    could matter. So it costs nothing while nothing is attacking a horse, it cannot
+    go stale in an unloaded chunk, and it cannot miss the heal that finished the
+    job. Same reasoning as HorseCareHandler.creditBondTiers. The shared slow tick
+    was considered and rejected: it runs every 30 ticks, which would have made the
+    re-arm granular for no gain.
+
+What is left open
+
+    AbstractHorse, not Horse. That is the mod's consistent answer to "what is a
+    horse" — the notice handlers and the care handler's own herd scan all use it —
+    but it is a wider family than it sounds: llamas and camels are AbstractHorse in
+    26.1.2, alongside the donkeys and mules this mod actually breeds. Left as-is
+    because singling them out here would be the odd decision rather than this one,
+    but written down in the class, on the Gameplay and Coding tabs, and as a
+    verification check, because it is the kind of call an owner may want narrowed.
+
+    Nothing about the behaviour is tested. LastStandTest covers the arithmetic and
+    the wording — that damage exactly equal to remaining health still counts as
+    fatal, the window, the Long.MIN_VALUE the cooldown store answers with for a key
+    never written, the two ways a setting could hand back immortality, and the
+    clamps that stop a configured health of 0 killing what it rescues. Everything
+    else is NeoForge.
+
+    The single assumption the whole feature rests on is the setNewDamage/setHealth
+    pairing inside LivingDamageEvent.Pre. It was read out of the 26.1.2 sources
+    rather than guessed, but it has never been watched working, so the verification
+    summary leads with it: a charged creeper against a full-health horse. The second
+    check is that a lethal foal still dies in its four seconds, because that is the
+    failure that would quietly break something that already worked rather than fail
+    to deliver something new.
+
+What shipped
+
+    common/care/LastStand.java, LastStandTest.java
+    neoforge/server/HorseLastStandHandler.java
+    ServerConfig: four settings and their accessors
+    HorseCooldownsAttachment: clear()
+    horse-care.html: gameplay §7, a coding section, a Verification entry
+
+    :neoforge-26.1.2:build green, LastStandTest green, check-parity green,
+    check-links green. web.wasm was rebaked and reverted — LastStand is not
+    reachable from DesignerApi, so the only difference was the known
+    non-reproducible noise.
