@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,10 +84,17 @@ import java.util.Set;
  * starts below {@link Hunger#GRAZE_BELOW}, about once every two minutes a horse, and is counted
  * into one line a minute.
  *
+ * <h2>Over the fence</h2>
+ * <b>The horse only goes after food it can walk to.</b> A pasture beside a farm used to pin
+ * every horse against the fence: the crops were the best rung in sight, the path to them ended
+ * at the rail, and the horse leaned on it. {@link #search} now asks {@code canReach} before it
+ * commits, keeps the nearest candidate of <i>each</i> rung so an unreachable farm falls through
+ * to the grass in the pen, and {@link #tick} drops a pursuit the moment a gate shuts on it.
+ *
  * <p>UNVERIFIED: that {@code BlockTags.CROPS} and {@code BlockTags.SMALL_FLOWERS} hold what
- * their names say in 26.1.2 (both compile; contents not read), and that a partial path to an
- * unreachable target times out cleanly - an unreachable target is ignored for a minute after
- * {@link #MAX_PURSUIT}.
+ * their names say in 26.1.2 (both compile; contents not read), and that {@link #REACH_ACCURACY}
+ * of 1 separates a hay bale the horse stands beside from a crop one fence away - the manhattan
+ * reading of vanilla's own {@code moveTo} accuracy, not measured in game.
  */
 public final class HungerFoodGoal extends Goal {
 
@@ -98,6 +107,16 @@ public final class HungerFoodGoal extends Goal {
     private static final int REPATH_INTERVAL = 20;
     private static final int MAX_PURSUIT = 400;
     private static final int IGNORE_TICKS = 1_200;
+    /**
+     * How close the path has to get to count as reached - the same accuracy vanilla's own
+     * {@code moveTo(x, y, z, speed)} passes, so the check below and the move that follows it
+     * ask one question. Manhattan distance in blocks: 1 lets the horse stand beside a hay
+     * bale or on a grass block, and is still 2 short of a crop on the far side of a fence.
+     */
+    private static final int REACH_ACCURACY = 1;
+    /** Path tests one search may spend before giving up and waiting for the next. */
+    private static final int MAX_REACH_TESTS = 3;
+    private static final int RUNGS = Hunger.Food.values().length;
     /** A grazing horse takes a mouthful about once in this many checks - roughly every two minutes. */
     private static final int GRAZE_CHANCE = 1_200;
     /** How far a grazing horse takes a dropped mouthful from without walking to it. */
@@ -223,6 +242,15 @@ public final class HungerFoodGoal extends Goal {
             } else if (!horse.getNavigation().moveTo(at.x, at.y, at.z, SPEED) && pursuitTicks > REPATH_INTERVAL) {
                 pursuitTicks = MAX_PURSUIT;     // no path at all: give up now and ignore it
                 return;
+            } else {
+                // A gate can shut behind a horse that set off while it was open. moveTo takes
+                // the partial path and would walk the horse into the fence and hold it there
+                // until MAX_PURSUIT; the path it just built already knows it stops short.
+                Path path = horse.getNavigation().getPath();
+                if (path != null && !path.canReach()) {
+                    pursuitTicks = MAX_PURSUIT;
+                    return;
+                }
             }
         }
         if (horse.distanceToSqr(at) > REACH_SQ) {
@@ -256,7 +284,26 @@ public final class HungerFoodGoal extends Goal {
         return d.diet() != Diet.NOTHING && d.diet() != Diet.BLOOD;
     }
 
-    /** The best thing to eat in reach, in {@link Hunger.Food} order and nearest within a rung. */
+    /**
+     * The best thing to eat in reach, in {@link Hunger.Food} order and nearest within a rung.
+     *
+     * <p><b>In reach means walkable to</b> (owner, 2026-09-23: "all the horses are pushing
+     * against the pasture edge where the fence separates them from the farm/crops"). A farm
+     * over the fence is a hundred crop blocks ten blocks away, every one of them the best rung
+     * on offer and none of them reachable; the horse took the nearest, got a partial path that
+     * ended at the fence, leaned on it for {@link #MAX_PURSUIT}, ignored that one block and
+     * started again on the block beside it. So each candidate is now asked
+     * {@link #reachable(BlockPos)} before the horse commits to it, the way
+     * {@code BondFollowGoal.ReachCheck} asks it of an owner behind a door.
+     *
+     * <p>That alone would starve the horse instead: the crop rung beats grass, so a pen of
+     * grass beside a fenced farm would spend every search rejecting crops and never fall
+     * through to the grass under the horse's feet. The scan therefore keeps <b>the nearest
+     * candidate of every rung</b>, not one global best, and walks them best-first until one
+     * is reachable - so an unreachable farm quietly demotes the horse to the grass it is
+     * standing in. A rejected candidate is ignored for {@link #IGNORE_TICKS} like any other
+     * dead end, which is what stops the next search picking its neighbour.
+     */
     private boolean search(ServerLevel level, HorseDiet diet) {
         long now = level.getGameTime();
         if (ignoredUntil.size() > 64) {
@@ -289,42 +336,57 @@ public final class HungerFoodGoal extends Goal {
                 bestItemDist = d;
             }
         }
+        int tests = 0;
         if (bestItem != null) {
-            item = bestItem;
-            rung = bestIsFavourite ? Hunger.Food.FAVOURITE : Hunger.Food.DROPPED;
-            return true;
+            if (reachable(bestItem)) {
+                item = bestItem;
+                rung = bestIsFavourite ? Hunger.Food.FAVOURITE : Hunger.Food.DROPPED;
+                return true;
+            }
+            ignore(~(long) bestItem.getId());
+            tests++;
         }
 
+        // The nearest of every rung, so a rung the horse cannot walk to demotes it to the
+        // next one rather than ending the search - see this method's note.
+        BlockPos[] nearest = new BlockPos[RUNGS];
+        double[] nearestDist = new double[RUNGS];
+        java.util.Arrays.fill(nearestDist, Double.MAX_VALUE);
         BlockPos origin = horse.blockPosition();
-        BlockPos bestBlock = null;
-        Hunger.Food bestRung = null;
-        double bestBlockDist = Double.MAX_VALUE;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int dx = -SEARCH_RADIUS; dx <= SEARCH_RADIUS; dx++) {
             for (int dz = -SEARCH_RADIUS; dz <= SEARCH_RADIUS; dz++) {
                 for (int dy = -SEARCH_DOWN; dy <= SEARCH_UP; dy++) {
                     p.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
                     Hunger.Food r = rungOf(level, p, diet);
-                    if (r == null || (bestRung != null && r.ordinal() > bestRung.ordinal())
-                            || ignored(p.asLong(), now)) {
+                    if (r == null || ignored(p.asLong(), now)) {
                         continue;
                     }
                     double d = horse.distanceToSqr(Vec3.atCenterOf(p));
-                    if (bestRung == null || r.ordinal() < bestRung.ordinal() || d < bestBlockDist) {
-                        bestBlock = p.immutable();
-                        bestRung = r;
-                        bestBlockDist = d;
+                    if (d < nearestDist[r.ordinal()]) {
+                        nearest[r.ordinal()] = p.immutable();
+                        nearestDist[r.ordinal()] = d;
                     }
                 }
             }
         }
-        if (bestBlock != null) {
-            block = bestBlock;
-            rung = bestRung;
-            return true;
+        for (Hunger.Food r : Hunger.Food.values()) {
+            BlockPos at = nearest[r.ordinal()];
+            if (at == null) {
+                continue;
+            }
+            if (tests++ >= MAX_REACH_TESTS) {
+                return false;       // the rest keep until the next search, a rung poorer
+            }
+            if (reachable(at)) {
+                block = at;
+                rung = r;
+                return true;
+            }
+            ignore(at.asLong());
         }
 
-        if (diet.diet() == Diet.RAW_MEAT || diet.diet() == Diet.FISH) {
+        if (tests < MAX_REACH_TESTS && (diet.diet() == Diet.RAW_MEAT || diet.diet() == Diet.FISH)) {
             Set<EntityType<?>> kinds = diet.diet() == Diet.FISH ? FISH_PREY : MEAT_PREY;
             LivingEntity best = null;
             double bestDist = Double.MAX_VALUE;
@@ -340,12 +402,33 @@ public final class HungerFoodGoal extends Goal {
                 }
             }
             if (best != null) {
-                prey = best;
-                rung = Hunger.Food.DROPPED;     // what it is after is the drop
-                return true;
+                if (reachable(best)) {
+                    prey = best;
+                    rung = Hunger.Food.DROPPED;     // what it is after is the drop
+                    return true;
+                }
+                ignore(~(long) best.getId());
             }
         }
         return false;
+    }
+
+    /**
+     * "Could this horse actually walk to it?" - one real {@code createPath} call, and a path
+     * that exists but stops short ({@code !canReach()}) is a fence. The same question
+     * {@code BondFollowGoal.ReachCheck} asks of an owner; it needs no cache here because only
+     * a hungry horse asks it, at most {@link #MAX_REACH_TESTS} times per
+     * {@link #SEARCH_INTERVAL}, where the pursuit it replaces repathed every
+     * {@link #REPATH_INTERVAL} ticks for up to {@link #MAX_PURSUIT}.
+     */
+    private boolean reachable(BlockPos pos) {
+        Path path = horse.getNavigation().createPath(pos, REACH_ACCURACY);
+        return path != null && path.canReach();
+    }
+
+    private boolean reachable(Entity target) {
+        Path path = horse.getNavigation().createPath(target, REACH_ACCURACY);
+        return path != null && path.canReach();
     }
 
     /**
