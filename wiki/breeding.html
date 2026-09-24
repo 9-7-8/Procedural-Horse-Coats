@@ -1380,6 +1380,51 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     </p>
 </div>
 
+<h3 id="my-horses-filter">The My horses filter: carries, genotype, expresses</h3>
+
+<p>
+    The filter box on <em>My horses</em> is a whitespace-separated AND of terms, <code>-</code> negating
+    one. The language lives game-free in <code>HorseQuery</code> (<code>common/&hellip;/horse/</code>), over
+    <code>HorseListing</code> rows, so the same predicate is unit-tested without a game and can move
+    server-side when the owned-horse index exists. <code>HorseQuery.keys()</code> is what the tab&rsquo;s
+    help line prints &mdash; add a key there and the help line follows.
+</p>
+
+<p>
+    Three keys ask three different questions about one locus, and a breeder wants all three:
+</p>
+
+<ul>
+    <li><code>gene:e</code> (alias <code>carries:</code>) &mdash; the horse holds <em>a</em> copy of that
+        allele, carrier and homozygote alike. Also takes a gene name or key, meaning &ldquo;anything
+        off-baseline here&rdquo;.</li>
+    <li><code>genotype:E/e</code> (alias <code>pair:</code>) &mdash; the pair is <em>exactly</em> those two,
+        either way round, written the way <code>AllelePair.toTokens()</code> writes it. This is the
+        question the other two cannot ask: <code>gene:e</code> is every horse with a red copy,
+        <code>genotype:E/e</code> the carriers only, <code>genotype:e/e</code> the chestnuts only.</li>
+    <li><code>expresses:chestnut</code> &mdash; the resolved <code>Expression</code>, so what the horse
+        actually <em>shows</em> rather than what it holds.</li>
+</ul>
+
+<p id="filter-case">
+    <strong>Allele tokens are case-sensitive; nothing else is.</strong> Extension&rsquo;s alleles are
+    <code>E</code> and <code>e</code>, and agouti&rsquo;s <code>A</code> and <code>a</code> &mdash; at those
+    loci case <em>is</em> the allele. Until 2026-09-24 <code>HorseQuery.terms()</code> lower-cased every
+    term before it compared and <code>carries()</code> matched with <code>equalsIgnoreCase</code>, so
+    <code>gene:e</code> quietly meant &ldquo;carries E <em>or</em> e&rdquo; &mdash; which is every horse
+    alive &mdash; and no combination could be spelled at all. Case now survives <code>terms()</code>
+    and the folding happens at each point of use instead: names, breeds, coats, flags, gene names and the
+    keys themselves still ignore case, so <code>MARE</code>, <code>BREED:Shir</code> and
+    <code>gene:EXTENSION</code> all work, while <code>gene:E</code> and <code>gene:e</code> are two
+    different questions. <code>HorseQueryTest</code> pins both halves.
+</p>
+
+<p>
+    A malformed term matches nothing rather than throwing &mdash; <code>genotype:E/</code> is a half-typed
+    term in a box that re-filters every keystroke, not an error, and an exception into a render loop is
+    not an option.
+</p>
+
 <h3 id="verified">Verified</h3>
 
 <p id="verified-drift">
@@ -1574,7 +1619,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, and a long unplayed browser list.</p>
+    <p>The barn-name box was invisible to every player for seventeen days and is the first thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, a <em>My horses</em> filter whose allele tokens just became case-sensitive so that <code>genotype:E/e</code> could exist at all &mdash; the one change here that will look like a regression if it is wrong &mdash; and a long unplayed browser list.</p>
 </div>
 
 <h3 id="barn-name-0918">The barn-name box is visible at all (2026-09-24, NOT played)</h3>
@@ -1741,6 +1786,41 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         the names are still findable at all when a generation is two hundred wide.</li>
 </ul>
 
+<h3 id="genotype-filter-0924">Searching by an allele combination (2026-09-24, NOT played)</h3>
+<p>
+    <code>genotype:E/e</code> is new on the <em>My horses</em> filter, and the allele tokens in
+    <code>gene:</code> stopped folding case at the same time &mdash; the two are one change, because a
+    combination cannot be spelled while <code>E</code> and <code>e</code> are the same string. The
+    mechanism is on <a href="#my-horses-filter">the Coding tab</a> and pinned by
+    <code>HorseQueryTest</code>; what no test can say is whether it answers the question in front of a
+    real stable.
+</p>
+<ul>
+    <li><strong>The case change is the one that can bite.</strong> <code>gene:e</code> used to list every
+        horse you own; it should now list only the ones with a red copy, and <code>gene:E</code> only
+        those with a black one. A horse that is <code>E/e</code> answers to both. If an old habit of
+        typing <code>gene:e</code> to mean &ldquo;extension&rdquo; is now returning far fewer rows, that
+        is the fix working, not a regression &mdash; but say so if it reads wrong in practice.</li>
+    <li><strong>The ladder on one locus.</strong> On a stable with all three kinds present:
+        <code>gene:e</code> lists carriers and chestnuts, <code>genotype:E/e</code> only the carriers,
+        <code>genotype:e/e</code> only the chestnuts, and <code>expresses:chestnut</code> the same
+        chestnuts as the last. Counts should add up.</li>
+    <li><strong>Either way round, and negated.</strong> <code>genotype:e/E</code> gives the same rows as
+        <code>genotype:E/e</code>, and <code>-genotype:E/e</code> the complement.
+        <code>pair:E/e</code> is the same key.</li>
+    <li><strong>A multi-character token.</strong> Try a real pair off a horse's Genes tab &mdash;
+        <code>genotype:n/SB1</code> or similar &mdash; and check the horse it came from comes back.</li>
+    <li><strong>Half-typed terms still filter to nothing.</strong> Type <code>genotype:E/</code> one
+        character at a time: the table empties, and nothing throws into the render loop.</li>
+    <li><strong>The help line and the hint.</strong> The <code>keys:</code> line under the table now
+        includes <code>genotype</code>, and the empty box hints
+        <code>mare&nbsp;&nbsp;gen&gt;2&nbsp;&nbsp;genotype:E/e&nbsp;&nbsp;-lethal</code> &mdash; check the
+        hint is not clipped at the box's width at GUI scale 2 and 3.</li>
+    <li><strong>The Allele&hellip; picker still writes a working term.</strong> It writes
+        <code>gene:&lt;token&gt;</code> with the token's real case, which is now load-bearing; pick an
+        allele and confirm the rows it leaves are the right ones.</li>
+</ul>
+
 <h3 id="breeding-preview-0924">The mare picker's missing row (2026-09-24, NOT played)</h3>
 <p>
     The Breeding preview's two horse lists painted their panel down to a fixed bottom edge
@@ -1818,7 +1898,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <li><strong>A horse held still by its information screen</strong> (<a href="known-gaps.html#gap-77">gap 77</a>). Open <strong>i</strong> on a walking horse: it stands, and walks again within a second or two of closing. A ridden horse still steers. Open it, then <code>/kill</code> yourself or Alt-F4: the horse moves again within about three seconds.</li>
     <li><strong>Back to a working inventory</strong> (<a href="known-gaps.html#gap-71">gap 71</a>). Done or Escape on the information screen returns to the horse inventory, and moving the saddle to your inventory still works. The family tree's Done returns to the information screen.</li>
     <li><strong>My horses lists every horse you own.</strong> One left in another dimension and one in an unloaded chunk show <em>not loaded</em>, <code>?</code> bond and adult. Tame a horse with the screen shut: it appears on open and again after Refresh. Clicking a heading sorts and reverses it, and an unknown bond sorts to one end.</li>
-    <li><strong>The My horses filter.</strong> Try <code>mare</code>, <code>foal</code>, <code>-lethal</code>, <code>gen&gt;2</code>, <code>bond&gt;50</code>, <code>breed:shire</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code> and <code>mare gen&gt;2</code>. Half-typed <code>speed&gt;</code> or <code>gene:</code> filters to nothing without throwing. <code>gene:&lt;token&gt;</code> lists a silent carrier that <code>expresses:</code> does not.</li>
+    <li><strong>The My horses filter.</strong> Try <code>mare</code>, <code>foal</code>, <code>-lethal</code>, <code>gen&gt;2</code>, <code>bond&gt;50</code>, <code>breed:shire</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code> and <code>mare gen&gt;2</code>. Half-typed <code>speed&gt;</code> or <code>gene:</code> filters to nothing without throwing. <code>gene:&lt;token&gt;</code> lists a silent carrier that <code>expresses:</code> does not. The exact-pair key and the case rule that came with it are newer and have <a href="#genotype-filter-0924">their own checks</a>.</li>
     <li><strong>The Offspring tab.</strong> It is empty until Refresh and says so. On a horse you have bred from, foals and grandfoals sit under their own headings, and a horse bred back into its line appears once without looping. Refresh on horse A then on B shows B's descendants, not A's.</li>
     <li><strong>The information screen's round trips.</strong> Type a barn name, press Set, close and reopen: it stuck. Copy the Genes tab's full code into the custom spawn egg: the horse that appears is this one. Owner now shows only on a <a href="item-transfer-papers.html">transferred</a> horse.</li>
     <li><strong>The breeding preview's roster and odds.</strong> Your horses are in both lists, including one you were given a transfer paper for. A mare and a stallion that share a recessive read <code>1 in 4</code>.</li>

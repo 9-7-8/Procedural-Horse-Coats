@@ -1,0 +1,132 @@
+2026-09-24, after the cover notice — searching My horses by an allele combination
+
+    One bullet, the next in the Bugs section of intake/To do.txt, in the owner's words:
+
+        The H menu should support searching by allele combinations, if it does not
+        already.
+
+    Retired. The bullet below it — the breeding overview sorting and filtering mares and
+    stallions the same way — is deliberately untouched: it is the Breeding preview tab,
+    which has no filter box at all, and it is its own bullet.
+
+    Dated first, as START HERE says. The phrase went into To do.txt on 2026-09-23
+    (de4cde82), in the same batch of sixteen lines the last four sessions have been
+    working top-down. One day old, so not a stale inbox entry.
+
+The answer to "if it does not already" was no — and the reason was worse than missing
+
+    HorseQuery is the filter language, game-free in common/.../horse/, over HorseListing
+    rows, and HorseBrowserScreen's My horses box passes the player's text straight into
+    it. gene: and carries: walk the genotype's pairs and match one allele token; there
+    was no pair form, and splitAt() only ever treated : > < = as separators, so "E/e"
+    was not a malformed term — it was a bare word, and fell through to the free-text
+    haystack, which holds names and breeds and no genotype text at all. It matched
+    nothing, silently, which is the worst of the three possible failures.
+
+    The blocker underneath it is the part worth writing down. terms() lower-cased every
+    term on the way in, and carries() compared with equalsIgnoreCase. Extension's two
+    alleles are E and e (ExtensionGene:31-32); agouti's are A and a. At those loci case
+    IS the allele. So gene:e did not mean "carries a red copy" — it meant "carries E or
+    e", which is every horse alive, and gene:E meant the same thing. The single-allele
+    filter documented in the tester list has been answering a different question than
+    the one asked since it shipped, and no allele combination could be spelled at all
+    while the two tokens were the same string.
+
+    Nothing caught it because HorseQueryTest had no case case: its gene tests all use
+    lower-case tokens (carries:e, gene:extension, gene:brindle), and every one of them
+    passes under either behaviour.
+
+What the owner chose
+
+    Two decisions, put as options rather than guessed:
+
+    Syntax — a separate genotype: key, not an extension of gene:. gene:e keeps meaning
+    "carries one copy"; genotype:E/e is the exact pair. The rejected alternative was
+    folding the pair into gene:'s value, which reads shorter but makes one key mean two
+    different strengths of question depending on whether the value has a slash in it.
+    The compact GeneCodeDisplay spelling (gene:Ee) was rejected as unparseable: with
+    multi-character tokens like SB1 there is no way to know where the first token ends.
+
+    Case — case-sensitive allele tokens everywhere, not only inside the new pair form.
+    The alternative left gene:e loose and made only genotype: strict, so the two keys
+    would have disagreed with each other about what a token means. The owner took the
+    strict version knowing it changes an already-shipped filter.
+
+The change
+
+    common/.../horse/HorseQuery.java
+
+        terms() no longer lower-cases. The folding moved down to each point of use, so
+        the blast radius is exactly the allele tokens and nothing else:
+          - term() lower-cases the key before the switch
+          - flag() lower-cases before its switch and before the haystack contains
+          - contains() lower-cases the needle as well as the haystack (it used to
+            assume a pre-lowered needle, which is why this had to move together)
+          - equalsIgnoreCase() is now really equalsIgnoreCase, not "b is already lower"
+          - carries() compares the token with equals(), and keeps case-insensitive
+            comparison for the gene name and key around it
+          - expresses() unchanged in behaviour; it takes a lower-cased copy for the
+            gene-key suffix test
+
+        genotypeIs() is new. It splits the value on the first /, requires two non-empty
+        tokens and no second slash, and walks Genes.codeOrder() for a pair whose two
+        tokens are that set — either way round, case-exact. Registered as genotype: with
+        pair: as an alias, and added to keys(), which is what the tab's help line prints,
+        so the "keys:" row under the table picked it up with no second edit.
+
+        A malformed value matches nothing rather than throwing. The box re-filters every
+        keystroke, so genotype:E/ is a term on its way to being whole, not an error.
+
+    neoforge-26.1.2/.../client/HorseBrowserScreen.java
+
+        The empty box's hint, one line: "mare  gen>2  gene:SB1  -lethal" became
+        "mare  gen>2  genotype:E/e  -lethal". The Allele… picker still writes
+        gene:<token> and needed no change — it takes the token off the Allele object, so
+        it was already emitting the real case; that case is now load-bearing rather than
+        decorative.
+
+    HorseQueryTest
+
+        Four new tests plus seven malformed values. anAlleleTokenComparesCaseSensitively
+        is the regression test for the case fold and fails under the old code.
+        namesBreedsAndFlagsStillIgnoreCase is its other half — MARE, ARABIAN,
+        BREED:Shir, Name:AMB and gene:EXTENSION all still work, which is the assertion
+        that the fix did not over-reach. genotypeMatchesAnExactPair walks the ladder on
+        one locus (gene:e, genotype:E/e, genotype:e/e) and covers the pair: alias and
+        negation; two more cover order-insensitivity and that the tokens inside a pair
+        are still case-exact.
+
+What was not done, and why
+
+    The wasm was not re-baked. The rule in CLAUDE.md is that anything in common/ invalidates
+    wiki/horse-designer/wasm/web.wasm, but HorseQuery and HorseListing are not referenced
+    anywhere in web/ — grep over web/src returns nothing — so they are not in the
+    designer's reachable graph and the bake could only produce a non-reproducible 2MB
+    diff. Worth re-checking if the designer ever grows a roster view.
+
+    The breeding overview has no filter or sort controls at all: layoutGeneButtons gates
+    horseFilterBox, genePickButton and allelePickButton to the My horses tab, and the two
+    pickers read straight off ClientHorseRoster.of(Sex) in insertion order. Its click
+    index and its draw index share that list, which is the constraint the next bullet has
+    to respect.
+
+Verification
+
+    wiki/breeding.html gained a Coding-tab section, "The My horses filter: carries,
+    genotype, expresses" (#my-horses-filter), documenting the three-key ladder and the
+    case rule with the date the fold was removed; and a Verification entry,
+    #genotype-filter-0924. The case change is called out there as the one thing that will
+    look like a regression to anyone who had learned to type gene:e to mean extension.
+    The older "The My horses filter" bullet in the pre-09-13 list now points at it rather
+    than contradicting it.
+
+    Nothing here has been seen in game.
+
+Next
+
+    The next bullet in the Bugs section is the breeding overview one: sort and filter both
+    pickers by carrying an allele, or by an exact X/X combination. genotype: and the
+    case-exact carries() are now sitting in common/ ready for it, so that bullet is mostly
+    a UI question — where the controls go on a tab that currently has room for none, and
+    keeping ClientHorseRoster.of(Sex) the single place filtering happens so the pickers'
+    click and draw indices stay in step.
