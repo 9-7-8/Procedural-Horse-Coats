@@ -242,7 +242,7 @@ wiki/fertility.html#real-horses	science	What real mares do
 wiki/fertility.html#real-nursing	science	Nursing does not stop conception
 wiki/fertility.html#real-pregnancy	science	Pregnancy and twins
 wiki/fertility.html#real-stallions	science	Stallions: no heat cycle
-wiki/fertility.html#setting	gameplay	The setting
+wiki/fertility.html#setting	gameplay	The settings
 wiki/fertility.html#settled	coding	Settled
 wiki/fertility.html#sources	science	Sources
 wiki/fertility.html#state	coding	State is derived, never stepped

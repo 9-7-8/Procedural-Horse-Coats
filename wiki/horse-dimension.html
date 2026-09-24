@@ -488,7 +488,7 @@
 <p>
     <strong>Rows O to R are packed, and every pen in them is a world of its own.</strong> Every
     breeding and band check counts horses by distance, straight through walls. Examples: a mare is not
-    covered when eight other horses stand within sixteen blocks; a bachelor challenges a stallion whose mare is within
+    covered when <code>fertility.nearby_horse_cap</code> other horses stand within sixteen blocks; a bachelor challenges a stallion whose mare is within
     24; a youngster looks 64 blocks for somewhere to go. Until 2026-09-14 these rows were spread
     over three hundred blocks so that no pen reached another. Now each pen registers with
     <code>YardPens</code>, and inside the yard those checks see only the horses in their own pen.

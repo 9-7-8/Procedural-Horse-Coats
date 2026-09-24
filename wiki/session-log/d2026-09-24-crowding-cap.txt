@@ -1,0 +1,99 @@
+2026-09-24, after the stallion's day — the crowding cap becomes the world's number
+
+    The next bullet in the tuning section of intake/To do.txt, and the one the previous
+    session handed over by name:
+
+        Up the number of horses allowed within a 1 chunk radius of any given horse up to
+        50, because right now it's way too restrictive. Also, this should be controlled by
+        the config, and server-authoratative
+
+    Retired from the file. Three asks in one sentence: the number, the config, and who
+    decides.
+
+Dated first, as START HERE says
+
+    ReproRules.NATURAL_CAP was 8, a compile-time constant, and ServerConfig had no fertility
+    option but gestation_days — the only "crowding cap" in it was a word in a comment about
+    which refusals earn a chat line. Nothing in wiki/verification.html claimed it. Genuinely
+    absent, not stale.
+
+Why eight was wrong, and not merely small
+
+    The radius is sixteen blocks, about a chunk, and it counts foals and wild horses and
+    reaches straight through walls (only YardPens narrows it, and only inside the yard).
+    So eight is not "eight brood mares" — it is a barn, its foals, and whatever is standing
+    on the other side of the fence. On the owner's heavily modded server that meant a normal
+    stable was over the cap permanently.
+
+    The failure mode is the same one the stallion's day had that morning, one verdict along:
+    CROWDED is a refusal the owner does hear about, so instead of silence they got a yellow
+    line every five minutes telling them to empty a paddock that was not, by any ordinary
+    reading, full. Fifty is roughly "this pen is genuinely packed" rather than "you own more
+    than one family".
+
+The shape: the cap travels with the count
+
+    common/ cannot see a config (hard rule 1), and the number is quoted in three places —
+    the decision, the owner's chat line, and two log lines. Passing a second bare int beside
+    othersNearby would have let any of them drift back to the constant, which is exactly how
+    a line that says "the limit is 8" on a server set to 200 gets written.
+
+    So NaturalCover.Crowd is a record of both: how many horses are around her, and how many
+    this world allows. It is built in the one place that counts them —
+    NaturalBreedingHandler, from ServerConfig.nearbyHorseCap() — and read by
+    NaturalCover.decide (crowd.tooMany()) and CoverNotice.line (crowd.cap()) alike. The
+    constant survives only as ReproRules.DEFAULT_NATURAL_CAP, the default the option starts
+    on, with MAX_NATURAL_CAP bounding it because the same number sits inside a per-scan
+    entity search.
+
+    Server-authoritative came free: ServerConfig is the server spec, the count happens on
+    the server in an entity tick, and no client is asked. The new option is
+    fertility.nearby_horse_cap, 1 to 1,000, default 50.
+
+    cover() gained the crowd as a parameter rather than being handed a 0. Three of the four
+    reasons it reports ignore the number, but a call site that passes a made-up one is the
+    thing this whole record shape exists to prevent.
+
+What the tests pin
+
+    NaturalCoverTest.aWorldMayRaiseOrLowerTheCap — the same crowd of twelve refuses under a
+    cap of eight and covers under a high one. That is the assertion that stops anything
+    downstream reading DEFAULT_NATURAL_CAP back. The existing cap test was rewritten against
+    the default rather than the constant's old value, and CoverNoticeTest now asserts the
+    line quotes the cap it was handed, not a compiled-in one.
+
+Where it lives
+
+    common/repro/ReproRules — DEFAULT_NATURAL_CAP (50) and MAX_NATURAL_CAP replace NATURAL_CAP.
+    common/repro/NaturalCover — the Crowd record; decide takes it.
+    common/repro/CoverNotice.line — takes a Crowd, quotes its cap.
+    neoforge/ServerConfig — NEARBY_HORSE_CAP and nearbyHorseCap().
+    neoforge/server/NaturalBreedingHandler — builds the Crowd; both log lines read it.
+
+Checks
+
+    :common:test --tests '*NaturalCoverTest' --tests '*CoverNoticeTest' green.
+    :neoforge-26.1.2:build green. No full :common:test; nothing outside repro/ moved, so no
+    golden or pipeline row could have.
+
+    :web:bakeDesignerAssets was NOT run. Nothing under web/src touches repro at all, so
+    NaturalCover is not in the designer's reachable graph, and the wasm binary is not
+    reproducible — a rebuild would have been two megabytes of noise for no behaviour change.
+
+    Unplayed. fertility.html#crowd-cap-0924 has the three checks: turn the option down to 3
+    and read the limit off the yellow line, a packed stable breeding again on the default,
+    and — the real question — how big a wild band gets left alone overnight now that fifty
+    rather than eight is the brake. The ten-minute "crowding cap held back N wild mares"
+    summary in the log is the cheap read on that.
+
+    Note the interaction with the previous session's own verification: its one-stallion,
+    six-mares pen had to stay under eight, and no longer does.
+
+What the next session should pick up
+
+    The next bullet in the same tuning section: "there should be no mechanic that inherently
+    stops incest (aka line breeding) even in wild bands". Implementation advice.txt already
+    suspects this one is satisfied — "the current request is satisfied by no ancestry gate in
+    the common conception logic" — so it is a verification bullet, not a code one: prove
+    there is no ancestry check on any of the three breeding paths, write that down where it
+    can be found, and retire it. After it, bond decay's daily floor.

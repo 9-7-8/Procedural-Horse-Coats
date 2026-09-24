@@ -145,8 +145,8 @@
     <li>either horse is <strong>badly hurt</strong> &mdash; below 90% of its health; a scratch does
         not stop it (<a href="#settled-cover-health">why</a>) &mdash; ridden, or on a lead;</li>
     <li>he is a <a href="#gelding">gelding</a>;</li>
-    <li><strong>eight or more other horses</strong>, foals included, are within 16 blocks of
-        her;</li>
+    <li><strong>fifty or more other horses</strong>, foals included, are within 16 blocks of
+        her &mdash; a server setting (<a href="#setting">the settings</a>);</li>
     <li>the horses are a cowboy's, whose string never breeds;</li>
     <li>nobody is near enough for that area to be loaded.</li>
 </ul>
@@ -155,7 +155,8 @@
 
 <p>
     When one of your own mares is not covered for a reason you can do something about, you
-    get a line in chat: the paddock is over the eight-horse limit (with the count), she is
+    get a line in chat: the paddock is over its crowding limit (with both the count and the
+    limit this server plays with), she is
     hurt, she is being ridden, she is on a lead, or she is a cowboy&rsquo;s branded stock.
     When a cover does happen you are told whether it took. Only you are told, only while
     you are in the same world as her, and the same reason is not repeated for five minutes
@@ -185,10 +186,20 @@
     today.
 </p>
 
-<h2 id="setting">The setting</h2>
+<h2 id="setting">The settings</h2>
 
 <p>
-    <code>fertility.gestation_days</code> in the server config, from 1 to 340. Every other
+    <code>fertility.nearby_horse_cap</code> in the server config, from 1 to 1,000, and
+    <strong>50 by default</strong>. This is how many other horses may stand within 16 blocks
+    of a mare and still let a stallion cover her; foals and wild horses count, and only
+    horses she shares a pen with. It was a hard-coded eight, which is a hobby paddock rather
+    than a stable &mdash; on a busy server that quietly stopped nearly every cover, and the
+    refusal is the one the owner does hear about, so it read as the mod breaking. Server-side
+    on purpose: whether a foal exists has to be one answer for everyone on the server.
+</p>
+
+<p>
+    <code>fertility.gestation_days</code>, from 1 to 340. Every other
     stage grows with it in proportion, but is never shorter than one day, so at 340 a mare
     keeps a realistic three-week cycle. The clock is game time: sleeping and
     <code>/time set</code> do not move anything. With the server&rsquo;s testing tools on,
@@ -251,8 +262,8 @@
         <code>lastNaturalTry</code> is before this heat began). She finds the best entire
         stallion within <code>NATURAL_REACH</code> &mdash; the nearest of those with covers
         still in hand, or the nearest of the tired if none has
-        (<code>NaturalCover.better</code>) &mdash; checks
-        <code>NATURAL_CAP</code>, stamps the try, and calls <code>breed</code> with her
+        (<code>NaturalCover.better</code>) &mdash; checks the
+        <code>NaturalCover.Crowd</code> she is in, stamps the try, and calls <code>breed</code> with her
         owner as <code>bredBy</code>. Before that, the same stallion must stay in reach for
         <code>NaturalCover.COURTSHIP_TICKS</code> (a transient <code>Courtship</code> per mare),
         exactly as vanilla's <code>BreedGoal</code> waits out <code>loveTime &gt;= 60</code> inside
@@ -262,6 +273,19 @@
         mare&rsquo;s owner, behind <code>notices.owned_horse_breeding</code>; the
         <code>ActionTrace</code> lines beside it are unchanged and throttle on their own
         schedule, because they are the debug record and not owner-facing.</li>
+    <li><strong>The crowding cap is the world's, not a constant</strong> (2026-09-24).
+        <code>NaturalCover.Crowd</code> is a pair &mdash; how many horses are around her, and
+        how many this world allows &mdash; built in the one place that counts them and read
+        by both <code>decide</code> and <code>CoverNotice.line</code>, so the sentence the
+        owner reads always quotes the number that actually refused her.
+        <code>common/</code> cannot see a config, so the cap arrives as data:
+        <code>ServerConfig.nearbyHorseCap()</code> fills it from
+        <code>fertility.nearby_horse_cap</code>, and
+        <code>ReproRules.DEFAULT_NATURAL_CAP</code> is only the default
+        (<code>MAX_NATURAL_CAP</code> bounds the option, since the same number sits inside a
+        per-scan entity search). Nothing downstream may read the constant back:
+        <code>NaturalCoverTest.aWorldMayRaiseOrLowerTheCap</code> refuses the same crowd under
+        a cap of eight and covers under a high one.</li>
     <li><strong>Gelding</strong> is <code>HorseRecord.gelded</code>, and
         <code>HorseRecord.entire()</code> is what every stallion check asks: the herd goals,
         rivalry, the jar and <code>onBabySpawn</code>. <code>VetKitHandler</code> gelds and
@@ -790,8 +814,41 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is a stallion's day no longer being capped, because it is the rule that decides how many foals a working paddock makes and the change has never been run; behind it the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat and nothing but a night's play can say whether fifty is a stable or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side.</p>
 </div>
+
+<h3 id="crowd-cap-0924">The crowding cap is fifty, and a server setting (2026-09-24, NOT played)</h3>
+
+<p>
+    Eight other horses within 16 blocks used to stop every cover, hard-coded (owner: <em>"way
+    too restrictive"</em> on a heavily modded server). It is
+    <code>fertility.nearby_horse_cap</code> now, 50 by default and 1 to 1,000, carried to the
+    rule as <code>NaturalCover.Crowd</code> so the chat line quotes the world's own number.
+    <code>NaturalCoverTest</code> pins that a high cap covers where a low one refuses; what no
+    test can reach is what a fifty-horse brake does to a world over a night.
+</p>
+
+<h4>What to look at</h4>
+
+<ul>
+    <li><strong>The setting is read at all.</strong> Turn <code>fertility.nearby_horse_cap</code>
+        down to 3 on the server, pen a mare in heat, a stallion and three other horses.
+        <strong>Pass:</strong> the yellow line says <em>the limit is 3</em>.
+        <strong>Fail:</strong> a line saying 50, which would mean something is still reading
+        <code>ReproRules.DEFAULT_NATURAL_CAP</code> instead of the config.</li>
+    <li><strong>A packed stable breeds again.</strong> The paddock that went quiet on the old
+        cap &mdash; a dozen or two horses in one place &mdash; on the default 50.
+        <strong>Pass:</strong> <code>natural cover:</code> lines under <code>fertility</code>
+        again, and no crowding line at all.</li>
+    <li><strong>How far a wild band runs (the real question).</strong> Leave a wild band loaded
+        overnight, or walk back to one after a long session, and count it.
+        <strong>Pass:</strong> a band that is bigger than it used to be and still a band.
+        <strong>Fail:</strong> a valley of horses, or a visible tick cost where they are
+        &mdash; in which case the answer is a lower default rather than the old constant back,
+        since the ask was explicitly that the cap stop refusing ordinary stables. The
+        ten-minute <code>crowding cap held back N wild mares</code> summary in the log is the
+        cheap read on whether wild bands are hitting fifty at all.</li>
+</ul>
 
 <h3 id="no-daily-cap-0924">A stallion's day is not capped (2026-09-24, NOT played)</h3>
 
@@ -809,8 +866,8 @@
 
 <ul>
     <li><strong>One stallion, six mares.</strong> Pen one entire stallion with six tamed
-        mares and keep the total under the crowding cap of eight
-        (<code>NATURAL_CAP</code>) or that will stop it first, which is a different bullet.
+        mares and keep the total under <code>fertility.nearby_horse_cap</code> (50 by
+        default) or that will stop it first, which is a different bullet.
         Run a few in-game days with <code>debug.tools</code> on so a heat is a minute.
         <strong>Pass:</strong> <code>natural cover:</code> lines under <code>fertility</code>
         in the log naming more than three different mares inside one day, with
@@ -846,8 +903,10 @@
 
 <ul>
     <li><strong>The cap says so.</strong> Put a tamed mare in heat with a stallion and more
-        than eight other horses within 16 blocks. <strong>Pass:</strong> one yellow line
-        naming her, the count and the limit. <strong>Fail:</strong> nothing, which would
+        horses within 16 blocks than <code>fertility.nearby_horse_cap</code> allows &mdash;
+        turn the option down to a handful rather than pen fifty horses.
+        <strong>Pass:</strong> one yellow line naming her, the count, and <em>the limit this
+        server is set to</em>. <strong>Fail:</strong> nothing, which would
         mean the owner lookup or the config is wrong; or a line every two seconds, which
         would mean the quiet period is not holding.</li>
     <li><strong>A changed reason speaks immediately.</strong> With that line just shown,
@@ -980,8 +1039,9 @@
         not.</li>
     <li><strong>A cowboy's string</strong> shows some geldings, a little cheaper than his
         stallions.</li>
-    <li><strong>Wild bands</strong> foal over a few days of play, and never grow past eight around a
-        mare.</li>
+    <li><strong>Wild bands</strong> foal over a few days of play. They used to stop at eight
+        around a mare; the cap is fifty now, so what to watch for is how big a band gets left
+        alone over a night's play &mdash; see <a href="#crowd-cap-0924">the cap entry</a>.</li>
     <li><strong>Looking at it (last):</strong> the Breeding line's wording in each state; a mare in
         heat and a stallion walking together; a gelding keeping company like a mare.</li>
 </ul>
