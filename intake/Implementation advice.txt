@@ -224,3 +224,54 @@ Validation:
 - Check standing, walking, jumping, gliding, saddled, and different horse sizes.
 - Verify at least one texture retexture works without assuming every elytra
   resource pack is compatible.
+
+8. Magical loci: drop the explode allele, and go runtime-registry for lycan/egg-layer/item-drop
+=================================================================================================
+Likely code:
+- common/src/main/java/.../genetics/genes/MagicOnDeathGene.java
+- common/src/main/java/.../genetics/genes/LycanGene.java
+- common/src/main/java/.../genetics/genes/EggLayerGene.java
+- common/src/main/java/.../genetics/genes/MagicItemDropGene.java
+- neoforge-26.1.2/src/main/java/.../server/LycanthropyHandler.java
+
+Implementation:
+- Magic on death: delete the Xpl allele and the EXPLODE expression/ability from
+  MagicOnDeathGene; Xpl/Xpl should resolve to WILD like any other mismatched
+  pair. Decide (Design decisions) what an existing Xpl allele on a saved horse
+  or splice recipe becomes, since there is no back-compat path in this repo.
+- Lycan mob list: LycanGene currently hand-lists vanilla mob ids at compile
+  time (form("Aly", "minecraft:allay", ...) etc.), grouped only by "non-hostile
+  spawn category". Split that into a category blacklist (aquatic: water
+  creature, water ambient, axolotl, underground water creature; flying: any
+  mob whose movement type is flying, e.g. bat, bee, parrot, phantom, happy
+  ghast; hostile: MONSTER and anything already excluded) and remove every mob
+  in a blacklisted category from the allele set, including ones currently in
+  the hand-written list.
+- Lycan mob list, runtime: replace the hand-written form(...) calls with a
+  derivation over the live entity-type registry at startup/data-gen time -
+  every registered mob (vanilla or modded) whose spawn category and movement
+  type pass the blacklist becomes a form/allele automatically. Common/ cannot
+  import Minecraft classes, so this has to be resolved on the NeoForge side
+  (following the existing "ids are plain strings, resolved against the live
+  registry" pattern lycan and egg-layer already use for unrecognised ids) and
+  handed to LycanGene as data, not hard-coded per mob.
+- Egg layer / magic item drop, runtime: EggLayerGene and MagicItemDropGene each
+  ship a fixed short list of vanilla item ids as alleles. Give both the same
+  registry-driven treatment as the lycan mob list - a run built from every
+  item any loaded mod registers - rather than adding modded items by hand one
+  at a time. Keep the founder-table balancing (rarity per allele) as config the
+  runtime derivation reads, not something that has to be re-authored per mod.
+- All three derivations need to be stable across a world's lifetime (an allele
+  index that shifts when a mod is added/removed corrupts saved genotypes), so
+  settle the id-to-allele-index scheme (likely sorted-by-id, keyed by string id
+  rather than by ordinal) before wiring it in.
+
+Validation:
+- LycanGeneTest (or equivalent) asserting no aquatic/flying/hostile mob id is
+  ever produced, including under a modded entity-type registry fixture.
+- A round trip test that a genotype recorded against one registry snapshot
+  still resolves correctly after mobs/items are added by a fake "other mod" in
+  the test fixture.
+- Confirm MagicOnDeathGene has exactly three real outcomes (wild, lava, water)
+  and that Xpl/Xpl (if constructed directly, e.g. from an old save) degrades to
+  WILD rather than throwing.

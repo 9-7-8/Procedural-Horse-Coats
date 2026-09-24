@@ -1,0 +1,34 @@
+2026-09-24, after the stasis page — magical-loci implementation advice is added to intake, and the intake folder gets a START HERE
+
+    No wiki-page or code work this session; both changes are to intake/ itself.
+
+Magical loci and modded content
+
+    "Magical loci and modded content" (drop the Xpl/explode allele, rebuild LYCAN's mob list
+    from the live entity registry with an aquatic/flying/hostile blacklist, and give
+    EggLayerGene and MagicItemDropGene the same registry-driven treatment) was written into
+    intake/To do.txt, and intake/Implementation advice.txt gained a matching section 8 naming
+    the likely classes (MagicOnDeathGene, LycanGene, EggLayerGene, MagicItemDropGene,
+    LycanthropyHandler), the id-to-allele-index stability concern, and the validation tests to
+    write first. Routing this properly (Known gaps, Decisions, or a Roadmap tab per
+    roadmap-execution.html) is left for the implementation session that actually picks it up.
+
+intake/START HERE.txt
+
+    The intake folder had three files and no reading order, so a session opening
+    intake/To do.txt cold would start at the top — a stasis chamber system — rather than the
+    reported bugs, which roadmap-execution.html's own routing table ranks first. START HERE.txt
+    sets that order explicitly: check whether a "Bugs:" entry is already fixed (grep
+    session-log/, check verification.html) before writing any code, route what's left through
+    roadmap-execution.html's symptom map, then delete the bullet from wherever it lives in
+    intake/ once it's fixed and written up on its owning page — never leave a done marker in
+    place of the text.
+
+    Two more rules went in at the owner's request. One bullet per context window: finish a
+    single bug or feature, run the CLAUDE.md ending-session routine, report what shipped and
+    what's next, then stop rather than pulling in the next bullet's unrelated context in the
+    same conversation. And a short list of ways to answer "where is X" without burning it:
+    wiki/text/ and its index.txt over the HTML, a narrow includePattern over a bare repo-wide
+    grep, never touching wiki/search-index.js directly, not re-reading the routing pages in full
+    more than once a session, the Explore subagent for open-ended discovery, and targeted
+    --tests runs instead of the full suite.

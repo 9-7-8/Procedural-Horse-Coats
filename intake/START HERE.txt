@@ -1,0 +1,123 @@
+Read this before touching anything else in intake/.
+
+What this folder is
+====================
+intake/ is the inbox, not a plan. Nothing in here is a source of truth once it
+has been routed - the wiki is. This file exists because "To do.txt" mixes
+several different kinds of request together (bug reports, tuning asks, whole
+unbuilt systems), and working it top-to-bottom wastes time on the wrong things
+first. Read this file, then "Implementation advice.txt" for the fast path
+through a single session, then wiki/roadmap-execution.html for the full
+routing table and the implementation handoff packet. Do not start editing code
+from "To do.txt" directly.
+
+Why start with the bugs, specifically
+======================================
+wiki/roadmap-execution.html's own routing table puts "built and wrong" ahead
+of "shape is agreed, work is absent": a regression in something that already
+works is cheaper to find, cheaper to fix, and worth more to the owner than a
+new system. The "Bugs:" section of To do.txt is exactly that category. Work it
+first, before the tuning requests and the unbuilt systems (stasis chambers,
+wing rendering, magical-loci cleanup) further down the same file.
+
+One bullet, one context window
+===============================
+This is a long backlog and context is the scarce resource, not developer time.
+Work exactly one bullet (one bug, one tuning ask, one feature) per session:
+1. Pick the next bullet per the ordering below.
+2. Finish steps 1-3 for it (check if already fixed, route/fix it, retire the
+   bullet from the file).
+3. Run the CLAUDE.md "Ending a session" routine (regenerate what you
+   invalidated, build, commit and push code, then docs as a second commit,
+   verify clean, kill any processes you started).
+4. Stop. Report what shipped and which bullet is next, then wait - do not pull
+   in the next bullet in the same conversation. Its context (which classes,
+   which wiki page, which tests) is unrelated and would only bloat this one.
+The owner will clear context and re-prompt to start the next bullet. Do not
+try to batch several bullets into one session to "save round trips" - a fresh
+context that reads only what the next bullet needs is cheaper than one long
+conversation carrying every previous bullet's dead context.
+
+Step 1 - check whether the bug is already fixed
+================================================
+Several entries in To do.txt describe behaviour that a later session already
+changed - the file is an inbox that nobody has swept, not a live defect list.
+Before writing any code for a bug entry:
+1. Grep wiki/session-log/ for a keyword from the bug (a session that fixed it
+   says so in the owner's own words, e.g. d2026-09-21-menu-gesture.txt for the
+   sneak-right-click entry - already fixed, still sitting in the file).
+2. Check wiki/verification.html (the generated index of every open check) for
+   the same keyword - if the fix landed but is unconfirmed in-game, it is
+   listed there with a link to the owning page's Verification tab, not in
+   To do.txt.
+3. Only if neither turns anything up is the bug still open.
+
+Step 2 - route it, don't implement straight from the file
+===========================================================
+Use wiki/roadmap-execution.html#routing for the four possible destinations
+(Known gaps/Verification tab, Decisions, Roadmap tab, or already fixed). Most
+bug entries are "built and wrong": find the owning page from
+wiki/roadmap-execution.html#symptom-map first (it already lists the classes
+behind bond decay, pathing, the H-menu, ownership transitions, damage/death
+messages, etc.) before searching the repository by hand. If a bug doesn't
+match a symptom-map row, use Explore to find the owning class(es), fix it
+there, and write the result on that page's Verification or Coding/Gameplay tab
+- never leave the fix described only in To do.txt.
+
+Step 3 - retire the bullet, in every intake file, not just To do.txt
+======================================================================
+Once a bullet is fixed and written up on its owning page (or confirmed already
+fixed, or routed to Decisions/a Roadmap tab), delete it from wherever it lives
+in intake/ - To do.txt, and any note added to "Implementation advice.txt" or
+elsewhere in this folder that only concerned that bullet. Do not leave a
+"done" marker or a struck-through line in place of the text: delete the text
+itself. To do.txt's own first line says why - it empties down to just that
+line over time, and a bullet that has been intaken and still sits here is a
+duplicate description competing with the real record on the wiki, not a log
+of what happened. If deleting a bullet leaves a now-empty section heading
+behind, delete the heading too.
+
+Step 4 - everything else in the file, in order
+================================================
+After the Bugs section: the tuning asks (breeding caps, aggression, incest,
+bond decay rate) are design questions as much as code - check decisions.html
+before assuming the requested number or rule is settled. The stasis-chamber
+and wing-rendering systems are unbuilt features; give each its own Roadmap tab
+on a new or existing page rather than building from the paragraph in
+To do.txt directly, per "Implementation advice.txt"'s recommended order.
+
+Searching the wiki without burning context
+============================================
+- Read wiki/text/, never wiki/*.html, for anything that is just prose lookup
+  (see .github/copilot-instructions.md) - it is the same content with the
+  markup stripped, and one page is one small file instead of a script-and-tag
+  heavy document. Open the real .html only to edit it, or for releases.html
+  and making-a-gene.html, which aren't baked.
+- Start a prose search at wiki/text/index.txt - it maps every heading to a
+  file#anchor, so you can jump straight to the right file instead of grepping
+  the whole tree.
+- Prefer grep_search with a narrow includePattern (a single file, or
+  wiki/text/**) over a bare repository-wide search. wiki/search-index.js is a
+  single multi-megabyte generated file - never grep or read it directly, it
+  will flood the context for no benefit that wiki/text/index.txt doesn't
+  already give you.
+- Don't re-read wiki/roadmap-execution.html, wiki/verification.html or
+  wiki/known-gaps.html in full more than once per session. Read the section
+  you need (routing table, symptom map, or the one gap) with a line range once
+  you know it, not the whole page again on the next question.
+- For "which class handles this" questions, check
+  wiki/roadmap-execution.html#symptom-map before searching the repository by
+  hand - it already names the owning classes for the common bug shapes.
+- Use the Explore subagent for open-ended "where is X" or "how does Y work"
+  questions that would otherwise take several rounds of grep/read - it keeps
+  that exploration's dead-end searches out of the main conversation's context.
+- Never run the full :common:test suite to check one fix - use
+  --tests '*ThatClassTest' as CLAUDE.md already says. A full run is minutes of
+  output for one bullet's worth of change.
+- Batch independent reads (the bug's owning page's text file, the classes the
+  symptom map names, the relevant test) in one parallel round rather than
+  reading them one at a time across several turns.
+
+Do not re-derive this process per session. Run
+node wiki/tools/check-roadmap-execution.mjs before editing, same as any other
+implementation session.
