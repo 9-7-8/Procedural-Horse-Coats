@@ -2677,6 +2677,7 @@ wiki/horse-care.html#ground-food	coding	What counts as dropped food — and why 
 wiki/horse-care.html#hand-taming	gameplay	Taming by hand
 wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
 wiki/horse-care.html#kept-herds	gameplay	Tamed herds
+wiki/horse-care.html#reachable-food	coding	A horse only walks to food it can reach
 wiki/horse-care.html#roles	gameplay	Who is who
 wiki/horse-care.html#science-bachelors	science	Bachelor bands and how a stallion gets mares
 wiki/horse-care.html#science-bands	science	How free-roaming horses actually live

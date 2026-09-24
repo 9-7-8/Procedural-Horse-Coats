@@ -1,0 +1,71 @@
+2026-09-24, after the dropped-food fix — a horse only walks to food it can reach
+
+    One bullet, the next in the Bugs section of intake/To do.txt, in the owner's words:
+
+        All the horses are pushing against the pasture edge where the fence separates them
+        from the farm/crops.
+
+    Dated first, as START HERE says to. The bullet went into To do.txt on 2026-09-23 and
+    nothing in the session log or on any Verification tab had touched pasture-edge pathing,
+    so: open, and go and read the code. The symptom map has no row for it; the class was
+    obvious from the last two sessions, which had both been in HungerFoodGoal.
+
+Why a pen shoves a fence
+
+    HungerFoodGoal.search took the best rung within ten blocks and the nearest block on it,
+    and then simply moved to it. Vanilla's pathfinder does not refuse an unreachable target:
+    it returns the *partial* path that gets as close as it can, so moveTo returned true, the
+    horse walked up to the rail and stood there pushing. Nothing broke it out until
+    MAX_PURSUIT — twenty seconds — after which stop() put that one block on the ignore list
+    for a minute and the next search picked the block beside it.
+
+    That is the whole bug. A farm is a few hundred crop blocks; a pen of horses never runs
+    out of them, so the shoving has no end. CROP also outranks GRASS, so the crops beat the
+    pasture the horses were standing in every single time.
+
+What changed
+
+    search() asks createPath(...).canReach() before committing to a candidate. That question
+    was already in the codebase — BondFollowGoal.ReachCheck asks it of an owner behind a
+    door, and this session's predecessor shipped it — so the idiom was borrowed rather than
+    invented. The accuracy is 1, which is what vanilla's own moveTo(x,y,z,speed) passes, so
+    the check and the move that follows it ask one question rather than two. It is a
+    manhattan distance: 1 still reaches a hay bale the horse stands beside and the grass
+    block under its feet, and is two short of a crop on the far side of a one-block fence.
+
+    The check on its own would have swapped pushing for starving, which is the part worth
+    writing down. Rejecting the crop rung does not promote the grass rung: the old scan kept
+    one global best, so a horse in a grass pen beside a fenced farm would have rejected
+    crops every search and never fallen through to what was under it. The scan now keeps the
+    nearest candidate of *each* rung and walks them best-first until one is reachable. An
+    unreachable farm demotes the horse to its own grass.
+
+    Around that: a rejected candidate joins the same minute-long ignore list, so the next
+    search does not just pick its neighbour; a search spends at most three path tests, which
+    is fewer than the repaths the twenty-second pursuit it replaces was already spending
+    every twenty ticks, so this is cheaper than what it removes, not an added cost; and
+    tick() now drops a pursuit whose path stops short, for the gate that shuts behind a
+    horse that set off while it was open. Items and hunted prey go through the same check —
+    a carcass over a fence pins a carnivore the same way.
+
+Scope
+
+    This is the pathing half only. A horse that is beside the fence for some other reason
+    can still eat a crop through it: the goal's eating radius is 2.5 blocks and does not ask
+    what is in between. That is its own bullet further down the Bugs section ("Horses are
+    eating crops through a fence or wall") and was deliberately left alone — one bullet, one
+    context window.
+
+Not played
+
+    No unit test. The behaviour is NeoForge's navigation end to end, and per
+    roadmap-execution's session contract that means leaving the production path narrow and
+    writing the runtime reproduction instead of building a harness for it.
+
+    wiki/horse-care.html grew #reachable-food on the Coding tab and #pasture-edge-0924 on
+    the Verification tab with four checks. Two of them exist to catch this fix overshooting
+    rather than to confirm it: that the pen still eats its grass (the fall-through works) and
+    that a hay bale dropped in the open is still walked to (REACH_ACCURACY of 1 is not too
+    tight for a block a horse can only stand beside — if it is, cake, pumpkin and melon fail
+    the same way). The accuracy figure is a reading of vanilla's pathfinder, not a
+    measurement, and the class javadoc says so.

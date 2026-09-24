@@ -430,6 +430,44 @@
     grass, on the same one-in-1,200 roll.
 </p>
 
+<h2 id="reachable-food">A horse only walks to food it can reach</h2>
+
+<p>
+    The owner's pasture backs onto a farm, and on 2026-09-23 every horse in it stood pressed
+    against the dividing fence. The crops were the best rung in sight and well inside the
+    ten-block search; the horse took the nearest one, <code>moveTo</code> handed it the
+    <strong>partial path</strong> that stops at the rail, and it leaned there for the full
+    pursuit before giving up, ignoring that one block, and starting again on the block beside
+    it. A farm is a hundred such blocks, so the pen never ran out of turns and the shoving never
+    stopped.
+</p>
+<p>
+    <code>HungerFoodGoal.search</code> now asks <code>createPath</code>/<code>canReach</code>
+    before it commits to a candidate &mdash; the same question
+    <code>BondFollowGoal.ReachCheck</code> asks of an
+    <a href="#bond-reach-0924">owner behind a door</a>, at vanilla's own <code>moveTo</code>
+    accuracy of 1. That number is the whole trick: a manhattan block still reaches a hay bale
+    the horse stands beside, or the grass block under its feet, and is two short of a crop on
+    the far side of a fence.
+</p>
+<p>
+    <strong>The check alone would have swapped pushing for starving.</strong>
+    <code>CROP</code> outranks <code>GRASS</code>, so a horse in a grass pen beside a fenced farm
+    would reject crops every search and never fall through to what it was standing in. The block
+    scan therefore keeps <strong>the nearest candidate of every rung</strong> rather than one
+    global best, and walks them best-first until one is reachable; an unreachable farm quietly
+    demotes the horse to its own grass. A rejected candidate is ignored for the usual minute, so
+    the next search does not simply pick its neighbour, and a search spends at most three path
+    tests &mdash; fewer than the repaths the pursuit it replaces was already spending every
+    twenty ticks. <code>tick</code> drops a pursuit whose path stops short as well, for the gate
+    that shuts behind a horse that set off while it was open.
+</p>
+<p>
+    This is the pathing half of the pasture-edge report only. <strong>A horse that is beside the
+    fence for some other reason can still eat a crop through it</strong>: the goal's eating
+    radius is 2.5 blocks and does not ask what is in between, which is a separate bullet.
+</p>
+
 <h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
 
 <p>
@@ -1340,8 +1378,44 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, so the check that matters is on the modded server that prompted it &mdash; drop another mod&rsquo;s crop by a hungry horse and see it eaten; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>A hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
+
+<h3 id="pasture-edge-0924">Horses lean on the fence beside a farm (2026-09-24, NOT played)</h3>
+
+<p>
+    Reported from the owner&rsquo;s server: <em>all the horses are pushing against the pasture
+    edge where the fence separates them from the farm/crops</em>. The hunger goal was walking
+    every horse at crops it could see and could not path to. It now asks
+    <code>canReach</code> first and keeps the nearest candidate of every rung so an unreachable
+    farm demotes the horse to the grass in its own pen &mdash;
+    <a href="#reachable-food">the coding note</a>. <strong>None of it is played.</strong> The
+    navigation is NeoForge&rsquo;s, so there is no unit test to write: the accuracy figure that
+    decides reachable from unreachable is a reading of vanilla&rsquo;s pathfinder, not a
+    measurement.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The pen stops shoving.</strong> Fence a pasture against a wheat or potato field,
+        put hungry horses in it (no gate, no way round) and watch the fence line for a few
+        minutes. <strong>Pass:</strong> horses graze or wander. <strong>Fail:</strong> any horse
+        holds itself against the rail facing the crops.</li>
+    <li><strong>It did not stop them eating.</strong> The same pen, with grass in it.
+        <strong>Pass:</strong> <code>hunger</code> lines in the log show those horses eating
+        grass, and their hunger does not drain to 0 &mdash; the demotion to a worse rung is
+        working. <strong>Fail:</strong> the pen starves quietly with grass under it, which means
+        the crop rung is being rejected without the fall-through.</li>
+    <li><strong>A bale is still reachable.</strong> Drop a hay bale in the pen beside a hungry
+        horse. <strong>Pass:</strong> it walks over and eats it. <strong>Fail:</strong> it
+        ignores a bale in the open, which means
+        <code>REACH_ACCURACY</code> of 1 is too tight for a block a horse can only stand beside,
+        and the cake, pumpkin and melon rungs will be failing the same way.</li>
+    <li><strong>Open a gate.</strong> Put a gate in that fence and open it.
+        <strong>Pass:</strong> within a minute &mdash; the ignore window &mdash; horses walk
+        through and eat the crops.</li>
+</ul>
 
 <h3 id="bond-reach-0924">Bond behaviour needs a walkable route (2026-09-24, NOT played)</h3>
 
