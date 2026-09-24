@@ -2891,6 +2891,7 @@ wiki/item-whistles.html#reading	coding	The area whistles
 wiki/item-whistles.html#tiers	gameplay	The four whistles
 wiki/item-whistles.html#use	gameplay	What happens when you blow an area whistle
 wiki/items.html#adding	coding	Adding an item
+wiki/items.html#chest-loot	coding	Chest loot — every chest, any mod
 wiki/items.html#gaps	coding	Known gaps, across the roster
 wiki/items.html#gate-exception	gameplay	The double gates are outside the modded-ingredient rule
 wiki/items.html#golden-carrot-seeds	gameplay	Golden carrot seeds — a crop, and not a gold farm
@@ -2901,6 +2902,7 @@ wiki/items.html#tab	coding	The creative tab
 wiki/items.html#tack	gameplay	Tack: the saddle is dyeable
 wiki/items.html#tack-derived	gameplay	The textures are derived, not drawn
 wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
+wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
 wiki/known-gaps.html#migrated	all	Migrated open checks
 wiki/paint-order.html#exception	coding	The one gene the order does not describe

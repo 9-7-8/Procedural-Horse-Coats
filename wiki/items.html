@@ -260,6 +260,27 @@
     render, because the HD body had been the small one all along.
 </p>
 
+<h3 id="tack-found">Somebody else&rsquo;s tack, in a chest</h3>
+
+<p>
+    Chests now hold horse tack. About one chest in five &mdash; <em>any</em> chest, vanilla or
+    another mod&rsquo;s &mdash; carries one piece: a leather horse armour, a saddle, or an iron,
+    golden or diamond horse armour, plus one of every
+    <a href="compatibility.html">modded metal&rsquo;s armour</a> you happen to have. Leather is
+    the commonest and diamond the rarest, so a diamond armour in a chest is still the best
+    thing in it.
+</p>
+
+<p>
+    <strong>The leather pieces come already dyed</strong>, in the mod&rsquo;s own three zones,
+    with the two leather zones rolled separately &mdash; an unrelated pair, because a piece
+    somebody lost in a dungeon should not look like it came off a shop rack. The fittings are
+    deliberately cheap: iron, copper, bone, coal, basalt or gold, never a gem. The
+    <a href="villagers.html">leatherworker&rsquo;s</a> five tiers are a ladder ending in
+    lapis-dyed tack on diamond, and that is only worth climbing if a chest cannot hand you the
+    top rung.
+</p>
+
 <h2 id="golden-carrot-seeds">Golden carrot seeds &mdash; a crop, and not a gold farm</h2>
 
 <p>
@@ -283,9 +304,11 @@
 <ul>
     <li>The <a href="villagers.html">equestrian supplier</a>&rsquo;s <strong>top rank</strong>,
         at 38 emeralds for one, twice per restock.</li>
-    <li><strong>Dungeon-grade chest loot</strong> &mdash; 7% across eight tables (dungeon,
-        mineshaft, stronghold corridor, plains house, mansion, outpost, jungle temple, desert
-        pyramid), one to three seeds when it hits.</li>
+    <li><strong>Chest loot</strong> &mdash; 20% in <em>any</em> chest, one to three seeds when
+        it hits. Not a list of dungeons any more: it was 7% across eight named vanilla tables,
+        and the owner played a heavily modded server for weeks without ever finding one,
+        because nearly every chest she opened belonged to somebody else&rsquo;s structure. See
+        <a href="#chest-loot">every chest, any mod</a> on the Coding tab.</li>
 </ul>
 <p>
     They are <strong>not craftable from anything</strong>, and a golden carrot itself will not
@@ -338,6 +361,65 @@
     breed eggs additionally appear in vanilla&rsquo;s Spawn Eggs tab. In a dev build, the
     <em>Spawn Test Horse World</em> button&rsquo;s starting inventory contains one of
     every item.
+</p>
+
+<h2 id="chest-loot">Chest loot &mdash; every chest, any mod</h2>
+
+<p>
+    Four global loot modifiers put this mod&rsquo;s things in chests:
+    <code>data/loot/AddResearchPaperModifier</code>,
+    <code>AddGoldenCarrotSeedsModifier</code>, <code>AddBreedSpawnEggModifier</code> and
+    <code>AddHorseTackModifier</code>. Three of the four reach <strong>every chest table in
+    every namespace</strong>; the breed spawn egg still names its ten, because a foundation
+    horse turning up in an arbitrary modded chest is a different question from a saddle
+    doing so.
+</p>
+
+<div class="note">
+    <span class="label">Why a regex condition and not NeoForge&rsquo;s</span>
+    <p>
+        <code>neoforge:loot_table_id</code> tests <em>one exact id</em>, so &ldquo;put this in
+        chest loot&rdquo; was written as an <code>any_of</code> of however many ids somebody
+        thought to list &mdash; eight to ten vanilla chests apiece. On a heavily modded server
+        that is close to nothing: most of the chests a player opens belong to another
+        mod&rsquo;s structures, and none of those were ever in the list. That is why the owner
+        had never once found a golden carrot seed.
+    </p>
+    <p>
+        <code>data/loot/LootTableMatchesCondition</code>
+        (<code>horsegenetics:loot_table_matches</code>) matches the queried table id against a
+        regular expression instead, and <code>[^:]+:chests/.+</code> says the whole thing in one
+        line. It matches the <em>path</em> rather than the namespace, because vanilla and nearly
+        every structure mod file their chest tables under <code>chests/</code>; it deliberately
+        does not match block, entity, fishing or archaeology tables, since a horse armour
+        falling out of a sheep is not what was asked for. A malformed pattern is a
+        <code>DataResult</code> error rather than a thrown exception, so a datapack that
+        mistypes one loses that modifier instead of the whole pack.
+    </p>
+    <p>
+        <strong>26.1.2 has no <code>LootItemConditionType</code> class.</strong> The registry
+        holds the <code>MapCodec</code> itself, exactly as the loot-function registry does &mdash;
+        see <code>data/loot/ModLootConditions</code>, and
+        <a href="api-notes.html">the API notes</a>.
+    </p>
+</div>
+
+<p>
+    <code>AddHorseTackModifier</code> draws one piece from a weighted pool: leather horse armour
+    10, saddle 8, iron 6, gold 4, diamond 1. <strong>Every modded armour shares a single share
+    of 5</strong> and is drawn uniformly inside it. That is not tidiness &mdash;
+    <code>compat/ModdedArmour</code> registers one armour per metal any installed mod adds, and
+    a 319-jar pack brings dozens, so a weight each would make vanilla&rsquo;s four the rare ones
+    and turn the pool into a survey of the player&rsquo;s modlist. With no such mods installed
+    the bucket is not in the draw at all.
+</p>
+
+<p>
+    The saddle and the leather armour get a <code>tack_tint</code>, not vanilla&rsquo;s
+    <code>dyed_color</code> &mdash; same reason as
+    <a href="item-equestrian-bench.html">the bench</a> and
+    <code>SetTackTintFunction</code>: <code>dyed_color</code> holds one value per stack, reaches
+    only the blanket, and does <em>nothing at all</em> to a saddle.
 </p>
 
 <h2 id="gaps">Known gaps, across the roster</h2>
@@ -432,7 +514,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Golden carrot seeds carry this mod's <strong>first block tint</strong>, and every way they fail is quiet &mdash; a crop frozen at age 0 because <code>randomTicks</code> never took, a gold item dropping where nothing gold should, or a tint that misses the model so the crop just grows orange and looks like a loot-table bug.</p>
+    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and fail invisibly &mdash; a crop frozen at age 0, a gold item dropping where nothing gold should, a tint that misses the model &mdash; and <strong>chest loot now rides on a regex</strong> that has never had anything taken out of a chest to prove it.</p>
 </div>
 
 <h3 id="goldencarrot-0918">Golden carrot seeds (2026-09-18, NOT played)</h3>
@@ -450,9 +532,39 @@
         still will not plant at all.</li>
     <li><strong>The supplier sells them at rank 5</strong>, 38 emeralds, twice. Level him up
         and look. He has four other rank-5 trades and rolls three of the five.</li>
-    <li><strong>They turn up in dungeon chests</strong> - 7%, so this needs a lot of chests
-        or a creative check of the loot modifier.</li>
+    <li><strong>They turn up in chests</strong> - now 20% in <em>any</em> chest rather than 7%
+        across eight named ones, so a handful of chests should do it where it used to need a
+        creative check of the loot modifier.</li>
     <li><strong>The two checklist boxes tick</strong> - plant one, harvest one.</li>
+</ul>
+
+<h3 id="chest-tack-0924">Tack in chest loot (2026-09-24, NOT played)</h3>
+
+<p>Proven only to the depth a server boot can prove it: a clean <code>runServer</code> logs
+nothing, and the same boot with a deliberately invalid regex logs the decode error from our own
+codec - which shows the folder is scanned, <code>add_horse_tack</code> resolves and
+<code>horsegenetics:loot_table_matches</code> is registered. <em>Nothing has been taken out of a
+chest.</em></p>
+
+<ul>
+    <li><strong>The regex reaches modded chests, and only chests.</strong> Open another
+        mod&rsquo;s structure chest and tack should turn up at about one in five; open a
+        <em>block</em> drop, a fishing catch or a mob drop and it must not. The pattern matches
+        the path, so a mod that files its chest tables somewhere other than
+        <code>chests/</code> is invisible to it and would be worth knowing about.</li>
+    <li><strong>A found saddle and leather armour are visibly dyed</strong>, in two unrelated
+        leather colours with cheap fittings - and never a gem fitting, which would undercut the
+        leatherworker&rsquo;s top tier.</li>
+    <li><strong>No gem fitting, and no diamond flood.</strong> Diamond horse armour is weight 1
+        of 29; several chests in a row producing one means the weighted chain is wrong.</li>
+    <li><strong>With another mod&rsquo;s metals installed, its armours appear</strong> - and do
+        not swamp vanilla&rsquo;s four. This is the one branch that cannot be checked in a
+        vanilla dev world at all; it needs the
+        <a href="compatibility.html">synthetic compat mod</a>, and nothing generated for another
+        mod&rsquo;s materials has ever been drawn.</li>
+    <li><strong>Rates feel right rather than merely different.</strong> 20% seeds, 30% research
+        papers and 22% tack per chest were picked against &ldquo;much more common&rdquo; and
+        nothing else; a stronghold is a lot of chests.</li>
 </ul>
 
 

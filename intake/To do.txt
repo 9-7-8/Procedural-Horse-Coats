@@ -12,8 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-- Golden carrot seeds and gene books should be much more common as loot. Add all horse armor types, dyed saddles, and dyed leather horse armor to all loot tables.
-
 - If a breeding attempt does not go through for any reason, print the failure to the horse's owner in chat.
 
 - The H menu should support searching by allele combinations, if it does not already.

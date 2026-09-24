@@ -1,0 +1,113 @@
+2026-09-24, after the cowboy's string — chest loot reaches every chest, in every mod, and
+carries tack
+
+    One bullet, the first in the Bugs section of intake/To do.txt, in the owner's words:
+
+        Golden carrot seeds and gene books should be much more common as loot. Add all horse
+        armor types, dyed saddles, and dyed leather horse armor to all loot tables.
+
+    Dated first, per START HERE's step 1. The bullet's only appearance in the file's history is
+    de4cde82 (2026-09-23); nothing in wiki/session-log/ or on any Verification tab had touched
+    chest loot since the golden carrot seeds shipped on 2026-09-18. Open.
+
+Two things had to be decided before any code
+
+    "Gene books." There is no gene-book item. A gene book is what the Equine Research Shelf
+    copies a research paper onto, and server/GeneBookFromHorse writes one off a living horse.
+    The owner's call: she means the research papers, which are the lootable gene-knowledge
+    item. Recorded on item-research-papers.html in her own word so the next session does not
+    go looking for an item.
+
+    "All loot tables." Two readings: grow the hand-written id lists out to the full vanilla
+    chest set, or reach every chest table in every namespace. Her call was the second, and it
+    turned out to be the actual bug rather than a nicety — see below.
+
+Why she had never found a golden carrot seed
+
+    The three existing injections each listed eight to ten vanilla tables by id, because
+    neoforge:loot_table_id tests one exact id and "chest loot" therefore has to be written as
+    an any_of of whatever somebody thought to name. On the heavily modded server she actually
+    plays, nearly every chest a player opens belongs to another mod's structure — and not one
+    of those was in any of the three lists. The seeds were documented as 7% across eight
+    tables; in practice they were 7% of a slice of chests she rarely opened.
+
+    So the reach was the defect and the rate was the request. Both moved.
+
+What changed
+
+    data/loot/LootTableMatchesCondition — a loot condition of ours that regex-matches the
+    queried table id. "[^:]+:chests/.+" is the whole of "every chest table, any mod". It
+    matches the path rather than the namespace, because vanilla and nearly every structure mod
+    file their chest tables under chests/; it deliberately misses block, entity, fishing and
+    archaeology tables, since a horse armour falling out of a sheep is not what was asked for.
+    A malformed pattern is a DataResult error, not a thrown exception, so a datapack that
+    mistypes one loses that modifier rather than the pack.
+
+    Golden carrot seeds 7% over eight tables -> 20% over every chest. Research papers 18% ->
+    30% the same way. The breed spawn egg keeps its named ten: a foundation horse appearing in
+    an arbitrary modded chest is a different question from a saddle doing so, and nobody has
+    asked it.
+
+    data/loot/AddHorseTackModifier — new, 22% per chest, one piece per hit. Weighted by what
+    the piece is worth rather than what it is made of: leather horse armour 10, saddle 8, iron
+    6, gold 4, diamond 1.
+
+    Two things about that pool are deliberate and would look arbitrary later.
+
+    Every modded armour shares ONE share of 5, drawn uniformly inside it. compat/ModdedArmour
+    registers one armour per metal any installed mod adds, and a 319-jar pack brings dozens; a
+    weight each would make vanilla's four the rare ones and turn the draw into a survey of the
+    player's modlist. With no such mods installed the bucket is not in the draw at all.
+
+    The fittings are cheap on purpose — iron, copper, bone, coal, basalt, gold, never a gem.
+    The leatherworker's five tiers are a ladder whose top rung is lapis-dyed tack on diamond,
+    and that ladder is only worth climbing if a dungeon chest cannot hand you its last rung.
+
+    The saddle and the leather armour carry the mod's own three-zone tack_tint, not vanilla's
+    dyed_color, which holds one value, reaches only the blanket and does nothing whatsoever to
+    a saddle. The two leather zones roll separately and out of the whole wheel: the
+    leatherworker draws his pair from one palette because his tiers are a progression, and a
+    piece somebody lost in a dungeon has no such excuse. An unrelated pair is what makes it
+    read as second-hand.
+
+How far this is actually proven
+
+    A clean runServer boots and logs nothing about loot. That on its own proves nothing — a
+    folder nobody scans is also silent. So the same boot was run again with the new modifier's
+    regex deliberately set to "[", and it logged:
+
+        Couldn't parse data file 'horsegenetics:add_horse_tack' ... Not a regular expression: [
+
+    from our own codec's error message. That is the positive half: the loot_modifiers folder is
+    scanned, horsegenetics:add_horse_tack resolves to the serializer, and
+    horsegenetics:loot_table_matches is registered and its codec runs. It also confirms the
+    degrade-don't-throw path. Both boots are in the session's scratchpad; the port had to be
+    moved off 25565 for the first one, because the owner's own server was on it.
+
+    Nothing has been taken out of a chest. That, and the modded-armour branch — which cannot be
+    checked in a vanilla dev world at all — are on items.html's Verification tab.
+
+Two API notes came out of it, now on api-notes.html
+
+    26.1.2 has no LootItemConditionType class: Registries.LOOT_CONDITION_TYPE holds the
+    MapCodec itself, the same shape the loot-function registry already used here.
+
+    Global loot modifiers no longer need a data/neoforge/loot_modifiers/global_loot_modifiers.json
+    index — LootModifierManager is a SimpleJsonResourceReloadListener over the folder. This mod
+    has never shipped one, which was worth confirming rather than assuming, since its absence
+    and a silent non-load look identical from outside.
+
+Pages moved
+
+    items.html — the golden carrot seeds' loot line, a new gameplay section on found tack, a
+    new coding section "Chest loot — every chest, any mod", and a Verification entry.
+    item-research-papers.html — both tabs, and the "gene books" naming.
+    api-notes.html — the two notes above.
+    intake/To do.txt — bullet retired.
+
+Next
+
+    The next bullet in the Bugs section: "If a breeding attempt does not go through for any
+    reason, print the failure to the horse's owner in chat." Note that the tuning section
+    higher up the file asks for the same thing for covers specifically, so check whether the
+    two are one bullet before starting.

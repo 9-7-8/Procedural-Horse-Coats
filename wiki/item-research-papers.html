@@ -59,9 +59,12 @@
 <h2 id="get">Four ways to get one</h2>
 
 <ul>
-    <li><strong>Find it.</strong> Research papers turn up in about eight kinds of vanilla
-        chest. Which gene a found paper names is weighted by rarity, so the common genes
-        come up far more often.</li>
+    <li><strong>Find it.</strong> Research papers turn up in <em>any</em> chest, vanilla or
+        another mod&rsquo;s, in about three chests in ten. Which gene a found paper names is
+        weighted by rarity, so the common genes come up far more often. It used to be eight
+        kinds of vanilla chest at not quite one in five, which on a large modded server meant
+        almost none &mdash; see
+        <a href="items.html#chest-loot">every chest, any mod</a>.</li>
     <li><strong>Take it off a horse.</strong> Right-click a horse while holding a book
         and you get a paper for <strong>one gene that horse carries, at random</strong>.
         You do not choose which &mdash; that is the point, and it is why a paper is a
@@ -87,9 +90,13 @@
 </p>
 
 <ul>
-    <li><strong>Chest loot</strong> &mdash; injected into ~8 vanilla chest tables by a
-        global loot modifier, with the gene weighted by its rarity tier
-        (<code>data/loot/AddResearchPaperModifier</code>).</li>
+    <li><strong>Chest loot</strong> &mdash; injected at 30% into <em>every</em> chest table in
+        every namespace by a global loot modifier, with the gene weighted by its rarity tier
+        (<code>data/loot/AddResearchPaperModifier</code>). It was 18% across eight named vanilla
+        tables until 2026-09-24; what replaced the list is
+        <a href="items.html#chest-loot">a regex condition</a>. The owner calls these
+        &ldquo;gene books&rdquo;, after what
+        <a href="item-research-shelf.html">the shelf</a> copies them onto.</li>
     <li><strong>Off a horse</strong> &mdash; <code>server/GeneBookFromHorse</code>, on
         <code>EntityInteract</code> with a book. It collects every locus the horse is not
         homozygous-baseline at (the same test discovery uses) and picks one uniformly. No
