@@ -20,23 +20,245 @@
 <p class="lede">
     The horse browser is the mod&rsquo;s own index of everything you own and everything it
     knows &mdash; an <kbd>H</kbd>-key screen carrying a list of your horses, a searchable
-    gene database, the recipes, the alleles, the breeds and a breeding preview.
-    <strong>Part of it ships.</strong> This page is, for now, only the plan: the half that
-    exists is written up on <a href="breeding.html">Breeding &amp; pedigree</a>, under
-    <a href="breeding.html#H">client sync, the information screen and the family tree</a>.
+    gene database, the recipes, the alleles, the breeds, a breeding preview and a
+    <a href="#log">log of what has been happening to your stable</a>.
+    <strong>Part of it ships.</strong> Most of the built half is written up on
+    <a href="breeding.html">Breeding &amp; pedigree</a>, under
+    <a href="breeding.html#H">client sync, the information screen and the family tree</a>; the
+    Log tab is written up here, and the rest of the plan is on the Roadmap tab.
 </p>
 
 <div class="note">
-    <span class="label">This page carries a Roadmap tab and nothing else, for now</span>
+    <span class="label">Where the browser is documented</span>
     <p>
-        The browser is half built, and the built half is documented on
-        <a href="breeding.html#H">Breeding &amp; pedigree</a> rather than here &mdash; so all
-        this page holds today is the plan, moved whole from the main
-        <a href="roadmap.html">roadmap</a>. When somebody writes the browser up properly it
-        gains a Gameplay and a Coding tab here, and <a href="breeding.html">breeding</a> keeps
-        the breeding half.
+        The browser is half built, and most of the built half is documented on
+        <a href="breeding.html#H">Breeding &amp; pedigree</a> rather than here. This page began
+        as the plan, moved whole from the main <a href="roadmap.html">roadmap</a>, and has
+        started to grow the other tabs as pieces of that plan ship &mdash; the
+        <a href="#log">Log tab</a> is the first of them.
+        <a href="breeding.html">Breeding</a> keeps the breeding half.
     </p>
 </div>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="log">The Log tab &mdash; what has been happening to your horses</h2>
+
+<p>
+    Press <kbd>H</kbd> and pick <strong>Log</strong>. It is a plain list of things that have
+    happened to horses you own, <strong>newest at the top</strong>: every cover that went
+    through and every one that did not, every foal, every death, every horse you tamed, bought,
+    were handed or lost. Each row carries the day and the time it happened, what kind of thing
+    it was, which horse it was about, and the result in a sentence.
+</p>
+
+<div class="note">
+    <span class="label">It is written down whether or not you were there to read it</span>
+    <p>
+        This is the point of the tab. The mod already says most of this in chat &mdash; a mare
+        was not covered, a horse was killed &mdash; but chat reaches whoever is standing there,
+        once, and scrolls away. <strong>The log is written on the server as things happen</strong>,
+        including while the menu is shut, while you are in another dimension, while the chunk is
+        unloaded, and while you are logged out entirely. Come back in the morning and the night
+        is in the list. Turning the chat notices off in the config does not stop the log; that
+        setting is about chat.
+    </p>
+</div>
+
+<h3 id="log-filters">The filter chips</h3>
+
+<p>
+    Along the top, right of the count: <strong>All</strong>, then one chip per kind of event,
+    each with how many of that kind you have. Click one to see only those; click it again by
+    picking another. Every kind gets a chip even when the count is zero, because a chip that
+    only appears once you already have one teaches nobody what the log can tell them. Filtering
+    never changes the order &mdash; newest is still first.
+</p>
+
+<ul>
+    <li><strong>Covers.</strong> Both halves: <em>&ldquo;was covered, and is in foal&rdquo;</em>
+        and every refusal. A refused cover keeps its reason and its numbers, so
+        <em>&ldquo;12 other horses within 16 blocks of her, and the limit is 8&rdquo;</em> reads
+        in the log exactly as it read in chat. Those are the same refusals
+        <a href="fertility.html#natural-notice">the chat line</a> can end in, because they are
+        literally the same sentence &mdash; see the Coding tab.</li>
+    <li><strong>Births.</strong> One row per foal, naming its dam and sire. Both breeding paths
+        are here: a foal fed into being with a golden carrot, and one born overnight from a
+        pregnancy.</li>
+    <li><strong>Deaths.</strong> What killed it, by name where something did and by cause where
+        nothing did. Recorded for an owner who was nowhere near, which is the case
+        <a href="horse-care.html#hurt-notice">the hurt and death chat lines</a> deliberately do
+        not cover.</li>
+    <li><strong>Taming.</strong> A wild horse you got a rope on. A foal is not a taming, even
+        though a foal born to a tamed mare is tamed on the spot &mdash; it gets a birth row.</li>
+    <li><strong>Purchases, sales and transfers.</strong> The three ways a horse changes hands
+        on a <a href="villagers.html">transfer paper</a>. Buying a dealer&rsquo;s stock is a
+        purchase; taking on somebody else&rsquo;s horse is a transfer; and when your horse is
+        the one redeemed, <strong>a row appears in your log too</strong> &mdash; otherwise
+        losing a horse is the one thing that happens to your stable that you are never told
+        about, since the chat line goes to whoever spent the paper.</li>
+</ul>
+
+<h3 id="log-bounds">How much it keeps</h3>
+
+<p>
+    The last two hundred events, per player. Past that the oldest fall off the end and the tab
+    says so at the bottom. That is a real loss and it is the right one: a log is
+    <em>what has been happening</em>, and nobody reads to the bottom of one that never ends. The
+    <a href="breeding.html">pedigree</a> is the permanent record and is not bounded.
+</p>
+
+<p>
+    A refusal that is still true two seconds later is not written again &mdash; a crowded
+    paddock is re-checked constantly and would otherwise fill the whole log by lunchtime. The
+    same refusal for the same mare is one row for five minutes, which is the same quiet period
+    the chat line uses. A <em>different</em> reason is always news, and two foals five minutes
+    apart are always two rows.
+</p>
+
+<h3 id="log-refresh">Refresh</h3>
+
+<p>
+    There is a Refresh button, top right, the same one My horses and Breeding preview carry.
+    You should not often need it: the server pushes your log to you about once a second
+    whenever something is added to it, so a tab left open fills in as the day goes on.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="log-coding">The Log tab, as built</h2>
+
+<p>
+    Shipped 2026-09-24. The model is game-free and the game module only translates into it,
+    which is the usual split and matters more than usual here: what a row <em>says</em> is the
+    feature, and a sentence is the easiest thing in the mod to unit-test and the hardest to
+    notice going wrong.
+</p>
+
+<h3 id="log-classes">Where it lives</h3>
+
+<ul>
+    <li><code>common/&hellip;/log/HorseEvent</code> &mdash; one row. Kind, tick, horse UUID,
+        the horse&rsquo;s name as it read at the time, the other party, and &mdash; for a cover
+        only &mdash; a <code>CoverNotice.Reason</code> plus the crowd numbers.
+        <code>line()</code> is the sentence; <code>detail()</code> is that sentence with the
+        leading name trimmed off for the table&rsquo;s own Horse column; <code>when()</code>
+        turns the tick into <em>Day 42, 06:30</em>.</li>
+    <li><code>common/&hellip;/log/HorseEventLog</code> &mdash; the store. One log per
+        <strong>owner</strong>, newest-first reads, bounded at
+        <code>MAX_PER_OWNER</code>, and the deduplication rule. Everything a test can check is
+        in these two classes; <code>HorseEventLogTest</code> checks it.</li>
+    <li><code>neoforge/&hellip;/data/HorseEventData</code> &mdash; a server-global
+        <code>SavedData</code>, in the same shape as <code>HorseAncestryData</code>, with
+        <code>HorseEventCodecs</code> for disk and wire.</li>
+    <li><code>neoforge/&hellip;/server/HorseLog</code> &mdash; the translation layer and the
+        death hook.</li>
+    <li><code>HorseLogPayload</code> / <code>HorseLogRequestPayload</code>,
+        <code>client/ClientHorseLog</code>, and the <code>LOG</code> tab in
+        <code>HorseBrowserScreen</code>.</li>
+</ul>
+
+<h3 id="log-reason">A refusal is a constant, not a string</h3>
+
+<p>
+    A row for a failed cover carries the <code>CoverNotice.Reason</code> itself, and renders by
+    calling <code>CoverNotice.line(&hellip;)</code> &mdash; the same method the chat notice
+    calls. So the log row and the chat line the owner missed are not merely similar, they are
+    the same string built by the same code, and a refusal added to
+    <code>NaturalCover</code> becomes a log row for free. The Horse column would have repeated
+    the name, so <code>detail()</code> trims the leading name off mechanically rather than
+    keeping a second, shorter set of phrasings that could drift from the first.
+</p>
+
+<h3 id="log-owner-uuid">Why every writer resolves a UUID and never a player</h3>
+
+<p>
+    <code>HorseDeathNoticeHandler</code> and <code>HorseHurtNoticeHandler</code> both need a
+    <code>ServerPlayer</code> in the same level, and both are right to: a chat line for somebody
+    who logged out an hour ago is not an alarm. But that owner still lost a horse, and the
+    answer to <em>what happened while I was away</em> has to be written <em>while they are
+    away</em> or it cannot exist. So every writer here goes through
+    <code>HorseOwnership.ownerId</code>, and none of them is gated on the notice config.
+</p>
+
+<p>
+    For the same reason the death hook is <code>HorseLog</code>&rsquo;s own
+    <code>LivingDeathEvent</code> subscriber rather than a call from the notice handler, which
+    returns early on three separate conditions &mdash; the config, the
+    <code>showDeathMessages</code> game rule, and the horse not being tamed. The duplicate that
+    risks (several handlers, one death) is caught by the same deduplication rule as everything
+    else.
+</p>
+
+<h3 id="log-dedup">One deduplication rule, in one place</h3>
+
+<p>
+    Two different things produce repeats: a refused cover is re-evaluated every two seconds for
+    the whole of a mare&rsquo;s heat, and a death passes through several handlers. Rather than
+    teach each call site its own throttle &mdash; which is how one of them ends up without one
+    &mdash; a repeat of the same <em>kind, horse and reason</em> within
+    <code>DEDUPE_TICKS</code> is dropped in <code>HorseEventLog.add</code>. The window is
+    <code>CoverNotice.QUIET_TICKS</code> on purpose, so the log and the chat line agree about
+    what counts as news.
+</p>
+
+<p>
+    Note what the rule cannot collapse: a birth is keyed by the <em>foal</em>, so two foals five
+    minutes apart are two different horses and two rows. The rule is about one happening
+    reported twice, never two happenings that look alike.
+</p>
+
+<h3 id="log-clock">One clock</h3>
+
+<p>
+    Every row is stamped with the <strong>overworld&rsquo;s</strong> game time whatever
+    dimension the event happened in. Each dimension keeps its own day counter, so stamping
+    locally would interleave the <a href="horse-dimension.html">horse dimension</a>&rsquo;s day
+    4 with the overworld&rsquo;s day 900 and newest-first would be nonsense.
+</p>
+
+<h3 id="log-packet">The whole log, coalesced</h3>
+
+<p>
+    <code>HorseLogPayload</code> carries the player&rsquo;s whole log rather than a page or a
+    delta, which rests on it already being bounded server-side: two hundred rows of a few dozen
+    bytes is less than the roster this screen already sends. Paging would buy two more states to
+    get wrong &mdash; a half-loaded list and a stale page &mdash; and would force the filter
+    server-side for a list the client can filter in a frame.
+</p>
+
+<p>
+    Because the payload is the whole log, writes mark the owner dirty and a server tick flushes
+    once a second instead of sending on every row. A foaling morning can land a dozen rows in
+    one tick, and sending the same two hundred rows a dozen times over is the kind of waste that
+    only shows up on a server with people on it.
+</p>
+
+<h3 id="log-foal-not-taming">A foal is not a taming</h3>
+
+<p>
+    <code>HorseOwnerTrackingHandler</code> writes the taming row at the one moment
+    <code>tamedBy</code> goes from empty to filled. That normally happens only to a horse
+    somebody roped &mdash; but a foal born to a tamed dam whose owner was <em>offline</em> also
+    arrives with <code>tamedBy</code> empty and gets filled in later by the same poll. So the
+    row is skipped when the record already has a mother: that foal already has its birth row,
+    and without the guard the owner would come back to <em>&ldquo;You tamed Willow&rdquo;</em>
+    for a horse they never touched.
+</p>
+
+<h3 id="log-strip">It needed no new tab-strip work</h3>
+
+<p>
+    The horizontal scrolling tab strip already existed &mdash; centred while it fits, scissored
+    and scrolled with a bar once it does not &mdash; so adding a seventh tab cost nothing but an
+    enum constant. The rest of <a href="#tab-layout">that plan</a> is still open: nothing
+    scrolls the selected tab into view, and the tabs are drawn rather than being widgets, so
+    there is no keyboard focus to move through them.
+</p>
+
+</section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
@@ -47,9 +269,9 @@
         A <strong>server-side owned-horse registry</strong> is still owed &mdash; My horses
         ships on <code>HorseRoster</code> walking the whole ancestry table instead &mdash; and
         beside it the vial, herd, bonding and crafting-tree tabs, a <strong>Where</strong>
-        column that teleports rather than merely printing, and a roster that refreshes on
-        birth and death, plus a chronological <strong>Log</strong> tab and horizontal tab
-        scrolling for the growing menu.
+        column that teleports rather than merely printing, a roster that refreshes on birth and
+        death, and the rest of the tab-strip work: nothing scrolls the selected tab into view
+        and the tabs take no keyboard focus.
     </p>
 </div>
 
@@ -66,10 +288,10 @@
 <h2 id="browser">The horse browser</h2>
 
 <p>
-    The <code>H</code>-key screen is a real container menu; the horse list and the gene
-    database are built. The full plan is six tabs, and what is left is the <strong>vial
-    inventory</strong>, the <strong>herd view</strong>, the <strong>bonding view</strong>, the
-    generated <strong>crafting tree</strong> and an event <strong>Log</strong> tab, plus
+    The <code>H</code>-key screen is a real container menu; the horse list, the gene database
+    and the <a href="#log">Log tab</a> are built. What is left of the full plan is the
+    <strong>vial inventory</strong>, the <strong>herd view</strong>, the
+    <strong>bonding view</strong> and the generated <strong>crafting tree</strong>, plus
     out-of-band actions (teleport a horse to a stall, whistle for bonded horses, recall to a
     holding pen).
 </p>
@@ -101,39 +323,15 @@
     how to move.
 </p>
 
-<h3 id="log-tab">The Log tab</h3>
-
-<p>
-    The Log tab is a chronological, newest-first history of the player&rsquo;s horse events:
-    every successful or failed cover, birth, death, taming, purchase, sale, transfer and
-    other ownership-changing action. It is a record of events, not a second horse roster, so
-    each row carries the event time, event type, horse identity and the useful reason or result.
-</p>
-<ul>
-    <li><strong>Server-backed history.</strong> Record events where the authoritative action
-        happens, keep them across unloaded chunks and reconnects, and send a bounded page or
-        delta to the client. A client-only list would miss natural covers, deaths and purchases
-        that happen while the menu is closed.</li>
-    <li><strong>One filter model.</strong> Filter by event type (coverage, birth, death, taming,
-        purchase, sale, transfer and future event kinds), with an All option and newest-first
-        ordering preserved after filtering. Failed covers must retain their refusal reason.
-        <strong>That vocabulary already exists</strong>: <code>CoverNotice.Reason</code>
-        (<a href="fertility.html#natural-notice">the chat line</a>) is the set of refusals a
-        natural cover can end in, and the Log tab&rsquo;s rows should be those same constants
-        rather than a second list of strings that can drift from them.</li>
-    <li><strong>Registry prerequisite.</strong> The event record should reference the same horse
-        identity and ownership state as the owned-horse registry, so sold or dead horses remain
-        understandable instead of becoming anonymous log rows.</li>
-</ul>
-
 <h3 id="tab-layout">Tabs that keep working as the menu grows</h3>
 
 <p>
-    The H menu needs a horizontal scroll bar for its tab strip. The selected tab must remain
-    visible while scrolling, keyboard focus must move through only visible tab buttons, and the
-    scroll position must not change the server-side menu state. This is layout infrastructure,
-    so build it before adding more tabs such as Log, rather than solving overflow separately on
-    each new screen.
+    The horizontal scroll bar is built, and a seventh tab
+    (<a href="#log">Log</a>) has since gone in on top of it without touching the strip. What is
+    left of this: <strong>the selected tab is not scrolled into view</strong>, so picking one at
+    the far end and then resizing the window can leave it off screen, and the tabs are drawn
+    rather than being widgets, so <strong>keyboard focus does not move through them at all</strong>.
+    The scroll position is client-only and already changes no server state.
 </p>
 
 <h3 id="browser-rest">The rest</h3>
@@ -295,6 +493,65 @@
     no user-visible result, and is the kind of thing that only pays if the restyle is actually
     wanted.
 </p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach.</p>
+</div>
+
+<h3 id="log-verify-0924">The Log tab records what happens (2026-09-24, NOT played)</h3>
+
+<p>
+    Shipped today. <code>HorseEventLogTest</code> pins the ordering, the cap, the
+    deduplication and the wording; <code>runServer</code> reaches
+    <code>Done&nbsp;(0.357s)</code> with no <code>ERROR</code> line, so the
+    <code>SavedData</code> and both payloads register. Everything below is what only a session
+    in a world can answer.
+</p>
+
+<h4>What to look at</h4>
+
+<ul>
+    <li><strong>One row each, and the right one.</strong> In a pen: let a mare be covered, let a
+        foal be born, kill a spare horse, tame a wild one, and redeem a
+        <a href="villagers.html">transfer paper</a> on a cowboy&rsquo;s horse. Open
+        <kbd>H</kbd> &rarr; Log. <strong>Pass:</strong> five rows, newest first, each with a
+        sensible day and time. <strong>Fail:</strong> a taming row for the foal, which would
+        mean the guard in <code>HorseOwnerTrackingHandler.logTaming</code> is not firing.</li>
+    <li><strong>The offline case &mdash; the one that matters.</strong> Leave a mare and a
+        stallion penned and log out for a night, or better, have the events happen on a
+        dedicated server while you are off it. <strong>Pass:</strong> the covers and foals are
+        in the log when you come back. <strong>Fail:</strong> an empty log, which would mean
+        something in the write path still wants a <code>ServerPlayer</code>.</li>
+    <li><strong>It survives a restart.</strong> Stop the server and start it again.
+        <strong>Pass:</strong> the same rows. <strong>Fail:</strong> an empty log, meaning
+        <code>HorseEventData</code> is not being marked dirty or not being written.</li>
+    <li><strong>A refused cover reads like the chat line.</strong> Crowd a paddock past
+        <code>fertility.nearby_horse_cap</code>. <strong>Pass:</strong> one Covers row quoting
+        the same count and limit the yellow chat line quotes, and <em>not</em> a new row every
+        two seconds. <strong>Fail:</strong> a wall of identical rows, which would mean the
+        dedup window is not being reached &mdash; check that the tick being stamped is the
+        overworld&rsquo;s.</li>
+    <li><strong>The chat config does not gate the log.</strong> Turn
+        <code>notices.owned_horse_breeding</code> off and crowd the paddock again.
+        <strong>Pass:</strong> no chat line, but a Covers row.</li>
+    <li><strong>Losing a horse.</strong> Two players: give one a transfer paper for the
+        other&rsquo;s horse and redeem it. <strong>Pass:</strong> a Transfers row for the taker
+        and a Sales row for the loser. This one needs two accounts and has not been tried at
+        all.</li>
+    <li><strong>The tab fills in while it is open.</strong> Leave the Log tab up and let a foal
+        drop. <strong>Pass:</strong> the row appears within a second or so, with no click.</li>
+    <li><strong>The chips and the layout.</strong> Every chip present with a count, zero ones
+        greyed; picking one keeps newest-first; the sentences fit at 1&times; and 3&times; GUI
+        scale and at a narrow window rather than running under the scroll bar.</li>
+    <li><strong>The cap.</strong> Only reachable after two hundred events; the footer line
+        should appear then. Nothing has been near it.</li>
+</ul>
 
 </section>
 

@@ -1,0 +1,171 @@
+2026-09-24, after the crowding cap — the H menu gets a Log tab, and a stable keeps a record
+
+    The owner, in one line:
+
+        if you haven't yet, please implement the log tab in the H menu which tracks
+        taming, births, deaths, coverings, etc
+
+    Followed, a moment later, by: follow the plan in START HERE to implement it.
+
+    Not a bullet in To do.txt. The plan is on the wiki: horse-browser.html carried a
+    Log tab section on its Roadmap tab, and roadmap-execution.html named it twice more.
+
+Step 1 — is it already built?
+
+    START HERE's first step, and it paid for itself in one grep. Two session logs from
+    earlier today mention a Log tab, and both say the same thing:
+
+        d2026-09-24-cover-notice.txt:91 — "The Log tab is not built —
+        horse-browser.html carries the plan and nothing else"
+
+        d2026-09-24-hurt-notice.txt:72 — an owner offline or in another dimension hears
+        nothing, "and that gap belongs to the browser's planned Log tab"
+
+    So: genuinely absent, written up as a plan, and two other features had already
+    deferred a known gap to it. A code survey found no partial implementation either —
+    no LogEntry, EventKind, HorseEvent or eventLog anywhere in either module.
+
+    check-roadmap-execution.mjs before editing, as the file says: 49 roadmap pages, 49
+    coverage rows, 0 unrouted gaps.
+
+What the plan asked for, and what was already lying around
+
+    horse-browser.html#log-tab wanted a chronological newest-first history of covers
+    (successful and failed), births, deaths, taming, purchases, sales and transfers;
+    server-backed so it survives unloaded chunks and reconnects; filterable by kind with
+    an All option and the order preserved; and — the specific instruction that shaped
+    most of this — a failed cover must keep its refusal reason, and those rows "should be
+    those same constants rather than a second list of strings that can drift from them",
+    naming CoverNotice.Reason.
+
+    Three things already existed and did most of the work:
+
+    CoverNotice.Reason, shipped this morning, is already the complete set of ways a
+    natural cover can end — CROWDED, HURT, RIDDEN, LEASHED, COWBOY_STOCK, DID_NOT_TAKE,
+    NOT_RECEPTIVE, CONCEIVED — and CoverNotice.line() already turns one into the
+    sentence an owner reads. A log row therefore carries the constant and renders by
+    calling that same method: the row and the chat line are not similar, they are the
+    same string from the same code.
+
+    The scrollable tab strip. horse-browser.html's Roadmap said to build tab-strip
+    overflow "before adding more tabs such as Log". It was built some sessions ago —
+    centred while it fits, scissored and scrolled with a bar once it does not — so the
+    seventh tab cost one enum constant. (Not all of that plan is done; see below.)
+
+    ActionTrace already subscribes to AnimalTameEvent, BabyEntitySpawnEvent and
+    LivingDeathEvent. It writes to the server log file, not to anything a player can
+    read, so it is not the feature — but it proved every hook point exists.
+
+The shape
+
+    common/.../log/HorseEvent — one row: kind, tick, horse UUID, the horse's name as it
+    read at the time, the other party, and for a cover a CoverNotice.Reason plus the
+    crowd numbers. line() is the sentence, when() is "Day 42, 06:30", good()/bad() colour
+    it.
+
+    common/.../log/HorseEventLog — one log per owner. Newest-first reads, bounded at
+    MAX_PER_OWNER, and the deduplication rule. Every rule a test can check is here.
+
+    neoforge data/HorseEventData — a server-global SavedData in the same shape as
+    HorseAncestryData, with HorseEventCodecs for disk and wire.
+    server/HorseLog — the translation layer, and the death subscriber.
+    HorseLogPayload / HorseLogRequestPayload, client/ClientHorseLog, and the LOG tab.
+
+    HorseEventLogTest: 20 tests, green first run. Ordering, same-tick ties, the cap
+    dropping from the old end, per-owner scoping, six dedup cases, filtering, snapshot
+    round trip, the clock, and that a refused-cover row is byte-for-byte the chat line.
+
+The four calls that turned out to matter
+
+    Keyed by owner UUID, never by player. This is the whole difference between the log
+    and every chat notice in the mod. HorseDeathNoticeHandler and HorseHurtNoticeHandler
+    both require a ServerPlayer in the same level and both are right to — a chat line for
+    somebody who logged out an hour ago is not an alarm — but that owner still lost a
+    horse, and "what happened while I was away" has to be written while they are away or
+    it cannot exist. Every writer goes through HorseOwnership.ownerId, and none is gated
+    on the notice config. Turning chat off is a statement about chat.
+
+    Death is its own subscriber, not a call from the notice handler, because that handler
+    returns early on three separate conditions (the config, the showDeathMessages game
+    rule, and the horse not being tamed). A log that loses rows when chat is off is
+    exactly the log nobody can trust. The duplicate this risks — several handlers, one
+    death — is caught by the same dedup rule as everything else, since a death is keyed by
+    the horse and a horse dies once.
+
+    Deduplication in one place, in common/. Two unrelated things produce repeats: a
+    refused cover is re-evaluated every two seconds for the whole of a heat, and a death
+    passes through several handlers. The alternative was a throttle at each call site,
+    which is how one of them ends up without one. The rule is "same kind, horse and reason
+    within DEDUPE_TICKS", and the window is CoverNotice.QUIET_TICKS on purpose so the log
+    and the chat line agree about what counts as news. Crucially it cannot collapse two
+    real events: a birth is keyed by the foal, so two foals five minutes apart are two
+    different horses and two rows. There is a test for that.
+
+    A foal is not a taming. HorseOwnerTrackingHandler writes the taming row where tamedBy
+    goes from empty to filled, which happens once in a horse's life. But a foal born to a
+    tamed dam whose owner is offline also arrives with tamedBy empty and gets filled by
+    the same poll — so the row is skipped when the record already has a mother. Without
+    the guard an owner comes back to "You tamed Willow" for a horse they never touched.
+    Found by reading populateFoal rather than by playing, which is the only way it would
+    have been found.
+
+Two things changed after they were written
+
+    The whole log per packet, coalesced. HorseLogPayload carries all two hundred rows
+    rather than a page or a delta — it is already bounded server-side, and paging would
+    add a half-loaded list and a stale page to get wrong, and force the filter onto the
+    server for a list the client filters in a frame. But the first version pushed that
+    payload on every row written, and a foaling morning lands a dozen rows in one tick.
+    Writes now mark the owner dirty and a server tick flushes once a second.
+
+    detail() instead of a second vocabulary. The table has a Horse column, so a cell
+    carrying the full sentence repeats the name. The tempting fix was a short phrasing per
+    reason — which is precisely the "second list of strings that can drift" the plan warns
+    against. Instead detail() trims the leading name off the real sentence mechanically. A
+    line that does not start with the name ("It didn't take - Mare was covered...") is
+    left whole, which reads correctly in the column anyway.
+
+Checks
+
+    :common:test --tests '*HorseEventLogTest' — 20 green.
+    :common:test --tests '*CommonPortabilityTest' — green; the new package imports no
+    Minecraft and uses no banned API.
+    :neoforge-26.1.2:build — green, jar assembled.
+    runServer — Done (0.357s), and zero ERROR or FATAL lines in 32,073. A successful boot
+    is not a clean boot, so that count is the check, not the Done line. (The first attempt
+    died on BindException: the owner's own server was on 25565. It had already got through
+    all of mod loading, which is what was being tested; the retry ran on 25599 and the port
+    was put back afterwards.)
+
+    Nothing has been played. The whole tab is on horse-browser.html's new Verification
+    tab, and the item at the top of it is the one that matters: rows written while the
+    owner was logged out being there when she comes back. That is what the tab is for and
+    no test can reach it.
+
+Docs
+
+    horse-browser.html stops being a page with only a Roadmap tab. It gains a Gameplay
+    tab (the tab as a player meets it) and a Coding tab (as built), the Log tab section is
+    deleted from Roadmap per the rule that shipped work moves rather than being marked,
+    and a Verification tab goes on with the nine things to look at.
+
+    The tab-layout roadmap section is NOT retired, and the check for that was worth doing:
+    the scroll bar is built, but nothing scrolls the selected tab into view and the tabs
+    are drawn rather than being widgets, so there is no keyboard focus to move through
+    them. Two of its four clauses are still open, so it stays and now says which two.
+
+    horse-care.html's two deferrals to the "planned log tab" — the offline hurt case and
+    the cross-dimension death case — now point at it as built. fertility.html's chat-line
+    section gains a paragraph saying the same sentence is written down as well.
+    roadmap-execution.html corrected in three places: the Log tab shipped ahead of the
+    owned-horse registry by keying its own store on the owner UUID, which is not a reason
+    to defer the registry.
+
+Next
+
+    The owned-horse registry, still. It is the prerequisite for everything else left on
+    the browser — the greyed sold rows, the Where column that teleports, a roster that
+    refreshes on birth and death — and the Log tab going in without it does not change
+    that. Nothing in the log should be taken as evidence the registry is less needed; it
+    sidestepped the dependency for one feature by keying on a UUID, and the rest of the
+    slice cannot.

@@ -97,7 +97,7 @@
 <tr><td>Allele or exact-genotype filter disagrees with the stable</td><td><code>common/src/main/java/com/example/horsegenetics/common/horse/HorseQuery.java</code>, <code>HorseListing.java</code>, <code>common/src/test/java/com/example/horsegenetics/common/horse/HorseQueryTest.java</code></td><td><a href="known-gaps.html#gap-198">gap 198</a></td></tr>
 <tr><td>Horse gear action equips the wrong item or loses a stack</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/data/HorseGear.java</code>, <code>entity/HorseTackSlot.java</code>, <code>network/TackSlotPayload.java</code>, <code>client/HorseInfoScreen.java</code></td><td><a href="horse-gear.html#roadmap">gear roadmap</a>, <a href="known-gaps.html#gap-294">gap 294</a></td></tr>
 <tr><td>Sold, dead, or transferred horse vanishes or has stale history</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/HorseRoster.java</code>, <code>HorseOwnership.java</code>, <code>HorseWhereabouts.java</code>, <code>TransferPaperHandler.java</code></td><td><a href="known-gaps.html#gap-300">gap 300</a>, <a href="known-gaps.html#gap-283">gap 283</a></td></tr>
-<tr><td>Owned-horse damage/death message duplicates or reaches the wrong player</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/ActionTrace.java</code>, <code>HorseWhereaboutsHandler.java</code>, damage/death handlers, <code>ServerConfig.java</code></td><td><a href="horse-browser.html#log-tab">browser log plan</a></td></tr>
+<tr><td>Owned-horse damage/death message duplicates or reaches the wrong player</td><td><code>neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/server/ActionTrace.java</code>, <code>HorseWhereaboutsHandler.java</code>, damage/death handlers, <code>ServerConfig.java</code></td><td><a href="horse-browser.html#log">the browser log, as built</a></td></tr>
 </tbody>
 </table>
 </div>
@@ -356,9 +356,12 @@ Next blocked gate:</code></pre>
     <a href="villagers.html">Villagers &amp; transfer papers</a> for selling and naming. Build
     the server-side owned-horse registry first. Then sold horses can remain greyed out, damage
     and death notices can target the owner, the barn can carry a name, and the browser can refresh
-    on birth, death, taming and transfer without inventing separate ancestry scans. That same
-    registry is the prerequisite for the H-menu Log tab, which records successful and failed
-    covers, births, deaths, taming, purchases, sales and transfers while the menu is closed.
+    on birth, death, taming and transfer without inventing separate ancestry scans. The
+    <a href="horse-browser.html#log">H-menu Log tab</a> &mdash; successful and failed covers,
+    births, deaths, taming, purchases, sales and transfers, recorded while the menu is closed
+    &mdash; <strong>shipped ahead of the registry</strong> (2026-09-24) by keying its own store
+    on the owner's UUID rather than waiting for one; it is therefore not a reason to defer the
+    registry, and the registry is still what the rest of this slice needs.
 </p>
 <p>
     <strong>First proof:</strong> register one horse, sell it, damage it, kill it and breed a new
@@ -398,11 +401,14 @@ Next blocked gate:</code></pre>
 </p>
 
 <p>
-    The H-menu additions are one browser slice after the registry: build the tab-strip overflow
-    control, then the newest-first Log tab with event-type filters, then the gear-tab inventory
-    and bulk equipment actions. The acceptance check must cover a successful cover, a failed
-    cover, a birth, a death, taming and purchase while the menu is closed, followed by reconnect,
-    filtering and newest-first ordering.
+    The H-menu additions are one browser slice. The tab-strip overflow control and the
+    newest-first <a href="horse-browser.html#log">Log tab with event-type filters</a> are both
+    built; what is left here is the gear-tab inventory and bulk equipment actions. The Log tab's
+    acceptance check &mdash; a successful cover, a failed cover, a birth, a death, taming and a
+    purchase while the menu is closed, then reconnect, filtering and newest-first ordering
+    &mdash; is written out on
+    <a href="horse-browser.html#verification">the browser's Verification tab</a> and has not
+    been played.
 </p>
 
 <h2 id="coverage">Every roadmap tab has a lane</h2>
@@ -438,7 +444,7 @@ Next blocked gate:</code></pre>
 <tr><td><a href="forced-riding.html#roadmap">Forced riding - the kelpie</a></td><td>Behaviour</td><td>After ride-lock and warning feedback are specified and tested.</td><td><code>wiki/forced-riding.html</code></td></tr>
 <tr><td><a href="stables.html#roadmap">Generated stables</a></td><td>World content</td><td>After stable ownership, loot and horse protection rules are decided.</td><td><code>wiki/stables.html</code></td></tr>
 <tr><td><a href="genetics-model.html#roadmap">The genetics model</a></td><td>Foundation</td><td>Resolve sex-linked inheritance before adding any Y-linked gene.</td><td><code>wiki/genetics-model.html</code></td></tr>
-<tr><td><a href="horse-browser.html#roadmap">The horse browser</a></td><td>Fixes first, then browser</td><td>Registry and stale-row correctness come before scrollable tabs, the filtered event log and other actions.</td><td><code>wiki/horse-browser.html</code></td></tr>
+<tr><td><a href="horse-browser.html#roadmap">The horse browser</a></td><td>Fixes first, then browser</td><td>Scrollable tabs and the filtered event log are built; registry and stale-row correctness come before the remaining actions.</td><td><code>wiki/horse-browser.html</code></td></tr>
 <tr><td><a href="horse-care.html#roadmap">Horse care: bond, herds and care</a></td><td>Fixes first</td><td>Fix pathing, feeding and herd-edge behaviour before adding bond rewards.</td><td><code>wiki/horse-care.html</code></td></tr>
 <tr><td><a href="horse-gear.html#roadmap">Horse gear</a></td><td>Foundation</td><td>Build one attachment with player inventory, equip-all and unequip-all before opening the remaining slots.</td><td><code>wiki/horse-gear.html</code></td></tr>
 <tr><td><a href="item-horse-shoes.html#roadmap">Horse shoes</a></td><td>Gear and rendering</td><td>After shared hoof attachment and enchantment plumbing are proven.</td><td><code>wiki/item-horse-shoes.html</code></td></tr>

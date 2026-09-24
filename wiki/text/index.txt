@@ -2671,6 +2671,19 @@ wiki/horse-body.html#reference-numbers	all	Why the reference’s percentages are
 wiki/horse-body.html#resolve	all	One walk, one record
 wiki/horse-body.html#units	all	What those numbers are in metres
 wiki/horse-body.html#verified	all	Verified
+wiki/horse-browser.html#log	gameplay	The Log tab — what has been happening to your horses
+wiki/horse-browser.html#log-bounds	gameplay	How much it keeps
+wiki/horse-browser.html#log-classes	coding	Where it lives
+wiki/horse-browser.html#log-clock	coding	One clock
+wiki/horse-browser.html#log-coding	coding	The Log tab, as built
+wiki/horse-browser.html#log-dedup	coding	One deduplication rule, in one place
+wiki/horse-browser.html#log-filters	gameplay	The filter chips
+wiki/horse-browser.html#log-foal-not-taming	coding	A foal is not a taming
+wiki/horse-browser.html#log-owner-uuid	coding	Why every writer resolves a UUID and never a player
+wiki/horse-browser.html#log-packet	coding	The whole log, coalesced
+wiki/horse-browser.html#log-reason	coding	A refusal is a constant, not a string
+wiki/horse-browser.html#log-refresh	gameplay	Refresh
+wiki/horse-browser.html#log-strip	coding	It needed no new tab-strip work
 wiki/horse-care.html#band-code	coding	Band life
 wiki/horse-care.html#bands	gameplay	3. Wild bands
 wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the top tier is for
