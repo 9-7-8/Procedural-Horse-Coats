@@ -1,0 +1,90 @@
+2026-09-24, after the mouth reach — a cowboy's string fights for him, and stops the moment he
+falls
+
+    One bullet, the top of the Bugs section of intake/To do.txt, in the owner's words:
+
+        Attacking a cowboy makes his horses aggro and the cowboy flee, but killing him makes
+        the horses wild and tamable. Add a way to obtain cowboy horses without buying them
+        with emeralds.
+
+    Dated first, per START HERE. The bullet went in on 2026-09-23; the kill-clears-the-brand
+    half has been in CowboyHandler.onCowboyDied since 2026-09-07 and is written up on
+    villagers.html. Bullet newer than the fix, so not stale — and reading the code turned the
+    sentence inside out.
+
+What was actually true
+
+    Three claims in one sentence, and only two of them were code.
+
+        the cowboy flees            built — Cowboy.java:199, a vanilla PanicGoal, which
+                                    triggers on getLastHurtByMob
+        his horses aggro            NOT BUILT. Nothing anywhere set a herd horse's target
+                                    when the man was hurt.
+        killing him frees the herd  built since 2026-09-07, and lazily re-checked in
+                                    CowboyHandler.ownerOf for herd members that were not
+                                    loaded at the time
+
+    So the sentence was not a bug report. It was a description of the deterrent the owner
+    expected to be there, written from the outside, and the emerald-free route it is attached
+    to already existed — it was simply free. You walked up to a man with 200 HP who runs away,
+    killed him, and six horses watched you do it and were then yours for the climbing on.
+
+    A second, quieter gap fell out of the same read. HorseAggroHandler's herd-mate alert is
+    gated on care.inWildHerd(), and a branded horse is not in a wild herd: CowboyHandler.settle
+    puts the COWBOY's UUID in HorseCareAttachment.herd, and inWildHerd() wants a herdBreed that
+    a cowboy's horse has never had. So sameHerd said no to two horses standing side by side in
+    the same man's string, and hitting one of them rallied nobody either.
+
+What changed
+
+    HorseAggroHandler.onCowboyHurt — every branded horse within the herd-alert radius of the
+    cowboy takes the attacker as its target. liveHerd covers loaded horses only, which is the
+    right set: an unloaded one could not have seen it happen. Not restricted to players, though
+    in practice only a player can get there, because CowboySafetyHandler already makes an Enemy
+    incapable of targeting him.
+
+    sameHerd asks the brand before it asks the care attachment, so a string counts as a herd and
+    the mate alert works on it. That is the half the owner did not ask for and would have
+    noticed the first time she hit one horse and the other five grazed on.
+
+    CowboyHerdGoal yields while the horse has a target. This is the part that would have made
+    the rest of it look broken. It and HorseMeleeGoal are both at priority 3 and both hold
+    Flag.MOVE, and WrappedGoal.canBeReplacedBy needs a STRICTLY lower number — so whichever
+    took movement first kept it, and a horse strung out behind the man when the fight started
+    would have walked to heel with the melee goal starving behind it. Exactly the failure the
+    panic goal had on 2026-09-13 ("the guardian makes a half-hearted attempt... runs off, then
+    gets chased by the zombie and gets killed by it"), and behaviour-hierarchy.html had the
+    collision listed at priority 3 the whole time.
+
+The owner's correction, mid-session
+
+        The horses should de-aggro after the cowboy is dead
+
+    Right, and it is not a detail. The three-second line-of-sight forget in
+    WildHorseForgetTargetGoal would have cleared it eventually, but "eventually" here means the
+    player backing round a corner from the animals they had just freed — the emerald-free route
+    turned into a fight you have to win twice, once against the man and once against the thing
+    you came for. onCowboyDied now drops each horse's target and lastHurtByMob alongside the
+    brand, in the same loop.
+
+What this does not do
+
+    The second half of the bullet — "a way to obtain cowboy horses without buying them with
+    emeralds" — is still one way, and that way is murder. The owner chose "both, aggro first":
+    ship the deterrent, write the honest route up as a plan. villagers.html#honest-route now
+    carries four shapes for it (barter he wants, work done for him, a horse in part-exchange,
+    gift on standing) with the cheapest named — Cowboy.updateTrades already builds one offer per
+    horse, so a second ItemCost is nearly the whole change — and one constraint on whichever is
+    picked: it must not be strictly cheaper than robbery, or the two routes collapse into one.
+
+Not verified
+
+    Nothing here is unit-testable; it is four goals arguing over Flag.MOVE in a live level, and
+    the neoforge module has one test and it is about material scanning. villagers.html grew
+    #robbery on the main body and #robbery-0924 on the Verification tab with four checks. The
+    one that would be a regression rather than a disappointment is the fourth: CowboyHerdGoal
+    now refuses to run while the horse has a target, so a target that never clears parks a horse
+    for good. Leave a fought-over string alone for a day and watch it gather back on the man.
+
+    The owner's dedicated server was up on a separate install (C:\Users\Isabel\phc-server) for
+    the whole session, so the repo build never went near the jar it is running.

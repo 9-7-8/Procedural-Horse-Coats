@@ -245,7 +245,50 @@
         branded horse refuses every interaction except a transfer paper. Kill the
         cowboy and the brand is cleared: their horses go feral and can be tamed the hard
         way, while keeping their name as their breeder.</li>
+    <li><strong>And the string is what killing him costs.</strong> See
+        <a href="#robbery">robbing the cowboy</a> below &mdash; hit the man and every
+        branded horse near him turns on you.</li>
 </ul>
+
+<h3 id="robbery">Robbing the cowboy</h3>
+
+<p>
+    <strong>There is a way to get one of their horses without emeralds, and it is
+    murder.</strong> Killing them clears the brand off the whole string, so the horses
+    they bred stand there feral and tameable the ordinary way. That has been true since
+    the cowboy shipped, and for a long time it was <em>free</em>: they flee on a
+    <code>PanicGoal</code> and their six horses stood and watched it happen.
+</p>
+
+<p>
+    They do not stand and watch any more (2026-09-24).
+    <code>server/HorseAggroHandler.onCowboyHurt</code> rallies every branded horse within
+    the herd-alert radius onto whoever hit them &mdash; a horse kicks for
+    <code>MagicFighterGene.BASELINE_DAMAGE</code> and there are usually several &mdash;
+    and hitting <em>one</em> of the string now rallies the rest of it, which it did not
+    before: the herd-mate alert tests <code>sameHerd</code>, and a branded horse carries
+    the cowboy's id in its brand rather than a lead mare's id in
+    <code>HorseCareAttachment.herd</code>, so six horses standing together read as six
+    strangers. The brand is asked first now.
+</p>
+
+<p>
+    <strong>They stand down the moment he falls.</strong>
+    <code>CowboyHandler.onCowboyDied</code> drops each horse's target along with its
+    brand. The alternative was the ordinary three-second line-of-sight forget, which
+    would have the player backing round a corner from the animals they had just freed
+    &mdash; a fight you have to win twice, once against the man and once against the
+    thing you came for. (Owner's call, 2026-09-24.)
+</p>
+
+<p class="muted">
+    One knock-on inside the AI: <code>CowboyHerdGoal</code> now yields while the horse has
+    a target. It and <code>HorseMeleeGoal</code> are both at priority 3 and both hold
+    <code>Flag.MOVE</code>, and equal priority cannot preempt &mdash; so a horse strung out
+    behind the man when the fight started would have walked to heel while the melee goal
+    starved &mdash; the same failure the panic goal had, and the collision is one of the
+    pairs <a href="behaviour-hierarchy.html#goal-p3">priority 3</a> lists.
+</p>
 
 <h3 id="trades">What they sell</h3>
 
@@ -1761,7 +1804,8 @@
         The cowboy spawns in plains villages and nowhere else &mdash; injecting
         <code>horsegenetics:cowboy_barn</code> into the other four terminator pools is a
         handful of lines, but <strong>a barn per village material palette</strong> is the real
-        project, and a plains barn in a desert is why neither is done.
+        project, and a plains barn in a desert is why neither is done; and the only way to
+        get a horse off him without emeralds is still to kill him.
     </p>
 </div>
 
@@ -1826,6 +1870,55 @@
     variants are designed.
 </p>
 
+<hr>
+
+<h2 id="honest-route">A way to a cowboy's horse that is not emeralds and not murder</h2>
+
+<p>
+    <strong>The ask, in the owner's words: a way to obtain cowboy horses without buying
+    them with emeralds</strong> (2026-09-23). There is exactly one today, and it is
+    <a href="#robbery">robbery</a> &mdash; which as of 2026-09-24 costs you a fight with
+    the string, but is still the only door. That is a thin set of choices for the
+    character the early game is built around: pay one to three emeralds, or commit
+    murder in a village that will remember it.
+</p>
+
+<p>
+    Nothing here is built, and the design is not settled. The shapes worth weighing, in
+    rough order of how much new machinery each needs:
+</p>
+
+<ul>
+    <li><strong>Barter he actually wants.</strong> A second <code>MerchantOffer</code>
+        per horse, priced in something a player has before they have emeralds &mdash;
+        hay bales, leather, wheat in quantity, a saddle. This is the cheapest by a wide
+        margin: <code>Cowboy.updateTrades</code> already builds one offer per herd horse
+        and <code>HorsePrices</code> already rolls a per-horse number off its UUID, so a
+        second <code>ItemCost</code> is the whole change. The design question is not how
+        but <em>what</em>, and whether a horse having two prices reads as a discount.</li>
+    <li><strong>Work done for him.</strong> He wants his string fed, or a strayed horse
+        brought back, or a mare covered by a stallion you own; the reward is a paper.
+        This needs a task-and-completion notion the mod does not have &mdash;
+        <code>ProgressTask</code> is the player's own checklist, not a villager's
+        request &mdash; so it is the expensive option, and probably wants its own page
+        if it is ever chosen.</li>
+    <li><strong>A horse for a horse.</strong> Trade him a signed
+        <a href="#papers">transfer paper</a> of your own plus a small sum, the way a
+        dealer takes a horse in part-exchange. Fits the mod's own instruments exactly
+        &mdash; the paper is already a bearer document and he already reads them &mdash;
+        and it is the one option that makes his stock drift toward your breeding rather
+        than the local pool, which may be a feature or may be a way to ruin him.</li>
+    <li><strong>Gift and bond.</strong> He gives away a horse at some threshold of
+        repeated trade, the way a villager's prices fall for a player they know. Needs
+        a per-player standing on the cowboy, which nothing else wants yet.</li>
+</ul>
+
+<p class="muted">
+    Whichever is chosen, it should not quietly make robbery pointless: the string
+    fighting back is what makes murder a <em>price</em> rather than a shortcut, and an
+    honest route that is strictly cheaper turns both into one route.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -1833,8 +1926,46 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Four equestrians replaced one horseman, each with its own POI and a five-tier ladder, and <strong>none has been met in a world</strong> &mdash; so the failures to hunt are a post that never hands out its job, a Master still offering Novice trades, and a scientist whose breed eggs ignore the local cowboy's region.</p>
+    <p>Four equestrians replaced one horseman, each with its own POI and a five-tier ladder, and <strong>none has been met in a world</strong> &mdash; so the failures to hunt are a post that never hands out its job, a Master still offering Novice trades, and a scientist whose breed eggs ignore the local cowboy's region; and nobody has yet tried to rob one and been kicked for it.</p>
 </div>
+
+<h3 id="robbery-0924">Robbing the cowboy (2026-09-24, NOT played)</h3>
+
+<p>
+    <a href="#robbery">The string defends the man</a> now, and stands down when he dies.
+    It compiles; no horse has kicked anybody over it. <strong>Four things to watch, and
+    the last one is the one that would be a regression rather than a disappointment.</strong>
+</p>
+
+<ul>
+    <li><strong>Hit the cowboy once, then get clear.</strong> <em>Pass:</em> the horses
+        standing round him turn and come for you, and he runs
+        (<code>PanicGoal</code>). <em>Fail:</em> they graze on. The likeliest cause of a
+        fail is distance &mdash; only branded horses within the herd-alert radius of
+        <em>him</em> are rallied, so a string spread over the barn's far field is not
+        a bug. Stand in the middle of them to test it.</li>
+    <li><strong>Hit one horse of the string instead.</strong> <em>Pass:</em> its
+        stablemates pile in, which is new; before 2026-09-24 only the horse you hit
+        reacted. <em>Fail:</em> one horse fights alone &mdash; that is
+        <code>sameHerd</code> not reading the brand.</li>
+    <li><strong>Kill him, then stand still.</strong> <em>Pass:</em> every horse drops
+        you as a target immediately, and can then be tamed the ordinary way by climbing
+        on. <em>Fail:</em> they keep kicking &mdash; the stand-down is the whole point
+        of the owner's call, and a fail here makes the emerald-free route a fight you
+        have to win twice.</li>
+    <li><strong>Then leave them alone for a day and watch the string.</strong>
+        <em>Pass:</em> horses that fought and lost interest gather back on the man as
+        usual. <em>Fail:</em> a horse that stops following for good, or one that
+        stands in place &mdash; <code>CowboyHerdGoal</code> now refuses to run while the
+        horse has a target, so a target that is never cleared parks it. The three-second
+        line-of-sight forget in <code>HorseAggroHandler.WildHorseForgetTargetGoal</code>
+        is what is supposed to clear it; break eyesight and count.</li>
+</ul>
+
+<p class="muted">
+    Nothing here is unit-testable &mdash; it is four goals arguing over
+    <code>Flag.MOVE</code> in a live level &mdash; so a world is the only instrument.
+</p>
 
 <h3 id="equestrians-0918">The horseman is four people now (2026-09-18, NOT played)</h3>
 
