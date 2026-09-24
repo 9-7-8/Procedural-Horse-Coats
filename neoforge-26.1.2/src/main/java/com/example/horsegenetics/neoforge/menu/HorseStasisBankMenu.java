@@ -9,6 +9,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -17,23 +19,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <b>The Horse Stasis Bank's menu.</b> Two tabs: a grid of
+ * <b>The Horse Stasis Bank's menu.</b> Three tabs: a grid of
  * {@link HorseStasisBankBlockEntity#SLOTS} slots that takes stasis chambers and
- * refuses everything else, and <b>Browse</b>, which is the same chambers read as
- * horses rather than as items.
+ * refuses everything else, <b>Browse</b>, which is the same chambers read as
+ * horses rather than as items, and <b>Supply</b>, the three slots the bank feeds
+ * and waters them from.
  *
  * <h2>It holds no state of its own</h2>
- * Every slot wraps the block entity's container, exactly as
+ * Every slot wraps the block entity's containers, exactly as
  * {@link ResearchShelfMenu}'s do, so closing the screen changes nothing. The
- * client's copy wraps an empty container of the same shape, which the ordinary
+ * client's copy wraps empty containers of the same shape, which the ordinary
  * slot sync fills in.
  *
- * <p><b>Still no {@code ContainerData}.</b> The research shelf needs one because
- * it has a clock running on the block; nothing here advances, and the Browse tab
- * is a reading of slots the client already has. The tab state is the shelf's
+ * <p><b>One {@code ContainerData} value, and only one.</b> The water meter is a
+ * number on the block that moves with nobody looking, which is the research
+ * shelf's case and is why the shelf has one; everything else on these three tabs
+ * - the horse count, every Browse row, what is in the feed slot - is a reading
+ * of slots the client already holds. The tab state is the shelf's
  * {@code setStoreTab}/{@code activeOnTab} pair under another name - a
  * client-side field and an {@code isActive()} override, which is why every slot
- * stays live on the server and only the client hides the grid.
+ * stays live on the server and only the client hides the ones it is not
+ * drawing.
  *
  * <h2>Every chamber's whole horse is on the wire</h2>
  * A chamber's {@code stasis_snapshot} component carries the entire entity tag,
@@ -46,9 +52,11 @@ import java.util.List;
  */
 public final class HorseStasisBankMenu extends AbstractContainerMenu {
 
-    /** The chamber grid is the first block of slots; the player's follow it. */
+    /** The chamber grid is the first block of slots; the supply slots and the player's follow it. */
     public static final int FIRST_CHAMBER_SLOT = 0;
-    private static final int SLOT_COUNT = FIRST_CHAMBER_SLOT + HorseStasisBankBlockEntity.SLOTS;
+    public static final int FIRST_SUPPLY_SLOT = FIRST_CHAMBER_SLOT + HorseStasisBankBlockEntity.SLOTS;
+    private static final int SLOT_COUNT =
+            FIRST_SUPPLY_SLOT + HorseStasisBankBlockEntity.SUPPLY_SLOTS;
 
     // ------------------------------------------------------------------
     // The window's layout, in one place - addSlot needs it here and the screen
@@ -72,6 +80,11 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     public static final int LIST_ROWS = 4;
     public static final int LIST_H = LIST_ROWS * ROW_H;
 
+    /** Supply tab: three slots in a row, with room above for a line of text. */
+    public static final int SUPPLY_Y = 40;
+    public static final int SUPPLY_GAP = 32;
+    public static final int SUPPLY_X = MARGIN + 16;
+
     public static final int INV_LABEL_Y = 128;
     public static final int INV_Y = 140;
     public static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
@@ -79,13 +92,31 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     private final Player player;
     private final @Nullable HorseStasisBankBlockEntity bank;
     private final Container chambers;
+    private final Container supplies;
+    private final ContainerData data;
 
     /**
-     * <b>Which tab the screen is showing</b>, so the chamber grid goes inactive
-     * while the player is reading the Browse tab. Only ever set on the client -
-     * see {@link #activeOnTab}.
+     * <b>Which tab the screen is showing</b>, so the slots of the other two go
+     * inactive. Only ever set on the client - see {@link #activeOnTab}.
      */
-    private boolean chamberTab = true;
+    private Tab tab = Tab.CHAMBERS;
+
+    /** The three tabs, in the order the screen draws them. */
+    public enum Tab {
+        CHAMBERS("Chambers"),
+        BROWSE("Browse"),
+        SUPPLY("Supply");
+
+        private final String label;
+
+        Tab(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
+    }
 
     /** Client constructor - {@code MenuType} hands us no block entity. */
     public HorseStasisBankMenu(int containerId, Inventory inventory) {
@@ -100,9 +131,19 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         this.chambers = bank != null
                 ? bank.chambers()
                 : new SimpleContainer(HorseStasisBankBlockEntity.SLOTS);
+        this.supplies = bank != null
+                ? bank.supplies()
+                : new SimpleContainer(HorseStasisBankBlockEntity.SUPPLY_SLOTS);
+        this.data = bank != null
+                ? bank.data()
+                : new SimpleContainerData(HorseStasisBankBlockEntity.DATA_COUNT);
+        addDataSlots(this.data);
 
         for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
             addSlot(new ChamberSlot(chambers, i, MARGIN + (i % 9) * 18, GRID_Y + (i / 9) * 18));
+        }
+        for (int i = 0; i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
+            addSlot(new SupplySlot(supplies, i, SUPPLY_X + i * SUPPLY_GAP, SUPPLY_Y));
         }
 
         for (int row = 0; row < 3; row++) {
@@ -141,7 +182,32 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
 
         @Override
         public boolean isActive() {
-            return activeOnTab(true);
+            return activeOnTab(Tab.CHAMBERS);
+        }
+    }
+
+    /**
+     * A supply slot: feed, water, or the empties the water leaves behind.
+     *
+     * <p>{@code mayPlace} defers to the container's own
+     * {@code canPlaceItem} rather than repeating the rules, so the slot a player
+     * clicks and the slot a hopper pushes into agree by construction - see
+     * {@link com.example.horsegenetics.neoforge.block.StasisBankCapability}.
+     */
+    private final class SupplySlot extends Slot {
+
+        SupplySlot(Container container, int index, int x, int y) {
+            super(container, index, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return container.canPlaceItem(getContainerSlot(), stack);
+        }
+
+        @Override
+        public boolean isActive() {
+            return activeOnTab(Tab.SUPPLY);
         }
     }
 
@@ -151,12 +217,41 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
      * know which tab the player is looking at, and the client will not send a
      * click on a slot it is not drawing.
      */
-    private boolean activeOnTab(boolean tab) {
-        return !player.level().isClientSide() || chamberTab == tab;
+    private boolean activeOnTab(Tab which) {
+        return !player.level().isClientSide() || tab == which;
     }
 
-    public void setChamberTab(boolean chambers) {
-        this.chamberTab = chambers;
+    public void setTab(Tab tab) {
+        this.tab = tab;
+    }
+
+    // ------------------------------------------------------------------
+    // What the Supply tab reads
+    // ------------------------------------------------------------------
+
+    /**
+     * Water left, in health points it can pay for - out of
+     * {@link com.example.horsegenetics.common.horse.StasisUpkeep#WATER_PER_BUCKET}
+     * to the bucket.
+     *
+     * <p><b>The bank's first {@code ContainerData}</b>, and the first thing here
+     * that genuinely has to be synced: the meter is a number on the block that
+     * moves with nobody looking, which is exactly the case the Browse tab did
+     * <i>not</i> have. Everything else on this screen is still read off slots
+     * the client already holds.
+     */
+    public int water() {
+        return data.get(HorseStasisBankBlockEntity.DATA_WATER);
+    }
+
+    /** Is there a horse in here the bank could be mending? */
+    public boolean anyHealable() {
+        return HorseStasisBankBlockEntity.anyHealable(chambers);
+    }
+
+    /** What is in the feed slot, for the line that says whether it is enough. */
+    public ItemStack feed() {
+        return supplies.getItem(HorseStasisBankBlockEntity.FEED_SLOT);
     }
 
     // ------------------------------------------------------------------
@@ -217,8 +312,10 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
 
     /**
      * Shift-click. Out of the bank into the player; from the player, a chamber
-     * goes into the bank and anything else stays where it is -
-     * {@code moveItemStackTo} asks each slot's {@code mayPlace}.
+     * goes to the grid and feed or water to its own supply slot -
+     * {@code moveItemStackTo} asks each slot's {@code mayPlace}, so the empties
+     * slot refuses everything and a water bucket cannot land in the feed slot.
+     * Anything else stays where it is.
      */
     @Override
     public ItemStack quickMoveStack(Player who, int index) {
@@ -234,7 +331,12 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
             }
             slot.onQuickCraft(stack, original);
         } else if (HorseStasisBankBlockEntity.isChamber(stack)) {
-            if (!moveItemStackTo(stack, FIRST_CHAMBER_SLOT, SLOT_COUNT, false)) {
+            if (!moveItemStackTo(stack, FIRST_CHAMBER_SLOT, FIRST_SUPPLY_SLOT, false)) {
+                return ItemStack.EMPTY;
+            }
+        } else if (HorseStasisBankBlockEntity.isWater(stack)
+                || HorseStasisBankBlockEntity.isFeed(stack)) {
+            if (!moveItemStackTo(stack, FIRST_SUPPLY_SLOT, SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
         } else {

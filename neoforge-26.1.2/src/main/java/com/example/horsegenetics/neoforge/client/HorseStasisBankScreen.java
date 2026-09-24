@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * <b>The Horse Stasis Bank's screen.</b> Two tabs: <b>Chambers</b>, a chest of
- * stasis chambers, and <b>Browse</b>, the same chambers read as the horses
- * inside them.
+ * <b>The Horse Stasis Bank's screen.</b> Three tabs: <b>Chambers</b>, a chest of
+ * stasis chambers; <b>Browse</b>, the same chambers read as the horses inside
+ * them; and <b>Supply</b>, the feed and water the bank mends them from.
  *
  * <h2>Browse is a reading, not a second inventory</h2>
  * Every row is a chamber the bank already holds, and the whole tab is one
@@ -56,16 +56,7 @@ import java.util.Locale;
  */
 public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseStasisBankMenu> {
 
-    private enum Tab {
-        CHAMBERS("Chambers"),
-        BROWSE("Browse");
-
-        final String label;
-
-        Tab(String label) {
-            this.label = label;
-        }
-    }
+    private static final HorseStasisBankMenu.Tab[] TABS = HorseStasisBankMenu.Tab.values();
 
     private static final int TITLE_Y = 6;
     private static final int TAB_H = 16;
@@ -76,9 +67,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
      * of the session - the research shelf's rule, and for its reason. The
      * question is "what was I doing", not "what was this bank".
      */
-    private static Tab lastTab = Tab.CHAMBERS;
+    private static HorseStasisBankMenu.Tab lastTab = HorseStasisBankMenu.Tab.CHAMBERS;
 
-    private Tab tab = lastTab;
+    private HorseStasisBankMenu.Tab tab = lastTab;
     private EditBox filterBox;
     private int scroll;
 
@@ -102,7 +93,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         this.titleLabelY = TITLE_Y;
         this.inventoryLabelX = HorseStasisBankMenu.MARGIN;
         this.inventoryLabelY = HorseStasisBankMenu.INV_LABEL_Y;
-        this.menu.setChamberTab(tab == Tab.CHAMBERS);
+        this.menu.setTab(tab);
 
         // Unbordered, like the equestrian bench's name field: the sunken well
         // drawn behind it is the frame, so the box draws no second one.
@@ -132,14 +123,14 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        Tab hit = tabAt(event.x(), event.y());
+        HorseStasisBankMenu.Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
             if (hit != tab && this.menu.getCarried().isEmpty()) {
                 tab = hit;
                 lastTab = hit;
                 scroll = 0;
                 applyTab();
-                if (hit == Tab.BROWSE) {
+                if (hit == HorseStasisBankMenu.Tab.BROWSE) {
                     requestRoster();
                 }
             }
@@ -150,7 +141,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
-        if (tab == Tab.BROWSE && sy != 0 && overList(mx, my)) {
+        if (tab == HorseStasisBankMenu.Tab.BROWSE && sy != 0 && overList(mx, my)) {
             scroll = Math.max(0, Math.min(scroll - (int) Math.signum(sy), maxScroll()));
             return true;
         }
@@ -184,9 +175,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     /** The box belongs to one tab, and an invisible box must not eat keystrokes. */
     private void applyTab() {
-        this.menu.setChamberTab(tab == Tab.CHAMBERS);
+        this.menu.setTab(tab);
         if (this.filterBox != null) {
-            boolean browsing = tab == Tab.BROWSE;
+            boolean browsing = tab == HorseStasisBankMenu.Tab.BROWSE;
             this.filterBox.visible = browsing;
             this.filterBox.active = browsing;
             if (!browsing) {
@@ -199,11 +190,11 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
     }
 
-    private Tab tabAt(double mx, double my) {
+    private HorseStasisBankMenu.Tab tabAt(double mx, double my) {
         int tx = leftPos + 4;
         int ty = topPos - TAB_H;
-        for (Tab t : Tab.values()) {
-            int w = this.font.width(t.label) + 18;
+        for (HorseStasisBankMenu.Tab t : TABS) {
+            int w = this.font.width(t.label()) + 18;
             if (mx >= tx && mx < tx + w && my >= ty && my < ty + TAB_H) {
                 return t;
             }
@@ -289,26 +280,28 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         // Tabs first, so the window's own bevel draws over the active one's
         // bottom edge and the two read as joined.
         int tx = leftPos + 4;
-        for (Tab t : Tab.values()) {
-            int w = this.font.width(t.label) + 18;
+        for (HorseStasisBankMenu.Tab t : TABS) {
+            int w = this.font.width(t.label()) + 18;
             VanillaPanel.tab(g, tx, topPos - TAB_H, w, TAB_H + 4, t == tab);
-            g.text(this.font, Component.literal(t.label), tx + 9, topPos - TAB_H + 5,
+            g.text(this.font, Component.literal(t.label()), tx + 9, topPos - TAB_H + 5,
                     t == tab ? VanillaPanel.TEXT : VanillaPanel.TEXT_DIM, false);
             tx += w + 2;
         }
 
         VanillaPanel.window(g, leftPos, topPos, HorseStasisBankMenu.WIDTH, HorseStasisBankMenu.HEIGHT);
 
-        if (tab == Tab.CHAMBERS) {
+        if (tab == HorseStasisBankMenu.Tab.CHAMBERS) {
             for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
                 VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + (i % 9) * 18,
                         topPos + HorseStasisBankMenu.GRID_Y + (i / 9) * 18);
             }
-        } else {
+        } else if (tab == HorseStasisBankMenu.Tab.BROWSE) {
             VanillaPanel.well(g, leftPos + HorseStasisBankMenu.MARGIN,
                     topPos + HorseStasisBankMenu.FILTER_Y,
                     HorseStasisBankMenu.LIST_W, HorseStasisBankMenu.FILTER_H);
             drawList(g, mouseX, mouseY);
+        } else {
+            drawSupply(g);
         }
 
         for (int i = 0; i < 27; i++) {
@@ -319,6 +312,66 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + i * 18,
                     topPos + HorseStasisBankMenu.HOTBAR_Y);
         }
+    }
+
+    /**
+     * <b>The Supply tab</b>: three slots, and a sentence saying what the bank is
+     * actually doing with them.
+     *
+     * <p>That sentence is the whole point of the tab. A bank that quietly heals
+     * nothing has four possible reasons - no chamber it can see inside, no feed,
+     * no water, or nothing hurt - and three of them look identical from outside.
+     * {@link #supplyLine} says which, in the order a player would fix them.
+     */
+    private void drawSupply(GuiGraphicsExtractor g) {
+        int l = leftPos + HorseStasisBankMenu.MARGIN;
+        int t = topPos + HorseStasisBankMenu.FILTER_Y;
+
+        drawFitted(g, "Feed and water the horses filed here.", l + 1, t, HorseStasisBankMenu.LIST_W,
+                0xFF3F3F3F);
+
+        String[] captions = {"Feed", "Water", "Empties"};
+        for (int i = 0; i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
+            int sx = leftPos + HorseStasisBankMenu.SUPPLY_X + i * HorseStasisBankMenu.SUPPLY_GAP;
+            VanillaPanel.slot(g, sx, topPos + HorseStasisBankMenu.SUPPLY_Y);
+            int w = this.font.width(captions[i]);
+            g.text(this.font, Component.literal(captions[i]), sx + 8 - w / 2,
+                    topPos + HorseStasisBankMenu.SUPPLY_Y + 20, 0xFF4A4A4A, false);
+        }
+
+        drawFitted(g, waterLine(), l + 1, topPos + HorseStasisBankMenu.SUPPLY_Y + 36,
+                HorseStasisBankMenu.LIST_W, 0xFF202020);
+        drawFitted(g, supplyLine(), l + 1, topPos + HorseStasisBankMenu.SUPPLY_Y + 36 + LINE_H,
+                HorseStasisBankMenu.LIST_W, 0xFF3F3F3F);
+    }
+
+    /**
+     * The meter in the unit a player can act on - hearts, not the internal
+     * points, since a horse's bar is what they are watching.
+     */
+    private String waterLine() {
+        int water = this.menu.water();
+        if (water <= 0) {
+            return "No water. A bucket fills the meter.";
+        }
+        return "Water: enough for " + (water / 2) + (water / 2 == 1 ? " heart" : " hearts") + ".";
+    }
+
+    /** Why nothing is happening, or what is - in the order a player would fix it. */
+    private String supplyLine() {
+        if (this.menu.occupied() == 0) {
+            return "No horses filed here to look after.";
+        }
+        if (!this.menu.anyHealable()) {
+            return "Basic chambers only - the bank cannot look inside one.";
+        }
+        if (this.menu.feed().isEmpty()) {
+            return "Nothing in the feed slot.";
+        }
+        if (this.menu.water() <= 0) {
+            return "Fed, but dry - healing needs both.";
+        }
+        return "Mending one horse at a time, slowly.";
     }
 
     private void drawList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
@@ -459,7 +512,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
      * came back.
      */
     private String countLine() {
-        if (tab == Tab.BROWSE && !builtQuery.trim().isEmpty()) {
+        if (tab == HorseStasisBankMenu.Tab.BROWSE && !builtQuery.trim().isEmpty()) {
             return shown.size() + " of " + rows.size();
         }
         int filed = this.menu.filed();

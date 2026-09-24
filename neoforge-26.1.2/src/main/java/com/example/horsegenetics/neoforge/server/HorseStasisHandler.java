@@ -106,7 +106,7 @@ public final class HorseStasisHandler {
             return;
         }
 
-        StasisSnapshot snapshot = new StasisSnapshot(name, horse.getUUID(), save(horse));
+        StasisSnapshot snapshot = snapshot(horse, name);
 
         // Filled in place rather than swapped for a new stack: chambers are
         // stacksTo(1), so the one in hand is the one that fills, it stays in the
@@ -118,6 +118,17 @@ public final class HorseStasisHandler {
         say(player, name + " is in stasis.");
         ActionTrace.log("stasis", ActionTrace.describeShort(horse) + " captured into a "
                 + chamber.tier().id() + " chamber by " + player.getGameProfile().name());
+    }
+
+    /**
+     * <b>What a chamber would hold if it took this horse now</b>, without
+     * discarding it. Split out of {@link #capture} so the bank's gametest can
+     * make a real snapshot of a real horse and check that
+     * {@link StasisCare} can still read it - the one thing about the upkeep
+     * that fails silently, since a renamed NBT key simply stops matching.
+     */
+    public static StasisSnapshot snapshot(Horse horse, String name) {
+        return new StasisSnapshot(name, horse.getUUID(), save(horse));
     }
 
     // ------------------------------------------------------------------

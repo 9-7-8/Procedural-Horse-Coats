@@ -71,6 +71,9 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.block.Jumps.init();
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        // The stasis bank's feed and water slots, and only those, exposed to
+        // hoppers and other mods' pipework. The chamber grid stays unreachable.
+        com.example.horsegenetics.neoforge.block.StasisBankCapability.listen(modEventBus);
         com.example.horsegenetics.neoforge.particle.ModParticles.register(modEventBus);
         com.example.horsegenetics.neoforge.menu.ModMenus.register(modEventBus);
         ModItems.register(modEventBus);

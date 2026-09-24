@@ -29,17 +29,18 @@ import org.jetbrains.annotations.Nullable;
  * a chest that takes chambers and nothing else, so a stud farm is a block you can
  * walk up to rather than a double chest of identical bottles.
  *
- * <p><b>Stage two of the build order, and no more than that.</b> Right now the
- * bank stores and nothing else; the tiers above Basic still buy nothing, because
- * everything they buy is the Browse tab and what it can do - see the Roadmap tab
- * on {@code wiki/horse-stasis.html}. It is listed here rather than hidden because
- * "chambers can be put somewhere sensible" is worth having on its own, and
- * because every later stage is a second tab on this menu.
+ * <p>It also <b>looks after them</b>. Give the bank feed and water and it mends
+ * the horses it is holding, slowly, one at a time - see
+ * {@link HorseStasisBankBlockEntity#tick}. That needs a chamber the bank can see
+ * inside, so Basic chambers are stored and nothing more; what the tiers above it
+ * buy is the Browse tab and the upkeep. The drop buffer and in-bank breeding are
+ * still to come - the Roadmap tab on {@code wiki/horse-stasis.html}.
  *
  * <h2>Breaking it</h2>
- * Every chamber drops, plus the block - {@link HorseStasisBankBlockEntity#preRemoveSideEffects}.
- * Nothing is lost by moving a bank, which matters a great deal more here than it
- * does for a shelf of papers.
+ * Every chamber drops, and so does whatever was in the supply slots, plus the
+ * block - {@link HorseStasisBankBlockEntity#preRemoveSideEffects}. Nothing is
+ * lost by moving a bank, which matters a great deal more here than it does for a
+ * shelf of papers.
  */
 public class HorseStasisBankBlock extends BaseEntityBlock {
 
@@ -80,9 +81,23 @@ public class HorseStasisBankBlock extends BaseEntityBlock {
         return InteractionResult.CONSUME;
     }
 
-    // No getTicker: nothing in the bank advances with nobody looking yet. Passive
-    // healing (stage four) is the thing that will need one, and it will need a
-    // server-only ticker exactly like the research shelf's.
+    /**
+     * <b>Server-only</b>, exactly like the research shelf's: the upkeep changes
+     * items and there is nothing for a client to animate.
+     *
+     * <p>The ticker is always attached, because a block entity's ticker is
+     * chosen per <i>blockstate</i> and this block has none - but see
+     * {@link HorseStasisBankBlockEntity#tick}, whose first line is a cached
+     * boolean. A bank with no healable chamber in it does a field read and
+     * returns; it never scans, never reads a tag and never touches a supply.
+     */
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        return level.isClientSide() ? null
+                : createTickerHelper(type, ModBlockEntities.HORSE_STASIS_BANK.get(),
+                        HorseStasisBankBlockEntity::tick);
+    }
 
     /**
      * Chest-strength wood, iron-banded, and <b>deliberately not flammable</b>.

@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
+import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -445,6 +446,8 @@ public final class ModGameTests {
         register(event, environment, BUILDING_BLOCKS_SURVIVES, 100);
         // Two tag lookups in one tick.
         register(event, environment, HAY_IS_STILL_A_BALE, 100);
+        // One horse spawned, saved and read back, all inside a single tick.
+        register(event, environment, STASIS_TAG_IS_READABLE, 100);
     }
 
     /**
@@ -475,6 +478,105 @@ public final class ModGameTests {
                             + " Check data/horsegenetics/tags/item/hay_bales.json."), 0);
         }
         helper.succeed();
+    }
+
+    /**
+     * <b>The stasis bank can still read the horse inside a chamber.</b>
+     *
+     * <p>A stored horse is a {@code saveWithoutId} tag on an item, and the
+     * bank's upkeep changes it by reaching into that tag by name -
+     * {@code Health}, the {@code base} of the {@code minecraft:max_health}
+     * attribute, and the {@code hunger} and {@code horse_record} attachments
+     * under {@code neoforge:attachments}. See {@link StasisCare}.
+     *
+     * <p><b>Every one of those names fails silently.</b> Rename an attachment,
+     * or let a version change the attribute layout, and nothing throws and
+     * nothing is logged: the reads simply return their defaults, the bank
+     * decides the horse is not hurt, and it quietly never heals anything again.
+     * A player would see a bank that eats hay and mends nothing, or - worse -
+     * a bank that mends without ever charging hunger for it. This is the
+     * tripwire, and it is the only thing that can be.
+     *
+     * <p>It takes a real horse, hurts it, snapshots it exactly as a capture
+     * would, and then asserts both directions: that the four numbers come back
+     * out, and that one turn of upkeep actually moves the health in the tag.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_TAG_IS_READABLE =
+            TEST_FUNCTIONS.register("stasis_tag_is_readable", () -> ModGameTests::stasisTagIsReadable);
+
+    private static void stasisTagIsReadable(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, net.minecraft.core.BlockPos.ZERO);
+        // A horse is founded on a later tick, not on the one it is spawned on -
+        // see HorseFoundingTickHandler. Snapshotting it immediately would test a
+        // horse with no papers, which is not the case the bank ever meets.
+        helper.runAfterDelay(10L, () -> stasisTagIsReadable(helper, horse));
+    }
+
+    private static void stasisTagIsReadable(GameTestHelper helper,
+                                            net.minecraft.world.entity.animal.equine.Horse horse) {
+        if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the spawned horse still has no record ten ticks in - this test's premise is"
+                            + " broken, not the bank"), 0);
+        }
+        float max = horse.getMaxHealth();
+        horse.setHealth(max / 2.0F);
+
+        com.example.horsegenetics.neoforge.data.StasisSnapshot snapshot =
+                com.example.horsegenetics.neoforge.server.HorseStasisHandler.snapshot(horse, "Tripwire");
+        net.minecraft.nbt.CompoundTag tag = snapshot.horse();
+
+        float readMax = StasisCare.maxHealth(tag, StasisCare.record(tag));
+        if (Math.abs(readMax - max) > 0.01F) {
+            throw new GameTestAssertException(Component.literal(
+                    "the bank cannot read a stored horse's maximum health: the entity says " + max
+                            + " and its saved tag reads " + readMax + ". The upkeep will decide every"
+                            + " horse in every bank is unhurt and heal nothing, silently."
+                            + " Check LivingEntity.TAG_ATTRIBUTES and the 'base' field in StasisCare."), 0);
+        }
+        double hunger = StasisCare.hunger(tag);
+        if (Math.abs(hunger - com.example.horsegenetics.common.care.Hunger.FULL) > 0.01) {
+            throw new GameTestAssertException(Component.literal(
+                    "the bank cannot read a stored horse's hunger: expected "
+                            + com.example.horsegenetics.common.care.Hunger.FULL + " and read " + hunger
+                            + ". Healing in a bank would be free, or would never happen."
+                            + " Check the hunger attachment's id in StasisCare."), 0);
+        }
+
+        // ...and the write half, through the real component on a real chamber.
+        net.minecraft.world.item.ItemStack chamber = new net.minecraft.world.item.ItemStack(
+                com.example.horsegenetics.neoforge.item.ModItems.INTERMEDIATE_STASIS_CHAMBER.get());
+        chamber.set(com.example.horsegenetics.neoforge.data.ModDataComponents.STASIS_SNAPSHOT.get(), snapshot);
+        if (!StasisCare.isHurt(chamber)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a chamber holding a horse on half health does not read as hurt"), 0);
+        }
+        com.example.horsegenetics.common.horse.StasisUpkeep.Result turn = StasisCare.turn(
+                chamber, new net.minecraft.world.item.ItemStack(Items.HAY_BLOCK),
+                com.example.horsegenetics.common.horse.StasisUpkeep.WATER_PER_BUCKET);
+        if (turn == null || turn.healed() <= 0.0) {
+            throw new GameTestAssertException(Component.literal(
+                    "one turn of bank upkeep on a hurt, fed, watered horse healed nothing"), 0);
+        }
+        float after = snapshotHealth(chamber);
+        if (after <= max / 2.0F) {
+            throw new GameTestAssertException(Component.literal(
+                    "the upkeep reported healing " + turn.healed() + " but the chamber still holds a"
+                            + " horse on " + after + " health - the mended tag was not written back"), 0);
+        }
+        horse.discard();
+        HorseGenetics.LOGGER.info("[gametest] a stored horse reads back: max {}, hunger {}, and healed to {}",
+                readMax, hunger, after);
+        helper.succeed();
+    }
+
+    /** The health in the chamber's snapshot, for the assertion above. */
+    private static float snapshotHealth(net.minecraft.world.item.ItemStack chamber) {
+        com.example.horsegenetics.neoforge.data.StasisSnapshot held =
+                com.example.horsegenetics.neoforge.item.StasisChamberItem.snapshotOf(chamber);
+        return held == null ? -1.0F
+                : held.horse().getFloatOr(net.minecraft.world.entity.LivingEntity.TAG_HEALTH, -1.0F);
     }
 
     private static void register(RegisterGameTestsEvent event,

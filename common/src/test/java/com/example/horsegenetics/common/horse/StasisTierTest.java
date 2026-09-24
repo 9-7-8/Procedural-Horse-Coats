@@ -32,6 +32,8 @@ class StasisTierTest {
             StasisTier here = ladder[i];
             assertTrue(!below.searchable() || here.searchable(),
                     here + " lost searchability that " + below + " had");
+            assertTrue(!below.heals() || here.heals(),
+                    here + " lost healing that " + below + " had");
             assertTrue(!below.collectsDrops() || here.collectsDrops(),
                     here + " lost drop collection that " + below + " had");
             assertTrue(!below.breedsInBank() || here.breedsInBank(),
@@ -39,19 +41,40 @@ class StasisTierTest {
         }
     }
 
-    /** And each rung adds exactly one thing, which is what the recipes charge for. */
+    /**
+     * And each rung adds something, which is what the recipes charge for - no
+     * rung above the bottom may cost a diamond and hand back the tier below.
+     */
     @Test
-    void eachRungAddsExactlyOneCapability() {
+    void eachRungAddsSomething() {
         StasisTier[] ladder = StasisTier.values();
         assertEquals(0, count(ladder[0]), "the bottom tier is storage only");
         for (int i = 1; i < ladder.length; i++) {
-            assertEquals(count(ladder[i - 1]) + 1, count(ladder[i]),
-                    ladder[i] + " does not add exactly one capability over " + ladder[i - 1]);
+            assertTrue(count(ladder[i]) > count(ladder[i - 1]),
+                    ladder[i] + " buys nothing over " + ladder[i - 1]);
+        }
+    }
+
+    /**
+     * <b>Searching and healing are one capability wearing two names</b>, and
+     * the ladder must never drift into having one without the other. Both are
+     * the bank being able to look inside the chamber: the Browse tab reads the
+     * horse to list it, and the upkeep reads the same horse to find out that it
+     * is hurt, what it eats and how much of its bar is gone. A tier that could
+     * be healed but not searched would be a bank that mends a horse it cannot
+     * name.
+     */
+    @Test
+    void healingAndSearchingAreTheSameWindow() {
+        for (StasisTier tier : StasisTier.values()) {
+            assertEquals(tier.searchable(), tier.heals(),
+                    tier + " can do one of search/heal but not the other");
         }
     }
 
     private static int count(StasisTier tier) {
         return (tier.searchable() ? 1 : 0)
+                + (tier.heals() ? 1 : 0)
                 + (tier.collectsDrops() ? 1 : 0)
                 + (tier.breedsInBank() ? 1 : 0);
     }

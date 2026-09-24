@@ -25,30 +25,42 @@ package com.example.horsegenetics.common.horse;
 public enum StasisTier {
 
     /** Storage and nothing else. The cheap rung, and the point of the feature. */
-    BASIC("basic", false, false, false,
+    BASIC("basic", false, false, false, false,
             "Holds one horse. The bank cannot look inside."),
 
-    /** Everything about the horse becomes searchable in the bank's Browse tab. */
-    INTERMEDIATE("intermediate", true, false, false,
-            "Holds one horse, and the bank can search everything about it."),
+    /**
+     * The bank can see the horse: everything about it becomes searchable in the
+     * Browse tab, and the bank can mend it from its feed and water.
+     *
+     * <p><b>Those two are one capability</b>, which is why one rung buys both.
+     * Basic's contract is that the bank cannot look inside, and a bank that
+     * cannot look inside cannot know that the horse is hurt, what it eats, or
+     * how much of its bar is missing. Healing is that same window used for
+     * something other than a list.
+     */
+    INTERMEDIATE("intermediate", true, true, false, false,
+            "Holds one horse. The bank can search it, and heal it from its feed and water."),
 
     /** The bank passively collects what the horse would have dropped. */
-    ADVANCED("advanced", true, true, false,
-            "Searchable, and the bank collects this horse's drops."),
+    ADVANCED("advanced", true, true, true, false,
+            "Searchable and healed, and the bank collects this horse's drops."),
 
     /** The horse can be bred without ever leaving the bank. */
-    SPACER("spacer", true, true, true,
-            "Searchable, collects drops, and can be bred inside the bank.");
+    SPACER("spacer", true, true, true, true,
+            "Searchable, healed, collects drops, and can be bred inside the bank.");
 
     private final String id;
     private final boolean searchable;
+    private final boolean heals;
     private final boolean collectsDrops;
     private final boolean breedsInBank;
     private final String what;
 
-    StasisTier(String id, boolean searchable, boolean collectsDrops, boolean breedsInBank, String what) {
+    StasisTier(String id, boolean searchable, boolean heals, boolean collectsDrops,
+               boolean breedsInBank, String what) {
         this.id = id;
         this.searchable = searchable;
+        this.heals = heals;
         this.collectsDrops = collectsDrops;
         this.breedsInBank = breedsInBank;
         this.what = what;
@@ -62,6 +74,17 @@ public enum StasisTier {
     /** May the bank's Browse tab show and search this horse's details? */
     public boolean searchable() {
         return searchable;
+    }
+
+    /**
+     * <b>Does the bank mend this horse while it is shelved?</b>
+     *
+     * <p>Also the tick gate: a bank holding not one chamber that answers this
+     * does no upkeep work at all, however full of Basic chambers it is. See
+     * {@code HorseStasisBankBlockEntity}.
+     */
+    public boolean heals() {
+        return heals;
     }
 
     /** Does the bank collect this horse's milk and drops into its buffer? */
