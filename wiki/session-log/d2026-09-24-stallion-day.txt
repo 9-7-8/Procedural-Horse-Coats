@@ -1,0 +1,105 @@
+2026-09-24, after the cover notice — a stallion's day stops being a hard stop
+
+    Two bullets from the tuning section of intake/To do.txt, in the owner's words:
+
+        when a stallion is in a pen with mares, he should always attempt to cover them
+        if the conditions are right (ie theyre in heat).
+
+        stallions should ALWAYS cover every day as much as they can, if they don't have
+        any kind of negative fertility gene.
+
+    They are one mechanic, so they were worked as one bullet — the same judgement the
+    cover-notice session made about its own pair. Both are retired from the file.
+
+Dated first, as START HERE says
+
+    The phrase went into To do.txt on 2026-09-22 (29a1b009). Nothing has closed it since:
+    d2026-09-24-cover-notice.txt, which worked the neighbouring bullet in the same section,
+    says in as many words that "a stallion attempting every eligible mare rather than
+    stopping at one — is untouched and stays". decisions.html has no entry on a stallion at
+    all, so the number was never a settled call to reopen. Open, and genuinely absent.
+
+What was actually stopping him
+
+    NaturalCover.decide filtered out any candidate whose coversToday was at or over
+    ReproRules.FREE_COVERS_PER_DAY. Not a penalty — a filter. Past three covers a stallion
+    was invisible to every other mare in the paddock, and what those mares got back was
+    Verdict.NO_STALLION.
+
+    That is the thing worth writing down. NO_STALLION is one of the two verdicts CoverNotice
+    deliberately says nothing about, because it is the honest answer for nearly every mare
+    nearly all of the time and a line each would be a wall of text. So a paddock whose
+    stallion had topped out looked, from the owner's chair, exactly like a paddock where
+    nobody was in heat: no foals, no chat, no log line. The cover notice shipped that
+    morning could not have surfaced this one, which is why it read as "nothing is
+    happening" rather than as a rule.
+
+    The other two breeding paths never had the stop. The carrot and the jar both go through
+    Conception.attempt, which multiplies by ReproRules.stallionFactor — a halving, not a
+    refusal. ReproRules' own comment admitted the asymmetry in passing: "A natural cover is
+    a hard stop at the same number instead." The natural path was the odd one out, and the
+    fix was to delete the filter rather than to add anything.
+
+The owner's call, and the one she amended mid-session
+
+    Three options went to her: drop the hard stop only (the taper stays, unifying the three
+    paths), drop the taper too for any stallion who is not sf/sf, or keep the shape and just
+    raise the number. She took the first.
+
+    Then, unprompted, she named the tie-break: "mares should always prefer stallions who
+    have 3 covers or less, and a stallion with 3+ covers should only cover mares if there's
+    no other, more virile, stallion around". That is NaturalCover.better — rested beats
+    tired at any distance inside NATURAL_REACH, and distance decides only within a group.
+
+    Her two halves collide at exactly three ("3 or less" preferred, "3+" deprioritised), and
+    the split was put at >= FREE_COVERS_PER_DAY, where stallionFactor actually halves. A
+    stallion who has made his third cover is already on half odds for his fourth, so
+    counting him fresh would have had her prefer the halved one — the opposite of what the
+    preference is for. Flagged to her in the summary rather than decided quietly.
+
+    Worth noting what is NOT done: the second bullet's "if they don't have any kind of
+    negative fertility gene" clause. Under the option she chose the halving applies to every
+    stallion, sound or subfertile, and the subfertile allele keeps only its existing 0.25x.
+    That is written on fertility.html#settled-no-daily-cap so it is her call to reopen, not
+    a thing that silently got lost between two bullets.
+
+The wording the change broke
+
+    ReproText.vetMale read "N of 3 covers made today". With no cap that sentence would have
+    reported "5 of 3". It is now the count on its own, plus a second line when he is past
+    three saying what it costs him — which is more use to a breeder than a fraction was.
+    ReproTextTest asserts the string never contains " of " again, because that is the shape
+    the bug would come back in.
+
+    The same number was prose in four more places: the tutorial's breeding and seed-jar
+    steps and the vet's-kit step (TutorialPage), item-vet-kit.html and item-seed-jars.html.
+    All four said he was "done until tomorrow" or counted him against a limit.
+    releases.html was left alone — it records what shipped then, and it was true then.
+
+Where it lives
+
+    common/repro/NaturalCover.decide — the filter deleted; better() for the preference.
+    common/repro/ReproRules — TIRED_STALLION_FACTOR now documented as every path's taper.
+    common/repro/ReproText.vetMale — the count, and the tired sentence.
+    neoforge/client/TutorialPage — three steps reworded.
+
+Checks
+
+    :common:test --tests '*NaturalCoverTest' --tests '*ReproTextTest' --tests '*ReproRulesTest'
+    green. :neoforge-26.1.2:build green. A full :common:test was not run; nothing outside
+    repro/ changed, so the golden and pipeline suites could not have moved.
+
+    :web:bakeDesignerAssets run to prove common/ still compiles to wasm, and its web.wasm
+    reverted — NaturalCover is not reachable from DesignerApi and the binary is not
+    reproducible.
+
+    Unplayed, all of it. fertility.html#no-daily-cap-0924 has the three pens to build: one
+    stallion and six mares under the crowding cap, a fresh-versus-tired pair, and the vet's
+    kit on a stallion past three.
+
+What the next session should pick up
+
+    The next bullet in the same tuning section, and it is the one that will bite first in a
+    real paddock: the crowding cap. NATURAL_CAP is 8 within 16 blocks, the owner wants 50,
+    server-authoritative and in the config. Note that the pen this session's own verification
+    asks for has to stay under 8 until that lands, which is the two bullets interacting.

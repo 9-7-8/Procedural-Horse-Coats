@@ -77,9 +77,15 @@
 
 <p>
     Her own fertility moves these a little either way, and a <a href="gene-fertility.html">subfertile</a>
-    horse halves them. A stallion can cover three mares, or fill three jars, in one
-    Minecraft day; after that his odds are halved for the rest of the day. Nothing is ever
+    horse halves them. <strong>A stallion's day is never over.</strong> His first three
+    covers or jar fills in a Minecraft day are at full odds; after that his odds are
+    halved for the rest of the day, but he goes on covering. Nothing is ever
     more certain than 95%. The action bar says straight away whether it took.
+</p>
+<p>
+    A mare with two stallions in reach takes the one who still has covers in hand, even if
+    he is standing further off; a stallion past his three only covers when there is no
+    fresher one about (<a href="#settled-no-daily-cap">why</a>).
 </p>
 
 <h2 id="pregnant">Pregnancy</h2>
@@ -138,7 +144,7 @@
 <ul>
     <li>either horse is <strong>badly hurt</strong> &mdash; below 90% of its health; a scratch does
         not stop it (<a href="#settled-cover-health">why</a>) &mdash; ridden, or on a lead;</li>
-    <li>he is a <a href="#gelding">gelding</a>, or has already covered three mares today;</li>
+    <li>he is a <a href="#gelding">gelding</a>;</li>
     <li><strong>eight or more other horses</strong>, foals included, are within 16 blocks of
         her;</li>
     <li>the horses are a cowboy's, whose string never breeds;</li>
@@ -242,8 +248,10 @@
         <code>ReproHandler.receptive</code> instead of vanilla love.</li>
     <li><strong><code>NaturalBreedingHandler</code></strong>: every 40 ticks an adult mare
         asks <code>ReproRules.mayTryNaturally</code> (in heat, and her
-        <code>lastNaturalTry</code> is before this heat began). She finds the nearest entire
-        stallion within <code>NATURAL_REACH</code> who is under the cover limit, checks
+        <code>lastNaturalTry</code> is before this heat began). She finds the best entire
+        stallion within <code>NATURAL_REACH</code> &mdash; the nearest of those with covers
+        still in hand, or the nearest of the tired if none has
+        (<code>NaturalCover.better</code>) &mdash; checks
         <code>NATURAL_CAP</code>, stamps the try, and calls <code>breed</code> with her
         owner as <code>bredBy</code>. Before that, the same stallion must stay in reach for
         <code>NaturalCover.COURTSHIP_TICKS</code> (a transient <code>Courtship</code> per mare),
@@ -302,6 +310,31 @@
 </ul>
 
 <h3 id="settled">Settled</h3>
+
+<p id="settled-no-daily-cap">
+    <strong>A stallion's day is not capped; mares prefer the one with covers in hand</strong>
+    (the owner, 2026-09-24). Three covers a day was a <em>hard stop</em> on the natural path and a
+    halving of the odds on the carrot and jar paths, and the natural one was the odd path out. Left
+    with six mares in heat a stallion served three and then dropped out of the other three mares'
+    scans entirely &mdash; and the verdict that leaves behind, <code>NO_STALLION</code>, is exactly
+    the one <a href="#cover-notice-0924"><code>CoverNotice</code></a> deliberately says nothing
+    about, so the paddock simply went quiet with no way to tell that from a mare between heats.
+    <code>NaturalCover.decide</code> no longer reads <code>coversToday</code> as a filter; every path
+    now tapers on <code>ReproRules.TIRED_STALLION_FACTOR</code> alone and nothing stops him.
+</p>
+<p>
+    The owner's rule for which stallion a mare takes, in her words: <em>&ldquo;mares should always
+    prefer stallions who have 3 covers or less, and a stallion with 3+ covers should only cover
+    mares if there's no other, more virile, stallion around&rdquo;</em>. That is
+    <code>NaturalCover.better</code>: rested beats tired at any distance inside
+    <code>NATURAL_REACH</code>, and distance decides only within a group. <strong>The split sits at
+    <code>&gt;= FREE_COVERS_PER_DAY</code>, not above it</strong> &mdash; a stallion who has made his
+    third cover is already halved for his fourth, so counting him fresh would have her prefer the
+    halved one. What remains unbuilt is the owner's other half of the same ask, that a stallion cover
+    freely unless he carries a negative fertility gene: the halving still applies to every stallion,
+    sound or <a href="gene-fertility.html">subfertile</a>. <em>Not played yet</em> &mdash;
+    <a href="#no-daily-cap-0924">&sect;the paddock below</a>.
+</p>
 
 <p id="settled-repro-timing">
     <strong><code>debug.tools</code> shortens the reproductive day</strong> (the owner, 2026-09-13). With the testing
@@ -674,8 +707,10 @@
 <p>
     Two more suggestions are built. Repeated covers should never push the chance past
     90&ndash;95%: the mod caps every chance at 95% and allows one natural try per heat. A
-    stallion should have a service limit of one to three mares a day: he covers three, and his
-    odds are halved after that (<a href="#odds">gameplay tab</a>). The suggested +5&ndash;10%
+    stallion should have a service limit of one to three mares a day: the mod takes the soft
+    half of that and not the hard half &mdash; his first three are at full odds and every one
+    after is halved, but there is <em>no</em> limit on how many mares he serves
+    (<a href="#settled-no-daily-cap">why</a>). The suggested +5&ndash;10%
     breeding-season bonus for stallions is not built, because there are no seasons.
 </p>
 
@@ -755,8 +790,46 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the chat line an owner now gets when a mare is not covered, because every player with a paddock sees it and nobody has read one yet; behind it, one twin pregnancy in ten is a single genome drawn once, epigenetics included, and no pair has been compared side by side.</p>
+    <p>Ranking first is a stallion's day no longer being capped, because it is the rule that decides how many foals a working paddock makes and the change has never been run; behind it the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side.</p>
 </div>
+
+<h3 id="no-daily-cap-0924">A stallion's day is not capped (2026-09-24, NOT played)</h3>
+
+<p>
+    Three covers used to be a hard stop on the natural path: a stallion past them vanished
+    from every other mare's scan. He now attempts every mare in heat he is left with, at
+    <code>TIRED_STALLION_FACTOR</code> odds past his third, and a mare with a choice takes
+    the stallion who still has covers in hand
+    (<a href="#settled-no-daily-cap">the call</a>). <code>NaturalCoverTest</code> pins the
+    decision and <code>ReproTextTest</code> the vet&rsquo;s new wording; what no test can
+    reach is whether a real paddock now behaves the way the owner wanted.
+</p>
+
+<h4>What to look at</h4>
+
+<ul>
+    <li><strong>One stallion, six mares.</strong> Pen one entire stallion with six tamed
+        mares and keep the total under the crowding cap of eight
+        (<code>NATURAL_CAP</code>) or that will stop it first, which is a different bullet.
+        Run a few in-game days with <code>debug.tools</code> on so a heat is a minute.
+        <strong>Pass:</strong> <code>natural cover:</code> lines under <code>fertility</code>
+        in the log naming more than three different mares inside one day, with
+        <code>(chance ...)</code> visibly lower on the later ones.
+        <strong>Fail:</strong> exactly three a day, which would mean something else is still
+        capping him &mdash; check it is not the crowding cap by counting the pen.</li>
+    <li><strong>She takes the fresher stallion.</strong> Two entire stallions and a mare in
+        heat, one stallion already past three covers today and standing nearer than the
+        other. <strong>Pass:</strong> the <code>natural cover:</code> line names the
+        <em>further, rested</em> stallion. <strong>Fail:</strong> it names the nearer tired
+        one, which would mean the gathering in <code>NaturalBreedingHandler</code> is handing
+        <code>NaturalCover</code> a stale <code>coversToday</code> rather than the decision
+        being wrong &mdash; the decision itself is tested.</li>
+    <li><strong>The vet&rsquo;s kit never says &ldquo;5 of 3&rdquo;.</strong> Use a vet&rsquo;s
+        kit without sneaking on a stallion who has covered more than three times today.
+        <strong>Pass:</strong> &ldquo;<em>N covers made today</em>&rdquo; and a second line
+        saying he is tired and his chance is halved. <strong>Fail:</strong> any &ldquo;of
+        3&rdquo;, which would mean an untranslated copy of the old wording somewhere.</li>
+</ul>
 
 <h3 id="cover-notice-0924">Why she was not covered, in chat (2026-09-24, NOT played)</h3>
 

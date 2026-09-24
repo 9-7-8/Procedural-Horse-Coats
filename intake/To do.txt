@@ -4,9 +4,7 @@ https://mcpedl.com/evil-s-better-elytra-texture-pack/
 Can we use this, somehow, directly as wings for horses? Can we just repurpose the existing elytra model as horse wings, so I can grab elytra retextures to use as horse wing textures? 
 
 Tuning stuff, from using this in my heavily modded server:
-- when a stallion is in a pen with mares, he should always attempt to cover them if the conditions are right (ie theyre in heat).
 - Up the number of horses allowed within a 1 chunk radius of any given horse up to 50, because right now it's way too restrictive. Also, this should be controlled by the config, and server-authoratative
-- stallions should ALWAYS cover every day as much as they can, if they don't have any kind of negative fertility gene. 
 - there should be no mechanic that inherently stops incest (aka line breeding) even in wild bands
 
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
