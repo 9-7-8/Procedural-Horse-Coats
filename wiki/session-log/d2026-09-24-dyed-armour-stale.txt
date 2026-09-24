@@ -1,0 +1,56 @@
+2026-09-24, after the foal's name — the last bug bullet was already shipped, and the Bugs
+section emptied
+
+    One bullet, the only one left in the Bugs section of intake/To do.txt, in the owner's words:
+
+        Dyed leather horse armor should be very common in loot tables, and should appear in
+        loot tables that contain normal human leather armor.
+
+    No code was written this session. The bullet was dated, found stale, and retired — which is
+    START HERE's step 1 doing exactly what it is for, and is worth a file of its own so the next
+    session does not re-open it on the strength of the wording.
+
+Dating it
+
+    The bullet entered the file in de4cde82, 2026-09-23, in the same brain-dump batch as
+    "Golden carrot seeds and gene books should be much more common as loot. Add all horse armor
+    types, dyed saddles, and dyed leather horse armor to all loot tables." The two are the same
+    request written twice, once generally and once with the emphasis on one piece.
+
+    The general one was implemented the next day: 0a24ca17, 2026-09-24, "Put horse tack in every
+    chest, and widen the two thin injections" — AddHorseTackModifier plus the
+    horsegenetics:loot_table_matches condition. Bullet 2026-09-23, fix 2026-09-24, no "still" in
+    the wording and no play session in between. Stale.
+
+What the shipped code already does for it
+
+    Dyed leather horse armour is in the pool, tinted with the mod's own three-zone tack_tint,
+    and it is the heaviest entry in that pool on purpose: weight 10 of 29, inside a 22% per-chest
+    roll, over every table whose id matches [^:]+:chests/.+ — every chest in the game, vanilla or
+    modded. About one chest in thirteen.
+
+    "Loot tables that contain normal human leather armor" has no literal implementation: a global
+    loot modifier is handed the rolled stacks, not the table's pools, so there is nothing to test
+    a table's contents against. Every vanilla table that hands out a leather armour piece is a
+    chests/ table, so the regex is a superset of the ask rather than an approximation of it —
+    though nobody has enumerated vanilla's tables to prove that, and it is an assumption, not a
+    check that was run.
+
+What moved instead
+
+    items.html, the Tack-in-chest-loot Verification entry — a new bullet naming the owner's bar
+    ("very common") for this one piece, the number it currently sits at (one chest in thirteen,
+    one in fifteen with another mod's metals in the draw) and which constant is the dial
+    (W_LEATHER_ARMOUR, not the 22%). The rate was always the open half of that entry; it now has
+    a figure to be judged against rather than "much more common".
+
+    intake/To do.txt — bullet deleted, and the "Bugs:" heading with it, since it was the last
+    one under it. The Bugs section is empty and gone.
+
+Next
+
+    The Bugs section is finished. Per START HERE's step 4 the file's remaining order is the
+    tuning asks first — the stallion/heat and per-chunk-cap block near the top, which
+    Implementation advice.txt also puts first — then the unbuilt systems (horse cryostasis, wing
+    rendering, the magical-loci cleanup), each of which wants a Roadmap tab written before any
+    code. Check decisions.html before assuming a requested number is settled.
