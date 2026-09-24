@@ -95,9 +95,6 @@ Implementation:
 - Keep feeding logic diet-driven rather than maintaining a second hard-coded
   edible-item list. The goal should search for valid dropped food, verify the
   item is in the horse's diet, and confirm the path to it is reachable.
-- Reuse the same reachability/boundary predicate for pasture crowding, crop
-  eating, and food selection so a horse does not grind against an unreachable
-  fence or through a blocked barrier.
 
 Validation:
 - Test daily decay, minimum floor, persistence, and no multiple decays in one day.

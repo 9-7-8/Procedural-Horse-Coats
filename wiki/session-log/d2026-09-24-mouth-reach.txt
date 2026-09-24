@@ -1,0 +1,77 @@
+2026-09-24, after the last stand — a horse can no longer eat a crop through the fence it is
+standing at
+
+    One bullet, the next in the Bugs section of intake/To do.txt, in the owner's words:
+
+        Horses are eating crops through a fence or wall.
+
+    Dated first. The bullet went into To do.txt on 2026-09-23; horse-care.html's verification
+    summary already claimed a hungry horse no longer walks at crops it cannot path to, which is
+    exactly the shape START HERE's step 1 warns about. But the session that made that claim
+    (d2026-09-24-pasture-edge) scoped this out in its own words — "the goal's eating radius is
+    2.5 blocks and does not ask what is in between... its own bullet, deliberately left alone" —
+    so it was open before a line of code was read, and the class was already named.
+
+Why fixing the first half is what let the second half happen
+
+    HungerFoodGoal.search asks createPath/canReach before committing to food. That settled the
+    horses leaning on the rail, because the crops in that report were behind a fence with no way
+    round at all.
+
+    A real farm has a gate somewhere. So canReach says yes, the horse commits to the crop, and
+    the way it is meant to get there is the long walk round. Then tick's eating test fires: a
+    plain distanceToSqr against 2.5 blocks, centre to centre. A horse that happened to be stood
+    at the rail was already inside that radius on the first tick of the pursuit, and ate the
+    crop where it stood. The better the pathing check got, the more crops passed it.
+
+    The same held for a dropped carrot or a carcass over a rail, for grazeInPlace's two-block
+    dropped mouthful, and for a carnivore's swing at a cow through a fence.
+
+What changed
+
+    tick asks one question before the mouthful: for a block, HungerFoodGoal.exposed; for an item
+    or prey, vanilla's own hasLineOfSight, which is the identical clip and was already used in
+    five places here. A blocked target is not given up on — tick just returns, the repath keeps
+    running, and the horse walks the way round that search already proved exists. The ordinary
+    pursuit timeout is the backstop if it never arrives.
+
+    The only real difficulty was where to aim the ray.
+
+    Eye to block centre — the obvious test — would have stopped grazing dead. A grass block sits
+    below the ground the horse walks on, so a ray from a horse's eye to the middle of one five
+    blocks away dives through the turf in between and hits it. Every distant grass block would
+    have read as barred, on flat open pasture, with nothing in the way at all. exposed therefore
+    aims at the nearest point of the block's box to the eye, clamped axis by axis: for a grass
+    block that is the top edge facing the horse, the part it actually puts its head on, and the
+    ray skims the surface rather than burrowing under it.
+
+    What the predicate stops is then set by collision height rather than by what a block is
+    called. A fence and a cobble wall both collide to a block and a half, above a grazing
+    horse's eye line, so both stop the ray — which is the two things the owner named. A full
+    one-block wall does not, and that is deliberate: a horse can put its head over one and can
+    jump it, so the pathfinder was going to walk it there anyway. It is written up as a
+    judgement call that can be reversed by lowering the aim point, not as a defect.
+
+Not played, and no test
+
+    No unit test. It is one clip call into NeoForge's collision shapes end to end, so per the
+    session contract the production path stays narrow and the runtime reproduction is written
+    instead.
+
+    wiki/horse-care.html grew #mouth-reach on the Coding tab and #mouth-reach-0924 on the
+    Verification tab with five checks. The one that matters most is not the fix: it is that an
+    ordinary pen still grazes its own grass. If grazing has stopped, the aim point is wrong in
+    the way described above and every tuft five paces off is being refused.
+
+    The fence's 1.5-block collision height is a reading of vanilla, not a measurement, and the
+    class javadoc now says so beside the other two unverified readings in it.
+
+    intake/Implementation advice.txt lost its line asking for one reachability/boundary
+    predicate across pasture crowding, crop eating and food selection: all three now have one.
+
+Next
+
+    The bullet now at the top of the Bugs section: attacking a cowboy makes his horses aggro and
+    the cowboy flee, but killing him makes the horses wild and tamable — with an ask attached,
+    for a way to obtain cowboy horses without buying them with emeralds. That second half is a
+    design question before it is a bug, so check wiki/decisions.html before building anything.

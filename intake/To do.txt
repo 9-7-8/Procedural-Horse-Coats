@@ -12,8 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-- Horses are eating crops through a fence or wall.
-
 - Attacking a cowboy makes his horses aggro and the cowboy flee, but killing him makes the horses wild and tamable. Add a way to obtain cowboy horses without buying them with emeralds.
 
 - Golden carrot seeds and gene books should be much more common as loot. Add all horse armor types, dyed saddles, and dyed leather horse armor to all loot tables.

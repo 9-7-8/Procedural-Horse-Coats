@@ -644,10 +644,43 @@
     twenty ticks. <code>tick</code> drops a pursuit whose path stops short as well, for the gate
     that shuts behind a horse that set off while it was open.
 </p>
+<h2 id="mouth-reach">&hellip;and only eats what it can get its mouth to</h2>
+
 <p>
-    This is the pathing half of the pasture-edge report only. <strong>A horse that is beside the
-    fence for some other reason can still eat a crop through it</strong>: the goal's eating
-    radius is 2.5 blocks and does not ask what is in between, which is a separate bullet.
+    That was the pathing half. The other half of the same report &mdash; <em>horses are eating
+    crops through a fence or wall</em> &mdash; survived it, and the reason is worth following,
+    because the first fix is exactly what lets the second bug happen. <strong>A farm across a
+    fence is usually reachable.</strong> There is a gate somewhere, so <code>canReach</code>
+    says yes and the horse commits to the crop. But the eating radius is 2.5 blocks, plain
+    centre-to-centre distance, and a horse that was already stood at the rail is inside it on
+    the first tick. It ate the crop through the fence instead of walking the long way round.
+</p>
+<p>
+    <code>tick</code> now asks <code>HungerFoodGoal.exposed</code> of a block, and vanilla's own
+    <code>hasLineOfSight</code> of a dropped item or of hunted prey, before the mouthful. A
+    blocked target is <strong>not</strong> given up on: the horse simply keeps walking, and the
+    way round is the one <code>search</code> already proved exists, so the natural outcome is a
+    horse that walks to the gate. If it never gets there the ordinary pursuit timeout ends it
+    and the block goes on the ignore list like any other dead end.
+    <code>grazeInPlace</code>'s dropped mouthful asks the same question, since two blocks away
+    through a fence is not &ldquo;at its feet&rdquo; either.
+</p>
+<p>
+    <strong>Where the ray is aimed is the whole of the difficulty.</strong> The obvious test
+    &mdash; eye to the centre of the block &mdash; is wrong for precisely the rung a horse eats
+    most. A grass block sits <em>below</em> the ground the horse is walking on, so a ray to the
+    middle of one five blocks away dives through the turf in between and reports a barrier every
+    single time; grazing would have stopped altogether. <code>exposed</code> therefore aims at
+    the nearest point of the block's box to the horse's eye, clamped axis by axis, which for a
+    grass block is the top edge facing the horse &mdash; the part it actually puts its head on
+    &mdash; and the ray to it skims the surface instead of burrowing under it.
+</p>
+<p>
+    What that predicate stops is set by collision height, not by what the block is called. A
+    fence and a cobble wall both collide to a block and a half, above a grazing horse's eye
+    line, so both stop the ray. <strong>A one-block wall deliberately does not</strong>: a horse
+    can put its head over that, and can jump it, so the pathfinder was going to walk it there
+    anyway and refusing the mouthful would only look broken.
 </p>
 
 <h2 id="hurt-notice-code">The hurt notice &mdash; whose chat, how often, and why sunlight is a special case</h2>
@@ -1850,7 +1883,7 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>No horse can be killed by a single blow any more, and that rests entirely on one unverified assumption &mdash; that zeroing the damage and setting the health inside <code>LivingDamageEvent.Pre</code> behaves the way the 26.1.2 sources read &mdash; so the first check is a charged creeper against a full-health horse and the second is that a lethal foal still dies in its four seconds rather than outliving the mechanic that is meant to kill it; a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>No horse can be killed by a single blow any more, and that rests entirely on one unverified assumption &mdash; that zeroing the damage and setting the health inside <code>LivingDamageEvent.Pre</code> behaves the way the 26.1.2 sources read &mdash; so the first check is a charged creeper against a full-health horse and the second is that a lethal foal still dies in its four seconds rather than outliving the mechanic that is meant to kill it; a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; a horse can no longer eat a crop through the fence either, and the check that matters more than the fix is the one that catches it overshooting &mdash; if an ordinary pen has stopped grazing its own grass, the sight line is being aimed at block centres and every tuft five paces off reads as barred; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
 
 <h3 id="last-stand-0924">No horse dies to one blow (2026-09-24, NOT played)</h3>
@@ -2115,6 +2148,44 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <li><strong>Open a gate.</strong> Put a gate in that fence and open it.
         <strong>Pass:</strong> within a minute &mdash; the ignore window &mdash; horses walk
         through and eat the crops.</li>
+</ul>
+
+<h3 id="mouth-reach-0924">Horses eat crops through a fence (2026-09-24, NOT played)</h3>
+
+<p>
+    The other half of the pasture-edge report, in the owner&rsquo;s words: <em>horses are eating
+    crops through a fence or wall</em>. Fixing the pathing is what exposed it &mdash; a farm with
+    a gate somewhere <em>is</em> reachable, so the horse commits to the crop, and the 2.5-block
+    eating radius does not ask what is in between. The mouthful now waits on a sight line
+    (<a href="#mouth-reach">the coding note</a>). <strong>None of it is played</strong>, and there
+    is no unit test: it is one clip call into NeoForge's collision shapes end to end.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The one that answers the report.</strong> Fence a pasture against a wheat field
+        <em>with a gate in the fence, left shut</em>, and stand hungry horses along the rail.
+        <strong>Pass:</strong> the wheat stays up and no <code>hunger</code> line names a crop.
+        <strong>Fail:</strong> crops on the far side of the rail disappear.</li>
+    <li><strong>Then open the gate.</strong> Same pen. <strong>Pass:</strong> the horses walk
+        round through it and eat &mdash; the check refuses the mouthful, it does not cancel the
+        pursuit. <strong>Fail:</strong> they stand at the rail and never set off, which would
+        mean the pursuit is dying to the timeout instead of walking.</li>
+    <li><strong>The check that catches this overshooting, and the one to run first.</strong>
+        Watch a pen of horses graze ordinary pasture for a few minutes. <strong>Pass:</strong>
+        <code>hunger</code> lines show grass being eaten and grass blocks turning to dirt.
+        <strong>Fail:</strong> grazing has stopped dead &mdash; which would mean
+        <code>exposed</code> is aiming at block centres after all and every grass block five
+        paces away reads as barred.</li>
+    <li><strong>A head over a low wall.</strong> Put a one-block cobblestone wall &mdash; a full
+        block, not a <code>cobblestone_wall</code> &mdash; between a hungry horse and a crop.
+        <strong>Pass:</strong> it eats over the top, because it could have jumped it anyway.
+        This one is a judgement call, not a defect: if it reads wrong in play, say so and the
+        aim point moves down.</li>
+    <li><strong>A carnivore does not bite through the rail.</strong> Pen a meat-eating horse
+        beside a cow with a fence between. <strong>Pass:</strong> the cow is not hurt through
+        it.</li>
 </ul>
 
 <h3 id="bond-reach-0924">Bond behaviour needs a walkable route (2026-09-24, NOT played)</h3>
