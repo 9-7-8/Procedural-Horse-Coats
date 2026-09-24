@@ -107,6 +107,12 @@ public final class HorseCareHandler {
             }
         }
         horse.goalSelector.addGoal(GOAL_PRIORITY, new BondFollowGoal(horse));
+        // Tier 1 is head-turning only, so it goes BELOW every herd goal
+        // (HerdGoals runs 3-7): it claims LOOK alone, but a goal of a lower
+        // priority number wins the flag outright, and watching its owner used
+        // to stop a bonded horse sparring, grooming or answering a mare in
+        // heat. Nothing about looking should out-rank doing.
+        horse.goalSelector.addGoal(GOAL_PRIORITY + 4, new BondFollowGoal.Watch(horse));
         // Wild herd cohesion: a member trails its herd lead so a spawned pack
         // stays together and wanders as a unit (HerdManager sets the herd).
         horse.goalSelector.addGoal(GOAL_PRIORITY + 2, new WildHerdGoal(horse));
