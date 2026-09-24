@@ -24,6 +24,7 @@ public final class ClientLifecycleHandler {
         ClientHorseRoster.clear();
         ClientHorseCoats.clear();
         ClientOffspring.clear();
+        ClientPopulation.clear();
         HorsePortrait.clear();
         // The tutorial's villager and cowboy belong to that client level too, and
         // its item stacks were built against that world's registries.

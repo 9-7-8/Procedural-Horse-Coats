@@ -1,0 +1,67 @@
+2026-09-24 — four asks about the horse menu, and a chart of every horse in the world
+
+    A session of the owner's own queue, in the order it arrived, all of it on the
+    screens rather than the simulation.
+
+    Tack goes to the top of Overview. The wearing-count line sat below Body and
+    Draught; it now opens the page, above Sex. The reasoning is worth keeping
+    because it generalises: what a horse has on is the one fact on that page
+    likely to have changed since you last opened it, and everything under it is a
+    fact about the animal. Bond gained the rule it used to inherit from the block
+    that moved.
+
+    E from the saddle opens this mod's menu rather than vanilla's horse
+    inventory. The interesting half is where the key is taken:
+    HorseInfoKeyHandler consumes it on ClientTickEvent.Pre, which Minecraft.tick
+    fires before handleKeybinds — the loop whose keyInventory.consumeClick()
+    reaches isServerControlledInventory() and sends OPEN_INVENTORY. The obvious
+    alternative, letting vanilla open and swapping the screen on
+    ScreenEvent.Opening, is wrong twice over: that screen is a container screen
+    the server opened, so a plain screen in its place leaves a menu bound to the
+    player with nothing to close it. Take the key and the server is never asked.
+    A donkey, a mule or a horse with no record does not consume the press. The
+    screen also closes on E now — it is a plain Screen and got none of
+    AbstractContainerScreen's key handling for free, and a focused barn-name box
+    swallows the key first so a name with an "e" in it still types. See
+    breeding.html#H.
+
+    Every other horse named on the screen became a link. Companions and the rival
+    on Overview, descendants on Offspring; a click opens that horse's own copy of
+    the screen with the one you came from as its parent, so Escape walks back.
+    That needed the id beside the name — HorseSocialSyncPayload.Companion
+    replaced a bare string — and the Offspring answer is now merged into
+    ClientHorseRecordCache so a foal opens with no round trip. A horse we hold no
+    record for is fetched with the family-tree request, which already means "the
+    record for this id, please", and dropped after three seconds of silence.
+
+    The family overview — the big one, and the owner's own design: every horse in
+    the world on one chart, a row per generation, lines from each horse down to
+    every foal it got, drag and zoom to browse, and a click that hides everything
+    a horse has nothing to do with. Two decisions are worth having written down.
+    First, the rows are the horse's stored generation, which is one more than the
+    higher of its parents — so a founder mare's foal by a fourth-generation
+    stallion sits five rows down with a long line reaching up past four rows to
+    its dam. The owner called this out in advance and called the result messy; it
+    is, and the mess is the true shape of a line-bred family. Second,
+    PopulationDataPayload sends light entries rather than records: the family tree
+    sends whole HorseRecords because it draws real coats, and a record carries an
+    epigenome of thousands of characters, which is affordable for a dozen horses
+    and absurd for every horse a world has ever bred. See
+    breeding.html#family-overview.
+
+    And a layout bug with a lesson in it. The Breeding preview's mare list "had
+    weird negative space at the bottom of the box". The box was painted down to a
+    fixed bottom edge while its rows were counted by flooring that height into
+    26-pixel steps, so (bottom - top) % 26 pixels of empty panel always hung below
+    the last row — with the scrollbar's track drawn full height to outline it. The
+    mares had it worse by construction: the six-pixel separator between the two
+    lists is charged to their box alone, so their remainder is always six less
+    (mod 26) than the stallions', which for many window heights is most of a blank
+    row on one side and almost nothing on the other. The box now ends on a row
+    boundary. A fixed edge and a floored row count in the same box is a bug
+    wherever it appears, and it appears a lot.
+
+    Nothing here has been played. The new checks are on breeding's Verification
+    tab; the one that matters most is whether the generation rows are right, since
+    it is the only claim the overview makes about the data rather than about
+    pixels.

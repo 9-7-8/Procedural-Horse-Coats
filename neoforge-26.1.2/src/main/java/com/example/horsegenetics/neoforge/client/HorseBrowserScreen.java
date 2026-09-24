@@ -3162,12 +3162,32 @@ public final class HorseBrowserScreen extends Screen {
         return (mares ? listTop() : pickerSplit()) + 12;
     }
 
-    private int pickerBottom(boolean mares) {
+    /**
+     * The lowest this picker is <i>allowed</i> to reach - the split for the
+     * mares, the foot of the panel for the stallions. Not where the box ends:
+     * see {@link #pickerBottom}.
+     */
+    private int pickerLimit(boolean mares) {
         return mares ? pickerSplit() - 6 : contentBottom();
     }
 
+    /**
+     * <b>The box ends on a row boundary.</b> It used to be painted down to
+     * {@link #pickerLimit} while the rows were counted by flooring that same
+     * height into {@code HORSE_ROW_H} steps, so {@code (limit - top) % 26}
+     * pixels of empty panel always hung below the last row - with the
+     * scrollbar's track drawn the full height to outline it. The mares had it
+     * worse by construction: the six-pixel separator between the two lists is
+     * charged to their box alone, so their remainder is always six less (mod
+     * 26) than the stallions', and for many window heights that is most of a
+     * blank row on one side and almost nothing on the other.
+     */
+    private int pickerBottom(boolean mares) {
+        return pickerTop(mares) + pickerRows(mares) * HORSE_ROW_H;
+    }
+
     private int pickerRows(boolean mares) {
-        return Math.max(1, (pickerBottom(mares) - pickerTop(mares)) / HORSE_ROW_H);
+        return Math.max(1, (pickerLimit(mares) - pickerTop(mares)) / HORSE_ROW_H);
     }
 
     private int pickerScroll(boolean mares) {
@@ -3178,7 +3198,7 @@ public final class HorseBrowserScreen extends Screen {
     private HorseListing horseAt(double mx, double my, Sex sex) {
         boolean mares = sex == Sex.FEMALE;
         if (mx < listX() || mx > listX() + listW()
-                || my < pickerTop(mares) || my >= pickerTop(mares) + pickerRows(mares) * HORSE_ROW_H) {
+                || my < pickerTop(mares) || my >= pickerBottom(mares)) {
             return null;
         }
         List<HorseListing> list = ClientHorseRoster.of(sex);

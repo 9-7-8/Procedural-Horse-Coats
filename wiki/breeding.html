@@ -1175,7 +1175,61 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         tree. The chart shrinks to fit the window by default; a
         <code>familyTree.scrollBar</code> config flag switches to full-size +
         scroll.</li>
+    <li><code>FamilyOverviewScreen</code> is the same chart <strong>with no subject</strong>
+        &mdash; every horse the world has a record of, at once. Reached from the family
+        tree's <strong>Everyone</strong> button, since that is where somebody already
+        looking at a pedigree is standing. See below.</li>
 </ul>
+
+<h3 id="family-overview">The family overview &mdash; every horse at once</h3>
+<p>
+    One row per generation, founders along the top, a line from every horse down to every
+    foal it got. Drag it about, scroll to zoom (about the cursor, so the horse you are
+    pointing at stays put), <strong>Fit</strong> to put the whole thing back on screen.
+</p>
+<ul>
+    <li><strong>The row is the horse's own <code>generation</code></strong>, which
+        <code>HorseBreedingHandler</code> sets to <strong>one more than the higher of its
+        two parents</strong>. So a foal out of a founder mare by a fourth-generation
+        stallion is a fifth-generation horse, sitting five rows down with one long line
+        reaching up past four rows to its dam. That is what a line-bred family honestly
+        looks like, and it is why this chart is a thicket rather than a pyramid. Generations
+        nobody has a horse on are skipped rather than drawn as empty bands.</li>
+    <li><strong>The gutter down the left is the generation axis</strong>, pinned to the
+        window rather than drawn on the map &mdash; pan two thousand pixels sideways and you
+        still want to know which row you are reading. Within a row, horses are in name
+        order, tie-broken by id so nothing swaps places between two rebuilds.</li>
+    <li><strong>Clicking a horse hides everything it has nothing to do with</strong>,
+        leaving that horse, everything it produced, and whoever it produced them with. On a
+        chart this crowded that is the only way to answer &ldquo;who did this mare actually
+        breed with&rdquo;. Nothing moves when the focus changes &mdash; the horses keep
+        their places, so the map does not jump under the cursor. <strong>Show everyone</strong>,
+        on the right, puts the world back; so does a click on empty chart.</li>
+    <li><strong>The dam's line is drawn in her colour and the sire's in his</strong>, which
+        is most of what makes a crowded patch legible. The elbows are axis-aligned because
+        <code>fill</code> is the only line a screen has &mdash; and because a thicket of
+        diagonals would not read as a pedigree at all.</li>
+</ul>
+
+<div class="note rule">
+    <span class="label">Light entries, not records</span>
+    <p>
+        <code>PopulationDataPayload</code> sends a name, a sex, a generation and two parent
+        ids per horse &mdash; <strong>not</strong> <code>HorseRecord</code>s. The family tree
+        and the Offspring tab send whole records because they draw each horse in its real
+        coat, and a record carries a genetic code and an epigenome: thousands of characters
+        of per-allele numbers. Affordable for a dozen horses, absurd for every horse a world
+        has ever bred. The overview draws named boxes, so it is sent named boxes, and a horse
+        worth knowing more about is one click from its own screen.
+    </p>
+    <p>
+        The cap is <code>PopulationDataPayload.MAX_ENTRIES</code> and the cut is made
+        <strong>oldest first</strong>: entries are sorted by generation before it is applied,
+        so what survives is a complete map from the founders down to wherever it stops rather
+        than a scatter of horses whose parents are missing. The screen says so in its hint
+        line instead of presenting part of a world as the whole of it.
+    </p>
+</div>
 
 <div class="note rule">
     <span class="label">Ancestor coats are the real ones</span>
@@ -1530,6 +1584,53 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <li><strong>Something in your hand.</strong> Wheat, a lead, a name tag, a research
         paper, a golden carrot: every one of them should do what it always did, sneaking or
         not, and none of them should open a window.</li>
+</ul>
+
+<h3 id="family-overview-0924">The family overview (2026-09-24, NOT played)</h3>
+
+<p>
+    Every horse in the world on one chart, reached from the family tree's
+    <strong>Everyone</strong> button (<a href="#family-overview">&sect;the family overview</a>).
+    Nothing here has been in front of a player, and the layout in particular is a guess made
+    without ever seeing a real world's worth of horses in it.
+</p>
+<ul>
+    <li><strong>It comes up at all, and on a world with some breeding behind it.</strong> A
+        horse menu &rarr; Family tree &rarr; Everyone. Founders on the top row, a gutter down
+        the left naming each generation, a line from every foal up to each parent it has.</li>
+    <li><strong>The generation rows are right.</strong> Breed a founder mare to a
+        fourth-generation stallion and the foal should appear on the <em>fifth</em> row with
+        a long line reaching up past four rows to its dam &mdash; not beside its dam. This is
+        the one thing on the screen that is a claim about the data rather than about pixels.</li>
+    <li><strong>Drag, scroll and Fit.</strong> Dragging moves the chart; the scroll wheel
+        zooms about the cursor (the box under the pointer should stay under it); Fit puts the
+        whole chart back on screen. A click that does not move should still pick a horse
+        &mdash; that is the same mouse button doing both jobs.</li>
+    <li><strong>The focus.</strong> Click a mare with several foals: she, her foals and the
+        stallions she had them by should be all that is left, in their original places, and
+        the header should say how many of each. <em>Show everyone</em> on the right, and a
+        click on empty chart, should both put the world back.</li>
+    <li><strong>A big world.</strong> This has never been drawn with more than a handful of
+        horses. Worth watching the frame rate with a few hundred, and watching for whether
+        the names are still findable at all when a generation is two hundred wide.</li>
+</ul>
+
+<h3 id="breeding-preview-0924">The mare picker's missing row (2026-09-24, NOT played)</h3>
+<p>
+    The Breeding preview's two horse lists painted their panel down to a fixed bottom edge
+    while counting whole rows into that height, so a strip of empty panel always hung below
+    the last row &mdash; worst on the mares, who are charged the whole six-pixel separator
+    between the two lists. The box now ends on a row boundary.
+</p>
+<ul>
+    <li><strong>Open Breeding preview and look at the bottom of each list.</strong> No dead
+        strip under the last row, on either side, and the scrollbar track should end where
+        the rows do.</li>
+    <li><strong>Resize the window</strong> through a few heights and at GUI scale 2 and 3
+        &mdash; the remainder this fixes depends on the window height, so one size proving
+        nothing is the trap here. The mares should gain a row at some heights.</li>
+    <li><strong>The bottom row is clickable</strong> in both lists, and picking it selects
+        the horse the row draws.</li>
 </ul>
 
 <h3 id="hunger-0914-ratio">What the ratio logging still owes (2026-09-14, built 22:12)</h3>

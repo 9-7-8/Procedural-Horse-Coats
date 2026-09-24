@@ -211,6 +211,18 @@ public final class FamilyTreeScreen extends Screen {
         homeButton.active = !rootId.equals(originalId);
         addRenderableWidget(homeButton);
 
+        // The way out of one horse's family and into all of them. It belongs
+        // here rather than on the browser: this screen is the family chart, and
+        // the overview is the same chart with no subject.
+        int everyoneW = Math.max(74, this.font.width("Everyone") + 12);
+        addRenderableWidget(Button.builder(Component.literal("Everyone"),
+                        b -> net.minecraft.client.Minecraft.getInstance()
+                                .setScreen(new FamilyOverviewScreen(this)))
+                .bounds(x + 112, y, everyoneW, 20)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                        "Every horse in the world, a row per generation.")))
+                .build());
+
         addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
                 .bounds(this.width - 56, y, 50, 20)
                 .build());

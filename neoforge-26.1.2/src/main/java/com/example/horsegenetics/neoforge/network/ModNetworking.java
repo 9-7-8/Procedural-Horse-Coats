@@ -277,6 +277,20 @@ public final class ModNetworking {
                         handleOffspringRequest(payload, context.player()))
         );
 
+        registrar.playToClient(
+                PopulationDataPayload.TYPE,
+                PopulationDataPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientPopulation.accept(payload))
+        );
+
+        registrar.playToServer(
+                PopulationRequestPayload.TYPE,
+                PopulationRequestPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        handlePopulationRequest(context.player()))
+        );
+
         registrar.playToServer(
                 TackSlotPayload.TYPE,
                 TackSlotPayload.STREAM_CODEC,
@@ -667,6 +681,55 @@ public final class ModNetworking {
         }
         PacketDistributor.sendToPlayer(serverPlayer,
                 new OffspringDataPayload(payload.rootId(), List.copyOf(generations)));
+    }
+
+    /**
+     * <b>Every horse in the world, as a graph.</b> The whole ancestry table,
+     * stripped to what the family overview draws - see
+     * {@link PopulationDataPayload} for why it is not a list of records.
+     *
+     * <p>Sorted by generation before the cap is applied, so a world too big for
+     * one payload loses its newest horses rather than a scatter from
+     * everywhere, and what arrives is a map that is complete as far as it goes.
+     * The blank sentinels {@code HorseRecord.unassigned} leaves behind are
+     * dropped the way the roster drops them: a horse with no genome is a row
+     * waiting to be filled in, not an animal.
+     *
+     * <p>It reads {@code sex()} per horse, which parses that horse's genetic
+     * code. That is the one non-trivial cost here and it is why this is a
+     * button rather than something the screen asks for as you pan around.
+     */
+    private static void handlePopulationRequest(net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        MinecraftServer server = serverPlayer.level().getServer();
+        if (server == null) {
+            return;
+        }
+        List<HorseRecord> found = new ArrayList<>();
+        for (HorseRecord record : HorseAncestryData.get(server).all()) {
+            if (record.hasGenome()) {
+                found.add(record);
+            }
+        }
+        found.sort(java.util.Comparator.comparingInt(HorseRecord::generation)
+                .thenComparing(HorseRecord::displayName, String.CASE_INSENSITIVE_ORDER));
+        boolean truncated = found.size() > PopulationDataPayload.MAX_ENTRIES;
+        List<HorseRecord> sent = truncated
+                ? found.subList(0, PopulationDataPayload.MAX_ENTRIES) : found;
+        List<PopulationDataPayload.Entry> entries = new ArrayList<>(sent.size());
+        for (HorseRecord record : sent) {
+            entries.add(new PopulationDataPayload.Entry(
+                    record.id(),
+                    record.displayName(),
+                    record.sex() == com.example.horsegenetics.common.horse.Sex.FEMALE,
+                    record.generation(),
+                    record.motherId(),
+                    record.fatherId()));
+        }
+        PacketDistributor.sendToPlayer(serverPlayer,
+                new PopulationDataPayload(List.copyOf(entries), truncated));
     }
 
     private static void handleFamilyTreeRequest(FamilyTreeRequestPayload payload, net.minecraft.world.entity.player.Player player) {
