@@ -41,7 +41,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *   <tr><td>AC</td><td>BAIT, BAIT CONTROL - does a husk come for the horse</td>
  *       <td>SWIM SPEED - laps of a channel; BREATH - three horses under a lid</td></tr>
  *   <tr><td>AD</td><td>DEATH LAVA, DEATH WATER - on a built floor</td>
- *       <td>DEATH BOOM - Xpl + Dia beside a witness; DEATH ITEMS - Egg and Swd</td></tr>
+ *       <td>DEATH DIAMONDS - a Dia horse; DEATH ITEMS - Egg and Swd</td></tr>
  * </table>
  */
 final class DebugYardEffects {
@@ -63,7 +63,7 @@ final class DebugYardEffects {
             breath(level, gy, east + 9, mouthZ + ROW_AC);
             deathFluid(level, gy, west, mouthZ + ROW_AD, "DEATH LAVA", "Lav/Lav", Blocks.LAVA);
             deathFluid(level, gy, west + 9, mouthZ + ROW_AD, "DEATH WATER", "Wat/Wat", Blocks.WATER);
-            deathBoom(level, gy, east, mouthZ + ROW_AD);
+            deathDiamonds(level, gy, east, mouthZ + ROW_AD);
             deathItems(level, gy, east + 9, mouthZ + ROW_AD);
             ActionTrace.log("test yard", "effect pens built (rows AB-AD: ward, bait, swim speed, water breathing,"
                     + " on death, item drop)");
@@ -388,43 +388,34 @@ final class DebugYardEffects {
         });
     }
 
-    /** A horse that is volatile and diamond-bearing: a creeper's blast, then 2 to 5 diamonds instead of leather. */
-    private static void deathBoom(ServerLevel level, int gy, int x0, int z0) {
-        DebugYardUnattended.pen(level, gy, x0, z0, 9, ROW_AD_D, "DEATH BOOM", Blocks.STONE.defaultBlockState(),
-                List.of("DEATH BOOM", "Xpl + Dia horse", "and a witness: a", "blast, diamonds"));
+    /**
+     * A diamond-bearing horse: 2 to 5 diamonds instead of leather.
+     *
+     * <p>This pen was DEATH BOOM until 2026-09-24, when the volatile allele was retired and took the
+     * blast, the witness horse and the rebuild-the-pen-afterwards step with it. The diamond half is
+     * kept because nothing else in the yard watches {@code Dia}.
+     */
+    private static void deathDiamonds(ServerLevel level, int gy, int x0, int z0) {
+        DebugYardUnattended.pen(level, gy, x0, z0, 9, ROW_AD_D, "DEATH DIAMONDS", Blocks.STONE.defaultBlockState(),
+                List.of("DEATH DIAMONDS", "a Dia/Dia horse:", "2 to 5 diamonds,", "never leather"));
         Horse h = DebugYardUnattended.horse(level, gy, x0 + 4.5, z0 + 4.5, Sex.MALE,
-                "horsegenetics.magic_on_death=Xpl/Xpl-horsegenetics.magic_item_drop=Dia/Dia", true, "DEATH BOOM");
-        Horse witness = DebugYardUnattended.horse(level, gy, x0 + 4.5, z0 + 8.0, Sex.FEMALE, PLAIN, true, "BOOM WITNESS");
+                "horsegenetics.magic_item_drop=Dia/Dia", true, "DEATH DIAMONDS");
         AABB box = DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AD_D);
         DebugYardHerd.after(level, 260, () -> {
             if (h == null || !h.isAlive()) {
-                ActionTrace.log("test yard", "DEATH BOOM: the horse was gone before its death - nothing to test");
+                ActionTrace.log("test yard", "DEATH DIAMONDS: the horse was gone before its death - nothing to test");
                 return;
             }
-            float before = witness == null ? -1.0F : witness.getHealth();
-            double apart = witness == null ? -1.0 : Math.sqrt(witness.distanceToSqr(h));
-            ActionTrace.log("test yard", "DEATH BOOM: killing the horse at " + h.blockPosition().toShortString()
-                    + String.format(", the witness %.1f blocks away", apart));
+            ActionTrace.log("test yard",
+                    "DEATH DIAMONDS: killing the horse at " + h.blockPosition().toShortString());
             h.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
             DebugYardHerd.after(level, 40, () -> {
                 Map<String, Integer> found = itemCounts(level, box);
                 int diamonds = found.getOrDefault("minecraft:diamond", 0);
                 int leather = found.getOrDefault("minecraft:leather", 0);
-                String w = witness == null ? "none" : witness.isAlive()
-                        ? String.format("%.1f -> %.1f", before, witness.getHealth()) : "DEAD";
-                ActionTrace.log("test yard", "DEATH BOOM at 2 s: items " + found + ", witness hp " + w
-                        + " - 2 to 5 diamonds and no leather: " + (diamonds >= 2 && diamonds <= 5 && leather == 0 ? "PASS" : "FAIL")
-                        + "; also expect a '[watch] EXPLOSION' line");
-                DebugYardHerd.after(level, 100, () -> {
-                    // Put back what the blast took, so the pen still holds its witness.
-                    for (int x = x0 + 1; x < x0 + 9; x++) {
-                        for (int z = z0 + 1; z < z0 + ROW_AD_D; z++) {
-                            DebugPenManager.groundColumn(level, x, gy, z, Blocks.STONE.defaultBlockState());
-                        }
-                    }
-                    DebugTestYard.fencedPlot(level, gy, x0, x0 + 9, z0, z0 + ROW_AD_D);
-                    ActionTrace.log("test yard", "DEATH BOOM: floor and walls rebuilt after the blast");
-                });
+                ActionTrace.log("test yard", "DEATH DIAMONDS at 2 s: items " + found
+                        + " - 2 to 5 diamonds and no leather: "
+                        + (diamonds >= 2 && diamonds <= 5 && leather == 0 ? "PASS" : "FAIL"));
             });
         });
     }

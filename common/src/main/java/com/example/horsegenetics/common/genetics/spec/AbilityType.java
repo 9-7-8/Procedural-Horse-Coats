@@ -598,7 +598,7 @@ public final class AbilityType {
      * express as the two independent loci it is.
      */
     public static final AbilityType ON_DEATH = register(new AbilityType("on_death",
-            List.of(Param.requiredChoice("effect", List.of("lava", "water", "explode"),
+            List.of(Param.requiredChoice("effect", List.of("lava", "water"),
                     "what happens at the horse's feet when it dies")),
             v -> new GeneAbility.OnDeath(v.str("effect"), v.when, v.minDose)));
 

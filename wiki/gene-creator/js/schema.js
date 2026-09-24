@@ -870,7 +870,7 @@ window.HG = window.HG || {};
     on_death: {
       doc: "What happens to the GROUND where the horse died. Items are a different verb.",
       params: [
-        eChoice("effect", ["lava", "water", "explode"], null,
+        eChoice("effect", ["lava", "water"], null,
           "what happens at the horse's feet when it dies")
       ]
     },

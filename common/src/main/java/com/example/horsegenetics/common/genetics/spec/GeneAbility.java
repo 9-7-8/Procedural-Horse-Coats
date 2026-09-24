@@ -174,9 +174,10 @@ public sealed interface GeneAbility {
     record Swim(double factor, Condition when, int minDose) implements GeneAbility {}
 
     /**
-     * <b>What the world does when the horse dies</b> - {@code lava},
-     * {@code water} or {@code explode}, the choices on
-     * {@link AbilityType#ON_DEATH}.
+     * <b>What the world does when the horse dies</b> - {@code lava} or
+     * {@code water}, the choices on {@link AbilityType#ON_DEATH}. There was a
+     * third, {@code explode}, retired with magic on death's {@code Xpl} allele
+     * on 2026-09-24.
      *
      * <p>Deliberately <b>not</b> about items. What a horse leaves behind and
      * what happens to the ground it died on are two different questions with

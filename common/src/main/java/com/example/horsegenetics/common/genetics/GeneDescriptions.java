@@ -617,8 +617,8 @@ public final class GeneDescriptions {
                             + "shows on the living animal, which is the point: worth breeding a line "
                             + "for, and impossible to spot in a field."),
             Map.entry("horsegenetics.magic_on_death",
-                    "What happens to the world where the horse died - a lava source, a water source, "
-                            + "or a creeper-sized explosion. It says nothing about items; that is "
+                    "What happens to the world where the horse died - a lava source or a water "
+                            + "source. It says nothing about items; that is "
                             + "magic item drop, and the two are kept apart on purpose."),
             Map.entry("horsegenetics.magic_mob_aura",
                     "How everything else in the world feels about the horse. A warding horse keeps "

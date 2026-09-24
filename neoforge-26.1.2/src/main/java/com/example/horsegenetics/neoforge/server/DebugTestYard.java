@@ -194,7 +194,7 @@ final class DebugTestYard {
      * sunburn - and it is the last of them.
      *
      * <p>They are put at the <b>far end</b> on purpose. Everything in J and K
-     * either fights, explodes, or floods its own floor, and the rest of the
+     * either fights or floods its own floor, and the rest of the
      * yard is full of pens whose whole result is a count of things that were
      * standing quietly.
      */

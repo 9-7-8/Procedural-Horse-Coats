@@ -17,7 +17,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -50,9 +49,6 @@ public final class GeneDeathHandler {
 
     private GeneDeathHandler() {}
 
-    /** How hard a volatile horse goes off. A creeper is 3.0F; this is deliberately the same. */
-    public static final float EXPLOSION_RADIUS = 3.0F;
-
     // ------------------------------------------------------------------
     // on_death - what happens to the ground
     // ------------------------------------------------------------------
@@ -72,11 +68,11 @@ public final class GeneDeathHandler {
      * player.
      *
      * <p>The guard was defensible when it was written - a horse dimension full
-     * of lava springs and explosions is a horse dimension that eats itself, and
-     * nothing could die there anyway - and it is <b>not</b> defensible now that
-     * the yard has a pen whose entire purpose is killing six horses to see what
-     * they leave behind. The pen is floored in stone for exactly this: two of
-     * the six leave a fluid and a third detonates.
+     * of lava springs is a horse dimension that eats itself, and nothing could
+     * die there anyway - and it is <b>not</b> defensible now that the yard has
+     * a pen whose entire purpose is killing horses to see what they leave
+     * behind. The pen is floored in stone for exactly this: two of them leave a
+     * fluid.
      */
     @SubscribeEvent
     static void onHorseDeath(LivingDeathEvent event) {
@@ -94,9 +90,11 @@ public final class GeneDeathHandler {
     }
 
     /**
-     * The three things a death may do to the world.
+     * The two things a death may do to the world. There was a third,
+     * {@code explode}, retired with magic on death's {@code Xpl} allele on
+     * 2026-09-24 - see {@code MagicOnDeathGene}.
      *
-     * <p>The two fluids are placed only into a block that is genuinely free -
+     * <p>Both fluids are placed only into a block that is genuinely free -
      * air, or something a fluid would wash away anyway. A horse that died inside
      * somebody's floor should not eat the floor, and the alternative reading
      * ("replace whatever is there") turns a novelty locus into a griefing tool
@@ -108,8 +106,6 @@ public final class GeneDeathHandler {
         switch (effect) {
             case "lava" -> place(level, at, Blocks.LAVA.defaultBlockState());
             case "water" -> place(level, at, Blocks.WATER.defaultBlockState());
-            case "explode" -> level.explode(horse, horse.getX(), horse.getY(), horse.getZ(),
-                    EXPLOSION_RADIUS, Level.ExplosionInteraction.MOB);
             default -> { }
         }
     }
