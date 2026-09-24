@@ -9,8 +9,16 @@ import java.util.List;
  *
  * <p>Owner, 2026-09-13: every horse breeds on its own, tamed or wild, once per
  * heat when they meet. Both at full health, neither ridden nor leashed, cowboy
- * stock exempt, a gelding never covers, three covers a day is a hard stop, and
- * {@link ReproRules#NATURAL_CAP} other horses near her stops it.
+ * stock exempt, a gelding never covers, and {@link ReproRules#NATURAL_CAP}
+ * other horses near her stops it.
+ *
+ * <p><b>A stallion's day is not capped</b> (owner, 2026-09-24): he attempts
+ * every mare in heat he is left with, and past
+ * {@link ReproRules#FREE_COVERS_PER_DAY} his <i>odds</i> halve, exactly as they
+ * already did on the carrot and seed-jar paths. It used to be a hard stop here
+ * and nowhere else, so the fourth mare in a paddock saw no stallion at all -
+ * and {@link Verdict#NO_STALLION} is the one refusal her owner is never told
+ * about, which is what made it look like nothing was happening.
  *
  * <p><b>"Full health" is a threshold, not exact equality</b> - see
  * {@link ReproRules#COVER_HEALTH}. Demanding the maximum exactly meant a single
@@ -125,11 +133,10 @@ public final class NaturalCover {
         for (int i = 0; i < candidates.size(); i++) {
             Stallion s = candidates.get(i);
             // Strictly inside the reach, as vanilla's BreedGoal is (distanceToSqr < 9.0).
-            if (!s.party().entireStallion() || s.coversToday() >= ReproRules.FREE_COVERS_PER_DAY
-                    || s.distanceSq() >= reachSq) {
+            if (!s.party().entireStallion() || s.distanceSq() >= reachSq) {
                 continue;
             }
-            if (best < 0 || s.distanceSq() < candidates.get(best).distanceSq()) {
+            if (best < 0 || better(s, candidates.get(best))) {
                 best = i;
             }
         }
@@ -140,5 +147,31 @@ public final class NaturalCover {
             return Decision.refuse(Verdict.CROWDED);
         }
         return new Decision(Verdict.COVER, best);
+    }
+
+    /**
+     * <b>Which of two stallions in reach she takes:</b> the one whose odds are
+     * still whole, and the nearer of the two otherwise.
+     *
+     * <p>Owner, 2026-09-24: <i>"mares should always prefer stallions who have 3
+     * covers or less, and a stallion with 3+ covers should only cover mares if
+     * there's no other, more virile, stallion around"</i>. Distance decides only
+     * within a group, so a rested stallion four blocks off beats a tired one at
+     * her shoulder. It never refuses anybody - a paddock of tired stallions
+     * still covers, which is the point of the cap going away.
+     *
+     * <p><b>The split is where the odds change</b>, {@code >= }
+     * {@link ReproRules#FREE_COVERS_PER_DAY}, not above it. A stallion who has
+     * made his third cover is already on {@link ReproRules#TIRED_STALLION_FACTOR}
+     * for his fourth, so counting him as fresh would have her prefer the halved
+     * one - which is the opposite of what the preference is for.
+     */
+    private static boolean better(Stallion candidate, Stallion best) {
+        boolean tired = candidate.coversToday() >= ReproRules.FREE_COVERS_PER_DAY;
+        boolean bestTired = best.coversToday() >= ReproRules.FREE_COVERS_PER_DAY;
+        if (tired != bestTired) {
+            return bestTired;
+        }
+        return candidate.distanceSq() < best.distanceSq();
     }
 }

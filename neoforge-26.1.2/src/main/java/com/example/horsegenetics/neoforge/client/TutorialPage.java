@@ -736,8 +736,10 @@ public final class TutorialPage {
                                 + "needs to mend first. Neither can be ridden or on a lead. A mare with "
                                 + "eight or more horses crowded within sixteen blocks will not be "
                                 + "covered at all, so a packed paddock quietly stops breeding by "
-                                + "itself. And a stallion manages three covers in a day, after which "
-                                + "he is done until tomorrow.",
+                                + "itself. A stallion is never done, though: his first three covers "
+                                + "in a day are at full odds and every one after is at half, but he "
+                                + "goes on serving every mare in heat you leave him with. Given a "
+                                + "choice, a mare takes the stallion who still has covers in hand.",
                         "That crowding rule is also why wild herds so rarely produce foals on their "
                                 + "own: they live close together. A paddock of your own with a little "
                                 + "room in it does far better."),
@@ -750,8 +752,9 @@ public final class TutorialPage {
                         "Use it on a mare and she tells you where she is: in heat, and whether this is "
                                 + "the better half of it; out of heat, and how long until the next one; "
                                 + "pregnant, and how long to go; or newly foaled and waiting on her "
-                                + "foal heat. Use it on a stallion and he tells you how many of his "
-                                + "three covers he has made today.",
+                                + "foal heat. Use it on a stallion and he tells you how many covers "
+                                + "he has made today, and whether he is past the three that are at "
+                                + "full odds.",
                         "It is the only thing in the game that will tell you a mare is carrying twins. "
                                 + "The information screen deliberately will not."),
                 List.of(new ItemStack(ModItems.VET_KIT.get())), Art.NONE,
@@ -790,8 +793,8 @@ public final class TutorialPage {
                                 + "one is a glass bottle and horse hair.",
                         "Filling it is the owner's act: get an entire stallion of yours interested in "
                                 + "breeding, then use the empty jar on him. The jar takes his "
-                                + "genetics, his name and his breed with it - and it counts as one of "
-                                + "his three covers for that day.",
+                                + "genetics, his name and his breed with it - and it counts against "
+                                + "his three full-odds covers for that day like any other.",
                         "Using it is simpler: use the filled jar on a mare you own while she is in "
                                 + "heat. Out of heat she refuses it and you keep the jar. In heat it is "
                                 + "spent whether or not it takes, because it was a real attempt.",

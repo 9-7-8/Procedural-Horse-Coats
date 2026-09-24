@@ -32,9 +32,10 @@ import java.util.List;
  * so it is gone and this is what every horse does.
  *
  * <p>This class only gathers facts. Every rule - once per heat, healthy enough
- * ({@link ReproRules#COVER_HEALTH}), not ridden or leashed, no geldings, three
- * covers a day, the local cap, cowboy stock exempt - is
- * {@link NaturalCover#decide}, which is unit-tested. The cover goes
+ * ({@link ReproRules#COVER_HEALTH}), not ridden or leashed, no geldings, the
+ * local cap, cowboy stock exempt - is {@link NaturalCover#decide}, which is
+ * unit-tested. A stallion's day is not capped: past
+ * {@link ReproRules#FREE_COVERS_PER_DAY} his odds halve and he keeps covering. The cover goes
  * through {@link ReproHandler#breed}, so carrot effects armed on either horse act
  * on it, and it is credited to the mare's owner. It runs off the entity tick, so it
  * only ever happens in loaded chunks. The heat-attraction goal

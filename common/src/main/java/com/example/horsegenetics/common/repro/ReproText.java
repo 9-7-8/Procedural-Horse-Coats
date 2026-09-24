@@ -154,7 +154,14 @@ public final class ReproText {
         return lines;
     }
 
-    /** What the vet's kit says about a stallion, colt or gelding. */
+    /**
+     * What the vet's kit says about a stallion, colt or gelding.
+     *
+     * <p>The count used to read "{@code 2 of 3}", which was right while three was
+     * a stop. It is a taper now, not a limit, so the number stands on its own and
+     * a tired stallion gets the sentence that tells the breeder what it costs him
+     * - otherwise the kit would report "5 of 3 covers made today".
+     */
     public static List<String> vetMale(String name, boolean adult, boolean gelded, int coversToday) {
         List<String> lines = new ArrayList<>();
         if (gelded) {
@@ -162,8 +169,12 @@ public final class ReproText {
         } else if (!adult) {
             lines.add(name + " is a colt, too young to breed.");
         } else {
-            lines.add(name + " is an entire stallion: " + coversToday + " of "
-                    + ReproRules.FREE_COVERS_PER_DAY + " covers made today.");
+            lines.add(name + " is an entire stallion: " + coversToday
+                    + (coversToday == 1 ? " cover" : " covers") + " made today.");
+            if (coversToday >= ReproRules.FREE_COVERS_PER_DAY) {
+                lines.add("He is tired: past " + ReproRules.FREE_COVERS_PER_DAY
+                        + " a day, his chance of getting a mare in foal is halved until tomorrow.");
+            }
         }
         return lines;
     }

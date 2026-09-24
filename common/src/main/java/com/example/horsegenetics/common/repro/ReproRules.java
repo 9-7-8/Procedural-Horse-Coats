@@ -31,8 +31,15 @@ public final class ReproRules {
     /** Covers (or jar fills) a stallion makes in one day before his odds drop. */
     public static final int FREE_COVERS_PER_DAY = 3;
     /**
-     * What his odds are multiplied by once he is past them - on the carrot and
-     * jar paths. A natural cover is a hard stop at the same number instead.
+     * What his odds are multiplied by once he is past them, on <b>every</b> path
+     * - carrot, jar and natural cover alike.
+     *
+     * <p>A natural cover used to be a hard stop at the same number instead
+     * (owner, 2026-09-24: a stallion left with mares should always attempt every
+     * one of them that is in heat). The stop was invisible: a capped stallion
+     * simply dropped out of every other mare's scan, and the resulting
+     * {@link NaturalCover.Verdict#NO_STALLION} is the refusal {@code CoverNotice}
+     * deliberately says nothing about, so a paddock just went quiet.
      */
     public static final double TIRED_STALLION_FACTOR = 0.5;
 

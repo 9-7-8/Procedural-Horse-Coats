@@ -137,8 +137,27 @@ class ReproTextTest {
                 ReproText.vetMare("Bess", false, inHeatFromZero(), 10, T));
         assertEquals(List.of("Rook is a gelding."), ReproText.vetMale("Rook", true, true, 0));
         assertEquals(List.of("Rook is a colt, too young to breed."), ReproText.vetMale("Rook", false, false, 0));
-        assertEquals(List.of("Rook is an entire stallion: 2 of 3 covers made today."),
+        assertEquals(List.of("Rook is an entire stallion: 2 covers made today."),
                 ReproText.vetMale("Rook", true, false, 2));
+        assertEquals(List.of("Rook is an entire stallion: 1 cover made today."),
+                ReproText.vetMale("Rook", true, false, 1));
+    }
+
+    /**
+     * A stallion's day is not capped (owner, 2026-09-24), so the kit no longer
+     * counts him against a limit - it says when he is past his free covers and
+     * what that costs, and it must never read "5 of 3".
+     */
+    @Test
+    void theKitNamesATiredStallionRatherThanCountingHimAgainstACap() {
+        List<String> rested = ReproText.vetMale("Rook", true, false, ReproRules.FREE_COVERS_PER_DAY - 1);
+        assertEquals(1, rested.size(), "nothing to say about a stallion with covers in hand");
+
+        List<String> tired = ReproText.vetMale("Rook", true, false, ReproRules.FREE_COVERS_PER_DAY + 2);
+        assertEquals(2, tired.size());
+        assertTrue(tired.get(0).contains((ReproRules.FREE_COVERS_PER_DAY + 2) + " covers made today"));
+        assertFalse(tired.get(0).contains(" of "), "no cap to count him against any more");
+        assertTrue(tired.get(1).contains("halved"), tired.get(1));
     }
 
     @Test

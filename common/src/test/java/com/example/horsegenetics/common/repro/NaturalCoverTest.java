@@ -70,12 +70,43 @@ class NaturalCoverTest {
         assertEquals(NaturalCover.Verdict.NO_STALLION, decide(MARE, List.of(near(gelding)), 1).verdict());
     }
 
+    /**
+     * Owner, 2026-09-24: a stallion in a pen with mares attempts every one of
+     * them that is in heat. His day is not capped - {@link ReproRules#TIRED_STALLION_FACTOR}
+     * takes his odds down instead, which {@code ReproRulesTest} covers.
+     */
     @Test
-    void threeCoversADayIsAHardStop() {
-        assertEquals(NaturalCover.Verdict.NO_STALLION,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, 3)), 1).verdict());
+    void aStallionsDayIsNotCapped() {
         assertEquals(NaturalCover.Verdict.COVER,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, 2)), 1).verdict());
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, ReproRules.FREE_COVERS_PER_DAY)), 1)
+                        .verdict());
+        assertEquals(NaturalCover.Verdict.COVER,
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, 40)), 1).verdict(),
+                "a stallion who has covered all day still covers");
+    }
+
+    /**
+     * Between two in reach she takes the one whose odds are still whole, near or
+     * not (owner, 2026-09-24). The split is at {@link ReproRules#FREE_COVERS_PER_DAY}
+     * itself, because that is where {@link ReproRules#stallionFactor} halves.
+     */
+    @Test
+    void aRestedStallionIsPreferredToANearerTiredOne() {
+        NaturalCover.Decision d = decide(MARE, List.of(
+                new NaturalCover.Stallion(STALLION, 1.0, ReproRules.FREE_COVERS_PER_DAY),
+                new NaturalCover.Stallion(STALLION, 8.0, 0)), 2);
+        assertEquals(1, d.stallion());
+
+        NaturalCover.Decision tiredOnly = decide(MARE, List.of(
+                new NaturalCover.Stallion(STALLION, 8.0, 5),
+                new NaturalCover.Stallion(STALLION, 1.0, 5)), 2);
+        assertEquals(1, tiredOnly.stallion(), "all tired, so the nearest again");
+
+        NaturalCover.Decision onHisThird = decide(MARE, List.of(
+                new NaturalCover.Stallion(STALLION, 1.0, ReproRules.FREE_COVERS_PER_DAY),
+                new NaturalCover.Stallion(STALLION, 8.0, ReproRules.FREE_COVERS_PER_DAY - 1)), 2);
+        assertEquals(1, onHisThird.stallion(),
+                "his free covers are spent at FREE_COVERS_PER_DAY, so he is the tired one");
     }
 
     @Test
