@@ -47,7 +47,28 @@ public final class HorseOwnerTrackingHandler {
         String ownerName = resolveOwnerName(horse);
         if (ownerName != null) {
             HorseRecords.setTamedBy(horse, ownerName);
+            logTaming(horse);
         }
+    }
+
+    /**
+     * A row in the browser's Log tab, at the one moment {@code tamedBy} goes
+     * from empty to filled - which happens exactly once in a horse's life, so
+     * this needs no guard against repeating.
+     *
+     * <p>It does need one against lying. <b>A foal is not a taming.</b> A foal
+     * born to a tamed dam is tamed on the spot, and it only reaches this line at
+     * all when its dam's owner was offline at the birth - in which case its
+     * record already has a mother, and the row it deserves ("was born, out of
+     * ...") has already been written by {@code HorseBreedingHandler}. Without
+     * this the owner would come back to "You tamed Willow" for a horse they
+     * never touched.
+     */
+    private static void logTaming(Horse horse) {
+        if (HorseRecords.of(horse).motherId().isPresent()) {
+            return;
+        }
+        HorseLog.tamed(horse, HorseOwnership.ownerId(horse));
     }
 
     private static String resolveOwnerName(Horse horse) {

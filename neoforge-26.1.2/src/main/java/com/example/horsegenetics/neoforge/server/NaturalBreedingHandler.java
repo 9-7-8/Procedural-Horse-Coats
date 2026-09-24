@@ -252,6 +252,16 @@ public final class NaturalBreedingHandler {
      * quiet period are {@link CoverNotice}; this is the translation.
      */
     private static void tell(Horse mare, CoverNotice.Reason reason, NaturalCover.Crowd crowd, long now) {
+        // THE LOG FIRST, AND BY UUID. Everything below needs a player standing in
+        // this level with the notices config on; the browser's Log tab needs
+        // neither, because the owner who was not here to read the line is exactly
+        // who it is for. Its deduplication is in common/ - so a refusal that is
+        // still true two seconds from now costs nothing, and this needs no
+        // throttle beside the one underneath it.
+        java.util.UUID mareOwner = HorseOwnership.ownerId(mare);
+        if (mareOwner != null) {
+            HorseLog.covered(mare, mareOwner, reason, crowd, now);
+        }
         if (!ServerConfig.breedingNotices() || !(ownerPlayer(mare) instanceof ServerPlayer player)) {
             return;
         }

@@ -322,6 +322,13 @@ public final class HorseBreedingHandler {
         HorseRecords.apply(child, childRecord);
         HorseRecords.applyTraitsToEntity(child, childTraits, true);
 
+        // A row in the dam's owner's Log tab. After apply(), so the foal has the
+        // name the row will carry; silent for a wild birth, which has no owner.
+        // Both breeding paths come through here, so a foal born overnight from a
+        // pregnancy is logged exactly like one fed a golden carrot.
+        HorseLog.born(child, damHorse, damRecord.displayName(),
+                (sireFirstName + " " + sireLastName).trim());
+
         // Born into its dam's band, if she has one - which is how a wild band
         // grows - and with an age, a dam and a day to leave it, for the herd system.
         HorseCareAttachment damCare = damHorse.getData(ModAttachments.HORSE_CARE.get());

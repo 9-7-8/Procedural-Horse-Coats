@@ -14,12 +14,15 @@ import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.HorseQuery;
 import com.example.horsegenetics.common.horse.RosterGenetics;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.log.HorseEvent;
+import com.example.horsegenetics.common.log.HorseEventLog;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
+import com.example.horsegenetics.neoforge.network.HorseLogRequestPayload;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -107,16 +110,23 @@ public final class HorseBrowserScreen extends Screen {
     /**
      * <b>The strip reads left to right in the order a player meets these
      * things.</b> Getting started, then the thing you do next (craft
-     * something), then your own horses, then breeding them, and only then the
-     * three reference tabs - genes, the alleles you have collected, the breeds
-     * you have met - which are worth nothing until you have horses to look up.
-     * Enum order is strip order. (Owner's call.)
+     * something), then your own horses, then breeding them, then what has been
+     * happening to them, and only then the three reference tabs - genes, the
+     * alleles you have collected, the breeds you have met - which are worth
+     * nothing until you have horses to look up. Enum order is strip order.
+     * (Owner's call.)
+     *
+     * <p>Log sits after Breeding preview rather than beside My horses because it
+     * is the history of <i>both</i> of them: covers and births are most of what
+     * it carries, and a player who has just read a Punnett square is one step
+     * from asking whether that pairing ever took.
      */
     private enum Tab {
         GETTING_STARTED("Getting started"),
         RECIPES("Recipes"),
         MY_HORSES("My horses"),
         BREEDING_PREVIEW("Breeding preview"),
+        LOG("Log"),
         GENE_DATABASE("Gene database"),
         ALLELES("Alleles"),
         BREEDS("Breeds");
@@ -490,6 +500,21 @@ public final class HorseBrowserScreen extends Screen {
     private int horseRowsVersion = -1;
     private String horseRowsQuery = null;
 
+    // --- Log tab ---
+    /**
+     * Which kind of event is shown, or {@code null} for all of them. Sticky
+     * across opens like every other tab's state, so a player watching one thing
+     * - births, say, through a foaling season - does not re-pick it every time.
+     */
+    private static HorseEvent.Kind logFilter = null;
+    private static int logScroll = 0;
+    /** The filter chips' hit boxes, rebuilt every frame the way the Alleles ones are. */
+    private final List<TocEntry> logChips = new ArrayList<>();
+    /** The rows as last drawn; recomputed when the log or the chip changes, never per frame. */
+    private List<HorseEvent> logRows = List.of();
+    private int logRowsVersion = -1;
+    private HorseEvent.Kind logRowsFilter = null;
+
     // --- Breeding preview tab ---
     private static UUID damId;
     private static UUID sireId;
@@ -564,6 +589,9 @@ public final class HorseBrowserScreen extends Screen {
         damId = null;
         sireId = null;
         horseScroll = 0;
+        // The chip is a preference and survives; a scroll position into another
+        // world's log is meaningless.
+        logScroll = 0;
     }
 
     private boolean creative() {
@@ -723,7 +751,7 @@ public final class HorseBrowserScreen extends Screen {
         allelePickButton.visible = false;
         addRenderableWidget(allelePickButton);
 
-        refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> requestRoster())
+        refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> refresh())
                 .bounds(listX(), contentTop() - 1, buttonW("Refresh"), 18).build();
         refreshRosterButton.visible = false;
         addRenderableWidget(refreshRosterButton);
@@ -748,6 +776,9 @@ public final class HorseBrowserScreen extends Screen {
         applyFilter();
         if (tab == Tab.MY_HORSES && !ClientHorseRoster.received()) {
             requestRoster();
+        }
+        if (tab == Tab.LOG && !ClientHorseLog.received()) {
+            requestLog();
         }
     }
 
@@ -786,6 +817,24 @@ public final class HorseBrowserScreen extends Screen {
 
     private void requestRoster() {
         ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
+    }
+
+    private void requestLog() {
+        ClientPacketDistributor.sendToServer(HorseLogRequestPayload.INSTANCE);
+    }
+
+    /**
+     * What the Refresh button asks for, which depends on which tab it is sitting
+     * on. One button rather than two, because "refresh" means the same thing to
+     * a player on all three tabs and a second button in the same place with a
+     * different name would only raise the question of what the difference is.
+     */
+    private void refresh() {
+        if (tab == Tab.LOG) {
+            requestLog();
+        } else {
+            requestRoster();
+        }
     }
 
     /**
@@ -998,12 +1047,14 @@ public final class HorseBrowserScreen extends Screen {
             }
         }
         if (refreshRosterButton != null) {
-            // Both roster tabs want it; it sits in the same place on each.
-            boolean show = breeding || mine;
+            // Both roster tabs want it, and so does the Log; it sits in the same
+            // place on each, and asks for whatever that tab reads - see refresh().
+            boolean log = tab == Tab.LOG;
+            boolean show = breeding || mine || log;
             refreshRosterButton.visible = show;
             refreshRosterButton.active = show;
             refreshRosterButton.setRectangle(refreshW, 18,
-                    mine ? fsRight() - refreshW : listX(), contentTop() - 1);
+                    mine || log ? fsRight() - refreshW : listX(), contentTop() - 1);
         }
         if (settledToggle != null) {
             settledToggle.visible = breeding;
@@ -1165,8 +1216,22 @@ public final class HorseBrowserScreen extends Screen {
                         && !ClientHorseRoster.received()) {
                     requestRoster();
                 }
+                // Asked for every time the tab is opened, not only the first:
+                // unlike the roster, the log changes on its own while you are
+                // elsewhere in the menu, and a stale one is the failure this tab
+                // exists to prevent. The server pushes it too, so this is the
+                // belt on the braces - it costs one small packet per click.
+                if (tab == Tab.LOG) {
+                    requestLog();
+                }
             }
             return true;
+        }
+        if (tab == Tab.LOG) {
+            if (logFilterClicked(event.x(), event.y())) {
+                return true;
+            }
+            return super.mouseClicked(event, doubleClick);
         }
         if (tab == Tab.MY_HORSES) {
             HorseQuery.Sort column = columnAt(event.x(), event.y());
@@ -1364,6 +1429,11 @@ public final class HorseBrowserScreen extends Screen {
             horseScroll = Math.max(0, Math.min(max, horseScroll - (int) Math.signum(sy) * 3));
             return true;
         }
+        if (tab == Tab.LOG) {
+            int max = Math.max(0, logRows.size() - logVisibleRows());
+            logScroll = Math.max(0, Math.min(max, logScroll - (int) Math.signum(sy) * 3));
+            return true;
+        }
         if (tab == Tab.BREEDING_PREVIEW) {
             if (mx >= listX() && mx <= listX() + listW()) {
                 boolean upper = my < pickerSplit();
@@ -1417,6 +1487,7 @@ public final class HorseBrowserScreen extends Screen {
         bars.clear();
         tocEntries.clear();
         alleleChips.clear();
+        logChips.clear();
         drawChrome(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (tab == Tab.RECIPES) {
@@ -1457,6 +1528,7 @@ public final class HorseBrowserScreen extends Screen {
 
         switch (tab) {
             case MY_HORSES -> drawMyHorses(g, mouseX, mouseY);
+            case LOG -> drawLog(g, mouseX, mouseY);
             case GENE_DATABASE -> {
                 drawGeneList(g, mouseX, mouseY, contentBottom());
                 drawGeneDetail(g);
@@ -2919,6 +2991,209 @@ public final class HorseBrowserScreen extends Screen {
     // The query language, the sort comparators and the coat description live in
     // common/horse (HorseQuery, HorseListing), where they are unit-tested
     // without a game and will survive the backport. This class draws.
+
+    // ------------------------------------------------------------------
+    // Log tab
+    // ------------------------------------------------------------------
+    //
+    // WHAT HAS BEEN HAPPENING TO YOUR HORSES, newest first. Most of what happens
+    // to a stable happens while nobody is looking at it: a cover in a paddock
+    // across the world, a foal overnight, a horse killed in a dimension you are
+    // not in. Chat reaches whoever is standing there, once. This is where it is
+    // written down.
+    //
+    // The rows arrive already ordered, already bounded and already deduplicated -
+    // all of that is HorseEventLog, in common/, where it is unit-tested without a
+    // game. This draws, and filters by kind, and nothing else. In particular it
+    // never re-sorts: one place decides what "newest first" means.
+
+    /** Taller than {@link #ROW_H}: a row is a whole sentence and wants the air. */
+    private static final int LOG_ROW_H = 14;
+
+    /** The four columns, as shares of the table's width. When, what, who, and what happened. */
+    private static final int LOG_W_WHEN = 92;
+    private static final int LOG_W_KIND = 74;
+    private static final int LOG_W_HORSE = 118;
+
+    private int logHeadY() {
+        return contentTop() + 34;
+    }
+
+    private int logTop() {
+        return logHeadY() + ROW_H + 2;
+    }
+
+    /** A line of footer below, when there is anything to say in it. */
+    private int logBottom() {
+        return contentBottom() - 14;
+    }
+
+    private int logVisibleRows() {
+        return Math.max(1, (logBottom() - logTop()) / LOG_ROW_H);
+    }
+
+    /**
+     * Re-filter. Called when the log or the chip changes and never per frame -
+     * cheap either way, but the same discipline as the roster table, and for the
+     * same reason: a list rebuilt sixty times a second is a list whose cost
+     * nobody notices until somebody else's machine.
+     */
+    private void rebuildLogRows() {
+        logRows = ClientHorseLog.of(logFilter);
+        logRowsVersion = ClientHorseLog.version();
+        logRowsFilter = logFilter;
+        logScroll = Math.max(0, Math.min(logScroll, Math.max(0, logRows.size() - logVisibleRows())));
+    }
+
+    private void drawLog(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (logRowsVersion != ClientHorseLog.version() || logRowsFilter != logFilter) {
+            rebuildLogRows();
+        }
+
+        int l = fsLeft();
+        int r = fsRight();
+        int top = logTop();
+        int bottom = logBottom();
+
+        int total = ClientHorseLog.all().size();
+        String count = logFilter == null
+                ? total + (total == 1 ? " event" : " events")
+                : logRows.size() + " of " + total + " events";
+        g.text(this.font, Component.literal(count), l + 2, contentTop() + 20, LABEL, false);
+        drawLogFilters(g, r, contentTop() + 20, mouseX, mouseY);
+
+        // Headings. Not clickable, and that is deliberate: the one order this
+        // list has is the order things happened in, and a log you can sort by
+        // horse name is a roster with the wrong columns.
+        g.fill(l - 2, logHeadY() - 2, r + 2, logHeadY() + ROW_H, HEAD_BG);
+        drawFitted(g, "When", logColX(0), logHeadY() + 1, logColW(0, r - l), LABEL);
+        drawFitted(g, "What", logColX(1), logHeadY() + 1, logColW(1, r - l), LABEL);
+        drawFitted(g, "Horse", logColX(2), logHeadY() + 1, logColW(2, r - l), LABEL);
+        drawFitted(g, "What happened", logColX(3), logHeadY() + 1, logColW(3, r - l), LABEL);
+
+        g.fill(l - 2, top - 2, r + 2, bottom + 2, PANEL_SOFT);
+
+        if (logRows.isEmpty()) {
+            String empty = !ClientHorseLog.received()
+                    ? "Asking the server..."
+                    : total == 0
+                            ? "Nothing yet. Covers, births, deaths, taming and every change of "
+                                    + "ownership are written here as they happen - including while this menu is shut."
+                            : "No " + logFilter.plural().toLowerCase(Locale.ROOT) + " in the log.";
+            drawFitted(g, empty, l + 4, top + 6, r - l - 8, NAME_DIM);
+            return;
+        }
+
+        g.enableScissor(l - 2, top, r + 2, bottom);
+        for (int i = logScroll; i < logRows.size() && i < logScroll + logVisibleRows(); i++) {
+            HorseEvent row = logRows.get(i);
+            int ry = top + (i - logScroll) * LOG_ROW_H;
+            if (mouseX >= l && mouseX <= r && mouseY >= ry && mouseY < ry + LOG_ROW_H) {
+                g.fill(l - 2, ry, r, ry + LOG_ROW_H, ROW_HOVER);
+            }
+            drawLogRow(g, row, ry, r - l);
+        }
+        g.disableScissor();
+
+        int max = Math.max(0, logRows.size() - logVisibleRows());
+        if (max > 0) {
+            int thumb = Math.max(12, (bottom - top) * logVisibleRows() / logRows.size());
+            scrollBarV(g, r + 3, r + 6, top, bottom, logScroll, max, thumb,
+                    v -> logScroll = (int) Math.round(v));
+        }
+
+        // Said once, at the bottom, and only when it is true: the cap is a real
+        // loss and a player who breeds hard should know the oldest rows are going.
+        if (total >= HorseEventLog.MAX_PER_OWNER) {
+            drawFitted(g, "The log keeps the last " + HorseEventLog.MAX_PER_OWNER
+                            + " events; older ones fall off. The pedigree keeps everything.",
+                    l + 2, bottom + 4, r - l - 4, TAG);
+        }
+    }
+
+    private void drawLogRow(GuiGraphicsExtractor g, HorseEvent row, int y, int width) {
+        int text = y + 3;
+        drawFitted(g, row.when(), logColX(0), text, logColW(0, width), TAG);
+        drawFitted(g, row.kind().label(), logColX(1), text, logColW(1, width),
+                row.bad() ? BAD : row.good() ? GOOD : ALLELE_TOK);
+        drawFitted(g, row.horseName(), logColX(2), text, logColW(2, width), NAME);
+        drawFitted(g, row.detail(), logColX(3), text, logColW(3, width),
+                row.bad() ? BAD : DESC);
+    }
+
+    private int logColX(int index) {
+        int x = fsLeft() + 2;
+        if (index > 0) {
+            x += LOG_W_WHEN;
+        }
+        if (index > 1) {
+            x += LOG_W_KIND;
+        }
+        if (index > 2) {
+            x += LOG_W_HORSE;
+        }
+        return x;
+    }
+
+    /** The first three are fixed; the sentence gets whatever is left. */
+    private int logColW(int index, int width) {
+        switch (index) {
+            case 0:
+                return LOG_W_WHEN - 6;
+            case 1:
+                return LOG_W_KIND - 6;
+            case 2:
+                return LOG_W_HORSE - 6;
+            default:
+                return Math.max(60, width - LOG_W_WHEN - LOG_W_KIND - LOG_W_HORSE - 8);
+        }
+    }
+
+    /**
+     * The filter chips - All, then one per kind - right-aligned beside the count
+     * the way the Alleles tab's are, so they cost the list no height.
+     *
+     * <p>Every kind gets a chip even when the player has none of it yet, and the
+     * chip says so by its count. A chip that appears only once you have one of
+     * something teaches nobody what the log can tell them.
+     */
+    private void drawLogFilters(GuiGraphicsExtractor g, int right, int y, int mouseX, int mouseY) {
+        HorseEvent.Kind[] kinds = HorseEvent.Kind.values();
+        int x = right;
+        // Backwards, so the rightmost chip is the last kind and All lands nearest
+        // the count it qualifies. Index kinds.length is All - see logFilterClicked.
+        for (int i = kinds.length; i >= 0; i--) {
+            boolean all = i == kinds.length;
+            HorseEvent.Kind kind = all ? null : kinds[i];
+            int n = ClientHorseLog.count(kind);
+            String label = (all ? "All" : kind.plural()) + " " + n;
+            int tw = this.font.width(label) + 10;
+            x -= tw + 3;
+            boolean active = kind == logFilter;
+            boolean hover = mouseX >= x && mouseX < x + tw && mouseY >= y && mouseY < y + 12;
+            g.fill(x, y, x + tw, y + 12, active ? ROW_SEL : (hover ? ROW_HOVER : DIVIDER));
+            g.text(this.font, Component.literal(label), x + 5, y + 2,
+                    active ? NAME : (n == 0 ? TAG : (hover ? HEADING : NAME_DIM)), false);
+            logChips.add(new TocEntry(x, y, x + tw, y + 12, i));
+        }
+    }
+
+    /** A click on one of the Log tab's filter chips. */
+    private boolean logFilterClicked(double mx, double my) {
+        for (TocEntry e : logChips) {
+            if (mx < e.x0() || mx > e.x1() || my < e.y0() || my > e.y1()) {
+                continue;
+            }
+            HorseEvent.Kind[] kinds = HorseEvent.Kind.values();
+            HorseEvent.Kind picked = e.index() == kinds.length ? null : kinds[e.index()];
+            if (picked != logFilter) {
+                logFilter = picked;
+                logScroll = 0;
+            }
+            return true;
+        }
+        return false;
+    }
 
     /** One column of the table: a sort key, and its share of the width. */
     private record Column(HorseQuery.Sort sort, int weight) {

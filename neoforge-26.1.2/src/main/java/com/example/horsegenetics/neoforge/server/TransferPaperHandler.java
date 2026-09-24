@@ -202,6 +202,13 @@ public final class TransferPaperHandler {
             return;
         }
 
+        // Who had it, asked before the line that stops it being true. A dealer's
+        // stock answers null here, which is what tells the log this is a purchase
+        // rather than a handover - and what stops it writing a "sold" row for a
+        // previous owner who never existed.
+        java.util.UUID previousOwner = HorseOwnership.ownerId(horse);
+        String previousOwnerName = HorseOwnership.ownerName(horse).orElse("");
+
         // The transfer itself. Note what is *not* here: nothing writes bredBy,
         // and the horse's genome, name, pedigree and generation are untouched.
         horse.setOwner(player);
@@ -218,6 +225,12 @@ public final class TransferPaperHandler {
         if (!player.getAbilities().instabuild) {
             paper.shrink(1);
         }
+        // Both logs: the taker's, and - when there was somebody to take it from -
+        // the loser's. A horse leaving your stable is news you would otherwise
+        // never be told, since the chat line goes to whoever redeemed the paper.
+        // A dealer's stock credits the dealer, who is on the record as its breeder.
+        HorseLog.changedHands(horse, player.getUUID(), player.getGameProfile().name(),
+                previousOwner, previousOwnerName, record.bredBy().orElse(""));
         say(player, Component.translatable(
                 "message.horsegenetics.transfer.redeemed",
                 Component.literal(record.displayName())));

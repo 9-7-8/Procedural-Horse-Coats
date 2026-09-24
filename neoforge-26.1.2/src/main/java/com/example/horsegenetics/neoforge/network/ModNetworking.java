@@ -270,6 +270,23 @@ public final class ModNetworking {
         );
 
         registrar.playToClient(
+                HorseLogPayload.TYPE,
+                HorseLogPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientHorseLog.accept(payload.events()))
+        );
+
+        registrar.playToServer(
+                HorseLogRequestPayload.TYPE,
+                HorseLogRequestPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.HorseLog.sendTo(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToClient(
                 OffspringDataPayload.TYPE,
                 OffspringDataPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
