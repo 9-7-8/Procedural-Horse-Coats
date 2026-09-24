@@ -10,7 +10,6 @@ import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.HorseSocialAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -163,24 +162,23 @@ final class DebugYardHerd {
     // ------------------------------------------------------------------
 
     /**
-     * Brother and sister are both due to leave at once, which is the <b>only</b>
-     * arrangement that asks {@code BandLife} the question gap 234 exists for: a
-     * dispersing filly takes the nearest bachelor over the nearest band, and a
-     * brother who left at the same moment is the nearest bachelor there is, so
-     * {@code closeKin} has to refuse him.
+     * Brother and sister are both due to leave at once: the colt to the bachelors,
+     * the filly to whichever is nearer, a family band or a bachelor to found one with.
+     * Both must be gone by the first scan and neither may stay home.
      *
-     * <p>This pen used to stagger the colt three minutes behind the filly, and the
-     * comment here called that deliberate. It was not: the stagger meant the colt
-     * had not yet left when she chose, so he was never a candidate and the check was
-     * never exercised - both horses dispersed cleanly in the 16:11 run of 2026-09-15
-     * and proved nothing. Dropping it is what gap 234's Pass line always asked for.
+     * <p>The pen used to carry a kinship question - the nearest bachelor to a
+     * dispersing filly is usually the brother who left the same band a moment
+     * earlier, and {@code BandLife} refused him. The owner withdrew that rule on
+     * 2026-09-24 (no mechanic anywhere may stop line breeding), so the brother
+     * recruiting his own sister is now a correct outcome, not the defect this pen
+     * was watching for. What is left to watch is the dispersal itself.
      *
      * <p>The two mover mares know the host band's mares already (their side only), so
      * either may move over. Two pens, one {@link YardPens} group.
      */
     private static void leavingHome(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 10, ROW_Q_D, "LEAVING HOME", "LEAVING HOME",
-                List.of("LEAVING HOME", "both leave now:", "she must NOT take", "her brother"));
+                List.of("LEAVING HOME", "both leave now:", "neither may still", "be here"));
         Horse sire = horse(level, gy, x0 + 2.5, z0 + 3, Sex.MALE, false, "NATAL STALLION", 9.0);
         Horse m1 = horse(level, gy, x0 + 5.5, z0 + 3, Sex.FEMALE, false, "MOVER MARE 1", 8.5);
         Horse m2 = horse(level, gy, x0 + 8.0, z0 + 3, Sex.FEMALE, false, "MOVER MARE 2", 8.0);
@@ -192,14 +190,6 @@ final class DebugYardHerd {
             // Adult days lived past the day each is due, so the first scan sends both.
             born(filly, 3.05, natal, 3.0);
             born(colt, 1.05, natal, 1.0);
-            // ...and make them full siblings on the RECORD, which is the only place
-            // closeKin looks. Sharing a natal band is not kinship: born() carries the
-            // band id, while closeKin reads motherId and fatherId, and a yard horse is
-            // spawned rather than bred so both are empty - "unknown parents never
-            // match", so the brother was an eligible suitor however the pen was timed.
-            // Dropping the stagger was necessary and not sufficient; the first run
-            // after it had the filly join her brother's band as his lead mare.
-            siblings(filly, colt, m1, sire);
         }
 
         int hx = x0 + 10;
@@ -403,35 +393,6 @@ final class DebugYardHerd {
         h.setData(ModAttachments.HORSE_SOCIAL.get(), s.withBirth(bornTick, s.dam(), natal, disperseAfter));
     }
 
-    /**
-     * Record {@code dam} and {@code sire} as the parents of every one of
-     * {@code foals}, making them full siblings to anything that reads the record.
-     * {@code BandLife.closeKin} is the only caller that cares, and it is why this
-     * exists: the yard's horses are spawned rather than bred, so their records have
-     * no parents and the kinship check can never fire on them.
-     */
-    private static void siblings(@Nullable Horse a, @Nullable Horse b,
-                                 @Nullable Horse dam, @Nullable Horse sire) {
-        if (dam == null || sire == null) {
-            return;
-        }
-        for (Horse foal : new Horse[]{a, b}) {
-            if (foal != null) {
-                // HorseRecords.apply re-derives the visible name from the record, and
-                // the yard's labels are set straight on the entity by DebugTestYard.label
-                // rather than through barnName - so applying here renames "FILLY: LEAVES
-                // NOW" to whatever the generator called her, and the pen stops being
-                // readable in the watch lines. Keep the label across the write.
-                Component label = foal.getCustomName();
-                HorseRecords.apply(foal, HorseRecords.of(foal)
-                        .withParents(dam.getUUID(), sire.getUUID()));
-                if (label != null) {
-                    foal.setCustomName(label);
-                    foal.setCustomNameVisible(true);
-                }
-            }
-        }
-    }
 
     private static void band(@Nullable Horse lead, BandType type, Horse... members) {
         if (lead == null) {

@@ -197,8 +197,8 @@ public record HorseRecord(
      * The same horse with a recorded dam and sire. Breeding sets these when it
      * builds a foal's record; this is for the cases that make a horse without
      * going through breeding and still need it to have a pedigree - the test
-     * yard's own siblings, which otherwise have unknown parents and so are kin
-     * to nobody. See {@code BandLife.closeKin}, which reads exactly these two.
+     * yard's own horses, and an imported or spawned horse whose pedigree is known
+     * to the caller but was never bred here.
      */
     public HorseRecord withParents(UUID mother, UUID father) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,

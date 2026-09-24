@@ -319,10 +319,10 @@ public final class TutorialPage {
                                 + "one, and for this purpose a gelding counts as a mare, which is one of "
                                 + "the quieter arguments for gelding a horse you mean to keep.",
                         "Young horses leave home a few days after they grow up: colts to the bachelors, "
-                                + "fillies to another band - and a filly will not take a suitor who "
-                                + "shares a parent with her, which will be her own brother who left the "
-                                + "same band a minute earlier. Mares move between bands now and then, to "
-                                + "wherever they know the most horses.",
+                                + "fillies to another band, or to a bachelor who takes them on and "
+                                + "founds a band of his own - her brother, who left the same place a "
+                                + "minute earlier, as readily as any other. Mares move between bands "
+                                + "now and then, to wherever they know the most horses.",
                         "Your own horses band up too. Leave two of them standing together long enough "
                                 + "and they form a herd, which mends twice as fast and teaches a foal "
                                 + "twice as quickly."),
