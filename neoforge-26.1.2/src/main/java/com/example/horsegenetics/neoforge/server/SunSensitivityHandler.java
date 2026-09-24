@@ -83,6 +83,12 @@ public final class SunSensitivityHandler {
         if (!inSunlight(horse) || !isSensitive(horse)) {
             return;
         }
+        // Vanilla's on-fire damage on purpose, so fire resistance and fire
+        // immunity reach it without this mod re-adding a type of its own to
+        // every one of vanilla's fire tags. The cost is that the damage type
+        // cannot say "sunlight": HorseHurtNoticeHandler tells the two apart by
+        // isOnFire(), which is false here because this never ignites the horse.
+        // Give the burn its own damage type and that check has to change too.
         horse.hurtServer(level, level.damageSources().onFire(), SUN_DAMAGE);
         level.sendParticles(ParticleTypes.SMOKE,
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.7, horse.getZ(),

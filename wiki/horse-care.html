@@ -346,6 +346,42 @@
         per scan instead of +1 when the water/food gate is met.</li>
 </ul>
 
+<h2 id="hurt-notice">4. When one of your horses is hurt</h2>
+
+<p>
+    Your horses tell you when something is happening to them. Whenever a horse you own takes
+    a hit, <strong>you</strong> get one line in chat &mdash; nobody else does &mdash; naming
+    the horse, what hurt it, and what to do about that:
+</p>
+
+<div class="note">
+    <span class="label">What the line looks like</span>
+    <p><em>Ravensong took 1 heart from Zombie. Something is attacking it &mdash; light and fence
+        the pen, or move the horse.</em></p>
+    <p><em>Ravensong took half a heart from sunlight. Daylight burns this one &mdash; shade, a
+        roof or a stable by day. It runs for cover on its own if there is any.</em></p>
+    <p><em>Ravensong took 3 hearts from a fall. Fence the drops around the pen. It is down to
+        2 hearts &mdash; a horse heals beside water, once it has eaten.</em></p>
+</div>
+
+<ul>
+    <li><strong>It is an alarm, not a log.</strong> One line per horse every five seconds at
+        most, so a pen that catches fire is something you can read rather than a wall of text,
+        and it turns red when the horse is down to a quarter of its hearts.</li>
+    <li><strong>How to heal it is only added when it matters</strong> &mdash; below that same
+        quarter. Above it, the sentence is about keeping it from happening again.</li>
+    <li><strong>You are not told what you did yourself.</strong> Hitting your own horse produces
+        nothing; you are looking at it.</li>
+    <li><strong>You have to be in the same world as the horse.</strong> A horse hurt in the
+        <a href="horse-dimension.html">horse dimension</a> while you are in the overworld says
+        nothing, and neither does one hurt while you are logged out. That is what the browser's
+        planned log tab is for, not this.</li>
+    <li><strong>A lethal genotype is not an injury.</strong> A foal dying of one says so, and
+        says the only thing that would have prevented it: not pairing those two.</li>
+    <li>Server owners who would rather have none of it can turn it off &mdash;
+        <code>notices.owned_horse_damage</code> in the server config, on by default.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -376,6 +412,12 @@
         pushed to trackers on change and on start-tracking, shown on the
         <a href="breeding.html#H">horse information screen</a>'s Overview tab
         (the <strong>i</strong> button on the horse inventory).</li>
+    <li><code>common/care/HurtNotice</code> &rarr;
+        <code>server/HorseHurtNoticeHandler</code> &mdash; the
+        <a href="#hurt-notice-code">owner-only hurt notice</a>: the words and the
+        quiet period in the game-free module, the damage hook and the owner
+        lookup in the game one. Switched by
+        <code>notices.owned_horse_damage</code>.</li>
     <li>Block tags <code>data/horsegenetics/tags/block/horse_water.json</code>
         and <code>horse_food.json</code>.</li>
 </ul>
@@ -467,6 +509,62 @@
     fence for some other reason can still eat a crop through it</strong>: the goal's eating
     radius is 2.5 blocks and does not ask what is in between, which is a separate bullet.
 </p>
+
+<h2 id="hurt-notice-code">The hurt notice &mdash; whose chat, how often, and why sunlight is a special case</h2>
+
+<p>
+    <code>common/care/HurtNotice</code> is the words and the rules; it is in the game-free module
+    for <code>repro/ReproText</code>'s reason &mdash; the wording <em>is</em> the feature, so a
+    test should be able to pin it down (<code>HurtNoticeTest</code>). It groups vanilla's damage
+    types into a <code>Cause</code> by <strong>the advice each earns</strong> rather than by what
+    they are: a campfire, a hot floor and a burning horse are three damage types and one thing to
+    do about it. Each cause carries one prevention sentence. What to do about the injury itself
+    does not vary by cause &mdash; it is <a href="#hunger">water and a fed horse</a> every time
+    &mdash; so it is appended once, and only below <code>BADLY_HURT</code> (a quarter of the
+    horse's own maximum). A line on every scratch that ended "it heals beside water" would train
+    the owner out of reading the half that changes.
+</p>
+<p>
+    <code>server/HorseHurtNoticeHandler</code> is the translation, on
+    <code>LivingDamageEvent.Post</code> &mdash; the same hook
+    <code>DebugWorldWatch</code> logs damage from, and the one that reports the damage
+    <em>actually taken</em> after armour rather than the amount aimed at the horse. It answers the
+    entity question before the config one, because it fires for every hit anything in the world
+    takes.
+</p>
+
+<ul>
+    <li><strong>The owner, via <code>getOwner()</code>, and only if that returns a
+        <code>ServerPlayer</code>.</strong> That method answers only for an owner loaded in the
+        same level, which is exactly this message's audience: a line in the chat log of somebody
+        who logged out an hour ago is not an alarm. The offline and cross-dimension cases are the
+        browser's <a href="horse-browser.html#roadmap">planned log tab</a>, deliberately not
+        this.</li>
+    <li><strong>Never when the damage source's entity is the owner.</strong> A player who hits
+        their own horse is looking at it &mdash; and in the test yard the line would be
+        constant.</li>
+    <li><strong>One line per horse per <code>QUIET_TICKS</code></strong> (five seconds), keyed on
+        the horse rather than on the cause: a burning horse takes damage every two seconds and a
+        horse among zombies several times a second. Five seconds because the message is an alarm
+        the owner is meant to be able to answer, and no shorter because the second line about the
+        same fire says nothing the first did not. The map is a <code>HashMap</code> cleared on
+        <code>LivingDeathEvent</code> and swept of five-minute-old entries whenever it passes 512
+        horses.</li>
+    <li><strong>Sunlight is told apart from fire by whether the horse is alight.</strong>
+        <code>SunSensitivityHandler</code> burns a sun-sensitive horse with vanilla's
+        <code>onFire</code> damage and never ignites it, so <code>isOnFire()</code> is false
+        exactly in the sun case &mdash; and <code>HurtNotice.of</code> can never return
+        <code>SUNLIGHT</code> from a damage type alone, which is what the test asserts. Giving the
+        burn its own damage type would have been cleaner and would also have moved it out of the
+        fire-resistance and fire-immunity tags, so it was not done.</li>
+    <li><strong><code>AbstractHorse</code>, not <code>Horse</code></strong> &mdash; a donkey or a
+        mule is somebody's animal too. The name falls back from the tag, to this mod's record, to
+        whatever vanilla calls the species.</li>
+    <li><strong>Damage type ids are matched, not verified</strong> (hard rule 8). They are
+        vanilla's own strings and an unrecognised one is simply "something", so a wrong id costs a
+        sentence of advice and never correctness &mdash; which is also what makes another mod's
+        damage safe to be hit by.</li>
+</ul>
 
 <h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
 
@@ -1378,8 +1476,54 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>An owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
+
+<h3 id="hurt-notice-0924">The owner hears about a hurt horse (2026-09-24, NOT played)</h3>
+
+<p>
+    Asked for directly: <em>when an owned horse takes damage, only its owner should receive a chat
+    message with the horse name, damage source, and, when applicable, how to cure or prevent
+    it</em>. Built as <a href="#hurt-notice-code">the hurt notice</a>.
+    <code>HurtNoticeTest</code> covers everything that is words or arithmetic &mdash; the
+    sentence, the hearts, the quiet arithmetic, that a lethal genotype is never offered a cure and
+    that sunlight is never guessed from a damage type. <strong>Nothing about the routing is
+    tested</strong>, because all of it is NeoForge: which player <code>getOwner()</code> returns,
+    what <code>getHealthDamage()</code> is at <code>Post</code>, and whether
+    <code>isOnFire()</code> really is false for a sun-burnt horse.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>One line, and an alarm rather than a flood.</strong> Stand a tamed horse you own
+        in a campfire, or let a zombie at it. <strong>Pass:</strong> one yellow line naming the
+        horse and what hurt it, then at most one more every five seconds, turning red when it
+        drops to a quarter health and picking up the &ldquo;heals beside water&rdquo; half at the
+        same point. <strong>Fail:</strong> a line per tick &mdash; the quiet period is keyed
+        wrongly &mdash; or no line at all, which is the config default or the
+        <code>AbstractHorse</code> cast.</li>
+    <li><strong>Only the owner.</strong> Two players, one horse. <strong>Pass:</strong> the owner
+        sees the line and the other player sees nothing, including while riding it.
+        <strong>Fail:</strong> anything reaching the second player, which would make this the
+        server-wide death message by accident.</li>
+    <li><strong>Not your own blows.</strong> Hit your own horse with a sword.
+        <strong>Pass:</strong> silence. <strong>Fail:</strong> a line, which means the source
+        entity is not being compared to the owner.</li>
+    <li><strong>Sunlight reads as sunlight.</strong> A dhampir (or anything else carrying
+        sun sensitivity) left in the open by day. <strong>Pass:</strong> &ldquo;from
+        sunlight&rdquo;, with the shade advice. <strong>Fail:</strong> &ldquo;from fire&rdquo;,
+        which means <code>isOnFire()</code> is not the discriminator it was taken for and the burn
+        needs its own damage type after all.</li>
+    <li><strong>A dying foal says the true thing.</strong> Breed a known lethal pairing with
+        <code>health.mode = FULL</code>. <strong>Pass:</strong> &ldquo;a genetic defect &hellip;
+        not to pair those two again&rdquo;, and <em>no</em> water advice.
+        <strong>Fail:</strong> &ldquo;from something&rdquo;, which means the damage type's msgId is
+        not <code>genetic_defect</code> &mdash; the one id in the table that is this mod's own and
+        so the one worth checking.</li>
+    <li><strong>The switch works.</strong> Set <code>notices.owned_horse_damage = false</code> and
+        confirm the chat goes quiet without anything else changing.</li>
+</ul>
 
 <h3 id="pasture-edge-0924">Horses lean on the fence beside a farm (2026-09-24, NOT played)</h3>
 

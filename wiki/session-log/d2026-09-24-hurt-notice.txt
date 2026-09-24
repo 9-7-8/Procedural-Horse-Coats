@@ -1,0 +1,111 @@
+2026-09-24, after the sold-horse greying — an owner is told when their horse is hurt
+
+    One bullet, the first in the Bugs section of intake/To do.txt, in the owner's words:
+
+        When an owned horse takes damage, only its owner should receive a chat message
+        with the horse name, damage source, and, when applicable, how to cure or prevent
+        it. This should be configurable and on by default.
+
+    Dated first, as START HERE says to. The bullet went into To do.txt on 2026-09-23
+    (27cd45aa) and nothing in the repository sends a player any message about a horse
+    being hurt — the only damage hook that speaks at all is DebugWorldWatch, which writes
+    to the yard log. So: open, and genuinely absent rather than built and wrong.
+
+    roadmap-execution.html's symptom map has the row ("Owned-horse damage/death message
+    duplicates or reaches the wrong player") and its stage 5 already sets the terms:
+    target damage messages only to the owner, deduplicate the hooks. The owning page is
+    horse-care.html, which is where healing and hunger already live, and the notice's
+    advice is mostly about healing and pens.
+
+Where it lives, and why the words are in common/
+
+    common/care/HurtNotice — the sentences, the quiet period, the hearts arithmetic.
+    server/HorseHurtNoticeHandler — LivingDamageEvent.Post, the owner lookup, the map.
+    ServerConfig.notices.owned_horse_damage, default true.
+
+    The wording is the feature here, so it goes where a test can pin it down. That is
+    ReproText's precedent, made for the same reason. HurtNoticeTest asserts the shape of
+    the sentence, that an attacker's name outranks the cause's own phrase, that a lethal
+    genotype is never offered a cure, that an unknown damage type is named but not
+    explained, and that SUNLIGHT cannot be reached from a damage id at all.
+
+Grouping damage types by the advice they earn
+
+    Vanilla has dozens of damage types and this message has one job, so Cause is a
+    grouping by what the owner should DO: inFire, onFire, campfire and hotFloor are four
+    types and one sentence about keeping the pen clear of fire. Lava gets its own because
+    the advice differs (nothing walks out of it). Cactus, sweet berries and thorns are one
+    thing to clear out. Mobs, arrows, tridents and lightning are all "something is
+    attacking it".
+
+    Each Cause carries the prevention. The CURE does not vary by cause — it is water and a
+    fed horse, every time (Hunger) — so it is appended once, and only when the horse is at
+    or below a quarter of its own maximum health. That is the one judgement call in the
+    file worth defending: a line on every scratch that ended "it heals beside water" is a
+    line the owner learns to stop reading, and the half that changes is the half in front
+    of it. GENETIC_DEFECT is excluded from it outright, because nothing heals a lethal
+    genotype and saying otherwise would send somebody to fetch a bucket.
+
+    The ids are matched, not verified (hard rule 8) — they are vanilla's own strings and an
+    unrecognised one is simply "something". That fallback is also what makes another mod's
+    damage safe: it is named, not explained, and nothing breaks.
+
+Sunlight is fire on the wire
+
+    SunSensitivityHandler burns a sun-sensitive horse with level.damageSources().onFire(),
+    so the damage type cannot distinguish a dhampir caught in the open from a horse
+    standing in a campfire — and those two want opposite advice (stable it by day, versus
+    keep the pen clear). It never ignites the horse, though, so isOnFire() is false exactly
+    in the sun case, and that is the discriminator.
+
+    The cleaner fix is a horsegenetics:sun damage type of its own. It was not done: the
+    burn is deliberately in vanilla's fire tags, where fire resistance and fire immunity
+    reach it, and a new type would have to be re-added to every one of them to keep
+    behaviour identical. A comment says so in both places. If the in-game check comes back
+    saying "from fire", that is the fix, and the tags are what to get right.
+
+Deciding who hears it
+
+    getOwner() only answers for an owner loaded in the same level, and that turned out to
+    be the right audience rather than a limitation to work around: a chat line for somebody
+    who logged out an hour ago is not an alarm. An owner in another dimension, or offline,
+    hears nothing, and that gap belongs to the browser's planned Log tab — written up as a
+    deliberate scope line on horse-care.html rather than left to be discovered.
+
+    Never when the source entity is the owner. A player hitting their own horse is looking
+    at it, and in the test yard the line would be constant.
+
+    AbstractHorse rather than Horse, so a donkey or a mule is covered; the name falls back
+    from the tag, to this mod's record, to the species.
+
+The quiet period, and what it is keyed on
+
+    QUIET_TICKS is 100 — five seconds, per horse, whatever hurt it. Keyed on the horse and
+    not on the cause deliberately: a burning horse takes damage every two seconds and a
+    horse among zombies several times a second, and a key that included the cause would let
+    two overlapping threats double the rate. Five seconds because the message is an alarm
+    the owner is meant to be able to answer; not shorter because the second line about the
+    same fire says nothing the first did not.
+
+    The map is cleared on LivingDeathEvent and swept of five-minute-old entries above 512
+    horses, so a busy server does not accumulate one entry per horse it has ever hurt.
+
+    MIN_DAMAGE of 0.5 keeps a quarter-heart scratch from spending a horse's whole quiet
+    period on the least interesting hit of the five seconds.
+
+Not played
+
+    Everything that is words or arithmetic has a test. Nothing about the routing does,
+    because all of it is NeoForge: which player getOwner() returns, what getHealthDamage()
+    is at Post, whether isOnFire() really is false for a sun-burnt horse, and whether the
+    mod's own damage type reports msgId "genetic_defect". The checks are on
+    horse-care.html#hurt-notice-0924; the two-player one is the one that matters most,
+    since "only the owner" is the whole ask.
+
+Next
+
+    The bullet directly below this one in To do.txt: a server-wide death message for an
+    owned horse, configurable and on by default. It is the same hook and the same config
+    section, and vanilla's getLocalizedDeathMessage already writes the sentence — but it is
+    a different audience (everyone, not one player) and a different deduplication problem,
+    so it is its own bullet and its own session.

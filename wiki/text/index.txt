@@ -2676,6 +2676,8 @@ wiki/horse-care.html#food-tempt	gameplay	Horses come to food — and run for the
 wiki/horse-care.html#ground-food	coding	What counts as dropped food — and why it is not the hand-feeding test
 wiki/horse-care.html#hand-taming	gameplay	Taming by hand
 wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
+wiki/horse-care.html#hurt-notice	gameplay	4. When one of your horses is hurt
+wiki/horse-care.html#hurt-notice-code	coding	The hurt notice — whose chat, how often, and why sunlight is a special case
 wiki/horse-care.html#kept-herds	gameplay	Tamed herds
 wiki/horse-care.html#reachable-food	coding	A horse only walks to food it can reach
 wiki/horse-care.html#roles	gameplay	Who is who
