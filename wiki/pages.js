@@ -143,6 +143,7 @@ window.HG.pages = {
                 { href: "magical-genes.html", text: "Magical genes still to build", kind: "magical", views: ["coding"] },
                 { href: "model-parts.html", text: "Attached model parts", kind: "core", views: ["coding"] },
                 { href: "momentum-sprint.html", text: "Momentum sprint", kind: "magical", views: ["coding"] },
+                { href: "item-rescuing-braid.html", text: "Rescuing braid", kind: "core", views: ["coding"] },
                 { href: "rider-comfort.html", text: "Rider comfort", kind: "core", views: ["coding"] },
                 { href: "item-stall-bars.html", text: "Stall bars", kind: "core", views: ["coding"] },
                 { href: "saddle-pads.html", text: "Saddle pads", kind: "core", views: ["coding"] },

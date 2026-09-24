@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rescuing braid &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<h1>Rescuing braid</h1>
+<p class="lede">
+    A one-use piece of <a href="horse-gear.html">mane or tail gear</a> that turns a killing
+    blow into a trip home instead of just a reprieve: the moment it would break, the horse
+    (and its rider, if mounted) blinks back to a bound stall and comes up already fleeing.
+    <strong>None of it is built.</strong> This page exists so the plan has its own home rather
+    than a paragraph in the intake to-do list.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page exists in the game</span>
+    <p>
+        Everything below is a plan. When a piece of it ships, it comes <em>off</em> this
+        Roadmap tab and is written up on a Gameplay and a Coding tab here instead &mdash; the
+        page grows tabs as the thing grows, the way every other gear page on the wiki does.
+    </p>
+</div>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        A mane-or-tail item that binds to a horse&rsquo;s <a href="item-stall-signs.html">stall</a>
+        (or a <a href="item-tickets.html#holding-pen">holding pen</a>), rendering as a dyed streak
+        in the hair, and that consumes itself the instant the horse&rsquo;s
+        <a href="horse-care.html#last-stand">last-stand</a> immunity would trigger &mdash;
+        teleporting the horse and any rider to the bound stall and dropping the horse straight
+        into its <a href="horse-care.html#escape">escape</a> behaviour, rather than leaving it
+        standing where it was hit.
+    </p>
+</div>
+
+<h2 id="what-it-is">What it is</h2>
+<p>
+    A rescuing braid is worn in the <strong>mane</strong> or <strong>tail</strong> slot of the
+    <a href="horse-gear.html">nineteen-slot gear roster</a>, and does one thing: it is a second,
+    stronger save layered on top of the last-stand immunity every horse already gets for free.
+    Where last stand only buys six seconds standing in place, a worn braid spends itself to move
+    the horse (and rider) somewhere safer at the same instant &mdash; its own bound stall.
+</p>
+
+<ul>
+    <li><strong>It needs a stall first.</strong> The braid has to be bound to one of the
+        horse&rsquo;s own <a href="item-stall-signs.html">stall signs</a>, or to its owner&rsquo;s
+        <a href="item-tickets.html#holding-pen">holding pen</a> &mdash; the same two destinations a
+        <a href="item-tickets.html">ticket</a> already sends a horse to. A horse with neither
+        cannot wear one, the same way it cannot be sent home by ticket.</li>
+    <li><strong>It triggers with last stand, not instead of it.</strong> The moment a blow would
+        take the horse to zero and last-stand immunity would normally hold it at half a heart in
+        place, a worn braid instead breaks, and the horse (and its rider, if one is aboard) is
+        teleported to the bound stall and enters the same fleeing behaviour
+        <a href="horse-care.html#escape">low-health escape</a> already gives a horse that survives
+        a killing blow.</li>
+    <li><strong>One use.</strong> The braid is destroyed the instant it fires. A horse saved this
+        way needs a fresh braid before it can be saved this way again &mdash; exactly the same
+        shape as last stand needing to heal back to full before it will save the horse a second
+        time.</li>
+    <li><strong>Dyed wool decides its colour.</strong> It renders as a streak worked into the mane
+        or tail, tinted to whatever wool went into it, purely cosmetic on top of a mechanical
+        item &mdash; the same split <a href="item-equestrian-bench.html">tack dyeing</a> already
+        draws between what an item does and how it looks.</li>
+    <li><strong>Craftable from wool, horse hair and an ender pearl.</strong> The wool supplies the
+        colour, the horse hair ties it to the rest of the item roster&rsquo;s one shared material,
+        and the ender pearl is the same &ldquo;this reaches somewhere else&rdquo; ingredient the
+        <a href="item-tickets.html">bound ticket</a> already uses for leaving a stall behind.</li>
+    <li><strong>Dyeable after crafting, at the <a href="item-equestrian-bench.html">Tack Dyeing
+        Bench</a></strong>, the same as a saddle&rsquo;s seat or a bridle&rsquo;s leather &mdash;
+        so a braid crafted from the wrong-coloured wool is not a wasted ender pearl.</li>
+</ul>
+
+<h2 id="open-questions">Open questions</h2>
+<ul>
+    <li><strong>Rider handling.</strong> A rider aboard at the moment of the save has to travel
+        with the horse rather than being left behind or unhorsed mid-teleport &mdash; the same
+        problem <a href="horse-care.html#escape">bolting</a> already solves by keeping the rider
+        mounted through the whole event, so the braid should reuse that path rather than invent a
+        second one.</li>
+    <li><strong>Order against last stand.</strong> Whether the braid replaces the six-second
+        immunity window entirely or rides on top of it (immune, teleported, <em>then</em>
+        fleeing) is a design call to make before the trigger hook is written, not after.</li>
+    <li><strong>Binding UX.</strong> Whether binding a braid to a stall is a right-click on the
+        stall sign (mirroring how a blank stall sign itself binds), or a right-click on the horse
+        while standing in its stall, needs settling against the existing stall-sign interaction
+        pattern.</li>
+    <li><strong>Which slot wins if both are worn.</strong> A horse has both a mane and a tail
+        slot; whether a braid in each is two independent saves or the second is refused while one
+        is already armed needs a rule before both slots can accept the item.</li>
+</ul>
+
+<h2 id="anticipated-files">Anticipated files</h2>
+<p>
+    Nothing here is settled, but the shape follows the existing stall/ticket/last-stand
+    machinery rather than inventing a parallel one:
+</p>
+<ul>
+    <li>An item class beside <code>TicketItem.java</code>, holding a bound stall reference the
+        same way a ticket resolves one at use time rather than at craft time.</li>
+    <li>A hook into whatever fires <code>common/care/LastStand</code>&rsquo;s immunity window, so
+        the braid can intercept the same event rather than polling health every tick.</li>
+    <li>A tag entry in the mane and tail slots&rsquo; item tags
+        (<code>horsegenetics:gear/mane</code>, <code>horsegenetics:gear/tail</code>), per
+        <a href="horse-gear.html#tags">how every gear slot decides what it accepts</a>.</li>
+    <li>A recipe under <code>data/horsegenetics/recipe/</code>: wool (any colour, by tag) + horse
+        hair + ender pearl, picked up automatically by <code>bake-recipe-reference.mjs</code>.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="horse-gear.html">Horse gear: the nineteen slots</a>
+        <a href="horse-care.html#last-stand">Last stand</a>
+        <a href="item-stall-signs.html">Stall signs</a>
+        <a href="item-tickets.html">Tickets</a>
+    </div>
+    The question to answer before a line is written is which event the braid actually hooks:
+    riding on last stand&rsquo;s own trigger, rather than a second health check running beside it.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
