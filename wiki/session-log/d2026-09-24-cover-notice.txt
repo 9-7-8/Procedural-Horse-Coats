@@ -1,0 +1,107 @@
+2026-09-24, after the chest loot — a mare's owner is told why she was not covered
+
+    One bullet, the first in the Bugs section of intake/To do.txt, in the owner's words:
+
+        If a breeding attempt does not go through for any reason, print the failure to
+        the horse's owner in chat.
+
+    And, higher up the same file in the tuning section, the narrow half of it:
+
+        If a cover fails because there's too many horses, print it to the chat for that
+        player.
+
+    Those are one bullet, which is what the previous session's handoff asked to check
+    before starting: the second is the crowding cap specifically, the first is every
+    reason including it. Both are retired; the rest of that tuning bullet — a stallion
+    attempting every eligible mare rather than stopping at one — is untouched and stays.
+
+    Dated first, as START HERE says. The phrase went into To do.txt on 2026-09-23
+    (de4cde82). Nothing in the repository sends an owner any message about a cover: the
+    only breeding chat lines are the same-sex joke and the carrot cooldown's refusal,
+    both aimed at whoever fed the carrot. Open, and genuinely absent.
+
+    The symptom map's row ("Natural cover is missing, repeated, or reports the wrong
+    reason") names the four classes, and all four were the right ones.
+
+What was already there, and what was missing
+
+    Every reason already existed as a typed value. NaturalCover.Verdict has COVER,
+    NOT_A_BREEDING_MARE, NOT_NOW, NO_STALLION and CROWDED; Conception.Outcome has
+    CONCEIVED, DID_NOT_TAKE and NOT_RECEPTIVE. Both were already being switched on in
+    NaturalBreedingHandler, with the mare's owner resolvable two lines away. What was
+    missing was only the translation to chat: all four failure branches ended in
+    ActionTrace.log, the debug record, or in nothing at all.
+
+    So this is not new logic. Implementation advice.txt's rule — return typed results
+    from the common breeding logic instead of leaking chat into the model layer — was
+    already satisfied, and the work sat entirely in the NeoForge translation plus a new
+    file of sentences.
+
+Where it lives
+
+    common/repro/CoverNotice — the sentences, the Reason enum, the quiet period.
+    server/NaturalBreedingHandler.tell — verdict to reason, owner lookup, the map.
+    ServerConfig.notices.owned_horse_breeding, default true, beside the damage and
+    death notices it follows.
+
+    The wording is the feature, so it goes where a test can pin it down: ReproText's
+    precedent, and HurtNotice's, both made for this reason. CoverNoticeTest asserts that
+    every reason names the mare, that the crowding line carries both numbers, that only
+    CONCEIVED is good news, that the same reason waits out the quiet period, that a
+    changed reason does not, that a clock which went backwards does not silence her
+    forever, and that the two empty rolls read differently.
+
+The judgement call: two refusals say nothing at all
+
+    NOT_NOW (she is between heats) and NO_STALLION (nobody eligible in reach) have no
+    Reason and produce no line. The scan runs every 40 ticks on every adult mare in a
+    loaded chunk, and those two are the answer for nearly every mare nearly all of the
+    time — a line each would be a wall of text that trains the owner to stop reading the
+    one that matters. That is the same argument HurtNotice makes for not appending the
+    cure sentence to every scratch.
+
+    What is left is the set an owner can act on: the cap (with the count and the limit,
+    which is what makes it actionable rather than mysterious), a hurt mare, one being
+    ridden, one on a lead, and a cowboy's branded stock. Note that the ActionTrace log
+    beside it logs only the health case, on the grounds that ridden and leashed are the
+    player's own doing and obvious — that reasoning holds for a debug log read after the
+    fact and not for chat, where a mare left saddled in a pen overnight is exactly the
+    "why is she the only one not in foal" the notice exists to answer.
+
+Two smaller calls
+
+    The successful cover is announced too, though the bullet asked only for failures. An
+    owner who is told why a cover did not happen and then hears nothing when one does
+    reads the silence as another failure. A cover is once per heat, so it is not noise.
+
+    The throttle is five minutes and per reason, not per mare. Five because this is not
+    an alarm the way a burning horse is — a full paddock is still full a minute later and
+    there is nothing new to act on — and per reason because the owner who has just moved
+    six horses out needs to hear what stopped it this time rather than silence.
+
+What is not done
+
+    A cover arranged by hand — a golden carrot, or the seed jar — still reports only on
+    the action bar, as it always has. The player just acted and is looking at the horse,
+    which is what the action bar is for. If that flash turns out to be too easy to miss,
+    the same CoverNotice line should go to chat there too; that call is written on
+    fertility.html#cover-notice-0924 for the owner to make.
+
+    The owner asked mid-session that failed breedings also go into the horse log. The
+    Log tab is not built — horse-browser.html carries the plan and nothing else — so the
+    note went onto that plan instead: its rows should be CoverNotice.Reason constants
+    rather than a second list of strings that can drift from them. That page's Roadmap
+    tab already required a failed cover to keep its refusal reason; now it names which
+    reasons those are.
+
+Checks
+
+    :common:test --tests '*CoverNoticeTest' green (8 tests).
+    :neoforge-26.1.2:build green.
+    :web:bakeDesignerAssets run and its web.wasm reverted: CoverNotice is not reachable
+    from DesignerApi, the bake proved it compiles, and the binary is not reproducible.
+    A full :common:test was not run; nothing in common/ changed behaviour, so the golden
+    and pipeline suites could not have moved.
+
+    Unplayed, all of it. fertility.html#cover-notice-0924 has the paddock to build and
+    what each line should say.

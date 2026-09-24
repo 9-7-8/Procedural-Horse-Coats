@@ -145,6 +145,24 @@
     <li>nobody is near enough for that area to be loaded.</li>
 </ul>
 
+<h3 id="natural-notice">She tells you why</h3>
+
+<p>
+    When one of your own mares is not covered for a reason you can do something about, you
+    get a line in chat: the paddock is over the eight-horse limit (with the count), she is
+    hurt, she is being ridden, she is on a lead, or she is a cowboy&rsquo;s branded stock.
+    When a cover does happen you are told whether it took. Only you are told, only while
+    you are in the same world as her, and the same reason is not repeated for five minutes
+    &mdash; though a <em>different</em> reason always speaks, so an owner who has just
+    emptied a paddock hears what stopped it this time instead of silence.
+</p>
+<p>
+    A mare who is simply <strong>between heats</strong>, or who has <strong>no stallion in
+    reach</strong>, says nothing at all. That is nearly every mare nearly all of the time,
+    and a line each would bury the ones that matter. Turn the lot off with
+    <code>notices.owned_horse_breeding</code>.
+</p>
+
 <h2 id="gelding">Geldings and the vet&rsquo;s kit</h2>
 
 <p>
@@ -187,6 +205,7 @@
 <tr><td><code>common/repro/Pregnancy</code>, <code>Embryo</code></td><td>What she carries. An embryo is the foal&rsquo;s genome already drawn, its breed label, whether it is lost early, and the sire&rsquo;s id, names, generation and whole <code>GenomeSample</code>.</td></tr>
 <tr><td><code>common/repro/Conception</code></td><td><code>attempt(mating, mare, now, timing, sireCovers, health, lethals, rng)</code>: the one draw every pregnancy path uses. Also <code>vanillaFoalChance</code>, the only thing fertility does to plain golden carrots.</td></tr>
 <tr><td><code>common/repro/NaturalCover</code></td><td><code>decide(mare, record, now, timing, stallions, othersNearby)</code>: every rule of a natural cover, as a verdict (<code>COVER</code>, <code>NOT_A_BREEDING_MARE</code>, <code>NOT_NOW</code>, <code>NO_STALLION</code>, <code>CROWDED</code>) plus which stallion. <code>NaturalBreedingHandler</code> only gathers the facts.</td></tr>
+<tr><td><code>common/repro/CoverNotice</code></td><td>The owner-facing line for a cover that did not happen, and the quiet period that stops it repeating. A <code>Reason</code> per sentence: the cap, hurt, ridden, leashed, cowboy stock, and the three ways a cover itself ends. <code>dueAgain</code> always lets a <em>changed</em> reason through.</td></tr>
 <tr><td><code>common/repro/ReproText</code></td><td>Every sentence: durations, refusals, the info screen's Breeding line, the vet's kit report. Tested, above all, so that twins show only through the kit.</td></tr>
 <tr><td><code>common/genetics/Conceivable</code></td><td>A genotype a gene rules out (<code>canOccur</code>) is treated as an embryonic lethal on both breeding paths, with a synthetic cause.</td></tr>
 <tr><td><code>neoforge/data/ReproCodecs</code></td><td>The save format of <code>horsegenetics:horse_repro</code>. Not <code>copyOnDeath</code>, not synced.</td></tr>
@@ -230,7 +249,11 @@
         <code>NaturalCover.COURTSHIP_TICKS</code> (a transient <code>Courtship</code> per mare),
         exactly as vanilla's <code>BreedGoal</code> waits out <code>loveTime &gt;= 60</code> inside
         <code>distanceToSqr &lt; 9</code>. Like vanilla, there is no line of sight check. Cowboy-branded
-        horses are skipped. It is an entity tick, so only loaded chunks ever breed.</li>
+        horses are skipped. It is an entity tick, so only loaded chunks ever breed.
+        <code>tell</code> turns the verdict into a <code>CoverNotice.Reason</code> for the
+        mare&rsquo;s owner, behind <code>notices.owned_horse_breeding</code>; the
+        <code>ActionTrace</code> lines beside it are unchanged and throttle on their own
+        schedule, because they are the debug record and not owner-facing.</li>
     <li><strong>Gelding</strong> is <code>HorseRecord.gelded</code>, and
         <code>HorseRecord.entire()</code> is what every stallion check asks: the herd goals,
         rivalry, the jar and <code>onBabySpawn</code>. <code>VetKitHandler</code> gelds and
@@ -732,8 +755,48 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>One twin pregnancy in ten is now a single genome drawn once, epigenetics included, and no pair has been compared side by side; ranking above it is gap 258&rsquo;s silence &mdash; a mare who loses a pregnancy must be covered again, and the old failure was a pen that simply went quiet for the rest of the run.</p>
+    <p>Ranking first is the chat line an owner now gets when a mare is not covered, because every player with a paddock sees it and nobody has read one yet; behind it, one twin pregnancy in ten is a single genome drawn once, epigenetics included, and no pair has been compared side by side.</p>
 </div>
+
+<h3 id="cover-notice-0924">Why she was not covered, in chat (2026-09-24, NOT played)</h3>
+
+<p>
+    A natural cover used to report every refusal only to the debug log, so a paddock the
+    crowding cap had quietly shut down looked the same as one where nothing was in heat.
+    The mare&rsquo;s owner is now told, in <code>CoverNotice</code>&rsquo;s words, for the
+    reasons they can act on &mdash; and told how a cover went once one happens. The wording
+    and the quiet period are unit-tested (<code>CoverNoticeTest</code>); what is unplayed is
+    every part that needs a real paddock.
+</p>
+
+<h4>What to look at</h4>
+
+<ul>
+    <li><strong>The cap says so.</strong> Put a tamed mare in heat with a stallion and more
+        than eight other horses within 16 blocks. <strong>Pass:</strong> one yellow line
+        naming her, the count and the limit. <strong>Fail:</strong> nothing, which would
+        mean the owner lookup or the config is wrong; or a line every two seconds, which
+        would mean the quiet period is not holding.</li>
+    <li><strong>A changed reason speaks immediately.</strong> With that line just shown,
+        lead her away on a rope. <strong>Pass:</strong> the &ldquo;on a lead&rdquo; line
+        arrives without waiting out the five minutes.</li>
+    <li><strong>A quiet mare stays quiet.</strong> Stand in a paddock of mares between
+        heats with no stallion. <strong>Pass:</strong> no breeding lines at all. Any line
+        here is the bug this feature is one step away from being.</li>
+    <li><strong>The cover itself reports.</strong> Let a cover go through.
+        <strong>Pass:</strong> a green &ldquo;in foal&rdquo; line, or a yellow
+        &ldquo;didn&rsquo;t take&rdquo;. <strong>Fail:</strong> silence on a successful
+        cover, which would read to a player as another failure.</li>
+    <li><strong>Nobody else hears it.</strong> On a server, a second player standing in the
+        same paddock should see none of these lines.</li>
+</ul>
+
+<p>
+    <strong>One call to confirm or overturn:</strong> a cover arranged by hand &mdash; a
+    golden carrot, or the seed jar &mdash; still reports only on the action bar, as it
+    always has, on the grounds that the player just acted and is looking at the horse. If
+    that flash is too easy to miss, the same line should go to chat there too.
+</p>
 
 <h3 id="identical-twins-0917">One twin pregnancy in ten is identical (2026-09-17, NOT played)</h3>
 

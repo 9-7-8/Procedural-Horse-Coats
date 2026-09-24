@@ -116,7 +116,11 @@
         that happen while the menu is closed.</li>
     <li><strong>One filter model.</strong> Filter by event type (coverage, birth, death, taming,
         purchase, sale, transfer and future event kinds), with an All option and newest-first
-        ordering preserved after filtering. Failed covers must retain their refusal reason.</li>
+        ordering preserved after filtering. Failed covers must retain their refusal reason.
+        <strong>That vocabulary already exists</strong>: <code>CoverNotice.Reason</code>
+        (<a href="fertility.html#natural-notice">the chat line</a>) is the set of refusals a
+        natural cover can end in, and the Log tab&rsquo;s rows should be those same constants
+        rather than a second list of strings that can drift from them.</li>
     <li><strong>Registry prerequisite.</strong> The event record should reference the same horse
         identity and ownership state as the owned-horse registry, so sold or dead horses remain
         understandable instead of becoming anonymous log rows.</li>

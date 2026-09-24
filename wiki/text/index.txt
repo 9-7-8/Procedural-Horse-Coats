@@ -227,6 +227,7 @@ wiki/fertility.html#heat	gameplay	Heat
 wiki/fertility.html#hooks	coding	The hooks
 wiki/fertility.html#left-out	science	What the model leaves out
 wiki/fertility.html#natural	gameplay	A stallion left with mares
+wiki/fertility.html#natural-notice	gameplay	She tells you why
 wiki/fertility.html#odds	gameplay	Will it take?
 wiki/fertility.html#odds-reference	science	The odds, against the reference
 wiki/fertility.html#pregnant	gameplay	Pregnancy
