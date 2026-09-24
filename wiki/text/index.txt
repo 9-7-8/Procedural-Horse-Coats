@@ -2683,6 +2683,8 @@ wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
 wiki/horse-care.html#hurt-notice	gameplay	4. When one of your horses is hurt
 wiki/horse-care.html#hurt-notice-code	coding	The hurt notice — whose chat, how often, and why sunlight is a special case
 wiki/horse-care.html#kept-herds	gameplay	Tamed herds
+wiki/horse-care.html#last-stand	gameplay	7. And when the blow lands anyway
+wiki/horse-care.html#last-stand-code	coding	Surviving a killing blow — two events, because they are two different refusals
 wiki/horse-care.html#reachable-food	coding	A horse only walks to food it can reach
 wiki/horse-care.html#roles	gameplay	Who is who
 wiki/horse-care.html#science-bachelors	science	Bachelor bands and how a stallion gets mares

@@ -473,6 +473,55 @@
         <strong>0</strong> to turn the whole thing off.</li>
 </ul>
 
+<h2 id="last-stand">7. And when the blow lands anyway</h2>
+
+<p>
+    <strong>No horse is killed by a single blow.</strong> Damage that would take a horse to zero
+    takes it to <strong>half a heart</strong> instead, and for <strong>six seconds</strong>
+    afterwards nothing can touch it at all &mdash; not the creeper that nearly killed it, not the
+    lava it is standing in, not the drop it just landed from. Six seconds is what
+    <a href="#escape">bolting</a> needs to get clear, and a horse on half a heart is bolting
+    already: the save and the run are one behaviour, and the window is the head start.
+</p>
+
+<div class="note">
+    <span class="label">What you read when it happens</span>
+    <p><em>Ravensong took a killing blow and is still standing, on its last breath. Nothing can
+        touch it for 6 seconds &mdash; get it out. It will not be saved again until it is back to
+        full health.</em></p>
+</div>
+
+<ul>
+    <li><strong>It is one save, not a state.</strong> When the six seconds are up the horse is as
+        mortal as any other animal, and the <em>next</em> killing blow kills it. The save comes
+        back only once the horse has healed all the way to full &mdash; which costs food, water
+        and time, the same as any other <a href="#hunger">healing</a>. That is the whole price,
+        and it is what stops this being immortality.</li>
+    <li><strong>You have six seconds and you should use them.</strong> The horse is on half a
+        heart and running; your job is to get it somewhere the next hit does not come. A horse
+        led back into the fight at the end of the window dies there.</li>
+    <li><strong>Every horse, wild or yours.</strong> A horse you have never met gets the same
+        save, which is mostly visible as wild horses surviving falls and creepers they used to be
+        flattened by. Donkeys and mules are in, and so are vanilla&rsquo;s llamas and camels
+        &mdash; they are the same family as far as every other part of this mod is concerned, and
+        singling them out here would be the odd decision rather than this one.</li>
+    <li><strong>A genetic defect is still fatal.</strong> A <a href="horse-body.html#lethals">
+        lethal foal</a> dies on schedule, and the half-heart a mare loses to an embryonic lethal
+        can still be her last. So can the void, and so can <code>/kill</code>. The save is about
+        surviving the world, not about surviving your own genetics.</li>
+    <li><strong>It is not a totem.</strong> Nothing is consumed and nothing has to be equipped.
+        The particles are vanilla's totem burst because that is the effect every player already
+        reads as <em>that should have killed it</em>.</li>
+    <li><strong>Four settings.</strong> <code>behaviour.last_stand</code> turns it off entirely
+        (vanilla rules, a horse dies when its health reaches zero);
+        <code>behaviour.last_stand_health</code> is the sliver it is left on;
+        <code>behaviour.last_stand_immunity_ticks</code> is the six seconds, in ticks, and
+        <strong>0</strong> keeps the save and drops the breathing space; and
+        <code>behaviour.last_stand_rearm_fraction</code> is how far back it must heal before it
+        can be saved again. Lower that last one and a horse is rescued again before it has really
+        recovered.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -820,6 +869,75 @@
         which is what "whatever it can" means; a wild one bolts on the same rule as an owned one.
         The one thing that turns it off is
         <code>behaviour.escape_health_fraction = 0</code>.</li>
+</ul>
+
+<h2 id="last-stand-code">Surviving a killing blow &mdash; two events, because they are two
+    different refusals</h2>
+
+<p>
+    <code>common/care/LastStand</code> holds the arithmetic (<code>LastStandTest</code> covers it);
+    <code>server/HorseLastStandHandler</code> is the translation. The per-horse state is a single
+    stamp &mdash; the game tick of the last save &mdash; kept under the key
+    <code>last_stand</code> in the existing <code>HorseCooldownsAttachment</code>, which was
+    already serialized, already <code>copyOnDeath</code>, and already the place this mod records
+    "when did this last happen to this horse". It gained a <code>clear</code> for the purpose,
+    since this is the first gate re-opened by <em>something happening</em> rather than by time
+    passing.
+</p>
+
+<ul>
+    <li><strong>The window is a cancel; the save is a rewrite.</strong> Immunity is
+        <code>LivingIncomingDamageEvent.setCanceled(true)</code> &mdash; the shape
+        <a href="gene-fireproof.html">a gene's fire immunity</a> already uses, and the only one
+        that means <em>no damage happened</em> rather than <em>zero damage happened</em>. The save
+        itself is <code>LivingDamageEvent.Pre</code>, because that is the first point at which the
+        number is the one that will really come off the health: armour and enchantments are out of
+        it by then, so a horse in barding is not judged on a blow it was never going to take in
+        full.</li>
+    <li><strong>Setting the health inside <code>Pre</code> is safe, and this is why.</strong>
+        <code>LivingEntity.actuallyHurt</code> reads the damage container back <em>after</em> the
+        event and only subtracts when it is non-zero, so <code>setNewDamage(0)</code> plus a bare
+        <code>setHealth(&hellip;)</code> leaves the horse on exactly that health at the end of the
+        tick. It is also what vanilla's own totem does &mdash;
+        <code>checkTotemDeathProtection</code> is a bare <code>setHealth(1.0F)</code>. Everything
+        else about the hit still lands: hurt animation, hurt sound, knockback, and
+        <code>LivingDamageEvent.Post</code>, so nothing that watches a horse being damaged goes
+        quiet.</li>
+    <li><strong>The save and the bolt are one behaviour by arithmetic, not by wiring.</strong>
+        <code>resolveMobResponsibleForDamage</code> runs after <code>actuallyHurt</code>, so a
+        saved horse still gets its <code>lastHurtByMob</code> and its <code>hurtTime</code> &mdash;
+        which is exactly what <a href="#escape-code"><code>HorseEscapeGoal.inDanger</code></a>
+        reads. A horse on half a heart therefore bolts on the same tick it is saved, and
+        <code>Escape.THREAT_LINGERS_TICKS</code> (200) outlasts
+        <code>LastStand.DEFAULT_IMMUNITY_TICKS</code> (120) on purpose: the running does not stop
+        before the immunity does.</li>
+    <li><strong>Re-arming is read off the health, not ticked.</strong> "Healed back to full" is a
+        fact about the horse, so it is evaluated in the incoming-damage handler, which is the one
+        place guaranteed to run whenever the answer could matter. It costs nothing while nothing is
+        attacking, cannot go stale in an unloaded chunk, and cannot miss the heal that finished the
+        job &mdash; the same reasoning as <code>creditBondTiers</code>. There is no tick and no
+        countdown anywhere in this feature.</li>
+    <li><strong>Two damage sources are exempt, in both directions.</strong>
+        <code>horsegenetics:genetic_defect</code> has to be: <code>LethalFoalHandler</code> is
+        tuned to out-damage the care handler's regeneration, so a foal rescued to half a heart
+        every six seconds would be an <em>immortal</em> lethal foal, and the half-heart a mare
+        loses to an embryonic lethal is deliberately allowed to be her last. Everything in
+        <code>minecraft:bypasses_invulnerability</code> is the other &mdash; the void,
+        <code>/kill</code>, and the generic kill <code>LycanthropyHandler</code> falls back to when
+        a were-animal dies of something its horse body shrugs off. That fallback was written for
+        gene immunities and covers this one unchanged.</li>
+    <li><strong><code>AbstractHorse</code>, not <code>Horse</code>.</strong> Matching the hurt and
+        death notices and the care handler&rsquo;s own herd scan rather than the goal handlers: a
+        rule about not dying should not depend on having been born here. It is a wider family than
+        it sounds &mdash; donkeys and mules, which this mod breeds, but also llamas and camels,
+        which it does not. Left that way because <code>AbstractHorse</code> is this mod&rsquo;s
+        consistent answer to "what is a horse", but it is a call worth an owner&rsquo;s eye.</li>
+    <li><strong>The chat line is not behind <code>notices.owned_horse_damage</code>.</strong> That
+        switch exists to stop a pen on fire becoming a wall of text; this is the opposite kind of
+        line, and it cannot repeat without the player healing a horse to full in between. A horse
+        that walks out of an explosion on half a heart with nothing said reads as the mod failing
+        to kill it &mdash; <a href="horse-body.html">the lethal foal's</a> "the chat line is the
+        feature", pointed the other way.</li>
 </ul>
 
 <h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
@@ -1732,8 +1850,74 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>No horse can be killed by a single blow any more, and that rests entirely on one unverified assumption &mdash; that zeroing the damage and setting the health inside <code>LivingDamageEvent.Pre</code> behaves the way the 26.1.2 sources read &mdash; so the first check is a charged creeper against a full-health horse and the second is that a lethal foal still dies in its four seconds rather than outliving the mechanic that is meant to kill it; a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
+
+<h3 id="last-stand-0924">No horse dies to one blow (2026-09-24, NOT played)</h3>
+
+<p>
+    Asked for directly: <em>horses should never be able to be "one shot" and die &mdash; any
+    health which would kill them takes them to one health point instead, and they get 120 ticks of
+    immunity to damage, then the immunity disables until they heal back to full health again</em>,
+    amended the same day to put the duration, the thresholds and the off switch in the config with
+    those numbers as defaults. Built as <a href="#last-stand-code">the last stand</a>.
+    <code>LastStandTest</code> covers the arithmetic and the wording &mdash; that damage exactly
+    equal to the remaining health still counts as fatal, the window, the "never" value the cooldown
+    store answers with, the two ways a setting could hand back immortality, and the clamps that stop
+    a configured health of 0 killing what it rescues. <strong>Nothing about the behaviour is
+    tested</strong>, because all of it is NeoForge.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The one that decides whether any of it works.</strong> Stand a full-health horse
+        next to a charged creeper, or hit one with a sharpness-V sword it could not survive.
+        <strong>Pass:</strong> totem particles, one red line in chat, and the horse alive on half
+        a heart. <strong>Fail:</strong> it dies &mdash; which most likely means
+        <code>LivingDamageEvent.Pre</code>'s <code>setNewDamage</code>/<code>setHealth</code>
+        pairing does not behave the way the 26.1.2 sources read, and that is the single assumption
+        this whole feature rests on.</li>
+    <li><strong>The window is real immunity, not a hurt cooldown.</strong> Save a horse standing in
+        fire or lava. <strong>Pass:</strong> its health does not move for six seconds, then it
+        starts burning down again. <strong>Fail:</strong> it keeps losing health through the
+        window, meaning the incoming-damage cancel is not landing (another handler may be
+        cancelling or consuming the event first).</li>
+    <li><strong>It is spent.</strong> Save a horse, wait out the window, hit it again hard without
+        healing it. <strong>Pass:</strong> it dies. <strong>Fail:</strong> it is saved a second
+        time, which is the stamp not being written or not surviving &mdash; check
+        <code>[trace] last-stand</code>.</li>
+    <li><strong>It comes back.</strong> Heal the same horse to full at food and water, then hit it
+        hard. <strong>Pass:</strong> saved again, with the line. <strong>Fail:</strong> it dies at
+        full health, which means the re-arm read never fires.</li>
+    <li><strong>It survives a relog.</strong> Save a horse, log out inside the six seconds, log
+        back in. <strong>Pass:</strong> it is still not saveable until healed. The stamp is on
+        <code>HorseCooldownsAttachment</code>, which is serialized, but nothing has watched it hold
+        a value written mid-damage.</li>
+    <li><strong>A lethal foal still dies on schedule.</strong> Breed two lethal-white carriers
+        outside the gallery. <strong>Pass:</strong> the foal dies in about four seconds, as it
+        always did. <strong>Fail:</strong> it survives, or takes six seconds longer &mdash; the
+        <code>genetic_defect</code> exemption is the thing to look at, and this is the failure that
+        would quietly break an existing mechanic rather than the new one.</li>
+    <li><strong><code>/kill</code> still kills.</strong> And a horse pushed into the void still
+        dies. <strong>Fail:</strong> an unkillable horse, which is the
+        <code>bypasses_invulnerability</code> check.</li>
+    <li><strong>A were-animal's horse still dies with it.</strong> Kill a shifted horse in its
+        animal form. <strong>Pass:</strong> the restored horse dies too &mdash;
+        <code>LycanthropyHandler</code>'s generic-kill fallback is supposed to cover this for free,
+        and it has never been watched doing it.</li>
+    <li><strong>The save and the bolt are one behaviour.</strong> <strong>Pass:</strong> a saved
+        horse is already running when the particles clear, and is still running when the immunity
+        ends. <strong>Fail:</strong> it stands on half a heart for six seconds and then gets hit,
+        which would mean a cancelled hit does not leave the <code>hurtTime</code> and
+        <code>lastHurtByMob</code> that <code>HorseEscapeGoal.inDanger</code> reads.</li>
+    <li><strong>A wild horse gets it too.</strong> And a donkey &mdash; and, by the same class
+        test, a llama and a camel. Worth looking at once and deciding whether that is wanted.</li>
+    <li><strong>The switches.</strong> <code>behaviour.last_stand = false</code> &mdash;
+        <strong>pass:</strong> a horse dies to one blow again, vanilla-exactly.
+        <code>behaviour.last_stand_immunity_ticks = 0</code> &mdash; <strong>pass:</strong> still
+        saved, no window, and the chat line does not promise one.</li>
+</ul>
 
 <h3 id="escape-0924">A dying horse bolts (2026-09-24, NOT played)</h3>
 
