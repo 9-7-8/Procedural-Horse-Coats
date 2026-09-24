@@ -97,9 +97,8 @@ before assuming the requested number or rule is settled. Wing rendering is
 still an unbuilt feature; give it its own Roadmap tab on a new or existing
 page rather than building from the paragraph in To do.txt directly, per
 "Implementation advice.txt"'s recommended order. (The stasis system was the
-other one named here; it is built through stage four and its remaining stages
-are on wiki/horse-stasis.html's Roadmap tab, which is how this is meant to
-go.)
+other one named here; it is built through stage five and the one stage left is
+on wiki/horse-stasis.html's Roadmap tab, which is how this is meant to go.)
 
 Searching the wiki without burning context
 ============================================

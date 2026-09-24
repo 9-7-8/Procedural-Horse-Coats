@@ -2766,10 +2766,14 @@ wiki/horse-stasis.html#browse-coding	coding	The Browse tab reads the stable's pa
 wiki/horse-stasis.html#browse-gameplay	gameplay	The Browse tab: the bank as a list of horses
 wiki/horse-stasis.html#capture-release	coding	Capture and release: it is the lycanthropy swap
 wiki/horse-stasis.html#chambers	gameplay	The four stasis-chamber tiers
+wiki/horse-stasis.html#drops-coding	coding	The drop buffer: the same ability verb, a different sink
+wiki/horse-stasis.html#drops-gameplay	gameplay	The drop buffer: what an Advanced chamber collects
 wiki/horse-stasis.html#files	coding	What is where
-wiki/horse-stasis.html#pipes	coding	Why the supply slots are on the wire and the chambers are not
+wiki/horse-stasis.html#pipes	coding	Why the goods slots are on the wire and the chambers are not
 wiki/horse-stasis.html#refusals	gameplay	What it refuses, and why it says so
 wiki/horse-stasis.html#release-details	coding	Small decisions inside release
+wiki/horse-stasis.html#stud-coding	coding	In-bank breeding: the mark, the cover, and coming out to foal
+wiki/horse-stasis.html#stud-gameplay	gameplay	Putting a horse to stud in the bank
 wiki/horse-stasis.html#supply-gameplay	gameplay	The Supply tab: feeding and mending what is in there
 wiki/horse-stasis.html#the-component-syncs-whole	coding	The component syncs the whole tag, on purpose
 wiki/horse-stasis.html#two-custom-recipes	coding	Why two of these are Java recipes

@@ -23,9 +23,10 @@
     many chambers and lets you read the horses inside them. The whole point is the cheapest
     tier, so a server with hundreds of horses can put most of them somewhere that costs
     nothing, instead of every horse being a real, ticking entity forever.
-    <strong>The four chambers are built, the bank keeps them, its Browse tab reads them, and
-    with feed and water in its supply slots it slowly mends them.</strong> What is still
-    planned is the drop buffer and in-bank breeding.
+    <strong>All four chambers are built and the bank does everything they buy</strong> &mdash; it
+    keeps them, reads them on its Browse tab, mends them from its feed and water, collects what
+    they drop, and breeds a pair you turn out at stud. What is still planned is the
+    self-triggering Emergency chamber.
 </p>
 
 <section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
@@ -69,11 +70,14 @@
             the bank will feed and mend it. <strong>Both built.</strong></td></tr>
     <tr><td><strong>Advanced Horse Stasis Chamber</strong></td>
         <td>Intermediate + a gold ingot.</td>
-        <td>The bank passively collects the horse's milk/drops into its 9-slot buffer.</td></tr>
+        <td>The bank collects what this horse drops on its own &mdash; eggs, feathers, wool and
+            the rest of the laying alleles &mdash; into its nine-slot buffer.
+            <strong>Built.</strong></td></tr>
     <tr><td><strong>Spacer Horse Stasis Chamber</strong></td>
         <td>Advanced + a diamond.</td>
-        <td>The horse can be bred while still inside the bank &mdash; the other parent must
-            also be in a Spacer chamber &mdash; and the foal pops out into the world.</td></tr>
+        <td>This horse can be turned out <strong>at stud</strong> and bred without leaving the
+            bank, against another Spacer in the same bank. She carries the pregnancy in her
+            chamber and comes out on her due date to foal. <strong>Built.</strong></td></tr>
 </table>
 <p>
     <strong>Storage is free at every tier and always will be.</strong> What the upper tiers buy
@@ -100,7 +104,7 @@
     <strong>double chest's worth of slots that take stasis chambers and nothing else</strong>.
 </p>
 <p>
-    That is the first of its two tabs, and it is worth having on its own: fifty-four bottles in
+    That is the first of its three tabs, and it is worth having on its own: fifty-four bottles in
     an ordinary chest are fifty-four identical bottles, and this is where a stud farm's shelved
     horses live instead. Chambers of any tier go in, full or empty &mdash; a rack of spare
     empties beside the occupied ones is the obvious way to use one. The title bar counts what is
@@ -142,6 +146,12 @@
     rather than being hidden or guessed at. With a filter typed, the count in the corner turns
     into <em>3 of 9</em>.
 </p>
+<p>
+    <strong>The rows are also buttons.</strong> Clicking one turns that horse out
+    <a href="#stud-gameplay">at stud</a>, if it is in a Spacer chamber; the line under the list
+    says how many are, or invites you to try it, and a click on a chamber that cannot be marked
+    says which rung can.
+</p>
 <div class="note">
     <span class="label">Breaking it gives everything back, and it will not burn</span>
     <p>
@@ -153,8 +163,9 @@
 </div>
 <h2 id="supply-gameplay">The Supply tab: feeding and mending what is in there</h2>
 <p>
-    The third tab is three slots &mdash; <strong>feed</strong>, <strong>water</strong>, and the
-    <strong>empties</strong> the water leaves behind. Put hay or wheat in one and a bucket of
+    The third tab is <strong>feed</strong>, <strong>water</strong>, the <strong>empties</strong>
+    the water leaves behind, and a row of nine under them that is the bank's
+    <a href="#drops-gameplay">drop buffer</a>. Put hay or wheat in one and a bucket of
     water in the other and the bank <strong>slowly heals the horses it is holding</strong>.
     That is the first thing it does <em>to</em> a horse rather than shelving one.
 </p>
@@ -185,15 +196,94 @@
     </p>
 </div>
 <p>
-    <strong>Those three slots are the one part of the bank a hopper can reach.</strong> Feed,
-    water buckets and the empty buckets coming back out can all be piped &mdash; by a hopper, a
-    dropper, or another mod's pipework &mdash; so keeping a stud farm's bank supplied is not a
-    chore you do by hand. <strong>The chambers are not:</strong> nothing outside the bank can
-    file or fetch a horse, and nothing is meant to.
+    <strong>The whole of that tab is the one part of the bank a hopper can reach.</strong> Feed
+    and water going in, the empty buckets coming back out, and the drop buffer being emptied can
+    all be piped &mdash; by a hopper, a dropper, or another mod's pipework &mdash; so keeping a
+    stud farm's bank supplied, and collecting from it, is not a chore you do by hand.
+    <strong>The chambers are not:</strong> nothing outside the bank can file or fetch a horse,
+    and nothing is meant to.
+</p>
+
+<h2 id="drops-gameplay">The drop buffer: what an Advanced chamber collects</h2>
+<p>
+    Some horses make things. The <a href="gene-egg-layer.html">egg-layer locus</a> gives a horse
+    two matching copies of a laying allele and it drops that thing on the ground every few hours
+    &mdash; an egg, a feather, wool, a slime ball, ink, string, bone or leather, depending which
+    allele it is, and how often is written on the allele copy itself. Put such a horse in an
+    <strong>Advanced</strong> chamber and the bank catches all of it in the nine slots under the
+    supply row instead.
 </p>
 <p>
-    What the bank still cannot do is collect a horse's drops or breed one in place, which is
-    what the two tiers above Intermediate pay for. Both are on the Roadmap tab.
+    It is the same clock, at the same rate, on the same genetics: a shelved layer is not a
+    better or a worse layer than one standing in a paddock, and a horse whose egg was nearly due
+    when you shelved it does not lose it. What changes is only that nothing ends up on the floor.
+</p>
+<div class="note">
+    <span class="label">A full buffer stops production rather than wasting it</span>
+    <p>
+        A horse in a field drops its egg and walks off; a bank has nowhere to drop one. So if the
+        nine slots are full the bank <strong>does not produce at all</strong> that turn, and the
+        horse's clock is not spent either &mdash; empty the buffer and it picks up where it left
+        off. Nothing is ever quietly destroyed, and the tab says <em>full, so nothing more is
+        made</em> rather than leaving you to work that out.
+    </p>
+</div>
+<div class="note warn">
+    <span class="label">Not milk. Milk cannot work this way</span>
+    <p>
+        This was planned as a &ldquo;milk and drops&rdquo; buffer, and the milk half is not
+        buildable. Every milk locus in the mod &mdash; <a href="gene-milk.html">milk</a>,
+        <a href="gene-potion-milk.html">potion milk</a>, the volume gene &mdash; works by
+        <em>you holding a bucket out to the horse</em>. There is no passive milking anywhere in
+        the mod for a bank to copy, so a bank that filled itself with milk buckets would be
+        inventing a mechanic rather than shelving one, and a milkable horse would be worth more
+        in a box than in a field. The buffer collects what a horse does <strong>on its
+        own</strong>; milking is still something you do with your hands.
+    </p>
+</div>
+
+<h2 id="stud-gameplay">Putting a horse to stud in the bank</h2>
+<p>
+    A <strong>Spacer</strong> chamber can be turned out <strong>at stud</strong>: open the Browse
+    tab and <strong>click the row</strong>. The right-hand corner of the row changes from
+    <em>Spacer</em> to <em>at stud</em>, and clicking again brings it back in. Nothing else on
+    the row moves, and a click on any lower tier says so rather than doing nothing.
+</p>
+<p>
+    <strong>A bank with a mare and a stallion at stud is a paddock.</strong> Both horses stay
+    exactly where they are, and the bank breeds them on the ordinary rules: she is covered when
+    she comes into heat, <strong>once per heat and not twice</strong>, and a cover that does not
+    take waits for her next one. A stallion who has already covered three times that day is less
+    likely to catch, exactly as he would be in a field. Both of them have to be <em>well</em>,
+    too &mdash; which is the other reason the feed and water slots matter.
+</p>
+<p>
+    Her cycle runs while she is shelved. It does not need her to be awake: a mare's heat is
+    worked out from the clock, so a fortnight in a chamber is a fortnight of cycles, and she is
+    in whatever phase she would have been in standing in a field.
+</p>
+<div class="note">
+    <span class="label">She comes out to foal</span>
+    <p>
+        The pregnancy is carried in the chamber &mdash; you can see it on her row in the Horse
+        Browser like any other &mdash; and on her <strong>due date the bank lets her out</strong>,
+        standing beside the block, and she foals within a couple of seconds. So you come back to
+        a mare and a foal next to the bank and an empty chamber where she was. The foal is named,
+        tamed, filed and logged exactly like any other foal, because it <em>is</em> any other
+        foal: the birth is the ordinary one.
+    </p>
+    <p>
+        <strong>It will not foal into a wall.</strong> If there is nowhere beside the bank to put
+        her down, she stays in her chamber and the Supply tab says <em>a mare is due &mdash; clear
+        a space beside the bank</em>. Nothing is lost while you do.
+    </p>
+</div>
+<p>
+    Two things a bank breeding does <em>not</em> do. <strong>Breeding carrots do not reach it</strong>
+    &mdash; a carrot is armed on a live horse and spent by a breeding you are standing next to, so
+    a bank pairing draws like a wild cover. And there is <strong>no crowd limit</strong>: the
+    paddock rule that stops breeding in a packed pen counts animals, and a bank holds none. How
+    many chambers you mark is the only cap, which is the point of having to mark them.
 </p>
 
 <h2 id="refusals">What it refuses, and why it says so</h2>
@@ -261,19 +351,40 @@
     <tr><th>File</th><th>What it does</th></tr>
     <tr><td><code>common/&hellip;/horse/StasisTier.java</code></td>
         <td>The four tiers and what each unlocks, as cumulative flags rather than a name the
-            UI switches on. <code>heals()</code> is both the upkeep's gate and the bank's tick
-            gate.</td></tr>
+            UI switches on. <code>heals()</code>, <code>collectsDrops()</code> and
+            <code>breedsInBank()</code> are the three jobs, and the tick gate is their
+            or.</td></tr>
     <tr><td><code>common/&hellip;/horse/StasisUpkeep.java</code></td>
         <td><strong>The bank's whole economy, as arithmetic.</strong> One turn on one horse:
             what it eats, what it heals, what that cost in hunger and water. No Minecraft in it
             &mdash; <code>StasisUpkeepTest</code>.</td></tr>
+    <tr><td><code>common/&hellip;/horse/StasisProduce.java</code></td>
+        <td><strong>What a shelved horse has made</strong>, off the gene's own
+            <code>produce</code> ability and its own interval. Owns
+            <code>holdsInStasis</code> - which ability conditions a chamber can honestly answer.
+            No Minecraft in it: <code>StasisProduceTest</code>.</td></tr>
+    <tr><td><code>common/&hellip;/horse/StasisMating.java</code></td>
+        <td><strong>Whether the bank may cover this mare</strong>, as a
+            <code>Verdict</code>, and the <code>Conception.Mating</code> it hands over. Every
+            answer is <code>ReproRules</code>' - <code>StasisMatingTest</code>.</td></tr>
     <tr><td><code>neoforge/&hellip;/server/StasisCare.java</code></td>
-        <td>The tag surgery: health, maximum health, hunger, record and diet out of a stored
-            horse's NBT, the mended tag back in. The <em>only</em> place that reaches into a
-            snapshot's contents.</td></tr>
+        <td>The tag surgery: health, maximum health, age, hunger, record, diet, cooldowns and
+            the reproductive record out of a stored horse's NBT, and the amended ones back in.
+            <strong>Every string that has to match something Minecraft or NeoForge wrote is in
+            this one file</strong>, where one gametest can walk the lot.</td></tr>
+    <tr><td><code>neoforge/&hellip;/server/StasisDrops.java</code></td>
+        <td>The buffer's game half: an item id into an item, and the cooldown stamp back onto
+            the horse. Two calls - <code>due</code> changes nothing, <code>stamp</code> is only
+            paid once the bank has the items.</td></tr>
+    <tr><td><code>neoforge/&hellip;/server/StasisStud.java</code></td>
+        <td>In-bank breeding: the at-stud mark, finding a sire among the chambers, the
+            conception written into both tags, and <strong>releasing a mare at her due
+            date</strong> - including the standable-spot search that refuses to foal into a
+            wall.</td></tr>
     <tr><td><code>neoforge/&hellip;/block/StasisBankCapability.java</code></td>
-        <td>The item-handler capability over the supply slots, and only those. What makes a
-            hopper work and keeps the chamber grid unreachable.</td></tr>
+        <td>The item-handler capability over the goods container, and only that. What makes a
+            hopper work and keeps the chamber grid unreachable. <strong>Unchanged by the drop
+            buffer</strong>, which is why the buffer is in that container.</td></tr>
     <tr><td><code>common/&hellip;/horse/StasisBrowseRow.java</code></td>
         <td>One line of the Browse tab: the chamber's name, its tier, and the horse's
             <code>HorseListing</code> if the stable has one. Owns the tier gate, the filter call
@@ -283,7 +394,9 @@
             stream codec.</td></tr>
     <tr><td><code>neoforge/&hellip;/data/ModDataComponents.java</code></td>
         <td><code>STASIS_SNAPSHOT</code>. <strong>Absent means an empty chamber</strong> &mdash;
-            that is the whole of the item's state machine.</td></tr>
+            that is the whole of the item's state machine. And
+            <code>STASIS_AT_STUD</code>, a bare boolean: on the item, so it syncs with the slot
+            and travels with the chamber.</td></tr>
     <tr><td><code>neoforge/&hellip;/item/StasisChamberItem.java</code></td>
         <td>One class, four registrations, parameterised by tier the way
             <code>TicketItem</code> is. Holds release (<code>useOn</code>) and the tooltip.</td></tr>
@@ -298,22 +411,30 @@
             <code>useWithoutItem</code>. A server-only ticker, the research shelf's
             <code>createTickerHelper</code> shape.</td></tr>
     <tr><td><code>neoforge/&hellip;/block/HorseStasisBankBlockEntity.java</code></td>
-        <td>Fifty-four chamber slots and three supply slots as two <code>SimpleContainer</code>s,
-            the water meter and the rotation cursor, the upkeep <code>tick</code> and its cached
-            gate, plus the static <code>isChamber</code> / <code>filed</code> /
-            <code>occupied</code> / <code>anyHealable</code> helpers both sides read.</td></tr>
+        <td>Fifty-four chamber slots and a twelve-slot goods container as two
+            <code>SimpleContainer</code>s, the water meter, the foaling-blocked flag and the
+            rotation cursor, the <code>tick</code> and its cached gate, the buffer's
+            all-or-nothing <code>roomFor</code> / <code>store</code> pair, plus the static
+            <code>isChamber</code> / <code>filed</code> / <code>occupied</code> /
+            <code>anyHealable</code> / <code>anyCollecting</code> / <code>anyAtStud</code>
+            helpers both sides read.</td></tr>
     <tr><td><code>neoforge/&hellip;/menu/HorseStasisBankMenu.java</code></td>
         <td>The grid and the supply row over the player's inventory, the <code>ChamberSlot</code>
             and <code>SupplySlot</code> predicates and shift-click, the <code>activeOnTab</code>
-            pair, <code>stored()</code> - the occupied chambers as tier-and-snapshot pairs - and
-            one <code>ContainerData</code> value, the water meter.</td></tr>
+            pair, <code>stored()</code> - the occupied chambers as slot, tier, snapshot and
+            mark - <code>clickMenuButton</code>, which is the whole of putting a horse to stud,
+            and two <code>ContainerData</code> values: the water meter and whether a mare is
+            stuck waiting to foal.</td></tr>
     <tr><td><code>neoforge/&hellip;/client/HorseStasisBankScreen.java</code></td>
         <td>All three tabs, drawn with <code>VanillaPanel</code> and no texture: the chamber
-            grid, the Browse list and its filter box, the supply row and its two status lines,
-            and the count on the title row.</td></tr>
+            grid, the Browse list and its filter box, the supply row, the drop buffer and their
+            status lines, and the count on the title row. Owns the click that marks a row and
+            the one spare line the list has room for.</td></tr>
     <tr><td><code>neoforge/&hellip;/gametest/ModGameTests.java</code></td>
         <td><code>stasis_tag_is_readable</code> &mdash; the tripwire for every NBT key
-            <code>StasisCare</code> reaches for, since all of them fail silently.</td></tr>
+            <code>StasisCare</code> reaches for, since all of them fail silently. It ends by
+            <strong>really releasing</strong> a horse whose tag <code>StasisCare</code> wrote to,
+            which is the half no amount of tag-reading proves.</td></tr>
 </table>
 
 <h2 id="bank-coding">The bank is a filtered chest with a clock on it</h2>
@@ -327,11 +448,12 @@
 </p>
 <p>
     The shelf's <code>createTickerHelper</code> shape is copied exactly, and
-    <strong>one <code>ContainerData</code> value</strong> has appeared with it &mdash; the water
-    meter, which is genuinely a number on the block that the screen cannot derive. Everything
-    else on all three tabs is still a loop over slots the client already has: the horse count,
-    every Browse row, what is in the feed slot. Every chamber carries its whole horse, so both
-    sides can count and read for free.
+    <strong>two <code>ContainerData</code> values</strong> have appeared with it &mdash; the water
+    meter and the foaling-blocked flag, both genuinely facts about the block that the screen
+    cannot derive. Everything else on all three tabs is still a loop over slots the client
+    already has: the horse count, every Browse row, what is in the feed slot, what is in the drop
+    buffer, <em>and which chambers are at stud</em>. Every chamber carries its whole horse and its
+    own mark, so both sides can count and read for free.
 </p>
 <div class="note">
     <span class="label">Two small divergences from the chest it resembles</span>
@@ -356,8 +478,9 @@
     order, and nothing past a refusal happens:
 </p>
 <ol>
-    <li><strong>Is there anything here worth healing?</strong> A cached <code>boolean</code>,
-        recomputed only when a chamber slot moves. A bank of Basic chambers &mdash; or of empty
+    <li><strong>Is there anything here worth doing?</strong> A cached <code>boolean</code>,
+        recomputed only when a chamber slot moves: the or of the three jobs - a chamber that
+        heals, one that collects, one at stud. A bank of Basic chambers &mdash; or of empty
         ones, or an empty bank &mdash; costs one field read a tick and no more. This is the
         owner's rule, and it is why the ticker may be attached unconditionally: the block has no
         blockstate properties to pick a ticker by, so the gate has to be the first line of the
@@ -376,6 +499,16 @@
     Only past all four does the bank open a bucket or take a mouthful. That ordering is what lets
     the feature keep its own promise: <strong>a bank must cost less than the horses it
     replaced</strong>, and it has to hold that at fifty-four chambers as well as at one.
+</p>
+<p>
+    Stage five added two more jobs to the same turn rather than a second clock, and each refuses
+    again on its own terms: the buffer on whether anything is owed, the stud on whether she is in
+    heat at all. <strong>The whole turn is still one chamber's worth of work</strong>, which is
+    the number the promise is about. Reading a stored horse's abilities costs roughly what a live
+    horse's own tick costs &mdash; and <code>GeneAbilityHandler</code> pays that
+    <em>every tick</em>, where a shelved horse pays it once every
+    <code>StasisUpkeep.HEAL_INTERVAL</code> at its very busiest, in a bank holding exactly one
+    chamber. A full bank is thirty times cheaper again.
 </p>
 <div class="note">
     <span class="label">The economy is the field's, which is why it is so small</span>
@@ -417,22 +550,37 @@
     </p>
 </div>
 
-<h2 id="pipes">Why the supply slots are on the wire and the chambers are not</h2>
+<h2 id="pipes">Why the goods slots are on the wire and the chambers are not</h2>
 <p>
-    The bank exposes a NeoForge item-handler capability over the <strong>three supply slots
+    The bank exposes a NeoForge item-handler capability over the <strong>goods container
     only</strong>. Feed and water are bulk goods that run out, and keeping a stud farm's bank
     topped up by hand is exactly the chore automation is for (owner, 2026-09-24) &mdash; so a
-    hopper, a dropper or another mod's pipework can push hay and buckets in and pull empties out.
-    The chamber grid is not part of the handler at all, so the original call stands untouched:
-    nothing outside the bank can file or fetch a live animal.
+    hopper, a dropper or another mod's pipework can push hay and buckets in, pull empties out, and
+    empty the drop buffer. The chamber grid is not part of the handler at all, so the original
+    call stands untouched: nothing outside the bank can file or fetch a live animal.
 </p>
 <p>
     <strong>The slot rules are written once.</strong> NeoForge's
     <code>VanillaContainerWrapper</code> asks <code>Container.canPlaceItem</code> before it
     inserts, so the per-slot predicates the block entity already writes for the menu are the same
     rules a pipe obeys &mdash; feed in the feed slot, water in the water slot, nothing at all
-    into the empties, which is an output. There is no second copy to drift.
+    into the empties or the buffer, which are outputs. There is no second copy to drift.
 </p>
+<div class="note">
+    <span class="label">The buffer is in that container on purpose, not for tidiness</span>
+    <p>
+        The drop buffer could have been a third <code>SimpleContainer</code> beside the other two
+        and it is <strong>nine more slots on the existing one</strong> instead, with
+        <code>FIRST_DROP_SLOT</code> telling them apart. The capability wraps <em>one</em>
+        container: a second would have wanted a second registration, something to join the two
+        handlers, and a second copy of the slot rules to keep in step. As it is,
+        <code>StasisBankCapability</code> did not change at all when the buffer shipped, and a
+        hopper under the bank pulls eggs out of it for free. The cost is that
+        <code>SUPPLY_SLOTS</code> now means twelve, which is why every reader goes through
+        <code>HorseStasisBankMenu.supplyX</code> / <code>supplyY</code> rather than doing the
+        arithmetic twice.
+    </p>
+</div>
 <div class="note warn">
     <span class="label">26.1.2 has no <code>IItemHandler</code></span>
     <p>
@@ -511,6 +659,158 @@
         rather than rediscovering it. See <a href="api-notes.html">api-notes.html</a>.</li>
 </ul>
 
+<h2 id="drops-coding">The drop buffer: the same ability verb, a different sink</h2>
+<p>
+    Passive production in this mod is exactly one thing &mdash;
+    <code>GeneAbility.Produce</code>, an item id, an interval and a count &mdash; and
+    <code>HorseAbilities.activeFor(genotype, epigenome)</code> is pure
+    <code>common/</code>. So the bank reads a shelved horse's yields off
+    <strong>the same call the live translator reads them off</strong>, with no second table and
+    no per-gene knowledge anywhere in the stasis code. A gene that gains a <code>produce</code>
+    is collectable in a bank the day it ships.
+</p>
+<p>
+    The epigenome has to be passed. <code>EggLayerGene</code> is an
+    <code>EpigeneticAbilityContribution</code> and its interval is written on the allele copy, so
+    <code>activeFor(genotype)</code> alone would have given every horse in every bank the
+    midpoint interval instead of its own &mdash; a difference nothing would ever have reported.
+</p>
+<div class="note">
+    <span class="label">The cooldown had to become durable, and that is an improvement</span>
+    <p>
+        <code>GeneAbilityHandler</code> keeps its produce cooldowns in a
+        <code>static Map&lt;String, Long&gt;</code> keyed by
+        <code>uuid/geneKey/produce</code>, which is lost on restart and
+        <em>cleared wholesale</em> past eight thousand entries. A shelved horse has no tick to
+        carry one at all, so the bank writes its stamp into the horse's own
+        <code>HORSE_COOLDOWNS</code> attachment under <code>produce:&lt;geneKey&gt;</code> &mdash;
+        the same attachment shearing and the yield genes already use. The consequence is the
+        pleasant one: a shelved layer keeps a real clock across restarts, where a live one lays
+        again on every server boot.
+    </p>
+</div>
+<div class="note">
+    <span class="label">Priced, then paid: why <code>due</code> and <code>stamp</code> are two calls</span>
+    <p>
+        A live horse calls <code>spawnAtLocation</code> and cannot fail. A bank can: nine slots
+        fill up. So <code>StasisDrops.due</code> reads what is owed and changes nothing, the block
+        entity's <code>roomFor</code> runs the insert against a throwaway container, and only if
+        <em>all</em> of it fits does <code>stamp</code> mark the cooldown spent. A full buffer
+        therefore pauses production rather than destroying a yield, and emptying it resumes on the
+        next turn. Half a yield is never taken either, which is why the dry run is over the whole
+        batch rather than per stack.
+    </p>
+</div>
+<div class="note warn">
+    <span class="label">A condition a chamber cannot answer refuses</span>
+    <p>
+        <code>GeneAbilityHandler.conditionHolds</code> reads the live entity and the level for
+        almost every flag in the vocabulary &mdash; <code>in_water</code>, <code>night</code>,
+        <code>raining</code>, <code>has_rider</code>, <code>near_jukebox</code>. A horse in a
+        chamber is in none of those, and they are not <em>false</em> about it so much as
+        meaningless. <code>StasisProduce.holdsInStasis</code> answers only the flags that are
+        facts about the horse itself &mdash; <code>adult</code>, <code>baby</code>,
+        <code>sex_male</code>, <code>sex_female</code> &mdash; and refuses everything else,
+        <strong>negation included</strong>: &ldquo;not raining&rdquo; is no more a fact about a
+        bottle than &ldquo;raining&rdquo; is. The alternative was a gene quietly behaving
+        differently indoors. Nothing shipped is affected: the egg-layer's condition is
+        <code>always</code>, and no spec gene emits a <code>produce</code> yet.
+    </p>
+</div>
+<div class="note">
+    <span class="label">The <code>Age</code> key is the one bare literal, and it has a tripwire</span>
+    <p>
+        <code>adult</code> means reading a saved <code>AgeableMob</code>'s age, and there is no
+        constant to import for it &mdash; vanilla writes the literal <code>"Age"</code>. A rename
+        would not throw; every shelved foal would simply start producing as though it were grown.
+        So <code>stasis_tag_is_readable</code> snapshots the same horse twice, once grown and once
+        with <code>setBaby(true)</code>, and asserts both.
+    </p>
+</div>
+
+<h2 id="stud-coding">In-bank breeding: the mark, the cover, and coming out to foal</h2>
+<p>
+    Three separate problems, and only the third was interesting.
+</p>
+<p>
+    <strong>The mark</strong> is a <code>Boolean</code> data component,
+    <code>STASIS_AT_STUD</code>, on the chamber item. That is the same call
+    <code>STASIS_SNAPSHOT</code> made and for the same reasons: it syncs to the client with the
+    ordinary slot sync so the Browse tab can draw it with no packet of its own, it travels with
+    the chamber between banks, and there is no copy on a block entity to drift from the chamber it
+    describes. A set of marked <code>UUID</code>s on the block would have needed syncing, pruning
+    when a chamber left, and a rule for what happens when the same horse is in two banks.
+    <strong>The mark alone is not permission:</strong> <code>StasisStud.atStud</code> asks the
+    tier as well, because <code>StasisUpgradeRecipe</code> copies components and a mark can
+    therefore outlive the rung that bought it.
+</p>
+<p>
+    Toggling it is <code>AbstractContainerMenu.clickMenuButton</code> with the chamber slot as the
+    id &mdash; <code>JumpMenu</code>'s shape, and the rule
+    <code>BenchNamePayload</code> states from the other side: an int fits in a menu button and a
+    string does not. The server re-checks the tier and the occupancy, because a menu button is a
+    packet and a packet is whatever somebody sent.
+</p>
+<p>
+    <strong>The cover</strong> is <code>StasisMating</code> over
+    <code>Conception.attempt</code>, and it is small because it borrows everything.
+    <code>Reproduction</code>'s times are all <em>absolute game ticks</em> and its state is
+    <em>derived</em> from them (<code>ReproRules.stateAt</code>), so a mare's cycle reaches her on
+    a shelf with nothing ticking &mdash; the single property that makes this feature possible, and
+    it was there before stasis was. Once-per-heat is <code>ReproRules.mayTryNaturally</code>
+    unchanged, the stallion's three-a-day tiredness is <code>coversOn</code> read off his own
+    stored record, and the health gate is <code>COVER_HEALTH</code>. Nothing here is a stasis
+    number.
+</p>
+<div class="note">
+    <span class="label">The pregnancy is carried in the chamber; the mare comes out to foal</span>
+    <p>
+        <strong>This is the design call of the stage.</strong> Gestation is free: a
+        <code>Pregnancy</code> is two ticks and a list of embryos, and it advances on a shelf
+        exactly as it would in a field. <em>Birth</em> is not free, and the reason is worth
+        stating plainly &mdash; <code>HorseBreedingHandler.populateFoal</code> names the foal under
+        the dam's owner's <code>NamingPolicy</code>, tames it to her owner, gives it a quarter of
+        her bond, files it in <code>HorseAncestryData</code>, puts it in her wild band, writes its
+        <code>HORSE_SOCIAL</code> birth record and tells everyone nearby. Every one of those is a
+        fact about the <em>dam</em>, and half of them are read off her live entity.
+    </p>
+    <p>
+        Reimplementing that against a saved tag would have been a <strong>second breeding path to
+        keep in step for ever</strong>, which is the exact class of drift this repository keeps a
+        table of rules about. So the bank does the cheap half and hands the expensive half back:
+        at her due date it releases her beside the block and <code>ReproHandler</code>'s ordinary
+        <code>SCAN</code> tick foals her within two seconds. A bank-bred foal is not
+        <em>like</em> every other foal, it <em>is</em> one.
+    </p>
+    <p>
+        It also means she is a ticking entity for the minutes around the birth and not for the
+        gestation, which is the trade the whole feature is about. <code>alreadyLoose</code> is
+        checked first, for the creative-copy reason release already had.
+    </p>
+</div>
+<div class="note">
+    <span class="label">It will not foal into a wall</span>
+    <p>
+        <code>foalingSpot</code> wants a position whose block <em>and the one above it</em> have an
+        empty collision shape &mdash; two, because a horse is nearly two tall and setting one down
+        inside a wall is how a released animal suffocates in a cellar. The four horizontal
+        neighbours are tried first, then a small box round the block. With nothing found she
+        <strong>stays in her chamber</strong>, <code>foalingBlocked</code> goes up, and the Supply
+        tab says so; her turn comes round again. That flag is the second
+        <code>ContainerData</code> value, because it is the one thing the bank can want that a
+        player cannot read off a slot. It is not saved &mdash; it is a fact about the room, and a
+        reloaded bank that is quiet for a minute beats one that remembers a wall somebody has
+        knocked down.
+    </p>
+</div>
+<p>
+    <strong>Two deliberate omissions.</strong> No carrot bias: <code>ARMED_CARROTS</code> lives on
+    a live horse and is spent by a breeding somebody is watching, so a bank pairing folds
+    <code>GameteBias.NONE</code> on both sides, which is what a wild cover draws. And no crowd
+    cap: <code>DEFAULT_NATURAL_CAP</code> counts entities in a chunk radius, a bank holds none, and
+    the number of chambers the player marked is already their own cap.
+</p>
+
 <h2 id="two-custom-recipes">Why two of these are Java recipes</h2>
 <p>
     Neither is a <code>CustomRecipe</code> for the fun of it, and both reasons are worth
@@ -583,50 +883,19 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        The Advanced drop buffer, Spacer in-bank breeding, and the Emergency Horse Stasis
-        Chamber that self-triggers below 10% health &mdash; everything left that needs the bank
-        to act on a horse in a way the upkeep does not already.
+        One thing: the <strong>Emergency Horse Stasis Chamber</strong>, a carried chamber that
+        captures a horse of yours by itself the instant its health drops below a tenth.
     </p>
 </div>
 
 <p>
-    Four stages of the build order below have shipped, all on 2026-09-24: the chambers and the
-    capture/release path everything stands on, the bank itself as a place to keep them, its
-    Browse tab, and the supply slots it feeds and mends them from. The machinery for changing a
-    horse the bank is holding therefore exists now &mdash; <code>StasisCare</code> reads and
-    writes a stored horse's tag, and the block has its ticker and its rotation cursor &mdash; so
-    what follows is mostly a question of what to do with it, not how.
+    Five of the six stages of the build order below have shipped, all on 2026-09-24: the chambers
+    and the capture/release path everything stands on, the bank itself, its Browse tab, the supply
+    slots it feeds and mends from, and then the drop buffer and in-bank breeding. Everything the
+    four chamber tiers advertise is built. What is left is not another thing the bank does &mdash;
+    it is an item that acts on a horse <em>in the world</em>, which is why it is last and why it
+    needs a piece of machinery none of the rest did.
 </p>
-
-<h2 id="drops-and-breeding">The drop buffer, then in-bank breeding</h2>
-<p>
-    Advanced's 9-slot milk/drops buffer lives in the bank beside the chamber grid; Spacer's
-    in-bank breeding pairs two Spacer chambers and pops the foal out into the world. Both also
-    want an affordance on the <strong>Browse tab</strong>, which exists now and gates per row
-    already &mdash; a &ldquo;collect&rdquo; control on a row whose chamber answers
-    <code>collectsDrops()</code>, and a pairing control on two that answer
-    <code>breedsInBank()</code>.
-</p>
-<p>
-    <strong>The hard half of both is now built.</strong> These used to be described here as
-    needing &ldquo;the bank to act on a horse that is not a loaded entity, which is the hardest
-    problem in the whole feature&rdquo;. That problem was stage four's, and it has an answer:
-    <code>StasisCare</code> reads and writes a stored horse's tag, the block rotates through its
-    chambers on a gated ticker, and <code>StasisUpkeep</code> is where per-turn arithmetic goes.
-    Breeding is still the harder of the two, because a foal is a <em>new</em> horse and nothing
-    here has yet had to make one from two tags &mdash; but it is no longer the same kind of
-    unknown.
-</p>
-<div class="note">
-    <span class="label">Bandwidth is the bank's problem, not the chamber's</span>
-    <p>
-        Every chamber's component carries a whole entity tag over the wire, for the creative
-        pick-block reason on the Coding tab. One in a hand is nothing; fifty-four syncing on
-        container open is a number nobody has measured yet. It ships that way on purpose &mdash;
-        sending less is how a creative player silently erases a horse &mdash; and the measurement
-        is on the Verification tab, not a plan here.
-    </p>
-</div>
 
 <h2 id="emergency-chamber">Emergency Horse Stasis Chamber</h2>
 <p>
@@ -636,44 +905,47 @@
     below 10% &mdash; the player does nothing, the capture is the save. A horse cannot take
     damage while it is inside any stasis chamber, so entering one is a hard stop against dying.
 </p>
-<div class="note warn">
-    <span class="label">Open question: what happens on a second trigger</span>
+<div class="note">
+    <span class="label">Settled: a second trigger is refused, out loud</span>
     <p>
-        If the emergency chamber already holds a horse and a second one crosses the 10%
-        threshold, does the player need a second emergency chamber, does the mechanic refuse and
-        let the second horse take its chances, or does it queue and swap at the next
-        opportunity? This has to be settled before the item is built, alongside how &ldquo;every
-        horse that player owns&rdquo; is watched at server scale &mdash; see
-        <a href="#watching-health">watching health cheaply</a> below.
+        Owner, 2026-09-24. If the emergency chamber already holds a horse and a second one crosses
+        the threshold, <strong>it refuses and says so</strong> &mdash; one clear line naming the
+        horse it could not save. The second horse takes its chances. The alternatives were a queue
+        that survives logout and goes stale, or swapping the healthier horse out, which can drop an
+        animal into the fight that is killing the other one. Refusing keeps the item's value
+        legible: <strong>one chamber is one life</strong>, and the answer to wanting two is to
+        carry two.
     </p>
 </div>
 
-<h2 id="watching-health">Watching health cheaply, for the emergency chamber</h2>
+<h2 id="watching-health">Watching health cheaply, and it is now the only open question</h2>
 <p>
-    The emergency chamber needs a per-tick check on &ldquo;every horse this player owns&rdquo;,
-    which is exactly the kind of per-tick server-wide scan the whole stasis system exists to
-    avoid doing elsewhere. In practice this only has to watch <em>loaded, ticking</em> horses
-    (an unloaded one cannot be taking damage), so it is a hook on the existing damage/health-change
-    path for owned horses, not a scan of the world. Whatever handler already watches for the
-    intake to-do list's &ldquo;buck off below 20% health&rdquo; escape-behaviour entry is the
-    natural place to add a second, lower threshold that captures instead of fleeing.
+    The chamber needs to know when &ldquo;a horse this player owns&rdquo; crosses a tenth of its
+    bar, which is exactly the kind of per-tick server-wide scan the whole stasis system exists to
+    avoid. In practice it only has to watch <em>loaded, ticking</em> horses &mdash; an unloaded one
+    cannot be taking damage &mdash; so it is a hook on the existing damage/health-change path for
+    owned horses, not a scan of the world. Whatever handler ends up watching for the intake to-do
+    list's &ldquo;buck off below 20% health&rdquo; escape behaviour is the natural place to add a
+    second, lower threshold that captures instead of fleeing.
+</p>
+<p>
+    The other half of the hook is finding the <em>chamber</em>: the horse is the thing being
+    damaged, and the empty emergency chamber is somewhere in its owner's inventory. That is a walk
+    of one player's inventory on a damage event that has already passed a health threshold, so it
+    is cheap &mdash; but it has to run on the owner even when the owner is nowhere near, which is
+    the part to write carefully.
 </p>
 
 <h2 id="anticipated-files">Anticipated files</h2>
 <ul>
-    <li><code>neoforge-26.1.2/&hellip;/item/EmergencyStasisChamberItem.java</code> - the
-        self-triggering variant; likely needs a tick or damage-event hook rather than living
-        purely as passive item data.</li>
+    <li><code>neoforge/&hellip;/item/EmergencyStasisChamberItem.java</code> - the
+        self-triggering variant; a fifth registration of
+        <code>StasisChamberItem</code>&rsquo;s shape or a subclass of it, since capture itself is
+        already <code>HorseStasisHandler</code>&rsquo;s.</li>
+    <li>A hook in whatever handler owns the damage/health-change path for owned horses. Nothing
+        new is needed on the bank: an emergency chamber that has caught a horse is an ordinary
+        occupied chamber and can be filed, searched, mended and upgraded like any other.</li>
 </ul>
-<p>
-    The bank's files all exist; what is left adds to them rather than adding more. The drop
-    buffer is a further <code>SimpleContainer</code> in
-    <code>HorseStasisBankBlockEntity</code> alongside the supply row, filled from the same
-    rotation the upkeep already walks; both of the remaining controls hang off the Browse list
-    that <code>HorseStasisBankScreen</code> already draws. See
-    <a href="#bank-coding">the Coding tab</a> for which piece of the research shelf each one
-    copies.
-</p>
 
 <div class="note">
     <span class="label">The rest of the build order</span>
@@ -685,11 +957,11 @@
         unlocks</s> &mdash; shipped 2026-09-24, with Intermediate's search.
         <strong>4.</strong> <s>The supply slots and passive healing</s> &mdash; shipped
         2026-09-24, gated on <code>StasisTier.heals()</code> and pipeable.
-        <strong>5.</strong> Advanced's drop buffer, then Spacer's in-bank breeding. Breeding is
-        still the last of these: a foal is a new horse, and nothing has yet had to make one out
-        of two stored tags.
+        <strong>5.</strong> <s>Advanced's drop buffer, then Spacer's in-bank breeding</s> &mdash;
+        shipped 2026-09-24. The foal turned out not to need making from two tags at all: the
+        mare carries the pregnancy in her chamber and comes out to foal.
         <strong>6.</strong> The Emergency Horse Stasis Chamber, once the health-threshold hook
-        exists and the double-trigger question above is answered.
+        exists.
     </p>
 </div>
 
@@ -701,12 +973,13 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        The chambers, the bank, its Browse tab and its supply slots all compile, craft and pass
-        the gametests, but <strong>no horse has yet gone into one in a running game</strong>
-        &mdash; so the whole capture/release round trip, the water-container remainder for a
-        modded bucket, the tier upgrade carrying an occupied chamber, every one of the bank's
-        slots, drops and sync costs, every line the Browse tab draws, and the whole of the
-        healing upkeep and its hopper plumbing are all unplayed.
+        The chambers, the bank and all four things it does compile, craft and pass the
+        gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
+        so the whole capture/release round trip, the water-container remainder for a modded
+        bucket, the tier upgrade carrying an occupied chamber, every one of the bank's slots,
+        drops and sync costs, every line the Browse tab draws, the healing upkeep and its hopper
+        plumbing, the drop buffer, and <strong>every part of in-bank breeding up to a mare
+        letting herself out to foal</strong> are all unplayed.
     </p>
 </div>
 
@@ -747,6 +1020,10 @@
     <li>A hopper under the bank pulls empty buckets out &mdash; and, worth knowing either way,
         whether it also pulls the feed back out. That is allowed today; if it turns out to be
         annoying in practice it is a per-slot extraction rule, not a bug.</li>
+    <li><strong>A hopper under the bank empties the drop buffer.</strong> This is the whole
+        reason the buffer lives in the same container as the supply slots, and if it does not
+        work then that decision bought nothing. Nine slots of eggs should end up in a chest
+        without anyone opening the bank.</li>
     <li><strong>No hopper can reach a chamber</strong>, in either direction. This is the one
         that matters: a hopper that can drain a bank of horses is a disaster, not a nuisance.</li>
     <li>A water bucket cannot be pushed into the feed slot, nor anything at all into the
@@ -754,12 +1031,21 @@
 </ul>
 <h3 id="verify-supply-screen">The Supply tab reads correctly (NOT played)</h3>
 <p>
-    Three slots, two status lines and a synced water meter, none of it seen. Check the meter
-    counts down as horses are mended and that each of the tab's four explanations &mdash; no
-    horses, Basic only, no feed, fed but dry &mdash; appears in the situation it names. The tab
-    is the only thing that tells a player why a bank is idle, so a wrong line here is worse than
-    no line.
+    Three slots, a nine-slot buffer under them, three status lines and two synced values, none of
+    it seen. Check the meter counts down as horses are mended and that each of the tab's
+    explanations &mdash; no horses, Basic only, no feed, fed but dry, <em>a mare is due and there
+    is no room</em> &mdash; appears in the situation it names and in that order of priority. The
+    tab is the only thing that tells a player why a bank is idle, so a wrong line here is worse
+    than no line.
 </p>
+<ul>
+    <li><strong>The layout fits.</strong> Stage five moved the supply row up and put nine slots
+        below it; the whole tab has to sit clear of the <em>Inventory</em> label at
+        <code>INV_LABEL_Y</code>. <strong>Fail:</strong> a caption or a slot overlapping the
+        player's inventory, which no test can see.</li>
+    <li><strong>The buffer counter is right</strong> &mdash; <em>n/9</em> beside the caption,
+        counting slots with something in them.</li>
+</ul>
 
 <h3 id="verify-round-trip">The round trip, with a horse worth losing (NOT played)</h3>
 <p>
@@ -882,6 +1168,85 @@
         server, not a lossier snapshot.</li>
 </ul>
 
+<h3 id="verify-drops">The drop buffer collects anything at all (NOT played)</h3>
+<p>
+    Every part of this is new and none of it has been watched. It needs a horse with two matching
+    copies of a laying allele, which the test kit's gene carrots or a designed horse will make.
+</p>
+<ul>
+    <li><strong>It collects.</strong> Put a laying horse in an <strong>Advanced</strong> chamber,
+        file it, and come back: eggs (or whatever its allele is) in the buffer.
+        <strong>Fail:</strong> nothing ever arrives, which most likely means
+        <code>HorseAbilities.activeFor</code> is being asked about a horse whose record the tag
+        did not carry &mdash; the <code>[stasis]</code> ActionTrace lines and a
+        <code>would produce ... which is not an item here</code> warning are the two things to
+        grep for.</li>
+    <li><strong>The first one is immediate, and that is intended.</strong> A freshly captured
+        layer has no stamp, so it produces on its first turn. Worth seeing once so it is not
+        mistaken for a bug later.</li>
+    <li><strong>The rate is its own.</strong> Two horses with different epigenetic intervals
+        should fill the buffer at visibly different speeds. <strong>Fail:</strong> both laying at
+        exactly the same rate means the epigenome is not reaching
+        <code>activeFor</code> and every horse is on the midpoint.</li>
+    <li><strong>A full buffer stops it without losing anything.</strong> Fill the nine slots,
+        wait past an interval, empty one slot: the next yield should arrive promptly rather than
+        having been skipped for as long as the buffer was full.</li>
+    <li><strong>An Intermediate chamber collects nothing</strong>, and a Basic one certainly
+        does not &mdash; the tier gate, on the cheapest thing to check.</li>
+    <li><strong>The clock survives a restart.</strong> Stop the server with a layer mid-interval
+        and start it again. <strong>Pass:</strong> it does not immediately lay.
+        <strong>Fail:</strong> it does, which means the cooldown is not reaching the horse's
+        attachment and a bank is a faster hen-house than a field.</li>
+</ul>
+
+<h3 id="verify-stud">In-bank breeding, end to end (NOT played, and the biggest thing on this tab)</h3>
+<p>
+    A mare, a stallion, two Spacer chambers and some patience. <strong>The debug clock does not
+    reach a shelved mare</strong> &mdash; it is a right-click on a live horse &mdash; so the way
+    to shorten this is to wind her cycle and her gestation <em>before</em> capturing her, or to
+    turn the gestation setting down in the server config.
+</p>
+<ul>
+    <li><strong>The mark works at all.</strong> Click a Spacer row on the Browse tab: the corner
+        should read <em>at stud</em>, and clicking again should undo it. <strong>Fail:</strong>
+        nothing happens, which means <code>clickMenuButton</code> is not arriving &mdash; the
+        server checks the tier again, so a silent refusal is indistinguishable from a lost
+        packet. Clicking a Basic or Intermediate row must print the line naming the rung, not
+        nothing.</li>
+    <li><strong>The mark rides on the chamber.</strong> Take a marked chamber out, put it in
+        another bank: still marked. Take it out and let the horse out: the mark goes with the
+        horse leaving.</li>
+    <li><strong>She is covered, once.</strong> Mark a mare and a stallion, walk away, and watch
+        for the <code>[stasis] ... was covered in a bank by ...</code> ActionTrace line.
+        <strong>Fail, and the worst possible one:</strong> that line appearing repeatedly inside
+        one heat, which would mean <code>lastNaturalTry</code> is not being written back and a
+        bank is a breeding machine.</li>
+    <li><strong>Her row in the Horse Browser says she is pregnant</strong> while she is still in
+        the chamber, because the pregnancy is on her record and the browser reads records.</li>
+    <li><strong>She comes out and foals.</strong> The one that decides the feature.
+        <strong>Pass:</strong> at her due date she is standing beside the bank, her chamber is
+        empty and unmarked, and a named foal is beside her within a couple of seconds, with the
+        ordinary gold chat line. <strong>Fail:</strong> she comes out and no foal follows, which
+        means <code>ReproHandler</code>'s tick is not picking her up &mdash; check she has the
+        <code>HORSE_REPRO</code> attachment at all, since that tick refuses a horse without
+        one.</li>
+    <li><strong>The foal is a proper foal.</strong> Its surname follows the naming policy, it is
+        tamed to the mare's owner, it starts part-bonded, and the family tree names both
+        parents. This is the whole argument for releasing her rather than building the foal in
+        the bank, so it is the assertion that argument has to survive.</li>
+    <li><strong>It will not foal into a wall.</strong> Wall the bank in on all sides with a mare
+        due, and check the Supply tab says <em>a mare is due &mdash; clear a space beside the
+        bank</em> and that she is still in her chamber. Then break one block and check she comes
+        out on her next turn. <strong>Fail:</strong> a mare suffocating in stone, or a
+        pregnancy quietly disappearing.</li>
+    <li><strong>A gelding sires nothing</strong>, and two mares at stud do nothing at all
+        &mdash; both refusals are silent by design, so the check is that the log is quiet rather
+        than that something is said.</li>
+    <li><strong>Hurt horses do not breed.</strong> A mare below nine-tenths health should not be
+        covered, and the bank's own feed and water should be what fixes that &mdash; which is
+        the one place the two halves of the bank are supposed to meet.</li>
+</ul>
+
 <h3 id="verify-bank-bandwidth">What fifty-four horses cost on the wire (never measured)</h3>
 <p>
     Every chamber's component carries the horse's whole entity tag, on purpose (see the Coding
@@ -900,6 +1265,10 @@
         open &mdash; one tag every <code>StasisUpkeep.HEAL_INTERVAL</code> ticks per bank, and
         only while something is actually being mended. That is small next to opening a full bank,
         but it is continuous where the other is a one-off, and nobody has watched it.</li>
+    <li><strong>Stage five added two more writers to that same path</strong> &mdash; a collected
+        yield stamps a cooldown into the horse's tag, and a cover writes a whole reproductive
+        record into it. Both re-sync that chamber's entire entity tag, both are far rarer than a
+        heal turn, and neither has been measured either.</li>
 </ul>
 
 <h3 id="verify-bank-flammable">That it does not burn (reasoning unverified)</h3>
@@ -926,8 +1295,9 @@
         <a href="architecture.html">Architecture &amp; attachments</a>
         <a href="horse-care.html">Horse care: healing, bond, herds</a>
     </div>
-    Capture and release turned out to be a mechanism the mod already had; everything left on
-    this page is UI and recipes built on top of it.
+    Capture and release turned out to be a mechanism the mod already had, and birth turned out to
+    be one best handed straight back to it; everything on this page is built except the
+    self-triggering emergency chamber.
 </div>
 
 </article>

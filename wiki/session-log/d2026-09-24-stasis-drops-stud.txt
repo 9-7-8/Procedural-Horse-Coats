@@ -1,0 +1,214 @@
+2026-09-24 — stage five: the bank collects what a horse drops, breeds a pair you turn out at stud, and lets the mare out to foal
+
+    The last two jobs on the six-stage build order on wiki/horse-stasis.html, both hung off the
+    rotation stage four built: Advanced's drop buffer and Spacer's in-bank breeding. Everything
+    the four chamber tiers advertise is now built; only the Emergency chamber is left, and it
+    needs a health-threshold hook rather than more of the bank. One bullet, per
+    intake/START HERE.txt — the owner chose "stage 5 only, then stop" when asked.
+
+Milk was never buildable, and finding that out is most of why the buffer is small.
+
+    The roadmap called this "Advanced's 9-slot milk/drops buffer" from the day it was sketched.
+    It cannot be. Every milk locus in the mod — MilkGene, PotionMilkGene, MagicMilkVolumeGene —
+    emits GeneAbility.Yield or YieldCharges, whose trigger is OnInteract, and
+    GeneAbilityHandler.onHorseTick explicitly no-ops on both of them: milk happens because a
+    player holds a bucket out to a horse, and there is no passive milking path anywhere in the
+    mod for a bank to copy. A bank that filled itself with milk buckets would have been
+    inventing a mechanic rather than shelving one, and would have made a milkable horse worth
+    more in a box than in a field.
+
+    What is left is one verb. GeneAbility.Produce — an item id, an interval, a min and a max —
+    and today exactly one gene emits it (EggLayerGene, eight laying alleles, the interval
+    written on the allele copy). So the buffer collects what a horse does on its own, and the
+    Gameplay tab now says that in as many words, with a warn box explaining why milk is not
+    among it. The page had been promising something for days that the code it describes cannot
+    do.
+
+The buffer reads the same call the live translator reads.
+
+    HorseAbilities.activeFor(genotype, epigenome) is pure common/ and needs no entity, so
+    common/…/horse/StasisProduce.java walks it, filters to Produce, and answers with a list of
+    (geneKey, item, count). No second table, no per-gene knowledge in the stasis code: a gene
+    that gains a produce ability is collectable in a bank the day it ships.
+
+    The epigenome has to be passed. EggLayerGene is an EpigeneticAbilityContribution and its
+    interval lives on the allele copy; activeFor(genotype) alone hands back the midpoint, so
+    every horse in every bank would have laid at exactly the same rate and nothing would ever
+    have reported it. There is now a verification bullet aimed straight at that: two horses with
+    different intervals must visibly fill the buffer at different speeds.
+
+The cooldown had to become durable, and that is an improvement on the live path.
+
+    GeneAbilityHandler keeps its produce cooldowns in a static Map<String, Long> keyed by
+    uuid/geneKey/produce — lost on restart, and cleared wholesale past 8192 entries. A shelved
+    horse has no tick to carry one at all, so the bank stamps the horse's own HORSE_COOLDOWNS
+    attachment under "produce:<geneKey>", the same attachment shearing and the yield genes
+    already use. The consequence is the pleasant one: a shelved layer keeps a real clock across
+    a restart where a live one lays again on every boot. An absent stamp reads as ready, which
+    is HorseCooldownsAttachment's own documented rule, so a horse shelved with an egg nearly due
+    does not lose it.
+
+Priced, then paid — because a bank has no floor to drop an egg on.
+
+    A live horse calls spawnAtLocation and cannot fail. A bank can: nine slots fill up. So
+    StasisDrops.due reads what is owed and changes nothing, the block entity's roomFor runs the
+    insert against a throwaway SimpleContainer, and only if *all* of it fits does
+    StasisDrops.stamp mark the cooldown spent. A full buffer therefore pauses production rather
+    than destroying a yield, and emptying it resumes on the next turn. The dry run is over the
+    whole batch rather than per stack, so half a yield is never taken either.
+
+A condition a chamber cannot answer refuses, negation included.
+
+    GeneAbilityHandler.conditionHolds reads the live entity and the level for nearly every flag
+    in the vocabulary — in_water, night, raining, has_rider, near_jukebox. A horse in a chamber
+    is in none of those, and they are not false about it so much as meaningless.
+    StasisProduce.holdsInStasis answers only adult, baby, sex_male and sex_female and refuses
+    everything else — and refuses Not(unanswerable) too, because "not raining" is no more a fact
+    about a bottle than "raining" is. Guessing either way would have been a gene quietly
+    behaving differently indoors. Nothing shipped is affected: the egg-layer's condition is
+    ALWAYS and no spec gene emits a produce yet.
+
+    "adult" means reading a saved AgeableMob's age, and there is no constant to import for it:
+    vanilla writes the literal "Age". A rename would not throw — every shelved foal would simply
+    start producing as though it were grown — so the gametest now snapshots the same horse twice,
+    once grown and once with setBaby(true), and asserts both directions.
+
+The buffer is in the supply container, and that is the capability's doing.
+
+    Nine more slots on the existing goods container rather than a third SimpleContainer beside
+    it, with FIRST_DROP_SLOT telling them apart. The item-handler capability wraps *one*
+    container: a second would have needed a second registration, something to join the two
+    handlers, and a second copy of the per-slot rules to keep in step. As it is,
+    StasisBankCapability did not change at all when the buffer shipped, and a hopper under the
+    bank pulls eggs out of it for free. The cost is that SUPPLY_SLOTS now means twelve, which is
+    why every reader goes through HorseStasisBankMenu.supplyX/supplyY instead of doing the
+    arithmetic twice.
+
+In-bank breeding: a mark on the item, not state on the block.
+
+    A Spacer chamber is turned out "at stud" by clicking its row on the Browse tab. The mark is
+    a new Boolean data component, stasis_at_stud, which is the same call stasis_snapshot made
+    and for the same three reasons: it syncs with the ordinary slot sync so the tab can draw it
+    with no packet of its own, it travels with the chamber between banks, and there is no copy on
+    a block entity to drift from the chamber it describes. A set of marked UUIDs on the block
+    would have needed syncing, pruning when a chamber left, and a rule for the same horse being
+    in two banks.
+
+    The mark alone is not permission. StasisStud.atStud asks the tier as well, because
+    StasisUpgradeRecipe copies components across and a mark can therefore outlive the rung that
+    bought it. StasisBrowseRow.atStud() counts only rows whose own tier breedsInBank(), and
+    StasisBrowseTest pins that.
+
+    Toggling it is AbstractContainerMenu.clickMenuButton with the chamber slot as the id —
+    JumpMenu's shape, and the rule BenchNamePayload's own comment states from the other side: an
+    int fits in a menu button and a string does not. The server re-checks the tier and the
+    occupancy, because a menu button is a packet and a packet is whatever somebody sent.
+
+The bank invents no breeding rule. That is the whole of why StasisMating is short.
+
+    Owner, asked directly, on where the foal comes from and how often: "only creates a new foal
+    once per the mare's heat, same cycle as on land". That is not a cap this had to invent, it is
+    the rule it had to reuse — ReproRules.mayTryNaturally, unchanged, the same once-per-heat stop
+    that keeps a paddock from breeding flat out. The stallion's three-covers-a-day tiredness is
+    coversOn read off his own stored record; the health gate is COVER_HEALTH. Nothing in
+    common/…/horse/StasisMating.java is a stasis number.
+
+    Her cycle reaches her on a shelf for free, and that is the single property that makes the
+    feature possible at all: every time in a Reproduction is an absolute game tick and the state
+    is *derived* from those anchors (ReproRules.stateAt), so a mare who has spent three cycles in
+    a chamber is in exactly the phase she would have been in standing in a field. It was true
+    before stasis existed. StasisMatingTest walks a whole cycle past a shelved mare and asserts
+    she comes into heat on her own.
+
+The design call of the stage: the pregnancy is carried in the chamber, the mare comes out to foal.
+
+    The roadmap tab had been treating the foal as the hard part — "a foal is a new horse, and
+    nothing here has yet had to make one out of two stored tags". It turned out not to need
+    making from tags at all.
+
+    Gestation is free: a Pregnancy is two ticks and a list of embryos and it advances on a shelf
+    exactly as it would in a field. Birth is not free, and the reason is worth stating plainly.
+    HorseBreedingHandler.populateFoal names the foal under the dam's owner's NamingPolicy, tames
+    it to her owner, gives it a quarter of her bond, files it in HorseAncestryData, puts it in
+    her wild band, writes its HORSE_SOCIAL birth record and tells everyone nearby. Every one of
+    those is a fact about the dam, and half of them are read off her live entity. Reimplementing
+    that against a saved tag would have been a second breeding path to keep in step for ever —
+    the exact class of drift CLAUDE.md keeps a table of rules about.
+
+    So the bank does the cheap half and hands the expensive half back: at her due date it
+    releases her beside the block and ReproHandler's ordinary SCAN tick foals her within two
+    seconds. A bank-bred foal is not *like* every other foal, it is one. She is a ticking entity
+    for the minutes around the birth rather than for the gestation, which is the trade the whole
+    feature is about.
+
+    It will not foal into a wall. foalingSpot wants a position whose block and the one above it
+    both have an empty collision shape — two, because a horse is nearly two tall and setting one
+    down inside a wall is how a released animal suffocates in a cellar. The four horizontal
+    neighbours first, then a small box round the block. With nothing found she stays in her
+    chamber, a second ContainerData value goes up, and the Supply tab says "a mare is due — clear
+    a space beside the bank". That flag is not saved: it is a fact about the room, and a reloaded
+    bank that is quiet for a minute beats one that remembers a wall somebody has knocked down.
+
+    Two deliberate omissions. No carrot bias — ARMED_CARROTS lives on a live horse and is spent
+    by a breeding somebody is watching, so a bank pairing folds GameteBias.NONE both sides, which
+    is what a wild cover draws. And no crowd cap: DEFAULT_NATURAL_CAP counts entities in a chunk
+    radius, a bank holds none, and the number of chambers the player marked is already their own
+    cap.
+
+StasisCare grew rather than splitting, on purpose.
+
+    StasisDrops and StasisStud both reach into a stored horse, and both do it through StasisCare
+    rather than naming a key of their own: health(), isBaby(), cooldowns(), repro(),
+    putCooldowns(), putRepro(), and one generic putAttachment that creates the attachments
+    compound if the tag has none. So the class's claim changed from "the only place that reaches
+    into a snapshot's contents" to "every string that has to match something Minecraft or
+    NeoForge wrote is in this one file, where one gametest can walk the lot of them", which is
+    the claim that was load-bearing anyway.
+
+    putAttachment is deliberately unlike putHunger, which refuses to invent one. Hunger's
+    absence means the horse was never charged for its healing, so writing one would be healing it
+    for free; a missing cooldown or reproductive record means only that nothing has happened to
+    this horse yet, and the bank is about to be the thing that happens.
+
+The gametest now ends by really letting a horse out, and it also had a flake.
+
+    stasis_tag_is_readable gained the Age key, a cooldown round trip, a reproductive-record round
+    trip, and then the half no amount of tag-reading proves: it releases a real Horse from the
+    tag StasisCare wrote to and asserts ReproHandler.of(released).lastNaturalTry() is the number
+    the bank put there. That is exactly the call the bank makes when a mare is due, and every step
+    of it fails silently — a wrong attachment id writes into nowhere, a broken codec parses to a
+    default, and either way she comes out of the chamber empty and nobody is told she lost
+    anything. The release has to happen after horse.discard(), because a tag remembers its UUID
+    and addFreshEntity refuses a second entity on one id; that refusal is alreadyLoose's whole
+    reason for existing.
+
+    Fixing a flake in the same test on the way. The test spawns a horse, waits ten ticks for it
+    to be founded, and snapshots it — but a NeoForge attachment is materialised on first access,
+    and the thing that usually asks for hunger is HorseCareHandler on a slow tick phased by
+    entity id, which by tick ten may or may not have come round. Without a hunger attachment
+    StasisCare.putHunger correctly refuses to invent one, the upkeep reports healing nothing, and
+    the healing assertion fails on perhaps one run in three with nothing at all wrong with the
+    bank. It now asks for the hunger itself first, with a comment saying why. Confirmed by
+    stashing the session's work and running the test on a clean HEAD, where it passed — the
+    first run against the new code had failed on that assertion and it would have been very easy
+    to go hunting for a regression that was not there.
+
+What shipped, and what is now waiting.
+
+    common/: StasisProduce (+StasisProduceTest), StasisMating (+StasisMatingTest),
+    StasisBrowseRow grew a slot and an at-stud mark. neoforge/: StasisDrops, StasisStud,
+    STASIS_AT_STUD, twelve goods slots and a second ContainerData value on the block entity,
+    clickMenuButton on the menu, the drop row and a clickable Browse list on the screen.
+    :neoforge-26.1.2:build green, all nine gametests green (twice), creator parity green, the
+    designer still boots after a wasm rebuild — reverted, since the bake is not reproducible and
+    nothing reachable from DesignerApi changed.
+
+    A full :common:test run would still need to check nothing this session touched outside
+    common/horse/ — the coat goldens and the spec fixtures are untouched — but the four Stasis
+    tests, CommonPortabilityTest and ReproRulesTest were run and are green.
+
+    The Verification tab has two large new sections and nobody has played any of it. The one
+    that decides the feature is verify-stud: a mare and a stallion marked at stud, and at her due
+    date she should be standing beside the bank with a named foal. Note for whoever runs it that
+    the debug clock is a right-click on a live horse and does not reach a shelved mare, so wind
+    her cycle before capturing her or turn the gestation setting down.
