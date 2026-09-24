@@ -50,7 +50,19 @@ Before writing any code for a bug entry:
    the same keyword - if the fix landed but is unconfirmed in-game, it is
    listed there with a link to the owning page's Verification tab, not in
    To do.txt.
-3. Only if neither turns anything up is the bug still open.
+3. Date the bullet against the fix. This is the step that decides it, and
+   skipping it gets a live bug deleted as stale. A hit in the session log is
+   not proof: the owner plays a released jar on her own server, so a bullet
+   written after a fix shipped may be an older jar - or a fix that did not
+   work. Get both dates:
+     git log --date=short --pretty='%h %ad %s' -S 'a phrase from the bullet' -- 'intake/To do.txt'
+     git log --date=short --pretty='%h %ad %s' -S 'someIdentifier' -- path/to/OwningClass.java
+   Bullet older than the fix: stale, retire it. Bullet newer, and the word
+   "still" is a strong tell: treat it as open and go and read the code, even
+   when a session log says it was fixed. That is exactly how the barn-name box
+   turned out to be built, fixed once for the wrong cause, and invisible to
+   every player for seventeen days (2026-09-24).
+4. Only if none of that turns anything up is the bug still open.
 
 Step 2 - route it, don't implement straight from the file
 ===========================================================
