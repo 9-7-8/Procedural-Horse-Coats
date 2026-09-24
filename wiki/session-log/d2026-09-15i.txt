@@ -1,0 +1,90 @@
+2026-09-15, later still — fourteen breeds, a re-supply merged, and three headline disorders with no locus
+
+    The sixth intake batch: the queue from the Newfoundland Pony to the Sorraia, alphabetically.
+    Fifteen drafts went in and fourteen breeds came out, because one of the fifteen
+    was a breed the mod already had. Breeds.all().size() owns the count.
+
+The batch
+
+    American Saddlebred, Newfoundland Pony, Nokota, Nonius, Novooleksandrivsky Heavy Draught,
+    Oldenburg, Orlov Trotter, Pindos, Pony of the Americas, Riwoche Horse, Rocky Mountain Horse,
+    Sanhe, Selle Franais, Sorraia.
+
+    - The fifteenth draft was a re-supply, and the owner's call was to merge it rather than
+        ship it twice. Paint Horse (APHA) arrived with a filename asserting it was
+        “distinct from the mod's American Paint” and a request for a second
+        apha_paint_horse id. It is not distinct: same registry, same 1965 merger, same
+        horse. The instruction was to take its numbers only where they are cited to a real
+        study, which turned out to be exactly two. HYPP moved to the 0.025 allele
+        frequency reported for the control American Paint group of an inherited-disease survey —
+        several times the generic 1.2% carrier rate it had been carrying, and the single biggest
+        change in the batch to a breed that already existed. Frame did not move, and that is
+        worth recording precisely because nothing had to be edited: the same study's
+        0.107 gives about 19% carriers under Hardy-Weinberg and the pool already sat at
+        20, so the measurement corroborated what shipped. The draft's GBED, PSSM1 and HERDA figures
+        were declined — it calls all three Quarter Horse proxies itself.
+
+    - Three breeds ship without the disorder they are actually known for. This is
+        the first batch where that happened more than once. WFFS has no locus, so the
+        Oldenburg and the
+        Selle Franais both ship clear of the thing their
+        drafts were built around; JEB has no locus, so the
+        American Saddlebred does too.
+        The evidence arrived with the gaps, and in two cases it is better than anything else
+        in that roadmap section — a 2022 study measured 6% WFFS carriers in Selle
+        Franais specifically rather than across warmbloods generally, and the Saddlebred's JEB
+        has 9 carriers in 175 foals from a random 2007 foal crop, a 0.026 allele frequency. Both went
+        onto the roadmap with their numbers (PLOD1 and
+        LAMA3 have since shipped them). The Saddlebred
+        also settles half of an open question there: its form is a LAMA3 deletion, separate
+        from the LAMC2 variant, so JEB wants two alleles or two loci.
+
+    - PLOD1 is Friesian dwarfism and it nearly ate this batch. Both warmblood drafts
+        name their WFFS locus PLOD1, which is the correct real-world gene symbol and is
+        also the key of a gene this mod already ships for something else entirely. A file that had
+        pasted the draft's block would have loaded, parsed, and quietly seeded Friesian dwarfism into
+        two sport horses at 3–5%. The roadmap had already flagged exactly this trap for the
+        Gelderlander; it is the first time it was actually walked into and stepped over.
+
+    - The Nokota could not have the strains it wants, and it is the third breed in
+        two days to lose the same thing. The Conservancy's two types are named along a size axis
+        — Traditional about 14 to 15 hands, Ranch to 17 — and a strain may override gene
+        pools and nothing else, so the strains carry colour alone and one band spans both. Chincoteague
+        and Budyonny each lost a shade of meaning to this; this one loses three hands.
+        Gap 256 now names all three.
+
+    - Silver turns out to owe a disease. Found taking in the
+        Rocky Mountain Horse, whose chocolate coat is its entire
+        identity and carries the highest silver rate of any breed here. The same PMEL variant
+        causes multiple congenital ocular anomalies, badly in the homozygote. This is a different shape
+        from every other row in the health section: not a missing gene, but a shipped gene
+        missing its consequence, so it needs no allele and no locus, only a contribution that scales
+        with copy count. On the roadmap.
+
+    - Every draft's size scale was wrong. All fifteen, six batches running. All were
+        re-derived from the cited heights through BreedStatCurve. The Pony of the Americas
+        is the tidiest check in the batch, because its registry states the band in inches rather than
+        hands: 46 to 56 inches, which lands on 0.730–0.889, and a pony
+        outside it cannot hold permanent registration in life or be generated here.
+
+    - Two breeds are visually fixed and one is nearly so. The
+        Sorraia and the
+        Riwoche Horse both fix dun in every founder, joining the
+        Henson and the Konik. Both also force grey wild for the same reason the Konik does: their
+        colour is called “mouse grey” in the old language, and seeding STX17
+        would whiten the one thing either breed looks like. The Pony
+        of the Americas is the inverse — the first breed in the mod where LP is
+        fixed and no founder is ever lp/lp.
+
+    - An empty file, and a file named for the wrong horse. Nonius .md
+        with a trailing space was zero bytes beside a real Nonius.md; it was removed with
+        the batch and nothing was lost. Novoalexandrovsk Trotter.md contains no trotter at
+        all — it is the Novooleksandrivsky heavy draught, a breed with no trotting history —
+        which is the third time a draft's filename has disagreed with its contents.
+
+    Green on the way out: BreedFilesTest and BreedSpecParserTest (the two that
+    matter are everyShippedFileLoadsWithNoErrorsAndNoWarnings, which proves no allele token
+    was warned and dropped, and everyShippedFileIsExactlyWhatABakeWouldWrite),
+    :neoforge-26.1.2:build, the designer boot check, and every internal link across the
+    wiki. Nothing in the batch has been seen in game — see
+    the checklist.

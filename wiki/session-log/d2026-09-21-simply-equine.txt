@@ -1,0 +1,89 @@
+2026-09-21, later — Simply Equine, walked from the jar: three sections harvested, five ideas refused
+
+    No code. A survey session, and the first one to work a row off
+    the survey backlog. The owner picked
+    Simply Equine —
+    the only row asked for exhaustively rather than for highlights — and asked for every
+    choice to be posed as a choice rather than decided on her behalf.
+
+    The store page and the jar describe different mods, and the jar is the one to read
+
+        CurseForge advertises a new horse model, 18 coat textures, animations, jumps, level
+        progression, armour, tack, fencing and stable decor. The jar is 197 items, 3
+        blocks, 19 classes, zero recipes and no horse entity. Every item is
+        creative-tab-only; the headline “grooming system” is
+        util/GroomingTools, which checks whether your main hand holds the
+        black rubber curry comb — one item out of 197 — and spawns
+        particles on any entity, with no state and no effect. The layered shavings block is a
+        Forge tutorial with the textures swapped: its config key is still
+        enablePowderLayers and its class is TutorialConfig. The mod is
+        abandoned at Minecraft 1.15.2 and its author joined
+        SWEM, which we had already read.
+
+        So the brief was reported back before any of it was walked: the row asked for an
+        add/adapt/skip pass over a codebase that is mostly a statement of intent, and the honest
+        harvest is ideas. The row is deleted rather than promoted to a
+        compatibility entry — a 1.15.2 mod cannot run beside this one. The
+        remaining survey rows should each be read the same way.
+
+Taken — three sections, each attributed where it landed
+
+    A grooming tool that replaces shears
+    outright. Grooming already ships as minecraft:shears:
+    server/HorseShearHandler gives an adult horse 1–3
+    horse hair and +2 bond once per Minecraft day, and the
+    dressing was renamed to grooming on 2026-09-13. What was missing was the item —
+    the verb reads as care and the thing in your hand is a pair of blades. One verb tiered by
+    material, where a better tool buys bond and cooldown and never hair, so grooming cannot
+    become a farming action. The top tier grooms the whole herd, which is the
+    only rung doing something the others cannot and which finally gives the herd computation a
+    consumer — a gap listed two paragraphs below it on the same page. Note the contract is
+    wider than the handler: ProgressTask.SHEAR_HORSE and
+    husbandry/shear_horse.json are named for the old item.
+
+    Ground work — halter, vanilla
+    lead, lunge line. Bond you build without riding, for the foals and
+    disorder-carrying horses that today have hand-feeding and nothing else. The halter joined
+    the accessories slot roster, taking it from
+    fourteen slots to fifteen and HorseTackSlot’s growth from twelve to
+    thirteen. The lunge line is the one new item and the circling movement is the real work:
+    it has to yield to riding, fleeing and the herd goals, so
+    the behaviour hierarchy and its bake are in the
+    contract.
+
+    Stall bars, a third per-material
+    block family after the double gates and the jumps. Both its utilities fall out of the same
+    physical fact, which is the sign they are the right ones: bars are see-through, so a stalled
+    horse keeps its herd where a solid wall would isolate it; and bars are reachable, so you can
+    groom and feed through them. It is also the point at which
+    JumpModel.Unbaked.bake’s per-variant loop stops being wasteful and starts
+    being the cost.
+
+Refused — and the reasoning recorded, so the same source cannot re-propose them
+
+    - The six-tool grooming roster (dandy brush, body brush, rubber and metal
+        curry combs, hoof pick, sponge) and the stable-mucking loop (muck rake,
+        layered shavings, thatch). Both want a per-horse condition that decays, and a horse that
+        suffers for going unbrushed or unmucked is the punishing husbandry
+        philosophy rules out.
+
+    - Riding crop, lunge whip, driving whip. Implements for striking a horse
+        to make it go, against the premise the care layer is built on.
+
+The rosettes forced a new kind of section
+
+    Twelve show ribbons, Champion and Reserve Champion among them, and the owner’s first
+    answer was to take them as cosmetic decor. That collided with a rule she had settled
+    earlier the same day —
+    nothing this mod adds may be purely
+    aesthetic except breeding, the reversal that gave tack its stats. Re-asked rather than
+    written through, and the answer went further than the question: racing and
+    competitions are a separate add-on, attaching to a horse’s
+    pedigree rather than living in the base mod, because a
+    competition ladder is progression for the player and breeding is this mod’s
+    progression.
+
+    The roadmap is planned-features-only and had no way to say “considered, and placed
+    outside”, so Deliberately out of scope was
+    added as a single labelled exception with the rosettes as its first entry. It exists so the
+    next person with the idea finds the verdict rather than the request.

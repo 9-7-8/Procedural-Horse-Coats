@@ -1,0 +1,71 @@
+2026-09-20, after the roadmap cut — Three entries that described a mod from a fortnight ago
+
+    The owner read the trimmed roadmap and said two of its entries were describing work that is
+    in the game. They were right, and a third turned up on the sweep that followed.
+    The cut had moved the page’s sections around faithfully and checked almost
+    none of them against the code — which is the same failure the page exists to
+    prevent, committed while tidying the page that exists to prevent it.
+
+    - “Something has to read pulling ability” is done twice over.
+        HorseDraft reads traitsOf(horse).pull(),
+        AbstractDrawnEntity.applyDraught spends it, and
+        CartDraft.retention turns it into a speed ceiling. The entry also said the
+        number needed somewhere to be seen: the information screen prints a Pull row with a word
+        for it, a Draught block giving empty and laden retention, whether the horse carries a
+        second rider, and a lifetime hauled distance that survives being sold. And the “what
+        happens above 10” question it parked is answered in CartDraft's own
+        comment — the score is clamped at the floor and deliberately not at the
+        top. Written up at carts §12 and §13.
+
+    - The diet and vampire rows are the same mistake.
+        Diet ships a wild type and nine narrow diets — meat,
+        fish, wheat, cake, potions, lava, one metal, one gem and blood — with a carrot,
+        feral-only inheritance and a documented override contract with
+        food preference. And “vampire horses: heal
+        only by damaging other living mobs, optionally take sun damage” is the
+        blood diet composed with
+        sun sensitivity, down to the detail that a
+        sun-sensitive blood-drinker shelters first and eats after dark. Both rows went, and with
+        them the whole behavioural-gene family section, which had nothing else left in it.
+
+    - Two players on one horse, found on the sweep.
+        HorseTwoRidersMixin gates a second seat on
+        CartDraft.TWO_RIDER_PULL, places the pillion along the horse's body axis
+        rotated by yaw, and squares it with the wagon's hidden postilion so a driver on the box
+        and a rider on the horse coexist. The three questions the entry said to settle first are
+        not open either: the rear mixin only touches isImmobile and ejects nobody,
+        and the flight mixin works through getRiddenInput on the controlling
+        passenger, so a pillion is carried by construction. The in-game check was already on
+        the checklist.
+
+    Gap 277 went with them — “pulling
+    ability is a number nothing reads, shows, or can be checked against” was false in its
+    headline and in most of its body. Its one surviving point, that the debug yard has no pull
+    pen because the stat pens read a named vanilla attribute and pull is not one, was not
+    re-filed: the information screen now answers the question the pen was for.
+
+    The rest of the page was then swept rather than trusted, which is the part
+    worth keeping. Every remaining entry in “asked for, and not built” was checked
+    against the source: no chase gene, no grab gene, no storm-fed reservoir, no block-preference
+    locus, no kelpie, no momentum sprint, no lasso or rope item, no horse chest, no horse shoes,
+    no weather key in BreedSpecParser, nothing touching
+    startSleeping or setRespawnPosition, and no checkbox rule anywhere
+    in styles.css. The gameplay layer checked out too —
+    RESEARCH_GENE is still a bare gene-key String, there is no
+    collectedFrom, no bonding tab and no per-copy epigenetics editor. Those entries
+    stand.
+
+    And it happened again mid-session. A jump-styles commit landed on
+    main while this was being written, shipping the oxer that the obstacles entry
+    listed as missing. That entry now names the three styles that exist and drops the oxer from
+    the wanted list — and it gained the thing the commit makes sharper rather than softer:
+    all three styles collide identically on purpose, so a stack of three means the same
+    thing whatever it is built from, and anything that made a style matter mechanically would be
+    taking that back. The owner’s one-block-deep rule is recorded with it, since it bounds
+    every obstacle still on the list.
+
+    The lesson is cheap to state and was expensive here: moving an entry is not
+    reading it. A backlog entry is a claim about the current code, and a session that
+    reorganises one without opening the code is laundering its age — the entries came out
+    of the cut looking freshly reviewed and three of them were describing a mod from a fortnight
+    earlier. The grep that settles it is usually one line, and all three of these fell to one.

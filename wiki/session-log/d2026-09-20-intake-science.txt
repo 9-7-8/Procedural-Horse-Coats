@@ -1,0 +1,67 @@
+2026-09-20, later still — Four base-colour loci get their science, and three of them disagree with us
+
+    Four source files landed in intake/ over the afternoon — MC1R,
+    ASIP, EDNRB and KIT — which is four of the loci the roadmap
+    listed as carrying a paragraph where they needed a page. All four science tabs are written
+    from them and the files are consumed. Not one word came from memory, which
+    is the only reason these can state variants, coordinates and frequencies;
+    the method note written this morning got its
+    first use the same day.
+
+    The tabs.
+    Extension was the shortest in the mod and now
+    carries the three-allele series with its two missense variants, the epistasis argument, the
+    ea testing trap, and why ED is a myth that
+    keeps coming back.
+    Agouti keeps both of its existing sections and
+    gains the 11-bp exon-2 deletion, what the commercial test actually detects, and a full
+    treatment of why A+ and At failed.
+    EDNRB was the highest-priority one — four
+    other tabs cite it as the pigment gene with a health consequence and it could not
+    support the citation — and now has the neural-crest mechanism that makes white hair and
+    a fatal gut disease one gene.
+    KIT keeps its locus table and gains the melanoblast
+    mechanism, the booster group, multi-variant haplotypes, and a careful reading of what
+    “homozygous lethal” is actually claiming.
+
+    Three departures, filed as
+    gaps 297–299. Two are the familiar shape
+    — a deliberate design limit whose consequence was undocumented, which is what
+    gap 134 exists to catch. KIT cannot express haplotype
+    phase, so the mod can breed a W22 horse with no W20 where reported
+    W22 horses always have one; and frame white is capped below the spine as a hard
+    rule where the literature says “usually”.
+
+    The third is different and is the find of the session.
+    The settled call not to add
+    ea to Extension is recorded on the grounds that “the two-allele
+    model is accurate to the science as it stands”. The source the owner supplied says the
+    established, routinely tested series is E, e and
+    ea. So the decision’s premise is false —
+    and the gene page had been saying so all along, describing ea as real
+    and merely unmodelled, which means page and decision had quietly disagreed since the call was
+    made. The conclusion may still be right for a different reason: nothing would look different,
+    because ea is phenotypically red like e, so the value is
+    entirely in the genotype code and the carrier display. The decision is not reopened
+    here — it is the owner’s to confirm on honest grounds or reverse.
+
+    The pleasant surprise is how much of this the mod already had right, and not
+    by luck. Both sources close with advice for a genetics simulator, and both describe what is
+    already built: treat Extension as a pigment-permission gate and let Agouti operate only when
+    eumelanin is enabled; model ASIP with two alleles and push wild bay, dark bay and
+    seal-brown-like expression into probabilistic modifiers with breed-linked frequencies rather
+    than Mendelian alleles. That is this gene plus shade, down to
+    the skewed pools in the breed files. The KIT review’s advice — treat white extent
+    as a probability distribution conditional on genotype rather than a fixed sprite — is
+    the combination table plus a strength roll. The A+/At call made on
+    2026-09-15 is confirmed outright by a source that arrived five days later.
+
+    Also intaken: To do.txt, whose own last line says to empty it
+    once its contents reach the roadmap. Its three asks are there now — more flavour genes
+    for breed designers, a gene that reads what the horse is wearing, and a possible aggression
+    overhaul. The tack-aware one is the interesting entry: the when vocabulary has
+    no flag that can see an equipment slot, so it is a condition-contract job before it is a
+    gene, and BarebackSteeringHandler’s phantom saddle means a naive
+    “is saddled” check is true for horses the player thinks are bare. The aggression
+    note is recorded as unspecified on purpose: it says only that they may need an
+    overhaul, and nothing should be rebuilt off that sentence.

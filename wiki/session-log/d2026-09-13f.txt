@@ -1,0 +1,86 @@
+2026-09-13 — three fixes that were never reached, and a freeze that needed a reboot
+
+    A long afternoon of live testing with a log watch running beside the game. The
+    through-line: three separate "fixes" were written, documented and
+    committed, and not one of them ever ran — and each was caught by a
+    measurement, never by reading the code that contained it.
+
+The fixes nobody reached
+
+    - The eyesight readout. DebugWorldWatch.attributeReadout,
+        which names each horse instead of printing a min–max, was private and called
+        from nowhere. Wired in, then extended to print each horse against its own base and
+        its block light — which answered eyesight in four censuses (gap 216,
+        219).
+
+    - The horse attack interval. HorseMeleeGoal overrode
+        getAttackInterval() to 12 ticks; vanilla's resetAttackCooldown
+        writes a hard-coded 20 and never asks. Found in bytecode after a guardian died one
+        second before its zombie. The goal owns its cooldown now, at 10 (gap 222, since verified).
+
+    - The stall detector's fallback box. Built to "never refuse", it
+        turned every failed search into a plausible stall — which hid that the yard's
+        stalls had a hole for a doorway instead of a gate. It refuses now.
+
+A regression I shipped, caught the same way
+
+    The world-flag cache answered flags it had never computed, and my fix stamped
+    "never sampled" as Long.MIN_VALUE — so now - sampledAt
+    overflowed, and dark, snowing, near_jukebox and
+    hostile_near went permanently off for every gene for about an hour. The
+    census line DAYWALKER (dark)=0.221 … light=1 made it undeniable. The
+    sentinel is compared with == now.
+
+The freeze
+
+    Walking toward a herd froze the owner's whole machine, needing a reboot. A thread dump
+    put it on the render thread (173s of CPU against the server's 32s): every
+    newly-seen horse was baked twice inside the frame that first drew it. Now one bake per
+    horse, a 4ms-per-50ms time budget with a shared stand-in coat, a 32-block
+    detail distance, and a founding budget of 15ms per server tick. Owner:
+    “Much, MUCH better feeling performance.”
+    Pipeline  when a coat is baked,
+    gap 221. My first two diagnoses were both wrong
+    within the hour; cumulative CPU per thread settled it, a single stack sample did not.
+
+Stalls, tickets and ownership
+
+    - The horse in the roof was the stall's own sign being measured as a
+        one-tile room: signs are force-solid, so a sign hung outside with sky above closed
+        as a room, and at ticket time it was smaller than the real stall and won. Diagnosed
+        on the first use of a trace line added for the purpose (gap 223).
+        An L-shaped stall also needed the search to start from the nearest floor along the
+        wall, not only the square straight behind the sign.
+
+    - Owner rules: nothing binds to a horse you do not own, creative
+        included; a seed jar is filled only from your stallion and used on any mare you own;
+        one stall sign per horse, with a second placement moving the stall and popping the
+        old sign off.
+
+    - Lycanthropy was deleting horses. A were-animal's death removed the
+        horse with no death at all. The first fix — refusing aquatic forms on land
+        — was overruled: “It should absolutely still shift and then just
+        die.” The animal's death now rebuilds the horse and kills it with the same
+        damage source (gap 220).
+
+Confirmed and retired from the yard
+
+    Gladiator; dhampir (all three questions — its pen was wrongly deleted once and
+    restored); eyesight; bone meal and the mixed dryad pair; ender echo's on-foot blink;
+    shears; milking for milk and potion; the carrot breeding mechanism; the horseman, the
+    cowboy and the transfer papers; every ticket stall; one stall sign per horse. Rows G and
+    H are gone and the yard is seventeen blocks shorter.
+
+Process, written down so it is not paid for twice
+
+    - Kill every client before relaunching — a
+        MinecraftMain command-line filter misses the dev client, two clients
+        ran at once and interleaved the log; fml.modFolders is the marker that
+        works.
+
+    - Check what else is in a room before retiring it — the
+        horseman's study also held the untested transfer-paper chest.
+
+    - Untracked files in intake/ are the owner's drop-ins, not strays.
+
+    What is still open, and where to look: verification  §0-DS.

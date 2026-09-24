@@ -1,0 +1,68 @@
+2026-09-17, after the flag — Eleven genes stop faking it with subtraction
+
+    The entry below built "over": true and deliberately left the payoff untaken:
+    no real gene used it, and the eleven candidates each wanted judging on a horse rather than
+    folding into the commit that built the mechanism. This session took it. Dorsal wing,
+    contour, starburst and the eight nested genes of the 2026-09-10 intake now carry the flag,
+    and the inverted copies that stood in for it are gone — 165 splices, overwhelmingly
+    deletions.
+
+The conversion was derived, not hand-written — and the derived rule was wrong
+
+    These files are big and repetitive: the same 9KB SVG d string appears in
+    several layers, differing only by an "invert": true. Hand-editing that is how
+    you get a gene that is subtly wrong in one expression. So the edit was stated as a rule and
+    applied by script: drop a carving mask exactly when it duplicates a non-carving
+    mask of a later layer, then mark that later layer over, splicing byte
+    ranges so untouched number literals and line endings survived.
+
+    - The rule is not sufficient, and finding out why was the session. It
+        flagged dorsal wing's margin band for conversion, because the margin's carve
+        matched the squiggles layer — whose region is the inner shape. But the
+        squiggles only paint where their SPOTS land, so they do not repaint all of
+        it. Dropping that mask floods the whole butterfly teal over the dark ground. The real
+        condition is that the later layers must jointly cover the carved shape, and
+        two layers keep their subtraction because what they must not cover is painted
+        BEFORE them: that margin, and contour's drawn line, which would otherwise wash
+        across the summit bands.
+
+    - Static reasoning about it was unreliable — the renderer settled it.
+        Contour's case was talked into and back out of twice on paper. What resolved it was
+        CoatBakeGoldenTest, whose own javadoc says a diff there is “a prompt
+        to go and look at the icons, never a verdict”, followed by a per-pixel diff of the
+        icons themselves.
+
+What the measurement said
+
+    Corolla, taper flame, barred wing, uraniid, trillium and ooze drip move by at most
+    one channel bit — the same picture out of fewer masks — and foxglove's
+    coloured form holds its mean saturation to three decimals. The genes that move are the ones
+    painting at strength below 100: stacking makes a layer measure from the
+    accumulated colour rather than the gene's start, so instead of landing on its stated colour
+    it compounds. Contour is seven bands at 93 and shifts about 38% of the horse, visibly
+    greener. The owner took that deliberately rather than revert it, on the
+    argument that stacking is what the layers always meant; whether the hypsometric ramp still
+    reads as a contour map is the open question at
+    §0-EY.
+
+Two traps worth keeping
+
+    - An icon diff is not necessarily like-for-like. GeneIconTool
+        photographs whichever allele repaints the most, so a change that moves those scores
+        changes the subject. Foxglove's icon switched from its coloured form to its pale
+        one and read as a total loss of hue — identical pixel counts, saturation 93% to 0%
+        — and was very nearly written up as a regression. It was nothing of the kind. Only
+        contour and dorsal wing declare a preview expression; the other nine are
+        auto-picked, and for those the honest check is a per-allele render through
+        CoatSampleTool.
+
+    - Three icons were stale in git. flaxen, roan and
+        silver changed in this bake without their genes moving in the coat golden.
+        Baking twice proved the tool deterministic — 230 of 230 byte-identical — so
+        they were simply committed before some earlier change and never re-baked. Fixed here by
+        accident rather than design.
+
+    DeadLayerTest passed untouched, which is a real result: nothing died and nothing
+    on the 29-line ratchet came alive. CoatPipelineGoldenTest did not move either,
+    correctly — no gene was added or removed, so no epigenome slot shifted, and none of the
+    eleven is among its 39 genotypes. Only coat-bake-golden.txt needed regenerating.

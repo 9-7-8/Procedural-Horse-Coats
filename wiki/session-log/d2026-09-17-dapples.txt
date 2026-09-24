@@ -1,0 +1,59 @@
+2026-09-17, later still — Silver draws its dapples, and a render that could not settle it
+
+    Next on the natural list, one at a time. Silver had
+    shipped as the dilution only — the dapples the gene is named for were not
+    drawn — and the roadmap also recorded that its flaxen mane read a little
+    gold rather than pale. Both fixed in one pass.
+
+    The lattice is BodyNoise.cellDistance in body space, warped exactly as
+    grey’s is, so that two kinds of dapple on one horse
+    are the same shape of thing. The depth is 0.16 against grey’s 0.42:
+    a grey dapple is the difference between pigment kept and pigment lost, while a silver
+    dapple is a shading within one chocolate, and at grey’s depth it reads as
+    spots. Body only; the mane and tail keep the flat flaxen path. The mane was pulled from
+    HAIR_KEEP_RED 0.40 to 0.30 in the same change.
+
+The seed lives on the allele, which was the owner’s correction
+
+    The roadmap had specified a fixed-seed modulation “per-genotype rather than
+    per-horse”, and the owner overrode it mid-session: the seed, spacing and
+    strength are stored in the silver allele’s own epigenetics. That is the
+    better call and it is worth writing down why. A genotype-derived hash would make every
+    horse of a given genotype dapple identically and permanently; on the allele, the values
+    inherit with the copy they sit on and drift each breeding, so two siblings can differ and
+    a line can be bred toward heavy dappling. Strength runs down to zero, because a
+    silver that barely dapples is a real and common horse.
+
+The render confirmed two things and could not settle the third
+
+    Checked with an offline render rather than by spending game time. It confirmed the
+    dilution and the paler mane. It could not confirm the dappling either way
+    — a 0.16-depth modulation is a few percent of brightness on a 128-texel sheet, which
+    is below what can honestly be judged by eye, and the sample’s strength comes from its
+    own seed, so the picture might not even have been a fair test of the feature.
+
+    “I could not see it” is not evidence of absence, and would not have
+    been evidence of presence either. So the eyeball was replaced with a measurement:
+    SilverDappleTest paints silver horses across 64 seeds and measures the spread
+    of surviving black over body texels. It asserts that a strongly dappled horse really is
+    modulated, that a barely dappled one is not, that the long hair stays uniform, and —
+    the one a picture can never show — that strength varies from horse to
+    horse, which is the specific way this design breaks if the epigenetics are read
+    from the wrong place. A render of one horse would look perfectly correct while every
+    silver in the world wore the same coat.
+
+The coat sample tool had been broken for months, silently
+
+    Found while trying to render that probe. bakeCoatSamples was dying on its
+    twelfth sample with “gene horsegenetics.grey has no allele 'G'”, so it
+    had been producing 11 of its 122 renders and exiting non-zero. The cause is
+    dated: the commit that reworked grey into a dosage locus left the sample rows asking for
+    grey=G/g, an allele the locus no longer has. Silver’s samples sit below
+    the break, which is why the probe produced nothing at all.
+
+    Repaired to real dosage genotypes (G2/N steel, G2/G2 mid,
+    G3/G3 nearly white) and all 122 samples render again. The file’s own
+    comment already warned that “a sample list is a poor place to keep a claim about
+    how a gene works” — it now carries the cost of having been right. The
+    wider lesson is the one that closed gap 263 later the same day: a tool or test that
+    nobody’s change happens to run can stay broken indefinitely with no session at fault.

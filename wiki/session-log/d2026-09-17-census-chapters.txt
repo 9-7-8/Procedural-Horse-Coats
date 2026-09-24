@@ -1,0 +1,115 @@
+2026-09-17, last of the day — A census of every allele, and the wild put first
+
+    Two pieces, asked for together: the Getting started book gained a chapter on wild horses
+    and one on magic, and the wiki gained a gene census —
+    one page listing what every combination of every gene's alleles actually does. The census
+    is meant to be handed to an AI as much as read by a person, which is why it is a plain
+    semantic table with its text in the source rather than injected by script.
+
+The census could not be assembled from anything that already existed
+
+    Three baked assets look like they should back it and none can.
+    genes.json carries a description per outcome but only for the data-driven
+    magical genes; marking-facts.json has the family and pair spine for the
+    painting genes but no descriptions at all, and it drops every non-painting gene
+    and every wild type. Their union still misses the behaviour, yield, health and sex loci
+    entirely. So GeneCensusTool walks Genes.codeOrder() and
+    GenotypeCatalog.allPairsOf and reads Expression#description(),
+    which exists for every gene whether or not it paints. A new gene reaches the census
+    by existing, the way a gene page does — the only way to make it
+    stale is not re-running the bake, which is why it is in the regeneration table rather
+    than in anybody's memory.
+
+Expression#wildType() means two different things, and it broke the same instruction twice
+
+    The owner asked for wild-type rows to go, keeping agouti, extension and shade. That reads
+    as a one-line filter and is not, because Expression.wildType(…) is also
+    the only constructor that paints in neither phase — so a gene with no coat
+    effect uses it for real outcomes. Culling literally on the flag dropped 917
+    rows and deleted 85 whole genes: body size, magic speed, diet, fireproof
+    and sex all went to zero rows, which is precisely the population the census was built to
+    cover.
+
+    The second attempt was wildType() && affectsCoat(), which is right for
+    painting genes and spares every non-painting gene's baseline too — 80 rows
+    still reading "Wild type". The third attempt, suggested from outside the code, was "the
+    expression of the gene's baseline pair", and that over-selects: SexGene's
+    default allele is X, so its baseline pair X/X is Mare.
+    What shipped tests Expression#id() against the "wild" id that
+    Expression.wildType assigns — stable identity rather than display prose,
+    so a renamed outcome cannot silently change what gets deleted. Eight rows still carry the
+    label, and three of those are genes whose outcome is named "Wild type" while carrying a
+    custom id (gap 267).
+
+    Two requirements genuinely conflicted at patn1 and
+    patn2: both declare one unnamed expression answering for every pair, so "drop
+    unnamed baselines" removes the only row the locus has and the census stops mentioning it.
+    The tool now decides a gene's rows before writing any, and a gene that would lose all of
+    them keeps all of them; if that rescue ever fails it refuses to write the page. The bake
+    failed loudly on exactly those two genes before the rescue existed, which is the shape of
+    failure this wanted.
+
+The breed column, and the trap a string comparison would have passed
+
+    The census says which built-in breeds naturally carry each presentation, so a blank cell is
+    a blank spot — and 1014 of the rows are blank, because only 51
+    of the registered genes are named by any breed at all. Attribution is per presentation
+    rather than per gene, which gives the carrier-versus-shows split for nothing: a breed
+    holding Agt/n lands on the wild row, one holding Agt/Agt on the
+    variant row.
+
+    The trap is that breed files store pairs as authored while the census prints them
+    canonicalised. akhal_teke.json writes ShL/Sh; the page
+    prints Sh/ShL, because AllelePair orders by
+    Gene#alleles() declaration order. A token-string comparison would have quietly
+    credited nobody on that row and on its Cr/N and G3/N rows, and
+    the column would have looked like it worked. Credits are built by resolving tokens to
+    Alleles and comparing pairs. Every credit is also checked against the pairs the
+    row actually prints, and the bake throws rather than emitting a breed name beside a pair
+    list that does not contain the pair which earned it.
+
+    Excluded deliberately, all of which would have made the column useless rather than wrong:
+    Feral Mixed (its sheet is empty — it rolls everything in the founder instead), magical
+    herds (they bolt a random magical gene onto 5% of wild herds, so Friesians would appear
+    against genes Friesians do not carry), splices, carrots and the editors. The four body-stat
+    loci are not in any gene pool — they come from the breed's stat scores — so they
+    read set by stat scores rather than a false blank, and feralOnly loci
+    read feral only for the same reason.
+
+The wild comes first, because that is what a player meets
+
+    Getting started went from six chapters to seven and from 66 tasks to 90. Horses in the
+    wild moved to the front and from two sub-chapters to eleven, and taming moved into it:
+    every horse a player meets is wild until they tame one, so husbandry now begins where a
+    horse is already yours. The chapter describes behaviour that was fully implemented
+    and completely undocumented — sparring that settles rank without damage, a
+    band stallion coming round behind a stray mare to drive her in, takeover fights
+    that stop at two-fifths health, displacement at water but never at plain grass, grooming
+    partners standing head to tail. A new Magical horses chapter covers what a magical
+    gene is, the dhampir's two strains and why a white one cannot be hand-tamed at all, and
+    magical herds.
+
+    Thirteen of the 24 new tasks are things you watch rather than do, which no
+    existing hook shape could express, so HorseProgress.completeForWatcher credits
+    the nearest player within 24 blocks with line of sight. The line-of-sight test is
+    the point: a box that ticked for a fight behind a hill would be claiming the player had seen
+    something they had not. Four hooks needed a firing guard because they sit inside goals that
+    tick, and those are the ones that can stick on or off —
+    §0-EO says which.
+
+    One near-miss worth recording: the first draft of the enum renamed
+    NAME_HORSE. Task ids are what a save stores, so that would have
+    orphaned every player's completed task and broken a live call site, while compiling
+    perfectly in between. The enum's ordering was changed freely and its constant names were
+    not.
+
+What is not verified
+
+    None of the checklist has been played. Every one of the 24 new tasks is
+    unseen in game and the watcher mechanism is the part able to fail silently in both
+    directions at once. The census, by contrast, is verified by construction and by 26 headless
+    Chrome checks, including that the collapsed mobile pair cell still has its full pair list in
+    the file on disk — the AI-readability requirement depends on that and it is invisible
+    in a browser. Also fixed in passing, because the census put it on a page built to be read:
+    night watch's "close behind" description carried a stranded "silently, all night."
+    mid-paragraph, a fragment left from the day gene it was cloned against.

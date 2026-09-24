@@ -1,0 +1,153 @@
+2026-09-13 — the night's findings turned into a locus, and a shove that lost to a pathfinder
+
+    The overnight watch built the previous evening produced its first readings, and
+    almost everything below came out of them rather than out of anybody's judgement.
+    That is the point of the thing and it is worth saying once: three of the
+    four changes in this entry were prompted by a measurement, and the fourth was
+    prompted by a measurement being impossible.
+
+Owner-verified in-game, 2026-09-13
+
+    - Hydrophobic works, and it heads for an edge afterwards. “It
+        seems like the horse moves for an edge after too?” - which
+        contradicts what this project has been telling itself. §0-BT
+        called the gene half-built: “the 'and then heads for the nearest shore' half
+        is not implemented - the horse is simply dumped where it stood… I would treat
+        this gene as incomplete rather than untested”. Watched, it does head out.
+        The translator only ejects; the heading-out is vanilla's own behaviour for a horse
+        in deep water, which the gene inherits for free. The note was written from reading
+        the code and was wrong about the outcome.
+
+    - F8 toggles correctly (§0-CQ). The red herd leader has been
+        seen before but wants a herd, so that pen stays.
+
+    - Molten hooves: the prints are oriented correctly, and the black
+        allele's prints do not glow.
+
+    - Hot blooded. The thaw is seen. What is left of §0-BT's entry
+        needs a frozen lake - "check that a horse on a frozen lake ends up
+        swimming rather than falling through into a hole" - which a flat fenced pen cannot
+        provide at all, so the pen is retired and that question moves to the overworld.
+
+    - Molten hooves' black prints do not glow. “The black hoofprints
+        do indeed look like they're not glowing” - which is the whole point of that
+        allele and the one thing about it that could not be checked from an icon.
+
+    - Single-colour ooze drip. “Looks GREAT.” The first of the
+        intake genes confirmed as good rather than merely present.
+
+    - Verdant, all three alleles - re-confirmed. Its pens were already
+        removed on 2026-09-12 when it was first confirmed, so there was nothing left to
+        retire; recorded here because the owner asked for it a second time and the honest
+        answer is “already done” rather than a fresh change.
+
+    - The fireproof lava crawl. “Both that you float and that the
+        rider doesn't take damage as long as they're mounted.” The float was already
+        recorded; the rider's immunity in lava specifically was not, and the
+        clause that matters is as long as they are mounted — dismounting
+        mid-lake leaves the rider standing in it, which is correct and worth knowing before
+        somebody “fixes” it. Only the speed decision is still open
+        (gap 179 (closed 2026-09-13): whether a crossing that slow is
+        acceptable, or worth the project's first mixin).
+
+    - Lethal foals die at birth. The first thing in §0b
+        ever confirmed in play — the trait, size and health system has
+        carried “NOT play-tested” since 2026-09-04, and this is the part of it
+        with the least margin for being quietly wrong. A foal that should die and does not
+        is a silent failure; one that dies when it should not is a ruined line. The other
+        four bullets under that heading are untouched, including whether the death message
+        resolves rather than printing its raw key.
+
+The dryad became nine alleles
+
+    The night proved the gene works — a sapling at 00:00:03, six logs and
+    fifty-two leaves by 00:01:09, the first dryad tree in the mod's history. It also
+    proved a sixth of its output was permanent litter: the translator
+    picked a species from pos.hashCode() and one of the six was dark oak,
+    which vanilla grows only from a 2×2. A gene planting one sapling
+    at a time in a random spot will never make a square. A dark oak planted at 01:28 was
+    still a sapling at 02:04 while its oak neighbour had been a tree since 00:01, and one
+    position logged ten failed growth attempts in forty-five minutes.
+
+    The owner's fix was the better one: put the species on the allele,
+    so a dark-oak horse plants only dark oak and its saplings accumulate, and let the
+    translator cluster them toward each other so the square completes on its own. Then
+    the locus may as well carry the rest of what a dryad could plausibly be —
+    mushrooms, flowers, and bone meal — which makes it nine variants plus the wild
+    type.
+
+Incomplete dominance, and why halving is the whole design
+
+    The rule asked for: recessive to the wild type as before, but two different
+    variants both express. The question that decides whether that is a design or an
+    exploit is what “both” means, and the answer is each at half
+    rate. If a mismatch planted two things at full speed, every breeder would
+    keep their lines deliberately mixed and a matched pair would be strictly worse than
+    the thing you get by accident — at a locus whose most interesting allele
+    requires a matched pair. Halving makes it a real choice: specialise for one
+    thing reliably, or mix for variety at the same total pace.
+
+    It needed no new machinery, which is the tell that the model was already shaped for
+    it. The interval is epigenetic and lives on the copy, so a heterozygote
+    reads copy(0) and copy(1) separately and doubles each
+    — and GeneEpigenetics.copy(int)'s own javadoc already said it
+    existed for “a codominant gene, where both copies contribute at once”.
+
+One guard for a whole family of bugs
+
+    Adding mushrooms and flowers would have reproduced the dark oak bug twice over: a
+    mushroom in daylight pops off next tick, a flower on the wrong ground never exists,
+    and both look exactly like a broken gene. Every planting word now answers
+    BlockState.canSurvive before the block is written — one call,
+    the game's own rule, no light table duplicated in this repo. Note what it
+    does not cover: a dark oak can survive anywhere an oak can, it just
+    cannot grow. That is why the clustering is a separate mechanism, and the
+    distinction is worth keeping straight.
+
+Bone meal, refused in 2026 and granted the same year
+
+    This gene's javadoc carried a refusal: “a horse which auto-farms every crop
+    you own, which is an economy lever nobody asked for and very hard to walk back once
+    players have it… recorded here so it is not quietly improved later.”
+    The owner asked for the allele. The note did precisely its job -
+    it made the reversal deliberate rather than silent, which is all a note like that can
+    ever do.
+
+    And the objection was answered rather than overruled: the cover refuses
+    crops. What is left is a horse that hurries a wood along, which is the
+    flavour the allele was wanted for and none of the economy the old note feared. It
+    also rolls the block's own isBonemealSuccess, so it is no faster than a
+    player with a stack.
+
+Intimidating: the first change measured against a baseline collected before it
+
+    The night said the gene does not do what it claims: six cows placed at three blocks,
+    sixty-four readings, median nearest 4.2 blocks and 63 of 64 inside the eight
+    the gene promises. But it also ruled out the boring explanation — the
+    first reading moved them from 3.0 to 5.6 within a minute, so the aura was firing all
+    along.
+
+    The mechanism was wrong, not the wiring. repel was a velocity shove once
+    a second, and a shove loses to a pathfinder: the cow's own navigation walks it
+    straight back, because nothing ever told the cow's AI anything. It issues a
+    path now, toward the far edge of the radius — which is the
+    mechanism this same file had already chosen for the mirror-image case, and
+    followHorse's comment already contained the argument for it. The shove
+    is kept at 0.2, not as the mechanism but as the reading: it is what makes
+    the moment look like being driven off rather than like a cow wandering away.
+
+    What makes this one different from every other behaviour change in the project is
+    that there is a number to check it against, collected before the
+    change was made, by a test that runs itself. That has not been true here before.
+
+And one test that could never have worked
+
+    The holy ward produced zero spawns in three hours.
+    BaseSpawner.serverTick opens with isNearPlayer and
+    requiredPlayerRange is sixteen blocks, so a vanilla spawner only runs
+    while somebody stands next to it — the one thing an overnight run guarantees
+    nobody is doing. No code changed: the answer is to leave the character in the spawner
+    room, since every other pen is force-loaded and does not care where the player is.
+    Worth recording that §0-CW's control line is what caught it. Without
+    “if there are no monster spawned lines anywhere, stop there”,
+    three hours of no hostile spawns beside a warded horse reads as a triumphant pass.

@@ -1,0 +1,52 @@
+2026-09-12 — a play session that answered five genes, and a test yard that learned to throw things away
+
+    The long tail of the previous entry: the owner played it. Five behaviour genes came
+    back confirmed — spontaneous breeding, pack
+    leader, and all three of verdant's alleles — and not
+    one of them had ever been broken. Every one had been unrunnable. The kit only
+    ever handed out mares, so the breeding gene could not have produced a foal on any
+    hotbar it shipped. The dimension deleted every non-horse mob on arrival, so the pack
+    leader's cows and the holy ward's zombies could not exist in the yard built to judge
+    them. And GeneAbilityHandler.spread returned early in that dimension, so
+    the spreading genes were silent no-ops in the one place designed for watching them.
+
+    That is a pattern worth naming, because it cost most of two sessions.
+    A gene that does nothing and a gene that is forbidden from doing anything look
+    identical from inside the game, and the instinct on seeing nothing happen is to go and
+    read the gene. The tell in all three cases was in the scaffolding: the kit,
+    the dimension rules, the floor of the pen. So the yard now stocks itself rather than
+    leaning on a hotbar, all three dimension restrictions are off behind
+    gap 204 with RESTORE BEFORE 1.0 at
+    each site, and each growing pen is floored for its own gene — because
+    convert() is a whitelist per cover and grass, famously, only converts
+    bare dirt, which makes the obvious test (a grass gene in a grass field) the
+    one test that can never show anything.
+
+    Then the yard threw the answered questions away. Verdant's three pens
+    and the pack leader's are gone. What is left is only the tests that need time rather
+    than attention: the dryad, about a game-day between plantings; a new hot-blooded pen
+    floored with snow and a strip of ice, the ice because it melts to a water
+    source and that is the half of the gene that could flood something; and the
+    breeding field, re-signed from “does it breed” to does it
+    stop. An uncapped automatic breeder is the classic way to kill a server, and
+    no amount of watching answers it — only leaving and counting.
+
+    The holy ward got the thing it actually needed, which was arithmetic.
+    Its whole claim is a negative, and a negative cannot be watched: standing in the
+    spawner room counting zombies tells you the spawner works, not whether the ward moved
+    anything, because the ones it stopped are the ones that never appeared. Every hostile
+    spawn is now logged with its distance to the nearest horse whose ward is live
+    — asked of the resolved ability list rather than the genotype, since a carried
+    gene can still be running nothing. A working ward reads as a floor under that column.
+    A broken one reads as spawns at two blocks.
+
+    Three bugs out of the same session, all in shipped behaviour rather than scaffolding:
+    spontaneous breeding was putting same-sex pairs in love (hearts over
+    both, never a foal, since the gene was written — and the only visible sign of the
+    gene working is exactly what it looks like when it cannot), the F8 highlight
+    crashed on a horse that had left its team, and pack leader's label
+    promised followers it does not summon. One is still open: horses keep the F8 outline
+    after the highlight is switched off, because it lights them by proximity and clears
+    them by proximity later — and effect timers do not tick in unloaded chunks, so a
+    group left behind holds the outline frozen until somebody walks back.
+    Gap 205, with the fix written down.

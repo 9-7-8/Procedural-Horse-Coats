@@ -1,0 +1,52 @@
+2026-09-16, later — Getting started becomes a book, and every item gets a box
+
+    “Overhaul the getting started page on the H menu in line with the new plans
+    in the road map. Also add dying each piece of tack as a sub chapter. Also make
+    subchapters on the table of contents have a yellow background when you've finished the
+    checklist for that sub chapter.” The plan was already written down —
+    roadmap 24.5, from 2026-09-15 — asking for chapters and sub-chapters with every
+    sub-header ending in at least one checklist item.
+
+The yellow is the reason for the restructure, not a decoration on it
+
+    A sub-chapter can only be finished if it owns checklist items, so the two halves
+    of the request turned out to be one change. The checklist stopped being a section of its
+    own and its items moved up under the sub-chapters that teach them. What that arrangement
+    loses is the overview — “how much is left?” — so a Checklist
+    section at the end keeps the total and lists only what is outstanding, and therefore
+    shrinks as the player works through it.
+
+Every item has a task, which cost twenty-six of them
+
+    Asked mid-session. Auditing the registered items against the then 36 tasks left eleven
+    items nothing could ever tick a box for: the five themed splice carrots, braided rope,
+    hair cloth and hair bundles, two of the three ticket tiers, and breed spawn eggs. A
+    twelfth, the blank ticket, looked like a mere crafting base until the recipe folder
+    showed the horseman sells it. Each new task was wired to a real hook rather than declared
+    and left dangling, because ProgressTask's own rule is that an unreachable
+    task reads as a bug the player cannot diagnose.
+
+    Two of them had no player to credit. Healing at water and forming a herd
+    happen on the horse's shared slow tick, with nobody interacting, so they are credited to
+    horse.getOwner() when that owner is loaded. That is the most likely thing
+    here to be subtly wrong in either direction, and it is why it leads
+    §0-EO rather than sitting in
+    the list with the rest.
+
+Written from the code, because the wiki was wrong in four places
+
+    Checking every claim against the source rather than the wiki turned up four stale ones,
+    all fixed in the same change: grooming is +2 and not +5; riding is a point per forty
+    seconds, because a rider always also earns the proximity gain; a stall sign refuses an
+    unenclosed room rather than falling back to “the ground in front of the sign”,
+    a fallback that was removed some time ago; and breeding still
+    said heat and pregnancy were unbuilt and that there were no sex-linked loci, both long
+    since false.
+
+    The one that changed the writing most was inbreeding. Roadmap 24.5 asks
+    the genetics chapter to cover “line breeding, inbreeding and the risks of both”,
+    and there is no inbreeding penalty in the mod at all — no coefficient, no
+    warning, no weaker foal; the only kinship rule anywhere is a wild dispersing filly
+    refusing a close-kin suitor. So that sub-chapter says so outright and describes line
+    breeding as a practice with a real cost that the game does not enforce, rather than
+    implying a mechanic that does not exist.

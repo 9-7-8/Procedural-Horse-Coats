@@ -1,0 +1,92 @@
+2026-09-17, last — The horse dimension stops being a random gallery
+
+    The owner’s brief: the aisles should be every breed down one side and
+    every unchecked marking down the other, generated as you walk, with more
+    signs saying what each thing should look like — and the visual checks taken out of
+    the test yard and put first in the tester page’s visual section.
+
+The corridor is two lists now, and one of them ends
+
+    It was PEN_COUNT = 2,000 random showcase genotypes on both sides: a corridor
+    that never ran out and so never told you anything was left. Now the right-hand
+    (+Z) column is CoatCheckPlan — one pen per
+    allele combination of every gene whose wiki page carries no Verified block,
+    newest-gene-first by the timeline, because a painter written last week is where a drawing
+    bug actually is. The left (-Z) column is every breed alphabetically, a mare and
+    a stallion each, looping for as long as the right column runs.
+
+    The length is derived and it shrinks as the mod is tested.
+    COAT_CHECK_PENS is CoatCheckPlan.size(): confirm a gene, write its
+    Verified block, re-bake, and its pens leave the corridor. That is the opposite
+    direction from the old catalogue corridor, which grew with every gene added until it wanted
+    seven million blocks.
+
+    - Four horses to a pen, one combination on a black, a bay, a chestnut and
+        a white base, named on their nameplates — chosen over four consecutive pens because
+        “does this work on every base?” is answered by looking at them together, and
+        four pens would have made it a memory test and quadrupled the walk.
+
+    - The white horse is the masking check, on KIT
+        W2/N — one copy of an allWhite allele, which
+        removes every pigment. Anything still drawn on it is a gene ignoring a mask. Not
+        W22, which is sabino-like alone and all-white only beside a booster.
+
+    - Up to four sign boards per pen, replacing the single genotype-code sign:
+        the pen number and gene, the outcome’s name, then the gene file’s own
+        description wrapped across the rest — so a tester compares the horse to what the
+        gene claims, not to a guess.
+
+    - A breed pen’s horses really are that breed: a new
+        HorseRecords.newFounder(horse, rng, breed, sex), because the existing pair of
+        overloads could give you the lineage token or a forced sex and never both. A pen
+        labelled with a breed whose horse reads as feral is a label, not a breed.
+
+Where the list comes from
+
+    :common:bakeUnverifiedGenes reads the wiki’s own
+    Verified blocks — the record hard rule 9 already requires — and writes
+    horsegenetics/unverified-genes.txt, because the wiki is not in the jar and the
+    game cannot ask a web page. The alternative was a second hand-kept list of what is untested,
+    and a drifted list of that kind is worse than none: it says “done” about something
+    nobody looked at.
+
+    Two filters stay at runtime rather than bake time, so the resource is a faithful copy
+    of the wiki and the build decides what it means: a gene absent from genes/index.json
+    is skipped (an absence there is a killswitch, not an oversight), and a gene that paints nothing
+    is skipped — several of the newest genes are health and behaviour loci whose pen would have
+    been four identical horses. Extension and agouti are excluded as the base coat rather than a
+    marking on one, the same exclusion ShowcaseGenotypes makes.
+
+    The first scan was wrong in the mod’s favour and had to be fixed: agouti and
+    champagne carry the older marker (Owner-verified in-game, a
+    note good div with no id="verified" anchor), so they were being counted
+    as unconfirmed and would have filled the corridor with pens for work done on 2026-09-01.
+
+The yard gave up its looking pens
+
+    - Row E’s gilded-crackle display stall is gone — it asked only
+        “does this look right?” for one gene, which the corridor now does for every
+        unconfirmed marking. The row itself stays: the same west block holds the pool, six
+        blocks along. Deleting the row outright broke the pool’s z and failed the
+        build, which is the one mistake the chained-row layout cannot absorb for you.
+
+    - Row D’s egg-layer pen is gone — its last open question was the
+        cap, and the overnight run of 2026-09-14/15 answered it on that very pen: the despawn timer
+        bounds the floor and nearby_cap never fires.
+
+    - The magic stat pens now say what to do (“RIDE both horses”)
+        rather than what the census prints, which is not something a tester does.
+
+    - Everything else stayed. Ender echo’s ridden half, holy ward’s
+        spawner farm, starburst’s pale structure, lantern’s bloom and the stat loci are all
+        still open on verification.html, so their pens are still earning their place. The
+        rule used was the pen’s own question being answered in writing — not the gene
+        being flagged verified, which would have deleted the egg-layer pen while its cap question was
+        still live.
+
+For the testers
+
+    Two new entries at the top of §12 How things look
+    — walk the coat column, and walk the breed column — deliberately not one
+    entry per allele, which would have been bloat nobody reads. They say to report the pen number, which
+    is on the first board.

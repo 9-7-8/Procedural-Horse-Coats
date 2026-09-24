@@ -1,0 +1,13 @@
+2026-09-02
+
+Owner-verified in-game (2026-09-02)
+
+- Custom horse spawn egg end to end - the egg, the age/sex/genome editor, and the spawn (see the status bullet below for the two follow-up fixes).
+
+- Waterborn's coat: the neon-blue streaks in the mane and tail render.
+
+- Waterborn's particle trail: the blue dust at the hooves on the move works. walk_on_water and the tamed-mare milking are not yet confirmed - wiki/verification.html §13.
+
+- Suntouched's glow: the emissive gold mane + tail render (bright in the dark), the gold-dust emitter shows, and the horse lights the area around it (the trailing minecraft:light block). Light cleanup on death/unload, the foal case, and hard base coats (cremello, dominant white) are not yet confirmed - wiki/verification.html §13.
+
+- Stallion seed jar - collecting from a stallion and impregnating a mare produces a real bred foal, and the jar carries the correct genome. Two bugs found and fixed the same day: the jar didn't visibly change in creative (now transforms in hand), and it worked with the horse not in breeding mode (now both ends require isInLove()). The short genome display string (info panel / tooltip) is missing the magical genes - a GeneCodeDisplay bug, data is fine (open issue in wiki/verification.html). The breeding-mode gate itself is built-but-unretested.

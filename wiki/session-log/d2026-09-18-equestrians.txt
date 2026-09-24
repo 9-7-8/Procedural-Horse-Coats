@@ -1,0 +1,67 @@
+2026-09-18, after the herd test — The horseman is four people now
+
+    One villager profession sold tack, carrots, armour, papers, eggs and tickets across five
+    tiers. That is a shop rather than a tradesman, and it left nothing for any of it to
+    become as he rose: his fifth tier was the same counter with dearer things on it. He is
+    deleted outright — no alias, no transitional profession, hard rule
+    6 — and four take his place: an
+    equestrian leatherworker, scientist, supplier and
+    metalsmith, each with a post, a POI, a hat colour and five tiers of its own.
+
+    Four blocks and not one, and that is forced rather than chosen. A POI
+    hands out exactly one profession — vanilla reads the job off the job site claimed,
+    not the other way round — so four jobs need four job sites. They are the same block
+    four times over, sharing one model and one texture set with the
+    hitch, and making each look like its trade is
+    open work. The recipes are not shared: every post takes two hair cloth and two fences, and
+    the remaining three slots are what tells them apart, which is what keeps
+    check-recipes.mjs able to hold the whole set distinct.
+
+    Two loot functions did the work the tiers needed.
+    set_tack_tint writes the mod’s own three-zone tack_tint
+    from a named palette, so it reaches the saddle and the metal fittings that vanilla’s
+    dyed_color cannot — which is what makes the leatherworker’s five
+    tiers a ladder you can see, bone meal and flowers at Novice through lapis on diamond
+    fittings at Master. That also answers the
+    open question the roadmap had been holding since the dyed-saddle trade was withdrawn for
+    selling an invisible upgrade: the objection has expired, and the master tier sells a
+    fitting material, which makes the trade a source rather than a convenience.
+    set_random_gene grew a homozygous flag, which names both alleles
+    the same so the foal is certain to get the gene rather than getting it on a coin flip, and
+    skips genes whose homozygote canOccur rejects rather than selling an inert
+    carrot.
+
+    The homestead was rebuilt around them, and the interesting part is what the bake
+    stopped counting by hand. The house is deepened three rows as well as widened a
+    column, for five beds — one per sleeper, because a villager who claims a job site
+    and has no bed never sleeps and never restocks, so the bed count is the other half of the
+    post count. The row that is duplicated is the only cross-section a hip roof tiles, and it
+    is also the door’s own row, so the door is lifted out first and put back or the west
+    wall grows one door per copy. Interior extents, the run of wall a post may stand in front
+    of, and every post position are now read off the finished grid and asserted
+    rather than counted up from the duplication constants — so retuning the depth moves
+    the frontage with it instead of silently posting a block over the doorstep.
+
+    The cowboy got his own hat file. He used to read the horseman’s
+    profession PNG directly, which was the cheapest possible guarantee the two could not
+    drift. That stopped being possible the moment the horseman became four files in four
+    colours, so tools/villagers/bake-profession-hats.ps1 now writes all five from
+    one piece of source art. The trap it documents is that the hat is two rectangles
+    on the sheet and a long way apart — the crown, and the brim, which unwraps into the
+    far corner — and recolouring only the crown gives a villager a teal hat with a brown
+    underside, which reads as a texture bug rather than as a mistake in a bake. The texel
+    counts are asserted so a redrawn source fails loudly. None of the four is purple: that is
+    the arcane dealer’s, and he has to stay
+    pickable out of a crowd.
+
+    Fixed on the way past: cowboy_hitch had shipped with no loot
+    table at all, so breaking one dropped nothing. It has one now and so do the four new posts.
+
+    What this bought and what it owes. It bought four shops that can each get
+    better at one thing, and a checklist item that names which POI is broken rather than
+    reporting that nothing happened. It owes a
+    confirmed homestead: the piece grew on the axis the
+    jigsaw bounding-box check is tightest on, the pool weight behind it is arithmetic against
+    the old footprint, and nothing downstream — four jobs, one surname across
+    five, five beds slept in — can be tested until a homestead is found in a world. The
+    whole batch is §0-FJ.

@@ -1,0 +1,77 @@
+2026-09-11 — a breed is exactly its sheet; the designer draws, asks and explains
+
+    The owner's fourteen-point list after walking the new designer, and one principle that
+    fell out of it: now that breeds are designed, magic in a breed is a design
+    decision. Everything is waiting in game, on
+    the breeds verification tab.
+
+No stray magic, no background disorders
+
+    - BreedFounder forces every magical gene and every disorder the
+        breed does not name to wild. The geometric magic draw, magic_chance,
+        the white/blacklists and hardy are gone from the record, parser, writer
+        and all 49 files; BreedFounder.plate went with them, since a founder is
+        now what the plate was. Feral Mixed - the unbred population - is the
+        only place random magic or an unlisted disorder comes from
+        (breeds).
+
+    - Nine breeds relied on the background rate for disorders their sheets
+        name, so they now list them at the wild carrier rates: HYPP, PSSM1 and HERDA
+        on the Quarter Horse and Paint, SCID, CA and LFS on the Arabian, GBED and HERDA on
+        both Mustangs, PSSM1 on the Percheron and Shire, ACAN on the Miniature and Friesian,
+        megaesophagus on the Friesian. Gap 68 (“disorders are global”) closed
+        by the same move.
+
+    - Stables were left alone: a generated stable still adds its own
+        extra magic to the breeds it places (stables). That is a
+        separate ladder, and whether it should go too is the owner's call.
+
+    - The spawn egg's breed list starts at Feral Mixed instead of
+        “(none)”, in the screen and the horse designer. Drop-in breeds were
+        already in it - Breeds.all() includes them on the client.
+
+The designer
+
+    - Health, speed and jump are always asked, and every number on
+        those steps is the game's own curve (BreedStatCurve.factor, exported as
+        statFactor) turned into hearts, m/s and blocks, with a 1-10 table and
+        what each score means next to vanilla's range.
+
+    - The eye step is swatches (eyeHuesJson): iris, sclera,
+        wedge and wedge colour, glow and third eye, with “same in both eyes”.
+        Iris and sclera start named at brown and white. Above them, a strip of two dozen
+        rolled founders' eyes - breedFounderJson now returns what
+        Eyes.resolve paints - so champagne's amber and a white pattern's blue
+        appear on their own, and the gene responsible is named. The page does not know which
+        genes do that; Eyes.force already did it.
+
+    - Ticking a gene names one pair: the outcome measured to cover the
+        most, on its homozygote where it has one; eye genes at their wild type. Check / uncheck
+        all and “every pair with X” on genes of three or more alleles.
+
+    - Epigenetics are always open under a chosen gene, one row per
+        value: wild, within a range (two sliders) or the same on every horse. A colour triple
+        is one colour picker; a hue is a hue slider; a seed is “same pattern”
+        with a shuffle.
+
+    - Colour search: type any CSS colour and see only the genes whose
+        numbers can be a colour (colourableJson, derived from each schema - three
+        _r/_g/_b channels, or a hue scalar spanning 0-360); adding one names its
+        coloured form and locks the numbers to it.
+
+    - Size is ticked by default; biomes are a grouped checklist plus a box for modded ids;
+        the last step's button is Export breed.
+
+The jar
+
+    - The gene pictures go in as 64-pixel copies written at build time
+        (shrinkGeneIcons), nearest-neighbour - a smooth resize made gradients PNG
+        compresses worse than the originals, and the jar grew. The *Tool classes
+        (wiki bakes) and the creator's example genes are no longer packed. 3.96 MB, of which
+        the pictures are half a megabyte. Nothing else from wiki/ was ever in the
+        jar; the pictures are the one thing the game draws. Gap 187 closed.
+
+    Tests run: the breed classes (founder, plate, parser, breeds, stat curve), all green;
+    the designer driven in headless Chrome. The full :common:test was not run -
+    a full run would still need to confirm nothing outside the breed package rolled a founder
+    expecting stray magic. Gaps 68, 187 and 189 closed.

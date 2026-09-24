@@ -1,0 +1,88 @@
+2026-09-18, after the phone session — Everything run at once, and four red checks that were all the checks being wrong
+
+    The owner asked for the lot — the full :common:test
+    that normally never runs, plus every checker script. 1071 tests in 14m28s
+    and twelve scripts. Four came back red, and none of the four was the mod.
+    Every one was a check that had stopped describing what the code now does. That is
+    worth the entry on its own: the value of running the slow suite was not finding a bug,
+    it was finding out which instruments had quietly stopped reading.
+
+    CoatGeneratorTest.keepsTheGenotypeVerbatim asserted an invariant
+    the eye system had deliberately broken. It handed
+    generate() a chestnut carrying champagne and checked the genotype came
+    back identical. It does not, and should not: champagne is an eye requester,
+    so generating the horse resolves that request into real Gld/Gld alleles
+    at the two eye loci — the failure message read
+    expected eeaa nCh, but was eeaa nCh GldGld GldGld. A flat equality check
+    reads the eye system working as corruption. It is
+    movesNoLocusItWasNotAskedTo now, asserting every locus is untouched
+    except the eye loci and that the request actually landed, so
+    a gene that quietly rewrote extension or champagne still fails it.
+
+    GeneCoatHookTest had no category for a gene that grants an
+    ability and paints nothing. horsegenetics.flying declares only
+    effects, and SpecGene hands such an outcome a painter that
+    returns null on purpose — the comment in the source says it
+    outright: an expression carrying only effects still isn't a wild type — it
+    changes the horse, just not its coat. So null there is the gene
+    working. The skip is structural: it asks the spec whether any layer
+    was declared. It is explicitly not “skip a gene whose hook returns
+    null”, which would have covered this case and silently stopped testing any
+    gene that quietly broke — the same argument the file already makes at length
+    about sooty.
+
+    And it was hiding a second one. The new skip catches two genes, but
+    only flying (priority169) was ever reported: the assertion
+    threw on it and the loop never reached blight (185), which is the same
+    defect. A fix aimed only at the gene named in the message would have uncovered the
+    next one and looked like a new failure. The predicate’s javadoc says so now,
+    because this test names one gene at a time by construction.
+
+    FounderWhiteRateTest was measuring the leftovers. It
+    reported marked 42.0% against a floor of 45% — and the tempting fix,
+    widening a band the test itself calls deliberately wide, would have been exactly wrong.
+    The locus list was written 510 commits ago and never updated, while
+    markings took over ordinary white outright and
+    MITF’s SW1 was deliberately dropped 55%
+    6% because of it. So the test was dutifully measuring everything except the locus that
+    now does the job. Adding markings to
+    MARKING_LOCI takes the marked share to 60.5% —
+    mid-band, and matching the page’s own “roughly two founders in
+    three”. The band never needed touching. A new locus that hands out everyday
+    white belongs in that list, or the instrument reports on the wrong thing.
+
+    Gap 263 is closed, both halves of it.
+    check-path-canvas.mjs died at no canvas to drive, and the
+    standing guess — a starter gene whose first mask was no longer the one
+    masks[0] assumes — was wrong. Walking the element’s ancestors
+    for the first with a zero clientWidth answered it in one run: the creator
+    boots into the step-by-step view, which sets hidden on
+    section.column.right, so the canvas was present with a 320×267
+    backing store and no layout size at all. It ticks “show everything” first
+    now and passes 41 checks. The second half is the one that generalises: the guard
+    threw, and checks() buffers, so report() never ran
+    and the process died with a single line — no count, no list of what had passed.
+    That is why it sat broken for a day. The throw is folded into a failed check now, so a
+    forced failure prints the three passes, both failures with the measured box,
+    and 2 of 5 checks failed. Written up on
+    coding notes: never let one of these throw past
+    report().
+
+    An environment note that cost two runs. The full suite was killed
+    twice for low memory, and the cause was not the suite: an All the Mods 11 dedicated
+    server in C:\Users\Isabel\26.1.2-neoforge-server was cycling in the
+    background at ~4.9GB on a 16GB box. It crash-looped on its own
+    (a single server tick took 180.00 seconds, which is what thrashing looks
+    like from inside the watchdog) and the third run, with the machine to itself, finished
+    in 14m10s. Two habits paid: capture the real exit code rather than the harness’s
+    (a trailing echo reports 0 over a red build), and after a killed Gradle
+    run delete common/build/test-results/test/binary before retrying —
+    an orphaned worker leaves a zero-length output.bin and the next run wedges
+    on it.
+
+    Verified after the fixes: 1071 tests, 0 failures, 0 skipped
+    — the same count as before, which is the check that the new skip did not quietly
+    drop coverage. Parity 7163 checks across 60 cases, links across 374 pages, and
+    the other browser guards green. wiki/coding-notes.html’s
+    browser-check list was also advertising four of the seven checks that exist; it lists
+    all of them now.

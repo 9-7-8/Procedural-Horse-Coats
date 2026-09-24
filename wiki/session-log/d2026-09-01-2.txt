@@ -1,0 +1,17 @@
+2026-09-01
+
+Built 2026-09-01, NOT yet play-tested
+
+per-allele epigenetics and the dapple-grey rework. Epigenetics moved off the horse and onto the allele copy (Epigenome / Genome / AlleleEpigenetics, each copy carrying a priority + epigeneticSeed, inherited unchanged by a foal); GreyGene now renders a real dapple grey through the new GreyCoat + BodyNoise; and bay's leg black is a uniform per-horse extent with per-leg jitter instead of the old low-biased single number. Compiles, 138 common tests pass, sample bakes look right, nothing seen in-game yet - checklist in wiki/verification.html.
+
+Built 2026-09-01, never play-tested, and superseded 2026-09-04
+
+the genotype gallery rework of the horse dimension - one pen per visually distinct genotype, the entrance tally sign, and the per-gene distinctness metadata. Reverted to random pens before anyone walked it. What survives from it: the per-pen genotype sign, the pair per pen, and the entity-only teardown that leaves blocks standing.
+
+Built 2026-09-01, NOT yet play-tested
+
+the dev test-world auto-delete
+
+- client/DebugTestWorldCleanup wipes every test_horse_* save on client
+
+shutdown (and sweeps leftovers on the next start), so the button stops filling run/saves. See "Running the game".

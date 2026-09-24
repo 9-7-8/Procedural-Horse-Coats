@@ -1,0 +1,91 @@
+2026-09-11 — the two items at the top of the roadmap, both of them
+
+    One session, the roadmap's first and second entries. Both were long-standing, both
+    turned out to be smaller than the page implied once the groundwork underneath them
+    had shipped, and both are now waiting on a person rather than on code
+    (the gene-authoring verification tab).
+
+The PATH drawing canvas
+
+    A PATH mask's control points are handles on a view of the horse now.
+    Click to add, drag to move, a hollow dot mid-span to insert, right-click or
+    Delete to remove, arrows to nudge; the textarea survives, folded under
+    the numbers, and the two write the same array. It changed no format, no
+    engine and no parity fixture — which is exactly what the entry predicted when
+    it argued for shipping the mask first and the surface after, and is worth recording
+    as a case where sequencing a job that way paid.
+
+    Two decisions inside it are the ones a later session might undo without knowing why.
+    The silhouette is the model's own body-space boxes, part by part,
+    because that is precisely the set of (u, v) the mask can reach — a
+    prettier horse drawn by hand would be a drawing of a horse rather than a map of where
+    a point lands. And both axes are drawn at one scale in body units, so
+    the top and front planes letterbox rather than stretch: the
+    alternative fits the box better and makes every circle an ellipse on the animal. The
+    curve is SpecPainter's own Catmull-Rom, reached through two new
+    spec-engine exports rather than a second copy of the maths.
+
+    The test found a bug on its first run, and it was in the form layer
+
+        Every mask parameter is wrapped in a <label>, which forwards a
+        click anywhere inside it to the first control it contains. The canvas's toolbar
+        sits inside that label, so every click on the horse was also pressing
+        Reverse and the drawing came out backwards one point at a time. It would
+        have been baffling to hit by hand and was obvious from an automated click
+        sequence that printed the array after each step. Controls made of several widgets
+        get a plain block now, not a label.
+
+    Verified by driving the real page in headless Chrome — 26 checks covering click
+    placement, drag isolation, insert ordering, deletion, the textarea round-trip, the
+    foal mesh, and one-scale mapping in all three planes. The driver lives in the
+    scratchpad rather than the repo; landing it as a checked-in tool was offered and not
+    taken up, so it is a candidate rather than a gap.
+
+The Java gene API, and an open registry
+
+    TwoAlleleGene answers seven of Gene's eight methods from a
+    fluent declaration; AbstractNaturalGene and
+    AbstractMagicalGene leave the subclass restrict() or
+    tint(). The short path is the
+    write-up.
+
+    The part worth keeping: AbstractAbilityGene was moved onto the
+    same skeleton. It is where this shape was first noticed, seventeen genes
+    ago, and folding it in is the difference between a generalisation and a second copy
+    of one — it kept its positional constructor so all seventeen call sites were
+    untouched. Mushroom (natural) and
+    healer (magical) were converted as worked examples, and
+    both coat goldens are unmoved, which is what says the conversions
+    preserved behaviour rather than a reading of the diff.
+
+    Genes.register takes any Gene now, validates the namespaced
+    key, then freeze()s. The freeze buys no speed — the
+    orderings were already computed once and cached — and the entry that asked for
+    it implied otherwise; what it actually buys is a named failure instead of horses whose
+    loci have all shifted by one segment, which reads as a breeding bug and is not one.
+
+Two things deliberately not built
+
+    - AbstractPatternGene. §8 said it would absorb
+        "the BodyNoise boilerplate and the pull-N-knobs-off-the-expressing-copy
+        helper". Neither is boilerplate: reading epigenetics is the single line
+        ctx.epigeneticsFor(KEY), and BodyNoise is a static call
+        whose arguments are the design of the pattern using it. A base wrapping
+        those would hide the trivial half and constrain the interesting one. Write it from
+        a third pattern gene's duplication, if ever — not from the entry.
+
+    - Proof that another mod can register a gene.
+        RegisterHorseGenesEvent fires from FMLConstructModEvent's
+        deferred work queue, which is the one moment when every mod has been
+        constructed and nothing has parsed a genotype code. That sequence was read off the
+        loader's own constructMods rather than assumed, and it compiles
+        — but it has never run with a second mod present, and no test in this repo
+        can make it. Flagged in the class note and on
+        the gene-authoring verification tab, which carries a cheap
+        log-line check that needs no second mod.
+
+    Also: making-a-gene.html documented
+    geneCarrotHomozygous() as defaulting to false; the code
+    changed to true on the owner's call the day before and the page had not
+    followed. And the designer's wasm was re-baked — common/ moved, so
+    the browser had been running the previous build.

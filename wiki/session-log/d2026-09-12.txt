@@ -1,0 +1,260 @@
+2026-09-12 — three quarters of §10, three genes that use it, and one word that had to be neither of the obvious two
+
+    Three of the four things left in §10 shipped:
+    erase-down, the expression preview, and glow intensity. The first two turned out to be
+    one feature seen from two ends, which is why they are one commit. What
+    remains of the section is per-region colour ranges.
+
+The dial: naming the knob that means “how much”
+
+    The format could always express a gene varying in strength — declare a knob,
+    point every threshold at it — but nothing could find that knob,
+    because “this one is the important one” lived in the author's head. So the
+    creator could not offer a handle for it, and a mask could not default to it. One flag
+    fixes both: "dial": true, at most one per gene, per-horse, never a seed.
+    It changes nothing at paint time.
+
+    The word was the hard part, and it was got wrong twice before it was got
+    right. “Expression” is what the owner and the roadmap both call it
+    and it is what a horse person would say — but the format's
+    expressions is already the table of outcomes, so a file would
+    have read "expressions": […] beside "expression": true
+    meaning something else entirely. It was renamed to strength on that
+    reasoning, and strength turned out to be a parameter on every colour op
+    already (how hard it pulls) — found while editing an example gene that had
+    "strength": 75 three lines below the new knob. dial is
+    named after being a handle rather than after what the number means, which is the one
+    reading neither of the others collides with.
+
+pointsMin: a marking that gets smaller, not fainter
+
+    A weakly marked horse has a smaller blaze, not a translucent one. Every field
+    mask could say that already (wind a threshold and it covers less); a
+    PATH could not, because a drawing is not a rule — so a drawn shape
+    was the same on every carrier and a gene built from one looked stamped.
+    pointsMin is that shape at the gene's weakest, one point per point, each
+    morphing to its twin as the dial falls.
+
+    Morph rather than crossfade, decided before any of it was written.
+    Blending two coverage fields is easier and imposes no authoring constraint, and it is
+    wrong: a hard-edged mark fading into a different hard-edged mark ghosts
+    through the middle rather than shrinking. So the arrays must be the same length, a
+    mismatch is a load error, and the lerp is read through the control points inside the
+    sampler — no second path evaluated, no morphed array allocated, so a
+    PATH with a minimal shape costs what one without costs.
+
+    Both shapes are drawn on the one canvas behind a Full / Minimal toggle, with
+    the other as a dashed ghost, because what matters about the minimal shape is how much
+    smaller it is and that is invisible in a second editor elsewhere on the page. Starting
+    one seeds it by shrinking the drawn shape toward its own centre. Every structural edit
+    happens to both arrays, since the loader requires them twinned.
+
+    Parity was green about a blend running backwards
+
+        With a minimal shape on prismatic's crescent and nothing else,
+        reversing the lerp in the creator's port left check-parity.mjs
+        completely green. A drawing on a flank is a few dozen texels and
+        the fixtures sample four per part; the two sets simply never met. The page had
+        warned about exactly this —
+        the contracts note says to check that a
+        probe case reaches the new thing — and the way it was established was to
+        break the port on purpose and watch the check stay quiet, which is
+        the only way to tell "covered" from "not reached".
+
+        There is an answer table now (SpecFixtureTool.pathSection, 101 checks)
+        comparing the morph where it happens, at five points along the dial, straight and
+        curved and filled. The same sabotage now fails it on the first row. Do the
+        sabotage for the next one too: a green parity check is evidence only about
+        what it reaches.
+
+Glow became a level, which reverses an old call on purpose
+
+    Emissiveness was one bit per texel, cut at a coverage of 0.5, and
+    GeneSpec said outright that there was no half-lit. That cut was always a
+    stand-in: it existed so a soft mask would not bloom a glow two body units
+    wider than the shape that drew it, and it paid for that with a hard line across a soft
+    edge. The renderer turned out to make the better version free — the emissive pass
+    is BlendFunction.TRANSLUCENT over the coat, read out of
+    RenderPipelines.EYES rather than assumed — so an intensity written
+    as the second texture's alpha is a true dimmer rather than a darker
+    colour.
+
+    So CoatOverlay holds a float per texel, a layer's emissive is
+    a Value (true, a number, a $knob, the dial), and
+    the mask's coverage scales it — the author draws the falloff once, in the mask.
+    Two genes over one texel take the brighter rather than summing, since there is nothing
+    above full bright to spend an overlap on. Every glowing gene in the game
+    changed: fifty-odd layers fade at their edges now.
+    §0-CO names the five soft-masked
+    genes to look at and the control group that should be identical.
+
+    Particle intensity is deliberately not part of it (owner's call).
+    Particles are the emitter effect, a different system with its own rate and
+    count.
+
+Two bugs found by looking rather than by being told
+
+    - The creator dropped a layer's glow from its export entirely. Load a
+        glowing gene, export it, and the light was out - tidy rebuilt each
+        layer from name, masks and op, and emissive was in none of those. It
+        had no control either, so there was no way to notice. Now written, validated
+        (range, phase, the PIGMENT/LUMA masks the loader refuses)
+        and round-tripped, with wiki/tools/check-glow-control.mjs to keep it
+        that way. That check exists because the creator's preview is a flat sheet with no
+        lighting to be brighter than: where a control has no picture, the check is
+        the feedback.
+
+    - CreatorMetadataRoundTripTest had been red at 16 of 23.
+        AbilityType grew seven verbs (sound, produce,
+        teleport, summon, temper, bond,
+        ward) and the all-verbs fixture did not follow. The creator's form
+        offered all seven, so the drift the test exists to catch had not happened -
+        only the fixture was stale.
+
+And then somebody played it, which found four things no test had
+
+    The owner ran the client on this machine and worked through the kit. Everything
+    below came out of about twenty minutes of that, and none of it was reachable from
+    the repo: two confirmations, a wrong instruction of mine, a crash, and two
+    tools that do not work.
+
+    The features are right. Starburst's emblem “does indeed look
+    like a smooth variety of sizes” - the 45% floor gives a continuum rather than
+    two sizes with a gap, which was the open question and the whole bet of the minimal
+    shape. Lantern shows “different light levels” per horse, Tron has
+    “a glowing diffuse painted along the body for both forms”, gamma, geode
+    and angler read right, and suntouched - the
+    control, which lights whole parts at full alpha and must look untouched -
+    “does indeed look the same as before”. §0-CO
+    is closed on that pair of readings: changed where the masks are soft, identical
+    where the path is old.
+
+    “I don't think ember veins has any fall off” - and it should not
+
+        The checklist I wrote for §0-CO named five genes to look at and picked them
+        by the wrong property: whether the glow sat behind a field mask rather than a part
+        list. That is not the same question as whether the mask has a soft edge.
+        Measured afterwards, ember veins' lit layers are 0.04 to 0.2 and data rain's are
+        soft bands multiplied by a SPECKLE - hard by construction, so
+        coverage-times-level is level-or-nothing and the change cannot show. The owner
+        found both in a minute.
+
+        The rule worth keeping: masks fold by MULTIPLY, so the hardest mask in a
+        layer governs its edge. Geode's glints are a WAVES at 0.09
+        inside an AXIS at 3.0 and the product is as hard as the 0.09. The
+        softest lit mask in the mod is gamma's SPOTS at 1.8, and gamma is the
+        gene that actually demonstrates the feature. On the
+        format page now, next to the other thing that session taught: a glow has no
+        colour of its own, so Tron's two haloes at an identical 0.25 read differently
+        because one sweeps 300° of hue and the other is flat.
+
+F8 crashed the server, and had been lying about it for four minutes first
+
+    Reported as “F8 isn't toggling off, only turning on”, and then, minutes
+    later, “the game just crashed”. One cause. The horse
+    highlight puts herd leads on a scoreboard team and took every nearby horse
+    off it again - but only leads were ever added, and
+    Scoreboard.removePlayerFromTeam(name, team) throws for an entry that is
+    not on that team. It threw on the first ordinary horse it reached.
+
+    - On the OFF press it threw inside the packet handler, after the
+        player had been removed from the on-set and before the "OFF" message - so the
+        toggle silently un-toggled and the next press said ON again.
+
+    - Four minutes later the auto-off ran the same line from
+        ServerTickEvent.Post, where nothing catches it, and the server died
+        with Exception in server tick loop. The gap between the last keypress and
+        the crash is exactly why the two reports did not look related.
+
+    Fixed by asking the scoreboard first, and by wrapping what the overlay does so that
+    anything else going wrong in there switches the overlay off rather than ending
+    the tick loop. Worth being blunt about: this binding is registered
+    outside the production gate on purpose, because the testers asked for it, so
+    "it is only a dev tool" was never true of it and a released jar could hit this.
+    The crash is written up on the coding-notes
+    verification tab, with the API asymmetry on
+    api-notes - addPlayerToTeam is forgiving,
+    removePlayerFromTeam is not.
+
+Two tools that do not work, found by using them
+
+    - The test kit only ever hands out mares. Every preset egg in it is
+        Sex.FEMALE, and HorseBreedingHandler cancels same-sex
+        pairings - so batch 3's spontaneous-breeding test ("spawn FOUR in a wide fenced
+        field, come back and count") cannot ever have produced a foal,
+        and neither can the starburst breeding slot written the same day. A test that
+        cannot pass is worse than no test: it was on the checklist looking like coverage.
+
+    - "Make egg" in the custom spawn screen does nothing. No egg, no
+        refusal, and - decisively - nothing in the log, where every refusal on
+        that path logs at INFO. So the packet never left the client. The button is not
+        greyed (the owner checked), which leaves a widget sitting on top of it eating the
+        click: the same family as gap 139, where "Clear
+        genes" and "Make egg" overlapped in a real window.
+
+    Both were fixed the same day. The kit now hands out both sexes
+    wherever a batch breeds, with the rule written into the class so the next author
+    inherits it rather than the bug. And the screen's right column pairs its last two
+    buttons onto one row - six rows instead of seven - which is what pulls the top group
+    off the pinned one at 270px; the designer's copy of those constants was changed with
+    it (hard rule 5). The screen now also says in the log when the two
+    groups collide, because the failure it produces is a button that looks alive, is
+    alive, and cannot be pressed, and that leaves nothing to find.
+    Left to check: KIT’s verification tab.
+
+Then three genes picked it up
+
+    A format nothing uses is a format nobody has tested, so the same session put the three
+    features into shipped genes — one each, chosen because the gene was already
+    describing the thing it could not say.
+
+    - Starburst scales. All
+        twenty-one of its paths are centred on the same point in units space, which is
+        what makes a minimal shape possible at all here: pointsMin is each
+        path scaled about that centre to 45%, so the rings stay concentric and the spikes
+        stay registered to the core at every size. The size knob's range is
+        deliberately the scale itself (0.45 to 1), so the number a horse drew reads as
+        what it means.
+
+    - Lantern and
+        Tron burn. Both were already a lit core
+        beside an unlit halo — which is what you write when a glow is a bit and a
+        halo can only be painted. The halo is lit now (22% and 25%), the core carries the
+        gene's dial, and the falloff is free: a glow is scaled by its layer's coverage,
+        and both haloes' masks already faded.
+
+    The haloes are flat constants rather than a share of the core,
+    because the format has no arithmetic - "a fifth of the core" is not expressible - and
+    a constant under the dial's own floor keeps the core the brighter of the two on every
+    horse. That is a real limit found by using the feature, and it is the first thing a
+    knob-driven glow wants that it cannot have.
+
+    The dial exposed a gene that was already a coin flip
+
+        Adding a knob to Starburst made DeadLayerTest fail on "black shards in
+        the spikes", and the obvious reading - the shrunken emblem starved the shards - was
+        wrong. Setting pointsMin equal to points,
+        so the geometry could not have changed, failed identically: what had happened was
+        that the extra knob re-rolled that gene's draw for the one horse the test seeds.
+
+        Measuring it settled what was actually true. That layer is a sparse
+        SPOTS field inside a shape a few units across, and over twenty horses
+        it painted nothing on five of them. It had always been a coin
+        flip; the test had only ever seen the one horse, which happened to land. So the
+        fix was the gene, not the dial: 2.8 / 0.5 instead of 3.4 / 0.4 lands on every horse
+        at every size and keeps the density it had at full size. A layer whose
+        existence depends on a seed is one re-roll from dead, and the only thing
+        that finds those is measuring across horses rather than looking at one.
+
+What is not built
+
+    - The creator still cannot show a glow. Its preview is an unlit
+        sheet, so there is nothing to be brighter than. Fixing it means shading in the
+        preview, which is a different job from anything in §10
+        (gap 201).
+
+    - Per-region colour ranges are what is left of §10, and the
+        first question is whether a colour becomes a Value at all —
+        every colour in the format is a literal today, while a hundred-odd genes already
+        carry a hue knob feeding a RAMP axis, so the answer may
+        be a different shape from the one the roadmap assumes.

@@ -1,0 +1,108 @@
+2026-09-10
+
+Twenty-seven behaviour genes, specified one at a time and then built
+
+    The session started as a design conversation about invisible ability genes and
+    finished with the whole family in the mod. It went in that order deliberately, and
+    the order is most of why it worked: every gene was specified, argued over and
+    written up before any of it was built, so building it was transcription
+    rather than invention.
+
+The specification pass
+
+    A twenty-nine-gene proposal was walked one gene at a time, in batches of four or five,
+    with the owner ruling on each genuine fork. Two were cut.
+    Moon-sick turned out to be already shipped as the Aga/Aga allele
+    on night temper. Electric cannot be
+    built as described at all, because redstone power comes from blocks and never from
+    entities - the achievable version is pressure plates, which already respond to every
+    horse in vanilla.
+
+    Several specifications were wrong in ways only the code could reveal, and finding that
+    out on paper was cheap. A Minecraft sound cannot be started partway through, so
+    singer plays a record’s opening rather than
+    “a section” of it. There is no concept of a “base” anywhere in
+    the mod, so base alarm measures from the horse and
+    stabling becomes the interface. And the mod’s own swimming assist means
+    hydrophobic restores vanilla behaviour rather than
+    adding to it - which flipped it from dominant to recessive, because dominant would have
+    silently changed how every horse already bred behaves.
+
+Each page carries its own hazards
+
+    The owner asked for the game-breaking, compatibility and performance risks to be
+    flagged on each gene’s coding tab, and that turned out to be the
+    most useful thing written all session. Five genes can damage a world -
+    spontaneous breeding (a gene since removed) is uncapped automatic
+    breeding that runs while the player is asleep; holy
+    ward hooks every spawn attempt in the world and can break a mob farm invisibly;
+    spawner can bypass other mods’ protections;
+    egg layer accumulates entities; and the three genes
+    granting a traversal flag to the rider write state onto a player.
+
+    Writing those down first meant the implementation answered them by shape
+    rather than by a comment asking the next person to be careful. The ward does not scan
+    for horses at all - the horse tick, which already runs per horse and already holds the
+    ability list, writes its position into a small map and the spawn event walks that.
+    Rider-targeted traversal is re-applied per tick and stores nothing, so there is no
+    state to remove on dismount and it cannot become an invulnerability dupe. Followers are
+    nudged rather than given an injected goal, so a dead horse cannot leave a goal behind on
+    every creature it ever met. And ward entries expire rather than being removed
+    on death, so a missed hook cannot leave a ward suppressing spawns for ever at a
+    position with no horse at it.
+
+What the batch actually cost
+
+    The previous estimate on the roadmap - “about one verb per behaviour” - was
+    roughly three times too high. Twenty-six genes needed seven new verbs, two triggers,
+    four condition flags and five widened verbs, because behaviours cluster:
+    four genes wanted sound, five wanted one mob-group filter, three wanted one
+    traversal parameter. Three base classes carry twenty-three of the twenty-six between
+    them, and they were worth more than any individual verb.
+
+    Parity earned its keep twice in one session, both times immediately: it caught the
+    creator’s missing condition flags, and then caught MOB_GROUPS being
+    declared below the table that reads it - a JavaScript hoisting bug that produced empty
+    choice lists and would have been invisible in the editor.
+
+Both goldens moved, and neither moved wrongly
+
+    None of the twenty-seven paints, and that is measured rather than
+    asserted: all 1056 rows of the pipeline golden kept their rendered-byte hashes and only
+    their genotype keys changed, and the bake golden gained 206 rows with not one existing
+    row moving. That check had to be done keyed by gene and allele - a positional
+    diff claimed 312 rows had moved, which was entirely the artefact of inserting 206 rows
+    into a sorted file.
+
+Three things recorded rather than fudged
+
+    - Gap 170 - lycan
+        still keeps its own mob list rather than reading MobRoster, because its
+        allele order is baked into the genotype code and two goldens.
+
+    - Gap 171 - a guardian never retaliates against
+        a player, because 26.1.2 exposes no server-side PvP flag to gate it on. A decision
+        forced by an API gap rather than chosen.
+
+    - Gap 172 - four pages were invisible because
+        their filenames did not match their gene keys, with the build entirely green. The
+        bake does say so, on a line nobody reads.
+
+A review pass, which found three bugs in the same day's code
+
+    Re-reading the finished work before closing turned up a dimension leak in the ward - a
+    horse warding in the Nether would have suppressed Overworld spawns at the same x/z -
+    and two per-entity costs that had been hidden behind comments asserting they were
+    cheap. All three are fixed, and gap 173 records
+    the part worth keeping: every one of them was in code whose hazards had been
+    correctly identified and written down in advance on the gene's own page.
+    Knowing the hazard did not prevent it. Only reading the finished code back against the
+    hazard did, and no check in this repo would have caught any of the three.
+
+    The same pass found that hydrophobic only does half
+    of what its page claims - it ejects the rider and does not then head for shore - which
+    is now said on the page rather than discovered in a lake.
+
+    Nothing in this batch has been seen in game.
+    The goals are listed on the behaviour hierarchy,
+    and the checklist was ordered by what can do damage first.

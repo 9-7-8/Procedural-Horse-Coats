@@ -1,0 +1,98 @@
+2026-09-16, morning — fifteen fittings, armour that dyes in three zones, and two guesses that died on a false-colour map
+
+    A play session on the overnight saddle work, and then the bench grew. Everything below
+    was confirmed in a world except where it says otherwise, and it
+    shipped as v0.5.002 on a dedicated-server boot at
+    Done (0.274s).
+
+    One process note worth carrying, because the session nearly ended a step short. The
+    wrap-up routine in CLAUDE.md finishes at “commit, push, verify
+    clean” and says nothing about publishing a release — so the tag went
+    up, the summary announced a shipped version, and there was no jar anyone could download.
+    The owner caught it: “I don’t see it here /releases”.
+    Every version in this repo has a GitHub Release with the jar attached, and
+    gh release list is the thing that proves it — a tag on
+    origin does not appear there.
+
+The tack-fit bug closed, and the recorded diagnosis was wrong
+
+    “The saddle now fits resized breeds correctly.” That closed
+    the last unverified thing hanging over the tack work, and it is worth keeping why
+    the roadmap had it wrong for so long. The entry said equipment layers did not inherit the
+    horse’s genetic scale. They always did — LivingEntityRenderer
+    scales the pose stack and then iterates the layers, inside one push and pop. The
+    real cause was that vanilla applies MeshTransformer.scaling(1.1F) in
+    LayerDefinitions, one level above the mesh function, and
+    HdHorseModel is a copy of the mesh function — so the transform was
+    never in the part that was copied and its absence is invisible on inspection.
+
+    Which means it was never about resizing at all. The transform is
+    scaled(f).translated(0, 24.016 × (1 − f), 0), so tack sat
+    10% large and 2.4 units high on every horse including scale 1.0.
+    The size locus multiplied a gap that was always there, which is exactly why it read as
+    “worse on big horses” and sent the original diagnosis hunting in the renderer.
+    Two roadmap sections were deleted rather than marked done: the scale defect, and one that
+    still claimed “nothing in the game dyes a saddle”.
+
+Eight fittings became fifteen
+
+    Redstone, ender pearl, basalt, bone and prismarine, then lapis lazuli and coal. Three of
+    those sit close to an existing one, and each was pulled away from its
+    material’s own average colour rather than set to it — basalt cooler and
+    lighter than netherite, bone creamier and darker than quartz, ender pearl deeper than
+    prismarine. Two fittings a player cannot tell apart are worth one option, not two.
+
+    Coal is deliberately not 0x000000, and that is a trap rather than a
+    taste call. These colours feed getArmorLayerTintColor, where
+    returning zero means skip this layer entirely — so pure black
+    would have rendered no hardware at all rather than black hardware. The tooltip also
+    learned to consult materials before dyes, or a redstone fitting would have reported
+    itself as “red”, naming a material the bench will not accept in that slot.
+
+Leather horse armour, and two guesses that had to die first
+
+    It needed no new artwork. Vanilla’s leather.png is
+    already a pure greyscale tint mask — 624 texels, four flat tones, zero coloured
+    — which is why vanilla’s dyed armour looks as good as it does. All the work
+    was splitting leather_overlay.png, the part vanilla never tints: 417 texels
+    of brown trim, 79 of metal, 92 of near-black shadow left deliberately undyeable because
+    shadow reads as depth rather than as material.
+
+    That split was measured, not argued, and the arguing lost twice. The
+    saddle’s rule — hardware is “R equals G equals B” — does
+    not transfer, because the overlay holds twenty-odd greys rather than three. First guess:
+    the dark greys are outlines. Wrong; a false-colour map came back with the bag outlines
+    green, meaning they are dark brown and never were grey. Second guess: hardware
+    is grey above 0x3E. Wrong; at that threshold every metal bar renders as a
+    dark body speckled with bright dots, because a bar is shadow plus highlight and
+    the cut ran through the middle of it. The boundary is 0x20, where thresholds
+    plateau and each bar comes out solid. Three attempts at a reasoned answer, one
+    picture to settle it.
+
+    Two hazards worth carrying forward. There is no
+    leather_horse_armor.json: the asset is equipment/leather.json,
+    and that one file also serves every leather chestplate, helmet, legging and boot in the
+    game, so the override rewrites horse_body only and copies the three humanoid
+    entries verbatim. And vanilla’s crafting-grid dye had to keep working without
+    getting worse than vanilla — it reads a stack’s dye once and hands it
+    to every dyeable layer, so the new layers would have turned a grid-dyed armour one flat
+    colour over straps and buckles alike. They are pinned to their undyed constants whenever
+    no bench tint is present.
+
+A bug found by reading the commit, not by playing it
+
+    The bench would have destroyed a grid-dyed armour’s colour, silently.
+    Reviewing what had just been pushed: undyedFor treated any armour without a
+    bench tint as plain brown, but a player can arrive with an armour dyed blue in a crafting
+    grid years earlier. Recolouring only its trim would have written the blanket back to
+    leather and thrown the dye away without a word. It now seeds the blanket from
+    dyed_color. The failure mode is the nasty kind — you get a result, it
+    simply is not the one you asked for — so it is a named check on
+    the verification list rather than
+    something to stumble into.
+
+    Three PowerShell attempts were also spent on one line that converts RGB to signed ARGB,
+    which exists precisely so nobody hand-computes it. 0xFF000000 is neither a
+    long nor a uint in PowerShell — it is Int32 -16777216 — so the
+    arithmetic overflowed one way, then underflowed the other. It builds the value from four
+    bytes now and has no literal in it at all.

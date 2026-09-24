@@ -1,0 +1,39 @@
+2026-09-18, after the components fix — Two bugs singleplayer cannot see
+
+    The tester's third report, and the best one yet: it named the mechanism, both affected
+    classes, the fix, and the reason release testing had missed it. All four were right, and
+    checking it took longer than fixing it.
+
+    Every client was kicked on join. Both of this mod's special recipes built
+    their map codec from a supplier and their stream codec from a separately-constructed
+    instance. StreamCodec.unit writes no bytes — it checks that the value
+    you hand it equals the one it captured — and a CustomRecipe
+    subclass declares no equals, so that is an identity check against an object the
+    RecipeManager never produces. NeoForge sends the whole recipe set to each
+    joining client in one payload, so one unencodable recipe fails the payload, the packet and
+    the login.
+
+    Building Blocks was silently emptied. The gate-filing code did guard its
+    anchor, but not the way insertAfter asserts it: with
+    PARENT_AND_SEARCH_TABS the anchor must be in both entry sets and the
+    guard read only the parent one, and it compared with stack.is(item) where the
+    sets key on item and components. Either mismatch throws — and
+    CreativeModeTab.buildContents assigns the finished list only after the event
+    returns, so a throw does not lose our gate, it loses the tab, vanilla
+    blocks included, with no crash and nothing in the log.
+
+    What these two have in common is the point of the session. Neither is
+    visible in singleplayer — one needs a packet that is never sent, the other needs
+    another mod's item — and between them they had survived a full build, a green suite,
+    a clean runServer and a release. So the fixes came with two
+    headless gametests that both fail on the old
+    code: every_recipe_encodes pushes all 1638 recipes through
+    Recipe.STREAM_CODEC, the same dispatch the sync uses, and reproduced the
+    tester's exception verbatim when the bug was put back; building_blocks_survives
+    drives tryRebuildTabContents and asserts the tab is not empty. The blunt
+    assertion is deliberate: a missing gate is a nuisance, an empty tab is the disaster.
+
+    Shipped as v0.5.015. The gametest suite is five tests now rather than three, and
+    that is the part worth keeping — the lesson is not about codecs, it
+    is that this mod's untested surface is the client/server boundary, and it is reachable
+    headlessly after all.

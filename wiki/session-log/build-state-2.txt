@@ -1,0 +1,9 @@
+Standing build state
+
+Open issues + NOT verified in-game
+
+see wiki/verification.html. The two newest items are the top of the list, and they are the same play session: PAX3 SW2 on 90% of founders (does a herd still read as a population rather than one horse repeated - and does it read as socks or as four white legs, which would be gap #30 rather than the frequency) and the face-marking family (does a three-to-five-texel star read as a star at 128px, does a snip land on the nostrils, is the star above the eyes given the head's approximate rest-pose projection). After those: the particle locus (§0c - forty particle ids, six body sites, none of it seen; the emitter-style ones and the ten Bedrock substitutions are the likeliest to read badly), the seven magical utility genes (§0a - and inside that, the walking animation of a scaled horse and whether the wild size spread reads right across a herd), the trait / health layer (§0b), the random pens and the rebuilt spawn egg, then foals (only spot-checked). Update it after each runClient.
+
+Machine caveat (this dev laptop)
+
+hybrid graphics (NVIDIA RTX 3050 Ti + AMD integrated). java.exe/javaw.exe are pinned to the NVIDIA GPU and the FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See "Running the game".

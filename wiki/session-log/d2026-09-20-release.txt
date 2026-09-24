@@ -1,0 +1,36 @@
+2026-09-20 — 0.5.019, and two releases for one set of changes
+
+    Released as 0.5.019: the double-gate duplication fix and
+    the horse-hair chain removal, packaged, built, boot-checked and shipped as a jar. The
+    interesting part of the session was not the release but what it collided with.
+
+    A scheduled daily release job had already released the same work, four hours
+    earlier. It is a cloud routine that looks at what landed on main since
+    the last tag and cuts a release if it is worth one — and on its first run it did
+    exactly that, writing its own entry here and on the releases page under the version
+    0.5.018.2026.09.20. So main had a release for the gate and hair
+    work, and this session was cutting a second one for the same four commits without knowing.
+    The divergence only surfaced at git push, which was rejected.
+
+    What the job could not do is the reason it was retired. Its sandbox blocks
+    maven.neoforged.net, so :neoforge-26.1.2:build could not run:
+    :common compiled and nothing else did, and the release shipped no jar. That is
+    the whole value of a release here — outside testers are on tagged builds, and a source
+    tag they cannot build is not something they can play. A release that cannot build the mod, on
+    a schedule, will also silently consume each day's work into an untested version number. The
+    owner's call was to fold its entry into 0.5.019 and delete the schedule; releases
+    stay hand-cut, with a jar and a server boot behind them.
+
+    Its one genuinely good idea was kept. The job opened its release with a
+    curated known bugs, open right now box — known
+    gaps filtered down to actual defects (wrong behaviour, duplication risk, dead mechanics)
+    and stripped of unbuilt work, deferred calls and unverified claims. A player reading a
+    changelog does want to know what still bites before they read what is new. It carries over
+    to 0.5.019 verbatim and is worth keeping in later releases.
+
+    The release itself was cut the usual way. Jar built and its
+    neoforge.mods.toml read back as 0.5.019 rather than assumed; a
+    dedicated server booted to Done with no ERROR line, on port 25599 because the
+    owner's own server holds 25565, and the world logged its own
+    0.5.018 -> 0.5.019 upgrade; parity, recipes, progress tasks, gene tabs and
+    wiki links all green.

@@ -1,0 +1,83 @@
+2026-09-17, later still — One layer, a different colour per region
+
+    The owner asked what was next on the roadmap. The top of
+    the roadmap is play-testing, which is hers rather than
+    mine, so the next buildable item was §10’s last unbuilt piece:
+    per-region colour.
+
+Two thirds of it already existed. Again.
+
+    That is the third time this section has given that answer, after the dial and the colour
+    control. SpecPainter already varies a colour by region:
+    applyColour computes leg = legIndex(part) and every knob read
+    goes through v.get(value, leg), so a perLeg hue knob
+    paints four legs four hues today. LEGS and BARREL have
+    been first-class names in PartGroups all along. What was missing was not
+    per-region variation but an authored regioncolour mapping,
+    and that distinction was the whole decision: three of the four shapes on offer — a
+    perPart knob flag generalising perLeg, a partId axis
+    mirroring RAMP’s cellId, or a creator gesture writing the
+    layer-per-region idiom — deliver variation, and none of them removes the duplication
+    the roadmap was actually complaining about. The owner took the authored map.
+
+The shape, and the refusals that replace a precedence rule
+
+    A regions entry carries the op’s four colour parameters again,
+    sentinel and all, so it can be a literal color or a hue
+    pointed at a knob. A part no entry names falls through to the op’s own colour, which
+    is what makes the field additive: adding one cannot move a texel it does not name, and
+    that is why no shipped gene changed. solidColour is the single funnel for
+    TOWARD and FLAT, and applyColour already held
+    part at both call sites, so the engine change was one parameter and a loop.
+
+    Three load errors rather than a precedence rule: a region naming no parts, a
+    region carrying no colour, and a part claimed by two entries. Refusing
+    the third is what lets there be no “first entry wins” for an author to find
+    out about by experiment — and it matters because the groups overlap, so
+    POINTS beside LEGS claims all four legs twice without either
+    name looking wrong. The corpus scan the refusal discipline asks for was free here: the
+    parameter is new, so zero of 195 genes can trip any of the three.
+
+The regression that proved nothing, and had to be thrown away
+
+    Parity came back green at 7171 checks, which on this page means nothing until the
+    gate has been watched going red. The first attempt at that was void and was
+    discarded: the anchor indexOf(part) >= 0 matched
+    two sites, the new region lookup and spec-engine.js:414 — the
+    PARTS mask’s own coverage — so the 984 failures it produced were
+    mostly a different code path, and the first one reported was a pigment mismatch
+    on silver.json, a natural gene the change cannot touch. A regression that
+    breaks two things measures neither.
+
+    Re-run against one site, the numbers are real and they are two different numbers:
+    480 checks see the region lookup, and 138 see a 0.05
+    lightness difference inside a region, confined to mane and tail. That second one
+    is the one that mattered, because it answers the question
+    the contract raises about
+    pointsMin: the probes sample four texels per part, and a feature that lands
+    on a flank slips between them. This one does not, so no answer table was
+    needed — the pathSection treatment does not apply.
+
+What was deliberately not done
+
+    - RAMP and PALETTE do not take the field. Both
+        bypass solidColour for a colour source of their own — a stop list
+        walked along an axis, a colour drawn per cell — so scoping them is a second
+        change rather than the same one. It is the remainder of
+        §10 now.
+        (Built the same day — the next entry
+        up.)
+
+    - Gap 164’s hueOffset
+        stays open. It was floated as a cheap addition once the colour ops were open
+        and then left out on purpose, to keep the change one feature.
+
+    - No MarkingFactsTool change was needed, contrary to the
+        first reading. It does not enumerate a gene’s declared colour fields — it
+        renders the coat and measures what moved, so a per-region colour reaches the
+        breed designer’s markings filters on its own.
+
+    One trap closed on the way past: the spread-out
+    contracts list did not mention the creator’s exporter, where an unknown key is
+    dropped silently. The over flag hit that same omission and recorded
+    it only in its own log entry; it is in the list itself now.

@@ -1,0 +1,44 @@
+2026-09-14 — what the all-day pens found in their first hour
+
+    The owner loaded the all-day yard after the fertility crash fix and asked how it was looking.
+    The dam defence, leaderless band and takeover tests passed, and so did natural breeding. The
+    log also showed four things wrong, all fixed with the game still running (owner: "Just don't
+    restart the game"). The common tests were run with :common:test. The NeoForge
+    files were checked with a bare javac into a scratch folder against the module's
+    printed compile classpath, because a Gradle build would have replaced classes the running
+    client had loaded.
+
+    - Brindle did not follow sex in any real breeding
+        (gap 235). Genotype.breedWith applies the
+        X-linked rule. Genome.breedWith, the draw every foal actually comes through, had
+        its own allele loop and never did. The ratio pen tallied brindle colts and plain fillies, a
+        result the tests could not see because they only bred genotypes.
+
+    - Lethal foals never died in the test yard
+        (gap 236). LethalFoalHandler skipped the
+        whole debug dimension to protect the gallery, and the yard is in that dimension too. An O/O
+        foal was still standing two minutes after birth. The skip is now the corridor only, which is
+        the rule two other handlers' comments had already asked for.
+
+    - Dryad trees suffocated horses (now verified fixed).
+        A tree grew onto the DRYAD OAK+BIRCH mare, who died 11 seconds later. The inWall damage
+        started at the same tick as the tree grew line in all three cases.
+        BlockGrowFeatureEvent is cancelled when a horse is within reach of the tree.
+
+    - The crowding cap was 2,914 of 3,358 fertility lines, from 97 wild mares each
+        repeating once a minute. Wild mares are now one ten-minute summary. Yard mares still get
+        their line.
+
+    - A second bug from the wild-type change turned up in GameteBiasTest.
+        An epigenetic splice re-rolled numbers onto wild copies, and then the white-pattern eye roll
+        read them. Wild copies are now emptied after pass 2, with the same draws spent. The test
+        still failed after that, and a diagnostic showed why: the eye request came from a real
+        KIT W23 copy that the splice re-rolls by design. The forced eye loci are written
+        from the epigenome on purpose, so the test's "alleles unchanged" now excludes them. It
+        passed before only because of where the drift stream happened to land.
+
+    - Not a bug: the twins mare delivering neither foal is the 5% outcome of
+        ReproRules.twinSurvivors. Open: lycan horses shifted into
+        pufferfish drown on land and take the horse with them
+        (gap 238). The DRYAD DARK pen had planted nothing
+        after 72 minutes.

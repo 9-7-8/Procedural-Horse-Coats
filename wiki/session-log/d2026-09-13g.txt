@@ -1,0 +1,48 @@
+2026-09-13, evening — the dhampir taken apart, bands that stay together, an ender whistle, and AI on the wiki
+
+    One long list from the owner, worked through from a phone, with every in-game test
+    saved for the end. None of it has been played; what each piece needs checking is in
+    verification §0-DU,
+    §0-DT and
+    §0-R, and test kit batches 1 and 2 are
+    aimed at them.
+
+    - The dhampir gene is gone, rebuilt as loci and a breed. It became
+        magic white, sun
+        sensitivity, blood diet, the vampiric allele on
+        the three magic stat loci, and a red iris. The night-only
+        Dhampir breed puts them back together through a
+        new breed-file feature, strains: one founder in ten is
+        white and homozygous for everything, the rest are seal brown and carry it. Blood diet
+        bites mobs first, players only when nothing else is near, and tamed pets last, and it
+        never bites horses or the undead.
+
+    - Day twins of the night temper and night watch loci, rarer in the
+        wild, run through one cached reading per genotype so they cost nothing per tick.
+
+    - Wild bands from the herd research (horse care):
+        relationships with familiarity, rank, grooming and rivalry; a lead mare the band
+        follows, so a stallion's death no longer scatters it; herding, sparring, takeover
+        fights that stop short, displacement, dam and foal, and dispersal. The fertility
+        research went onto breeding's science tab. None of it is
+        built: the discussion was opened last, and its three options and open questions are
+        written up, unanswered, on fertility & gestation, the
+        first thing to finish next session.
+
+    - The ender whistle (whistles):
+        bound for good, calls its horse across dimensions (waiting for an unloaded chunk on a
+        portal ticket), crumbles once the horse is dead.
+
+    - Tools. The breed designer's Temper step became Day & night
+        habits and Fighting & defence; the gene creator is eight steps
+        beside the horse with show everything for the old view; and there is a
+        generated behaviour hierarchy of every goal a
+        horse runs.
+
+    - AI helpers, bring-your-own-key: a chat
+        on every page that answers from the search index and writes up bug reports for GitHub,
+        and Draft with AI in both designers, checked by the tools' own parsers, with a
+        failed file sent back to the model to fix. Every provider listed was checked for browser
+        CORS first, which is why Google's Gemini API is not on the list. It is tested headlessly
+        with the AI stubbed out (check-ai.mjs) and has never talked to a real model
+        (gap 224).

@@ -1,0 +1,46 @@
+2026-09-15, late afternoon — the pen that was lying about the ward, and a fix that took two tries
+
+    A short session, picking up where the 15:36 run stopped. Its one standing FAIL — the SPAWNER WARD pen reading
+    0 of 16 and blaming the holy ward — was the pen, not the gene. That is now the fourth time this
+    yard has accused a working feature, and the reason the reading is written down rather than the verdict.
+
+    - The ward was never involved. Every meal logged [Spawner] made 2 of 2 Zombie, no
+        [Ward] refusal line appeared all run, and both zombies joined the level — then vanished about
+        40ms later. A summoned mob carries no persistence by design, and vanilla's Mob.checkDespawn
+        takes a monster on its first mob tick when no player is near, which in an unattended yard is always. The pen
+        counted five ticks after the feed, long after the bodies were gone. The sheep pens never hit this because a
+        vanilla Animal does not despawn, which is why this was the only pen that failed.
+
+    - The first fix was wrong, and was pushed before it was run (b9915ce5). It moved the
+        count into the feed's own tick, on the assumption that the summon happens inside
+        CommonHooks.onInteractEntity. It does not: GeneAbilityHandler.onFeed queues a
+        PendingFeed and drainPendingFeeds summons on ServerTickEvent.Post, at the
+        end of the tick. The 16:05 run showed it exactly — the count logged at 16:06:01.675, the zombies
+        arrived at .683 and .689 — so it read 0 of 16 again, now by counting before they existed.
+
+    - The fix that worked stops timing them altogether (751de924). The live window is
+        about one tick wide, so every tick number is a race. While a meal is armed, an
+        EntityJoinLevelEvent handler gives each arriving zombie setPersistenceRequired —
+        what DebugYardHerd already does for the DAM DEFENCE zombie — and the original five-tick sweep
+        counts and discards them unchanged. Nothing is cancelled, so made 2 of 2, which is the measurement
+        itself, is untouched. Verified in the 16:11 run: eight meals at 2 zombie(s),
+        16 made, 2 inside the ward, PASS
+        (spawner, holy ward).
+
+    - Gap 253 closed, on both halves of its own test. Its pass needed no inWall all run
+        and a moved line at some dawn. The 15:36 run gave the first half only — nine clean
+        restores, no moved line anywhere in any of the day's logs — which is indistinguishable from a
+        fix that never ran, so it was nearly recorded as unexercised. At the 16:31 dawn
+        clearOfBlocks fired twice, moving Grand Aura and Boulder Alaafin out of the blocks they were restored
+        into, with no inWall across twelve restores
+        (lycan).
+
+    - Gap 250 deliberately left open. It was never fixed — the owner's call was to log and keep
+        watching — so a third run of prompt bites is a data point, not a verification.
+
+    - Not built, by instruction: the intake folder's breed write-ups. An hour went into reading and
+        schema-mapping them before the owner stopped it: “don't ever worry about or do anything with content in
+        the intake folder until I directly tell you to.” Nothing from it reached the repo.
+
+    - The designer's boot check, left un-run by the previous session, passes: 4 checks, wasm bridge present, overlay
+        drawn from a real genome, clean console.

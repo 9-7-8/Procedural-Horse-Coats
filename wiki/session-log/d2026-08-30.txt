@@ -1,0 +1,13 @@
+2026-08-30
+
+Owner-verified in-game (2026-08-30)
+
+- Hay-bale portal: golden-carrot lighting; the animated hay_portal.png texture renders, faces the player (thin half-block slab), is opaque (no sky/clouds/water through it), and its fps ramps 12 -> 48 as you dwell; gold dwell-swirl particles + the chat countdown; the End-portal starfield effect (before it was replaced by the custom texture); return teleport drops your tamed horses in the air beside the overworld portal, unharmed (10 s invuln), not sucked back.
+
+- Horse dimension: the reworked E/W pen-back walls (gravel strip flush to the pen, glowstone above, one wood wall, bedrock); the layered wall behind the portal (gravel floor strip + floating glowstone + wood wall + bedrock, no dark band / missing blocks) with the E/W walls carried to originX-1 so the corner has no gap; no block break / place anywhere in the dimension (survival + creative).
+
+- Info panel (mounted horse GUI): readable shadow-free text, the "View Family Tree" / Set buttons + barn box visible and clickable, and E no longer closes the screen while the barn box is focused (Enter submits, Esc closes).
+
+- FamilyTreeScreen: per-node 3D horse models in the right coat/pose that turn to face the cursor; the chart shrinks to fit the window (boxW/boxH/uiScale from rebuildNodes, full names via drawFitted's pose scale) - no column overlap, nothing cut off, names legible, no scroll bar by default.
+
+- Breeding: a foal rolls speed/health between its parents, a correctly combined genetic code, and (for the pairing's first foal) a name combining both parents.

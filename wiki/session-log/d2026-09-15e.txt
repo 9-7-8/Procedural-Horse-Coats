@@ -1,0 +1,77 @@
+2026-09-15, late — five more out of intake/, and the format saying no twice
+
+    The second batch, same cadence: five alphabetically, translated rather than pasted. Anadolu, Barb,
+    Boerperd, Budyonny, Chilean Corralero. The interesting part was not the translation — that is a
+    known routine now — but the two places the drafts asked for something the file format will not do, and
+    one verification check that has never run.
+
+    - The Budyonny is the first shipped breed to use spawn. It is a state-stud and
+        sport-horse breed with no feral population, so the draft was right that it should not head wild herds, and
+        the format has had the checklist for exactly that case since it was written
+        (“a breed the cowboy has heard of but that no longer runs
+        wild”). Nothing had ever used it: all 55 previous breeds take the default of all four sources. So
+        the field is documented, parsed, and unexercised in a real world —
+        §0-EF makes "no wild Budyonny" the first thing to look
+        at, because a failure there would be silently wrong for every breed that uses it later.
+
+    - Gap 256 got its second breed, which was the condition it named for being fixed. The draft
+        wanted the three historical Budyonny types — Massive, Eastern, Middle — as strains differing in
+        size and strength. A strain may override gene pools and nothing else
+        (BreedSpecParser allows a strain only name, weight and
+        genes), so they are a note and one size band spanning all three. That is the same wall the
+        Chincoteague's sport type hit, and the gap had said to wait for a
+        second breed to want it.
+
+    - Nothing needed a new gene, so nothing went to the roadmap — a first for an intake
+        batch. The two cosmetic losses are already recorded elsewhere: the Budyonny's golden sheen is the same
+        shader problem as the Akhal-Teke's, and the Boerperd's rack is gait, which is a roadmap item. The Boerperd
+        does carry DMRT3 deliberately, at Tennessee Walking levels, so it is ready when gait is.
+
+    - Every pool was checked for silent loss, not just for a green build. A wrong allele token is
+        warned and dropped rather than thrown, so a breed can load missing a locus with every test still passing.
+        Dumping the loci back out of the baked files confirmed all 42 pools and every pair round-tripped.
+        Worth doing every batch: flaxen and pangare are the traps, because their wild-type
+        tokens are the lower-case f and pa while the variants are Fl1/
+        Fl2 and Pa1/Pa2 — the natural loci are Java classes, and
+        neither gene index lists them.
+
+    - The “bake dirties every breed file” noise turned out to be two problems, and only one
+        of them was line endings. The repo now has a .gitattributes pinning
+        *.json to eol=lf (and marking *.wasm binary), which is what the bake
+        tools already write. The index already stored LF, so not one committed byte changed.
+        But the file count did not drop — because the rest of it was never CRLF at all:
+        git status on this repo flags a rewritten file on mtime alone, without comparing
+        content. After a bake it claimed 60 modified files while git diff --name-only named the 5 that
+        had actually changed. Proven on a sample: worktree, worktree-filtered, index and HEAD SHAs all identical,
+        git diff empty, git show HEAD:path | cmp - path identical with zero CR either
+        side; and across all 61 breed files exactly one differed — the one that had been edited. So a
+        post-bake git status is not evidence of staleness, and
+        coding notes now says so with the check to use
+        instead. An earlier draft of this entry claimed a for loop and xargs "silently
+        fail" to restore those files; that was this same misreading, and they work fine.
+
+    - Renormalising is scoped to the glob, never to .
+        git add --renormalize . is the documented follow-up to changing .gitattributes
+        and it did settle the breed files — but being repo-wide it also staged 51
+        intake/*.md files, rewriting every line of each to strip CR from blobs that
+        genuinely hold CRLF. That is the owner's queue and not ours to rewrite, so it was backed out with
+        git restore --staged intake/ and nothing in intake/ was committed. Use
+        git add --renormalize -- '*.json'.
+
+    - A breed's country must be a nation, never a region (owner, stated outright).
+        The Barb shipped as maghreb — the draft leans hard on “not any single modern
+        nation”, which is true of the breed and useless to the format — and was corrected to
+        morocco. An audit of all 60 files found it was the only region token; everything else
+        was already a nation. The reason is mechanical rather than stylistic: country exists to be
+        keyed on by a mechanic not yet built, and a region token would simply never match, so it is a value that
+        silently does nothing. The format page now says so, and its own example
+        list no longer offers arabian_peninsula as a valid token. The Dhampir keeps no country at
+        all, which is the separate and correct answer for a breed from nowhere on earth.
+
+    Green: :neoforge-26.1.2:build, BreedFilesTest, BreedSpecParserTest,
+    check-parity, check-links, the designer boot check. None of the five has been
+    seen in a world — §0-EF says what to look
+    at. The five .md files were deleted from intake/, leaving 52 breed drafts queued; the
+    next five alphabetically are Colorado ranger, criollo, Croatian warmblood, Danubian and the
+    Domestic Mountain Pony, but re-sort the folder first — the owner pushes new files
+    mid-run and they interleave.

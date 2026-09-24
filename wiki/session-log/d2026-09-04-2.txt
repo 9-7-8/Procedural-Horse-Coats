@@ -1,0 +1,5 @@
+2026-09-04
+
+Owner-verified in-game (2026-09-04)
+
+- The white-pattern rewrite - KIT, MITF, PAX3 and EDNRB all render correctly: the eight-step KIT ladder reads as distinct steps, KIT body white is patches rather than confetti, the splash waterline is crisp with no gold fringe, the two splash loci visibly stack, W20 boosts rather than acts alone, O/O renders pure white, and eyes survive the widest patterns. Confirmed as a whole, not item by item - see the note above for what that leaves open.

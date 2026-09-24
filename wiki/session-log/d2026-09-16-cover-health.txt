@@ -1,0 +1,52 @@
+2026-09-16, evening — the mare who lost a pregnancy and was never bred again
+
+    “Figure out why the mare who lost a pregnancy stopped getting covered.”
+    She was half a heart short of full health, and a natural cover required full health
+    exactly. Three deliberate designs, each defensible alone, multiplied into permanent
+    sterility: a miscarriage costs the dam half a heart; NaturalCover demanded
+    getHealth() >= getMaxHealth(); and healing only happens beside water, which the
+    fertility pens did not have. She cycled forever, read In heat, and no stallion ever
+    touched her.
+
+Why it took three sessions to see
+
+    Because it logged nothing. The refusal is NOT_A_BREEDING_MARE, and that is the
+    verdict NaturalBreedingHandler's switch drops into default with the comment
+    “nothing worth a line”. The only refusal the class has ever written is the crowding cap,
+    which is why gap 258 was filed against the ratio pens
+    — the pens were simply where a guaranteed miscarriage happened often enough to notice. That
+    entry told the next session to check whether a stale pregnancy survived the loss. It did not; the
+    repro state was correct throughout.
+
+Settled from the logs before touching code
+
+    The 2026-09-15 run was already on disk and answered it outright. Six mares miscarried and
+    not one was ever covered again, against 30 of 48 whose cover merely
+    did not take and 25 of 62 who foaled normally. Two of the six were their own
+    controls: they had run COVER FOALED COVER FOALED COVER for hours and went silent at the
+    exact moment of their loss. 21.0/22.0 is the last health line for every one of them
+    — none ever healed. That is a within-subject result, not an inference from the code.
+
+What changed
+
+    - The rule is a fraction, not an equality.
+        ReproRules.COVER_HEALTH (90%), with
+        healthyEnoughToBreed in common/ so it is testable without a world, and
+        NaturalCover.Party.fullHealth renamed healthyEnough so the field stops
+        lying. ReproRulesTest pins it at exactly the health a miscarriage leaves her.
+
+    - The silence is gone. The health refusal logs once a minute per mare, naming her
+        health, throttled the way the crowding cap already was. Only the health case — by then she
+        is known to be in heat with a stallion in reach, so ridden and leashed are the player's own doing
+        and obvious.
+
+    - Every pen has water, a cauldron sunk into the floor in
+        DebugTestYard.fencedPlot, so it reaches all 21 fenced pens and every future one from
+        one place. Sunk rather than raised, which is what keeps it clear of gap 247's escape route
+        — the owner's existing call for the corridor pens. The splicePair breeding
+        pens build their own walls and got one per half.
+
+    The bug was wider than the mare. Exact-equality full health meant a wolf bite or a lost
+    stallion fight sterilised any horse until it found water. Not played yet —
+    three checks are waiting in §0-DV, and row W should
+    finally produce a usable sample for gap 225's ratios.

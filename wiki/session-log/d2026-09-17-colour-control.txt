@@ -1,0 +1,119 @@
+2026-09-17, later — A colour control, and the preview that had been lying about ranges
+
+    The session began as §10’s last bullet
+    — “per-region colour ranges and gradients”, with the roadmap asking
+    whether a colour should become a Value. The answer is no, and
+    two thirds of the bullet was already built. Gradients are RAMP,
+    which has shipped for weeks with six axes and interpolated stops. A per-horse colour
+    range is a knob on hue, and 160 of the 195 shipped genes already
+    do it ("$hue" alone appears 396 times). A colour
+    cannot become a Value: GeneSpecParser.readColor
+    matches a six-hex string, so "color": "$tint" is a load error. The HSL
+    triple is not a workaround for the missing feature — it is the feature.
+
+    So what was actually missing was the tool, and the owner’s call was to fix that
+    and touch no format. It turned out to be the same shape as the dial: a channel that
+    existed and a creator that showed no sign of it.
+
+The colour well that was dead and still looked alive
+
+    A colour op’s fork is exclusive — SpecPainter.solidColour
+    paints color while hue is below zero and the HSL triple the
+    moment it is not — and the creator admitted none of it. The well stayed live and
+    editable after a hue took over, and the three parameters that had taken over sat
+    further down the form looking like unrelated numbers. The failure mode is nasty
+    because every frame of it looks right: you set a colour, the preview changes
+    (the hue is painting), and you export a gene whose color is never read.
+
+    A colour op is one Colour control now — one fixed
+    colour against hue, saturation & lightness, the triple folded inside
+    it rather than beside it, and a strip showing the span a varying hue can
+    draw. That strip is the part that was missing rather than merely hidden: a
+    hue pointed at a knob is a range, and the horse in the preview can only ever
+    be one draw from it. A ramp gets the same question as named stops against
+    a swept hue, which is the same fork spelled as a stop list.
+
+Underneath it, a preview that had been lying — and could not have been caught
+
+    Building “a colour that varies” meant leaning on the value editor’s
+    Random mode, which turned out not to work. Random wrote an inline
+    {min,max} range — legal in the format, since
+    GeneSpecParser.readValue hoists one into an anonymous
+    inline#N knob — but this tool’s own engine never learned
+    to: drawValues walks spec.knobs only and
+    resolveValue has no branch for an inline object, so it fell through to
+    the parameter’s fallback. The preview drew a constant while the game
+    drew a real range.
+
+    It was proved rather than argued, in headless Chrome, with control groups so the
+    result was attributable: a plain number resolved to itself, a "$knob"
+    resolved inside its range, a perDose triple resolved at the dose, and the
+    inline range came back -1 — the fallback — on its own.
+
+    Why it survived: nothing could have noticed
+
+        No shipped gene uses an inline range in a parameter slot —
+        zero of 195, checked by parsing every file rather than grepping, since a naive
+        search for "min" matches all 189 genes that merely declare a
+        knob. So nothing in game was wrong, and the defect was waiting for the first
+        author who reached for the mode the tool openly offered. Parity could not see it
+        either: SpecFixtureTool bakes five fixed genes
+        (silver, dun, tobiano, aurora,
+        prismatic), none of which contains one, so the oracle is silent on
+        the case by construction. A mode used by zero genes is itself the tell —
+        people probably tried it, saw nothing happen, and backed out.
+
+    Random declares a real named knob now, named after the parameter, and
+    points the value at it. The alternative — hoisting anonymously to match Java
+    — was rejected deliberately: the knob’s index is its parse-order append
+    position, so a walk order that disagreed with the parser’s would make the
+    preview draw the wrong number instead of an obvious fallback, and there is no
+    fixture that would catch it. A named knob has no ordering to get wrong, shows up in
+    What this horse drew, and can be pointed at twice.
+
+The hue that varied by never applying
+
+    One more defect fell out of the same control. hue’s
+    ui.min is −1 — the “not set”
+    sentinel — and Random seeded its range from ui.min, so picking
+    Random on a TOWARD or FLAT hue wrote
+    {min:-1, max:-1}: a colour asked to vary, written as one that never
+    applies. A knob now starts from a new creator-only ui.varyFrom,
+    which is 0 on a hue, so the range is 0–360. Creator-only is safe and was
+    confirmed by running it rather than reasoning about it —
+    SpecSchema carries no ui block and
+    SpecFixtureTool emits only kind, fallback and choices.
+
+Two blind spots in the delete guard, found by needing it
+
+    knobUses counts the references that stand between you and deleting a
+    knob, and it walked layersOf — the one expression the forms
+    edit — checking masks and ops only. So a knob used solely by a layer’s
+    emissive (a glow is written "$burn" like anything else), or
+    solely by a second expression in a pasted gene, reported zero uses and was
+    deleted without the warning the function exists to raise. It walks every
+    expression and counts emissive now. Over-counting is the safe direction:
+    the number only ever guards a destructive action.
+
+What is left, and one thing that was already broken
+
+    The route taken leaves one path unfixed on purpose: a pasted gene
+    carrying an inline range still previews as the fallback, because the engine was
+    deliberately not touched (that is what kept parity risk at zero — it still
+    passes at 7169 checks across 60 cases). The mitigation is a validator rule that
+    names the layer, the mask or op, and the parameter, and it was checked firing
+    rather than merely checked for false positives — an unfired validator rule is
+    worth nothing.
+
+    And check-path-canvas.mjs is failing, which was found
+    while checking whether this work had broken it. It has not: a detached worktree at
+    HEAD reproduces the identical error with none of these changes.
+    Gap 263, left alone deliberately rather than folded into an unrelated session.
+    (Closed 2026-09-18 — the cause was the stepped view hiding the mask editor's
+    column, not the mask index this entry suspected; coding
+    notes carries the record.)
+
+    New: wiki/tools/check-colour-control.mjs, 22 checks, asserting on the
+    spec after each gesture rather than on the picture — which is the only
+    kind of evidence that would have caught the old behaviour, since the old behaviour
+    looked fine.

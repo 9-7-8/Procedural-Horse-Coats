@@ -1,0 +1,101 @@
+2026-09-11 — a playtester session, and the roadmap stops being fiction
+
+    Two halves. The first was a sweep of the roadmap against the code, which found that a
+    large part of it described work already done. The second was a live bug queue from
+    outside playtesters — the first time this mod has had reports from people who did
+    not write it — and most of those turned out to be missing feedback rather
+    than missing behaviour, which is a pattern worth naming.
+
+Three things that were never broken, only silent
+
+    “The diet gene doesn't appear to work.” It expresses on
+    about one horse in eight. What it never did was report: healing a horse already at full
+    health is a no-op and the bond award declines silently at max bond or the daily cap, so
+    feeding a healthy, well-bonded horse spent the item, played the sound, showed the
+    hearts and told the player nothing. Indistinguishable from a gene that does nothing.
+    The food is still always eaten — it was never the refusing that was wrong —
+    and the player is told when both halves declined.
+
+    “A horse randomly got bigger, and it tracks bond.” Nothing
+    in the mod grows a horse, and the negative is provable: one write to
+    Attributes.SCALE, a setBaseValue so it cannot accumulate, over
+    inputs fixed at birth, guarded to run once. It was a foal reaching adulthood. The bond
+    correlation is a shared cause: feeding awards bond and does not cancel the
+    interaction, so vanilla's feed runs too, and on a baby vanilla's feed is
+    ageUp. Hand-feeding a foal for bond accelerates its growth with the same
+    click. Gap 196.
+
+    “An aura of glowing entities round a horse.”
+    MobEffects.GLOWING is applied in exactly one place in the mod — the
+    F8 highlight, which lights every horse within 96 blocks, in a dimension that is wall to
+    wall with pens. The effect carries no particles and no icon and refreshes for as long as
+    it is on, so left on by accident it is indistinguishable from a bug. It times out now
+    and says how to stop itself.
+
+Name tags, and a gate asked on the wrong side
+
+    The one report that was a plain defect. HorseInteractionHandler runs on both
+    sides and cancels the name-tag interaction, but only when
+    HorseRecords.hasRealRecord says the horse is ours — and that asks the
+    attachment, which is never synced. Client-side it was always false, so the client
+    never cancelled and did what vanilla does for a tamed horse plus an item: ride it.
+    The rename window opened and the player was put on the horse at the same time. The client
+    does know which horses are ours, in ClientHorseRecordCache, so the question
+    is asked in a Dist.CLIENT subscriber. The stick and clock branches in that
+    same file carry a comment saying to cancel on both sides for exactly this reason.
+
+What the audit found
+
+    Part 1 of the roadmap is finished. Of its five “genes drawing the wrong thing”,
+    one was real, one was real and misdiagnosed, one was a decision and two were
+    already built; the attribute verb it called inert has been dispatched
+    for some time, with the class javadoc still saying otherwise. Epigenetic drift — item
+    two of five in “where to start” — is built, written up on
+    breeding, and had only never been deleted. Bareback
+    steering was listed as unbuilt while a playtester was confirming it works. The bond heart
+    particle likewise. On the gaps page, 38 of 183 entries are already marked closed and 41
+    more need play rather than code, so the real backlog is nearer 97 than 183.
+
+The one that got away
+
+    A whole session of green builds over a broken module
+
+        Changing CarrotEffect's shape broke web/DesignerApi, and
+        nothing noticed for eleven commits: :web is not a dependency of
+        :neoforge-26.1.2:build, so every build was green, the tests were green,
+        and two commits of common/ shipped with a stale wasm beside them. It
+        surfaced only because the end-of-session routine runs
+        :web:bakeDesignerAssets by hand. Gap
+        199 - the check that would have caught it does not exist, and
+        gap 45 assumes somebody looked at
+        git status.
+
+Also built
+
+    - Magic zebra is codominant, tuned off a rendered dose ladder rather
+        than guessed - 0.18 read as black on a bay and was indistinguishable from the
+        homozygote.
+
+    - Particle stops lying about carriers (owner's call): two variant
+        alleles that are not partners now show nothing, where the lower-ranked one used to
+        show and make a cross-family heterozygote look exactly like a homozygote.
+
+    - The foal sclera - the rects were 2 texels wide where the eye is 4,
+        on the strength of a comment claiming the foal template has no sclera. It has two
+        columns of one. All 528 foal golden rows moved; no adult row did.
+
+    - The family tree runs both ways - Ancestors, Descendants, Overview,
+        with Back and Home, on data the client was already being sent.
+
+    - A gene carrot names two alleles, which is stage one of the
+        allele-paper design and fixes a limitation
+        nothing had recorded: the pair came from alleles().get(0), so the
+        forty-allele particle locus could only ever be spliced to dust.
+
+    - Horses come to food, and run for their favourite - the only way the
+        preference locus is visible before you have fed it.
+
+    - Gene and allele pickers on My horses, listing only what the roster
+        contains; /bond for testing the tiers; F8 in production
+        with the herd lead in red; a portal every 25 pens in a corridor that
+        had one way out in seven thousand blocks.

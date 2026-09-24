@@ -1,0 +1,49 @@
+2026-09-02
+
+Built 2026-09-02, NOT yet play-tested
+
+the seven remaining visual natural genes (roadmap §§4.1-4.2), all hand-written Genes in common/genetics/genes/:
+
+- dilutions - DunGene (then D/d, now the three-allele D/d1/d2: mild body dilution + primitive markings - a dorsal stripe + leg barring that skip the dilution, via new CoatRegions.dorsalStripe / legBar), SilverGene (Z/z, DOMINANT: eumelanin-only, chocolate body + flaxen mane/tail, chestnut unaffected - runs right after agouti in naturalOrder()), MushroomGene (Mu/mu, RECESSIVE: pheomelanin-only, chestnut -> sepia).
+
+- white patterns (all non-deterministic, epigenetic seed on the variant copy) - RoanGene (Rn/rn, DOMINANT: near-binary white-hair dither, density tapering back-to-front so it feathers into the solid face), TobianoGene (To/to, DOMINANT: big crisp patches from a topline-biased PatchNoise.field, white legs), FrameGene (Ov/ov: bold jagged-edged patches in an absolute-Y flank band on BODY/NECK + a bald face) and SabinoGene (SB1/sb1, dose 1 = jagged stockings + belly + blaze, dose 2 = "sabino-white"). The last two are gone - the white-pattern rewrite (2026-09-04) moved frame to EdnrbGene and sabino into KitGene, and both painters became strengths on the shared WhitePattern.
+
+- New helper coat/pattern/PatchNoise (warped 3-octave fractal field + 2-octave fbm2) - the spotting genes need patch fields that cross seams smoothly and aren't one lattice cell wide; single-octave BodyNoise gridded up into visible squares. CoatRegions.dorsalStripe / legBar are the dun primitive-marking helpers.
+
+- Reworked 2026-09-02 after owner feedback on the first bakes: grullo was warm-brown not mouse-grey (dun's keepRed now scales to ~0 by the texel's black content, so a black base lands on the LUT's neutral column); mushroom read as no-op (keepRed 0.44 -> 0.12); silver's mane came out chestnut not flaxen (mane now pulls red down too); roan made hard 100% white pixels and had a hard edge at the face (now near-binary flecks + a smooth rear->front density falloff); tobiano was ~80% white with gold fringing (higher threshold, hard-binary decision - a half-scaled black texel reads gold on the LUT); frame produced almost nothing (per-part sideWeight left the barrel untouched -> absolute-Y band); sabino showed axis-aligned squares (PatchNoise instead of raw BodyNoise.value).
+
+- Registry was 18 genes then; it is 18 now - cream and pearl merged, then sex was added (20 in-game with the two shipped spec genes). GeneCodeDisplay's trailing order gained all seven. coat-golden.txt regenerated (10 new cases). GenotypeCatalog blew up to 331 778 distinct coats; the combination-table rewrite brought that back to 98 306, and the white-pattern rewrite took it to 2 064 387 (totalGenotypes() 55 099 802 880) - which is where the catalogue stopped being materialised at all and the gallery gained a cap - both since superseded by the revert to random pens. The exhaustive 2^genes / 3^genes tests (CoatTextureIdTest, CoatTextureComposerTest's combo sweep) were converted to seeded sampling - enumerating them is no longer tractable. Sample bakes (:common:bakeCoatSamples, 12 new) look right after the rework; nothing seen in-game - checklist in wiki/verification.html.
+
+Built 2026-09-02, NOT yet play-tested
+
+the gameplay-layer items (roadmap wiki §§11-19, first slice). 19 new Items in item/ModItems: horse_hair + horse_hair_bundle (4 hair  1 bundle, roadmap §12.2's first two rungs), four breeding carrots (epigenetic_splice/gene_splice/stabilizer/magnifier), one generic known_gene_splice_carrot (per-gene parameterisation needs a data component - deferred), placeholder_gene_book (literal name "PLACEHOLDER GENE BOOK", stands in for the research paper), empty_seed_jar + stallion_seed_jar (both SeedJarItem, tooltip from the stored_genome component), four tickets, three whistles, and stall_sign + bound_stall_sign. The 17 non-sign items have owner-supplied textures (tickets share one, whistles share one); the two stall signs borrow minecraft:item/oak_sign - per-tier / real art is a follow-up in wiki/verification.html §15. New item/ModCreativeTabs registers one Horse Genetics tab holding all of them (20 with the custom spawn egg, which also still shows in vanilla Spawn Eggs). The dev test-world hotbar (server/DebugTestWorldHandler) gives the spawn egg on slot 0 (tools shifted to 1-6) and one of every new item in the main inventory. Recipes are datapack JSON under data/horsegenetics/recipe/ (singular). Tickets are inert (stall-teleport needs stall blocks that don't exist); the carrots do nothing yet. The whistles work - see below.
+
+Built 2026-09-02, NOT yet play-tested
+
+the whistles (item/WhistleItem). Right-click anywhere to teleport every tamed horse you own within range (basic 16 / golden 32 / echo 64 blocks), same dimension, not ridden, to a grid of spots beside you; ~3 s use cooldown, a chime, a chat count. Leashed horses are unleashed and come; a horse already within 3 blocks or one you are riding is left alone. This is the owner's "area recall" reading of roadmap §11; the bond-gated version waits on bond, and "what echo adds" beyond range is still open. Checklist wiki/verification.html §17.
+
+Built 2026-09-02, NOT yet play-tested
+
+the stall system (roadmap §11). A new bound_horse data component (data/BoundHorse), a stall_sign / bound_stall_sign item (item/StallSignItem, texture borrowed from minecraft:item/oak_sign), a server-global data/StallData SavedData of data/StallRecords (one per bound horse), a flood-fill server/StallDetector, and server/StallDebug (the "debug overlay" - a particle wireframe + chat summary). Flow: right-click a horse with a blank stall_sign (server/StallSignHandler) -> it becomes a bound_stall_sign carrying that horse's UUID + name; right-click the outside face of a wall with the bound sign -> StallSignItem.useOn drops a real oak_wall_sign with the horse's name and flood-fills the block behind that wall (this layer ± 1, air only,  MAX_BLOCKS 512) - an enclosed area becomes that horse's stall, its outline flashed with HAPPY_VILLAGER particles. Breaking the sign (BreakBlockEvent) releases the stall. Dev keybind F7 (key.horsegenetics.show_stalls -> RequestStallHighlightPayload, dev-gated in ModNetworking) re-flashes every stall's outline near the player + prints a summary. No teleport-to-stall yet (that's the tickets, still inert); no client-side persistent wireframe (particles only). Checklist wiki/verification.html §18.
+
+Built 2026-09-02, NOT yet play-tested
+
+the stallion seed jar first slice (roadmap §15.1). New common/genetics/GenomeSample (a Genotype + Epigenome detached from a horse as code strings, with breedInto(mareGenome, rng)); new data/StoredGenome + data/ModDataComponents registering the horsegenetics:stored_genome data component (persistent Codec + networked StreamCodec); server/HorseBreedingHandler refactored so its foal-building body is a reusable applyBredFoal(...); new server/StallionSeedJarHandler - right-click a tamed adult stallion with an empty_seed_jar  a stallion_seed_jar stamped with his genome, sex, UUID, name, speed/health; right-click a tamed adult mare with a filled jar  a foal bred immediately through applyBredFoal from her live genome + the jar's stored one, jar consumed, mare put on the vanilla breeding cooldown. Both ends require the horse to be in breeding mode (isInLove() - fed a carrot/apple, works in creative); the op consumes that love state. The jar transforms in the player's hand (creative included). No real breeding-carrot gate (vanilla love is the stand-in), no gestation state (foal is immediate). Partly owner-confirmed 2026-09-02 (collection + tooltip); :common:test 194, :neoforge-26.1.2:build, runServer all green.
+
+Built 2026-09-02, NOT yet play-tested
+
+the horse-care systems - gated healing (roadmap §7.2) plus bond + herds (§13), the first slice of both, sharing one slow tick as the roadmap demands. All in neoforge-26.1.2/, nothing in common/:
+
+- data/HorseCareAttachment - a copyOnDeath attachment (horsegenetics:horse_care) holding bond (0-100), an Optional<UUID> herd id, the bondToday/dayStamp daily-cap pair, a bondTicks fractional accumulator and a togetherTicks herd-formation counter; behaviourTier() (0 vanilla / 1 face / 2 approach / 3 follow).
+
+- server/HorseCareHandler - EntityTickEvent.Post, every 30 ticks, staggered by tickCount + entityId. Gated healing: only for a hurt horse, a 3-block scan for a block in #horsegenetics:horse_water (or any #minecraft:water fluid) and one in #horsegenetics:horse_food; heal(1) + HEART particles per hit (2 if in a herd). Bond: proximity (~+0.5/min), riding (~+1/min), feeding (+2, on EntityInteract with any isFood stack from the owner); cap +15 per 24 000-tick day; foal-in-herd doubles the accrual. Herds: togetherTicks +30 with company / -30 alone; ≥ 12 000 → join a neighbour's herd or mint a UUID and pull in herdless neighbours; decays to 0 → leave. Attachment written back only on change; sync packet only when bond / in-herd changed.
+
+- server/BondFollowGoal - one Goal added at priority 4 to every Horse on join (dedup via goalSelector.getAvailableGoals()), inert below tier 1 / while leashed / while ridden; tier 1 look-only, tier 2 paths only if a route exists, tier 3 follows persistently. Real pathfinding, never a teleport.
+
+- network/HorseCareSyncPayload → client/ClientHorseCareCache (cleared on LoggingOut); client/HorseScreenHooks shows a bond N  <tier>  • herd line. Care sync also sent on StartTracking.
+
+- Two block tags: data/horsegenetics/tags/block/horse_water.json, horse_food.json.
+
+- :common:test (195), :neoforge-26.1.2:build, runServer (boots clean, tags load with no error) all green. Checklist: wiki/verification.html §0; machinery: wiki/horse-care.html.
+
+- Not in this slice: milking (§7.1), shearing/sleeping bond (shearing unbuilt), a stored herd alpha, any stamina resource.

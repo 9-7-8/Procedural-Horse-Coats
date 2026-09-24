@@ -1,0 +1,118 @@
+2026-09-10
+
+A black allele for forty-two markings, the rule that produced them written
+    down on the gene page, and Cleave split into two loci.
+
+Every magical marking here that had a white form and a
+    coloured form now has a black one as well — 42 forms
+    across 41 genes. That is not 42 judgement calls; it is one rule applied 42
+    times, and the rule is the part worth keeping.
+
+White and coloured are two points on one axis with the far end unused
+
+The convention these genes were written to is a white form on
+    allele[0] and a recessive coloured one that draws the same layers
+    with "hue": "$hue" where the white one names
+    #ffffff. Every one of them therefore already knew how to draw
+    itself in a single flat tone, and the whole dark end of the scale was
+    unoccupied. The black form costs one allele and no new vocabulary, and it
+    lands on a set of horses the white form has never read well on — the
+    palominos, cremellos, greys and dominant whites, where a white marking on a
+    white coat is a marking nobody can see.
+
+Re-tone, do not repaint — and measure achromatic as chroma
+
+The black expression is the white one with every achromatic target
+    moved into the dark end of the scale, keeping the order and the spacing of
+    the tones it had, and every saturated target left alone: that
+    colour is the gene rather than its lightness. Moonwing
+    is the clearest result — a graphite wing carrying the same iridescent
+    dust and the same gold binding, because only the wing itself was ever white.
+
+    The measurement that has to be chroma
+
+        Achromatic is max(r,g,b) - min(r,g,b) under about
+        0.12, not HLS saturation. Saturation reads
+        backwards at exactly the values that matter, because its denominator
+        collapses near white: #f4f0e8, a pearl six counts off the top
+        of the scale, scores 0.35 and gets protected as though it
+        were a colour. The first pass of this change used saturation and shipped a
+        black moonwing byte-for-byte identical to the pearl one, along with six
+        other genes whose black form was a copy of their white form. It was caught
+        by the transformer printing how many grey steps each gene came out with and
+        seven of them saying zero — which is the argument for making a bulk
+        edit report what it did rather than how many files it touched.
+
+The half that is easy to skip: both achromatic forms get the same depth
+
+A coloured form that separates its layers into a dark ring, a mid field and a
+    bright core, against a white form that paints all three off-white, is not two
+    versions of one marking — it is the good one and the flat one. Where the
+    coloured form spanned a noticeably wider range of lightness, the white form was
+    regraded onto the coloured form's own per-layer ordering, in greys. Three genes
+    qualified. Pavonem is the one that shows why:
+    its coloured form makes the peacock eye's pupil the darkest thing on
+    the horse, and its white form had been painting that pupil the same white as
+    the spots around it, so the eye had no pupil at all.
+
+Dominance: nothing that existed moved
+
+Black sits directly under white and above coloured, in declaration
+    order. Written that way, adding an allele to an existing gene changes nothing
+    that already existed — every pair that had an outcome keeps it, and only
+    the pairs carrying the new token are new. The new pairs were handed out by one
+    rule, an unclaimed pair belongs to whatever its more dominant allele's own
+    homozygote shows, which reproduces the series each file already had and is
+    the only rule that got Cleave's two independent pairs right without anybody
+    typing out 28 combinations.
+
+The proof is the bake golden: 42 rows added, 3 rows moved, none
+    removed — and the three that moved are the three regraded white
+    forms. The pipeline golden did not move at all.
+
+The rule is now on the page, not just in the files
+
+Three forms, where the palette is
+    narrow is the whole of it — the dominance table, the token
+    convention, the re-toning rule with the chroma warning, the depth rule, and
+    when not to. It is a recommendation and it says so: where the colour
+    is the gene, coral bloom's sea-blue
+    and gold or anything whose whole idea is that it is ember, a grey version is a
+    different marking wearing its name. The prompt's CONVENTION block says the same
+    thing to a model, with the slot order and the tone targets spelled out.
+
+And Cleave became two genes
+
+Cleave carried four alleles that crossed two questions together:
+    Clv and Clc for a front-half split, Wav
+    and Wac for a back-half one. So "the same marking in the other
+    colour" and "the same marking on the other half" were the same kind of thing,
+    and adding the black form to it had to add two alleles. They are
+    separate questions and they are two loci now:
+    horsegenetics.cleave says whether there is a
+    cleave and what colour, and cleave_side
+    says which half, wild type being the front.
+    Clvw/Clvwn/n is a white front half;
+    Clvw/ClvwWve/Wve is the same marking on the back.
+
+It is modelled on accretion +
+    accretion field, which is the same
+    shape already in the mod: the modifier locus has no layers, every horse carries
+    it, and the painting gene asks for it with needs. Two things about
+    it are load-bearing and are written into the file's notes. The conditional
+    expressions must be listed before the unconditional ones, because
+    SpecGene walks the conditionals in file order and only falls
+    through to the plain combination table when none is satisfied. And
+    Wve is dominant — needs asks for one copy —
+    so a foal out of one back-half parent takes the back half.
+
+The old back-half drawing survived the split byte-for-byte: of the six golden
+    rows that moved, all six are the new heterozygous Wve/n
+    horse, and the Wve/Wve one hashes exactly as the old
+    Wav/Wav did.
+
+What was regenerated
+
+Gene bundle, icons, all 143 gene pages, the designer wasm, both goldens, the
+    search index. Links, gene tabs, parity and recipes green;
+    :neoforge-26.1.2:build green.

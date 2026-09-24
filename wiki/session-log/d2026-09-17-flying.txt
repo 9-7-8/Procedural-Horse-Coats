@@ -1,0 +1,64 @@
+2026-09-17, night — Flying, and the effects bug that was hiding under it
+
+    The owner asked for flight: one locus, a wild type, a creative-style allele and an
+    elytra-style one. What shipped is flying — three
+    alleles in a dominance series, El > Tf > n, gliding dominant and
+    true flight recessive at two copies. It paints nothing, which makes it the first
+    data-driven gene in GeneFamily’s override map: the bands assume a
+    JSON gene always paints, and without an entry it would have been filed under
+    “magical coat genes”.
+
+Neither flight model is written here
+
+    26.1.2 carries both already, on LivingEntity and neither of them
+    player-gated: travelFlying is creative/ghast flight, and
+    travelFallFlying is the real elytra maths. So the mixins decide
+    when a horse is allowed each one and let vanilla do the physics. That is the
+    determinism rule paying for itself — there are no invented constants to drift,
+    and a 1.12.2 backport reimplements “which vanilla path” rather than a
+    table of tuning numbers. True flight’s airspeed comes off the horse’s own
+    MOVEMENT_SPEED, so the speed loci keep meaning something in the air.
+
+Three sessions of fixing the wrong layer
+
+    Gliding did nothing, three times running, and each fix was aimed downstream of a thing
+    that did not exist. HorseAbilities gated every effect on
+    SpecGene.dose(), which counts copies of the first-declared
+    allele, against a minDose defaulting to 1. On a two-allele gene those
+    agree; on a dominance series they do not, so El/El scored zero — it
+    carries no Tf at all — and lost the effect its own expression
+    declared. The ability was never created, so the flag, the sync and the mixins were all
+    innocent. SpecGene.abilityDose counts non-wild-type copies instead;
+    dose() is untouched, so perDose coat knobs and both goldens
+    are unchanged. Any data-driven gene with three or more alleles was
+    affected.
+
+    The lesson worth keeping: the diagnostic that broke the deadlock printed what the
+    server thought the horse had (traversal=[] against
+    traversal=[flight_glide]), and it was deliberately placed outside the
+    case it was meant to diagnose — a probe inside that case would have proved
+    nothing, because the case was what was not running.
+
+Two vanilla traps, both found by crashing
+
+    A floating vehicle disconnects its rider after eighty ticks unless
+    isFlyingVehicle() says otherwise. And updateFallFlying does
+    not merely keep the elytra flag lit — every twentieth tick it picks a random
+    glider item out of the entity’s equipment and damages it. Overriding
+    canGlide() promised an item a horse does not have, so
+    Util.getRandom was handed an empty list and took the server down
+    mid-flight. Cancelling updateFallFlying outright is the honest version:
+    a gene-winged horse has no glider to wear out. The cost is that sculk sensors cannot
+    hear a gliding horse.
+
+    Fall damage is cancelled at the damage event rather than reset afterwards, because the
+    server accumulates its own fallDistance from the movement packet, outside
+    the entity tick — a reset is always one call too late, which was learned twice.
+    The gene still grants no fall protection: that is bird
+    boned’s locus, and breeding the two together is the point.
+
+    Parked deliberately: the cloud-treading allele. Clouds turn out to be
+    reachable — 26.1.2 moved cloud height into the common-side
+    EnvironmentAttributes and ships Entity.isInClouds() —
+    but the allele was removed rather than left in place describing a thing it no longer
+    did. The cloud_walk flag survives, unused.

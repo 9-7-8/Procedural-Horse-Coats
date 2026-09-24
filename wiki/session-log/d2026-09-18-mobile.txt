@@ -1,0 +1,83 @@
+2026-09-18, after the homestead — The wiki on a phone: a search that would not close, and a boot that would not speak
+
+    Three reports, all from a phone, all of them about the wiki rather than the mod:
+    the search “infinitely searches”, the close buttons on the search panel and
+    the Draft a breed with AI dialog do nothing, and the breed designer
+    “appears to be loading forever”. Two turned out to be one bug and the third
+    turned out not to be a bug at all.
+
+    The search was never searching; it was never closing.
+    close() sets overlay.hidden = true, and that is normally
+    enough because the browser’s own sheet carries [hidden] { display: none }.
+    But that is a user-agent rule, and any author display: on the same
+    element outranks it — and .search-overlay is
+    display: flex. So the attribute flipped, the panel stayed exactly where it
+    was, and body.search-open kept the page behind it scroll-locked. At a desk
+    you can ignore a panel you cannot dismiss. On a phone the panel is the viewport,
+    and a search box you cannot get out of reads as a search that never finishes. Confirmed
+    before the fix at 390×844:
+    {"hidden":true, "display":"flex", "visible":true}.
+
+    The interesting part is that this had been found before and fixed in one place only.
+    wiki/ai/ai.css already carried
+    .phc-ai[hidden] { display: none !important; } with a comment recording that
+    the AI panel “showed open on every load” — the same trap, scoped to the
+    one component that had hit it. It is one rule at the top of
+    wiki/styles.css now, ahead of every layout rule, and
+    .section-body[hidden] — a third local patch on the same
+    problem, on the landing page’s collapsible sections — folded into it.
+
+    Two touch-only faults found while checking the fix. Moving the
+    backdrop-tap handler from mousedown to pointerdown made the tap
+    close the panel and then hand the click that followed to whatever was underneath
+    the finger — on the landing page a nav link, so the tap that meant “go
+    away” navigated instead. The shape that works is: judge the target on the press,
+    close on the click. And both close buttons were far too small to hit — search’s
+    Esc is 36×27, the AI dialog’s × is 22×22, against the
+    ~44 a fingertip actually lands on. That is the best remaining explanation for the AI
+    dialog’s ×, which could not be reproduced: under touch emulation it
+    closes cleanly by button and by backdrop, and its close() genuinely removes
+    the node rather than hiding it. Both targets are 44px on a touch screen now; the glyphs
+    are unchanged. Whether that was the cause is still unconfirmed —
+    gap 276.
+
+    The breed designer was slow, not frozen, and had no way to say so.
+    Bringing common/ up in a browser downloads the 2MB wasm, the gene
+    bundle, the breeds, two name tables and five PNGs, and then compiles the wasm. At a desk
+    that is over before the boot screen finishes fading in; on a phone it is long enough that
+    a screen reading “Loading the mod…” and nothing else is
+    indistinguishable from one that has hung. So java.js announces every stage
+    now, and a new wiki/horse-designer/js/boot-progress.js renders them: the
+    whole ordered list with ticks, the bytes arriving on the stage that is running, and
+    — past twelve seconds on one stage — a line saying in as many words that it
+    is downloading rather than stuck. Both designers attach it; the loader is shared, so the
+    gene pages’ preview windows get the API whether or not they use it.
+    architecture.html#boot-progress.
+
+    Real byte counts meant fetching the wasm here rather than handing TeaVM a URL. Its
+    load() compiles a non-string argument directly, so the
+    ArrayBuffer goes straight in and nothing about the runtime changes.
+
+    Two things a local server hides and a gzipping one does not. The
+    published wiki is served gzipped, so Content-Length describes the
+    compressed stream while the reader hands back decoded bytes: believing it
+    counted “2.1MB of 607KB” and filled the bar to three hundred per
+    cent. Content-Encoding is readable from JS and says when that is happening,
+    so a compressed response now reports its bytes with no denominator, with an overshoot
+    check behind it for a proxy that strips the header. Then losing the denominator
+    mid-download slid the bar backwards, which is the one thing a progress bar must
+    never do. The bar measures stages now — always countable, always
+    forwards — refined by the within-stage fraction only where it is trustworthy, and
+    clamped to a floor so it cannot retreat. Both faults were invisible against a plain local
+    server and obvious against one that gzips; the check now does both.
+
+    And a browser with no WebAssembly GC cannot run these pages at all, but
+    said so with an error about a byte at an offset. There is a probe for it now that puts it
+    in words — deliberately only to explain a failure that has already
+    happened, never to gate the boot, so a probe that is wrong about a browser that would in
+    fact have worked cannot cost anybody the page.
+
+    Verified against the published site on a 200kbit/s throttled phone: it boots, the
+    stages appear in order, the counts climb, the bar is monotonic and never exceeds 100%,
+    and the stall line appears when a stage is made slow. Which is the answer to the original
+    report — it was loading, just slowly, and now it says so.

@@ -1,0 +1,116 @@
+2026-09-10
+
+Four genes retuned off looking at them, and the coverage rule of thumb written
+    down.
+
+Four notes from the owner on yesterday's intake, and the interesting thing is
+    that two of the four turned out to be the same defect wearing a different
+    complaint.
+
+“Contour doesn't have enough colour” was not a palette problem
+
+Contour draws a topographic map: six bands of a
+    landscape, each a threshold on one FRACTAL field. Band 0.38 therefore
+    sits entirely inside band 0.30 — the bands are nested. And a
+    magical gene's layers each measure their delta against the colour the gene started
+    from and then sum, so six nested TOWARDs do not paint six
+    bands. They paint one colour, which is whatever six deltas add up to, and six of
+    them add up to white.
+
+Which is what shipped: an almost-white horse with a brown patch. The pastel palette
+    it was given — #e2d5b8, #e8c8e5,
+    #c8eeec — was the author compensating for a wash whose cause they
+    could not see, and adding saturation to those colours would have made the wash
+    worse rather than better. Every band now subtracts the threshold above it and paints
+    only the ring between the two. Once they are disjoint the colours can be what a
+    contour map actually looks like, so they are: a hypsometric ramp from deep green
+    through gold and orange to red-brown.
+
+The coloured form gets a second hue knob rather than more saturation on one.
+    inkHue runs the low ground and highHue the high ground,
+    and they are independent draws — a knob cannot be offset by a
+    constant in this format (gap 164), so a horse
+    can roll two hues that sit next to each other and come out nearly monochrome. That
+    is the honest cost of the missing arithmetic, and it is a good deal less bad than
+    one flat hue.
+
+    Three genes in two days, same cause
+
+        Dorsal wing painted a solid black horse, contour painted a white one, and both
+        were layers summing where the author expected them to stack. It is
+        gap 169, and the thing that makes it hard
+        to see is that the symptom does not look like the cause: dorsal wing
+        looked like a mask that was not firing, and contour looked like a palette that
+        was too pale. Neither looks like an arithmetic problem, so neither sends you to
+        the rule that explains it.
+
+Dorsal wing wraps down the sides now
+
+The butterfly is drawn half again as wide as the horse and centred on the spine
+    (sizeV 1.5, originV -0.25), so the outer part of each wing
+    falls off the edge of the back and lands on the flank, and the NORMAL
+    mask was opened from 0.15 down to -0.75 at round 0.85 to let it get
+    there. The two numbers have to move together: widening the drawing without opening
+    the NORMAL just clips more of the wing away, and opening the
+    NORMAL without widening the drawing puts bare flank into vertical
+    bands.
+
+Worth being precise about what is on the sides, because it is not a drawing. A
+    top-plane shape is read at (x, z) and a flank face has one constant
+    z, so the whole side shows a single vertical slice of the
+    butterfly stretched downward. On the back you are looking at the drawing; on the
+    flank you are looking at its cross-section running down. It reads as wings folding
+    over the barrel, which is what it is for.
+
+Dripwork: no ground, fewer marks, and runs down the legs
+
+The white ground went first — an ALL layer at 86% opacity, which
+    turned every base coat into the same pale grey before the gene drew anything. That
+    is a lot of horse to spend on a backdrop for a scatter of small marks, and the same
+    argument took the white out of rising sun. The
+    marks are on the BODY and the LEGS now rather than
+    everywhere, and there are fewer of them. The runs are new: STROKES on
+    Y, weighted to the lower half by an AXIS mask, which is what makes them
+    read as ink running toward the hooves rather than as a stripe pattern.
+
+The AXIS went in inverted the first time, which selected
+    everything above the barrel — on a gene restricted to the body and
+    the legs, that is nothing at all, and the layer rendered as though it were not there.
+    Caught by looking at it, which is the only thing that catches it.
+
+Rising sun goes to the top of the order
+
+Priority 123 to 620, which is the top third and above every other
+    marking except invert and tron.
+    It covers the whole horse, so by the rule of thumb below it should be near the
+    bottom. It is at the top on purpose: a rising sun is a poster printed
+    on the horse rather than a marking the horse has, and a poster that other
+    markings draw over is not a poster.
+
+The rule of thumb it breaks
+
+Coverage and priority is new and is
+    deliberately not a rule: the more of a horse a gene covers, the lower its
+    priority should be. Later paints over earlier, so a whole-coat gene painting
+    late erases everything under it and a small mark painting early gets erased by
+    anything bigger. Sorted by coverage, a horse carrying five markings shows five
+    markings.
+
+It ships with its own counter-examples attached, which is the point of writing it
+    as a rule of thumb: rising sun breaks it for the reason above, and
+    fielded breaks it because a gene that reads
+    the coat with LUMA or PIGMENT has to run after whatever it
+    is reading however little it covers. The five priority bands the mod already uses
+    are written out beside it, because slotting a new gene next to whatever it most
+    resembles beats reasoning it out from scratch. The prompt carries a four-line
+    version.
+
+What was regenerated
+
+Icons, the bundle, 157 gene pages, the designer wasm, both goldens. The bake golden
+    moved exactly eight rows — the two alleles of each of the four genes —
+    and nothing was added or lost. Every genotype code in the pipeline golden changed
+    and no horse did, which is rising sun's priority moving it up the code
+    order and nothing else.
+
+The intake folder was empty this session; nothing new to import.

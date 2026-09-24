@@ -1,0 +1,508 @@
+2026-09-07
+
+Built 2026-09-07, NOT yet looked at: the wiki became three views — Gameplay, Coding, Science — and got a real search.
+
+Owner-driven, one request with four things in it. Design: every gene page, every item page, the landing page. Checklist on the coding-notes verification tab. Gaps 88–91.
+
+- The wiki was serving three readers one index, and serving none of them. A player who wants to know what a flaxen looks like, someone adding a gene, and someone checking the model against real horse genetics want almost disjoint subsets of the same page. The split is wiki/tabs.js reading <section class="tab-panel" data-tab>; a page with no panels is left completely alone, which is why the seventeen pages that are one subject for one audience needed no edit at all. The chosen view rides in ?view= and in sessionStorage and is pushed through every link the sidebar and the index build, so choosing Science and clicking Flaxen opens Flaxen's science tab.
+
+- Where a section went was decided by rule, and the rules came from the owner. Design rationale - the "why one locus and not forty genes" sections - goes to Science, not Coding, because those arguments are almost always framed against real genetics. Look-alikes and breed lists go to Gameplay, because telling two horses apart and knowing where to find one are things a player does. Everything unrecognised defaults to Coding, which is the safe direction: a coding tab carrying a section it did not need is a nuisance, and a gameplay tab carrying one is the thing the split exists to prevent.
+
+- Nothing was rewritten out of existence, and that was checked rather than assumed. The split moved whole top-level blocks and was verified word-for-word against HEAD on all 69 registered gene pages: zero words lost. Worth having done, because the first run of the transform re-processed pages it had already split and double-wrapped 67 of them - the pages were reverted and it was re-run once, and the script now refuses a page that already has panels.
+
+- The inheritance table is asked of the mod, not written down. A new @JSExport - DesignerApi.geneInheritanceJson - reports every genotype at a locus and the phenotype each one gives, and wiki/gene-inheritance/ draws it. That is hard rule 3 applied to a table rather than to a painter: forty gene pages carry a hand-written combination table, and a live one cannot fall out of step when a gene gains an allele. Above three alleles a square stops being readable, so it falls back to a plain list of outcomes - the owner's call, and the reason the gameplay tab of KIT is a list and the gameplay tab of flaxen is a grid.
+
+- items.html was one page describing thirteen unrelated things. It is now a roster of links, and each item or group has a page: hair, the breeding carrots, the splice carrots, research papers, seed jars, whistles, stall signs, tickets, transfer papers, the Horseman's Table and the spawn eggs. Their gameplay tabs are written fresh in plain language; the implementation prose moved across intact rather than being reworded, because it was accurate and rewording accurate prose is how errors get introduced.
+
+- The sidebar box was never a search. It filtered page names, so anything you could not already name was unfindable - which on a wiki with seventy gene pages is most of it. wiki/search.js searches the text of every page, and a hit knows which tab it is on and links to it. The corpus is baked to a script rather than fetched as JSON on purpose: the wiki is read from a file:// path as often as from a server, and fetch does not work there. It is loaded lazily on the first keystroke, because it is 1.8MB and almost every visit never searches.
+
+- The page list moved out of nav.js into wiki/pages.js. The landing page needs the same list to know which cards to hide in which view, and a second copy would have drifted the first time a page was added. Hard rule 7 now names pages.js. Which views a tabbed page appears in is not an editorial call at all - it is exactly the tabs it has - so sync-page-views.mjs reads them out of the HTML and writes them back, and only an untabbed page keeps a hand-set value.
+
+- 24 natural gene pages came out with no science tab, and were left that way. Their real-world material is in the lede rather than in a section a split could pick up. Writing a stub would have meant either inventing veterinary claims or shipping 24 pages whose science tab says "not written yet", and an honest absence beats both. They are listed on the coding-notes verification tab as the next thing to write. The magical genes having no science tab is correct, not a gap - they are invented.
+
+Audited afterwards, same day. Two of the gaps this session opened were checkable in the repo without a browser, so they were.
+
+- Every recipe on the new item pages was checked against the JSON, and the pages were right. All 29 recipe files against all eleven pages: the hair chain and its four reversals, the three whistle tiers, the four tickets, the shaped transfer paper, both jars and all ten carrots including the five themed reagents. What the audit found was absence, not error - the stall sign's own recipe (oak sign + horse hair) had never been written down anywhere, on the old page or the new, so nothing told a player how to get one; and the Cowboy Hitch is a registered item that appeared on no roster at all. Both fixed.
+
+- And it found a real bug. cowboy_hitch.json and horsemans_table.json are byte-identical shapeless recipes with different results, so only one of them can ever match and one of the two blocks is uncraftable in survival - which matters because those blocks are how both merchant NPCs come to exist. Villagers states the shared recipe as though it were fine, so it had been documented rather than noticed. Gap 92, deliberately left unfixed: choosing a reagent to tell a hitch from a table is a gameplay decision and not a documentation pass's to make.
+
+- The predicted routing failure was real, and on the pages that could least afford it. Measuring prose per gameplay tab found 26 pages whose gameplay tab was seven words - two headings and the widgets - because they carry neither a look-alike table nor a breed list, which were the only two things the routing rule could move onto Gameplay. Agouti, tobiano, roan, MATP, shade, sooty, leopard and natural zebra were all in that set. Each now opens with a short plain-language "What it does" written from what the page already asserts; thinnest tab is 44 words, median 95. The other direction - whether anything reached Gameplay that should not have, and whether the 307 sections that defaulted to Coding belong there - is still unread. Gap 88.
+
+- And the landing page had been quietly lying about the size of the mod. Checked at the end of the session because CLAUDE.md names derived numbers as a repeat offender: three of the hero's four headline stats were stale. 48 genes against a real 69; 4.3×1031 genotypes against 6.7×1048; and 11,098,128,386 visually distinct coats against 3,121,348,608,000,004 - six orders of magnitude out. Only the breed count was right. Verified against the built jar rather than recounted by hand, corrected, and the accessor names left in a comment beside them. This is gap 13 recurring on the most-read page in the repo, so the actual fix - generating the four numbers from a Gradle task - went on the roadmap rather than being trusted to somebody remembering (and shipped the next day). Gap 93.
+
+Built 2026-09-07, NOT yet looked at: breeds became JSON files, and got spawn eggs, a designer, and a splice mark.
+
+Owner-driven, one request with four things in it. Design: the breed file format, breeds, items, carrots. Gaps 83–85.
+
+- The 49 breeds were not translated by hand, and that was the whole plan. An 885-line Breeds.java retyped as 49 JSON files is 49 chances to mistype an allele weight and no way to notice. So the writer came first: BreedSpecWriter turns a Breed back into the file that would produce it, BreedFileTool ran it over the Java definitions once, and only then were the definitions deleted. BreedFilesTest now asserts every shipped file is exactly what a fresh bake would write, so the two halves cannot drift apart afterwards either.
+
+- Map.copyOf was quietly making the output non-deterministic. Found on the first bake: Breed's compact constructor used Map.copyOf and Set.copyOf, which are deliberately unordered, so the gene pools came out in a different order from the one they were declared in - and would have come out differently again on a JVM with a different hash seed. Harmless while a breed only fed a founder roll; a checked-in generated artefact whose diff depends on the hash seed is exactly the trap CLAUDE.md's regenerate table exists for. Ordered copies now, with the reason on the line.
+
+- A breed file's two kinds of wrongness are treated differently, and that is the format's main design decision. A gene file is parsed strictly because the creator writes it. A breed file is mostly references to other people's genes, so a malformed file is thrown and a file that names something this install has not got is warned and skipped, one locus at a time. A Friesian written for a bigger modpack has to degrade to the horses this install can actually make, not vanish.
+
+- "Allele band restrictions for every gene" turned out to be the interesting half. The owner meant the epigenetic numbers, not the allele pools - so BreedBands generalises what the stat targets already did for the four body axes to every gene and every declared value. A breed can now say "deeply black" rather than only "black", written onto both allele copies of every founder and then let go of, exactly like a stat band. It refuses three things loudly rather than quietly: the four body-stat genes (owned by the stats block), seeds and categories (neither has a "slightly more"), and a value the gene does not declare.
+
+- The source checklist replaced four booleans nobody had written yet. "Can the cowboy sell it", "can it found a wild herd", "does it get a spawn egg", "can a stable have one" are four independent questions, and answering them as a set means no consumer has a special case - each just asks Breed.allows. Feral Mixed names none of the four, which is the honest answer for the absence of a breed, and is what stopped the empty-set default being "all four".
+
+- Breed spawn eggs are one item with a component, not forty-nine items. The deciding argument is not effort: a breed a player drops into config/ after the jar was built has no registry entry and could never have an item of its own, so per-breed items would have made the eggs a built-ins-only feature and quietly broken the promise the file format makes. The blank egg is listed in no tab, because an egg with no breed on it is a puzzle rather than an item.
+
+- "Spliced (Breed)" needed no new rule. The owner's phrasing - "think of it like a cross between Breed and Splice" - is implementable literally: splice is a reserved lineage component, a spliced Friesian is the pair {friesian, splice}, and BreedLineage.combine gained no branch at all. Splicing a cross falling out as Mixed is a consequence of that rather than a decision - three lines have always been Mixed. The first attempt did add a branch, let the mark ride on a cross, and produced "Spliced (Arabian × Friesian cross)"; the test written from the owner's table is what caught it.
+
+- Whether a splice "reached the foal" is a question about the foal. SpliceOutcome asks whether the foal carries an allele neither parent had. Not "the fed one", because a mare fed a splice for a gene the stallion is already homozygous for was going to produce a carrier whichever copy she passed on - nothing outside can tell whether the carrot did anything, and nothing was added, so nothing is claimed. That reading is decidable and the other is not.
+
+- The browser needed a second copy of the breed files, and it is generated by the same tool. TeaVM cannot walk a classpath, so bakeBreedFiles also writes wiki/horse-designer/assets/breeds.json - the same content as one array - and java.js hands it to Breeds.registerBundle before anything asks for a breed. Two copies of anything is a chance to disagree, so BreedFilesTest checks they hold the same breeds in the same order. Finding this also fixed a latent bug: HorseEditor snapshotted Breeds.all() in a field, which in the browser would have been the empty list.
+
+- The breed designer validates with the game's own parser, so there is no parity to keep. Every question the page asks - the gene list, the allele tokens, the epigenetic schemas, the base-coat presets, whether the file is good, what a herd of it looks like - goes to common/ compiled to wasm. The base-coat presets in particular are built by calling Breed.Builder's own extensionBlackBias() / agoutiBayBias() helpers and reading back what they produced, so the weights the tool offers and the weights in a Friesian's file are the same numbers by construction.
+
+- What the page deliberately does not have is a spawn button, and neither does the horse designer. The custom spawn egg gained Make egg this session, which is a second output action with no browser twin, so the divergence is written at the top of both HorseEditor.java and gui.js rather than left to be discovered - hard rule 5. A browser has no inventory; its equivalent of both buttons is Copy code.
+
+- The conversion found a bug that had been invisible in the Java. Four breeds - Cleveland Bay, Friesian, Przewalski, Quarter Horse - name no shade pool, because they were written with .fixed(AGO, ...) rather than the agoutiBlack() helper that calls shadeAny(), and BreedFounder forces an unnamed modifier locus wild. It is precisely what shadeAny()'s own javadoc warns about. A missing key is obvious in a 30-line file and was invisible in an 885-line class - which is a fair argument for the format on its own. Not fixed: adding the pool changes the shade of every horse of those four breeds in every existing world, and that is a decision about how they should look rather than a typo to sweep up in a conversion pass. Gap 87.
+
+- Not built: a per-breed carrot. The request listed one; asked about it, the owner called it an oversight. Nothing was built and no field was reserved for it.
+
+Built 2026-09-07, NOT yet looked at: three stables that generate with rare horses already in them.
+
+Owner-driven, one request with three buildings attached. Design and attribution: generated stables. Checklist §0-AK. Gaps 80–82.
+
+- None of the three files was a Minecraft structure, and that was most of the work. Two are Sponge Schematic v2 and one is a legacy MCEdit .schematic carrying numeric 1.12 block ids with no block names in it at all. tools/stables/bake-stables.py converts both. The trick that made it affordable is the DataVersion: the output claims to be 1.13.2 rather than current, because the game runs every structure it loads through the DataFixer against the file's own version - so grass_path becoming dirt_path, and every other rename in twelve years of Minecraft, is done by the game rather than by a hand-written table that would be subtly wrong. The legacy id table therefore only has to reach 1.13, and it stops there on purpose.
+
+- The generation is vanilla's and the horses are this mod's, joined by a structure id and nothing else. That split is what makes "drop in an NBT and a JSON" true: the three worldgen files are ordinary datapack registries this mod has no code for, and StableDefinitions only says what stands in a building it never places. A pack with only the worldgen gets an empty stable; one with only the stable file is ignored. Both failures are quiet.
+
+- The unit test found a real design bug in the magic ladder. "All horses have at least one homozygous magic trait, 10% chance of two, 5% of three" is a statement about the horse - and the first implementation added the guarantee on top of whatever the breed's own geometric draw had already given it, so every Friesian had four or five and the ladder described nothing observable. A stable that names a magic count now clears the magical loci and puts back exactly the rolled number. The test that caught it asserted "fewer than half the horses have extras" and got 400 out of 400.
+
+- The four body-stat loci are magical genes and are not magic. Same test run, second finding: clearing "every magical locus" for the no-magic stable also cleared size, magic speed, health and jump - which is how BreedFounder hits a breed's stat bands, so it quietly deleted the breed's character and made every stable horse a baseline-statted one. They are exempt everywhere now, in both directions: never cleared, never forced.
+
+- A stable may not hand out a horse that is dying, and may hand out one that is unwell. Every locus a stable forces comes from SpliceSafety's pool, so nothing it adds can kill. But a breed's own genetics can still produce PSSM1, exactly as it would on a wild horse of that breed, and a stable is not a promise of a healthy animal. The line is that a building full of dying foals is not a surprise, it is a bug.
+
+- Finding the stalls is a block scan, and the alternative was worse. A structure NBT cannot say where a stall is. Baking data markers into the NBTs would have worked and would have made "drop in an NBT" untrue for everyone after us - a modder would have had to edit somebody else's schematic in game first. So the populator reads the placed blocks: a floor, two air, a roof, and two of four sides shut in. Two sides rather than three, because a stall's open side is its gate and the one opposite is often open to the aisle - three finds only boxes, and a box is not a stall. It is a heuristic, it degrades to "put them outside", and it is gap 82.
+
+- The populator fires on the wrong event because there is no right one. There is no "structure finished generating" hook, so it queues on the start chunk's load, waits 40 ticks for the neighbouring chunks the piece spans to finish their own feature stage, and re-queues if any is still missing. Every number in that was picked by reading. The part that is not a guess is the once-only record: without a per-level StablePopulationData a stable gains another seven horses every time a player walks back to it, which is the famous failure of this whole class of hook and looks like a feature for two days.
+
+- The attribution is a doc with a licence question on it, not a credits line. Three buildings by Seuchendoktor, Alpha_One_Seventeen and Tyiarrah, all redistributed inside the jar rather than linked. Planet Minecraft carries no uniform licence and none of the three has been read. That is gap 80 and it is cheap to fix now (delete two files) and expensive once somebody's world has one in it - so it is written down as a blocker on distribution rather than as a nicety.
+
+2026-09-07: deleted the “HYPP is not built” notes, some sessions after HYPP was built.
+
+Prompted by the owner asking whether HYPP had been added. It had — registered, unit-tested, with its own page and a nav entry. What had not happened was deleting the notes saying it had not.
+
+- Six places were still telling a reader it did not exist: two breed notes() strings, two cells in the breeds table, and the class javadoc on both Breed and Breeds naming it as an example of what the mod cannot model. Tiger eye and the leopard complex were in the same javadoc list and are also built; of the seven early-lethal foal disorders that page named, six shipped and only NNF has no locus.
+
+- This is the failure the “update the page in the same change” rule exists to prevent, and it is worth writing down because of where it survived. The wiki pages that own each gene were all correct; the roadmap was correct; what was stale was the prose beside the code, in javadoc and in display strings, which no docs pass ever walks. Nothing behavioural was wrong, and a reader checking whether HYPP existed would have been told twice by the source that it does not.
+
+Built 2026-09-07, NOT yet looked at: five themed random splice carrots.
+
+Owner-driven, one request. Design: the five themed splices. Recipes: items. Checklist on the splice carrots’ verification tab.
+
+- They are one field, not five carrots. CarrotEffect.GeneSplice gained a SpliceCategory, and everything downstream — the token, the fold, the combine recipe, the feed handler — carried on working. That was the point of the check: if adding five carrots had needed five CarrotEffect cases and five fold branches, the abstraction the roadmap claimed was cheap would not have been.
+
+- Every themed pool is a subset of the safe pool, and that is the whole safety story. Each theme starts from SpliceSafety.pool() and removes from it, so the existing blacklist covers all six random carrots at once and a health gene registered tomorrow is out of every one of them the moment it exists. There is a test asserting the subset property rather than a comment claiming it, because the failure mode is a dead foal in somebody's world.
+
+- “Positive health genes” forced the first carrot that narrows the combination. The blacklist stops at hearts deliberately — a slower horse is not a damaged one — so HMGA2's pony allele and LCORL's short copy are both safe and both the opposite of what a carrot labelled positive promises. Filtering the locus was not enough; the performance carrot draws only pairs that beat the baseline on speed, health or jump and lose to it on none. Size is read neither way, because a draught horse is not a better horse than a pony — which is what drops HMGA2 off the carrot entirely and keeps LCORL on it for its speed.
+
+- The coat three are a declared table, and that is a deliberate departure. SpliceSafety's standing argument is that a hand-written list is wrong the day someone adds a gene and wrong silently. It holds there because the cost is a dead foal. It does not hold here: dilution / white / marking is a taxonomy a person applies, and no measurement of a finished coat sorts dun (a dilution that draws a dorsal stripe), roan (removes pigment without being a spotting pattern) or brindle (paints white and is a striping gene) the way a horse person would. A derived answer would have been wrong and harder to argue with. The table is written against the Genes constants rather than key strings, so a renamed gene breaks the compile, and an unclassified gene falls to marking if it paints and to no theme at all if it does not.
+
+- The base coat is in none of the five. Extension, agouti and shade are what a marking sits on, and a carrot sold as “markings” that turned a black horse chestnut would be answering a question nobody asked. They stay on the unthemed carrot, which promises nothing about what it rolls — and that is the general shape of the whole feature: the themed carrots are the unthemed one with a promise attached, so anything the promise cannot cover stays where no promise was made.
+
+- Two exclusions fell out for free and are worth naming. Silver is a textbook dilution and is not on the dilution carrot; EDNRB is a textbook white pattern and is not on the white one. Neither needed a line of code — MCOA costs hearts and overo lethal white kills, so the blacklist had already taken both. That is the subset property doing its job the first time it was asked.
+
+- The textures are the plain carrot, recoloured by luminance ramp. The leafy top is detected by hue and left alone; the body's own shading is rescaled onto a value ramp of the theme's colour, so the sculpting survives and the five read as one family. The feed particle burst uses the same five colours, so the feedback says which carrot went in rather than only that one did.
+
+Built 2026-09-07, NOT yet looked at: the stable as a table, and an information screen you can read.
+
+Owner-driven, ten requests in one pass. Design: roadmap § the horse browser, breeding § client sync. Checklist on breeding’s verification tab. Gaps 76, 77.
+
+- Two screens were painting over their own widgets, and it explains the request that opened the session. “Make the barn name box more obvious as a box you can type in” — it was not a styling problem. Screen.extractRenderState draws the widgets and then hands over, which is right for a screen with a background and wrong for one that fills the window with a 94%-opaque panel: the EditBox was drawn, and then buried. Same cause on the browser, where extractLabels runs after both the widget and the slot passes and the Crafting tab's own button sits inside the panel it draws. Both now put the chrome down first. Worth writing down because the bug was legible in the source from the day it was written and nobody had a reason to read that far — it took a cosmetic complaint to find it, and the honest lesson is about untested GUIs rather than about draw order.
+
+- The horse list ships, and it ships against the roadmap's own advice. §18 says the expensive part is a per-player owned-horse index and that sort and filter belong server-side, paginated — “do not sync every horse's genome to the client to filter it there”. This does. The reason it was still the right call: the breeding preview was already sending exactly those rows, with exactly those genotypes, for exactly those horses, so the tab cost one packet field rather than one packet. Building the index first would have meant a second source of truth for the same list while the first one sat there working. The cap is the whole of the difference and it is gap 76.
+
+- One roster, two tabs, so BreedingRoster is HorseRoster. Keeping a second round trip for the same question would have been two things to keep in step and twice the bytes for the half that overlaps. The entry grew the fields a table needs and a horse's genotype now arrives once for both.
+
+- The filter is a language, and it lives in common/. HorseQuery parses whitespace-separated terms, ANDs them, negates on -, and understands flags (mare, foal, lethal), text keys, numeric comparisons (gen>2) and gene terms. Putting it in common/ was not tidiness: it means the predicate is unit-tested without a game, it survives the backport, and the same code can move to the server the day the index exists rather than being rewritten there. HorseListing is beside it — one horse flattened, with its coat description, four body numbers and disorders resolved once, because a table redraws every frame and a sort compares thousands of times.
+
+- gene: matches an allele the horse holds, not one it shows. The owner's framing on the roadmap was “show me every horse carrying SB1”, and a filter that read the phenotype would answer a different and much less useful question. A silent carrier is the single most valuable row a breeder can be handed; expresses: is there for when the narrower question is the one you have.
+
+- The same argument decided the information screen's new filter. The request was to hide “wildtype genes”. Read literally that removes carriers, which are wild type by phenotype and the whole reason to look at the tab — so the filter tests the alleles: a locus is hidden when the horse is homozygous for the gene's default there. Extension, agouti and shade are kept whatever it says, because “what colour is this horse” has no answer without them. It is also the rule the Coat and Other genes tabs already used, so the screen now has one rule rather than two.
+
+- The full genetic code left the Genes tab and was not moved anywhere. It is a thousand characters; the two surfaces that actually read it are the custom spawn egg and the horse designer, and both take it by paste from somewhere else. On a horse's own screen it was pushing the list it introduces below the fold. Deleting rather than relocating is the point: there was no second place it belonged.
+
+- A foal's inventory screen exists now, and vanilla's reason for not having one does not apply here. AbstractHorse.mobInteract bails on isBaby() before it reaches the “tamed and sneaking” branch — sensible when the screen is a saddle and two armour slots, wrong when it is also the only door to a horse's genetics. Nothing had to be done about the saddle: the slot's isActive() already asks canUseSlot(SADDLE), which is false for a baby, so it excludes itself. The handler runs at EventPriority.LOWEST so the carrots, the name tag, the shears and the transfer paper all get first refusal on the click, and a cancelled event never reaches it.
+
+- Holding a horse still is a lease, not a flag. A boolean set when the information screen opens and cleared when it closes is correct right up until the client crashes with the screen up — and then that horse stands in a field forever with nothing in the world able to say why. So the client re-asserts once a second and the hold lapses three seconds after the last word. Anything that can freeze a mob has to be the kind of thing that thaws by itself. The freeze goes through the AI (a priority-0 goal claiming MOVE, JUMP and LOOK) rather than clamping the position, so nothing is fighting it and nothing has to be undone when it lifts.
+
+- The i button moved outside the window because there was nowhere inside it. The vanilla horse inventory is a fixed-size sprite with no spare pixels; a button in the top-left corner is a button on top of something. Off the left edge is the only place it covers nothing, which is the same “own exactly one pixel” rule that deleted the grey side panel.
+
+- Every button on both screens is now exactly as wide as what is written on it, and that follows directly from the draw-order fix above. Each had a hand-picked width, each was too big for its label, and while the panels were being painted over the widgets nobody could see it; the moment the widgets came to the front, the browser's “Only what can vary” toggle was sitting on top of the Punnett pane's first line. Sizing from the font means a relabelled or translated button cannot go back to overlapping, which a re-picked constant would.
+
+- Rows carry a real horse now. The My horses table and both breeding pickers draw each horse as a model in its actual coat, and that needed a decision about where the coat comes from: a coat is the genotype and the epigenome, and an epigenome code is around eight thousand characters, so putting one on every roster row would have multiplied that packet tenfold to draw sixteen-pixel horses that are mostly scrolled off screen. So the browser asks for the rows it is actually drawing, once each, and caches them for the session. A player who never scrolls pays for one screenful; a player who scrolls the whole stable pays what the roster would have cost anyway, and only because they looked. The stand-in that the family tree explicitly rejected - inventing a plausible epigenome from the UUID - was never on the table here for a stronger version of the same reason: these are horses you can walk up to, so a wrong coat is falsifiable in about ten seconds.
+
+- Two throwaway horses draw two hundred rows. HorsePortrait keeps one adult and one foal, because the render state is built per draw and the coat pushed into it - the entity is only a shape to hang that on. FamilyTreeScreen keeps one per record, which is right for seven boxes and would be two hundred entities here; the two are not yet one piece of code (gap 78).
+
+- The Offspring tab is the pedigree read downward, and it is the only tab in the mod that refuses to refresh itself. Owner's call, and the cost is the argument: the answer is a pass over the whole ancestry table per generation and a full record per descendant, so it happens on a button and the tab says whether what you are looking at was ever asked for. descendantsOf is grouped by generation rather than flat, because "who came from this horse" is a question about generations and flattening it only makes the caller rebuild it - and it stops at the first horse it has already seen, so a mare bred back to her own grandson is listed once at her first rung instead of looping.
+
+- Brindle was showing on every stallion, and the bug is one line of Mendelian bookkeeping. A stallion's X-linked pair reads n/Y - his one real allele plus the reserved slot he does not have - which is not homozygous for anything, so pair.homozygousFor(defaultAllele()) called him a carrier. Every filter in the mod that means "is this horse carrying nothing here" now asks Gene.atBaseline, which tests the real alleles. Worth writing down because the reserved-slot scheme is designed to keep sex linkage from leaking into the rest of the model, and this is the first place it leaked: anything that reads a pair's two slots directly is wrong on one gene in sixty-nine.
+
+- A gene's tab is now a question about the horse, not about the gene. KIT implements the eye-colour channel, so every horse alive got a KIT row under Other genes - when only its broad white outcomes ever claim an iris. GeneCategory.of(gene, pair, genotype, epigenome) calls the channel and looks at the answer. The refinement that makes it right rather than merely different: a gene that neither paints nor moves the body - the particle locus, diet, the cutie mark - stays on Other whatever its combination grants, because a silent carrier of one has no business on a tab about colour. So KIT is judged per combination and particle is not, and the difference is what the gene is rather than a list of keys.
+
+- The Barn column went, and the barn name did not. It was a column of dashes - almost no horse has one - and it was taking width from Coat and Name. The name is still on the footer line, still on the information screen, and barn: still filters on it.
+
+Built 2026-09-07, NOT yet looked at: a horse that is a wolf until dawn, a horse that kicks up rainbows, and a particle locus that stopped showing on one copy.
+
+Owner-driven, three requests. Design: LYCAN, rainbow dust, the particle locus going recessive. Checklist on LYCAN’s verification tab. Gaps 73–75.
+
+- The werewolf gene swaps the entity, and the requirement is what forced that. The roadmap scoped the WERE locus “render-layer first, entity-swap second”, and the owner's spec overruled it in one clause: a shifted horse must be interactable in all the ways its animal is and no others, “up to and including breeding with other members of that species”. A horse wearing a wolf skin cannot be bred with a wolf. It also cannot be tamed with a bone, sheared, bucketed, or fed a cookie, and every one of those would have to be hand-written and would still be wrong for the next mob on the list. So at dusk the Horse is discarded and a real animal takes its place. The “and no others” half then falls out for free: while it is a wolf there is no horse in the world, so none of this mod's own horse interactions can see it. The single thing left to enforce by hand is riding.
+
+- The horse rides out the night inside the animal, as a tag. LycanShift holds the horse's complete saveWithoutId output on the animal — which on NeoForge carries the data attachments, so the record, pedigree, bond, cooldowns and brand all cross the night, and so does the UUID. That last one is the load-bearing part: a shifted horse is the same horse, so the ancestry database and the stalls never notice. The alternative considered was keeping the horse alive off-map and teleporting it back, which needs a holding dimension, a reaper for orphans, and a rule for chunk unloads. A tag that travels with the animal needs none of them, and kills the horse when the animal dies, which is the right answer rather than a compromise.
+
+- Two copies of the same allele, or nothing. Thirty-seven shapes at one locus, every one recessive to the wild type and to each other, so Wlf/Cat is a horse and gets its own named outcome. That is what keeps a thirty-seven-allele locus from being a slot machine: if any one allele showed, a shifter would be common and which animal you got would be luck. Requiring the same allele twice makes it a search with a target, and makes two shifters caught in different biomes a disappointment rather than a breeding pair.
+
+- The allele set is a mechanical rule, which is why it contains a pufferfish. Every vanilla mob in a non-hostile spawn category, minus the horse family. That is why nobody had to defend the wandering trader and why the golems and the villager are out (they are MobCategory.MISC) — the alternative was a hand-picked list of “funny” mobs, which is a list somebody has to keep and argue about. The ids are strings, because common/ may not import Minecraft; an id this build has never heard of simply never shifts and says so once.
+
+- The grudge is one goal because a chicken has no attack. “If struck, they will aggro against anyone who hits them until either sunrise or they lose eyesight” — and MeleeAttackGoal calls doHurtTarget, which reads an ATTACK_DAMAGE attribute most of the thirty-seven do not have. Adding it through EntityAttributeModificationEvent would hand every sheep, cod and wandering trader in the world an attack stat it never had, for the sake of the one in ten thousand that is secretly a horse. LycanTemperGoal deals a flat three points by hand and touches nothing that is not already ours.
+
+- Rainbow dust is its own locus, and that is the whole decision in it. It looks like a forty-first particle allele and must not be one: that locus's premise is that its alleles compete for two chromosome slots, and this one competes with nothing — a horse should be able to trail flames and rainbow dust at once. Filing it there would have quietly cost a flame horse its flames.
+
+- A rainbow needed one new emitter parameter, not a new verb. cycle: ticks for one lap of the hue circle, 0 for every other emitter in the mod. Set it and the translator recomputes color and color2 off the clock and ignores what the gene put in them, with the second colour a twelfth of a turn ahead so the dust_color_transition fade reads as “red going orange”. It is a parameter rather than a verb because everything else about a rotating trail is the emitter it already was, and a verb whose only difference is where two ints come from would be a copy of this one. It is the first colour source in the vocabulary that is not fixed.
+
+- The particle locus is now recessive to its own wild type, and its founder table stopped being random mating. Both are owner calls and the second follows from the first. Once Rflm/n shows nothing, a carrier is invisible — and a founder population full of invisible carriers is a locus run in the dark, where you cannot see what a horse has and so cannot choose what to pair it with. So the table now lists only combinations that show: the forty homozygotes and the forty-six codominant pairs, no X/n and no cross-family Dst/Bflm. What you catch is what you watched it do, and the carriers appear one generation down where they belong. The aggregate is unchanged at about one wild horse in thirteen; what moved is that a wild double is now possible (one in twenty-five hundred) and a wild carrier is not.
+
+- The golden file moved on eighteen rows, and none of them is a coat. Two new genes with epigenetic schemas shifted the seeded epigenome stream, so every gene that sorts after them and reads epigenetics draws differently — which in the golden set is exactly the magic-sectoral-heterochromia rows. Nothing about how any gene paints changed. Worth writing down because “the golden file moved” and “a coat moved” are not the same event, and the first one will happen again the next time a gene is inserted mid-order.
+
+Built 2026-09-07, NOT yet looked at: an information screen behind an “i”, a breeding preview, and a mare that miscarries.
+
+Owner-driven, five requests in one session. Design: breeding § client sync, § the miscarriage, § every draw written down. Checklist on breeding’s verification tab.
+
+- The horse inventory screen now owns exactly one pixel of ours. An i button in its top-left corner, and nothing else. The grey 128-pixel side panel behind a collapsible tab is deleted, and so is GeneInspectScreen; everything both of them said moved into HorseInfoScreen, a six-tab full-window overlay in the browser's dark chrome. The panel had been growing a row per session — it gained the four body numbers, then a condition list, then a bond line — and it was a column trying to hold a page. Deleting rather than hiding is the risk worth naming: if the new screen fails to open there is no longer any way to read a horse's record in game (gap 71).
+
+- The bug the owner reported was one line, and it explains a year of blank panels. “Shift right click a horse, you can still view the family tree menu and genes” — it did not work, and the cause is that vanilla's AbstractHorse.mobInteract opens the inventory screen without mounting, while HorseScreenHooks read its horse off player.getVehicle(). Riding worked; shift-clicking silently produced a panel with nothing in it. The screen knows which horse it is showing — AbstractMountInventoryScreen.mount, protected, now opened by the access transformer. runServer boots clean with an AT on a @OnlyIn(Dist.CLIENT) class, which was the thing worth checking (api-notes).
+
+- Which tab a gene lands on is derived, not listed. GeneCategory asks what interfaces the gene implements: an ability, diet, eye-colour or cutie-mark channel wins and puts it under Other genes; otherwise a trait contribution puts it under Health; otherwise it paints and goes under Coat. That is the owner's rule about dhampir generalised — “even though dhampir can affect coat, since it affects MORE than JUST coat, it goes on this tab” — and it means a drop-in gene from the gene creator sorts itself with nobody editing a table.
+
+- The Health tab shows each gene's own arithmetic, and that needed a new class rather than a new formula. HorseTraits.resolve walks every gene into one shared TraitBuilder and returns a total; TraitBreakdown walks them into separate builders and returns the terms. Nothing re-implements a gene and nothing re-derives the sum — adding the terms back up would be a second copy of build() and would drift from it the first time a clamp moved. HMGA2 turned out to be the shape that matters: it moves size, speed, jump and health, so it is listed under all four headings, which a test tried to forbid before the test was wrong rather than the code.
+
+- The breeding preview is a Punnett square per locus and deliberately nothing more. The owner's framing was the design: “it doesn't show a baby preview, and it doesn't show all genotypes, because those are more powerful than this needs”. So BreedingPreview answers one question — can this pair throw that allele, and how often — and the odds come out of the same coin Genotype.breedWith flips. The test that matters breeds ten thousand foals and counts, rather than re-deriving the arithmetic, because re-deriving it would only prove the class agrees with itself.
+
+- “Group polygenetic genes together” had to be answered without a polygenic system. Philosophy is explicit that every real QTL cluster is modelled as one atomic gene, so there is no grouping to read off. But there are two places several genes genuinely pull on one trait, and both are already declared: the body axes fall out of TraitBreakdown (every gene that moves speed lands under Speed), and on the coat side Gene.coatDependsOn() nests a silent modifier under the gene that reads it, so the leopard complex arrives as one block. Neither is a hand-kept list, which is the only reason it will still be right in six months.
+
+- A miscarriage describes what it looked like and refuses to name the gene. An embryonic lethal used to be a silent non-event; it is now half a heart off the mare, a line to everyone within 32 blocks, and a sentence from MiscarriageSigns. The withholding is the feature: a pairing that comes to nothing is the only evidence a player ever gets that two of their horses share a recessive lethal, and naming it would retire the pedigree that exists to find it. Two lethals, two visibly different descriptions, and a dozen pairings sorts a herd into two groups without anyone being told the groups' names. The log names it, because a dev reading a log is debugging rather than playing.
+
+- Every draw is now written down, which nothing about breeding has ever been. BreedingReport emits one line per gene — both parents' pairs, the foal's, whether the combination is new, what it expresses, and which parent supplied which copy where that can be said at all. It refuses to guess when both parents could have supplied an allele, because the draw records nothing about that. The log gets all of it always; chat gets the notable loci and only in a dev build. The reason this is worth a class: one foal is a single sample of a distribution, and “every foal came out chestnut” and “five foals happened to” are the same picture from the paddock.
+
+- The spawn-egg report could not be reproduced, and three candidate causes were removed anyway. A third party said only that the “custom egg spawner also does not seem to be working”. There is no environment gate anywhere in that path — no isProduction(), item registered, model present, payload registered unconditionally — so what was fixed is what could plausibly produce that sentence: the egg handled two of the four right-click events, so aiming at a horse fell through to vanilla and mounted it; the Spawn button failed silently in survival and now says creative only on its face; and two server-side refusals were silent returns and now write chat and log. None of that is a diagnosis and gap 70 says so — the likeliest explanation is still that the tester was in survival.
+
+Built 2026-09-07, NOT yet looked at: the rest of the reference’s disorders, and the first dominant ones.
+
+Closes the roadmap’s §12 gene table. Design: the two shapes a disorder comes in; a page each under Health genes. Checklist on the horse-body verification tab.
+
+- Nine loci, seven of which were nearly free. HERDA, SCID, lavender foal, cerebellar abiotrophy, CVM, GBED and megaesophagus are all simple recessives, so they are RecessiveDisorderGene subclasses of about forty lines each — a name, a carrier rate, a Condition and four numbers. That base class existing is the whole reason the batch was one session rather than several, which is what the roadmap predicted when it said to batch them.
+
+- The two dominants are a new shape, and they broke an invariant on purpose. Every disorder before these was recessive, and the layer leaned on two facts: a heterozygote is invisible, and no founder is ever affected. A dominant has neither. The second is the interesting break — if founders could never be affected, a dominant allele could never enter the world and the locus would be dead code, so a wild-caught horse can now be born visibly unwell. The homozygote is still excluded, which keeps the worst outcome something somebody bred. The old test asserting "no founder is affected" is now two narrower tests, and the narrower ones are the true ones: no founder is born with a recessive disorder, and no founder is ever born dying.
+
+- HYPP is the first locus that is two things at once. A survivable heart reducer on one copy and a lethal on two, which nothing in the mod had been, and the reason DominantDisorderGene is a second base class rather than a flag on the first. It is also the only locus where the breeding mistake is one you make with your eyes open: an affected horse is visibly unwell and can still be excellent on every other axis, so it is genuinely tempting, and two of them throw a dead foal one time in four.
+
+- The reference’s percentages turned out to be unusable as arithmetic. Each disorder carries a health / speed / jump percentage, and the obvious implementation is to multiply. Read literally against a 22-health baseline, HYPP’s "30% health" makes an affected but living horse worse than several of the mod’s outright lethals — which is plainly not what the table means. So every new locus is calibrated against the disorders that already ship and the reference is used for the ordering only. Recorded on decisions.html#decisions, because whatever the severity model turns out to be, it does not get to inherit those numbers either.
+
+- Two of the nine have no gene behind them, and say so. CVM and megaesophagus are well-attested heritable breed conditions with no agreed causal variant. Every other natural gene in the mod names a real locus with a real published mutation, so rather than invent a respectable-looking symbol they are keyed on the condition itself and both pages state plainly that one recessive locus is the mod’s simplification. The alternative was to leave them out; they earn their place because the simplification is honest at the level the mod models anything.
+
+- The golden coat file moved and not one coat changed. All 1026 lines differed, which was alarming for as long as it took to compare the hash column instead of the whole line: every hash was identical and only the genotype-code label had grown nine =N/N segments. That is the confirmation the health loci really are free — affectsCoat() false, out of the texture key, one catalogue entry each — and it is worth writing down that the golden file's line format makes a no-op look like a total rewrite.
+
+- One real interaction fell out. BreedFounderTest went red: a Thoroughbred founder can now be born with PSSM1 and be genuinely slower for it, which dropped one seed in sixty under the "near double speed" threshold. The test asks a well horse now. Worth noting because it is the first time a health gene has reached the breed layer at all, and it will happen again to anything that asserts a breed’s numbers.
+
+- Left global rather than per breed — the reference associates each disorder with particular breeds and the mod ignores that, consistent with the seven that shipped first. known-gaps.html#gap-68 has the reason and what it would cost.
+
+Built 2026-09-07, NOT yet looked at: epigenetics become literal numbers, foals drift, and a breed stops chasing its own horses.
+
+Owner-driven, and the largest single change to the genetics model so far. Design: the genetics model, breeding § drift, breeds § founder-only. Checklist §0-AE.
+
+- A seed is not a number a player can tinker with, and that was the whole complaint. An allele copy carried one opaque long, and every gene recovered its numbers by replaying a PRNG off it in a documented draw order. “How much jump does this copy add” could only be answered by running the gene. A copy now carries named literal values declared by the gene in Gene.epiSchema() — delta:0.34215, cover:0.4113 — stored as text, read by name. The cost is size and it is not small: an epigenome code went from roughly 4500 characters to about 8300, even after dropping the ~25 genes that turn out to store nothing at all. The owner accepted that explicitly in exchange for a genotype you can read and edit.
+
+- The draw-order hazard is gone as a side effect, and it was the sharpest edge in the codebase. The position of a draw was the meaning of each number, so inserting one while tuning a gene silently rewrote every horse in every save — which is why the particle locus drew five values on every copy whether it used them or not, and why every varying gene carried a paragraph of draw-order contract. Values are keyed by name now: adding or re-ordering is free, and only renaming orphans a value. About twenty of those contract paragraphs were deleted rather than rewritten.
+
+- Three kinds of value, because drift cannot treat them alike. A SCALAR is a magnitude and drift nudges it continuously. A SEED is the long behind a noise field — there is no “slightly different” splash, so nudging it would replace the pattern rather than adjust it. A CATEGORY is a pick from a list the gene owns, and a boundary nudge would silently move a horse's particles from its mane to its tail. Both of the latter are instead replaced whole, at about one breeding in a thousand. Colours became three channels rather than one packed int so a line's colour can drift — but a founder's still rolls through HSV at a held-up saturation, because a magical mane that rolled a muddy olive reads as a bug. That is the one place a value's roll depends on its neighbours.
+
+- Founder distributions had to be declared, or every gene's character would have shifted. The obvious simplification was “a value is a name and a range, roll it uniformly”. That would have quietly changed the wild population on every gene that was deliberately skewed — ednrb's cover is a power curve so most splash horses carry a little white, the magical stat deltas are Gaussian so one copy is usually subtle. The distribution rides on the EpiValue and only EpiRoll ever consults it.
+
+- Drift: every value moves at every breeding, and almost none of it is visible. The magnitude is a two-sided exponential at EpiDrift.SCALE of the value's design span — half of all drifts under 0.10% of the range, 99% under 0.70%, one in a million past 2.1%. A horse carries a few hundred of these, so roughly one foal in thirty has one value that visibly moved. That shape was chosen over a “rare but large” gate on the owner's call: most pairs breed true, and chaos stays reachable. Drift may leave the range founders are rolled in — only a hard safety clamp holds it — because the design range is where wild horses start, not a ceiling a breeder can never pass.
+
+- The breed bug was worse than reported. The complaint was that breeds normalise a cross. They did, and they did it at resolve time: BreedLineage.statTargets() handed a cross the per-axis average of its two parents' bands, and HorseTraits.resolve applied it on every single lookup. A Percheron bred to a Falabella had its foal's size recomputed into a mid-size band every time anything looked at it, regardless of which alleles the foal actually inherited, with no way for a breeder to select out of it. BreedFounder now writes the band onto a founder's two copies as ordinary numbers — unevenly, so the two gametes are worth different things — and breedBand, BreedStatTargets.average, BreedLineage.statTargets() and the four-argument resolve are all deleted. A breed label is now cosmetic.
+
+- A live bug fell out of measuring the new format. SpawnCustomHorsePayload capped the epigenome at stringUtf8(4096), and the old code was already about 4500 characters across 58 registered genes. NeoForge throws rather than truncating, so custom-horse spawning had presumably been broken for some time and nothing said so. The cap is 65536, and EpigenomeSizeTest now fails from the common/ side while there is still headroom — the margin is the point, since registering a wide gene is a normal thing to do.
+
+- Values are quantised on creation, and that is a correctness requirement. Every stored number is rounded to what the text format can write the moment it exists. Without it a value would lose a digit on the way to disk, a horse would repaint subtly after a reload, and the two versions would fork the texture cache without ever looking different enough for anyone to work out why. It also makes parse(toCode()) an identity, which is how three round-trip tests found it.
+
+- Data-driven genes needed almost nothing. GeneSpec.Knob was already this design — a named number with a range — so SpecValues.schema is a ten-line translation into an EpiSchema. The one real change is that a perLeg knob draws four independent stored values across a range widened by its spread, instead of one base plus four correlated jitters; each leg is a number a player can edit. The creator's JS port needed the same change plus the quantisation, or parity failed in the sixth decimal.
+
+- The readout is the only window onto any of this. GeneInspectScreen — the existing “View Genes” popup — grew a per-copy value list under each gene, with the expressed copy marked and an Active/All filter. Extending it beat adding a screen: it was already the per-gene readout. There is deliberately no in-game editing yet; that was staged behind getting the storage right.
+
+- Deleted rather than kept: AlleleRandomness (renamed GeneEpigenetics — nothing about it was random, and the name said otherwise), MidpointRng's role in epigenetics (a schema declares its own midpoint, which is right even when the distribution is skewed), and FamilyTreeScreen's invented-ancestor fallback, which drew a plausible stranger for any record without a stored genome. A blank portrait is the honest answer.
+
+- Regenerated: the golden coat file wholesale (every horse moved, deliberately), the spec fixtures, and the designer wasm. Parity is green at 3869 checks; :common:test is green at 574.
+
+Built 2026-09-07, NOT yet looked at: the walk moves to road level and out in front of the steps, and the cowboy learns to open a door.
+
+Owner-driven, from what he could see in game: the path was in the wrong place, the beds faced the wrong way, and the man could not get into his own barn. Design: Villagers § the barn and § he can work a door. Checklist on the villagers verification tab.
+
+- Layer 0 of a building is not the ground, and that is the whole bug. It is the course that rests on the ground — the street's road block is the layer below it, outside the piece — so the lane laid in layer 0 was a block-high curb you walked over rather than a walk you walked on. A structure cannot have a negative layer, so the piece gained a ground course: everything lifts by one and the jigsaw lifts with it, which means nothing about where the homestead lands changes and the new bottom layer falls in the road's own course. Verified by diffing the old and new bakes with the jigsaw as origin — measured from it, not one block of either building moved.
+
+- The walk got a column of its own, and the first answer to "move it forwards" was wrong. It was refused on the grounds that x=0 was the piece's west edge and one column further west is the street's own connector block, which is true — a box reaching over that overlaps the street piece and the placer throws it out, so the homestead would never generate. What that missed is that the barn did not have to own the west edge. Both buildings moved one east, the walk took the vacated column, and the jigsaw stayed put resolving to air above it. The walk now runs the full length of the front, at the foot of the barn's steps and in front of the doorstep and both work posts. The lane between the buildings is gone: that gap is a yard, not a corridor.
+
+- A path under a step is not a path. DirtPathBlock.canSurvive is false with a solid block overhead and schedules a tick that turns it to dirt, and structure placement runs the neighbour-shape update that fires it. The first attempt ran the walk under the barn's stair skirt and the two posts, which would have laid ten blocks of dirt into the world while the NBT still said dirt_path. Caught by auditing the bake rather than by playing it, which is the only way it could have been caught — nothing warns you and the file looks right.
+
+- The cowboy could not open a door, and needed two unrelated things to. He is an AbstractVillager running goals rather than a villager brain, so he had neither a goal to swing one nor a navigator that would route through one. CowboyDoorGoal is both halves: it opens both leaves of a double door — one leaf is a one-block gap and the pathfinder rounds a mob up to floor(width + 1) across, so a single leaf is no use to a horse — and only in daylight, with PathNavigation.setCanOpenDoors rising and falling alongside it. Vanilla's OpenDoorGoal was not usable: with closeDoorAfter=false its canContinueToUse is false immediately and its unconditional stop() shuts the door it just opened. He closes nothing, deliberately — the herd is following him through.
+
+- The partner-leaf rule, because getting it backwards fails silently. A double door's other half is the neighbour along the wall with the same FACING and the opposite HINGE, and both perpendicular sides have to be tried: the hinge says which way a leaf swings, not which side its partner is on. Checked offline against the baked barn — all four openings resolve to two leaves, symmetrically both ways, and the house's single door correctly resolves to none.
+
+- Beds turned round so the heads are at the back wall and the feet toward the door. Four blocks.
+
+- Two stale claims fixed while passing. BarnPoolInjector's frequency note still quoted the old footprint, and CowboyHandler still described home as “the place he rides back to at dusk and the box the door code works on” — both the dusk ride and that door code were deleted with the mounted cowboy, and the sentence had become actively misleading now that there is door code again.
+
+- Nothing here has been seen in a game. The piece is a column wider than the one that has never been confirmed to generate either, which is gap 62; the door behaviour is gap 63.
+
+    An unattended session
+
+        The owner queued a run of gene references and left: “don’t ask
+        questions or interrupt this session … use your best judgement, and try to
+        adhere to existing systems as much as possible. Put questions in the verification
+        file.” Every entry below therefore has a Questions for the
+        owner block in its verification section,
+        and every one of them is a real open call rather than a summary.
+
+        The standing rule for the whole run: each process/*info.md reference
+        was absorbed into that gene’s wiki page and the file deleted, and anything a
+        reference proposed that would have needed a new system was
+        declined and written down as declined. process/ is now empty and gone.
+        Nothing here has been seen in a game.
+
+Built 2026-09-07, partly looked at: the cowboy gets off the horse, and the barn grows a house.
+
+A playtest round rather than a build round — the owner played the villagers and reported what he saw, repeatedly, and most of what follows is deletion. Design: Villagers & transfer papers. Checklist on the villagers verification tab.
+
+- The mounted cowboy is gone, and that is the headline. Roughly a thousand lines — CowboyMountGoal, CowboyRemountGoal, CowboyRoutine, CowboyDoors, HerdCollision — deleted at the owner's call after eight rounds of fixes, each of which exposed the next. He is an ordinary AbstractVillager on foot now; the horses treat him as their herd lead and trail him. The two lessons worth keeping are written up as gap 55 (vanilla navigation will not put a large animal through a two-block door) and gap 59 (a goal that stops for no reason its own predicates explain has had a control flag disabled underneath it).
+
+- He survives by not being a target rather than by going indoors. Ten times a villager's health, plus CowboySafetyHandler, which cancels LivingChangeTargetEvent whenever anything implementing Enemy tries to take him. That covers retaliation as well as acquisition, since both go through Mob.setTarget. An AbstractVillager has no schedule at all, so shelter was never available to him; this is what replaces it.
+
+- One job block became two. A single post was meant to hand out a cowboy and then a horseman by alternating, which failed for a reason worth writing down: Villager.releaseAllPois is private and death-only, so a villager discarded to become a cowboy holds his job-site ticket for ever and no second villager can ever claim the post. Demoting and calling the public releasePoi fixed it, and the owner's call was that two blocks were less work than that trick either way. Cowboy Hitch and Horseman's Table are now the same block twice with different names; the hitch is deliberately not a POI, which is what makes discarding a villager at it safe.
+
+- Both handlers ask the same question about names. HorsemanHandler.familySurname looks round the village for a cowboy or horseman who already has a surname and takes his, coining a new one only if there is nobody. Order-independent on purpose: which post gets claimed first is down to where the villagers happen to be standing, so neither role can be the one that owns the name.
+
+- The horseman's house is baked into the barn's structure piece. It was built at runtime and never once appeared — and the reason it could not have worked is gap 61: the work posts stand on the house, the work posts are what make a cowboy, and a cowboy cannot build the thing that made him. bake-barn.py now takes two sources and writes one piece: the barn, plus a reshaped plains_small_house_1 beside it with a dirt_path lane between them, a four-wide interior, two beds pushed together, a chest either side of them on a new loot table, and both work posts on the front step with a villager on each. The piece went 15×7  15×15, so its pool weight went 1  3 to keep the same hit rate against the generator's bounding-box check — which is arithmetic, not measurement, and is gap 62.
+
+- A speed floor, set by vanilla's own slowest horse. The owner asked for a minimum "just barely fast enough to outrun a zombie", which does not translate: a zombie's MOVEMENT_SPEED of 0.23 is on the walking-mob scale, not the ridden-horse scale, and is above the average horse. HorseSpeedFloor uses AbstractHorse.generateSpeed(() -> 0.0) instead — the slowest horse vanilla itself will ever produce — and clamps only in HorseRecords.applyTraitsToEntity, so the genetic numbers on the info panel are untouched.
+
+- Confirmed in game by the owner: the face (the base skin was villager/type/plains.png, an overlay with a hole where the head goes, not a skin), the barn sitting on the ground with steps up to it, horse prices at 1–3 emeralds, both posts handing out their jobs, the shared surname, the horseman keeping vanilla's brain, and transfer papers end to end. Also confirmed: run/logs/latest.log and debug.log under neoforge-26.1.2/run/ are readable from here, which settled several disputes in this round outright — including proving a dismount really did fire when the owner could see it had not.
+
+Built 2026-09-07, NOT yet looked at: the test world lands you in a plains village, and the cowboy says hello.
+
+Tooling for the entry below, written straight after it, because testing the two villagers started with a hike and that was most of the cost of testing them at all.
+
+- “Spawn Test Horse World” now teleports into the nearest plains village on login and moves the world spawn there, so dying does not undo it. Plains only, because no other village kind grows a cowboy and a savanna hit would be a wasted trip; the middle rather than the edge, even though the barn is on the outskirts, because from the bell you can see which way the streets run and can walk out along each of them - from a random point on the perimeter you cannot tell which side of the village you are on. The bell is also what the cowboy’s own routine navigates by, so it is the origin of his map.
+
+- It is a synchronous 100-chunk structure search, which is a thing to do exactly here and nowhere else: the handler fires once, in a throwaway dev world, on the one login that created it. A miss is reported in chat rather than silently leaving the player at spawn.
+
+- A cowboy now announces himself in chat when he founds (dev builds only, FMLEnvironment-gated). He founds the moment his chunk starts ticking, which is usually before the player is near enough to see the barn - so “did one generate in this village?” used to be a question answered by reading a server log while it scrolled past. The absence of a yellow line is now the answer, and a present one carries his coordinates.
+
+- The barn bake is byte-reproducible now (gzip.compress(..., mtime=0)). It was not: gzip stamps the current time into its header, so every run of bake-barn.py rewrote cowboy_barn.nbt with identical content and different bytes. That is gap #45’s defect in a second place, and it mattered more here, because git status is the barn’s only staleness signal - nothing else compares the checked-in structure to the source save it came from. Found by running the end-of-session re-bake and watching a file change that should not have.
+
+Built 2026-09-07, NOT yet looked at: the cowboy rides out — two villagers, and papers that sell a horse.
+
+The roadmap’s §19 villager, a second character the owner asked for alongside it, and the item that connects them. Design: Villagers & transfer papers. Checklist on the villagers verification tab.
+
+- The cowboy is not a villager profession, and that was the first real decision. A profession is acquired from a job site by a villager whose brain runs vanilla’s daily schedule - and that schedule would dismount him every morning to go and stand at a workstation. Always mounted, home is a barn rather than a bed, stock is a live herd rather than a trade table: every one of those is a fight with that brain. He is his own AbstractVillager instead, which keeps the merchant screen, the villager silhouette and the trading goals and throws away the schedule. The horseman is a real profession for the mirror-image reason - a shopkeeper who walks to a workstation and restocks is precisely what that brain is for. One ask, two characters, because one piece of machinery does not fit both.
+
+- The horse does the walking. A rider that is not a player cannot steer a horse - vanilla only hands control to a saddled mount’s player passenger - so a mounted mob is dead weight while the animal keeps running its own stroll goal. Fighting that from the rider’s side means reimplementing steering; the cheaper answer is to put the itinerary on the mount, as a priority-0 goal holding Flag.MOVE, which starves every other movement goal the horse has. It holds MOVE and deliberately not JUMP: JUMP is the horse’s own FloatGoal, i.e. the thing that stops it drowning with a man on its back.
+
+- The barn goes in at the terminator pool, which is where a village runs out of road. The ask was “on the outskirts”, and the jigsaw system has no way to say that. What it does have is village/plains/terminators - the pool both streets and houses name as their fallback, so a terminator is by construction the last piece on a road that had nowhere left to go. That is the outskirts, expressed in the only vocabulary the generator speaks. The barn’s own connector is a street jigsaw at y=1, matching the relationship the vanilla terminators have to a road.
+
+- The append is code, and needed this repo’s first access transformer. A datapack can only replace terminators.json, which would freeze today’s four vanilla terminators into this mod and silently delete any other mod’s additions to the same pool - a compatibility cost paid forever for a one-line convenience. NeoForge has no template-pool modifier, so BarnPoolInjector edits the live pool on ServerAboutToStartEvent and three AT lines make the element lists reachable. ModDevGradle auto-detects META-INF/accesstransformer.cfg, so there was no build change. The append is idempotent, because a single-player session that quits to title and reloads reuses the same frozen pool objects and a blind append would stack a copy every load.
+
+- He rides in with the building. The cowboy is in the structure template’s entities list, which is how vanilla puts villagers in village/plains/villagers/*.nbt - so there is no structure-placement event to hook and no “did a barn generate?” scan to run. A template can only place an entity, not roll one, so he arrives bare and CowboyHandler builds him on his first server tick. That founding is on EntityTickEvent.Post and not the join event, for the reason HorseFoundingTickHandler already documents at length: founding spawns horses, and a horse spawn ends in an Attributes.SCALE write that can force-load a chunk from inside the chunk system’s own update pass.
+
+- A horse is sold as a paper, and the paper is the point. The owner’s framing mid-session settled the shape: buying a signed transfer paper moves nothing, and you walk out to the horse it names to redeem it. That is what makes it worth trading - a claim the bearer has not collected yet is an object, where “pay and receive a horse” is one click that leaves nothing behind. The blank is bound to whoever crafted it and only signs a horse they currently own; the signed one is a bearer instrument anybody can redeem. bredBy is untouched by every path, so a horse still names its breeder after four owners.
+
+- His stock had to stop being free. Vanilla lets a player tame any untamed horse by climbing on it until it stops bucking, so a herd of untamed horses standing in a barn is a free stable rather than a shop. A CowboyBrand attachment refuses every interaction except a paper - and it is the mod’s first synced attachment, because that particular interaction is client-predicted and a server-only refusal makes the player mount and then snap off.
+
+- The night has one rule, covering two failures. The owner’s spec had two cases - he never got into the barn, or the barn was breached - and they collapse into one test: is he inside the barn with nothing hostile inside it with him? If not, and something is near, he runs until dawn and comes home whatever the distance. Writing it as one predicate rather than two branches is why the flee behaviour also covers cases nobody enumerated.
+
+- Doors are opened by area, and only his own. A door opened one leaf at a time leaves a one-block gap and a horse will not fit through one, so every door operation works on a box - which gets both leaves of a double door, and all four of the barn’s, without any “find the paired leaf” logic. The first version opened whatever was in front of the horse, which does solve the stated problem and also leaves a trail of open front doors through a village he rides past every day. Cut back to his own barn, plus a standing daylight guarantee that he can never be sealed in.
+
+- The horseman cost almost no code, because 26.1.2 gave the hard part away. Villager trades are datapack registries now, and a trade’s given_item_modifiers are loot functions that run when the offer is generated. That is exactly the “roll per restock, not per purchase” semantics §19 spent a paragraph arguing for. So the five tiers are JSON and the only Java is one loot function, set_random_gene, whose pool is computed from GeneRarity - a third-party gene joins automatically, and “legendary and mythic are never sold” is a comparison rather than a blacklist that can go stale.
+
+- Deliberately not built: random genotype vials and buying player-made ones back (both need §17’s collectedFrom; tier 5 buys a stallion seed jar instead), the custom HORSE_TRADER gossip type (vanilla gossip works, and it was flagged unverified), and any restocking for the cowboy - his herd is a fixed cast, so a horse he has written a paper for leaves the list for good whether or not that paper is ever redeemed.
+
+- Placeholder art, all of it flagged. Both papers reuse the research-paper texture; the Horse Trader’s Post wears vanilla’s barrel; the cowboy and the horseman share one overlay (the owner’s recolour of the farmer hat) over a plains-villager body - shared as a render layer rather than a flattened composite, so there is one file to repaint and no derived copy to go stale.
+
+- Five new gaps (#54-#58), all of them about things only a world can answer: whether terminators really read as the village edge, whether a herd can funnel through a two-block doorway, the two-barns case, brand lifetime across chunk boundaries, and gene-trade pricing that is a plausible ladder rather than a measured one.
+
+Built 2026-09-07, NOT yet looked at: KIT gains the booster group, and it is the common part of the locus.
+
+Four new alleles at KIT, taking it from eight to twelve. Checklist on KIT’s verification tab.
+
+- W35, W32 and W34 are the same kind of allele as W20 - mild, viable homozygous, ranging from no visible white through frank sabino-like spotting, additive beside anything else at the locus. The mod modelled W20 as a one-off special case and filed the rest of the W series as rare founder curiosities. In the one large commercial dataset that measured them, W35 is commoner than W20 (0.168 against 0.34 in Thoroughbreds but far lower elsewhere), with W32 at 0.061 behind it. Between the four they are most of what this locus does to a population, and the mod had one of them.
+
+- So the cascade has a booster group rather than four pair.has(W20) branches. One booster copy is minimal-white, two - the same one twice or two different ones - is modest-white, and any booster lifts a stronger allele one step. The three new alleles therefore cost the table nothing.
+
+- W15 is the one strong allele with a homozygote actually on record, and it is all white. It matters that the locus can distinguish “no homozygote has been found” from “a homozygote has been found”; every other strong allele here is on the first side of that. W23 moved the other way: it was the locus's “viability unknown, therefore allowed” example at broad-white, but its source row reads all-white or near-all-white with a suspected lethal homozygote. It is a strong allele now and cannot double.
+
+- Founder frequencies are the reference's ordering at roughly half its magnitude, because its dataset is horses whose owners paid for a colour test - a population selected for having something to find. Breed tables carry the rest, and the Thoroughbred gets the 34% W20 the survey actually measured plus traces of W5 and W22, being the breed most of the rare series was first described in.
+
+- Declined: haplotype phase (several KIT changes can sit on one chromosome, and a 2024 dataset found six across one horse's two copies - but an allele pair is the model and linkage is a system); W34’s possibly stronger effect on chestnut, which would cost it an outcome of its own for a “may be”; and the remaining twenty-odd named alleles, which stay on the roadmap where the owner already wants the full set eventually.
+
+- WhitePatternGenesTest’s count assertion now reads KitGene.nonviableHomozygotes() instead of quoting four. A test that quotes a derived number goes red for the wrong reason the next time the locus grows - the same lesson W4 taught this morning.
+
+Built 2026-09-07, NOT yet looked at: the two splash loci swap roles - the common allele was on the wrong gene.
+
+MITF and PAX3. Checklist on MITF’s verification tab.
+
+- The two genes were right and the two alleles were the wrong way round. PAX3 carried the mod's near-ubiquitous minimal splash allele - 90% of founders were SW2/N - on the reasoning that a mild splash allele is what gives an ordinary horse its socks and its blaze. The reasoning was right and the allele was wrong. SW1 on MITF is the widespread one: a several-hundred-year-old promoter change predating most modern breeds, found across a dozen of them. SW2 is a PAX3 coding change found chiefly in Quarter Horses and American Paints. So the common-allele job moved next door and PAX3 became rare and breed-clustered.
+
+- SW1/N is painted over a range, and it is the only outcome in the white loci that is. That is the reference's central claim about the allele: one copy can be a snip and one white foot, or a full blue-eyed splash, on the same genotype - the paper that identified it says a minimally expressed splash cannot be told from common white markings by eye. Painting it at a fixed strength would make the widespread splash allele the one thing it is documented not to be, which is predictable. WhitePattern.splash gained a two-strength overload; the horse's roll picks a point in the range and then sets the waterline, so it costs no extra draws.
+
+- Being honest about the cost: SW1 is now doing two jobs. Ordinary markings in life are polygenic, and the same study found no splash allele at all in 112 horses picked for minimal white. The mod has no markings system, so the one allele that genuinely does hide in plain sight is standing in for one. The honest fix is a small markings contribution running before the white loci - roadmap §10.2b, and a new system, which is why it is there and not in the gene. (Shipped 2026-09-17 as the markings gene, at priority 65; that roadmap section is deleted.)
+
+- PAX3’s javadoc and wiki page both still said deafness was not modelled. It has been for some time - the shared informational splash-deafness condition comes from both loci. Corrected; no behaviour change. A mangled paragraph in genetics-model.html about founder tables was repaired while it was being updated.
+
+Built 2026-09-07, NOT yet looked at: grey becomes a copy number, and gets four rates instead of one.
+
+Grey - three alleles, and the mod's first coat gene that is also a health gene. Checklist on grey’s verification tab.
+
+- Grey is not a point mutation. It is a copy-number variation in and around intron 6 of STX17, and what varies is how many copies a horse carries: G3 a triplication, G2 a duplication, N normal. Either makes a horse grey, so grey stays dominant - but dosage (G3 counts two, G2 one) runs 0 to 4, and that is the greying rate.
+
+- A rate needs a clock and there isn't one, so the dosage picks a window. Aging stays out; instead each dosage class is drawn at the stage that rate would plausibly have reached on an ordinary adult, and the horse's own epigenetics pick where inside its window it sits - fixed for life. The windows overlap on purpose, because individual variation inside a real genotype class is large and what is reliably true is only the ordering of the means.
+
+- An inverted region rule, found and fixed. The head used to take a point-retention boost - it held colour on the one region a greying horse loses it from first. White hairs round the eyes are the usual first sign. The head now takes a lead, the opposite sign, strongest at the forehead.
+
+- The mane and tail grey from the root. Greying changes hairs as they are produced, so new hair at the root is whiter than old hair at the tip - and long hair is the only place that has room to show. They also carry an independent stage that can run ahead of or behind the body. Plus chubari spots (18%, light greys only) and a bloody shoulder (7%), which are the bounded variation the reference asks for and are visual only.
+
+- Melanoma is reported and never simulated. The same STX17 change drives melanocyte proliferation, so grey emits one Condition.informational, tiered by copy number and raised a step on a black-based coat, and nothing else: no lesions, no stat docked, no death. Melanoma in life is a lifetime probability that mostly resolves as benign nodules on an old horse, and there is no age here to hang one on. The mod says what the DNA test says and stops. Whiteness is never a diagnosis - the tier reads the genotype, not how pale the horse came out.
+
+- Declined: the reference's five-stage health pipeline, whose last two stages (age-related lesion onset, then lesion burden and severity with health effects) need an age clock and a disease-progression system that do not exist.
+
+Built 2026-09-07, NOT yet looked at: dun's mane and tail get the midtstol.
+
+Dun - a dark band down the centre of the long hair with pale guard hair either side. Checklist §0-Y.
+
+- A dun's primitive markings are one continuous system - forelock, crest, spine, tail dock - and the mane and tail were the one stretch of it drawn as a flat point. The marking is not breed-specific: every true dun has it, and the Fjord is only famous for it because the breed clips the mane upright so the cross-section is unmissable.
+
+- The value is set by the mesh, not by taste. The band reuses HairPattern.centreStripe, so it lands on the part's own axes; MIDSTOL_HALF_WIDTH is 0.25 because a mane is four texels across and that puts the feather exactly between the two texel rows. At 0.20 it caught the dark rows and left the centre 3% off black.
+
+- A bay dun had no mane stripe at all, and the cause was an early exit. alreadyAPoint(red, black) returns 1 for a bay's absolute-black mane, so the painter bailed before drawing anything - a grullo got a perfect stripe and a bay dun was byte-identical to a plain bay. On the long hair the mask now caps the point term instead of losing to it. Everywhere else the maximum is still right: a leg is a point because it is already black, not because a mask said so.
+
+- The guard hair is an overshoot scaled by how far each channel is being diluted at all, which is what keeps it a dun feature - a non-dun d1 horse dilutes nothing, so its guard factor is exactly 1 and its painter stays the byte-for-byte no-op the test pins.
+
+- Declined: the reference's fictional F “Fjord mane pattern” allele plus three hidden quantitative modifier loci gating the effect. A new system for a marking every dun already has, and it would have let a genuine dun show no mane stripe - which the same document says is not how dun works.
+
+Built 2026-09-07, NOT yet looked at: sunshine and snowdrop, two more dilution alleles at MATP.
+
+MATP gains sun and sno. Checklist on MATP’s verification tab.
+
+- Both found in 2019, both recessive, both at the same locus as cream and pearl - which is the consequential part, because it means they compete for a horse's two slots and can compound with cream.
+
+- sun/sun reads closer to champagne than to a double cream, so its numbers sit near champagne's rather than at a point between pearl and the double dilute. What shows is the black: sunshine leaves enough for real taupe points on a bay where a double dilute leaves almost none, and it keeps a pale amber eye rather than the double-dilute blue.
+
+- The look-alike trap is the reason the alleles are worth having. Cr/sun and Cr/sno look like a cremello or perlino and carry one cream allele. A true Cr/Cr passes cream to every foal, a compound heterozygote to half - two identical-looking pale horses, completely different breeding propositions, and no amount of looking separates them.
+
+- Two undocumented compounds had to be decided and both say so on the page: prl/sun resolves to classic pearl (the milder of the two claims) and sun/sno to a double dilute.
+
+- Tried and reverted: declaring cream last would have made the gallery's double-dilute pen read Cr/Cr rather than sno/sno, because allPairsOf walks the allele list backwards - but declaration order is also what a genotype code prints, and prlCr everywhere a horse is inspected is a worse trade than one pen label.
+
+Built 2026-09-07, NOT yet looked at: manchado - white with islands in it, and its own locus.
+
+The rare Argentine pattern: broad clean white over the topline with rounded islands of base colour inside it. Checklist on manchado’s verification tab.
+
+- Close to the inverse of a leopard - a leopard puts dark spots on a white horse; this leaves dark islands in a white field. Head, belly and lower legs stay dark; the tail is mostly white.
+
+- Its own locus on purpose. Manchado is not a leopard-complex modifier and not a KIT allele - it is not one of the mapped white-spotting pathways at all, and no white-pattern panel can confirm it. Filing it under an existing locus would have claimed something nobody has earned.
+
+- Modelled as the long-proposed rare recessive, the hypothesis that explains the observations: it turns up sporadically out of solid-looking parents across several Argentine populations without spreading like a dominant pinto gene. Carriers only in the wild (~1.2%) and no affected founder, so the only way to see one is to breed two carriers.
+
+- The islands came out as slivers first, and the cause was arithmetic rather than art: which cells are islands was sampled at the cells' own frequency, so it varied inside each one and cut it in half. Sampled far lower it picks island-rich regions and leaves the ovals whole. (Grey's chubari spots reused the fix later the same day.)
+
+Built 2026-09-07, NOT yet looked at: rabicano - dominant to inherit, a roll to see.
+
+White ticking from the tail dock and flank forward. Checklist on rabicano’s verification tab.
+
+- The design is the separation of inheritance from appearance. Pedigrees behave as if rabicano were a simple autosomal dominant, but no causal variant is identified, there is no test, and expression runs from a few frosted hairs to something that reads almost roan - so a parent can be minimal enough to have been recorded as solid. The allele inherits like a dominant and what it shows is a per-horse roll that can come out at practically nothing. A plain horse throwing a heavily ticked foal is the commonest thing rabicano does, and a locus whose phenotype is fixed by its genotype cannot model it.
+
+- The homozygote raises the floor rather than forcing the maximum, with the ranges deliberately overlapping - a dosage effect has never been demonstrated because nobody can identify an RR horse.
+
+- Head, neck, mane and legs get nothing. Rabicano makes no blaze and no socks, and that absence is diagnostic against sabino and splash.
+
+- No health association of any kind, stated at length because every other white pattern in this mod carries something - and asserted through the trait resolver rather than an instanceof: a rabicano horse resolves to exactly the same body as a plain one.
+
+Built 2026-09-07, NOT yet looked at: pangare, sooty's mirror - and the medial helper gap #51 asked for.
+
+The pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor or a Fjord. Pangar; checklist on pangar’s verification tab.
+
+- Working on red rather than on lightness is the whole design, because it makes every base-colour rule in the reference fall out of the arithmetic instead of needing a table: a chestnut shows it brightest, a bay's black points are spared automatically (a point is red 0, black 1 - there is no red on it to take), a black horse shows nothing at all, and a double dilute is visually redundant. None of those is a special case in the gene.
+
+- No confirmed mutation and no test - the nearest evidence is a 2018 population study of an EDN3-adjacent region whose marker sat at 99% in Fjords, 98% in Exmoors and 1% in Thoroughbreds. That is an association with a breed group rather than a cause, so it is a dosage with a roll and the population evidence lands in the breed frequencies, which is where it belongs.
+
+- CoatRegions.medial closes known gap #51. Every other region helper addresses a part; “the inside of a leg” is a face of a part, which is why it went undrawn - a leg is a box and all four sides are the same distance from its axis. The Face was in the visitor's hand the whole time and unused. It is a shared helper because the medial face is mirrored left-to-right, which is exactly the thing one of four legs quietly gets backwards.
+
+Built 2026-09-07, NOT yet looked at: sooty - a dark cape, made by declining to remove pigment.
+
+Sooty; checklist on sooty’s verification tab.
+
+- Phase 1 only ever pushes pigment down, so a gene that adds black cannot exist here. Sooty adds none: it declines to remove what agouti and the dilutions were about to take, and the painter walks the black level back up toward - never past - the load the texel began with. That is the honest mechanical description and it happens to be what the biology is thought to be, since the region sits beside ASIP, whose job is telling a follicle to stop. The test asserts the ceiling directly, because if it breaks the pipeline's downward-only guarantee goes with it.
+
+- Two consequences fall out rather than being coded: the same dosage looks different on every base (black over a bay, bronze over a palomino, liver over a chestnut, because the chart's warm edge stays brown a long way down), and it does nothing on a plain black, which has had nothing removed to keep.
+
+- Deliberately not the shade locus, though they model the same 2020 paper. Shade is scoped to bays, where the evidence is; sooty is scoped to the phenotype, which turns up on palominos the evidence says nothing about. Folding them together would have claimed one mutation causes both.
+
+Built 2026-09-07, NOT yet looked at: flaxen - a chestnut's pale mane, as a dosage rather than as folklore.
+
+Flaxen; checklist on flaxen’s verification tab.
+
+- There is no identified flaxen mutation and no DNA test for it, and that is the single most important fact about the gene. Breeders have modelled it as a simple recessive for a century on pedigree evidence, which has never been confirmed: there is no demonstrated one-copy-versus-two dose series and the intensity varies far too widely for a two-allele locus. So it is three alleles at 0/1/2, summed - a simulated polygenic modifier that says so in its own description. One strong copy and two mild ones are the same horse, which is what lets two mild carriers throw something paler than either.
+
+- Chestnut only, so a bay or a black carries the whole dosage silently. It takes red away and leaves black alone, which on a chestnut is the whole move: the chart's top row runs brick red to white without passing through grey, so a pale mane lands blond with no tint term - which is exactly what silver cannot do and why silver has one.
+
+- Genotype.coatCode() now asks whether a gene paints on this horse rather than whether it can ever paint. About half the population carries flaxen and it is invisible on every non-chestnut, so the old key would have multiplied the bay textures by six for six identical bakes.
+
+Built 2026-09-07, NOT yet looked at: W4, the Camarillo white - a second all-white allele at KIT.
+
+- It paints the identical horse W22 does - pure white, pink skin, everything else hidden - and it is a separate outcome anyway, because the two differ in the only thing a breeder can act on: W22’s homozygote is thought nonviable and W4’s is not known to be.
+
+- It is a named line rather than a generic white horse - one stallion, Sultan, 1912, bought at the California State Fair in 1921 and bred to Morgan mares - so the gene dictionary says “Camarillo white”, and the Morgan is the one breed carrying it. That makes it the only breed here that throws an all-white foal rather than a grey.
+
+- A test restated rather than renumbered. “KIT has eight alleles, thirty-two carryable combinations and eight outcomes” went red on an addition that broke nothing, and a reader cannot tell that from a regression. It became two relationships instead - and survived the locus growing twice more the same day.
+
+- Roan: roaninfo.md turned out to be the reference the page was already rebuilt from, so the only thing left in it was the seasonal half - real roan reads strongest in a short summer coat and washes out in a faded winter one. Written down as explicitly not modelled, because it is the commonest reason a photograph disagrees with the page.
+
+Built 2026-09-07, NOT yet looked at: the dhampir, a recessive whose carrier is the advertisement.
+
+Dhampir; checklist §0-R.
+
+- One copy gives red eyes with glowing scleras and costs nothing at all. That is the point of the gene: two red-eyed horses in a field are a promise rather than a lottery ticket, and a silent dhampir carrier would be a locus nobody would ever meet. Two copies give the animal - white nose to tail, red eyes, triple health, 1.5× speed, double jump, and it cannot be fed.
+
+- “Cannot be fed” is not a special case. It is Diet.NOTHING through the diet channel built earlier the same day, which keeps the last claim in codeOrder() - so this gene sorting after the diet locus wins even over a horse homozygous for the lava diet. The same value carries one step further: gated regen now asks the diet handler, so a horse nothing can feed does not quietly heal beside a hay bale either.
+
+- Behaviour is three hand-written pieces in the game module, not effects verbs - each would be a verb with exactly one user, and that vocabulary is for data-driven genes. It burns in open daylight at half a heart every two seconds (vanilla ignite would kill it before the treeline), runs for shade at the top goal priority, and bites one living non-undead thing a day for half a heart. One bite a day against a five-heart cow means a dhampir sustains itself beside livestock and starves alone.
+
+- Two bugs it found: EyeColor.depigmented() was rank >= RANK_DEPIGMENTED, indistinguishable from equality until something outranked blue - a magical claim would have given a dhampir one red eye and one ordinary one. And the overlay phase having the last word over the iris is right for the light gene and the leopard sclera rim and wrong here, so a dhampir carrying LP came out black-eyed.
+
+Built 2026-09-07, NOT yet looked at: a diet locus - twelve narrow appetites, and a channel other genes override.
+
+Diet; checklist on diet’s verification tab.
+
+- Thirteen alleles: an ordinary wild type and twelve narrow diets. Each needs two identical copies, so two different narrow alleles is an ordinary horse carrying both surprises - the same rule the LUT locus uses. The trade is breadth for efficiency: eating anything gains least per item, the single-family diets a hay bale's worth, and cake, potions, lava, one metal and one gem take the horse to full health off one item. Which metal and which gem is a per-horse roll off the expressing copy's seed, fixed for life and inherited with the allele.
+
+- HorseDiet.resolve keeps the last claim in codeOrder(), which is why the locus sits at priority 5, ahead of everything that paints: a later gene saying “this horse cannot be fed at all” wins with no special case. Diet.NOTHING exists for that and is not an allele.
+
+- The handler intervenes only for a special diet, ignores anything that is not a feed attempt (a saddle must still saddle), and lets vanilla love items through - the locus governs healing, not breeding, so a narrow-diet line is not a dead end.
+
+- Wild only, and never a carrier: new Gene.feralOnly(). The founder table lists n/n and the twelve homozygotes with nothing between; the splice table is its mirror image, because an unasked-for horse that only eats gold is a trap and a carrier is a gift.
+
+- Four tests moved, all of them gap #47 - registering a locus at priority 5 renumbers every epigenetic seed after it, and four assertions were calibrated against a specific draw rather than a property. All four restated as properties.
+
+Built 2026-09-07, NOT yet looked at: bay is a shade continuum - blood, bay, liver and seal off one score.
+
+Shade, a new locus that paints nothing; agouti rewritten. Checklist on agouti’s verification tab.
+
+- Bay used to be one expression whose darkness was a bare uniform roll on the A copy, with a constant body colour - so “seal brown” meant nothing but “the black climbed high”, and a liver bay could not be drawn at all.
+
+- Blood bay, bay, liver bay and seal brown are phenotype descriptions, not loci - they all test as the same E_A_ foundation and no validated allele separates them. What the evidence supports is a regulatory region on chromosome 22 between ASIP and RALY, causal mutation unidentified, plus MC1R and ASIP dosage effects and a polygenic tail. So: three haplotypes at −1.5 / 0 / +1.5, summed, plus an E/E bonus, an A/a bonus and a per-horse roll narrower than a band.
+
+- Band edges are placed so every Sh/Sh bay is an ordinary bay whatever the dosage terms do - otherwise E/E would read as a test for liver bay, which is exactly the claim the research does not support.
+
+- Every horse carries shade, chestnuts included, so a chestnut line can throw a seal brown two generations out; agouti names it in coatDependsOn(), which folds it into a bay's texture key and leaves it out of a chestnut's.
+
+- Two fixes found in passing: the hoof floor raised the whole leg band to 0.4, so every bay whose black did not reach the knee had four identical socks; and CoatSampleTool’s SEEDS had drifted two entries past SAMPLES, silently handing every sample after the gap someone else's seed.

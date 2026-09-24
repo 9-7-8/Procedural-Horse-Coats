@@ -23,8 +23,8 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 
 | Do NOT put here | It belongs in |
 |---|---|
-| What a session built, measured, or decided | `wiki/session-log.html` |
-| Anything with a date on it | `wiki/session-log.html` |
+| What a session built, measured, or decided | `wiki/session-log/` |
+| Anything with a date on it | `wiki/session-log/` |
 | How a gene, system or class works | its own wiki page (see the map) |
 | A defect, gap, unchecked assumption, or open follow-up | the owning page's **Verification tab** |
 | Something to go look at in-game | a **Verification tab on that thing's own page** |
@@ -76,7 +76,7 @@ the same change as the code, and never copy it back into here.
 | **What is waiting to be looked at** - generated; every page's Verification tab, one sentence each | `wiki/verification.html` |
 | **What is planned and not built** - generated; every page's Roadmap tab, one sentence each | `wiki/roadmap.html` |
 | **Design calls** - settled (do not reopen) and still open | `wiki/decisions.html` |
-| **What each session built, and why** | `wiki/session-log.html` |
+| **What each session built, and why** | `wiki/session-log/` |
 
 `README.md` is **user-facing only** - what the mod does, how to play it,
 install, licence. No status, no architecture, no API notes.
@@ -86,8 +86,8 @@ ships, *delete* it from that tab and write it up on the same page's Gameplay and
 Coding tabs - "marked shipped" is not "moved".
 **Look things up in `wiki/text/`, not `wiki/*.html`.** Same prose, markup
 stripped, one file per page or tab, plus `wiki/text/index.txt` (heading to
-`file#anchor`), baked by `bake-agent-text.mjs`. Open the `.html` only to edit
-it, or for `session-log.html`, `releases.html`, `making-a-gene.html` (not baked).
+`file#anchor`), baked by `bake-agent-text.mjs`. For a dated record, choose one
+file under `wiki/session-log/` from its index; those files are not baked.
 
 ---
 ## Hard rules
@@ -260,7 +260,7 @@ where the session landed rather than narrating it mid-change.
    branch. One descriptive commit: what changed and *why*, not a file list.
 4. **Then update the docs to what is true now** - not "what I changed today".
    Walk the map above and honour the source-of-truth rule. At minimum:
-   `wiki/session-log.html` (a new dated entry at the top),
+   a new dated file in `wiki/session-log/` and its index entry,
    the **Verification tab of each page the session built on** (what is newly
    unplayed *and where to look*; delete only what the owner confirmed in-game,
    then re-bake the index), `wiki/known-gaps.html` (delete what closed, add

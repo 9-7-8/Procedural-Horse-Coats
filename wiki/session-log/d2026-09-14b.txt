@@ -1,0 +1,32 @@
+2026-09-14 — band life gets yard rows that run with nobody there
+
+    The owner asked for the debug area to be read, especially the fertility rows, and for band life
+    to have tests that work with her away from the keyboard, ready for a new round of testing. Until
+    then band life had no pens at all: every check on the list meant watching wild horses in the
+    overworld, which cannot be left running.
+
+    - Rows U to X (DebugYardHerd): leaving home, a host band, a
+        leaderless band, sparring, herding, grooming, displacement, a takeover and a dam defending
+        her foal. Each pen sets up the state its event needs, such as a colt already due to leave or
+        stallions who already know each other, then acts on a clock where a player would have. The
+        audit is §0-DW.
+
+    - Rows thirty blocks apart, not the yard's grid. A wild horse's reach does not
+        stop at a fence (challenge 24, guard 16, transfer 32, dispersal 64), so each row holds one wild
+        group, and the tamed pens sit beside it where no band decision can see them.
+
+    - The watch reads band life: watchSocial logs role, band, rank
+        counts, grooming partner, rival, health and target, and the goals that were silent
+        (displacement, herding, guarding, grooming, a dam's defence, a band holding together without
+        its stallion) now write [trace] herd lines.
+
+    - Two bugs found while designing the pens, both fixed unplayed:
+        gap 232, where a bachelor who took a band kept his
+        bachelors as band-mates; and gap 233, where a tamed
+        dam kept a dead target for good, which vanilla does not clear. One design gap is left for
+        the owner: gap 234, a filly recruited by her own
+        brother.
+
+    - The fertility rows were read against the new rows' reaches. The herd rows start 24 blocks
+        past row T, so no herd horse counts toward a fertility pen's cap. Test kit batch 2 now keeps
+        only the overworld half of band life.

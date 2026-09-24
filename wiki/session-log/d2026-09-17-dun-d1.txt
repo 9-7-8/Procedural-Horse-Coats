@@ -1,0 +1,58 @@
+2026-09-17, to finish — Dun’s d1 gets its bars and shoulder bar
+
+    The last row of the roadmap’s “shipped genes whose vocabulary is too narrow”
+    table, so the table went with it. d1 — non-dun,
+    but marked — drew the dorsal stripe alone, where a real nd1 horse
+    can also carry faint leg barring and shoulder shadowing.
+
+The recorded blocker was half true, and that is the whole fix
+
+    The roadmap row named its own obstacle: “d1 does not dilute, so there
+    is nothing on a leg to countershade a bar against.” That is true of a black
+    leg and false of everything else, and separating the two cases is all the change
+    amounts to. d1 takes 5% off the visible red, so a bar it draws
+    countershades against whatever red that texel had spare:
+
+PigmentField.diluteNeutral, for d1 (keepBlack = 1)
+
+chestnut / bay barrel  (1, 0)   room = 1    red × 0.95, the bar reads
+black coat             (1, 1)   room = 0    red never written
+a bay's absolute point (0, 1)   room = 0    red never written
+
+    So the bars and the shoulder bar now run on both marked outcomes with
+    no allele check in the painter. They appear on the bases that can show them
+    and resolve to nothing on the ones that cannot, by arithmetic rather than by a branch —
+    which keeps the gene’s “one dilution, one mask, no special case anywhere”
+    property intact rather than bolting an exception onto it. A real non-dun black showing no
+    primitive markings is the correct output, not a gap, and it now falls out for free.
+
+    The face mask and cobwebbing stay D-only. A cobwebbed forehead is a strong-dun
+    feature, and both the roadmap row and known-gaps asked for bars and shoulder
+    shadowing only.
+
+Depth was deliberately not reduced
+
+    The obvious reading of “faint” is a scaling constant, and it is the wrong one.
+    A bar can never out-contrast the dilution it countershades, so d1’s 5%
+    ceiling already makes it an order of magnitude fainter than a dun’s, which
+    countershades a 58% black take. Halving it on top of that would have bought a
+    0.025 red delta — almost certainly below what a 128px sheet can show,
+    which is to say a layer that technically paints and practically never appears.
+    Full depth, no new constant (owner’s call, offered against two
+    alternatives). The faintness is a property of the allele, not of a number.
+
+The goldens carried a checkable invariant
+
+    Reordering the Math.max chain to apply the face last is commutative, so
+    every real dun had to come out bit-identical — which makes the golden
+    diff a test of the change rather than a chore after it. It held exactly:
+    12 of 1092 whole-horse rows moved, every one d1/d1 or d1/d2,
+    none carrying a D. Two existing tests also stayed green untouched,
+    which is the sharper evidence: both are built on a solid-black field, precisely where
+    d1’s new markings are correctly a no-op.
+
+    What is not settled is whether 5% is visible at all in game. The tests prove
+    the pigment moves, not that an eye can see it.
+    §0-EU leads with that question and says
+    plainly that if nothing reads on a d1/d1 chestnut’s foreleg, this goes back
+    to known gaps rather than being quietly called shipped.

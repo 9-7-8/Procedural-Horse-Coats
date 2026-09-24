@@ -1,0 +1,267 @@
+2026-09-05
+
+Built 2026-09-05, NOT yet play-tested: spawn-egg preview controls + a many-allele dropdown + a Randomize button; cutie-mark placement/rotation tuned.
+
+:common:test unaffected (391), :neoforge-26.1.2:build green. Client-only, CustomHorseSpawnScreen + CutieMarkLayer.
+
+- The preview no longer follows the cursor. Click-drag over the preview orbits the horse (previewYaw / previewPitch, pitch clamped 80°); scroll-wheel over it zooms (previewZoom 0.3&ndash;4x, on top of the size-locus scaling). New mouseDragged / mouseReleased overrides + a draggingPreview flag; mouseScrolled gained a preview-zoom branch and a dropdown-scroll branch ahead of the existing list-scroll one.
+
+- The preview horse is always mid-stride - walkAnimationSpeed = 1, walkAnimationPos / ageInTicks advanced off wall-clock, animateTail true.
+
+- Particle emitters now preview. The real emitter translator is server-side (GeneAbilityHandler, EntityTickEvent.Post, client-guarded) and the preview entity never ticks, so the screen runs its own tiny GUI-space mote system: drawPreviewParticles reads every particle-kind emitter from HorseAbilities.activeFor(genotype(), epigenome) (epigenetic colour resolved through the live editor epigenome), spawns coloured 2px motes on a ~0.1s beat in a band keyed loosely to the emitter's body anchor (hooves low, body/spine mid, head high), drifts + fades + clips them to the preview panel, capped at 160. It is a stand-in - a colour-correct cloud round the horse, not world-placed particles - enough to preview "this horse trails something, in this colour". Mote is a private nested class; previewRng + lastFrameNanos + emitAccumulator drive it.
+
+- Genes with more than 3 alleles get a dropdown instead of a cycle button (particle 41, KIT 8, ACAN 5, MITF 4). An in-screen overlay (ddRow / ddSlot / ddScroll / ddX / ddY, DD_VISIBLE 8, DD_ROW_H 12, DD_W 76), drawn last in extractRenderState so it sits over the widgets, with clicks/scroll intercepted at the top of mouseClicked / mouseScrolled while open. Any click resolves or dismisses it. Genes with 3 alleles still cycle.
+
+- Randomize button (right column, under Breed). applyBreedPreset was refactored to a shared applyGenome(Genome, boolean adoptSex); randomizeGenes() rolls Genome.random with Breed: (none) or BreedFounder.roll(breed, rng, sex) with a breed selected, so the draw stays inside the breed's pools/targets. Keeps the chosen sex; baseline loci don't become added rows.
+
+- Cutie-mark emblem repositioned + de-cluttered. CutieMarkLayer was stamping at body-local z = -6 (the centre of the body box, z[-17,+5]); it now anchors mid-haunch (z = 0), high on the flank (y = -4), a touch proud of the x = &plusmn;5.6/16 side face. Multi-icon marks were overlapping with co-planar z-fighting ("weird clipping") and the row was wide enough to spill past the rump: SPACING 0.16 -> 0.085 blocks, icons now shrink with the count (countScale = 1/(1+0.28*(count-1))), each successive icon steps DEPTH_STEP = 0.012 blocks toward the viewer so the stack order is unambiguous, and each is fanned 5&deg; in-plane for a "stacked stickers" read. layout() widened its slot pitch to 1.1 and centres the row/triangle on the anchor. Also the icons were upside down: entity-model space is drawn rotated 180° about Z, so an item submitted in ItemDisplayContext.FIXED came out inverted - a + (float) Math.PI on the existing Axis.ZP tilt rotation spins it upright in its own plane (rotation, not reflection, so no mirroring). Still first-guess constants; checklist wiki/verification.html §0-D.
+
+- Not done: baking the cutie mark into the coat texture. The owner asked whether the emblem could be stamped into the 128px coat bake instead of the 3D item render. Left as the render layer: per-frame it is not a measured problem (cutie-mark horses are ~0.36% of the population), and a 16px item icon stamped onto the ~14-texel flank region would be lower fidelity than the current item models; the bake path also needs a new cache-key branch (the gene is a wild type, out of textureKey()) and item-atlas pixel extraction (multi-layer item models, per-side mirroring) that can't be verified without a play session. A follow-up if the stamp look is wanted after the reposition is seen in-game.
+
+Built 2026-09-05, NOT yet play-tested: name-tag rename window.
+
+Right-clicking a horse (with a real record) with any name tag - not just an anvil-renamed one - now opens client/HorseRenameScreen: two fields (first / last name) prefilled from ClientHorseRecordCache, a Rename + Cancel button. Confirm -> RenameHorsePayload -> server re-checks range + a tag still in hand + not both-blank, then HorseRecords.rename and consumes one tag (creative exempt); Cancel consumes nothing. HorseInteractionHandler's name-tag branch now fires for any Items.NAME_TAG, cancels on both sides (no vanilla custom name), and server-side sends OpenHorseRenamePayload (playToClient -> HorseRenameScreen.open). The old handleNameTag (split-on-first-space, needed CUSTOM_NAME) is deleted. Lang: gui.horsegenetics.rename_horse / .rename_confirm. :neoforge-26.1.2:build green, runServer boots clean (both payloads register). Checklist: wiki/verification.html §0-E.
+
+Built 2026-09-05, NOT yet play-tested: the cutie-mark gene + Horse Browser splice-recipe rework.
+
+:common:test 391 green, :neoforge-26.1.2:build green, runServer boots clean (45 segments, no errors). Two pieces:
+
+- CutieMarkGene (horsegenetics.cutie_mark, priority 196, magical, recessive Cutmrk/n). Cutmrk/Cutmrk wears an emblem of 1-3 flat item icons on both flanks, drawn over everything including white patterns. 43 built-in genes (45 in-game). Owner-approved approach: use the game's own item icons, restricted to flat (non-BlockItem) items, modded ones included; cross-install determinism is explicitly not a goal.
+
+- Paints nothing in the pipeline - all three outcomes are wild types (the particle pattern), so affectsCoat() is false, it's out of the texture key, and the catalogue is unchanged (924 844 034). totalGenotypes() x3 to 52 933 214 613 797 373 206 937 600 000.
+
+- CutieMarkGene.markFor(genotype, epigenome) (common/) draws the spec off the expressing copy's seed, fixed order: nextInt(3) count, nextBoolean() triangle (count 3 only), 3x nextFloat() normalised item picks (always 3 - the draw-order contract), nextFloat() scale, nextFloat() tilt. Returns Optional<Mark>, empty unless homozygous. common/ names no item - the picks are [0,1) and resolved on the client.
+
+- client/FlatItemCatalog - every registered item that is not a BlockItem, built once per session off the frozen registry (a new mod / version is a new session = rebuild, which is all the gene needs).
+
+- client/CutieMarkLayer - a RenderLayer<HorseRenderState, HorseModel> twin of EmissiveCoatLayer, added after it in GeneticHorseRenderer so it draws last. Reads CutieMarkGene.markFor off coatData, resolves each pick to an item, updateForTopItem -> ItemStackRenderState.submit at a per-item offset out from the animated body part (root().getChild("body"), translateAndRotate), rotated to face outward, scaled small, row or triangle. Placement is a first-guess fixed offset and wants tuning against a live horse - flagged in wiki/verification.html §0-D.
+
+- coat-golden.txt regenerated (only the new cutie_mark=n/n segment; hashes unmoved). New CutieMarkGeneTest (5). SpecGeneTest.BUILT_IN_GENES 42 -> 43. Old saves won't parse. Docs: wiki/gene-cutie-mark.html (new), wiki/nav.js, wiki/genetics-model.html, wiki/api-reference.html, index.html, README.md.
+
+- Horse Browser splice recipe - removed the "View splice recipe" button; selecting a gene now auto-ghosts its Known Gene Splice recipe into the Crafting grid's empty slots (client-only, no inventory movement), and hovering a ghost shows the real item's tooltip (extractTooltip -> setTooltipForNextFrame). "Craft research paper" stays (both tabs) and no longer self-hides when the gene isn't in the client DB. The default splice recipe is now exactly four items: horse hair + the gene's research paper + a golden carrot + the rarity ingot (gold at the default tier). KnownGeneSpliceRecipe requires exactly those (filled == 4, one of each), dropping the old ">= 5 with a flavour" rule; SpliceRecipeDisplay matches. Deleted ViewSpliceRecipePayload + HorseBrowserMenu.fillSplicePreview. Lang: dropped gui.horsegenetics.view_recipe.
+
+LUT is owner-verified in game 2026-09-05
+
+(see the Owner-verified block).
+
+Built 2026-09-05, NOT yet play-tested: white top/bottom UV swap + two Horse Browser gene buttons.
+
+:common:test 386 green, :neoforge-26.1.2:build green.
+
+- The horse's top and bottom cube faces were UV-swapped in HorseSkinGeometry.faceMapsOf - Face.TOP (body-space yMax, the spine) was mapped to the texture's bottom patch and Face.BOTTOM (the belly) to the top patch. So any white painter that whitened "from below" (splash, sabino belly, frame off the underline) was flooding the topline while the belly stayed coloured - the standing "white over the whole back" gap. Owner diagnosed it visually; the two FaceMap entries are now the right way round. Measured (bold splash, per-BODY-texel): back white 90%+ -> ~35%, belly -> 100% (a proper dipped-from-below coat). One Face.BOTTOM consumer (WhitePattern.covers, "no blaze under the jaw") flips to the correct face for free. :common:test still green (incl. FaceMarkingTest's Face.BOTTOM jaw assertions); coat-golden.txt regenerated - most rows moved (any BODY/NECK top or bottom texel). A secondary frame-band calibration remains (gap #30): EdnrbGene's BAND_LO/BAND_HI are still whole-horse-AABB fractions so frame still leans topline-ward (~75% back on O/N); the per-part fix would also strip frame's legitimate neck-side white, so it's deferred. Tobiano over the topline is correct.
+
+- Two gene buttons in the Horse Browser (shown when a discovered carrot gene is selected - detail-pane bottom on Gene database, right of the grid on Crafting):
+
+- "Craft research paper" - the existing WriteResearchPaperPayload / ResearchPaperWriter flow (consume one book -> a research_paper for the gene), just surfaced as its own button on both tabs. Still requires the gene discovered (in the DB) even in creative, because the server writer checks that.
+
+- "View splice recipe" - new. network/ViewSpliceRecipePayload -> HorseBrowserMenu.fillSplicePreview(gene): empties the 3x3 grid back to the inventory, then pulls one of each Known Gene Splice ingredient the player actually has into the grid (golden carrot, this gene's paper via ResearchPaperItem.geneOf match, horse_hair, the RarityItems ingot, sugar as a flavour). menu/SpliceRecipeDisplay.forGene is the canonical 9-slot layout, client-safe so the screen shows the same list as ghosts (dimmed g.fakeItem) in whatever slots the player couldn't fill. It never crafts - with all five real, the result slot shows the carrot to take normally. Ghosts clear on gene change / switching to Gene database. Lang: gui.horsegenetics.craft_paper, .view_recipe (replaced .write_paper).
+
+- Checklist: wiki/verification.html §0-B (buttons) and the "Open issues" note (white swap - main bug fixed, frame calibration deferred).
+
+Built 2026-09-05, NOT yet play-tested: the LUT gene + the Horse Browser becomes a container menu with a Crafting tab; plus two fixes on owner play-test feedback (browser UI redesigned, splash face-marking boosted).
+
+:common:test 386 green, :neoforge-26.1.2:build green, runServer boots clean (44 segments, loaded 2 data-driven gene(s), menu type + payloads register with no error). Pieces:
+
+- LutGene (horsegenetics.lut, priority 190, magical, alleles n / Blupnk) - a gene that swaps the phase-2 colour gradient instead of painting. A horse homozygous for a variant allele resolves its surviving red/black pigment against an unnatural LUT (Blupnk/Blupnk -> assets/horsegenetics/textures/coat/lutbluepink.png, a blue/pink palette); one copy, or two different variants, is a silent carrier (bluepink-carrier, a wild type). 42 built-in genes (44 in-game). It is affectsCoat() true (the swap is a real coat change) and deterministic, so it is in Genotype.coatCode() / the texture key but out of the per-horse fingerprint. Machinery:
+
+- common/genetics/LutContribution - a new gene capability interface (the fourth thing a gene can be, beside Expression / TraitContribution / AbilityContribution): alternateLut(pair, genotype) -> Optional<String> (non-empty only for a true variant homozygote) + lutResources() -> Map<key, "textures/coat/....png"> (plain strings - common names no Identifier). Exactly one gene implements it and always will - owner's rule, mirroring KIT: a new palette is a new allele on this gene, never a new gene, because a horse has two chromosome copies and shows at most one alternate palette.
+
+- common/coat/pattern/LutSet - record LutSet(GradientLut base, Map<String,GradientLut> alternates) + LutSet.of(base) + resolve(key) (unknown/null key -> base). CoatTextureComposer.bake / compose gained a (LutSet luts) overload; the old (GradientLut lut) one delegates with LutSet.of(lut), so every pre-LUT caller (CoatSampleTool, the golden test's synthetic LUT path) is untouched. The composer's selectAlternateLut(genotype) walks Genes.codeOrder() for a LutContribution with a non-wild, non-empty answer and resolves phase 2 against that LUT.
+
+- Expression.Builder.marker() - finishes an outcome that is not a wild type but has no painter of its own (both restrict and tint null). The LUT swap is applied out of band; bluepink is the first user. GeneCoatHookTest.aMagicalExpressionReturnsADeltaAndLeavesTheAccumulatorAlone now skips LutContribution genes.
+
+- client/GeneticCoatTextureFactory - loads redblackgradient.png as the base plus every LutContribution gene's lutResources() textures into a LutSet (a failed alternate logs a warning and falls back to base), and threads it through compose / bake.
+
+- Founder table: carriers only (Blupnk/n ~1.7%, n/n the rest); a variant homozygote is never a founder. No gene carrot (hasGeneCarrot() false).
+
+- coat-golden.txt regenerated: every existing row gained a lut=n/n code segment but no hash moved (per-gene epigenetic seeds are keyed by gene, not stream position - the magic-speed precedent); four new lut=Blupnk/* cases added, with a synthetic blue/pink alt LUT built in the test. SpecGeneTest.BUILT_IN_GENES 41 -> 42. New LutGeneTest (6). GenotypeCatalog.size() 462 422 018 -> 924 844 034 (LUT is a two-outcome coat gene, so it doubles the unmasked entries); totalGenotypes() x3 to 17 644 404 871 265 791 068 979 200 000. bakeCoatSamples gained three lut_bluepink_* samples.
+
+- Old saves will not parse (code 41 -> 42 built-in segments). Dev only.
+
+- Docs: wiki/gene-lut.html (new), wiki/nav.js, wiki/genetics-model.html (table + counts), wiki/pipeline.html (phase 2 swap note), wiki/api-reference.html. LUT owner-verified in game 2026-09-05 (§0-A retired).
+
+- The Horse Browser (H) is a real container menu now. It was a client-only Screen; it is now client/HorseBrowserScreen extends AbstractContainerScreen<HorseBrowserMenu> over a new neoforge-26.1.2/menu/ package: ModMenus (a DeferredRegister< MenuType<?>>, registered from the mod ctor), HorseBrowserMenu (AbstractContainerMenu - a 3x3 TransientCraftingContainer = slots 1-9, a ResultContainer = slot 0, the 36 inventory slots added by hand so they too can go inactive), and HorseBrowserRecipes (the result logic). Pressing H now sends network/OpenHorseBrowserPayload and the server openMenus a SimpleMenuProvider; ClientSetup binds the screen via RegisterMenuScreensEvent. HorseBrowserKeyHandler sends the payload instead of setScreen.
+
+- Two tabs, drawn from a strip at the top-centre of the window. "Gene database" is a full-window reference (list left, scrolling detail right, "Write research paper" button) with no slots - every menu slot goes inactive here. "Crafting" is a compact centred panel (3x3 grid + result + player inventory) with the gene list still down the left. (The first attempt crammed everything into one 316x244 panel and overlapped badly - owner feedback - so it was redrawn this way the same day. All custom drawing is in screen coords: extractLabels undoes the container leftPos/topPos translate first.)
+
+- Crafting tab - a private 3x3 grid that makes only this mod's recipes (no vanilla recipe lookup anywhere): (1) a single book in the grid + a discovered gene picked in the left list -> that gene's research_paper (creative sees every carrot-bearing gene); (2) the paper-parameterised KnownGeneSpliceRecipe; (3) CarrotCombineRecipe. HorseBrowserRecipes.resultFor / .consume implement it; the shared KnownGeneSpliceRecipe / CarrotCombineRecipe instances are stateless. Gene selection is menu state set from the client by network/SelectBrowserGenePayload (sent on every list click, so the two tabs stay in sync); slotsChanged recomputes the result server-side and pushes a ClientboundContainerSetSlotPacket.
+
+- On the Gene database tab every slot (grid, result, and the player inventory) goes inactive via an isActive() override tied to HorseBrowserMenu.setCraftingVisible, which the screen toggles each frame
+
+- so that tab renders no slots, no highlights, no tooltips; slotClicked is guarded too. Switching away from Crafting while holding a picked-up stack is blocked.
+
+- Lang: gui.horsegenetics.horse_browser. No new items, no datapack changes.
+
+- Not done / risks (still an untested GUI against the 26.1.2 retained-mode screen API): the redraw's geometry is verified only on paper - check for overlap at GUI scale 2/3/4; quickMoveStack edge cases; the book -> paper result-slot consume path. Checklist: wiki/verification.html §0-B.
+
+- Splash face fix - WhitePattern.splash was scaling its face marking with its body strength (~0.35 for one copy), which on the shared face ladder is star/snip/nothing, so splash horses came out bare-faced (owner feedback). It now boosts the face strength by SPLASH_FACE_BOOST = 0.34: one copy -> a blaze, homozygote / two-locus -> a bald face. Same RNG draw count. coat-golden.txt regenerated (splash rows moved); KIT/EDNRB untouched. New WhitePatternGenesTest case. Checklist: wiki/verification.html §0-C.
+
+2026-09-05 follow-ups to the carrot pass, NOT yet play-tested
+
+- Carrots renamed (owner's call, dev-only, no saves): "mutinogenic" -> Unknown Epigenetic Splice carrot (CarrotEffect.EpigeneticSplice, token epigenetic_splice); "chaos" -> Unknown Gene Splice carrot (CarrotEffect.GeneSplice, token gene_splice); "magic gene carrot" -> Known Gene Splice carrot (CarrotEffect.KnownGeneSplice, token known:<gene>:het|hom, item known_gene_splice_carrot, server/recipe/KnownGeneSpliceRecipe). Gene.chaosTable() -> spliceTable(); the spec chaos block -> splice; Gene.hasMagicCarrot() -> hasGeneCarrot(), magicCarrotHomozygous() -> geneCarrotHomozygous(). Naming logic: "Unknown" = random, "Known" = you pick the gene. Fixtures + parity regenerated (no output change).
+
+- Crash fix: the DistanceManager.runAllUpdates re-entrancy trap, hit going to the horse dimension. GeneAbilityHandler.onEntityLeave (a glow light-block cleanup, from the 2026-09-04 magical-utility pass) called level.getBlockState synchronously from inside the entity-untracking callback -> IllegalStateException: Entity is already tracked!. Now it queues a PendingClear and a ServerTickEvent.Post drains it next tick. See the 26.1.2 API note.
+
+Built 2026-09-05, NOT yet play-tested: shearing + milking rules + the whole carrot family + the gene database + research papers
+
+(roadmap wiki §§7, 12, 14, 16, 19). Big multi-system pass. :common:test 379 green, :neoforge-26.1.2:build green, parity 3832/48, runServer boots clean (43 segments, still - format 3 is additive). Shape of it:
+
+- Shearing (§12) - right-click an adult horse with shears -> 1-3 horse_hair, once per MC day, gated by a new data/HorseCooldownsAttachment (a stored Map<String,Long> game-time stamp per key: "shear", and "yield:<geneKey>" - which replaces the static cooldown map GeneYieldHandler was criticised for). +5 bond per shear via a new HorseCareHandler.awardBondFor. New items braided_rope + hair_cloth with reversible shapeless recipes, finishing the §12.2 chain. The sheared look (a low-fidelity render-layer overlay) is deferred - a verification item; the mechanic is complete.
+
+- Milking rules (§7) - the interaction shipped with the milk gene; the rules did not. Built as effects-vocabulary additions (buys it for every gene): a full_health condition flag (own max, so a frail mare is milkable at her own ceiling); tamed added to the milk yield's when; GeneAbility.Yield gained deniedDamage + deniedMessage - the else-branch a bare yield can't express, so milking a stallion now kicks you (half a heart) and milking a foal says so. MILK_COOLDOWN_TICKS is 24_000 (once a day) and lives on the cooldown attachment. Not SpecSchema/parity (effects don't paint). GeneYieldHandler: a matched yield with an empty produces is a denial branch; a producing yield on cooldown now says "nothing to give yet" (closes gap #25's feedback complaint).
+
+- §19 gene metadata - common/genetics/GeneRarity (6 tiers) + three Gene defaults: rarity() (default UNCOMMON = the gold-ingot tier), hasGeneCarrot() (false for SexGene, the recessive disorders via RecessiveDisorderGene, and extension + agouti), spliceTable() (Optional<FounderTable> - the Unknown Gene Splice carrot's per-gene distribution) plus geneCarrotHomozygous(). Spec FORMAT 2 -> 3: optional blurb, rarity, carrot ({enabled, behaviour, flavour}) and splice blocks (splice reuses the founder-weight parser). SpecGene surfaces all of them. Every example + shipped gene file and the creator emit format: 3; the parity fixtures regenerated with no output change (the §19 fields don't touch the paint engine). The strict format != FORMAT check stays - dev only.
+
+- The gamete hook (§14, the determinism-sensitive core) - common/genetics/GameteBias: a per-parent breeding modifier (rerollEpigenetics / preferLowerOrder (dominant vs recessive copy) / substitutePairs). Genome.breedWith gained a (bias, bias) overload run in two passes: pass 1 is the allele draw and consumes exactly what the plain breed consumes (so NONE/NONE is bit-for-bit identical - asserted, and coat-golden.txt is untouched); pass 2 does the epigenetic re-rolls after every allele is locked, so a Unknown Epigenetic Splice carrot never moves a foal's genotype. GeneticCodeCombiner.combine got the matching overload. New GameteBiasTest (5).
+
+- common/genetics/CarrotEffect (sealed: Unknown Epigenetic Splice / Stabilizer / Magnifier / GeneSplice / KnownGeneSplice(geneKey, homozygous)) with a flat string id() for serialisation, parse/parseList/tokens/isContradictory, and fold(effects, parentGenotype, rng) -> one GameteBias. Gene splice rolls its target gene + pair at breeding time off the foal RNG (deterministic per foal; never the sex locus). Magic-carrot homozygous falls back to het when the homozygote canOccur is false.
+
+- NeoForge, the carrot side - data/CarrotWindowAttachment (List<String> effect tokens + expiresAt; not copyOnDeath; WINDOW_TICKS = 30 s, vanilla love length). server/BreedingCarrotHandler (EntityInteract): a carrot on a breedable adult -> merge the window, horse.setInLove(player), a per-type coloured particle burst, consume 1; stabilizer/magnifier on an all-homozygous horse messages "does nothing". HorseBreedingHandler.onBabySpawn reads both live windows, CarrotEffect.folds each, threads the biases through applyBredFoal (new overload; old arity delegates with NONE), then clears both windows. data/ModDataComponents gained CARROT_EFFECTS (an item List<String> component) and RESEARCH_GENE (a string).
+
+- Magic carrot recipe (§14.2) - server/recipe/KnownGeneSpliceRecipe is one parameterised CustomRecipe: golden carrot + research_paper + a hair item + the gene's rarity item (RarityItems: iron/gold/diamond/ emerald/netherite ingot/nether star) + >=1 flavour slot -> a known_gene_splice_carrot carrying known:<geneKey>:het|hom. One recipe, so a drop-in gene gets its carrot free. CarrotCombineRecipe merges 2+ carrots into one and rejects contradictions at craft time (stabilizer+magnifier; two Known Gene Splice carrots that disagree). Both are unit-codec serializers registered via server/recipe/ModRecipes + one datapack JSON each. placeholder_gene_book and its shapeless recipe are deleted.
+
+- Gene database (§16.1) - data/GeneDatabaseData, server-global per-player SavedData (seen tokens, carrot-unlock flag, first-met time per gene). server/GeneDiscoveryHandler fills it on tame (AnimalTameEvent) and on foal birth (from applyBredFoal, for the breeder) - one entry per gene the horse carries a non-baseline allele at. It hides nothing: the info panel + genotype code still show every gene; discovery only gates the carrot-recipe display (the recipe itself is gated by needing a paper). network/GeneDatabaseSyncPayload -> client/ClientGeneDatabase (browser only; cleared on logout; re-synced on login).
+
+- Research papers (§16.2) - item/ResearchPaperItem with a research_gene component. Right-click -> adds the gene to the DB + unlocks its carrot line + consumes; tooltip = name + rarity + blurb. Chest-loot injection: data/loot/AddResearchPaperModifier (an IGlobalLootModifier, gene weighted by GeneRarity.lootWeight()) + data/horsegenetics/loot_modifiers/*.json targeting ~8 chest tables. 26.1.2 note: the neoforge:loot_modifiers/global_loot_modifiers.json index file is gone - LootModifierManager is now a SimpleJsonResourceReloadListener that reads every file in the loot_modifiers/ folder directly.
+
+- Horse Browser rework (Phase H) - the Gene Database tab is no longer creative-only: it reads ClientGeneDatabase, shows a discovered gene in full (blurb, alleles, phenotypes, variants seen, "Magic carrot recipe: unlocked/locked") and an undiscovered one as a dim name + a nudge (creative sees all). A "Write research paper" button spends one book for a paper on the selected discovered gene (WriteResearchPaperPayload -> server/ResearchPaperWriter).
+
+- Deliberately deferred (owner call): the Horse Master villager (§18), seed-jar gestation + carrot-on-jar effects (§15.1), attached model parts (§19.2), the sheared render-layer look. Also not built: a DB check inside KnownGeneSpliceRecipe.matches (the paper ingredient is the gate); the §19 header fields as creator form inputs (the creator emits format: 3 but has no rarity/carrot/splice fields yet); per-gene splice tables on any built-in (all fall back to the uniform draw).
+
+- Docs: wiki/carrots.html (new), wiki/nav.js, wiki/gene-effects.html (yield denial + full_health), wiki/gene-format.html (format 3), wiki/gene-milk.html, wiki/horse-care.html, wiki/genetics-model.html, wiki/api-reference.html, wiki/modding.html, wiki/roadmap.html (§§7/12/14/16/19 trimmed to remainders). Checklist: wiki/verification.html §0.
+
+Built 2026-09-05, NOT yet play-tested: the Horse Browser (H page), first slice, + a per-horse gene popup.
+
+A new common/genetics/GeneDescriptions (a one-paragraph, plain-English summary of every one of the 41 built-in genes) behind a new Gene.description() default - the authoritative gene docs stay in wiki/gene-*.html; this is the glanceable version, and a data-driven gene returns "". :common:test still green (no test touches it). Three new client screens / handlers in neoforge-26.1.2/client/:
+
+- HorseBrowserScreen - opened by a new H keybind (HorseBrowserKeyBindings + HorseBrowserKeyHandler, registered in production, category MISC, lang key.horsegenetics.horse_browser). A tabbed reference window; one tab built, Gene Database. In creative: every registered gene alphabetically by name(), a filter box matching gene name / key / allele token / label, and a detail pane with the description() summary, every allele (token — label) and every Expression (name + sentence + wild type / masks / varies flags). Both list and detail scroll independently. Outside creative the tab is a short note. The tab strip is drawn and click-wired (tabAt) so a second tab slots in without input changes.
+
+- GeneInspectScreen - a full-window popup opened from a new "View Genes" button on the horse inventory panel (above "View Family Tree"). The horse's two allele tokens in column one, the genotype-context phenotype sentence (genotype.expressionOf(gene)) in column two. Lists sex / extension / agouti always, then every gene the horse carries a non-baseline allele at (!pair.homozygousFor(defaultAllele())) - so expressing coat genes and heterozygous carriers, matching the paper dump's nJ / nC / nCr shortform. Expressing rows green, carrier rows muted gold; both print the outcome's real name + sentence (a one-copy MSTN reads "Middle distance", not "no effect"). Closes to the game like the family tree.
+
+- HorseScreenHooks - the compact genotype short-form line is removed from the grey panel (superseded by the popup); GeneCodeDisplay and the local wrap / shortGenes helpers went with it. New shared client/GuiText (pixel word-wrap + clip).
+
+- Nothing talks to the server - all the data is common/ already on the client. :neoforge-26.1.2:build green. Checklist: wiki/verification.html "Still to verify" §0 (gene-browser).
+
+- Docs: wiki/verification.html (§0), wiki/api-reference.html (the Gene.name() / description() row), README.md (the panel + the H key), index.html - which was also brought current in the same pass: it was missing cards for dun, silver, mushroom, roan, tobiano and had no section at all for the 13 non-coat genes, so all 41 built-ins now have a card (a new "Non-coat genes" section). Lang: key.horsegenetics.horse_browser.
+
+- Not built: any second tab (horse roster, breeding planner, punnett); a gene-level description for data-driven genes (the spec format has no field for it); returning the popup to the inventory screen instead of the world; surfacing description() on the wiki / a generated gene dictionary (gap #10).
+
+Built 2026-09-05, partly play-tested: breeds + herds + wild aggro; Test gene removed.
+
+A common/breed/ package, 49 real-world breeds + UNKNOWN, biome-weighted wild-herd spawning (traditional harems + bachelor bands), cross/mixed breeding labels, wolf-style herd aggro, and a batch of dev tools. The Test gene was deleted (TestGene + TestCoatPattern gone) - it had served its purpose and looked ugly. Genotype code 44 -> 41 segments (43 in-game with suntouched + waterborn), coat-golden.txt regenerated (the three test=T/t golden cases dropped; CoatTextureComposerTest / GeneCodeDisplayTest / GenotypeTest / GeneticCodeCombinerTest / SpecGeneTest retargeted off Genes.TEST), GenotypeCatalog.size() 462 422 019 -> 462 422 018, totalGenotypes() /3 to 5 881 468 290 421 930 356 326 400 000. Machinery is wiki/breeds.html and wiki/horse-care.html; the shape of it:
+
+- A breed is a constrained founder roll. Breed carries per-gene allele pools (as tokens), a BreedStatTargets (per-axis multiplier bands), a biome list, a Commonness -> spawn weight, a magic chance, and a notes list. BreedFounder.roll(breed, rng) starts from Genotype.random and overrides: every coat gene the breed doesn't name -> wild (so no stray pattern), every named gene -> the breed's pool, the four magical body-stat loci -> homozygous for the pushing allele on any axis the breed pins, every other magical gene -> wild, then a geometric draw (p=0.20, then 0.10, 0.05, ... halving, cap 10) switches a few back on. Breeds.UNKNOWN skips all of it - the pre-breeds unconstrained roll. Disorder genes keep their global rates unless the breed is .hardy().
+
+- Stat targeting is a band, not the Gaussian. The sheet scores speed/jump/heartiness 1-10; BreedStatCurve maps 5 -> x1.0 and 10 -> the sheet's ceiling (speed x2.02, health x2.24, jump x3.43), linear, with a shared ~x0.2 floor at score 1. Height (hh range) -> scale band midHh / 15.75. HorseTraits.resolve gained a resolve(genotype, epigenome, BreedStatTargets, healthGenetics) overload; TraitBuilder carries the targets and the four body-stat genes (AbstractMagicStatGene + MagicSizeGene) read out.breedBand(axis) - when a band is set and the horse carries a variant copy, they lerp inside the band from the two copies' epigenetic seeds instead of the bounded Gaussian. So a Thoroughbred reliably resolves near x2 speed (two Swift copies on the Gaussian only reach ~x1.2) and within-breed spread is exactly the band width. A near-baseline band (straddles 1.0) is dropped -> locus left wild -> horse sits on the baseline. New: common/trait/StatAxis, TargetBand, BreedStatTargets.
+
+- Spawn side - herds by connected clump (4th revision). BreedSpawnHandler (FinalizeSpawnEvent) does one thing: on a NATURAL / CHUNK_GENERATION / SPAWNER spawn, set horse.getPersistentData() horsegenetics:wild_spawn. The SpawnGroupData route is dead - Horse.finalizeSpawn replaces any custom pack data with its own Horse.HorseGroupData between every member, so the BandData approach silently made every horse "member 0" with its own breed -> "herds are all mixed / groups of 4 solo Unknowns". HerdManager forms the herd by proximity instead (deferred one tick). Non-natural spawns (egg with a pre-set record; /summon) have no flag -> lone unknown. Two data/horsegenetics/neoforge/biome_modifier/ JSONs: add_horse_herds (37 biomes, weight 10, minCount 3, maxCount 6) and add_horse_loners (#minecraft:is_overworld, weight 1, 1-1) - a strong bias to packs. Horses now spawn in taiga, jungle, badlands, swamp, snowy biomes and mushroom fields - none vanilla.
+
+- Breed labels combine (BreedLineage.combine, in applyBredFoal): A x A -> A; A x B -> "A x B cross" (components sorted, order-free); same cross x itself or x one of its own breeds -> that cross; cross x anything else -> Mixed; Mixed x anything -> Mixed. Unknown acts as an ordinary distinct breed (Friesian x Unknown -> a cross; owner may want it absorbing like Mixed - flagged wiki/decisions.html#decisions). A cross averages its two components' stat bands per axis (only where both pin it); Mixed/Unknown pin nothing.
+
+- HorseRecord gained Optional<String> breed (position 7, after epigenomeCode); codec breed optional field; founder/bred factories gained a breedToken param (old arities kept, delegating to unknown); record.lineage() -> BreedLineage, record.traits() is breed-aware. StoredGenome (seed jar) gained a breed field so a seed-jar foal crosses right.
+
+- Surfaces. Info panel shows the breed under the sex/gen line (PANEL_H 164 -> 176). Paper dump (HorsePaperInspectHandler) prints a breed: line. The dev-build [coat] chat line (GeneticCoatTextureFactory.debugLogCoat) appends [<breed>] - threaded from GeneticHorseRenderer via a new GeneticHorseRenderState.breedLabel and coatTextureFor(coat, baby, label) / getOrCreate(coat, baby, label) overloads (label is cosmetic only; the bake is genome-keyed). The custom spawn egg gained a Breed: cycle button (CustomHorseSpawnScreen.cycleBreed / applyBreedPreset): landing on a breed rolls a fresh BreedFounder.roll of it into the editor (genotype + epigenome + sex) and SpawnCustomHorsePayload carries the token so the spawned horse is stamped (ModNetworking.handleSpawnCustomHorse -> record.withBreed).
+
+- Referenced-but-not-built (noted per-breed + wiki/roadmap.html#breeds): leopard complex (Lp/PATN1 - already §4.2), Tiger Eye, HYPP (a heart-reducing gene), pangare/mealy, flaxen, the early-lethal foal disorders (SCID/CA/LFS/GBED/NNF/CVM/megaesophagus), gait (DMRT3), mane-shape and feathering render layers. Won't model: metallic sheen, curved ears, head profiles.
+
+- server/HerdManager.assignFounder - called by server/HorseFoundingTickHandler on EntityTickEvent.Post, 20 ticks after the horse spawns (WILD_FOUND_DELAY_TICKS), not from the join event. Two reasons it had to move off the join path: (a) the join deferral (server.execute) drains during chunk streaming only a few ms later, still the same tick, so a scan for pack-mates saw an empty clump and every horse founded a herd of one - owner hit this: all wild horses Unknown, no herds; (b) applyTraitsToEntity's SCALE write crashes from that context (see the crash note below). Waiting 20 ticks on the entity tick fixes both - the pack is loaded and query-visible, and nothing re-enters the chunk system. It then forms the herd over the whole connected clump (HERD_RADIUS 32 per flood-fill step, BandType TRADITIONAL 70% / BACHELOR 30%):
+
+- why a clump and not a 32-block look: NaturalSpawner walks each pack member a cumulative ±5 blocks from the last, so a pack of four routinely spans more than 32 blocks end-to-end, and the tick handler processes horses in entity-iteration order, not spatial order. A single-radius rule would let a spread pack found two herds of two breeds.
+
+- herdedMemberOfClump - flood-fill the connected clump (untamed horses, each within 32 of the next, hopping through fresh pack-mates); if any member is already inWildHerd() -> JOIN it (its breed, band, lead; leadSex if the lead UUID is this horse, else joinerSex);
+
+- else freshClump (flood-fill of fresh wild_spawn pack-mates, incl. self) has >1 member -> FOUND: elect the clump's lowest-UUID member as the lead, and derive breed + band from RandomSource seeded by that lead's UUID + the lead's biome (pickHerdBreed). Every clump member computes the same lead and therefore the same herd, whatever the processing order - the elected lead included, when its own tick runs (it JOINs a mate whose herd() already points back at it);
+
+- else a clump of one -> a lone UNKNOWN. BandData and the band NBT keys are gone. Traditional-band foals now spawn at vanilla's ~5% rate (the pack AgeableMobGroupData can't be overridden any more) - noted as a follow-up. Breed + herd assignment is owner-confirmed working in-game 2026-09-05; the crash fix is not yet play-tested.
+
+- server/WildHerdGoal (new, added beside BondFollowGoal at priority 6): an untamed herd member paths to its lead (resolved via ServerLevel.getEntity(uuid)) when >8 blocks away, re-path every ~15 ticks; if the lead is gone for 10s it promotes itself. HorseCareHandler's together-timer skips any horse inWildHerd().
+
+- HorseCareAttachment gained herdBreed + herdBand (herd is now the lead horse's UUID for a natural herd; the lead points at itself). inWildHerd() = herd + herdBreed both set. Codec fields herd_breed / herd_band.
+
+- server/HorseAggroHandler (new) - wild horses aggro like wolves. EntityAttributeModificationEvent (mod bus) gives EntityType.HORSE an ATTACK_DAMAGE of 4; every horse gets a MeleeAttackGoal (priority 3) and a WildHorseForgetTargetGoal (targetSelector, priority 1) that clears the target after 60 ticks with no line of sight ("break eyesight -> neutral"). LivingIncomingDamageEvent: an untamed victim + every herd-mate within 24 blocks target the living attacker. Tamed horses and debug-dim horses are untouched.
+
+- Debug tools. F8 (RequestHighlightHorsesPayload -> server/DebugHighlightHandler.toggle) is a toggle now: press once to keep every horse within 96 blocks glowing (refreshed every 40 ticks on ServerTickEvent.Post), press again to stop. Per-player, dropped on logout. The stick / clock shortcuts now also work anywhere in a dev build (!FMLEnvironment.isProduction()), not just the horse dimension - HorseInteractionHandler.
+
+- Paper dump (HorsePaperInspectHandler) - dropped generation: and the ancestors block, added a herd: line: band type, "this horse is the lead" or "led by &lt;name&gt;", and the member count within 64 blocks.
+
+- Bigger big horses. BreedStatCurve.scaleBand now runs the above-baseline part of a height ratio through BIG_GAMMA = 3.0 (below-baseline untouched - small breeds already read fine). Real horse heights barely differ (a Shire is ~10% over average) but a draught horse should tower: Quarter Horse resolves ~x0.96, Percheron ~x1.0-1.38 (avg ~1.19), Shire/Clydesdale x1.14-1.43. Falabella etc. unchanged.
+
+- Surfaces. The custom spawn egg gained a Breed: cycle button (CustomHorseSpawnScreen.cycleBreed / applyBreedPreset): pick a breed and it rolls a fresh wild individual of it (genotype + epigenome + sex) into the editor; SpawnCustomHorsePayload carries the token so the spawned horse is stamped (ModNetworking -> record.withBreed). The paper dump prints a breed: line; the dev [coat] chat line appends [<breed>] (via a new GeneticHorseRenderState.breedLabel + coatTextureFor(coat, baby, label) / getOrCreate(coat, baby, label) overloads - label is cosmetic only, the bake is genome-keyed).
+
+- New tests: BreedLineageTest (11), BreedStatCurveTest (7), BreedsTest (7), BreedFounderTest (8); TestCoatPatternTest deleted. :common:test 374 green, :neoforge-26.1.2:build green, runServer boots clean (43 segments, biome modifiers load, loaded 2 data-driven gene(s)). Checklist: wiki/verification.html §0e.
+
+- The DistanceManager.runAllUpdates crash - actually fixed 2026-09-05. History: FinalizeSpawnEvent -> onHorseJoin didn't help (onHorseJoin also fires inside the chunk system's updateFutures), and deferring onHorseJoin's whole body to server.execute also crashed in runClient - server.execute tasks drain in MinecraftServer.waitUntilNextTick right next to ServerChunkCache.pollTask -> runDistanceManagerUpdates, so applyTraitsToEntity's Attributes.SCALE write there still re-enters the ticket pass and NPEs. Breeds made it reliable: a breed pins the body-size locus homozygous, so every Fjord / Percheron / Falabella gets a real scale change on its first resolve. Real fix: all record / coat / trait / herd work now runs from HorseFoundingTickHandler on EntityTickEvent.Post
+
+- the settled entity-tick loop, after the tick's chunk updates, with the horse's surroundings already loaded so refreshDimensions touches nothing re-entrant. onHorseJoin's server.execute deferral is gone; HorseGeneticsEventHandler keeps only the debug-dimension guards + ensureExistingRecordResolved (called by the tick handler). A wild horse founds WILD_FOUND_DELAY_TICKS (20) after spawn so its pack is loaded and query-visible first - the earlier "found on join" scan saw an empty clump (pack-mates not indexed yet) and every horse came out a lone Unknown.
+
+- Also confirmed in the same session: the frame/tobiano/splash "white over the whole topline" defect (known gap #30) is real in-game; still deferred.
+
+- Docs: wiki/breeds.html (new), wiki/nav.js, wiki/breeding.html, wiki/horse-body.html, wiki/roadmap.html §22, wiki/verification.html §0e, README.md.
+
+- Deliberately not built: per-breed pool-rate balancing (all estimates), the biome-density audit, sex-linked / gaited genes, and a "blended F1 toward the stronger parent" cross-stat rule.
+
+Built 2026-09-05, NOT yet play-tested: magic speed, magic health and magic jump - three more genes on the MagicSizeGene pattern.
+
+MagicSpeedGene (horsegenetics.magic_speed, priority 141, Swift/Sluggish/n), MagicHealthGene (horsegenetics.magic_health, 142, Hardy/Frail/n), MagicJumpGene (horsegenetics.magic_jump, 143, Springy/Leaden/n). 42 built-in genes, 44 in-game. Shape of it:
+
+- One shared base, AbstractMagicStatGene (the ManeColor/TailColor -> HairColor precedent). It is the magic body size design generalised to the three additive stats: codominant, three alleles, MEAN_DELTA 0.10 / SIGMA_DELTA 0.07 / MIN_DELTA 0.01 per copy, one nextGaussian() off each copy's own epigenetic seed (GeneEpigenetics.copy(slot)), both copies added (up positive, down negative), six combinations = six outcomes, all wildType. Founder table written out 40% up/n, 40% down/n, 20% n/n - heterozygotes only, ~80% carrier rate, so most wild horses now carry all four body-stat genes. MagicSizeGene stays its own class - it multiplies scale, which has the two-stage natural+magical clamp; the other three have no natural clamp.
+
+- New on TraitBuilder: multiplySpeedUnclamped / multiplyHealthUnclamped / multiplyJumpUnclamped, the exact counterparts of multiplyScaleUnclamped - applied after every addition, clamped only to new HorseTraits.MAGICAL_MIN_FACTOR / MAGICAL_MAX_FACTOR (0.1 - 10, the "10x either way" cap). The bounded Gaussian keeps the real reach near 2.04x at two maximal copies, so the guard never fires - same story as size. MIN_HEALTH (0.5 heart) is still applied last, so Frail/Frail + a disorder can't zero a horse.
+
+- It multiplies the natural loci, it doesn't add. A magic-speed horse that is also mstn=C/C is faster than a plain magic-speed horse by the same ratio - MagicBodyStatGenesTest.theMagicScalesTheNaturalStat pins it. A magically fast pony is still slower than a magically fast racehorse.
+
+- Magic health is deliberately NOT a HealthContribution. That marker is what health.mode = OFF suppresses, and it is for disorders; turning those off must not strip a horse's magical vigour. Frail/Frail is a horse with fewer hearts, not a sick one - no Condition, never suppressed. (Same call milk's Watr/Lava lethal made.)
+
+- Paints nothing - all outcomes wildType, so affectsCoat() false, out of the texture key, GenotypeCatalog collapses each to one entry: size() unchanged at 462 422 019. totalGenotypes() went to 17 644 404 871 265 791 068 979 200 000 (x216, three loci x 6 carryable pairs).
+
+- New MagicBodyStatGenesTest (16 tests). :common:test 348 green, :neoforge-26.1.2:build green. SpecGeneTest.BUILT_IN_GENES 39 -> 42. Two brittle statistical tests were widened where the seed-stream reshuffle tipped them: ShowcaseGenotypesTest magical-share upper bound 0.60 -> 0.66 (it is a floor, not a rate), and GenotypeCatalogTest's raw-product comparison moved to BigInteger (the long had already wrapped - gap #13).
+
+- coat-golden.txt regenerated, but no coat moved - all 450 rows are byte-identical bar the three new =n/n code segments per line. Per-gene epigenetic seeds are keyed by gene, not by stream position, so inserting genes at priority 141-143 doesn't shift particle / light / verdant / test.
+
+- Old saves will not parse. Genotype code went 41 -> 44 segments. Dev only; start a fresh world.
+
+- Deliberately not built: per-part scaling, a coat marking (they are the magic body size family and it has none either), per-allele founder frequencies, environmental noise on the natural stats (still zero - gap #24).
+
+- Docs: wiki/gene-magic-speed.html / -health / -jump (new), wiki/nav.js (new "Magical body-stat genes" section, gene-body-size.html moved into it), wiki/genetics-model.html (table + counts + raw total), wiki/horse-body.html, wiki/api-reference.html, wiki/modding.html, wiki/roadmap.html, index.html, README.md. Checklist: wiki/verification.html §0d.
+
+Built 2026-09-05, NOT yet play-tested: PAX3 SW2 is the ordinary horse - 90% of founders carry one copy.
+
+Owner's call, and it is how minimal splash works in life: a mild splash allele is near-ubiquitous, and what one copy buys a horse is roughly what most horses look like. Pax3Gene's founder table went from hardyWeinberg(SW2 2%, SW4 0.5%) to a written-out 90% SW2/N / 1% SW4/N / 9% N/N.
+
+- It had to be written out, for two independent reasons. Hardy-Weinberg's heterozygote share is 2pq, which peaks at 50% - there is no allele frequency anywhere that makes 90% of a randomly-mating population heterozygous, so the table has to say it directly. And left to HWE, one copy on nine horses in ten would put 81% of wild horses at SW2/SW2, the bold outcome - not a pattern any more, the base coat. Heterozygotes only, baseline last, the MagicSizeGene rule.
+
+- Measured effect on the wild population (20 000 founder draws, 400 baked coats): horses showing any white-pattern locus 33.3% -> 93.6%; mean white coverage of a wild-caught horse 32.5% -> 49.5%; a foal of two wild-caught parents is splash-bold 0.07% -> 20.5%. Bold splash is now the commonest thing a player breeds by accident, and a horse that is also MITF splash is the usual case rather than a rarity - which is the interaction the two-locus split exists to show.
+
+- It makes the splash calibration bug load-bearing. The audit that opened this session found that WhitePattern.splash measures its waterline against the whole-horse height (hoof to ear tip, span 33.75) while the barrel top is at 0.622 of that and the legs only reach 0.326. So S_SPLASH = 0.34 puts the line at frac 0.325-0.386 - i.e. all four legs entirely white - and that is now what 90% of wild horses look like. "Minimal marking" currently means four white legs. Fixing the mapping (s = 1 should land at the crest, not the ear tip) is no longer optional tuning; see the known-gaps entry.
+
+- :common:test 333 green. coat-golden.txt untouched - the golden cases are explicit codes, not founder draws, so nothing about any individual coat moved. No format change; old saves parse.
+
+- Deliberately not done: the same treatment for the particle locus. It was asked for on the premise that a heterozygote is silent, and it is not - ParticleGene.expressionOf returns singles[a] when the second copy is n, so one variant copy visibly trails its particle. At 90% het, 90% of wild horses would trail something (today: 7.7%). Owner chose to skip it rather than take that tonal shift.
+
+Built 2026-09-05, NOT yet play-tested: face markings become a family - star, stripe and snip.
+
+All four white loci now draw the head from one shared vocabulary, WhitePattern.faceMarking(epi, skin, strength, jag) + WhitePattern.FaceMarking, which closes the standing "every locus draws the same centreline stripe" gap. Machinery is wiki/pipeline.html#face-markings; the shape of it:
+
+- Three components, not eight named shapes. Horsemen name eight or nine markings, but they are three independent components - a patch on the forehead, a band down the nose, a patch at the nostrils - plus one width, and every named marking is a combination of them. describe() reads the term back off the components ("star and snip", "blaze to the nostrils", "bald face"); nothing ever chose it, which is the check that three booleans and a width really do span the vocabulary. FaceMarkingTest asserts every name is reachable.
+
+- Star and snip are the point - both are detached patches, white with coloured face on every side, which the old painter structurally could not draw: it was one centreline band starting at the nose and running back, so its whole vocabulary was stripe / blaze / bald face. Measured: a star-only marking is 12 texels on HEAD.TOP and nothing on the muzzle; a snip-only is 7 texels on MUZZLE.TOP and nothing on the head.
+
+- Face space is t from poll (0) to nose tip (1), measured along body-space x over head and muzzle together, so the same numbers mean the same anatomy on the adult (separate MUZZLE box) and the foal (no muzzle box at all). The eyes sit near t = 0.4 on both meshes, which is what anchors the star at 0.30 and the snip at 0.90.
+
+- Strength picks the distribution, not the marking. A locus does not decide a horse has a snip; it decides how much white the horse tends toward. At S_MINIMAL 0.12 that is star 37% / nothing 29% / snip 9% / star+snip 12%; at sabino 0.42 a bare face is essentially gone; at 0.62 it is a blaze; at 0.93 a bald face three times in five. This is what finally makes W20/N mean its own description - "a star and a sock" - which was prose nothing implemented.
+
+- jag carries the sabino/splash difference onto the face - 0.42 for KIT, 0.11 for the two splash loci, 0.34 for frame. Same reason their body margins differ, one parameter rather than two painters.
+
+- A blaze no longer wraps under the jaw. Face.BOTTOM on the head and muzzle only whitens at bald-face width. The old painter tested the centreline on every plane of the box, so the underside of the jaw went white on every blaze from every locus - a real bug, found while wiring this up.
+
+- The draw is fixed and unconditional: one long and eight floats, every time, including for components that turn out absent. The particle locus's lesson, applied: a draw made only when a flag is set silently repaints every horse in every save the first time that flag's odds move. FaceMarkingTest runs an empty marking and a bald face through a nine-value FakeRng and asserts both exhaust it.
+
+- EdnrbGene stopped hand-rolling its own face. It was a bare |z| <= faceHalf over the whole head with no top and no shape; it is now FACE_STRENGTH = 0.80 / FACE_JAG = 0.34 on the shared vocabulary, which is the bald-faced pattern frame is supposed to be. FACE_HALF_MIN/_RANGE and WhitePattern.withinFace are gone.
+
+- New FaceMarkingTest (12 tests). :common:test 333 green, :neoforge-26.1.2:build green, creator parity 3 832 checks / 48 cases (untouched - the creator only ports KIT's dominant-white outcome, not WhitePattern). coat-golden.txt regenerated: 330 of 450 rows byte-identical, and the 120 that moved are exactly the rows carrying a KIT / MITF / PAX3 / EDNRB variant. No format change, so old saves still parse - those horses just repaint.
+
+- Deliberately not built: giving tobiano a face marking (real tobianos commonly carry a star or blaze, but the gene's documented behaviour is a coloured head and that is a separate call); medicine hat / war shield, which is not a face marking at all but a retention rule on a near-white horse
+
+- logged in wiki/roadmap.html#natural-genes, and see gap #29 below; surfacing describe() anywhere player-facing (it is a natural feed for the gene dictionary and the info panel - gap #10).
+
+- Docs: wiki/pipeline.html (new "Face markings" section), wiki/api-reference.html, wiki/gene-kit.html, wiki/gene-mitf.html, wiki/gene-pax3.html, wiki/gene-ednrb.html, wiki/roadmap.html §4.2. Checklist: wiki/verification.html.

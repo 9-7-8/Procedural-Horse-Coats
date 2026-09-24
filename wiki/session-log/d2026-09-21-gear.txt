@@ -1,0 +1,104 @@
+2026-09-21, last of all — two tack slots become nineteen, and two documentation conventions fall out of it
+
+    The horse gear overhaul, asked for directly: a Gear tab holding every
+    slot. It shipped as the roster, the storage and the screen — and deliberately
+    not the pieces, which the owner said up front were for later.
+    Horse gear is the page, and it is the first one built under
+    the two conventions this session established.
+
+The ceiling was the design, and it had already been worked out
+
+    EquipmentSlot has exactly two animal entries, BODY and
+    SADDLE, and EquipmentClientInfo.LayerType is not extensible, so
+    nineteen slots were never going to be nineteen equipment slots. The saddle and the barding
+    keep the two real ones because vanilla draws those free; the other seventeen ride
+    data/HorseGear, a new synced attachment. A container was the other
+    option and is worse twice over — a widened container is reachable by
+    hoppers, and AbstractMountInventoryMenu.quickMoveStack computes every
+    shift-click range from hardcoded indices it shares with donkeys, mules and llamas, which is
+    how items duplicate or vanish. None of that was discovered this session: the roadmap had
+    written it down, and HorseTackSlot's own class comment had named
+    “a bridle, a blanket and shoes” as the obvious next ones. The seam
+    was built expecting this, and the work was smaller than the roster's length suggests.
+
+The roster carries the layout, so the screen did not grow with it
+
+    Each constant now holds its backing, its zone, its label, its hint and its position
+    on the paper doll as a fraction of the doll's box. Adding a slot is a line in the
+    enum plus a tag; the screen is not touched. The Gear tab draws the horse's own portrait and
+    the slots over it in the place the gear actually sits, which needed a new
+    HorsePortrait.drawPosed — the existing portrait swings to follow the
+    cursor, and a doll whose horse moves would put the near fore leg somewhere different from
+    the boot slot that belongs to it. Overview's old two-slot row is gone; it now reports a
+    count and points here.
+
+    What a slot accepts is an item tag, and all seventeen are empty. That is
+    the correct refusal while the pieces do not exist — a slot with an empty tag takes
+    nothing rather than taking dirt — and it is the seam each piece joins later, from a
+    datapack if wanted. The tab says so on screen, because seventeen slots that silently refuse
+    everything read as broken rather than as unfinished.
+
+The roster checks itself at boot, because it could not be a test
+
+    Every way a nineteen-row table of screen geometry can be wrong fails silently: two
+    slots on one anchor draw exactly on top of each other and one becomes unclickable, an
+    anchor outside 0..1 is invisible but still holds its click box, and a third constant handed
+    a real EquipmentSlot would take one the barding needs. A unit test was written
+    for exactly this and deleted — this module's test source set has no
+    Minecraft on its classpath on purpose (MaterialScanTest imports none) and the
+    enum cannot load without one. So it is HorseTackSlot.verify(), thrown from the
+    mod constructor beside DietFoods.verify, which exists for the same stated
+    reason.
+
+Four calls from the owner, and one reversal
+
+    - A bridle and a halter share one headstall slot, reversing the
+        roadmap's split. The distinction that split protected is real — haltered means
+        led and lunged, bridled means steered — but a horse cannot wear both at once, so
+        they are two items competing for one slot. The distinction survives; it just lives in
+        the items now. Recorded.
+
+    - A blanket gets a slot, which the enum's own documentation had already
+        named and the roster had not.
+
+    - Legs and hooves are four slots each, not a set of four, so a horse can
+        throw a single shoe.
+
+    - Mane and tail go in with their utility owed rather than declared. They
+        are the two slots that collide with the rule reversed earlier the same day —
+        nothing purely aesthetic except breeding — so braids alone will not qualify to
+        fill them. A neck slot was considered and dropped as already covered by barding.
+
+Two conventions, and they are now hard rule 9
+
+    Both came from the owner while the code was being written, and both are about the same
+    failure: a subject's plans and its checklist were living on two enormous shared
+    pages instead of beside the thing they are about.
+
+    - A subject with a page keeps its plans on a Roadmap tab there. The
+        accessories system, the slot roster, shoes, native tack, the saddlebags and the saddle
+        pad moved off the roadmap whole — ids and all, so every
+        inbound roadmap.html#anchor became horse-gear.html#anchor in
+        one rewrite rather than two. The roadmap keeps one sentence pointing at them,
+        because a summary would be the same content in two places again.
+
+    - A new thing's verification checklist goes on a Verification tab of its own
+        page, not in the one growing document, which
+        now holds older entries only. A checklist beside the thing it tests is read by whoever
+        opens that page and deleted by whoever confirms it.
+
+    Both use wiki/tabs.js's existing page-local tab mechanism,
+    which turned out to be designed for precisely this and is deliberately not a wiki-wide
+    view, so no sidebar filter or index switcher had to learn about them. Four tabs on the gear
+    page were confirmed rendering in headless Chrome, with no console errors.
+
+What was not built, and what nobody has seen
+
+    No render layer for any of the seventeen, because there is nothing to
+    render; the saddle and the barding draw through vanilla as they always did. No items. And
+    nothing here has been opened in a game — the checklist is on the
+    page's own Verification tab, and the regression that matters most is that the saddle and
+    the barding still work, since they changed screens and their write path moved from an
+    inline setItemSlot to HorseTackSlot.set. A server boot was
+    not run: another NeoForge instance of the owner's had held the run directory since
+    02:01, and it was left alone.

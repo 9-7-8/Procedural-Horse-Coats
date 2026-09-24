@@ -1,0 +1,95 @@
+2026-09-17, last of the day — A ramp or a palette takes its colour source per region
+
+    The entry below left RAMP and PALETTE out, and that remainder
+    was all of §10 still standing. This finished it.
+
+What does a region even mean on an op that generates its colour?
+
+    That was the whole decision, and it is not answerable from the roadmap entry, which only
+    said “the same field”. TOWARD and FLAT name
+    a colour, so a region overrides it. RAMP and PALETTE
+    generate one — a stop list walked along an axis, a draw per cell
+    — so there is no flat colour to override. Three shapes were put to the owner:
+    an entry carrying a whole colour source of its own with a one-stop shorthand
+    (taken), the same without the shorthand, or the cheap one — reuse the existing
+    Region record verbatim so a named part takes one solid colour and the ramp
+    covers only what is left.
+
+    The cheap one was the one to refuse. It would have made a region
+    less expressive than the op it sits in, which is the exact thing
+    the field’s own doc calls out as wrong, and
+    a flat patch inside a ramp is already writable as a second FLAT layer —
+    so it would have cost a format change and bought nothing. It also would not have touched
+    the complaint the roadmap actually had: a ramp confined to one region still costing a
+    layer per region.
+
+The op keeps the geometry, and that is the point
+
+    An entry carries exactly one source — its own colors, its own swept
+    hue, or a single color. What it does not carry
+    is the axis, space, from/to, seed or
+    scale: those stay the op’s, so the regions recolour one shared
+    sweep rather than each running one of their own. That is the whole advantage over a
+    layer per region — the sweep cannot drift out of step with itself, because there is
+    only one of it. On a PALETTE the same holds one level down: seed and scale are
+    read before the region is consulted, so the tessellation runs unbroken across a
+    region boundary and only the colours drawn from it change.
+
+    A flat region turned out to need no special case. It is a one-stop ramp:
+    interpolation needs a pair of stops, a list of one has none, and the tail of
+    rampColour already returns the last stop. The parser normalises
+    color to a one-entry list on the way in, so nothing downstream grew a second
+    fork for “flat” — and a palette of one hands every cell the same entry
+    for the same reason.
+
+Where the legal keys live, and why that spot
+
+    A region may only spell a colour the way its own op does, so the parser needs to know
+    which keys each op allows — hueSpan on a TOWARD region is
+    refused rather than stored for nobody to read. Those keys ride in
+    SpecSchema.Param.choices, which is a second meaning for that field and was
+    chosen deliberately: choices is what SpecFixtureTool
+    bakes and parity.js compares. A sixth record component would have
+    been invisible to parity unless both of those were extended too, so the creator could have
+    offered a region a key the game refuses and nothing would have caught it. This way the
+    vocabulary is compared across the two engines for free. Defaults are read out of the
+    op’s own parameter list by name for the same one-copy reason — which is why
+    hue defaults to −1 on TOWARD and 0 on RAMP
+    without the parser knowing either number.
+
+    Four load errors now rather than three: no parts, no colour, two
+    colour sources in one entry, and a part claimed twice. The third is new and is
+    the same discipline as the fourth — a region naming both colors and a
+    hue has no answer that is not arbitrary, and the op’s own quiet
+    precedence (stops win) is not a rule worth teaching by experiment.
+
+The gate was watched going red, because green meant almost nothing here
+
+    Parity came back green at 7173 checks against 7171 before
+    — a rise of two, after two whole layers were added to
+    prismatic and a new parameter to two ops. Those two are the schema table’s
+    two new entries, which is consistent, but it is exactly the shape a fixture that never
+    looks at the new path would also have. So it was measured: ignoring the region lookup on
+    both ops fails 496 checks, and regressing only a region’s
+    own hueSpan fails 108 — so the per-region span is
+    compared, not merely the fact that a region exists. Both coat goldens and
+    dead-layers.txt are untouched, because no shipped gene carries the field.
+
+What was deliberately not done
+
+    - No gene was authored to use it. The field is opt-in and nothing in
+        the game draws one, which is why both goldens sat still. prismatic gains
+        a four-source ramp and a region-swapped palette, but that is a parity fixture rather
+        than a horse anyone meets.
+
+    - The creator’s control for it has never been on a screen. The
+        region editor grew a third mode on the two generating ops (its own stops / its own
+        swept hue / one flat colour), driven off the schema so it cannot offer an illegal
+        key. It is syntax-checked and the designer boots clean, but the
+        creator itself was not opened —
+        §0-EZ.
+
+    - Gap 164 is still open. A region
+        can now hold its own hue, which is a second independent draw and still not
+        “this hue plus 180 degrees”. Nothing here brings arithmetic to a
+        parameter slot.

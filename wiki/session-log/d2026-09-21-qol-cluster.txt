@@ -1,0 +1,164 @@
+2026-09-21, later still — the quality-of-life cluster, and a reversal: the rider is half of what a horse can do
+
+    No code. The second survey session in a day, and the one that worked off
+    the backlog's largest row — the six-mod
+    quality-of-life cluster, which the row itself insisted be read “as one batch, not
+    six”. The owner asked for every call to be put to her as a choice rather than decided on
+    her behalf, the same brief as the Simply Equine entry below, and the most important answer of
+    the session was one she wrote herself instead of picking an option.
+
+The row was wrong about two of its own six names
+
+    The cluster is five mods, and one of the links pointed at something that does not exist
+
+        The Horse Buff at 9minecraft is a fabricated repost. It
+        advertises builds for Minecraft 26.2 and 26.3 dated three weeks ago; the real mod is
+        archived on GitHub (April 2025) and on Modrinth, topping out at 1.21.4, and the one fork
+        still moving stalls at an unreleased 26.1 branch. The page's feature list paraphrases the
+        real mod but drops three features it has and adds one it never had
+        (mount armour rendered see-through for the rider). It was dropped rather than read. The
+        genuine mod's own README names Horseman as its
+        successor — which we had already read and which sits on the compatibility page
+        already.
+
+        Horse Upgrades is two unrelated mods sharing a name. The
+        CurseForge link in the row is Lothrazar's 2016 Minecraft 1.8 mod, whose whole design is
+        carrots granting permanent stats. The Modrinth mod of the same name is horseshoes forged
+        on an anvil — which the horse-shoe roadmap already owns
+        as its own section. Both were read; they went to opposite places.
+
+        This is the second session running where a store page and the artefact described different
+        mods, and the second where reading the thing itself was the whole value of the row. The
+        Simply Equine entry below has the same finding in stronger form.
+
+The reversal: a horsemanship skill is in, and the objection is answered rather than dropped
+
+    Two mods in the cluster let a horse exceed its own stats — Superb Steeds by training it
+    with riding, Horse Upgrades by feeding it carrots — and both ran straight into a
+    position this project had taken twice: a player-progression ladder cuts against breeding being
+    the progression. I offered four ways to refuse them.
+    The owner took none of the four and reframed the question instead: gate the
+    gain behind both bond and a rider skill, because
+    “bonding with a horse makes it listen better, and rpg skill makes you a better horse
+    rider”.
+
+    That is a better answer than any of mine, because it relocates the gain. Nothing makes the
+    horse a better horse; what improves is the rider, and how well a particular horse listens to
+    them. The consequence, settled as
+    its own call, is that
+    the bonus belongs to the pairing and is never written to the animal — an
+    AttributeModifier applied on mount and removed on dismount. The horse's stored
+    stats stay exactly its genome, the info screen keeps telling the truth, and a sold horse
+    carries none of the seller's skill.
+
+    That distinction is also what lets the same session accept one and refuse the
+    other. The carrots are refused —
+    written up beside the rule they break —
+    because a carrot changes the horse permanently, and riding well changes only the ride. Speed
+    and jump only; never health or size, which would stop a frail horse being legible at a glance.
+    The magnitude is the owner's call and the one number carrying real design risk:
+    uncapped, with sharply diminishing returns, which means the curve is the only
+    thing keeping a well-ridden ordinary horse from overtaking a bred one. The roadmap says to
+    pick it against measured genome spread rather than in the abstract.
+
+The hook was chosen by reading three jars, not three store pages
+
+    The owner supplied her own RPG stack and asked which to integrate with. All three were
+    unpacked from her server and read as bytecode.
+    Pufferfish's Skills is the answer, and it
+    is not close.
+
+    - The tree is pure data and needs no code at all. Pufferfish scans every
+        namespace for data/<ns>/puffish_skills/config.json, so a Horsemanship
+        category shipped inside our own jar is read when the mod is installed and inert when it is
+        not — no registration, no isLoaded probe, no presence check. Skill Tree
+        ships its own categories exactly this way, which makes its jar the schema
+        documentation.
+
+    - The effect needs no branch either. The built-in attribute reward applies
+        a modifier to any registered attribute, including one we register unconditionally —
+        so our horse code reads a value that simply stays at baseline when nothing ever grants it.
+        A genuine zero-branch soft dependency, and the shape to copy for future optional
+        integrations.
+
+    - The other two cannot host it. RPG Attribute System's
+        isAvailable() is compiled as a literal return true and is
+        useless as a presence check, it exposes no events at all, and its eight attributes are
+        fixed. Skill Tree has no api package and hard-requires two spell mods.
+
+    With no skills mod installed, bond alone carries the feature at a lower ceiling.
+    That was the deliberate choice over letting it not exist: most players run no skills mod, and
+    it also means the whole system can be built and tuned against bond before any hook is written.
+
+Superb Steeds looked like a head-on collision and turned out not to be
+
+    It is the rare overlapping mod that can be installed beside this one — a
+    maintained NeoForge branch on our exact version — and it mixins away vanilla's per-horse
+    stat variance including offspring attributes, which reads as a direct attack on the genetics.
+    Checking the code rather than assuming changed the verdict.
+    HorseRecords.applyTraitsToEntity writes base values from the genotype on every
+    join, so its flattening is overwritten by ours the next time a horse loads, and its offspring
+    mixin is moot because our foals never inherit an attribute. What actually survives is its
+    star-training, which is applied as modifiers and composes on top of us.
+
+    So the real finding is subtler and more useful: it is a second implementation of the
+    feature this session just designed, differing in where the gain lives. Two training
+    systems on one horse is a bug generator, the same argument that already sits on Icy's bond.
+    Its page plans runtime detection rather than a
+    patch, because the bad outcome is silent: stars climbing on a horse whose genome says
+    otherwise, with no way to tell which mod is talking. Three of its smaller tweaks were
+    harvested; its “no saddle needed to steer” was not, because
+    bareback steering at bond tier 3 already does
+    it better.
+
+What else was taken, and what was refused
+
+    - Rider comfort — the
+        mining-speed debuff while mounted, a keybind for your own inventory while riding, fading
+        the horse as you look down, leads returning to your inventory, and right-click-to-equip.
+        Two carry warnings written into the section: the fade is the first thing to ask a
+        procedural coat to render half-transparent, and right-click-to-equip lands on the
+        same interaction as our own i button.
+
+    - Two bond behaviours — a
+        trusted horse stops bucking, and a bonded horse waits where you left it. Both were keyed
+        to a saddle in their original mods; keying them to bond instead is the
+        adaptation, and it keeps a low-bond horse behaving exactly as vanilla does.
+
+    - Horse Tweaks' seven saddle upgrades become
+        enchantments, which is also
+        what that section's own rule already implied. Two of the seven we ship by other means
+        already, and feather fall is flagged as the one that is a larger change than it
+        looks.
+
+    - Leave My Bars Alone is folded into
+        the RideHUD section rather than rebuilt. It
+        is maintained, MPL-2.0, and two files long, on a branch matching our Minecraft version. We
+        design our readout not to add clutter; the vanilla bar problem stays solved by the mod
+        that solves it.
+
+    - Refused: the stat and recolour carrots (above); Horse Buff's step-height
+        change, because it moves a number every other mod's pathing assumes; and creative
+        instant-tame, which was offered and declined because it would reopen the
+        no-creative-exception ownership rule set on 2026-09-13.
+
+    Licences: ideas only, always. The five mods are MIT, GPL-3.0, MPL-2.0,
+    CC BY-NC-SA and All Rights Reserved, and the owner's call was one rule rather than five
+    — nothing is ported whatever the terms allow. The MIT one is the tempting exception,
+    since Horse Tweaks is also Minecraft 1.12.2 and would double as a
+    backport reference; it was declined anyway.
+
+    Two survey rows closed — the quality-of-life cluster, and the
+    RPG-skills row, the latter by building the thing it was hedging about. The count of what is
+    left is on the table itself and is deliberately not
+    repeated here — the entry below quoted a count that was already wrong when written, and
+    it has been taken out rather than corrected, which is the whole argument against writing a
+    derived number into prose.
+
+    One defect fell out of measuring ourselves against other mods, which is the real
+    argument for doing it. Several of the five protect an owned horse from wandering or
+    vanishing, and checking what we do revealed that
+    setPersistenceRequired is called on cowboy stock, egg-spawned horses, stable
+    stock and the debug pens — and never on taming or ownership. Whether vanilla already
+    protects a tamed horse was looked for and not established, so it is recorded as a question
+    with the test attached rather than as a bug: gap 300.

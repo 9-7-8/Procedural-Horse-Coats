@@ -1,0 +1,87 @@
+2026-09-21, last — the health layer leaves the roadmap, and five breed rows were lying about shipped genes
+
+    No code. The owner read the roadmap's health-layer section and said, in
+    four lines, that most of it had already happened: the expected-foal display exists in the
+    H menu, so does carrier display, per-part scaling is not worth the effort, and the
+    naked-foal coat is not worth it for a horse that dies at birth. Every one of the four was
+    right, and the section is now gone.
+
+Two were shipped, and the roadmap said the opposite of the code
+
+    The bullet asking for “a punnett square answered about two specific animals,
+    in game” describes the H menu's Breeding preview tab exactly: two
+    pickers over your own tamed horses, then one row per locus reading
+    chance | foal pair | expression name, phrased as 1 in 4 /
+    3 in 4 / always, grouped stat axis  disorders  coat
+     abilities, with settled loci hidden behind an “All loci” toggle. It also
+    re-derives which parent is the dam from the sex locus rather than trusting the picker.
+    BreedingPreview's own class comment argues the owner's framing back at the
+    roadmap — “it does not draw a foal, because a predicted coat is a promise
+    the draw does not make”, and the screen says “deliberately not ‘what
+    will the foal look like’”.
+
+    The carrier bullet claimed “every disorder declares a carrier sentence
+    and nothing shows it”. RecessiveDisorderGene generates that sentence, and
+    it renders under the row on the information screen's Coat and Other genes
+    tabs, and per gene in the H menu's Gene database tab. What is genuinely absent is
+    narrower and was not what the bullet asked for: no surface says “this horse of
+    yours is a carrier” in prose — the Genes tab tints the row, and the paper
+    dump carries it only inside the short genetic code.
+
+Two were cut, and cuts are not gaps
+
+    Per-part scaling for both dwarfisms and ST14's naked-foal coat
+    went to the settled list, not the gaps list.
+    The reopen trigger on the first is written down deliberately: the mod has its own horse
+    model, never “someone has time”. The second is simpler — the affected
+    foal dies within seconds of birth, so a bare-skin template buys a few seconds of a horse the
+    player is about to lose. B4GALT7,
+    ST14 and the body page now
+    say both are the shipped shape by design; gap 28
+    kept only what is still really missing, with no “closed” note left behind.
+
+Gait had no roadmap entry at all, while the game promised it to the player
+
+    Deleting the four left the section empty — and surfaced that
+    DMRT3 is registered, inherited, carried by the breeds that
+    really have it, and moves no horse, with no roadmap entry anywhere while its
+    three expression strings tell the player “the gait is not animated yet”.
+    The owner's call was to keep it planned but not under health, so it is now
+    its own section. It is explicitly not bundled with the
+    per-part cut: that one wanted the mod to own the horse model, this one wants new motion on the
+    model it already borrows.
+
+The find: five breed rows advertised three genes as unbuilt, and all three ship
+
+    “JEB is not built” — linked to a roadmap section that had not mentioned JEB in a long time
+
+        Chasing what still linked to the doomed anchor turned up five rows in
+        the breed table claiming JEB,
+        FIS and WFFS were missing features. All three ship
+        (Lama3Gene, Slc5a3Gene, Plod1Gene), and four of the
+        five breeds carry exactly the rates their own row quotes as absent: Fell Pony
+        38% fis/N, Selle Franais 6% ffs/N, Swedish Warmblood
+        7.4%, American Saddlebred 5.14% jeb/N. Zangersheide is the one real
+        “no” and for a different reason — its draft's rate was a self-labelled
+        proxy and was declined — so it now says that instead. The body page's
+        “No CSNB — the leopard complex is not built” was stale the same way.
+
+        The shape to remember: a stale claim survives because its link still
+        resolves. Every one of these pointed at a live anchor whose section had long
+        since stopped saying what the sentence promised, so nothing ever failed.
+        check-links.mjs cannot see this, and did not.
+
+Checked
+
+    - check-links.mjs green across 378 pages after the anchor was deleted and its
+        twelve inbound links were retargeted — including four in this log, which were
+        pointed at the genes that have since shipped rather than left dangling.
+
+    - Search index rebuilt; sync-page-views.mjs had nothing to update.
+
+    - :neoforge-26.1.2:build up-to-date and check-parity.mjs green
+        (7,163 checks) — confirmed rather than assumed, though no code changed.
+
+    - Nothing new to play. Both shipped features were already on
+        the checklist as unverified, so nothing was added or
+        deleted there.

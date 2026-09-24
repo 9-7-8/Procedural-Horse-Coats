@@ -1,0 +1,62 @@
+2026-09-18, evening — Six reports from play, and what they had in common
+
+    A session driven entirely by the owner playing and saying what was wrong. Worth recording
+    because four of the six were the same kind of bug: a value that was
+    computed correctly, stored correctly and then read from the wrong place.
+
+    The family tree drew every ancestor as a plain black horse, and the obvious
+    theory — ancestor genomes are not persisted — was wrong. They are on
+    HorseRecord, they sync, and FamilyTreeScreen built the right
+    CoatData from them. The coat-bake rationing of 2026-09-13 had added a resolved
+    coatId to the render state and made getTextureLocation prefer it;
+    a screen’s throwaway model horse is not in ClientCoatCache, so that id
+    resolved from the wild type and the real coat, assigned one line later, was never read
+    again. The general shape is now on
+    coding notes: caching a derived value
+    beside the thing it is derived from, where somebody else writes the source afterwards.
+    Four screens had it. The fix removed the broken half rather than repairing four copies.
+
+    “There doesn’t seem to be a way to change the barn name”
+    was the same shape again. There is a way, and it worked end to end —
+    HorseInfoScreen simply held the record it was constructed with in a
+    final field, so pressing Set renamed the horse and its nameplate while
+    the screen kept printing the old name. A button that does nothing, from the outside.
+
+    Suntouched was the one that was genuinely three bugs, and the one where the
+    guess going in was wrong. The prediction was a client-side genome read failing before the
+    record arrived — the family-tree shape. It is not: the light is a real server-placed
+    block, and it had one candidate position which had to be air. Grass, ferns, snow,
+    crops and shallow water all occupy that block, so failing was the common case outdoors,
+    and the 2026-09-02 check that passed had been done in a swept pen — the one place a
+    single candidate always works. The lesson worth keeping is about the test venue:
+    a debug yard with a clean floor cannot show a bug whose trigger is ordinary terrain.
+    Separately, singleplayer was not working better than the server, it was littering:
+    EntityLeaveLevelEvent fires on the client level too, the statics are shared in
+    a single JVM, and the client’s copy tore the horse out of the tracking map before the
+    server could queue its light for removal. Every glowing horse walked away from left its
+    light burning for good.
+
+    Speed and jump in metres turned up an inconsistency worth recording. Four
+    places in the mod already quoted m/s and nothing checked they agreed. They do: 43.17 m/s per
+    point of movement speed falls out of the player movement model a ridden horse travels on,
+    and the breed curve’s 9.71 is that same constant against a different anchor —
+    the average vanilla horse, not BASE_SPEED. Writing the test also corrected the
+    session’s own arithmetic: vanilla’s jump roll stops at 0.8, about
+    3.6 blocks; the familiar 5.3 is jump strength 1.0, which only breeding reaches.
+    Two places had said 5.3 was vanilla’s ceiling.
+
+    Jade is the first third-party jar this mod compiles against, and
+    compatibility.html said outright that nothing reaches into another mod’s
+    classes. That rule was rewritten rather than quietly excepted. The Horse Powered argument is
+    specifically about guessing at private names that can be renamed without warning; a
+    published, versioned plugin API is the opposite, and fails at compile time here rather than
+    silently in somebody’s world. Still compileOnly, and the built jar was
+    checked for leaked classes. The API was read out of the jar with javap, because
+    Jade’s own docs document neither IEntityComponentProvider nor
+    EntityAccessor.
+
+    One process note. The first runServer of the night printed
+    BUILD SUCCESSFUL over a server that had crashed and never reached
+    Done (. The cause was mundane — the owner’s own dedicated server
+    held port 25565 — but it is the cleanest demonstration yet of why that line is not
+    evidence. Grep for Done ( and for ERROR, every time.

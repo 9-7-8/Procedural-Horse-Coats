@@ -1,0 +1,91 @@
+2026-09-15, later still — fourteen breeds, four drafts that were two horses, and a stub declined
+
+    The fourth intake batch, and the first run at more than five at a time: the queue from the Posavac
+    to the Hucul Pony, alphabetically. 79 breeds ship now. Sixteen intake files went in
+    and fourteen breeds came out, because two pairs of files were each one horse twice.
+
+The batch
+
+    Posavac, Debao Pony, Dlahest, Fell Pony, Finnhorse, Florida Cracker Horse, Gelderlander,
+    Gotland Pony, Baise Horse, Guoxia, Henson Horse, Hequ, Highland Pony, Hucul Pony.
+
+    - Two pairs of drafts were the same breed. Croatian Posavina Horse.md
+        and Posavac.md are one horse; Hucul Horse.md and
+        Hucul Pony.md are another. Both pairs were merged rather than shipped twice, and
+        both pairs disagreed with themselves in ways worth recording.
+
+    - The two Posavac drafts gave opposite coat identities. One led bay and seal
+        brown with flaxen explicitly unsupported; the other led chestnut with flaxen as a defining
+        trait. Neither cited a coat survey. The better-sourced draft won — it is also the one
+        carrying the peer-reviewed heights (Ivankovi etal.) — so bay leads
+        with chestnut a real ninth and a mild flaxen on it. The disagreement is written into
+        the breed file rather than averaged silently, because the loser is not obviously wrong.
+
+    - The Hucul's reputation and its genotype disagree, and the genotype won. One
+        draft was evidence-driven (a published Polish allele-frequency study), the other
+        studbook-driven (what the registry admits). The study makes dun about a quarter of the herd
+        where the prose everywhere calls it the signature. This is the
+        Domestic Mountain Pony situation again and was resolved the same
+        way; a 2019 study finding recorded Hucul colours disagreeing with genotype is the
+        justification. Tobiano is the one value that splits the two drafts and is a judgement call.
+
+    - Every draft's size scale was wrong. All fourteen. This is now four batches
+        running and should be assumed rather than checked for. The Dlahest draft wanted
+        ×1.00–1.11 for a 148–156cm horse and the Guoxia ×0.42 for an
+        86cm one. All were re-derived from cited heights through
+        BreedStatCurve. Two landed exactly on shipped neighbours as a check: the Florida
+        Cracker on the Mustang's [0.857, 0.984], and the Gelderlander's
+        1.238 on the Irish Draught's 17.0hh.
+
+    - The Guangxi is properly the Baise Horse and ships under that name (owner's
+        call). Its own draft opened by arguing the point, and it is right: Guangxi is the autonomous
+        region, and the Debao Pony and the Guoxia in this same batch come from the same ground.
+
+    - The Hucul is Romanian here, on intake/breedbycountry.md, over
+        both drafts leaning toward Poland as holder of the Studbook of Origin. The owner's table wins;
+        the homeland genuinely spans four countries and a breed is pinned to a nation regardless.
+
+    - The Gotland ships single cream and cannot ship double. Its conservation
+        profile excludes the homozygote, not the allele, so Cr/N is in the pool and
+        Cr/Cr is simply absent from it — a founder is never cremello, though
+        breeding two carriers still gets there. Grey and tobiano are excluded outright by the same
+        profile. It also has the rare measured negative: a published sample of 28 found
+        DMRT3 at zero frequency, so the no-gait call is evidence rather than omission.
+
+    - The Guoxia forces dun wild on purpose, which is the most interesting
+        restraint in the batch. Its primitive markings are described in every source and tied to the
+        tested D allele in none, so naming a dun pool would assert a molecular result
+        nobody has. Neither it nor the Debao borrows a dwarfism allele for being tiny; the size band
+        carries both, as it does for the Domestic Mountain Pony.
+
+    - Hequ is the first breed to use strains for a
+        regional colour cline. Three named plateau varieties — Jiaode, Suoke, Kesheng
+        — differing in grey alone, Jiaode much the greyest. They differ in size in life
+        and cannot here, since a strain may override gene pools and nothing else; the file says so.
+
+    - The Finnhorse's interesting half is its minorities. Chestnut is past 90% by
+        studbook policy rather than ancient type — the 1907 closure refused grey, palomino,
+        piebald and white as foreign — so the pool's real content is bay at ~6%, black at ~1.2%
+        and percent-level traces of grey, cream, silver, dun, roan, rabicano and SW1.
+        Sabino is deliberately absent despite the breed having a common sabino-like pattern,
+        because that pattern is documented as non-SB1. Its four official sections are performance
+        categories over one gene pool and are pointedly not strains.
+
+Two disorder genes went to the roadmap, not into a guess
+
+    FIS (foal immunodeficiency syndrome) is the sharpest health gap the mod has: a
+    recessive lethal that about 38% of real Fell Ponies carry — 82 of 214 in the
+    foundational screen — shared with the Dales Pony, and tested for by the societies since 2010.
+    A Fell that carries nothing is the one thing the real breed is not, and both breeds ship clear and
+    say so in their files. WFFS is the real modern concern across the Dutch warmblood
+    population and the Gelderlander names no rate for it; PLOD1 is Friesian dwarfism and is
+    not a substitute, which is the trap worth flagging. Both on
+    roadmap §12 (retired 2026-09-21; PLOD1 shipped).
+
+One draft was declined
+
+    The Dutch Warmblood is not in this batch and its file stays in intake/.
+    The draft is a 28-line stub — no breed JSON, no loci, no frequencies, no disorders, no
+    population, no size — and ends by offering to write a real one later. Shipping it would have
+    meant inventing a warmblood off the Hanoverian and calling it a translation. Owner's call was to
+    skip it and ship fourteen rather than backfill, so the batch is 14 and not 15.

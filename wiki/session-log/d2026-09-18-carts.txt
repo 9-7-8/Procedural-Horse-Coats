@@ -1,0 +1,121 @@
+2026-09-18, after Cloudtouched — Carts, and a stat that finally does something
+
+    A cart mod arrived in intake/ — UsefulCarts, MIT, four ports deep from
+    MennoMax's AstikorCarts — with a brief saying to merge it in. The brief was about
+    licences and entrypoints. The interesting half of the job was not in it:
+    every horse in that mod pulls a cart at exactly the same speed, and this
+    is a mod about horses that differ.
+
+The rule, and the test that fixed it
+
+    The model is one line: pull sets a ceiling, speed
+    decides how close you get to it. Haul speed comes out as
+    speed × capacity / (capacity + load × speed / BASE_SPEED), which
+    approaches BASE_SPEED × capacity / load and never passes it. A weak
+    horse is capped on a wagon however fast you breed it; a strong slow horse never reaches
+    the ceiling its shoulders could carry; a balanced horse beats both
+    specialists. That last property is the requirement — the owner's brief said
+    outright that speed must not become a dump stat on draft breeds — and it is a test,
+    not a claim.
+
+    The test earned its keep on the first run. The model originally had a flat
+    floor on retention: never below a quarter speed, so a hopeless horse still visibly moved.
+    pullSetsACeilingSpeedCannotPass failed immediately, and the reason is worth
+    keeping: past the speed at which that floor engages, haul becomes
+    speed × 0.25 and climbs without limit. A fast enough
+    weak horse out-pulls its own capacity, and pull is a dump stat again at exactly the margin
+    the model exists to defend. The floor is now a clamp on the score instead, at
+    MIN_PULL, which does the floor's actual job — never pin a horse —
+    without touching the asymptote.
+
+    That is the second time this week a test has caught a design error rather than a typo,
+    and both times the error was a special case quietly destroying a general property.
+
+Carts in every wood, by the gates' own contract
+
+    Upstream keyed carts on vanilla's WoodType from a hand-written table of
+    twelve, which is precisely why a modded wood could never have one. They are keyed on
+    CartWood now: vanilla's twelve plus one per wood any loaded mod adds, from
+    the same ModdedMaterials scan the double gates use. The asset split is the
+    gates' split too — tools/bake-carts.mjs for vanilla at author time,
+    compat/GeneratedCarts for everyone else at run time, and the same warning
+    that the two can drift silently.
+
+    The carts kept RegisterEvent rather than being converted to
+    DeferredRegister, and for once that is the less awkward choice:
+    DoubleGates and ModdedArmour both have to create their
+    per-material entries during class load because a DeferredRegister will not
+    take an entry afterwards, and RegisterEvent fires after mod construction, so
+    the modded woods need no trickery at all.
+
+Four API guesses, four corrections
+
+    The port had never been compiled against the game jars, and this repo had never touched a
+    crop, a block tint or a passenger limit. In order:
+
+    - BannerFlagModel.flag is public in the decompiled sources jar and
+        private in the compiled jar. The access-transformer line for it was removed
+        on the strength of reading the sources, and cost two compile errors. The sources lie;
+        the line is back with a comment saying so.
+
+    - BannerModel.getChildPart does not exist — Model.root()
+        plus getChild does.
+
+    - ItemNameBlockItem does not exist in 26.1.2. Vanilla builds
+        wheat_seeds as a plain BlockItem with
+        useItemDescriptionPrefix().
+
+    - RegisterColorHandlersEvent.Block does not exist either. The block form is
+        BlockTintSources and takes a list of one-method
+        BlockTintSource, indexed by the model's tint index.
+
+    And one that only a running server could find. HorseTwoRidersMixin was an
+    @Inject on canAddPassenger, and the server refused to boot:
+    AbstractHorse does not declare that method. It is on
+    Entity, and a mixin injector can only target a method the target class
+    actually has — inheritance does not count. It is an override now, the same move
+    CartHorseMixin already makes for maxUpStep, which avoids mixing
+    into Entity for a one-expression change. Nothing but
+    runServer would have found it: it compiled, and the checks were all
+    green.
+
+What else went in
+
+    - Pull is on the horse screen, beside Jump where the other body stats
+        are, with a word for the number (feeble … a true draft horse)
+        and a Draught block saying what it buys — including
+        how far this horse has hauled in its life, which is a fact about the
+        animal and survives being sold or inherited.
+
+    - Two riders on a horse at pull 6 or better. Carrying and hauling are
+        the same claim about an animal, so it is the same stat rather than a second gene.
+
+    - A Farming and haulage chapter in Getting Started, eleven
+        sub-chapters, placed after Husbandry because everything in it needs a saddled horse
+        and nothing in it needs genetics — pulling ability is taught there from scratch.
+        One sub-chapter per vehicle, each ticked by actually driving it.
+
+    - Golden carrot seeds, a crop that grows golden carrots and yields no
+        gold at any point. Not craftable: the supplier's top rank sells them dearly, and
+        dungeon chests have them. It wears vanilla's carrot sheets tinted gold, so no art
+        ships for it.
+
+    - The Horse Powered patch, half of it. Every horse carries
+        horsegenetics:draft_power now, a work rate blended 60/40 from pull and
+        speed. The half that reads it has to be written against their real API and is
+        gap 281 — guessing their class names would
+        have been a fabrication that fails silently the first time they rename anything.
+
+Trimmed, on the owner's call
+
+    The hand cart (player-pulled; the one vehicle a horse never touches), all eleven
+    advancements and their seven criterion triggers, and the slow-speed toggle with its
+    keybind, payload, config value and the whole client mixin that existed to add one line to
+    the mount overlay. Per-cart pull_speed went too, and not as a trim: a config
+    option that overrode the genetics would make the genetics decorative.
+
+    None of it has been played. The build is green, the server boots, 106
+    checklist tasks all have something that completes them — and
+    §0-FO is fourteen checks long, starting
+    with "the game starts" and "a strong horse is visibly faster than a weak one on the same
+    cart", which is the whole feature in one line.

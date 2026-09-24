@@ -1,0 +1,88 @@
+2026-09-15, last thing — the deferred bake runs, and the last two intake files turn out not to be breeds
+
+    The session was asked to intake the remaining breeds from intake/, and
+    there were none — the folder held two reference documents and
+    tools/. The “remaining breeds” were the fourteen already committed as
+    JSON and left unbaked on purpose, waiting on the next batch rather than on a free moment. The
+    instruction to run the bake chain is what released that deferral.
+
+The bake, and what it says about hand-written breed files
+
+    Run in the prescribed order: bakeBreedFiles on its own, then the tests, then the
+    designer assets, then the build. It rewrote three files — the Tersk, the Trottatore
+    Italiano and the Ukrainian Riding Horse — and every change was 1.0 becoming
+    1 in a size band. That is BreedSpecWriter's number
+    formatting disagreeing with hand-written JSON, and nothing else. The useful result is the negative
+    one: nothing was warned-and-dropped at load, so the allele tokens that were checked
+    by eye against the new Allele(…) lines held up, and the hand-written field order
+    was right everywhere it mattered. index.json needed no change. The browser bundle had
+    been sitting at 108 entries against 122 on disk, which was the visible symptom of the wait, and is
+    current again.
+
+    Green: every *Breed*Test class — twelve of them, including
+    DhampirBreedTest and BreedingPreviewTest, which a grep turned up beyond the
+    obvious ten — plus ConceivableTest, DietGeneTest and
+    ReproRulesTest, the three outside the breed package that touch breeds at all. Then
+    :web:bakeDesignerAssets, the designer boot check,
+    :neoforge-26.1.2:build, check-links and check-parity. The full
+    :common:test was deliberately not run; what it would still cover is the coat goldens and
+    the gene suite, which adding a breed cannot move.
+
+The two documents, and why the country table was not imported
+
+    Neither file was a breed draft. One was a breed-count-by-country table, marked INCOMPLETE by its
+    author; the other a long list of registries sorted by how a horse gets into them. Both were
+    read, mined into a roadmap entry and deleted.
+
+    The country table is not a coverage oracle, and saying so is the point of the entry.
+    Every row but one already ships — the exception is the Dutch Warmblood, awkward because the
+    Gelderland's own notes name KWPN as the book it was folded into — and it
+    under-represents the mod badly in the other direction, carrying no row at all for China or the
+    Balkans, where a good part of the catalogue now comes from. Importing it as data would have taught
+    the mod nothing and implied a gap that is not there.
+
+    The registry document gave a candidate list (the continental draft cluster, the natives, the gaited
+    and show breeds, the spotted-pony registries, the sport-horse books) and one genuinely new
+    design question: open versus closed studbooks are not modelled anywhere, and the breed format cannot
+    express them — BreedSpecParser's key whitelist has no such field, and the
+    idea survives only as prose in notes. It is written up as an owner's call rather than a
+    plan, because gap 134 already reasoned against studbooks in
+    another context and the nearest hook, strains, is itself limited by
+    gap 256. The same entry records that country sits
+    on nearly every breed with nothing reading it, which is worth settling before the catalogue
+    grows by another country's worth of drafts.
+
+The wasm is not reproducible, and that is not what the TeaVM spike proved
+
+    web.wasm came back dirty from the bake with no common/ Java change behind
+    it. It was not staleness: no common/src/main/java commit exists since the binary was
+    last baked, and two forced rebuilds of an identical tree produced two different binaries at
+    identical size. The rebuild was reverted — a data-only bake should leave the binary
+    alone — and it is written up as gap 261.
+
+    This does not contradict the 2026-09-06 TeaVM spike, and a later session should not
+    “correct” one against the other. That spike proved the compiled code produces
+    byte-identical coats to the JVM; this is about the binary not being reproducible
+    between builds. The practical consequence is one-directional: the CLAUDE.md rule holds
+    as written — common/ changed with the wasm unchanged still means the designer is
+    running yesterday's mod — but the converse is false, and committing a moved wasm spends a
+    2MB binary diff on nothing while camouflaging a real one.
+
+Docs that had gone false
+
+    - verification.html lost the block calling the fourteen “pushed unbaked and
+        untested” and “deliberately still waiting”; its own instruction was to delete it
+        when green. It is replaced by
+        §0-EK, which records what the bake found and
+        that the fourteen are still unplayed.
+
+    - Two stale derived numbers on the roadmap said “the 49” against a catalogue that
+        Breeds.all().size() owns — the repeat offender the standing rules name.
+
+    - The carried-over owner question asking whether to add the Mangalarga Marchador is closed: it
+        ships.
+
+    Left for the next session: §0-EK has no per-breed checklist of the kind
+    §0-EJ and §0-EI carry. Nobody has sat down with those fourteen files to work out what each
+    should look like in a herd, and that write-up — not the build — is the outstanding work
+    on them.

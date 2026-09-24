@@ -1,0 +1,69 @@
+2026-09-18 — The horse wizard, and the three things he needed that did not exist
+
+    One request: a cowboy who stocks no breeds, only Mixed horses carrying a showing gene
+    from every magical family, no two alike, priced up. The interesting part was that it
+    was not really a request for a villager. Magical genes sit near a 0.1% founder weight,
+    so most of the registry has been unobtainable in practice since it was written, and the
+    dealer is the answer to that — which is why three quite separate features had to
+    be built before buying from him was a thing a player could do at all.
+
+The pools are generated, which was the whole brief
+
+    ArcaneStock builds every family's pool by walking
+    Genes.magicalOrder() and asking GeneFamily.of, so a gene from
+    a data pack is in his string the moment it registers. The only hard-coded thing is
+    which families a horse must cover. The first version of the draw order was
+    hand-written, smallest family first, with a test asserting the order was right —
+    and the test failed on one swap. That was the useful signal: a hand-written
+    order that needs re-sorting whenever somebody adds a mane gene is the same maintenance
+    burden the generated pools exist to avoid. It is computed per horse now,
+    scarcest first, and re-sorts itself.
+
+    Before committing to per-gene-and-pair uniqueness across a herd of ten, the question
+    was whether the registry could even supply it. A scratch census said the tightest
+    family holds nineteen showing pairs against a maximum herd of ten — comfortable,
+    and now asserted by a test rather than remembered.
+
+Three things discovered by building it
+
+    - You could not read a horse you did not own. The info screen was
+        reachable only through the vanilla horse inventory, which only opens on a tamed
+        horse — so a player was being asked for up to twenty-eight emeralds for an
+        animal whose genes are the entire product, sight unseen. Sneak-and-use now opens it
+        on any untamed horse. Which immediately raised a second thing: renaming had
+        never been gated on ownership, because nothing could reach a stranger's
+        horse before.
+
+    - A name tells you nothing about a horse. Fine for six horses of one
+        breed; useless for ten horses carrying a hundred loci between them. Hence the filter
+        box — and the reason it filters server-side is the sharp edge of the
+        day: a trade is an index into the merchant's offer list, so a client drawing fewer
+        rows would sell you a different horse from the one you clicked, silently.
+
+    - The owner's premise that monsters ignore cowboys was wrong.
+        Cowboy extends AbstractVillager, which zombies target by
+        class — his two hundred health exists precisely because of it. Survivable in a
+        village with golems and walls; not on a hillside. Checked rather than taken on
+        trust, and now made true rather than assumed.
+
+What the yard was for
+
+    One in twelve barns is the right rate for a world and a miserable one for looking at
+    him, so row AL-west of the debug yard founds one on the spot. It calls the real
+    founding path with only the paddock walk disabled, because a fixture that assembled its
+    own herd would go on passing after the real one broke. The owner confirmed the string in
+    game within minutes — no geldings, eleven or twelve genes each, no repeats, prices
+    right — which is a soft verification: the yard cannot show the one-in-twelve roll
+    firing at a real barn, and it cannot show restock keeping the string distinct over time.
+
+Also
+
+    A stale-documentation sweep fell out of it: villagers.html still described
+    a mount deleted weeks ago, in five places and in the present tense, and the founding
+    announcement was still subtracting that mount from the herd count. And
+    BreedHerdTest turns out to fail on a clean tree — confirmed by
+    stashing the whole day's work and running it on HEAD. Nobody knows since
+    when, which is its own gap: with no full-suite run
+    and no CI, a class nobody edits can sit red indefinitely.
+    (Fixed later the same day — the test was the stale
+    half.)

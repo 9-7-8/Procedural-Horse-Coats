@@ -1,0 +1,90 @@
+2026-09-17, last of all — A layer can say it paints over the ones above it
+
+    Two pieces of work, and the first one is why the second was findable. The owner asked
+    what was next on the roadmap, and the honest answer was that the top of the page was
+    not answerable: its first item pointed at a verification entry that had been
+    deleted because the thing was confirmed, and several others were checks
+    rather than work. So the page was audited first, and then the real top item was built.
+
+The roadmap was carrying nine things that were not work
+
+    The roadmap is unbuilt work; to be verified is
+    built-but-unseen. Nine entries had drifted across that line — balance
+    questions and “go and look at it” checks about things already in the game.
+    They were a trap rather than clutter: a session reading the top of the page for
+    what do I build next found items it could not build, only look at.
+
+    - Five moved to a new §0-EW,
+        ranked below the behavioural checks by that page’s own rule, since each
+        announces itself the moment anybody looks: the themed splices’ per-theme
+        weighting, a scaled foal against Skin.BABY’s approximate
+        projection, the animations at scale, whether the twelve eye wedges read as
+        heterochromia or as a stray pixel, and leopard’s first-guess spot and blanket
+        constants.
+
+    - Four were deleted rather than moved, because the check already
+        existed and a third copy is how three sources of truth drift apart: the
+        browser’s untested tabs (gap 37), breed
+        pool rates and world horse density (gap 31,
+        verbatim), the unplayed health layer, and founder and wild-spawn frequency —
+        which the owner parked on gap 214, so
+        moving it would have quietly reopened a closed call.
+
+    - Two stale things fell out of the audit. §21’s
+        “split the corridor” had shipped that morning and should have gone with
+        it, and the page’s own top item still pointed at the dialled genes, whose
+        verification entry is gone because they were confirmed.
+
+Then the thing at the top, which was a format change
+
+    A magical gene’s layers each measured their delta against the colour the
+    gene started from, and the deltas summed. Authors — human and model
+    alike — write files as though each layer painted over the one above it, because
+    that is what layers mean everywhere else, and the format had no way to say it. So they
+    wrote the thing that looks like stacking and got summing: a solid black dorsal wing, a
+    white contour, a starburst with no core, and eight of the twenty-four genes in the
+    2026-09-10 intake, every one rewritten disjoint by hand. That is
+    gap 169, and
+    "over": true is its root cause fix.
+
+    - The arithmetic falls out rather than being imposed.
+        toward() returns a step from whatever view it is handed, so a step
+        measured from the accumulated colour lands the layer on the colour it asked for,
+        while a layer without the flag still measures from the gene’s start and sums
+        exactly as before. The engine copies the idiom
+        SpecPainter.restrict already used ten lines above — snapshot,
+        apply the delta so far, hand that to the layer — and going through
+        apply() rather than adding channels by hand means a FLAT
+        layer underneath reads as the flat colour it set.
+
+    - Opt-in is the whole design, and it was provable. No shipped gene
+        sets the flag, so CoatBakeGoldenTest and DeadLayerTest
+        pass with both golden files untouched. That answers the question the
+        roadmap entry had parked — whether expected.json and the goldens
+        move — without a migration: only the fixtures gained rows.
+
+    - The five-file contract was the wrong template.
+        SpecSchema holds mask and op parameters only — a layer’s
+        allowed keys live in GeneSpecParser.expectKeys — and the designer
+        inherits common/ through TeaVM. What it did need and the
+        contract does not mention: the creator’s exporter whitelist, where an unknown
+        key is silently dropped, and a ColorField.mutableCopy that only
+        PigmentField had.
+
+    - Parity coverage was demonstrated, not assumed. Prismatic gained an
+        over wash across the barrel, all four BODY probes moved,
+        and breaking the creator’s branch on purpose turned the check red on
+        124 comparisons before it was restored — the step
+        pointsMin nearly shipped
+        without.
+
+    - Two refusals, both load errors that name the reason:
+        over on a natural gene, where restrict already re-reads
+        between layers so the flag would change nothing, and on a FLAT layer,
+        which replaces the texel anyway. A flag that quietly means nothing is how an author
+        talks himself into believing a layer does something it does not.
+
+    - The payoff is deliberately not taken. No real gene uses it yet.
+        Dorsal wing, contour, starburst and the eight nested intake genes each want judging
+        on a horse, so they belong after this is proven rather than inside the commit that
+        built it.

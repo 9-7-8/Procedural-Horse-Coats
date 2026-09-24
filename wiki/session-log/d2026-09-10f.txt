@@ -1,0 +1,78 @@
+2026-09-10
+
+Eleven more genes out of intake, none of them duplicates, and the dead-layer
+    check paying for itself on its first batch.
+
+Agatebound, bargello, bracketed, coronal, geode, maelstrom, nacre, starburst,
+    sunspiral, wing margin and witchfire. The batch was checked for duplicates
+    by content rather than by name first: every gene's layer signature
+    — which masks, folded how, painted with what — and the nouns in its
+    blurb, scored against all 159 that already ship. The best match in the whole
+    batch scored 0.13, so nothing was a re-arrival and nothing was skipped.
+
+Two collisions, both resolved rather than skipped
+
+Nacre collided by name with a gene that already ships, and the content
+    check is what settled what to do about it: they score 0.04 against each other.
+    The installed one breaks the coat into hard-edged plates at gold seams; the new
+    one is a marbled saddle with a shifting film along its folds. They have nothing
+    in common but the word, so the new one is Nacre Saddle.
+
+All eleven arrived keyed ixora.* where every other gene in
+    the mod is horsegenetics.*. The format allows a modder their own
+    namespace and should — but a gene shipping inside this mod under a
+    second one breaks every tool that builds a key from a slug, so they were
+    renamed. Recorded in each file's notes rather than done silently.
+
+The check caught nine dead layers before anything shipped
+
+DeadLayerTest was written earlier the same
+    day, and this is the first batch it saw. It failed on nine layers across three
+    genes — every one of which would have shipped, because all eleven files
+    parse, all eleven paint plenty of texels, and ten of the eleven look fine in a
+    render. The nine had three different causes, which is the argument for
+    measuring the symptom rather than pattern-matching the cause:
+
+    - Wing margin's heavy veins painted
+        nothing at all. FAN's spacing is an
+        angle, and at 1.4 radians the veins are eighty degrees apart —
+        the barrel does not subtend enough of the fan for a single one to land on it.
+        0.51 puts a heavy vein at every third fine one.
+
+    - Starburst's white core was
+        overruled — a genuine gap-169 instance. Outline, inline and core
+        are three nested filled PATHs at strength 100, so the core was
+        adding white to a texel the two outside it had already driven to the clamp.
+        Each star now subtracts the one inside it. Its flecks were a separate problem:
+        spacing 4.6 at radius 0.6 and chance 0.3 is about three spots a texel and a
+        half across, and they landed on four texels in total.
+
+    - Geode was mis-scaled, not mis-built.
+        Every layer was bounded by an AXIS reaching 11.5 units and a
+        WAVES band reaching 7, so the shards lived in the bottom quarter
+        of the horse and the whole gene moved about three hundred texels out of
+        eleven thousand. Visible in the file, invisible on the horse — and
+        the one gene in the batch whose icon had already made me suspicious.
+
+Diagnosis needed one measurement the check does not make: render each dead layer
+    alone. A layer that paints nothing alone has an empty mask fold; a layer
+    that paints plenty alone and nothing in place has been overruled by its
+    neighbours. Wing margin's veins scored 0 alone, starburst's core 132. That two-way
+    split is worth building into the check's failure message the next time it fires.
+
+And dorsal wing stops clear of the underline
+
+Opening the NORMAL mask to -0.75 at round 0.85 is what
+    carries the butterfly down the flank, but a rounded normal that far open also
+    admits the belly — a downward-facing face reads well above the
+    threshold once it is blended — so the wing ran to the bottom of the barrel.
+    An explicit AXIS on Y now cuts it at y 13.5, about two and a half
+    units above the underline. A height is the right tool for a height: raising the
+    NORMAL instead would have pulled the marking back off the shoulder
+    as well.
+
+What was regenerated
+
+Bundle, icons, 168 gene pages, the designer wasm, both goldens. The bake golden
+    gained 40 rows and moved exactly two — dorsal wing's, from the belly cut.
+    Every pipeline-golden code grew by eleven loci and no horse moved.

@@ -1,0 +1,62 @@
+2026-09-17, after dark — A doorway is a hole, and a hole leaks
+
+    A stall you walk into through a plain gap could not be bound. The sign refused, and the
+    only ways to make it take were to hang a gate in the gap or brick it up — owner:
+    “if you put the sign on the y=2 level, you’re forced to brick over the
+    entrance.” The fix is a second way for a room to close, described on
+    stall signs; what it does not yet prove is
+    gap 153.
+
+Why the floor alone could never see it
+
+    The detector walks floor columns, and that rule was itself bought with a
+    dead horse: the version before it flood-filled air three blocks up, climbed the
+    one-block fence at the front of every real stall and spilled into the aisle. Walking the
+    floor fixed that permanently and should not be touched. But it means the room’s
+    boundary is read at exactly one height — and at that height a doorway is simply
+    missing. The floor of the stall and the floor of the yard are the same surface, so the
+    fill strolled out through the gap, ran past MAX_COLUMNS and reported
+    “not a room”. Every symptom pointed at the sign’s height because that
+    is what the owner was varying, but height was never the variable; the gap was.
+
+    The wall above the gap is not missing. A doorway has a lintel. So when the floor
+    runs away, each height within three blocks of the sign is flood-filled for a ring of wall
+    that does close, and the floor is then walked inside that ring —
+    the ring is the boundary, the floor is still what the room is made of. The search is
+    StallFill.fillWithin, in common/ beside the fill it wraps,
+    because the lesson from the dead horse was that a piece of pure logic parked on the
+    Minecraft side is one nobody can write a five-line test for. It is two lines of graph
+    work and a mask; the NeoForge side only answers “is this cell wall”.
+
+Lowest ring, not smallest — and the bug that settled it
+
+    Several heights can close at once, so one of them has to win. Smallest is
+    the obvious rule and is wrong: it is precisely what
+    gap 223 did, where
+    smaller() chose a one-tile pocket over the real stall and a ticket put a
+    horse in a wall. A one-tile pocket at some odd height is exactly the shape that rule would
+    hand back. Lowest is the rule that matches the building: a doorway’s
+    lintel is the first height at which the gap seals, and every ring above it is a
+    larger room containing this one — the barn the stall stands in, or, once the walls
+    run out, the sky. The doorway’s own square belongs to the ring, so the stall ends
+    there, which is the same answer hanging a gate in the gap gives. A door, trapdoor or gate
+    counts as wall at ring height too, since the top half of a door is where a doorway’s
+    ring closes; a sign does not, for the same reason a sign is never floor.
+
+What play confirmed, and the one thing it could not
+
+    Three bind-and-ticket cycles in the yard. The stall bound with the sign at head height,
+    and — the half of the complaint this settles — measured the same room
+    whether the sign hung level with the floor at y=129 or a block above it at y=130:
+    room 17, 129, 100 to 20, 136, 104 (20 tiles), the ticket landing dead centre
+    at 19.00, 129.00, 102.50 with the box fitting first try, no refusal and no
+    inWall anywhere in the log. Owner: “making stalls works
+    perfectly”.
+
+    It does not prove the ring did it. A gated entrance and an open doorway
+    produce an identical success line, so the log cannot say which code path approved those
+    three binds, and the discriminating test — break the lintel so the gap runs open to
+    the sky, expect a refusal, put it back, expect it to take — was not run. That is
+    written down rather than glossed: gap 153 carries the
+    question and verification carries the test. It is the first
+    thing to do next, and it is one block of work.

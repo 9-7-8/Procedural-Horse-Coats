@@ -1,0 +1,49 @@
+2026-09-21, last — the horse menu goes back to sneak-and-use, and 0.5.022 ships
+
+    One bug report, in the owner's words: “when the player right clicks the horse to
+    mount it, it brings up the menu. It should only bring up the menu when shift right click,
+    like the vanilla behavior.” That was
+    yesterday's change, made deliberately and behind a
+    setting that defaulted to on, and it is reverted without the setting:
+    HorseInfoInteraction takes only sneak-and-use, the plain click mounts, and
+    horseScreen.rightClickOpens is deleted rather than flipped. A toggle whose
+    on state is the thing the owner rejected is not a choice worth carrying.
+
+    The one real question was the tamed horse, where sneak-and-use is
+    vanilla's inventory. Put to the owner as two options — leave vanilla that gesture, or
+    take it — the answer was take it. The recommendation had been the
+    other way, on the grounds that a chested donkey or mule would lose its only way in, and
+    that reasoning was wrong: reading
+    AbstractHorse.openCustomInventoryScreen and
+    getInventoryColumns() out of the decompiled sources showed a
+    Horse has no chest at all, and a donkey never reaches this screen because the
+    mod writes a record only for a Horse — no record, and the click falls
+    through to vanilla untouched. So the Inventory button that option had
+    promised was written and then deleted before it shipped: nothing was stranded to route
+    around. The lesson is the plain one — the cost of an option is worth checking in the
+    source before it is quoted in the question.
+
+    Fallout, all of it documentation: HorseInteractionHandler.onFoalInventory
+    exists for a tamed foal and now only ever fires for a donkey or mule foal, since a
+    horse foal's empty-handed sneak is claimed first — it says so rather than being
+    deleted, because that is still behaviour vanilla refuses. Breeding,
+    horse gear and for testers carry
+    the new rule, and breeding's Verification tab now leads with the two clicks that settle it.
+
+And the release: 0.5.022
+
+    The boot check earned its place again. The first
+    runServer reported BUILD SUCCESSFUL and exit 0 while the server
+    inside it had crashed — FAILED TO BIND TO PORT, because the
+    owner's own dedicated server is up on 25565. Gradle's exit code says nothing about the game
+    it launched, which is the whole reason the routine greps the log rather than trusting the
+    build. The dev run was moved to a free port (run/server.properties is
+    git-ignored, and it was put back afterwards) and the second boot reached Done
+    with zero ERROR or FATAL lines.
+
+    The tag range back to 0.5.021 is thirty-four commits and mostly documentation — the
+    two verification and roadmap dismantles, the gene-page bake fix, the philosophy frame, the
+    Simply Equine survey, the intake. What a player gets is two things: the
+    Gear tab's nineteen slots (two of them working) and this
+    session's gesture. The release note says exactly that,
+    including that seventeen slots accept nothing yet.

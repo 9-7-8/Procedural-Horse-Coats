@@ -1,0 +1,87 @@
+2026-09-18, overnight — Tests that could not fail, and a run that was not running
+
+    An unattended night, chosen off verification and
+    known gaps with one rule: only work whose evidence lands in a
+    log, a file or an exit code, because nobody was awake to look at anything. The theme
+    turned out to be narrower than that and more uncomfortable — nearly everything
+    found was a check that could not fail, and one of them was mine.
+
+Four tests that were not testing
+
+    The suite was not green, and had not been. CoatTextureComposerTest's
+    combination sweep built its gene mask in a long: Java masks a shift distance
+    to the low six bits, so (1L << 291) silently meant
+    (1L << 35) and every locus from the 36th onward had been pinned to its
+    last allele for months. Nothing went red, because the test only asserts that a bake
+    returns a full sheet. It is a BitSet now. Widening it revealed the second
+    half of the problem: a coin flip per locus turns on about 145 genes at once and costs
+    roughly a second a compose, so the original 3000 samples ran thirteen minutes without
+    finishing. The masks are sparse now and drawn from the whole width, which is both cheaper
+    and closer to what a real genotype looks like.
+
+    Two more were red on main and unrecorded.
+    whiteHorseIsExactlyTheTemplate asserted an all-white horse from
+    kit=W22/N, which stopped being one on 2026-09-15 when W22 became
+    sabino-alone; CoatCheckPlan was corrected to W2/N at the time and
+    this constant was missed. magicZebraStripes… counted levels below a
+    fixed 0x20, and the floor that keeps the multiply non-zero puts the darkest
+    stripe texel at 37 — so the set came back empty and the failure read
+    got [], as though the stripes had vanished when all 11,902 of them were
+    present. It measures the darkest band now, which is what it always meant.
+
+    The fourth was the creator round-trip, failing 23 declared verbs against 22 emitted. The
+    creator's schema.js had day_watch all along; the
+    fixture was stale. And the frightening half of that entry — that an
+    epigenetic splice might be rerolling a foal's alleles — is green today.
+
+The yard's warning that never said anything
+
+    Every boot logged test yard is NOT sound: 1 blocked at head height, around x=3
+    and had been set aside as noise in four separate sessions. It was unactionable because
+    around x=3 was the plot centre, not the offending spot. Made to name
+    the position and the block, it answered itself on the first boot:
+    minecraft:water_cauldron at -16, 129, 414 — the fertility
+    rows' own flush cauldron, missing from the furniture allowlist. The check had been crying
+    wolf since it was written. The yard reports built and walkable now.
+
+closeKin, asked a question for the first time
+
+    Written up on horse care, because the
+    interesting part is not that it passed. Dropping the LEAVING HOME stagger was necessary
+    and not sufficient: the pen's horses are spawned rather than bred, so their records carry
+    no parents, and unknown parents never match. The first run after the stagger came
+    out had the filly join her brother's band as his lead mare — indistinguishable from
+    the original defect, and not it.
+
+The first in-game tests
+
+    26.1.2 has no @GameTest annotation at all — the whole annotation API is
+    gone, replaced by a datapack registry of test instances, so every tutorial about it
+    describes a different game. Details are in API notes,
+    along with the discovery that the three
+    neoforge.enabledGameTestNamespaces lines this build had been carrying set a
+    property nothing in this version reads. Two tests exist now, run headless
+    by ./gradlew :neoforge-26.1.2:runGameTest in about sixteen seconds: a smoke
+    test, and the double gates' redstone rule, which is a real answer to
+    §0-DG's first item. Both were mutation-checked rather than trusted — asserting
+    the wrong block fails one, moving the redstone out of range fails the other at tick 102.
+
+And the check that could not fail was mine
+
+    The overnight run was launched detached and hidden at 00:55, confirmed into the yard, and
+    watched by a monitor armed for crash reports, exceptions and Stopping server.
+    At 06:21 it had produced seven minutes of data. The client had not crashed: it
+    paused. run/options.txt ships
+    pauseOnLostFocus:true, a hidden window never holds focus, and at 01:02 the
+    integrated server logged Saving and pausing game… and stopped ticking.
+    A pause writes nothing afterwards, so a watch looking for failure strings stayed silent
+    through five and a half hours of nothing — silence read exactly like health.
+
+    Fixed by turning the option off and watching the log's line count rather than its
+    contents. But it is the same defect as everything else found tonight, committed by the
+    thing that was finding them, which is worth recording plainly rather than tidying away.
+
+    Tagged as 0.5.009 at the end of the session. It is a
+    release with no gameplay in it — every changed file is a test, the debug yard,
+    gametest infrastructure or build config — and the note says so rather than dressing
+    it up.

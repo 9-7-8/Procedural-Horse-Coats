@@ -1,0 +1,28 @@
+2026-09-13, later still — every horse breeds, and the vet’s kit
+
+    Straight after fertility shipped, the owner removed the Spontaneous Breeding gene:
+    “that's now basically just base game behavior”, with heat and pregnancy slowing
+    the rate and conception limited to loaded chunks. The follow-up questions turned it into
+    natural breeding for every horse, and a way to stop it. The calls are under
+    settled decisions. Nothing has been played:
+    §0-DV, test kit batch 2.
+
+    - The gene is gone: class, handler, registry, family, description and
+        wiki page. Both coat goldens lose its locus again.
+
+    - NaturalBreedingHandler: tamed and wild, once per heat
+        (Reproduction.lastNaturalTry, ReproRules.mayTryNaturally),
+        within three blocks. Both at full health, not ridden or leashed. A cap of eight other
+        horses within sixteen blocks, and three covers a day as a hard stop. Cowboy stock is
+        exempt. The foal is credited to the mare's owner, falling back to her tamer when the
+        owner is offline (gap 228).
+        Gap 206, whether an automatic breeder's cap holds,
+        was reopened for it rather than closed with the gene.
+
+    - Gelding is a flag on HorseRecord, and
+        entire() replaced the sex test in every stallion behaviour. A gelding bonds
+        25% faster, and about half a cowboy's males are geldings, priced lower.
+
+    - The vet’s kit: sneak-use gelds,
+        plain use examines, and it is the one place twins are revealed before birth. Crafted, and
+        sold by the horseman. The texture is a borrowed vanilla bundle for now.

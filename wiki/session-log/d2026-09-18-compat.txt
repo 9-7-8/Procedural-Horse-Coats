@@ -1,0 +1,81 @@
+2026-09-18, after the equestrians — Gates and horse armour for other mods' woods and metals
+
+    Install a wood-adding mod and you got nothing: the twelve
+    double gates came off a hardcoded table. Install a
+    metal-adding mod and its ingot was not a
+    tack fitting and had no horse armour.
+    Both lists are now read off the other mods themselves, and the content is generated for
+    them. The whole of it is written up on
+    Mod compatibility, which had until now been a
+    page entirely about accidents.
+
+    The list comes out of the jars, and it has to. Not the registries and not
+    the tags. Everything here must be known in the mod constructor — the last moment a
+    DeferredRegister can be handed an entry — and at that moment no registry
+    is populated and no tag exists at all. What does exist is every mod's jar, so
+    compat/ModdedMaterials reads the files they ship: a wood is a mod with a
+    <name>_fence_gate blockstate, a metal is an item in
+    c:ingots/* or c:gems/*, and a colour is the mean of that
+    item's own art in linear light, because nothing anywhere states an ingot's colour
+    but the picture of it. Results are sorted before they leave the class, so load order
+    cannot matter (philosophy §7).
+
+    The output is a pack on disk rather than resources in memory, which was
+    the owner's own suggested fallback — a one-time tool you run in the Minecraft
+    directory — minus the running it. compat/GeneratedPack writes
+    phc/generated/ and serves it back through AddPackFindersEvent as
+    both a resource pack and a datapack, carrying a fingerprint of what it was built from:
+    same mods and nothing is written, mods changed and the folder is wiped and rebuilt. The
+    files stay on disk because a generated model that fails is otherwise a purple cube
+    with nothing logged anywhere, and being able to open the file that failed is the
+    difference between a five-minute fix and an afternoon. Per wood: eight re-parented models,
+    a 32-variant blockstate, an item definition, loot, a recipe, two tag entries and a lang
+    key, and no textures at all — a double gate has never had art, only
+    a pointer at a plank texture. Per metal: one item wearing one shipped greyscale
+    plate tinted through the equipment asset's dyeable layer, so there is no image code at
+    runtime and it behaves identically on a dedicated server.
+
+    How strong the armour is was the one real design question, answered in
+    three tries: their own chestplate's armour value mapped to the horse-body value of the
+    nearest vanilla material; else a ladder by gems over ingots and the item's
+    Rarity; else iron. The vanilla rungs are read off ArmorMaterials
+    rather than written down, so a vanilla rebalance carries. Step one needs other mods' items
+    to exist, which is why the pack is built at pack-finder time and the numbers are written
+    in ModifyDefaultComponentsEvent. The comment says plainly what the fallback
+    is worth: where an ore generates is not readable from a jar, so the ladder
+    is a guess from the two weakest signals there are and will sometimes be wrong. The
+    metalsmith stocks all of them, at the tier
+    that same number picks — which also fills out the one profession that was thin
+    because vanilla has only three ingot armours.
+
+    A fake mod was built on purpose, because doing nothing correctly is
+    indistinguishable from being broken. tools/compat/build-test-mod.mjs
+    writes a jar with one wood and two metals, and it found a real bug on its first run: a mod
+    can declare an item in a tag and never register it, and the generated recipe then
+    fails to parse in three walls of red naming somebody else's mod id. Recipes now ask whether
+    the item exists and say which mod and which id when it does not. On a dedicated server all
+    three fingerprint states were confirmed — generates, short-circuits, wipes —
+    with zero datapack parse errors and Done() each time.
+
+    What it owes, and the list is longer than the list of what was proved. No
+    real third-party mod has ever been installed beside this
+    (gap 271). No generated recipe has ever successfully
+    parsed, because the test mod declares items it never registers — so what was verified
+    is the skip (272). Nothing has been seen
+    rendering at all: not a modded gate, not a tinted armour, not its icon, and the plate art
+    was measured and never looked at (273). Two mods that
+    both add a maple give two items with one name
+    (274), and the armour tier reads a
+    <material>_chestplate by name, which is a convention and not a contract
+    (275). The checklist is
+    §0-FK, and it needs the one thing the test
+    kit cannot make: another mod.
+
+    Several findings were dug out of the 26.1.2 sources on the way and would have cost
+    the next session an hour each — IModFile.findResource is gone
+    and JarContents replaced it; Pack.ResourcesSupplier has two
+    abstract methods so it is not a lambda; building a Pack by hand means never
+    writing a pack format number; ModifyDefaultComponentsEvent.modify's
+    Consumer overload is deprecated-for-removal in this SDK itself; datapack tags
+    merge and datapack registries do not. All of them are on
+    the API notes.

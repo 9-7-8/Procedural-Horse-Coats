@@ -1,0 +1,85 @@
+2026-09-17, after the regions work — A glow can be seen without starting the game
+
+    §10’s last entry was “the creator
+    cannot show a glow”, and the roadmap framed the fix as shading in the
+    preview. Asked for it across the horse designer, the breed designer, the custom
+    spawn egg and the gene pages, two of those four turned out not to be the job described.
+
+Two findings that changed the work before it started
+
+    The spawn egg already renders glows.
+    CustomHorseSpawnScreen.drawPreview builds a real
+    EntityRenderState and goes through GeneticHorseRenderer, which
+    carries EmissiveCoatLayer — so a glowing gene has been emitting there
+    all along. What it cannot do is dim: vanilla’s
+    g.entity(state, scale, translation, rot, camRot, x0,y0,x1,y1) takes no
+    lighting argument. Owner’s call was to look first and build a
+    darkened-texture variant only if the glow does not read against the GUI’s
+    directional shading — it is the most expensive item in the job and it is for one
+    screen.
+
+    The gene creator cannot have this, and it is a hard rule rather than a cost.
+    Its preview is the one engine that never touches the wasm —
+    spec-engine.js / fields.js, the hand-written port, which has no
+    emissive pass at all. Writing one is exactly what hard rule 3 forbids. So the creator was
+    left out and the roadmap entry rewritten to the job that would actually close it: move
+    that preview onto the wasm so it can bake an unsaved spec, which would also end
+    the port’s reason to exist.
+
+One fold, in common/, because the browser draws the same glow
+
+    The interesting part was not the toggle. “The level becomes the texel’s
+    alpha, the RGB stays the coat’s own colour” lived inside
+    GeneticCoatTextureFactory.buildGlow, and giving the browser a glow meant
+    either calling it or copying it. It moved to
+    CoatTextureComposer.Baked.glowSheet, and the whole-part set a
+    glow effect lights moved with it as
+    CoatTextureComposer.glowParts — that second one mattered, because
+    three shipped genes (glow, nebula points, suntouched) get
+    their light from the effect rather than from an emissive layer, and leaving the resolver
+    behind in the renderer would have made exactly those three the ones that did not light in
+    the designer. Both modules now call one implementation; the NeoForge side got
+    smaller.
+
+    Alpha is the level because the emissive pass blends: 0.4 is four tenths of the
+    full-bright colour over six tenths of the world-lit texel, a dimmer colour rather than a
+    darker one. The browser cannot express that the same way — three reads an emissive
+    map’s RGB and has no alpha to honour — so setGlow premultiplies
+    (RGB × level, opaque) and reaches the same answer by the route that
+    renderer has. That is the one deliberate divergence, noted on both files.
+
+The lights go down, not the glow up
+
+    A glow is always drawn; in daylight it is simply lost in an already-bright coat, exactly
+    as in game. So the toggle dims the scene — lights, sky and fog — and leaves
+    the emissive map alone, which is what an emissive map is for. It does not go to black:
+    a horse lit by nothing is a silhouette, and you could not tell whether the unlit half of
+    a marking is the shape you drew.
+
+    On the gene pages the button is hidden until a bake proves this horse lights
+    up. Asking the pipeline beats a per-gene flag: it is right for a built-in Java
+    gene painting emissive texels in overlay(), for a spec gene’s emissive
+    layer and for a glow effect alike — and right per outcome, so a
+    heterozygote under its minDose offers no dead button. Changing to an outcome
+    that does not glow puts the lights back on rather than stranding the reader in the dark
+    with the way out hidden.
+
+What was measured, including one guess that had to stop being one
+
+    emissiveMap on the pinned three r128 was an assumption, and
+    the failure mode is invisible — a perfectly good horse that never lights. It is
+    asserted now by wiki/tools/check-glow-render.mjs, on both material types
+    (Lambert for the horse designer, Standard for everything else), along with the white
+    emissive that multiplies the map. The same check drives the button on a real
+    gene page: tron reveals it, agouti leaves it hidden — the whole chain, export to
+    DOM, in a browser. GlowSheetTest pins the arithmetic (0.4  alpha 102,
+    a transparent texel never lit, an ordinary horse  null rather than a
+    sheet of zeroes). Both coat goldens came through untouched, which is the
+    evidence that the fold was lifted rather than rewritten.
+
+    Not done, on purpose: the LUT lab shares
+    viewport.js and so inherits the capability, but was given no control —
+    it was not asked for and its question is the gradient, not the dark. The breed
+    designer’s six-founder herd strip is six coat sheets at 76px rather than
+    six horses, and a flat sheet has no lighting for a glow to be brighter than, so only its
+    3D founder lights.

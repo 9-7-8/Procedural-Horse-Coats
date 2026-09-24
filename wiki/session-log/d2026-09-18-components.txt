@@ -1,0 +1,59 @@
+2026-09-18, after the collision — A question that cannot be asked, and twelve recipes nobody read the log for
+
+    The same tester put v0.5.013 on the same 319-jar pack and it still did not start. Their
+    report was better than the bug: it named the line, the cause, and a second crash path they
+    could see coming one frame over. Both were right.
+
+    ModdedArmour asked another mod's chestplate how strong it was, so a generated
+    armour could sit at the tier that mod had put the metal at. The read is
+    Item.components(), and on a pack with any modded ingot it threw
+    NullPointerException: Components not bound yet and took mod loading with it.
+
+    The interesting part is that there is nowhere to move the read to, and two
+    of the places that look like they should work do not. Reading the 26.1.2 sources settles it:
+    Item.components() delegates to Holder.Reference.components(), which
+    is requireNonNull on a field bound during the first datapack load.
+    ModifyDefaultComponentsEvent is not an exception — it is the mechanism by
+    which components are built. Nor is deferring into the three-argument
+    Initializer it hands out, which was the obvious next idea and is wrong for a
+    reason you only find by reading
+    DataComponentInitializers.build: it runs every initializer into
+    builders and only then walks the results calling bindComponents, so during that
+    pass nothing is bound, not the item being initialised and not the one you wanted to read.
+    AddPackFindersEvent is earlier still — which is where the second copy of
+    the bug was waiting, in the tier decision that stocks the metalsmith. The report had seen
+    that one from the stack trace alone.
+
+    So the question is no longer asked. protectionFor is a pure function of the
+    metal: diamond's body value for a gem, iron's for an ingot, decided at registration. That
+    reverses a documented owner's call and flattens 167 metals to two values, which is recorded
+    as gap 274 rather than quietly absorbed — but it
+    also deletes an entire class of load-order dependency, and it is what lets one function be
+    safe at three moments with three different amounts of game in existence. The
+    rule worth carrying forward: anything you
+    need about another mod's item at load time must come from its registry id, or from its jar,
+    or not at all.
+
+    Proving it is what found the other bug. The fix is invisible without another
+    mod installed, so the check was the synthetic jar
+    (tools/compat/build-test-mod.mjs) plus runServer — and the
+    boot log that came back to Done (0.312s) had twelve red lines in it that had
+    nothing to do with any of this:
+
+Couldn't parse data file 'horsegenetics:oak_reaper':
+  Invalid pattern: each row must be the same width
+
+    A two-wide row in a three-wide pattern. The game throws out the whole file, so
+    every reaper in all twelve woods has been uncraftable since carts shipped in
+    0.5.012, and the only symptom is a recipe that is not there — indistinguishable
+    from one the player has not unlocked. Fixed in both writers, and
+    check-recipes.mjs now rejects a ragged pattern, one that does not fit
+    3×3, a symbol with no key and a key no symbol uses; the guard was run against the real
+    defect before the fix and after it. The wider lesson is not about recipes: a
+    successful boot is not a clean boot, and nobody had been reading the middle of the log.
+
+    Shipped as v0.5.014 with the jar attached. Verified as far as a headless server can verify
+    it: five modded metals scanned, four armours registered, the metalsmith stocking tin and
+    hellforged at tier 2 beside iron horse armour and ruby and entro at tier 5 beside diamond,
+    and no Invalid pattern lines. That is a server, so nothing was drawn, and
+    the real pack has still not been tried — this is the third attempt.

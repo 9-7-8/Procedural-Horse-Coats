@@ -1,0 +1,15 @@
+2026-09-22 — horse shoes get their own implementation plan
+
+    This session was documentation-only. The horse-shoe material was moved out of the shared
+    horse gear roadmap and given its own
+    Horse shoes page with Gameplay, Coding, Science,
+    Roadmap and a page-local Suggested implementation tab. The proposal defines
+    four independent attachment-backed shoe stacks, metal-tier flat speed and jump bonuses, universal
+    powered-snow walking, per-shoe enchantments, and generated variants for metals supplied by mods in
+    a modpack through the existing ModdedMaterials and MaterialScan path.
+
+    The implementation tab also includes integration-shaped Java sketches for copying worn stacks into
+    GeneticHorseRenderState, registering a custom HorseShoeLayer beside
+    CutieMarkLayer, and rendering each shoe under its hoof with deliberate oversizing,
+    ground intersection, generated-metal tint and the item's enchantment glint. No runtime code was
+    changed; the page records the suggested path for a later implementation session.

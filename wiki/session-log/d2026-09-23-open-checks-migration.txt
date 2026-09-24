@@ -1,0 +1,17 @@
+2026-09-23 — the open-check migration reaches a stable handoff point
+
+    This session moved the active open defect / runtime / design / compatibility records out of
+    a single central Known gaps document and into the owning page’s
+    Verification tab. The old page is now a compatibility index for historical anchors only, and the
+    generated Open checks page is the single source of truth for
+    page-local open work. The source-of-truth rule in CLAUDE.md was updated to match:
+    a check belongs on the page that owns the behaviour or document, not in a second backlog.
+
+    What is stable now: the migrated records are on page-local Verification tabs, the verification
+    index is generated from those tabs, and the generic gap language has been retired from the repo
+    rule set. The remaining follow-up is not another schema change; it is cleanup work in the next
+    session: a few legacy internal references still point to the old page name or the old wording,
+    and a few Verification-tab hints still say “Built, not yet seen in a game” instead of
+    the unified “Open checks” language. That cleanup is low-risk and should be done in a
+    short follow-up pass, after which the full model is: page-local checks, generated index, roadmap
+    tabs for unbuilt work, and nothing left in a central gap list as a live backlog.

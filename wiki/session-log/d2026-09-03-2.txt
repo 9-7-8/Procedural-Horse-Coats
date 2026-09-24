@@ -1,0 +1,5 @@
+2026-09-03
+
+Owner-verified in-game (2026-09-03)
+
+- The data-model rewrite (gene priority + derived orderings + gene-keyed tolerant code strings): wild horses spawn and render their correct coats - no regression from the new codeOrder() / code format - and the right-click paper genome dump works. Not yet checked: a bred foal, the stallion-seed-jar round-trip, and a spec gene (Suntouched/Waterborn) appearing in the short genome display.

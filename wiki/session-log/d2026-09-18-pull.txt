@@ -1,0 +1,88 @@
+2026-09-18, after the full suite — A fifth body stat, and the split that copy count cannot say
+
+    Pulling ability, ahead of the cart mod sitting in
+    intake/. A new locus, horsegenetics.magic_pull —
+    Strong, Weak, wild type — codominant, with a signed
+    number of points on each variant copy that add. See
+    Magic pull; the numbers live in the gene.
+
+    Two design calls, both the owner’s. The first: pull is a raw
+    1–10 score, not a multiplier like the other four body stats
+    — because it’s going to be used by a different part of the mod. That
+    turned out to be the load-bearing decision. The other four multiply because they have
+    to scale whatever the natural loci settled on, so a magically fast pony stays
+    slower than a magically fast racehorse. Pull has no natural loci to compose with, so
+    multiplying would have bought nothing and cost the one property worth having: that a
+    copy worth +2.5 is worth two and a half points on every horse that
+    inherits it, readable off the copy without a conversion. TraitBuilder
+    gets addPull and deliberately no multiplyPullUnclamped.
+
+    The second call was forced by an arithmetic fact worth writing down.
+    The dhampir was to pull at 9 for the white strain and 6
+    for the seal brown. The other three stat loci give the dhampir its strength through the
+    Vmp allele, where one copy is worth half of two — so the obvious move
+    was a fourth allele here too. It cannot work, and the reason is not a limitation of the
+    code: 9 is four times as far above the baseline as 6 is, and two copies of
+    anything are only ever worth twice one. No fixed per-copy amount can produce a
+    4:1 split from a 2:1 mechanism. That is why pull has three alleles rather than four, and
+    why a Strain now carries its own optional stats block, laid
+    over the breed’s axis by axis, with the founder roll picking the strain
+    before it reads any band. The dhampir is the only breed using it; any strain
+    may. Format on the breed file format.
+
+    Every breed on the roster is scored, from the owner’s list.
+    Eleven breeds were not on it — the warmbloods, the trotters, Quarter Horse,
+    Pony of the Americas, Walkaloosa — and were scored by analogy with ones that
+    were, at the owner’s direction rather than by guess. Worth noting that a breed
+    written "pull": 5 and a breed that omits pull produce the same horse,
+    because the near-baseline rule drops a band that close to ordinary; the difference is
+    only whether the sheet records that the 5 was a decision.
+
+    Nothing reads Traits.pull(), on purpose. What a pull
+    score is worth in cart loads belongs to whatever ends up hitching a horse to
+    something, not to the genetics. That makes the gene unobservable in game —
+    there is no attribute to watch and no screen showing it, so it got no debug-yard pen:
+    the stat pens work by reading a named vanilla attribute’s range across a pen, and
+    a pen that cannot answer its own question is worse than no pen. MagicPullGeneTest
+    is what holds it down instead — the arithmetic, the invisibility, a breed’s
+    score reaching its founders, and the dhampir’s two strains landing apart.
+
+    The interesting part was the wreckage, and none of it was the gene.
+    A new locus costs one extra draw per horse, which moves every seeded roll downstream of
+    it — and that shook out two tests that had been passing on luck.
+    ArcaneStockTest asserted that nothing a dealer’s horse
+    shows repeats across the string. ArcaneStock never promised that:
+    it promises not to force a token another horse already has, and the horse
+    underneath is Feral Mixed, which may coincidentally roll one. Rather than reseed until
+    it passed, the rate got measured — a throwaway probe over 400 seeds said the old
+    assertion holds for 44% of them, and none of the
+    failures involved a forced pair. So the assertion was the thing that was wrong, and it
+    now checks the rule that exists. CowboyHandler.takenCombos had conceded
+    exactly this in its own comment the whole time.
+
+    And the body-stat key list turned out to exist five times.
+    Four were findable by their own comments, which say they agree by test rather than by
+    import; the fifth, in BreedFounderLog, said nothing and was the expensive one — left alone it would
+    have logged every breed founder in the world as carrying stray magic, a false
+    positive in the one diagnostic you would go to when hunting stray magic. It and
+    BreedPlateTest now read BreedFounder.BODY_STAT_KEYS instead of
+    keeping their own. Two copies remain, and both say in a comment that they agree by test
+    rather than by import; those two have a reason (neither module should depend on the
+    other), which the two that were changed did not.
+
+    The re-bake also caught a stale artefact nobody was looking for.
+    unverified-genes.txt — the horse dimension’s coat-check column
+    — gained six lines, and only one of them was pull. Blight, smoke scroll,
+    endless knot, paisley spill and stormvein all carry no Verified block and had
+    simply never been baked in, so the dimension was hiding five pens it should have been
+    showing. Exactly the failure mode the regenerate-what-you-invalidate table exists for,
+    found by regenerating for an unrelated reason. Pull itself lands in that file and
+    correctly produces no pen: CoatCheckPlan skips anything that paints
+    nothing, so the list can name a gene the column has nothing to show for.
+
+    Both coat goldens moved on the key only. A new locus lands in every
+    genotype code, so both files rewrite wholesale — which is exactly the shape a real
+    regression would also take. Checked before copying back rather than after: all
+    1086 coats compose byte-identically once the new locus is stripped
+    from the key, and no existing bake row’s hash changed, with the only new rows being
+    one per allele.

@@ -1,0 +1,80 @@
+2026-09-17 — Aggression onto one locus, fear onto another, and a way in
+
+    Four loci decided whether a horse was dangerous, and between them they could not
+    answer the question. magic_night_temper and magic_day_temper
+    each named a target but welded half the day into the verb;
+    gladiator named a gate but only ever one target. A breeder had to know
+    three of them to read one animal. They are gone, replaced by
+    aggression — a grid of three times crossed
+    with five targets, every allele recessive and recessive to the others — and by
+    skittishness, the same grid for what a horse runs
+    from. Passification is new beside them.
+
+Splitting the mood out is the change that buys something
+
+    The old loci carried four hunting alleles and four fleeing ones, so a horse could be a
+    monster-hunter or shy of people and never both. Two loci say what one could
+    not: “goes for monsters, runs from riders” is a single animal, a herd-guard
+    nobody can catch, and it is worth breeding for. The owner's other three calls:
+    gladiator folds in as an always-hostile allele while
+    guardian stays its own locus (it is reactive, not a
+    temperament); some aggression expresses in the wild, rarer the nastier the
+    target, because passification needs a horse to rescue; and passification's alleles
+    stack, so a compound heterozygote offers both ways in rather than the better one.
+
+A saddle stopped being a gate, and only half of that works
+
+    Gladiator stopped dead whenever anybody mounted it, on the argument that a horse
+    fighting while you steer is a horse fighting your steering. The owner reopened that
+    deliberately: a horse aggressive toward riders now bucks them off and
+    comes for them, and one aggressive toward anything else ignores its
+    rider. The buck shipped, at the moment a target is acquired rather than on one
+    gene, so every route to targeting a rider gets it. The second half did not and could
+    not from there — a ridden horse's movement belongs to its passenger, not to its
+    navigation, so the melee goal cannot walk it anywhere. Written down as
+    gap 268 rather than left to be discovered,
+    because from outside it reads as the gene half-working.
+
+The two time-of-day verbs were deleted, and the flee path nearly died with them
+
+    night_temper and day_temper existed because a gate written
+    onto every allele by hand would be wrong the first time somebody forgot it — an
+    argument about gene files. These loci generate their alleles from a table in
+    Java, so the gate is written once, and the general temper verb already
+    carried a when. Both verbs went, from Java and from the creator's mirror;
+    parity stayed green.
+
+    The trap was underneath. GeneAbilityHandler.temper
+    returned early on any mood that was not aggressive: fleeing was implemented
+    over in the night handler, against the verb that was being deleted. Moving skittishness
+    onto the shared verb without moving the flee path with it would have produced a locus
+    that loads, registers, bakes, appears in the census and does nothing whatsoever.
+    The same shape reappeared one layer down: passive excluded equines only in
+    the night handler's private matcher, so routing flee through MobGroups
+    would have re-opened gap 241 — the foal that fled its own band 1,578 times. The
+    exclusion lives in the shared resolver now, where every caller gets it, and
+    horses is a group in its own right because the aggression locus names its
+    own kind.
+
+Passification is a veto, and vetoes have to be asked at every door
+
+    It grants no ability and is not an effect verb — it would have been one with
+    exactly one user, the test lycanthropy already failed. The gene owns the alleles and
+    the epigenetic offering (which item, how many, how long, how soon again, all written on
+    the allele copy and inherited with it); the NeoForge side owns the feeding and the veto.
+    “Will not target the player for any reason” only means something if each
+    reason asks, so Passification.suppresses is consulted at all four: the
+    temper verb, the wild aggro-and-alert path, the dam defending her foal, and guardian's
+    retaliation.
+
+What was rescued on the way out
+
+    Deleting the three gene pages would have destroyed four verified records with them
+    — the ten-tick swing rate, the re-target fix, the night-temper confirmation and
+    the night-shy record. They were recovered from git and carried onto the new pages under
+    the anchors the rest of the wiki already points at. Nothing about the new loci
+    has been played; what to look at is on
+    To be verified, including the one thing most likely to
+    be quietly wrong, which is whether the supersede rule still holds now that temperament
+    and watching live in different handlers and talk through
+    NightBehaviourHandler.noteActing.

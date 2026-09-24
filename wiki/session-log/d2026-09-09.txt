@@ -1,0 +1,1837 @@
+2026-09-09
+
+Four pages about making a gene become one, and the prompt is allowed to say a shape
+    cannot be drawn.
+
+A documentation session, run alongside the play session below and touching none of the
+    same files. It started as “bring the gene-writing page up to date” and
+    turned into a merge, because the reason the page was out of date was structural.
+
+The page had missed five masks, and the reason it missed them is the interesting part
+
+FRACTAL, PATH and CHOICE landed earlier the same
+    day; LUMA, EDGE and spreadFrom the day before.
+    None of them had reached creating-a-gene.html, so its machine-facing tab
+    was handing a model a vocabulary with no lace, no drawn shape, no branch and no
+    way to read the resolved colour — and cheerfully inviting it to
+    approximate. Both schema tables were re-transcribed whole from
+    expected.json rather than patched row by row, which is how they went stale
+    the first time, and the page now says so and gives the one-liner that dumps the
+    fixture.
+
+Also caught up in the same pass: space: "local" in all four places it
+    appears, the parts-by-position rule, that a layer cannot see what the layer above it
+    painted, PATH’s body space where the spine is 0.62 and not 1.0, and
+    the six things the loader now refuses outright — several of which the
+    page still described as traps to be careful about, which they have not been for some
+    time.
+
+“No commentary” was buying a worse failure than it prevented
+
+The pasteable prompt used to end output ONLY the JSON, no commentary. That is
+    right about the ninety per cent of the job that is transcription. It is wrong about the
+    rest, and wrong in a way that hides: a model told to emit JSON and nothing else
+    will always find something to emit, so the answer to “draw a shape this
+    format cannot express” came back as a confident approximation with no sign
+    attached that it was one. Every mask after the first eight exists because a
+    person hit that wall and said which measurement was missing.
+
+It is now conditional and narrow: ship the closest honest approximation, record it in
+    notes, then a fixed-shape TOOL GAP section — the element, how
+    the approximation falls short, why no composition reaches it, and a concrete mask or op
+    design with every parameter and default. Two at most, nothing else. The bar is the one
+    the page already sets for a human author: a
+    different measurement, not different tuning, with PATH and
+    “you have not found the numbers yet” both named as explicitly not gaps.
+
+Then the merge, on the owner’s call that it was spread too thin
+
+The split across four pages was not by subject, it was by accident of when each was
+    written: creating-a-gene.html had the traps, gene-format.html
+    had the parameter that caused them, modding.html had the Java escape hatch,
+    gene-effects.html had the effects vocabulary — and
+    which one you needed depended on already knowing the answer.
+    Making a gene is all of it in eight topical tabs:
+    Start here, Shapes, The file, Masks & ops, Effects, In Java, The prompt, Checks.
+
+The material was moved by line range, not retyped. Four thousand lines
+    of reference retyped by hand is four thousand chances to introduce something nobody
+    would ever find; what is newly written is the connective tissue, and an assembler script
+    refused to emit a page that still named a file it had just deleted.
+
+The tabs are page-local — tabs.js has given a panel whose
+    data-tab is not one of the three wiki views its own button since the LUT
+    lab, but nothing had used it at this scale. Two things had to give.
+    sync-page-views.mjs derived views from the panels and would have
+    written [] for a page whose panels are all topical, hiding it from
+    every view at once; a page that names no wiki view is now left alone exactly as an
+    untabbed page is, and this one’s views: ["coding"] is hand-set. And
+    .tab-bar had no flex-wrap: three buttons never needed it,
+    eight do.
+
+The unbuilt architecture was being written twice
+
+Half of gene-effects.html was auras, pools, memory, goals and spawn variants
+    — none of which runs. The plan was to move it to
+    the trait architecture page, and on comparison
+    that page already carried a faithful summary of every one of those
+    sections. So the merge there is not a bulk move: horse-traits gained the
+    anchors the new page links into, the build-order table annotated with what actually
+    shipped against each step, and the divergences catalogue in place of a
+    slice-vs-architecture table that still described five live verbs.
+
+Two things that were simply wrong
+
+    - night_temper and night_watch were undocumented.
+        Both have been registered on AbilityType since the night loci landed
+        this morning, and the effects reference never got them — so it documented
+        every verb but two, with no sign the other two existed. Both now have a section
+        written from the declarations. Gap 160 is the
+        shape of that failure rather than the instance.
+
+    - The format page still said the creator cannot edit an effects
+        block. That stopped being true when the creator grew a form for it.
+
+Nothing here touched the play session’s files. The eight Java edits in
+    this work are one-line doc comments and test failure messages that named a page which no
+    longer exists — including GeneWikiTool, which is the
+    generator for every gene page, so leaving it would have had the next bake
+    rewrite all of them with a dead link.
+
+0.3.8 – 0.4.0 — the stall that killed a horse, and a long evening of the owner playing while I worked.
+
+An unusual session in shape: the owner was in the game the whole time, so almost
+    everything here came from a report rather than from a plan, and three things were
+    confirmed working within minutes of shipping. The releases run together because they
+    were handed over one at a time as the reports arrived.
+
+The one that mattered
+
+A horse was teleported into a wall and suffocated, and the cause was two
+    bugs that only killed anything together. The stall detector flood-filled air,
+    three blocks above the sign - and a fence is one block tall, so it climbed over the
+    front rail of every real stall, spilled into the aisle, exhausted its cell budget and
+    reported “not a room”. That dropped it into a fallback box straddling the
+    wall. Then landingSpot scanned that box, found nothing standable, and fell
+    through to return stall.signPos() — the block the sign itself
+    occupies, flush against the wall, with wall material at head height. It was the only
+    position in the whole routine never checked for anything, and it was reached exactly
+    when the stall was least understood.
+
+The search now walks floor columns rather than air: it never rises, so
+    it cannot climb a fence, and it steps at most one block between neighbours, so a slab or
+    a carpet is still one room. A door, trapdoor or gate is the edge of the room
+    in every state — judging a doorway by whether a horse could
+    squeeze through it measures a different stall depending on which way the gate happens to
+    be swinging, which is not a property a stall should have. Landing is measured live from
+    the sign instead of read back from the record, so a rebuilt stall is the stall the horse
+    arrives in; the chunk is pulled in first; and a stall with nowhere to stand
+    refuses the ticket without consuming it. A refusal the player can read
+    beats a horse in a wall.
+
+The graph search moved to common/ as StallFill, behind a
+    one-method interface the game implements, with StallFillTest building
+    stalls out of ASCII. That is the cooldown sentinel's lesson applied rather than
+    restated: a piece of pure logic parked on the Minecraft side is a piece of logic nobody
+    can write a five-line test for. The test that would have caught this is six lines and
+    draws an L-shaped room.
+
+Confirmed by the owner, in play
+
+Shearing and milking both work — which closes the cooldown-sentinel gap, since
+    those two had never worked on any horse, ever. Binding a stall sign works. Spending a
+    ticket brings a horse home. Research papers off a book work. The Alleles tab collects.
+    The gene previews turn in 3D and the owner likes them. The cowboy and the horseman read
+    correctly as they/them.
+
+Reports that turned out to be something else
+
+“All of my horses have the exact same speed, health, jump, and size.”
+    True, and not a defect. The custom spawn egg starts every locus at
+    Gene.defaultAllele(), and an all-baseline genotype resolves to exactly
+    HorseTraits.baseline() every time — the rolled epigenome cannot vary
+    it, because epigenetic numbers ride on allele copies and a baseline locus contributes
+    nothing for them to modulate. BodyStatSpreadTest pins both halves so the
+    question is answerable in seconds rather than by reading six gene classes. Whether that
+    is the right default for the egg is now
+    gap 157 and nobody has decided.
+
+“Milking does not work.” It did; the bucket had gone to the
+    inventory rather than the hotbar. Worth recording only because it is a water bucket:
+    there is no milk gene in the mod, the only bucket yield is waterborn, and the checklist
+    task is called “Milk a mare” without saying the mare needs the gene.
+
+The research shelf was written up as fixed and was not. Two faults the
+    first pass had not looked for: four fixed captions were wider than the 176px window and
+    drawn with raw g.text rather than the fitter three methods away, and the
+    filing slot had been inactive on the server for the life of the block because
+    its isActive() read a field only the client ever sets. Every paper filed
+    had been snapping back to the cursor. The layout constants had been moved, which was the
+    described fix; nobody had opened the window.
+
+Built to order
+
+Taming by hand. Crouch, hold food the horse eats, look at it, stay still:
+    it walks over and eats out of your hand, and each mouthful is vanilla's own taming roll.
+    Deliberately the same odds as being thrown off — a second door in, not an easier
+    one — and diet-aware, so a carnivore wants meat and a dhampir does not come.
+
+Bareback riding, twice. First it was made to bond, because
+    vanilla only calls a rider “controlling” once the horse is saddled and the
+    obvious test therefore paid a bareback rider nothing — and bareback is how you
+    talk a wild horse round in the first place. Then it was made to steer, at the
+    top bond tier. The first attempt drove the horse from outside on the tick and felt like
+    it; the owner's suggestion — fake a saddle and take it off on dismount — was
+    better, so it now equips a real saddle carrying a PHANTOM_SADDLE component.
+    The renderer feeds the saddle layer an empty stack, the saddle comes off the tick the
+    rider leaves, and the rider's inventory is swept, because you can open a horse's
+    inventory while mounted and this would otherwise mint saddles.
+
+The breed book (wiki/breed-book.html) and a
+    Breeds tab. The page carries the mod's lore, set out by the owner: none
+    of these horses are native, every breed is an artefact of a collapsed civilisation,
+    gathered up and moved here by a race nobody has a name for, who then went away or
+    stopped coming or is still here and not introducing itself. The horses are thriving
+    without their masters and remain fond of people — which is the in-world reason a
+    wild Shetland will eat out of your hand. The hay portal and the breeding carrots are
+    that race's leftovers: they work, nobody knows why, and the mod never explains the
+    mechanism. The cowboy and the horseman may be the last of them or may have inherited the
+    instructions; the page leaves it open and argues that leaving it open is worth more.
+
+The in-game tab follows the browser's standing rule — it fills in as you meet
+    breeds, because every reference tab here is a record of your game rather than a
+    manual. Only Getting Started and Recipes are complete from the first minute, since those
+    are how you find out what to do at all.
+
+Smaller
+
+    - The allele collection now sweeps every horse you own whenever the roster is
+        gathered, retroactively — it had only ever hooked taming and breeding, so a
+        bought or gifted horse counted for nothing and the tab read empty for a player with
+        a full stable.
+
+    - The wild type left that tab: every horse carries it at nearly every locus, so it was
+        congratulating players for not having found the gene. Extension, agouti and
+        shade keep theirs, because at those three the baseline is a real coat rather than an
+        absence. Both ask EditorRules.alwaysCarried, which already existed for
+        the spawn screen, so neither keeps a list of its own.
+
+    - Foals born to a tamed dam start at a quarter of her bond. Starting at zero made a
+        horse born in your own stable exactly as wary of you as one caught wild that
+        morning.
+
+    - Shearing was worth more bond than a treat. It is 2 now, level with a hand-feed.
+
+    - “Take a gene off a horse” is “Research a gene with a book”.
+        Taking implies the horse loses something; it does not.
+
+    - The tutorial's contents lost their inconsistent numbering and its
+        “Next:” footer, which was a second control doing the contents list's
+        job.
+
+    - The cowboy and the horseman are they/them across twenty-three Java files and two
+        wiki pages. Singular they takes a plural verb, so every third-person
+        -s beside those pronouns came back a step with it; pronouns about
+        stallions were left alone.
+
+What the next session should pick up
+
+Gap 154 (closed 2026-09-10 - see settled decisions) — the Breeds tab ignores creative and
+    did not fill in on a tame. The creative half is certain and small; the taming half has a
+    named prime suspect (a BreedLineage token that is not a bare
+    Breed.id()) and should be checked there first.
+
+0.3.7 — two things you could craft but not use, and two you could do that did nothing.
+
+    A repair release, and the repairs came out of somebody playing it and saying what
+    happened. The shape of the day was the same as the last one: less building, more
+    being told.
+
+The bug that had never worked once
+
+    “Sheers aren't working. They say that the horse's coat hasn't grown back
+    yet” — on a horse that had never been sheared. Then the same for
+    milking. One cause:
+    HorseCooldownsAttachment.last(key) answers Long.MIN_VALUE
+    for a key that has never fired, and ready was
+    now - last(key) >= cooldown, which overflows to a large
+    negative elapsed time. So the gate said “not ready” for every horse that
+    had never done the thing — and since the stamp is only written on success, that
+    is forever.
+
+    Shearing and every gene yield had therefore never worked on any
+    horse in any build, and the dhampir's bite gate was dead the same way without
+    anybody noticing. The fix is one absent check. The part worth keeping is
+    why it survived: the class is Minecraft-side, so
+    there is no test source set it could have been caught in. The same record in
+    common/ would have been a five-line test.
+
+Stalls: the gate was the broken part
+
+    “Binding a sign to a horse works, creating a stall / the interior detector
+    definitely doesn't.” StallDetector demanded the sign on the outside
+    face, a room sealed with nothing in it but air, and everything within one block up or
+    down of wherever the sign happened to be. A doorway failed it, a roof beam failed it,
+    a wall torch failed it, hanging the sign from the inside failed it. And stalls are
+    read by exactly one thing — the ticket — so the gate was standing in front
+    of the only feature it existed to serve.
+
+    On the owner's call it measures instead of judging: both sides of the wall,
+    !blocksMotion() instead of isAir(), five blocks of headroom,
+    and a plain box in front of the sign when nothing encloses. It cannot refuse.
+    Stall signs has the detail.
+
+Tickets, built on top of it
+
+    Inert since they were added. The owner's spec: one-time use, teleport a horse back to
+    its stall, and — against the original design — not bound to a horse.
+    You click the horse you want sent. The tier is reach: basic within the overworld,
+    bound within any one world, interdimensional across them.
+
+    The middle rung was read off the recipe ladder rather than specified —
+    the owner said outright they did not know what the third one should be, and an ender
+    pearl to leave the overworld / an eye and blaze powder to leave the world you are in is
+    what the recipes already said. bound_ticket is consequently named after a
+    design that no longer exists (gap 152).
+    Tickets.
+
+Getting Started is a book, not a scroll
+
+    Asked for a table of contents; what it wanted was to stop being one long article.
+    It is a section at a time now, the contents list picks one, and the checklist
+    is split into its seven groups rather than thirty-odd boxes in a column. Every section
+    ends with a link to the next, so it still reads straight through — a tutorial you
+    cannot page through would have been a regression from the scroll.
+
+    New Bonding chapter, because none of it was written down where a player could
+    reach it: the rates, the fifteen-a-day ceiling and why it is there, and what each tier
+    changes about the animal. Four new checklist tasks — one per bond tier, credited
+    from syncCare so that every path that moves bond funnels through one
+    place, and one for giving a horse a barn name.
+
+Two ticks that fired on the wrong thing
+
+    TRANSFER_PAPER was completed at the top of
+    onEntityInteract, before the target was known to be a horse or the held
+    item to be a paper — so right-clicking anything with anything ticked it. Found
+    while reading a stack trace for something else. BUILD_STALL ticked when
+    the sign was bound to the horse, which is a sign in a pocket rather than a stall. Both
+    moved to the act they name.
+
+And the jar was lying about its own version
+
+    mod_version in gradle.properties names the jar;
+    neoforge.mods.toml carried a second, hand-edited copy that tells the
+    game. This release built as horsegenetics-0.3.7.jar announcing itself as
+    0.3.6, and was caught only because the file size came out identical to the previous
+    one. The toml is templated now and processResources declares the property
+    as an input, so there is one place to write it.
+
+What the day cost that was nobody's fault
+
+    “Trying to use a nametag crashed my game” — a
+    ClassNotFoundException for HorseProgress, one of our own
+    classes, whose .class file has an mtime of the exact second of the crash.
+    A compileJava run underneath a live runClient. Not a mod bug,
+    and the second time this pattern has cost a debugging session — check the jar or
+    class mtime against the crash timestamp first.
+
+Where the day ended.
+
+    Six releases, 0.3.1 through 0.3.6, and the shape of the day was outside
+    testers: almost everything here started as somebody else playing the mod and
+    saying what went wrong. That is new, and it changed what the work looked like —
+    less building, more reading a stranger's stack trace and asking what they actually
+    saw.
+
+    Two of the day's bugs were invisible from this machine and obvious from
+    theirs. The encoder crash that made 0.3.0 and 0.3.1 unplayable fired the
+    moment a horse came into render range, which a dev world reaches less reliably than a
+    survival one; the empty stables needed a rotated jigsaw, and three quarters of them
+    were. Neither would have been found by running the game here for another week.
+
+    And two of the reports were not bugs at all — a shared horse
+    inventory that was the player's own hotbar showing under every horse, and a crash that
+    was this session rebuilding common.jar underneath a running client. Both
+    cost real time to rule out, and both are now written down
+    (coding notes) because the second
+    one looks exactly like a packaging bug and would be chased again.
+
+    What is not done is the playing. The Equine Research Shelf has never been
+    placed, the Getting Started tab has never been drawn, and thirty-one checklist hooks
+    are proven reachable rather than proven correct. Those are gaps 143, 146 and 148, and
+    they are the first thing the next session should ask about rather than build past.
+
+A checklist that teaches the mod, and a collection that makes you want to find one more horse.
+
+    The mod now says what there is to do and keeps score. Thirty tasks
+    under the Getting Started prose, in the order somebody learning would meet them, and
+    every unticked one carries a line saying what to actually do — a player staring
+    at an empty box wants an instruction, not a title.
+
+    It gates nothing, deliberately. Nothing in the mod asks whether a
+    task is done; somebody who reads the wiki and builds a shelf on their first day ticks
+    two boxes at once and is not stopped. The moment a checklist gates content it stops
+    being advice and starts being homework.
+
+The rule that made it real work
+
+    A checklist with an item nobody can tick is worse than a shorter checklist: it reads
+    as a bug and the player cannot tell which one is broken. So every task exists only
+    once something completes it — which meant hooks in thirteen files, each one
+    line, next to whatever event already existed. The enum is in common/ and
+    the hooks are not, so nothing but a sweep can prove they all connect;
+    tools/check-progress-tasks.mjs is that sweep and it fails by name.
+
+    It also caught its own bug immediately. Written through a shell heredoc, the check's
+    \b word boundary arrived in the file as a literal backspace, so
+    the regex matched nothing and it cheerfully reported all thirty tasks unwired. A check
+    that silently matches nothing is worse than no check; it is a plain
+    indexOf now, with a comment saying why.
+
+The collection was half-built already
+
+    The Alleles tab is every allele in the mod with the unmet ones under question marks,
+    and most of what it needed already existed: the gene database has recorded
+    seen tokens per gene for a long time. What it could not do is record a
+    baseline allele, because an entry in that book is what knows()
+    tests, and creating one off an ordinary horse would have unlocked every gene in the
+    mod.
+
+    So the collection is a second set beside the book — a flat
+    geneKey|token per player — and the distinction is the interesting
+    part. Discovering a gene is a gameplay gate; collecting an allele is a
+    record. A plain wild-type allele belongs absolutely in the second and must
+    never be in the first. Sharing one map would have made one of those two behaviours
+    quietly become the other.
+
+And the shelf stopped looking like a different mod
+
+    Reported: the craft page's icons overlapped its text and the whole thing looked rough.
+    Both halves were the same mistake — placing things by eye. The list ran to y=96
+    and the slots sat at y=40, straight through it.
+
+    The layout constants now live on the menu, because that is where
+    addSlot needs them, and the screen reads every one; a slot and the well
+    drawn under it can no longer disagree. And the window is drawn in vanilla's idiom
+    rather than the browser's: mid-grey face, white highlight up and left, dark shadow
+    down and right, slots with the bevel inverted, dark text. Drawn, not blitted
+    — the thing that reads as Minecraft is the bevel, not the texture, and four
+    fills mean the window is whatever size the layout needs with no art to keep in step.
+
+    Two smaller things while in there. The shelf's item was the classic 26.1.2 trap: its
+    model was in models/item/, which this version ignores in favour of
+    items/, so it drew the missing texture. And an unattached signed transfer
+    paper now falls back to the blank paper's model through a
+    minecraft:condition on the deed component, instead of rendering nothing.
+
+The spawn screen ran out of column, and the fix was to stop using it.
+
+    Gap 139 was written the day the right-hand
+    column was widened, saying in as many words that the top and bottom groups would
+    still meet on a short window. They did, and it was reported: “Clear genes”
+    and “Make egg” overlapping.
+
+    The owner’s fix is better than the two I had written down. Both of mine
+    (scroll the column, split the column) treated the column as the place buttons go;
+    moving Spawn under the preview asks why the one button that
+    does the thing was queued up with Copy, Paste and Cancel in the first place.
+    The strip between the preview panel and the bottom of the window was empty and always
+    had been. So the bottom group is three rows now instead of four, which is 24 pixels
+    the column no longer has to find.
+
+    And this time the threshold is measured rather than asserted. The
+    top group ends at 208 and the bottom starts at height−74;
+    they clear at 290, and once rightStep() squeezes to its 20-pixel floor
+    they clear at 270 — a 1080p screen at GUI scale 4, which is where the report
+    came from. Below about 258 they still meet, because seven 20-high buttons need 140
+    pixels even touching. That is written down rather than claimed fixed.
+
+A page that opens first, a copy that takes a minute, and a browser that remembers.
+
+    The mod had no way in. Everything it does is documented somewhere on this wiki, which
+    is no help at all to somebody who has just installed it and is standing in a field
+    looking at a horse. So the browser has a Getting Started tab, it is
+    the first thing that opens on a fresh install, and it is the first tab in the strip.
+
+    Thirteen sections, in the order a player actually needs them: tame one, notice that
+    you need a mare and a stallion, feed them both a golden carrot, take a gene
+    off a horse with a book, file it on a shelf, buy one from the horseman if you would
+    rather, splice it into a foal, and repeat until the paddock looks the way you
+    pictured. Then the horse dimension, because a door made of hay is worth knowing
+    about.
+
+    The pictures are entities and items, not art. Item stacks go through
+    the item renderer and the horseman and the cowboy are built as real entities and
+    drawn the way the roster's horses are - never added to a level, made once, kept.
+    Nothing has to be exported, nothing goes stale when a texture changes, and a resource
+    pack the player has on is reflected. That matters most for the case the page exists
+    for: recognising a villager you have never seen.
+
+The flavour is not decoration
+
+    “Some horses are magic” and “breeds belong to biomes” are the
+    two facts that make somebody go and look at a horse rather than walk past it, and
+    both read better as an aside than as a heading. The horseman and the cowboy are
+    written as a pair who built their posts side by side and are, the villages say,
+    married - which is flavour the code half-suggested already, since the two
+    workstations share a texture set on purpose.
+
+One number I did not write down
+
+    The brief said a gene carrot gives “a 25% chance of getting that gene”.
+    That is not what the code does. A Known Gene Splice sets the fed
+    parent's gamete outright, so that parent passes the gene on with certainty; what is
+    uncertain is whether the foal shows it, which depends on the other parent
+    and on whether the gene needs two copies. For a recessive against an unrelated mate
+    the visible rate lands near a quarter, which is very likely where the number came
+    from. The tab was written to the code rather than to the number, and
+    gap 145 puts the choice back where it belongs:
+    a flat 25% roll is easier to explain and makes the carrot a gamble, at the cost of
+    the one real virtue the current design has, which is that you can plan a breeding
+    around it.
+
+Copying costs time now
+
+    A shelf copy is one iron ingot's smelt - 200 ticks - per rarity tier, so ten seconds
+    for a common gene and a minute for a mythic one. The progress rides on a
+    ContainerData, vanilla's furnace pattern, because the menu already syncs
+    those every tick and a progress bar that lags is worse than no bar. The work is ticked
+    per open menu rather than per block, which is what lets two players at one
+    shelf each copy their own gene onto their own book.
+
+And the browser stays where you left it
+
+    It was a fresh Screen every time the key was pressed, so it forgot
+    everything the moment you closed it - you came back to the top of the first tab
+    however deep you had been reading. The remembered position is now static state, which
+    is to say per session: the tab, both scroll positions, both search boxes, the sort,
+    the selections. Only the parts that name a horse are dropped, and only on
+    disconnect, so a UUID from one save can never select something in another.
+
+Stables in mountains
+
+    Reported against 0.3.2. The three stables were beard_thin, which lays a
+    skirt of material under a piece without clearing what is above it - so a rigid
+    86-block building projected onto a slope comes out with one end inside the hill. They
+    carve their whole bounding box now. What is not fixed is the other half of
+    the cause: meadow and savanna_plateau are in the biome tag
+    and are mountains in all but name, and no terrain adaptation makes a flat-bottomed
+    stable sit well on a 40-block slope (gap 147).
+
+A bookshelf that remembers genes, and a portal that finally notices its frame.
+
+    The Equine Research Shelf is the other half of
+    the paper loop. A book on a horse gives you a paper for a gene it carries, at
+    random; the shelf is where a paper stops being scarce. File one and that shelf will
+    copy it onto blank books for as long as the original stays in it. Take the original
+    back and the copying stops.
+
+    What makes it worth having is that it can be emptied. A one-time
+    unlock would have been simpler and would have made knowledge a flag on a player; a
+    shelf is a thing in the world that somebody could walk into and read, and that you
+    can carry to a friend. Breaking it gives every paper back, deliberately - the
+    alternative is a player never daring to move one.
+
+A set of keys, not a chest
+
+    The block entity stores a Set<String> of gene keys. A research
+    paper is completely described by the gene it names, and the shelf holds one of each,
+    so the rule is structural rather than enforced: there is no way to express
+    "two papers for flaxen" in the data, so no code has to remember not to, and a shelf
+    can hold every gene in the mod without an item stack per gene. Keys become items
+    again at exactly two moments - a withdrawal, and the block being removed.
+
+    The tabs cost one small discovery: Slot.x and Slot.y are
+    final, so the obvious trick of parking a slot off-screen does not
+    compile. Slot.isActive() is the right mechanism anyway, and better -
+    vanilla consults it for drawing and for hit-testing, which is exactly the
+    pair that must never disagree. A slot you cannot see but can still click is the worst
+    of both.
+
+The portal was never told its frame had gone
+
+    Reported plainly: knock a hay bale out of a lit portal and the interior stays. The
+    portal block had no updateShape, so it was only ever removed
+    deliberately. Vanilla's mechanism is the good one and it is barely any code - a
+    portal block that finds itself no longer enclosed returns air, and turning to
+    air is itself a block change, so one broken bale collapses the whole sheet in a
+    cascade and nothing has to know how big the portal was.
+
+    Adding it would have broken lighting a portal, and reading vanilla is what
+    caught that. Level.setBlock runs neighbour shape
+    updates unless bit 16 (UPDATE_KNOWN_SHAPE) is set - flag 2 does not set
+    it. Both places that build a portal used flag 2, so each block placed would have
+    asked its neighbours to re-check themselves while the rest of the sheet was still
+    air, and the new rule would have eaten the portal as it was being lit. Vanilla's
+    PortalShape.createPortalBlocks passes 18 for exactly this reason, and now
+    so do both of ours. The bug never existed outside a compiler, which is the useful
+    kind to find.
+
+And the Recipes tab, twice
+
+    One row per discovered gene meant the splice carrots outnumbered every other recipe
+    several times over and buried the 27 that are not gene carrots, so the tab gained a
+    two-entry category dropdown defaulting to the small half. Each recipe also gained a
+    line saying what the thing it makes is for, out of the lang file so it is
+    translatable and so a recipe that converts between two items can say which
+    direction it goes - packing a bundle and unpacking one share an output but not a
+    purpose. The gene carrots' line is formulaic, as asked: there are as many of them as
+    there are genes and the only thing that changes is the gene.
+
+The H menu stops crafting, and a book becomes the way a horse tells you something.
+
+    "Putting crafting in the H menu breaks the flow of normal Minecraft so much
+    it's confusing people." That is the whole argument and it is a good one: a
+    window bound to a key, that is not a block, that nonetheless crafts, is a fifth
+    thing to learn for no gain. Every recipe on that tab already worked at an
+    ordinary crafting table — both custom ones are registered serialisers with
+    real recipe JSON — so removing it cost nothing but the one thing the grid
+    could uniquely do.
+
+    The browser is now a plain Screen. Losing the container was the
+    point rather than a side effect: with no slots there is nothing to drag,
+    nothing to lose on close, and no server menu to keep in step. Seven types went
+    with it — the menu, its recipe class, the menu registry, three payloads and
+    the paper writer — and the key now opens the screen directly instead of
+    asking the server to open a menu. It came to about twenty container-specific
+    references in a 1,400-line file, which was a good deal less than it looked.
+
+    One behaviour change was caught by reading vanilla rather than by running
+    it: Screen.isPauseScreen() returns true and
+    AbstractContainerScreen's returns false, so the conversion would have
+    quietly started pausing singleplayer — and a horse you were watching would
+    stop moving whenever you opened its gene list. Overridden back. It is the kind of
+    difference that does not show up in a compiler and does show up as "the mod feels
+    wrong", so gap 141 says plainly that there
+    may be others of that shape.
+
+Recipes, generated rather than queried
+
+    The tab that is left is a reference to every recipe the mod adds. Getting the
+    ingredients to draw turned out to be the interesting part: the client has no
+    dependable way to ask for a recipe — data/ is datapack
+    territory and 26.1.2's client-side recipe API hands out display objects rather
+    than recipes, with nothing in api-notes about
+    either. So tools/bake-recipe-reference.mjs reads the real recipe
+    files and writes a flat summary into assets/, where the client reads
+    it straight off the classpath. 26 shapeless, one shaped, and two custom recipes
+    whose inputs live in Java and are described in words instead of drawn wrongly.
+    The trade is written down as gap 142: it
+    describes the recipes this jar ships, not the ones a datapack might have
+    replaced.
+
+A book on a horse
+
+    Removing the grid removed the only targeted source of research papers, which
+    would have left the splice chain fed by chest loot alone. The replacement is
+    deliberately not targeted: right-click a horse with a book and you get a
+    paper for one gene that horse carries, chosen at random. Choosing the gene
+    yourself — which is what the old button did — meant a paper was never
+    a discovery, only paperwork once you already knew. Now the horse decides. An
+    entirely ordinary horse has nothing to teach and costs you no book, and discovery
+    is deliberately not required, since reading the paper is the thing that teaches
+    you.
+
+Three smaller ones
+
+    The search box was closing the window. Typing "speed" into the
+    gene search hit e and opened the player's inventory. It is a vanilla
+    trap rather than a mistake here: EditBox.keyPressed handles the
+    control keys and returns false for an ordinary letter, because
+    letters arrive separately through charTyped — so the letter
+    falls out of super.keyPressed and the next thing
+    AbstractContainerScreen does is test it against the inventory key.
+    Any screen with a text field and a container behind it has this bug until it says
+    otherwise. A focused box now swallows every key but Escape; the letter still
+    types, because GLFW's character callback is a separate one.
+
+    Two mares now say why nothing happened. Vanilla does not know
+    horses have a sex, so a same-sex pair fed breeding carrots goes through the whole
+    courtship and reaches BabyEntitySpawnEvent like any other pair, where
+    the foal was cancelled in silence. The attempt is left exactly as it was —
+    they still try — and it now says so, in one of three lines per sex, to the
+    player who fed them. Light rather than an error: nothing has gone wrong, and a red
+    warning would read as a bug in the mod rather than a fact about horses.
+
+    ♀ and ♂ after a horse's name, coloured, so sex is
+    readable across a paddock. Appended at render time through
+    RenderNameTagEvent.CanRender and never to the stored name —
+    that name is what the record keeps, what a transfer paper prints and what the
+    rename box shows, and a glyph baked into it would reach all three and then be
+    inherited. A display aid belongs at display time, which is also why the switch is
+    client-side.
+
+A gene says what it does when you point at it — and seventeen of them could not.
+
+    Asked for plainly: hovering a gene in the custom spawn egg's list should pop up a
+    blurb describing what it does. The text already existed and already had the right
+    job description — Gene.description() is documented as
+    “one to three plain sentences for the in-game gene browser and
+    tooltips”, with built-ins reading GeneDescriptions and
+    data-driven genes carrying their own blurb.
+
+    Except for seventeen of them. The contract says an absent summary
+    resolves to "" and callers should treat that as “no
+    summary available”, which is honest and, on a hover panel, means the gene
+    silently has nothing to say while the one above it does. Coverage was 185 of 202:
+    missing were tiger eye, leopard, PATN1, PATN2, shadowcreature, the ten magic
+    utility loci, and two data-driven genes. All seventeen are written —
+    compressed from each gene's own wiki page rather than invented, which is the only
+    way to write a summary that will not contradict the page it summarises. It is 202
+    of 202 now, and GeneDescriptionCoverageTest fails by name
+    rather than by count when the next gene arrives without one.
+
+    The panel is drawn the way the dropdowns are — fills and text — rather
+    than as a vanilla Tooltip. Two reasons, and the second is the one that
+    decided it: a list row is not a widget on this screen (an unadded row takes its
+    click in mouseClicked), and the browser twin has no vanilla tooltip to
+    mirror. A panel built out of fills exists identically on both sides; a
+    Tooltip would have made the designer's version a reimplementation
+    rather than a copy.
+
+    Mirroring it turned up a real difference the two files had been carrying quietly:
+    rowAt() returns a view index in the screen and a
+    gene index in the browser, because the screen's rows carry their
+    own gene and the browser's are bare indices into genes[]. Nothing had
+    ever needed to tell them apart — both are only compared against the same kind
+    of thing — but a panel has to be positioned beside the drawn row, and with a
+    family filter on, the two indices differ. The browser now has a separate
+    rowSlotAt(), named and commented for exactly that, and
+    rowAt() is written in terms of it.
+
+A play session, four reports, and one root cause behind three of them.
+
+    0.3.2 launches and makes a world, which was the thing worth knowing. The session
+    that confirmed it then produced four more reports, and reading the log for one of
+    them turned up a fifth nobody had asked about.
+
+The stables generated empty, and the guard that did it was commented as doing
+something else
+
+    “The structures generate, but there are no horses anywhere in the structure.”
+    StablePopulator queues a stable when the chunk holding its
+    StructureStart loads, and guarded that with a comparison between the
+    bounding box's minimum corner and the chunk being loaded — under a comment
+    saying it queued “only the chunk holding the structure's own start”. Those
+    are different tests. A jigsaw start piece is placed at its chunk's minimum block
+    corner and then rotated, and SinglePoolElement.getBoundingBox rotates
+    about BlockPos.ZERO — so three of the four rotations carry the box
+    into the previous chunk in x, z, or both. Only unrotated stables were ever
+    queued. The other three quarters generated the building and stopped.
+
+    The guard was not merely wrong, it was unnecessary: getAllStarts()
+    already returns only the starts belonging to that chunk, and
+    StablePopulationData.claim() is what makes population happen once per
+    world. It now dedupes against the queue on the same (structure, corner) key
+    claim() uses, so the two cannot disagree. A stable also logs when it is
+    queued now, not only when it is filled — this bug's entire signature
+    was a missing filled line with nothing to say why, and one line without
+    the other is what tells you which half broke.
+
+Two shipped assumptions, and they are the same assumption
+
+    The [Cowboy] and [Horseman] lines were going to
+    chat in a normal install, because DebugAnnounce.ENABLED was a
+    hard-coded true. It was hard-coded for a good reason, written down at
+    the time: it had been !FMLEnvironment.isProduction(), and a whole
+    session went by unable to tell “the gate is shut” from “the code
+    never ran”. The constant was not the mistake. The mistake was that the
+    sentence beside it — this mod is a dev build with one tester and is not
+    shipped — stopped being true and nothing went back to look. It is now a
+    debug.announce server config, on in dev, off in a normal install,
+    switchable in both, which is what you want from a player who has something to
+    report. The startup line that says which way the gate went is kept.
+
+    That is the second defect this week from the same root, after
+    the encoder crash that was invisible on
+    the only machine that had ever run the mod. It has a gap of its own now
+    (gap 140), because the sweep has not been
+    done: nothing has gone looking for the other places that assume nobody
+    else is running this.
+
+One hundred and twenty-one errors that meant nothing, every launch
+
+    Found by reading their log for the stables line. Genes loads the
+    shipped gene files from its own class initialiser, on purpose; then
+    ModGeneSpecs called loadAndRegister, which re-read the
+    classpath and handed every one of them back to a registry that throws on a taken
+    key. Each throw was logged at ERROR. Nothing was actually broken — the first
+    registration is the one that counts — and that is what makes it worth fixing
+    rather than shrugging at: it trains the log's reader to scroll past a wall of red,
+    and a real collision would be sitting in the middle of it. The classpath half is
+    gone; a drop-in that collides still throws and is still reported. The launch now
+    says how many genes shipped and how many segments the genotype code has, every
+    time, which is the first thing worth knowing from a pasted log.
+
+The spawn screen's right column
+
+    “WAY too cramped”, and measurably so: the column was 96px wide with a
+    2px gutter, and "Spawn (creative only)" alone measures 111px.
+    A vanilla button neither shrinks nor wraps its label, so several were drawn straight
+    over the edges. It is 128 wide with a 4px gutter now, and the breed label fits
+    itself to the button rather than being cut at twelve characters — a number
+    that was a guess at what fitted a 96px button and was wrong in both directions.
+
+    The interesting part is what it exposed. Seven buttons grow down from the top of
+    that column and four are pinned to the bottom, and widening the gutter makes them
+    meet sooner. rightStep() now spends the gutter to buy room — but
+    seven 20-high buttons need 140px even touching, and a 1080p screen at GUI scale 4
+    leaves about 120, so below roughly 290px they still overlap exactly as they always
+    did. That is gap 139 rather than a fix,
+    because the honest answers (scroll the column, or split it) are larger than the
+    change that surfaced the problem. The designer took
+    the same numbers, per the standing rule that those two screens are one screen in
+    two places.
+
+Two releases nobody could play, and a test that was watching the wrong cap.
+
+    This one arrived from outside, which is new. The owner handed the jar to friends: 0.2.0
+    worked, and 0.3.0 and 0.3.1 both disconnected on trying to make a world
+    — Internal Exception: io.netty.handler.codec.EncoderException: Failed to
+    encode packet 'clientbound/minecraft:custom_payload'. The stack, once it arrived,
+    named the line exactly: CoatSyncPayload.java:26, and under it
+    String too big (was 35568 characters, max 32767).
+
+    CoatSyncPayload is how a horse’s coat reaches the client — the
+    genotype and the epigenome as text, sent when a player starts tracking the entity. It
+    was writing both with a bare buf.writeUtf(v). That overload caps at
+    32767 characters, throws rather than truncating, and a throw inside the encoder
+    takes the connection with it. A full epigenome is 35304 characters
+    today. So the first wild horse to come into render range ended the session, which on a
+    freshly generated world is roughly immediately. Nothing about it is intermittent; it was
+    simply never seen here, because the trigger is a horse coming into view rather than the
+    world load, and a dev world gets entered and quit a lot.
+
+    The uncomfortable part is that a test exists for precisely this.
+    EpigenomeSizeTest was written the last time this threshold was crossed, and
+    it fired then, and it is still green. It was watching
+    SpawnCustomHorsePayload’s stringUtf8(131072) — the
+    one cap in the mod with a number written beside it. An implicit cap has no number to
+    watch. The test could only ever have guarded the site that had already been thought
+    about, which is the site least likely to be wrong.
+
+    So the fix is not the raised cap, it is GenomeCodeCodecs: two constants and
+    two StreamCodecs that are now the only way a genome code is allowed onto
+    the wire. Four call sites moved onto them — the coat packet,
+    StoredGenome (which was on ByteBufCodecs.STRING_UTF8, i.e. the
+    same 32767, on a component that rides every inventory sync, so a preset
+    spawn egg or a filled genome jar would have kicked whoever picked one up), and the
+    genotype fields on the roster and spawn payloads. The test now guards each cap at half
+    budget rather than one of them.
+
+    The genotype guard failed on its first run, which is the entire argument
+    for having written it: 5612 characters against the 8192 those payloads had been
+    declaring — two thirds spent, on a number that grows with every gene registered,
+    and nothing anywhere would have said so until it did the same thing the epigenome had
+    just done. That cap is 32768 now.
+
+    Shipped as 0.3.2, and both 0.3.0 and 0.3.1 should be treated as
+    withdrawn — there is no way to play them. A world made under either is fine and
+    opens normally, since the fault was in what the server sent and never in what it saved.
+    The size problem underneath is untouched and is still
+    gap 66: 35KB of text per horse per tracking
+    client is a bandwidth cost nobody has budgeted, and two paths — the horse record
+    and the transfer deed, both of which cross the wire as NBT — still have a
+    65535-byte ceiling that no code here declares and no test watches. A
+    little over half spent.
+
+The PATH mask — a shape you drew, stored as points rather than pixels.
+
+    The session was paused here, mid-§10, to deal with something else
+
+        Stopped at a clean seam rather than abandoned: both masks are complete on both
+        sides, tested, parity-gated, documented, committed and pushed, the build is green
+        and the tree is clean. Nothing is half-written and nothing is waiting to be
+        reverted.
+
+        Resume from the roadmap,
+        which says what the next job is and what question is waiting on the owner first.
+
+The other half of §10, and the piece the drawing
+tools have to be written against. Every other mask in the vocabulary says what a shape is
+made of — a lattice of spots, a band of this width, noise at that scale —
+and lets the geometry and the horse's own numbers decide where it lands. That is the right
+tool for a marking with a rule behind it, which is nearly all of them. A lightning bolt, a
+crescent, a brand, a curl on one particular shoulder has no rule behind it: it is a shape,
+and the only honest way to describe it is to give its outline.
+
+Control points in a plane, stroked as a line or filled as an outline, extruded through the
+horse. plane picks the two axes — side is the flank and
+appears on both of them, which is what a marking drawn on a side view should do.
+space: "body" normalises the points over the horse, so a shape drawn for the
+adult lands in the same anatomical place on the foal. Full documentation, which is the source
+of truth, is on the gene file format.
+
+Points rather than a baked stencil was the owner's call from the previous
+session, and building it confirmed the reasoning: the shape stays procedural, stays legible in
+the JSON, follows a resized horse, and is the same arithmetic in Java and in the browser. It
+is the first parameter kind in the format that is neither a number nor a word, so
+SpecSchema.Kind gained POINTS and the parser gained its errors.
+
+Catmull-Rom, not Bezier, and the reason is the editor rather than the
+curve. A Bezier's handles do not sit on the curve; Catmull-Rom passes through every control
+point. Since the creator is going to draw those points as draggable handles, a curve that
+merely got near them would make the editor lie about its own data. The ends hold
+their tangent by duplicating the first and last point rather than extrapolating a phantom
+one, which is what stops a smoothed path from overshooting off the horse and back.
+
+Two things found by building it that were not the job
+
+    - A mask FLAG had no checkbox. The creator's mask form
+        sent PARTS and CHOICE to their own editors and everything
+        else to the number/knob/per-dose control — so SPOTS'
+        mirror offered to be driven by a knob, which is not a thing, and could
+        not simply be ticked. PATH carries three flags, which turned an obscure
+        bug into a blocking one. It is a checkbox now, and tidyMask drops an
+        unticked one instead of exporting false.
+
+    - The parity gate could not see PATH_CURVE_SAMPLES.
+        Sabotaging the creator's copy from 8 to 7 left the check green. The fixtures
+        probe four texels per part, and one sub-segment more or less on a curve moves the line
+        by a fraction of a texel — so a real divergence in a shared constant was
+        invisible. It is not a schema parameter, so nothing compared it. It is emitted into
+        the fixture and compared directly now, the way the condition flags are, and breaking
+        it fails properly. The fill's crossing test was caught on the first try; both
+        are verified by breaking them and watching parity go red rather than by assuming.
+
+And one mistake worth keeping
+
+The first PATH examples were written at v around 0.7 —
+"high on the flank". Rendered, they were floating above the horse's back. body
+space normalises over the whole-horse box and that box runs to the ear tips,
+so on the adult mesh 0.33 is the underline and 0.62 is the spine. It is the
+same trap WhitePattern.toplineHeight exists because of, met again from the other
+direction: measuring against the whole box is correct for a mask whose author is
+drawing on the whole horse, it is simply not anatomical. Moved to the barrel, and written into
+the format page as its own warning rather than left for the next person.
+
+Also worth recording: PathMaskTest failed twice on first run and both were
+test bugs, not code. One probe point sat exactly on the Catmull-Rom midpoint of a
+symmetric span, so "the curve should leave the chord" was false at the one place it was
+checked; the other measured a stroke's softness fade and called it an overshoot. Both are
+rewritten to sample the spline directly, where neither confound exists.
+
+:common:test not run in full (owner's standing rule). Run:
+PathMaskTest (13), FractalMaskTest, both coat goldens (neither moved
+— no registered gene uses either new mask), GeneSpecParserTest,
+GeneFilesTest, SpecGeneTest,
+CreatorMetadataRoundTripTest, :neoforge-26.1.2:build, and every
+wiki and parity check. Re-baked: spec fixtures, creator assets, designer wasm, search
+index.
+
+A gene can be a fractal — and a stale roadmap sent the session somewhere else first.
+
+The session opened by picking the top item off
+the roadmap and found two thirds of it already
+shipped. §1.1 listed three white-pattern calibration defects; the entry for
+EDNRB’s frame band still cited BAND_LO / BAND_HI, which
+have not existed since the barrel-and-neck rewrite, and the entry for the
+cover knobs described a threshold-on-a-bell that both
+EdnrbGene.paintFrame and TobianoGene stopped being two sessions
+ago when they became score-sort-and-cut-at-a-quantile. Both had been fixed and written up
+elsewhere, and neither had been deleted from here, which is the failure mode this
+page and the roadmap’s own header warn about. Both rows
+are gone now.
+
+The third row went the other way and was closed by decision. Medicine
+hat was measured before it was argued about: over eight seeds a kit=SB1/SB1
+horse comes out ears 0% white, the rear 30% of the head 0.4% — the
+cap is genuinely there — against a 99.6% white mane and a 100% white
+neck, so rendered it reads as two dark ears and a smudge behind them. The owner
+declined to model it: “it will roll randomly, I do not care if it does or does
+not”, and “the hat should not be a unique gene”. Nothing
+retains for it and nothing rolls for it.
+Gap 29 is now a record of that call rather than a
+defect.
+
+The FRACTAL mask
+
+With §1 closed the owner picked §10, the visual
+marking designer, and within it the fractal masks before the drawing tools — the
+roadmap names them as what peacock and laced tobiano both want, they live
+in common/, and the drawing tools sit on top of the mask vocabulary rather
+than beside it. FRACTAL joins the mask vocabulary (GeneSpec.MaskType.values()
+counts it): value noise summed over
+octaves with lacunarity, gain and a domain
+warp, and a shape that reads the summed field as
+fbm, ridged or billow. It is documented on
+the gene file format, which is the source of truth
+for it.
+
+Two things in it are deliberately not the textbook recipe, and the
+first is the reason the mask is worth a write-up at all.
+
+    - The octaves are normalised by the root of the summed squares, not by the
+        summed amplitude. Dividing by the sum — what every fbm snippet
+        does, and what PatchNoise.field does — makes the result a
+        weighted mean of independent samples, and a mean is narrower than one
+        sample, more so with every octave. On such a field an author who adds a fourth
+        octave for detail also drags the coverage toward whatever
+        threshold: 0.5 selects, silently, with no parameter to blame.
+        That is the same defect the cover knobs were built on
+        — a knob written against a field nobody had measured, delivering a 3×
+        swing where a 1.4× one was intended — and it cost a rewrite of two
+        painters. Dividing by the root preserves the spread instead, so one octave is
+        exactly a PATCHES mask and every octave after buys detail and nothing
+        else. It was cheaper to not have the problem than to document it.
+
+    - shape is applied to the summed field, not per octave.
+        Ridging each octave and then summing gives a thicket; ridging once gives
+        continuous lines that fork, taper and pinch out — the lace. It is the same
+        move BodyNoise.ridge already makes on a single octave, and the one
+        STROKES is built on.
+
+FractalMaskTest pins both, and measures the naive normalisation
+alongside so the claim in the comment is not taken on trust: six octaves of the
+textbook form come out visibly narrower, and the shipped form does not.
+
+Two things looking at it changed
+
+    - One octave is not bit-identical to BodyNoise.value,
+        only identical to a rounding step: the sum is written
+        0.5 + (v - 0.5), which is not v in binary floating point.
+        The test asserts a last-bit tolerance and the comment says so, rather than claiming
+        an identity that is a hair off.
+
+    - Lace is two or three octaves, not six. Rendered rather than
+        reasoned about: a texel is about 0.5 body units, so by the fourth octave of a
+        scale of 5 or 6 the finest detail is below the sheet’s
+        resolution and a ridged field breaks into stipple — a perfectly
+        good speckle, and not lace. The guidance to take the extra irregularity from
+        warp instead is on the format page.
+
+All four contract files moved (SpecSchema, SpecPainter, the
+creator’s schema.js and spec-engine.js), plus
+gene-format.html. No new primitive was needed in
+js/noise.js: the fractal sum is built out of value, which is
+already ported.
+
+The parity gate was proved to reach it rather than assumed to. Two
+FRACTAL layers went into example-genes/prismatic.json — a
+ridged one and a warped fbm one, so both branches are exercised
+— and then the JS divisor was deliberately broken and check-parity.mjs
+watched to go red before being restored. A fixture that never runs the new code is green
+by definition, which is exactly how the UV swap hid for a day.
+
+Settled for the drawing tools, which are not built: a drawn shape will
+become vector paths in body space — a handful of curve control
+points in body units — rather than a baked bitmap stencil. It stays procedural, stays
+small in the gene file, survives a resized horse, and the same maths runs in Java and in
+the browser. That makes the tool a curve editor rather than a brush, and it wants a
+PATH-family mask before any UI is written.
+
+Also settled, by reading the code rather than by asking: the roadmap
+entry that said to decide whether the pipeline needed a scalar-expression channel
+“before building the UI” was already answered. GeneSpec.Knob plus
+Value.FromKnob lets any mask parameter be driven by a per-copy stored scalar
+over a declared range, and Value.PerDose gives a per-dose triple beside it.
+“Expression scales parts” is expressible today; what is missing is that the
+creator never shows the channel.
+
+:common:test was not run in full (owner’s standing
+rule). Run: FractalMaskTest, both coat goldens (neither moved — no
+registered gene uses the new mask), GeneSpecParserTest,
+GeneFilesTest, :neoforge-26.1.2:build,
+check-parity.mjs, check-links.mjs,
+check-gene-tabs.mjs. Re-baked: spec fixtures, creator assets, the designer
+wasm, the search index. Unplayed: nothing new in game — no shipped
+gene uses FRACTAL yet, so there is nothing to look at until a gene does.
+
+Twenty-five loci get the science they were built from — and three of them argue back.
+
+The health layer and most of the natural colour genes have been carrying their
+real-world basis in a Java doc comment and nowhere a reader could reach it.
+Gap 89 had that written down as 25 pages missing from
+the science view, with a check
+(wiki/tools/check-gene-tabs.mjs) holding the list so it could not grow. The
+owner supplied source material for all 25. Twenty-three are now written; the
+backlog is 2.
+
+Each tab is the same shape, because the source files were: the locus and the variant
+with its coordinates, the mechanism, the real inheritance table, breed-by-breed frequency
+where anyone has measured it, and an explicit three-way split between what is established,
+what is strong inference, and what is not supported. That last section is the one worth
+having — a page that only says what is known reads as more certain than the field is,
+and several of these loci have a famous unsupported claim attached that a player is
+more likely to arrive holding than the real one.
+
+The point was never the citations
+
+It was the fourth thing each page now does: state where the mod and the
+literature disagree, and which way. Until both halves were on one page there was
+nowhere that comparison could happen, and the risk was never that a divergence was wrong
+— it was that it was undocumented and would be “corrected” one day by
+somebody who had read only one side. Three turned out to be substantive enough to earn
+a gap of their own.
+
+SCN4A kills a horse that lives. The mod
+makes the HYPP homozygote lethal at birth. A real H/H horse survives, is more
+severely affected than a heterozygote, and is ineligible for AQHA registration
+— a studbook rule, which has no analogue in a game. This is the mod’s largest
+flat contradiction of fact on the health layer, and it is a design call rather than a
+misreading: HYPP is the one locus where the player makes the mistake with their eyes open,
+because an H/N horse is visibly unwell and can still be excellent on every
+other axis. Making the homozygote a cliff is what turns that temptation into a decision. If
+a severity axis ever lands, H/H becoming much worse but survivable is
+the fix — and it would cost the gene its cliff.
+
+HMGA2 pays the pony allele in the wrong
+direction. HEALTH_PER_P is +2.0, on the reasoning that a
+pony is a hardy horse rather than a broken one and that a locus whose only effect is
+“worse” is one a player fixes once and never thinks about again. Sound design.
+The only validated health association at that locus is higher basal insulin and,
+through it, laminitis risk — so the sign is inverted against the evidence. A metabolic
+or laminitis system would give the real effect somewhere honest to live;
+the diet gene is the nearest existing hook.
+
+CKM is a speed locus the literature does not
+support. Its only equine performance claim came from a 2010 Thoroughbred
+candidate-gene study, failed that same paper’s own independent replication
+sample — the combined analysis retained COX4I2, not CKM — and was
+explicitly non-significant in a later Quarter Horse study. The biochemistry is real and the
+genotype-to-phenotype link is not. The trade is deliberate: the mod wants three legible
+speed genes of different sizes so a breeding programme has a gradient with a long tail, and
+CKM is the smallest of the three precisely because it is the least defensible. It also
+names its alleles T/C where the marker in the paper is G>A.
+
+A fourth is drift rather than a decision. MATP
+makes pearl commoner than cream — 1/22 against
+1/30 — where the real ordering is emphatic in the other direction: cream
+is in 25 of 28 surveyed breeds and reaches 0.42 in Lusitanos, pearl is in 7 and tops out
+near 0.12 in Iberians. The cause is visible in the source comment: those are “the same
+numbers the two old genes carried”, from when cream and pearl were separate loci tuned
+independently. Merging them made the two figures directly comparable for the first time, and
+nobody had looked.
+
+Everything else that diverges, diverges for one reason
+
+The missing age model, showing through on gene after
+gene. Cerebellar abiotrophy arrives at six weeks and worsens
+for months; SCID gives a foal a fortnight of perfect health on
+its dam’s borrowed antibodies; HERDA is a horse that is
+fine until you put a saddle on it at two; naked foal syndrome
+runs from weeks to three years; champagne foals
+are born blue-eyed and turn amber. All of them are charged flat, from birth. Written out
+across five pages it reads less like five separate approximations and more like one missing
+system, which is what it is.
+
+Two pages needed a different kind of honesty. Diet has no
+real locus behind it at all, so its tab is a real-horse feeding guide judged against the
+mod’s own item list — and the finding worth having is that Dveg and
+Dwht are the only narrow diets a real horse could survive on, while hay, the
+one thing the mod treats as ordinary, is the only item on the whole list a horse actually
+lives on. SHOX models one allele where the real locus has two
+overlapping deletions whose compound heterozygote is also affected, which the
+mod cannot currently represent.
+
+The last two, and what they cost to be sure of
+
+Tiger eye and
+rabicano came last, because their first source files both
+arrived holding a byte-identical copy of the mushroom
+write-up — all three hashed the same. Re-supplied, they turned out to be the two most
+interesting pages in the batch, for opposite reasons.
+
+Tiger eye is the mod’s cleanest match to its source and asserts one
+thing the source will not. TE1/TE1 and TE1/TE2 give amber, carriers show nothing, the coat is
+untouched, TE2 is rarer than TE1 — all of that is exactly right, including the mod
+setting TE2’s frequency at 0.6× TE1’s against an observed 20-to-8 split. But the mod
+gives TE2/TE2 its own paler yellow iris, and the literature has one
+documented TE2 homozygote — a palomino whose eye phenotype could not be separated from
+the cream allele it also carried. The extrapolation is reasonable and it is an
+extrapolation.
+
+Rabicano has no gene at all. No causal variant, no locus symbol, no
+validated inheritance model, no test — the strongest lead is a 1.7Mb haplotype near
+KITLG on ECA28, about 160kb from the transcription start site. The
+Rb symbol on the coding tab is this mod’s invention, which is now written down
+where somebody looking for the paper will find it instead. What is striking is that the
+mod already had the right structure: a dominant allele whose expression is a
+per-horse roll that can come out at nothing. That is not a compromise between two
+readings of the evidence, it is the only shape that reproduces both halves of what the
+literature reports — apparent dominance in pedigrees, and expression ranging down to
+invisible.
+
+What the closure created
+
+Gap 89 is closed and its roadmap section has been replaced rather than deleted, because
+finishing the 25 made a second gap visible underneath. Measured against the new tabs, which
+run 1,200–2,300 words, 17 of the 23 that already existed read as stubs:
+MC1R is 41 words for the foundational red/black locus,
+EDNRB is 62 for the frame-overo lethal that four new pages cite
+as their cautionary example, and MITF is 90 for SW1 — the
+common splash allele, whose PAX3 twin now has 2,024. And 20 of the 48 natural tabs
+name no breed at all; some correctly, but
+leopard complex without Appaloosa and
+ACAN without the Miniature Horse are the same hole one level
+down. It is written up, tiered by which pages the new tabs cite and cannot get an answer
+from, on the roadmap.
+
+The other half of the audit was the tabs that already existed. Measured against the new
+ones, which run 1,200–2,300 words, the older science tabs are thin:
+MC1R is 41 words for the foundational red/black locus,
+EDNRB is 62 for the frame-overo lethal that four new pages cite
+as the cautionary example, and MITF is 90 for SW1 — the
+common splash allele, whose PAX3 twin now has 2,024. And 20 of the 48 natural
+science tabs name no breed at all. Some of those are universal loci where that is correct
+(shade, sex), but
+leopard complex without Appaloosa,
+ACAN without the Miniature Horse and
+megaesophagus without the Friesian are gaps of the
+same kind gap 89 described, one level down.
+
+Some players would rather their saddles fit.
+
+An owner's call, and a small one to build: the size loci now answer to a server
+setting. body.size, true by default; false and every horse renders and
+collides at 1.0 whatever its alleles say.
+
+The reason it is the one body trait with a switch is the sentence that normally sells
+it. Speed, health and jump are numbers; Attributes.SCALE is not, because
+vanilla scales the hitbox from it as well as the model. So a Falabella and a
+Percheron meet a saddle, a lead, an arrow and a two-block doorway in genuinely different
+places, and that is a feature in most worlds and a nuisance in some. Server-side for the
+same reason: a client that disagreed with the server about a horse's size would be aiming
+at a horse that is not there.
+
+The gate is one expression, in
+HorseRecords.applyTraitsToEntity — the single place the resolved scale
+reaches the game. Everything upstream is untouched: the size genes are registered, drawn
+from the same founder tables, inherited and reported identically, and
+Traits.scale() still resolves to what the alleles say, so the info panel, the
+family tree, the browser and the inspect paper all keep showing the real number. Two
+details were deliberate rather than incidental. It writes 1.0 rather than skipping
+the write, so flipping the setting off and reloading actually shrinks the big horses back
+instead of leaving them frozen large. And the other route to
+SCALE — an effects attribute verb naming
+scale, which no shipped gene uses but the table has always allowed —
+answers to the same setting in both applyAttribute and
+clearAttributes, so a modifier already standing comes off on the next reconcile
+rather than being stranded on the horse by a setting change.
+
+Two things came out of writing it down that were not in the ask.
+A breed's height target rides on the same write —
+stats.height in hands becomes a StatAxis.SCALE band, which is the
+entire reason a Falabella looks like one — so with the setting off every breed in the
+mod stands the same height. That is the honest consequence and not a bug, but it costs more
+than "tack fits" and nothing in game says so
+(gap 132, with the compress-rather-than-flatten
+alternative written out). And both gene testers scale their preview by the
+genotype and cannot know whether the server will honour it — the designer has
+no server to ask at all (gap 133).
+
+The thing this cost, now on api-notes: a
+ModConfig.Type.SERVER file is written to the instance's
+config/<modid>-server.toml, and a world's serverconfig/
+folder is an optional override of that path rather than where the file is made.
+The verification entry said the wrong one until the generated file was actually looked at.
+The checks are on the body size gene, and the first of them
+is that the default is unchanged — a mistake here flattens every world
+silently.
+
+Ask the neck what shape it is — and six gene layers that had never painted a texel.
+
+Two defects, both picked for being fixable and provable without opening the game.
+
+The coat cache was unbounded, and no reload touched it
+
+Gap 130, opened by the previous session’s
+resolution analysis and closed here. GeneticCoatTextureFactory filled two
+ConcurrentHashMaps with computeIfAbsent and never removed an
+entry, so a client accumulated one permanently registered DynamicTexture per
+distinct genome it had ever drawn — adult and foal separately, plus a mask for every
+glowing one — and released them only on logging out. And there was no client
+reload listener anywhere in the mod, so editing the gradient and pressing F3+T
+appeared to do nothing at all.
+
+The fix that matters is the shape of the cache, not its size.
+TexelBudgetCache lives in common/ because the interesting part is
+a policy rather than a texture: an LRU whose capacity is texels rather
+than entries. One entry is a whole sheet, so what has to stay bounded as
+SHEET_SIZE changes is the memory, not the horse count — an entry-count
+LRU tuned today would quietly be sixteen times the memory at four times the sheet, which
+is precisely the trap the resolution work is walking
+toward. A 64-entry floor sits under the budget so the cache can never come out smaller
+than a frame, which would not merely thrash but could release a texture an
+already-submitted draw call still wanted. Every removal, eviction and clear()
+alike, goes through one hook that releases the texture and drops the reverse-map entry.
+CoatAssetReload is the listener; the event is
+AddClientReloadListenersEvent, not the
+RegisterClientReloadListenersEvent the gap guessed at, which is now on
+api-notes along with the reshaped
+PreparableReloadListener.reload signature.
+
+Worth recording: the unit test caught an off-by-one in the eviction loop on its first
+run — it double-counted removals and stopped one entry early.
+
+The neck’s geometry was written out by hand in eleven files, and six of them were dead
+
+Gap 103. A Y band across the adult neck is a
+collar: it wraps the crest and the throat alike, which is the bug that put
+goth’s hood on the underside of the neck and had to be
+reported twice. The workaround was a WAVES mask with a sawtooth longer than
+the horse (wavelength 90) at an amplitude of 77.94, so the
+displacement never wrapped and the band came out as a plane tilted to
+2A/ = tan(60°) — sixty because the neck’s own long axis
+is sixty off horizontal.
+
+The gap said five gene files. It was eleven — and the audit found
+why it had spread so quietly. amplitude is in whatever space says
+while wavelength never is, so six of the eleven had copied the pair
+into space: "part", where 77.94 displaces the band twenty to forty normalised
+spans off the horse. Measured over all 1280 neck texels, beetle pearl, diamond
+scutes, duskfall speckle, ink scroll, nebula points and wyrmwood sigils selected
+exactly zero, on every horse and at every seed. They loaded, they registered, they
+had icons, and the layer was inert. Nothing could have said so: a mask cannot fail, it can
+only select nothing.
+
+HorseSkinGeometry.local is the replacement — the inverse of
+posed’s frame change, giving a body point as fractions along the edges of
+the part’s actual cuboid, read by AXIS, WAVES and
+RAMP as space: "local". On the neck, axis: "X" is
+across its depth (low is the crest, which is the face the mane box sits on) and
+axis: "Y" is along its length, so a band there is a collar square to the
+neck rather than to the world — which is what ink scroll and wyrmwood sigils
+described all along. Details on body space and
+the gene format.
+
+The old trick turns out to be exactly that coordinate. The fit is
+affine with a maximum residual of 0.0002 over the whole neck, which is what made the
+conversion safe rather than hopeful: the five genes whose bands did land converted with a
+texel-for-texel identical selection, and four of them — cosmic, shark, stars, suit
+— came back byte-identical in the bake golden. Only goth moved, because its
+$depth knob was in body units and is now a fraction; the range of hoods is
+unchanged and an individual horse redraws. Thirteen golden rows moved in total, which is
+exactly the six revived genes plus goth and nothing else.
+
+What used to be two constants is now assertions. PartLocalFrameTest pins
+that local equals part space on an unpitched part, differs sharply on the pitched neck, and
+that the old sixty-degree coordinate is still affine in the new one with the slope the
+neck’s 7-unit depth implies — and it establishes “the crest” by
+asking where the mane box is rather than by repeating a number, so it survives the
+neck being reproportioned. Beside it, GeneFilesTest now refuses any
+WAVES amplitude far above 1 in a normalised space, which is the general form
+of the mistake all six made; it was checked by breaking a gene on purpose and watching it
+fire.
+
+The thing worth carrying forward
+
+Both defects had the same shape and it is worth naming: a failure that produces no
+output at all is invisible to every test that hashes output. The six dead layers were
+in the bake golden the whole time, hashing consistently, because a mask that selects
+nothing is stable. What found them was measuring where a gene paints, per part,
+rather than whether its bytes moved — and that measurement took twenty lines. The
+same reasoning is why the cache defect needed a texel budget rather than an entry count:
+both are cases where the number that has to stay true is not the number the code was
+counting.
+
+The sheet size turned out to be a variable in disguise, eight mods got a verdict, and the whistles got a design.
+
+A documentation session — no Java changed, no gene moved, no golden touched. Three
+questions asked, and the first one had a better answer than expected.
+
+Scaling the coat sheet is mostly already done
+
+The question was “what breaks at half, eight, sixteen, thirty-two and sixty-four
+times the current sheet?”. The premise of the question was that resolution is baked
+in everywhere. It is not. HorseSkinGeometry.faceMapsOf
+multiplies vanilla’s own 64-space texOffs by
+TEXELS_PER_UNIT, and HdHorseModel divides by the reciprocal
+through a per-cube texScale, so the UV layout has always been a function of k
+and nobody has ever typed a texel coordinate into the geometry tables.
+CoatBuildContext.size() already exists as the seam a gene should read.
+
+So the answer is a short list rather than a rewrite. The absolute references, all of
+them:
+
+- The eye rectangles in CoatRegions are literals —
+    but every value divides exactly by TEXELS_PER_UNIT, so they are 64-space
+    rectangles that were pre-multiplied once and can be un-multiplied with no behaviour
+    change at the current size. That makes the refactor provable by the goldens.
+
+- EyePatch’s four-bit iris. “A sector is four
+    bits because an iris is 2×2” is a rendering fact that stops being true in
+    both directions: it survives larger sheets as a coarse quarter-split and
+    dies at half size, where the iris is one texel and both heterochromias have
+    nowhere to go.
+
+- SpecPainter.spread is the only genuinely bad one. It is
+    a per-texel square search whose radius is derived from k, so it is correct at every
+    resolution and quartic in cost — k more texels each
+    searching a k-times-bigger box. It has to be redesigned rather than
+    re-parameterised, and a signed distance field computed once per bake would speed up
+    the current resolution too.
+
+- The sample grid is a Sample plus a BodyPoint
+    object per mapped texel — an object graph, so roughly an order of magnitude more
+    memory per texel than the finished texture, static and never freed. It is the largest
+    allocation in the mod and nobody had counted it.
+
+No gene indexes on texel coordinates at all. Every gene takes
+(px, py) from forEachTexel as an address to write to and does its
+arithmetic on the BodyPoint beside it; there is no per-texel hash, no
+neighbour step, no threshold on px anywhere in
+genetics/genes/. That is the body-space decision paying off years later, and
+it is why raising the resolution is supersampling rather than reinterpretation. The
+genes that are coupled to k are coupled through the three shared sites above, plus
+the soft one nothing can detect: constants tuned by eye at the current size, which the
+goldens cannot isolate because they all move at once.
+
+Two things also worth having found. Storage is free — no coat is
+ever written to disk, so resolution costs nothing in save size, jar size or bandwidth.
+And OptiFine is irrelevant: it, ETF and EMF solve the resource-pack
+selection problem, which a mod that generates its texture does not have.
+
+The point of the exercise: paint on the player’s own pack
+
+The resolution work is the prerequisite for the feature the owner actually wants
+— read whatever white horse the player’s resource pack ships and paint the
+genome on that, at the pack’s own resolution. Checked, not assumed: vanilla
+26.1.2 ships horse_white.png and horse_white_baby.png at 64
+under exactly the two paths this mod shadows in its own namespace, and the
+ResourceManager the factory already uses resolves through the active pack
+stack. So it costs a namespace change, plus an un-mirroring pass to give the adult
+sheet’s four legs and two ears their own patches — the foal needs
+none, because vanilla’s baby model already gives each leg a distinct patch
+— plus making the sheet size a variable. Two tiers, no fallback chain: a pack that
+ships our namespaced template gets it used verbatim, otherwise we derive from
+minecraft:.
+
+The undecided part is left undecided on the page: a pack whose “white” horse
+is cream would tint every coat in the game, because the composite is a multiply that
+assumes the template is shading and nothing else. Normalise it, accept it as the
+pack’s intent, or gate the feature — owner’s call, flagged rather than
+guessed.
+
+All of it is on the new texture resolution page,
+which is now the single source of truth for the subject.
+
+Eight mods, and the finding that the blocker is usually a version
+
+Compatibility had the accidental half — what
+happens when two mods meet and neither knows about the other. It now has the deliberate
+half: what a patch would actually have to do. It decomposes into four seams (entity
+identity, the mesh and its UVs, the renderer, gameplay overlap), and the recurring finding
+across SWEM, Icy’s Better Horses, Horseman, Horse Powered, Horse Combat Controls,
+AstikorCarts, armour-only mods and the Fresh Animations pack is that
+the overlap is nearly always one subsystem and the blocker is nearly always a
+version rather than a technical conflict. Of the eight, three are co-installable
+with 26.1.2 today.
+
+Two ideas came out of it worth more than the verdicts. User-written model
+remaps: HorseSkinGeometry is already a table of pivots, boxes and
+64-space texOffs, and an OptiFine/EMF .jem is very nearly the
+same table — so describing someone else’s horse mesh is a file, not a fork, and
+every gene and both editors would work on it unchanged because no gene has ever known what
+mesh it was painting. What it cannot express is non-box geometry, which is exactly what
+blocks the SWEM patch. Gaits: the mod resolves speed, jump and health and
+then says nothing about movement, which throws away a real heritable breed-defining trait
+it already has the inputs for. A GaitContribution resolving in
+common/ to a named gait plus a tempo, with a thin per-mod animation mapping on
+the NeoForge side, would make the gene work shared across every detailed-leg mod instead of
+written once per mod.
+
+Callable horses: bind the whistle, not the player
+
+The Callable Horses mod binds one personal horse per player to a keybind. Taking
+the feature, not the shape — a player here has a stable, and picking one favourite is
+the choice this mod exists to make hard. The binding goes on the item:
+ModDataComponents.BOUND_HORSE already exists on the stall sign and its javadoc
+already anticipated being reused, so a bound whistle is that component on a whistle, bound
+by right-clicking the horse the way every other item in this mod claims one. Many horses,
+many whistles, and the component’s name field puts the horse’s name on the
+tooltip for free.
+
+Keybinds: the item is the interface. The mod has exactly one production
+keybind (H, the browser) and everything else is an item and a click. Callable
+Horses needs two keys because it has nowhere to put the binding; we do not. At most one
+optional convenience key, registered the way HorseBrowserKeyBindings does it.
+
+Writing it up settled three questions the roadmap was already carrying, which is the
+part worth recording. Bond gates the bind — a whistle that binds to a
+barely-tamed horse makes bond meaningless. Path if it can, teleport if it
+cannot, using the range BondFollowGoal already walks. And the three
+whistle tiers become loaded chunk / any distance / any dimension, which finally
+gives the echo whistle an identity that is not just a bigger number, and puts the
+configuration in the crafting ladder rather than in a config file. Against the tickets, the
+split is clean: a whistle brings the horse to you, a ticket sends it to its
+stall — the interdimensional ticket and the echo whistle being the same idea
+pointed opposite ways.
+
+Declined deliberately: respawning a dead horse. A horse here is a genome and a pedigree
+and the breeding layer rests on death being real. The one genuine unknown is finding an
+entity in an unloaded chunk — HorseRoster already documents that
+whereabouts are entity facts — and the answer is an index in the per-world horse
+database, which the browser, the stall records and the tickets all want as well. So it is
+shared infrastructure to be scoped on its own, not whistle work.
+
+Found on the way
+
+Gap 130, in two halves and both present-day
+defects at the current resolution. The generated coat textures are never released until
+logout — clear() does exactly the right thing and its only caller is the
+logout handler — so a session accumulates one registered DynamicTexture
+per genome it has ever drawn. Harmless now, and the first thing that stops the sheet ever
+getting bigger. And there is no client reload listener anywhere in the mod,
+so F3+T leaves every baked coat on screen and leaves the templates and the
+LutSet holding the old pack’s pixels — which means editing the
+gradient and reloading appears to do nothing, and which is a hard prerequisite for the
+resource-pack feature above.
+
+Nothing was built, so nothing new is waiting in
+verification. The compatibility verdicts are read
+off the other mods’ public listings rather than their source, and the two that matter
+most — whether Horse Powered’s mob capture preserves data attachments, and
+whether Icy’s replaces the renderer for its breed coats — are exactly what a
+listing does not answer. They are stated on the page as checks, not conclusions.
+
+The random number generator was never mixing its seed, and two goldens had to move to fix it.
+
+Eight gaps, taken as four pieces of work. The largest one changed every horse in the mod.
+
+Three gaps, one root cause
+
+SeededRng wrapped java.util.Random, whose seed handling is a
+single XOR against a constant. That is not a mix, and three separate
+entries on the gaps page turned out to be the same fact seen from different angles:
+
+- Gap 44: the first nextFloat() off
+    sequential seeds spanned 0.58 to 0.95, mean 0.77 - never touching
+    either end of [0,1). It had already cost an hour on a 62/22/16 split that measured
+    as 100/0/0.
+
+- Gap 117: because each gene reads its knobs at
+    its own offset in a shared stream, and the offset is its priority, moving two
+    unrelated genes pushed magic jump's mean 1.7% out - fifteen standard errors on a
+    distribution that had not changed.
+
+- Gap 47: a related but separate defect -
+    Epigenome.fromSeed drew every gene from one stream in registry order, so
+    adding a locus renumbered every gene after it and the horse at seed 13 became a
+    different horse.
+
+The seed now goes through splitmix64's finaliser before
+Random sees it, and each gene draws from its own generator namespaced by its
+key. The first measurement becomes 0.0002 to 0.9999, mean 0.5043;
+neighbour covariance drops from about 0.013 to about 0.001.
+
+The convincing evidence was a deletion.
+MagicBodyStatGenesTest carried its own splitmix64 finaliser as a local
+workaround, with a comment saying the real correlation was the gaps page's problem rather
+than the test's. That workaround was removed rather than left to double-mix, and the file
+passes without it - which is the fix demonstrating itself, and leaves the test as a
+tripwire if anyone takes the scramble back out.
+
+What it cost, and the check that nearly went wrong
+
+It changed every horse ever generated, exactly as the gap said it would: 883 of
+1056 lines of the pipeline golden and 218 of 623 of the bake golden, plus 154 gene
+icons, the designer wasm and the spec fixtures. The check that mattered was not the count
+but the membership: the genes that moved are exactly the genes that store
+epigenetics, with acan and b4galt7 correctly untouched.
+
+Regenerating the pipeline golden turned out to be impossible as documented
+(gap 128). Its javadoc said "run the test, copy the
+file it writes"; it only wrote that file when the golden was missing, never on a
+mismatch - so build/coat-golden.txt held an older run's output, and copying it
+back reinstated a stale golden while the test went green. The tell was a file that had
+"moved by zero lines" while the test was still failing, which cannot both be true.
+
+Two tests then failed for no real reason, and both were the fragility gap 47 describes -
+a claim about a distribution pinned to specific draws. Neither was widened without
+measuring first: the splash dose response was comparing single horses at seed 3, which after
+the reseeding became the single unluckiest draw in sixty (+0.08 where the mean is +0.43), and
+the grey spread was a range over 8 seeds - the statistic most sensitive to a small
+sample, since it depends only on the two extremes. Over 24 seeds it is about 45 against a
+threshold of 20. Both now state their claim over a distribution.
+
+The last ungated mirror
+
+Gap 100 is closed and the creator's geometry port
+is inside the parity gate. posed() existed twice - in
+HorseSkinGeometry and again in model3d.js's
+emitPart - in two languages, in two files that were not obviously a pair. It
+now exists once in geometry.js, with emitPart calling it;
+528 cuboid corners were verified bit-identical before and after, so the
+preview mesh did not move. The fixture bakes every part × face on both skins: 924 new
+checks, 5485 to 6409.
+
+The probes are deliberately not only corners. A corner is a fraction of
+0 or 1 on both axes, and several ways of getting the axis pairing wrong agree at every
+corner and disagree everywhere else - which is the exact shape of the UV swap that once hid
+behind a stale fixture for a day. Proved by regressing the port three ways: swapping the
+body-Y/Z pairing (460 failures), dropping the pitch rotation (402), flipping one sign in the
+normal (44).
+
+A per-horse choice, and a mirror bug caught before it shipped
+
+Gap 102: the mask fold has no branch in it, so
+quarter faked one by sampling noise at a scale of 4000 body units - a
+hundred times the length of a horse - and amplifying it until the clamp turned it into a
+yes or no. The new CHOICE mask is the real thing: an integer drawn once per
+horse, constant across the body, exactly 0 or 1. Both of the trick's residual defects go
+with it - the slight drift across the body, and the 1-in-401 strip that clamped to neither
+end and produced a half-strength quadrant.
+
+Writing it turned up a 64-vs-32-bit modulus hazard, and that is why the
+example gene uses options: 3. The draw is mixed and the modulus taken over the
+low 32 bits only, because the creator mirrors this in JavaScript where a 64-bit remainder
+needs long division the u64 helpers do not have. Java over all 64 bits and JS over the low
+word agree for every power-of-two number of options and silently disagree for 3, 5
+and 6 - so a two-way example would have been green either way. With a three-way choice in
+prismatic.json, reintroducing the mismatch fails 72 parity checks.
+
+Wing cloak switched off
+
+    Parked rather than patched, at the owner’s call: it paints under two dozen texels out of
+    roughly five thousand, which is invisible to a person and was marginal long before the reseed
+    moved it across the icon baker’s floor. It wants retooling, not a lowered threshold.
+
+    The killswitch is one line — "wing_cloak.json" out of
+    index.json — because that file is the only thing that registers a gene.
+    Everything else is derived and fell out on the next bake: the designer’s
+    genes.json, the generated spans of pages.js and
+    index.html, the landing card. Every file still exists, and the wiki page carries
+    a banner explaining the state and how to undo it.
+
+    It changed no horse, and proving that was worth the two minutes. All 1056
+    composed-coat hashes in the pipeline golden came back byte-identical — only the
+    wing_cloak=n/n segment left the genotype code prefix, which is why all 1056
+    lines looked like they had moved. The bake golden lost exactly its three lines and
+    nothing else. That second fact is also a clean demonstration of
+    gap 47’s fix: before this session, removing a locus
+    would have redrawn every gene registered after it.
+
+Two measurements, and one gap that is a writing job
+
+Gap 53 is measured and the answer is reassuring:
+about two founders in three wear white from the two ordinary-marking loci,
+mean coverage about 10%, only about 8% loudly marked. The estimate on the page was three in
+four, so it was close and slightly high. The measurement has a trap in it:
+counting white on a founder directly says 91%, because on a flat greyscale chart a cremello,
+a grey and a palomino are pale coats with no marking on them. The giveaway was 91%
+wearing white while only 78% carried either locus. The test composes each founder twice and
+differences them, so the base coat cancels.
+
+Gap 89 was recounted rather than fixed. The recorded
+24 is 25; a briefly-feared 157 is wrong, because 131 of those are magical genes where having
+no science tab is correct. None of the 25 has an orphaned real-world section that could
+simply be moved, so it is genuinely a writing job and wants the owner - filling those tabs
+means writing veterinary material, not generating it.
+wiki/tools/check-gene-tabs.mjs does the code-side half: it holds the 25 as a
+written-out allowlist and fails if a new natural gene page arrives without a science tab, or
+if one on the list gains a tab and is not removed from it.
+
+Two parser refusals, three live bugs, and the discovery that the composer was never inside the parity gate.
+
+A code-only audit pass: things findable and fixable without opening the game.
+
+The parser now refuses what has already shipped broken
+
+Two gaps had been half-fixed on 2026-09-08 - the broken files were corrected and
+the checks were never written, which is the half that stops it happening again.
+
+- Gap 105: a perDose triple
+    on an expression that can only ever be reached at one dose is a constant written in the
+    form that looks most like a variable. A coloured expression is reached by two
+    copies of the second allele, so its dose is 0 and it reads perDose[0] -
+    which authors write as 0.0, because a dose of nothing should draw nothing.
+    A chance of 0 means the mask never fires, and five genes shipped painting nothing at all.
+
+- Gap 106: smoothstep with
+    its edges reversed is a hard step in the original direction - it does not reverse
+    the ramp, it removes it. The test is possibility, not certainty, because
+    the worse of the two historical cases was a knob whose range straddled its own
+    from: half the horses drew reversed and nothing about the file looked wrong.
+    RAMP is deliberately exempt, its from/to being a linear interpolation where
+    reversal is a thing an author might mean.
+
+Both were scanned across the corpus before being written, and both trip
+zero shipped genes - 513 banded masks, 130 of them pointing at knobs. So these are
+prevention with no migration behind them, which is the cheapest moment to add a rule. Six
+tests cover the two rejections and the three shapes that must keep working.
+
+Three live bugs
+
+- One item could not be crafted.
+    Cowboy Hitch and
+    Horseman’s Table (retired since) had byte-identical shapeless
+    recipes, so the recipe manager resolved one and the other was unobtainable in survival -
+    and those blocks are how both merchant NPCs come to exist.
+    Villagers stated the shared recipe as though it were fine,
+    which is how it survived being written down. They now differ along the line that page
+    itself draws between them: the hitch is rope-heavy, the table takes the leather.
+    neoforge-26.1.2/tools/check-recipes.mjs refuses the next collision.
+
+- The gene creator had been drawing every dark coat too dark, for months.
+    See below - this one is the interesting one.
+
+- Eleven repeated HTML ids, so eleven sections could not be linked at all
+    while every link to them still looked correct. The link checker now refuses a duplicate id;
+    it found the duplicate gap-46 on the gaps page itself, two different gaps under
+    one number.
+
+The composer was never inside the parity gate
+
+The creator’s mirror of the composer had rgb === 0 ? PURE_BLACK_ALPHA :
+0xFF - an exact equality against pure black, which is what the game used to have
+too. The game was changed to a ramp when a LUT edit moved the chart’s black corner off
+#000000; the mirror was not. So the branch had stopped matching anything at
+all: black bakes to about #161515, the equality never fired, and the
+creator drew every dark coat at full opacity.
+
+The finding is not the line, it is why nothing caught it.
+check-parity.mjs runs restrict() and tint() and never runs
+compose() - the magical cases are seeded with a synthetic flat colour field rather
+than resolved through a chart - so the entire composite path had no net whatsoever. The gate
+looked comprehensive and had a hole the exact size of the bug.
+
+The composite itself still cannot be compared in the harness: it needs the gradient PNG and
+the white template, and there is no image decoder in Node there. The arithmetic can be,
+and the arithmetic is what drifted - so the fixture now carries answer tables for
+nearBlackAlpha and the shadow lift, generated from Java, and parity checks them.
+Verified by restoring the old equality and watching three checks fail, one of them on
+#161515 exactly.
+
+What this says about the other mirrors
+
+There are four JavaScript ports of common/ in the creator -
+spec-engine, schema, geometry and the composer in
+fields.js - and until today the gate covered two of them.
+Gap 100 is the same shape and still open:
+geometry.js never received posed(), and the arithmetic lives one
+directory over in model3d.js. It is now a small job rather than an open question,
+because the technique exists: export the function, bake a table of Java’s answers into the
+fixture, compare. That is what closed the composer.
+
+Two genes that make a horse frightening, a per-gene coat test, and a category audit that found the taxonomy was sorting on the wrong axis.
+
+The night loci
+
+Two new mechanical genes, and between them they are the mod’s first deliberate
+attempt at unsettling rather than pretty.
+Night temper has eight variants in two families
+— four that hunt and four that flee, each naming who it feels that about.
+Night watch has five, and they are a ladder
+rather than a list: stares from anywhere through walls, closes to ten blocks first, watches
+only while it can see you, moves to where you cannot see it, stands directly
+behind you. Any of the five silences the horse’s footfalls at night, which is what
+makes the locus work at all — the behaviours are unsettling in proportion to how
+little warning you get, and hoofbeats are warning.
+
+The temper locus supersedes the watch locus whenever it has something to
+act on, because a horse that both stalks you and flees from you is not two behaviours, it
+is a bug. That rule could not live in common/: whether there is a cow within
+sixteen blocks is a question only the running game can answer. So the handler resolves the
+temper first and withholds the watch ability if it found a target, and the goal reports
+canUse() == false and stands down instead of fighting for the navigation.
+
+Both founder tables are entirely heterozygous (owner’s call), which
+nothing else in the registry does. Every feral horse carries exactly one variant and none of
+them expresses it, so the plainest outcome each locus has is the one that cannot be
+caught. It broke a test, and the test was right to break: GenotypeTest
+asserted that a maximal founder roll lands every gene on its default homozygote, and these
+two have no such row at all.
+
+The coat pass
+
+Nine genes, all from the owner’s own list. Three were painting a ground over
+the whole horse before marking it — coccinella
+black, shieldback green,
+tribal ward pale — which made every carrier the same
+animal underneath, the opposite of what a coat gene here is for. All three grounds are
+gone.
+
+Removing them broke two genes, and the break is the interesting part.
+Shieldback and tribal ward each had a “coloured” allele whose only job was to
+vary the ground. With the ground gone the two alleles came out
+byte-identical — a locus with two names for one outcome. Both now point their
+unused hue knob at the marking instead, which is what “a colour the line carries”
+should always have meant on a gene whose ground was never the interesting part.
+
+- Koi was painting the bright patches and their
+    complement, so the two tiled the horse and no base coat showed. The complement layer is
+    gone from the orange and dark varieties; the white one keeps it, because
+    white-against-colour is the variety whose whole point is the hard boundary.
+
+- Snow cloud’s white was a flat PARTS
+    mask over every part, so the base coat could only ever be not-seen. It runs through a
+    large-scale PATCHES mask now, so there are bare drifts — which is
+    what the gene’s own name describes.
+
+- Cleave’s “detached spears” were fat
+    ovals scattered over a band up to 42% of the horse long, which read as white splotches
+    loose on the far half. Long and thin now, and tied close behind the line.
+
+- Opossum’s edge is dithered rather
+    than faded, and the distinction is worth stating because the format makes it easy to get
+    wrong. Coverage scales an op’s strength, so an axis ramp times a speckle gives
+    faded dots — every dot present, each one weaker — which reads as a
+    gradient with texture in it. Dots that get rarer is a density change, and
+    density is a speckle parameter no mask can drive. So the falloff is three bands with hard
+    edges and falling densities, which is this format’s way of writing a density
+    gradient.
+
+- Nyxborn stars only what is genuinely black. On the
+    shipped gradient a black horse reads 0.807 on LUMA’s dark
+    channel and a bay reads 0.782 — no threshold separates those without losing half the
+    black. What does separate them is saturation: 0.02 against 0.556,
+    because the difference between them is colour and not brightness.
+
+- Stained glass gained a grisaille palette —
+    grey and white only, the colourless glazing a real window uses where it wants light
+    rather than a picture, and the one palette that reads as glass on any base coat.
+
+The category audit found the taxonomy sorting on the wrong axis
+
+The complaint was concrete: hood and
+magic item drop were in the same category. The cause
+was general. Magical families are derived from priority bands, and
+MAGIC_CORE had become a 24-gene dumping ground holding coat markings, hair
+colour, milk buckets, spawn eggs and a horse that stares at you through walls.
+
+Priority is a real fact about a gene that paints and an accident about one that
+does not. For a painter it says where in the stack it lands, and the bands were laid
+out as families precisely because the paint order and the taxonomy want the same grouping.
+A gene that paints nothing has a priority only because every gene needs a slot in the
+genotype code, so banding on it grouped genes by when they happened to be written.
+
+So the non-painting magicals are named explicitly now, by what they do —
+yield and death, behaviour, trails and
+emissions, and the body stats that already had their own band — and the bands
+go back to meaning what they were built to mean. It is the same split the naturals already
+make, where anything invisible is a health locus; this is that idea applied to the other
+half of the registry, with the groups spelled out because “invisible” covers more
+ground here.
+
+The coat baking test
+
+CoatBakeGoldenTest closes gap 124: every
+registered gene, every variant allele, composed through the real gradient and hashed.
+203 genes in 623 lines, and it runs in seconds rather than needing the
+ten-minute suite — which is the property that matters, because the pipeline golden is
+expensive enough that its cost gets weighed against its value and this one is not. It was
+checked by nudging one gene’s strength by a single point and confirming it fails.
+
+It hashes; it does not look. Four of the twelve genes that broke their hashes yesterday
+were fixed by the change that broke them, so a diff here is a prompt to go and look
+at the icons, never a verdict — and the test says so in its own failure message.
+
+What the audit of the generator turned up
+
+- Phase 1 chains its layers and phase 3 does not, and only phase 1 says
+    so. A LUMA mask reads the coat as it was before this gene painted,
+    so “replace the white, then star the black” is not expressible in that order.
+    Nyxborn works around it with a union mask. Gap 125.
+
+- Two genes make opposite total claims about white.
+    Extreme white dominant holds a lock that
+    beats every gene at every slot; Nyxborn promises to paint every white out. The lock wins,
+    which is correct and falls out of the design — but neither description mentioned the
+    other, so the only way to find out was to breed the pair.
+    Gap 126.
+
+Also: shadowcreature’s page had no preview
+widget at all — it was written from the template for a gene that paints nothing, and
+shadowcreature paints plenty. That is why its previewer “was not loading”.

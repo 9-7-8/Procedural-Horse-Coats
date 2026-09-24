@@ -1,0 +1,51 @@
+2026-09-15, night — a country on every breed, and the first five out of intake/
+
+    The ask was to start taking breeds out of intake/, five at a time and alphabetically, and to add a
+    country to the breed files because it is going to drive a mechanic. Both done; the shipped count is 55.
+
+    - intake/*.md is not drop-in material, and that shaped the whole session. Each
+        file is a research write-up from another model carrying a “Breed JSON” block in a schema this
+        mod has never had — coat_genes, sources, stat_scores,
+        per-allele frequencies instead of weighted pairs, prices in the hundreds where this mod trades in tens, and
+        invented gene keys (sabino_1, frame_overo). Every one says so in its own schema
+        caveat. So all five were translated against BreedSpecParser rather than pasted.
+
+    - The drafts' size bands contradicted their own research. Each states a hand range and then
+        gives a scale band that does not match it. Calibrating against the Fjord's known
+        [0.857, 0.921]  13.2–14.2 proved the convention — decimal hands
+        = scale × 15.75, displayed in stable notation — and all five were re-derived to land on the
+        heights their own sources give.
+
+    - country is a lower-case token, not a display name
+        (the format page), because it is meant to be keyed on rather than only
+        printed; a capital letter is an error the way a bad id is. Blank is a real answer meaning
+        nowhere on earth, and the Dhampir is the only breed with none. Plumbed through the record, parser, writer,
+        breed designer and format page, and backfilled across all 49 earthly breeds.
+
+    - The owner's own breedbycountry.md overrode two of my 49. It arrived mid-session
+        in a push and is the authority: the Lipizzan is filed under Austria (I had Slovenia) and the
+        Arabian under Saudi Arabia (I had a region token). The other 47 already agreed.
+
+    - Three genes these breeds need do not exist, and went to
+        the roadmap rather than known-gaps (owner's call): the
+        curly coat (KRT25/SP6) — which is the whole of the
+        American Bashkir Curly, so it ships with the colour pool and no curl — plus ACAN D5 and
+        RYR1. What stayed a gap is a format limit: a strain can override gene pools but not stats, so the
+        Chincoteague's sport type cannot be the taller of the two (gap 256).
+
+    - main was already red before any of this.
+        HerdManager used NeoRng without importing it — it sits in
+        …neoforge.server, the class in …neoforge — from the previous
+        session's commit. Fixed in its own commit so it is not buried in the breed work.
+
+    - Two Windows traps worth knowing. A pushed intake filename containing double quotes cannot be
+        created on NTFS, so git failed the checkout and it read like a merge conflict; the owner
+        renamed it. And a bake dirties all 55 breed files under core.autocrlf with no
+        .gitattributes — git diff --ignore-cr-at-eol showed no real change, and the
+        committed bytes were identical, so it is noise rather than staleness.
+
+    Green: :neoforge-26.1.2:build, BreedFilesTest, BreedSpecParserTest,
+    BreedFounderTest, check-links, the designer boot check. None of the five has
+    been seen in a world — §0-EE says what to look
+    at. The five .md files were deleted from intake/, leaving 58; note that the folder's
+    alphabetical order was disturbed mid-session by a 36-file push, so the next batch is not simply the next five.

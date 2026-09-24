@@ -1,0 +1,93 @@
+2026-09-17 — The health batch, and the locus that was there the whole time
+
+    “Let’s add all the rest of the genes from the roadmap.”
+    Scoped down on the owner’s instruction to all of health, with everything
+    else to be checked for existence and put back to her one at a time before building.
+    That instruction is the reason this entry exists in the shape it does: auditing before
+    writing found that a third of the section was already built.
+
+WFFS never needed a gene, and five breed files were carrying the error
+
+    The roadmap called WFFS “the most-wanted health locus in the mod”, and five
+    breed files repeated a warning against confusing it with
+    PLOD1: “PLOD1 here is Friesian
+    dwarfism and is emphatically not a substitute.” That sentence was itself the
+    mistake it warned about. This mod’s PLOD1 is warmblood fragile
+    foal syndrome — its condition id is fragile-foal-syndrome and its
+    science tab is PLOD1 c.2032G>A throughout — while Friesian dwarfism is
+    B4GALT7, a different gene entirely. Somebody
+    conflated the two when writing those notes, and four breeds then shipped clear of a
+    disorder the mod had had all along.
+
+    The fix was wiring, not building. Gelderland, Oldenburg, Selle Franais and
+    Swedish Warmblood now carry PLOD1 at rates measured in those breeds
+    (7.63 / 15.53 / 6.0 / 7.4%), three of which came out of the survey table already sitting
+    on the PLOD1 page — better evidence than the warmblood-wide ~11% proxy the roadmap
+    had been holding. Zangersheide stays clear, because its only figure was a self-declared
+    proxy that had already been declined.
+
+Four loci that genuinely did not exist
+
+    SLC5A3 (foal immunodeficiency syndrome),
+    LAMC2 and LAMA3 (junctional
+    epidermolysis bullosa) and RYR1 (malignant hyperthermia),
+    plus a D5 allele on ACAN. Two calls in that set
+    are worth keeping:
+
+    JEB is two loci, not one locus with two alleles (owner’s call).
+    The draft variant is LAMC2 and the Saddlebred’s is a partial LAMA3
+    deletion — genuinely different genes. One locus carrying both as alleles would have
+    made them mutually exclusive in the ACAN shape, where any two
+    broken copies leave no working one; here a horse can carry one and be clear of the other,
+    and pairing a carrier of each is completely safe.
+
+    RYR1 is dominant and costs nothing, which is a first. Every other
+    disorder here is a standing condition, but malignant hyperthermia is episodic —
+    triggered by anaesthesia or extreme stress, and between episodes the horse is genuinely
+    normal. There is no trigger in this game, so pricing it in hearts would invent a symptom
+    the real condition does not have. One copy is INFORMATIONAL; the homozygote,
+    which has no working channel left, does pay. It is the first locus whose entire value is
+    being known rather than felt, which is precisely what the registries screen for.
+
+    That decision broke oneCopyOfADominantAlreadyCostsTheHorse, which asserted
+    every dominant takes hearts on one copy. Rather than carve out an exception, the test now
+    checks the price against what each condition declares — informational must
+    be free, impairing must cost — so a gene disagreeing with its own severity fails.
+    Stronger than what it replaced.
+
+Silver stops getting its colour for free
+
+    Silver’s MCOA already shipped as
+    homozygous-only. It is now dosed: Z/z carries the cyst phenotype —
+    named on the horse and costing nothing — and Z/Z keeps its two hearts.
+    The Rocky Mountain Horse is where it lands hardest, at 12%
+    Z/Z and 46% Z/z, which is correct: chocolate is the breed’s
+    whole identity, so it is the population that should pay for it.
+
+The goldens moved and nothing changed
+
+    Adding four loci rewrote 1056 rows of coat-golden.txt, which looks alarming
+    and was not. coat-bake-golden.txt gained nine rows and deleted none,
+    and comparing the hash column before and after found zero of the 1056 hashes
+    changed. The entire diff was the code-string column growing new locus segments. Worth
+    recording as the method as much as the result: a golden that moves wholesale is worth
+    decomposing by column before it is copied back, because “every row moved” and
+    “every coat changed” look identical in git diff --stat.
+
+What the audit found that was not asked about
+
+    The roadmap was stale in both directions. LUT ships
+    two palettes and the roadmap said one; dun’s
+    guard hairs ship and the roadmap listed them as missing. Both corrected. In the other
+    direction, polygenic face and leg white is not built, contrary
+    to an expectation at the start of the session — no markings locus is registered,
+    nothing outside the four allele-gated white loci calls
+    WhitePattern.faceMarking, and MitfGene still holds
+    WILD_SW1_PERCENT = 55.0 with a comment saying in as many words that
+    SW1 is standing in for a system the mod does not have.
+
+    Also found, and not fixed: GeneDescriptionCoverageTest is red for
+    dmrt3, magic_heat and magic_cold. Confirmed
+    pre-existing by checking HEAD — all three were registered with no
+    description before this session touched anything. Left alone as out of scope rather than
+    folded in silently; it is three map entries whenever somebody wants it.

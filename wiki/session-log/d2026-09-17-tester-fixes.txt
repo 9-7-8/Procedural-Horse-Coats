@@ -1,0 +1,84 @@
+2026-09-17, earlier — Five fixes from the testers' first day on 0.5.004
+
+    The first release with outside testers on it came back with five reports the same day.
+    Four were defects and one was a request; none of them had been found here, and three of
+    them had been sitting in shipped code for longer than 0.5.004.
+
+The dimension crash, and why a test was the actual deliverable
+
+    Every pen in the new coat-check corridor threw.
+    CoatCheckPlan.Pen.sex() wants to know whether a combination is one only a
+    stallion can carry, so it asked Gene.hemizygousPlaceholder() for the
+    reserved allele and checked the answer for null. That method does not
+    return null for an autosomal gene — it throws. Every gene in
+    the plan is autosomal, so the null check was dead code and the corridor’s first
+    pen threw during the teleport. The dimension was unenterable, which also meant the
+    entire §0-EV verification entry written that morning was unperformable.
+
+    The one-line guard is not the interesting part. The interesting part is that this shipped
+    at all: the dimension had been reworked, the build was green, the server booted clean, and
+    nothing in the project ever asked a pen a question. So the fix came with
+    CoatCheckPlanSanityTest, which walks every pen in the plan and asks it for
+    exactly what the corridor asks — four genotype codes, the expression name, the
+    description the signs wrap. It failed 438 of 438 before the change. A crash that costs a
+    world on entry now costs two seconds in :common:test, and it will keep
+    catching this as genes come and go, because it has no list to fall behind.
+
+A window you could neither type into nor leave
+
+    The rename window took keystrokes perfectly well. It drew its widgets, then filled a
+    94%-opaque panel across the whole window on top of them, so the boxes, the caret, the
+    letters and both buttons were all underneath it. This project had already found
+    and fixed this exact bug twice — HorseInfoScreen has a long
+    comment about the barn-name box coming out “still there, still clickable, and
+    looking like nothing at all”, and HorseBrowserScreen carries the same
+    note. HorseRenameScreen was simply never brought along. Worth remembering
+    that a fix written up on one page does not propagate itself to its siblings.
+
+A stall stops having a height
+
+    The detector demanded two clear cells above every floor tile. That refused roofed stalls
+    and low doorways outright, and — the part that made it a report rather than an
+    annoyance — pushed a rider dismounting inside an accepted stall up into the ceiling
+    and hurt them. Owner’s call was the whole rule rather than an exemption for the
+    doorway: a stall is its floor and the fence, gate, wall or door around it,
+    and height is not part of the question.
+
+    The thing that makes that safe is a separation that was already there. Loosening what
+    counts as a room does not loosen where a horse may be put:
+    landingSpot still tests the horse’s real bounding box with
+    noCollision, so a room too low to hold a horse is refused at the moment
+    something tries to stand in it. Validation is about the architecture; fitting is about
+    the animal. Had those been one check, this change would have needed to be much more
+    careful.
+
+The wild was mostly mares, and the founder table was innocent
+
+    The sex locus is a clean 50/50 and the foal path is properly Mendelian, which is exactly
+    why this took reading rather than guessing. Wild horses never keep that roll:
+    HerdManager assigns sex from the band. Founding
+    a clump was near even — three in ten bands are all-male bachelors, and a harem is one
+    stallion in four or five. Joining was not.
+    joinerSex returned FEMALE unconditionally for every adult joining
+    a traditional band, with no cap and no re-check, so a band near a spawn point collected
+    mares for ever and never gained a second stallion.
+
+    Joining is most of what happens in a world that has been running a while, which is why the
+    testers saw it and the unit tests did not: every test starts from a founding. The band’s
+    own maxMares is honoured now, and the default harem is capped at four
+    (BreedHerd.MAX_HAREM_MARES) instead of sixty-four, so
+    Band.stallionCount’s documented precedence — surplus mares turn
+    stallion — finally has something to bite on. Kept the harem shape rather than flattening
+    everything to a coin flip: one-stallion bands are the point of the system, and the ratio is a
+    population-level property, not a per-band one.
+
+Four checklist entries, and one trap
+
+    Ride a horse bareback and Steer a horse with no saddle under Bonding;
+    own a gelding and bond a gelding to approaching under Gelding. The trap is
+    that isSaddled() is the wrong question: at bond tier 3 a bareback rider is handed
+    a real saddle so vanilla’s mounted path works, so the horse with nothing on it reports
+    true. Hence BarebackSteeringHandler.bareback(), which also accepts a
+    saddle carrying the phantom component. The two gelding tasks hang off the bond-tier credit,
+    which credits state rather than an event — so a gelding bought from a cowboy
+    already done counts the same as one you had done yourself, with no interaction to hook.

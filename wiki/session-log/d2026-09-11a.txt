@@ -1,0 +1,83 @@
+2026-09-11 — breeds you can drop in, a designer that asks one thing at a time
+
+    The owner's brief: the breed designer was overwhelming; break it into steps, keep the
+    options on the left and the horse on the right; let a player make a breed and drop it
+    into a folder with nothing but the jar. And the principle underneath it, now on
+    the philosophy page: a concept
+    is a breed, not a gene - a zombie horse is a zombie breed of ordinary
+    genes (rotted markings, a temper, a low speed score), not one indivisible zombie gene.
+    Everything is waiting in game, on the breeds verification tab.
+
+The breed designer, rebuilt
+
+    - Sixteen steps, one decision each, in the owner's order (base colour,
+        size, dilutions, white, eyes, magical markings, health, health issues, diet, temper,
+        abilities, speed, jump, where it lives) with the two things the list left out placed
+        after 13, as asked: price and stray magic. Left pane: Current step or
+        Chosen so far, which lists every step with what it says and jumps back to
+        any. Right pane: a founder, and a Reroll example founder button in
+        its corner.
+
+    - The example founder is BreedFounder.plate - a real
+        founder with no stray magic - because “reroll within the traits I picked”
+        is what was asked. A herd strip under it is real rolls, stray magic included.
+
+    - Every gene is a card: tick the exact pairs the breed may have, with
+        weights and the share each works out to, and under “fine-tune the
+        numbers” a range or a lock for every epigenetic value - seeds included, which
+        the format could not say before. Not on the four stat steps, as asked.
+
+    - Base colour is three sliders, not presets. Extension and agouti are
+        drawn independently, so P(chestnut) is the e/e share and the black/bay split among
+        the rest is agouti's - which reproduces the mix exactly. Measured: 38 bay, 15 black,
+        7 chestnut of 60 founders, against 60/25/15.
+
+    - The markings step lists every magical outcome - 424 of them - and
+        filters on what each actually does: sex, colourful / black only / white only,
+        coverage at most and at least, what it paints on, which parts it reaches (and
+        “nowhere else”), magic effects. Those are not in any gene file; they are
+        measured, by the new :common:bakeMarkingFacts composing every outcome
+        on real base coats (MarkingFactsTool, a minute). A gene that shows
+        nothing on a bay is measured on the first base it does show on, the way its icon
+        is chosen, or flaxen would read as covering nothing.
+
+    - Export at any step; an unnamed breed is named for the moment it was
+        exported. Import, or open a built-in breed. The page also keeps its place in
+        browser storage across a refresh - a convenience, not a save.
+
+    - Driven end to end in headless Chrome over the DevTools protocol -
+        steps, filters, random picks, hover card, export, import, a phone-width window. That
+        caught the one real bug the unit tests could not: every designer-made breed made
+        FounderTable log an error per roll, because the format's weights are
+        relative and the table wants percentages. Breed.founderTable scales them
+        now.
+
+The game side
+
+    - The drop-in folder is .minecraft/phc/breeds/, made on
+        first launch with a README, and the H menu's Breeds tab has Open breeds
+        folder. config/horsegenetics/breeds/ is no longer read.
+
+    - A drop-in breed now actually spawns. Herds came from a fixed list of
+        37 vanilla biomes in a data file, so a breed living anywhere else loaded, registered
+        and was never seen wild. The herd modifier is a type of its own now
+        (BreedHerdsBiomeModifier): its list, plus every biome any wild breed
+        names, once each.
+
+    - spawn_time (day / night / any) and
+        description (the Breeds tab's new “About”)
+        joined the format.
+
+    - Size is a multiple of an ordinary horse, and the genes follow from
+        it: a founder between 0.7x and 1.3x carries one size copy, outside it two. Every
+        shipped breed was converted from hands through the curve the game already used, so
+        none changed size - one line per file.
+
+    - The gene hover card has its picture - the baked icon at the left,
+        text round it - in the spawn egg screen and the horse designer (one screen in two
+        places, same constants) and in the breed designer. The icons reach the jar at build
+        time; that doubled it (gap 187, closed the next session).
+
+    Tests run: every breed class, both goldens, the gene files, showcase and white-rate -
+    all green. The full :common:test was not run. New gaps 187–189
+    (188 is still open); gap 83 closed.

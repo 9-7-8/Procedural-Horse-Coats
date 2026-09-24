@@ -1,0 +1,750 @@
+2026-09-08
+
+An overnight upkeep pass: a link checker, the invert bug measured and fixed, and two rules that now enforce themselves.
+
+Left to do “whatever upkeep seems necessary” with the long jobs unattended.
+Four things, and the second is the one that mattered.
+
+A link checker, and two links it caught
+
+wiki/tools/check-links.mjs is new: every internal href and
+src across the wiki must resolve to a file that exists, and every
+#fragment must find an id on the page it points at. Nothing had
+ever checked this, and the wiki is hand-written HTML with several thousand cross-links
+added in two bulk sittings.
+
+It found two real breaks, both mine from the previous two commits:
+magic item drop linked to a page called
+item-preset-horse-spawn-egg.html that does not exist (the preset egg is
+documented on spawn eggs), and the session log pointed
+at known-gaps.html#gap-107, which had been closed and deleted. The fragment
+half is the part most likely to rot, because an id is invisible in the rendered page.
+
+It also has a --orphans mode for the other half of
+gap 115. It reports none: the two gene pages not in
+pages.js (shade and
+accretion field) are deliberately absent,
+because GeneWikiTool.foldedInto omits a locus that paints nothing and is
+documented inside the page of the gene that depends on it. Both are linked from their
+parent. Not a bug, and worth having established rather than assumed.
+
+The invert bug: measured, then fixed
+
+Gap 120 was opened the same day it was found, on
+stained glass, and left for the owner on the grounds
+that fixing it moves ten shipped coats. Measuring it settled the question.
+A throwaway probe rendered every gene that leads with an inverted, parts-restricted mask
+and counted texels inside and outside its declared parts:
+
+gene                   inside  OUTSIDE parts it paints but never declared
+iridescent_jewel       5600    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+opal_wing_veins        5600    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+elytra_veins           3874    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+webbed                 1481    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+moth_mantle            7208    4568    [MUZZLE, MANE, EARS, all four LEGS]
+lace                   8322    2008    [MUZZLE, MANE, TAIL, EARS]
+fracture               4751    520     [MUZZLE]
+
+6176 is every texel the gene excluded, and
+webbed was putting four times more paint outside its
+declared region than inside it. That is not a curiosity to leave for a decision; the
+before-and-after render is a horse that had been dipped in white with a net on its barrel,
+versus a bay with a net on its barrel.
+
+The first fix was one condition — a texel the parts test ruled out stays 0
+through the invert — and it was half right. It fixed the four, and
+it broke the opposite idiom: galaxy’s black field and
+tribal ward’s pale one are both “a ground,
+with a cut aimed at one part”, written as a broad first mask and a narrow inverted
+second one. Zeroing outside the cut deleted the ground everywhere the cut did not reach.
+Tribal ward went from a painted white horse to a plain bay with swirls on it, which is
+visibly not what its own blurb describes.
+
+The rule that serves both is that a mask’s parts
+mean different things depending on where the mask sits. The first mask defines the
+layer’s region, so outside its parts coverage is 0 and an invert does not bring it
+back. Every later mask modifies that region, so outside its parts it has nothing
+to say and contributes its combine’s identity — it is skipped.
+PARTS is exempt, because there the list is the mask rather than a restriction
+on it.
+
+Twelve icons moved. Galaxy and tribal ward came back byte-identical to
+before any of this. Webbed and the other three stayed fixed. And five more moved that
+nobody had been looking at — masked,
+ehretia, peafowl,
+snow cloud and war mask
+— every one a layer that had been losing coverage on a part it explicitly
+listed. Masked’s “mask over the head and ears” was not reaching the ears.
+Ehretia’s “dorsal stripe from withers to tail” was not reaching the tail.
+Those are the genes that quietly paid for the second half of the bug.
+
+The parity check was green about all of it by default, which is the
+part worth remembering. example-genes/prismatic.json had no layer whose second
+mask was narrower than its first, so nothing in the fixtures could tell the two semantics
+apart. A discriminating layer was added, and then checked by deliberately regressing
+the JavaScript twin: 264 parity checks fail under the old rule and pass under the new
+one. Re-baking a fixture that cannot reach the change is the same trap as not re-baking it
+at all.
+
+It also explains an entry already on this page.
+Gap 119 records webbed being rebuilt after a contact
+sheet showed it as “a white ground with brown islands rather than a net”. That
+was this bug all along, and the rebuild had treated the symptom.
+
+Two hard rules that now enforce themselves
+
+CommonPortabilityTest scans common/’s own sources for a
+Minecraft / NeoForge / Mojang import, for Map.of() or
+Map.copyOf( outside CommonMaps, and for the two Java 9+ calls
+that were removed for the TeaVM and Java 8 targets. Nothing had ever checked hard
+rule 1 or hard rule 2, and both fail in ways the compiler cannot see — a
+green build, a shipped mod, and the damage in a browser or in a backport that does not
+exist yet. That closes gap 116.
+
+Writing it turned up the boundary worth recording: the check was too strict at first and
+flagged light’s six-entry Map.of(…).
+The trap is the empty immutable map specifically, a populated one gets a sized
+table, and that gene paints — so the browser exercises it on every preview and would
+have died on it the way the ALL mask did. Allowed, and the test says why.
+
+And the long job
+
+Full :common:test and a regenerated golden coat file, since ten genes
+changed what they paint. The bakes were re-run first, including
+:web:bakeDesignerAssets, because common/ moved and the designer
+runs the real engine rather than a port of it.
+
+0.3.0, and the release procedure earning its keep on the first run.
+
+Tagged 0.3.0 for the mechanical-gene batch — a minor bump rather
+than a patch, because eight new behavioural loci and six coat genes are features and the
+genotype code moved again. Both version strings, the
+releases page, the tag and the GitHub release object.
+
+The procedure’s first step caught something on its first real use.
+“Re-run every bake and confirm it moved nothing” turned up a modified
+wiki/gene-creator/js/examples.js: :common:bakeCreatorAssets copies
+example-genes/prismatic.json into the creator’s example list, and the
+previous session had edited prismatic (to exercise the new LUMA and
+EDGE masks for the parity check) without re-running that bake. The creator
+would have shipped an example gene missing the two masks the release is about. The
+regenerate table in CLAUDE.md only said “the coat PNGs or the name
+tables” for that task; it now names example-genes/ too, in the same row
+rather than a new one.
+
+The golden coat file was regenerated, which is what
+gap 118 said to do at the next deliberate suite run and closes
+it. It had been two sessions stale — forty-six genes across the two imports, each of
+which moves Genes.codeOrder() and so every horse’s epigenome slots. The
+suite is genuinely green at this tag rather than green-except-one-known-failure, which is
+the state a tag ought to be in and had not been.
+
+Fourteen genes, a mask that asks the gradient chart what colour it made, and eight loci that paint nothing at all.
+
+The brief was “a bunch more mechanical genetic toggles, so a breed can be
+described by what its horses do”, plus six coat genes. It came to fourteen
+genes, two new masks, six new effect verbs and one correction to the effect format that had
+been wrong since it was written.
+
+The mask that started it: LUMA
+
+Nyxborn was specified as “replace all white with black, then put tiny white stars
+over all the black”, and the request added: use the LUT to decide what black
+is. That is not a detail, it is a different question from the one the format could
+ask. PIGMENT reads melanin — a pair of levels that mean
+nothing until a gradient chart turns them into a colour. “Black” and
+“white” are facts about that colour, and the
+LUT locus can hand a horse a chart whose black corner is
+violet. Such a horse has identical pigment everywhere and is no longer black anywhere.
+
+So the format gained LUMA, which thresholds
+the resolved colour — what phase 2 got out of the chart, plus whatever the
+magical genes before this one painted. Magical genes only: the natural phase is what
+decides the pigment the chart is handed, and the overlay pass has already spent the
+accumulator, so the parser refuses it in both rather than let it read zero.
+
+Its channels were picked off measurement rather than guessed. A throwaway probe baked
+nine representative coats through the real gradient and printed the readings, and the
+useful finding was that white is not light: a
+bald white texel reads 1.000 on the achromatic floor, a perlino 0.871, an old grey 0.698, a
+palomino 0.475 — while all four are “pale”. On a palomino “the white
+markings” and “the pale parts” are different sets of texels, and only one
+of the two channels tells them apart. The same probe gave the black end: black 0.807, bay
+0.782, chestnut 0.599, which is why Nyxborn’s stars land on a bay and not on a
+chestnut.
+
+The four genes that were hunting for the horse’s own white through pigment —
+fielded, yalia,
+voided and opalized —
+were moved onto it, which is the second half of what was asked for. The three that hunt for
+black through pigment (integration and
+opalized’s dark side) were left alone: nobody asked, and moving them would shift
+shipped coats for no stated reason. Worth doing deliberately one day.
+
+Two more pieces of vocabulary
+
+- EDGE — the rim of each body part’s box, on the
+    face the texel is on. It is the one mask that asks about the model rather than
+    about body space, because a field sampled at a point has no idea where the horse stops,
+    and on a Minecraft horse the line where two of a box’s faces meet is the only
+    thing that reads as an edge. Tron is built entirely from
+    it.
+
+- spreadFrom on PIGMENT and LUMA
+    — which side a spread may take its growth from. It is the only way
+    to ask for the bottom edge of a marking rather than its whole rim, and
+    bloodstained is the gene that needed it: mask the
+    white, then multiply by the non-white grown upward, and what is left is the
+    band just inside the marking’s lower boundary and nowhere else on it.
+
+The six coat genes
+
+Nyxborn, stained
+glass, Tron, ocular and
+bloodstained are gene files.
+Shadowcreature could not be: its three halves land in
+three different phases, and the gold eyes with no sclera can only be reached from the
+overlay pass, because CoatRegions.redrawEyes restores the eyes from the
+template as the last act of the bake.
+
+Every one was baked as an icon and looked at, and four were wrong on the
+sheet in ways no test would have caught:
+
+- Ocular drew nothing at all at first, then blobs, then eyes whose irises
+    sat beside their whites. The last one is the instructive bug: an eye is four
+    concentric SPOTS draws off one lattice, and stretch divides
+    the sample before the lattice walk — so a different stretch per layer is
+    a different lattice, and the parts of one eye scatter. Every layer of a compound
+    element must share its stretch. Also: at two texels to the body unit, a
+    radius under 0.5 is sub-texel and most cells paint nothing.
+
+- Stained glass blackened the mane, tail and ears, which are not in its
+    parts list. An invert is applied after the parts test, so an
+    inverted mask with a parts list paints everything it excluded. Fixed here
+    with a leading PARTS mask — and ten shipped genes have the same
+    shape, recorded on known gaps rather than changed
+    silently.
+
+- Nyxborn’s stars went from 161 texels to blotches to right, on
+    the same sub-texel arithmetic.
+
+Eight loci that paint nothing
+
+Swim speed, water breathing, fighter, on death, item drop, mob aura, meat and milk
+volume. Three shapes between them:
+
+- Codominant, per-copy percentage — swim speed, water breathing,
+    fighter. AbstractMagicFactorGene is
+    AbstractMagicStatGene with the last step replaced: the same genetics, a
+    GeneAbility instead of a number on TraitBuilder. They are two
+    classes on purpose. Traits is four numbers and a condition list, re-derived
+    from the genotype and stored nowhere, and it is the record meant to survive a version
+    port unchanged — “swims faster” means nothing without a running game,
+    which is the line GeneAbility exists on.
+
+- Recessive switches — on death, item drop, mob aura, meat. Each
+    has a compound heterozygote that says something true rather than arbitrary: two
+    different variants give the wild type, because “what happens where this horse
+    died” and “does a mob want to be near it” cannot have two answers.
+
+- A production trait — milk volume, codominant and summed, and meat,
+    whose two copies are averaged. The difference is a claim: a percentage is a
+    dose and two copies are twice the push, but the amount of meat on an animal is a
+    property of the animal, and a homozygote is one horse rather than two half-horses.
+
+The founder rule, and its one exception
+
+The standing rule for a magical locus with an invisible carrier is that the wild
+population sits on the combinations that show — item drop, mob aura, meat and
+the coat genes all follow it. Magic on death does not, at the
+owner’s explicit instruction: carriers only, never affected, so a feral horse never
+craters the ground it dies on. The argument for the standing rule assumes the outcome is
+something you would want to find, and an exploding horse is not; a player who has never
+heard of the gene should not lose a stable to it.
+
+Six effect verbs, and one thing that was simply wrong
+
+charges, breath, on_death, item_drop,
+mob_aura and combat, all translated and all flagged unverified in
+their own comments. attribute was also finally wired — it had been parsed
+and logged-once since it was written.
+
+Its list named swim_speed, and there is no such attribute.
+Vanilla has never had one; the thing that means “how fast does this mob move in
+water” is water_movement_efficiency, Depth Strider’s attribute. It
+had gone unnoticed because the verb was never executed, so the name never had to resolve to
+anything. That is worth remembering about any verb sitting in the format unbuilt.
+
+The interesting one is charges. Milk volume has to reach the milk
+gene’s three fillings, and the two loci cannot see each other’s
+epigenome — a gene is handed its own values and nobody else’s,
+deliberately. So the verb names a yield kind rather than a gene, the milk locus
+tags all three of its fillings "milk", and a future gene producing some other
+fluid is governed for free instead of by somebody remembering. Charges divide the cooldown
+rather than banking uses, so “three times a day” is three fillings spread across
+the day — which needs no new stored state at all.
+
+Two tripwires fired, both correctly
+
+- A full epigenome is 35459 characters, past the half-of-cap
+    headroom EpigenomeSizeTest guards. The cap doubled to 131072 on both
+    sides. Every gene with an epigenetic schema costs a segment and the count only goes up,
+    so this will fire again; raising the cap is the right answer rather than trimming a
+    gene to fit a number that was arbitrary to begin with.
+
+- The showcase magical share drifted to 0.667, just past a 0.66 ceiling.
+    That edge moves upward every time a magical coat gene is registered — the
+    incidental tail is “did any of N genes happen to express”, and N only grows.
+    Widened to 0.80 rather than pinned, because pinning it means editing the number on every
+    gene import and the assertion is about the forcing working at all.
+
+The golden coat file is knowingly a run further behind. Fourteen genes
+change the registry order, which changes every horse’s epigenome slots, which changes
+every hash in it — and regenerating it needs a full :common:test.
+Known gaps has it.
+
+A gene file can hold its own reasons now, and thirty-two genes arrived to test that.
+
+Two things, and the first is why the second is worth having. The gene format gained a
+notes block — on the gene and on each expression, an
+array of paragraphs, printed on the generated wiki page as written. JSON has no comments,
+so everything an author actually knew (why the wavelength is 90, which two layers must stay
+in that order, what the source description asked for and where the build knowingly does
+something else) used to go on a hand-written page and drift from the gene the first time
+either moved. It lives beside the layers now. See
+the format and
+creating a gene, which spells out which of the
+three prose fields a sentence belongs in.
+
+Then thirty-two genes off the intake folder, in three waves as they
+were dropped in. Every one is a translation rather than a transcription: the
+sketches were written against a vocabulary this mod does not have — boxes at explicit
+coordinates, rings at named centres, arithmetic inside JSON, spread on ops
+that have no such parameter, pigment ops on magical genes — and each gene’s own
+notes block now records what it asked for and what was done instead. That is
+the first real use of the field and the reason it was added.
+
+- Looked at, not just parsed. All thirty-two were baked as icons and
+    read as a contact sheet, and four of them were wrong on the sheet in a way no test
+    would have caught: banded socks came out as a solid sock (the band was half the leg, so
+    every repeat overlapped), beetle pearl as a single blob, opaline zebra as a smudge, and
+    webbed as a white ground with brown islands rather than a net. The zebra is the
+    instructive one — it was built from STROKES, which wander, and a
+    zebra whose stripes wander is a brindle. WAVES is the only mask that
+    repeats evenly, and that is what it is for.
+
+- index.json is hand-kept and nothing says so. A gene file
+    dropped in the folder loads perfectly in a dev run and is absent from a built
+    jar, because a jar has no directory to walk. That is now a
+    contract of its own next to the four-file
+    ones.
+
+- Four things the format cannot do, learned one rejection at a time and
+    all four recorded in the genes that met them: no arithmetic in a value, no addressing a
+    point on the body, spread is a PIGMENT mask parameter rather
+    than an op one, and a magical gene may not use a pigment op at all (the parser says so
+    outright, which saved two of these).
+
+Invert's preview window: an empty map, in the browser only.
+
+Gap 107 is closed, and the cause was not in the gene.
+TeaVM’s empty immutable map traps with remainder by zero on the
+first get — it hashes the key into a table it never sized — so
+Map.of() and Map.copyOf() are correct on a JVM, correct in the
+game, and a live grenade in the wasm every wiki page runs. Invert
+is the only gene in the registry with an ALL mask; an ALL mask
+takes no parameters; its Params map was therefore empty, and the painter’s
+very first lookup on it killed the bake. Everything else about the gene was fine, which is
+why a session had already checked every value it consumes from Java and found nothing.
+
+- Found by running the wasm under node. The gap said it needed a browser
+    console, which is the one tool this end does not have — but the TeaVM runtime
+    takes a nodejs flag and reads the module off disk, and the four textures
+    the pipeline wants can be dumped out of Java as int arrays. Ten minutes of that gave
+    the exception and a stack. Then synthetic genes registered through
+    registerGenes bisected it to the mask in three runs: an ALL
+    mask failed, a PARTS mask with no parts failed, a PARTS mask
+    with parts did not. It was never about INVERT.
+
+- Eight sites now build their maps through CommonMaps, which
+    is a LinkedHashMap behind an unmodifiable wrapper — correct empty on
+    both targets, and Java 8 clean, which hard rule 2 wanted anyway. Nothing enforces the
+    rule, so the next Map.of() in common/ reintroduces it:
+    gap 116.
+
+A gene may now say which picture is its picture.
+
+Which allele combination and which base coat a gene is illustrated on is
+measured — bake the candidates, keep the loudest — and that stays the
+default, because it means no list goes stale when a gene starts or stops painting. But
+loudest and most recognisable are not always the same thing.
+Flametouched’s homozygote is a whole-horse ember
+gradient and shouted down the flames the gene is named for;
+Patina moves more texels on a tobiano than on the plain bay
+it reads better on. Both now declare a preview block, which the icon baker,
+the gene page’s opening coat and the preview window’s opening outcome all obey.
+Two genes out of a hundred and fifteen; the thresholds behind the measurement are
+gap 114.
+
+A second palette, and the tools stopped keeping their own list.
+
+The LUT locus has a green-through-pink allele beside the
+blue-pink one. The gene was built to grow and did: a row in LutGene.VARIANTS
+carries the allele, the expression table, the carrier wording and the founder odds. What
+did not follow from that row was the offline tooling — the icon baker, the
+wiki baker, the sample tool and the golden test each wrote Map.of("bluepink", ...)
+out by hand, four copies of a list none of them knew when to update. They call
+LutSet.fromRegistry now, which is the same walk the game has always done.
+
+Smaller, and all owner's calls.
+
+- Panda’s white band is half again as wide: the body
+    keeps its coat outside 0.22–0.70 rather than 0.30–0.62. The freckle band
+    moved with it, because it reads the same two edges.
+
+- Opalized dropped below voided
+    (611  609), and synort came down from the fields
+    band to 106, among suit and hood at the bottom of the order. 106 rather than the 104
+    first tried: 104 put it under dhampir, whose
+    own test says only suit and hood may be painted under a dhampir — being invisible
+    on every dhampir is not what "one of the lowest" was asking for.
+
+- A test that failed for a reason that had nothing to do with its subject.
+    Moving those two priorities shifted magic jump along the epigenome stream, and 3000
+    sequential seeds put its mean 1.7% out — fifteen standard errors, on a
+    distribution that had not changed. Epigenome.fromSeed is a
+    java.util.Random, whose seed scramble is one XOR, so neighbouring seeds
+    are correlated streams and the draw at a given position in them is correlated
+    across the whole sample. The test now runs its index through a splitmix64 finaliser,
+    which is what makes n a sample rather than a stream offset. Whether the
+    underlying correlation matters to real horses is
+    gap 117 and the owner’s call, because the
+    fix would change every horse ever generated.
+
+Not done: the coat golden file is a run behind — thirty-two genes
+moved every hash in it, and regenerating it means a full suite run, which the owner has
+asked not be done casually. The next deliberate run will fail on
+CoatPipelineGoldenTest and that failure is expected;
+gap 118 has the recipe.
+
+Released 2026-09-08: 0.2.0, and two gene pages that outlived their genes.
+
+Cutting a release rather than building anything, and the interesting part is what
+the process caught. The tag is 0.2.0, not the 1.1 that was asked for:
+the only previous tag is 0.1.0, there is no 1.0, and
+to be verified is still the authority on how little of
+this has been seen in a game — a 1.x on a mod where most of what is built has
+never been rendered in a client would be a claim the project cannot support. Owner’s
+call, taken on that reasoning.
+
+- The re-bake was not a formality. The session being packaged had
+already staged its regenerated artefacts, and re-running the five bake tasks over the
+same tree still moved four of them — index.html,
+gene-opalized.html, genes.json and
+wiki/horse-designer/wasm/web.wasm. Nothing warns about this. A staged
+artefact looks exactly like a current one, and the designer would have shipped a wasm
+built before the last two gene edits. This is the whole reason the regenerate table in
+CLAUDE.md is phrased as “re-baking is part of the check, not a chore
+beside it”, and it is the second time that sentence has earned itself.
+
+- Two gene pages outlived their genes, and the wiki’s search went on
+serving them. collar.json became suit.json and
+waves.json was folded into Cleave as an
+allele; both genes correctly vanished from pages.js and the landing page,
+because the bake writes those spans from the registry. Their
+wiki/gene-*.html files stayed on disk, unreachable from any nav and still
+picked up by build-search-index.mjs, so searching the wiki for
+“Collar” returned a whole page about a gene that no longer exists.
+bakeGeneWikiPages owns that directory and knows the registry, so it can
+sweep it; until it does, a gene rename leaves a lie in the search results. Gap 115.
+
+- A releases page, because the release notes had nowhere to live.
+The repo allows exactly two markdown files, so there is no CHANGELOG.md to
+write and a release body pasted into GitHub is not a source of truth anybody can find
+later. Releases is the player-facing record — what
+shipped in each tag, by theme, without the reasoning, which is what this log is for.
+The README now points at it and says plainly that there is no back-compatibility layer
+and a new version will not load an old world.
+
+- A pushed tag is not a release, and the difference is invisible from
+here. The tag went up with --follow-tags and everything read as
+done; the owner then went looking and the Releases page was empty, because GitHub files
+a bare tag under Tags and a release is a separate object that has to be created.
+gh was not installed, so it now is - user scope through winget, no elevation
+- and gh release create is written into
+the release procedure along with the check that
+matters afterwards: gh release view --json isDraft,assets, because a release
+publishes perfectly well with a jar that never attached. The lesson is smaller than the
+mechanism: the last step of shipping is looking at the thing you shipped from
+where the user looks at it, and "the tag pushed" was not that.
+
+- The jar was opened rather than assumed. 0.1.0 exists entirely
+because common/ was not folded into the jar and a dev run cannot notice,
+and everything added since that fix is resources - 85 gene files, 49 breed
+files, the name tables, four structure NBTs - which would fail the same silent way. So
+the built jar was listed: all of them are in it, suit.json present with
+collar.json and waves.json gone,
+ExtremeWhiteDominantGene compiled in and PinkHairGene not. That
+is the current tree and not a stale build, and it turns the scariest-sounding item on the
+checklist into a much smaller one: what a zip listing cannot answer is whether the
+runtime finds them, which is still §0-AQ.
+
+- An interrupted test run blocks the next one.
+:common:test failed outright on
+Unable to delete directory ... test-results/test/binary, left locked by the
+run that was killed mid-flight. No java process held it and
+gradlew --stop did not clear it; removing the directory did. Worth
+recognising rather than re-diagnosing, because it reads like a build break and is not
+one.
+
+Built 2026-09-08: a gene that changes the rule instead of the coat, and the paint order rebuilt round it.
+
+Owner-driven, and the whole session hangs off one observation: the mod’s magical markings are painted after the natural ones and mostly cover them, so a horse carrying both a tobiano and something loud reads as the loud thing alone. Three separate requests were about that, at three different levels.
+
+- Extreme white dominant is the general answer, and it is the first gene here that paints nothing at all. While it is present, a white texel is final: every magical gene still runs, in the ordinary order, and every one of them is discarded wherever the coat is already white. The obvious implementation is wrong and it is worth saying why. Giving it priority 999 and repainting the white last is a slot, and a marking sitting above the slot paints over the white exactly as before; there is no number high enough, because “highest” is a position and the rule is not positional. So it is a capability - WhiteLockContribution, read out of band by the composer the way LutContribution is - and the mask it produces is applied at every step of phase 3 and over the overlay pass. Its own priority is a code-order slot and nothing else. The pipeline page has the mechanism.
+
+- The lock is seeded from phase 1 and grows as phase 3 runs. Seeded from the pigment field, because the texels the melanin genes left unpigmented are the natural white markings, exactly and by construction. Grown after each gene paints, because the owner asked for “prevents the painter from ever changing a pixel if it’s been set to white” - so white a magical gene puts down is locked from the moment it lands too. The eyes are cut back out and never re-added: a blue eye on a white face is pigment biology rather than a marking, and locking it would silently delete every eye-colour gene on precisely the horses whose eyes are worth looking at.
+
+- The specific answer was to move nine genes. Anything that reads somebody else’s marking has to be painted after it, so fielded, yalia, voided and opalized went to 600+ and invert to 700. In the other direction, dhampir paints the whole horse absolute white and sat at 135, above every data-driven gene in the mod - so a dhampir was a plain white horse whatever else it carried, which is a dead end rather than a phenotype. It is at 105 now, and suit (102) and hood (103) below it. The paint order is a new page that draws the whole stack from the registry at run time, highest first, so this is the last session that has to describe it in prose.
+
+- Waves was not a gene, it was Cleave backwards. Owner’s call, and once said it is obviously true - both split the horse in half along a boundary, one taking the front and one the back. They are one locus now with four alleles (white and coloured, each way round) and Cleave’s spear boundary drawn on both. Cleave also gained the half-opaque outline it was asked for, built by subtracting the hard-edged tooth field from a wide-edged one: SpecPainter.band ramps outside the band, so the difference is a strip on the coat side of the boundary, hugging it and following the teeth. The three hard masks are subtracted one after another rather than MAXed first, which the fold cannot express and does not need to - over-subtraction can only happen where one of them is 1, which is inside the field, where the field has already painted.
+
+- Two genes gained an allele that reads the other end of what they already read. Opalized’s Opb takes the iridescence to the black regions instead of the white, which needed no new mask type at all: the white form asks for texels with no pigment left, this one asks for texels at the top of the black channel. Yalia’s Ylo is the white form’s last layer on its own - the outline round the horse’s own white, and nothing else - so it adds no white anywhere and is completely silent on a horse that has none.
+
+- Panda was backwards and is now the other way up. White is a band round the belly and barrel carrying on over the neck, head and tail; the shoulder, the butt and all four legs keep the coat. The panda face is kept, because it is the gene’s name.
+
+- Pink hair is gone, owner’s call - redundant beside mane colour, tail colour and the hair genes the magical import brought. Every page that used it as a live example now uses one; every page that used it as a piece of history says what the technique was rather than which gene did it first.
+
+Built 2026-09-08: which horse a gene is photographed on, got right on the third try.
+
+Three owner reports - Fielded shown on a plain bay, mushroom wanting a chestnut, KIT’s icon a featureless white horse - are all the same question, and CoatVisibility answers it for both the icon baker and every gene page’s preview window. Two rules changed, and the second one is worth reading before touching it again.
+
+- “The first coat it shows on at all” is not “the coat it is worth photographing on”. Fielded draws tendrils out of the edges of existing white; on a bay there is no white, but the muzzle and pasterns sit low enough in the pigment band to catch a few dozen texels of it - over the threshold, so the bay “worked” and the tobiano was never tried. The rule is relative now: measure every base coat and take the first one that reaches 60% of the loudest. An ordinary gene paints about the same amount on all of them and still answers bay.
+
+- “Not completely white” is a claim about pigment, not about pixels - and measuring the pixels failed twice, in opposite directions. Counting distinct quantised colours let a dominant white straight through: the composite is a multiply against the template’s hair shading, so a flat white horse is a spread of a dozen near-whites and reads as varied. Counting contrast then caught the dominant white and caught a cremello, a chestnut, a black and a grey with it - genes for which a horse of one colour is the honest picture. The version that ships asks phase 1 instead: a dominant white has had its pigment removed, a cremello has had it diluted and still resolves through the gradient. That is a difference in kind rather than a threshold, and it is a number the pipeline already computes.
+
+- KIT then needed a second candidate per allele, because every KIT homozygote is a white horse. Dominant white, camarillo white, near-white or dead - so a homozygotes-only rule can photograph nothing but a blank, while the patterns the locus is famous for are all heterozygous. An allele whose homozygote comes out blank now offers its heterozygote with the wild type instead. The two pools are ranked together rather than in sequence, and that mattered: KIT does have one non-blank homozygote, W20/W20, which puts white on four pasterns and reads as a plain bay - preferring any homozygote over any heterozygote settled for it over an eighteen-times louder pinto, and the icon went from an all-white horse to an all-bay one before it went right.
+
+Built 2026-09-08: the punnett square asks who the parents are, and three other wiki changes.
+
+- The inheritance grid on every gene page is a real punnett square now. It was allele × allele - every genotype at the locus, which sounds better than it reads: it answers “what genotypes exist” when the question a player has is “I own these two horses, what can they throw”. It also fell apart above three alleles and dropped to a plain list. Now the parents are chosen, one across the top and one down the side, and the square is the four gametes they can pair - four cells for any locus however many alleles it has. Each distinct phenotype gets its own colour and anything that does not present is grey, so “how often does this actually show” is answerable by looking. Both parents start heterozygous, which is the cross worth defaulting to: two homozygotes have nothing to say, and carrier × carrier is the whole reason a punnett square exists.
+
+- A page may now carry a tab of its own, and the LUT lab is the first - it is a tab on the LUT locus’s page rather than a page beside it. The three wiki views stay three: the index switcher offers them, the sidebar filters on them, and a fourth would mean a “Lab” filter that a hundred and fifty pages have nothing for. So a page-local tab gets a button and never becomes the reader’s remembered view.
+
+- The landing page’s sections collapse, and the health genes start shut. Done at run time by wiki/landing.js walking a flat .section-head + siblings shape, because half of index.html belongs to :common:bakeGeneWikiPages and a wrapper in the markup would have to be understood by both halves. Which sections start shut is GeneFamily.collapsed(), true for exactly one family - forty-odd cards with nothing to show, sitting between the two halves people actually came for.
+
+- Accretion Field lost its card and kept its page. It is a real locus that paints nothing on its own and exists to be read by Accretion, and two adjacent cards for one marking read as two markings. It is detected rather than listed: a gene with affectsCoat() false that some other gene names in coatDependsOn() folds into that gene’s entry. A modifier that grows a painter gets its card back at the next bake.
+
+Built 2026-09-08: a “Creating a gene” page, written twice - once for a person and once for a model.
+
+Owner-driven. The page carries two tab panels rather than two pages, so the sidebar has one entry and a reader picks the register they want.
+
+- The Gameplay tab is about the part that is hard, which is not the format. The gene file format already documents every field; what it does not say is that you are not drawing, you are writing a rule that is true at every point on a horse and then finding out what it looks like. So the human tab is a decision table (what KIND of thing is this marking - region, countable marks, wandering lines, something periodic?), the argument for composing before inventing, and the traps in the order they actually catch people.
+
+- The Coding tab ends in a paste-able prompt. Ten numbered rules that are not optional, the body-space extents, the part names, a full template, and the instruction to output JSON only - so an owner with a reference image and two sentences can hand the whole job to a model. Every rule in it is one this session learned the hard way: region-first-shape-last, width-under-spacing, PALETTE has walls, RAMP varies colour and not coverage, reversed smoothstep edges are a hard step, which PIGMENT channel actually discriminates, and the neck’s two tilts with their calibrated constants.
+
+- The vocabulary tables were transcribed, not remembered. They come from expected.json’s schema block, which :common:bakeSpecFixtures writes out of SpecSchema - so every parameter name and every fallback on the page was correct when written. They are still a copy, which is exactly the failure mode gap 13 is about, so the page says so in a box at the top and names both the maintained prose table and the machine-readable one as the things to believe instead.
+
+- The icon baker found a gene that sometimes paints nothing. Sharing the visibility measurement with the preview picker meant re-baking every icon, and auroraband’s came out empty. It is not the tooling: its band is one stroke at a spacing wider than the barrel, so on about one epigenome in six the stroke lands off the mesh entirely and the horse wears nothing. Gap 108; the icon is deleted rather than kept stale, which is the baker working as intended.
+
+Built 2026-09-08: a third pass over the registry, and two more masks caught painting the wrong thing.
+
+Owner-driven, another twenty-odd notes off the gene pages. Most of it is placement and colour and is written up on each gene's page; what is worth keeping is below.
+
+- A PALETTE has walls, and Gamma's were cutting across its own fields. Its blooms had softnesses of two and three body units - several texels of fade - and still read as hard-edged shapes, because the edge was not in the mask at all. PALETTE gives each cell of its own lattice one whole colour and neighbouring cells meet at a wall; that is the documented point of the op and the difference between an opal and a gradient. But its lattice has nothing to do with the spot field's, so the walls ran straight through the blooms. A RAMP has no cells, so the hue sweeps along the body instead and the gene still carries several colours without any of them ending on a line. The same trap is live wherever a soft mask is painted with a hard op - the mask's softness is not the whole story about whether a marking has an edge.
+
+- The neck's pitch bites in both directions. Hood is meant to fade back along the neck and was fading from the crest down instead - the colour left the top of the neck before it left the throat. A band on plain X is a plane of constant X, and against a long axis sixty degrees off horizontal that plane cuts the neck diagonally. The fix is the same trick as goth's with the sign flipped: goth wants a plane lying along the neck (slope tan 60), hood wants one square across it (slope -tan 30). Two genes, two opposite tilts, one calibration - and gap 103 now covers six genes rather than two.
+
+- A RAMP varies the colour, not the coverage. Fade is an ombre that should leave the roots alone, and it was painting the whole mane and tail: its only mask was PARTS: HAIR, so coverage was 1 everywhere and the roots got the ramp's first stop rather than the horse's own hair. A ramp positions colour along an axis and has no opinion about where the layer applies; if a gradient is supposed to fade out, the coverage has to fade with it.
+
+- Two more genes were flooding a part because the region was folded in after the shape. Filigree's new head tracery and Lasertae's shoulder both did it: a PARTS or AXIS mask MAXed on after the shape mask evaluates to max(shape, 1) on the named part and the shape is simply gone. That is three instances in two days of the same mistake, and it reads perfectly naturally the wrong way round, which is why it keeps happening. Region first, shape last.
+
+- Voided stopped being random, and the format did the rest. It was painting a warm grey - hue 25, saturation 0.25 - through a lightness knob, so "black" was whatever the knob rolled. The gene's whole promise is that it changes no pattern and no boundary, only the pigment, so there was nothing about it that should vary. Deleting the knob makes it deterministic by the format's own rule (a gene with no knobs is), which lets the coat cache share one texture across every voided horse with the same markings. A knob removed is sometimes a cache win.
+
+- Circuit's colour was a thirty-degree slice of the wheel. Its coreHue ran 195 to 225, so every circuit horse ever bred was the same cyan give or take a shade. The value was already stored per allele copy - every knob is - so nothing was missing but the range. Opened to the full wheel and renamed hue to match the other forty-odd colour genes.
+
+- Gudial is a gradient between two hues rather than two flat ones. It already carried two hue knobs; a RAMP is written as a start plus a span, and the format has no arithmetic, so the second hue could not stay a hue and be subtracted from the first. It became the span, which is the better knob anyway - it cannot roll the two colours on top of each other the way two independent hues can.
+
+- Two genes got a fade onto the tops of the legs and nothing more. Nebula Light and Spectrum Light both ended at the elbow on a line. Each gained a separate layer for the legs rather than an extra mask on the body one - different parts cannot double-paint, and it avoids the fold problem above entirely. Nebula also took a curated pink-violet-blue palette off the owner's own list, with the teal-green entries left out: those were the ones that made a palette wall jump.
+
+- Not fixed: Invert's preview. The owner reports the window does not load on that page. Everything it consumes checks out from here - genePreviewJson and previewGenotypeCode both return well-formed output, the icon is baked, the founder table is sane, the page is registered and carries a family - so it is a browser-side failure and needs a console. Gap 107.
+
+Built 2026-09-08: Pavonem is an actual ocellus, because the owner drew one.
+
+Owner-driven, and the one item on the review that was flagged rather than guessed - the note said “flag that one if you need me to walk you through it” and it was taken up. What came back was an SVG with the proportions in it, which settled in one message what several passes of guessing would not have.
+
+- The middle ring is not painted, and that is the whole thing. The gene had been a pale oval with a bright spot low in it - a spot with a highlight, not an eye. A peacock ocellus is three zones: a dark pupil, a ring around it that is the horse’s own coat left completely alone, and a broad outer leaf around that. Paint the middle and it stops being an eye. Off the reference drawing the radii are 0.20, 0.55 and 1.00 of the leaf, and all three are about 1.2 times taller than wide.
+
+- Two saturations of one hue, not two colours. The reference is navy and green; the instruction was that the centre is the most saturated, the middle is the coat, and the outer is a washed-out version of the centre. So the coloured form runs the pupil at 0.98 saturation and the leaf at 0.42, and the white form - which has no saturation to vary - runs the pupil to white at 96 and the leaf at 52, which is the same relationship expressed in the only axis it has.
+
+- Concentric by construction. All three zones are SPOTS masks sharing one seed, spacing, stretch and vary, so they land on the same lattice cell and draw the same per-element size roll - vary multiplies every radius by the same per-cell factor, so an eye that rolls large rolls large in all three zones and the ratios hold. That is why the radii are literals rather than knobs: three independently drawn knobs would break the proportions the reference is made of. The drawing sets the eye slightly low in the leaf rather than dead centre; at the size these render that offset is under one texel, so it was dropped and said so.
+
+Built 2026-09-08: a gene page's preview opens on a coat the gene can actually be seen on.
+
+Owner-driven, one request - “set the default preview model for fielded to tobiano bay”. Written up in CoatVisibility and in gene-preview.js's header.
+
+- It could not be done by editing the page, because the page is generated. A hand-written data-base on gene-fielded.html would survive exactly until the next bakeGeneWikiPages. So the choice had to be made by the tool - and once the tool is making it, making it per gene by name would be a list to keep, which is the thing this repo keeps learning not to build.
+
+- So it is measured. GeneWikiTool now bakes every gene against every base coat and writes data-base when the first coat the gene can be seen on is not the bay. Fielded was the request; Voided and Opalized came out of it for free, because all three modify white somebody else put there and none of them paints a thing on a solid horse. No list anywhere says so, and a gene that starts or stops painting changes its own answer at the next bake.
+
+- The measurement was already written, twice over nearly. GeneIconTool has chosen an icon's backdrop this way since the bulk import - bake the plain coat, bake the gene over it, count the texels that moved by more than jitter. Rather than write that a second time it moved to CoatVisibility, which both bakers now call. Two tools answering “can this gene be seen here?” differently is a small bug that would have been very hard to notice.
+
+- The window ignores an attribute it does not recognise. data-base is generated, but the page carrying it can be older than BaseCoats.all(); an unknown key falls back to bay rather than being trusted into a blank selector.
+
+Built 2026-09-08: the owner reviewed the whole registry gene by gene, and the review found more than the fixes did.
+
+Owner-driven, roughly thirty notes taken while reading the gene pages, arriving as a running commentary rather than a list. Written up on each gene's page; the two engine changes are on the gene format.
+
+- Five genes were drawing nothing at all, and the owner found three of them by opening the pages. “Colored crescents isn't loading on the bay example”, then Lasertae, then Stellar. It is one bug: perDose indexes on copies of the gene's first-declared allele, and a coloured expression is reached by two copies of the second - so its dose is always zero, it reads perDose[0], and every one of these files had written that as 0.0 on the entirely reasonable ground that a dose of nothing should draw nothing. A chance of zero means the mask never fires. Crescents, Lasertae, Polymoon, Stellar and Wormholes all shipped with an invisible coloured form. Grepping for the shape found the other two before they were reported. Gap 105 is the real fix: the parser can see this at load.
+
+- A Y band on the adult neck is a collar, and the first attempt to fix that got the angle wrong. Goth's hood was on the throat; the tilted-plane trick was built for it, and the owner came back with “it's still coloring the underside of the neck”. They were right. The slope had been set to tan(30) from the neck's pitch, and what matters is the neck's own long axis: its box is 12 by 7 and its bounding box comes out 12.07 by 13.89, which only works if the long axis is sixty degrees off horizontal. tan(60), not tan(30) - the complement, which tilts the plane the other way and runs the band across the neck rather than along it. Probing with four coloured bands settled it in one bake, and is what should have been done the first time rather than the second.
+
+- Integration was reading a channel that saturates. It is supposed to spread outward from wherever the coat is already dark - “like the black socks on a bay” - and it was covering the entire horse. darkness is 0.55*red + 0.95*black, so a bay's barrel already reads about 0.84 against its points' 0.95: at any threshold high enough to mean “the points” it had already selected everything. The channel that tells a sock from a barrel is black, where the body sits at 0.2 and the points at 0.85. Found by painting four threshold bands on a horse in primary colours, which took a minute and settled what half an hour of reasoning had got wrong twice.
+
+- spread changed meaning twice in one session, and ended up simpler than it started. It began as “grow the pale side of the reading”, which is what Fielded needed. Integration needed the opposite. Rather than a second parameter, it moved to after invert and now dilates the mask's output - grow whatever this mask selected - which serves both, and is provably the same operation for Fielded. Then Integration proved the disc was in the wrong space: dilating three units off a bay's socks covered the horse, because the leg patches sit next to the barrel on the texture sheet. It measures in body space now (gap 104, opened and closed the same day), and the fix was cheap because HorseSkinGeometry.sample is a cached grid rather than a computation.
+
+- A mask list is a fold, and putting the shape first throws it away. Lasertae's eclipses were meant to be confined to the shoulder, and the region terms were MAXed on after the RINGS mask - so a neck texel evaluated max(0, neckBand), the band on its own with no ring in it, and the shoulder came out as a wash. The rule is: fold the region into one number first, then multiply the shape in. Worth remembering because it reads perfectly naturally the wrong way round.
+
+- An eclipse is not an annulus, and RINGS could never draw one. Lasertae took three passes. A ring has two edges by construction, and the whole point of an eclipse is that its outer one is not there - the corona has to run out into the coat over two or three texels rather than stop. What draws it is two concentric SPOTS on the same seed and spacing: a big disc with a softness of more than a body unit, times a small one inverted and sharp. The big disc's soft edge is the corona fading to alpha zero; the small one's hard edge is the circle of bare coat it closes around. Neither is a shape the mask vocabulary has a name for, and both fall out of composing two it does.
+
+- width has to stay under spacing. Zebra's Coat had stripes up to 10 body units wide at a 3-unit pitch - they overlapped four deep, and the “narrow transverse striping” its own description promised rendered as a solid white neck. Six genes were within a whisker of the same thing; the others are broad by design, and only this one was reported.
+
+- Two markings lost a stamped-on spiral. The SPIRAL mask draws one figure per part, centred on the part's bounding box, and it reads as a decal applied to the horse rather than as something grown on it. Circuit and Filigree both dropped theirs at the owner's request; nothing else uses it, and the mask is now unexercised outside the parity gene.
+
+- What was flagged rather than guessed. Pavonem does not read as a peacock eye and the owner offered to walk through what one should look like - so it is untouched, which is the right answer to an offer like that. Flametouched had its look reverted: the earlier session had changed the gene when the request was only about which of its two forms the wiki icon shows, and the icon baker always picks the loudest homozygote with no way for a gene to nominate a different combination.
+
+Built 2026-09-08: twenty-four gene fixes, four new painters, one polygenic locus — and a mask bug that had been eating half of fifteen genes.
+
+Owner-driven, a list of twenty-four notes taken from looking at the horses. Written up on each gene's own page; the vocabulary additions are on the gene format and the cross-locus block on the genetics model.
+
+- The bug was found by not believing the file. Panda is supposed to keep the coat on the shoulder and the hindquarter, its own file said so in two masks unioned with MAX, and the horse had one of them. Rendering the hindquarter mask on its own drew it correctly, which is the fact that made it a code bug rather than a gene bug. SpecPainter.coverage bailed out the moment a MULTIPLY mask took the accumulator to zero — a sound optimisation for a chain of multiplications and wrong the instant anything later can put coverage back. So the second half of every union was unreachable wherever the first half was empty, which is to say everywhere it mattered. Fifteen gene files use that shape. The test is now “can anything from here on raise it”, and the JavaScript twin had the identical line, which is why check-parity.mjs was green about it for its whole life: two engines agreeing is not the same as two engines being right.
+
+- Four things went into the mask vocabulary, and three of them exist because noise cannot repeat. Every shape in this format that curves, curves because a noise field bent it, and noise never comes back to the same place twice. That is right for a marking and wrong for a lobe, a string of lights and a row of teeth, all three of which are periodic. WAVES is a band whose edge is displaced by a sine, a triangle or a sawtooth: Waves gets the three-to-six even scallops its description had always promised and never drawn, Angler's lights sit on a curve you can follow with a finger instead of on a forking ridge, and Cleave gets straight-sided spears — the triangle and sawtooth are the only way to ask this vocabulary for an edge made of straight lines, because everything noise-derived rounds off however far the softness is wound down.
+
+- CRACKLE is the giraffe, and it is a different measurement rather than a different tuning. DAPPLES and SPOTS both draw round marks however hard they are pushed, because both measure the distance to a cell's centre. A giraffe is polygons: straight sides, corners meeting three at a time, an even channel between them. That is the distance to the wall between two cells, which needs the two nearest lattice points and not just the one — BodyNoise.cellEdge, half the difference of their distances. Qular was fuzzy blobs and is now a giraffe read backwards.
+
+- The other two additions are parameters rather than masks. SPOTS takes "shape": "heart" — the classic polar heart, evaluated in the (x, y) plane so it stands upright on the flank — which is what let Valentine drop its pink half entirely (the owner is making that a LUT) and become an appaloosa whose spots are hearts and whose blanket has hearts cut out of it. And PIGMENT takes spread, which grows the pale side of the reading by a radius, so a gene can finally ask for “beside the white this horse already has”. Fielded's whole description turned on that and it had been drawing wisps on solid horses; it now draws nothing whatever on a horse with no white.
+
+- Accretion is two loci, and the format grew a needs block to say so. The owner asked for it polygenic: one locus for colour, one for which half of the horse. Nothing in the file format could express a gene reading another gene — but Gene.expressionIn and Gene.coatDependsOn have existed since the leopard complex started reading PATN1 and PATN2, so the addition is a way to reach an existing hook from a file rather than a new mechanism. An expression may carry "needs": {"<gene key>": {"<token>": copies}}; entries carrying one are exempt from the exactly-once coverage check, because they override a combination rather than claiming it, and the plain entry underneath is still what a horse gets when the condition fails. So the table stays total whatever the second locus says. Accretion Field paints nothing, is carried by every horse alive, and is why two underside-marked parents can throw a topline foal.
+
+- Hued pangare stopped being a gene file, and that was the point of the request. The owner asked for it to use “the exact same drawing process” as pangare. It had been a Y band up the belly and another down the neck, tuned by eye — and pangare is not a band, it is a region map with nine named weights on it and a mottle over the top. Two hand-tuned copies of that would have drifted the first time either was touched, and drifted invisibly, because both horses would still have looked like mealy horses. So the field came out of PangareGene's painter as mealyCoverage and the new class calls it: the same code, differing only in that one takes red out in phase 1 and the other walks the colour toward a hue in phase 3. Ordinary pangare paints exactly what it painted before.
+
+- Patina was drawing on the wrong half of the horse and the reason was an argument order. Its PIGMENT mask read from: 0.75, to: 0.35 — and smoothstep with its second edge below its first is not a reversed ramp, it is a hard step in the original direction. So “verdigris where the coat lightens” was landing on everything dark. It follows pangare's regions now (the owner asked for that shape) with a heavy speckle through every edge, and reads on a chestnut the way copper reads: grains rather than a wash, and nearly invisible on a black, which is what its own description had always said.
+
+- A Y band on the neck is a collar, not a crest. The adult neck is pitched thirty degrees, so goth's hood — a band in the upper part of the neck's box — wrapped the throat as readily as the top. Probing it with four coloured bands showed that immediately and is the only reason it was cheap to fix. The hood is a tilted plane now, got by giving WAVES a sawtooth whose wavelength is longer than the horse: the displacement then never wraps, so it is a straight ramp, and a band on a ramped coordinate is a plane at an angle. Cosmic uses the same trick to hang its blanket off the crest the whole length of the neck. It is a trick and it is gap 103: the pitch is written out by hand in two gene files.
+
+- Quarter needed a choice, and the format has no way to make one. It is supposed to cut the trunk into quadrants and pale one of them; it was drawing a soft wash indistinguishable from nimbus. A knob can move a boundary but cannot pick between two of them, and the mask fold has no branch. What it does instead is sample value noise at a scale of 500 body units — the whole horse inside one lattice cell, so one number per horse — and amplify it until the clamp turns it into a coin. Two coins give four quadrants, one layer each, exactly one of them live. It works and it is honest about being a workaround (gap 102); what it really wants is a per-horse integer knob.
+
+- Every gene preview now opens on six base coats rather than three. Bay, black and chestnut are the three pigments every marking is read against, and they are no background at all for a gene that modifies somebody else's white: fielded now draws nothing on any of them, and a preview of it on three solid horses is three pictures of a plain bay. So BaseCoats gained a tobiano, a splash and a sabino bay — heterozygous, and picked to cover the three shapes white comes in.
+
+- What was not built. Nothing on the list was skipped, but one item was interpreted: “change flametouched to have the preview be of the single-color flametouched” describes an outcome that did not exist, so the gradient form was made single-coloured — one hue whose strength ramps fore-and-aft, rather than a hue sweeping through two or three — which makes the form the preview opens on the single-coloured one. The flame form beside it keeps its sweep. If that reading is wrong the fix is small.
+
+Built 2026-09-08: the seven magical family index pages are deleted — the landing page was already the index.
+
+Owner-driven, one request. Written up in GeneWikiTool; the grouping itself is unchanged and still common/genetics/GeneFamily.
+
+- Two indexes over one list is one too many. Each genes-magic-*.html listed one family's genes with an icon, a blurb and a link to the full page — which is what the landing page's section for that family already said, in the same order, from the same table. The pages were generated an hour after the landing-page cards were, by the same tool, from the same source, and nobody noticed they had become a duplicate of each other. The owner did.
+
+- What went with them. The “All ground and strong white” item that led each of the seven sidebar sections, and the family card that led each section of landing-page cards. GeneFamily lost its slug and magicalSpecFamilies(); nothing else asked for either, which is the tell that they existed only to name a file. The .gene-card block in styles.css had no other reader either.
+
+- A gene page's eyebrow still names its family, as text rather than a link. The family is a heading now — a sidebar section and a landing-page section — and not a destination, so there is nothing for it to point at. Keeping the words is worth it: the eyebrow is where a reader learns that Dust is a speckle gene rather than a spot gene, and that is the one fact the page's own title cannot carry.
+
+- The hand-written family blurbs went with the cards and are in the history rather than on the page: each opened by counting its family (“Sixteen genes that replace the base coat…”), which was a derived number sitting in prose and already drifting. What is left is GeneFamily.lede(), which every section heading has always used and which counts nothing.
+
+- harvestIcons went too, and it is the only removal that lost a capability. It existed because a family card's icon was a hand-picked representative — nothing in the registry would have chosen panda.png to stand for ground-and-strong-white — so a card that carried an icon the tool would not have picked kept the one it had. A gene's own icon has always been derived from its name, so with the family cards gone there was nothing left for it to preserve.
+
+Built 2026-09-08: the gene icons were being drawn through a sheared camera, and every gene has one now — or honestly none.
+
+Owner-driven, five requests in one, and one of them had to be answered twice. Written up in GeneIconTool and HorseSkinGeometry.posed; the card markup is GeneWikiTool.card.
+
+- Two separate bugs were making the icons wrong, and fixing the first one was not enough. The owner said the baked horses looked wrong; the mesh was fixed; the owner said they still looked wrong. That second report was correct and the useful part of the session. The mesh was the obvious half: the baker placed every texel on the part's rest-pose bounding box, which is all the coat pipeline ever needs, and the adult neck's AABB is nearly twice the neck — so the horse was a pile of oversized blocks with a rake of stripes for a tail. model3d.js had solved that for the browser preview years of sessions ago and says so in its own header; that arithmetic is now HorseSkinGeometry.posed() / posedNormal() on the Java side, and the two files name each other as twins.
+
+- The second bug was the camera, and it was a sign. sideView built its basis with cross products and wrote up' = v × right with two of its three terms negated, so “up” was about 45 degrees off perpendicular to the view direction — dot(up, view) came out at essentially 1 rather than 0. An orthographic projection down a non-orthogonal basis is a shear along the view axis: every part slid up or down the image by its own depth, which put the head in the sky, the tail on the floor, and the legs nowhere near the barrel they hang off. The basis now comes straight out of an azimuth and an elevation, so all three axes are orthonormal by construction rather than by a cross product somebody has to check, and the camera can be read back as a viewpoint instead of three hand-tuned components.
+
+- The lesson is that the picture was not enough. The sheared horse read enough like a horse to survive being looked at twice, once by the owner and once by me immediately after fixing the mesh underneath it. Gap 13's cousin: looking at the output is necessary and is not sufficient when “it looks like a horse” is the whole test. Two cheap checks would have caught it in seconds — the three dot products of the basis, and counting enclosed transparent pixels, which went from 568 on a plain bay to zero once the projection stopped shearing the texel grid apart.
+
+- An icon for every gene, and the allele it advertises is measured rather than assumed. The baker walked the data-driven genes only, so 88 of 155 had a picture; it walks the registry now. Which allele to show could not be found by equality: swapping an allele copy swaps the epigenome slot the coat reads with it, so A/A is never byte-identical to the A/a underneath it, and a plain difference test was about to illustrate Agouti with a bay. It counts the texels that moved by a channel step or more and takes the loudest allele, which gives Extension its chestnut and Agouti its black. The fallback backdrop became a ladder — tobiano bay, chestnut, leopard bay — and that is what gets Flaxen, PATN1 and PATN2 a picture of themselves rather than of the horse under them.
+
+- A gene that changes no pixel gets no icon at all (owner's call, once the rest was working). Thirty-six of them — the health loci, the four magical stat genes, and the ones like cutie mark and particle that do their work in a client render layer rather than in the sheet — were baking as the plain bay. That is honest and useless: a card for a jump gene showed a horse that has nothing to do with it, and thirty-six identical bays down a page read as a bug. The baker deletes a stale file rather than skipping it, so a gene that loses its paint loses its picture on the next bake; the landing card, the family index and the harvested-icon fallback all drop to words, and those sections keep the tighter three-across grid because only a grid holding an icon widens.
+
+- A card is a picture beside a paragraph now, not a paragraph under a picture. Two columns, the horse on the left and every word on the right. The icon also stopped riding inside the harvested card body: it is now harvested separately by href, so a change to the card markup can reach a card somebody has edited by hand — which is the whole point of harvesting, and was quietly not true.
+
+- The landing page reads in the order a reader wants it. Start here, Gameplay, Items, then the coat engine, For modders and Project, with the hundred-odd gene cards last; wiki/pages.js mirrors it, so the sidebar and the landing page tell one story. “For modders” was also appearing on the Gameplay view, which is not what that heading is for: the Horse designer was the single card under it flagged gameplay, and a section shows when any one of its cards does. That card moved to Gameplay, where a player would look for it anyway.
+
+Built 2026-09-08: the wiki groups genes the way the editors do, every gene page is listed in both places, and neither list is written by hand.
+
+Owner-driven, four requests in one. Written up on the spawn eggs and in GeneWikiTool; the grouping itself is common/genetics/GeneFamily.
+
+- One taxonomy, three readers. The sidebar had five hand-written gene sections, the landing page had a different arrangement again, and the gene editors' new family filter would have made three. They are all GeneFamily now - natural coat, dilution, white, health and other, then the magic - in the same order under the same labels. The magical families were already derived from the paint-priority bands and GeneWikiTool was already using that table to write the seven family pages, so this was less a new idea than finishing an existing one.
+
+- A gene page is registered by existing. :common:bakeGeneWikiPages now writes the whole gene region of wiki/pages.js and a matching span of index.html, walking the registry rather than a list. All 162 gene pages appear in the sidebar and as a card on the landing page; before this, 84 of them were reachable only through a family index and none had a card. PATN1 and PATN2 have no page at all - they are documented inside the leopard complex - and the tool names them on stdout rather than inventing two.
+
+- The label and the views come off the page, not out of a table. A gene's sidebar text is its own <h1> and its views are the data-tab panels it actually carries - the same rule sync-page-views.mjs applies to everything else, applied while the file is already open. So the sidebar cannot offer a science tab that is not there, and cannot call a gene something its own heading does not. The cost is that three curated sidebar labels went back to the page's heading (“KIT (white spotting)” rather than “KIT (dominant white / sabino)”); the fix, if it matters, is to change the heading.
+
+- A hand-written landing card always wins. The tool harvests each card's body by href and puts it back verbatim, rebuilding only the anchor - so the sixty-three cards somebody wrote survived, a hundred and one were generated from the genes' own blurbs, and editing one by hand keeps working. Rebuilding the anchor rather than keeping it is what makes a card that moves between families pick up the right colour and icon.
+
+- Bay is the default base coat everywhere now, not black. BaseCoats.all() is ordered bay, black, chestnut, so everything that takes the first entry gets a bay - the LUT lab included. The old order was darkest-first, on the argument that a white marking goes from most obvious to least that way; true of white markings, and wrong for the rest of the registry, because a black horse hides every dark marking on it and a great many of these genes paint dark. The gene-preview window had already been overriding it by name for exactly that reason, and the gene icons were already baked on a bay - this makes the three agree.
+
+- The per-outcome prose moved to the coding tab. The eighty-four imported genes carry a description of each outcome that came out of the source documents part by part - “from the poll down through the orbits and the nasal region to the muzzle, bounded along the cheekbone and the jaw”. That is a specification of how the thing is drawn, and it was sitting on the gameplay tab, which CLAUDE.md says is for a player who does not want the model. It is now on the coding tab immediately above the layer list that draws it, where the prose and the mechanism can be read against each other. Gameplay keeps the picture, the outcome names and what it takes to carry them, the odds and the carrot.
+
+- The designer's toasts are gone entirely (owner's call, later the same day). They were a stack of dismissible cards over the field on a ten-second timer, and the timer did not reliably fire - a pointer resting anywhere over the stack held every card in it - so a run of Randomize clicks buried the horse behind the thing you were trying to look at. Nothing was lost with them: the conditions and the struck-through gene rows were already on the panel permanently, so those notes went to the console, and the two cases where nothing on screen would otherwise change kept a real channel - a failure to boot holds the boot overlay up and says why, and an unreadable horse file raises a dialog. A notification that can outlive its own dismissal is worse than no notification.
+
+- Two things about the build, found while closing the session out. :common:test is green at 674 tests in 9m42s - the twenty-five and thirty-four minute runs earlier in the day were two suites contending for the same results directory, not the suite getting slower, so gap 97's figure still stands. And TeaVM's wasm output is not byte-reproducible: two consecutive builds of identical source give different bytes at the same length. That matters because the regeneration rule reads both ways at a glance and only holds one way - a stale wasm beside a changed common/ is a real problem, a wasm diff on its own is just a re-bake and not worth committing. Written up on architecture.
+
+- And the landing page's four headline numbers are generated at last - gap 93, closed. No new Gradle task was needed: the tool was already rewriting index.html, so the stats block went in behind the same markers. It corrected 69 genes to 155 on the way in, and the distinct-coat figure now prints as a floor rather than a number, because it passed Long.MAX_VALUE somewhere in the eighty-four magical genes and a saturated counter quoting its own ceiling is a lie.
+
+Built 2026-09-08, NOT yet looked at in game: the gene editor grows a randomize menu, per-gene locks and a family filter — on both screens.
+
+Owner-driven, one request. The custom horse spawn egg and the browser designer are one screen in two places (hard rule 5), so all of it landed twice — and the parts that are genuinely the same rule rather than two parallel ones stopped being mirrored and moved into common/. Written up on the spawn eggs; checklist there.
+
+- Randomize is a split button with eleven modes. common/genetics/RandomizeMode — the plain founder roll, a uniform true random, one for the naturals and one for the magic, one for the dilutions and one for the whites, a random breed, +1/+2/+3 magical, and the epigenome on its own. The face does the thing, the arrow picks which thing, and the choice sticks. Picking from the menu also runs it: having said what Randomize means, you wanted it done.
+
+- The narrow modes are the point, and they are what made the shared enum necessary. Most of the time you are not asking for a different horse, you are asking for a different something on the horse you already have — so a scoped roll leaves everything outside its scope untouched, epigenetics included. That is one rule with four moving parts (scope, locks, the visible-gene switch, and putting the untouched loci's epigenetics back into a freshly rolled epigenome), and keeping two hand-written copies of it in step was not going to survive the week. EditorRules and RandomizeMode in common/ now hold it; variantPair moved there too, having been written out twice verbatim since the designer existed.
+
+- The sex is rolled first, before a single allele. Not cosmetic: a stallion carries one copy of an X-linked gene and a mare two, so rolling the genes and then the sex means immediately snapping half of what was rolled back to something else. Only the whole-genome modes do it — re-rolling the dilutions is an edit to the horse in front of you, and changing its sex underneath that is not what was asked for.
+
+- A padlock per gene. Locked means every randomize, main and epigenetic, leaves that gene exactly as it stands: alleles, whether it is on the horse, and its epigenetics. The last of those is the half most likely to break, because the epigenome is rebuilt whole and the locked loci have to be put back into it — Epigenome.with throws on a gene that stores nothing, hence the new Epigenome.carries. Drawn as eight rectangles rather than typed: the font has no lock glyph in the plane it can reach, and the mark has to be the same on both screens.
+
+- “Rnd health”, off by default, and the line it draws is not affectsCoat. The switch is for genes that change nothing you can see, which is not the same set: PATN1, PATN2 and shade all paint nothing themselves and every one of their expressions is a wild type, yet a horse carrying them looks different, because a painter names them in coatDependsOn. Genes.influencesCoat reads that declaration rather than keeping a list of exceptions beside it. Off, because the reason to press Randomize on a gene editor is almost always to look at a coat, and rolling a lethal into the horse you are looking at is a surprise nobody asked for.
+
+- The gene list gained a family filter, and the families are derived. common/genetics/GeneFamily. Magical genes band on their paint priority — which costs nothing, because the magical bands were laid out as families in the first place, and GeneWikiTool had already been using exactly that table to write the seven family pages. It reads it from here now, so the menu and the wiki cannot drift. The naturals: anything invisible is a health gene, the rest band on priority, and a handful whose slot in the paint order fights their family are named in one short override table with the reason. Shade is the honest example — parked at 95 among the disorders because it paints nothing itself, and nonetheless one of the three genes that decide what colour a horse is.
+
+- Extension, agouti and shade are always on the horse and carry no x. Every horse has alleles at all three; a list that hides them until you click implies a horse can be without them.
+
+- One way to copy a horse, not two, and it is the one that carries everything. The screen had Copy code / Paste code and the designer had those plus Export / Import. A genotype code is the alleles and nothing else — paste one back and the horse returns with fresh epigenetics, no name and no breed, which on a mod whose whole premise is that one genotype makes many horses is a lossy copy pretending to be an exact one. Both now speak common/horse/HorseFile: the designer writes it to a file, the spawn egg to the clipboard, and a horse crosses between them intact. That closes roadmap §9, which had asked for an Import horse file button beside Paste code; it shipped as a replacement instead, because nobody reads two copy buttons and works out which is the lossy one.
+
+- What was actually verified. The wasm was loaded in Node and driven through every export the page uses — all eleven modes, the locks, the filter menu, the file round trip — and a separate harness ran the editor model directly: a locked KIT survives all eleven modes with its epigenetics intact, Rnd white moves nothing outside its family, the +N modes always reach their floor, and two hundred true random rolls never produced a pair a gene forbids. None of it has been looked at on screen, in the browser or in game, which is where the layout risk is: two new buttons in the right column and a padlock column that narrows every gene name.
+
+Built 2026-09-08, NOT yet looked at in game: eighty-four magical genes, imported in bulk out of process/.
+
+Owner-driven, one overnight request. Every gene is a JSON file — none of them is a Java class. Each has its own generated page, gathered at the time by seven family indexes — ground and strong white, fields and regions, spots and rings, speckle and dust, lines and strokes, mane and tail, colour modifiers. (Those index pages were later deleted as redundant to the landing page.) Gaps 94–97.
+
+- Every gene has its own page; the family pages are an index over them. The owner's correction, and the right call: a gene page is where acquisition and gameplay information lives — the preview, the inheritance table, how often a wild horse is born carrying it, and the gene carrot. Eighty-four generated pages plus seven indexes, and the wiki went from 116 pages to 200. The two genes that already had hand-written pages keep them: the tool treats a page without its marker comment as off limits, and drops it from the generated part of pages.js so it is not listed twice. That generated span is how eighty-four pages get registered without hand-editing hard rule 7's one page list.
+
+- The designer was showing none of them, and the cause was ordering. Reported by the owner. HorseEditor snapshots Genes.codeOrder() in its constructor - it has to, the page addresses gene rows by index - and DesignerApi.main() built one immediately, which the page calls before it hands the gene bundle in. So all eighty-four registered successfully, reported no problems, and none appeared. main no longer builds anything; the editor is built lazily, first at setNameWords, which runs after both register calls, and both register calls drop the cached editor as well. java.js now compares the bundle's length against what the page is showing and says so in the console if they ever disagree again — the bug's whole problem was that it was silent.
+
+- The format grew before any gene was written, and that was the whole trick. Reading all seven source files first turned up perhaps a dozen shapes described over and over: countable spots, hollow rings, fine stipple, tapering strokes, a spiral, a colour running along an axis, a colour drawn per cell. Building those as five masks and two ops — SPOTS, RINGS, SPECKLE, STROKES, SPIRAL, RAMP, PALETTE — is what let eighty-four genes be data instead of eighty-four classes. See the format.
+
+- Every colour op can now take a hue instead of a colour. The single most valuable addition, and the least obvious: color is a constant, and a constant cannot be the thing a horse drew for itself. hue is an ordinary number parameter, so it can point at a knob — and one knob is the difference between a gene that paints teal spots and a gene that paints spots of whatever colour this line of horses runs to. It is a negative sentinel rather than "is the key present", because the gene creator carries every parameter whether or not you touched it, and a presence test would preview one colour and export another.
+
+- Glow is a layer flag, not an op. "emissive": true on a layer marks the texels it covers full-bright, orthogonal to what colour the layer paints — the same TOWARD paints a lit teal spot with one flag flipped. SpecGene implements CoatOverlayContribution to do it, because the overlay is the pass markEmissive exists in. Two combinations are load errors rather than surprises: a natural gene cannot glow, and an emissive layer cannot use a PIGMENT mask, because the pigment field is gone by then.
+
+- INVERT is the one op that could not be composed. Every other colour op walks the texel toward something; a negative is a function of what is already there. It reads what the texel looks like rather than what it stores, for the same reason TOWARD does — otherwise the negative would differ per base coat, which is the one thing an inversion must not do.
+
+- The shipped gene folder was never loaded. GeneSpecLoader.fromClasspath had no caller, so Suntouched and Waterborn had been in the jar and dead. Genes' class initialiser registers them now, which is also where the eighty-four land; the NeoForge module's duplicate copy of the folder is gone, and both genes moved out of the example. namespace, where they collided with the example files a test registers.
+
+- Two tools, and they earned their keep in the first hour. GeneIconTool bakes one three-quarter snapshot per gene on a standard bay (which the wiki index wanted anyway); process/tools/sheet.py stitches them into a contact sheet. Baking the first five and looking at the sheet showed four of them were effectively invisible: the sources quote centimetres for a real horse, and one body unit is eight of them and two texels, so a "3cm ring wall" is a third of a pixel. process/tools/coverage.mjs is the other half — a gene that paints nothing and a gene that paints where the camera cannot look are the same picture and opposite bugs, which is how Lantern's dorsal line was declared missing when it had been there all along.
+
+- STROKES had to be rewritten once. The first version thresholded |n−0.5| on the noise field, which is not a width: value noise is flat at its extrema and steep between them, so the same parameters drew a hairline over half the horse and a blot over the other half — which is what every stroke gene looked like on its first bake. It divides by the field's own gradient now, making the reading an approximate distance, and width is in body units like every other mask's parameter.
+
+- A MAX or ADD on a layer's first mask is now a load error. Coverage starts at 1, so either returns 1 whatever the mask found and the layer paints the whole horse — indistinguishable from a mask that is merely too generous, and how Brindlelace came out solid black.
+
+- Founder rates are budgeted across the set, not chosen per gene. Twenty genes at "a few percent each" took the share of wild horses showing something magical from a half to 0.86, because the shares compound. process/tools/founders.py derives each gene's table from its rarity tier and budgets the whole set; eighty-four of them now reach about one wild horse in fifteen. A magical breed sets its own pools and is unaffected.
+
+- Every white-only gene carries a coloured recessive twin, per the owner's rule: white dominant, colour needing two copies, and the coloured allele never giving blue eyes. Thirty-three genes qualified. A gene that paints white alongside something else does not — Corvid's black muzzle, Cosmic's hue ramp, Winged's dark ground — and where that line was drawn is written out in the checklist for the owner to disagree with.
+
+- GenotypeCatalog.size() had been claiming to saturate and never did. Every gene multiplies the catalogue and a two-allele dominant one doubles it, so it takes about sixty to pass 263; this import reached it, the plain long multiply wrapped to a negative, and get then rejected every index against it. It saturates properly now, and the plain product is capped to leave room for the masked entries so those stay reachable.
+
+- Four tests turned out to be asserting luck rather than behaviour, and were only ever green because the model was small. clearLoaded() dropped the jar's own genes and never put them back, so any test after one that cleared saw a shorter genotype code — it surfaced as an unrelated gene inheriting the wrong particle trail. ParticleGeneTest required every foal to inherit its parent's body site, when EpiDrift deliberately re-rolls a category outright once in a thousand breedings, precisely so that a change is a real event; the test held only because the RNG stream had not reached one. And the pen-sign label cap is a per-gene budget now rather than 200 characters, since the label length tracks the registry size and not the wrap logic it is there to guard.
+
+- What was refused. Nothing changes after the coat is baked, so Patina's oxidation over years, Opossum's progression with age, Goth's greying over successive sheds and Stardust's spread all became a fixed extent drawn once per horse. Laciano's homozygous blindness and deafness were not built: these genes paint and glow and do nothing else. Paint Moon was refused as a duplicate — it is real-world pinto and roan genetics, all seven of which are already first-class natural genes here, and building it would give every horse two independent tobianos that know nothing about each other.

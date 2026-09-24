@@ -1,0 +1,65 @@
+2026-09-17, later — Ordinary markings get a locus, and SW1 gives back a job
+
+    “Roadmap natural genes”, taken one at a time per the
+    owner’s instruction, starting with the biggest: the star, stripe, snip, sock and
+    stocking that a horse can have without carrying any white pattern gene. The
+    audit at the start of the day had established these did not exist, contrary to
+    expectation — no markings locus was registered, and nothing outside the four
+    allele-gated white loci drew a star.
+
+An additive locus, not an allele-free roll
+
+    Markings is a dosage locus in the
+    sooty / shade shape:
+    M2, M1 and m stacking to a score from a coronet
+    up to a broad blaze and high stockings. The alternative considered and rejected was an
+    allele-free per-horse score, which would have been cheaper and carried no genotype-code
+    slot. The locus won because a breeder can select for it — the
+    dosage inherits Mendelianly, shows in the code and prints on a paper — and because
+    an allele-free marking could only be inherited through epigenetic drift.
+
+    It runs at priority 65, before every white pattern locus (tobiano is
+    72, and the rest run to 79), so KIT,
+    MITF, PAX3 and
+    EDNRB stack their white on top of it. A sabino
+    horse with three markings copies is a horse with a blaze that its sabino then widens,
+    which is the right relationship and not two genes fighting over one face.
+
+    The face is drawn with WhitePattern.faceMarking — the same call the
+    white loci use, so a markings blaze and a sabino blaze cannot drift apart; only the
+    jag differs, small here because ordinary markings have a clean edge rather
+    than a sabino’s roaned one. Legs use EpiValue.perLeg with a threshold,
+    which is what leaves a three-socked horse one clean leg instead of dressing every horse
+    in four matching socks. The gene consumes no nextFloat():
+    every decision is stored epigenetics, so a horse marks identically every time it is drawn.
+
+SW1 stops doing two jobs
+
+    SW1 was at 55% of founders
+    purely because it was standing in for this system — a majority of horses carried a
+    splash allele so that the world would contain ordinary marked horses. It is now
+    6%, a rate its own evidence supports: the study that identified it found
+    no splash allele at all in 112 horses picked for minimal white. An ordinary star is now
+    far more likely to be markings than a splash carrier, which is the real-world situation.
+
+The golden covered every natural gene except the new one
+
+    Worth recording as a method. CoatPipelineGoldenTest’s javadoc says its
+    codes are “chosen to hit every natural gene”, and when the golden moved,
+    decomposing the diff by column showed zero of 1056 coat hashes changed
+    and all 1056 fixtures reading markings=m/m. The gene painted nothing in the
+    entire regression suite: the file had moved only in its code-string column. Six fixtures
+    were added — three dosages on a bay, one on a chestnut, one under sabino and one
+    beside splash — taking the golden to 1092 rows, 36 of which now carry a markings
+    allele. A golden that moves wholesale can still be testing nothing, and
+    the column decomposition is what tells the difference.
+
+A defect this session introduced, found the same way
+
+    The four health gene pages written earlier in the day were missing
+    gene-inheritance.js and gene-carrot.js, which every other gene
+    page carries, so their inheritance and punnett widgets were inert on the live wiki. Found
+    by reading sooty’s page as a template for the markings
+    one and noticing two script tags that the PLOD1 page’s foot had not shown. Fixed on
+    all four. The lesson is narrow and practical: copy a page template from its
+    end as well as its beginning.

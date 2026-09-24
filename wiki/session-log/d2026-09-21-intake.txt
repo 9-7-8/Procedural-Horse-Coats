@@ -1,0 +1,127 @@
+2026-09-21 — A todo batch becomes nine roadmap sections, and philosophy gains a frame
+
+    No code. A routing session. The owner filled
+    intake/To do.txt with a long batch — forty-odd mod links with a
+    question attached to each, two fully-specified systems, and an opening paragraph stating
+    what the mod is for — and asked for it on the roadmap, consolidated rather than
+    transcribed: “combine all the systems together into one header, like the
+    enchanted horse armor and the enchantable / all metals/gems horse shoes become one header
+    underneath the new accessories system.”
+
+    The file is edited on github.com, and the local copy was twelve commits stale
+
+        The session began by reporting the todo as empty, because it was — locally. The
+        owner writes it in the web editor, so git pull is part of reading it.
+        Worth knowing before concluding anything about that file.
+
+The consolidation, which was the actual brief
+
+    The accessories system is the
+    example the owner gave and the largest of the nine. Enchanted barding, enchantable shoes in
+    every metal and gem, bridles, saddle pads, boots × 4, fly masks, martingales, two
+    chest slots and the enchantments on all of them arrived as separate asks over months and
+    kept being scoped separately — and each time the same four questions came back: where
+    does a piece live when the horse has two equipment slots, how is it made, how is it
+    decorated, how is it drawn. They are now one section answering those four
+    once, and the two roadmap entries that already belonged to it —
+    #native-tack and #horse-shoes — were moved inside
+    it rather than left to drift alongside. Curios is written up the way it was
+    asked for: an optional view onto our own attachment, never a dependency, with the two things
+    to verify before promising it.
+
+    Eight more sections came out of the same batch —
+    undead horses (promoted out of “asked
+    for”: it is a design now, not an open question),
+    storage,
+    the cart and jump bench,
+    the horse menu,
+    the survey backlog,
+    config,
+    the cowboy in every village,
+    troughs and salt licks and
+    breeds from elsewhere.
+
+Each written from the code, so the next session does not pay twice
+
+    Two audits ran before a word was written, and they changed the text
+    repeatedly — which is the argument for doing it that way. What they turned up, all of
+    it now on the roadmap rather than here:
+
+    - Nothing in the mod is enchantable, and the near-miss matters:
+        compat/ModdedArmour gives every generated armour iron’s
+        enchantmentValue(), but with no enchantable component
+        that value is inert. The first enchantable piece pays for the whole path.
+
+    - Netherite is absent on purpose.
+        MaterialScan.collectTagged skips every minecraft: tag entry,
+        because vanilla’s own armours are left to BHAR. So a netherite horse armour means
+        crossing that line knowingly — a call, not a task.
+
+    - A cart’s wood is in its registry id (oak_wagon), and
+        CartWood says that id is permanent once a world uses it. Per-piece wood is
+        therefore the jumps migration done a second time, not a
+        screen — and jumps are already dyeable per half, which the ask did not
+        assume.
+
+    - The cowboy is plains-villages-only —
+        BarnPoolInjector touches one terminator pool — but
+        “he doesn’t need a house” is already built:
+        CowboyHitchHandler converts an unemployed villager standing near a hitch.
+
+    - The horse menu’s Where column exists and is inert, and
+        data/HorseWhereabouts already stores last-seen position for the unloaded
+        horses the column cannot show. Wiring those together improves the column whether or not
+        a teleport button is ever built.
+
+    - The rejected undead design had a price tag: teaching the mod about two
+        more entity types means 125 instanceof Horse checks, done
+        in handlers rather than in a retargetable mixin. Making undeath a gene avoids all of it.
+
+The opening paragraph was philosophy, not roadmap
+
+    It stated eight things about what the mod is for, and six were absent from
+    the philosophy page outright — a page with eight
+    good rules about the genetics and no answer to “does this belong in the mod at
+    all”, which is the first question a design call asks. The owner’s instruction was
+    to rewrite the page to agree with it, so there is now an unnumbered
+    frame above the eight: one major system with a
+    two-to-three-level budget for everything else, horses-only, vanilla stays intact,
+    carrot-not-stick as a mod-wide rule rather
+    than a care-layer one, utility not
+    decoration with breeding as the sole exception, and
+    the SWEM gap stated as design rather than as
+    compatibility.
+
+    The numbering was deliberately left alone. Seven wiki pages and four Java
+    files cite Philosophy §N in running prose —
+    GameteBias, ArcaneStock and HorsePrices among them
+    — where a renumber breaks silently and no checker can see it. Every heading gained an
+    id instead, so the page can be deep-linked at all; roadmap.html
+    had been writing “Philosophy §8” in prose because there was no anchor to
+    point at. Recorded as
+    a trap between pages.
+
+Two contradictions, handled differently on purpose
+
+    - “Tack gets no stats” is
+        reversed (owner). The system the batch describes is tack with real effects,
+        and the old call was argued from “no outcome is better”. That argument
+        was not wrong, it was misapplied: no-gene-is-better is a rule about the genetic
+        model, where a value judgement tells a player what to want, and a saddle that helps you
+        is not a judgement about a horse. The entry now records the reversal and the replacement
+        reasoning rather than being edited to look like it always said this.
+
+    - The undead genes contradict
+        “a concept is a breed, not a
+        gene” — which used zombie as its worked example. The
+        planned zombie locus bundles double health, a speed penalty, a carnivorous diet,
+        aggression and its own taming rule: the “indivisible lump” that rule exists
+        to prevent. This one was not resolved, because the undead case has two good
+        answers — undeath is arguably one trait with many consequences, the way a lethal
+        is, and the design wants an undead horse of any breed, which a breed cannot
+        express. The example changed to war horse; the question is
+        an open call, flagged from both the
+        philosophy note and the roadmap section, and it decides the shape of both genes.
+
+    Nothing was built, so nothing is newly unverified and no gap opened or closed. The intake
+    queue is empty again, down to its one permanent line.

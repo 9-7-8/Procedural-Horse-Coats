@@ -1,0 +1,217 @@
+2026-09-04
+
+Built 2026-09-04, NOT yet play-tested: the particle locus - forty alleles on one gene.
+
+ParticleGene (horsegenetics.particle, priority 150), the largest gene in the mod by a wide margin: 40 variant alleles + n, 861 combinations, 87 outcomes. 39 built-in genes, 41 in-game. A horse trails a particle as it moves - flames, souls, snow, hearts, portal motes. Machinery is wiki/gene-particle.html; the shape of it:
+
+- One locus, not forty genes, and that is the whole design. Forty independent two-allele genes would let a horse carry all forty, so "which of these does this horse trail" stops having an answer and every serious line converges on a horse emitting everything. One locus says the opposite structurally: a horse has two copies of the chromosome, so it shows at most two, ever, and a third is not rare but impossible. The KitGene argument at forty times the scale.
+
+- Rank, and the copy a horse is hiding. Every allele carries a rank and the alleles are declared in rank order - load-bearing rather than tidy, because AllelePair canonicalizes on Allele.order(), so declaring them this way is what puts the shown copy in slot 0 and the hidden one in slot 1. Two non-codominant alleles meet and the lower rank wins; the loser is carried silently and passed on intact, indistinguishable from a wild type. That is what makes a locus this wide breedable rather than merely large.
+
+- Codominance is by family - one group string per allele, and two different alleles of one group both show at once. Nine families cover 29 of the 40 alleles and produce the 46 double outcomes; the other 11 never stack. The flames and the smokes are one family of eight, not two of four (any -flm stacks with any -smk), which is 28 of the 46 by itself - a unit test pins it, because getting that grouping wrong would quietly delete most of the locus. Two tokens that look related and are not: Dstrn (enchanting glyphs) is no Dst, Lmstr (totem sparks) is no -str.
+
+- Everything visible about it is epigenetic. The allele names a particle and nothing else; colour, second colour, body site, count and one spare data number are drawn per allele copy, in that fixed order, every time - including for particles that use none of them, because the draw order is the contract and a conditional draw silently rewrites every horse in every save. So two Rflm/n horses are not the same horse, and each half of a codominant pair is independent: red flames off the front hooves and blue smoke off the tail is one horse nobody designed. A foal that inherits the copy inherits the exact number.
+
+- New machinery: common/genetics/EpigeneticAbilityContribution - the exact twin of EpigeneticTraitContribution, one layer along. AbilityContribution is a pure function of the genotype, which is right wherever the alleles fix the behaviour (two Hlr/Hlr horses heal identically, and should); this locus is the case it cannot express. GeneEpigenetics moved from common/trait/ to common/genetics/ so both sides can use it without the two packages depending on each other, and gained the forGene(gene, genotype, epigenome) factory HorseTraits used to keep private. HorseAbilities.activeFor gained an Epigenome overload; the translator's per-horse cache is now keyed on both code strings, or it would hand one horse another horse's colours.
+
+- The emitter verb grew, and all of it is usable from a gene file today - which is the property the shared vocabulary was chosen for. New: color2, count (1-16), data (a normalised [0,1) standing in for a shriek's delay or a sculk charge's roll), and five body sites beside the four single-point anchors - spine, hooves, front_hooves, back_hooves, tail. A multi-point site is re-picked per particle, so a firing of four off hooves really does come off different hooves. Positions come from the live bounding box and yaw, which already has Attributes.SCALE applied, so a magically enormous horse trails from its own hooves.
+
+- particleFor is a registry lookup now, not a name table. Only the ~8 parameterised particles are written out; everything else is BuiltInRegistries.PARTICLE_TYPE + instanceof SimpleParticleType. Forty case labels would have been forty chances to mistype a field name that does not match its own id (TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS is registered as trial_spawner_detection_ominous), and it would go stale the next time the game adds a particle. The colour-carrying options want ARGB and read the alpha (ColorParticleOption.getAlpha), so a bare 0xRRGGBB is fully transparent - DustParticleOptions is the exception and takes plain RGB, which is why the two are written differently.
+
+- The source list was Bedrock particle names. Ten have no Java equivalent and carry a substitute (magnesium_salts -> white_ash, small_soul_fire_flame -> copper_fire_flame, sculk_sensor_redstone -> vibration, oozing_emitter -> item_slime, warden_dig -> block(sculk), crop_growth_emitter -> happy_villager, evoker_spell -> instant_effect, plus four straight renames). Two were cut rather than substituted - Bigflm and Cndlflm both land on a particle another allele already has, and Java flames are SimpleParticleTypes carrying neither colour nor scale, so the pairs would have been indistinguishable. Forty alleles, not forty-two.
+
+- It paints nothing. All 87 outcomes are wild types, so affectsCoat() is false, the locus is out of the texture key, and GenotypeCatalog collapses 861 combinations to one entry - size() is unchanged at 462 422 019. Forty alleles for no catalogue growth at all.
+
+- GenotypeCatalog.totalGenotypes() is a BigInteger now, and the old number was already wrong. The particle locus pushed the product past 2^63 - and checking that revealed the long had already wrapped before this session: the documented 3 028 898 126 035 238 912 was nonsense, and the true pre-particle figure was 94 874 633 669 214 259 200 000. It is now 81 687 059 589 193 477 171 200 000. size() still saturates at Integer.MAX_VALUE, which is right for an index bound callers loop over; this is a statistic nothing indexes, so the honest answer costs nothing. No production caller - the entrance sign that used it is long gone.
+
+- Founder frequency is 0.1% per variant, the same for all forty, because no particle is the ordinary one. Forty of them puts the variant share at 4%, so about 7.7% of wild horses trail something while any named particle is roughly 1 in 500 - and a codominant double is about 1 in 10 000, i.e. you cannot catch one. Same rule as the health loci, pointed at something worth having.
+
+- New ParticleGeneTest (21 tests). :common:test 321 green, :neoforge-26.1.2:build green, creator parity 3 832 checks / 48 cases, runServer boots clean (41 segments, loaded 2 data-driven gene(s), zero errors). coat-golden.txt regenerated - every row moved, because the gene set moved and every derived epigenetic seed moved with its position.
+
+- Old saves will not parse. The genotype code went 40 -> 41 segments. Dev only; start a fresh world.
+
+- Deliberately not built: any coat marking for the locus (it does not need one
+
+- the gene is the visible thing, which is the answer to the complaint milk and verdant attract); per-allele founder frequencies (no particle is more ordinary than another); an epigenetic emission rate (density is already the count draw, and a second density knob would fight it).
+
+- Docs: wiki/gene-particle.html (new), wiki/nav.js, wiki/gene-effects.html (the emitter's new fields, the anchor table, which particles read what), wiki/genetics-model.html, wiki/api-reference.html, wiki/modding.html, index.html, README.md. Checklist: wiki/verification.html §0c.
+
+Built 2026-09-04, NOT yet play-tested: seven magical utility genes, designed as a set.
+
+The point of them is combination - broad epigenetic ranges and independent loci, so that a ten-times healer with a striped mane that spreads moss is a horse nobody wrote a line of code for. 38 built-in genes, 40 in-game at the time (39 / 41 now, with the particle locus). Machinery is wiki/gene-milk.html and its six siblings; the shape of it:
+
+- MilkGene (horsegenetics.milk, priority 130, Watr/Lava/n) - a bucket gets milk from a grown mare, water from any Watr/Watr horse, lava from any Lava/Lava one. Both variants are recessive to the wild type and to each other, so it is the cleanest double-carrier locus in the mod: you cannot catch a lava horse, only breed one. Watr/Lava is an embryonic lethal - the same path as MET (canOccur false, the breeding handler reads the drawn genotype and cancels), but deliberately not a HealthContribution: health.mode governs disorders, and turning them off must not quietly make a water/lava horse possible.
+
+- MagicSizeGene (horsegenetics.body_size, 140, Big/Small/n) - codominant, and revised 2026-09-04 after the first draft. Every allele copy carries a percentage and both copies contribute: the size is one plus their sum, Big positive and Small negative. Six combinations, six outcomes - the one locus in the mod where every combination genuinely differs, which is what codominance is. Big/Small lands near 1.0 rather than exactly on it, because the two percentages are independent draws; forcing an exact zero would need a special case contradicting "the percentages add", and the residual usefully says "this horse carries both extremes".
+
+- The distribution is normal, mean 10% and sigma 7% per copy, floored at 1% so a Big allele can never come out making a horse smaller. That shape is load-bearing: 80% of wild horses carry a copy, so if one copy were dramatic then dramatic would be the baseline and nothing would read as unusual. Instead the population has a quiet continuous spread you notice across a paddock rather than on any one horse.
+
+- Only heterozygotes are born wild - the founder table is written out (Big/n 40%, Small/n 40%, n/n 20%) rather than derived from Hardy-Weinberg, because random mating is exactly what it is not. Every doubled horse in the world is one somebody bred: the health loci's rule, pointed at something worth having.
+
+- It is the mod's first EpigeneticTraitContribution, and the first caller of the new GeneEpigenetics.copy(slot) - a codominant gene cannot ask for "the copy that expresses", which would count one allele twice and the other not at all.
+
+- Rng.nextGaussian() is a new default method: Irwin-Hall (twelve uniforms minus six) rather than Box-Muller, for two reasons that both matter here. Its tails are bounded at +/-6 sigma, so a trait deciding how big a horse is has a hard bound on absurdity and the guard clamps never fire; and all-0.5 inputs give exactly 0, so MidpointRng lands on the mean (Box-Muller would hand it 1.18 sigma below it).
+
+- The practical ceiling is now about 2.04x (two copies at +6 sigma), not the first draft's 10x - and it takes two good copies to pass even the natural MAX_SCALE, which is the point of making it codominant. The magical bounds stay as guards rather than as the design.
+
+- ManeColorGene / TailColorGene (112 / 114, Mnsld/Mnstrp/n and Tlsld/Tlstrp/n, sharing HairColorGene) - solid or banded hair in any colour, and the heterozygote is both at once in two different colours. That is the first thing in the mod that needs both allele copies' seeds rather than the expressing one, hence the new CoatBuildContext.epigeneticsForCopy(key, slot); asking for the expressed copy would paint the stripes in the base colour. Two loci and not one, so a red mane and a blue tail is breedable.
+
+- LightGene (160, Lthf/Ltmn/Lteye/n) - gold hooves / mane / eyes, each glowing, plus torch-strength world light. Ten combinations, seven outcomes, genuinely codominant: three alleles each dominant to the wild type and to none of each other, which no dominance ranking can express and the combination table says in one row each. Any variant copy lights the horse; the alleles decide only where it shows.
+
+- HealerGene (116, Hlr/n, recessive) - players within 3 blocks mend, and a red stripe runs down the centre of the mane so a player can see it. The stripe's opacity is the gene's one epigenetic value; it says nothing about the healing, deliberately - a mark that encoded a stat would make a horse's value legible from a screenshot.
+
+- VerdantGene (180, mush/moss/grass/n) - spreads mycelium, moss or grass from the hooves. Every variant needs two of itself; mush/moss is not half of each, it is nothing. A different shape from milk's mutually recessive pair, whose clash is lethal where this one is merely inert.
+
+- The three that paint nothing (milk, size, verdant) reuse the non-coat trick: every outcome is a wildType, so affectsCoat() is false, they are out of the texture key, and the gallery collapses each to one entry. Seven genes for four genes' worth of catalogue growth. GenotypeCatalog.size() is now 462 422 019 and totalGenotypes() was 94 874 633 669 214 259 200 000 at this point. (The figure originally recorded here, 3 028 898 126 035 238 912, was a wrapped long - the overflow was found and fixed when the particle locus landed. See that entry.)
+
+- New machinery, four pieces, all in common/:
+
+- trait/EpigeneticTraitContribution + HorseTraits.resolve(genotype, epigenome, healthGenetics) - a trait whose magnitude is on the allele copy. Determinism is untouched: the Rng is a SeededRng on the expressing copy's stored, heritable seed, exactly as the coat's is. resolve(genotype) with no epigenome now answers with the midpoint (MidpointRng, new), which is the honest answer to a question about a genotype rather than a horse.
+
+- TraitBuilder.multiplyScaleUnclamped - applied after the natural MIN_SCALE/MAX_SCALE clamp and bounded only by the new MAGICAL_MIN_SCALE/MAGICAL_MAX_SCALE (0.1-10). The exact counterpart of the coat's uncapped phase-3 accumulator, and it composes right: a magically enormous pony is still smaller than a magically enormous draught horse.
+
+- coat/pattern/CoatOverlay + CoatOverlayContribution - a fourth coat phase, after the composite and after redrawEyes. It exists for exactly two things the earlier phases structurally cannot do: colouring the eyes (phase 5 restores them from the template, so a gene wanting them has to run later) and carrying an emissive texel mask ("this glows" is not a colour, so neither accumulator has a channel for it). CoatTextureComposer.bake returns Baked(argb, emissive); compose is the pixels alone, so the golden test and every existing caller were untouched.
+
+- genetics/AbilityContribution - a built-in gene can now grant game behaviour, using the same GeneAbility vocabulary a data-driven gene's effects block parses into. SpecAbilities was renamed HorseAbilities because it stopped being about the spec path. The alternative - a second vocabulary for built-ins - would have meant writing the translator twice and would have let a behaviour exist for Java genes and not for gene files.
+
+- Two new effect verbs, both written for a built-in gene and both usable from JSON today, which is the property the shared vocabulary was chosen for: healing (target / radius / amount / interval / max_targets - the cap wiki/gene-effects.html requires of any radius effect) and spread (cover / radius / chance / interval). spread's cover is a vocabulary word, not a block id: what "spreading moss" eats is a family of conversions plus a rule, and that judgement needs the block registry, so it lives in the translator.
+
+- The emissive path is now texel-level. getOrCreateEmissive folds the bake's own mask together with a spec Glow's part list, and the renderer asks for it every frame (a NO_GLOW sentinel is cached, because computeIfAbsent will not store a null and would recompose the coat per frame for every ordinary horse). That is what lets light glow four hooves and two eyes, neither of which is a Part.
+
+- Gold eyes keep a pupil. CoatOverlay.shadeToward scales the target colour by the texel's own luma before blending, so the sclera goes gold and the pupil stays black; a flat lerp turned the whole eye into one gold rectangle.
+
+- The size gene broke the walking animation, and the fix is one line. Vanilla advances the leg-swing phase (walkAnimationPos) from the world distance the entity moved and nothing else; the only size compensation anywhere in it is a hard-coded isBaby() ? 3.0F : 1.0F. Nothing consults Attributes.SCALE, because before this mod nothing changed it - so a scaled horse walked with its feet sliding, worse the bigger it got, and mirrored on a small one. GeneticHorseRenderer.stretchGaitToSize divides the phase by renderState.scale after super.extractRenderState, which makes a bigger horse take proportionally longer, slower strides. Amplitude (walkAnimationSpeed) is deliberately untouched - it is a 0-1 multiplier on an angle, and an angle already scales with the model. No-op at scale 1.
+
+- The spawn egg previews size. CustomHorseSpawnScreen resolves the genome's Traits and scales the preview model by it, so Reroll epi. visibly resizes the horse, with a size 1.14x readout under the panel whenever it is not ordinary size. Framing is deliberately not refitted to the result - fitting a big horse back into the panel would cancel exactly the thing being previewed - so the model is capped at 2.5x and the readout says (preview capped) past that. The number never caps.
+
+- Founder tables use a LinkedHashMap, baseline last - Map.of iteration order is salted per JVM start, so a multi-allele table built from one would have made a world's founders unreproducible. Caught by GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder.
+
+- coat-golden.txt regenerated (75 cases now, up from 57): every row moved, because the gene set moved and every derived epigenetic seed moved with it. New MagicalUtilityGenesTest (32 tests). :common:test 300 green, :neoforge-26.1.2:build green, creator parity 3 832 checks / 48 cases, runServer boots clean (40 segments, loaded 2 data-driven gene(s)).
+
+- Old saves will not parse. The genotype code went 33 -> 40 segments. Dev only; start a fresh world.
+
+- Deliberately not built: a coat marking for milk or verdant (both are invisible until you put a bucket under the horse or watch the floor - logged as a gap, and it sits awkwardly beside healer, which draws a stripe precisely so you can see what it does); an epigenetic colour for light (vanilla light has no hue, so a blue-glowing horse would still cast white light); any stat change from the size locus (a ten-times horse is a spectacle, not a better horse); milking's §7 rules - tamed, full health, once a day, the stallion kick - four of which are limits of the effect vocabulary rather than of milk, so they are logged in wiki/roadmap.html rather than special-cased.
+
+- Docs: seven new wiki/gene-*.html, wiki/nav.js, wiki/gene-effects.html (the two verbs + the "both kinds of gene" note), wiki/pipeline.html (phase 6), wiki/horse-body.html (the epigenetic twin + the two-stage scale), wiki/genetics-model.html, wiki/api-reference.html, wiki/modding.html (walkthrough 4 + both-copies + epigenetic traits), wiki/horse-traits.html, wiki/roadmap.html §7, index.html. Checklist: wiki/verification.html §0a.
+
+Built 2026-09-04, NOT yet play-tested: the horse dimension goes back to random pens
+
+(roadmap §8, done). The genotype gallery is retired before anyone ever walked it.
+
+- common/genetics/ShowcaseGenotypes (new, pure, 6 tests) is the draw: an ordinary Genotype.random founder roll with a floor under it. Always at least one natural coat gene expressing beyond extension and agouti; with MAGICAL_CHANCE = 0.5, a magical one too. A draw that already clears the floor is left exactly as it fell.
+
+- Two rules keep it honest. Forcing only ever keeps a combination that actually expresses in this genotype (Genotype.shows), so a chestnut is never handed an agouti it will not paint. And a combination that masks neither counts toward the floor nor is ever forced - a quarter of all founders carry the diagnostic test gene, which paints flat over everything, so counting it would quietly exempt a quarter of the corridor.
+
+- The one honest gap: the floor guarantees a gene expresses, not that it is perceptible. Mushroom on a black horse is a real expression that looks like nothing, and nothing in the model can answer "would a player see this". Accepted rather than special-cased; flagged in wiki/verification.html.
+
+- Genotype.with(AllelePair) is the founder-only setter it needed - one locus replaced, the shape of withSex, which now delegates to it.
+
+- The corridor is a fixed 2 000 pens (DebugPenManager.PEN_COUNT, ~7 000 blocks), an arbitrary number rather than one derived from the genotype space - which is the whole point. MAX_GALLERY_PENS, galleryPens() and the catalogue tally sign are gone; the entrance sign now reads Horse Pens / 2,000 pens / random genome / mare + stallion. PLOT_SPACING_X drops from 2 526 to 8 007.
+
+- Two correctness fixes the randomness forced. buildPen now clears untamed horses in the pen before stocking (a pen is built once per plot, so anything standing there belongs to a previous occupant of that recycled X slot and has nothing to do with the sign just written); and plotBox covers the whole X slot rather than stopping at highestIndex, or a slot where a previous visitor walked further would accumulate horses forever. The "leaving clears entities, not blocks" claim still holds, for a new reason - see the horse-dimension section.
+
+- GenotypeCatalog is untouched and still used, by the tests and by whatever punnett display gets built - it just stopped driving the dimension. size() is still 2 064 387. Known gap #12 is closed by this rather than by a cap.
+
+- The catalogue's per-entry sign-fits test stays; ShowcaseGenotypesTest adds the property-test twin over random draws the roadmap asked for (a sign may overflow its last line, it may never drop a gene).
+
+- :common:test 268 green, :neoforge-26.1.2:build green. coat-golden.txt untouched - nothing about the pipeline or any gene moved.
+
+Built 2026-09-04, NOT yet play-tested: the custom horse spawn egg's editor was rebuilt
+
+(roadmap §9, most of what was left). client/ CustomHorseSpawnScreen is now gene list left / live 3D horse centre / controls right, and the horse that spawns is the horse you were looking at.
+
+- Every registered gene is a row, alphabetically by Gene.name() - "ACAN, Agouti, B4GALT7, Champagne, EDNRB (frame overo), KIT (white spotting)..." rather than horsegenetics.ednrb in registry order. The sex locus is excluded - the Mare/Stallion button owns it. The old modal + Add gene picker is gone; the list is the picker.
+
+- The list is a catalogue you add from. A gene starts off the horse and draws as a plain name; clicking the row adds it, and only then does it grow two allele buttons and an x. Every gene carrying two baseline buttons from the start was a wall of N/N that said nothing - a horse carries every locus whether or not you have touched it, so what the list is for is picking the handful you want to see. Row.added is held explicitly, not inferred from the alleles, so a gene you added and cycled back to baseline stays on the horse.
+
+- A gene is added homozygous for the allele that does something - the first allele that is not defaultAllele(), doubled. If a horse cannot carry that pair (KIT's four nonviable W homozygotes, MET's met/met) the next one it can, and failing all of them one copy against the baseline. Either copy can then be cycled anywhere, baseline included.
+
+- A row that expresses says so - the name turns green and the Expression.name() prints under it (no effect otherwise). That is one more consumer for the expression prose (known gap #10).
+
+- A live 3D preview in the middle, reusing FamilyTreeScreen's technique exactly: a throwaway client-only Horse, the CoatData injected straight onto GeneticHorseRenderState, never through ClientCoatCache. The coat is rebuilt only when the genotype-plus-epigenome key moves, and the texture factory caches by textureKey() on top of that, so editing is cheap.
+
+- Reroll epi. is the point of the change. The screen holds a real Epigenome and previews with it, so re-rolling flips through the bay leg heights / grey dapples / splash edges one genotype can produce - the first surface anywhere that makes per-allele epigenetics visible. It is then sent with the genotype (SpawnCustomHorsePayload gained epigenomeCode) and written straight in via the new HorseRecords.newFounder(horse, rng, Genome). The server used to roll its own, which made the preview a suggestion rather than a preview.
+
+- Copy code / Paste code round-trip the genotype code through the clipboard (roadmap §9's "turns every bug report into something reproducible"). Genotype only - the epigenome has its own button, and a code you can paste into chat wants to stay one line. A pasted locus sitting at its baseline is not marked added, or a paste would come back as 30-odd rows of N/N. Plus a Clear genes.
+
+- Creative-only, re-checked on the server. handleSpawnCustomHorse now requires getAbilities().instabuild and that the sender is holding the egg; the payload spawns an arbitrary entity with an arbitrary genome, so the client-side gate was worth nothing on its own. The survival egg-consumption path is gone with it - it can't be reached any more.
+
+- Still not built (the remainder of roadmap §9): the per-allele epigenetics editor proper - each copy's priority and seed shown individually with a type-it-in field. At 30-odd genes that is 60 fields, so it wants a per-gene expander rather than a flat list.
+
+Built 2026-09-04, NOT yet play-tested: the trait / size / health system, and the death of the random stat roll (roadmap Tier 2 §6.1, Tier 3 §7, §4.3, §4.4, §6.2-6.4).
+
+Thirteen new genes, a new common/trait/ package, and the removal of the last non-genetic randomness on a horse. 31 built-in genes, 33 in-game. Machinery is wiki/horse-body.html; the shape of it:
+
+- HorseStats is deleted. A foal's speed and health used to be a uniform draw from [0.75*min(parents), 1.5*max(parents)] - an uncapped random walk with no genetics in it, where two full siblings could differ by a factor of two and "breeding for speed" was breeding for luck. HorseRecord lost its speed and health fields (and hasStats / withStats / ceilSpeed / ceilHealth), exactly as it lost sex: a stored derived value can only go stale against the alleles beside it. HorseRecord.traits() resolves on demand. StoredGenome and HorseRecordCodecs lost the two fields too.
+
+- common/trait/ - HorseTraits.resolve(genotype[, healthGenetics]) walks Genes.codeOrder() once, hands every TraitContribution a TraitBuilder, and returns a Traits(speed, health, jump, scale, conditions). Pure: no Rng, no epigenetics, no entity. Baselines 0.1875 / 22.0 / 0.5 / 1.0, a little under vanilla's midpoints so the variant alleles are what push a horse up. MIN_HEALTH = 1.0 - a genetic health value must never resolve to zero.
+
+- One capability interface, not the roadmap's four. TraitContribution (+ a HealthContribution marker) replaced StatContribution / BodyContribution / ViabilityRule / ConditionRule: they all run in the same walk, and the genes that need any of them mostly need several at once. Viability is derived from the worst Condition.severity(), so a gene cannot declare a horse lethal without saying what killed it.
+
+- Additions are applied before multipliers, so trait resolution is order-independent by construction and gene priority buys nothing here. Multipliers exist only for scale, because dwarfism is proportional - a dwarf pony is smaller than either alone.
+
+- All thirteen genes paint nothing: every expression is wildType, which now explicitly means "changes nothing about the coat". So affectsCoat() is false for all of them, they are out of the texture key, and GenotypeCatalog collapses each locus to one entry - size() is unchanged at 2 064 387, while totalGenotypes() went to 292 822 943 423 500 800. Thirteen genes for zero gallery growth; the sex locus's trick, reused.
+
+- Priority sub-band 80-99 is now "non-coat": mstn 80, pdk4 81, ckm 82, ryr2 83, lcorl 84, hmga2 85, acan 86, b4galt7 87, plod1 88, rapgef5 89, st14 90, shox 91, met 92. They sort after every painting gene and before the magical band.
+
+- Performance / size (6): MstnGene (codominant; each C buys 0.020 speed and costs 2 health - with no stamina resource, endurance is paid in hearts), Pdk4Gene, CkmGene (speed), Ryr2Gene (jump strength is tracked for the first time), LcorlGene + Hmga2Gene (size).
+
+- Attributes.SCALE answers the roadmap's flagged-unverified question. It exists in 26.1.2, is on LivingEntity.createLivingAttributes (so every living entity has it), and vanilla scales the model and the hitbox from it. No renderer work, no hitbox work - the whole size system is one attribute write. JUMP_STRENGTH is there too.
+
+- Health (7): AcanGene (5 alleles, 15 combinations; affected is "no working copy left", so D1/D4 is affected - the check is a predicate on the pair, not homozygous(), which is the clearest argument yet for the combination table), B4galt7Gene (the one survivable disorder), Plod1Gene, Rapgef5Gene, St14Gene, ShoxGene (lethal at birth) and MetGene (lethal at conception, canOccur = false). Six of them extend a new RecessiveDisorderGene base - two alleles, three combinations, only the double-variant does anything.
+
+- Four colour genes gained a disorder: SilverGene Z/Z -> MCOA (impairing, -2 health), EdnrbGene O/O -> overo lethal white, which now actually kills (closing the "the death is not modelled" gap), and MitfGene / Pax3Gene homozygotes -> deafness, shared as one condition with two causes (TraitBuilder de-dups on id) and INFORMATIONAL, because the mod has no hearing to take away.
+
+- No founder is ever affected - verified over 200 000 draws. Every health founder table lists only the clear horse and the carrier: a wild-caught horse is an adult that survived, so the only way to see a disorder is to breed two carriers. Carrier rates 1.4%-4%.
+
+- server/LethalFoalHandler - born, then dies. Stores nothing: being lethal is a property of the genotype, so it re-reads it each second and a foal that logs out mid-death still dies on the way back in. Damage is 28% of the foal's own max health, floor 2, once a second, which out-damages HorseCareHandler's regen at any health value (roadmap §7's open item, closed). Guards: babies only (an adult spawned by the egg is a debug tool for looking at a coat), not in the horse dimension, and only on health.mode = FULL. New datapack damage type horsegenetics:genetic_defect + a lang key.
+
+- The conception lethal is one branch: applyBredFoal now returns boolean, onBabySpawn cancels the event on false, and StallionSeedJarHandler discards the foal (spending the jar and the mare's love, as a real pairing would). Genotype.breedWith is untouched, so the odds stay the ordinary one-in-four.
+
+- ServerConfig (the mod's first) - health.mode = FULL (default) / NO_DEATHS / OFF. The genes are registered and inherited identically in all three; the setting only governs whether what a horse carries is allowed to affect it. OFF is resolve(g, false), which skips every HealthContribution.
+
+- Surfaces read it. The info panel shows speed / health / jump / size (as a word) plus a condition list, reading speed and health off the live entity attributes (authoritative and synced) and the conditions off the genotype; the paper dump prints all four plus every condition with its description. That partly closes old gap #10 - the expression/condition prose is finally read by something.
+
+- coat-golden.txt regenerated: 312 of 342 rows byte-identical. Only the 30 rows involving pink hair / magic zebra / test moved, because those three genes shifted position in codeOrder() and their derived epigenetic seeds moved with them. Nothing else about any coat changed - the pipeline was not touched. New HorseTraitsTest (10) + HealthGenesTest (8); :common:test 262 green, :neoforge-26.1.2:build green, runServer boots clean (33 segments, loaded 2 data-driven gene(s), the server config file generates correctly).
+
+- Old saves will not parse. The genotype code went 20 -> 33 segments. Dev only; start a fresh world.
+
+- Deliberately not built: DMRT3 (gait - needs animation work); per-part scaling for the two dwarfisms (SCALE is one number for the whole entity); ST14's near-hairless coat (phase 1 only removes pigment, and a de-pigmented mane reads as a white mane); environmental noise on the stats (deliberately zero - see the gaps list). (CSNB shipped 2026-09-06 with the leopard complex.)
+
+- Docs: wiki/horse-body.html (new, the machinery), thirteen new wiki/gene-*.html, wiki/nav.js, wiki/breeding.html, wiki/genetics-model.html, wiki/api-reference.html, wiki/modding.html (walkthrough 3), wiki/roadmap.html §§4.3/4.4/6/7, wiki/gene-silver.html, gene-ednrb.html, gene-mitf.html, gene-pax3.html, index.html, README.md. Checklist: wiki/verification.html §0b.
+
+Built and owner-verified in-game 2026-09-04: the white-pattern rewrite - four real loci replace four made-up genes.
+
+WhiteGene, SplashGene, SabinoGene and FrameGene are deleted. In their place, named for the genes they model: KitGene (horsegenetics.kit, priority 76, eight alleles), MitfGene (horsegenetics.mitf, 78, four), Pax3Gene (horsegenetics.pax3, 79, three) and EdnrbGene (horsegenetics.ednrb, 74, two). Still 18 built-in genes, 20 in-game. The rule the owner set: only alleles at exactly the same locus share a gene - so tobiano (an inversion near KIT, not a KIT variant) and roan (region-mapped, causal change unresolved) stay their own genes and compose freely with everything. Landing with it:
+
+- KIT absorbs dominant white and sabino, which were two alleles of one real gene modelled as two independent genes - so a horse could be homozygous sabino and dominant white, a genotype that cannot exist because a horse has two copies of chromosome 3 and no more. Alleles W22/W13/W10/W5/W23/SB1/W20/N; 36 combinations, 32 carryable, 8 outcomes. W20 is the booster the source describes (subtle alone, adds white beside another variant); SB1 is the one documented viable dose series; the rest are "dominant with variable expression". Only a table says all three at once.
+
+- Splash splits in two, because it really is two genes (MITF and PAX3). That is not bookkeeping: a horse carrying one copy at each is markedly whiter than either alone - a genotype one gene cannot express at all, since one gene has two slots. SW6-SW8 are deliberately folded into SW5: the source describes all four in word-for-word identical terms, so four alleles would be four indistinguishable rows.
+
+- EDNRB gains lethal-white. O/O is Overo Lethal White Syndrome, and the model now distinguishes two kinds of lethal. An embryonic lethal (KIT's four nonviable W homozygotes, SW3/SW3, SW4/SW4) gets canOccur = false - no pen, not counted, not a founder. O/O is born, so it occurs, has its own masking all-white outcome and gets a pen; it is simply absent from the founder table, because a founder is an adult horse. The death is not modelled (no health system) - the foal lives. Deliberate; wiki/roadmap.html#health-genes.
+
+- Two shared painters, coat/pattern/WhitePattern - sabino (the KIT shape: ragged margins growing inward from legs, belly, face, then torn body patches) and splash (the MITF/PAX3 shape: a hard, wobbled waterline rising up the horse). Each takes one strength in [0,1]; each outcome picks a number on that ramp. One painter per family, not per allele - the difference between two alleles at one locus is overwhelmingly a difference of degree, and eight bespoke painters would be the same painter eight times pretending the differences were principled.
+
+- "White finds white": both painters read the coat they are handed and raise their own strength by how much of it is already de-pigmented (splash 0.55, sabino 0.35). This is load-bearing, not a flourish. Painted blindly, SW1/N + SW2/N measured 44% white against 45% and 42% alone - two waterlines at the same height are one waterline, and the whole point of the split would have been invisible. With it: 70%. It is also what makes W20 a booster and what makes frame-plus-splash louder than either. One line per painter, no interaction table anywhere.
+
+- Two rendering bugs caught in the sample bakes and fixed before landing. KIT body white thresholded a high-frequency fractal and came out salt-and-pepper - a perfectly good roan and completely wrong for sabino; it now uses a low-frequency PatchNoise.field plus a fine jag on the threshold, the same recipe frame uses. And the splash waterline's one-pixel fade painted a gold fringe along the whole horse (a half-scaled black texel samples the LUT's warm diagonal), so the cut is now hard and the irregularity comes from wobbling where the line falls.
+
+- FounderTable.hardyWeinberg(Map<Allele,Double>, Predicate<AllelePair>) - the multi-allele generalisation. KIT has 36 combinations and four homozygous lethals; hand-tabulating that is not transparency, it is an invitation to a typo nobody would ever see. Excluded combinations are dropped and the rest rescaled - which is the biology: a lethal is absent from the adult population you observe.
+
+- GenotypeCatalog is now computed on demand, not materialised. size() is arithmetic; get(i) reads an odometer over each gene's non-masking distinct pairs, with the one entry per masking combination appended after them (so masked pens moved from mid-corridor to the tail). It had to change: the catalogue is 2 064 387 pens and an eager List<Genotype> that size is hundreds of megabytes. totalGenotypes() is 55 099 802 880.
+
+- The gallery was capped. 2M pens is a ~7.2M-block corridor - a quarter of the way to the world border, leaving room for four plots in the dimension. MAX_GALLERY_PENS = 20 000 held it for one session. Superseded 2026-09-04: the corridor is random pens now and there is no cap, no catalogue tally sign and no MAX_GALLERY_PENS.
+
+- CoatRegions.whitenLowerLeg / whitenBlaze now have no callers. Both cut hard, which is why every splash sock used to end in a perfect ring - that old known gap is gone with the gene rather than fixed. Kept as helpers, with the caveat written into their javadoc.
+
+- Measured coverage through the real pipeline (three seeds): KIT 5.7 / 11 / 15 / 25 / 25 / 73 / 94 / 100 %; MITF 45 / 72 / 91; PAX3 42 / 70; EDNRB 42 / 100. New WhitePatternGenesTest (12 tests) pins that each table is total, that every declared outcome is reachable, that the ladder is monotone at every step, that the viability rules hold, and that the two splash loci and W20 actually stack. Also closes old known gap #12: CoatPipelineGoldenTest.override now throws on an unknown gene instead of silently leaving the segment alone, and the five stale cream / pearl cases were re-pointed at matp.
+
+- coat-golden.txt regenerated (57 cases now, up from 42); every coat changed - the gene set moved, so every founder draw and every derived epigenetic seed moved with it. :common:test 248 green, :neoforge-26.1.2:build green, creator parity 3 832 checks / 48 cases, runServer boots clean (20 segments, loaded 2 data-driven gene(s)).
+
+- Old saves will not parse their white-pattern loci. Dev only; start a fresh world. Summon tokens moved: kit=SB1/N, mitf=SW1/N, pax3=SW2/N, ednrb=O/N.
+
+- Deliberately not built: the leopard complex (LP / TRPM1) and PATN1 - the appaloosa family. It is a new pattern family (leopard, blanket, snowcap, varnish roan, plus white sclera / striped hooves / mottled skin), not an overhaul of the white markings that exist: it needs a spot field and a blanket mask, neither of which WhitePattern's two shapes cover, and PATN1 would be the model's first modifier gene. Logged in wiki/roadmap.html#natural-genes.
+
+- Owner-verified in-game 2026-09-04, as a general confirmation that it all renders correctly rather than an item-by-item walk of the checklist. The one thing left in wiki/verification.html is the lethal-white breeding ratio - that two O/N carriers throw an all-white foal about one time in four - because that is a statistic over many foals, not something a play session can see, and recording it as confirmed would be overstating what was checked.
+
+- Docs: wiki/gene-kit.html, wiki/gene-mitf.html, wiki/gene-pax3.html, wiki/gene-ednrb.html (all new; gene-white/gene-splash/gene-sabino/ gene-frame deleted), wiki/nav.js, wiki/genetics-model.html, wiki/pipeline.html (the "white finds white" section), wiki/api-reference.html, wiki/modding.html, wiki/roadmap.html §4.2 / §5.2, index.html, README.md. Checklist: wiki/verification.html §0.

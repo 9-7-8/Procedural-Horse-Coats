@@ -1,0 +1,73 @@
+2026-09-11 — 0.5.000: a world decides which breeds it has
+
+    The owner's brief for the release: the big thing is custom breeds; before shipping,
+    move the settings somewhere sensible relative to the breeds folder, and let a world set
+    the spawn rate and location of every shipped breed - down to switching all of them off,
+    Feral Mixed included, with a horse that has nothing to be simply not spawning. Commit
+    94332fb; tagged 0.5.000. Waiting in
+    game: §0-CC.
+
+One folder
+
+    - .minecraft/phc/ holds everything a player is told to
+        touch: the breeds folder and three settings files. NeoForge resolves a
+        config's file name against config/ with a plain
+        Path.resolve, so ../phc/server.toml lands beside the
+        breeds (ModBreedSpecs.configFile; api-notes).
+        Read from the FML source, then seen on a dedicated server - including the file
+        watcher re-reading an edit through the ...
+
+    - The gene folder was not moved (gap 192, closed the same day -
+        see the next entry up): a drop-in gene is a segment in every genotype code, so
+        moving its folder under a tester is a different kind of change from moving a
+        settings file.
+
+breed-spawning.toml
+
+    - Generated from the registry in the mod constructor, after the
+        breeds load: a section per shipped breed (enabled,
+        spawn_weight, biomes, spawn_time, each
+        defaulting to the breed's own file), shipped_breeds_enabled, and a
+        feral_mixed section (enabled, biomes,
+        herd_weight). Drop-in breeds are not listed; they are already files.
+
+    - COMMON, not SERVER: the herd biome modifier runs at server start and
+        needs it, and a SERVER config is synced to clients whose spec was built from their
+        own breeds. The price is that it is per install
+        (gap 190).
+
+    - It works by changing what the registry publishes.
+        Breeds keeps each breed as its file says and publishes copies with the
+        settings applied (BreedSpawnSettings, in common/, tested by
+        BreedSpawnSettingsTest), swapped whole because the file watcher re-reads
+        off the server thread. A switched-off breed loses every source but keeps its entry,
+        so a horse's label still means something. Herds, the biome modifier, the cowboy,
+        stables, egg loot and the breed book needed no change beyond asking the same
+        registry.
+
+    - Nothing to be, nothing spawned. BreedSpawnHandler
+        cancels a natural, chunk-generation or spawner spawn when
+        Breeds.anythingMaySpawn says no; HerdManager discards what
+        gets past (a lone horse where Feral Mixed is off). /summon is left
+        alone - a player asked for it.
+
+    - The first boot crashed, which is why the server was booted at all:
+        defineInList with a List.of throws on NeoForge's
+        contains(null) probe while writing a fresh file.
+
+Old worlds
+
+    - Diffing the gene bundles against the v0.4.1 tag found one retired
+        allele set: Cleave's four, from when it became two loci. A strict parse of a saved
+        horse carrying one throws, and from the entity tick that is a world that will not
+        load. Saved codes now go through Genotype.readableStored at the codec
+        (records, transfer papers, seed jars), which drops what it cannot read the way
+        parse already drops unknown genes. parse itself stays
+        strict. Unverified on a real 0.4.1 world
+        (gap 193).
+
+    Tests run: BreedSpawnSettingsTest, GenotypeTest, the breed
+    classes, creator parity; :neoforge-26.1.2:build green; a dedicated server
+    booted clean twice. The full :common:test was not run - it would still need
+    to confirm that nothing else reads Breeds in a way the published copies
+    change. The debug world kit was not re-aimed: nothing in §0-CC is an item.

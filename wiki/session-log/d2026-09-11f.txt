@@ -1,0 +1,90 @@
+2026-09-11 — three coat defects, and a roadmap that had stopped being true
+
+    The session began as “go through the whole roadmap and clear it out”. It
+    turned into something more useful: auditing it against the code first,
+    because a large part of Part1 turned out to describe work that was already done.
+    Three real defects were fixed on the way, and the page lost two whole entries that had
+    shipped and never been deleted — which is the exact failure its own banner warns
+    about.
+
+What the audit found
+
+    Of the five rows under “genes drawing the wrong thing”, one was a
+    real defect, one was a real defect misdiagnosed, one was a design decision, and two were
+    already built. Particle’s carrier case
+    was correct, documented in its own javadoc and asserted by a passing test;
+    light’s glowing hooves are wired end to end —
+    the gold tint and markEmissiveLowerLeg through to
+    EmissiveCoatLayer. Under “behaviour that silently does nothing”,
+    the hurt-mare denial message shipped on 2026-09-10 and was still listed as missing, while
+    sitting in the same page’s own Settled section. Only the inert
+    attribute verb survived the sweep.
+
+    The larger find is that epigenetic drift is built — item two of
+    five in “where to start”, whose stated problem was that a foal copies its
+    parent’s seed exactly. EpiDrift nudges every scalar at every breeding
+    on a two-sided exponential, re-rolls seeds and categories on a chance, and clamps to the
+    hard safety bound rather than the design range, so a long-bred line may reach somewhere no
+    wild horse has been. Its own javadoc opens “Before this, inheritance was
+    verbatim.” It shipped without the per-gene opt-in flag the roadmap proposed
+    for the job, and it is written up on breeding, so the
+    write-up had happened and only the deletion was missed. The section is gone, and the
+    Settled entry that still said “verbatim” now says what is true.
+
+Magic zebra is codominant
+
+    One Mzeb copy drew the whole pattern, so the locus had nothing between a
+    plain horse and a finished one. It follows natural
+    zebra now: one painter taking a strength, two outcomes, so a dusky
+    parent and its black-striped foal cannot end up wearing different bands.
+    Mzeb/Mzeb passes 1.0 and is byte-for-byte what it always drew;
+    Mzeb/n is a new dusky outcome scaling the subtraction and the
+    opacity together — scaling only the colour would put a dusky band at full opacity
+    over the template, which on a dominant white is a grey stripe as strong as the black one.
+
+    The strength is 0.09 because it was picked off a rendered dose
+    ladder, not reasoned about: the first guess of 0.18 read as black on
+    a bay and was not distinguishable from the homozygote. Three base coats by three genotypes
+    in one image settled it in one look, which is the cheapest thing in this repo and is still
+    under-used. 48 Mzeb/n rows of the pipeline golden moved and the 6
+    Mzeb/Mzeb rows did not.
+
+Particle stops lying about what a horse carries
+
+    The owner reopened this one deliberately. Two variant alleles that were not codominant
+    partners used to show the lower-ranked of the pair, which meant a horse trailing dust was
+    either Dst/Dst or Dst over any of the other thirty-nine
+    — identical to look at, and unguessable. The locus asks for
+    agreement now: the same allele twice, or two of one family, and anything else is two
+    carriers and a plain horse. It cost nothing in the wild, because the founder table already
+    excluded exactly these pairs for exactly this reason. The rank rule went with it;
+    declaration order survives only to keep AllelePair canonical so
+    copy(0) and copy(1) address a codominant pair in a fixed order.
+
+The foal sclera — and what it was not
+
+    The owner-reported “the coat overwrites the sclera” was real, and both of the
+    roadmap’s suggested causes were wrong: the composer already redraws the eyes after
+    both paint phases, and the coordinates were on the eyes.
+    EYE_RECTS_BABY was 2 texels wide where the eye is 4, on the
+    strength of a comment in the file asserting that the foal template has no bright sclera.
+    It has two columns of one beside each pupil. So every white painter and every magical gene
+    painted over the whites of a foal’s eyes and the redraw put back the black alone.
+
+    Worth recording how it was settled, because reasoning about body space has been wrong here
+    before: the fix was checked by dumping the template’s actual pixels and by asking
+    HorseSkinGeometry which columns the head’s faces own, rather than by
+    deriving it. An intermediate claim that the adult right eye was misaligned came
+    from feeding mistyped coordinates to a probe and was withdrawn on reading the source
+    — the adult has been correct since 2026-09-06. Every one of the 528 foal rows in the
+    pipeline golden moved, and not one adult row did, which is what a foal-only fix should
+    look like.
+
+    A test that cannot see the bug it is for
+
+        CoatBakeGoldenTest stayed green through the whole zebra change, and
+        correctly: it walks every gene but pairs each variant allele with itself
+        (new AllelePair(variant, variant)), so it never bakes a heterozygote and
+        is structurally blind to a codominance defect. That is not a fault in it — it
+        exists to catch a gene whose paint moved — but it is worth knowing which half of
+        the space it covers before trusting a green run to mean a coat did not move.

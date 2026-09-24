@@ -1,0 +1,51 @@
+2026-09-13, overnight — breeding finished, its gaps closed, and a yard built to audit it
+
+    The owner went to bed asking for breeding to be finished, the gaps closed, tests designed, and
+    the debug area rebuilt so that everything could be audited in the morning. Nobody was awake
+    to ask, so the calls that were not purely technical are on the roadmap as
+    provisional, to confirm or reverse. Nothing was played.
+    The audit is §0-DV, in order.
+
+    - Gaps closed in code:
+
+            - 225: impossible genotypes are embryonic
+                lethals, through Conceivable. The code read was confirmed; two
+                stabilised carriers would have made one every time.
+
+            - 226: a synced pregnant flag.
+
+            - 228: offline owner names from the server
+                and NeoForge caches.
+
+            - 229: geldings through the roster, the
+                filters, the sire picker, band challenges and bond grants.
+
+        Also the seed jar's pedigree edge: a jar foal now takes its generation and names from the
+        real sire's record. Found on the way: 230, a cover
+        through a fence, and 231, the client never
+        cancelling jar and clock clicks.
+
+    - Designed for testing: the natural-cover decision and all the wording moved
+        into common/ (NaturalCover, ReproText) so they could
+        be unit-tested. New tests: NaturalCoverTest, ReproTextTest,
+        ConceivableTest and GeldingListingTest. 98 tests pass across the
+        eleven affected classes. The full suite was not run.
+
+    - The yard grew rows O to T (DebugYardFertility):
+
+            - twelve pens, one scenario each, spaced so no pen caps another;
+
+            - maternity mares made pregnant through the real conception path until the dice gave
+                what the sign promises;
+
+            - a new DebugWorldWatch.watchBreeding that logs every horse's breeding
+                state;
+
+            - natural covers switched off in the carrot pens, which would otherwise breed through
+                their dividers.
+
+        The heat-attraction goal now stops at 2.5 blocks, inside the 3-block cover reach, so a
+        pair that walks together can actually breed.
+
+    - The test kit lost the paddock batch to those pens. Batch 1 is now only
+        what the yard cannot do.

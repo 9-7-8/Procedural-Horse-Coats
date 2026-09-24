@@ -1,0 +1,58 @@
+2026-09-19 — Two mods' worth of wrong, and a brief that was wrong about all of it
+
+    Released as 0.5.017. Both faults are invisible on a dev
+    client with nothing else installed, which is the thread running through the whole session:
+    the compat layer does nothing measurable until another mod is present, and
+    until today nothing had measured it.
+
+    The hay bale. Asked for Bale of Sugar Cane, whose block is
+    ofFullCopy(Blocks.HAY_BLOCK) and which horses ignored entirely. The interesting
+    part was not the feature but a vanilla inconsistency found on the way in:
+    AbstractHorse.isFood is a tag, so a tag entry is genuinely enough to make a horse
+    want the bale — but handleEating, which decides what food
+    does, is a hard-coded is(Items.X) chain with no tag in it. Shipping the
+    tag alone would have produced a horse that accepts the bale forever and never eats it, which
+    is worse than refusing it. The ids came out of the mod’s jar rather than being guessed,
+    which mattered: block baleofsugarcane:baleofsugarcane, item
+    baleofsugarcane:baleofsugarcane_item, two names that do not match each other.
+
+    Grazing hay stopped being is(Blocks.HAY_BLOCK) and became a tag
+    lookup, which buys the extensibility and sells a silent failure: break the tag file
+    and every horse in the game quietly stops eating hay. That is what the new gametest
+    hay_is_still_a_bale is for, and it was confirmed to fail by emptying
+    the tag before being trusted. A tripwire nobody has watched trip is not a tripwire.
+
+    The pseudo-woods. A 332-jar pack with Every Slab installed reported 287
+    modded woods. collectWoods defines a wood as anything shipping a
+    <name>_fence_gate blockstate, and Every Slab generates a gate for every
+    block in the game — so 247 of those were andesite,
+    black_wool, coal_ore, and the mod had registered
+    1,488 cart items nobody could craft, each warning once into a boot log.
+    This is “a tag entry is a declaration,
+    not a promise” a second time, one rung earlier and in a different file format.
+
+    Worth recording that the double gates were fine, and the owner asked
+    directly whether they were not. They were not, and for a structural reason: a double gate
+    spends two of that mod’s own gate, which is the very file the scan keyed on,
+    so the ingredient is guaranteed by construction — all 468 candidates ship a gate item
+    and the nightly logged zero gate warnings. Only the carts reached past the declaration, for
+    <name>_planks. Dropping those woods removes 248 working-but-absurd double
+    gates too, which was a decision the owner took rather than a consequence slipped past them.
+
+    The rule was simulated over all 332 jars before it was written. It
+    reproduces the old count of 287 exactly, predicts 39, and independently matches all nine
+    no stripped log warnings by name — which is how the second bug was found:
+    nine real woods registering a wagon they could never build, because only the wagon
+    spends a stripped log.
+
+    The brief was wrong in every particular, and saying so was the useful part.
+    It prescribed guarding the scan with Item.exists(<ns>:<wood>_planks),
+    citing pack notes and a prior “Epic Knights ghost-ingot case”. There is no
+    Item.exists in Minecraft, NeoForge or this repo; there is no Epic Knights case
+    in any file; there are no pack notes; the scan never reads #minecraft:planks;
+    and the real idiom, ModdedMaterials.itemExists, already existed and was already
+    firing — it just suppressed the recipe while the item stayed registered. It also
+    cannot be moved to the scan, which runs in the mod constructor where the registries
+    are empty, so it would have rejected every mod on earth. The substance was right and the
+    prescription would have broken the feature; the fix had to be a file probe, as a second pass
+    over every jar, because a gate declared in one jar may have its planks in another.

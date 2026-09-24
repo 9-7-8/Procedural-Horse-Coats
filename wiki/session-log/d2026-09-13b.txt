@@ -1,0 +1,160 @@
+2026-09-13 — the ward proved itself unattended, and the project took its first mixin
+
+    The holy ward works. Thirty-nine spawn attempts inside the warded
+    chamber and none of them arrived; fifty-three attempts in the control and all
+    fifty-three did. Ten minutes, nobody watching, the player parked on a block of teal
+    wool thirty blocks away. This is a gene whose headline claim had never once been
+    tested, and two separate structural blockers had to be cleared first — the
+    dimension generated the_void, which spawns nothing, and every previous
+    attempt stood next to the horse, inside the 24-block radius where vanilla was never
+    going to spawn anything anyway.
+
+    The evidence came out stronger than the test was designed to produce, by
+    luck. Two hooks happen to straddle the cancellation:
+    FinalizeSpawnEvent fires before the ward can cancel, so it counts
+    attempts; EntityJoinLevelEvent only fires if nothing cancelled,
+    so it counts arrivals. The gap between those columns is the gene.
+    The design had aimed at "the warded room is empty", which is consistent with a dozen
+    boring explanations; 39-and-0 beside 53-and-53 is consistent with one.
+
+Both night loci, and both weather loci, closed in a day
+
+    Thirteen variants that nobody had ever watched. All eight night-temper
+    forms and all five night-watch forms are confirmed, and every one of those stalls is
+    gone. §0-AT had carried the family as unwatchable since 2026-09-09.
+
+    Not one of them was broken. They were unwatchable for three separate
+    reasons, and each looked exactly like "the gene does nothing": the dimension had no
+    night, because a dimension_type needs timelines as well as a
+    default_clock; the monster-targeted forms had nothing to be about,
+    because the biome was the_void; and the fleeing forms were in stalls too
+    small for the navigator to accept their path. Three different silences, one symptom.
+
+    The weather loci went the same way and are the sharper lesson. The
+    owner reported them as not working — and looking at the horses would have said
+    exactly that. The census says otherwise: speed 0.188 flat when dry against
+    0.194–0.252 in rain, jump 0.500 flat against 0.584–0.591. Both move, and
+    the shape is right too: identical when dry because there is no modifier at
+    all, spreading into a range under rain because the magnitude is drawn per allele copy.
+    It is a fact rather than an impression only because the watch prints a named
+    attribute's range, and a conditional modifier is a question about numbers.
+
+    Rain being invisible was a fault of mine and a small one: the new biome carried
+    has_precipitation: false, copied from the_void. The level
+    rained and the biome dropped nothing.
+
+    The yard is ten pens, from thirty-five.
+
+The hunters are done; the shy ones needed a bigger box
+
+    Every hunting form of night temper is confirmed and their stalls are
+    gone. The shy forms were reported as doing nothing, then as "working now, but hard
+    to tell in their tiny pens" - and the pen was the whole of it. A shy horse paths
+    FLEE_DISTANCE, twelve blocks, directly away; in a
+    4×7 stall the navigator refuses that before it starts.
+
+    The asymmetry is the lesson. Hunt and flee are the same locus with the
+    sign flipped, they were built into identical stalls, and the stall confirmed one half
+    and hid the other — because a hunter closes on you and a wall helps it,
+    while a flee-er needs room, which is the one thing a stall cannot give. Four paddocks
+    at 19×30 now.
+
+    And a second pass on the stalker: "watch behind still walks through the
+    player." The first fix diverted only when the horse was on the far side of the
+    player from its goal, which catches the head-on case and nothing else. The real reason
+    no choice of destination can fix it alone is that
+    Minecraft's ground pathfinder does not treat entities as obstacles at
+    all - it will walk a horse through a player as though they were not there. So
+    the player is made an obstacle by hand, and the test is now the perpendicular distance
+    from them to the segment the horse is about to walk.
+
+Owner-verified: the glow room, whole, and ooze in both forms
+
+    - "Glow looks perfect on all the horses in the glow room." That
+        closes §0-CO. The room held one horse per open question - gamma for the
+        falloff, rime, lantern's bloom, tron's two-form heterozygote, and a horse carrying
+        two glowing genes to check that overlapping lit texels take the brighter
+        rather than summing - and all of them read right. The room is gone. Still open and
+        never about that room: whether a dim glow is visible in daylight, which
+        wants a sunny field rather than a dark box.
+
+    - Ooze drip, both forms. Plain "looks GREAT", coloured "looks
+        perfect". Worth noting it was the gene that had already been rebuilt on the
+        GOO mask, and it is the one the rainbow drip was then rebuilt to
+        match - so this confirmation is also the argument for that change.
+
+Owner-verified: lava travel, and two of molten hooves' four
+
+    - The lava channel is confirmed — "lava is fast now!".
+        Epigenetic speed, floored near a walk and reaching twenty times vanilla, delivered
+        through this project's first mixin. The pen is gone and so is its gap. What is
+        not claimed: nobody has yet bred a fast one from two parents, which is
+        the half the epigenetics exists for.
+
+    - Molten hooves — the whole locus, all four forms. Black's
+        prints do not glow; one-colour and multicolour both read correctly and are
+        distinguishable from each other, which is the question the row was built
+        four-abreast to answer; and white shows from a single copy, which
+        is the only genuinely genetic question in the locus and the one none of the other
+        three could touch, because every one of those stalls was homozygous. The row is
+        gone. Worth noting what settled it: the four were retired one at
+        a time over about twenty minutes, which is what a row of side-by-side stalls buys
+        — "does this differ from that" is not a question anybody can answer from
+        memory two spawns apart.
+
+Night temper, confirmed - every hunting form but one
+
+    The hunting forms work. Owner, 2026-09-13: "the hunting gene
+    definitely works, confirmed for everything except the monster one (I had the horse
+    hunt me)", and earlier, "hunt all definitely killed whatever was in its
+    pen". That is a locus family §0-AT has listed as unwatchable since
+    2026-09-09, confirmed within minutes of the dimension having a night for the first
+    time. Only Agh, the monster-targeted form, is still unseen.
+
+    The cow was the design working. The herd- and everything-targeted
+    forms were given one each precisely because a hunt with nothing to hunt is
+    indistinguishable from a gene that does nothing — the same reasoning that moved
+    base alarm next to the spawner. A test needs something to happen to.
+
+    One tuning item out of it (gap 213): the horse
+    stands still and then the damage arrives. Half of that is vanilla's 20-tick swing
+    interval, and the half worth knowing is that a horse has no attack animation
+    at all — it was never a mob vanilla intended to melee. Making it hit
+    faster would leave it looking just as odd.
+
+The first mixin, and why it is allowed to exist
+
+    LivingEntity.travelInLava is moveRelative(0.02F, input) with
+    hardcoded drag and reads no attribute — in 26.1.2 and in 1.12.2 alike. Three
+    cheaper repairs were tried on paper and all three fail on the case that matters, a
+    horse with somebody riding it: a velocity nudge is overwritten by the rider's
+    client, there is no existing attribute, and NeoForge's FluidType.move
+    belongs to the fluid type.
+
+    What makes it defensible is that it does nothing unless asked: a
+    ModifyConstant on one float in one private method, returning vanilla's own
+    value unless the entity carries this mod's lava_movement attribute, which
+    is horses only. A mixin on LivingEntity sits in a hot path shared with
+    every mod in the pack, and "no-op by default" is not a nicety there; it is the licence.
+    And it costs the backport nothing that matters — the epigenetic speed, the
+    founder floor and the breeding all live in common/, and the mixin is the
+    translation, which is what the platform module is for.
+
+Four more settled, and a yard that keeps shrinking
+
+    Intimidating holds its radius now (min 7.9, median 8.1, against a pre-fix median of
+    4.2) — the path-based repel was the right mechanism and the shove never was. The
+    retinue costs nothing measurable: a flat 50.0ms/tick with twenty-four
+    continuously re-pathing mobs, which answers §0-BT's one open performance worry by
+    saying there was nothing to worry about. Lycanthropy works, found by accident in a log
+    line — the horse became an allay, which is also why its stall could
+    never have held it. And the new biome spawns: forty-two hostiles in two minutes.
+
+    All of those pens are gone. What went in on the freed ground is aimed at what the
+    biome and a new attribute readout just made possible: the two monster-targeted night
+    stalls stopped saying CANNOT FIRE HERE, and the weather loci
+    got a pen at last. §0-BT called them "the one locus family you cannot check on
+    demand", which is true of looking at a horse and false of reading its numbers —
+    a conditional modifier is either on the horse or it is not. The watch prints a named
+    attribute's range across a pen now, so the test is: read the census,
+    /weather rain, read it again.

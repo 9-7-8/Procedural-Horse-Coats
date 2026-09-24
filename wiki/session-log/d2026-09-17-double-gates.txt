@@ -1,0 +1,90 @@
+2026-09-17, later — A gate two blocks wide, written rather than ported
+
+    The owner pointed at a CurseForge mod — “could you add all the functionality of
+    this mod into ours? Double-wide gates would be perfect for horse stalls” — and
+    asked for the whole roster rather than the minimum. The result is
+    twenty-four blocks: twelve woods in two styles, one item
+    placing two blocks, both leaves on one click.
+
+Nothing was ported, because nothing could be
+
+    That mod is Fabric-only, so it cannot run beside this one and could not have
+    been depended on; it publishes no source, so there was nothing to read; and
+    it is CC BY-NC-SA, whose ShareAlike term would not have sat with this
+    repo's CC BY-NC even if there had been. Only the idea was taken, which copyright does not
+    cover.
+
+    That cost something concrete, and it was paid the same evening. The listing
+    also advertised “farm-style variant gates” — four words, no screenshot
+    — so a second style shipped alongside the first with its appearance guessed:
+    four rails instead of two, no diagonal brace. It was logged as unjustified rather than
+    presented as a port, and the owner's verdict on seeing it was
+    “what is the double farm gate? It looks weird”. All twelve were deleted
+    on her call, which is the right end for a thing that existed only because four words had to
+    be interpreted. Two gates whose difference nobody can justify is worse than one
+    gate, and both the generator and the registry now say so in a comment, so the next
+    session does not rediscover the idea and re-add it.
+
+Extending FenceGateBlock was the whole design decision
+
+    StallDetector.isDoorway tests instanceof FenceGateBlock by block
+    identity, in every state. Subclassing it therefore made a stall shut with a double gate a
+    closed room without touching the stall detector at all — and a gate
+    that had not would have read as a hole in the wall, sending the floor fill out into the yard.
+    That is the failure the detector's own header is mostly about, so inheriting past it was
+    worth more than the behaviour actually inherited, nearly all of which is overridden.
+
+Four bugs, all found by playing, none findable by building
+
+    The build was green and every generated reference resolved before the client was ever
+    launched. It was still wrong four ways, and each failure was silent in a different
+    manner:
+
+    - Twenty-four item models pointed at a file that was never written. The
+        generator emits <id>_left and <id>_right; the item
+        definitions asked for a bare <id>. Caught before the owner saw it, by a
+        script that walks every generated reference and checks the file exists — which is
+        worth keeping, because a missing model logs nothing and simply draws a chequerboard.
+
+    - BlockItem does not defer to its block's name in 26.1.2.
+        Item.Properties defaults to an item. prefix and
+        useBlockDescriptionPrefix() is what switches it, so twenty-four correct
+        block. lang keys were never consulted. The mod's existing block items paper
+        over this by shipping both prefixes; one line is better than duplicating every key.
+
+    - Bamboo was scrambled. It is the one wood vanilla textures with a bespoke
+        gate sheet rather than planks, and that sheet is drawn for vanilla's rail positions. These
+        rails run the full width, so it sampled the wrong regions. Bamboo now uses its planks like
+        the other eleven. The earlier decision to carry an explicit texture per wood rather than
+        compose <wood>_planks is what made this one line instead of a hunt.
+
+    - Two state-desync bugs, both from writing a pair one block at a time.
+        Placement wrote the first half with a flag that does not suppress shape updates, so it
+        saw an orphan and deleted itself before its partner existed; and opening from the wrong
+        side flips FACING, which swaps which side the partner is on, so between the
+        two writes both blocks briefly read as the same half and one removed itself. Written up
+        on the gate's coding tab.
+
+    A fifth was not a defect but a silence. A gate with no room for its second
+    block refuses to place, which is correct, and said nothing whatever while doing it —
+    indistinguishable from a dead item, and the reason the first round of diagnosis went after a
+    rendering bug that did not exist. It now says so, told apart from every ordinary placement
+    failure by asking whether the clicked block could have been replaced at all: a message on
+    every failed click would be noise. Stall signs had
+    already set that precedent and it should have been followed the first time.
+
+What the session got wrong about its own process
+
+    The first client was force-killed thirty-five seconds after launch, to rebuild with the model
+    fix, while the owner was inside it testing. She reported it as “a crash when I
+    grab one”; there was no crash, and the log proved it — 2970 lines ending
+    mid-normal-operation with no exception anywhere. Roughly ten minutes went into diagnosing a
+    crash that was an assistant killing the process. The standing rule already existed and was
+    reasoned around on the grounds that the client was mine and seconds old; it does not have
+    that exception.
+
+    The recipe is also deliberately not vanilla's planks-and-sticks: two vanilla gates
+    plus braided rope, because the house rule is that every recipe
+    carries a modded ingredient so none can collide with a vanilla or third-party one — and
+    check-recipes.mjs reads only this mod's own folder, so it could never have
+    caught such a collision. The rule is the guard; the checker is not.

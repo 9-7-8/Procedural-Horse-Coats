@@ -1,0 +1,87 @@
+2026-09-21, after the gear work — the verification page is dismantled, and becomes a generated index
+
+    To be verified had reached 3734 lines and
+    sixty <h2> sections. The owner's instruction was to move all of
+    it onto the page for the thing each section tested, and to rebuild the page itself as
+    nothing but a collector. Both halves shipped, and the rule behind them is now
+    settled and is hard rule 9 in
+    CLAUDE.md.
+
+The rule, in the owner's words
+
+    Verification data goes on the item's page. Nothing is ever hand-written onto the
+    verification page. That page exists to do one thing: collect the pages that have
+    an open Verification tab. And a verified item is not ticked, it moves
+    — off the Verification tab and onto the Coding tab beside it, as
+    what was seen, when, and on what evidence. A page whose last check is confirmed loses the
+    tab and drops off the index by itself, which is the property that makes the list
+    genuinely only shrink.
+
+    Why it had to change. A checklist kept beside the thing it tests is read
+    by whoever opens that page and deleted by whoever confirms it. Gathered into one document
+    it is read by nobody and deleted by nobody, and its entries outlive the memory of what
+    they were about. The measurable form of that rot: sixty-seven of the page's
+    anchors were empty <span id> stubs, left behind by sections
+    deleted months earlier, and eighty-nine links elsewhere in the wiki still pointed at
+    them. Every one of those links resolved. Every one of them told the reader nothing. This
+    is the third document to fail this way after CLAUDE.md and the roadmap.
+
+What was actually moved
+
+    Thirty-six sections had a single owner and moved whole. The other twenty-four were
+    grab-bags — “still open after 2026-09-13”, “what the overnight run
+    left unplayed”, “tuning and balance, moved off the roadmap” — and
+    the owner's call was to split them bullet by bullet rather than park each
+    on a nearest page, on the grounds that a cross-cutting list on a page it is only half
+    about is exactly the wall this change exists to remove. The largest,
+    Still open from before 2026-09-13, was 273 bullets across four ordered
+    groups, and fanned out to 92 pages; it was done by script with a
+    reconciliation that proved every <li> appears byte-for-byte exactly
+    once in the output.
+
+    The end state: 122 pages carry a Verification tab, 83 of them gene pages
+    and 15 item pages. The original section ids travelled with the bulk of each section, so
+    verification.html#jumps-0920 became
+    item-jumps.html#jumps-0920 and 81 inbound links were re-pointed
+    mechanically by looking up where each id had actually landed rather than from a
+    typed table.
+
+The page is now generated, and refuses to be wrong
+
+    wiki/tools/bake-verification-index.mjs scans wiki/ for a
+    verification panel, harvests the one sentence each opens
+    with in a note verify-summary box, and writes an alphabetical index between
+    generated markers. A page joins the list by growing the tab, the same way a gene
+    joins the census by existing. The per-row check count is the panel's own
+    <li> tally computed at bake time, so it is never a stale number
+    somebody typed.
+
+    It hard-fails rather than write a wrong index — a panel with no
+    summary box, two of either, or a summary box loose on a page each fail it by name. That
+    is deliberate: an index that quietly omits a page is worse than no index, because it is
+    trusted. The one thing it does tolerate is a page that only mentions the
+    attribute in prose, which is why known gaps writes it
+    escaped.
+
+What the writing pass found, as it always does
+
+    One real defect: on making a gene the new panel had been
+    inserted inside the “In Java” tab rather than beside it, because that
+    page carries a page-foot div within a panel and the insertion point looked
+    for the first one. A validator now confirms every verification panel is a direct child of
+    article.doc and that every page's <section> tags balance.
+    The 122 summary sentences also turned up several checks whose bullets were about a
+    different gene entirely — those were split as they were written.
+
+    Checked in a browser, not just in the markup (headless Chrome, over
+    file://, through wiki/tools/chrome.mjs): the index renders 122
+    rows each with its sentence, the first row's href resolves to a real panel, the
+    Verification button appears in the tab bar on a gene page, an untabbed page such as
+    villagers builds a tab bar rather than hiding its new
+    content, and the repaired making a gene panel is now the
+    last top-level panel on the page.
+
+    Not done, and deliberately: no Java changed this session, so
+    :neoforge-26.1.2:build was not re-run — and a dedicated server the
+    owner started at 02:01 was holding run/ throughout, so nothing was launched
+    against it.

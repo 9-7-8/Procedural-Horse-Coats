@@ -1,0 +1,19 @@
+2026-09-14 — the last two breeding gaps, the vanilla way
+
+    The owner settled the two gaps left open overnight and ended the session. The morning's
+    audit is unchanged: §0-DV.
+
+    - Gap 230, covers through a fence: done as vanilla does it. The patched
+        sources show vanilla's BreedGoal ignores line of sight on purpose
+        (ignoreLineOfSight()) and instead requires sixty ticks of approach, strictly
+        inside three blocks. A natural cover now requires exactly that (a
+        NaturalCover.Courtship), instead of covering on the first scan. So a fence
+        still does not stop a stallion; it does not stop a cow either.
+
+    - Gap 231, server-authoritative: the seed jar and debug clock cancel
+        unconditionally on the client and decide on the server. That is safe because the
+        interact packet is sent before the event fires, and in single-player the integrated server
+        runs the same handler.
+
+    - Both behaviours are recorded in the API notes, since each is a vanilla rule that looks like
+        the opposite from the outside.

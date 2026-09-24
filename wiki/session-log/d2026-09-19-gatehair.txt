@@ -1,0 +1,78 @@
+2026-09-19, later — A gate that duplicated, and a material chain nobody wanted to climb
+
+    Released as 0.5.019. Two separate briefs, both from
+    play, and the second one was the more interesting because it was not phrased as a bug at
+    all.
+
+    The duplication. Breaking a double fence drops two. The cause was a
+    comment that had been wrong since the block was written, and confidently so: the class
+    header explained that returning air from updateShape removed the orphaned half
+    without dropping it, and that this was why no loot-table condition was needed.
+    “One item in, one item out.” It is not true.
+    Block.updateOrDestroy calls
+    destroyBlock(pos, (updateFlags & 32) == 0), and an ordinary neighbour
+    update carries no UPDATE_SUPPRESS_DROPS, so both removals ran the loot table
+    and the gate paid twice.
+
+    What made it worth writing down is that vanilla has exactly this problem
+    in doors, beds and double plants, and solves it nowhere near the Java: every door’s
+    loot table is conditioned on half=lower. The fix is a data change in two
+    generators (bake-double-gates.mjs for vanilla’s woods,
+    compat/GeneratedGates for everyone else’s) plus a
+    playerWillDestroy for the mirror case — in creative, breaking the
+    non-paying half still leaked a free gate out of the partner’s removal. The
+    general lesson went to api-notes, because any future
+    multi-block block walks into it.
+
+    The second brief. Make the recipe to craft double gates not require
+    horse hair — and remove the horse rope or bundle or whatever and just make everything
+    that needs those just need horse hair. Reading it out, the real complaint was a
+    compounding price nobody had ever totalled: 4 hair made a bundle, 3 bundles a braided rope,
+    4 bundles a hair cloth, and the things a player actually wanted took the rope or the cloth.
+    So a double fence gate cost 12 horse hair, an equestrian post 32, the
+    supplier’s post 56 and the cowboy hitch 68 — against a supply
+    of one to three hair per horse per Minecraft day. Nowhere in the source or the wiki was
+    that number written down; it only existed multiplied out.
+
+    A constraint decided the shape of the answer. These are shapeless recipes
+    and the grid holds nine items, so 68 hair cannot be preserved even in principle. Collapsing
+    the chain had to make everything dramatically cheaper. That was put to the owner as
+    a choice rather than assumed, along with two others: which intermediates to delete (all
+    three) and what a hair-free gate should cost (two vanilla gates, nothing else).
+
+    That last one broke a house rule, which is the part worth remembering.
+    Every recipe in the mod carries at least one modded ingredient so that none of them can
+    collide with a vanilla or third-party one — and a collision is not an error in
+    Minecraft, the manager just resolves one recipe and the other item quietly becomes
+    uncraftable. Two vanilla gates and nothing else gives that up. It was taken deliberately
+    after checking that nothing in vanilla consumes a fence gate (every vanilla recipe
+    mentioning one produces it), documented as
+    the one exception rather than left to be discovered,
+    and — since check-recipes.mjs reads only our own folder and cannot see
+    a third-party clash — backed by a test that asks the server’s recipe manager
+    what two oak gates actually produce.
+
+    Both fixes are guarded by mutation-checked gametests, not by having been
+    looked at. double_gate_drops_one breaks each half in turn (they are not
+    symmetric — left is the half that pays, so testing one would pass with
+    the condition on the wrong half) and reverting oak’s table reproduces the owner’s
+    report exactly: expected 1, found 2. double_gate_crafts fails when a
+    stick is added to the recipe. Both on the gate
+    page.
+
+    What the removal actually touched, which was far more than the recipe
+    folder: three items, six chain recipes, nine lang keys, three item definitions, three
+    models and an orphaned texture; GeneratedArmour’s modded-metal padding;
+    KnownGeneSpliceRecipe, which had accepted cloth as an alternative to hair;
+    three progress tasks that would otherwise have become impossible to complete — caught
+    by check-progress-tasks.mjs, which exists for precisely that; the husbandry
+    tutorial step; two debug chests; and six villager trades.
+
+    The trades were the one judgement call not put to the owner, and it is
+    flagged as such on verification. A literal one-for-one
+    substitution would have made a post cost 2 hair and a trade pay an emerald for 2 hair,
+    which is a money printer. Working out the ladder turned up something better: in raw-hair
+    terms every intermediate trade had already been worse than the supplier’s
+    plain level-1 hair trade — 32 to 48 hair per emerald against 16 — so they had
+    been close to dead all along. They are now one monotonic ladder, 16/14/12/10/8 per emerald
+    by supplier level.

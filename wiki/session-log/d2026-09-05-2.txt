@@ -1,0 +1,5 @@
+2026-09-05
+
+Owner-verified in-game (2026-09-05)
+
+- The LUT gene - Blupnk/Blupnk resolves against the blue/pink gradient correctly, a carrier is indistinguishable from a plain horse, the alternate texture loads from common resources at runtime. Working perfectly (owner's word). The verification checklist item is retired.

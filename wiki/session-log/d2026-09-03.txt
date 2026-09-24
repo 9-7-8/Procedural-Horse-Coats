@@ -1,0 +1,77 @@
+2026-09-03
+
+Built 2026-09-03, NOT yet play-tested: dun becomes a three-allele locus (roadmap §4.1).
+
+DunGene now carries D / d1 / d2 - six combinations, three outcomes - and d1 is the allele that draws the dorsal stripe without diluting anything, so a horse can carry primitive markings and not be a dun. Landing with it:
+
+- The locus with two dominance orders. Dilution reads D > d1 = d2; marking reads D = d1 > d2. No single label covers both, which makes this the clearest argument yet for the combination table - clearer than MATP, which at least had one order.
+
+- d2, not the old catch-all d, is defaultAllele() (the only allele that draws nothing). So the allele tokens moved: summon with dun=D/d2. CoatSampleTool, CoatPipelineGoldenTest and the three LegacyCode test strings were updated with it.
+
+- How an undiluted horse shows a darker stripe. Phase 1 is downward-only, so d1 cannot paint a dark line - and does not need to: a primitive marking is countershading, so both marked outcomes run one painter and differ only in constants, the marking being the region the dilution is lerped off. d1 never touches black (the gradient's whole black = 1 row is pure black and PURE_BLACK_ALPHA gives such a texel 80% opacity, so nudging it off that row makes it fully opaque and therefore darker than its own stripe) and takes red only where there is red - keepRed ramps up to 1 as the texel's black rises, the mirror of D's ramp down to 0. Consequence, and the right one: d1 on a solid black composes byte-identically to a plain black horse. A real non-dun black shows no markings either.
+
+- Leg bars stay D-only (primitive(..., legBars)); d1 is the dorsal stripe alone.
+
+- Founder table written out as six weights, Hardy-Weinberg at p(D) = 1/24 and p(d1) = 1/10. The three D rows still sum to 8.16%, exactly the old two-allele number - d1 split the non-dun population rather than making duns rarer. About 18% of wild horses now carry a stripe and no dilution.
+
+- The gallery grew by half: dun contributes 3 distinct pens instead of 2, so GenotypeCatalog.size() is 147 458 and totalGenotypes() is 1 033 121 304 (dun's allPairsOf doubled, 3 → 6).
+
+- coat-golden.txt regenerated: all 240 pre-existing rows are byte-identical, including every D one - the only change is 12 new d1 cases. Nothing about any other coat moved. New DunGeneTest (8 tests) pins the table, the founder shares, the spine-vs-flank contrast on both marked outcomes, the black-coat no-op and the D-only leg bars. :common:test 235 green, :neoforge-26.1.2:build green.
+
+- Also fixed in passing: :common:bakeCoatSamples had been broken since the MATP merge - its build() helper still wrote positional code segments into what is now a gene-keyed string, and three samples named the retired cream / pearl genes. Both fixed; two dun_marked_* samples added.
+
+- Old saves will not parse their dun locus. Dev only; start a fresh world.
+
+- Docs: wiki/gene-dun.html (rewritten), wiki/genetics-model.html, wiki/roadmap.html §4.1. Checklist: wiki/verification.html §0.
+
+Built 2026-09-03, NOT yet play-tested: sex is a gene (roadmap §5.3, first half).
+
+SexGene (horsegenetics.sex, priority 1 - the first gene in codeOrder()), alleles X/Y: X/X is a mare, X/Y a stallion, Y/Y cannot occur. 18 built-in genes, 20 in-game. Landing with it:
+
+- Both outcomes are wild types - the first gene in the model that paints nothing, ever. So the gallery does not widen (GenotypeCatalog collapses every wild type into one group): still 98 306 pens, while totalGenotypes() doubles to 516 560 652 (every genotype now genuinely comes in two sexes).
+
+- Gene.affectsCoat() (derived: "is any of my outcomes not a wild type?") plus Genotype.coatCode() - toCode() minus the genes that can never paint. CoatData.textureKey() runs on that, so a mare and a stallion of the same colour still share one baked texture instead of doubling the cache. Same reasoning as the epigenetics already excluded from the key.
+
+- Gene.canOccur(AllelePair) (default true) - GenotypeCatalog. allPairsOf filters on it, so Y/Y gets no pen and is not counted. expressionOf still answers for it (a hand-written code reads as a stallion) because parsing is tolerant.
+
+- HorseRecord.sex is gone as a field - sex() reads the locus out of geneticCode via Genotype.sexOf(String) (a segment scan, not a full parse: the info panel asks per frame). The "sex" codec key and StoredGenome's sex component went with it, and HorseRecords.randomSex is deleted. HorseRecord.founder / bred lost their Sex parameter.
+
+- A foal's sex is inherited, not rolled - the dam is X/X and gives an X, the sire gives his X or Y 50/50, all through the same breedWith draw as every other gene. No special case anywhere. Genotype.withSex(Sex) / Genome.withSex(Sex) is the founder-only way to choose one (the custom spawn egg); the egg's gene list leaves the sex locus out, since its Mare/Stallion button owns it.
+
+- coat-golden.txt regenerated - 90 of 240 rows are byte-identical (the deterministic coats; the pipeline didn't move), the other 150 shifted because the code gained a segment and every gene's derived epigenetic seed moved with its position. :common:test 227 green, :neoforge-26.1.2:build green, parity 3 832 checks / 48 cases, runServer boots clean (20 segments, loaded 2 data-driven gene(s)).
+
+- Old saves will not reproduce their horses. Dev only; start a fresh world.
+
+- Docs: wiki/gene-sex.html (new), wiki/genetics-model.html, wiki/breeding.html, wiki/pipeline.html, wiki/api-reference.html, wiki/roadmap.html §5.3. Checklist: wiki/verification.html §0.
+
+Built 2026-09-03, NOT yet play-tested: the combination-table rewrite (roadmap Tier 1 §2, Tier 2 §5.1/§5.2).
+
+DominancePattern is deleted. A gene no longer declares a dominance label; it declares an Expression per distinct outcome - id, display name, a human-readable description, a wildType flag ("this combination changes nothing"), a masks flag, a deterministic flag and its own paint function - plus one function expressionOf(AllelePair) mapping any combination to one of them. Several pairs sharing an expression is what "dominant" meant; only the double-variant landing on a non-wild-type outcome is what "recessive" meant; two variant alleles each with an outcome plus a third for the pair of them is codominance. Works for any number of alleles with no special case. Landing with it:
+
+- Gene.randomPair(rng) → FounderTable - a weight per allele combination as percentages, sparse (an unlisted combination never occurs), normalised-with-a-warning, one nextFloat() per gene per founder, with a FounderContext for a genome-aware distribution that throws if asked about a gene not yet rolled. FounderTable.hardyWeinberg(variant, baseline, p) is the convenience that reproduces the old "1 in N per allele" numbers. The test gene is why this matters: 25% of founders are T/t and none are T/T, which no per-allele frequency can express.
+
+- Cream + pearl → MatpGene (horsegenetics.matp, priority 40) - the proving case and the mod's first three-allele locus: Cr/prl/N, six combinations, four outcomes. Kills the impossible Cr/Cr-and-prl/prl genotype; coat/pattern/CreamPearlDilution is gone (the dose table is a six-row switch on the gene). 17 built-in genes at the time (18 now, with sex); 19 in-game, 20 now.
+
+- Allele lost visible / deterministic (both are properties of a combination) and gained an order - its index in alleles(), which is a slot order for AllelePair's canonical form and not dominance. Gene.precedence and AllelePair.dominant() are gone.
+
+- Gene.wildType() → defaultAllele() - what a code segment-less gene reads as, a parsing default. The word "wild type" now means an expression.
+
+- The JSON gene format went to "format": 2 - dominance and wildOdds replaced by an expressions table (each entry with when, wildType, masks, description, its own layers and its own effects) and a founders table. The parser proves the table is total and unambiguous over every n(n+1)/2 combination: a gap, an overlap, or an unreachable catch-all is a load error naming the offending combination. Both shipped genes and all six examples rewritten.
+
+- The epigenome moved onto HorseRecord - see the separate bullet below.
+
+- GenotypeCatalog.distinctPairsOf now groups pairs by the expression they land on, with every wild type counting as one group ("changes nothing" is one look). Exact rather than an approximation, and it shrank the gallery from 331 778 pens to 98 306 (splash 3→2, MATP 9→4); totalGenotypes() was 258 280 326 (516 560 652 since the sex gene).
+
+- coat-golden.txt regenerated - every coat changed, because founder draws and the gene set both moved. :common:test 213 green at the time, :neoforge-26.1.2:build green, parity 3 832 checks / 48 cases (up 48: the fixtures now pin which expression each combination resolves to), runServer boots clean (19 segments at the time, 20 since the sex gene; loaded 2 data-driven gene(s)).
+
+- Old saves will not reproduce their horses - the code lost a segment and the founder draw changed. Dev only; start a fresh world.
+
+- Docs: wiki/genetics-model.html#combinations, wiki/gene-format.html, wiki/gene-matp.html, wiki/modding.html, wiki/api-reference.html. Checklist: wiki/verification.html §0.
+
+Built 2026-09-03, NOT yet play-tested: the epigenome lives on HorseRecord.
+
+HorseRecord gained epigenomeCode beside geneticCode (plus genotype() / epigenome() / genome() / hasGenome() / withGenome()), and data/HorseCoatAttachment + the horsegenetics:horse_coat attachment are deleted. Both are heritable facts assigned once at birth, so storing the genotype in two places was one fact twice - and keeping the epigenome off the record is why FamilyTreeScreen had to invent an ancestor's coat from its UUID. It now draws the real coat (closing old known gap #9's second half). HorseRecords.newFounder rolls the whole genome; HorseBreedingHandler / StallionSeedJarHandler read the parent genome off the record; the record attachment gained copyOnDeath. HorseRecordCodecs serialises epigenome_code as an optional field defaulting to "", which is the hasGenome() sentinel.
+
+Built 2026-09-03, owner-verified: the earlier data-model rewrite (roadmap Tier 1, §2).
+
+Every Gene now declares int priority(); codeOrder() / naturalOrder() / magicalOrder() are all derived by one sort on (priority, key) over built-ins + SpecGenes together (no hand-written lists, loaded genes interleave by priority). The genotype / epigenome code strings became gene-keyed and tolerant (<geneKey>=<a>/<b>; missing gene = wild type, unknown gene = dropped, "" = wild type) - see "The genetics model" below. coat-golden.txt regenerated: every deterministic coat is byte-identical (the pipeline is untouched); non-deterministic rows shifted because Epigenome.random / fromSeed now draw per-gene seeds in the new codeOrder() - a stored epigenome code round-trips unchanged, only the seed-derived stand-in moved. :common:test 195 green, :neoforge:build green, runServer boots clean (20 segments with the two shipped spec genes). NeoForge needed no source changes - it delegates all code parsing to common/. Closes old known-gap #18 (GeneCodeDisplay now derives its gene list, so spec genes show). Owner-verified in-game 2026-09-03: wild horses spawn and render correctly, right-click paper genome dump works. Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually showing in the display (needs a horse carrying Suntouched/Waterborn) - wiki/verification.html §0.

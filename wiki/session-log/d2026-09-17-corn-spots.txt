@@ -1,0 +1,37 @@
+2026-09-17, after that — Roan grows corn spots
+
+    Back to the natural queue. Roan’s per-texel dither had
+    no notion of corn spots — the islands of solid base colour that sit
+    inside a roan field — and the roadmap wanted a second low-frequency mask for them.
+
+    The insight that made it small: roan already computes a whitening weight
+    w per texel and calls PigmentField.whiten. A corn spot is
+    therefore a suppression of w, not a new thing painted over
+    the top — one insertion at one point rather than surgery on the existing dither
+    maths, and it falls out correctly that a spot is base coat at full strength with a hard
+    edge. Two fields decide them: a low-frequency cellDistance lattice for where
+    the islands sit, and a lower one still gating which cells become spots at all.
+    Without that gate every cell centre becomes one and the horse reads as polka-dotted.
+
+    Seed and propensity live on the Rn copy, following the precedent the owner
+    set for silver’s dapples earlier in the day, and
+    reusing roan’s own existing idiom — the forehead-white roll, a propensity
+    tested against a chance so that most horses get none. Roan went from three knobs off the
+    expressing copy to five, and the class javadoc says so.
+
+The test is statistical, and says so
+
+    RoanCornSpotTest could not do what
+    SilverDappleTest does, and the reason is worth recording. A corn spot cannot
+    be isolated on one horse: the painter reads its epigenetics from the build context, so
+    there is no way to paint the same roan with spots off and on, and
+    density varies enough between horses to move total whiteness far more than
+    the spots do. So the whiteness assertion compares means over 240 horses,
+    where the density spread averages out and a systematic suppression does not. The crisp
+    assertion is the other one — that corn spots are a minority trait —
+    because that is the claim the javadoc makes and the one that would be silently wrong if
+    the propensity roll were ignored.
+
+    Both passed first run, and the goldens moved by 8 of 1092 rows, all of them roan
+    horses — the same tightly-scoped result as the dapples, and the same method:
+    decompose the diff by column before copying anything back.

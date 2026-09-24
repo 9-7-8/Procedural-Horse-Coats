@@ -1,0 +1,92 @@
+2026-09-21, after the verification work — the roadmap is dismantled the same way, and a plan with no page now means a missing page
+
+    Same instruction, same day, the other list. The roadmap was
+    2498 lines and about fifty sections; it is now 363,
+    of which everything below the markers is generated. The rule is hard rule 9 in
+    CLAUDE.md, which now covers both indexes in one paragraph because they are
+    one mechanism.
+
+    The half that was new. Verification had it easy: every checklist was
+    about something that exists, so every section had a page to go to. A roadmap does
+    not — most of what is planned has no page precisely because it is not built. The
+    owner's call closed that: if an item is partly implemented its plans go on the
+    Roadmap tab of the page for the existing version, and if it is not implemented at all it
+    gets a new page carrying a Roadmap tab and nothing else. So “this plan has
+    nowhere to live” stops being a reason to keep a shared backlog and becomes a missing
+    page, and the page is already there to document the thing on when the first piece ships.
+
+Where it went
+
+    Twenty-four existing pages grew a Roadmap tab — the plans for a
+    subject now sit behind the same tab bar as what it does and how it is built, after
+    horse gear, which had been the only one.
+    Twenty new pages were written, each a single subject with a single tab:
+    undead horses, horsemanship,
+    the horse browser, the cart and
+    jump bench, attached model parts,
+    virtual stables, troughs,
+    stall bars, config,
+    rider comfort,
+    the magical gene backlog,
+    curly coat,
+    base-aware phenotype naming, and the seven researched-then-deferred
+    ideas — chase, magic grab,
+    storm fed, block preference,
+    forced riding,
+    momentum sprint and the lasso.
+    They are registered in wiki/pages.js under a Planned section
+    of their own rather than among the built pages, and the landing page carries them as a
+    section that starts collapsed — a reader looking under Items for a block that does
+    not exist is being lied to. When a piece of one ships, its page grows the other tabs and
+    its entry moves to the section it then belongs in.
+
+    One section deliberately did not get a Roadmap tab.
+    Deliberately out of scope — racing, competitions and the rosettes — was
+    the old page's single labelled exception, and it was never a plan: each entry was proposed,
+    considered and placed outside the base mod. It went to
+    design decisions, which is where an answer lives.
+    With it gone the page has no hand-written body at all, which is the whole point.
+
+The machinery, and the two things it had to be told
+
+    wiki/tools/bake-roadmap-index.mjs is the twin of the verification baker and is
+    deliberately the same shape: it harvests one note roadmap-summary sentence per
+    Roadmap tab, counts the panel's own headings, and hard-fails rather than write an
+    index that omits a page. It caught horse gear
+    immediately — that tab predated the contract and had no summary box.
+    The count is floored at one, because two pages dissolved their only heading
+    into the <h1> (repeating the page title under it read badly) and
+    “0 entries” beside a row that exists is simply wrong.
+
+    Two ids had to be renamed, and only two. #sex-linked and
+    #bond already existed on the genetics model
+    and horse care, so the moved sections became
+    #sex-linked-plans and #bond-roadmap. Everything else moved with
+    its id intact, which is what let 86 inbound links across 21 pages be
+    rewritten by one script rather than by hand. Historical mentions inside <code>
+    on this page were left alone: they record what a path was.
+
+What the move exposed, which is the part worth keeping
+
+    Putting a plan next to its subject made two things visible that were invisible while they
+    sat apart, and both are now recorded rather than quietly fixed.
+    Gap 301: seven pages already described the
+    same plan in their own words, and the two copies disagree — carrots on
+    whether the Epigenetic Stabilizer has a reason to exist yet, items on whether three or four
+    whistles share a texture, jumps on whether crossrails and the half-height rungs shipped.
+    The older half is usually the stale one, and the fix is a merge each.
+    Gap 302 is not a move artefact at all:
+    research papers’ Gameplay and Coding tabs give
+    opposite answers to what right-clicking a paper does, and it was found only because
+    a third tab moved in beside them.
+
+    The move was verbatim on purpose, which left one predictable class of damage: prose saying
+    “the table above”, “the chase gene below” or “a position this
+    page held twice” when the referent was the roadmap. Those were repaired in a separate
+    pass after the move rather than during it, so that the moving could be checked against the
+    source byte for byte first. check-links.mjs, check-gene-tabs.mjs,
+    sync-page-views.mjs, creator parity and both index bakes are green, and
+    headless Chrome confirmed the tab bars, the collapsed Planned section and its
+    Coding-view-only visibility. Nobody has looked at any of it, which is
+    three new items on coding notes —
+    ranked last, deliberately, because none of it can be wrong invisibly.

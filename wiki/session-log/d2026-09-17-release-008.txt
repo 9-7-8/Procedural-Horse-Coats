@@ -1,0 +1,103 @@
+2026-09-17, late — A long run of small things, and 0.5.008 out the door
+
+    Nine commits and a release, mostly of things that change what an ordinary horse
+    or an ordinary village is like rather than adding anything new to find. The through-line
+    was not planned: four separate items turned out to be a case of the mod contradicting
+    something it had already written down about itself.
+
+Breed spawn eggs get art, without becoming forty-five items
+
+    Forty-five drawn eggs came in. The item cannot be one per breed — a breed dropped
+    into .minecraft/phc/breeds/ after the jar was built has no registry entry
+    and must still get an egg — so the art is chosen by a
+    minecraft:select on the breed component's value, with the old
+    vanilla-egg model as the fallback every other breed takes.
+    tools/bake-breed-eggs.mjs derives the cases and the per-breed models from
+    the textures on disk, and hard-fails on a filename that is not a real breed
+    id — two arrived spelled “gypsey vanner” and
+    “halfinger”, and a case on a value no horse carries never matches and never
+    draws, which is the kind of failure that ships.
+
+Brindle was contradicting its own explanation
+
+    The owner's note said brindle was “backwards and inconsistent” and should
+    need two copies. Making it so turned up why it read as inconsistent: the gene's
+    stated cause is X-inactivation mosaicism — the pattern is a record
+    of which X each patch of skin silenced, which is the whole reason the two sides of the
+    horse never match — and a stallion has one X, nothing to silence, and cannot be a
+    mosaic at all. Yet under the old one-copy rule he was the common case: 2% of
+    wild stallions against 0.04% of mares.
+
+    So expressionOf now counts to two instead of asking “is every real
+    copy Brn”, and the difference is the gene. Segregation is untouched; only which
+    genotypes paint moved, and the crosses invert accordingly — a carrier mare's sons
+    go from 50% brindle to none, a Brn/Brn mare's from 100% to none, and the
+    only road to a brindle filly now needs the allele from both sides. The frequency went
+    from 2% to 10% per X because p of one sex is a far smaller number than the old
+    one-copy rate: at 2% the only horses that could show it were one mare in twenty-five
+    hundred. The pipeline golden moved exactly six rows, all of them
+    brindle=Brn/Y, and the new hash is byte-identical to the carrier's
+    — which is the proof that the stallion form now paints nothing.
+
+The horseman needed no mixin, and that was the thing worth finding out
+
+    Breed eggs on his counter were drawn from every breed in the game, so a Scandinavian
+    village sold Marwaris. The fix wanted to know which horseman was offering, and
+    the trades are fully data-driven — no ItemListing, no event to hook.
+    Reading 26.1.2's own sources settled it: AbstractVillager builds the trade
+    loot context with THIS_ENTITY set to the villager and
+    LootContextParamSets.VILLAGER_TRADE declares it required, so the loot
+    function can simply ask. It reuses the nearest-cowboy scan that already decides his
+    surname, so nothing new is stored and a cowboy who moves in changes the counter.
+
+    Where a region has no breed in a price band the trade is dropped rather
+    than widened or filled from the world pool — owner's call, taken against a measured
+    number: three of the ten regions have nothing in the commonest band. Both alternatives
+    lie, one about the price and one about the place.
+
+Twins, appetite, mutation
+
+    - Identical twins. Every twin pregnancy was two independent draws, so
+        every pair was fraternal. One pair in ten is now identical, and the owner's call was
+        true clones — the second embryo is not drawn at all, it IS the first,
+        epigenome included. Two things then fall out rather than being coded: an identical
+        pair can never be a colt and a filly, and it shares its lethal draw.
+
+    - Hunger follows the body. Linear in the scale, and the javadoc says
+        why it is not the metabolic exponent: real intake goes as mass0.75 against
+        a body that cubes with scale, which would put the smallest ponies past a week between
+        meals. The honest reason is that the hunger pool is a fixed 100 for every horse, so
+        what the number says is how fast a stomach-ful goes.
+
+    - Mutation. One bred foal in a thousand takes a magical allele from
+        nothing; one in a million takes two. Foals only, which keeps
+        MagicalVariant's rule intact. The roll sits at the end of the foal draw
+        so it shifts no other gene's inheritance, and before the eyes are forced so a mutated
+        gene that asks for an eye colour is honoured. Detection for the checklist compares
+        against both parents rather than storing a flag: it under-reports and never
+        over-reports, because every other allele a foal owns came from a parent.
+
+Blight, four markings, and an empty intake folder
+
+    Blight is verdant's opposite and reuses its machinery
+    entirely — the same spread verb, one new vocabulary word, and the
+    judgement about which blocks may be eaten staying on the game side where it belongs. It
+    will not touch a crop or a planted sapling, the same line melt draws around
+    packed ice.
+
+    Four markings intaken. Two had to move priority: they were written at 263 and 264, both
+    taken, and 250–298 is solid, so they sit at 248/249 and paint about fifteen places
+    earlier than intended. Every coat in the golden is byte-identical; the
+    1,092 rewritten lines are genotype code strings that grew a locus, and not one hash
+    moved. The design documents that were sitting in intake are roadmap 24.10–24.13,
+    the two tool gaps filed with the markings joined the mask-parameter list, and
+    Drag.md turned out to be already covered — better — by 24.4.
+
+The parity check had been red since flying shipped
+
+    Running it for the first time in a while found the creator's schema mirror missing
+    flight_true, flight_glide and cloud_walk as well
+    as the new cover. Nothing had caught it because nothing runs the check but a person.
+    That is gap 269, and it is a different shape from
+    the stale-fixture problem: the oracle was current and correct, and simply was not
+    consulted.

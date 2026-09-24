@@ -1,0 +1,146 @@
+2026-09-11 — a test kit you can finish, and a mask for liquids
+
+    A play session run as a conversation: the owner asked to be set up to test, tested, and
+    reported back, several times over. What the day produced is a test kit that is
+    worked through rather than looked at, three defects found by that testing and
+    fixed, and one new mask in the drawing engine. Nothing below has been seen in a client
+    since the last change; the checklist is the authority on
+    which parts the owner confirmed as they went.
+
+The kit: one hotbar, and a batch is deleted when it is done
+
+    - The kit filled all 36 slots and printed a 30-line legend. The owner: “SUPER
+        overwhelming. Let's start with one hotbar's worth of tests at a time.” It is
+        themed batches of at most nine now, batch 1 given on login and the rest behind a
+        dev-only /testkit n, so moving on costs a line of chat rather than a
+        rebuild and a fresh world. A batch is deleted once it is worked through and
+        the rest move up, so batch 1 is always the next thing to test - the breeds,
+        size and rebuilt-intake batches all went that way during the day.
+
+    - Every batch that tames carries a stick and every batch that breeds
+        carries golden carrots, on the owner's reminder. Preset eggs carry a
+        genotype and no epigenome: a stored one made every horse from one
+        creative egg the same horse, which is why a stack of trillium all stood in the same
+        place.
+
+    - Files the kit cannot make were prepared in the dev run's run/phc/ -
+        drop-in breeds (a dark-forest paint, a night-only cremello, one naming a missing
+        gene, one duplicating the Friesian), a drop-in gene, and a
+        breed-spawning.toml moving the Friesian and switching the Morgan off -
+        and a dedicated server confirmed all of them load.
+
+    - By the end the owner asked for tests that are not “does this look pretty
+        in-game”, so the front two batches are now ranked by what
+        fails badly rather than visibly (the goals themselves are on
+        the behaviour hierarchy): spontaneous breeding left in a field for days and
+        then counted, a ward beside a working spawner farm, pack leaders in one stable, a
+        dryad left half an hour; then ender echo under a rider, hydrophobic, food preference,
+        ocean-born.
+
+Three defects the testing found
+
+    - The debug stick did not count as taming. It called
+        tameWithName bare, which never fires AnimalTameEvent, so
+        GeneDiscoveryHandler.onTame never ran: a stick-tamed Morgan and Friesian
+        stayed “???” in survival's breed book, with no genes discovered and no
+        tame-a-mare tick. Hand-taming had the same bug once (gap 154) and
+        CrouchFeedGoal fires the event first; the stick does now. This is why two
+        breed-book checks looked broken and were not.
+
+    - Vanilla's minecraft:village POI tag had not loaded since
+        2026-09-07. It named horsegenetics:cowboy_hitch, which stopped
+        being a POI when the hitch and the table were split, and a tag with one missing entry
+        fails whole - taking vanilla's own village POIs with it. Found in the log while
+        checking something else. Waiting:
+        the villagers verification tab.
+
+    - Bare stripes along the spine on both drip genes: WAVES
+        displaces the whole band, so a far edge at 1.05 with a 0.2 amplitude dips to
+        0.85 of the barrel once per wavelength.
+
+Drawings that stand somewhere, and a gene that lied about itself
+
+    - Six SVG barrel drawings - taper flame, barred wing, candelabra, inkcoil, trillium,
+        uraniid - all placed their viewport at originU 0.27, so every horse wore
+        its drawing in the same spot. originU is a per-copy knob now
+        (posU 0.12-0.40): shoulder to hip, checked on a side-view render at six
+        seeds each, and it inherits with the allele copy.
+
+    - Taper flame was “a very very narrow white streak” - as
+        traced the flame is 150 by 752 in its viewBox, three texels wide on the horse, with an
+        outer skin under one texel. Every mask widens it 2.6× about its own centre line
+        now; 3.2 was tried and reads as an egg.
+
+    - A preset egg names only the loci it is given and leaves the rest at their defaults,
+        which comes out black - so the black barred wing and the nightbell
+        foxglove were invisible in the kit. Both spawn on a palomino.
+
+    - Rainbow Drip is Ribbon Drip. Two horses in three carry the pale
+        allele, whose rim is grey to white, so the name argued with the horse in front of you:
+        “the name makes it SUPER confusing”. The key stays
+        horsegenetics.rainbow_drip - it is the genotype code's spelling - and the
+        coat golden confirms no horse changed.
+
+GOO: the first mask for a liquid
+
+    Ooze drip “looks like triangles”, and needed to be “more irregular and
+    curved”. That is not a tuning problem: WAVES is one periodic function,
+    so every lobe is the same length, width and spacing, and at the two or three texels a lobe
+    gets on a barrel a sine is a zigzag. A liquid is not periodic - the whole read of
+    a drip is that one ran further than its neighbour. The owner gave permission to extend the
+    engine for it.
+
+    - A distance field, not a displaced line: a half-plane for the band, a
+        capsule per drip, a disc for each tip, unioned with a polynomial smooth-minimum so the
+        joins fillet like a meniscus. Every drip draws its own length, width and place from the
+        seed; chance leaves cells empty; sag bites an arc out of the
+        edge between two drips, because a ruled line with beads on it reads as a wire. Only
+        from and to are in the band's space - every other length is
+        body units, because a drip has to stay round.
+
+    - An end face is carried round the corner. The rump has one value of the
+        band's own axis over its whole surface, so it took a single drip's answer for the lot
+        and came out a slab, which is what the owner saw. The pattern continues round from each
+        flank and the two meet in the middle of the face.
+
+    - All five places a mask touches: SpecSchema, SpecPainter, the
+        creator's schema.js and spec-engine.js, and both docs tables -
+        plus a prismatic.json layer so parity reaches it. It was watched go
+        red: a port returning zero fails 43 checks and a missing corner wrap fails one, but
+        a 2% change to the field and a changed sag bite both stay green.
+        Gap 194 records exactly that, because
+        “parity is green” is worth only what the probe can discriminate.
+
+A log line instead of a chore
+
+    Checking that a breed carries only the disorders on its sheet meant taming horses one at a
+    time and reading their genes, which the owner declined - reasonably. Every breed founder
+    the server rolls now logs a [breed-health] line of its health genes against its
+    sheet, with a WARN ... NOT ON ITS SHEET for anything the sheet does not list.
+    Two dozen Quarter Horses and two dozen Thoroughbreds later: three HYPP carriers, no
+    warnings, and the answer came out of a grep rather than out of an evening.
+
+Owner-verified in-game
+
+    - The custom egg's Breed list starts at Feral Mixed and carries drop-in breeds; gene hover
+        pictures.
+
+    - A drop-in breed registers, fills its Breeds row when tamed in survival, shows its About
+        text, and its herds spawn wild in the biome its file names - the
+        breed_herds biome modifier, which nothing had tested.
+
+    - A moved Friesian's entry gives the new biome and its herds are found there; a night-only
+        breed's herds appear only after nightfall (9 founders after /time set night,
+        none before); a switched-off Morgan keeps its label and its entry, and has no egg in the
+        creative tab.
+
+    - A drop-in gene loads from phc/genes/ and draws.
+
+    - Size by copy count, all of it: Clydesdale Big/Big, Shire Big/n,
+        Falabella Small/Small, Connemara Small/n, and two Connemaras
+        throwing all three kinds of foal - including the ordinary-sized n/n at
+        exactly 1.00x.
+
+    - The rebuilt-disjoint intake marks: corolla, agate eye, barred wing, uraniid, trillium,
+        foxglove - and, after the fixes, the widened taper flame, the drawings moving along the
+        barrel, and the dark forms on a palomino.

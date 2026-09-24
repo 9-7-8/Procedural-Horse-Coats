@@ -1,0 +1,65 @@
+2026-09-15, evening — what the three tools could not reach, and a breed that shapes its own herds
+
+    The ask was whether the breed designer, the horse designer and the custom spawn egg were up to date. The
+    artefacts were: re-running every bake moved nothing of substance — index.html,
+    pages.js and the creator's textures.js came back as modified but with identical content,
+    line-ending churn only, and were restored. So "up to date" turned out to mean two things the tools could not reach,
+    one new feature, and a drifted twin.
+
+    - Fertility was offered on no step at all. horsegenetics.fertility is natural and
+        NATURAL_OTHER — and every breed-designer step filters by family or by a named key list, with
+        no step covering that family. So a breed could never say anything about subfertility or twinning. It now has a
+        Breeding step of its own (owner's choice of the three placements offered).
+
+    - magical_variant was silently dropped on a round trip. The key went into the parser
+        earlier the same day; bd-core.js neither read nor wrote it, so a breed file saying it has no magical
+        herds lost that on load-and-save. Fixed, with a checkbox on Price and kind.
+
+    - A breed can now say how its wild herds are founded (BreedHerd,
+        the format page) — the share founded as bachelor bands, and how
+        many stallions and mares each kind of band wants. The order of events is what shaped the design.
+        The first cut was a single bachelor_chance number; the owner asked for the full makeup, at which
+        point the honest constraint surfaced: vanilla spawns the pack before the breed is chosen
+        (HerdManager elects a lead, derives the breed from its seed, then founds over the clump). So the
+        sexes are ours to assign exactly, and the counts can only be a preference clamped by the clump — put to
+        the owner as "assign within the clump" against "spawn extra horses to reach the minimum", and the first chosen,
+        with the limit to be stated on the page. The assignment is made over the whole clump from the lead's seed, which
+        is what lets every member agree on who is a stallion without talking to each other. Precedence when it cannot
+        have everything: the stallion range, then the mare maximum, then the mare minimum.
+
+    - Family relations were left out on purpose
+        (roadmap §15). Doing them honestly means founding rolls a foal
+        from the lead and a mare rather than independently from the sheet; stamping mother and father ids
+        without the descent was offered and rejected, because the pedigree screen would then assert a relationship the
+        genetics contradict.
+
+    - The twin was audited against hard rule 5, and the rule itself was the least accurate document of
+        the set: it named variantPair and randomizeGenes, neither of which has existed in
+        either file since the identical rules moved to common/EditorRules. Four real drifts fixed —
+        Clear rerolled the epigenome in game but not in the browser, paste skipped
+        enforceSexLinkage, the browser drew an empty list where the screen says "No gene matches", and the
+        dropdown panel had lost the screen's 0xF0 alpha. Both files also claimed Export / Import sit in
+        Copy horse's slot; they sit one row higher, in Make egg's. Two findings were left as
+        gap 254 and gap 255 rather than
+        fixed in the same pass.
+
+    - Hunger needed nothing. Worth writing down, since it was asked: there is no hunger gene.
+        common/care/Hunger.java is pure constants driven by the diet gene and Food's order, and
+        the designer's Diet step already offers diet and food_preference.
+
+    - Green: :neoforge-26.1.2:build, creator parity (7169 checks across 60 cases),
+        check-links, build-search-index, the designer boot check,
+        check-ai.mjs (35 checks — which, usefully, already boots the breed designer), and the breed
+        test classes including a new BreedHerdTest at 12 of 12. The 50 shipped breed files are deliberately
+        unchanged: no breed sets herd, and the writer never writes a default.
+
+    - A one-off headless probe of the breed designer (scratchpad, not checked in) pushed the new block
+        through the game's own parser in wasm: 17 checks, all passing. It cost two false starts worth remembering —
+        the page will not boot from file:// (it fetches marking-facts.json, so
+        boot() never runs and bd.api stays null; check-ai.mjs stands up an HTTP
+        server for exactly this reason), and checkBreedJson returns ok, not
+        good — asserting the wrong field name reported four failures that were entirely the probe's.
+
+    - Not played. Wild-herd founding changed for every breed, and none of it has been in a world:
+        verification §0-ED, which is ranked first because a
+        disagreement between clump members fails invisibly — as two herds where there should be one.

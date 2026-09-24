@@ -1,0 +1,82 @@
+2026-09-10
+
+The eyes stopped being a channel and became thirteen genes
+
+    The owner asked for eyes that are “extremely polygenic”, specified locus by
+    locus: iris colour and sclera colour per eye, a heterochromia sector and a colour for it
+    per eye, a glowing iris and a glowing sclera per eye, and a third eye on the forehead that
+    can copy one of the others, mix them, or invent itself. Thirteen loci. Then the harder
+    half: the natural genes that used to paint an iris should stop, and ask
+    the eye loci for one instead.
+
+    What made it a design question rather than a port was where the asking
+    lands. The old channel applied a claim at bake time, so a splashed white
+    horse’s blue eyes were paint: real while it had the splash, gone the moment a foal
+    did not inherit it. The owner chose the other answer — the requested allele is
+    written onto the horse when it is made, so a splashed foal genuinely
+    carries MBl/MBl, shows blue eyes, and passes blue eyes on to foals that are
+    not splashed at all. Blue spreads through a herd the way any other allele does. That is a
+    bigger claim than it looks and it is the reason Eyes.force runs in
+    Genome and nowhere else: forcing twice, once with epigenetic midpoints and
+    once with the real numbers, would destroy the horse’s own eye alleles on the first
+    pass and leave the second unable to tell that it had.
+
+    The cost that had to be paid for it is on
+    gap 174. The old “this horse is broadly white however
+    it got there” rule measured the finished coat, which is the honest signal and is
+    unavailable at breeding time. It is a declared per-locus sum now, and it will be wrong on
+    horses whose white patterns overlap or avoid each other.
+
+    Three real bugs came out of the painting. Two were new and one was old:
+
+    - blendToward at strength zero still wrote the base colour, and
+        these are absolute last-writer-wins writes — so tintIris walking
+        over a sclera texel with weight 0 silently undid whatever the sclera painter had just
+        put there. A black sclera came out white.
+
+    - Iris and sclera were told apart by the luma of the coat. That stopped being
+        true the moment an iris could be invisible: a cleared iris shows the horse’s own
+        coat, which on a pale horse is bright, so the sclera painter claimed it. Both are read
+        off the template now, which never changes.
+
+    - Not redrawing the template over an invisible iris is not enough to make it invisible,
+        because the composite multiplies and the template’s iris is black. A
+        skipped texel came out black — the template’s own eye, which is exactly
+        what it was supposed to remove. Invisible halves are recomposited against plain white
+        before the redraw.
+
+    And one that had nothing to do with eyes. The weather loci minted allele
+    tokens as T+ and T-, and - is
+    Genotype’s own gene separator — so any horse carrying a
+    “suffers in” allele wrote a genotype code its own parser could not read back.
+    Nothing had caught it because it needs a founder to actually roll one, which is a few
+    percent of a few percent. Adding thirteen loci shifted the founder RNG stream and three
+    unrelated tests went red at once. The suffix is v now.
+
+    What was deliberately not done. The eye loci get no
+    wiki/gene-*.html pages: thirteen near-identical pages would be thirteen places
+    for one fact to go stale, and Eye colour is already declared
+    the single source of truth for eyes. The four magical genes that paint eyes directly
+    (dhampir, shadowcreature, light, magic sectoral heterochromia) were left exactly as they
+    were and are now audited on that page — two of them are redundant, and
+    gaps 175 and 176 record the calls the owner has to make.
+    The leopard complex’s white sclera rim was left alone too: it is not an iris colour,
+    and there is no allele meaning “more of the white shows”.
+
+    A fourth bug, found by reading a test while waiting for it.
+    CoatTextureComposerTest’s broadest case builds each genotype from a
+    bitmask over Genes.codeOrder() and writes (1L << n) - 1 for
+    “every gene on”. Java masks a shift distance to six bits, so past 64 genes that
+    silently becomes 1L << (n & 63) — at 291 genes, a shift of 35.
+    Three thousand random masks leave every locus from the 36th onward pinned to its last
+    allele, and nothing goes red because the test only asserts that a bake returns a full
+    sheet. It has been wrong since the registry passed 64 genes. Recorded as
+    gap 177 rather than fixed, because the same test is roughly
+    six and a half thousand whole coat bakes and is on its own a large share of the ten-minute
+    suite — widening it without sampling would make that worse.
+
+    Every horse in the world changed. Brown is the dominant iris allele, so
+    every horse now has a painted brown iris where it had the template’s flat black.
+    Both goldens moved wholesale, all 203 gene icons were rebaked, and none of it has been seen
+    in game — eye colour’s verification tab is the checklist, and
+    its first four items are the ones that could be wrong rather than merely unseen.

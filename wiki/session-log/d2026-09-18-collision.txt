@@ -1,0 +1,78 @@
+2026-09-18, after the carts — Six mods add a steel, and the mod stops loading
+
+    A tester put v0.5.012 on a 319-jar pack an hour after it was published, and it did not
+    start. Not a broken armour — the mod did not load at all, which on
+    their server meant the server did not come up. They sent back the stack trace, the
+    compat: line above it, a table of every colliding id, and two reproducers.
+    Almost all of the diagnosis in this entry is theirs; the session's work was deciding what
+    the fix should be and finding out what else was hiding behind it.
+
+java.lang.IllegalArgumentException: Duplicate registration redstone_alloy_horse_armor
+    at DeferredRegister$Items.registerItem(DeferredRegister.java:714)
+    at ModdedArmour.<clinit>(ModdedArmour.java:93)
+
+A name that was never unique
+
+    compat/ModdedArmour registered one horse armour per scanned metal, and the id
+    came from the material name alone: steel_horse_armor. Leaving the mod's name
+    out is deliberate — “Steel Horse Armor” is what a player searches for
+    — but it was written as though a material were an item. It is not. The scan dedupes
+    by namespace:path, one level finer than the id it hands to the registry, so
+    six mods each adding a steel ingot produced six items wanting one name.
+    Nineteen material names collided on that pack; redstone_alloy was merely the
+    first one the registry reached.
+
+    The crash lands in a static initialiser reached from the mod constructor, which is what
+    turns a cosmetic clash into an ExceptionInInitializerError and a dead mod.
+    Gap 274 had actually described this feature already,
+    and got it wrong in a way worth recording: it said “the ids differ, so nothing is
+    ambiguous to the game”. True of gates, whose ids carry a namespace. False of
+    armour, whose ids did not. The sentence was checked against one half of a feature and
+    written as though it covered both.
+
+Collapsing was the honest fix, not only the cheap one
+
+    Ids now collapse by material name: six
+    steels give one Steel Horse Armor, the winner being the lowest item id so load order stays
+    irrelevant. The tempting alternative — put the namespace in the id — was
+    rejected twice over. It gives the player six near-identical recipe-book entries, and
+    it would not have fixed the crash: the tester had also found
+    extendedae:entro_crystal and extendedae:entro_ingot, which
+    collide inside a single jar. Collapsing is also simply more correct, because those six
+    steels already share a c:ingots/steel repair tag — six registrations
+    would have been six identical items.
+
+    The thing that had to be got right alongside it: all six ingots still forge the
+    armour. Recipes are written per ingot rather than per armour now, because the
+    alternative is a dead end a player cannot see — holding a steel ingot, looking at a
+    steel armour in the recipe book, and watching the grid refuse. And
+    metals() deliberately keeps every one of the 167, because the bench colours a
+    fitting from whichever ingot was actually put in it.
+
+Two things found by looking, and one by booting
+
+    The tester's second reproducer, bloodmagic:ingot_hellforged, showed the affix
+    strip was prefix-blind — it would have been sold as “Ingot Hellforged Horse
+    Armor”. Both ends are stripped now. Separately, the generated pack's fingerprint
+    turned out to hash what the mods are and not what the rules do, so this
+    very rename would have left upgraders holding a folder built the old way; it carries a
+    rules version now.
+
+    And the last bug was the session's own. The report asked for a guard so that a compat
+    <clinit> could never again kill mod construction, which was right, and
+    the first version of that guard declared its Set below the static
+    block that used it. Static initialisers run in source order, so the field was
+    null and the anti-crash guard crashed at load — the identical failure shape, in the
+    code added to prevent it. A runServer boot caught it in about ninety seconds;
+    a green build had not, and could not.
+    Written up, because nothing but a real mod
+    load runs those blocks in anger.
+
+    Shipped as v0.5.013 with the jar attached. Verified as far as a server can verify it: 5
+    metals scanned, 4 armours registered, entro_horse_armor once,
+    hellforged_horse_armor correctly named. The per-ingot recipes are not
+    verified at all — the synthetic mod registers no items, so every generated
+    recipe still takes the itemExists skip, and that is now the most likely thing
+    in the release to be wrong (§0-FQ,
+    gap 272). The next real question is one only the
+    tester can answer, and it is worth asking for the launch log either way.

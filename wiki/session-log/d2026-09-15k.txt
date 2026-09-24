@@ -1,0 +1,86 @@
+2026-09-15, after the client was closed — six hours of yard log, read
+
+    No code this session. The 16:11 runClientTestWorld had been left running and was
+    closed at 22:14 with six hours and two minutes of log behind it: 181 censuses,
+    106 watched pens, 106371 mod lines and not one exception. Nobody typed a
+    command or a chat line all run, so this is a purely unattended read — which decides what it
+    can and cannot close. Everything below came out of that one file.
+
+Closed, with the evidence moved onto the owning page
+
+    - No tree grows through a horse, and the pens still grow trees (gaps 237 and
+        244, both deleted  dryad).
+        These two pull against each other, so both had to be read off one run. Zero
+        inWall damage lines in six hours; and since every dryad pen read
+        none of its watched blocks are present at census 1, the 99-log dark oak in DRYAD DARK
+        SMALL, the 26 in DRYAD DARK and the 30 birch in OAK+BIRCH all grew during the run. DARK SMALL
+        was the pen the two-block hold-back was expected to strangle, and it grew a full tree with its
+        horse standing in it.
+
+    - The bone meal allele never touches a crop (
+        dryad). Three
+        gene fertilised lines, all grass, never wheat. The pen's wheat did drop from 8 to
+        6 — because its horse ate two, which the hunger log says plainly.
+
+    - A carrier pair throws 1:2:1 (
+        breeding). HYPP 23:48:24
+        over 95 foals with all 23 dead; lethal white 22:47:28 over 97; size
+        20:58:24 over 102; brindle 61 plain colts to 58 brindle fillies with no
+        brindle colt. Every shadow draw agreed and no mare shared a random source with her stud. That is
+        the second clean instrumented run, so gap 245 shrinks to
+        the unexplained history of the 19:08 run's 0 in 35.
+
+    - Hunger, over a length that matters (
+        horse care). The order pen ate the cake, then the
+        hay, then stopped; STARVING held 11.0/22.0 for the whole six hours while its hunger drained to
+        zero.
+
+    - The splice carrots' spread over many foals (
+        splice carrots). Six pens, no
+        FAIL anywhere, 350 foals landing a new allele and every one in its carrot's theme.
+        The unthemed pen alone ran 106 foals with no death, no dwarf and nothing below baseline health.
+
+Three new gaps, all found in the log rather than looked for
+
+    - 258: a ratio pen whose pregnancy is lost early is
+        never covered again. The best find of the session. Row W's three pens conceived once or
+        twice in the first few thousand ticks and then sat idle for six hours, while row U's pens beside
+        them ran a hundred conceptions each. Every pen that stalled had an early loss; the three
+        that ran all day lose their foals at birth instead. The mares are still cycling — both read
+        In heat at the last census with their studs on 0 covers today — so
+        heat is reached and the cover never happens.
+
+    - 259: a pen's watch line lists its neighbour's
+        mare. SPLICE WHITE carried SPLICE DILUTION's mare through 278 censuses and CROSS SAME
+        carried BOND's through 643, each counted in both pens at once. A reporting fault, not a gameplay
+        one, but it double-counts exactly where the yard is packed tightest.
+
+    - 260: the yard's soundness check reports a blocked
+        spot and nothing acts on it. Every build logs 1 blocked at head height, around
+        x=3 and carries on. A warning that is always there teaches the next reader to skip it.
+
+Two things that looked like findings and were not
+
+    - The filly and her brother. Gap 234 nearly
+        got closed on this run: both horses dispersed, no kin pair formed, and the colt ended as a lone
+        bachelor lead. But LEAVING HOME staggers its colt three minutes behind its filly, so he
+        had not left when she chose and was never the nearest bachelor. closeKin was never
+        asked the question. The pen has to drop the stagger before this means anything, and the entry now
+        says so.
+
+    - “50 breeds registered”. The log says 50 while 122 breed files sit on
+        disk, which reads like a loader dropping them. It is not: the run started at 16:11 and the
+        evening's first breed commit landed at 18:58, so the client simply predates them.
+        index.json has 122 entries and matches the folder exactly. What is genuinely
+        stale is wiki/horse-designer/assets/breeds.json at 108 — the last fourteen
+        breeds are still unbaked, as the block at the top of
+        verification says. That bake is deliberately deferred:
+        the owner has more breeds to add and will bake once, after them, rather than twice. The client that
+        originally blocked it is closed, so the only reason left is the coming batch.
+
+    Nothing was removed from the tester guide, deliberately.
+    That page is where checks go when the yard cannot settle them — a player in a normal
+    world, on a shipped jar — so an unattended dev run does not prune it; it feeds it. The one
+    thing this run reinforced is that coat baking: 0 bakes is expected with nobody at the
+    keyboard, so gap 221's coat budget can only ever be answered by
+    a tester riding into a herd with a log attached.

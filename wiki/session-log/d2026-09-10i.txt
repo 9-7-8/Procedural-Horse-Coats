@@ -1,0 +1,82 @@
+2026-09-10 (evening) — three play sessions, fixed as they came
+
+    The owner played the build three times in one evening and reported as they went; the
+    session was almost entirely answering what they found. Commits 363b3a8 to
+    759f184.
+
+Owner-verified in game
+
+    - Fireproof protects horse and rider, floats in lava, and immunity ends on dismount.
+        Bird boned protects horse and rider.
+
+    - The spawner fires on feeding, uncapped (tested with a carrot on a plain horse).
+
+    - Potion milk, single and double copy, including the two-effect merge.
+
+    - The spawn egg's gene search box. Height in hands on the info screen and in My
+        horses.
+
+    - Hand-feed taming. Every eye locus - third eye, glows, sectors.
+
+    - The research shelf stores papers; stall tickets land a horse properly (as a basis);
+        the Breeds tab in creative; molten hooves' prints render.
+
+What was built, and the reason behind each
+
+    - Immunities are damage cancels, not per-tick resets. Fireproof only
+        called clearFire(), which stops burning but not lava's direct damage;
+        vanilla's fire immunity is an entity-type flag no gene can set. A rider's
+        fall damage turned out to be the horse's, handed down by
+        propagateFallToPassengers, so bird boned never covered riders either.
+
+    - A ridden horse is simulated on the rider's client. This explained
+        two bugs at once: server-side velocity nudges never reach it (so lava buoyancy is a
+        synced GRAVITY attribute modifier), and its server-side velocity is
+        exactly zero (so every on_move effect was silent under a rider; movement
+        is now measured by position between ticks).
+
+    - tickCount is not saved. The spawner's once-a-day timer
+        and dryad's 9 000-32 000-tick sapling needed that many unbroken ticks of one horse
+        staying loaded. Every timed beat now counts on saved game time, offset per horse by
+        UUID. The spawner then moved onto feeding at the owner's call, uncapped, counting only
+        a meal actually eaten - an uncapped trigger on a free click would be infinite.
+
+    - The spawner's colour was promised on its page and never read: a
+        per-copy epigenetic value now picks from the spawned mob's own colour data component
+        (server/MobVariants).
+
+    - Molten hooves became real prints on the ground - the mod's first
+        particle type (horsegenetics:hoofprint, flat, emissive, coloured, laid by
+        stride) - and then four alleles at the owner's design: a dominant white and three
+        recessive colours, black unlit.
+
+    - Stalls land a horse at the centroid of the floor, checked against its
+        box - it had been centred on one tile, and a horse is 1.4 blocks wide - and report the
+        real ceiling height. The holding pen (one per player, owner-confirmed
+        after briefly considering several) sends any owned horse to a general pen.
+
+    - The research shelf became a chest of papers, then copied like a
+        furnace on the block entity. Two bugs found on the way: its drops ran after the block
+        entity was gone, and its labels were offset twice.
+
+    - Hand taming never fired AnimalTameEvent, so it reached
+        neither the breed book nor the tame tasks. The Breeds tab's plate is now
+        BreedFounder.plate, with no unnamed magic.
+
+    - A search box on both gene editors, one rule in EditorRules; a generated
+        timeline of genes; the debug world's kit re-aimed
+        at the checklist, a standing request.
+
+Lessons
+
+    - Ask where a ridden entity is simulated before touching its movement.
+        It cost three separate symptoms before the one cause was named.
+
+    - A PowerShell function called as F 'a' + $x + 'b' gets five
+        arguments, not one. A cut-between-markers helper called that way deleted
+        about a thousand lines of the checklist; it was restored from git and the edit redone
+        with the Edit tool. Wrap every concatenated argument in parentheses, or don't script
+        multi-marker edits at all.
+
+    - A compile ran once while the owner's client was open, because the window check and
+        the build were one command. Gate the build on the check.

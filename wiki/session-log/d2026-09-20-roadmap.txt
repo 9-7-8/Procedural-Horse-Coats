@@ -1,0 +1,53 @@
+2026-09-20, later — The roadmap stops being four lists in a trench coat
+
+    Wiki only, by instruction: no code was touched. The roadmap had
+    grown to a little over three thousand lines and only a fraction of it was a roadmap. It
+    carried defects in shipped code, questions waiting on the owner, a long record of settled
+    calls under “do not reopen”, and — the reason it kept growing —
+    shipped work that had been annotated rather than deleted. Whole sections
+    opened with a green note saying the section was done. The owner’s instruction was
+    blunt: nothing in there but planned future features.
+
+    The settled calls became a page. They are the largest single thing that was
+    in the wrong place and the one with the clearest claim to existing somewhere: roughly five
+    hundred lines of “this was asked, this is the answer, here is why”, which is
+    exactly the material a later session re-litigates if it cannot find it.
+    Design decisions now holds them, regrouped by subject rather
+    than by the date they happened to be made — what the mod deliberately is not doing,
+    the authoring calls, the coat pipeline, the genetics model, health and aging, care and
+    the gameplay layer — with the dated batches kept underneath in their original words.
+    The open questions went with them, including four that were scattered through the backlog
+    as if they were tasks: the champagne foal’s eye colour, the studbook taxonomy, what
+    a breed’s country field is for, and the provisional calls made
+    overnight that nobody has confirmed or reversed.
+
+    Five defects moved to known gaps (292–296):
+    the leopard complex not reading the coat it is handed, the one-tick default-black wild horse,
+    the equipment that does not follow Attributes.SCALE, the hemizygous locus that
+    prints as a pair, and the Java comments still pointing at roadmap anchors this change
+    deleted. That last one is the price of a wiki-only session and is written down as such:
+    four one-line comment edits nobody can make from here, and no check that would catch them,
+    because check-links.mjs does not read Java.
+
+    Two things were stale rather than merely misfiled. The roadmap still listed
+    the saddle not fitting a resized horse; it was fixed and confirmed in a world on 09-16, and
+    the items page has the write-up including the wrong
+    diagnosis that preceded it. And the pipeline page still said
+    EDNRB’s frame band and every cover knob were whole-horse fractions.
+    Checked against EdnrbGene rather than against the prose: the band is measured
+    on the barrel’s own bounds and paintFrame sorts the field and cuts at the
+    quantile matching cover. Both claims were deleted. The roadmap had
+    recorded both as done and nobody had propagated it, which is the failure mode the
+    delete-don’t-annotate rule exists to prevent, caught in the act.
+
+    Also written up rather than dropped: how to write a gene’s science tab
+    is technique now, including the rule that none of
+    it is ever written from the model’s memory. The roadmap keeps the list of which tabs
+    are still thin, without the word counts — those were a derived number sitting in prose,
+    which is the repeat offender.
+
+    The result is 1,700-odd lines of planned features, sections named and not numbered, and four
+    named destinations in a note at the top so the next thing that does not belong has somewhere
+    to go. CLAUDE.md’s routing table gained the new page and the roadmap rule
+    was rewritten to say “planned features only” rather than “unbuilt
+    work”, which had been quietly wide enough to admit all four lists.

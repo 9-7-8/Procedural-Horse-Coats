@@ -1,0 +1,48 @@
+2026-09-17, and then — Flaxen fades from root to tip
+
+    The last shovel-ready item on the natural list. Flaxen
+    computed one flat score per part and applied it to every texel of the mane and
+    tail, so its only variation was the strand mixing. A real flaxen mane is darkest at the
+    crest and palest at the ends, and that is the one thing a uniform wash cannot look like
+    however good the strands are.
+
+    It was a one-line insertion, because the seam was already there. The
+    painter modulates its per-part score once already —
+    s * (1 - STRAND_DEPTH * strands) — so the gradient is a second factor at
+    exactly that point, and the two compose without either knowing about the other. No new
+    machinery at all.
+
+The coordinate was already solved, twice
+
+    The roadmap said the gradient “wants a coordinate along the hair rather than across
+    it” and noted HairPattern.axesBySpan as the seam. It was more solved
+    than that: grey’s hairRootLead already
+    uses axesBySpan(skin, part)[1] to let a mane grey ahead of the body, and its
+    comment records that this axis runs root to tip on both parts with the middle of
+    the box as the root — the same axis the midtstol is
+    centred in. So flaxen reads the existing convention rather than deriving its own.
+
+    That was a deliberate choice and worth the sentence: a second way of finding the
+    same coordinate is how two genes come to disagree about where a horse’s mane
+    begins, and this repository has already paid for that class of drift today, when
+    CoatSampleTool kept asking grey for an allele the locus had dropped. Three
+    genes and one test now move together if the convention ever changes.
+
+Depth on the allele, and a measurement rather than a look
+
+    How deep the fade runs is epigenetic on the copy, following the precedent set for
+    silver’s dapples and
+    roan’s corn spots: it inherits, drifts, and runs down to
+    zero — a horse at zero draws the flat mane the gene drew before, which is a real coat
+    rather than a failure.
+
+    FlaxenRootToTipTest compares mean surviving red in a band near the root
+    against a band near the tip on the same horse, which the roan test could not do and
+    so had to go statistical. It also checks that depth varies across horses and that nothing
+    outside the mane and tail is touched. All three passed first run, and the goldens moved by
+    24 of 1092 rows, every one carrying a flaxen allele.
+
+    The direction is the thing most worth checking in game, and the reason it
+    is first on the checklist: a reversed gradient still looks
+    like a gradient in a screenshot, so the test asserts which end is darker rather than that
+    the two differ.

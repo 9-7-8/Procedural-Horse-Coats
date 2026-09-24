@@ -1,0 +1,54 @@
+2026-09-16, afternoon — the release note described a tenth of its own release
+
+    “The 0.5.002 release has a VERY incomplete changelist.” It
+    did. The note was written the morning the dyeable-tack work landed, by the session that
+    did the tagging, out of what that session remembered building — so it described
+    dyeable tack. The range behind the tag was 297 commits over five days.
+    No code changed this session; both records of what 0.5.002 is were rewritten.
+
+What the note had left out
+
+    Everything except the tack, essentially. Seventy-three new breeds
+    (49  122), magical herds, natural breeding with heat, pregnancy and twins, gelding
+    and the vet’s kit, hunger, wild bands, KIT’s full W1–W39 series with
+    SW9, SW10 and DMRT3, heat and cold tolerance, the dhampir split into loci and a breed, the
+    ender whistle, cowboy regions and drop-in name tables, the family tree, F8 and the dive
+    key, and the coat-bake freeze fix. Releases is the
+    account now.
+
+How the range was audited, so the next one need not be
+
+    Git answers the what cheaply — the commit log with
+    --stat, per-tag breed counts, the en_us.json diff (the best
+    single proxy for new items, blocks and keybinds), recipe and source adds and deletes,
+    config defines, and gradle.properties for a version bump. It
+    does not answer the why, which lives only in this page, so the entries for the
+    range were read in a subagent and each item marked player-facing or dev-only.
+
+    The trap is that most of a heavy range is unreachable in a real jar.
+    debug.tools defaults to !production(), so the test yard, the
+    test kit, the debug pens and the stall overlay — the bulk of this range’s
+    commit count — are off in anything a player installs. A commit subject alone will
+    mislead you: “A way out every 25 pens in the horse dimension” reads
+    exactly like a player feature and lives in DebugPenManager. Check the gate,
+    not the subject.
+
+The wiki had no 0.5.002 section at all
+
+    Its player-facing record stopped at 0.5.001, which is the easier of the two records to
+    forget precisely because it is not where the work was happening. Both now carry the same
+    account, including what the release does to an existing world — removed genes drop
+    to their default rather than breaking a save, the cream/pearl rebuild moved several
+    breeds, four breeds were shorter than their own table row claimed, and new breeds are
+    written back into an existing breed-spawning.toml — and an honest
+    rough-edges section naming the mare who loses a pregnancy early and is never covered
+    again. The release was retitled off dyeable tack, which had come to argue with
+    its own body.
+
+    The standing rule this produced: write the note from an audit of the whole tag range, at
+    tag time, never from what the tagging session remembers. It pairs with the note in the
+    entry below — that the wrap-up routine ends at “verify clean” and never
+    mentions publishing a release. Both gaps are in the same seam, and
+    CLAUDE.md is at exactly 300 lines, so adding a release step to the
+    wrap-up means choosing a line to delete — an owner’s call, not a silent
+    restructuring of the standing rules.

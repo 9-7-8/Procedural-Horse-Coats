@@ -1,0 +1,75 @@
+2026-09-18, after the pull session — A flying breed that could not fly
+
+    Cloudtouched, a second magical breed, from a design a friend of the
+    owner wrote and handed over as JSON. The brief was: make it a base breed, make it
+    super rare, make it a genetic example of a true flyer, and make sure it has
+    bird-boned. See the breed book and the file
+    itself, which carries the reasoning in its notes.
+
+    The design pinned no flight gene at all. That is the whole entry,
+    really. It pinned barred wing — which is a
+    butterfly marking drawn across the ribs, with two paint layers per expression and zero
+    effects blocks — and nothing else that leaves the ground. Because
+    flying is registered MAGIC_BEHAVIOUR, and
+    BreedFounder.roll forces every unnamed magical locus to wild
+    type, every founder would have rolled n/n. The breed would have shipped
+    as a fast jumper with a marking that looks like a wing, and nothing in the build would
+    have said a word about it — no warning, no test, no log line. Worth knowing in
+    general: for coat, magical and disorder loci, omitting a gene is not “leave it
+    natural”, it is “homozygous wild type”. Only the natural performance
+    loci fall through to the gene's own founder table.
+
+    The flight is a reservoir, not a supply. The pool seeds
+    El/n, El/Tf and Tf/n and never
+    Tf/Tf, which honours the flying gene's own
+    owner's call from the day before — true flight is bred for rather than found,
+    and a glider may be carrying it without anyone knowing. Here that carrying actually
+    happens at a findable rate: Tf sits at 28% allele frequency, so two
+    Cloudtouched bred at random throw a true flier about one foal in thirteen and two
+    known gliders one in four. n/n is absent from the pool, so there is no
+    such thing as an ordinary one — the quiet two-thirds are Tf/n,
+    which expresses nothing at all.
+
+    Balanced against the other 122 breeds rather than in isolation, which
+    is the part that needed the sheets open. Run through
+    BreedStatCurve.factor, the original statline came out
+    ×1.92 speed, ×1.50 health and ×2.94 jump — near the ceiling on
+    all three at once, which no shipped breed is. The Thoroughbred pays for ×2.02
+    speed with health 4; the Zangersheide pays for ×3.43 jump with speed 8. This one
+    paid with nothing, and then also flew. It ships at speed 8, jump 9, health 4, pull 2:
+    hollow-boned, fast, fragile, useless in harness. Speed 8 rather than the 9.5 asked for
+    because airspeed is a pure function of MOVEMENT_SPEED —
+    HorseFlightMixin cruises at 1.1× to 2.5× ground speed —
+    and 9.5 would have put a horse past a rocket-boosted elytra at about 36 blocks a
+    second.
+
+    Bird-boned is in at 10% expressing, not the 50% the design asked for.
+    Its own founder table is CARRIERS_ONLY: no wild horse anywhere expresses
+    it, so this breed is the thing that makes it findable at all. But flight plus
+    bird-boned is unconditional fall immunity that covers the rider too, at zero stat
+    cost, and the two genes' comments say in four separate places that breeding them
+    together is meant to be the point. Handing both to every founder would have retired
+    the combination they were built to reward.
+
+    Dropped twelve loci the design pinned at uniform weight. No other
+    breed pins any of them, and the reason matters: naming a locus does not nudge its
+    frequencies, it replaces the founder table outright and rescales to 100. So
+    “every pair at weight 1” is a uniform distribution, which is neither the
+    gene's natural rate nor Hardy-Weinberg. Egg layer
+    was the worst of them — it is deliberately 0% expressing in the wild, because a
+    horse that lays something worth having is meant to come out of the splice layer, and
+    the uniform pool would have had about 18% of Cloudtouched dropping items on a
+    3–12 minute timer. Kept the cosmetic identity (barred wing, both iris loci, mane
+    and tail colour) and, on the owner's call, the weather affinity — leant towards
+    storms, since a horse that comes alive in the weather that grounds everything else is
+    the right flavour, with stacked pairs held to single figures because both copies emit
+    their own multiply_total. Added grey at 76%, which is what makes them
+    pale.
+
+    Found on the way past: stats.jump and
+    stats.health accept [lo, hi] syntactically and then silently
+    discard hi, while speed, size and
+    pull honour it and a strain's stats honour all five. The
+    breed-format page says all four take a range. Nothing catches it, because the writer
+    re-emits the collapsed point and the round-trip test passes.
+    Gap 278.

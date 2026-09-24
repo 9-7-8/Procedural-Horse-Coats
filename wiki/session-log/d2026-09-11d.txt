@@ -1,0 +1,18 @@
+2026-09-11 — every folder in phc/
+
+    The owner, after 0.5.000: “change the folder situation to all be in
+    agreement.” Drop-in genes move from config/horsegenetics/genes/ to
+    .minecraft/phc/genes/, beside breeds/ and the
+    three settings files, and nothing of the mod's is in config/ any more
+    (ModGeneSpecs.FOLDER is now ModBreedSpecs.ROOT + "/genes",
+    resolved against the game directory). Both folders' READMEs name the other and the
+    settings. Gap 192 closed.
+
+    Shipped as 0.5.001, on the owner's
+    call that a folder move is worth its own release; the notes carry the warning. It was
+    not in the 0.5.000 jar, which is why the warning matters: a
+    gene left in the old folder is not loaded, and a saved horse's segment for it is
+    dropped on load like any unregistered gene's - the player moves the file and restarts
+    before opening the world, or loses that gene from every horse that carried it.
+    The dev run had no drop-in genes, and its stale run/config/horsegenetics*
+    files were deleted (their values had already been copied into run/phc/).

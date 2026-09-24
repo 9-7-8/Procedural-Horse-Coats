@@ -1,0 +1,73 @@
+2026-09-20, later still — The checklist becomes advancements, and the horse menu opens on a click
+
+    Two asks, one build. Shipped as v0.5.021.
+
+Every checklist task is now a real advancement
+
+    The Getting Started book’s boxes were a private list the mod drew for itself and
+    announced with its own green chat line. They are now also Minecraft
+    advancements: a Horse Genetics tab, a root, eight chapter nodes and a
+    card per task, with toasts, chat, /advancement and the gamerule that
+    silences it. The mod’s own chat line is gone — two announcements of one
+    event is one too many, and vanilla’s can be turned off by the player, which a
+    hand-rolled line never could. Full writeup:
+    progression.
+
+    The shape is one trigger, not a hundred.
+    horsegenetics:progress_task fires once from
+    HorseProgressData.complete, and the condition names which task; a
+    chapter condition matches anything in a chapter and an empty one matches
+    anything at all, which is how the chapter nodes and the root are earned without a
+    hundred-entry requirements array. A trigger per task would have been a hundred classes
+    saying the same thing.
+
+    The JSON is baked, not written.
+    tools/bake-advancements.mjs reads the enum and rewrites the whole
+    directory, so a deleted task loses its card too. Text is literal rather than a
+    translation key, because the English already lives in the enum and a lang key would be
+    a second copy of it. The one thing it cannot derive is the icon, so those are a
+    hand-written map in the script — validated against the mod’s item
+    definitions and against vanilla’s item list read out of the patched jar, because
+    an icon naming an item that does not exist makes the advancement fail to load
+    silently.
+
+    The owner asked that future checklist items become advancements too, so that is now a
+    check rather than a habit: check-progress-tasks.mjs fails on a task with
+    no advancement and on an advancement no task backs, beside its original sweep for a
+    task nothing can complete. And ProgressHooks.onLogin awards everything
+    already ticked, which is what lets the advancements arrive after the fact on a save
+    that was played without them — at the cost of one flood of toasts, once.
+
+A right-click opens the horse menu
+
+    Empty-handed, no sneaking, on any horse. It is a client setting,
+    horseScreen.rightClickOpens, on by default. Sneak-and-use is deliberately
+    not taken over, so vanilla’s inventory stays one gesture away, and an
+    empty hand is required, so food, leads, name tags and papers all still mean what they
+    meant.
+
+    The click it takes over is the one that mounts — which is also
+    how a wild horse is tamed. That is the whole risk in this change, and the answer is a
+    Ride button on Overview doing exactly what the click did, bucking
+    included. Anything less would have quietly cost the game its taming.
+
+And the menu grew the tack
+
+    Saddle and body armour, as two real slots on Overview, built from
+    HorseTackSlot.values() so a bridle or a blanket is a line in that enum
+    rather than a screen rewrite — which is what the owner asked for. They are
+    entity EquipmentSlots, not container slots, so no menu had to be opened
+    on the server and the client already had them off synced equipment.
+    One click is a swap with your hand: this is a plain
+    Screen with no carried stack, so the hand is the only cursor there is,
+    and the whole interaction is one packet the server checks in one place.
+
+    An access transformer widens a declaration, not its overrides
+
+        The Ride button first tried to call AbstractHorse.doPlayerRide through
+        an AT. That broke the Minecraft recompile outright:
+        TraderLlama overrides it and stayed protected, which is “weaker
+        access privileges” and 6882 source files that no longer compile. The
+        four lines were copied instead. Worth remembering before widening anything a
+        subclass overrides — the failure is not in your module and does not mention
+        your name.

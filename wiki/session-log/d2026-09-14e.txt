@@ -1,0 +1,58 @@
+2026-09-14 — a wild-type copy carries no epigenetics
+
+    Owner: “wildtype for most genes should not carry any epigene data”.
+    It started as a log-size question: the spawn trace's epigenome was most of a 58 KB line
+    per horse. Then the owner asked for the whole epigenome back in the log once it had shrunk.
+
+    - Surveyed before building. For every gene that stores epigenetics, is
+        the copy on its default allele ever the expressed copy in a non-wild outcome? None is. So
+        “most” is “all” today, and the survey is kept as
+        WildCopySurveyTest, with Gene.wildTypeCarriesEpigenetics() as
+        the opt-out for a future gene.
+
+    - One rule, in Genome's constructor
+        (Epigenome.alignedTo): a wild-type copy is emptied
+        (AlleleEpigenetics.NONE). A variant copy that arrives empty, from forced
+        eyes or an editor changing an allele, gets deterministic numbers. Every horse is built
+        through Genome, so saves, packets and codes all shrink. A code writes an
+        empty copy as - and skips a gene whose copies are both wild.
+
+    - Readers that took a copy by slot without checking the allele were found and
+        fixed. These were the weather loci (read before the allele check), the
+        info-screen readout (now "—"), and the breed founder's band stamping. The rest
+        already checked the allele: stats, fighter, size, milk, meat, molten hooves, particles,
+        sectoral heterochromia.
+
+    - The survey missed one reader, and breeding threw on it.
+        WhitePatternEyes.blueIf rolls the eye spread off a white locus’s copy
+        whenever the whole horse passes the white threshold, even when that locus is wild. An
+        empty copy now asks for nothing (owner: “eyes should default to brown if nothing
+        else describes them”). No horse loses its blue: tobiano alone is under the
+        threshold, so a horse past it always has a variant white locus to roll.
+        WildCopySurveyTest.theEyeForceNeverReadsAnEmptyCopy runs every white
+        combination through the eye force.
+
+    - And it missed fertility, which crashed the owner’s world at the
+        first natural cover (FertilityGene.fertility, 08:51). The wild outcome
+        changes nothing visible, but an n/n mare’s number is her fertility,
+        so the survey’s question could not catch it. Fertility now keeps its wild numbers
+        (wildTypeCarriesEpigenetics). As a backstop, every read of an empty copy
+        returns the gene’s schema midpoints (Epigenome.readable) instead of
+        throwing, so any other unseen reader gets a default rather than a crash. The earlier
+        claim that “most” meant “all” was wrong by one gene.
+
+    - The whole genome is back on the [trace] horse-spawn line, as
+        only what the horse has. The genotype is Genotype.presentCode(): it leaves
+        out every gene at two wild-type copies that do nothing (owner: "that gene just doesn't
+        exist"), keeps carriers and always keeps sex, and parses back to the same genotype. The
+        epigenome carries numbers only on variant copies.
+
+    - Getting started caught up with breeding and band life
+        (TutorialPage). There are two new steps: heat, pregnancy and foals (natural covers, the
+        crowding cap, nursing and weaning, the vet's kit, gelding, seed jars), and horses living
+        in bands (the Social section, family and bachelor bands, dispersal, takeovers, and tamed
+        sparring, grooming, displacement and a dam's defence). The existing steps now mention
+        geldings, that horses breed on their own, and that a breeding carrot waits on a horse and
+        makes a pregnancy. The shearing bond was corrected to two, from the five it said. Every
+        number was checked against the code. The checklist's tasks were left alone: none was
+        wrong, and a new one needs a hook.

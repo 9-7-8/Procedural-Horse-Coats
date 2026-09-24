@@ -1,0 +1,163 @@
+2026-09-09
+
+The engine learns to read SVG, and twenty-two genes land with the ten masks they
+    asked for.
+
+The intake folder held twenty-two gene files and every one of them was written against
+    a vocabulary that does not exist — PAINT ops, CRACKLE
+    with a stretch, DAPPLES with a radius, SPOTS with a count and
+    a centre. That is not a complaint about the files. What each one did carry,
+    and what made the batch worth a day, was a TOOL GAP section saying which
+    measurement its reference needed and why no arrangement of the masks that exist
+    reached it. Ten of those were real, and the session ran in that order: build the tools
+    first, then write the genes that use them.
+
+The SVG mask, which is the one that was not in any tool gap
+
+PATH was the admission that some shapes are not made of a rule —
+    that a marking somebody drew has to arrive as points. This is the admission
+    that follows from it: markings that get drawn get drawn in a drawing program, and what
+    comes out is a d string of cubics, arcs and subpaths inside a
+    viewBox. Re-typing one as sixty-four normalised control points is the step
+    where the drawing stops being the drawing — the holes close up, the arcs become
+    chords, and an evening goes on arithmetic.
+
+So SVG is deliberately the whole of
+    the grammar rather than the convenient part of it. Every path command, including the
+    reflected control point an S and a T carry and the
+    endpoint-parameterised elliptical arc that every exported circle is made of. Subpaths,
+    so a letter O has a hole — and a fill rule, because whether that hole is
+    a hole is written in the artist’s file and cannot be recovered from the geometry.
+    The transform list. viewBox and preserveAspectRatio. A stroke
+    with real caps, joins, a miter limit and a dash pattern measured along the path.
+    SvgPath flattens it once, at load, so per texel it costs what
+    PATH costs however long the string is.
+
+node intake/tools/svg-to-mask.mjs reads an actual .svg and
+    writes the mask blocks: nested <g transform>s flattened into each
+    element, rect/circle/ellipse/line/polyline/polygon
+    converted to path data the way the specification defines them, the presentation
+    attributes carried across, and a warning printed for everything it cannot see — a
+    CSS class, a <use>, an element both filled and stroked. Moonwing is
+    the first gene in the mod that carries a drawing.
+
+Nine more measurements, each because a reference needed one
+
+- FAN — an angular phase around a pivot, so bars widen as they
+    radiate. WAVES takes its phase from a straight line, so its bars are
+    parallel, evenly spaced and all pointed the same way everywhere in the region,
+    whatever the wavelength. Morpho Wing and Gill Bloom both asked for it independently.
+
+- NORMAL — which way the surface faces, dotted with a body
+    axis, with a round knob that blends toward the normal an ellipsoid of the
+    same box would have. Carapace Sheen and Kite Bloom both asked for view-angle
+    iridescence; see below for why that half is refused.
+
+- CRACKLE.vertexWeight — blends in the distance to the three-way
+    corners, so a thresholded network pools where cracks meet and thins between
+    them. An even channel is what a distance to a plane is; a vein is not that. Emberveins.
+
+- CRACKLE.measure: "centroid" — the same tessellation read from
+    each cell’s middle out. Three separate files asked for a version of this, and it
+    turned out to be one parameter: it is the only per-cell radial coordinate a crackle
+    outline is guaranteed concentric with. Tidefoam, Opaline and Iris Bloom.
+
+- SPOTS.arc + angle — clips every mark in a tiled
+    field to the same wedge, which is the difference between a shingled roof and a closed
+    net. Fish Scales.
+
+- SPOTS/RINGS.offsetX/Y/Z — move where one
+    mask reads the cell centre without moving the cell, so an off-centre glint sits inside
+    a concentric set instead of replacing it. Moth Eyes.
+
+- RAMP.axis gains noise, cell and
+    cellId — three colour sources that are not straight lines: a
+    field that wanders, a per-cell radial fade, and one key per cell so neighbours land on
+    unrelated stops. Oil Sheen, Opaline and Opal Crackle.
+
+- Moth Eyes also asked for a LUMA channel measuring how far a colour sits from grey. It
+    was already there, called saturation; inverted, it is exactly “black
+    or grey and nothing else”.
+
+Two requests refused rather than deferred
+
+Nothing here will ever vary colour by the angle to the camera. The coat
+    is a texture baked once per horse and no mask or op will ever see a viewer, so true
+    iridescence is out of reach and will stay out of reach while the coat is a PNG.
+    NORMAL is the structural half of it — the sheen sits on the planes
+    that turn into the light and stays there — and that is the honest approximation.
+    And a knob cannot be offset by a constant. Agate’s import wanted
+    each cell’s heart to be its rim’s complement, 180 degrees round the wheel;
+    a hue knob is a number the horse drew and there is no way in the format to say
+    “that number plus 180”. Both are now stated in the prompt so the next batch
+    does not spend a section proposing them.
+
+Four things the imports got wrong that would have shipped silently
+
+This is the part worth reading, because none of the four would have gone red.
+
+- Opaline gave each cell one of three tints with a CHOICE mask.
+    CHOICE is a coin flip made once per horse and returns the same
+    answer on every texel, so all three layers would have painted the entire marking one
+    colour — and which one depended on the seed. That is now the
+    cellId ramp, and rule 11 in the prompt says out loud what
+    CHOICE cannot do.
+
+- Concentric Eyespots had leg bands 0.28 and 0.26 body units wide. A texel is 0.5.
+    Every ring on every leg was under a texel and averaged away to nothing. The
+    import’s own note said a fourth band would do that; it was already
+    happening at three. There is a new rule 15 about sizing against a texel before
+    shipping.
+
+- Iris Bloom Diamonds bet that CRACKLE and SPOTS agree
+    about where a cell’s centre is when given the same seed and spacing, and wrote a
+    note saying it was a bet. They do not agree. That is what
+    measure: "centroid" is for.
+
+- FAN’s spacing is an angle, and the first draft of
+    the schema defaulted it to about three bars per full turn. Three genes shipped with
+    numbers that read like body-unit spacings and drew a single bar across the whole
+    marking. Caught by looking at the contact sheet, which is the only way it could have
+    been caught.
+
+Two smaller things
+
+wing_cloak.json is missing from genes/index.json on
+    purpose, and this session regenerated the index from the folder and put it back.
+    The absence is the killswitch —
+    gap 129 parked the gene until it is retooled, and
+    the whole switch is that one line not being there. Rebuilding the list by walking the
+    directory is the obvious move, is what the
+    contract’s warning about a
+    hand-kept list invites, and re-enabled it silently: nothing went red, because the gene
+    loads perfectly. It was caught while writing the gaps page and reverted, which moved
+    the bake golden by exactly its three lines and no other hash. The real gap is that the
+    file carries two kinds of information — “these exist”, which a script
+    can derive, and “this one is off”, which it cannot — with nothing
+    telling them apart. Gap 162. Until that is fixed:
+    add to the index by hand, never regenerate it.
+
+Flags can default true, which the SVG mask needs twice: a
+    <path> with no stroke is filled, and a pasted drawing has to be
+    flipped. That is a real change to the creator rather than a cast, because its exporter
+    drops any setting equal to its default — a true default has to be written when it
+    is unticked. The parity check compares flag fallbacks now; it never did when
+    they were all false.
+
+founders.py was re-run over the whole set, as it is designed to be: it
+    budgets the tiers together, so twenty-two new genes re-derived everybody’s
+    numbers. Forty-three existing tables moved, not the twenty-two the commit
+    message guessed at — because the re-derivation also flattened every table that
+    had drifted above its declared tier, and several had, by a factor of seven.
+    Across the mod the share of founders expressing some magical gene went from 16.32% to
+    13.35% while gaining twenty-two genes. The table and the question of whether
+    those are the right numbers are on
+    the gene-authoring verification tab; the fix, if they
+    are wrong, is a gene’s rarity tier and another run, never a
+    hand-edited founders block.
+
+Sources: common/coat/pattern/SvgPath.java,
+    SpecPainter, SpecSchema,
+    wiki/gene-creator/js/svg-path.js,
+    intake/tools/svg-to-mask.mjs, and the twenty-two files in
+    horsegenetics/genes/.

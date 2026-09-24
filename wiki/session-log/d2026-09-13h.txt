@@ -1,0 +1,43 @@
+2026-09-13, late — fertility and gestation, designed with the owner and built
+
+    The in-progress design page from the evening had seven open questions. This session put
+    them to the owner one at a time, along with every implementation choice the breeding
+    code raised, then built the whole first slice. The calls are under
+    settled decisions, and the reference is
+    fertility & gestation. Nothing has been played:
+    §0-DV, test kit batch 1.
+
+    - Where the line was drawn. Plain golden carrots stay instant; the
+        owner's “we don't remove vanilla behavior” was the constraint that shaped
+        every other answer. Pregnancy lives on the mod's own paths: the seed jar, a
+        carrot-armed pair, the Spontaneous Breeding gene. The one thing fertility does to
+        vanilla is the subfertile allele, which no unbred horse has.
+
+    - common/repro: timing scaled from one
+        gestation_days and floored at a day; a mare's state derived
+        from a UUID phase and three ticks rather than stepped; and Conception,
+        the single draw. The genome is drawn at conception and stored as embryos carrying the
+        sire's whole sample, so birth needs no sire. 28 tests.
+
+    - The fertility gene: a natural Java
+        gene with n, sf and tw and a Gaussian number
+        per copy. Both coat goldens moved only because the genotype code gained a locus: the
+        whole-horse file was checked byte-identical with the token stripped before it was
+        copied back.
+
+    - The owner changed breeding carrots mid-build. They now wait on a horse
+        until a conception uses them, where they had been a 30-second window that also started
+        love. CarrotWindowAttachment became ArmedCarrotsAttachment, a
+        jar carries a stallion's, and the yard's carrot pens were re-signed.
+
+    - Checked, not assumed: vanilla's
+        spawnChildFromBreeding resets love and sets both cooldowns when
+        BabyEntitySpawnEvent is cancelled (the patched 26.1.2 sources), which is
+        what lets a carrot pair become a pregnancy with no extra bookkeeping.
+
+    - Found on the way: impossible KIT / MITF / PAX3 genotypes may be
+        breedable (gap 225, a code read only).
+
+    - Deliberately not built: wild band breeding (its own slice, on
+        the roadmap), body condition, seasons, a stallion
+        covers line on the info screen, and revealing twins before birth.

@@ -1,0 +1,27 @@
+2026-09-17, mid-afternoon — The one red test in the project, closed
+
+    Owner’s call: close out gap 263 before the next gene. Three
+    registered genes — DMRT3,
+    magic heat tolerance and
+    magic cold tolerance — had no
+    GeneDescriptions entry, so
+    GeneDescriptionCoverageTest.everyRegisteredGeneHasADescription had been
+    failing since before this session. Three Map.entry lines. The project now
+    has no red test.
+
+    The descriptions were written from each gene’s source rather than from its name,
+    which matters most for DMRT3: its own javadoc records (owner, 2026-09-15) that
+    it changes nothing about movement yet — every outcome is a wild
+    type and the gait waits on animation — so a description implying that horses amble
+    today would have been a plausible-sounding lie about shipped behaviour. That is the same
+    failure as the WFFS/PLOD1 warning this morning, in miniature: prose about a gene, written
+    without reading the gene.
+
+    Why it sat red, which is the part worth keeping. Nobody was at fault.
+    CLAUDE.md forbids running the full :common:test, so a class that
+    no session’s change happens to touch can stay red indefinitely and every individual
+    session is behaving correctly. It surfaced only because adding four health loci made that
+    class run. The same shape broke CoatSampleTool, which had been rendering 11
+    of its 122 samples for months. The open question the gap raised is not closed by
+    fixing it: whether a cheap always-run subset of the suite should exist. Nothing
+    currently catches the next one, and the next one may not be cosmetic.

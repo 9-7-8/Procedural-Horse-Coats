@@ -1,0 +1,114 @@
+2026-09-10
+
+Four genes retuned off looking at them, one new gene out of intake, and the gene
+    files’ notes moved to the tab they were always about.
+
+A short session, and every change in it came from the same place: somebody opened the
+    icon sheet and said what was wrong. That is worth saying because three of the four
+    fixes are things no test could have raised — the goldens were green, the parity
+    was green, and every gene was painting exactly what its file said.
+
+Coral bloom’s rim was not a rim
+
+Coral bloom was written as three concentric zones of
+    one tessellation: a bright orange rim in the seam, a deep blue field inside it, a pale
+    crown at the middle. On the horse it was an orange horse with blue blobs.
+    The arithmetic is the whole explanation and it is worth writing down, because the same
+    trap is waiting in every other CRACKLE gene: a wall of width w
+    through cells of size s takes roughly 2w/s of the surface, so at
+    gap: 1.2 in cells of 5.5 to 9.5 the seam is not a hairline round a cell, it
+    is most of the horse, and the cells are the things floating in it. A rim colour is
+    load-bearing in a way a fill colour is not — a fill can be wrong and the picture
+    survives it; a rim being wrong inverts figure and ground.
+
+The fix is to paint nothing in the seam. The base coat shows there instead, which
+    is a colour the horse already owns and which therefore cannot take the picture over
+    however much of the surface it covers. Blue band and pale crown are untouched.
+
+Moonwing, four times the size, and over the back
+
+Moonwing’s viewport went from 0.30×0.20 of the
+    body to 0.62×0.44 and, more to the point, is now deliberately taller than
+    the barrel. That last part is the whole of how it wraps: a side-plane
+    SVG ignores z entirely, so the drawing is a function of x
+    and y and nothing else. Raise its top edge past the barrel’s and the same
+    outline that covers both flanks covers the back between them — no seam, no second
+    placement, and the top of the wing simply clipped off by the horse. The extrusion that was
+    already doing symmetry for free turns out to do wrapping for free as well.
+
+And a gene that reads the coat underneath it
+
+The other half of the moonwing ask was that the pearl allele give other white
+    markings the same treatment — the gold edge and the coloured dust. That is
+    LUMA’s white channel, which is why it exists: not
+    “the pale parts” but the achromatic floor, so a splash reads 1 and a palomino
+    reads near 0.
+
+The rim is the move worth remembering. There is no erode operator and there does not need
+    to be one: the white selection, intersected with the same selection inverted and grown
+    by 1.3 units, is a band exactly that far inside every white border. Growing the
+    NOT-white eats into the white, and the intersection is what was eaten. Both layers run
+    first, before the wing — LUMA reads the coat as it stands when
+    the layer runs, so a wing laid down first would be read back as one of the markings it is
+    supposed to be matching, and edged twice.
+
+Measuring that turned up gap 166, which is
+    not this session’s doing: on a horse that is white everywhere, the pearl
+    form’s gold band comes out grey. Four warm texels against 589 on a bay, and 692 for
+    the coloured allele on the same white horse. It reproduces with the new layers stripped
+    back out, so it predates them; the cause is unestablished and is written down rather than
+    chased.
+
+Three greys instead of one ivory
+
+Iridescent rosette’s pale allele was a
+    single flat ivory annulus and it read as a smudge: a ring with no interior structure
+    has nothing to tell the eye where its edges are. It is now the same three concentric
+    bands the coloured form uses — same radii, same knobs, same registration — with
+    three greys where that one has three hues. The side effect is that the gene’s wiki
+    icon flipped to the coloured allele, because CoatVisibility photographs
+    whichever allele moves the most texels and the darkest grey sits close enough to a bay to
+    lose the count. Noted on the gene-authoring
+    verification tab so it is
+    not reported later as a bug.
+
+Nymphaline
+
+New, out of the intake folder, and the first arrival since the SVG engine landed —
+    which makes its most interesting property that it does not use the SVG mask.
+    Its source was eight posterised colour layers traced off a photograph of a butterfly wing,
+    about 300KB of path data: past MAX_PATH_POINTS by three orders of
+    magnitude, and the wrong shape of thing regardless, because a traced photograph is
+    a patch of membrane and not an outline, so there is nothing in it to place. It is rebuilt as
+    rules. FAN is the radiating venation, on a pivot that sits on the flank
+    rather than above the back — from above, the barrel subtends about 74 degrees and any
+    spacing wide enough to give a vein a texel of width leaves three veins on the whole side;
+    from the point of the shoulder it subtends nearer 100 and the same spacing gives six.
+    CRACKLE with vertexWeight up is the fine net where the venation
+    breaks down, because a second fan fine enough to read as secondary venation comes out under
+    half a texel wide at every radius on the barrel. Priority 118, with the other whole-coat
+    genes.
+
+The notes were on the wrong tab
+
+Every generated gene page put the gene file’s notes under “About
+    this gene” on the gameplay tab. They are implementation reasoning to the last
+    line — why FAN and not a second SVG, which mask the
+    registration hangs off, what the import asked for and was refused — and the gameplay
+    tab is defined as the one written for a player who does not want the model. They are on the
+    coding tab now, under “Why it is built this way”, which is the same call
+    outcomeSummary already made about the outcome prose, for the same reason. 56
+    pages moved.
+
+What was regenerated
+
+Both goldens: eleven rows in coat-bake-golden.txt, and every line of
+    coat-golden.txt gained a nymphaline segment. Worth being explicit that
+    no rendered horse in the pipeline golden moved — all 1056 hashes are
+    unchanged and only the genotype codes grew, which is what adding a locus does, and is also
+    the check that the four edited genes are on none of those 39 horses. Then the gene bundle,
+    the icons, the pages, the designer wasm, the search index and links.
+
+The intake folder’s twenty-two markdown sources are deleted — each was checked
+    against the gene it became before anything was removed, and all twenty-two ship.
+    intake/overcast.json arrived during the session and is untouched.

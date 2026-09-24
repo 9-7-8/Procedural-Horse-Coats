@@ -9,8 +9,9 @@ Read it first.
 or per tab (gameplay/coding/science), plus `wiki/text/index.txt` mapping every
 heading to a `file#anchor`. It is cheaper to grep and read than the HTML.
 Open the `.html` itself only when you are about to edit that page, or when
-looking up `session-log.html`, `releases.html` or `making-a-gene.html`, which
-are excluded from the bake (see `wiki/tools/bake-agent-text.mjs` for why).
+looking up `releases.html` or `making-a-gene.html`, which are excluded from the
+bake. For a dated record, select one small file from `wiki/session-log/` rather
+than reading the session-log index (see `wiki/tools/bake-agent-text.mjs` for why).
 
 If you edit any wiki page's prose, re-run `node wiki/tools/bake-agent-text.mjs`
 so `wiki/text/` doesn't go stale - `--check` reports staleness without writing.

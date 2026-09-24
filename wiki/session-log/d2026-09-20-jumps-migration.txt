@@ -1,0 +1,122 @@
+2026-09-20, later — The jumps become one item, and get a screen, paint and a height
+
+    The migration the morning left half-done, and then most of a day of the owner playing it and
+    sending it straight back. Twelve blocks and thirty-six items are now one block and one
+    item, and everything that used to be an item is a control in the block’s own
+    screen. Shipped as v0.5.020.
+
+What a jump is now
+
+    One horsegenetics:jump block, one Horse Jump item. Right-click a
+    placed one and you get two slots and a row of controls: the wood of the rails,
+    the wood of the standards, a dye for either half, the
+    style, and the height. Style and height apply to the whole
+    run; woods and paint to the block. The whole page is
+    item-jumps.html.
+
+    Three things about that are worth keeping. The plank swap is reversible and the dye is
+    not — a plank hands the displaced one back, a dye is spent for good, and the only
+    way to strip paint is a fresh plank in that half. The wood rides on the item
+    rather than behind the screen, because a jump is crafted out of a wood and three birch
+    fences have to give you something already birch. And every future style is a button,
+    not a thirty-seventh item, which is the point of there being one.
+
+The three wrong turns on paint, which are the useful part
+
+    Paint went through three designs and the first two failed for reasons that generalise.
+
+    - Tinting the wood. A block tint is a MULTIPLY, so it can only darken and can
+        only deepen a hue the texture already has. Oak’s blue channel sits around a third, so
+        blue-on-oak came out a dark navy-brown and blue on a dark modded wood came out
+        “nearly black purple”. Lightening the dye does not split the difference
+        — multiplying oak by a pale blue gives slightly darker oak, because the ratio between
+        the channels barely moves.
+
+    - Painting a pale neutral pole. Fixed the colour and threw the wood out with
+        it: “we’re losing too much of the original texture/shading”. Correct
+        — there was no wood left to see.
+
+    - An overlay. A third part laid over the wood, flat white at a fixed alpha,
+        tinted — so the blend is alpha rather than multiply and is not bounded by what is
+        behind it. The grain survives at full contrast and the colour reads as itself.
+
+    The art is generated rather than derived: the obvious implementation was a desaturated copy of
+    vanilla’s plank sheet, and that is Mojang’s art. tools/bake-paint-overlay.mjs
+    writes it from nothing, and carries the only PNG encoder in the repo’s tools.
+
+Crossrails, which took four goes
+
+    The owner said “looks bad” three times before the framing landed:
+    a crossrail is not an X per block, it is two poles crossing once. So the poles
+    are defined across the whole run and each block draws the slice through it — one X up to
+    three blocks wide, at the run’s own angle.
+
+    Two findings underneath that. Element rotation is no longer limited to 22.5 and
+    45 — verified against the artefacts, the angle is an unvalidated float in
+    26.1.2 and there is a second multi-axis form. The comment in crossArm had been
+    asserting the old limit as intended design, which is why this was stuck at one block. And
+    a bar must be sized by its projection, not its length: a bar 16 long turned 45
+    degrees only spans 11.3, which is why the old X sat marooned in the middle of its block touching
+    nothing.
+
+Three bugs worth naming
+
+    - Handedness. “Left” is the counter-clockwise side and lies at
+        high x, but runs are walked from the low-x end — so posting a group start with
+        its left standard put the upright one block in from the end. One cause, three symptoms: a
+        pole in the middle of a two-wide crossrail, “one off” on a three-wide.
+
+    - A doubled model suffix. The blockstate’s standards field
+        became a base that the model appends a connection suffix to, and only the crossrails branch
+        was updated — so verticals and oxers asked for _standards_lr_l and every
+        jump with a neighbour was a missing-texture cube. A lone one was fine, which is why it read
+        as “broken above 2 or 3”.
+
+    - A centred T in a three-wide run. The post was placed every third block by
+        world position rather than every third block of the run. Both it and the
+        post blockstate property are gone; every style now posts with an upright at
+        each group boundary, which halved the blockstate count.
+
+    Two process notes, both mine
+
+        check-block-models.mjs passed through the purple-cube bug, twice.
+        It walks the blockstate and asserts every model id named there exists — and every id
+        named there did. The doubling happened in Java, one layer past anything that checker can
+        see. A green run from it does not cover that class of bug.
+
+        “Zero errors” was the wrong grep. The client log had said so on
+        the first boot — 104 Missing block model lines — at WARN, while I
+        was grepping ERROR and FATAL and reporting clean boots. Grep for missing models explicitly.
+
+Also this session
+
+    - The clearance margin dropped from half a block to an eighth. Eight pixels is
+        vanilla’s fence number and vanilla needs it because its fence is exactly one block; a
+        jump has a height, so the margin only has to make a full-height one unsteppable. It also
+        moved the walkable line to where you can see it: everything under a block is walked over,
+        everything from a block up is jumped.
+
+    - Breed eggs have their own creative tab. One egg per breed is a list that
+        grows every time somebody writes a breed file, and it was burying the carrots and papers.
+        The three now read Horse Genetics, Horse Breeds, Horse Carts.
+
+    - A placement hint on the action bar, which stops for good once the player has
+        opened a screen — one item with everything behind a right-click has nothing about it
+        to say so.
+
+    - Gap 288: a painted run has a visible seam at every
+        block join. Accepted for this release; the suspect is the overlay inflating along the rail
+        axis and doubling its own alpha at each seam.
+
+What is not built
+
+    Standards of any solid block — cobblestone, brick, glass — is
+    scoped and parked on the roadmap at the owner’s call: not
+    needed for the first release. The scoping is written down there rather than re-derived: no art
+    is generated, the per-material model files are avoidable entirely, the roster can be a runtime
+    test, and the real cost is that Unbaked.bake loops every material once per
+    blockstate variant.
+
+    Nothing about the jumps has been measured against a horse yet. The height ladder is now a far
+    better instrument than a stack of whole blocks was — that was the argument for adding it
+    — and verification is where the unplayed list lives.

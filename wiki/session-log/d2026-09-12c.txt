@@ -1,0 +1,91 @@
+2026-09-12 — the yard learns to work a night shift, and the log learns to take readings
+
+    Two asks, an hour apart, that turned out to be one piece of work. First: “clear
+    the completed tests out of the horse dimension, and add in new areas of pre-tamed
+    horses in their stalls to test anything open”. Then, while that was being
+    built: “please put in a bunch of event listeners … to help you detect
+    what happened from the log. I'm going to leave the game and the horse dimension running
+    over night. Add as many time-reliant tests as possible, focusing on those that don't
+    require direct intervention from me.”
+
+    The second one is a different design brief from the one the yard was built to, and it
+    rules out more than it lets in. A pen earns its place now only if its test
+    starts itself, runs on a clock and leaves
+    something readable in the morning. The first two the yard already did. The
+    third did not exist anywhere in the repo.
+
+Why ActionTrace could not do this job
+
+    It logs what a person does — a right-click, a mount, a foal — and
+    that is the right design for reconstructing a play session. Every overnight test is the
+    opposite of it: a sapling that appeared, snow that stopped melting, eggs that piled up
+    and then stopped, a population that did or did not plateau. None of those is an
+    event anybody fires. They are differences between two readings, and nothing in
+    the repo took readings. So DebugWorldWatch: each pen registers itself as a
+    named box with the blocks worth counting in it, a scan every ten seconds logs only what
+    changed, and a census every two minutes prints everything whether it moved or not
+    — plus the entity count and the real milliseconds per tick, which is the safety
+    net under the whole thing, because an entity storm is the one failure here that damages
+    a save rather than looking wrong.
+
+    The event hooks she asked for sit underneath that and answer the question a delta
+    cannot: why. The best of them is the pair on items. A count says the egg total
+    went from five to eight; the hooks say when each was laid and, crucially, the
+    age of every item that left — because a 6000-tick despawn and a cap
+    refusing to drop look identical in a count and opposite in a log. Sounds are
+    counted rather than logged: five horses meowing on a 300-tick timer is seven
+    thousand lines a night, which would drown the four that matter. And the hooks throttle
+    themselves at 400 lines a minute, on the principle that the tool built to find a runaway
+    must not be the thing that makes it worse.
+
+The force-load, which is the difference between a test and a wasted night
+
+    Minecraft only ticks what is near a player. The yard is 110 blocks deep and its far end
+    is out of range of its near end, so any place to stand leaves part of it asleep
+    — and in the morning that reads exactly like the gene at that end being broken,
+    which is the same trap that cost most of two sessions already (a gene that does nothing
+    and a gene forbidden from doing anything are indistinguishable from inside the game). So
+    entering forces the yard's chunks and leaving releases them, with a sweep at server
+    start for any a crash left behind.
+
+What went in, and what came out
+
+    Out: the spontaneous-breeding field and the pack leader's pen, by her call —
+    “we're done with those tests”. In: egg layer (four in one
+    pen, which is the only arrangement that can make the cap fire at all —
+    gap 207), a sound herd of three
+    meowing and two singers, and intimidating with six cows ringed round
+    it. That last one is the design note worth keeping: a repel aura measured by
+    counting penned cows proves nothing, because they cannot leave — four in
+    the far corner and four round its feet are the same number and opposite results. The
+    watch reports the nearest non-horse distance instead.
+
+    One question left with the breeding field and is recorded as dropped rather than
+    answered (gap 206): whether
+    LOCAL_CAP actually stops an automatic breeder. The breeding is confirmed;
+    the cap never was.
+
+Three bugs found on the way, none of which anything could have caught
+
+    - The yard's stocked pens were untamed while the kit's own legend had
+        been saying “the yard's horses come tamed” since the day they were
+        stocked — so “breed a starburst pair in the yard” was another
+        instruction nothing in the world could carry out. Same shape as the mares-only kit
+        found yesterday, in the file that already carries three comments about it.
+
+    - Taming them would have walked the whole yard home.
+        evacuateTamedHorses took every tamed horse in the plot to the
+        overworld on the way out; the moment the scenery became tame, “tamed”
+        stopped meaning “yours”. It takes tamed and owned horses now
+        — a player's taming sets an owner, the yard's setTamed(true) does
+        not, and that is the line between somebody's horse and the furniture.
+
+    - Spontaneous breeding was claiming foals that were not coming. Read
+        out of her own log: two foals at 22:22:50 and then 212 identical
+        PAIRED lines with nothing behind any of them. The post-breeding
+        cooldown is getAge(), and canFallInLove() cannot see it
+        — Animal.aiStep zeroes inLove on every tick where the
+        age is non-zero. So a pair that had just bred read as available, were put in love
+        again on every beat, and had it cleared the following tick, for five minutes. The
+        gene was working; its account of itself was the thing that was wrong, which is
+        precisely the failure this handler already had three comments about.

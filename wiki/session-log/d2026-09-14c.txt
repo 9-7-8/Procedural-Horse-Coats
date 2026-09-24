@@ -1,0 +1,53 @@
+2026-09-14 — the yard packed, three pens retired, and the first quarter hour read off the log
+
+    The owner played the new rows for a quarter of an hour, then asked for the testing area to be
+    condensed. Her words were “there's so much empty space in the pens, there's no way it can all stay
+    loaded”.
+
+    - Pens isolated, yard only. The breeding and herd rows were spread over
+        three hundred blocks because every breeding and band check counts horses by distance
+        through walls. Tall walls would not have helped, and I said so before building anything.
+        The owner chose isolation over line of sight and over merely trimming the gaps.
+        YardPens registers each pen, and inside the horse dimension those checks see
+        only the horses in their own pen (or pen group). Rows O–X became O–T, about 240
+        blocks shallower.
+
+    - What isolation does not reach is vanilla's golden-carrot breeding, which
+        pairs two horses in love within three blocks through a wall. So breeding pens keep a
+        three-block gap, and the jar stud got his own pen (owner: “he'll just breed them as
+        normal”).
+
+    - Retired on the owner's word: the deathbed (“we've confirmed on death
+        works”), the food-preference pen, and the ticket mare. The holding pen stays for a
+        later test.
+
+    - Confirmed off the log with nobody touching the pens: a band staying one
+        band after its stallion dies; dispersal of both sexes; herding firing; sparring without
+        damage; grooming partners; tick time with about 270 horses; maternity to the minute; natural
+        covers; the subfertile pair's single cover per heat; the gelding control; the cap holding;
+        cowboy stock. The details are on §0-DW and
+        §0-DV.
+
+    - Then the confirmed pens went. NATURAL PAIR, GELDING CONTROL, SUBFERTILE
+        PAIR, COWBOY STOCK, SPARRING and HERDING were deleted, and what was left packed into four
+        rows, O–R. Pens with an open half stayed.
+
+    - Horses kick monsters twice as hard. The owner was hit first in the
+        guardian test, so the gene fired; the horse lost the trade, because an ordinary horse hit
+        for 3, exactly a zombie's hit. Her call was that a horse should out-hit a zombie against
+        hostile mobs only, not players or passive animals.
+        HorseAggroHandler.onHorseKicksMonster doubles a horse's melee hit on any
+        Enemy, so an ordinary horse kicks for 6 and a gladiator keeps its lead.
+
+    - A For Testers page (for-testers.html, Coding
+        view): the open overworld tests rewritten for volunteers, one action per step, with what a
+        pass and a fail look like. It leaves out what needs dev tools (/testkit, the
+        clock on a horse, stick-taming) and what a release jar cannot show (a wild horse's info
+        screen). Each test has a report button: with the AI helper set up it opens the chat
+        already reporting that test (HG.aiChat.report), otherwise it opens GitHub's
+        new-issue form filled in.
+
+    - Three test setups were wrong, and are fixed. DAM DEFENCE put a full-health
+        zombie against a plain horse, which killed the dam. HURT MARE's half health was undone when
+        her traits applied as she joined the level. Both geldings lost their labels to the record
+        rewrite.

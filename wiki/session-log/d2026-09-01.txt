@@ -1,0 +1,27 @@
+2026-09-01
+
+Owner-verified in-game (2026-09-01)
+
+- The coat pipeline end to end. Wild spawns show a wide variety of genotypes and every one renders its correct coat - no more flat-white horses. That was the CoatTextureId fix (see the coat-pipeline section): the old sanitize() lower-cased the texture key, folding all 19 683 genotypes onto 27 Identifiers.
+
+- Agouti / bay: renders correctly, and seal is properly gone as a gene
+
+- a high roll of bay's epigenetics gives the seal look. (Verified against the old two-number roll; the generator was rewidened afterwards - see the coat-pipeline section - so the spread of leg heights is unverified, the mechanism isn't.)
+
+- Splash: renders correctly (leg white + centreline blaze). (That was the old single splash gene, retired 2026-09-04 for MITF + PAX3; the replacement is unverified.)
+
+- Eyes: survive the coat on every horse seen, adult and foal.
+
+- FamilyTreeScreen: correct in full - nodes, coats, layout.
+
+- Horse dimension: correct in full, including the sunk pen amenities (water cauldron + hay bale flush with the grass) keeping horses penned.
+
+- "Spawn Test Horse World" title-screen button (dev only) works.
+
+- Clock on a tamed foal ages it to adult without also seating the player on it.
+
+- Roped-horse portal shortcut: right-clicking a hay_portal while leading a horse sends the horse through and drops the lead.
+
+- Diluted bay points (fixed and re-verified the same day): a bay carrying champagne / cream / pearl now shows real diluted points - amber champagne chocolate over gold, buckskin dark brown over gold, perlino rusty, pearl bay sepia - instead of the jet black they all rendered before. See the coat-pipeline section for the cause (PigmentField.dilute).
+
+- Three rendering issues found in the same session are logged in wiki/verification.html - see "Known gaps" below. The bay/dilution one closed the same day; grey closed later (the GreyCoat rework, built but not yet play-tested); the two splash ones were retired with the gene.

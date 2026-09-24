@@ -1,0 +1,39 @@
+2026-09-14 — pens for a whole day: more dryads, and inheritance ratios that count themselves
+
+    The owner is leaving the yard up all day and asked for more dryad pens, plus anything
+    else that benefits from a very long run. Two kinds fit (DebugYardLong, rows S to U;
+    the all-day pens).
+
+    - Eight dryad pens on a stone floor. The first night showed saplings three
+        blocks outside their pen, so these rows are stone except inside the pens, and nothing
+        planted over a fence can live there. The pens cover:
+
+            - one species each for spruce, jungle, acacia and flowers;
+
+            - a carrier control that must plant nothing;
+
+            - oak against oak+birch, for the half-rate rule;
+
+            - a small single-horse dark oak pen, to separate a clustering bug from a pen that is
+                too big.
+
+        Each planting now logs a line naming its pen, so a rate is a count of lines.
+
+    - Four ratio pens. A breeding pair, a clock that counts each foal's pair for
+        one locus, notes deaths, and removes the foal two minutes after birth so the cap never
+        stops the pen. The loci are HYPP, overo lethal white, sex-linked brindle and magic size.
+        The "one in four" claims in the checklist were written for a person to count by hand, and
+        nobody ever will; a day of these is a few hundred foals.
+
+    - The log, cut by about nine tenths. Measured before touching anything:
+        88% of an 18 MB log from twenty minutes of the yard was the [trace] horse-spawn
+        genotype and epigenome dump, about 58 KB per horse, and most of the rest was the
+        [Breeding] locus-by-locus table, about eighty lines per foal. Both are gone.
+        The spawn line keeps its stats and parents, and a birth keeps its heading, body and
+        conditions. Every census, herd, fertility and yard line is untouched; together they were
+        under 2%.
+
+    - The second run's log confirmed DAM DEFENCE in all rounds (gap 233 and the
+        doubled kick), a vacant band claimed without a fight with the other bachelor re-forming
+        (gap 232), a takeover fight seen off with nobody dying, and HURT MARE covered only once
+        she had healed.

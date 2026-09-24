@@ -1,0 +1,97 @@
+2026-09-21, after the roadmap work — the last eighty-eight links to “To be verified” are folded in, and the bake that had been eating the tabs is caught
+
+    One instruction: fold To be verified into the structure that replaced it. The two
+    dismantles moved the content; what they left behind was eighty-eight pages still
+    saying “Checklist on To be verified” and
+    linking a page that is now an index with no checklist on it. That is precisely the failure
+    the dismantle existed to remove — a link that resolves and tells the reader nothing
+    — so it had survived the fix for it.
+
+    Forty-nine of those pages already had a Verification tab and simply pointed
+    at the wrong place; they now link #verification on themselves, which
+    wiki/tabs.js opens as a tab switch, and their See also rows read
+    “What to check in-game” like every other gene page's. Thirty-three gene
+    pages promised a checklist that lived nowhere at all, and each got a real one,
+    written from what the page itself claims is unproven and ordered by the owner's rule: what
+    can be wrong invisibly first, “does it look right” last, every item with
+    a pass condition somebody can judge without asking what was meant. The index is
+    155 pages and 913 checks, from 122 and 713.
+
+    The pointers that named deleted sections were the worst of it, because they
+    resolved: releases' “§0-FJ and §0-FK” and
+    “§0-AT”, two §0-FK code references in
+    known gaps, gaps 121 and 98, and
+    coding notes' “the routine says boot a
+    server before tagging” — a routine that, after the dismantle, existed nowhere,
+    although that page states the rule itself. Each now names the page that owns the check.
+    Making a gene's own recipe still told an author to
+    “add an entry to To be verified”, which hard rule 9 forbids; it says give the new
+    gene's page a Verification tab and re-run the bake. Twenty-seven Javadoc
+    comments pointed at the old page too, three naming dead sections, and they are re-aimed the
+    same way — except the test kit's and the yard audit's, which really do mean the whole
+    wiki, and say so.
+
+The bake had been eating this work, and today it ate twenty-four tabs
+
+    :common:bakeGeneWikiPages rewrites a data-driven gene's page whole, so
+    anything a person adds has to be carried across by name. verifiedBlock carries
+    the Verified records — written on 2026-09-15 after a bake emptied
+    thirteen pages' — but it shipped with no test, so a routine re-bake
+    this session silently deleted the Verification tabs of twenty-four gene pages and one
+    Roadmap tab, all written the day before. Nothing went red. The pages are still valid
+    pages, the build was still green, and the only evidence was the verification index dropping
+    from 155 rows to 131 and one broken #fragment in the roadmap index.
+
+    The 24 were restored from HEAD, and GeneWikiTool.keptPanels now
+    carries any panel whose data-tab is not one of the three views
+    the tool writes, rather than naming verification and roadmap — so the next list broken
+    up onto its subject's page survives by having done that, with no edit to that method. A
+    re-bake reproduces all 24 byte-identically.
+    GeneWikiCarryTest is the guard the first fix lacked, and it
+    asserts the thing that actually broke rather than the extractor: every page the two generated
+    indexes name still carries the tab they name it for, and it fails in the other direction too
+    when a tab is added and its index is not re-baked. It was demonstrated to fail by stripping
+    one page's tab, because a test nobody has seen fail is a test nobody has tested. The contract
+    is written up on making a gene.
+
+Writing thirty-three checklists audited the code, as it always does
+
+    Gap 304 is the real one, and it is confirmed in the
+    source rather than suspected: a gene's two allele copies cannot both move one
+    attribute. AbstractWeatherGene deliberately emits one conditioned
+    AttributeMod per copy instead of summing them, because each carries its own
+    weather condition — but GeneAbilityHandler names a modifier
+    gene/<key>/<attribute>, one slot, and
+    addOrUpdateTransientModifier overwrites. Both weather pages promise that two
+    copies add. A thunderstorm reaches it with a single horse, since vanilla raises
+    isRaining() and isThundering() — which also falsifies
+    those pages' argument that the two conditions can never hold at once.
+    Gap 303: singer promises
+    a per-area arbitration that does not exist, and its cooldown (900 ticks) is shorter than its
+    interval (1200), so it can never refuse a firing the interval allowed.
+
+    The rest were stale claims, fixed in place. Six warn boxes said nothing had been
+    watched on pages carrying an owner-confirmed Verified block — bird
+    boned, fireproof, hydrophobic, magic health, magic jump, and
+    potion milk, whose “the merge is the one part not
+    built” is built, in GeneYieldHandler.
+    Magic swim speed's spec row and codebox still
+    described the water_movement_efficiency attribute its own Verified block records
+    being abandoned, because that attribute reads 0 on a horse.
+    Verdant and magic on
+    death both claimed a horse-dimension guard removed on 2026-09-13 — as did two
+    Javadocs — and dryad's freshly-written “does it run
+    there?” check was already answered by its own yard rows, so it was deleted rather than
+    re-asked. Twenty-four pages said Planned source: beside a class that exists.
+    FireproofGene justified its lava-speed floor by “a wild fireproof horse
+    caught in the world”, which Founders.CARRIERS_ONLY makes impossible.
+
+    Green: :neoforge-26.1.2:build, creator parity (7163 checks),
+    check-links, check-gene-tabs, sync-page-views, both
+    index bakes, and the carry test. Headless Chrome confirmed on every changed gene page that
+    the Verification button builds after the three views, the summary box is there, and a
+    #verification link opens the tab. web.wasm was deliberately
+    not rebuilt: nothing TeaVM reaches changed, and its output is not reproducible.
+    Nothing here has been in a game — the 913 checks are the point of the
+    session, not evidence about them, and gap 304 is the one worth a horse's time because it is
+    a live defect rather than an unlooked-at feature.

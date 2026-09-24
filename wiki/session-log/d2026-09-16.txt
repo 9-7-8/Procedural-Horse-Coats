@@ -1,0 +1,182 @@
+2026-09-16, overnight — a saddle worth dyeing, and the tack bug was never the one we recorded
+
+    Asked to build our own dyeable saddle, to leave other mobs looking default, and to look
+    into what tack is reachable without learning 3D modeling. The last of those turned up two
+    findings that overturned things this project had already written down, which is the more
+    useful result.
+
+The saddle, derived rather than drawn
+
+    The leather/hardware split needed no artistic judgement, and that is why it could
+    be a script. Vanilla's 64×64 saddle sheet holds exactly nine colours: six
+    browns at 66–76% saturation and three pure greys. Leather is
+    “saturated”, hardware is “R equals G equals B” — 208 pixels
+    and 36, summing to vanilla's 244 with no overlap. That rule is stated once, in
+    tools/tack/bake-saddle-textures.ps1, and asserted, so a future vanilla
+    retexture that breaks the assumption fails the bake instead of shipping a muddy saddle.
+
+    The base is vanilla's colour divided by the undyed tint, so base × undyed
+    reproduces vanilla exactly. Measured worst error: zero, on both the
+    entity sheet and the inventory icon, verified twice — once inside the bake and
+    again by reading the written files back and recomposing them against vanilla. That
+    exactness is not vanity: it is what lets the asset cover donkeys, mules, skeleton and
+    zombie horses without anyone noticing, which was the requirement.
+
+    The icon needed its own constant, and finding out why was the useful part.
+    The first attempt reused the entity divisor and the bake refused it — worst error
+    81. The icon's palette is genuinely brighter (channel maxima 241/153/136 against
+    138/85/46), so dividing by the entity's constant overflowed and clamped. The same run
+    also reported zero hardware pixels, which was itself wrong: the icon's three hardware
+    pixels are warm greys at ~22% saturation, so the neutral test never matched
+    them. Three pixels out of ninety-two on a 16×16 icon are not worth a second layer,
+    so the icon is treated as all leather and tints very slightly. The guard earned
+    its keep twice in ten minutes, which is the argument for writing the assertion
+    before the asset.
+
+    Scoped to the horse family only. Camel, pig, strider and nautilus keep vanilla's entry
+    verbatim in our override — a horse mod has no business repainting camels.
+
+The tack-fit bug was misdiagnosed on this project's own roadmap
+
+    §23.1 said the equipment layers render at vanilla scale over a resized body and need
+    to inherit state.scale. They already inherit it.
+    LivingEntityRenderer.submit scales the pose stack and then iterates the
+    layers inside the same push/pop. The real cause is that vanilla applies
+    MeshTransformer.scaling(1.1F) to three layers — HORSE,
+    HORSE_ARMOR, HORSE_SADDLE — in
+    LayerDefinitions, one level above the mesh function that
+    HdHorseModel copied. So the transform was never in the copied part, and its
+    absence is invisible on inspection: that class's doc discusses UV layout at length and
+    scale not at all.
+
+    It is also not only a scale —
+    scaled(f).translated(0, 24.016 × (1 − f), 0) — so tack sat
+    2.4 units off vertically as well as 10% large. The bug was on every horse,
+    including scale 1.0; the size locus multiplied the gap rather than causing it,
+    which is exactly why it read as “worse on big horses”. One line to fix. Both
+    ends were re-verified by hand before touching anything, because the same report also
+    contained the claim that turned out to be wrong.
+
+What the research changed about the tack plan
+
+    Geometry is hidden with alpha, not with JSON. Equipment draws through an
+    alpha-cutout pass, so a cube whose texels are transparent does not appear — which
+    means a halter, a bridle and a blanket are all re-textures of meshes that already exist,
+    with no modeling and no Java. A blanket does not even need a minecraft:
+    override, because equipment assets are keyed by their own file's namespace. And for two
+    colours on one item, NeoForge already provides
+    getArmorLayerTintColor with a layer index, which is twenty lines against the
+    hundred-and-fifty of the custom render layer this roadmap had proposed — a layer
+    that would not have worked as written anyway, since rendering is deferred and toggling
+    part.visible between submits mutates one shared model.
+
+The saddle learns three zones
+
+    The two-way split became a three-way one: seat, bridle and metal, each
+    its own dyeable layer, which is what lets the seat and the bridle be dyed independently
+    and the hardware recoloured for an ingot. The interesting part is that the two splits are
+    found differently. Metal is a colour question — vanilla's
+    sheet holds six saturated browns and three pure greys, so hardware is exactly
+    R=G=B. Seat versus bridle is a
+    geometric one, because both are the same brown; they are separated by
+    which of EquineSaddleModel's cubes owns the texel.
+
+    Verified on the written files rather than in the bake: 134 seat, 74 bridle, 36 metal,
+    summing to vanilla's 244, with no texel in two layers, none uncovered, none painted
+    outside vanilla's silhouette, and zero recompose error. An undyed saddle
+    is still pixel-identical to the one players know, which is what keeps donkeys, mules,
+    skeleton and zombie horses untouched.
+
+A formula error that invalidated its own verdict, and then survived it
+
+    The first three-way bake refused to ship: two painted texels belonged to no cube. They
+    turned out to be a bug in the analysis, not a gap in the sheet. A cube's
+    side row unwraps as west(d) | north(w) | east(d) | south(w), and the south
+    face had been placed at u+d+w+w rather than u+d+w+d —
+    wrong for every cube whose depth and width differ, which is most of them.
+
+    That formula had already produced a published answer. The
+    “seat 513, bridle 374, no overlap” figures given the day before came from it,
+    as did a “four unexplained texels” loose end that was never a mystery at all.
+    Recomputed: 522 and 380, still no overlap, nothing unexplained. The verdict
+    survived; the numbers did not — and it was only caught because the bake
+    asserts that every painted texel finds a home and refuses to write otherwise. An
+    assertion written before the asset is what turned a wrong published number into a
+    ten-minute correction.
+
+The Equestrian Bench, designed
+
+    A block with its own screen that dyes the three zones, recolours the metal for an ingot
+    or a gem, and turns a chosen part of a banner into a saddle pad. Eight decisions settled
+    with the owner and written up on the saddle-pad page;
+    nothing built beyond the zones above. The order is deliberate — bench and dyeing
+    first, the pad and the banner after — because the dyeing is nearly certain and the
+    banner half holds all the uncertainty.
+
+    Two research results reshaped it. Rasterising a banner is not a risk:
+    pattern layers are ordinary 64×64 resource PNGs and the composite is a multiply and
+    an alpha-over, so the coat engine's existing texture pipeline takes it unchanged. And
+    the danger in the horse-inventory slot is not the slot — it is
+    quickMoveStack, which derives every shift-click range from hardcoded indices
+    and is shared with donkeys, mules, llamas and nautiluses. A mis-ranged move there
+    duplicates items and looks fine until somebody shift-clicks with a chest on the horse.
+
+And then phase one of it was built
+
+    Block, menu, screen and three-zone dyeing — the half with no uncertainty in it.
+    The bench turned out small, and for a reason worth recording: it
+    computes its result the moment a slot changes and keeps nothing between uses, so it is
+    shaped like vanilla's loom rather than like the research shelf. No block entity, no
+    ticker, no save and load, no ContainerData sync — none of which would
+    have had anything to carry. The zone picker rides clickMenuButton, so
+    unlike the shelf it needs no custom packet either: a zone is a small int and vanilla
+    already carries small ints.
+
+    The screen had to land in the same change as the block, not after it.
+    registerBlockItem auto-joins the creative tab, so the bench was obtainable
+    the instant it was registered — and a menu with no registered screen crashes the
+    client on the first right-click. That is a nasty shape of half-finished: it compiles, it
+    builds, and it is broken only for whoever opens it.
+
+    The barn coordinate was probed, not chosen. The obvious next cell along
+    the homestead frontage turned out to be the doorway — the oak step is its
+    threshold and the door sits behind it — which is why the hitch and the table flank
+    it rather than sitting in a row. The bench went one further along, fronting a solid log
+    corner with headroom. put() overwrites without checking bounds or
+    occupancy, so guessing would have silently replaced a block and looked fine until
+    somebody walked into a barn and found a door bricked up. The reasoning is recorded
+    beside the call, and the bake's own palette count going 41 to 42 is what proved the
+    block actually entered the structure.
+
+Played, and four things came back from it
+
+    The bench went into a world and the dyeing worked — zones independent, fittings
+    recolouring, an undyed saddle indistinguishable, inputs returned on Escape. Four notes
+    came back, and the most interesting one was measurable.
+
+    “Not as brilliantly coloured as vanilla’s dyed leather.”
+    That is a headroom problem, not an art problem. Tinting multiplies, so vividness is
+    decided entirely by how bright the base is, and the base was vanilla’s saddle
+    divided by vanilla’s leather brown. That constant is free: base
+    × undyed reproduces vanilla whatever it is, so long as no channel clamps. Setting
+    it to the per-channel maximum of the leather pixels lifted mean luminance from
+    151.2 to 180.9 against vanilla leather’s 167.5 — and lifted blue, which the
+    brown’s B=0x40 had capped at 183, to a full 255. The fittings zone
+    needed nothing because 0x717171 already was its maximum, which is precisely
+    why the owner reported the metal looking right while the leather did not. The diagnosis
+    was in the report if you read it as a measurement rather than a complaint.
+
+    “Store the dyed information as NBT on each saddle.” It
+    always was — a component, which is the modern form of exactly that. But the
+    icon still read vanilla’s dyed_color, which our saddles do
+    not carry, so a saddle rendering in three colours on the horse sat in the hotbar looking
+    plain. From the outside that is indistinguishable from not being stored at all, and the
+    report was right even though the stated cause was not. A custom
+    ItemTintSource fixes the icon; a tooltip names all three zones, because an
+    icon can only ever show one.
+
+    The zone selector is gone, replaced by three labelled rows so all three
+    can be dyed in one pass, and the window grew to carry a name field — a saddle can
+    be “Daisy’s Saddle” now. Naming needed its own payload, because
+    vanilla’s rename packet is hard-wired to AnvilMenu; the keyboard guard
+    is the anvil’s too, without which typing an e closes the window.
