@@ -32,6 +32,9 @@ import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,16 +88,27 @@ import java.util.Set;
  * into one line a minute.
  *
  * <h2>Over the fence</h2>
- * <b>The horse only goes after food it can walk to.</b> A pasture beside a farm used to pin
- * every horse against the fence: the crops were the best rung in sight, the path to them ended
- * at the rail, and the horse leaned on it. {@link #search} now asks {@code canReach} before it
- * commits, keeps the nearest candidate of <i>each</i> rung so an unreachable farm falls through
- * to the grass in the pen, and {@link #tick} drops a pursuit the moment a gate shuts on it.
+ * A fence is two separate questions, and the horse has to fail both to be stopped by one.
+ * <ul>
+ *   <li><b>It only goes after food it can walk to.</b> A pasture beside a farm used to pin
+ *       every horse against the fence: the crops were the best rung in sight, the path to
+ *       them ended at the rail, and the horse leaned on it. {@link #search} asks
+ *       {@code canReach} before it commits, keeps the nearest candidate of <i>each</i> rung
+ *       so an unreachable farm falls through to the grass in the pen, and {@link #tick}
+ *       drops a pursuit the moment a gate shuts on it.</li>
+ *   <li><b>It only eats what it can get its mouth to.</b> That check passes a farm the long
+ *       way round through a gate - as it should - but {@link #REACH_SQ} is a plain distance,
+ *       so a horse stood at the rail was already within it and ate the crop through the
+ *       fence instead of walking. {@link #exposed} is the second half: a horse a barrier
+ *       away from its target keeps walking rather than eating where it stands.</li>
+ * </ul>
  *
  * <p>UNVERIFIED: that {@code BlockTags.CROPS} and {@code BlockTags.SMALL_FLOWERS} hold what
- * their names say in 26.1.2 (both compile; contents not read), and that {@link #REACH_ACCURACY}
+ * their names say in 26.1.2 (both compile; contents not read); that {@link #REACH_ACCURACY}
  * of 1 separates a hay bale the horse stands beside from a crop one fence away - the manhattan
- * reading of vanilla's own {@code moveTo} accuracy, not measured in game.
+ * reading of vanilla's own {@code moveTo} accuracy, not measured in game; and that a fence's
+ * collision shape stands 1.5 blocks in 26.1.2, which is what puts it above a grazing horse's
+ * eye line and is the whole of why {@link #exposed} sees it.
  */
 public final class HungerFoodGoal extends Goal {
 
@@ -256,13 +270,22 @@ public final class HungerFoodGoal extends Goal {
         if (horse.distanceToSqr(at) > REACH_SQ) {
             return;
         }
+        // ...and can get its mouth to it. Within 2.5 blocks is not the same as beside it:
+        // see #exposed. A blocked target is not given up on - the horse keeps walking, and
+        // the way round is what search already proved exists.
         if (item != null) {
+            if (!horse.hasLineOfSight(item)) {
+                return;
+            }
             eatItem(level, item);
             item = null;
         } else if (block != null) {
+            if (!exposed(block)) {
+                return;
+            }
             eatBlock(level, block, rung, false);
             block = null;
-        } else if (prey != null && --swingCooldown <= 0) {
+        } else if (prey != null && horse.hasLineOfSight(prey) && --swingCooldown <= 0) {
             swingCooldown = HUNT_SWING;
             hunt(level, prey);
         }
@@ -432,6 +455,44 @@ public final class HungerFoodGoal extends Goal {
     }
 
     /**
+     * <b>"Can the horse get its mouth to it?"</b> - {@link #reachable} answers the question
+     * for the horse's feet, and that is not the same question (owner, 2026-09-23: "horses are
+     * eating crops through a fence or wall"). A farm on the other side of a rail is normally
+     * reachable: there is a gate somewhere, so {@code canReach} says yes and the horse sets
+     * off. But the eating radius is {@link #REACH_SQ}, a plain distance, so a horse that
+     * happens to be stood at the fence is already inside it and eats the crop where it
+     * stands rather than walking the long way round. The same held for a carcass or a dropped
+     * carrot over the rail, and for a carnivore's swing at a cow behind one.
+     *
+     * <p>This is the same clip vanilla's own {@code hasLineOfSight} makes - collider shapes,
+     * fluids ignored, {@code MISS} means nothing is in the way - which is why the item and
+     * prey rungs just call that. The difference is only <b>where to aim</b>: at the nearest
+     * point of the block, not its centre. Centre is wrong for exactly the rung a horse eats
+     * most, because a grass block sits <i>below</i> the ground the horse walks on, and a ray
+     * to the middle of one five blocks away dives through the turf in between and reports a
+     * barrier every time. The nearest point of the box is the top edge facing the horse - the
+     * part it actually puts its head on - and the ray to it skims the surface.
+     *
+     * <p>A fence and a cobble wall both collide to 1.5 blocks, above a grazing horse's eye
+     * line, so both stop the ray. <b>A one-block wall deliberately does not</b>: a horse can
+     * put its head over that, and can jump it, so the pathfinder was going to let it walk
+     * there anyway.
+     */
+    private boolean exposed(BlockPos pos) {
+        Vec3 eye = horse.getEyePosition();
+        // The closest point of the block's box to the eye, clamped axis by axis.
+        Vec3 aim = new Vec3(
+                Mth.clamp(eye.x, pos.getX(), pos.getX() + 1.0),
+                Mth.clamp(eye.y, pos.getY(), pos.getY() + 1.0),
+                Mth.clamp(eye.z, pos.getZ(), pos.getZ() + 1.0));
+        HitResult hit = horse.level().clip(new ClipContext(
+                eye, aim, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, horse));
+        return hit.getType() == HitResult.Type.MISS
+                || (hit instanceof net.minecraft.world.phys.BlockHitResult b
+                        && b.getBlockPos().equals(pos));
+    }
+
+    /**
      * What this block is to this horse, or null if it is not food it may eat. Grass and moss
      * blocks count only with air above, which is where a horse eats them from.
      */
@@ -524,6 +585,9 @@ public final class HungerFoodGoal extends Goal {
                     && favourite.equals(BuiltInRegistries.ITEM.getKey(e.getItem().getItem()).toString());
             if (!fav && !DietFoods.acceptsFromGround(diet, e.getItem())) {
                 continue;
+            }
+            if (!horse.hasLineOfSight(e)) {
+                continue;       // two blocks away through a fence is not "at its feet"
             }
             rung = fav ? Hunger.Food.FAVOURITE : Hunger.Food.DROPPED;
             eatItem(level, e);
