@@ -57,8 +57,14 @@ public final class HorseOwnership {
      * Empty for an untamed horse, or an owner neither cache has seen.
      *
      * <p>API checked against the 26.1.2 sources, not yet exercised in-game.
+     *
+     * <p>The only method here that takes an {@code AbstractHorse} rather than a
+     * {@code Horse}: the rest of this class guards items bound to a horse, and
+     * nothing binds to a donkey - but the death notice names the owner of
+     * whatever died, mule included.
      */
-    public static java.util.Optional<String> ownerName(Horse horse) {
+    public static java.util.Optional<String> ownerName(
+            net.minecraft.world.entity.animal.equine.AbstractHorse horse) {
         if (!horse.isTamed()) {
             return java.util.Optional.empty();
         }

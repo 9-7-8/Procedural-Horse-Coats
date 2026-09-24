@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -41,10 +40,9 @@ import java.util.UUID;
  * just did, in red, is noise - and in the test yard it would be constant.
  *
  * <h4>Sunlight is not fire</h4>
- * {@code SunSensitivityHandler} burns a sun-sensitive horse with vanilla's
- * on-fire damage, so the damage type alone cannot tell a dhampir caught in the
- * open from a horse standing in a campfire. A sun-burnt horse is not actually
- * alight, which is the discriminator used here.
+ * The damage type alone cannot tell a dhampir burning in the open from a horse
+ * standing in a campfire - {@link HorseNotices#causeOf} settles it, and names
+ * the horse too, for this class and for {@link HorseDeathNoticeHandler}.
  */
 @EventBusSubscriber
 public final class HorseHurtNoticeHandler {
@@ -90,9 +88,9 @@ public final class HorseHurtNoticeHandler {
         }
         remember(horse.getUUID(), now);
 
-        HurtNotice.Cause cause = causeOf(horse, event.getSource().getMsgId());
+        HurtNotice.Cause cause = HorseNotices.causeOf(horse, event.getSource().getMsgId());
         String attacker = dealer == null ? "" : dealer.getDisplayName().getString();
-        String line = HurtNotice.line(name(horse), cause, attacker,
+        String line = HurtNotice.line(HorseNotices.name(horse), cause, attacker,
                 damage, horse.getHealth(), horse.getMaxHealth());
         player.sendSystemMessage(Component.literal(line).withStyle(
                 HurtNotice.badlyHurt(horse.getHealth(), horse.getMaxHealth())
@@ -114,30 +112,4 @@ public final class HorseHurtNoticeHandler {
         LAST_TOLD.put(horse, now);
     }
 
-    /**
-     * Vanilla's damage type, refined by the one thing it cannot say: whether the
-     * fire burning this horse is the sun.
-     */
-    private static HurtNotice.Cause causeOf(AbstractHorse horse, String msgId) {
-        HurtNotice.Cause cause = HurtNotice.of(msgId);
-        if (cause == HurtNotice.Cause.FIRE && !horse.isOnFire()
-                && horse instanceof Horse h && SunSensitivityHandler.isSensitive(h)) {
-            return HurtNotice.Cause.SUNLIGHT;
-        }
-        return cause;
-    }
-
-    /**
-     * What to call it: the name on the tag, then the name this mod gave it, then
-     * whatever vanilla calls a donkey.
-     */
-    private static String name(AbstractHorse horse) {
-        if (horse.getCustomName() != null) {
-            return horse.getCustomName().getString();
-        }
-        if (horse instanceof Horse h && HorseRecords.hasRealRecord(h)) {
-            return HorseRecords.of(h).displayName();
-        }
-        return horse.getName().getString();
-    }
 }

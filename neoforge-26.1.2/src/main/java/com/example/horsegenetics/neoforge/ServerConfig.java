@@ -140,6 +140,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue DAMAGE_NOTICES;
 
     /**
+     * <b>Does the whole server hear when an owned horse dies?</b> See
+     * {@code server/HorseDeathNoticeHandler} for what the line says.
+     */
+    public static final ModConfigSpec.BooleanValue DEATH_NOTICES;
+
+    /**
      * <b>The reproductive day while {@code debug.tools} is on</b> - one real
      * minute instead of twenty. Owner's call, 2026-09-13: a heat, a pregnancy
      * and half a cycle each become a minute, which is long enough to walk
@@ -223,6 +229,14 @@ public final class ServerConfig {
                         "once every few seconds per horse, so a pen on fire is not a wall of text.",
                         "Turn it off on a server where players keep hundreds of horses.")
                 .define("notices.owned_horse_damage", true);
+        DEATH_NOTICES = builder
+                .comment("Whether everybody on the server is told when an owned horse dies. (default: true)",
+                        "The line names the horse, whose it was and what killed it, once, and the",
+                        "owner's own copy is red so they can find it in a busy chat log.",
+                        "A wild horse dying says nothing, and neither does anything at all while",
+                        "the showDeathMessages game rule is off.",
+                        "Turn it off on a server where horses die often enough to be noise.")
+                .define("notices.owned_horse_death", true);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -323,6 +337,15 @@ public final class ServerConfig {
     public static boolean damageNotices() {
         try {
             return DAMAGE_NOTICES.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code notices.owned_horse_death}, safely. */
+    public static boolean deathNotices() {
+        try {
+            return DEATH_NOTICES.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }
