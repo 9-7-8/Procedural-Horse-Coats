@@ -49,6 +49,7 @@ wiki/breeding.html#drift	coding	Genetic drift
 wiki/breeding.html#family-overview	coding	The family overview — every horse at once
 wiki/breeding.html#miscarriage	coding	The miscarriage — and why it does not name the gene
 wiki/breeding.html#my-horses-filter	coding	The My horses filter: carries, genotype, expresses
+wiki/breeding.html#picker-filter	coding	The breeding pickers speak the same language (2026-09-24)
 wiki/breeding.html#play	gameplay	Breeding, as a player sees it
 wiki/breeding.html#rename	coding	D. Name-tag rename
 wiki/breeding.html#science-cycle	science	How horses actually reproduce
