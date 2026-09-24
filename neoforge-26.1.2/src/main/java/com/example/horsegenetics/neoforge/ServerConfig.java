@@ -146,6 +146,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue DEATH_NOTICES;
 
     /**
+     * <b>Does an owner hear why one of their mares was not covered?</b> See
+     * {@code server/NaturalBreedingHandler} for which refusals earn a line.
+     */
+    public static final ModConfigSpec.BooleanValue BREEDING_NOTICES;
+
+    /**
      * <b>How badly hurt a horse has to be before it bucks its rider and runs.</b>
      * A fraction of its own maximum health; zero turns the behaviour off. See
      * {@code server/HorseEscapeGoal}.
@@ -262,6 +268,17 @@ public final class ServerConfig {
                         "the showDeathMessages game rule is off.",
                         "Turn it off on a server where horses die often enough to be noise.")
                 .define("notices.owned_horse_death", true);
+        BREEDING_NOTICES = builder
+                .comment("Whether a mare's owner is told in chat when a natural cover does not",
+                        "happen, and how the cover went when it does. (default: true)",
+                        "Only reasons the owner can act on are said: the crowding cap, a hurt",
+                        "mare, one being ridden or led, and branded cowboy stock - plus whether",
+                        "a cover took. A mare who is simply between heats, or who has no",
+                        "stallion in reach, says nothing, because that is nearly every mare",
+                        "nearly all of the time.",
+                        "Only the owner is told, only while they are in the same world as the",
+                        "mare, and at most once every few minutes per mare per reason.")
+                .define("notices.owned_horse_breeding", true);
         ESCAPE_HEALTH_FRACTION = builder
                 .comment("How low a horse's health has to fall before it runs for its life,",
                         "as a fraction of its own maximum. (default: 0.2, so a fifth)",
@@ -432,6 +449,15 @@ public final class ServerConfig {
     public static boolean deathNotices() {
         try {
             return DEATH_NOTICES.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code notices.owned_horse_breeding}, safely. */
+    public static boolean breedingNotices() {
+        try {
+            return BREEDING_NOTICES.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }
