@@ -140,6 +140,86 @@ class HorseQueryTest {
         assertFalse(HorseQuery.matches(plain, HorseQuery.terms("gene:extension")));
     }
 
+    private static HorseListing carrier() {
+        return row("Carrier", "Arabian",
+                Genotype.wildType().with(new AllelePair(Genes.EXTENSION.E, Genes.EXTENSION.e)),
+                true, 1, 0);
+    }
+
+    /**
+     * Extension's two alleles are {@code E} and {@code e} - at this locus case
+     * <i>is</i> the allele. The filter used to lower-case every term before it
+     * compared, so {@code gene:e} answered "carries E or e", which is every
+     * horse alive, and no allele combination could be spelled at all.
+     */
+    @Test
+    void anAlleleTokenComparesCaseSensitively() {
+        HorseListing red = row("Red", "Arabian", chestnut(), true, 1, 0);
+        HorseListing black = row("Black", "Shire", bay(), true, 1, 0);
+
+        assertTrue(HorseQuery.matches(red, HorseQuery.terms("gene:e")));
+        assertFalse(HorseQuery.matches(red, HorseQuery.terms("gene:E")));
+
+        assertTrue(HorseQuery.matches(black, HorseQuery.terms("gene:E")));
+        assertFalse(HorseQuery.matches(black, HorseQuery.terms("gene:e")));
+
+        // The carrier is the one horse that answers to both.
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("gene:e")));
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("gene:E")));
+    }
+
+    /** Everything that is not an allele token still folds case, as it always did. */
+    @Test
+    void namesBreedsAndFlagsStillIgnoreCase() {
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(stable(), "MARE")));
+        assertEquals(List.of("Amber", "Cinder"), names(HorseQuery.filter(stable(), "ARABIAN")));
+        assertEquals(List.of("Boyd"), names(HorseQuery.filter(stable(), "BREED:Shir")));
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(stable(), "Name:AMB")));
+        // A gene *name* is words, not a token, so it folds too.
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("gene:EXTENSION")));
+    }
+
+    /**
+     * {@code genotype:} is the exact-pair question {@code gene:} cannot ask:
+     * {@code gene:e} is every horse with a red copy, {@code genotype:E/e} only
+     * the carriers, {@code genotype:e/e} only the chestnuts.
+     */
+    @Test
+    void genotypeMatchesAnExactPair() {
+        HorseListing red = row("Red", "Arabian", chestnut(), true, 1, 0);
+        HorseListing black = row("Black", "Shire", bay(), true, 1, 0);
+
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("genotype:E/e")));
+        assertFalse(HorseQuery.matches(red, HorseQuery.terms("genotype:E/e")));
+        assertFalse(HorseQuery.matches(black, HorseQuery.terms("genotype:E/e")));
+
+        assertTrue(HorseQuery.matches(red, HorseQuery.terms("genotype:e/e")));
+        assertFalse(HorseQuery.matches(carrier(), HorseQuery.terms("genotype:e/e")));
+
+        assertTrue(HorseQuery.matches(black, HorseQuery.terms("genotype:E/E")));
+        assertFalse(HorseQuery.matches(carrier(), HorseQuery.terms("genotype:E/E")));
+
+        // "pair:" is the same key, and negation works on it like any other term.
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("pair:E/e")));
+        assertTrue(HorseQuery.matches(red, HorseQuery.terms("-genotype:E/e")));
+    }
+
+    /** A pair is a set, not a sequence - a breeder types it either way round. */
+    @Test
+    void genotypeIgnoresTheOrderOfTheTwoTokens() {
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("genotype:E/e")));
+        assertTrue(HorseQuery.matches(carrier(), HorseQuery.terms("genotype:e/E")));
+    }
+
+    /** ...but the tokens themselves are still case-exact. */
+    @Test
+    void genotypeDoesNotFoldTheCaseOfEitherToken() {
+        HorseListing red = row("Red", "Arabian", chestnut(), true, 1, 0);
+        assertFalse(HorseQuery.matches(red, HorseQuery.terms("genotype:E/E")));
+        assertFalse(HorseQuery.matches(red, HorseQuery.terms("genotype:E/e")));
+        assertTrue(HorseQuery.matches(red, HorseQuery.terms("genotype:e/e")));
+    }
+
     /**
      * A stallion's X-linked pair reads {@code n/Y}, and the reserved {@code Y}
      * is the slot he does not have rather than something he is carrying. Get
@@ -165,7 +245,10 @@ class HorseQueryTest {
 
     @Test
     void malformedTermsMatchNothingAndDoNotThrow() {
-        for (String query : List.of("speed>", "gen>abc", "bond<", ":", ">", "-", "gene:", "expresses:")) {
+        for (String query : List.of("speed>", "gen>abc", "bond<", ":", ">", "-", "gene:", "expresses:",
+                // A genotype term is half-typed on the way to being whole.
+                "genotype:", "genotype:E", "genotype:E/", "genotype:/e", "genotype:/",
+                "genotype:E/e/A", "genotype:zz/zz")) {
             assertTrue(HorseQuery.filter(stable(), query).isEmpty(), query);
         }
     }

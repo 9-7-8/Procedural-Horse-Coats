@@ -46,6 +46,21 @@ import java.util.Locale;
  * {@code expresses:} is the narrower question: it matches the gene's resolved
  * {@link Expression}, so it finds the horses that actually <i>show</i> it.
  *
+ * <p>{@code genotype:} (alias {@code pair:}) is the third question - an
+ * <b>exact combination</b>, {@code genotype:E/e}, written the way
+ * {@link AllelePair#toTokens()} writes it and matched either way round. The
+ * three are a ladder: {@code gene:e} is every horse with a red copy,
+ * {@code genotype:E/e} is the carriers only, {@code genotype:e/e} the chestnuts
+ * only, and {@code expresses:chestnut} the same chestnuts by their outcome.
+ *
+ * <h2>Allele tokens are case-sensitive; everything else is not</h2>
+ * Extension's alleles are {@code E} and {@code e}, and agouti's {@code A} and
+ * {@code a} - at these loci case <i>is</i> the allele. So {@code gene:},
+ * {@code carries:} and {@code genotype:} compare tokens exactly, while names,
+ * breeds, coats, flags and the keys themselves still fold case. {@code Mare},
+ * {@code mare} and {@code MARE} are one flag; {@code gene:E} and {@code gene:e}
+ * are two different questions.
+ *
  * <p>Nothing here throws on a malformed term. A number that will not parse
  * makes the term match nothing, which is what a half-typed {@code speed>} in a
  * live-filtering box should do - an exception into a render loop is not.
@@ -85,7 +100,7 @@ public final class HorseQuery {
     public static List<String> keys() {
         return List.of("name", "barn", "breed", "coat", "sex", "age", "by", "where",
                 "gen", "bond", "speed", "health", "jump", "hands", "size",
-                "gene", "carries", "expresses", "condition");
+                "gene", "carries", "genotype", "expresses", "condition");
     }
 
     /** Every bare word that is a flag rather than a substring search. */
@@ -114,7 +129,14 @@ public final class HorseQuery {
         return out;
     }
 
-    /** Split on whitespace, dropping empties; an empty query means "everything". */
+    /**
+     * Split on whitespace, dropping empties; an empty query means "everything".
+     *
+     * <p><b>Case is kept.</b> Everything that reads words - names, breeds,
+     * flags, keys - folds case where it compares, but an allele token cannot:
+     * {@code E} and {@code e} are two different alleles at extension, and
+     * lower-casing here made {@code gene:e} match every black horse alive.
+     */
     public static List<String> terms(String query) {
         List<String> out = new ArrayList<>();
         if (query == null) {
@@ -122,7 +144,7 @@ public final class HorseQuery {
         }
         for (String raw : query.trim().split("\\s+")) {
             if (!raw.isEmpty()) {
-                out.add(raw.toLowerCase(Locale.ROOT));
+                out.add(raw);
             }
         }
         return out;
@@ -149,7 +171,7 @@ public final class HorseQuery {
         if (cut < 0) {
             return flag(row, term, haystack);
         }
-        String key = term.substring(0, cut);
+        String key = term.substring(0, cut).toLowerCase(Locale.ROOT);
         char op = term.charAt(cut);
         int valueStart = cut + (term.startsWith(">=", cut) || term.startsWith("<=", cut) ? 2 : 1);
         String value = term.substring(valueStart);
@@ -201,6 +223,9 @@ public final class HorseQuery {
             case "gene":
             case "carries":
                 return carries(row, value);
+            case "genotype":
+            case "pair":
+                return genotypeIs(row, value);
             case "expresses":
                 return expresses(row, value);
             case "gen":
@@ -229,7 +254,8 @@ public final class HorseQuery {
         }
     }
 
-    private static boolean flag(HorseListing row, String term, String haystack) {
+    private static boolean flag(HorseListing row, String rawTerm, String haystack) {
+        String term = rawTerm.toLowerCase(Locale.ROOT);
         switch (term) {
             case "mare":
                 return row.sex() == Sex.FEMALE && row.adult();
@@ -274,23 +300,30 @@ public final class HorseQuery {
     // Gene terms
     // ------------------------------------------------------------------
 
-    /** Does the horse hold this allele token anywhere - expressing or not? */
+    /**
+     * Does the horse hold this allele token anywhere - expressing or not?
+     *
+     * <p>The token compares <b>case-sensitively</b>; the gene name and key
+     * around it do not. {@code E} and {@code e} are extension's two alleles,
+     * so folding case here answered a different question than the one asked.
+     */
     private static boolean carries(HorseListing row, String value) {
         if (value.isEmpty()) {
             return false;
         }
+        String lower = value.toLowerCase(Locale.ROOT);
         for (Gene gene : Genes.codeOrder()) {
             AllelePair pair = row.genotype().pair(gene);
             if (pair == null) {
                 continue;
             }
             boolean namedGene = equalsIgnoreCase(gene.name(), value)
-                    || gene.key().toLowerCase(Locale.ROOT).endsWith("." + value);
+                    || gene.key().toLowerCase(Locale.ROOT).endsWith("." + lower);
             for (Allele allele : new Allele[]{pair.first(), pair.second()}) {
                 if (allele == null) {
                     continue;
                 }
-                if (equalsIgnoreCase(allele.token(), value)) {
+                if (allele.token().equals(value)) {
                     return true;
                 }
                 if (namedGene && allele != gene.defaultAllele() && !gene.isPlaceholder(allele)) {
@@ -309,6 +342,7 @@ public final class HorseQuery {
         if (value.isEmpty()) {
             return false;
         }
+        String lower = value.toLowerCase(Locale.ROOT);
         for (Gene gene : Genes.codeOrder()) {
             Expression expression = row.genotype().expressionOf(gene);
             if (expression == null || expression.wildType()) {
@@ -316,7 +350,47 @@ public final class HorseQuery {
             }
             if (contains(expression.name(), value) || contains(expression.id(), value)
                     || equalsIgnoreCase(gene.name(), value)
-                    || gene.key().toLowerCase(Locale.ROOT).endsWith("." + value)) {
+                    || gene.key().toLowerCase(Locale.ROOT).endsWith("." + lower)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * <b>An exact pair</b> - {@code genotype:E/e}, the two tokens either way
+     * round, matched against one locus's {@link AllelePair} in the spelling
+     * {@link AllelePair#toTokens()} writes.
+     *
+     * <p>This is the question {@code gene:} cannot ask. {@code gene:e} finds a
+     * horse with <i>a</i> red copy, carrier and chestnut alike; {@code
+     * genotype:E/e} finds only the carrier, and {@code genotype:e/e} only the
+     * chestnut. Tokens are case-sensitive for the same reason they are in
+     * {@link #carries}; the separator is the {@code /} of a genotype code.
+     *
+     * <p>A value that is not exactly two {@code /}-separated non-empty tokens
+     * matches nothing rather than throwing - {@code genotype:E/} is a half-typed
+     * term in a live-filtering box, not an error.
+     */
+    private static boolean genotypeIs(HorseListing row, String value) {
+        int cut = value.indexOf('/');
+        if (cut <= 0 || cut == value.length() - 1) {
+            return false;
+        }
+        String wantFirst = value.substring(0, cut);
+        String wantSecond = value.substring(cut + 1);
+        if (wantSecond.indexOf('/') >= 0) {
+            return false;
+        }
+        for (Gene gene : Genes.codeOrder()) {
+            AllelePair pair = row.genotype().pair(gene);
+            if (pair == null || pair.first() == null || pair.second() == null) {
+                continue;
+            }
+            String a = pair.first().token();
+            String b = pair.second().token();
+            if ((a.equals(wantFirst) && b.equals(wantSecond))
+                    || (a.equals(wantSecond) && b.equals(wantFirst))) {
                 return true;
             }
         }
@@ -347,11 +421,12 @@ public final class HorseQuery {
     }
 
     private static boolean contains(String haystack, String needle) {
-        return haystack != null && haystack.toLowerCase(Locale.ROOT).contains(needle);
+        return haystack != null
+                && haystack.toLowerCase(Locale.ROOT).contains(needle.toLowerCase(Locale.ROOT));
     }
 
     private static boolean equalsIgnoreCase(String a, String b) {
-        return a != null && a.toLowerCase(Locale.ROOT).equals(b);
+        return a != null && a.equalsIgnoreCase(b);
     }
 
     // ------------------------------------------------------------------

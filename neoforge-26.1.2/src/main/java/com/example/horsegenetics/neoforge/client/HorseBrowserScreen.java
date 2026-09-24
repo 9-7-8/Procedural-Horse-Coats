@@ -668,7 +668,7 @@ public final class HorseBrowserScreen extends Screen {
         horseFilterBox = new EditBox(this.font, fsLeft() + 1, contentTop(),
                 Math.max(160, (fsRight() - fsLeft()) / 2), 16, Component.literal("Filter"));
         horseFilterBox.setMaxLength(96);
-        horseFilterBox.setHint(Component.literal("mare  gen>2  gene:SB1  -lethal"));
+        horseFilterBox.setHint(Component.literal("mare  gen>2  genotype:E/e  -lethal"));
         horseFilterBox.setValue(horseFilter);
         addRenderableWidget(horseFilterBox);
 
