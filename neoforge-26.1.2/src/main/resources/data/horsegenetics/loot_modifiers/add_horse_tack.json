@@ -1,6 +1,6 @@
 {
-  "type": "horsegenetics:add_research_paper",
-  "chance": 0.3,
+  "type": "horsegenetics:add_horse_tack",
+  "chance": 0.22,
   "conditions": [
     {
       "condition": "horsegenetics:loot_table_matches",

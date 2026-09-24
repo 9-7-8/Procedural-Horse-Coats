@@ -20,9 +20,14 @@ import net.neoforged.neoforge.common.loot.LootModifier;
  * supply and the chance is what decides how long a player waits for a crop they
  * cannot buy their way into cheaply.
  *
- * <p>Seven per cent, across eight chest tables - rare enough that finding one is
- * an event, common enough that a player who explores at all will eventually
- * meet the crop without having to save up for a villager.
+ * <p>Twenty per cent, across <b>every</b> chest table in every namespace - see
+ * {@link LootTableMatchesCondition}. It was seven per cent across eight named
+ * vanilla chests, which on the owner's modded server meant a crop she had never
+ * once found: most of the chests a player opens in a large pack belong to
+ * somebody else's structures, and none of those were in the list. Widening the
+ * reach is most of the change; the rate went up with it because the ask was
+ * "much more common", and because a seed is the start of a field rather than the
+ * field.
  */
 public class AddGoldenCarrotSeedsModifier extends LootModifier {
 

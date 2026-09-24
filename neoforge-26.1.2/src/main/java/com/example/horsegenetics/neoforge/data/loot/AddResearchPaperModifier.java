@@ -20,8 +20,14 @@ import net.neoforged.neoforge.common.loot.LootModifier;
  * Chest-loot injection of {@code research_paper}s (roadmap wiki &sect;16.2). With
  * probability {@code chance} it adds one paper for a gene drawn weighted by
  * {@link Gene#rarity()} - so a common gene's paper turns up far more often than
- * a mythic one - to whatever loot the datapack JSON's conditions match (a small
- * set of chest tables).
+ * a mythic one - to whatever loot the datapack JSON's conditions match.
+ *
+ * <p>That is now <b>every</b> chest table in every namespace, at thirty per cent,
+ * where it was eighteen across eight named vanilla chests. The owner calls these
+ * "gene books", after what the research shelf copies them onto, and asked for
+ * them to be much more common; there are as many papers to find as there are
+ * genes with a carrot, so a rate that suits one dungeon's worth of exploring
+ * still leaves most of the registry unread.
  */
 public class AddResearchPaperModifier extends LootModifier {
 
