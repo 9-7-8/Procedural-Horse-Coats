@@ -1,7 +1,9 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.care.Bond;
 import com.example.horsegenetics.common.care.Hunger;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.HorseCareSyncPayload;
@@ -62,6 +64,12 @@ import static com.example.horsegenetics.neoforge.HorseGenetics.MOD_ID;
  * (about +0.5/min), being ridden by its owner (about +1/min), and being
  * hand-fed by its owner ({@link #FEED_BOND} at once). A foal in a herd gains at
  * double rate. {@link BondFollowGoal} reads the resulting tier.
+ *
+ * <p>It also <b>decays</b>, on the same day stamp: {@code behaviour.bond_decay_per_day}
+ * a day down to {@code behaviour.bond_floor} and no further, charged for every
+ * whole day since that stamp so an unloaded chunk costs what a loaded one does.
+ * The arithmetic, and why the floor is where it is, are in
+ * {@link com.example.horsegenetics.common.care.Bond}.
  *
  * <h4>Herds (wiki 13)</h4>
  * A continuously-tracked counter ({@code togetherTicks}) accumulates while
@@ -169,6 +177,30 @@ public final class HorseCareHandler {
                 horse.getBoundingBox().inflate(HERD_RADIUS),
                 h -> h != horse && h.isAlive());
         after = updateHerd(horse, after, nearbyHorses);
+
+        // --- bond decay: one point a Minecraft day, down to a floor (owner, 2026-09-24).
+        // Charged for every whole day since the last stamp rather than ticked, so a
+        // horse that spent a week in an unloaded chunk pays for the week the moment it
+        // loads: decay is a rate on time, and anything ticked would be a rate on
+        // attention - the horse in the pasture you ride through would lose bond and the
+        // one in a chunk nobody visits would keep it forever. It shares the stamp the
+        // daily gain cap rolls over on, so whichever of the two moves it first, the
+        // other reads that day as already counted. Before the gain block on purpose:
+        // a horse being ridden on a new day should decay and then earn it straight back.
+        long today = level.getGameTime() / HorseCareAttachment.DAY_TICKS;
+        if (after.dayStamp() == 0L && today > 0L) {
+            // Never stamped. bond can be written straight onto the attachment without
+            // going through awardBond - a foal's birthright, /bond, a debug yard - and
+            // in an established world a stamp of zero would otherwise read as hundreds
+            // of days owing and take that horse to the floor on its first tick.
+            after = after.with(after.bond(), after.herd(), after.bondToday(), today,
+                    after.bondTicks(), after.togetherTicks());
+        } else if (today > after.dayStamp()) {
+            int left = Bond.decayed(after.bond(), today - after.dayStamp(),
+                    ServerConfig.bondDecayPerDay(), ServerConfig.bondFloor());
+            after = after.with(left, after.herd(), 0, today,
+                    after.bondTicks(), after.togetherTicks());
+        }
 
         // --- bond: tamed, owner loaded in this level ---
         LivingEntity ownerEntity = horse.getOwner();

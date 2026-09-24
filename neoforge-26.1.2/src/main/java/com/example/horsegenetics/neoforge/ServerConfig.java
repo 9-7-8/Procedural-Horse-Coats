@@ -185,6 +185,15 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue LAST_STAND_REARM_FRACTION;
 
     /**
+     * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
+     * the decay off. See {@code common.care.Bond}.
+     */
+    public static final ModConfigSpec.IntValue BOND_DECAY_PER_DAY;
+
+    /** <b>The bond level that decay stops at</b>, and never falls below. */
+    public static final ModConfigSpec.IntValue BOND_FLOOR;
+
+    /**
      * <b>The reproductive day while {@code debug.tools} is on</b> - one real
      * minute instead of twenty. Owner's call, 2026-09-13: a heat, a pregnancy
      * and half a cycle each become a minute, which is long enough to walk
@@ -360,6 +369,29 @@ public final class ServerConfig {
                         "allowed, since a server that types that has asked for it.")
                 .defineInRange("behaviour.last_stand_rearm_fraction",
                         com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION, 0.0, 1.0);
+        BOND_DECAY_PER_DAY = builder
+                .comment("How much bond a horse loses per Minecraft day. (default: 1)",
+                        "Charged for every whole day since the horse last decayed, so a horse",
+                        "that sat in an unloaded chunk for a week pays for the week the moment",
+                        "it loads. Time, not attention.",
+                        "One point a day against a gain cap of fifteen is meant to be trivial to",
+                        "out-earn: a horse ridden even occasionally never notices it, and what it",
+                        "costs is bond you banked once and then stopped paying for.",
+                        "It never goes below behaviour.bond_floor.",
+                        "0 turns decay off entirely - bond only ever goes up, as it did before.")
+                .defineInRange("behaviour.bond_decay_per_day",
+                        com.example.horsegenetics.common.care.Bond.DEFAULT_PER_DAY, 0, 100);
+        BOND_FLOOR = builder
+                .comment("The bond level decay stops at. (default: 31)",
+                        "31 is the bottom of behaviour tier 1, where a horse turns its head to",
+                        "face its owner and does nothing else. So neglect can cost a horse the",
+                        "tiers that walk toward you (61) and steer bareback (81), and it can",
+                        "never cost you the one where it looks up as you walk past.",
+                        "It is a place decay stops, not a level bond is held at: a horse below it",
+                        "is left alone rather than topped up to it.",
+                        "0 lets a horse forget you completely.")
+                .defineInRange("behaviour.bond_floor",
+                        com.example.horsegenetics.common.care.Bond.DEFAULT_FLOOR, 0, 100);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -537,6 +569,24 @@ public final class ServerConfig {
             return LAST_STAND_REARM_FRACTION.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION;
+        }
+    }
+
+    /** {@code behaviour.bond_decay_per_day}, safely. */
+    public static int bondDecayPerDay() {
+        try {
+            return BOND_DECAY_PER_DAY.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.Bond.DEFAULT_PER_DAY;
+        }
+    }
+
+    /** {@code behaviour.bond_floor}, safely. */
+    public static int bondFloor() {
+        try {
+            return BOND_FLOOR.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.Bond.DEFAULT_FLOOR;
         }
     }
 
