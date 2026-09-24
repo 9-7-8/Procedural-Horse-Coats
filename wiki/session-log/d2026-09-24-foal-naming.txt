@@ -1,0 +1,122 @@
+2026-09-24, after the picker filter - a foal's surname runs down the same-sex
+line, and each player sets the rule for their own herd
+
+The bullet
+==========
+
+    Next bullet off intake/START HERE.txt, which puts the Bugs section of
+    "To do.txt" ahead of everything else. The bullet:
+
+        Horse names are too duplicated. Default naming should give daughters
+        their mother's last name and sons their father's last name, with
+        random first names. Make the first/last-name choice and parent source
+        configurable per player for their own horses, even on a server.
+
+    Step 1 of START HERE is "check whether it is already fixed", and the
+    answer here was the interesting kind of no: the naming code was not
+    absent, it was deliberate, unit-tested, and had been watched working in
+    the yard nine days earlier. What it had never been checked against was a
+    herd.
+
+Why the old schedule produced duplicates
+========================================
+
+    HorseNames.breedNth varied a foal's name by how many foals its exact
+    pairing had already produced - foal 1 took dam.first + sire.last, foal 2
+    the other combination, foals 3-6 one parent half plus a rolled word, and
+    foal 7 onward a wholly rolled name. The intent was right and the
+    verification was real: the 08:47 yard run on 2026-09-15 followed two pairs
+    through fifteen foals, every one landed in its documented slot, and no two
+    names repeated.
+
+    The defect is not visible from inside one pairing, which is the only place
+    it was ever looked at. Across pairings, every pair's first two foals are
+    assembled *entirely* out of words their parents already carry, and foals
+    3-6 keep one of those halves as well. A herd bred from a few founders
+    therefore recirculates a small pool of words, and after a few generations
+    the same full name comes round again. The owner's heavily modded server is
+    a herd; the debug yard was two pairs in two pens.
+
+    Worth writing down as a shape rather than an incident: a check that
+    exercises one instance of a thing cannot see a defect that only exists
+    between instances. The pen proved the schedule and the schedule was still
+    wrong.
+
+What it is now
+==============
+
+    HorseNames.foal(dam, sire, foalSex, policy, generator, rng). One half is
+    inherited from a parent, the other is always rolled. By default the
+    inherited half is the last name and it comes down the same-sex line - a
+    filly carries her dam's, a colt his sire's. The surname then reads as a
+    family, and the rolled first name is the thing separating two full
+    siblings, which it can do because it has a whole word table to draw on
+    instead of the four words the parents happen to hold.
+
+    The foal's sex is already the product of the same Mendelian draw as
+    everything else (HorseRecord derives sex() off the code), so the surname
+    line is genetic and needed nothing new.
+
+    breed and breedNth are gone, and with them HorseRecords.offspringCount,
+    which existed only to feed the schedule. HorseDatabase.offspringCount
+    stays: "how many foals has this pair had" is a fair question for the
+    browser and the papers, it just no longer has a caller.
+
+Where a per-player setting can live
+===================================
+
+    This was the half that needed a decision, and it is more constrained than
+    it looks. Two facts rule out both obvious homes:
+
+      - It cannot be a server config. On a shared server each player names
+        their own horses their own way; a server config holds one answer.
+      - It cannot be applied on the client. A foal is named on the server, at
+        a due date that routinely arrives while its owner is offline and their
+        client is not running at all.
+
+    So the client suggests and the server decides, which is also what
+    intake/Implementation advice.txt already said about naming ("clients may
+    suggest preferences, but they are not the authority"). The player edits
+    naming.inheritedHalf and naming.parentSource in phc/client.toml;
+    ClientLifecycleHandler sends both on every login as NamingPolicyPayload;
+    HorseNamingData - a server-global SavedData keyed by player UUID, built on
+    HorseProgressData's shape - files it, and nothing else ever names a foal.
+    Two players on one server keep different rules and neither reaches the
+    other's herd. Owner chose this surface over a command or an H-menu row.
+
+    Enum names on the wire and on disk, not ordinals, for the reason
+    ProgressSyncPayload already gives: reordering an enum must not silently
+    relabel somebody's setting. Every read is total - policyFor(null), an
+    unknown player and an unreadable name all answer NamingPolicy.DEFAULT,
+    because naming a foal must not be a path that can fail.
+
+    Whose policy applies is the dam owner's, not the breeder's. A foal is born
+    where its dam is, to whoever owns her, and that is the herd the name has
+    to sit in. The breeder is the fallback for a tamed stallion put to an
+    unowned mare; a wild birth has neither. HorseOwnership gained ownerId(),
+    which answers by UUID and so works for an owner who is offline - isOwner()
+    now goes through it.
+
+Checked
+=======
+
+    HorseNamesTest rewritten around the policy: seven tests, including a loop
+    over every sex x half x source combination asserting that exactly one half
+    of the foal's name ever comes from a parent. :neoforge-26.1.2:build green.
+    common/ changed, so :web:bakeDesignerAssets was re-run and
+    check-designer-boots.mjs passed - four checks, nothing on the console; the
+    rebuilt web.wasm was then reverted, since neither changed class is
+    reachable from DesignerApi and the TeaVM output is not reproducible.
+
+    Nothing here has been seen in game, and two of the checks cannot be seen
+    without a second client: breeding.html#foal-naming-0924 has the list.
+
+Next
+====
+
+    The next bullet in the Bugs section is dyed leather horse armour: it
+    should be common in loot tables, and should appear in any table that
+    already contains ordinary leather armour. Chest loot was rebuilt on
+    2026-09-24 (d2026-09-24-chest-loot.txt) into a single generated injection
+    pass, so that is where this belongs rather than in one-off table edits -
+    read that session first.

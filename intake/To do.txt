@@ -12,8 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-- Horse names are too duplicated. Default naming should give daughters their mother's last name and sons their father's last name, with random first names. Make the first/last-name choice and parent source configurable per player for their own horses, even on a server.
-
 - Dyed leather horse armor should be very common in loot tables, and should appear in loot tables that contain normal human leather armor.
 
 Horse cryostasis - a way to store lots of horses without a server-lag cost. Horses in stasis do not tick: no hunger, no growing up, nothing. The whole point is that the cheapest tier must be cheap, so people actually use it instead of just keeping horses loaded.
