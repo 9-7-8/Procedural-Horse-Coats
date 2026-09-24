@@ -223,6 +223,23 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.VAR_INT)
                     .build());
 
+    /**
+     * <b>The horse inside a stasis chamber</b> ({@link StasisSnapshot}) - the
+     * whole entity as a tag, attachments and UUID included.
+     *
+     * <p><b>Absent means an empty chamber</b>, which is the whole of the item's
+     * state machine: no component, right-clicking a horse captures it; component
+     * present, right-clicking the ground lets it out and the chamber comes back
+     * empty. The tier is the <i>item</i>, not part of this component, so an
+     * upgrade recipe moves the component across unchanged and never has to
+     * rewrite the horse.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<StasisSnapshot>> STASIS_SNAPSHOT =
+            TYPES.register("stasis_snapshot", () -> DataComponentType.<StasisSnapshot>builder()
+                    .persistent(StasisSnapshot.CODEC)
+                    .networkSynchronized(StasisSnapshot.STREAM_CODEC)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

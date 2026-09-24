@@ -26,6 +26,14 @@ public final class ModRecipes {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CarrotCombineRecipe>> CARROT_COMBINE =
             SERIALIZERS.register("carrot_combine", () -> CarrotCombineRecipe.SERIALIZER);
 
+    /** The Basic chamber - custom so the water container is handed back, not eaten. */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StasisChamberRecipe>> STASIS_CHAMBER =
+            SERIALIZERS.register("stasis_chamber", () -> StasisChamberRecipe.SERIALIZER);
+
+    /** The three tier upgrades - custom so a horse already inside rides across. */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StasisUpgradeRecipe>> STASIS_UPGRADE =
+            SERIALIZERS.register("stasis_upgrade", () -> StasisUpgradeRecipe.SERIALIZER);
+
     public static void register(IEventBus modEventBus) {
         SERIALIZERS.register(modEventBus);
     }

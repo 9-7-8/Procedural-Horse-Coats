@@ -1691,6 +1691,16 @@
       "count": 1
     },
     {
+      "id": "stasis_chamber",
+      "kind": "custom",
+      "type": "horsegenetics:stasis_chamber"
+    },
+    {
+      "id": "stasis_upgrade",
+      "kind": "custom",
+      "type": "horsegenetics:stasis_upgrade"
+    },
+    {
       "id": "suppliers_post",
       "kind": "shapeless",
       "in": [

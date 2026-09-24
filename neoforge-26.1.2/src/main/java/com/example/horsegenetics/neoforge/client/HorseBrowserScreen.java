@@ -42,6 +42,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.ArrayList;
@@ -1921,6 +1922,31 @@ public final class HorseBrowserScreen extends Screen {
                 false,
                 "Any two breeding carrots together make one carrot carrying both their "
                         + "effects. What comes out depends on what you put in."));
+        // The stasis chambers, also CustomRecipes. The Basic one has fixed
+        // ingredients and can be drawn; the three upgrades are one recipe
+        // parameterised by the chamber you put in, so they are described.
+        List<ItemStack> chamberGrid = blankGrid();
+        chamberGrid.set(0, new ItemStack(Items.GLASS_BOTTLE));
+        chamberGrid.set(1, new ItemStack(Items.WHEAT));
+        chamberGrid.set(2, new ItemStack(Items.WATER_BUCKET));
+        chamberGrid.set(3, new ItemStack(ModItems.HORSE_HAIR.get()));
+        rows.add(new RecipeRow("Basic Horse Stasis Chamber", chamberGrid,
+                new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()), true,
+                "Shapeless - the arrangement does not matter. Any mod's water container works, "
+                        + "and you get it back.",
+                false,
+                "Right-click one of your horses with it and the horse goes inside, where it "
+                        + "costs the server nothing - no hunger, no growing up, no ticking at all. "
+                        + "Right-click the ground to let it back out, unchanged, and keep the "
+                        + "chamber."));
+        rows.add(new RecipeRow("Upgrading a stasis chamber", blankGrid(),
+                new ItemStack(ModItems.SPACER_STASIS_CHAMBER.get()), true,
+                "Shapeless - a chamber plus one ingredient.",
+                false,
+                "A chamber and an eye of ender make the Intermediate; add a gold ingot for the "
+                        + "Advanced, a diamond for the Spacer. A horse already inside rides the "
+                        + "upgrade. Every tier stores a horse for free - what the higher ones buy "
+                        + "is what the Horse Stasis Bank may do with it."));
         // One row per gene, for the parameterised splice.
         for (Gene gene : allGenes) {
             if (!craftable(gene)) {

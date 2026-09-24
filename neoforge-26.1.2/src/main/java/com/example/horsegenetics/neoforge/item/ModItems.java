@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.item;
 
+import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import java.util.ArrayList;
 import java.util.List;
@@ -186,6 +187,42 @@ public final class ModItems {
             register("bound_ticket", p -> new TicketItem(p, TicketItem.Tier.BOUND));
     public static final DeferredItem<TicketItem> INTERDIMENSIONAL_TICKET =
             register("interdimensional_ticket", p -> new TicketItem(p, TicketItem.Tier.INTERDIMENSIONAL));
+
+    // --- stasis chambers - a horse held as data, not as a ticking entity ---
+    // One class, four tiers, differing only in what the (unbuilt) Horse Stasis
+    // Bank may do with the horse inside. stacksTo(1) for the same reason the
+    // signed transfer paper is: a chamber is about one specific horse, and a
+    // stack of them could not show you which is which. Empty ones would stack
+    // harmlessly, but an item cannot change its own stack limit once a horse is
+    // in it. See StasisChamberItem / server.HorseStasisHandler.
+    public static final DeferredItem<StasisChamberItem> BASIC_STASIS_CHAMBER =
+            register("basic_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.BASIC));
+    public static final DeferredItem<StasisChamberItem> INTERMEDIATE_STASIS_CHAMBER =
+            register("intermediate_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.INTERMEDIATE));
+    public static final DeferredItem<StasisChamberItem> ADVANCED_STASIS_CHAMBER =
+            register("advanced_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.ADVANCED));
+    public static final DeferredItem<StasisChamberItem> SPACER_STASIS_CHAMBER =
+            register("spacer_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.SPACER));
+
+    /** The chamber item for one tier - what an upgrade recipe produces. */
+    public static StasisChamberItem stasisChamber(StasisTier tier) {
+        switch (tier) {
+            case BASIC:
+                return BASIC_STASIS_CHAMBER.get();
+            case INTERMEDIATE:
+                return INTERMEDIATE_STASIS_CHAMBER.get();
+            case ADVANCED:
+                return ADVANCED_STASIS_CHAMBER.get();
+            case SPACER:
+                return SPACER_STASIS_CHAMBER.get();
+            default:
+                throw new IllegalStateException("no chamber item for " + tier);
+        }
+    }
 
     // --- stall signs (roadmap §11) - bind a horse, place on a stall wall ---
     public static final DeferredItem<StallSignItem> STALL_SIGN = register("stall_sign", StallSignItem::new);
