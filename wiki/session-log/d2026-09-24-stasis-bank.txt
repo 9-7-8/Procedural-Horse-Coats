@@ -1,0 +1,101 @@
+2026-09-24 — the Horse Stasis Bank: stage two, and almost all of it was the shelf again
+
+    Stage two of the six-stage build order on wiki/horse-stasis.html, picked up straight from
+    intake/START HERE.txt's one-bullet-one-session rule with the chambers' bullets already
+    retired: the bank block, its block entity, its menu and its screen, with the Storage grid
+    and nothing else. The Browse tab, passive healing, the Advanced drop buffer, Spacer in-bank
+    breeding and the emergency chamber are all still planned and all still on that page's
+    Roadmap tab.
+
+    Fifty-four slots — the shelf's grid, a double chest's worth — that take a stasis chamber of
+    any tier, full or empty, and refuse everything else. Crafted from five planks in a U, an
+    ender pearl in the middle, two iron ingots in the top corners and a horse hair between
+    them, which is the recipe the Roadmap tab had already specified. Any wood, by
+    #minecraft:planks, so it is not a per-wood block family and none of the double-gate
+    bake-twice machinery applies.
+
+There was nothing new to invent, and that was the finding
+
+    Stage one's lesson was that capture/release already existed as the lycanthropy swap. Stage
+    two's is smaller and the same shape: a bank is EquineResearchShelfBlockEntity with one
+    container instead of three and a different slot predicate. The setChanged forwarding, the
+    SimpleContainer the menu wraps on the server against an empty copy the client's slot sync
+    fills in, preRemoveSideEffects for the drop-on-break, ValueOutput/ValueInput with
+    ContainerHelper.saveAllItems — every one of those is the shelf's, copied deliberately
+    rather than re-derived. The screen needed no texture either: VanillaPanel draws the window,
+    the bevel and every sunken slot procedurally, so the whole of the art for this block is one
+    blockstate pointing at cube_column wearing vanilla's barrel textures.
+
+    The one thing the bank does that the shelf does not is count what is in it. The title row
+    reads "empty", then "n chambers" while only empties are filed, then "n horses of m". That
+    is a loop over the slots rather than anything synced, and it is free precisely because of
+    the decision stage one made for a different reason: a chamber's component carries the
+    horse's whole entity tag to the client, so the client can already see which slots are
+    occupied.
+
+Three things left out on purpose
+
+    No ticker. Nothing in the bank advances with nobody looking yet. Passive healing is stage
+    four and is what will want one, in the research shelf's server-only createTickerHelper
+    shape; adding the override now would have been a hook with an empty body.
+
+    No ContainerData. There is no progress bar and no server-side selection to sync. The count
+    is read, not sent.
+
+    No tab bar. The page's Roadmap tab described the menu as opening with two tabs "the way the
+    Equine Research Shelf's menu already does", and the honest reading of stage two — "the
+    Storage tab only (a filtered chest)" — is that a single-tab tab bar is a control that does
+    nothing and a second tab the owner can click into and find empty is worse than no tab at
+    all. So the chrome waits for the thing it selects. What the Coding tab now carries instead
+    is the list of the three pieces to copy when the Browse tab lands: ResearchShelfScreen's
+    Tab enum and tabAt, VanillaPanel.tab, and the menu's setStoreTab/activeOnTab pair — the
+    last being the load-bearing one, since it is why every slot stays live on the server and
+    only the client hides the tab it is not drawing.
+
+Two deliberate divergences from the chest it resembles
+
+    It is not flammable. Vanilla's chest takes ignitedByLava() and this does not, which is one
+    omitted call on the reasoning that mod blocks are absent from FireBlock's flammability
+    table unless they register themselves. The justification is worth stating because it is a
+    gameplay call and not a technical one: a chest that burns down loses its diamonds, and a
+    bank that burns down would drop fifty-four pedigreed horses into the fire that did it. The
+    reasoning is also unverified in game and now says so on the Verification tab — set fire to
+    one, drop one in lava.
+
+    It is not a Container. The block entity holds one rather than implementing one, exactly as
+    the research shelf does, so hoppers and pipes cannot reach it. Automating the filing of a
+    live animal is not something anybody asked for, and not exposing the inventory is the
+    cheapest way to not have it.
+
+    A third, smaller one: the slot predicate takes any tier, empty or occupied. A bank that
+    refused a Basic chamber would have inverted the whole ladder, since the bottom rung is the
+    one that has to be cheap enough to actually get used — and a rack of spare empties beside
+    the full ones is the obvious way to use the block.
+
+What was run, and what the port collision cost
+
+    :neoforge-26.1.2:build green. runGameTest green, all 8 including every_recipe_encodes, so
+    the new shaped recipe survives the whole-recipe-set login packet — the v0.5.014 shape that
+    only a real join catches. check-recipes.mjs 132 files with no collision,
+    check-block-models.mjs 250 model ids all present, bake-recipe-reference.mjs re-run so the
+    Horse Browser's Recipes tab has the bank in it with a .desc line.
+
+    runServer was worth a note. It loaded clean all the way through the gene registry freeze,
+    1647 recipes (up exactly one) and 1729 advancements, then failed to bind port 25565 —
+    because the owner's own live server, running out of C:\Users\Isabel\26.1.2-neoforge-server,
+    already holds it. Nothing to fix, but it means the in-repo runServer cannot boot to Done(
+    while she is playing, and the signal it would have given about world load came from the
+    gametest server instead, which prepared a spawn area and started with no errors. Worth
+    remembering before treating a bind failure as a mod problem.
+
+    Nothing has been played. The bank has never been placed in a running game, so the slots,
+    the count, the drop-on-break and the cost of opening a bank full of horses are all newly on
+    wiki/horse-stasis.html's Verification tab, along with everything stage one left there.
+
+Next
+
+    Stage three: the Browse tab, starting with Intermediate's search since Basic needs none.
+    Its first design call is written on the Roadmap tab — a stored horse is a tag rather than an
+    entity, so whether the tab decodes StasisSnapshot.horse() per rendered row or caches more
+    onto the component at capture time is the question to settle before drawing anything. The
+    name and the id are already cached for exactly that reason.

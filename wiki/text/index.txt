@@ -2758,6 +2758,8 @@ wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
 wiki/horse-gear.html#using	gameplay	Putting something on
 wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
+wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest, and that is the whole of stage two
+wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank
 wiki/horse-stasis.html#capture-release	coding	Capture and release: it is the lycanthropy swap
 wiki/horse-stasis.html#chambers	gameplay	The four stasis-chamber tiers
 wiki/horse-stasis.html#files	coding	What is where
