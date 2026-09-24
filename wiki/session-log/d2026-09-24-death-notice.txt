@@ -1,0 +1,90 @@
+2026-09-24, after the hurt notice — the whole server is told when somebody's horse dies
+
+    One bullet, the first one left in the Bugs section of intake/To do.txt, in the
+    owner's words:
+
+        When an owned horse dies, post a server-wide death message. This should be
+        configurable and on by default.
+
+    Dated first, as START HERE says to. The bullet went in on 2026-09-23 (27cd45aa)
+    and the previous session had already named it as the next one. Five classes
+    subscribe LivingDeathEvent and none of them speaks to a player: the whereabouts
+    index, the on-death genes, the hurt notice's own throttle eviction, the
+    were-animal revert, and the debug trace. So: open, and genuinely absent.
+
+    The owning page is horse-care.html, which is where the hurt notice landed
+    yesterday and where healing and hunger already live.
+
+Vanilla is not saying it either, which settles the deduplication question
+
+    The bullet was handed over with "a different deduplication problem", the worry
+    being that vanilla already writes this sentence and the mod would double it.
+    Read the decompiled 26.1.2 sources rather than guess: the block that tells an
+    owner their pet died is in TamableAnimal.die, and AbstractHorse extends Animal
+    and merely implements OwnableEntity. It never runs for a horse. Vanilla says
+    nothing at all when a horse dies, not even to the owner, so there is no line to
+    duplicate or suppress.
+
+    The real dedup problem is smaller and the other way round: NeoForge's hook is at
+    the very top of LivingEntity.die, before vanilla's own `!this.dead` guard, so a
+    second die() in the same tick would say it twice. ANNOUNCED is a map of horse to
+    tick with the hurt notice's sweep, and that is all it guards against.
+
+Why the sentence is not CombatTracker.getDeathMessage()
+
+    It was the obvious thing to broadcast and it is wrong here, because it names the
+    entity. A horse of this mod carries its name in its record, not on a name tag, so
+    vanilla's sentence would announce "Horse was slain by Zombie" about a named mare
+    with a pedigree and an owner — and the name, the owner and the cause are the
+    entire content of this message. common/care/DeathNotice writes it instead, beside
+    HurtNotice and for the same reason: the wording is the feature, so a test pins it
+    down.
+
+    The Cause table is reused, with the advice deliberately dropped: one table of
+    vanilla damage ids for both messages, so the line about a burning horse and the
+    line about the horse that burned to death cannot drift apart, but a dead horse is
+    not the moment to be told to fence the drops. The one cause that changes the verb
+    is GENETIC_DEFECT — "did not survive a genetic defect", matching what the mod's
+    own damage type already says in lang, because a lethal genotype is not something
+    that killed the foal.
+
+    Extracting server/HorseNotices (name, causeOf) out of HorseHurtNoticeHandler is
+    what makes that shared rather than copied.
+
+Grey for everyone, red for the owner
+
+    Server-wide is the ask, and it is right: a stable hand who finds the body should
+    not have to work out whose mare it was. But on a server keeping hundreds of
+    horses the one line that matters to a player is their own, so the owner's copy is
+    red. That costs a loop over getPlayerList().getPlayers() comparing UUIDs instead
+    of broadcastSystemMessage — nothing in the repository used that method anyway.
+
+    The owner is matched by getOwnerReference(), not getOwner(): unlike the hurt
+    notice, this message does not need the owner to be standing there. Their name
+    comes from HorseOwnership.ownerName and so from the server's name caches, which
+    means a mare that dies while her owner sleeps still says whose she was. An owner
+    neither cache has seen degrades to "somebody's horse" rather than losing the
+    clause. ownerName is the one method in HorseOwnership now taking AbstractHorse
+    rather than Horse — the rest of that class guards items bound to a horse and
+    nothing binds to a donkey, but a mule that dies still has an owner.
+
+    The showDeathMessages game rule is checked, in vanilla's own order of business. A
+    server that turned death messages off has said what it wants of its chat, and a
+    horse is not an exception to it. notices.owned_horse_death is the mod's own
+    switch, default true, next to notices.owned_horse_damage.
+
+Not played
+
+    DeathNoticeTest covers the sentence. Nothing about the routing is tested because
+    all of it is NeoForge, and the checks are on horse-care.html#death-notice-0924.
+    The two-player one is the one that matters: one line, both players, red only for
+    the owner. The second-best is the unnamed horse with a record, since "Horse was
+    killed by a zombie" would mean hasRealRecord is false at death and the whole
+    message is about the record.
+
+Next
+
+    The bullet directly below this one in To do.txt: a horse at 20% health (threshold
+    configurable) should buck off its rider, jump fences and run from whatever is
+    killing it. That is an AI goal and a server-authoritative threshold, not a chat
+    line — a different half of the mod, and its own session.

@@ -114,18 +114,14 @@ Validation:
 Likely code:
 - family-tree and horse-record ownership data
 - cowboy stable/ownership transition logic
-- horse death hooks
 
 Implementation:
 - Choose a deliberate ownership transition for cowboy horses instead of letting
   “cowboy died” silently revert to vanilla wild behavior. Preserve the record and
   pedigree while moving into a rescue, claim, or stable-transfer path.
-- Hook death messages on the server. They should only fire once, and only for
-  owned horses, when that toggle is enabled.
 
 Validation:
-- Test cowboy defeat and recovery paths and death notifications in a two-player
-  dedicated server setup.
+- Test cowboy defeat and recovery paths in a two-player dedicated server setup.
 
 4. Search, filters, naming, and loot
 =====================================

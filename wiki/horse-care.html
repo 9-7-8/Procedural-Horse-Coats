@@ -382,6 +382,40 @@
         <code>notices.owned_horse_damage</code> in the server config, on by default.</li>
 </ul>
 
+<h2 id="death-notice">5. When one of them dies</h2>
+
+<p>
+    A horse dying is the one thing everybody on the server hears about. One line, once, naming
+    the horse, whose it was and what killed it &mdash; grey for everyone, and <strong>red in
+    the owner's own chat</strong>, so that on a server keeping hundreds of horses you can find
+    your own loss in the scroll:
+</p>
+
+<div class="note">
+    <span class="label">What the line looks like</span>
+    <p><em>Ravensong, Ixora's horse, was killed by Zombie.</em></p>
+    <p><em>Ravensong, Ixora's horse, was killed by lava.</em></p>
+    <p><em>Thornfoal, Ixora's horse, did not survive a genetic defect.</em></p>
+</div>
+
+<ul>
+    <li><strong>Only a horse somebody owns.</strong> A wild horse, or one a
+        <a href="villagers.html">cowboy</a> is still keeping, dies quietly. So does a horse
+        nobody has tamed yet, however good it was.</li>
+    <li><strong>Whoever killed it is named</strong>, player or mob. When nothing dealt the blow
+        &mdash; lava, a fall, drowning &mdash; the line names that instead.</li>
+    <li><strong>Everybody, wherever they are.</strong> Unlike the hurt notice, this one does not
+        care which world you are in or whether you were anywhere near it. It is news, not an
+        alarm you can still do something about.</li>
+    <li><strong>You do not have to be online to be named in it.</strong> The owner's name comes
+        from the server's own name cache, so a mare that dies while her owner sleeps still says
+        whose she was.</li>
+    <li><strong>It obeys <code>showDeathMessages</code>.</strong> A server that turned vanilla's
+        death messages off gets no horse ones either.</li>
+    <li>Turn it off with <code>notices.owned_horse_death</code> in the server config, on by
+        default.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -564,6 +598,56 @@
         vanilla's own strings and an unrecognised one is simply "something", so a wrong id costs a
         sentence of advice and never correctness &mdash; which is also what makes another mod's
         damage safe to be hit by.</li>
+</ul>
+
+<p>
+    Naming the horse and reading the cause are <code>server/HorseNotices</code>, shared with the
+    death notice below so that the line about a burning horse and the line about the horse that
+    burned to death cannot drift apart.
+</p>
+
+<h2 id="death-notice-code">The death notice &mdash; why it is not vanilla's sentence</h2>
+
+<p>
+    <strong>Vanilla says nothing at all when a horse dies</strong>, not even to its owner. The
+    block that tells an owner their pet died is in <code>TamableAnimal.die</code>, and
+    <code>AbstractHorse</code> extends <code>Animal</code> and merely implements
+    <code>OwnableEntity</code> &mdash; so there is no vanilla line here to duplicate, to suppress,
+    or to be beaten to. That answers the question this bullet was filed with: the dedup problem is
+    not against vanilla, it is against the event firing twice.
+</p>
+<p>
+    <code>CombatTracker.getDeathMessage()</code> was the obvious thing to broadcast and is not used
+    either, because it names the <em>entity</em>. A horse of this mod carries its name in its
+    record rather than on a name tag, so vanilla's sentence would announce
+    "Horse was slain by Zombie" about a named mare with a pedigree and an owner &mdash; and the
+    name, the owner and the cause are the entire content of the message. So the sentence is
+    <code>common/care/DeathNotice</code>, beside <code>HurtNotice</code> and for the same reason,
+    with <code>DeathNoticeTest</code> on it.
+</p>
+
+<ul>
+    <li><strong>It reuses <code>HurtNotice.Cause</code> and drops the advice.</strong> One table of
+        damage ids for both messages; but a dead horse is not the moment to be told to fence the
+        drops, so only <code>phrase()</code> is read. The one cause that changes the verb is
+        <code>GENETIC_DEFECT</code> &mdash; "did not survive a genetic defect", matching the mod's
+        own damage type in lang, because a lethal genotype is not something that killed the foal.</li>
+    <li><strong>The owner's name, online or not</strong>, through
+        <code>HorseOwnership.ownerName</code> (widened to <code>AbstractHorse</code> for this) and
+        so through the server's name caches. A name neither cache has seen degrades to
+        "somebody's horse" rather than losing the clause.</li>
+    <li><strong>Everyone gets the line; the owner's copy is red.</strong> Which means a loop over
+        <code>getPlayerList().getPlayers()</code> comparing UUIDs rather than
+        <code>broadcastSystemMessage</code>, since the two styles differ. The owner is matched by
+        <code>getOwnerReference()</code>, not <code>getOwner()</code>, so an owner in another
+        dimension or offline is still the owner for naming purposes.</li>
+    <li><strong>Once.</strong> <code>LivingDeathEvent</code> fires from
+        <code>LivingEntity.die</code> <em>before</em> vanilla's own already-dead guard, so a second
+        <code>die()</code> in the same tick would say it twice. <code>ANNOUNCED</code> is a
+        <code>HashMap</code> of horse to tick with the hurt notice's sweep.</li>
+    <li><strong>The <code>showDeathMessages</code> game rule is checked</strong>, in vanilla's own
+        order of business: a server that turned death messages off has said what it wants of its
+        chat, and a horse is not an exception to that.</li>
 </ul>
 
 <h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
@@ -1476,8 +1560,46 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>An owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>An owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
+
+<h3 id="death-notice-0924">The server hears about a dead horse (2026-09-24, NOT played)</h3>
+
+<p>
+    Asked for directly: <em>when an owned horse dies, post a server-wide death message; this should
+    be configurable and on by default</em>. Built as
+    <a href="#death-notice-code">the death notice</a>. <code>DeathNoticeTest</code> covers the
+    sentence, including that a lethal genotype does not read as something that killed the foal and
+    that an unknown owner is still "somebody's horse". <strong>Nothing about the routing is
+    tested</strong>: it is all NeoForge.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>One line, everybody, red only for the owner.</strong> Two players; kill a tamed
+        horse one of them owns. <strong>Pass:</strong> both see the same sentence once, the owner's
+        in red and the other player's in grey. <strong>Fail:</strong> two lines, which means
+        <code>LivingDeathEvent</code> really does arrive twice and <code>ANNOUNCED</code> is keyed
+        or swept wrongly; or a line for only one of them, which is the player loop.</li>
+    <li><strong>The name is the horse's, not "Horse".</strong> Kill an unnamed horse that has one
+        of this mod's records. <strong>Pass:</strong> the record's name.
+        <strong>Fail:</strong> "Horse", which means <code>hasRealRecord</code> is false at death
+        &mdash; worth knowing, since the record is what the whole message is about.</li>
+    <li><strong>Whose it was, with the owner logged out.</strong> Have the second player log out,
+        then kill their horse. <strong>Pass:</strong> their name, out of the server's name cache.
+        <strong>Fail:</strong> "somebody's horse", which means neither cache answered and the
+        fallback is doing more work than it was meant to.</li>
+    <li><strong>A wild horse dies quietly.</strong> Kill an untamed one. <strong>Pass:</strong>
+        silence.</li>
+    <li><strong>A dying foal says the true thing here too.</strong> A lethal pairing with
+        <code>health.mode = FULL</code>. <strong>Pass:</strong> "did not survive a genetic
+        defect". <strong>Fail:</strong> "was killed by something", the same msgId check the hurt
+        notice wants.</li>
+    <li><strong>The two switches.</strong> <code>notices.owned_horse_death = false</code>, and
+        separately <code>/gamerule showDeathMessages false</code>. <strong>Pass:</strong> either
+        one alone silences it, and the hurt notice keeps working.</li>
+</ul>
 
 <h3 id="hurt-notice-0924">The owner hears about a hurt horse (2026-09-24, NOT played)</h3>
 

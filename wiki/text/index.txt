@@ -2672,6 +2672,8 @@ wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the t
 wiki/horse-care.html#bond	gameplay	2. Bond
 wiki/horse-care.html#bond-command	coding	Setting bond for testing — /bond
 wiki/horse-care.html#changes	gameplay	How bands change
+wiki/horse-care.html#death-notice	gameplay	5. When one of them dies
+wiki/horse-care.html#death-notice-code	coding	The death notice — why it is not vanilla's sentence
 wiki/horse-care.html#food-tempt	gameplay	Horses come to food — and run for their favourite
 wiki/horse-care.html#ground-food	coding	What counts as dropped food — and why it is not the hand-feeding test
 wiki/horse-care.html#hand-taming	gameplay	Taming by hand
