@@ -1,0 +1,76 @@
+PASSIFICATION SHOULD STOP FLEEING
+=================================
+
+Request
+-------
+The passification gene should also passify horses that flee from the player who
+has calmed them. If a horse is fleeing because of a passifiable player, the
+active flight should stop once that player's passification is granted, and the
+horse should stop selecting that player as the reason to flee while the calm is
+valid.
+
+Meaning of "passify" here
+-------------------------
+This extends the existing per-player passification bargain. A calm granted to
+Alice applies to the horse's aggression and flee decisions about Alice; it does
+not make the horse generally fearless, tame, or immune to panic. The same horse
+may still flee from Bob, a mob, fire, freezing, or any other non-player danger.
+A temporary route stops working when its calm expires, and a permanent route
+continues to suppress Alice indefinitely.
+
+Required behaviour
+------------------
+- The fleeing path must use the passification gene's existing per-player veto
+  when considering a player as the nearest flee source.
+- If the horse is currently fleeing from a player and that player becomes
+  passified, cancel that flee leg immediately rather than waiting for the next
+  path refresh. Clear the flee bookkeeping and let ordinary goals resume.
+- If another valid threat remains nearby, the horse may begin fleeing from that
+  threat on the next evaluation. Do not clear all fleeing just because one
+  player was passified.
+- Keep passification per player. Passifying one player must not suppress flee
+  reactions to every player or creature.
+- Keep environmental and injury panic separate. This change only affects the
+  player-threat route that is represented by the passification gene; it must not
+  suppress fire, freezing, escape-from-death, or other non-target panic.
+- Do not make the horse stop fleeing merely because it has no aggression target.
+  Fleeing and attacking are different temper outcomes and must remain so.
+
+Likely implementation surface
+-----------------------------
+The NeoForge flee implementation is in
+`GeneAbilityHandler.flee(...)`. Its candidate predicate currently checks the
+mood's group only, while the existing aggression path calls
+`Passification.suppresses(...)`. Reuse that same veto at the flee candidate
+chokepoint and add the smallest state/path cancellation needed for a newly
+passified current quarry. Keep the gene and per-player route semantics in
+`PassificationGene` and `Passification`; do not add a second calm state.
+
+Be careful about the distinction between a player and an environmental source:
+the existing `Passification.suppresses(...)` contract returns true only for a
+player, so it is the appropriate filter for this extension. The active fleeing
+map is keyed by horse and records the current quarry; it must not retain a
+passified player's UUID after the flee is cancelled or the player disappears.
+
+Validation
+----------
+- A horse with a flee temperament flees from an unpassified player.
+- Feeding the required passification offering to that player makes the horse
+  stop fleeing and prevents a new flee decision against that player while the
+  calm lasts.
+- A second, unpassified player still causes fleeing after the first player is
+  passified.
+- A temporary calm expires and the original player can again be a flee source.
+- A permanent calm remains effective after reload if the existing attachment
+  persistence already covers the aggression veto.
+- Fire, freezing, injury escape, and fleeing from non-player entities continue
+  to work on a passified horse.
+- The behaviour remains per player: Alice's calm does not protect Bob.
+
+Open runtime check
+------------------
+Verify in-game that granting passification while the horse is already moving
+away from the player actually releases the navigation goal promptly, rather
+than only preventing the next flee path from being chosen. Record the observed
+result on the owning passification or temperament page when this proposal is
+routed out of intake.
