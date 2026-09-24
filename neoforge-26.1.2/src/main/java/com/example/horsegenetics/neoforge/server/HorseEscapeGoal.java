@@ -48,6 +48,12 @@ import java.util.EnumSet;
  * whole reason the first version of this goal ejected the rider instead, and
  * that turned out to be the worse trade.
  *
+ * <p><b>Both halves of that are read off the 26.1.2 sources and neither is
+ * verified in a running game.</b> If a rider keeps steering, the
+ * {@code isSaddled()} gate in {@code getControllingPassenger()} is not the only
+ * one; if the horse stands still with a rider aboard and no saddle, it is
+ * {@code isImmobile()} that is wrong here, not the navigation.
+ *
  * <h2>How this meets bareback steering, which is the sharp edge</h2>
  * {@link BarebackSteeringHandler} implements bareback riding by <b>lending the
  * horse a real saddle</b> carrying {@link ModDataComponents#PHANTOM_SADDLE}, and
