@@ -33,16 +33,29 @@ import java.util.Locale;
  * the game.
  *
  * <h2>What the allele set is</h2>
- * Every vanilla mob in a <b>non-hostile spawn category</b> - creature, ambient,
- * water creature, water ambient, axolotl, underground water creature - minus the
- * horse family, because a horse that turns into a horse at night is not a gene.
- * That is a mechanical rule rather than a taste, which matters: it is the reason
- * the list contains a pufferfish and a wandering trader without anybody having
- * to defend either. The two golems, the villager, the copper golem and the
- * mannequin are {@code MISC} and so are out; the mob ids are strings because
- * {@code common/} may not import Minecraft, and the translator resolves them
- * against the live registry - an id this game version has never heard of simply
- * never shifts.
+ * {@link MobRoster#ground()}: every vanilla mob that is both <b>non-hostile</b>
+ * and <b>walks on land</b>, minus the horse family, because a horse that turns
+ * into a horse at night is not a gene. That is a mechanical rule rather than a
+ * taste, which matters: it is the reason the list contains a strider and a
+ * wandering trader without anybody having to defend either. The two golems, the
+ * villager, the copper golem and the mannequin are {@code MISC} and so are out;
+ * the mob ids are strings because {@code common/} may not import Minecraft, and
+ * the translator resolves them against the live registry - an id this game
+ * version has never heard of simply never shifts.
+ *
+ * <h2>Nothing that swims, nothing that flies, nothing hostile</h2>
+ * The other two per-mob loci - {@link PackLeaderGene}, {@link SpawnerGene} - are
+ * happy to name a squid or a bee, because there the mob turns up <i>beside</i>
+ * the horse. This one <b>replaces</b> the horse, and a body is not a costume: a
+ * were-cod left a horse drowning in air on a hillside, and a were-bat flew off
+ * over the treeline with somebody's mare inside it. So the roster's
+ * {@link MobRoster.Habitat} tag is a hard gate here rather than a note, and it
+ * is enforced twice - once by this constructor taking only
+ * {@link MobRoster.Habitat#GROUND} entries, and again in the game module, where
+ * the shift refuses a resolved entity type whose spawn category or navigation
+ * says it swims, flies or hunts. The second check is the one that will still
+ * hold when the roster is derived from the live registry and starts naming
+ * mobs nobody here has read.
  *
  * <h2>What is not in this file</h2>
  * The <b>shift itself</b> - swapping the horse for a real animal at dusk and
@@ -58,8 +71,8 @@ import java.util.Locale;
  * toward a particular colour of cat.
  *
  * <p>It paints nothing - every outcome is a {@link Expression#wildType() wild
- * type}, the locus is out of the texture key, and thirty-seven alleles cost the
- * genotype gallery one entry.
+ * type}, the locus is out of the texture key, and the whole wide allele set
+ * costs the genotype gallery one entry.
  */
 public final class LycanGene implements Gene {
 
@@ -70,9 +83,12 @@ public final class LycanGene implements Gene {
 
     /**
      * How many founders in a hundred are born homozygous for <b>each</b> of the
-     * forms. Thirty-seven of these is the whole wild share of the locus - about
-     * one horse in ninety shifts at night, and any one particular animal is
-     * roughly one horse in three and a third thousand.
+     * forms. One of these per form is the whole wild share of the locus, so the
+     * chance of meeting <i>a</i> shifter moves with the size of
+     * {@link MobRoster#ground()} while the chance of meeting a were-wolf
+     * specifically does not - which is the right way round. It is the one
+     * animal you are hunting for, and it should not get rarer because the game
+     * added a mob.
      *
      * <p>No founder is a carrier and none is mismatched, which is the rule the
      * particle locus settled: a combination that shows nothing is a combination
@@ -125,47 +141,13 @@ public final class LycanGene implements Gene {
     private final FounderTable founders;
 
     public LycanGene() {
-        // Alphabetical by mob id. Unlike the particle locus there is no rank
-        // here to encode - nothing is dominant to anything - so the order is
-        // only the genotype code's layout, and alphabetical is the order that
-        // makes a missing mob obvious when the game adds one.
-        form("Aly",  "minecraft:allay",           "Allay",           "an");
-        form("Arma", "minecraft:armadillo",       "Armadillo",       "an");
-        form("Axo",  "minecraft:axolotl",         "Axolotl",         "an");
-        form("Bat",  "minecraft:bat",             "Bat",             "a");
-        form("Bee",  "minecraft:bee",             "Bee",             "a");
-        form("Cml",  "minecraft:camel",           "Camel",           "a");
-        form("Cat",  "minecraft:cat",             "Cat",             "a");
-        form("Chk",  "minecraft:chicken",         "Chicken",         "a");
-        form("Cod",  "minecraft:cod",             "Cod",             "a");
-        form("Cow",  "minecraft:cow",             "Cow",             "a");
-        form("Dol",  "minecraft:dolphin",         "Dolphin",         "a");
-        form("Fox",  "minecraft:fox",             "Fox",             "a");
-        form("Frg",  "minecraft:frog",            "Frog",            "a");
-        form("Glsq", "minecraft:glow_squid",      "Glow squid",      "a");
-        form("Gt",   "minecraft:goat",            "Goat",            "a");
-        form("Ghst", "minecraft:happy_ghast",     "Happy ghast",     "a");
-        form("Lma",  "minecraft:llama",           "Llama",           "a");
-        form("Mshr", "minecraft:mooshroom",       "Mooshroom",       "a");
-        form("Ntls", "minecraft:nautilus",        "Nautilus",        "a");
-        form("Oce",  "minecraft:ocelot",          "Ocelot",          "an");
-        form("Pnd",  "minecraft:panda",           "Panda",           "a");
-        form("Prt",  "minecraft:parrot",          "Parrot",          "a");
-        form("Pig",  "minecraft:pig",             "Pig",             "a");
-        form("Plr",  "minecraft:polar_bear",      "Polar bear",      "a");
-        form("Pff",  "minecraft:pufferfish",      "Pufferfish",      "a");
-        form("Rbt",  "minecraft:rabbit",          "Rabbit",          "a");
-        form("Slm",  "minecraft:salmon",          "Salmon",          "a");
-        form("Shp",  "minecraft:sheep",           "Sheep",           "a");
-        form("Snf",  "minecraft:sniffer",         "Sniffer",         "a");
-        form("Sqd",  "minecraft:squid",           "Squid",           "a");
-        form("Strd", "minecraft:strider",         "Strider",         "a");
-        form("Tdp",  "minecraft:tadpole",         "Tadpole",         "a");
-        form("Tlma", "minecraft:trader_llama",    "Trader llama",    "a");
-        form("Trpf", "minecraft:tropical_fish",   "Tropical fish",   "a");
-        form("Trt",  "minecraft:turtle",          "Turtle",          "a");
-        form("Wtr",  "minecraft:wandering_trader", "Wandering trader", "a");
-        form("Wlf",  "minecraft:wolf",            "Wolf",            "a");
+        // The roster's order: alphabetical by mob id. Unlike the particle locus
+        // there is no rank here to encode - nothing is dominant to anything - so
+        // the order is only the genotype code's layout, and alphabetical is the
+        // order that makes a missing mob obvious when the game adds one.
+        for (MobRoster.Entry e : MobRoster.ground()) {
+            form(e.token(), e.mob(), e.label());
+        }
 
         n = new Allele(KEY, forms.size(), "n", "Wild-type (n)");
 
@@ -201,9 +183,19 @@ public final class LycanGene implements Gene {
         founders = b.weight(n, 100.0 - WILD_HOMOZYGOUS_PERCENT * forms.size()).build();
     }
 
-    private void form(String token, String mob, String label, String article) {
+    private void form(String token, String mob, String label) {
         Allele a = new Allele(KEY, forms.size(), token, label + " (" + token + ")");
-        forms.add(new Form(a, mob, label, article));
+        forms.add(new Form(a, mob, label, article(label)));
+    }
+
+    /**
+     * {@code "an ocelot"}, {@code "a wolf"}. Read off the label rather than
+     * carried beside it: every mob name in the roster takes the article its
+     * first letter implies, and a hand-written column would only be one more
+     * thing to forget when the registry starts supplying the names.
+     */
+    private static String article(String label) {
+        return "AEIOU".indexOf(Character.toUpperCase(label.charAt(0))) >= 0 ? "an" : "a";
     }
 
     private static String idOf(Form f) {

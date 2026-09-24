@@ -21,8 +21,13 @@ import net.minecraft.world.entity.EntityType;
 import org.jspecify.annotations.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -39,10 +44,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <b>The werewolf gene, as behaviour.</b> A horse homozygous for one of the
- * LYCAN locus's thirty-seven shapes stops being a horse at nightfall: the
- * {@code Horse} entity is discarded and a <b>real</b> wolf, cat, chicken or
- * pufferfish is put in its place, carrying the whole horse in an attachment
- * ({@link LycanShift}) until dawn puts it back.
+ * LYCAN locus's shapes stops being a horse at nightfall: the {@code Horse}
+ * entity is discarded and a <b>real</b> wolf, cat, chicken or panda is put in
+ * its place, carrying the whole horse in an attachment ({@link LycanShift})
+ * until dawn puts it back.
  *
  * <h2>Why a real entity and not a render layer</h2>
  * The roadmap scoped this "render-layer first, entity-swap second", and the
@@ -202,18 +207,29 @@ public final class LycanthropyHandler {
             return;
         }
 
-        // IT SHIFTS WHEREVER IT IS STANDING, including into a fish on dry
-        // land. That was briefly guarded here and the guard was wrong: owner,
-        // 2026-09-13, "if someone has a horse that's a FISH lycanthrope, they
-        // have to take care of it, and make sure it doesn't die at night.
-        // That's brutal, but it's just part of the gene. It should absolutely
-        // still shift and then just die."
-        //
-        // What was actually broken was the other half - see onWereAnimalDeath.
-        // A were-animal that died took its horse out of the world with no
-        // death, no drops and no line in the log, which is not a harsh gene, it
-        // is a horse that stops existing. It dies properly now, and a
-        // were-salmon on dry land is exactly as lethal as it sounds.
+        if (!isWearable(type, animal)) {
+            // The second half of the lycan blacklist. The allele set is already
+            // MobRoster.ground() and cannot name a fish, a bat or a monster -
+            // but that list is hand-tagged today and derived from the live
+            // registry tomorrow, so the body itself is checked here, where the
+            // game will actually answer the question. A horse is never shut
+            // inside something that drowns in air, flies out of its owner's
+            // reach, or is hunted on sight.
+            //
+            // This supersedes the owner's 2026-09-13 call that a were-fish
+            // "should absolutely still shift and then just die" - the fish
+            // alleles do not exist any more (owner, 2026-09-24).
+            if (WARNED.add(form.mob())) {
+                HorseGenetics.LOGGER.warn("[lycan] '{}' swims, flies or is hostile in this build - "
+                        + "{} will not shift", form.mob(), record.displayName());
+            }
+            animal.discard();
+            return;
+        }
+
+        // IT SHIFTS WHEREVER IT IS STANDING. What is not guarded is the rest of
+        // the night: a were-animal that dies takes its horse with it, properly,
+        // with a death, drops and a line in the log - see onWereAnimalDeath.
         double healthLeft = horse.getHealth() / Math.max(1.0F, horse.getMaxHealth());
         animal.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), horse.getXRot());
         animal.setBaby(horse.isBaby());
@@ -236,6 +252,41 @@ public final class LycanthropyHandler {
             ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " shifted into a " + form.mob() + " at dusk | "
                     + print + String.format(", hp %.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
         }
+    }
+
+    /**
+     * <b>Is this a body a horse can be found in again?</b> The runtime half of
+     * the lycan blacklist, asked of the animal the registry actually handed us
+     * rather than of the id we asked for.
+     *
+     * <p>Three things disqualify a body, and all three are the same complaint -
+     * the owner cannot get their horse back. It <b>swims</b>, so the horse
+     * suffocates the moment it shifts in a field; it <b>flies</b>, so it is over
+     * the treeline before dawn and its owner never sees it again; or it is
+     * <b>hostile</b>, so everything in the world attacks it and it attacks its
+     * owner. Each is asked the broadest way the game offers, exactly as
+     * {@link MobGroups} does, so that a modded mob answers honestly:
+     * {@link MobCategory} for the spawn-time classification, {@link Enemy} and
+     * {@link FlyingAnimal} for the interfaces mods implement, and the navigation
+     * and move control for the ones that do neither but still take off.
+     *
+     * <p>API note, unverified in game: {@code AMBIENT} is here because the bat -
+     * vanilla's one ambient mob - flies without a {@link FlyingPathNavigation}
+     * or a {@link FlyingAnimal} to show for it, so the category is the only
+     * thing that catches it. A modded ground-dwelling ambient mob would be
+     * excluded with it, which is the safe direction to be wrong in.
+     */
+    private static boolean isWearable(EntityType<?> type, Mob animal) {
+        MobCategory category = type.getCategory();
+        boolean swims = category == MobCategory.WATER_CREATURE
+                || category == MobCategory.WATER_AMBIENT
+                || category == MobCategory.UNDERGROUND_WATER_CREATURE
+                || category == MobCategory.AXOLOTLS;
+        boolean flies = category == MobCategory.AMBIENT
+                || animal instanceof FlyingAnimal
+                || animal.getNavigation() instanceof FlyingPathNavigation
+                || animal.getMoveControl() instanceof FlyingMoveControl;
+        return !swims && !flies && !MobGroups.isHostile(animal);
     }
 
     /** Debug only: each shifted horse's {@link #roundTripPrint} at dusk, for the dawn and death lines to compare. */
@@ -274,15 +325,16 @@ public final class LycanthropyHandler {
      * Put the horse back where the animal is standing, with the night's damage carried over - or,
      * when there is nothing under the animal, where it last stood on solid ground.
      *
-     * <p>LAND ON SOLID GROUND (owner, 2026-09-15). A flying form - bat, parrot, allay, bee, happy
-     * ghast - can be anywhere when the sun comes up, and the horse used to appear wherever it was.
-     * Two bat lycans came back 49 blocks below the horse dimension's floor and outside its wall, a
-     * parrot lycan the same way, and all three fell out of the world (gap 243). Now a revert with
-     * no solid block or water within {@link #SAFE_DROP} blocks below the animal sets the horse down
-     * at the last spot the animal stood on the ground ({@link #LAST_GROUND}), or, when that is not
-     * known because the animal was loaded since, where the horse changed at dusk. The night still
-     * happens; only the drop into nothing does not. Water counts as ground, so a were-fish at sea
-     * is left where it is. The death path is untouched: an animal that dies, dies where it is.
+     * <p>LAND ON SOLID GROUND (owner, 2026-09-15). This was written for the flying forms - two bat
+     * lycans came back 49 blocks below the horse dimension's floor and outside its wall, a parrot
+     * lycan the same way, and all three fell out of the world (gap 243). Those forms were taken off
+     * the locus on 2026-09-24 and nothing on it flies any more, but the guard stays: a walking
+     * animal still reaches ledges, boats, minecarts and a chunk whose floor was mined out under it
+     * overnight. A revert with no solid block or water within {@link #SAFE_DROP} blocks below the
+     * animal sets the horse down at the last spot the animal stood on the ground
+     * ({@link #LAST_GROUND}), or, when that is not known because the animal was loaded since, where
+     * the horse changed at dusk. The night still happens; only the drop into nothing does not. The
+     * death path is untouched: an animal that dies, dies where it is.
      */
     private static void revert(Mob animal, ServerLevel level, LycanShift shift) {
         Horse horse = restore(animal, level, shift, true);
@@ -378,7 +430,7 @@ public final class LycanthropyHandler {
     private static final int CLEAR_REACH = 3;
 
     /**
-     * <b>A horse is bigger than most of its animal forms.</b> A wolf, a fox or a bat fits against a fence or under a
+     * <b>A horse is bigger than most of its animal forms.</b> A wolf, a fox or a cat fits against a fence or under a
      * roof where a horse's box does not, and restoring the horse where the animal stood put it inside the blocks: the
      * yard's LYCAN WOLF foals suffocated ten seconds after dawn, and their sire took 23 wall hits (2026-09-15 run). So
      * a horse that would collide is moved to the nearest spot within {@link #CLEAR_REACH} blocks where its whole box is
@@ -529,7 +581,7 @@ public final class LycanthropyHandler {
     }
 
     /**
-     * Rideable forms are not rideable. Half a dozen of the thirty-seven are
+     * Rideable forms are not rideable. Several of the forms are
      * animals a player can sit on, and the one thing a shifted horse must not be
      * is a mount - the point of the gene is the night you cannot ride home.
      *

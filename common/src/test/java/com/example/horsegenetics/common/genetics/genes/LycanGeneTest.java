@@ -70,6 +70,60 @@ class LycanGeneTest {
         }
     }
 
+    /**
+     * <b>The blacklist.</b> Nothing that swims, nothing that flies, nothing
+     * hostile - because this locus does not put an animal <i>beside</i> the
+     * horse, it puts the horse <i>inside</i> the animal, and each of those three
+     * is a horse its owner cannot get back: drowned in air, gone over the
+     * treeline, or attacked by everything including its owner.
+     *
+     * <p>Asserted against the roster rather than against a copy of the list, so
+     * that a mob added to {@link MobRoster} as water or air is kept out by
+     * existing rather than by anybody remembering this rule.
+     */
+    @Test
+    void nothingThatSwimsFliesOrHuntsIsAForm() {
+        Set<String> ground = new HashSet<>();
+        for (MobRoster.Entry e : MobRoster.ground()) {
+            ground.add(e.mob());
+        }
+        for (Form form : GENE.forms()) {
+            assertTrue(ground.contains(form.mob()), "not a ground-dwelling peaceful mob: " + form.mob());
+        }
+        assertEquals(MobRoster.ground().size(), GENE.forms().size(),
+                "every ground mob on the roster should be a form");
+
+        // The ones the owner named on 2026-09-24, so the test fails loudly if
+        // the roster is ever re-tagged rather than quietly agreeing with it.
+        for (String banned : List.of("minecraft:cod", "minecraft:squid", "minecraft:axolotl",
+                "minecraft:dolphin", "minecraft:tadpole", "minecraft:bat", "minecraft:parrot",
+                "minecraft:bee", "minecraft:allay", "minecraft:happy_ghast")) {
+            assertNull(mobNamed(banned), banned + " must not be a lycan form");
+        }
+        for (MobRoster.Entry e : MobRoster.hostile()) {
+            assertNull(mobNamed(e.mob()), "a monster must not be a lycan form: " + e.mob());
+        }
+    }
+
+    private static Form mobNamed(String mob) {
+        for (Form form : GENE.forms()) {
+            if (form.mob().equals(mob)) {
+                return form;
+            }
+        }
+        return null;
+    }
+
+    /** {@code "an ocelot"}, {@code "a wolf"} - the article is read off the label now, so check it. */
+    @Test
+    void everyFormReadsAsASentence() {
+        for (Form form : GENE.forms()) {
+            String expected = "aeiou".indexOf(Character.toLowerCase(form.label().charAt(0))) >= 0 ? "an " : "a ";
+            assertTrue(form.withArticle().startsWith(expected),
+                    "wrong article for " + form.label() + ": " + form.withArticle());
+        }
+    }
+
     @Test
     void theWildTypeSortsLastSoAPairCanBeReadOffItsSlots() {
         List<Allele> alleles = GENE.alleles();
@@ -129,7 +183,7 @@ class LycanGeneTest {
     // ------------------------------------------------------------------
 
     /**
-     * Thirty-seven alleles for one gallery entry. It also grants no
+     * A locus this wide for one gallery entry. It also grants no
      * {@code effects} verb at all - the shift is hand-written behaviour on the
      * game side, the same split {@link SunSensitivityGene} makes - so a shifter's
      * ability list must be empty here.

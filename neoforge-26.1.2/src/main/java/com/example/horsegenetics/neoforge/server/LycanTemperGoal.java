@@ -15,8 +15,8 @@ import java.util.EnumSet;
  * for one reason: <b>the forms have no attack</b>. A chicken has no
  * {@code ATTACK_DAMAGE} attribute at all, so {@code Mob.doHurtTarget} - which is
  * what {@code MeleeAttackGoal} calls - has nothing to read. The alternative was
- * to add the attribute to all thirty-seven vanilla mob types through
- * {@code EntityAttributeModificationEvent}, which would hand every sheep, cod
+ * to add the attribute to every vanilla mob type the locus can name through
+ * {@code EntityAttributeModificationEvent}, which would hand every sheep, rabbit
  * and wandering trader in the world an attack stat they never had, for the sake
  * of the one in ten thousand that is secretly a horse. Dealing a flat
  * {@value #DAMAGE} by hand touches nothing that is not already ours.
