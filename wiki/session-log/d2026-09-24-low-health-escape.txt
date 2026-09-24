@@ -1,0 +1,109 @@
+2026-09-24, after the death notice — a horse close to death bucks its rider and bolts
+
+    One bullet, the first one left in the Bugs section of intake/To do.txt, in the
+    owner's words:
+
+        When a horse reaches 20% health (threshold configurable), it should buck off
+        its owner, jump fences, and do whatever it can to escape damage and avoid
+        dying.
+
+    Dated first, as START HERE says to. The bullet went in on 2026-09-23 (27cd45aa)
+    and the previous session had already named it as the next one. Nothing in the
+    repository reads a health threshold to decide behaviour: the only panic goal is
+    HorsePanicGoal, whose holdGround() asks about fire, freezing and whether the horse
+    has a target, and has no health term at all. AvoidEntityGoal is used nowhere. The
+    nearest existing thing is HerdRules.FIGHT_YIELD_HEALTH, which makes a stallion
+    yield a takeover fight, and it is not a flee. So: open, and genuinely absent.
+
+    The owning page is horse-care.html — the same page as the hurt and death notices,
+    and roadmap-execution.html's own stage 3 already lists "low-health escape" beside
+    fence avoidance as part of the behaviour pass it wants.
+
+Why this could not be a health check inside HorsePanicGoal
+
+    That was the first shape it took, and it is wrong in all three of the things the
+    sentence asks for. Vanilla's panic NEVER RUNS WHILE THE HORSE IS RIDDEN, and that
+    is correct of it: a mounted horse's movement belongs to its passenger, and a goal
+    that threw riders off as a side effect of being startled would be a different
+    feature. It also holds ground whenever the horse has a target — right for a
+    gladiator at full health, suicidal at two hearts. And it is not gated on health,
+    so it is the same behaviour for a scratch as for a mortal wound.
+
+    Three divergences is a second goal, not a third branch in an existing one.
+    server/HorseEscapeGoal, at priority 0, above panic at 1.
+
+    The arithmetic went to common/care/Escape with EscapeTest on it, for HurtNotice's
+    reason: three of the four decisions in the owner's sentence are a threshold and two
+    durations. RECOVERY_MARGIN is the one that would have been wrong and invisible —
+    without it, a horse that heals a single point stops dead in front of the thing
+    killing it and starts again on the next hit, so what it takes to stop is
+    deliberately more than what it took to start. THREAT_LINGERS_TICKS is the other
+    half: damage is instantaneous and flight is not, and a horse that stops the tick
+    the zombie stops swinging is standing next to a zombie.
+
+The buck is every tick, which is a deliberate divergence from the advice
+
+    intake/Implementation advice.txt asked for "a single buck-off". It is repeated
+    instead, and the reason is the same sentence that made this a separate goal: a
+    horse carrying somebody is steered by that rider rather than by its navigation, so
+    one buck followed by a remount is the same as the goal not running. Climb back on
+    inside the ten seconds and you come back off.
+
+    That is the call most likely to be wrong about how it feels to play, so it is
+    written as a pass condition on horse-care.html#escape-0924 rather than buried: if
+    the owner would rather ride a bolting horse to safety, the fix is one line.
+
+MOVE and not JUMP, although it jumps
+
+    Flags are declared as MOVE alone. Vanilla's FloatGoal is also at priority 0 and
+    holds JUMP, and the goal selector needs every declared flag free to start a goal —
+    so claiming JUMP would mean a horse swimming could not start this goal at all,
+    which is the exact case (being shot at in deep water) where it most needs to move.
+    Vanilla's own PanicGoal claims MOVE alone for the same reason and leaves jumping to
+    the move control.
+
+    Flagged in the class, because bake-behaviour-hierarchy.mjs reads the setFlags call:
+    the generated page now says MOVE for a class that presses jump, and a later session
+    reading only the page would be entitled to think the jumping was a bug.
+
+    The re-bake also reports HorseEscapeGoal and InspectHoldGoal as a priority-0 MOVE
+    conflict, correctly — neither can interrupt the other, so the insertion order in
+    HorseCareHandler.onHorseJoin is what decides it, and the escape goal is added
+    first. Somebody holding the information screen open does not get to pin a bleeding
+    animal in place. Adding the goal also un-stuck the page's BondFollowGoal.Watch row,
+    which had been missing from the generated span.
+
+Fences are jumped at, not pathed over
+
+    A fence is BLOCKED to a ground navigator, so no path over one is ever produced and
+    moveTo simply refuses. SunShadeGoal met this in September and its answer is reused
+    verbatim: on a refusal, drive getMoveControl().setWantedPosition straight at the
+    escape point and press getJumpControl().jump() while horizontalCollision holds.
+    Jump strength is a real attribute with a real range, so whether a horse clears the
+    rail is a fact about the horse — which is the right answer to "jump fences" and
+    also the thing most likely to disappoint.
+
+    What it runs away from: the attacker's position when getLastHurtByMob() answers,
+    otherwise the square it was standing on when the bolt began, which is the right
+    answer for lava, a cactus or powder snow where nothing is chasing it and the place
+    itself is the problem. When even that is where it still stands, it runs along its
+    own view vector.
+
+Not played
+
+    EscapeTest covers the rules. Nothing about the behaviour is tested because all of
+    it is NeoForge, and the checks are on horse-care.html#escape-0924. Two of them
+    matter more than the rest. The fence one cannot be read off a single horse — a
+    poor jumper failing to leave a pen is the honest outcome and a good one failing is
+    a bug, so it wants two horses with very different jump stats in the same pen. And
+    the water one is the only thing that would show the JUMP-flag reasoning to be
+    wrong: a swimming horse that drowns or stands still means FloatGoal and this goal
+    are fighting after all.
+
+Next
+
+    The bullet directly below this one in To do.txt: horses are eating crops through a
+    fence or wall. Note before starting it that horse-care.html's verification summary
+    already claims a hungry horse no longer walks at crops it cannot path to
+    (2026-09-24, the reachable-food work) — so this is exactly the case START HERE's
+    step 1 is about, and the bullet needs dating against that fix before any code.

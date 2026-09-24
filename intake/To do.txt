@@ -12,8 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-- When a horse reaches 20% health (threshold configurable), it should buck off its owner, jump fences, and do whatever it can to escape damage and avoid dying.
-
 - Horses are eating crops through a fence or wall.
 
 - Attacking a cowboy makes his horses aggro and the cowboy flee, but killing him makes the horses wild and tamable. Add a way to obtain cowboy horses without buying them with emeralds.

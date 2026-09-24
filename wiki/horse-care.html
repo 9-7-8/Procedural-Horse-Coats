@@ -416,6 +416,41 @@
         default.</li>
 </ul>
 
+<h2 id="escape">6. When one of them is about to die</h2>
+
+<p>
+    A horse down to <strong>a fifth of its hearts</strong> stops being a mount. It throws off
+    whoever is riding it, drops any fight it had picked, and runs &mdash; faster than it panics,
+    and at a fence rather than along it.
+</p>
+
+<ul>
+    <li><strong>It bucks you off, and it will do it again.</strong> Climb back on while it is
+        still bolting and you come straight back off. A horse carrying a rider is steered by
+        that rider, so letting you ride it would be the same as the behaviour not existing. When
+        it has calmed down it lets you back up as normal.</li>
+    <li><strong>A fifth of its <em>own</em> hearts.</strong> A frail horse and a Percheron bolt
+        at very different numbers and at the same fraction of themselves.</li>
+    <li><strong>It jumps.</strong> If the way out is over a fence, it tries the fence &mdash;
+        and whether it clears one is its own <a href="horse-body.html">jump</a>. A good jumper
+        leaves the pen. A Falabella gets stuck against the rail, which is the honest answer
+        rather than a special case.</li>
+    <li><strong>It keeps going for about ten seconds after the last blow</strong>, and stops
+        only once it has healed clear of the threshold &mdash; not the moment it crosses back
+        over it, or one point of healing would leave it standing in front of the thing that was
+        killing it.</li>
+    <li><strong>A fighter runs too.</strong> A horse with an <a href="gene-aggression.html">
+        aggression</a> gene holds its ground against what it has targeted at full health; at two
+        hearts it lets go and leaves. Nothing a horse can be doing outranks not dying &mdash;
+        including being <a href="horse-browser.html">read about</a>, which normally holds it
+        still.</li>
+    <li><strong>A tied horse pulls.</strong> It is not exempted, so it strains the lead like any
+        other animal that wants to be somewhere else.</li>
+    <li>The fifth is <code>behaviour.escape_health_fraction</code> in the server config. Set it
+        higher for horses that give up sooner, lower for horses that fight on, and
+        <strong>0</strong> to turn the whole thing off.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -648,6 +683,79 @@
     <li><strong>The <code>showDeathMessages</code> game rule is checked</strong>, in vanilla's own
         order of business: a server that turned death messages off has said what it wants of its
         chat, and a horse is not an exception to that.</li>
+</ul>
+
+<h2 id="escape-code">Bolting at low health &mdash; why it is not vanilla's panic with a health check</h2>
+
+<p>
+    <code>AbstractHorse</code> already registers <code>PanicGoal</code>
+    (<a href="gene-aggression.html">swapped</a> for <code>HorsePanicGoal</code> by
+    <code>HorseAggroHandler</code>) and it already runs from what hits it, so the first shape this
+    took was a health term inside <code>HorsePanicGoal.holdGround</code>. That is wrong in all
+    three of the things that were actually asked for. Panic <strong>never runs while the horse is
+    ridden</strong>, because a mounted horse's movement belongs to its passenger and panic has no
+    business ejecting anybody; it holds ground whenever the horse has a target, which is right for
+    a gladiator at full health and suicidal at two hearts; and it is not gated on health at all,
+    so it is the same behaviour for a scratch as for a mortal wound. The mortal-wound case is its
+    own goal, <code>server/HorseEscapeGoal</code>, sitting above panic.
+</p>
+
+<p>
+    The arithmetic is <code>common/care/Escape</code> with <code>EscapeTest</code> on it, for
+    <code>HurtNotice</code>'s reason: three of the four decisions in the owner's sentence are a
+    threshold and two durations, and a threshold with hysteresis is exactly the kind of thing that
+    is wrong in a way nobody notices from inside a running game. <code>RECOVERY_MARGIN</code> is
+    why: without it a horse that heals one point stops dead in front of what was killing it and
+    starts again on the next hit, so what it takes to stop is deliberately more than what it took
+    to start. <code>THREAT_LINGERS_TICKS</code> is the other half &mdash; damage is instantaneous
+    and flight is not, and a horse that stops the tick the zombie stops swinging is standing next
+    to a zombie.
+</p>
+
+<ul>
+    <li><strong>Priority 0, added before <code>InspectHoldGoal</code>.</strong> Nothing outranks
+        not dying, so it goes above panic and the shade goal at 1 and everything under them.
+        <code>InspectHoldGoal</code> shares priority 0 and <code>Flag.MOVE</code>; neither can
+        interrupt the other, and the goal selector breaks a priority tie by insertion order, so
+        adding this first is what stops an open information screen pinning a bleeding animal in
+        place. <a href="behaviour-hierarchy.html#goal-p0">The generated hierarchy</a> reports the
+        pair as a conflict, correctly.</li>
+    <li><strong>It claims <code>MOVE</code> and not <code>JUMP</code>, and it does jump.</strong>
+        Vanilla's <code>FloatGoal</code> is also at priority 0 and holds <code>JUMP</code>, so
+        claiming the flag would mean a horse swimming could not start this goal at all &mdash;
+        the exact case, being shot at in deep water, where it most needs to move. Vanilla's own
+        <code>PanicGoal</code> claims <code>MOVE</code> alone for the same reason and leaves
+        jumping to the move control. Flagged in the class, because
+        <code>bake-behaviour-hierarchy.mjs</code> reads the <code>setFlags</code> call and the
+        page will therefore say <code>MOVE</code>.</li>
+    <li><strong>The buck is every tick, not just at the start.</strong> "Buck off its owner" has
+        to mean a rider who remounts comes back off, or the behaviour is decorative: a horse
+        carrying somebody is steered by them rather than by this goal. This is the second place a
+        horse ejects a rider on purpose; the other is
+        <code>GeneAbilityHandler.buckIfItIsTheRider</code>, for a horse that has just decided to
+        attack the person on its back.</li>
+    <li><strong>Fences are not pathfound, they are jumped at.</strong> A fence is
+        <code>BLOCKED</code> to a ground navigator, so no path over one is ever produced and
+        <code>moveTo</code> simply refuses. <a href="gene-sun-sensitivity.html">
+        <code>SunShadeGoal</code></a> met this first and this does the same honest thing: on a
+        refusal, drive <code>getMoveControl().setWantedPosition</code> straight at the escape
+        point instead, and press <code>getJumpControl().jump()</code> while
+        <code>horizontalCollision</code> holds. Jump strength is a real stat with a real range, so
+        whether a horse clears the rail is a fact about the horse. <strong>An approximation of
+        intent, not a pathfinder.</strong></li>
+    <li><strong>What it runs away from.</strong> The attacker's position when
+        <code>getLastHurtByMob()</code> answers, and otherwise the square it was standing on when
+        the bolt began &mdash; which is the right answer for lava, a cactus or powder snow, where
+        nothing is chasing it and the place itself is the problem. When even that is where it
+        still stands, it runs along its own view vector, because a horse in a lava pool has no
+        wrong direction.</li>
+    <li><strong>It drops the fight.</strong> <code>setTarget(null)</code> on start, so a horse
+        with an aggression locus is not held next to what it was swinging at by a melee goal it
+        has stopped being able to feed.</li>
+    <li><strong>Leashed and tamed are not exemptions.</strong> A tied horse strains the lead,
+        which is what "whatever it can" means; a wild one bolts on the same rule as an owned one.
+        The one thing that turns it off is
+        <code>behaviour.escape_health_fraction = 0</code>.</li>
 </ul>
 
 <h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
@@ -1560,8 +1668,58 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>An owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>A horse under a fifth of its hearts now bucks its rider and bolts, and the sharpest question in it is the fence &mdash; hurt a good jumper and a Falabella to the threshold in the same pen and see which of them leaves, because jumping at a fence rather than pathing over one is an approximation of intent and the only way to tell it working from it failing is two very different jump stats; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
+
+<h3 id="escape-0924">A dying horse bolts (2026-09-24, NOT played)</h3>
+
+<p>
+    Asked for directly: <em>when a horse reaches 20% health (threshold configurable), it should
+    buck off its owner, jump fences, and do whatever it can to escape damage and avoid
+    dying</em>. Built as <a href="#escape-code">the escape goal</a>.
+    <code>EscapeTest</code> covers the arithmetic &mdash; the threshold, that a configured 0
+    turns it off, that stopping takes more health than starting, and the window that outlasts the
+    blow. <strong>Nothing about the behaviour is tested</strong>, because all of it is NeoForge,
+    and two pieces of it are guesses about the running game rather than about the rules.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>It throws you off, and keeps throwing you off.</strong> Ride a tamed horse, have
+        something take it under a fifth of its hearts. <strong>Pass:</strong> you are dismounted
+        at once, and remounting inside the next ten seconds dismounts you again.
+        <strong>Fail:</strong> you stay aboard, which means the goal is not starting &mdash; read
+        <code>[trace] escape</code> in the log, which says at what health it bolted and whether a
+        rider was thrown.</li>
+    <li><strong>The fence. This is the one that is an approximation.</strong> Pen a horse with a
+        good jump, hurt it to the threshold from outside the pen. <strong>Pass:</strong> it leaves
+        the pen over the rail. <strong>Fail:</strong> it runs at the fence and stays there, which
+        is the honest outcome for a poor jumper and a <em>bug</em> for a good one &mdash; the
+        trace says <code>the navigator never found it a way out</code> either way, so compare two
+        horses with very different jump stats before concluding anything.</li>
+    <li><strong>A frail horse and a big one bolt at the same fraction.</strong> Two horses with
+        very different maximum health. <strong>Pass:</strong> each bolts at a fifth of its own
+        maximum, not at the same number of hearts.</li>
+    <li><strong>It does not stutter.</strong> Leave a bolted horse alone beside water once it has
+        eaten. <strong>Pass:</strong> it runs, then settles, and does not flick between running
+        and grazing as it heals across the threshold.</li>
+    <li><strong>A fighter lets go.</strong> A horse with an aggression allele mid-fight, taken to
+        the threshold. <strong>Pass:</strong> it disengages and runs. <strong>Fail:</strong> it
+        stands and keeps swinging, which means <code>HorsePanicGoal</code>'s hold-ground rule is
+        still winning and this goal is not above it after all.</li>
+    <li><strong>An open information screen does not pin it.</strong> Have a second player hold
+        the horse's screen open while it is hurt to the threshold. <strong>Pass:</strong> it runs.
+        <strong>Fail:</strong> it stands still, which is the priority-0 tie breaking the wrong
+        way &mdash; insertion order in <code>HorseCareHandler.onHorseJoin</code>.</li>
+    <li><strong>In water.</strong> Shoot a swimming horse to the threshold. <strong>Pass:</strong>
+        it swims off and keeps its head up. <strong>Fail:</strong> it drowns or stands, which
+        would mean <code>FloatGoal</code> and this goal are fighting after all and the
+        <code>JUMP</code> reasoning was wrong.</li>
+    <li><strong>The switch.</strong> <code>behaviour.escape_health_fraction = 0</code>.
+        <strong>Pass:</strong> a horse on half a heart stays ridden and stays put, and vanilla's
+        own panic still works.</li>
+</ul>
 
 <h3 id="death-notice-0924">The server hears about a dead horse (2026-09-24, NOT played)</h3>
 

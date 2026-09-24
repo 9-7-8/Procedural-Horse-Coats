@@ -98,16 +98,12 @@ Implementation:
 - Reuse the same reachability/boundary predicate for pasture crowding, crop
   eating, and food selection so a horse does not grind against an unreachable
   fence or through a blocked barrier.
-- Low-health panic should be server-authoritative, trigger at a configurable
-  threshold, and include a single buck-off plus an escape goal that cannot
-  phase through walls or into unverified landing spaces.
 
 Validation:
 - Test daily decay, minimum floor, persistence, and no multiple decays in one day.
 - Test open pen, wall-separated pen, reachable gate, unreachable owner, and valid
   versus invalid dropped food.
-- Confirm food goals do not bypass hunger state and that panic goals stop before
-  they become an indefinite stuck state.
+- Confirm food goals do not bypass hunger state.
 
 3. Family history, ownership, and cowboy transitions
 ====================================================
