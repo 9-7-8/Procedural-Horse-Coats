@@ -1123,6 +1123,23 @@
     otherwise list-defined file). The <a href="horse-dimension.html">hay portal</a> still
     wants real hay bales; a sugar cane bale is food, not a doorway.
 </p>
+
+<h3 id="modded-ground-food">Another mod&rsquo;s crops and fruit, off the floor</h3>
+<p>
+    The same shape, one rung down and asked the other way round. As of 2026-09-24 an ordinary
+    horse picks food off the ground by the <strong>common tags</strong> &mdash;
+    <code>c:crops</code>, <code>c:foods/fruit</code>, <code>c:foods/vegetable</code>,
+    <code>c:foods/berry</code>, <code>c:mushrooms</code>, plus
+    <code>#minecraft:small_flowers</code> and cake &mdash; rather than by vanilla&rsquo;s
+    eight-item <code>#minecraft:horse_food</code>. Any mod that tags its grain, fruit or
+    vegetables the way NeoForge asks is fed to horses without this mod naming it, which was
+    the reported problem: on a heavily modded server almost nothing anybody drops is in
+    vanilla&rsquo;s tag. <strong>A mod that tags nothing is still invisible here</strong>
+    &mdash; the fix for that one is a datapack adding its items to
+    <code>c:crops</code>, not Java. See
+    <a href="horse-care.html#ground-food">what counts as dropped food</a>; hand-feeding is
+    unchanged and still vanilla&rsquo;s.
+</p>
 <p>
     <strong>The cost of the trade, and the tripwire for it.</strong> Grazing hay used to be
     <code>st.is(Blocks.HAY_BLOCK)</code> in Java and is now a datapack lookup, which buys the

@@ -56,11 +56,16 @@
         really stays hurt. Donkeys, mules and llamas keep it.</li>
     <li><strong>When it eats.</strong> Once hungry, a horse looks up to 10 blocks round for food
         and eats until it is nearly full. A horse that is not hungry yet but has eaten into its
-        reserve (below three quarters full) nibbles the grass it is standing on, about once every two
-        minutes.</li>
+        reserve (below three quarters full) takes a mouthful about once every two minutes: food
+        dropped within a couple of blocks of it if there is any, otherwise the grass it is
+        standing on.</li>
     <li><strong>What it looks for, best first:</strong> its favourite food lying on the ground;
         any dropped food it will eat; cake; hay bales; crops, pumpkins, melons and sugar cane;
         grass; moss; mushrooms; flowers. The nearest of the best kind wins.</li>
+    <li><strong>Dropped food is judged by what it grazes, not by what it takes from a hand.</strong>
+        An ordinary horse picks up crops, fruit, vegetables, berries, mushrooms, small flowers and
+        cake &mdash; and the same things from other mods, so a modded grain or fruit is food without
+        this mod having heard of it. Hand-feeding is unchanged and stays vanilla's shorter list.</li>
     <li><strong>Eating uses food up.</strong> Cake, hay bales, crops, mushrooms and flowers are
         eaten whole, and grass and moss turn to dirt, as they do under a sheep. With mob griefing
         off the horse is still fed and the block stays. A hay bale in a pen does not last.</li>
@@ -389,6 +394,41 @@
         added on entity join and the record is filled on the founding tick.
     </p>
 </div>
+
+<h2 id="ground-food">What counts as dropped food &mdash; and why it is not the hand-feeding test</h2>
+
+<p>
+    There are two questions, and they had one answer until 2026-09-24.
+    <code>DietFoods.accepts</code> is <strong>what a hand may offer</strong>, and for an ordinary
+    horse it answers <code>false</code> and hands the interaction back to vanilla, which means
+    <code>#minecraft:horse_food</code>: wheat, sugar, a hay block, an apple, a carrot and the three
+    golden foods. <code>DietFoods.acceptsFromGround</code> is <strong>what a horse picks up off the
+    floor</strong>, and for an ordinary or eat-anything horse it is deliberately wider &mdash; the
+    item form of every rung <code>HungerFoodGoal.rungOf</code> already sends it walking to:
+</p>
+<ul>
+    <li><code>c:crops</code>, <code>c:foods/fruit</code>, <code>c:foods/vegetable</code>,
+        <code>c:foods/berry</code>, <code>c:mushrooms</code>,
+        <code>#minecraft:small_flowers</code>, and cake;</li>
+    <li>plus <code>#minecraft:horse_food</code> itself, and any mod's bale via
+        <a href="compatibility.html">HayBales</a>.</li>
+</ul>
+<p>
+    The common tags are the point of the shape: another mod's grain or fruit is food without this
+    mod naming it, which is the case the owner hit &mdash; a heavily modded server drops almost
+    nothing that is in vanilla's eight-item tag. <strong>A narrow diet is untouched</strong> and
+    still answers <code>accepts</code>, because a wheat-eater walking past the rest is the whole
+    point of it.
+</p>
+<p>
+    The defect this closes was visible without mods: the block rungs let an ordinary horse cross a
+    pen for a planted potato, and the item rung, asking <code>GeneAbilityHandler.eats</code>, made
+    it ignore the same potato lying at its feet. That call also re-parsed the genotype
+    <em>per dropped item examined</em> &mdash; see the note above &mdash; so the search now asks with
+    the diet it resolved once. And because the ask was "food dropped near them", not "when
+    starving", <code>grazeInPlace</code> takes a dropped mouthful within 2 blocks before it takes the
+    grass, on the same one-in-1,200 roll.
+</p>
 
 <h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
 
@@ -1300,7 +1340,7 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A bonded horse no longer watches its owner through a fence, so the thing to watch for is the behaviour that was being crowded out &mdash; a bonded stallion covering a mare in heat while his owner stands in the paddock; band life has still never run outside the yard, and its sharpest question was never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
+    <p>Horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, so the check that matters is on the modded server that prompted it &mdash; drop another mod&rsquo;s crop by a hungry horse and see it eaten; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, with its sharpest question never actually asked: drop <code>LEAVING HOME</code>&rsquo;s stagger so a filly and her brother disperse together and see whether <strong><code>closeKin</code></strong> stops him recruiting her.</p>
 </div>
 
 <h3 id="bond-reach-0924">Bond behaviour needs a walkable route (2026-09-24, NOT played)</h3>
@@ -1336,6 +1376,48 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <li><strong>Nothing lost at tier 1.</strong> A bond 31&ndash;60 horse with its owner
         nearby and nothing else to do should still turn its head to follow you around the
         paddock.</li>
+</ul>
+
+<h3 id="ground-food-0924">Dropped food is judged by what a horse grazes (2026-09-24, NOT played)</h3>
+
+<p>
+    Reported from the owner&rsquo;s modded server: <em>horses should eat food dropped on the ground
+    near them, if it&rsquo;s in their diet</em>. The rung existed and had been seen working in the
+    yard, but it asked the <a href="#ground-food">hand-feeding question</a> &mdash; vanilla&rsquo;s
+    eight-item <code>#minecraft:horse_food</code> for an ordinary horse, which almost nothing on a
+    modded server is in. It now asks <code>DietFoods.acceptsFromGround</code>: crops, fruit,
+    vegetables, berries, mushrooms, small flowers and cake, vanilla&rsquo;s and any mod&rsquo;s, by
+    the common tags. A grazing horse also takes a dropped mouthful within 2 blocks before it takes
+    the grass.
+</p>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>A dropped potato is eaten.</strong> Drop a potato, a beetroot or a melon slice
+        &mdash; none of them in vanilla&rsquo;s horse-food tag &mdash; beside a hungry ordinary
+        horse. <strong>Pass:</strong> it walks over and eats it, and <code>hunger</code> logs
+        <code>ate minecraft:potato (dropped)</code>. <strong>Fail:</strong> it walks past to the
+        grass, which means the tag lookup is not matching.</li>
+    <li><strong>A modded grain is eaten</strong> &mdash; the case that prompted this. On the modded
+        server, drop another mod&rsquo;s crop or fruit by a hungry horse. <strong>Pass:</strong> the
+        same log line with that mod&rsquo;s item id. <strong>Fail:</strong> it is ignored, which
+        means that mod does not put its food in <code>c:crops</code> or <code>c:foods/*</code> and
+        the tags need naming a different way.</li>
+    <li><strong>A horse that is only peckish still takes what is at its feet.</strong> Drop food
+        beside a horse that is below three quarters full but not yet hungry. <strong>Pass:</strong>
+        within a couple of minutes it eats it without walking anywhere.</li>
+    <li><strong>A narrow diet still refuses.</strong> Drop a potato by a hungry
+        <a href="gene-diet.html">wheat-eater</a>. <strong>Pass:</strong> ignored; hay and wheat only.
+        <strong>Fail:</strong> it eats it, which means the widening leaked past
+        <code>NORMAL</code>/<code>ANYTHING</code>.</li>
+    <li><strong>Hand-feeding is unchanged.</strong> Hold a plain potato out to an ordinary horse.
+        <strong>Pass:</strong> nothing happens, exactly as before &mdash; this change is about the
+        floor, not the hand.</li>
+    <li><strong>Watch for horses hoovering.</strong> Untested worry rather than a known defect: a
+        player emptying crops out of a chest beside a pen now loses them to the horses. If that is
+        a nuisance in play it wants a rule (only food that has lain a few seconds, say), not a
+        narrower list.</li>
 </ul>
 
 <h3 id="hunger-by-size-0917">A bigger horse gets hungry sooner (2026-09-17, NOT played)</h3>

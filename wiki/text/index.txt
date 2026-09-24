@@ -181,6 +181,7 @@ wiki/compatibility.html#jade	all	Jade — and the rule this one breaks
 wiki/compatibility.html#jade-detail	all	Why it says a word and not a sentence
 wiki/compatibility.html#jade-server	all	With Jade on the client only
 wiki/compatibility.html#known	all	Known-good and known-bad
+wiki/compatibility.html#modded-ground-food	all	Another mod’s crops and fruit, off the floor
 wiki/compatibility.html#patches	all	Supporting another mod deliberately
 wiki/compatibility.html#realistic-horse-genetics	all	Realistic Horse Genetics
 wiki/compatibility.html#remaps	all	User-written model remaps
@@ -2672,6 +2673,7 @@ wiki/horse-care.html#bond	gameplay	2. Bond
 wiki/horse-care.html#bond-command	coding	Setting bond for testing — /bond
 wiki/horse-care.html#changes	gameplay	How bands change
 wiki/horse-care.html#food-tempt	gameplay	Horses come to food — and run for their favourite
+wiki/horse-care.html#ground-food	coding	What counts as dropped food — and why it is not the hand-feeding test
 wiki/horse-care.html#hand-taming	gameplay	Taming by hand
 wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
 wiki/horse-care.html#kept-herds	gameplay	Tamed herds

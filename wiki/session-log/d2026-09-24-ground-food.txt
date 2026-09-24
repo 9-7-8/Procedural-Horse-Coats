@@ -1,0 +1,71 @@
+2026-09-24, after the bond-reach fix — a dropped carrot is food, the same as a planted one
+
+    One bullet, the next in the Bugs section of intake/To do.txt, in the owner's words, and
+    written twice in a row because she queued it and then wrote it up:
+
+        Queue: horses should eat food dropped on the ground near them, if it's in their diet.
+        Horses should eat food dropped on the ground near them when the food is part of their
+        diet.
+
+    Dated against the code first, which is the step that decides these. The behaviour is not
+    absent: HungerFoodGoal has had a DROPPED rung since 2026-09-14, and the 2026-09-15 yard
+    run logged a horse eating a dropped chicken. But the bullet is from 2026-09-23, nine days
+    after that, and it comes off the heavily modded server she actually plays on. Newer than
+    the fix, so: open, and go and read the code.
+
+The set was the hand-feeding set
+
+    The rung asked GeneAbilityHandler.eats — "would this horse take this from a hand?" For a
+    special diet that is DietFoods.accepts, which is right. For an ordinary horse it falls
+    through to vanilla's horse.isFood, which in 26.1.2 is #minecraft:horse_food: wheat, sugar,
+    hay_block, apple, carrot, golden_carrot, golden_apple, enchanted_golden_apple. Eight items,
+    all vanilla. On a modded server, almost nothing anybody drops is in it.
+
+    It is wrong without mods too, and that is the sharper way to see it. rungOf sends an
+    ordinary horse across a pen to eat a *planted* potato, beetroot, melon or sugar cane —
+    none of which are in that tag — and then the item rung had the same horse walk past the
+    same potato lying at its feet. One food model, two answers, depending on whether the food
+    was in the world or on the floor.
+
+What changed
+
+    DietFoods.acceptsFromGround is the ground question, beside accepts, which stays the hand
+    question and is unchanged. For NORMAL and ANYTHING it is the item form of every rung the
+    horse already walks to: c:crops, c:foods/fruit, c:foods/vegetable, c:foods/berry,
+    c:mushrooms, #minecraft:small_flowers and cake, plus #minecraft:horse_food itself and any
+    mod's bale through HayBales. Common tags rather than an item list, so another mod's grain
+    or fruit is food without this mod having heard of it — that is the modded-server case, and
+    it is also the only shape that does not need editing every time she adds a mod.
+
+    A narrow diet is untouched and still answers accepts. A wheat-eater walking past the rest
+    is the whole point of the diet locus, so the widening is fenced to the two diets that eat
+    broadly anyway.
+
+    Two things fell out of it:
+
+    - HungerFoodGoal.search now asks with the HorseDiet it resolved once for that horse.
+      GeneAbilityHandler.eats calls HorseDietHandler.dietOf itself, so the old line parsed the
+      genotype and epigenome once *per dropped item examined* — inside the loop over every
+      ItemEntity in a 10-block box. That is precisely the cost this class was rebuilt on
+      2026-09-14 to avoid, reintroduced through a helper.
+    - grazeInPlace takes a dropped mouthful within 2 blocks before it takes the grass. The ask
+      was "near them", not "when starving": a horse below three quarters full standing on a
+      dropped carrot should take it rather than wait to fall under Hunger.HUNGRY. It costs one
+      entity query on the one-in-1,200 roll the grass mouthful already pays for.
+
+    Every tag key was read out of the 26.1.2 sources before being written (ItemTags.HORSE_FOOD
+    and SMALL_FLOWERS; Tags.Items.CROPS, FOODS_FRUIT, FOODS_VEGETABLE, FOODS_BERRY, MUSHROOMS).
+    Their *contents* were not, and DietFoods says so in the comment.
+
+Not played
+
+    wiki/horse-care.html grew #ground-food on the Coding tab — the two questions, why they are
+    different, and the tag list — and #ground-food-0924 on the Verification tab with six
+    checks. The one that matters is on her own server: drop another mod's crop by a hungry
+    horse and watch for the "ate <modid>:<item> (dropped)" line. The last check is a worry
+    rather than a defect — a player emptying crops out of a chest beside a pen now loses them
+    to the horses, and if that is a nuisance the answer is a rule about how long food has lain,
+    not a narrower list.
+
+    The Gameplay tab's food list gained the ground/hand distinction and the grazing line now
+    mentions dropped food.

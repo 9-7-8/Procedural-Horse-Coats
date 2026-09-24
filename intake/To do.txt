@@ -12,10 +12,6 @@ Tuning stuff, from using this in my heavily modded server:
 Bond should decay down to a set level (above 0) very slowly over time, at like 1 level per day. 
 
 Bugs:
-Queue: horses should eat food dropped on the ground near them, if it's in their diet.
-
-- Horses should eat food dropped on the ground near them when the food is part of their diet.
-
 - All the horses are pushing against the pasture edge where the fence separates them from the farm/crops.
 
 - Horses that have been sold should remain in the family tree, but appear greyed out rather than being removed.
