@@ -181,8 +181,38 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Only the awkward cases are left open &mdash; a ticket spent on a horse whose bound stall is in an <strong>unloaded chunk</strong>, and an interdimensional one used from the horse dimension &mdash; where the failure is a ticket that is consumed and delivers nothing rather than refusing out loud.</p>
+    <p>Only the awkward cases are left open &mdash; a ticket spent on a horse whose bound stall is in an <strong>unloaded chunk</strong>, and an interdimensional one used from the horse dimension &mdash; where the failure is a ticket that is consumed and delivers nothing rather than refusing out loud &mdash; and now a second way to spend one, from the horse browser, which picks the ticket for you.</p>
 </div>
+
+<h3 id="send-home-spend-0925">Spending a ticket from the browser (2026-09-25, NOT played)</h3>
+
+<p>
+    The <em>My horses</em> table has a <em>Send home</em> button per row, and it spends
+    these items without them ever being held. It does not restate the rules &mdash; the
+    tier check, the live re-measure of the stall and the refuse-without-spending
+    guarantee are all still <code>TicketHandler</code>'s, called into rather than copied,
+    because a second copy would drift into teleporting a horse inside a wall.
+</p>
+
+<p>
+    What is new is <strong>which</strong> ticket goes. The button spends the cheapest one
+    in the inventory that can actually make the trip, preferring a holding-pen ticket for
+    a pen trip. That ordering rides on <code>TicketItem.Tier</code> being declared
+    cheapest-first; reorder the enum and it would quietly start spending the dearest
+    ticket in a player's pocket.
+</p>
+
+<ul>
+    <li><strong>Cheapest first.</strong> Hold a basic and an interdimensional, send an
+        overworld horse to an overworld stall. <strong>Pass:</strong> the basic is the one
+        that goes.</li>
+    <li><strong>The tier still bites.</strong> Hold only a basic, with the horse in the
+        Nether. <strong>Pass:</strong> a refusal naming the interdimensional ticket, and
+        nothing spent.</li>
+    <li><strong>The pen prefers its own ticket.</strong> Hold a holding-pen ticket and a
+        written one, send a stall-less horse. <strong>Pass:</strong> the holding-pen one
+        goes, and the horse lands in the pen.</li>
+</ul>
 
 <h3 id="open-0913-holding-pen">The holding pen (still open after 2026-09-13)</h3>
 

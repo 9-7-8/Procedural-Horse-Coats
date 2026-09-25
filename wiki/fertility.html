@@ -820,8 +820,59 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat and nothing but a night's play can say whether fifty is a stable or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat and nothing but a night's play can say whether fifty is a stable or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers now refuse to happen through a wall, which had never been checked at all and which the same cap change had been hiding.</p>
 </div>
+
+<h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25, NOT played)</h3>
+
+<div class="note">
+    <p>
+        Reported by the owner as new, and it was not new &mdash; it was newly
+        <em>visible</em>. <code>NaturalBreedingHandler</code> has never had a wall check:
+        the partner search is an AABB inflated by <code>NATURAL_REACH</code> plus
+        <code>YardPens.together</code>, which returns true outside the test yard and says
+        so in its own javadoc. What changed is the crowding cap going from a hard-coded
+        eight to a configurable fifty. In a barn of adjacent stalls that cap had been
+        firing <code>CROWDED</code> and suppressing nearly every cover &mdash; it was
+        accidentally doing the wall's job, and raising it took the accident away.
+    </p>
+</div>
+
+<p>
+    The fix is a real path test: an unreachable stallion is dropped when the candidate
+    list is built, not at the verdict, so a mare picks the best stallion she can actually
+    walk to rather than being blocked by the nearest one she cannot.
+</p>
+
+<ul>
+    <li><strong>A wall stops it.</strong> Put a mare in heat and a stallion in adjacent
+        stalls, sharing one solid wall. <strong>Pass:</strong> no cover, indefinitely.
+        <strong>Fail:</strong> a foal, which would mean the path test is passing &mdash;
+        check the wall is actually two blocks high and has no gap a horse could path
+        through, because the test asks whether she can <em>walk</em> there, not whether
+        she can see.</li>
+    <li><strong>A gate does not.</strong> Same pair with an open gate between them.
+        <strong>Pass:</strong> a cover, as before. This is the one that matters: the test
+        must not have made ordinary penned breeding impossible.</li>
+    <li><strong>Round a corner still works.</strong> Two horses at opposite ends of one
+        L-shaped pen, out of sight of each other. <strong>Pass:</strong> a cover &mdash;
+        this is why it is a path and not a line of sight.</li>
+    <li><strong>Touching still works.</strong> Two horses pressed together in a one-wide
+        stall, where there may be no path to compute at all. <strong>Pass:</strong> a
+        cover, by way of the overlapping-hitbox fallback.</li>
+    <li><strong>The cost.</strong> A paddock of thirty horses in heat, watched for a
+        minute. <strong>Pass:</strong> no tick lag &mdash; the path is only built for a
+        mare already past <code>mayTryNaturally</code> and only over horses within three
+        blocks, but that reasoning has not been measured.</li>
+</ul>
+
+<p>
+    <strong>Still straight-line, and deliberately left so for now:</strong> the crowding
+    count itself. It counts every horse within <code>NATURAL_CAP_RADIUS</code> through
+    walls, so a mare in a barn is still held back by horses she could never reach. That is
+    a separate question from whether she breeds through the wall, and changing it would
+    move the cap's meaning for every world at once.
+</p>
 
 <h3 id="crowd-cap-0924">The crowding cap is fifty, and a server setting (2026-09-24, NOT played)</h3>
 

@@ -529,8 +529,73 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty.</p>
+    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty; and the <em>My horses</em> table has changed shape twice over, losing its dead and trading its coat column for a button that spends a ticket.</p>
 </div>
+
+<h3 id="dead-leave-roster-0925">Dead horses leave the roster (2026-09-25, NOT played)</h3>
+
+<p>
+    A dead horse used to sit in <em>My horses</em> for ever as a <em>not loaded</em> row,
+    which reads as a horse that could still be fetched and that no action clears. It is
+    now dropped by <code>HorseWhereabouts.isDead</code> &mdash; but <strong>after</strong>
+    the allele and breed sweeps, and that ordering is the part worth checking, because
+    those sweeps are deliberately retroactive.
+</p>
+
+<ul>
+    <li><strong>It goes.</strong> Note a tamed horse on the list, kill it, reopen
+        <kbd>H</kbd> &rarr; My horses. <strong>Pass:</strong> the row is gone.
+        <strong>Fail:</strong> it is still there as <em>not loaded</em>, which would mean
+        <code>LivingDeathEvent</code> never reached <code>HorseWhereabouts</code> for that
+        horse &mdash; worth checking separately for a horse killed by a gene lethal, by
+        the void, or while its chunk was unloading.</li>
+    <li><strong>Its alleles do not.</strong> Note the Alleles tab count before killing it
+        and again after. <strong>Pass:</strong> unchanged &mdash; what you have met is not
+        what you still own. <strong>Fail:</strong> the count drops, which would mean the
+        filter has slid ahead of <code>collectAlleles</code> and is un-collecting the
+        dead.</li>
+    <li><strong>The pedigree keeps it.</strong> Open the family tree of one of its foals.
+        <strong>Pass:</strong> the dead parent is still drawn. The ancestry database was
+        deliberately not touched, so a hole here would be a surprise.</li>
+</ul>
+
+<h3 id="send-home-0925">The Send home column (2026-09-25, NOT played)</h3>
+
+<p>
+    The coat column is now a per-row button that spends a ticket and sends the horse to
+    its own stall, or to the holding pen when it has none. None of it has been pressed in
+    game. The layout half is the cheap thing to get wrong: <code>TOTAL_WEIGHT</code> was
+    hand-edited from 658 to 626 alongside the column swap, and forgetting it would not
+    break anything visibly &mdash; every column would just be slightly the wrong width.
+</p>
+
+<ul>
+    <li><strong>The table still lines up.</strong> Open <kbd>H</kbd> &rarr; My horses at a
+        narrow window width and at full screen. <strong>Pass:</strong> headings sit over
+        their columns and the button clears the scrollbar. <strong>Fail:</strong> a drift
+        between heading and cell, which would mean the weight sum is wrong.</li>
+    <li><strong>It greys out with no tickets.</strong> Empty your inventory of tickets.
+        <strong>Pass:</strong> every button is dim and the tooltip says which ticket does
+        what; clicking does nothing at all &mdash; in particular it must not fall through
+        and select the row.</li>
+    <li><strong>A stall trip.</strong> With a horse that has a bound stall sign up, press
+        it. <strong>Pass:</strong> the horse arrives in the stall, one ticket is gone, and
+        the cheapest sufficient one was the one spent &mdash; hold a basic and an
+        interdimensional in the overworld and the basic should go.</li>
+    <li><strong>The pen fallback.</strong> Same, on a horse with no stall and a holding
+        pen hung. <strong>Pass:</strong> it lands in the pen. This is the one genuinely new
+        behaviour &mdash; right-clicking a written ticket on a stall-less horse still
+        refuses, and that difference is deliberate.</li>
+    <li><strong>An unloaded horse.</strong> The reason the button exists, and the least
+        proven path: it borrows the ender whistle's chunk ticket and wait, which is itself
+        unverified. <strong>Pass:</strong> &ldquo;Reaching for that horse&hellip;&rdquo;
+        and then an arrival within five seconds. <strong>Fail:</strong> &ldquo;not where it
+        was last seen&rdquo;, which means the chunk ticket did not land the entity in
+        time.</li>
+    <li><strong>Nothing is spent on a refusal.</strong> Try it on a horse whose stall sign
+        has been broken. <strong>Pass:</strong> a sentence saying so, and the ticket count
+        unchanged.</li>
+</ul>
 
 <h3 id="refresh-verify-0924">The roster re-asks on open (2026-09-24, NOT played)</h3>
 

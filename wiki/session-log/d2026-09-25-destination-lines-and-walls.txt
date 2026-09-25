@@ -1,0 +1,241 @@
+2026-09-25 — a debug overlay that draws what a horse wants, and the wall check that had
+never existed
+
+    Four asks, queued one at a time while the owner was playing. Three of them turned out
+    to be the same complaint wearing different clothes: the mod's goals decide things by
+    straight-line distance and do not believe in walls.
+
+    The queue, in the order it arrived:
+
+        the f8 menu, on debug and production builds, should show a line out of each horse
+        pointing at their destination that they're trying to walk to to interact with,
+        because I'm still seeing horses bunching up along a wall trying to get to my crops,
+        even when they can't see them and that "wall" is a 2 block high solid cobblestone
+        blocks
+
+        another issue: a dead horse lists as "not loaded" when it should just be removed
+        from the "my horses" list entirely (it still may need to populate in family trees)
+
+        if you have a ticket of any kind in your inventory, there should be a "tp to stall"
+        button in the my horses menu (remove the coat column to make way for this new
+        column) which will consume a ticket to bring the horse to either their stall (if it
+        exists) or the holding pen (if they don't have their own stall, and a holding pen
+        exists)
+
+        covers are now happening through walls, it seems
+
+    Plus one observation offered mid-session — "interestingly, the horses stopped pushing
+    against the wall once it became night time" — which is dealt with at the end, because
+    the obvious explanation for it is wrong.
+
+
+The version is further out than the version number suggests, so nothing was written from
+memory
+
+    Minecraft 26.1.2. The mod already knew this — api-notes.html opens by saying the SDK is
+    further from mainline 1.21.x than the numbers imply — but the rendering ask made it
+    concrete, because every remembered fact about drawing a line in the world is wrong here.
+
+    The decompiled sources were extracted and read before a line was written, and they
+    turned up an API this project has never used: net.minecraft.gizmos. Gizmos.arrow,
+    Gizmos.cuboid, Gizmos.billboardTextOverMob, bound to a thread-local collector by the
+    renderer. Vanilla's own PathfindingRenderer is written against it, which made it the
+    template rather than something to invent.
+
+    Two facts settled the design, and both were read off LevelRenderer rather than assumed:
+
+        DebugRenderer.emitGizmos is called unconditionally from extractRenderState, every
+        frame. It is NOT gated on the F3 screen and NOT gated on a dev environment — only
+        the individual vanilla renderers inside it are, each behind its own
+        SharedConstants.DEBUG_* flag or debug-entry toggle.
+
+        NeoForge posts RegisterDebugRenderersEvent from refreshRendererList, so a mod can
+        add its own.
+
+    Together those are the whole reason the overlay can ship in a production jar, which was
+    the explicit ask. The gate is entirely ours: the server sends nothing unless F8 is on,
+    so the client draws nothing.
+
+
+The line has to come from the goal, not from the navigation
+
+    The tempting implementation is to read horse.getNavigation().getPath() and draw that.
+    It is also the one that hides the bug.
+
+    A path to an unreachable target is not absent. It is SHORT: the pathfinder returns a
+    path that stops at the obstacle and sets canReach() false. So the navigation alone says
+    "this horse is walking at that wall" — which is exactly the misleading thing the owner
+    could already see with her own eyes — and says nothing about the crop on the other side
+    that the horse actually wants.
+
+    So the intent is asked of the goal, through a new DebugDestination interface, and both
+    are drawn:
+
+        the intent, as a coloured arrow to where the goal wants to be
+        the path's real stopping point, as a white box, but only when it is meaningfully
+            short of the target, so a healthy green arrow is not cluttered
+
+    Green reaches, red stops short, amber has no path at all. A row of horses bunched at a
+    wall shows as a row of red arrows overshooting their own boxes and converging on one
+    crop. That is the bug, to scale, and it is a picture rather than an inference.
+
+    The label above each horse is the simple name of whichever running goal holds
+    Flag.MOVE at the lowest priority number — by definition the goal steering that horse.
+    That is also the fallback destination when no goal implements the interface, so vanilla
+    goals draw lines too without anything having to be added to them. getAvailableGoals()
+    returns a Set with no useful order, so "lowest priority" is found by comparison rather
+    than by taking the first hit — a detail that would have produced an arbitrary answer
+    with two goals running.
+
+
+The dead-horse filter had to go AFTER the sweeps, not before
+
+    The one-line version of this fix is a continue in HorseRoster.gather, and it is wrong.
+
+    The same loop feeds collectAlleles and collectBreeds, and the comment above them says
+    why they are there: the sweep is retroactive, repairing a save that predates the
+    collection feature instead of only being right from now on. Filtering the dead out
+    before the sweep would un-collect the alleles of every horse that has since died — a
+    mare you bred, learned six alleles from and then lost to a creeper would silently
+    subtract herself from the Alleles tab on the next roster refresh.
+
+    So the filter is a removeIf placed after both sweeps. What you have met and what you
+    still own are different questions, and the roster answers the second one only.
+
+    The ancestry database was deliberately not touched. Aliveness already lived in
+    HorseWhereabouts, whose javadoc says outright that the ancestry database keeps dead
+    horses on purpose. The family tree, the offspring tab and the population figures all
+    read the ancestry database, and a pedigree that forgot the dead would be a pedigree
+    with holes in it.
+
+
+The Send home button spends tickets without restating their rules
+
+    Two decisions were put to the owner rather than guessed, because both changed what got
+    built and neither was answerable from the code:
+
+        which ticket to spend — answered "the cheapest that can reach", tier rules intact
+        whether unloaded horses are in scope — answered yes
+
+    The second is the one that makes the button worth having. A horse you can see is a
+    horse you can walk up to and right-click a ticket on; the rows worth a button are the
+    ones with no entity on the client at all. That path borrows the ender whistle's
+    machinery — a chunk ticket on the last known position, then a poll for a few seconds —
+    which is itself marked unproven in play, so the button inherits that doubt.
+
+    Everything about WHERE a horse may go stayed in TicketHandler and is called into, not
+    copied. Three of its helpers went from private to package-private with a comment
+    saying why. The stall is re-measured live at spend time, the tier decides which worlds
+    a ticket reaches, and a refusal must leave the ticket unspent; a second copy of any of
+    those drifts, and the drift is a horse teleported inside a wall — which that file's own
+    comments record having happened once already.
+
+    The only new behaviour is the fallback to the holding pen when a horse has no stall.
+    Right-clicking a written ticket on a stall-less horse still refuses, and that
+    difference is deliberate: "put this horse somewhere sensible" is what a button on a
+    list of horses you cannot see is for.
+
+    Client-side the button greys out on exactly one question — do you hold a ticket at all
+    — because that is the only one the client can answer honestly. Whether the horse has a
+    stall, whether you have a pen, and whether your ticket reaches the world it is in are
+    all server facts about a horse this client may never have seen. Guessing them would
+    mean syncing stall records to every client in order to grey out a button, and getting
+    it wrong in the direction that hides a button that would have worked.
+
+    The coat column was removed to make room, as asked. TOTAL_WEIGHT is a hand-summed
+    literal rather than a computed sum, so it was edited from 658 to 626 alongside the
+    swap; forgetting it would not break anything visibly, it would just make every column
+    slightly the wrong width.
+
+
+Covers through walls: not a new bug, a newly visible one
+
+    The owner said "now", and "now" was the wrong word — but the report was still exactly
+    right, and finding out why took reading the git history rather than the code.
+
+    NaturalBreedingHandler has never had a wall check. The partner search is an AABB
+    inflated by NATURAL_REACH (3.0) plus YardPens.together, and that second one is not a
+    wall check either: outside the debug test yard it returns true unconditionally, and its
+    own javadoc says so — "Every breeding and band check counts neighbours by distance,
+    straight through walls." Two horses in adjacent stalls are three blocks apart and were
+    therefore breeding.
+
+    What changed is 08fcf2b9, from the day before: the crowding cap went from a hard-coded
+    eight to a configured default of fifty, counted within sixteen blocks. In a barn that
+    cap had been firing CROWDED and suppressing nearly every cover. It was accidentally
+    doing the wall's job, and raising it took the accident away and left the unguarded
+    three-block box as the only gate.
+
+    The fix is a path test, not a line of sight, and the distinction is load-bearing in
+    both directions: two horses at opposite ends of an L-shaped pen cannot see each other
+    and should breed, and two horses either side of a glass pane can see each other
+    perfectly and should not.
+
+    It is applied when the candidate list is built rather than at the COVER verdict. At the
+    verdict it would merely block the cover — and since decide() keeps picking the same
+    best stallion, a mare would stay stuck on the unreachable one for ever with a reachable
+    one standing beside her. Filtering the list means she picks the best stallion she can
+    actually get to. Order is preserved, because decision.stallion() indexes back into that
+    list.
+
+    Left alone on purpose: the crowding count still counts through walls. Whether a mare is
+    held back by horses she cannot reach is a separate question from whether she breeds
+    through a wall, and changing it would move the cap's meaning for every existing world
+    at once.
+
+
+The night-time clue, and the guess that was wrong
+
+    "The horses stopped pushing against the wall once it became night time" has an obvious
+    explanation — a night goal taking MOVE away from the hunger goal — and it is wrong.
+    HungerFoodGoal is added at GOAL_PRIORITY - 1, which is 3. NightWatchGoal is added at 4.
+    A lower number wins outright, so hunger still outranks the night watch and nothing
+    about nightfall should displace it.
+
+    That was checked rather than asserted, and it leaves the observation unexplained. The
+    overlay is the instrument for it: the label above each horse names the goal actually
+    holding MOVE, so watching one horse across dusk answers in one screenshot what an
+    afternoon of reading priorities did not.
+
+
+A bake tool that guts its own page, found by reading a diff
+
+    bake-behaviour-hierarchy.mjs was re-run as part of the wrap-up, out of caution rather
+    than need — no goal was added, removed or re-prioritised this session. It reported
+    cheerfully:
+
+        behaviour hierarchy: 0 vanilla + 20 mod goals, 1 target
+
+    and deleted ninety-one lines. All nine vanilla goals gone, every vanilla-versus-mod
+    flag conflict note gone with them, and HorsePanicGoal's MOVE flag mis-read as "no
+    flags". Exit code 0.
+
+    The cause: the tool reads vanilla's goals by shelling out to `unzip -p` against the
+    patched sources jar, and its vanillaSource helper catches the failure and returns an
+    empty string. unzip is on PATH in Git Bash on this machine and is not in PowerShell.
+    Run from the wrong shell, the bake writes a confidently wrong page and says nothing.
+
+    Re-run from Bash it produced 9 vanilla + 20 mod goals and a byte-identical diff against
+    the committed page — so the page was already correct and the change never needed the
+    bake at all. The file was reverted rather than committed.
+
+    This is the failure mode CLAUDE.md warns about in general terms — derived artefacts
+    that fail silently when stale — with a new twist: this one fails silently when the
+    *environment* is wrong, not the input. It was caught only because the diff was read
+    before committing, which is the habit that CLAUDE.md's own "a post-bake git status
+    lies" note exists to encourage. Written up on coding-notes.html; the swallow is the
+    defect, not the missing binary.
+
+
+What is not done
+
+    None of it has been played. Four Verification tabs grew today — horse-browser,
+    fertility, item-tickets and coding-notes — and the single most load-bearing unknown is
+    small and dull: whether the debug renderer registers early enough to draw at all. The
+    tell is diagnostic rather than fatal. If no lines appear, toggling any F3 debug entry
+    once and having them appear would confirm the registration is simply landing late,
+    because refreshRendererList runs a second time on that event.
+
+    The crops bug itself is not fixed. It was not asked to be. What shipped is the
+    instrument for finding it, and the instrument should be pointed at a bunched-up horse
+    before anything else is changed in HungerFoodGoal.

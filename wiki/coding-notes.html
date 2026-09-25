@@ -1380,8 +1380,64 @@ done</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Diagnostics are the half that can be wrong quietly: a jar install must stay silent in chat where the dev run is not, and F8&rsquo;s highlight must time out rather than crash &mdash; the rest is wiki chrome, including a phone search panel whose close has only ever been proven in emulation, and a wiki full of new <strong>Roadmap tabs</strong> that no person has yet looked at.</p>
+    <p>Diagnostics are the half that can be wrong quietly: a jar install must stay silent in chat where the dev run is not, and F8&rsquo;s highlight must time out rather than crash &mdash; the rest is wiki chrome, including a phone search panel whose close has only ever been proven in emulation, and a wiki full of new <strong>Roadmap tabs</strong> that no person has yet looked at; F8 has also grown a second display that has never been seen drawn, and one bake tool turns out to gut its own page when run from the wrong shell.</p>
 </div>
+
+<h3 id="f8-destination-lines-0925">F8's destination lines (2026-09-25, NOT played)</h3>
+
+<p>
+    The highlight now also draws an arrow out of each horse to where it is trying to walk,
+    coloured green when the path reaches, red when it stops short (with a box at the real
+    stopping point), amber when there is no path at all, and labelled with whichever goal
+    holds <code>MOVE</code>.
+</p>
+
+<div class="note">
+    <p>
+        <strong>The one genuinely unverified thing is that it draws at all.</strong> It is
+        registered through <code>RegisterDebugRenderersEvent</code>, which is posted from
+        <code>DebugRenderer.refreshRendererList()</code> &mdash; called from that class's
+        constructor and again whenever the F3 debug-entry set changes version. Mod
+        construction is <em>expected</em> to precede the first of those, but that ordering
+        has not been watched happening. If no lines appear, the tell is diagnostic:
+        toggling any F3 debug entry once and having them appear would confirm the
+        registration is simply landing too late.
+    </p>
+</div>
+
+<ul>
+    <li><strong>It draws in a real jar.</strong> Not just the dev run &mdash; the whole
+        point is that the testers are on production builds, and the reasoning that this
+        works there is read off <code>LevelRenderer</code> rather than observed.</li>
+    <li><strong>It goes out when F8 does.</strong> <strong>Pass:</strong> lines vanish on
+        the off press. They should also vanish within three seconds if the server simply
+        stops talking &mdash; disconnect with it on and reconnect.</li>
+    <li><strong>Red means what it says.</strong> Stand horses behind a wall from a crop.
+        <strong>Pass:</strong> red arrows through the wall to the crop, each with a white
+        box back at the wall where its path really ends.</li>
+</ul>
+
+<h3 id="behaviour-bake-unzip-0925">bake-behaviour-hierarchy.mjs guts its page from PowerShell (2026-09-25, found)</h3>
+
+<p>
+    <code>wiki/tools/bake-behaviour-hierarchy.mjs</code> reads vanilla's goals by shelling
+    out to <code>unzip -p</code> against the patched sources jar, and its
+    <code>vanillaSource</code> helper <strong>catches the failure and returns an empty
+    string</strong>. On this machine <code>unzip</code> is on <code>PATH</code> in Git Bash
+    and not in PowerShell, so running the bake from PowerShell writes a page with
+    <em>&ldquo;0 vanilla + 20 mod goals&rdquo;</em> &mdash; all nine vanilla goals gone,
+    every vanilla-versus-mod flag conflict note gone with them, and
+    <code>HorsePanicGoal</code>'s <code>MOVE</code> flag mis-read as <em>no flags</em>.
+    Ninety-one lines deleted, exit code 0, and a cheerful summary line.
+</p>
+
+<p>
+    It was caught only because the diff was read before committing. <strong>Run that tool
+    from Bash</strong> until the <code>catch</code> is changed to fail loudly &mdash; the
+    swallow is the defect, not the missing binary, since a bake that cannot read its input
+    should not be allowed to write its output. Worth checking whether any other tool
+    shells out to <code>unzip</code> the same way.
+</p>
 
 <h3 id="open-older-coding-notes">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
