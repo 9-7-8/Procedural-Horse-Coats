@@ -20,9 +20,12 @@ import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.ClientConfig;
+import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.neoforge.item.TicketItem;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.HorseLogRequestPayload;
+import com.example.horsegenetics.neoforge.network.HorseRecallPayload;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -41,6 +44,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -1286,6 +1292,18 @@ public final class HorseBrowserScreen extends Screen {
                     sortDescending = defaultDescending(column);
                 }
                 rebuildHorseRows();
+                return true;
+            }
+            // Before the row-select below, because the button sits inside a row
+            // and the more specific target has to win.
+            HorseListing send = horseSendAt(event.x(), event.y());
+            if (send != null) {
+                if (holdsTicket()) {
+                    ClientPacketDistributor.sendToServer(new HorseRecallPayload(send.id()));
+                }
+                // A click on the greyed button is still swallowed: it should not
+                // fall through and select the row, which would look like the
+                // button did something it did not.
                 return true;
             }
             HorseListing row = horseRowAt(event.x(), event.y());
@@ -3262,7 +3280,12 @@ public final class HorseBrowserScreen extends Screen {
         return false;
     }
 
-    /** One column of the table: a sort key, and its share of the width. */
+    /**
+     * One column of the table: a sort key, and its share of the width. A
+     * <b>null</b> sort marks an action column - it is not sortable, its heading
+     * is not clickable, and it draws a control instead of a cell of text. There
+     * is one, {@link #SEND_COLUMN}.
+     */
     private record Column(HorseQuery.Sort sort, int weight) {
     }
 
@@ -3272,7 +3295,12 @@ public final class HorseBrowserScreen extends Screen {
             new Column(HorseQuery.Sort.AGE, 32),
             new Column(HorseQuery.Sort.BREED, 88),
             new Column(HorseQuery.Sort.GENERATION, 24),
-            new Column(HorseQuery.Sort.COAT, 104),
+            // Was the coat column. The coat is still on the footer line for the
+            // selected horse, and `coat:` still filters on it - what went is a
+            // column of long colour names that the portrait beside it already
+            // showed, which is the one thing on the row a picture says better
+            // than words.
+            new Column(null, 72),
             new Column(HorseQuery.Sort.SPEED, 40),
             new Column(HorseQuery.Sort.HEALTH, 40),
             new Column(HorseQuery.Sort.JUMP, 34),
@@ -3280,8 +3308,18 @@ public final class HorseBrowserScreen extends Screen {
             new Column(HorseQuery.Sort.BOND, 30),
             new Column(HorseQuery.Sort.WHERE, 64));
 
-    /** The weights above, summed. Columns are laid out as shares of this. */
-    private static final int TOTAL_WEIGHT = 658;
+    /** The one action column: <i>Send home</i>. Indexes {@link #COLUMNS}. */
+    private static final int SEND_COLUMN = 5;
+
+    /**
+     * The weights above, summed. Columns are laid out as shares of this.
+     *
+     * <p><b>Hand-summed, so it moves when a weight does.</b> It is not derived
+     * from {@code COLUMNS} because it is a compile-time constant, and the cost
+     * of that is exactly one failure mode: forget it and every column silently
+     * changes width rather than anything visibly breaking.
+     */
+    private static final int TOTAL_WEIGHT = 626;
 
     /** The heading strip, one row tall, above the rows themselves. */
     private int tableHeadY() {
@@ -3384,6 +3422,12 @@ public final class HorseBrowserScreen extends Screen {
         g.fill(l - 2, tableHeadY() - 2, r + 2, tableHeadY() + ROW_H, HEAD_BG);
         for (int i = 0; i < COLUMNS.size(); i++) {
             Column column = COLUMNS.get(i);
+            if (column.sort() == null) {
+                // An action column has no sort and no arrow - just a heading
+                // that says what the controls under it do.
+                drawFitted(g, "Send home", columnX(i), tableHeadY() + 1, columnW(i), LABEL);
+                continue;
+            }
             boolean on = column.sort() == sort;
             String head = column.sort().label() + (on ? (sortDescending ? " v" : " ^") : "");
             drawFitted(g, head, columnX(i), tableHeadY() + 1, columnW(i), on ? NAME : LABEL);
@@ -3391,6 +3435,9 @@ public final class HorseBrowserScreen extends Screen {
 
         g.fill(l - 2, top - 2, r + 2, bottom + 2, PANEL_SOFT);
         g.enableScissor(l - 2, top, r + 2, bottom);
+        // Once per frame, not once per row: the answer is the same for every
+        // row and the scan walks the whole inventory.
+        boolean hasTicket = holdsTicket();
         List<HorseListing> onScreen = new ArrayList<>();
         for (int i = horseScroll; i < horseRows.size() && i < horseScroll + horseVisibleRows(); i++) {
             HorseListing row = horseRows.get(i);
@@ -3411,6 +3458,7 @@ public final class HorseBrowserScreen extends Screen {
             HorsePortrait.draw(g, ClientHorseCoats.get(row.id()), !row.adult(),
                     l, ry + 1, PORTRAIT_W, HORSE_ROW_H - 2, mouseX, mouseY);
             drawHorseRow(g, row, ry + (HORSE_ROW_H - this.font.lineHeight) / 2, sel);
+            drawSendButton(g, ry, hasTicket, mouseX, mouseY);
         }
         g.disableScissor();
         // Only the rows actually on screen, and only once each - see
@@ -3447,7 +3495,7 @@ public final class HorseBrowserScreen extends Screen {
                 row.ageLabel(),
                 row.breed(),
                 Integer.toString(row.generation()),
-                row.coat(),
+                "",     // SEND_COLUMN - a button, drawn by drawSendButton
                 String.format("%.3f", row.speed()),
                 String.format("%.1f", row.health()),
                 String.format("%.2f", row.jump()),
@@ -3472,8 +3520,106 @@ public final class HorseBrowserScreen extends Screen {
                 row.loaded() ? plain : EXPR_OFF
         };
         for (int i = 0; i < COLUMNS.size(); i++) {
+            if (i == SEND_COLUMN) {
+                continue;   // a control, not a cell - drawMyHorses draws it
+            }
             drawFitted(g, cells[i], columnX(i), y, columnW(i), colours[i]);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // The Send home button.
+    // ------------------------------------------------------------------
+
+    /** Inset from the row, so consecutive buttons do not read as one bar. */
+    private static final int SEND_INSET = 4;
+
+    private int sendButtonY(int rowY) {
+        return rowY + SEND_INSET;
+    }
+
+    private static int sendButtonH() {
+        return HORSE_ROW_H - SEND_INSET * 2;
+    }
+
+    /**
+     * <b>Deliberately not disabled per row.</b> The only thing the client can
+     * honestly answer is "do you hold a ticket at all" - whether this horse has
+     * a stall, whether you have a holding pen, and whether the ticket you hold
+     * reaches the world the horse is in are all server-side facts, and two of
+     * them are about a horse this client has never seen.
+     *
+     * <p>So the button greys out on the one question it can answer and is live
+     * otherwise, and every other refusal comes back from {@code StallRecall} as
+     * a sentence saying what to do about it. Guessing the rest here would mean
+     * syncing stall and pen records to every client to grey out a button, and
+     * getting it wrong in the direction that hides a button that would have
+     * worked.
+     */
+    private static boolean holdsTicket() {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) {
+            return false;
+        }
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            Item item = inventory.getItem(slot).getItem();
+            if (item instanceof TicketItem || item instanceof HoldingPenTicketItem) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void drawSendButton(GuiGraphicsExtractor g, int rowY, boolean enabled,
+                                int mouseX, int mouseY) {
+        int x = columnX(SEND_COLUMN);
+        int w = columnW(SEND_COLUMN);
+        int y = sendButtonY(rowY);
+        int h = sendButtonH();
+        boolean hover = mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
+
+        g.fill(x, y, x + w, y + h, !enabled ? PANEL_SOFT : hover ? ROW_SEL : HEAD_BG);
+        g.fill(x, y, x + w, y + 1, BORDER);
+        g.fill(x, y + h - 1, x + w, y + h, BORDER);
+        g.fill(x, y, x + 1, y + h, BORDER);
+        g.fill(x + w - 1, y, x + w, y + h, BORDER);
+
+        String label = "Send home";
+        int textX = x + Math.max(2, (w - this.font.width(label)) / 2);
+        drawFitted(g, label, textX, y + (h - this.font.lineHeight) / 2 + 1, w - 4,
+                enabled ? NAME : EXPR_OFF);
+
+        if (hover) {
+            g.setTooltipForNextFrame(Component.literal(enabled
+                    ? "Spend a ticket to send this horse to its stall - or to your holding pen, "
+                            + "if it has no stall of its own."
+                    : "You have no tickets. A written ticket sends a horse to its stall; "
+                            + "a holding pen ticket sends it to your pen."), mouseX, mouseY);
+        }
+    }
+
+    /**
+     * The row whose Send home button is under the cursor, or null. Built on
+     * {@link #horseRowAt} so it inherits the scroll offset and the
+     * bottom-of-table bound for free - a button scrolled out of view is not
+     * clickable because the row under it is not.
+     */
+    private HorseListing horseSendAt(double mx, double my) {
+        HorseListing row = horseRowAt(mx, my);
+        if (row == null) {
+            return null;
+        }
+        int x = columnX(SEND_COLUMN);
+        int w = columnW(SEND_COLUMN);
+        if (mx < x || mx >= x + w) {
+            return null;
+        }
+        // Vertically the button is inset inside its row, so the gap between two
+        // buttons falls through to selecting the row, as it looks like it should.
+        int rowTop = tableTop() + ((int) ((my - tableTop()) / HORSE_ROW_H)) * HORSE_ROW_H;
+        int y = sendButtonY(rowTop);
+        return my >= y && my < y + sendButtonH() ? row : null;
     }
 
     /** Green above the baseline horse, red below - the same rule as the info screen. */

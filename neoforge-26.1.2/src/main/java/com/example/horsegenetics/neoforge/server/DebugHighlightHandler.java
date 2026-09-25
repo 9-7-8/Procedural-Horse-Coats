@@ -122,6 +122,7 @@ public final class DebugHighlightHandler {
         EXPIRES.remove(player.getUUID());
         if (ON.remove(player.getUUID())) {
             safely(player, () -> clearNear(player));
+            safely(player, () -> HorseDestinationDebug.clear(player));
             player.sendSystemMessage(Component.literal("Horse highlight OFF")
                     .withStyle(ChatFormatting.GRAY));
         } else {
@@ -131,10 +132,19 @@ public final class DebugHighlightHandler {
                         (long) player.level().getServer().getTickCount() + AUTO_OFF_TICKS);
             }
             safely(player, () -> glowNear(player));
+            // Immediately, rather than on the next multiple of PUSH_INTERVAL -
+            // a debug key that takes half a second to do anything reads as a
+            // debug key that did not work.
+            safely(player, () -> HorseDestinationDebug.push(player, RADIUS));
             player.sendSystemMessage(Component.literal("Horse highlight ON - herd leads in ")
                     .withStyle(ChatFormatting.GRAY)
                     .append(Component.literal("red").withStyle(ChatFormatting.RED))
-                    .append(Component.literal(". Press the key again to turn it off.")
+                    .append(Component.literal(", lines to where each horse is walking ")
+                            .withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal("green").withStyle(ChatFormatting.GREEN))
+                    .append(Component.literal("/").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal("red").withStyle(ChatFormatting.RED))
+                    .append(Component.literal(" for can/cannot reach. Press the key again to turn it off.")
                             .withStyle(ChatFormatting.GRAY)));
         }
     }
@@ -177,10 +187,16 @@ public final class DebugHighlightHandler {
         if (ON.isEmpty()) {
             return;
         }
-        if (event.getServer().getTickCount() % REFRESH != 0) {
+        long now = event.getServer().getTickCount();
+        // Two cadences on one pass. The glow is refreshed slowly because it is
+        // an effect with a duration; the destination lines are pushed four
+        // times as often because they are a position, and a stale one points at
+        // somewhere the horse has already given up on.
+        boolean refreshGlow = now % REFRESH == 0;
+        boolean pushDestinations = now % HorseDestinationDebug.PUSH_INTERVAL == 0;
+        if (!refreshGlow && !pushDestinations) {
             return;
         }
-        long now = event.getServer().getTickCount();
         for (UUID id : ON) {
             ServerPlayer player = event.getServer().getPlayerList().getPlayer(id);
             if (player == null) {
@@ -193,11 +209,17 @@ public final class DebugHighlightHandler {
                 ON.remove(id);
                 EXPIRES.remove(id);
                 safely(player, () -> clearNear(player));
+                safely(player, () -> HorseDestinationDebug.clear(player));
                 player.sendSystemMessage(Component.literal(
                         "Horse highlight timed out.").withStyle(ChatFormatting.GRAY));
                 continue;
             }
-            safely(player, () -> glowNear(player));
+            if (refreshGlow) {
+                safely(player, () -> glowNear(player));
+            }
+            if (pushDestinations) {
+                safely(player, () -> HorseDestinationDebug.push(player, RADIUS));
+            }
         }
     }
 

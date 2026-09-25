@@ -191,7 +191,10 @@ public final class TicketHandler {
      * ticket on a leashed horse used to leave the lead in the dimension it
      * started in. See {@link HorseLeads}.
      */
-    private static void arrive(ServerLevel from, ServerLevel target, Horse horse, Vec3 landing,
+    // Package-private, not private: StallRecall spends tickets too, from the
+    // horse browser's Send home button, and it must use THESE rules rather
+    // than a second copy of them. See that class.
+    static void arrive(ServerLevel from, ServerLevel target, Horse horse, Vec3 landing,
                                Player player) {
         from.sendParticles(ParticleTypes.PORTAL, horse.getX(), horse.getY() + 0.8, horse.getZ(),
                 24, 0.4, 0.6, 0.4, 0.2);
@@ -209,7 +212,10 @@ public final class TicketHandler {
     }
 
     /** Does a ticket of this tier reach from {@code from} to {@code to}? */
-    private static boolean reaches(TicketItem.Tier tier, net.minecraft.resources.ResourceKey<Level> from,
+    // Package-private, not private: StallRecall spends tickets too, from the
+    // horse browser's Send home button, and it must use THESE rules rather
+    // than a second copy of them. See that class.
+    static boolean reaches(TicketItem.Tier tier, net.minecraft.resources.ResourceKey<Level> from,
                                    net.minecraft.resources.ResourceKey<Level> to) {
         return switch (tier) {
             case BASIC -> from.equals(Level.OVERWORLD) && to.equals(Level.OVERWORLD);
@@ -240,7 +246,10 @@ public final class TicketHandler {
      * <p>The chunk is pulled in first. A horse teleported into unloaded terrain
      * is the failure that looks exactly like a horse that was deleted.
      */
-    private static Vec3 landingSpot(ServerLevel level, BlockPos signPos, Horse horse) {
+    // Package-private, not private: StallRecall spends tickets too, from the
+    // horse browser's Send home button, and it must use THESE rules rather
+    // than a second copy of them. See that class.
+    static Vec3 landingSpot(ServerLevel level, BlockPos signPos, Horse horse) {
         level.getChunk(signPos); // load it, so what we read is real and the horse arrives somewhere
         BlockState sign = level.getBlockState(signPos);
         if (!(sign.getBlock() instanceof WallSignBlock)) {

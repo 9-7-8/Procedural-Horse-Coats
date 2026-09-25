@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.neoforge.data.HorseWhereabouts;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.HorseRosterPayload;
 import net.minecraft.server.MinecraftServer;
@@ -60,6 +61,7 @@ public final class HorseRoster {
         }
         String username = player.getGameProfile().name();
         List<HorseRecord> mine = new ArrayList<>();
+        HorseWhereabouts whereabouts = HorseWhereabouts.get(server);
         for (HorseRecord record : HorseAncestryData.get(server).all()) {
             if (!record.hasGenome()) {
                 continue; // nothing to breed from - see HorseRecord.unassigned
@@ -83,6 +85,27 @@ public final class HorseRoster {
         // the table and what you have met are different questions.
         collectAlleles(server, player, mine);
         collectBreeds(server, player, mine);
+
+        // A dead horse leaves the table - but only AFTER the two sweeps above,
+        // and that order is the whole point. What you have met and what you
+        // still own are different questions: a mare you bred, learned six
+        // alleles from and then lost to a creeper is still a mare you have met,
+        // and dropping her before the sweep would un-collect her alleles on the
+        // next refresh - silently undoing the retroactive repair the sweep
+        // exists to perform.
+        //
+        // In the table itself she was a permanent "not loaded" row, which is
+        // the wrong claim twice over: "not loaded" means "somewhere you cannot
+        // see right now", so it reads as a horse that could still be fetched,
+        // and no action the player can take will ever clear the row.
+        //
+        // The ancestry database is deliberately not consulted for this and
+        // deliberately not changed - it keeps the dead on purpose, because the
+        // family tree, the offspring tab and the population figures are about
+        // descent rather than livestock, and a pedigree that forgot the dead
+        // would be a pedigree with holes in it. Aliveness lives in
+        // HorseWhereabouts, so that is what is asked.
+        mine.removeIf(record -> whereabouts.isDead(record.id()));
 
         // Newest first: a breeding programme is nearly always about the horses
         // at the front of it, and this is also the sensible thing to keep when

@@ -59,6 +59,15 @@ public final class ModNetworking {
                         ClientHorseRecordCache.put(payload.entityId(), payload.record()))
         );
 
+        // The F8 highlight's destination lines. Sent only to players who have
+        // the highlight on, and once more (empty) when they turn it off.
+        registrar.playToClient(
+                HorseDestinationsPayload.TYPE,
+                HorseDestinationsPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientHorseDestinations.accept(payload))
+        );
+
         registrar.playToClient(
                 com.example.horsegenetics.neoforge.network.HorseCareSyncPayload.TYPE,
                 com.example.horsegenetics.neoforge.network.HorseCareSyncPayload.STREAM_CODEC,
@@ -131,6 +140,19 @@ public final class ModNetworking {
                             && serverPlayer.containerMenu
                                     instanceof com.example.horsegenetics.neoforge.menu.EquestrianBenchMenu bench) {
                         bench.setSaddleName(payload.name());
+                    }
+                })
+        );
+
+        // The horse browser's Send home button. Every check that matters is on
+        // the far side of this - see StallRecall.request.
+        registrar.playToServer(
+                HorseRecallPayload.TYPE,
+                HorseRecallPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.StallRecall.request(
+                                serverPlayer, payload.horseId());
                     }
                 })
         );

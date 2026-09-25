@@ -110,7 +110,7 @@ import java.util.Set;
  * collision shape stands 1.5 blocks in 26.1.2, which is what puts it above a grazing horse's
  * eye line and is the whole of why {@link #exposed} sees it.
  */
-public final class HungerFoodGoal extends Goal {
+public final class HungerFoodGoal extends Goal implements DebugDestination {
 
     private static final int SEARCH_RADIUS = 10;
     private static final int SEARCH_DOWN = 2;
@@ -683,6 +683,32 @@ public final class HungerFoodGoal extends Goal {
         return horse.isAlive() && !horse.isVehicle() && !horse.isLeashed()
                 && (target == null || !target.isAlive())
                 && !BandLife.inFight(horse) && !HorseInspectHold.isHeld(horse);
+    }
+
+    // ------------------------------------------------------------------
+    // DebugDestination - the F8 overlay's line out of this horse.
+    // ------------------------------------------------------------------
+    /**
+     * The same point {@link #tick} steers at, so the arrow is the goal's real
+     * intent and not a second opinion that could drift from it. Null whenever
+     * the search has not settled on anything, which is most of the time.
+     */
+    @Override
+    public @Nullable Vec3 debugDestination() {
+        return targetPos();
+    }
+
+    /** e.g. {@code "hunger: crop"}, or {@code "hunger: dropped favourite"}. */
+    @Override
+    public String debugDestinationLabel() {
+        String what = rung == null ? "?" : rung.name().toLowerCase(java.util.Locale.ROOT);
+        if (item != null) {
+            return "hunger: dropped " + what;
+        }
+        if (prey != null) {
+            return "hunger: prey " + what;
+        }
+        return "hunger: " + what;
     }
 
     private @Nullable Vec3 targetPos() {

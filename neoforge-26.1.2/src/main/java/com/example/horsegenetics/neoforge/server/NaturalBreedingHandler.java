@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -91,6 +92,32 @@ public final class NaturalBreedingHandler {
     private static long wildCappedSince = -1L;
     private static final long WILD_CAP_SUMMARY_TICKS = 12_000L;
 
+    /**
+     * <b>Can these two actually get to each other?</b> The real question behind
+     * "is there a wall in the way", and the reason it is a path and not a line
+     * of sight: two horses at opposite ends of one L-shaped pen cannot see each
+     * other and should breed, and two horses either side of a glass pane can see
+     * each other perfectly and should not.
+     *
+     * <p>Affordable because of where it is called. It costs one
+     * {@code createPath} per stallion already within
+     * {@link ReproRules#NATURAL_REACH} of a mare who has already passed
+     * {@code mayTryNaturally} - so: only mares in heat, only on the
+     * {@value #SCAN}-tick scan, and only over the handful of horses standing
+     * essentially next to her. Nothing pays for this except a pairing that was
+     * about to happen anyway.
+     */
+    private static boolean canMeet(Horse mare, Horse stallion) {
+        Path path = mare.getNavigation().createPath(stallion, 0);
+        if (path != null && path.canReach()) {
+            return true;
+        }
+        // Touching. There is no path to compute between two horses whose
+        // hitboxes already overlap, and there is no room for a wall between them
+        // either - so the absent path means "no distance", not "no way through".
+        return mare.getBoundingBox().inflate(0.1).intersects(stallion.getBoundingBox());
+    }
+
     @SubscribeEvent
     static void onTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Horse mare) || !mare.isAlive() || mare.isBaby()) {
@@ -117,6 +144,29 @@ public final class NaturalBreedingHandler {
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_REACH),
                 h -> h != mare && h.isAlive() && HorseRecords.hasRealRecord(h)
                         && HorseRecords.of(h).sex() == Sex.MALE && YardPens.together(mare, h));
+        if (near.isEmpty()) {
+            return;
+        }
+        // A WALL IS NOT A SUGGESTION (owner, 2026-09-25: "covers are now
+        // happening through walls"). Everything above this line is straight-line
+        // distance: an inflated AABB, and YardPens.together, which returns true
+        // outside the test yard and says so in its own javadoc. So a mare and a
+        // stallion in adjacent stalls were three blocks apart and therefore
+        // breeding.
+        //
+        // This was always true; what changed is that it became visible. The
+        // crowding cap used to be a hard-coded eight within sixteen blocks and
+        // was accidentally doing this job - in a barn it fired CROWDED and
+        // suppressed nearly every cover. Raising it to the configured default of
+        // fifty took the accident away and left the unguarded three-block box as
+        // the only gate.
+        //
+        // Filtered here rather than at the COVER verdict so that an unreachable
+        // stallion does not merely block the cover: he is not a candidate, and
+        // NaturalCover.decide picks the best of the ones she can actually get
+        // to. Order is preserved, which matters - decision.stallion() indexes
+        // back into this list.
+        near.removeIf(stallion -> !canMeet(mare, stallion));
         if (near.isEmpty()) {
             return;
         }
