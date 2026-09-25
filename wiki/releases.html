@@ -61,6 +61,97 @@
     </p>
 </div>
 
+<h2 id="v0-5-027">0.5.027 &mdash; a field where a horse cannot be lost, two breeds out of the Nether, and the recipe flag that was still wrong</h2>
+
+<p>
+    <strong>A hay-bale portal now goes somewhere else.</strong> It arrives in the
+    <a href="horse-realm.html">horse realm</a>: a flat, sunlit field, a thousand chunks square,
+    where <strong>no horse can be hurt, die or despawn</strong>. It is a shared place. Everyone
+    on the server arrives in the same world, and the point of it is the horses you do not want.
+    Breeding makes more horses than anybody has room for, and every honest answer to that has
+    been a bad one &mdash; kill them, wall them into a pen you stop visiting, or turn them out
+    in the Overworld where a creeper finishes them by morning. This is the fourth answer.
+</p>
+<p>
+    Craft a <a href="item-freedom-stick.html">freedom stick</a> from a feather, a stick and one
+    horse hair, take a horse into the realm, and right-click it. It is healed to full, its tack
+    comes back to you, and it is wild. <strong>It is still the same horse</strong> &mdash; same
+    name, same genes, same breed, same parents, same place in every family tree &mdash; and
+    whoever finds it and tames it the ordinary way inherits all of that. That is the whole
+    feature: a horse you are done with does not have to stop existing.
+</p>
+<ul>
+    <li><strong>Your portal always comes out in the same place.</strong> There are a hundred
+        exits on a grid, and which one you arrive at is decided by where you built your
+        Overworld portal &mdash; so the herd you released last week is where you left it, and
+        two players who built in different places do not land on each other. Any exit takes
+        you home again, to the exact portal you came in by, and if somebody mined it while you
+        were away it is put back.</li>
+    <li><strong>Your own tamed horses come home with you</strong> if they are standing nearby.
+        Anything you released stays.</li>
+    <li><strong>A pool of water every eighty blocks.</strong> Not scenery &mdash; a horse only
+        heals near water, and a field without it is one where a hurt horse never recovers.</li>
+    <li><strong>Permanent day, no other mob, no building.</strong> Nothing but horses can be in
+        there, nobody can dig it up, and it never gets dark.</li>
+    <li><strong>Released horses band up and breed</strong>, slowly &mdash; a quarter speed by
+        default, so a field people keep adding to fills up on its own without running away.
+        Server owners have <code>realm.breeding_rate_percent</code>, 0 to 100, and 0 stops it
+        dead. <strong>Nothing at all happens while nobody is in the realm</strong>: a mare left
+        pregnant in an empty field is exactly as pregnant when somebody next walks in.</li>
+</ul>
+<p>
+    The old <a href="horse-dimension.html">pen corridor</a> has not gone anywhere &mdash; it is
+    the mod's showroom and its test bench, and it is reached by <strong>F6</strong> now instead
+    of by a portal. On a real server that key works for operators, which it never did before.
+</p>
+
+<h3 id="v0-5-027-nether">Two breeds out of the Nether</h3>
+<p>
+    <strong>The Netherhorse</strong> is a liver-bay tank for the Nether floor: nearly twice the
+    size and health of an ordinary horse, slow, no jumper, fireproof, millable for lava, and
+    hunting everything that comes near it &mdash; <em>including its own owner</em>, even tamed.
+    Feed a grown one nether wart and it stops seeing you as prey. A foal cannot be talked down
+    at all.
+</p>
+<p>
+    <strong>The Nightmare</strong> shares that liver-bay base and nothing else: hand-sized, truly
+    flying, fleeing everything alive on sight, unable to fight at all. Cake draws it in and buys
+    it permanently, at any age. Milk it and the bottle comes back carrying Weakness and Darkness
+    at once. The two share the molten-hooves locus at the same pair, banded red on one and gold
+    on the other, so their glowing hoofprints read as a matched set from across a room.
+</p>
+<p>
+    They arrived as a contribution and were <a href="breeds.html">reviewed rather than
+    trusted</a>. The genetics &mdash; the part that looks hardest &mdash; were right; everything
+    around them was where the misses were, and three printed heights elsewhere on the wiki
+    turned out to have been wrong for longer than that.
+</p>
+
+<h3 id="v0-5-027-rest">Also in this release</h3>
+<ul>
+    <li><strong>The stasis chamber recipes, a third time, and this is the one.</strong> Two
+        releases fixed two of the three flags that decide whether a recipe is visible; the
+        third lives on an interface above the class both previous sessions were reading, and a
+        recipe with no display has nothing for the recipe book to draw however findable it
+        claims to be. Every chamber now also has <strong>two</strong> recipes &mdash; one for an
+        empty chamber, which is what you are shown, and one for a chamber with a horse inside,
+        which carries the animal across an upgrade instead of eating it.</li>
+    <li><strong>Two new passification offerings</strong> (nether wart, cake) and two new
+        potion-milk brews (Weakness, Darkness), out of the breeds above.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">None of the realm has been played</span>
+    <p>
+        It boots, its geometry passes a test and the dimension loads on a dedicated server
+        &mdash; and nobody has walked into it, released a horse, come back for one, or watched
+        a foal born there. The list is on
+        <a href="horse-realm.html#verification">the realm's own Verification tab</a>. The check
+        most likely to be wrong, and the only one that cannot be made any other way, is leaving
+        a pregnant mare in an empty realm for a long while and confirming she did not advance.
+    </p>
+</div>
+
 <h2 id="v0-5-026">0.5.026 &mdash; insurance you can leave at home, a braid that takes a horse home, and horses that draw where they are going</h2>
 
 <p>

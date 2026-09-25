@@ -145,3 +145,18 @@ What was proven, and what was not
     The one check that cannot be made any other way, and is most likely to be wrong, is
     leaving a pregnant mare in an empty realm for a long while and confirming her
     pregnancy did not move.
+
+Shipped as 0.5.027
+
+    The tag range was eleven commits, not two: the two Nether breeds and their review,
+    the third and final stasis-recipe flag, and the realm. The release note on
+    wiki/releases.html covers all of it, which is the point of auditing the range at tag
+    time rather than writing up the session that happened to cut the tag.
+
+    One process note for whoever hits it next. runServer failed with a DirectoryLock
+    IOException partway through this session, which reads exactly like the owner's own
+    server or client holding the world - and was not. It was THIS session's earlier
+    runServer: the task had reported finished, the log ended with "All dimensions are
+    saved", and the JVM was still alive and still holding run/world. Check the process
+    list against the port before assuming somebody else's game is open; a gradle task
+    that says it finished is not a JVM that has exited.
