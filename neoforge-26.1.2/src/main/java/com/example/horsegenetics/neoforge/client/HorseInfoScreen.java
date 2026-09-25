@@ -38,6 +38,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -193,11 +194,22 @@ public final class HorseInfoScreen extends Screen {
     private static final float PORTRAIT_Y1 = 0.64f;
 
     /**
-     * A three-quarter view, held still. Face-on would overlap the near and off
-     * legs, and the four boot slots would then point at one visible leg.
+     * The three-quarter view the doll opens on. Face-on would overlap the near
+     * and off legs, and the four boot slots would then point at one visible
+     * leg - which is why this, and not a side view, is where it starts.
      */
     private static final float DOLL_YAW = 52.0f;
     private static final float DOLL_PITCH = 6.0f;
+
+    /**
+     * How far the doll may be tipped. Past vertical the horse is being looked
+     * at from directly above or below, where no slot anchor means anything and
+     * the model reads as a shape rather than an animal.
+     */
+    private static final float DOLL_PITCH_LIMIT = 75.0f;
+
+    /** Degrees turned per pixel dragged - a full turn in a little under the doll's width. */
+    private static final float DOLL_DEGREES_PER_PIXEL = 2.0f;
 
     /** Remembered across openings - reopening on the tab you were reading. */
     private static Tab lastTab = Tab.OVERVIEW;
@@ -225,6 +237,9 @@ public final class HorseInfoScreen extends Screen {
     private Button baselineFilterButton;
     private Button offspringRefreshButton;
 
+    /** Set once the opening ancestry walk has been asked for; see {@link #init()}. */
+    private boolean offspringAsked;
+
     /** Ticks since the screen opened, for the once-a-second hold heartbeat. */
     private int heldTicks;
 
@@ -233,6 +248,34 @@ public final class HorseInfoScreen extends Screen {
     }
 
     private final List<TackHit> tackHits = new ArrayList<>();
+
+    /**
+     * <b>Which way the paper doll's horse is facing.</b> Seeded from
+     * {@link #DOLL_YAW} / {@link #DOLL_PITCH} and then dragged: a slot is
+     * anchored to a part of the animal, so the off-side boots and the tail slot
+     * sit behind a horse the opening three-quarter view only half shows, and
+     * being able to turn it is how you see what you are clicking. Per screen,
+     * not static - reopening a horse starts from the canonical pose rather than
+     * from however the last one was left.
+     */
+    private float dollYaw = DOLL_YAW;
+    private float dollPitch = DOLL_PITCH;
+
+    /**
+     * The doll portrait's box as it was last drawn, or {@code null} on a frame
+     * that drew no doll. Recorded on the way past exactly as {@link TackHit} is,
+     * and for the same reason: it is where the drag has to start.
+     */
+    private @Nullable DollBox dollBox;
+
+    private record DollBox(int x0, int y0, int x1, int y1) {
+        boolean holds(double mx, double my) {
+            return mx >= x0 && mx < x1 && my >= y0 && my < y1;
+        }
+    }
+
+    /** True between pressing inside the doll and letting go. */
+    private boolean draggingDoll;
 
     /**
      * Where a <b>link to another horse</b> landed this frame - a companion or a
@@ -345,6 +388,22 @@ public final class HorseInfoScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+
+        // Ask for the descendants as the screen opens, so the Offspring tab is
+        // already filled the first time it is looked at. It used to be the
+        // Refresh button alone, on the grounds that the walk is expensive - but
+        // the cost lands on the server once per screen, the button was a step
+        // every player had to be told about, and an empty tab reads as "no
+        // foals" rather than "not asked". (Owner's call.) Refresh stays for a
+        // second look at a horse whose page is already open.
+        //
+        // Guarded because init() runs again on every resize, and a window being
+        // dragged must not become a stream of ancestry walks.
+        if (!offspringAsked) {
+            offspringAsked = true;
+            requestOffspring();
+        }
+
         addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
                 .bounds(this.width / 2 - 50, this.height - 26, 100, 20)
                 .build());
@@ -745,10 +804,48 @@ public final class HorseInfoScreen extends Screen {
         if (tab == Tab.GEAR && clickTack(event.x(), event.y())) {
             return true;
         }
+        // After the slots, deliberately: several of them overlap the animal, and
+        // a click on a boot is a click on a boot even though the leg is under it.
+        // What is left is the horse itself, which turns.
+        if (tab == Tab.GEAR && event.button() == 0
+                && dollBox != null && dollBox.holds(event.x(), event.y())) {
+            draggingDoll = true;
+            return true;
+        }
         if (clickLink(event.x(), event.y())) {
             return true;
         }
         return super.mouseClicked(event, doubleClick);
+    }
+
+    /**
+     * <b>Drag the doll's horse to turn it.</b> Horizontal is yaw and wraps all
+     * the way round; vertical is pitch and stops short of overhead
+     * ({@link #DOLL_PITCH_LIMIT}), because past that the slot anchors stop
+     * corresponding to anything a player can see.
+     *
+     * <p>The drag is not confined to the box it started in - once you have hold
+     * of the horse you keep it until you let go, which is what every model
+     * viewer does and what the hand expects.
+     */
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (draggingDoll) {
+            dollYaw = Mth.wrapDegrees(dollYaw + (float) dx * DOLL_DEGREES_PER_PIXEL);
+            dollPitch = Mth.clamp(dollPitch + (float) dy * DOLL_DEGREES_PER_PIXEL,
+                    -DOLL_PITCH_LIMIT, DOLL_PITCH_LIMIT);
+            return true;
+        }
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (draggingDoll) {
+            draggingDoll = false;
+            return true;
+        }
+        return super.mouseReleased(event);
     }
 
     private void select(Tab hit) {
@@ -843,6 +940,7 @@ public final class HorseInfoScreen extends Screen {
         Cursor c = new Cursor(g, contentLeft(), y0, contentWidth());
         tackHits.clear();
         linkHits.clear();
+        dollBox = null;
         switch (tab) {
             case OVERVIEW -> drawOverview(c, mouseX, mouseY);
             case GEAR -> drawGear(c, mouseX, mouseY);
@@ -1595,8 +1693,8 @@ public final class HorseInfoScreen extends Screen {
         y += lineH() + 1;
         boolean asked = record.id().equals(ClientOffspring.rootId());
         g.text(this.font, Component.literal(asked
-                        ? "as of the last refresh"
-                        : "press Refresh - this tab is the only one that asks the server"),
+                        ? "as of when this page was opened"
+                        : "asking the server..."),
                 x, y, DIM_TEXT, false);
         g.fill(x, contentTop() + OFFSPRING_HEADER_H - 5, contentRight(),
                 contentTop() + OFFSPRING_HEADER_H - 4, RULE);
@@ -1613,9 +1711,9 @@ public final class HorseInfoScreen extends Screen {
         if (generations.isEmpty()) {
             c.wrapped(record.id().equals(ClientOffspring.rootId())
                             ? "This horse has no recorded descendants."
-                            : "Nothing asked for yet. Refresh walks the whole ancestry table and "
-                                    + "sends a full record for every descendant, which is why it is a "
-                                    + "button and not something that happens when you open the tab.",
+                            : "Waiting on the server. Opening this page asks it to walk the whole "
+                                    + "ancestry table and send a full record for every descendant, "
+                                    + "so give it a moment - and Refresh asks again.",
                     DIM_TEXT, 0);
             return;
         }
@@ -1702,15 +1800,31 @@ public final class HorseInfoScreen extends Screen {
          * A labelled row of <b>horse names you can click</b>, comma-separated in
          * the value column where {@link #pair} would have put one string. Each
          * name is measured as it is drawn, so the box recorded for the click is
-         * the box the name is in - a long companion list that runs to the edge
-         * still has every name hittable where it appears.
+         * the box the name is in.
+         *
+         * <p><b>The value column wraps.</b> A name that would not fit before the
+         * right edge starts a fresh line indented to the same column, so a horse
+         * with a full band of companions reads as a short list rather than one
+         * run of names off the side of the panel - where the overflow was not
+         * only unreadable but unclickable, the hit boxes being recorded outside
+         * the panel with it. The comma stays on the line it ends, never leading
+         * the next one.
          */
         void links(String label, List<HorseSocialSyncPayload.Companion> items, int mouseX, int mouseY) {
             g.text(font, Component.literal(label), x, y, LABEL, false);
-            int lx = x + 96;
+            int left = x + 96;
+            int right = x + width;
+            int lx = left;
             for (int i = 0; i < items.size(); i++) {
                 HorseSocialSyncPayload.Companion item = items.get(i);
                 int w = font.width(item.label());
+                // Wrap before drawing, never mid-name; the first name on a line
+                // is drawn even when it alone overruns, since there is nowhere
+                // narrower to put it.
+                if (lx > left && lx + w > right) {
+                    y += lineH();
+                    lx = left;
+                }
                 boolean hover = mouseX >= lx && mouseX < lx + w
                         && mouseY >= y && mouseY < y + lineH();
                 g.text(font, Component.literal(item.label()), lx, y,
@@ -1721,7 +1835,7 @@ public final class HorseInfoScreen extends Screen {
                 linkHits.add(new LinkHit(lx, y, lx + w, y + lineH(), item.id()));
                 lx += w;
                 if (i < items.size() - 1) {
-                    g.text(font, Component.literal(", "), lx, y, DIM_TEXT, false);
+                    g.text(font, Component.literal(","), lx, y, DIM_TEXT, false);
                     lx += font.width(", ");
                 }
             }
@@ -1789,7 +1903,8 @@ public final class HorseInfoScreen extends Screen {
             int py = y + Math.round(dollH * PORTRAIT_Y0);
             int ph = Math.round(dollH * (PORTRAIT_Y1 - PORTRAIT_Y0));
             HorsePortrait.drawPosed(g, coatOf(record), horse != null && horse.isBaby(),
-                    px, py, pw, ph, DOLL_YAW, DOLL_PITCH);
+                    px, py, pw, ph, dollYaw, dollPitch);
+            dollBox = new DollBox(px, py, px + pw, py + ph);
 
             for (HorseTackSlot slot : HorseTackSlot.values()) {
                 int sx = dx + Math.round((dollW - SLOT) * slot.anchorX());

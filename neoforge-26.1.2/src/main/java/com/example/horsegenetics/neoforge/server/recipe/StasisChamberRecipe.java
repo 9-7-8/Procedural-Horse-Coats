@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server.recipe;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
@@ -10,9 +11,14 @@ import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.Tags;
+import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * <b>The bottom rung: a Basic Horse Stasis Chamber.</b> A glass bottle, a wheat,
@@ -121,6 +127,55 @@ public class StasisChamberRecipe extends CustomRecipe {
         }
         return remaining;
     }
+
+    /**
+     * <b>Not special, so the recipe is findable.</b> {@code CustomRecipe} answers
+     * {@code true} here and {@code PlacementInfo.NOT_PLACEABLE} below, and
+     * between them that is a recipe <i>no tool can show you</i>: no recipe-book
+     * entry, no place-into-grid button, and - the way this was actually found -
+     * <b>nothing at all when you click the chamber in JEI</b>, since JEI skips
+     * special recipes on the grounds that they have no ingredients to draw. The
+     * item existed, the recipe worked if you already knew it, and the game
+     * offered no way to learn it. See {@code wiki/horse-stasis.html}.
+     *
+     * <p>Overriding these two costs nothing that {@code matches} was doing:
+     * matching is still this class's, so the water is still any container in
+     * {@code c:buckets/water} and the container still comes back. The placement
+     * is only what the book and JEI <i>draw</i>.
+     */
+    @Override
+    public boolean isSpecial() {
+        return false;
+    }
+
+    /**
+     * The four ingredients, in no particular arrangement - {@code matches}
+     * accepts any, so this is drawn as the shapeless recipe it is.
+     *
+     * <p>Built on first use and only cached once it is real: the water tag is
+     * a datapack tag, so asking too early gives an empty ingredient and
+     * {@code PlacementInfo.create} answers {@code NOT_PLACEABLE} - which, if it
+     * were cached, would put this straight back to being the invisible recipe
+     * the override above exists to fix.
+     */
+    @Override
+    public PlacementInfo placementInfo() {
+        PlacementInfo cached = placement;
+        if (cached != null) {
+            return cached;
+        }
+        PlacementInfo built = PlacementInfo.create(List.of(
+                Ingredient.of(Items.GLASS_BOTTLE),
+                Ingredient.of(Items.WHEAT),
+                Ingredient.of(ModItems.HORSE_HAIR.get()),
+                Ingredient.of(BuiltInRegistries.ITEM.getOrThrow(Tags.Items.BUCKETS_WATER))));
+        if (!built.isImpossibleToPlace()) {
+            placement = built;
+        }
+        return built;
+    }
+
+    private volatile @Nullable PlacementInfo placement;
 
     @Override
     public RecipeSerializer<StasisChamberRecipe> getSerializer() {

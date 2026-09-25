@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
+import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
@@ -36,6 +37,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Collection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.connection.ConnectionType;
@@ -283,6 +285,101 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>Every stasis chamber crafts, and every one of them can be shown to a
+     * player.</b>
+     *
+     * <p>Two assertions, because the family shipped in v0.5.024 failing only the
+     * second and the difference is invisible from inside the game code. Each
+     * recipe is a {@code CustomRecipe}, and {@code CustomRecipe} answers
+     * {@code isSpecial() == true} and {@code placementInfo() == NOT_PLACEABLE}
+     * by default. A special recipe still <b>crafts</b> - so a test that only
+     * laid out the grid and checked the output would have passed all along -
+     * but it is omitted from the recipe book, has no place-into-grid button, and
+     * <b>JEI shows nothing when you click the item</b>. The owner's report was
+     * "the recipes never made it into the game": five items the player could
+     * hold, whose recipes the game would not tell them.
+     *
+     * <p>So the second half is the one with teeth. It asserts what a viewer
+     * needs rather than what a crafting table needs: not special, and a
+     * placement carrying real ingredients.
+     *
+     * <p>The upgrades are also why there are three upgrade files rather than one
+     * recipe matching all three rungs - a recipe advertises exactly one set of
+     * ingredients, so the single instance could not have described itself
+     * whatever these flags said. See {@code StasisUpgradeRecipe}.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_CHAMBERS_CRAFT =
+            TEST_FUNCTIONS.register("stasis_chambers_craft", () -> ModGameTests::stasisChambersCraft);
+
+    private static void stasisChambersCraft(GameTestHelper helper) {
+        ItemStack basic = new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get());
+        ItemStack pearl = new ItemStack(Items.ENDER_PEARL);
+
+        // Every grid the wiki's recipe table promises, laid out as a player would.
+        craftsInto(helper, "the Basic chamber",
+                CraftingInput.of(2, 2, List.of(
+                        new ItemStack(Items.GLASS_BOTTLE), new ItemStack(Items.WHEAT),
+                        new ItemStack(ModItems.HORSE_HAIR.get()), new ItemStack(Items.WATER_BUCKET))),
+                ModItems.BASIC_STASIS_CHAMBER.get());
+
+        craftsInto(helper, "the Intermediate upgrade",
+                CraftingInput.of(2, 1, List.of(basic, new ItemStack(Items.ENDER_EYE))),
+                ModItems.INTERMEDIATE_STASIS_CHAMBER.get());
+
+        craftsInto(helper, "the Advanced upgrade",
+                CraftingInput.of(2, 1, List.of(
+                        new ItemStack(ModItems.INTERMEDIATE_STASIS_CHAMBER.get()),
+                        new ItemStack(Items.GOLD_INGOT))),
+                ModItems.ADVANCED_STASIS_CHAMBER.get());
+
+        craftsInto(helper, "the Spacer upgrade",
+                CraftingInput.of(2, 1, List.of(
+                        new ItemStack(ModItems.ADVANCED_STASIS_CHAMBER.get()),
+                        new ItemStack(Items.DIAMOND))),
+                ModItems.SPACER_STASIS_CHAMBER.get());
+
+        craftsInto(helper, "the Emergency chamber",
+                CraftingInput.of(3, 3, List.of(
+                        pearl, pearl, pearl,
+                        pearl, basic, pearl,
+                        pearl, pearl, pearl)),
+                ModItems.EMERGENCY_STASIS_CHAMBER.get());
+
+        helper.succeed();
+    }
+
+    /**
+     * Asserts one grid makes one item - and that the recipe behind it is one a
+     * player could have been shown.
+     */
+    private static void craftsInto(GameTestHelper helper, String what,
+                                   CraftingInput input, net.minecraft.world.item.Item want) {
+        MinecraftServer server = helper.getLevel().getServer();
+        RecipeHolder<?> found = server.getRecipeManager()
+                .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, helper.getLevel())
+                .orElse(null);
+        if (found == null) {
+            helper.fail(what + ": that grid resolves to no recipe at all");
+            return;
+        }
+
+        ItemStack out = ((Recipe<CraftingInput>) found.value()).assemble(input);
+        if (!out.is(want)) {
+            helper.fail(what + ": that grid crafts " + out.getItem() + ", not " + want);
+        }
+
+        // The half that was actually broken.
+        Recipe<?> recipe = found.value();
+        if (recipe.isSpecial()) {
+            helper.fail(what + ": the recipe is special, so the recipe book and JEI both "
+                    + "skip it - the item is craftable and undiscoverable");
+        }
+        if (recipe.placementInfo().isImpossibleToPlace()) {
+            helper.fail(what + ": the recipe advertises no ingredients, so nothing can draw it");
+        }
+    }
+
+    /**
      * <b>Every recipe the server would send a joining client actually encodes.</b>
      *
      * <p>This is the cheapest possible version of "a player joins a dedicated
@@ -444,6 +541,8 @@ public final class ModGameTests {
         register(event, environment, HOMESTEAD_STILL_GENERATES, 400);
         // One pass over the recipe list inside a single tick; the budget is slack.
         register(event, environment, EVERY_RECIPE_ENCODES, 100);
+        // Five recipe lookups in one tick.
+        register(event, environment, STASIS_CHAMBERS_CRAFT, 100);
         register(event, environment, BUILDING_BLOCKS_SURVIVES, 100);
         // Two tag lookups in one tick.
         register(event, environment, HAY_IS_STILL_A_BALE, 100);

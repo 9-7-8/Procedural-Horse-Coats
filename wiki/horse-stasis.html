@@ -65,7 +65,7 @@
         <td>Storage only. The horse is listed by name on the Browse tab and nothing else
             about it can be asked for.</td></tr>
     <tr><td><strong>Intermediate Horse Stasis Chamber</strong></td>
-        <td>Any chamber + an eye of ender.</td>
+        <td>A Basic chamber + an eye of ender.</td>
         <td>The bank can see inside. All of the horse's information becomes searchable &mdash;
             the Browse tab shows what it is and the filter box can find it &mdash; <em>and</em>
             the bank will feed and mend it. <strong>Both built.</strong></td></tr>
@@ -1100,6 +1100,60 @@
     ever given the chance to run.
 </p>
 
+<h2 id="special-recipes">Every chamber recipe was invisible, and that is not the same as broken</h2>
+<p>
+    Reported 2026-09-25 from a modded server as <em>&ldquo;the recipes for the stasis chambers
+    never made it into the game &mdash; the bank has a recipe, but not the chambers&rdquo;</em>,
+    with the decisive detail that <strong>clicking a chamber in JEI popped up nothing at all</strong>.
+    Every recipe was in fact present, registered and working: the grids below crafted correctly
+    for anyone who already knew them. What no part of the game would do was <em>tell</em> anyone
+    what they were.
+</p>
+<p>
+    The cause is two defaults on <code>CustomRecipe</code>, which all five chamber recipes extend:
+    <code>isSpecial()</code> answers <code>true</code> and <code>placementInfo()</code> answers
+    <code>PlacementInfo.NOT_PLACEABLE</code>. Between them that means no recipe-book entry, no
+    place-into-grid button, and nothing in JEI &mdash; which skips special recipes on the entirely
+    reasonable grounds that a recipe declaring no ingredients has nothing to draw. The bank was
+    unaffected because it is an ordinary shaped JSON file.
+</p>
+<p>
+    <strong>This is the trap worth remembering</strong>, because it is invisible from inside the
+    game code and from every test that was in place. A special recipe still <em>crafts</em>. The
+    gametest suite had <code>EVERY_RECIPE_ENCODES</code>, which proved the recipes reach a joining
+    client, and the class comments explained at length why each had to be Java rather than JSON
+    &mdash; all true, all beside the point. Nothing asserted the one thing a player needs, which is
+    that the recipe can be shown to them. <code>STASIS_CHAMBERS_CRAFT</code> now does: for all five
+    grids it asserts the recipe resolves, produces the right item, is <em>not</em> special, and
+    advertises real ingredients.
+</p>
+
+<h3 id="three-upgrade-files">Why the upgrades became three recipes</h3>
+<p>
+    Overriding the two flags was enough for the Basic and Emergency chambers. It could not be
+    enough for the upgrades, because <strong>a recipe advertises exactly one set of
+    ingredients</strong>, and one <code>StasisUpgradeRecipe</code> instance was matching all three
+    rungs by reading <code>tier().next()</code> off whatever chamber was in the grid. There is no
+    <code>placementInfo()</code> that says &ldquo;a chamber, and whichever item its own tier calls
+    for&rdquo;, so that instance could never have described itself however the flags were set.
+</p>
+<p>
+    So the tier being upgraded <em>to</em> is now a field on the recipe, read from a
+    <code>"to"</code> key in the JSON, and <code>data/horsegenetics/recipe/</code> carries
+    <code>stasis_upgrade_intermediate</code>, <code>_advanced</code> and <code>_spacer</code> in
+    place of the single <code>stasis_upgrade</code>. Matching is unchanged in what it accepts: each
+    file takes the rung below its own and nothing else, which is what the one-instance version
+    already did by a different route &mdash; including an emergency chamber going up to an
+    Intermediate, since that item is a <code>StasisChamberItem</code> at <code>BASIC</code> and the
+    Intermediate file asks for a tier, not a class.
+</p>
+<p>
+    A side benefit worth naming: the upgrade serializer now has a real codec with a real field
+    instead of <code>MapCodec.unit</code>, which removes it from the shared-instance trap described
+    on <a href="carrots.html#combine">the carrot page</a> &mdash; there is nothing left for
+    <code>StreamCodec.unit</code>'s identity check to fail on.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -1108,7 +1162,9 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        The five chambers, the bank and everything it does compile, craft and pass the
+        <strong>The chamber recipes have just been made visible to JEI and the recipe book
+        and nobody has looked</strong>; beyond that,
+        the five chambers, the bank and everything it does compile, craft and pass the
         gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
         so the whole capture/release round trip, the water-container remainder for a modded
         bucket, the tier upgrade carrying an occupied chamber, every one of the bank's slots,
@@ -1119,6 +1175,32 @@
         unplayed.
     </p>
 </div>
+
+<h3 id="verify-jei">The recipes actually show up in JEI (2026-09-25, NOT seen)</h3>
+<p>
+    The fix is on the <a href="#special-recipes">Coding tab</a> and the gametest
+    <code>STASIS_CHAMBERS_CRAFT</code> pins what this repository can pin: all five grids
+    resolve, produce the right item, are not <code>isSpecial()</code>, and advertise real
+    ingredients. <strong>What no test here can check is JEI itself</strong> &mdash; this mod
+    carries no JEI dependency, so &ldquo;not special, with ingredients&rdquo; is a
+    well-founded inference about what JEI needs, not an observation of it.
+</p>
+<ul>
+    <li><strong>Click each chamber in JEI and check a recipe appears.</strong> All five: Basic,
+        the three upgrades, and Emergency. The upgrades are now three separate recipes, so each
+        should show its own rung &mdash; a Basic chamber and an eye of ender, an Intermediate and
+        a gold ingot, an Advanced and a diamond &mdash; rather than one recipe or none.</li>
+    <li><strong>Check the Emergency recipe draws as a ring.</strong> Nine ingredients in slot
+        order, pearls around a Basic chamber in the middle. If it draws as a shapeless heap the
+        recipe still crafts, but the picture is not telling the player where to put things.</li>
+    <li><strong>Craft one of each by hand anyway.</strong> The gametest asserts the recipe
+        resolves; it does not put a player at a table. The Basic one is the one to watch, since
+        it is the only recipe whose water container is <em>handed back</em>.</li>
+    <li><strong>Upgrade an occupied chamber, still.</strong> The upgrade matching was rewritten
+        to key off the tier in the recipe file rather than off the chamber in the grid, so
+        <a href="#verify-upgrade">the occupied-upgrade check below</a> is a regression check now
+        as well as an unplayed one.</li>
+</ul>
 
 <h3 id="verify-emergency">The emergency chamber catches a horse (NOT played)</h3>
 <p>

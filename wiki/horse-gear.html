@@ -70,6 +70,20 @@
     tail slot is behind the tail. You find a slot by looking at the horse rather
     than by reading a list.
 </p>
+<p>
+    <strong>Drag the horse to turn it.</strong> Press anywhere on the animal
+    itself and move the mouse: side to side spins it all the way round, up and
+    down tips it as far as a steep look from above or below. The three-quarter
+    view it opens on shows one side of the horse properly and the other at an
+    angle, so the off-side boots and the tail are worth turning to &mdash; and a
+    horse in full tack is worth walking round anyway. Let go and it stays where
+    you put it; reopen the screen and it is back to the opening pose.
+</p>
+<p>
+    The slots take the click first, so a drag that starts on a boot moves nothing
+    and equips as it always did. Start the drag on the horse and you get the
+    horse.
+</p>
 
 <table>
     <tr><th>Zone</th><th>Slots</th><th>What goes there</th></tr>
@@ -324,7 +338,10 @@
         Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the
         whole accessories system is the plan: derived models rather than drawn ones, a
         tack bench, dye and pattern, enchanted tack, hoof equipment, native tack, horse chests and
-        the saddle pad &mdash; with the armour materials the one piece that is only data.
+        the saddle pad &mdash; with the armour materials the one piece that is only data;
+        and beside all of that the tab needs
+        <a href="horse-gear.html#gear-inventory">the player's own inventory drawn next to the doll</a>, which
+        means putting a real container menu under a screen that has never had one.
     </p>
 </div>
 
@@ -1017,6 +1034,43 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 
 <hr>
 
+<h2 id="gear-inventory">The player's inventory, beside the doll</h2>
+
+<p>
+    Asked for on 2026-09-25: <strong>the player's own inventory should be visible down the
+    right of the Gear tab, and gear should move by dragging it</strong> rather than by the
+    click-to-toggle the tab ships with. That is how every other equipment screen in the game
+    behaves, and it is the difference between a tab you operate and a tab you have to be
+    taught.
+</p>
+
+<p>
+    <strong>Why it is a plan and not a fix.</strong> <code>HorseInfoScreen</code> is a plain
+    <code>Screen</code>. It has no menu behind it, so there are no slots, no carried stack and
+    no server-side click protocol &mdash; equipping is a <code>TackSlotPayload</code> naming a
+    slot, and the server decides what to do from the player's held item. Real drag-and-drop
+    means an <code>AbstractContainerMenu</code> with nineteen tack slots plus the player's
+    thirty-six, and <code>AbstractContainerScreen</code> under a screen that is currently
+    seven scrolling tabs of custom drawing. The tabs, the scroll, the link hit-testing and the
+    doll all have to keep working inside a window that now has a fixed-size inventory panel
+    pinned to part of it.
+</p>
+
+<p>
+    <strong>The shape to avoid</strong> is drawing thirty-six inventory-looking squares on the
+    existing screen and keeping click-to-toggle behind them. It would read as a real inventory
+    and behave as a picture of one, which is worse than the honest version that is there now;
+    and it is a dead end, because none of it survives the menu being added underneath.
+</p>
+
+<p>
+    Open questions before it starts: whether the menu backs the whole screen or only the Gear
+    tab (a menu that exists while the Genes tab is up is a menu whose slots are all hidden,
+    which vanilla does not much like); whether the window gets wider or the doll gets smaller;
+    and whether click-to-toggle stays alongside dragging, since it is one click where a drag is
+    two gestures and several of the nineteen slots are small.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -1056,10 +1110,15 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <ul>
     <li><strong>The saddle and barding still work.</strong> This is the regression that
         matters: they moved screens and their write path changed from an inline
-        <code>setItemSlot</code> to <code>HorseTackSlot.set</code>. On a tamed horse of
-        yours, put a saddle on from the Gear tab, ride it, take it off, and check it came
-        back. Then iron barding. Then both with a <strong>full inventory</strong> &mdash;
-        what comes off must drop at your feet, never vanish.</li>
+        <code>setItemSlot</code> to <code>HorseTackSlot.set</code>.
+        <strong>Half confirmed 2026-09-25</strong> &mdash; the owner clicked a saddle on the
+        Gear tab and it came back to their inventory, so the unequip path through
+        <code>TackSlotPayload</code> and <code>HorseTackSlot.set</code> works. What is left is
+        <em>ride between the two</em> (a saddle that comes off correctly may still not have
+        been doing anything while on), <strong>iron barding</strong>, which is a different
+        slot on the same path, and both with a <strong>full inventory</strong> &mdash; what
+        comes off must drop at your feet, never vanish, and that branch is the one a
+        successful click cannot exercise.</li>
     <li><strong>Click every one of the other seventeen slots holding something.</strong>
         Nothing should happen at all &mdash; no item consumed, no item duplicated, no
         packet error in the log. An empty tag is meant to refuse everything; the failure to

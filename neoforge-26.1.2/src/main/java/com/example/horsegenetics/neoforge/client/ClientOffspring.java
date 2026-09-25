@@ -11,10 +11,15 @@ import java.util.UUID;
  * <b>Offspring</b> tab draws them.
  *
  * <p>Exactly <b>one</b> horse's answer is held at a time, and that is
- * deliberate: the tab refreshes only on a button press, so a cache of several
- * would be a cache of several different ages with nothing on screen saying
- * which. {@link #rootId()} is what the screen checks before drawing - an answer
- * about a different horse is not this horse's, and is treated as no answer.
+ * deliberate: a cache of several would be a cache of several different ages
+ * with nothing on screen saying which. {@link #rootId()} is what the screen
+ * checks before drawing - an answer about a different horse is not this
+ * horse's, and is treated as no answer.
+ *
+ * <p>That check is also what makes the single slot safe now that opening a
+ * horse's page asks for its descendants automatically: walking a chain of
+ * links replaces this repeatedly, and every screen but the newest correctly
+ * sees an answer that is not about its horse.
  */
 public final class ClientOffspring {
 

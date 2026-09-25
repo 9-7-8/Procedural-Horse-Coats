@@ -1718,7 +1718,17 @@
       "type": "horsegenetics:stasis_chamber"
     },
     {
-      "id": "stasis_upgrade",
+      "id": "stasis_upgrade_advanced",
+      "kind": "custom",
+      "type": "horsegenetics:stasis_upgrade"
+    },
+    {
+      "id": "stasis_upgrade_intermediate",
+      "kind": "custom",
+      "type": "horsegenetics:stasis_upgrade"
+    },
+    {
+      "id": "stasis_upgrade_spacer",
       "kind": "custom",
       "type": "horsegenetics:stasis_upgrade"
     },

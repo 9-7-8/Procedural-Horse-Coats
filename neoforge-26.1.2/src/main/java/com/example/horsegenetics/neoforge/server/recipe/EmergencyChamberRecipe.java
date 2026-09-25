@@ -11,9 +11,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * <b>Surrounding a chamber with ender pearls.</b> A Basic Horse Stasis Chamber
@@ -109,6 +113,43 @@ public class EmergencyChamberRecipe extends CustomRecipe {
         }
         return out;
     }
+
+    /**
+     * <b>Not special, so the recipe is findable.</b> See
+     * {@link StasisChamberRecipe#isSpecial()} for the whole story - the short
+     * version is that {@code CustomRecipe}'s defaults hide a recipe from the
+     * recipe book <i>and</i> from JEI, which is how the entire stasis family
+     * shipped uncraftable-in-practice.
+     */
+    @Override
+    public boolean isSpecial() {
+        return false;
+    }
+
+    /**
+     * The nine slots in reading order, pearls around a Basic chamber. Listed
+     * slot by slot rather than as three ingredients, so a viewer laying nine
+     * ingredients into a three-by-three grid draws the ring the recipe actually
+     * wants - which is the arrangement {@code matches} insists on.
+     */
+    @Override
+    public PlacementInfo placementInfo() {
+        PlacementInfo cached = placement;
+        if (cached != null) {
+            return cached;
+        }
+        Ingredient pearl = Ingredient.of(Items.ENDER_PEARL);
+        PlacementInfo built = PlacementInfo.create(List.of(
+                pearl, pearl, pearl,
+                pearl, Ingredient.of(ModItems.BASIC_STASIS_CHAMBER.get()), pearl,
+                pearl, pearl, pearl));
+        if (!built.isImpossibleToPlace()) {
+            placement = built;
+        }
+        return built;
+    }
+
+    private volatile @Nullable PlacementInfo placement;
 
     @Override
     public RecipeSerializer<EmergencyChamberRecipe> getSerializer() {

@@ -37,6 +37,72 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 @EventBusSubscriber
 public final class HorseInteractionHandler {
 
+    /**
+     * <b>The server's half of the information screen's gesture, and without it
+     * the screen never stayed open.</b>
+     *
+     * <p>{@code client/HorseInfoInteraction} takes sneak-and-use on a horse and
+     * opens {@link com.example.horsegenetics.neoforge.client.HorseInfoScreen}.
+     * It cancels the event, and for a long time this mod believed that was the
+     * whole job, on the reasoning that a cancelled client-side interaction never
+     * sends a packet. <b>That is not true in 26.1.2.</b>
+     * {@code MultiPlayerGameMode.interact} sends {@code ServerboundInteractPacket}
+     * on its <i>first</i> line and fires {@code EntityInteractSpecific}
+     * afterwards, so the server hears every click whatever the client decides.
+     * It then ran {@code AbstractHorse.mobInteract}, opened the vanilla horse
+     * inventory and sent an open-screen packet - which replaced the screen the
+     * client had just put up. The symptom is that sneak-and-use appears to do
+     * nothing this mod wrote: <i>"shift-right-clicking a horse still opens the
+     * vanilla menu"</i>. Reported from a dedicated server on 2026-09-25 and true
+     * in singleplayer too, the integrated server taking the same path.
+     *
+     * <p>So the gesture has to be claimed on <b>both</b> sides, and this is the
+     * server's. The conditions are deliberately identical to the client's -
+     * an empty hand, the sneak key, and a horse this mod holds a record for -
+     * because the two cancels must agree about which clicks they are taking or
+     * one of them opens something the other one hid.
+     *
+     * <p><b>A record, not merely a {@code Horse}</b>, for the same reason the
+     * client checks its cache: no record means no screen to show, so the click
+     * must be left alone to do whatever it would have done. Donkeys and mules
+     * never reach here at all, which is what leaves {@link #onFoalInventory} its
+     * remaining job.
+     *
+     * <p>{@code HIGHEST} matches the client handler, and for the same reason:
+     * {@code TransferPaperHandler} cancels ordinary interactions on a branded
+     * horse at the default priority, and a branded horse is the main thing the
+     * screen exists to be read on.
+     */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    static void onInfoGestureSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (claimsInfoGesture(event.getTarget(), event.getEntity(), event.getItemStack())) {
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+        }
+    }
+
+    /**
+     * The other entity event, for completeness. The specific one above is what
+     * fires on a click aimed at a horse, but a plain {@code INTERACT} packet
+     * reaches {@code Player.interactOn} instead, and the gesture means the same
+     * thing there. See {@link #onInfoGestureSpecific}.
+     */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    static void onInfoGesture(PlayerInteractEvent.EntityInteract event) {
+        if (claimsInfoGesture(event.getTarget(), event.getEntity(), event.getItemStack())) {
+            consume(event, InteractionResult.SUCCESS);
+        }
+    }
+
+    /** Sneak, empty hand, and a horse with papers - the information screen's gesture. */
+    private static boolean claimsInfoGesture(net.minecraft.world.entity.Entity target,
+                                             Player player, ItemStack held) {
+        return target instanceof Horse horse
+                && held.isEmpty()
+                && player.isSecondaryUseActive()
+                && HorseRecords.hasRealRecord(horse);
+    }
+
     @SubscribeEvent
     static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         if (!(event.getTarget() instanceof Horse horse)) return;

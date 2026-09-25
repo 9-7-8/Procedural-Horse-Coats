@@ -30,9 +30,9 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * whole of what makes the rest of the feature work on it for free: the bank's
  * {@code isChamber} is an {@code instanceof} on the superclass, so an emergency
  * chamber files, counts, stacks and lists exactly like the basic chamber it was
- * built from, and {@code StasisUpgradeRecipe} reads {@code tier().next()} and
- * will happily trade a caught horse up to an Intermediate chamber with an eye of
- * ender. Nothing in the bank, the Browse tab, the upkeep, the drop buffer or the
+ * built from, and the Intermediate upgrade - which asks for a chamber at
+ * {@code BASIC} and does not care which class it is - will happily trade a
+ * caught horse up to an Intermediate chamber with an eye of ender. Nothing in the bank, the Browse tab, the upkeep, the drop buffer or the
  * stud logic knows this class exists, and none of it needed to.
  *
  * <p>A fifth {@code StasisTier} was the alternative and is wrong twice over. The
