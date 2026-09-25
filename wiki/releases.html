@@ -61,6 +61,136 @@
     </p>
 </div>
 
+<h2 id="v0-5-024">0.5.024 &mdash; horses on a shelf, and a log of what happened while you were out</h2>
+
+<p>
+    <strong>A horse can now be put away as an item.</strong> A stasis chamber catches one
+    whole &mdash; its name, its bond, its tack, its pedigree, the foal it is carrying, down to
+    the identity every stall sign and transfer deed keys on &mdash; and hands it back the same
+    horse. A <em>Horse Stasis Bank</em> holds fifty-four of them, and depending on the chamber it
+    will search them, feed and water them, collect what they produce, and breed them without a
+    horse ever setting foot on the ground. Full page:
+    <a href="horse-stasis.html">horse stasis</a>.
+</p>
+
+<p>
+    <strong>And the H menu keeps a log.</strong> Every cover that went through and every one
+    that did not, every foal, death, taming, purchase, sale and transfer &mdash; newest first,
+    filterable by kind. The point of it is the events nobody was there for: chat reaches whoever
+    is standing in the paddock, once, and then scrolls away. A foal born while you were logged
+    out is a row waiting for you when you come back.
+</p>
+
+<h3>Horse stasis, in full</h3>
+
+<ul>
+    <li><strong>Four chambers, a ladder of them.</strong> <em>Basic</em> holds a horse and
+        nothing more &mdash; the bank cannot look inside. <em>Intermediate</em> can be searched
+        and healed. <em>Advanced</em> also has its drops collected. <em>Spacer</em> can be bred
+        in the bank. An occupied chamber upgrades in place without letting go of the horse.</li>
+    <li><strong>The bank is a shelf, not a machine.</strong> Fifty-four slots, chambers only,
+        full or empty. It drops everything when broken, it does not burn, and hoppers cannot
+        reach the chamber grid &mdash; filing a live animal automatically is not a thing
+        anybody asked for.</li>
+    <li><strong>A <em>Browse</em> tab that reads as horses.</strong> Every occupied chamber as a
+        line &mdash; name, what it is, breed, generation, tier &mdash; over a filter box that
+        takes the Horse Browser&rsquo;s own query language. A Basic chamber still shows its
+        horse&rsquo;s name but no query can reach it, and the list counts the rows a filter
+        could not see, so a horse never quietly goes missing from a search.</li>
+    <li><strong>Feed, water, and slow healing.</strong> Three supply slots and a ticker that
+        mends the horses on the shelf under exactly the rule a live horse heals by &mdash; hurt,
+        a diet it can eat, water, hunger as the currency. The supply slots <em>are</em> pipeable,
+        so a hopper can keep them topped up and carry the empty buckets away.</li>
+    <li><strong>A drop buffer.</strong> Nine slots, filled by the same production a live horse is
+        read from. Nothing is produced until there is room for it, so a full buffer pauses
+        rather than spilling. Milk is not in it and cannot be &mdash; milking is something you
+        do to a horse, not something it does.</li>
+    <li><strong>Breeding in the bank.</strong> Click a Browse row to put that horse to stud. A
+        marked bank is a paddock, on the same heat cycle as on land &mdash; but the
+        <strong>mare comes out to foal</strong>, because birth is a dozen facts about the dam and
+        there is only one birth path in the mod. With nowhere to stand beside the block she
+        stays in her chamber and the Supply tab says so.</li>
+    <li><strong>The Emergency chamber: insurance you buy once.</strong> A Basic chamber
+        surrounded by eight ender pearls. Carry it, and the instant any horse you own drops below
+        a tenth of its health it is caught into the chamber, wherever the two of you are &mdash;
+        and a horse inside a chamber cannot be hurt at all, so the catch is the save. One chamber
+        is one life; a second horse crossing the line is refused out loud, naming the horse it
+        could not save. Let the first one out and the chamber comes back armed. The threshold
+        sits below the one a horse bolts at, so it always gets its own chance to run first.</li>
+</ul>
+
+<h3>What else a player gets</h3>
+
+<ul>
+    <li><strong>Bond fades.</strong> About a point a Minecraft day, down to a floor of 31 &mdash;
+        the bottom of the first behaviour tier. Neglect can take back the tiers where a horse
+        walks to you and steers bareback; it can never take back the one where it lifts its head
+        as you walk past. A horse you raised from a foal does not become a stranger. Both numbers
+        are settings and <code>0</code> turns it off.</li>
+    <li><strong>The crowding cap is your number now, and it was far too low.</strong> A mare is
+        not covered while too many horses stand within sixteen blocks of her, and that count was
+        a hard-coded <em>eight</em> &mdash; which is a barn and its neighbours, not eight brood
+        mares. On a busy server an ordinary stable was over the cap permanently and said so. It
+        is <code>fertility.nearby_horse_cap</code> now, default <strong>50</strong>.</li>
+    <li><strong>The Enderpony.</strong> A bad little horse worth catching, because it lays ender
+        pearls. Black under a dark shade, both irises chaos-banded into a purple box, portal
+        motes off the spine or hooves, and an ender-echo teleport when it is hurt. Five marking
+        strains &mdash; stars, wormholes, crescents, duskwing bands, polymoon &mdash; every one
+        of them amethyst to violet and never pink, blue or green. Slow, flat over a fence,
+        miserable in the rain, very rare, and from no country at all.
+        <a href="breed-book.html">The breed book</a> has it.</li>
+    <li><strong>Ender pearls join the egg layer.</strong> A ninth allele on
+        <code>horsegenetics.egg_layer</code>, in the ordinary wild spread &mdash; so the
+        Enderpony is the reliable source, not the only one.</li>
+    <li><strong>The Cloudtouched is one step commoner</strong> &mdash; very rare to rare, so its
+        wild herds should be founded about twice as often. Nothing else about the breed moves.</li>
+    <li><strong>A filly may take her own brother.</strong> The last kinship rule in the mod is
+        gone: a dispersing filly no longer refuses a suitor sharing her dam or sire. Nothing in
+        this mod stops line breeding, in a wild band as much as in a paddock.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">Two things were taken out</span>
+    <p>
+        <strong>The exploding allele is gone.</strong> Magic on death is now lava, water and
+        nothing. An explosion whose carrier looks like every other horse is a hazard the
+        breeder&rsquo;s neighbour takes without being asked. A saved horse that carried it loads
+        at the plain allele; a splice carrot naming it is inert.
+    </p>
+    <p>
+        <strong>Lycanthropy is ground-dwellers only.</strong> Fifteen shapes went &mdash; the
+        fish, the squids, the axolotl, the tadpole, the bat, the bee, the parrot, the allay, the
+        happy ghast. A horse on this locus does not stand beside the animal, it <em>becomes</em>
+        it, and those were bodies its owner could not get back: drowning in air on a hillside, or
+        over the treeline two seconds after dusk. A companion squid is still fine; a horse inside
+        a squid is not.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Four new settings</span>
+    <p>
+        All in <code>server.toml</code>: <code>fertility.nearby_horse_cap</code>
+        (<code>50</code>, 1 to 1,000); <code>behaviour.bond_decay_per_day</code>
+        (<code>1</code>, and <code>0</code> restores bond that only ever goes up);
+        <code>behaviour.bond_floor</code> (<code>31</code>); and
+        <code>behaviour.emergency_stasis_fraction</code> (<code>0.1</code>, and <code>0</code>
+        turns the rescue off while leaving the chambers craftable and usable by hand).
+    </p>
+</div>
+
+<p>
+    <strong>Not played.</strong> A dedicated server boots clean &mdash; <code>Done</code>, and
+    not one <code>ERROR</code> or <code>FATAL</code> line &mdash; the gametests pass, and the
+    creator parity check is green across 7,163 checks. None of it has been in front of a player,
+    and this is a bigger untested surface than usual: an entire storage feature built in a day.
+    <a href="verification.html">To be verified</a> is the honest list. The three worth doing
+    deliberately are the round trip (shelve a horse with a bond, a name, tack and a pregnancy,
+    relog, let it out), putting a mare to stud in the bank, and converting an
+    <em>occupied</em> Basic chamber with the pearls &mdash; the one failure on that list that
+    would be silent and permanent. Known bugs carry over unchanged from 0.5.022 below.
+</p>
+
 <h2 id="v0-5-023">0.5.023 &mdash; the mod tells you what happened, and a horse stops dying quietly</h2>
 
 <p>
