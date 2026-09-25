@@ -11,13 +11,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * <b>Surrounding a chamber with ender pearls.</b> A Basic Horse Stasis Chamber
@@ -30,17 +26,29 @@ import java.util.List;
  * deliberately. What the eight pearls buy is the self-triggering, not a bank
  * capability: an emergency chamber is a Basic chamber in every other respect,
  * and the bank cannot look inside one. A player who wants both takes the horse
- * out and files it, or spends an eye of ender upgrading the chamber, which
- * trades the emergency away for the window.
+ * out and files it, or spends a book upgrading the chamber, which trades the
+ * emergency away for the window.
  *
- * <h2>Why this is a Java recipe and not a shaped JSON file</h2>
- * The same reason {@link StasisUpgradeRecipe} is, and it is worth repeating
+ * <h2>This is the second of two recipes, and it takes only an occupied chamber</h2>
+ * An <b>empty</b> Basic chamber is converted by an ordinary shaped JSON recipe,
+ * {@code recipe/emergency_stasis_chamber.json}, whose centre key is a
+ * {@code neoforge:data_component} ingredient carrying the removal patch
+ * {@code "!horsegenetics:stasis_snapshot": {}} - so it matches a chamber with no
+ * horse in it and nothing else. {@link #middle} here <b>requires</b> the snapshot
+ * to be present, so the two never claim the same grid.
+ *
+ * <h2>Why the occupied half cannot be a shaped JSON file</h2>
+ * The same reason {@link StasisUpgradeRecipe} gives, and it is worth repeating
  * because the failure is silent: <b>the chamber in the middle may have a horse
  * in it</b>. A JSON recipe builds its result from scratch and copies no
  * components, so surrounding an occupied chamber with pearls would hand back an
  * empty emergency chamber and delete a pedigreed animal, with no message and
  * nothing in the log. This copies {@code stasis_snapshot} across, so the horse
  * rides the conversion the way it rides an upgrade.
+ *
+ * <p>Like the upgrades, this half keeps {@code CustomRecipe}'s defaults and is
+ * deliberately <b>not</b> drawn: the JSON twin draws the identical ring, and
+ * listing both would show the recipe twice.
  *
  * <p>Shaped rather than shapeless because the arrangement is the point of the
  * name - the pearls go <i>around</i> it - and because a shapeless nine-item
@@ -90,7 +98,13 @@ public class EmergencyChamberRecipe extends CustomRecipe {
                 }
             }
         }
-        return centre.isEmpty() ? null : centre;
+        // Occupied chambers only. An empty one is the JSON twin's ring, and two
+        // recipes claiming one grid would be resolved by registry order, leaving
+        // the loser unreachable. This is the line that keeps them apart.
+        if (centre.isEmpty() || StasisChamberItem.snapshotOf(centre) == null) {
+            return null;
+        }
+        return centre;
     }
 
     @Override
@@ -114,42 +128,9 @@ public class EmergencyChamberRecipe extends CustomRecipe {
         return out;
     }
 
-    /**
-     * <b>Not special, so the recipe is findable.</b> See
-     * {@link StasisChamberRecipe#isSpecial()} for the whole story - the short
-     * version is that {@code CustomRecipe}'s defaults hide a recipe from the
-     * recipe book <i>and</i> from JEI, which is how the entire stasis family
-     * shipped uncraftable-in-practice.
-     */
-    @Override
-    public boolean isSpecial() {
-        return false;
-    }
-
-    /**
-     * The nine slots in reading order, pearls around a Basic chamber. Listed
-     * slot by slot rather than as three ingredients, so a viewer laying nine
-     * ingredients into a three-by-three grid draws the ring the recipe actually
-     * wants - which is the arrangement {@code matches} insists on.
-     */
-    @Override
-    public PlacementInfo placementInfo() {
-        PlacementInfo cached = placement;
-        if (cached != null) {
-            return cached;
-        }
-        Ingredient pearl = Ingredient.of(Items.ENDER_PEARL);
-        PlacementInfo built = PlacementInfo.create(List.of(
-                pearl, pearl, pearl,
-                pearl, Ingredient.of(ModItems.BASIC_STASIS_CHAMBER.get()), pearl,
-                pearl, pearl, pearl));
-        if (!built.isImpossibleToPlace()) {
-            placement = built;
-        }
-        return built;
-    }
-
-    private volatile @Nullable PlacementInfo placement;
+    // No isSpecial(), placementInfo() or display() override: CustomRecipe's
+    // defaults are wanted here. The JSON twin draws this ring; see the class
+    // comment for why drawing it twice would be worse than not at all.
 
     @Override
     public RecipeSerializer<EmergencyChamberRecipe> getSerializer() {

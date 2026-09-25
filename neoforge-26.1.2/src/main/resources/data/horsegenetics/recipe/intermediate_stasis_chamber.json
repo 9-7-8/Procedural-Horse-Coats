@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "#horsegenetics:basic_stasis_chambers",
+      "components": {
+        "!horsegenetics:stasis_snapshot": {}
+      }
+    },
+    "minecraft:book"
+  ],
+  "result": {
+    "id": "horsegenetics:intermediate_stasis_chamber"
+  }
+}

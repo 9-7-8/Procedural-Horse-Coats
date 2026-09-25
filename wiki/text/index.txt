@@ -2799,7 +2799,7 @@ wiki/horse-stasis.html#stud-gameplay	gameplay	Putting a horse to stud in the ban
 wiki/horse-stasis.html#supply-gameplay	gameplay	The Supply tab: feeding and mending what is in there
 wiki/horse-stasis.html#the-component-syncs-whole	coding	The component syncs the whole tag, on purpose
 wiki/horse-stasis.html#three-upgrade-files	coding	Why the upgrades became three recipes
-wiki/horse-stasis.html#two-custom-recipes	coding	Why three of these are Java recipes
+wiki/horse-stasis.html#two-custom-recipes	coding	Every chamber has two recipes, and only one of them is drawn
 wiki/horse-stasis.html#upkeep-coding	coding	The upkeep: four refusals, then one horse
 wiki/horse-stasis.html#whereabouts-stasis	coding	How the browser knows a horse is in a chamber
 wiki/horse-traits.html#ability	all	11. Ability

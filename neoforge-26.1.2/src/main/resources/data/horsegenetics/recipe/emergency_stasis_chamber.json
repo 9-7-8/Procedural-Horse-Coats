@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "c": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "horsegenetics:basic_stasis_chamber",
+      "components": {
+        "!horsegenetics:stasis_snapshot": {}
+      }
+    },
+    "e": "minecraft:ender_pearl"
+  },
+  "pattern": [
+    "eee",
+    "ece",
+    "eee"
+  ],
+  "result": {
+    "id": "horsegenetics:emergency_stasis_chamber"
+  }
+}

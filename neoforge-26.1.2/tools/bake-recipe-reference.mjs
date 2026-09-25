@@ -33,6 +33,24 @@ const outFile = join(root, "src/main/resources/assets/horsegenetics/recipe_refer
 /** An ingredient is an item id, or a "#tag" the client resolves at draw time. */
 function ingredient(value, where) {
   if (typeof value === "string") return value;
+  // A NeoForge component ingredient narrows an item by its data components -
+  // the stasis chambers use one to mean "this chamber, with no horse in it".
+  // The reference draws the item; the narrowing is a matching rule and there is
+  // no way to draw it in one 16x16 cell anyway. `items` must be a single id or
+  // a #tag, for the reason the throw below gives.
+  // TWO NAMES HERE ARE EASY TO GET WRONG, AND BOTH FAIL THE SAME SILENT WAY -
+  // the recipe file is dropped with an error that reaches only the server log,
+  // so the item simply has no recipe and nothing says why. The dispatch key is
+  // "neoforge:ingredient_type", not "type"; and the type is registered as
+  // "neoforge:components", not "neoforge:data_component" after the class name.
+  // See NeoForgeMod.DATA_COMPONENT_INGREDIENT_TYPE. Both were wrong first.
+  if (value && value["neoforge:ingredient_type"] === "neoforge:components") {
+    if (typeof value.items === "string") return value.items;
+    throw new Error(
+      `${where}: a component ingredient over a list of items - give it a #tag instead, ` +
+        `so the client has one thing to resolve: ${JSON.stringify(value.items)}`,
+    );
+  }
   // Arrays (a choice of items) are legal in vanilla and unused here. Fail loudly
   // rather than silently drawing the first option as though it were the only one.
   throw new Error(`${where}: unsupported ingredient ${JSON.stringify(value)}`);

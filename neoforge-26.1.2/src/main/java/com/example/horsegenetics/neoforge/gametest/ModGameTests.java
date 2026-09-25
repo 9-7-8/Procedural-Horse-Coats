@@ -288,25 +288,27 @@ public final class ModGameTests {
      * <b>Every stasis chamber crafts, and every one of them can be shown to a
      * player.</b>
      *
-     * <p>Two assertions, because the family shipped in v0.5.024 failing only the
-     * second and the difference is invisible from inside the game code. Each
-     * recipe is a {@code CustomRecipe}, and {@code CustomRecipe} answers
-     * {@code isSpecial() == true} and {@code placementInfo() == NOT_PLACEABLE}
-     * by default. A special recipe still <b>crafts</b> - so a test that only
-     * laid out the grid and checked the output would have passed all along -
-     * but it is omitted from the recipe book, has no place-into-grid button, and
-     * <b>JEI shows nothing when you click the item</b>. The owner's report was
-     * "the recipes never made it into the game": five items the player could
-     * hold, whose recipes the game would not tell them.
+     * <p><b>Crafting was never the part that was broken</b>, which is why this
+     * test is mostly not about crafting. The family shipped in v0.5.024 and
+     * again in v0.5.026 making the right items from the right grids the whole
+     * time; what it could not do was tell anybody the grids. A test that laid
+     * out the ingredients and checked the output passed through both releases.
      *
-     * <p>So the second half is the one with teeth. It asserts what a viewer
-     * needs rather than what a crafting table needs: not special, and a
-     * placement carrying real ingredients.
+     * <p>{@code CustomRecipe} defaults three separate flags the wrong way for a
+     * recipe meant to be seen - {@code isSpecial() == true},
+     * {@code placementInfo() == NOT_PLACEABLE}, and (inherited from
+     * {@code Recipe}) {@code display() == List.of()}. They answer three
+     * different questions: is it listed, can it be placed for you, and what is
+     * drawn. v0.5.026 fixed the first two, the owner's report came back word for
+     * word unchanged, and the third turned out to be the one that mattered.
+     * {@link #craftsInto} now asserts all three.
      *
-     * <p>The upgrades are also why there are three upgrade files rather than one
-     * recipe matching all three rungs - a recipe advertises exactly one set of
-     * ingredients, so the single instance could not have described itself
-     * whatever these flags said. See {@code StasisUpgradeRecipe}.
+     * <p>Since then each chamber has <b>two</b> recipes: a plain JSON one for an
+     * empty chamber, which is what a player is shown, and a Java one for a
+     * chamber with a horse in it, which is deliberately undrawn and carries the
+     * animal across. {@link #carriesHorse} covers that half, and it is the
+     * assertion with real teeth - the others failing means an item nobody can
+     * craft, and that one failing means a pedigreed horse deleted in silence.
      */
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_CHAMBERS_CRAFT =
             TEST_FUNCTIONS.register("stasis_chambers_craft", () -> ModGameTests::stasisChambersCraft);
@@ -315,7 +317,9 @@ public final class ModGameTests {
         ItemStack basic = new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get());
         ItemStack pearl = new ItemStack(Items.ENDER_PEARL);
 
-        // Every grid the wiki's recipe table promises, laid out as a player would.
+        // HALF ONE: the empty grids. These are the plain JSON recipes, and they
+        // are the ones a player is ever actually shown, so they carry the whole
+        // showable-to-a-player assertion.
         craftsInto(helper, "the Basic chamber",
                 CraftingInput.of(2, 2, List.of(
                         new ItemStack(Items.GLASS_BOTTLE), new ItemStack(Items.WHEAT),
@@ -323,7 +327,7 @@ public final class ModGameTests {
                 ModItems.BASIC_STASIS_CHAMBER.get());
 
         craftsInto(helper, "the Intermediate upgrade",
-                CraftingInput.of(2, 1, List.of(basic, new ItemStack(Items.ENDER_EYE))),
+                CraftingInput.of(2, 1, List.of(basic, new ItemStack(Items.BOOK))),
                 ModItems.INTERMEDIATE_STASIS_CHAMBER.get());
 
         craftsInto(helper, "the Advanced upgrade",
@@ -344,6 +348,53 @@ public final class ModGameTests {
                         pearl, basic, pearl,
                         pearl, pearl, pearl)),
                 ModItems.EMERGENCY_STASIS_CHAMBER.get());
+
+        // HALF TWO: the same four grids with a horse in the chamber. These are
+        // the Java recipes, and what they have to prove is the opposite thing -
+        // not that they can be drawn (they deliberately cannot) but that the
+        // animal comes out the other side. A JSON recipe reaching one of these
+        // grids would craft the right item and silently delete the horse, which
+        // is exactly the failure the component ingredient exists to prevent.
+        carriesHorse(helper, "the Intermediate upgrade",
+                input -> CraftingInput.of(2, 1, List.of(input, new ItemStack(Items.BOOK))),
+                ModItems.BASIC_STASIS_CHAMBER.get(),
+                ModItems.INTERMEDIATE_STASIS_CHAMBER.get());
+
+        carriesHorse(helper, "the Advanced upgrade",
+                input -> CraftingInput.of(2, 1, List.of(input, new ItemStack(Items.GOLD_INGOT))),
+                ModItems.INTERMEDIATE_STASIS_CHAMBER.get(),
+                ModItems.ADVANCED_STASIS_CHAMBER.get());
+
+        carriesHorse(helper, "the Spacer upgrade",
+                input -> CraftingInput.of(2, 1, List.of(input, new ItemStack(Items.DIAMOND))),
+                ModItems.ADVANCED_STASIS_CHAMBER.get(),
+                ModItems.SPACER_STASIS_CHAMBER.get());
+
+        carriesHorse(helper, "the Emergency chamber",
+                input -> CraftingInput.of(3, 3, List.of(
+                        new ItemStack(Items.ENDER_PEARL), new ItemStack(Items.ENDER_PEARL),
+                        new ItemStack(Items.ENDER_PEARL), new ItemStack(Items.ENDER_PEARL),
+                        input,
+                        new ItemStack(Items.ENDER_PEARL), new ItemStack(Items.ENDER_PEARL),
+                        new ItemStack(Items.ENDER_PEARL), new ItemStack(Items.ENDER_PEARL))),
+                ModItems.BASIC_STASIS_CHAMBER.get(),
+                ModItems.EMERGENCY_STASIS_CHAMBER.get());
+
+        // AND THE TWO BASIC RECIPES MUST NOT BOTH WANT THE VANILLA GRID.
+        // StasisChamberRecipe subtracts minecraft:water_bucket from its tag for
+        // exactly this reason. If that subtraction is ever dropped, both it and
+        // the JSON twin match the grid above, the recipe manager picks one by
+        // registry order, and the other becomes unreachable - with nothing red
+        // anywhere. The grid would still craft, so no assertion above can see it.
+        if (com.example.horsegenetics.neoforge.server.recipe.StasisChamberRecipe.INSTANCE.matches(
+                CraftingInput.of(2, 2, List.of(
+                        new ItemStack(Items.GLASS_BOTTLE), new ItemStack(Items.WHEAT),
+                        new ItemStack(ModItems.HORSE_HAIR.get()), new ItemStack(Items.WATER_BUCKET))),
+                helper.getLevel())) {
+            helper.fail("the modded-water chamber recipe also claims the plain vanilla grid - "
+                    + "it and recipe/basic_stasis_chamber.json now collide, and one of them is "
+                    + "unreachable depending on registry order");
+        }
 
         helper.succeed();
     }
@@ -368,7 +419,9 @@ public final class ModGameTests {
             helper.fail(what + ": that grid crafts " + out.getItem() + ", not " + want);
         }
 
-        // The half that was actually broken.
+        // The half that was actually broken - three times over, because there
+        // are three separate flags and the family has now shipped failing two
+        // of them in two different releases.
         Recipe<?> recipe = found.value();
         if (recipe.isSpecial()) {
             helper.fail(what + ": the recipe is special, so the recipe book and JEI both "
@@ -376,6 +429,70 @@ public final class ModGameTests {
         }
         if (recipe.placementInfo().isImpossibleToPlace()) {
             helper.fail(what + ": the recipe advertises no ingredients, so nothing can draw it");
+        }
+        // v0.5.026 shipped with the two above correct and this one still wrong,
+        // which is why the owner's report came back unchanged. Recipe.display()
+        // defaults to List.of() and CustomRecipe never overrides it; a recipe
+        // with no display is one the recipe book has no entry to draw, however
+        // findable and placeable it claims to be.
+        if (recipe.display().isEmpty()) {
+            helper.fail(what + ": the recipe produces no RecipeDisplay, so the recipe book has "
+                    + "nothing to draw - this is the flag v0.5.026 still had wrong");
+        }
+    }
+
+    /**
+     * <b>A horse in the chamber survives the grid.</b> Asserts that crafting an
+     * <i>occupied</i> chamber resolves, makes the right item, and carries the
+     * {@code stasis_snapshot} across.
+     *
+     * <p>The last of those is the one with consequences: every other assertion
+     * in this test failing leaves a player unable to craft something, and this
+     * one failing eats a pedigreed animal with no message and nothing in the
+     * log. It is also the assertion that guards the JSON twins - if one of them
+     * ever widens far enough to claim an occupied grid, it will win the
+     * resolution here and this will go red.
+     *
+     * <p>The snapshot is built by hand rather than by capturing a real horse:
+     * what is under test is the recipe carrying a component, not
+     * {@code HorseStasisHandler} making a good one, and a real capture would
+     * need the horse to be founded first - ten ticks this test does not have.
+     */
+    private static void carriesHorse(GameTestHelper helper, String what,
+                                     java.util.function.Function<ItemStack, CraftingInput> grid,
+                                     net.minecraft.world.item.Item from,
+                                     net.minecraft.world.item.Item want) {
+        com.example.horsegenetics.neoforge.data.StasisSnapshot snapshot =
+                new com.example.horsegenetics.neoforge.data.StasisSnapshot(
+                        "Tripwire", java.util.UUID.randomUUID(), new net.minecraft.nbt.CompoundTag());
+        ItemStack occupied = new ItemStack(from);
+        occupied.set(com.example.horsegenetics.neoforge.data.ModDataComponents.STASIS_SNAPSHOT.get(), snapshot);
+
+        CraftingInput input = grid.apply(occupied);
+        MinecraftServer server = helper.getLevel().getServer();
+        RecipeHolder<?> found = server.getRecipeManager()
+                .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, helper.getLevel())
+                .orElse(null);
+        if (found == null) {
+            helper.fail(what + ", with a horse inside: that grid resolves to no recipe at all");
+            return;
+        }
+
+        ItemStack out = ((Recipe<CraftingInput>) found.value()).assemble(input);
+        if (!out.is(want)) {
+            helper.fail(what + ", with a horse inside: that grid crafts " + out.getItem()
+                    + ", not " + want);
+            return;
+        }
+
+        com.example.horsegenetics.neoforge.data.StasisSnapshot carried =
+                out.get(com.example.horsegenetics.neoforge.data.ModDataComponents.STASIS_SNAPSHOT.get());
+        if (carried == null) {
+            helper.fail(what + ", with a horse inside: the result carries no stasis_snapshot, so "
+                    + "the horse was deleted by crafting. A JSON recipe has claimed this grid - "
+                    + "check the '!horsegenetics:stasis_snapshot' removal patch in its ingredient");
+        } else if (!carried.horseId().equals(snapshot.horseId())) {
+            helper.fail(what + ", with a horse inside: the result carries a different horse");
         }
     }
 

@@ -74,7 +74,7 @@
         <td>Storage only. The horse is listed by name on the Browse tab and nothing else
             about it can be asked for.</td></tr>
     <tr><td><strong>Intermediate Horse Stasis Chamber</strong></td>
-        <td>A Basic chamber + an eye of ender.</td>
+        <td>A Basic chamber + a book.</td>
         <td>The bank can see inside. All of the horse's information becomes searchable &mdash;
             the Browse tab shows what it is and the filter box can find it &mdash; <em>and</em>
             the bank will feed and mend it. <strong>Both built.</strong></td></tr>
@@ -98,7 +98,7 @@
     uses itself.
 </p>
 <div class="note">
-    <span class="label">Why one eye of ender buys two things</span>
+    <span class="label">Why one book buys two things</span>
     <p>
         Searching a horse and healing it are the same capability with two uses:
         <strong>the bank being able to look inside the chamber</strong>. Basic's whole contract
@@ -138,7 +138,7 @@
     <strong>It is not spent, and the horse is not stuck.</strong> Let the horse out and you have
     the same emergency chamber back, empty and armed again for the next one. In every other
     respect it is a Basic chamber: it files in a bank, it is counted and listed by name, and the
-    bank cannot look inside it. An eye of ender will upgrade it with the horse still in &mdash;
+    bank cannot look inside it. A book will upgrade it with the horse still in &mdash;
     but that trades the emergency away, since what comes out is an ordinary Intermediate chamber.
     Letting the horse out and filing it properly is the cheaper move.
 </p>
@@ -964,32 +964,70 @@
     the number of chambers the player marked is already their own cap.
 </p>
 
-<h2 id="two-custom-recipes">Why three of these are Java recipes</h2>
+<h2 id="two-custom-recipes">Every chamber has two recipes, and only one of them is drawn</h2>
 <p>
-    None is a <code>CustomRecipe</code> for the fun of it, and the reasons are worth
-    keeping:
+    Each of the five chambers is made by <strong>a pair</strong>: a plain JSON recipe and a Java
+    <code>CustomRecipe</code>. They are written so that <strong>no grid ever matches both</strong>,
+    which is the property the whole arrangement rests on &mdash; two recipes claiming one grid are
+    resolved by registry order, and the loser becomes unreachable with nothing red anywhere.
+</p>
+<table>
+    <tr><th>Chamber</th><th>The JSON recipe takes&hellip;</th><th>&hellip;and the Java one takes</th></tr>
+    <tr><td><strong>Basic</strong></td>
+        <td>A <code>minecraft:water_bucket</code>.</td>
+        <td>Any <em>other</em> container in <code>c:buckets/water</code> &mdash; the tag minus the
+            vanilla bucket, via a <code>DifferenceIngredient</code>.</td></tr>
+    <tr><td><strong>The three upgrades</strong>, and <strong>Emergency</strong></td>
+        <td>A chamber with <strong>no horse in it</strong>.</td>
+        <td>A chamber with a horse in it.</td></tr>
+</table>
+<p>
+    The empty/occupied split is expressed in data by a NeoForge component ingredient carrying a
+    <em>removal</em> patch &mdash; <code>"!horsegenetics:stasis_snapshot": {}</code> matches only a
+    stack that does <strong>not</strong> have that component. The Java half asserts the opposite in
+    <code>upgradable</code> and <code>middle</code>. Each pair is therefore exhaustive and disjoint:
+    every grid a player can lay out matches exactly one.
+</p>
+<p>
+    <strong>Why bother, when the Java recipe alone matched everything?</strong> Because a plain JSON
+    recipe is the only shape proven to be drawable on a modded server &mdash; it is why the bank was
+    the one thing in this family a player could find in JEI &mdash; and because the two halves need
+    genuinely different things:
 </p>
 <ul>
-    <li><strong>The water container is not consumed.</strong> A vanilla recipe eats every
-        input. <code>StasisChamberRecipe</code> overrides
-        <code>getRemainingItems</code> and hands back the input's own declared crafting
-        remainder &mdash; which is how a vanilla water bucket returns an empty bucket, the same
-        as in a cake. The ingredient is matched on <code>c:buckets/water</code>
-        (<code>Tags.Items.BUCKETS_WATER</code>), so another mod's container crafts it without
-        anyone naming it here.</li>
     <li><strong>An upgrade must carry the horse.</strong> A shapeless JSON recipe builds its
         result from scratch and copies no components, so upgrading an occupied chamber would
         hand back an empty one and delete the animal &mdash; silently, with nothing in the log.
         <code>StasisUpgradeRecipe</code> copies the <code>stasis_snapshot</code> across. The
-        JSON version of this feature is not a cheaper version of it; it is a data-loss bug with
-        a crafting recipe attached.</li>
+        JSON version of <em>that</em> half is not a cheaper version of it; it is a data-loss bug
+        with a crafting recipe attached. It is safe for the empty half only because an empty
+        chamber has nothing to lose, and <strong>the removal patch is the only thing holding
+        those two apart</strong>.</li>
     <li><strong>So must the ender pearls.</strong> <code>EmergencyChamberRecipe</code> is the
         same hazard wearing a different shape &mdash; the chamber it converts sits in the middle
         of the grid and may well have a horse in it &mdash; so it copies
         <code>stasis_snapshot</code> too. It is shaped rather than shapeless because the
         arrangement <em>is</em> the recipe's name: a shapeless nine-item match would also accept
         the chamber in a corner, which reads like a different recipe that happens to work.</li>
+    <li><strong>A tag is the only way to accept a container this mod has never heard of.</strong>
+        <code>StasisChamberRecipe</code> matches <code>c:buckets/water</code>
+        (<code>Tags.Items.BUCKETS_WATER</code>) so another mod's bucket-equivalent crafts a chamber
+        without anyone naming it here. On a pack with no such mod the difference is empty and
+        <strong>that recipe goes quiet altogether</strong> &mdash; it neither matches nor draws,
+        rather than showing a recipe with a blank slot in it.</li>
 </ul>
+<div class="note warn">
+    <span class="label">A claim that stood here for a release and was simply false</span>
+    <p>
+        This section used to say the Basic chamber had to be a Java recipe because <em>&ldquo;a
+        vanilla recipe eats every input&rdquo;</em> and the water container must come back.
+        <strong>It does not.</strong> <code>Items.WATER_BUCKET</code> is declared
+        <code>craftRemainder(BUCKET)</code>, so <em>any</em> recipe hands the empty bucket back by
+        itself &mdash; it is how cake returns three of them. The custom recipe was never needed for
+        the vanilla bucket, only for a modded container that declares no remainder, which
+        <code>getRemainingItems</code> hands straight back still full.
+    </p>
+</div>
 <div class="note warn">
     <span class="label">Both serializers are <code>unit</code> codecs, and that is load-bearing</span>
     <p>
@@ -1059,7 +1097,7 @@
     chamber is built from the <em>cheapest</em> rung rather than sitting above the dearest one. A
     rung costing eight ender pearls that bought no bank capability would be exactly the hole in
     the ladder that test exists to prevent. The visible consequence is the right one:
-    <strong>an eye of ender upgrades an emergency chamber into an ordinary Intermediate</strong>,
+    <strong>a book upgrades an emergency chamber into an ordinary Intermediate</strong>,
     horse and all, spending the emergency for the window. That is the escape hatch rather than
     the intended path &mdash; releasing hands the armed chamber straight back &mdash; but it
     means a rescued horse is never stuck somewhere the bank cannot read it.
@@ -1266,12 +1304,24 @@
     what they were.
 </p>
 <p>
-    The cause is two defaults on <code>CustomRecipe</code>, which all five chamber recipes extend:
-    <code>isSpecial()</code> answers <code>true</code> and <code>placementInfo()</code> answers
-    <code>PlacementInfo.NOT_PLACEABLE</code>. Between them that means no recipe-book entry, no
-    place-into-grid button, and nothing in JEI &mdash; which skips special recipes on the entirely
-    reasonable grounds that a recipe declaring no ingredients has nothing to draw. The bank was
-    unaffected because it is an ordinary shaped JSON file.
+    The cause is <strong>three</strong> defaults, not two, and getting only two of them was enough
+    to ship the bug a second time. <code>CustomRecipe</code> answers <code>isSpecial() == true</code>
+    and <code>placementInfo() == PlacementInfo.NOT_PLACEABLE</code>; and <code>Recipe</code>, which
+    it implements, defaults <code>display()</code> to <code>List.of()</code> and
+    <code>CustomRecipe</code> never overrides it. They answer three different questions:
+</p>
+<table>
+    <tr><th>Method</th><th>Answers</th></tr>
+    <tr><td><code>isSpecial()</code></td><td>Is this recipe listed at all?</td></tr>
+    <tr><td><code>placementInfo()</code></td><td>May the book place it into the grid for you?</td></tr>
+    <tr><td><code>display()</code></td><td><strong>What is actually drawn?</strong></td></tr>
+</table>
+<p>
+    v0.5.026 overrode the first two and shipped. <strong>The owner's report came back word for word
+    unchanged</strong>, because a recipe that produces no <code>RecipeDisplay</code> has nothing for
+    the recipe book to draw however findable and placeable it claims to be. The bank was unaffected
+    throughout for the same reason it always was: it is an ordinary shaped JSON file, and vanilla's
+    <code>ShapelessRecipe</code> and <code>ShapedRecipe</code> build their displays for themselves.
 </p>
 <p>
     <strong>This is the trap worth remembering</strong>, because it is invisible from inside the
@@ -1279,9 +1329,10 @@
     gametest suite had <code>EVERY_RECIPE_ENCODES</code>, which proved the recipes reach a joining
     client, and the class comments explained at length why each had to be Java rather than JSON
     &mdash; all true, all beside the point. Nothing asserted the one thing a player needs, which is
-    that the recipe can be shown to them. <code>STASIS_CHAMBERS_CRAFT</code> now does: for all five
-    grids it asserts the recipe resolves, produces the right item, is <em>not</em> special, and
-    advertises real ingredients.
+    that the recipe can be shown to them. <code>STASIS_CHAMBERS_CRAFT</code> now asserts all three
+    flags for all five grids, and the whole family additionally grew a
+    <a href="#two-custom-recipes">plain JSON twin</a> &mdash; belt and braces, since a plain JSON
+    recipe is the only shape this mod has ever seen draw correctly on the owner's server.
 </p>
 
 <h3 id="three-upgrade-files">Why the upgrades became three recipes</h3>
@@ -1318,8 +1369,8 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        <strong>The chamber recipes have just been made visible to JEI and the recipe book
-        and nobody has looked</strong>; beyond that,
+        <strong>The chamber recipes have been made visible to JEI and the recipe book twice
+        now, the first attempt did not work, and nobody has looked at the second</strong>; beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
         gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
         so the whole capture/release round trip, the water-container remainder for a modded
@@ -1388,30 +1439,41 @@
         row should clear itself too.</li>
 </ul>
 
-<h3 id="verify-jei">The recipes actually show up in JEI (2026-09-25, NOT seen)</h3>
+<h3 id="verify-jei">The recipes actually show up in JEI (2026-09-25, NOT seen &mdash; and wrong twice already)</h3>
 <p>
-    The fix is on the <a href="#special-recipes">Coding tab</a> and the gametest
-    <code>STASIS_CHAMBERS_CRAFT</code> pins what this repository can pin: all five grids
-    resolve, produce the right item, are not <code>isSpecial()</code>, and advertise real
-    ingredients. <strong>What no test here can check is JEI itself</strong> &mdash; this mod
-    carries no JEI dependency, so &ldquo;not special, with ingredients&rdquo; is a
-    well-founded inference about what JEI needs, not an observation of it.
+    <strong>This check has now failed twice after being believed fixed</strong>, which is the
+    reason it is written the way it is. v0.5.026 shipped <code>isSpecial()</code> and
+    <code>placementInfo()</code> overridden and was reported unchanged; the missing third piece was
+    <code>display()</code>. The whole story is on the <a href="#special-recipes">Coding tab</a>.
+</p>
+<p>
+    Since then every chamber also has a <a href="#two-custom-recipes">plain JSON twin</a>, which is
+    the part that should settle it: an ordinary <code>minecraft:crafting_shapeless</code> is the
+    same shape as the stasis bank's recipe, and the bank is the one thing in this family the owner
+    could already see. <code>STASIS_CHAMBERS_CRAFT</code> pins all three flags and both halves of
+    every rung. <strong>What no test here can check is still JEI itself</strong> &mdash; this mod
+    carries no JEI dependency, so everything above remains a well-founded inference about what JEI
+    reads, not an observation of it.
 </p>
 <ul>
     <li><strong>Click each chamber in JEI and check a recipe appears.</strong> All five: Basic,
-        the three upgrades, and Emergency. The upgrades are now three separate recipes, so each
-        should show its own rung &mdash; a Basic chamber and an eye of ender, an Intermediate and
-        a gold ingot, an Advanced and a diamond &mdash; rather than one recipe or none.</li>
-    <li><strong>Check the Emergency recipe draws as a ring.</strong> Nine ingredients in slot
-        order, pearls around a Basic chamber in the middle. If it draws as a shapeless heap the
-        recipe still crafts, but the picture is not telling the player where to put things.</li>
+        the three upgrades, and Emergency. Each should show its own rung &mdash; a Basic chamber
+        and a book, an Intermediate and a gold ingot, an Advanced and a diamond &mdash; rather
+        than one recipe or none.</li>
+    <li><strong>Check nothing is listed twice.</strong> The Java halves deliberately keep
+        <code>CustomRecipe</code>'s defaults so that only the JSON twin is drawn. If a chamber
+        shows <em>two</em> identical-looking recipes, a Java half is advertising itself after all
+        and should go back to the defaults.</li>
+    <li><strong>Check the Emergency recipe draws as a ring.</strong> Pearls around a Basic chamber
+        in the middle. If it draws as a shapeless heap the recipe still crafts, but the picture is
+        not telling the player where to put things.</li>
     <li><strong>Craft one of each by hand anyway.</strong> The gametest asserts the recipe
         resolves; it does not put a player at a table. The Basic one is the one to watch, since
         it is the only recipe whose water container is <em>handed back</em>.</li>
-    <li><strong>Upgrade an occupied chamber, still.</strong> The upgrade matching was rewritten
-        to key off the tier in the recipe file rather than off the chamber in the grid, so
-        <a href="#verify-upgrade">the occupied-upgrade check below</a> is a regression check now
-        as well as an unplayed one.</li>
+    <li><strong>Upgrade an occupied chamber, still.</strong> The empty and occupied halves are
+        now different recipes, so <a href="#verify-upgrade">the occupied-upgrade check below</a>
+        is a regression check as well as an unplayed one &mdash; and the one whose failure costs
+        a horse rather than a craft.</li>
 </ul>
 
 <h3 id="verify-emergency">The emergency chamber catches a horse (NOT played)</h3>
@@ -1560,12 +1622,20 @@
         or the full one does. <strong>Fail:</strong> the container is consumed, since
         &ldquo;not consumed&rdquo; is the rule that matters and a full one handed back is the
         deliberate second-best.</li>
+    <li><strong>That the modded grid is reachable at all.</strong> This is now a
+        <em>separate recipe</em> from the vanilla-bucket one &mdash; the tag minus
+        <code>minecraft:water_bucket</code> &mdash; and on a pack with no water-adding mod it
+        matches nothing and draws nothing by design. <strong>Pass:</strong> on the modded server
+        a modded container crafts a chamber, and JEI shows the Basic chamber with two recipes.
+        <strong>Fail:</strong> only the vanilla one exists there, which means
+        <code>c:buckets/water</code> is not the tag that mod joins and the mod must be named
+        some other way.</li>
 </ul>
 
 <h3 id="verify-upgrade">Upgrading an occupied chamber (NOT played)</h3>
 <ul>
     <li><strong>The horse crosses the upgrade.</strong> Put a horse in a Basic chamber, then
-        craft that chamber with an eye of ender. <strong>Pass:</strong> the Intermediate still
+        craft that chamber with a book. <strong>Pass:</strong> the Intermediate still
         names that horse in its tooltip, and still releases it. <strong>Fail:</strong> an empty
         chamber comes out, which has destroyed the animal silently. Guarded in
         <code>StasisUpgradeRecipe</code> in Java rather than by a test, which is why it is worth

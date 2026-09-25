@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:wheat",
+    "horsegenetics:horse_hair",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "id": "horsegenetics:basic_stasis_chamber"
+  }
+}

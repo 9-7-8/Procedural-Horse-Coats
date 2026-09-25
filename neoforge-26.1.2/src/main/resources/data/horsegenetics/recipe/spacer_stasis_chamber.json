@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "horsegenetics:advanced_stasis_chamber",
+      "components": {
+        "!horsegenetics:stasis_snapshot": {}
+      }
+    },
+    "minecraft:diamond"
+  ],
+  "result": {
+    "id": "horsegenetics:spacer_stasis_chamber"
+  }
+}

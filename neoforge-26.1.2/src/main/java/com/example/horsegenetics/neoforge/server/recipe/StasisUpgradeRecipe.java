@@ -18,42 +18,68 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
 
 /**
- * <b>Climbing the stasis ladder.</b> A chamber plus one ingredient becomes the
- * chamber one rung up: an eye of ender for Intermediate, a gold ingot for
- * Advanced, a diamond for Spacer.
+ * <b>Climbing the stasis ladder, with a horse already inside.</b> A chamber plus
+ * one ingredient becomes the chamber one rung up: a book for Intermediate, a gold
+ * ingot for Advanced, a diamond for Spacer.
  *
- * <h2>Why this is a Java recipe and not three JSON files</h2>
+ * <h2>This is the second of two recipes per rung, and it takes only occupied chambers</h2>
+ * An <b>empty</b> chamber climbs by an ordinary shapeless JSON recipe -
+ * {@code recipe/intermediate_stasis_chamber.json} and its two siblings - whose
+ * chamber ingredient is a {@code neoforge:data_component} carrying the removal
+ * patch {@code "!horsegenetics:stasis_snapshot": {}}, so it matches a chamber
+ * with no horse in it and nothing else.
+ *
+ * <p>This class takes the other half: {@link #upgradable} now <b>requires</b> the
+ * snapshot to be present. The two therefore never claim the same grid, which is
+ * the whole reason the split is safe - see below.
+ *
+ * <h2>Why the occupied half cannot be JSON</h2>
  * <b>Because a chamber may have a horse in it.</b> A vanilla shapeless recipe
  * builds its result from scratch and carries no components across, so upgrading
- * an occupied chamber would hand back a shiny new empty one and delete the
- * animal - silently, with no message and nothing in the log. This recipe copies
- * the {@code stasis_snapshot} component onto the result, so a horse rides the
- * upgrade untouched.
+ * an occupied chamber that way would hand back a shiny new empty one and delete
+ * the animal - silently, with no message and nothing in the log. This recipe
+ * copies the {@code stasis_snapshot} component onto the result, so a horse rides
+ * the upgrade untouched.
  *
- * <p>That is worth being blunt about: the JSON version of this feature is not a
- * cheaper version of it, it is a data-loss bug with a crafting recipe attached.
+ * <p>That is worth being blunt about: the JSON version of <i>this</i> half is not
+ * a cheaper version of it, it is a data-loss bug with a crafting recipe attached.
+ * It is safe for the empty half only because an empty chamber has nothing to
+ * lose, and the component ingredient is what holds those two apart. <b>If that
+ * ingredient is ever loosened, this becomes a horse-eating recipe again.</b>
+ *
+ * <h2>Why this half is not drawn</h2>
+ * It deliberately keeps {@code CustomRecipe}'s defaults - special, not placeable,
+ * no display. Its JSON twin draws the identical grid, and a viewer showing both
+ * would list every upgrade twice with no way to tell which was which. The
+ * occupied recipe is not something a player needs to discover; it is the same
+ * recipe, quietly preserving the animal. Contrast {@link StasisChamberRecipe},
+ * which <i>is</i> drawn because its modded water containers are a grid the JSON
+ * twin genuinely cannot express.
  *
  * <h2>But it <i>is</i> three recipes, one per rung</h2>
  * It used to be one instance matching all three steps, which is tidier Java and
  * was wrong for the only thing that matters here: <b>a recipe can only advertise
- * one set of ingredients</b>. {@code placementInfo()} has no way to say "a
- * chamber and whichever item its own tier calls for", so one instance could
- * never be drawn, and an undrawable recipe is one JEI and the recipe book both
- * skip - which is how the whole stasis family ended up craftable only by a
- * player who already knew the answer. See {@link StasisChamberRecipe#isSpecial()}.
+ * one set of ingredients</b>. There is no way to say "a chamber and whichever
+ * item its own tier calls for", so one instance could never describe itself, and
+ * the JSON twins could not have been written against it either.
  *
  * <p>So the tier being upgraded <b>to</b> is a field, read from the recipe JSON's
- * {@code "to"}, and {@code data/horsegenetics/recipe/} carries one file per
- * rung. The cost table below is still the single place the prices live.
+ * {@code "to"}, and {@code data/horsegenetics/recipe/} carries one file per rung
+ * - {@code stasis_upgrade_*.json} for this half, and the item-named file for the
+ * empty half.
+ *
+ * <p><b>The cost table below is the single place the prices live for this half
+ * only.</b> The three JSON twins spell the same costs out again in data, and
+ * nothing checks that they agree - change a price here and you must change it
+ * there, or an empty chamber and an occupied one will upgrade for different
+ * money. {@code ModGameTests.STASIS_CHAMBERS_CRAFT} crafts both halves of every
+ * rung, which is what catches it.
  */
 public class StasisUpgradeRecipe extends CustomRecipe {
 
@@ -101,7 +127,6 @@ public class StasisUpgradeRecipe extends CustomRecipe {
     /** Which rung this file makes. The rung below it is what goes in the grid. */
     private final StasisTier upgradeTo;
 
-    private volatile @Nullable PlacementInfo placement;
 
     public StasisUpgradeRecipe(StasisTier upgradeTo) {
         this.upgradeTo = upgradeTo;
@@ -120,7 +145,7 @@ public class StasisUpgradeRecipe extends CustomRecipe {
     private static @Nullable Item costOf(StasisTier upgradeTo) {
         switch (upgradeTo) {
             case INTERMEDIATE:
-                return Items.ENDER_EYE;
+                return Items.BOOK;
             case ADVANCED:
                 return Items.GOLD_INGOT;
             case SPACER:
@@ -175,7 +200,13 @@ public class StasisUpgradeRecipe extends CustomRecipe {
         if (filled != 2 || chamber.isEmpty() || other.isEmpty()) {
             return null;
         }
-        return other.is(cost) ? chamber : null;
+        if (!other.is(cost)) {
+            return null;
+        }
+        // Occupied chambers only. An empty one is the JSON twin's grid, and two
+        // recipes claiming one grid would be resolved by registry order - with
+        // the loser simply unreachable. This is the line that keeps them apart.
+        return StasisChamberItem.snapshotOf(chamber) != null ? chamber : null;
     }
 
     @Override
@@ -206,35 +237,10 @@ public class StasisUpgradeRecipe extends CustomRecipe {
         return out;
     }
 
-    /**
-     * <b>Not special, so the recipe is findable.</b> See
-     * {@link StasisChamberRecipe#isSpecial()}.
-     */
-    @Override
-    public boolean isSpecial() {
-        return false;
-    }
-
-    /** The rung below, and the one item it costs to climb. */
-    @Override
-    public PlacementInfo placementInfo() {
-        PlacementInfo cached = placement;
-        if (cached != null) {
-            return cached;
-        }
-        Item cost = costOf(upgradeTo);
-        StasisTier from = below(upgradeTo);
-        if (cost == null || from == null) {
-            return PlacementInfo.NOT_PLACEABLE;
-        }
-        PlacementInfo built = PlacementInfo.create(List.of(
-                Ingredient.of(ModItems.stasisChamber(from)),
-                Ingredient.of(cost)));
-        if (!built.isImpossibleToPlace()) {
-            placement = built;
-        }
-        return built;
-    }
+    // No isSpecial(), placementInfo() or display() override: CustomRecipe's
+    // defaults are wanted here. This half of each rung is deliberately not drawn
+    // - its JSON twin draws the identical grid, and advertising both would list
+    // every upgrade twice. See the class comment.
 
     @Override
     public RecipeSerializer<StasisUpgradeRecipe> getSerializer() {

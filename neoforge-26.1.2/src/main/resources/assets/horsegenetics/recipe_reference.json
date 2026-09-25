@@ -113,6 +113,16 @@
       "count": 1
     },
     {
+      "id": "advanced_stasis_chamber",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:intermediate_stasis_chamber",
+        "minecraft:gold_ingot"
+      ],
+      "out": "horsegenetics:advanced_stasis_chamber",
+      "count": 1
+    },
+    {
       "id": "bamboo_animal_cart",
       "kind": "shaped",
       "grid": [
@@ -222,6 +232,18 @@
         "horsegenetics:cart_wheel"
       ],
       "out": "horsegenetics:bamboo_wagon",
+      "count": 1
+    },
+    {
+      "id": "basic_stasis_chamber",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:glass_bottle",
+        "minecraft:wheat",
+        "horsegenetics:horse_hair",
+        "minecraft:water_bucket"
+      ],
+      "out": "horsegenetics:basic_stasis_chamber",
       "count": 1
     },
     {
@@ -794,6 +816,23 @@
       "type": "horsegenetics:emergency_chamber"
     },
     {
+      "id": "emergency_stasis_chamber",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:ender_pearl",
+        "minecraft:ender_pearl",
+        "minecraft:ender_pearl",
+        "minecraft:ender_pearl",
+        "horsegenetics:basic_stasis_chamber",
+        "minecraft:ender_pearl",
+        "minecraft:ender_pearl",
+        "minecraft:ender_pearl",
+        "minecraft:ender_pearl"
+      ],
+      "out": "horsegenetics:emergency_stasis_chamber",
+      "count": 1
+    },
+    {
       "id": "empty_seed_jar",
       "kind": "shapeless",
       "in": [
@@ -894,6 +933,16 @@
         "minecraft:blaze_powder"
       ],
       "out": "horsegenetics:interdimensional_ticket",
+      "count": 1
+    },
+    {
+      "id": "intermediate_stasis_chamber",
+      "kind": "shapeless",
+      "in": [
+        "#horsegenetics:basic_stasis_chambers",
+        "minecraft:book"
+      ],
+      "out": "horsegenetics:intermediate_stasis_chamber",
       "count": 1
     },
     {
@@ -1588,6 +1637,16 @@
         "minecraft:paper"
       ],
       "out": "horsegenetics:scientists_post",
+      "count": 1
+    },
+    {
+      "id": "spacer_stasis_chamber",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:advanced_stasis_chamber",
+        "minecraft:diamond"
+      ],
+      "out": "horsegenetics:spacer_stasis_chamber",
       "count": 1
     },
     {
