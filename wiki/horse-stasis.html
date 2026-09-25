@@ -814,9 +814,30 @@
     describes. A set of marked <code>UUID</code>s on the block would have needed syncing, pruning
     when a chamber left, and a rule for what happens when the same horse is in two banks.
     <strong>The mark alone is not permission:</strong> <code>StasisStud.atStud</code> asks the
-    tier as well, because <code>StasisUpgradeRecipe</code> copies components and a mark can
-    therefore outlive the rung that bought it.
+    tier as well, because the component is a bare boolean on an arbitrary stack and nothing in
+    the type system ties it to the rung that is allowed to set it. A chamber handed in by a
+    <code>/give</code> with the component spelled out, or by another mod, or by some later
+    recipe, arrives marked without ever having passed the menu's check &mdash; so the read
+    asks the tier rather than trusting the flag.
 </p>
+<div class="note">
+    <span class="label">Corrected 2026-09-24: the reason this page gave was not true</span>
+    <p>
+        It said the tier is re-checked &ldquo;because <code>StasisUpgradeRecipe</code> copies
+        components and a mark can therefore outlive the rung that bought it&rdquo;, and
+        <code>StasisStud.atStud</code>'s own comment said the same. <strong>That cannot
+        happen.</strong> The upgrade copies <code>stasis_snapshot</code> and nothing else, so it
+        does not carry the mark at all; and only a Spacer can be marked in the first place
+        (<code>clickMenuButton</code> refuses any rung whose <code>breedsInBank()</code> is
+        false), while a Spacer is the top rung and <code>next()</code> hands back
+        <code>null</code>, so a marked chamber can never be put through an upgrade. Both halves
+        of the story were wrong. The <em>check</em> is right and stays; only the reason for it
+        has been replaced with one that happens. If a rung is ever added above Spacer, the
+        upgrade dropping the mark becomes a real behaviour to decide on rather than a hypothetical
+        &mdash; a mare quietly coming back in from stud &mdash; and that is the thing to remember
+        from this, not the sentence that was here.
+    </p>
+</div>
 <p>
     Toggling it is <code>AbstractContainerMenu.clickMenuButton</code> with the chamber slot as the
     id &mdash; <code>JumpMenu</code>'s shape, and the rule
@@ -1435,15 +1456,16 @@
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
+        <a href="verification.html">Verification &mdash; every page with open checks</a>
         <a href="items.html">The item roster</a>
         <a href="gene-lycan.html">The lycan gene, whose swap this reuses</a>
         <a href="architecture.html">Architecture &amp; attachments</a>
         <a href="horse-care.html">Horse care: healing, bond, herds</a>
     </div>
-    Capture and release turned out to be a mechanism the mod already had, and birth turned out to
-    be one best handed straight back to it; everything on this page is built except the
-    self-triggering emergency chamber.
+    Capture and release turned out to be a mechanism the mod already had, birth turned out to be
+    one best handed straight back to it, and the emergency chamber's health hook turned out to be
+    the last stand's event with a lower priority on it. Everything on this page is built; none of
+    it has been played.
 </div>
 
 </article>

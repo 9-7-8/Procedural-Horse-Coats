@@ -116,8 +116,15 @@ public class StasisUpgradeRecipe extends CustomRecipe {
             return ItemStack.EMPTY;
         }
         ItemStack out = new ItemStack(ModItems.stasisChamber(up));
-        // The horse rides the upgrade. Without this line an occupied chamber
-        // upgrades into an empty one and the animal is gone for good.
+        // The horse rides the upgrade, and nothing else does. Without this line
+        // an occupied chamber upgrades into an empty one and the animal is gone
+        // for good.
+        //
+        // STASIS_AT_STUD is deliberately NOT carried, and today it cannot
+        // matter: only a SPACER can be marked, and a SPACER is the top rung, so
+        // no marked chamber ever reaches this method. Add a rung above SPACER
+        // and that stops being true - an upgrade would then quietly bring a mare
+        // back in from stud, and this is the line to revisit.
         StasisSnapshot inside = StasisChamberItem.snapshotOf(chamber);
         if (inside != null) {
             out.set(ModDataComponents.STASIS_SNAPSHOT.get(), inside);

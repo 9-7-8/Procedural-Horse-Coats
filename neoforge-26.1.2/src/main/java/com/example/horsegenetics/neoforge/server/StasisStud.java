@@ -296,9 +296,24 @@ public final class StasisStud {
     /**
      * <b>Is this chamber turned out into the bank's paddock?</b> The mark is a
      * component on the item, so it rides with the chamber and needs no syncing
-     * of its own; the tier is asked again here rather than trusted, because a
-     * mark can outlive the chamber it was set on - an upgrade recipe copies
-     * components, and so would a downgrade if one ever existed.
+     * of its own.
+     *
+     * <p><b>The tier is asked again here rather than trusted</b>, because the
+     * mark is a bare boolean on an arbitrary stack and nothing ties it to the
+     * rung that is allowed to set it. {@code HorseStasisBankMenu.clickMenuButton}
+     * is the only thing that sets one and it refuses any rung whose
+     * {@code breedsInBank()} is false - but a {@code /give} with the component
+     * spelled out, another mod, or some later recipe can hand in a marked
+     * chamber that never passed that check.
+     *
+     * <p>This comment used to say the re-check was there because an upgrade
+     * recipe copies components, so a mark could outlive its rung.
+     * <b>That cannot happen</b>, twice over: {@code StasisUpgradeRecipe} copies
+     * {@code stasis_snapshot} and nothing else, and only a {@code SPACER} can be
+     * marked, which is the top rung and has no upgrade to go through. Corrected
+     * 2026-09-24. If a rung is ever added above {@code SPACER}, the upgrade
+     * dropping the mark stops being hypothetical and becomes a mare quietly
+     * coming back in from stud.
      */
     public static boolean atStud(ItemStack chamber) {
         StasisTier tier = HorseStasisBankBlockEntity.tierOf(chamber);
