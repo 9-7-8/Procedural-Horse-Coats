@@ -3,7 +3,7 @@
   "name": "Cloudtouched",
   "description": "A horse out of the high wind country that does not entirely belong to the ground. Most of them glide - ride one off a ledge and it trades height for speed and speed back for height until the ground comes up. Rather more of them show nothing at all, and are carrying the rarer thing quietly; two of those bred together throw a foal that simply goes where it is pointed, with nothing about its body to explain it. Pale, light-boned, quick, and no use whatever in harness.",
   "kind": "magical",
-  "commonness": "very_rare",
+  "commonness": "rare",
   "spawn_time": "day",
   "biomes": [
     "minecraft:windswept_hills",
