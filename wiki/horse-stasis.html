@@ -978,16 +978,58 @@
         <td>Any <em>other</em> container in <code>c:buckets/water</code> &mdash; the tag minus the
             vanilla bucket, via a <code>DifferenceIngredient</code>.</td></tr>
     <tr><td><strong>The three upgrades</strong>, and <strong>Emergency</strong></td>
-        <td>A chamber with <strong>no horse in it</strong>.</td>
-        <td>A chamber with a horse in it.</td></tr>
+        <td><code>horsegenetics:basic_stasis_chamber</code> and friends.</td>
+        <td><code>horsegenetics:occupied_basic_stasis_chamber</code> and friends &mdash;
+            <strong>different items</strong>.</td></tr>
 </table>
+
+<h3 id="occupied-is-an-item">A chamber with a horse in it is a different item</h3>
 <p>
-    The empty/occupied split is expressed in data by a NeoForge component ingredient carrying a
-    <em>removal</em> patch &mdash; <code>"!horsegenetics:stasis_snapshot": {}</code> matches only a
-    stack that does <strong>not</strong> have that component. The Java half asserts the opposite in
-    <code>upgradable</code> and <code>middle</code>. Each pair is therefore exhaustive and disjoint:
-    every grid a player can lay out matches exactly one.
+    This is the load-bearing decision of the whole arrangement, and it is worth being exact about
+    why. Each chamber is registered <strong>twice</strong> &mdash; <code>basic_stasis_chamber</code>
+    and <code>occupied_basic_stasis_chamber</code>, and so on for all five. Putting a horse in
+    <em>swaps the item</em>; letting it out swaps it back. The <code>stasis_snapshot</code>
+    component still carries the animal, but which item a stack <em>is</em> now tells you whether
+    there is one.
 </p>
+<p>
+    The pair of recipes above must never both claim a grid, because two that do are resolved by
+    registry order and the loser is simply unreachable &mdash; here, with a pedigreed horse deleted
+    on the way past. <strong>Two earlier attempts at holding them apart were both unsound:</strong>
+</p>
+<ul>
+    <li><strong>A component ingredient.</strong> NeoForge's <code>neoforge:components</code> takes a
+        <em>removal</em> patch, and <code>"!horsegenetics:stasis_snapshot": {}</code> matches only a
+        stack without that component. It works &mdash; but it makes the &ldquo;simple, maximally
+        compatible&rdquo; half of each pair neither, and it fails in the worst way available: get
+        one of its two easily-mistaken names wrong and <strong>the entire recipe file is dropped</strong>,
+        with the error reaching only the server log and the item silently having no recipe.</li>
+    <li><strong>A priority file.</strong> NeoForge's <code>data/neoforge/recipe_priorities.json</code>
+        ranks recipes, and ranking the Java halves above the JSON ones would make the Java one win
+        whenever both matched. <strong>This does not work</strong>, and the reason is worth carrying
+        elsewhere: when a player clicks an entry in the <em>recipe book</em>, the book hands that
+        recipe back to <code>RecipeManager.getRecipeFor</code> as a <em>hint</em>, and a matching
+        hint is honoured <strong>ahead of any priority</strong>. The book would have pulled an
+        occupied chamber out of the player's inventory to fill the grid it had just offered them.</li>
+</ul>
+<p>
+    Two item ids make the collision <strong>unrepresentable rather than guarded</strong>. Nothing
+    has to read a component, nothing has to be ordered correctly, and every recipe in
+    <code>data/horsegenetics/recipe/</code> is plain vanilla JSON again &mdash; a bare item id or a
+    tag, with no NeoForge extension anywhere in the folder.
+</p>
+<div class="note warn">
+    <span class="label">What it costs: a chamber can no longer be filled in place</span>
+    <p>
+        An <code>ItemStack</code> cannot change its own item, so
+        <code>HorseStasisHandler.swallow</code> <strong>returns</strong> the filled chamber and each
+        caller writes it back where the old one was &mdash; into the hand for a player capture, and
+        into a container slot for the emergency walk, which carries a <code>ChamberSlot</code>
+        (container plus index) rather than a bare stack for exactly this reason. Release, and a mare
+        coming out of a bank to foal, swap the other way. <strong>A caller that forgets leaves the
+        horse in a stack nobody is holding</strong>, which is the one new way this can go wrong.
+    </p>
+</div>
 <p>
     <strong>Why bother, when the Java recipe alone matched everything?</strong> Because a plain JSON
     recipe is the only shape proven to be drawable on a modded server &mdash; it is why the bank was
@@ -1001,8 +1043,8 @@
         <code>StasisUpgradeRecipe</code> copies the <code>stasis_snapshot</code> across. The
         JSON version of <em>that</em> half is not a cheaper version of it; it is a data-loss bug
         with a crafting recipe attached. It is safe for the empty half only because an empty
-        chamber has nothing to lose, and <strong>the removal patch is the only thing holding
-        those two apart</strong>.</li>
+        chamber is <em>a different item</em>, so no plain ingredient in that recipe can name one
+        that has a horse in it.</li>
     <li><strong>So must the ender pearls.</strong> <code>EmergencyChamberRecipe</code> is the
         same hazard wearing a different shape &mdash; the chamber it converts sits in the middle
         of the grid and may well have a horse in it &mdash; so it copies
@@ -1369,8 +1411,10 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        <strong>The chamber recipes have been made visible to JEI and the recipe book twice
-        now, the first attempt did not work, and nobody has looked at the second</strong>; beyond that,
+        <strong>The chamber recipes have been made visible to JEI and the recipe book twice now,
+        the first attempt did not work, nobody has looked at the second, and a horse entering or
+        leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
+        swap sites</strong>; beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
         gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
         so the whole capture/release round trip, the water-container remainder for a modded
@@ -1475,6 +1519,43 @@
         is a regression check as well as an unplayed one &mdash; and the one whose failure costs
         a horse rather than a craft.</li>
 </ul>
+
+<h3 id="verify-occupied-item">The chamber swaps item when a horse goes in (2026-09-25, NOT played)</h3>
+<p>
+    Brand new and the riskiest thing in this pass, because it changes what happens at every point a
+    horse enters or leaves a chamber. Filling one no longer edits the stack &mdash; it
+    <a href="#occupied-is-an-item">builds a new one and writes it back</a> &mdash; so a caller that
+    puts it back in the wrong place loses the animal into a stack nobody holds. The gametests cover
+    the recipes; <strong>none of the four swap sites has been watched in a running game</strong>.
+</p>
+<ul>
+    <li><strong>Capture from the hand.</strong> Right-click a horse with an empty chamber.
+        <strong>Pass:</strong> the thing in your hand is now a chamber naming that horse.
+        <strong>Fail:</strong> the horse vanishes and the hand still holds an empty chamber, which
+        means <code>swallow</code>'s result was dropped on the floor of the code.</li>
+    <li><strong>Release.</strong> Right-click the ground with it. The horse comes back and the hand
+        holds an empty chamber again.</li>
+    <li><strong>The emergency chamber, in a pack and in a bank.</strong> Both walks now write the
+        filled chamber into a container slot rather than editing a stack. Watch it fire from the
+        hotbar, and then from a bank, and check the chamber left behind names the horse.</li>
+    <li><strong>A mare foaling out of a bank.</strong> The slot must end up holding an
+        <em>empty</em> chamber with the at-stud mark gone. This is the rarest path and the one with
+        the longest setup, so it is the last to be reached and worth doing deliberately.</li>
+    <li><strong>An upgrade with a horse aboard, in the recipe book.</strong> Specifically: hold an
+        occupied chamber and a book, open the recipe book, and click the Intermediate entry.
+        <strong>Pass:</strong> it cannot use the occupied chamber to fill the grid at all.
+        <strong>Fail:</strong> it does, and the horse is gone &mdash; which is the exact hole the
+        two item ids exist to close, and the one a priority file could not.</li>
+</ul>
+
+<h3 id="verify-occupied-art">The occupied chambers have no art of their own (2026-09-25, known)</h3>
+<p>
+    All five reuse their empty twin's texture, so a chamber with a horse in it looks identical to
+    one without and only the tooltip says which is which. That is deliberate for now rather than
+    overlooked &mdash; it is five 16&times;16 PNGs and no code &mdash; but it is a real gap in a
+    feature whose whole point is telling your horses apart. Filed here rather than as a plan
+    because the fix is art, not a decision.
+</p>
 
 <h3 id="verify-emergency">The emergency chamber catches a horse (NOT played)</h3>
 <p>

@@ -8,7 +8,10 @@ wiki/ai-setup.html#settings	all	Your key
 wiki/ai-setup.html#what	all	What it does
 wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
+wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
+wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide which recipe runs
+wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
 wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
 wiki/api-notes.html#verified	all	Verified
@@ -2790,6 +2793,7 @@ wiki/horse-stasis.html#emergency-log	gameplay	It writes it down as well as sayin
 wiki/horse-stasis.html#emergency-log-coding	coding	Why a rescue is a log row and not only a chat line
 wiki/horse-stasis.html#emergency-not-a-tier	coding	Why it is a subclass and not a fifth tier
 wiki/horse-stasis.html#files	coding	What is where
+wiki/horse-stasis.html#occupied-is-an-item	coding	A chamber with a horse in it is a different item
 wiki/horse-stasis.html#pipes	coding	Why the goods slots are on the wire and the chambers are not
 wiki/horse-stasis.html#refusals	gameplay	What it refuses, and why it says so
 wiki/horse-stasis.html#release-details	coding	Small decisions inside release

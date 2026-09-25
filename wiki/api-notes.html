@@ -405,6 +405,81 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
         will drift.</li>
 </ul>
 
+<h2 id="recipe-visibility">Three flags decide whether a recipe can be shown, and only two are on <code>CustomRecipe</code></h2>
+
+<p>
+    A <code>CustomRecipe</code> that crafts perfectly can still be one <strong>no tool in the game
+    will draw</strong> &mdash; no recipe-book entry, no place-into-grid button, nothing when you
+    click the item in JEI. Three separate methods decide it, and they answer three different
+    questions:
+</p>
+<table>
+    <tr><th>Method</th><th>Declared on</th><th>Default</th><th>Answers</th></tr>
+    <tr><td><code>isSpecial()</code></td><td><code>CustomRecipe</code></td><td><code>true</code></td>
+        <td>Is this recipe listed at all?</td></tr>
+    <tr><td><code>placementInfo()</code></td><td><code>CustomRecipe</code></td><td><code>NOT_PLACEABLE</code></td>
+        <td>May the book place it into the grid for you?</td></tr>
+    <tr><td><code>display()</code></td><td><strong><code>Recipe</code></strong></td><td><code>List.of()</code></td>
+        <td><strong>What is actually drawn?</strong></td></tr>
+</table>
+<p>
+    <strong>The third is the trap</strong>, because it is not on the class you are looking at.
+    <code>CustomRecipe</code> does not mention <code>display()</code>; it inherits the empty default
+    from <code>Recipe</code>. Overriding the two visible ones and shipping is exactly what happened
+    here &mdash; twice, across two releases, with a green gametest suite that asserted the two flags
+    that had just been fixed. <code>ShapedRecipe</code> and <code>ShapelessRecipe</code> build their
+    own displays, which is why plain JSON recipes never show this and a custom one always does.
+    See <a href="horse-stasis.html#special-recipes">horse-stasis.html</a>.
+</p>
+
+<h2 id="recipe-priority-hint">A recipe priority does not decide which recipe runs</h2>
+
+<p>
+    NeoForge's <code>data/neoforge/recipe_priorities.json</code> looks like the answer when two
+    recipes match one grid and you need a particular one to win. <strong>It is not a guarantee.</strong>
+    It orders the search &mdash; <code>RecipeMap.order()</code> sorts by priority descending and
+    <code>getRecipeFor</code> takes the first match &mdash; but there is a path that never reaches
+    that search:
+</p>
+<pre><code>public Optional&lt;RecipeHolder&lt;T&gt;&gt; getRecipeFor(type, input, level, recipeHint) {
+    return recipeHint != null &amp;&amp; recipeHint.value().matches(input, level)
+        ? Optional.of(recipeHint) : this.getRecipeFor(type, input, level);
+}</code></pre>
+<p>
+    <code>CraftingMenu.slotsChanged</code> passes <code>null</code>, so priority applies while a
+    player lays a grid out by hand. <code>CraftingMenu.finishPlacingRecipe</code> passes <strong>the
+    recipe the player clicked in the recipe book</strong>, and a matching hint short-circuits
+    everything. So a recipe can win by being the one the book offered, whatever it ranks.
+</p>
+<p>
+    <strong>If two recipes must never both claim a grid, make their inputs disjoint</strong> rather
+    than ordering them. Where the difference is a data component, the reliable way to do that is a
+    separate item id &mdash; a plain ingredient cannot see components, so as long as one item means
+    both states, every plain recipe naming it is a silent data-loss bug waiting for the right click.
+    That is why the stasis chambers are registered twice; see
+    <a href="horse-stasis.html#occupied-is-an-item">horse-stasis.html</a>.
+</p>
+
+<h2 id="custom-ingredient-names">A custom ingredient has two names, and both are easy to get wrong</h2>
+
+<p>
+    A NeoForge ingredient in a recipe JSON does <strong>not</strong> use <code>"type"</code>, and is
+    <strong>not</strong> named after its class:
+</p>
+<pre><code>{ "neoforge:ingredient_type": "neoforge:components",   // NOT "type", NOT "neoforge:data_component"
+  "items": "horsegenetics:basic_stasis_chamber",
+  "components": { "!horsegenetics:stasis_snapshot": {} } }</code></pre>
+<p>
+    The dispatch key is set in <code>IngredientCodecs.codec</code>, and the registered ids are in
+    <code>NeoForgeMod</code> (<code>components</code>, <code>difference</code>,
+    <code>intersection</code>, <code>compound</code>, <code>block_tag</code>,
+    <code>custom_display</code>). <strong>Getting either wrong drops the whole recipe file</strong>
+    with a <code>Couldn't parse data file</code> line in the server log and nothing anywhere else,
+    so the symptom is an item that silently has no recipe. A <code>"!id": {}</code> entry in
+    <code>components</code> is a <em>removal</em> patch and matches only stacks lacking it
+    (<code>DataComponentPatch.PatchKey</code>).
+</p>
+
 <h2 id="saved-attributes">A saved entity&rsquo;s <code>attributes</code> list is often empty</h2>
 
 <p>

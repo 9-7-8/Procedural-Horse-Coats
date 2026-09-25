@@ -55,6 +55,17 @@
         confident sentence &mdash; a breed file looks like a thing that only configures itself,
         and two of its lines reached out and changed what every wild horse asks for, while its own
         note said in so many words that they had not</a></li>
+    <li><a href="session-log/d2026-09-25-chamber-recipes-again.txt">2026-09-25, later &mdash;
+        the stasis recipes a third time. The previous fix was real and insufficient:
+        <code>CustomRecipe</code> defaults <em>three</em> flags the wrong way and only two are
+        on that class &mdash; <code>display()</code> is inherited from <code>Recipe</code>, and a
+        recipe with no display has nothing for the book to draw. Then two designs for splitting
+        each chamber into a simple recipe and a complex one, both unsound: a component ingredient
+        whose failure mode is a silently dropped recipe file, and a priority file that
+        <strong>cannot work</strong>, because the recipe book hands its own recipe back as a hint
+        that is honoured ahead of any priority. The owner's answer &mdash; make an occupied
+        chamber a different item &mdash; makes the collision unrepresentable instead of guarded,
+        and returns every recipe in the folder to plain vanilla JSON</a></li>
     <li><a href="session-log/d2026-09-25-recipes-and-gesture.txt">2026-09-25 &mdash;
         five bug reports off a modded server. The stasis chamber recipes were present,
         registered and working, and <em>nothing in the game would show them to anybody</em>

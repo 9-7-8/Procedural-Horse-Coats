@@ -1,0 +1,120 @@
+2026-09-25 — the stasis recipes, a third time: the flag that was still wrong, and two
+designs that were unsound before the owner named the right one
+
+    The report was one sentence and it was the same sentence as before:
+
+        So the stasis chamber recipe is still not working.
+
+    "Still" is the whole report. d2026-09-25-recipes-and-gesture.txt records this being
+    diagnosed and fixed earlier the same day, and 0.5.026 shipped with that fix in it. The
+    fix was real, was necessary, and was not sufficient.
+
+The third flag
+
+    CustomRecipe defaults three things the wrong way for a recipe meant to be seen, and the
+    previous session found two:
+
+        isSpecial()      -> true                    is it listed?
+        placementInfo()  -> NOT_PLACEABLE           may the book place it for you?
+        display()        -> List.of()               WHAT IS DRAWN?
+
+    The third is not on CustomRecipe at all — it is inherited from Recipe, which defaults
+    display() to an empty list, and CustomRecipe never overrides it. A recipe that produces
+    no RecipeDisplay has nothing for the recipe book to draw however findable and placeable
+    it claims to be. Two of three flags is not two thirds of a visible recipe; it is an
+    invisible one.
+
+    Worth naming as a pattern rather than a fact about this class: the previous session
+    reasoned from the two defaults it found on the class it was looking at, and did not ask
+    what the interface above it defaulted. The gametest it added asserted exactly the two
+    things it had just fixed, which is why the suite stayed green across a release that
+    still had the bug.
+
+Then the owner asked for two recipes per chamber, and the interesting part was why
+
+    "One recipe that's as simple and compatible as possible, that does not take occupied
+    chambers or modded buckets, and then a more complex one that does, so the simpler recipe
+    is there as a fallback."
+
+    The reasoning behind it is sound and is worth keeping: a plain shapeless JSON file is the
+    only recipe shape in this mod that has ever been seen to draw correctly on the owner's
+    modded server. That is not a guess — it is why the report always arrived in the shape
+    "the bank has a recipe but the chambers don't". The bank is plain JSON.
+
+    So: for each chamber, a plain JSON recipe and a Java one. The Basic chamber's split is
+    the vanilla water bucket against every other container in c:buckets/water, which is a
+    DifferenceIngredient and is exactly what the owner asked for. The other four split on
+    whether the chamber has a horse in it, because a plain JSON recipe builds its result from
+    scratch and carries no components — it would craft the right item and delete the animal.
+
+Two designs for that split, both unsound, and the second failed in an interesting way
+
+    FIRST: a neoforge:components ingredient carrying a removal patch,
+    "!horsegenetics:stasis_snapshot": {}, which matches only a stack lacking that component.
+    This works. It was built, tested and committed. Two things are wrong with it. It makes
+    the "simple and maximally compatible" half of each pair neither. And getting it into the
+    datapack took two wrong names first — the dispatch key is "neoforge:ingredient_type" and
+    not "type", and the type is registered "neoforge:components" and not after its class —
+    each of which drops the WHOLE recipe file with an error that reaches only the server log.
+    A fallback whose failure mode is "the item silently has no recipe" is not a fallback.
+
+    SECOND: plain JSON plus data/neoforge/recipe_priorities.json, ranking the Java halves
+    above the JSON ones so the Java one wins wherever both match. The owner chose this, and
+    checking it before building it is what turned up that it does not work:
+
+        public Optional<RecipeHolder<T>> getRecipeFor(type, input, level, recipeHint) {
+            return recipeHint != null && recipeHint.value().matches(input, level)
+                ? Optional.of(recipeHint) : this.getRecipeFor(type, input, level);
+        }
+
+    CraftingMenu passes null for ordinary slot changes, so priority applies while a player
+    lays a grid out by hand. But finishPlacingRecipe passes the recipe the player clicked in
+    the RECIPE BOOK — and a matching hint is honoured ahead of any ordering. The book fills
+    the grid from the player's inventory using the plain ingredient, which cannot see
+    components, so it would have picked up an occupied chamber and then crafted with the very
+    recipe that eats it. Priority never gets a say.
+
+    Carry that one forward: a NeoForge recipe priority is not a guarantee about which recipe
+    runs. It orders the search that the recipe-book hint path skips.
+
+The owner's answer, which is the one that holds
+
+        Can you change the occupied stasis chamber into a fundamentally different kind of
+        item, as in like it has a different item ID?
+
+    Five new registrations — occupied_basic_stasis_chamber and its four siblings — and a
+    horse going in swaps the item rather than adding a component. The collision stops being
+    guarded and becomes unrepresentable: a plain ingredient naming basic_stasis_chamber
+    cannot match a stack that is a different item, whatever path reaches it, hint or not.
+    Every recipe in data/horsegenetics/recipe/ is plain vanilla JSON again, with no NeoForge
+    extension anywhere in the folder.
+
+    It is also the shape that needed the least argument afterwards, which is usually the sign.
+
+    What it costs is that a chamber can no longer be filled in place, because an ItemStack
+    cannot change its own item. swallow() returns the filled chamber and every caller writes
+    it back where the old one was: into the hand for a player capture, into a container slot
+    for the emergency walk — which now carries a ChamberSlot of container plus index rather
+    than a bare stack — and the other way for release and for a mare coming out to foal. A
+    caller that forgets leaves the horse in a stack nobody is holding, which is a new way for
+    this to go wrong and is why all four sites are on the Verification tab unplayed.
+
+Two claims that had stood and were simply false
+
+    "A plain recipe eats every input", on StasisChamberRecipe and on the wiki, given as the
+    reason the Basic chamber had to be a Java recipe at all. Items.WATER_BUCKET is declared
+    craftRemainder(BUCKET); any recipe hands the bucket back by itself, which is how cake
+    returns three of them. The custom recipe was only ever needed for a modded container that
+    declares no remainder.
+
+    And NeoForge 26.1.2 has no transmute recipe. Checking for one first — rather than
+    writing neoforge:transmute_shapeless from memory of a later version — is the only reason
+    an afternoon did not go into a recipe type that is not there.
+
+What shipped, and what did not
+
+    Not released. The owner's server is on 0.5.026 and still has the original bug; none of
+    this reaches it until a jar is cut. Cutting one wants a runServer boot to Done( first.
+
+    The five occupied chambers reuse their empty twin's texture, so a chamber with a horse in
+    it looks identical to one without. Five PNGs and no code; on the Verification tab.
