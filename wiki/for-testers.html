@@ -363,7 +363,7 @@
     <li>Start copying one of the papers with some books, and let it make at least one copy.</li>
     <li>Break the shelf.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> all 3 genes are still listed after reloading, and breaking the shelf drops every paper, every book and every finished copy.</p>
+<p class="tester-pass"><strong>It works if:</strong> all 3 pairs are still listed after reloading &mdash; each row reads like <em>Agouti: A/a</em> &mdash; and breaking the shelf drops every paper, every book and every finished copy.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> any paper is lost.</p>
 <button type="button" class="report-btn" data-report="The Equine Research Shelf keeps its papers">Report a problem with this test</button>
 </div>
@@ -917,14 +917,15 @@
 
 <div class="tester-test" id="t-shelf">
 <h3>Copying genes on the Equine Research Shelf</h3>
-<p class="tester-need"><strong>You need:</strong> a bookshelf, 2 horse hair, research papers, books. A second player with a paper for a different gene, if you can.</p>
+<p class="tester-need"><strong>You need:</strong> a bookshelf, 2 horse hair, research papers, books. A second player with a paper for a different pair, if you can.</p>
 <ol>
     <li>Craft the shelf from the bookshelf and 2 horse hair, and look at it in your inventory.</li>
     <li>Place the shelf.</li>
     <li>Put a research paper in on the Store tab.</li>
-    <li>Put a second paper for the same gene in.</li>
+    <li>Put a second copy of the <em>same</em> paper in &mdash; the same gene <b>and</b> the same pair.</li>
+    <li>Now put in a paper for the same gene but a <em>different</em> pair, if you have one.</li>
     <li>On the Store tab, click where the book slot is on the Copy tab, while holding a book.</li>
-    <li>Open the Copy tab and pick the gene.</li>
+    <li>Open the Copy tab and pick a pair.</li>
     <li>Add some books.</li>
     <li>Watch the progress arrow.</li>
     <li>Close the shelf and walk away for 2 minutes.</li>
@@ -932,7 +933,7 @@
     <li>Take the book out halfway through a copy.</li>
     <li>If you have a second player, both file a different gene and both copy at the same shelf.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the item and the placed block look like a bookshelf; the second paper for the same gene stays in its slot; clicking the empty spot on the Store tab puts nothing in; the arrow fills and copies keep being made while you are away; taking the book out resets the progress; each player gets copies of their own gene.</p>
+<p class="tester-pass"><strong>It works if:</strong> the item and the placed block look like a bookshelf; the duplicate of the same pair stays in your hand; a <em>different</em> pair of the same gene goes in and adds a second row; clicking the empty spot on the Store tab puts nothing in; the arrow fills and copies keep being made while you are away; taking the book out resets the progress; each player gets copies of their own pair.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> no copies are made while you are away, or items disappear.</p>
 <button type="button" class="report-btn" data-report="Copying genes on the Equine Research Shelf">Report a problem with this test</button>
 </div>
@@ -1102,25 +1103,44 @@
     <li>Click the search box and type <code>speed</code>.</li>
     <li>Close the browser, hold a book, and right-click your tamed horse.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the grid, result and inventory never overlap; the book gives a research paper; the carrot crafts in the browser and at the crafting table; the two carrots merge into one; the dropdown changes the list and descriptions stay inside their boxes; typing <code>speed</code> does not open your inventory (the letter "e" is in it); the horse gives you a research paper for a gene it carries.</p>
+<p class="tester-pass"><strong>It works if:</strong> the grid, result and inventory never overlap; the book gives a research paper; the carrot crafts in the browser and at the crafting table; the two carrots merge into one; the dropdown changes the list and descriptions stay inside their boxes; typing <code>speed</code> does not open your inventory (the letter "e" is in it); the horse gives you a research paper for an allele pair it carries.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> anything overlaps, a recipe does not craft, the inventory pops open while typing, or the book does nothing on the horse.</p>
 <button type="button" class="report-btn" data-report="The browser's Crafting and Recipes tabs">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-pair-papers">
+<h3>A paper names a pair, and the carrot grants that pair</h3>
+<p class="tester-need"><strong>You need:</strong> a horse with something unusual at a locus, 3 books, a golden carrot, horse hair, and the rarity ingot for that gene (gold, unless its page says otherwise). Papers you already had from before this update, if you have any.</p>
+<ol>
+    <li><strong>If you have old papers</strong> &mdash; in a chest, on a shelf, in a villager's window &mdash; hover each one first, before anything else.</li>
+    <li>Right-click your horse while holding a book. Read the chat line and the paper's tooltip.</li>
+    <li>Do it twice more on the same horse, to get papers for different loci or pairs.</li>
+    <li>Craft a splice carrot from one paper: golden carrot + paper + horse hair + the rarity ingot.</li>
+    <li>Hover the carrot.</li>
+    <li>If you got two papers for the <em>same</em> gene with different pairs, craft both carrots and hover them side by side.</li>
+    <li>Feed one carrot to a parent and breed it.</li>
+    <li>Check the foal's Genes tab for that locus.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> every old paper still names a gene and now shows a pair with both copies the same (<em>Gene: X/X</em>) rather than <em>Blank</em>; a new paper names the pair the horse really carries; <b>the carrot's tooltip says which pair it will hand on</b>, and two carrots for one gene read differently; and the foal comes out carrying the pair the carrot named.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> an old paper reads <em>Blank</em> or will not craft; a carrot tooltip is empty; two carrots for different pairs of one gene look identical; or the foal does not carry what the carrot said.</p>
+<button type="button" class="report-btn" data-report="A paper names a pair, and the carrot grants that pair">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-discovery">
 <h3>Finding research papers and discovering genes</h3>
 <p class="tester-need"><strong>You need:</strong> a survival world with dungeons or villages.</p>
 <ol>
-    <li>Open 10 or more dungeon or village chests.</li>
+    <li>Open 10 or more chests of any kind.</li>
     <li>Count how many research papers you find.</li>
+    <li>Hover each one and read the tooltip.</li>
     <li>Right-click a research paper.</li>
     <li>Press <kbd>H</kbd> and open the Gene database.</li>
     <li>Log out and back in.</li>
     <li>Check the Gene database again.</li>
     <li>Tame a wild horse by riding it, then check the Gene database once more.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> you find papers now and then (about 1 chest in 5); using one adds its gene; the gene is still there after logging back in; taming the wild horse adds the genes it carries.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> you never find a paper. Say how many chests you opened.</p>
+<p class="tester-pass"><strong>It works if:</strong> you find papers often (about 3 chests in 10, and any chest counts, not just dungeons); each tooltip names a gene <b>and a pair</b>, like <em>Cream: Cr/n</em>, and says homozygous or heterozygous; right-clicking one does <b>nothing at all</b> and does not consume it; taming the wild horse is what adds genes to the database.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you never find a paper (say how many chests you opened); a tooltip says only a gene name with no pair; or a paper says <em>Blank</em>.</p>
 <button type="button" class="report-btn" data-report="Finding research papers and discovering genes">Report a problem with this test</button>
 </div>
 

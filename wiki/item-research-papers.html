@@ -18,9 +18,11 @@
 <p class="eyebrow">Item <span class="sep">/</span> knowledge</p>
 <h1>Research papers</h1>
 <p class="lede">
-    A paper naming one gene. Reading it adds that gene to your gene database and
-    unlocks its targeted splice carrot &mdash; which is the only way to breed for a
-    specific gene on purpose.
+    A paper naming one gene and <strong>one allele pair</strong> &mdash;
+    <em>Agouti: A/a</em>, not just <em>Agouti</em>. Spend it on a
+    <a href="item-splice-carrots.html">Known Gene Splice carrot</a> and that is the pair
+    the carrot hands on, which is the only way to breed for a specific combination on
+    purpose. It is not something you read.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -28,16 +30,54 @@
 
 <div class="plain">
     <p>
-        <strong>Right-click the paper</strong> to learn its gene. That gene joins your
-        gene database, and you can then craft a
-        <a href="item-splice-carrots.html">Known Gene Splice carrot</a> for it.
+        A paper is the write-up of <strong>one combination</strong> &mdash; one gene, and the
+        two alleles you are being told about. Spend it on a
+        <a href="item-splice-carrots.html">Known Gene Splice carrot</a> and the carrot hands
+        that exact pair on to a foal.
     </p>
 </div>
 
 <p>
-    The tooltip tells you which gene the paper is for, how rare it is, and what it does,
-    so you can decide before you read it.
+    The tooltip names the pair, says whether it is homozygous or heterozygous, gives the
+    gene&rsquo;s rarity, and says what that particular combination does to a horse &mdash;
+    not what the locus is about in general.
 </p>
+
+<h2 id="pair">A pair, not a gene</h2>
+
+<p>
+    This is the change worth understanding, because it is what makes papers worth
+    collecting rather than ticking off. <strong>Two papers for the same gene are two
+    different items.</strong>
+</p>
+
+<ul>
+    <li><em>Cream: Cr/n</em> is a <strong>carrier</strong> paper. Its carrot hands the foal
+        one copy, so the foal carries cream and may not show it.</li>
+    <li><em>Cream: Cr/Cr</em> is a <strong>true-breeding</strong> paper. Its carrot hands on
+        two, so the foal is cream whatever the other parent brought.</li>
+    <li><em>Particle: Sflm/Gflm</em> is a <strong>compound</strong> pair &mdash; two different
+        variants, neither of them the ordinary one. Only a horse can teach you one of these.</li>
+</ul>
+
+<p>
+    <em>A/a</em> and <em>a/A</em> are the same paper. Which parent contributed which copy is
+    not a fact about the horse, so it is not a fact about the paper either: the two normalise
+    to one thing, stack in a slot, and take one place on a shelf.
+</p>
+
+<div class="note">
+    <span class="label">Why this replaced the one-paper-per-gene version</span>
+    <p>
+        A paper used to name a whole locus, and the carrot built from it took whichever pair
+        convention had picked. That was wrong twice over. A breeder standing in a field is
+        asking &ldquo;what does <em>A/a</em> do here?&rdquo;, not &ldquo;what is agouti?&rdquo;
+        &mdash; and on a wide locus the convention was a wall. The particle gene has around
+        forty alleles, and the old carrot could only ever hand over the first one, so no
+        amount of playing would get you a soul flame on purpose. Now every allele has a paper
+        and every paper has a carrot.
+    </p>
+</div>
 
 <div class="note">
     <span class="label">A paper is not something you read</span>
@@ -64,30 +104,94 @@
         weighted by rarity, so the common genes come up far more often. It used to be eight
         kinds of vanilla chest at not quite one in five, which on a large modded server meant
         almost none &mdash; see
-        <a href="items.html#chest-loot">every chest, any mod</a>.</li>
+        <a href="items.html#chest-loot">every chest, any mod</a>. A chest gives you a
+        <strong>carrier or a true-breeding</strong> paper, never a compound one.</li>
     <li><strong>Take it off a horse.</strong> Right-click a horse while holding a book
-        and you get a paper for <strong>one gene that horse carries, at random</strong>.
+        and you get a paper for <strong>one pair that horse actually carries, at random</strong>.
         You do not choose which &mdash; that is the point, and it is why a paper is a
         discovery rather than paperwork. A completely ordinary horse has nothing to teach
-        and costs you no book.</li>
+        and costs you no book. <strong>This is the only route to a compound pair</strong>, so
+        an odd horse is worth a book even when you already know the gene.</li>
     <li><strong>Copy one you already have.</strong> File a paper into an
         <strong>Equine Research Shelf</strong> and that shelf can copy it onto blank books
-        for as long as the original stays in it.</li>
-    <li><strong>Trade for it.</strong> Papers can be handed to other players &mdash; which
-        is the point of being able to write them. Knowledge is shareable rather than
-        hoardable.</li>
+        for as long as the original stays in it. One slot per pair, so a locus you have
+        studied properly takes several.</li>
+    <li><strong>Buy or trade for it.</strong> The <a href="villagers.html">equestrian
+        supplier</a> sells them at its last two tiers, on the same carrier-or-true-breeding
+        terms as a chest. Papers can also be handed to other players &mdash; which is the
+        point of being able to write them. Knowledge is shareable rather than hoardable.</li>
 </ul>
+
+<div class="note">
+    <span class="label">How many papers is that?</span>
+    <p>
+        Two per variant allele per locus, plus every compound pair a horse can show you.
+        The exact number is not written down here on purpose &mdash; it moves with every gene
+        anybody adds. Each gene&rsquo;s own page carries the count for that locus on its
+        gene-carrot card, asked of the mod rather than typed.
+    </p>
+</div>
 </section>
 
 <section class="tab-panel" data-tab="coding">
 <h2 id="component">The component and the routes</h2>
 
 <p>
-    <code>research_paper</code> carries a <code>research_gene</code> data component naming
-    one gene. Right-click it to add that gene to your
-    <a href="carrots.html#database">gene database</a> and unlock its carrot line; the
-    tooltip shows the gene&rsquo;s name, rarity tier and blurb.
+    <code>research_paper</code> carries a <code>research_gene</code> data component holding a
+    <code>common/genetics/ResearchTopic</code> &mdash; a gene key and two allele
+    <em>tokens</em>. <strong>Right-clicking it does nothing</strong>; the
+    <a href="carrots.html#database">gene database</a> is earned by owning a living horse
+    (<code>server/GeneDiscoveryHandler</code>), never by reading. A paper is an ingredient.
 </p>
+
+<h3 id="topic">Why it is strings, and where it normalises</h3>
+
+<p>
+    <code>ResearchTopic</code> holds tokens rather than <code>Allele</code> objects because a
+    paper outlives the gene it names: a datapack gene removed, a world opened without the mod
+    that added it. Every resolution &mdash; <code>gene()</code>, <code>pair()</code>,
+    <code>splice()</code> &mdash; answers <code>null</code> instead of throwing, because the
+    alternative is an exception inside somebody&rsquo;s inventory.
+</p>
+
+<p>
+    The pair is put in canonical order in the record&rsquo;s constructor, by handing it to
+    <code>AllelePair</code>, which has always sorted its two slots by declaration order. So
+    <code>A/a</code> and <code>a/A</code> are equal, produce the same
+    <code>token()</code> &mdash; <code>&lt;geneKey&gt;|&lt;a&gt;|&lt;b&gt;</code> &mdash; and
+    stack. That token is the key the research shelf, the menu sync and the block
+    entity&rsquo;s saved pick all use, which is why it is a flat string and not a record in
+    three more places.
+</p>
+
+<div class="note">
+    <span class="label">The one piece of back-compat in this repo</span>
+    <p>
+        <code>research_gene</code> used to be a bare <code>String</code> gene key, and there
+        are papers in chests, shelves and villager windows holding one. CLAUDE.md hard rule 6
+        refuses legacy shapes outright; <strong>this is the deliberate exception, asked for by
+        name</strong>. A stored string still decodes, through
+        <code>ResearchTopic.wholeGene</code>, as the <strong>homozygous non-wild pair</strong>
+        for that gene &mdash; the strongest thing a whole-gene paper could have meant. It falls
+        back to the carrier pair on a locus whose homozygote the gene forbids, because a paper
+        naming an impossible pair would craft an inert carrot.
+    </p>
+    <p>
+        The component <strong>keeps its old registry id</strong> for the same reason. Renaming
+        it to <code>research_topic</code> would be tidier and would silently drop the component
+        off every existing paper, leaving blanks. The whole of the compatibility is one
+        <code>Codec.either(record, string)</code> in <code>data/ResearchTopicCodecs</code>;
+        encoding always writes the map form, so a world loaded once never writes a bare string
+        again.
+    </p>
+    <p>
+        It is covered by a <strong>gametest</strong>, <code>old_papers_still_read</code>, and
+        not by JUnit: a component whose persistent codec refuses its stored value is
+        <em>dropped</em> on load with a warning nobody reads and no crash, and the NeoForge
+        module&rsquo;s test classpath deliberately carries no Minecraft, so <code>NbtOps</code>
+        and a real <code>ItemStack</code> only exist inside a booted game.
+    </p>
+</div>
 
 <ul>
     <li><strong>Chest loot</strong> &mdash; injected at 30% into <em>every</em> chest table in
@@ -99,11 +203,88 @@
         <a href="item-research-shelf.html">the shelf</a> copies them onto.</li>
     <li><strong>Off a horse</strong> &mdash; <code>server/GeneBookFromHorse</code>, on
         <code>EntityInteract</code> with a book. It collects every locus the horse is not
-        homozygous-baseline at (the same test discovery uses) and picks one uniformly. No
-        JSON recipe: the result depends on the animal.</li>
+        homozygous-baseline at (the same test discovery uses) and picks one uniformly,
+        <strong>writing down the pair the horse actually carries</strong>. No JSON recipe: the
+        result depends on the animal, and this is the only source of a compound pair.</li>
+    <li><strong>The equestrian supplier</strong> &mdash;
+        <code>data/loot/SetRandomGeneFunction</code> with <code>target: "paper"</code>, run as a
+        trade&rsquo;s <code>given_item_modifiers</code> so the offer is rolled once per restock
+        rather than under the player&rsquo;s cursor. Its <code>homozygous</code> flag narrows
+        the pool to the true-breeding half.</li>
     <li><strong>Traded from another player</strong> &mdash; which is the point of the
         second route: knowledge is shareable rather than hoardable.</li>
 </ul>
+
+<h2 id="pools">Which pairs a source may hand out</h2>
+
+<p>
+    A gene is drawn weighted by rarity, as it always was; the <em>pair</em> inside it then
+    comes from <code>ResearchTopic.lootPool</code> &mdash; for each variant allele, the carrier
+    pair <code>variant/wild</code> and the true-breeding pair <code>variant/variant</code>,
+    each filtered through <code>canOccur</code> and <code>sexConsistent</code>.
+</p>
+
+<p>
+    <strong>Deliberately not every combination the locus allows</strong> (owner&rsquo;s call).
+    A forty-allele locus has eight hundred pairs, and one of them being in this chest is not a
+    find, it is noise; eighty is a collection. The compound pairs still exist and still make a
+    carrot &mdash; a horse hands you one, which is the route that is supposed to be
+    interesting.
+</p>
+
+<h2 id="recipe">The recipe reads the pair off the paper</h2>
+
+<p>
+    <code>server/recipe/KnownGeneSpliceRecipe</code> resolves to a <code>ResearchTopic</code>
+    rather than a <code>Gene</code>, and emits <code>topic.splice()</code>. It refuses a grid
+    whose paper does not <code>isResolved()</code> &mdash; a retired gene, or a pair the locus
+    says cannot occur &mdash; because <strong>refusing to resolve is visible and an inert
+    carrot is not</strong>.
+</p>
+
+<div class="note">
+    <span class="label">What the plan expected to die, and did not</span>
+    <p>
+        This page&rsquo;s Roadmap tab predicted that <code>Gene.geneCarrotHomozygous()</code>
+        and <code>CarrotEffect.defaultSpliceFor</code> would both stop being needed once the
+        player picked both alleles. <strong>They survived</strong>, because that plan had the
+        shelf binding <em>two single-allele papers</em> into a book, and the shipped shape puts
+        the pair on the paper instead &mdash; which leaves three callers that have a gene and
+        no paper in hand: the Horse Browser&rsquo;s recipe ghost
+        (<code>menu/SpliceRecipeDisplay</code>), each gene page&rsquo;s
+        <a href="carrots.html#card">gene-carrot card</a> through
+        <code>web/DesignerApi.geneCarrotJson</code>, and the scientist&rsquo;s
+        <em>carrot</em> trades, which draw a gene and never see a paper at all. For those it is
+        now <code>ResearchTopic.defaultFor</code>: an <b>example</b> pair, not a claim about
+        every carrot for the locus. Both the card and the browser say so in those words.
+    </p>
+</div>
+
+<h2 id="shelf-key">The shelf keys on the pair</h2>
+
+<p>
+    <code>EquineResearchShelfBlockEntity</code> files one paper per <em>pair</em>, not per gene,
+    so <em>Agouti: A/A</em> and <em>Agouti: A/a</em> sit side by side &mdash; which is the whole
+    reason to file them, since those two craft different carrots. <code>topicOf</code>,
+    <code>topicsIn</code> and <code>holdsElsewhere</code> all key on
+    <code>ResearchTopic.token()</code>, the Copy tab&rsquo;s rows read
+    <code>Agouti: A/a</code>, and <code>copyTicks</code> is still the <em>gene&rsquo;s</em>
+    rarity &mdash; what is rare is the locus, and a carrier paper is no easier to transcribe
+    than a true-breeding one.
+</p>
+
+<h2 id="carrot-tooltip">The carrot says which pair it carries</h2>
+
+<p>
+    A <code>known_gene_splice_carrot</code> has always carried the right data and never shown
+    it, so every one of them looked identical in the inventory. That was tolerable while the
+    pair was a fixed convention per gene and is not now that a player can hold two carrots for
+    one locus that do different things. All eleven breeding carrots therefore share one class,
+    <code>item/BreedingCarrotItem</code>, whose only job is a tooltip built from the
+    <code>carrot_effects</code> tokens &mdash; so a combination carrot lists every effect it
+    merged, and a carrot for a gene this build no longer has says so in red rather than being
+    quietly inert.
+</p>
 
 <h2 id="gaps">Known gaps</h2>
 
@@ -118,64 +299,18 @@
     <strong>A research paper off a book works</strong> (owner-confirmed in play, 2026-09-10).
 </p>
 
-</section>
-
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
-
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>
-        Research papers would name an individual <strong>allele</strong> rather than a whole gene,
-        the Equine Research Shelf would bind two of them into one book, and the splice recipes would
-        take that book &mdash; which retires <code>Gene.geneCarrotHomozygous()</code> and the
-        carrot&rsquo;s homozygous-by-default rule.
-    </p>
-</div>
-
-<p class="lede">
-    <strong>Everything still planned for research papers, in one place.</strong> This section used
-    to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so that what a
-    paper is, how it is built and what is still planned for it are read together. The rest of the
-    knowledge loop it feeds &mdash; a hand-tuned carrot per gene, and a database check inside the
-    recipe &mdash; is planned on <a href="carrots.html#carrot-content">breeding carrots</a>.
+<p id="verified-tab-contradiction">
+    <strong>The Gameplay and Coding tabs agree that a paper is not read</strong> (settled
+    2026-09-24 against <code>ResearchPaperItem</code>, which has no <code>use</code> override
+    at all, and <code>GeneDiscoveryHandler</code>, which is the only writer of the database).
+    The Coding tab was the stale one. This was open check 302.
 </p>
 
-<hr>
-
-<h2 id="allele-papers">A research paper names an allele, not a gene</h2>
-
-<p>
-    The wanted end state: <strong>research papers pull out individual alleles</strong> rather
-    than whole genes, the <a href="item-research-shelf.html">equine research shelf</a> lets you
-    <strong>pick two of them</strong> and binds them into one book, and that book is what the
-    carrot recipes take. The crafting recipes themselves do not change. The load-bearing half
-    is built &mdash; a carrot already names exactly the pair it grants. What is left, in the
-    order that keeps the game working at each step:
-</p>
-
-<ul>
-    <li><strong>The paper carries an allele.</strong> <code>RESEARCH_GENE</code> becomes a gene
-        key plus an allele token, and the discovery system that grants papers has to decide
-        <em>which</em> allele a horse teaches you &mdash; presumably the ones it actually
-        carries, which is the same question <code>common/horse/RosterGenetics</code> already
-        answers for the browser's pickers.</li>
-    <li><strong>The shelf binds two into a book.</strong> Its <em>Copy</em> tab already picks
-        one gene and spends blank books; this is that tab taking two allele papers instead.
-        <code>ResearchShelfMenu</code> and <code>ResearchShelfScreen</code>.</li>
-    <li><strong>The recipe takes the book.</strong> <code>KnownGeneSpliceRecipe</code>
-        currently matches a research paper and calls <code>CarrotEffect.defaultSpliceFor</code>
-        to decide the pair; it would read the pair off the book instead, at which point
-        <code>defaultSpliceFor</code> and <code>Gene.geneCarrotHomozygous()</code> both stop
-        being needed and should go.</li>
-    <li><strong>The tooltip.</strong> A Known Gene Splice carrot already <em>carries</em> the
-        right data and has never <em>shown</em> it &mdash; every one of them looks identical in
-        the inventory. That is worth doing whether or not the rest lands.</li>
-</ul>
-
-<p class="muted">
-    Note the interaction: the carrot's homozygous-by-default rule is a stopgap that this design
-    deletes. Once the player picks both alleles there is no default to choose.
+<p id="verified-migration">
+    <strong>A paper written before papers named a pair still reads</strong> &mdash; pinned by
+    the <code>old_papers_still_read</code> gametest, which decodes the legacy bare string
+    through the real component codec and through <code>ItemStack.CODEC</code>, and by
+    <code>ResearchTopicTest</code>, which asserts every migrated paper still crafts.
 </p>
 
 </section>
@@ -185,7 +320,43 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Nothing but a single line of text is left: the paper dump&rsquo;s <code>genetic code:</code> row should carry <code>GeneCodeDisplay.shortForm</code>&rsquo;s compact code and <strong>wrap sensibly</strong> rather than running off the page &mdash; cheap to settle, and the last thing standing between this item and verified.</p>
+    <p>A paper names an <strong>allele pair</strong> as of 2026-09-24 and none of it has been
+    played: the pair a book takes off a horse, the carrot crafted from it granting <em>that</em>
+    pair, the shelf filing two pairs of one gene side by side, and an old whole-gene paper in
+    the owner&rsquo;s existing world still working.</p>
+</div>
+
+<h3 id="check-pair-papers" data-check-kind="open-gap">The pair swap, in play (NOT played)</h3>
+<div class="open-check">
+<strong>Open, shipped 2026-09-24: research papers now name one allele pair, and the whole loop is
+unplayed.</strong> Every piece of it is green in tests and in a gametest, which covers the parts
+that fail <em>invisibly</em> and covers nothing about whether it reads right. In the order that
+can be wrong without saying so:
+<ul>
+    <li><strong>An existing paper in the owner&rsquo;s live world.</strong> This is the one that
+        matters most and the only one the owner can check and nobody else can: the server at
+        <code>neoforge-26.1.2/run/</code> and her own save have papers written before the change.
+        Each should now read <em>Gene: X/X</em> rather than <code>Blank</code>, file into a shelf,
+        and craft a carrot. The gametest proves the codec; it cannot prove her actual save.</li>
+    <li><strong>Take a book to an odd horse.</strong> The paper should name the pair that horse
+        carries &mdash; including a compound pair such as <em>Particle: Sflm/Gflm</em>, which no
+        chest can produce. Chat says which; the tooltip should agree.</li>
+    <li><strong>Craft two carrots for one locus</strong> from a carrier paper and a true-breeding
+        paper, and check the <b>tooltips differ</b>. This is new
+        (<code>item/BreedingCarrotItem</code>): before today every Known Gene Splice carrot looked
+        identical in the inventory. Then feed each and confirm the foals differ the way the pairs
+        say they should.</li>
+    <li><strong>File both into an Equine Research Shelf.</strong> Two rows, not one, reading
+        <em>Gene: X/n</em> and <em>Gene: X/X</em>; each copies onto a blank book; a duplicate of
+        either still refuses the slot.</li>
+    <li><strong>A chest and the supplier.</strong> Found and bought papers should only ever be
+        carrier or true-breeding &mdash; a compound pair out of a chest means
+        <code>ResearchTopic.lootPool</code> is not what the draw is reading.</li>
+    <li><strong>Does a shelf full of pairs still read?</strong> Lowest priority, and the one the
+        flat-list decision was made on: the Copy tab is five rows and the list is now much longer
+        than it was. If it is unusable, grouping the rows under a gene heading was the rejected
+        alternative.</li>
+</ul>
 </div>
 
 <h3 id="open-older-item-research-papers">Still open from before 2026-09-13 (NOT played)</h3>
@@ -193,21 +364,6 @@
 <ul>
     <li><strong>Compact gene code</strong> (<code>GeneCodeDisplay.shortForm</code>) on the paper dump's <code>genetic code:</code> line, wrapped sensibly.</li>
 </ul>
-
-
-<h3 id="gap-302" data-check-kind="open-gap">Open check 302</h3>
-<div class="open-check">
-<strong>Open, found 2026-09-21 while dismantling the roadmap: <a href="item-research-papers.html">research papers</a> contradicts itself about what right-clicking a paper does.</strong>
-    The <strong>Gameplay</strong> tab says a paper grants nothing on reading &mdash; &ldquo;your gene
-    database is now earned only by owning a living horse&rdquo; &mdash; and the <strong>Coding</strong>
-    tab of the same page still says &ldquo;right-click it to add that gene to your gene database and
-    unlock its carrot line&rdquo;. One of the two describes code that no longer exists, and nothing
-    in the wiki says which. <strong>This is not a move artefact</strong>; it was already there and was
-    found because the Roadmap tab moved in beside it. Settle it against
-    <code>ResearchPaperItem</code> and the discovery path, fix the losing tab, and note which way it
-    went &mdash; a player reading the Gameplay tab and a modder reading the Coding tab currently
-    build opposite mental models of how the database is earned.
-</div>
 </section>
 
 <div class="page-foot">

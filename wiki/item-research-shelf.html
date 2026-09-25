@@ -18,7 +18,7 @@
 <p class="eyebrow">Block <span class="sep">/</span> genes</p>
 <h1>Equine Research Shelf</h1>
 <p class="lede">
-    A bookshelf that files research papers &mdash; one of each gene &mdash; and copies any
+    A bookshelf that files research papers &mdash; one of each <strong>allele pair</strong> &mdash; and copies any
     of them onto blank books for as long as the original stays in it. It is what turns
     knowing a gene into owning it.
 </p>
@@ -41,18 +41,20 @@
     <li><strong>Store</strong> &mdash; opens first, and it is <strong>a chest</strong>: six
         rows of nine slots for research papers. Put a paper in, take it out, whenever you
         like &mdash; nothing takes time and nothing is used up. Shift-clicking a paper from
-        your inventory files it. A shelf holds <strong>one paper per gene</strong>, so a
-        second paper for a gene that is already there will not go in.</li>
-    <li><strong>Copy</strong> &mdash; pick a gene from the papers on the shelf and put blank
+        your inventory files it. A shelf holds <strong>one paper per allele pair</strong>, so a
+        second paper for a pair that is already there will not go in &mdash; but
+        <em>Agouti: A/a</em> and <em>Agouti: A/A</em> are two pairs and both file, which is
+        the point, since they craft different carrots.</li>
+    <li><strong>Copy</strong> &mdash; pick a pair from the papers on the shelf and put blank
         books in. <strong>It works like a furnace</strong>: each book becomes a copy of that
-        gene&rsquo;s paper in the result slot, one after another, whether or not you have the
-        shelf open - set it going and walk away. Copies of the same gene stack. <b>The
+        pair&rsquo;s paper in the result slot, one after another, whether or not you have the
+        shelf open - set it going and walk away. Copies of the same pair stack. <b>The
         shelf&rsquo;s own paper is never used up.</b>
         <p>
             <strong>A copy takes time</strong> &mdash; one iron ingot&rsquo;s smelt per
             rarity tier, so about ten seconds for a common gene and about a minute for a
             mythic one. The arrow between the slots fills as it goes. Running out of books,
-            picking a different gene, or taking the original off the shelf starts the clock
+            picking a different pair, or taking the original off the shelf starts the clock
             again rather than pausing it.
         </p></li>
 </ul>
@@ -65,7 +67,7 @@
     <span class="label">Taking a paper back stops the copying</span>
     <p>
         The Copy list is what is on the shelf, not your gene database. Take the original
-        out of its slot and that gene leaves the list, and the shelf can no longer copy it.
+        out of its slot and that pair leaves the list, and the shelf can no longer copy it.
         That is the whole point: a shelf you have filled is a collection that exists in the
         world, and it can be emptied.
     </p>
@@ -81,13 +83,13 @@
     The shelf makes papers <em>plentiful</em>; it does not make them <em>appear</em>. The
     ways in are on <a href="item-research-papers.html">Research papers</a>, and the one
     that pairs with this is <strong>a book on a horse</strong>: right-click a horse
-    holding a book and you get a paper for one gene <em>that horse</em> carries, chosen
+    holding a book and you get a paper for one pair <em>that horse</em> carries, chosen
     at random. You cannot pick, which is what makes a paper something you found.
 </p>
 
 <p>
     So the loop is: meet horses, take what they will tell you, file it, and copy it from
-    then on. A gene you have filed is a gene you can hand to somebody else as often as
+    then on. A pair you have filed is a pair you can hand to somebody else as often as
     you like &mdash; which is what makes knowledge shareable rather than hoardable.
 </p>
 
@@ -95,18 +97,46 @@
 
 <section class="tab-panel" data-tab="coding">
 
-<h2 id="storage">Real slots, one paper per gene</h2>
+<h2 id="storage">Real slots, one paper per allele pair</h2>
 
 <p>
     <code>EquineResearchShelfBlockEntity</code> holds a 54-slot container
     (<code>SLOTS</code>, a double chest) saved with <code>ContainerHelper</code>. It was a
-    <code>Set&lt;String&gt;</code> of gene keys fed through one filing slot and read back
+    <code>Set&lt;String&gt;</code> of keys fed through one filing slot and read back
     through a clickable list; in play that read as a shelf that did nothing, and the owner
-    asked for it to be &ldquo;just a UI like a chest&rdquo; (2026-09-10). The one-per-gene
+    asked for it to be &ldquo;just a UI like a chest&rdquo; (2026-09-10). The one-per-pair
     rule the set used to make structural is now a slot rule:
-    <code>PaperSlot.mayPlace</code> refuses a paper whose gene another slot already holds,
+    <code>PaperSlot.mayPlace</code> refuses a paper whose pair another slot already holds,
     and every slot takes one item.
 </p>
+
+<div class="note">
+    <span class="label">The key is the pair, and that is the whole change</span>
+    <p>
+        Every static on this block entity used to take a <em>gene key</em> and now takes a
+        <code>ResearchTopic.token()</code> &mdash; <code>topicOf</code>,
+        <code>topicsIn</code>, <code>holdsElsewhere</code>, <code>stores</code>,
+        <code>displayName</code>, <code>copyTicks</code>, the saved <code>selected</code>
+        string, and <code>ShelfActionPayload</code>. Nothing about the shelf's shape moved;
+        what moved is what counts as &ldquo;the same paper&rdquo;, since
+        <a href="item-research-papers.html#pair">a paper names a pair</a> now.
+    </p>
+    <p>
+        Two consequences worth knowing. <strong>The Copy list is much longer</strong> &mdash;
+        a locus you have studied contributes several rows, and the flat
+        <em>Gene: pair</em> list sorted by gene name was chosen over grouping rows under a
+        gene heading because it needed no new row-type handling in the screen or the menu
+        sync (owner's call, 2026-09-24). And <strong><code>copyTicks</code> is still the
+        gene's rarity</strong>, not the pair's: what is rare is the locus, and a carrier
+        paper is no easier to transcribe than a true-breeding one.
+    </p>
+    <p>
+        A pick saved before the change is a bare gene key, which no longer matches any
+        filed paper, so the shelf simply has nothing selected and the player picks again.
+        A filed <em>paper</em> is migrated properly &mdash; see
+        <a href="item-research-papers.html#component">the one piece of back-compat</a>.
+    </p>
+</div>
 
 <p>
     <strong>Breaking it drops the contents from the block entity&rsquo;s
@@ -129,15 +159,15 @@
 
 <p>
     Because the papers are real slots the ordinary container sync carries them, and the
-    Copy list is read from those slots on both sides (<code>genesIn</code>). The only
-    packet left is <code>ShelfActionPayload</code>&rsquo;s gene pick; the old
+    Copy list is read from those slots on both sides (<code>topicsIn</code>). The only
+    packet left is <code>ShelfActionPayload</code>&rsquo;s pair pick; the old
     <code>ShelfSyncPayload</code> and the withdraw action are gone.
 </p>
 
 <h2 id="furnace">The copy runs on the block, like a furnace</h2>
 
 <p>
-    The book slot, the result slot, the picked gene and the progress all live on
+    The book slot, the result slot, the picked pair and the progress all live on
     <code>EquineResearchShelfBlockEntity</code>, and its ticker advances them whoever is
     looking. The menu only wraps them - its slots are the block&rsquo;s containers and its
     progress bar reads the block&rsquo;s <code>ContainerData</code>, the furnace&rsquo;s
@@ -177,7 +207,18 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Filing papers is the only part verified, and the rest fails quietly: copying is meant to keep running with the screen shut, pulling the book mid-copy must reset progress to zero, and a broken shelf has to drop every paper, book and finished copy rather than eat them.</p>
+    <p>Filing papers is the only part verified, and the rest fails quietly: copying is meant to keep running with the screen shut, pulling the book mid-copy must reset progress to zero, a broken shelf has to drop every paper, book and finished copy rather than eat them, and as of 2026-09-24 the shelf files one paper per <strong>allele pair</strong> rather than per gene, which nobody has watched.</p>
+</div>
+
+<h3 id="check-pair-filing" data-check-kind="open-gap">Filing by pair rather than by gene (NOT played)</h3>
+<div class="open-check">
+<strong>Open, shipped 2026-09-24 with <a href="item-research-papers.html#pair">pair papers</a>.</strong>
+Two papers for one locus &mdash; say <em>Agouti: A/n</em> and <em>Agouti: A/A</em> &mdash;
+should both file and show as <b>two rows</b>; a duplicate of either should still refuse the
+slot. Then: does a shelf holding several pairs of several genes still <em>read</em>? The Copy
+list is five rows and is now much longer than it was, and the flat list was chosen over
+grouping under gene headings on the argument that it needed no new UI. If it is unusable,
+grouping is the alternative that was weighed and set aside, not a new idea.
 </div>
 
 <h3 id="open-research-shelf-policy">May an undiscovered gene be filed?</h3>

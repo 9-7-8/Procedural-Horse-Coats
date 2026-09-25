@@ -261,16 +261,56 @@
 <h2 id="known">Known Gene Splice carrots</h2>
 
 <p>
-    <strong>One per gene, and you pick which.</strong> Feeding it makes the game
-    treat that parent as <code>n&lt;Gene&gt;</code> (heterozygous, the default)
-    or <code>&lt;Gene&gt;&lt;Gene&gt;</code> (homozygous, if the gene&rsquo;s
-    <code>carrot.behaviour</code> says so) for that one gene&rsquo;s gamete;
-    normal Mendelian rules apply from there, so two heterozygous-carrot parents
-    give the ordinary 25/50/25. If the homozygote cannot occur (a <code>KIT</code>
-    lethal, <code>met/met</code>) it falls back to heterozygous.
+    <strong>One per allele pair, and you pick which.</strong> Feeding it makes the
+    game treat that parent as carrying <strong>exactly the pair its research paper
+    named</strong> for that one gene&rsquo;s gamete; normal Mendelian rules apply
+    from there, so two carrier-carrot parents give the ordinary 25/50/25.
     (<code>CarrotEffect.KnownGeneSplice</code>, effect token
-    <code>known:&lt;geneKey&gt;:het|hom</code>.)
+    <code>known:&lt;geneKey&gt;:&lt;a&gt;:&lt;b&gt;</code>.)
 </p>
+
+<div class="note">
+    <span class="label">The paper decides, not the gene</span>
+    <p>
+        This used to be the gene&rsquo;s call: a carrot came out heterozygous
+        unless <code>carrot.behaviour</code> said homozygous, and the variant
+        allele was whichever the gene declared first. That was a wall on any wide
+        locus &mdash; the <a href="gene-particle.html">particle</a> gene has around
+        forty alleles and only the first could ever be spliced, so no carrot in the
+        game could hand over a soul flame, and <code>KIT</code> could reach one of
+        its thirteen.
+    </p>
+    <p>
+        Since <a href="item-research-papers.html#pair">a paper names a pair</a>, the
+        carrot simply grants it: <code>X/n</code> is the old heterozygous,
+        <code>X/X</code> the old homozygous, and <code>X/Y</code> is a thing the old
+        shape could not say at all. A pair the locus forbids (a <code>KIT</code>
+        lethal, <code>met/met</code>) makes no carrot &mdash; the recipe refuses to
+        resolve rather than handing over one that silently does nothing.
+    </p>
+    <p>
+        <code>Gene.geneCarrotHomozygous()</code> survives, narrowed to what it can
+        honestly answer: the <em>example</em> pair to show when nobody is holding a
+        paper. Three callers need that &mdash; the browser&rsquo;s recipe ghost, the
+        card on each gene page, and the scientist&rsquo;s carrot trades, which draw
+        a gene and never see a paper. It is
+        <code>ResearchTopic.defaultFor</code> now, and all three say &ldquo;example&rdquo;.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">A carrot now says what it will do</span>
+    <p>
+        Every breeding carrot is an <code>item/BreedingCarrotItem</code>, whose only
+        job is a tooltip read off its <code>carrot_effects</code> tokens. Before
+        this, a Known Gene Splice carrot carried the right data and showed none of
+        it, so every one of them looked identical in the inventory &mdash; tolerable
+        while the pair was a fixed convention per gene, and not once a player can
+        hold two carrots for one locus that do different things. A combination
+        carrot lists every effect it merged; a carrot naming a gene this build no
+        longer has says so, rather than being quietly inert.
+    </p>
+</div>
 
 <p>
     <strong>The recipe is one parameterised <code>CustomRecipe</code></strong>
@@ -279,8 +319,9 @@
     <a href="#database">research paper</a> + a hair item (<code>horse_hair</code>
     ) + the rarity item for that gene&rsquo;s tier
     &rarr; a <code>known_gene_splice_carrot</code> carrying the paper&rsquo;s
-    gene. The recipe reads the gene off the paper at craft time, so a drop-in
-    gene file gets its carrot the moment it registers &mdash; no datapack.
+    <strong>pair</strong>. The recipe reads it off the paper at craft time, so a
+    drop-in gene file gets its carrot the moment it registers &mdash; no datapack,
+    and two papers for one locus craft two different carrots.
 </p>
 
 <p class="muted">
@@ -313,14 +354,14 @@
     (<code>RecessiveDisorderGene</code>), and extension + agouti.
 </p>
 
-<div class="note">
+<div class="note" id="card">
     <span class="label">Every gene page shows its own recipe</span>
     <p>
         <code>wiki/gene-carrot/</code> is a card that any gene page carries in one
         line, and it <strong>asks the mod</strong> for the four things that differ
         per gene: whether a carrot exists at all, the rarity tier that prices it,
-        heterozygous or homozygous, and whether the
-        <a href="#blacklist">Unknown splice</a> may land on the locus. It runs the
+        how many distinct research papers the locus has, and whether the
+        <a href="#blacklist">Unknown splice</a> may land on it. It runs the
         same wasm the <a href="horse-designer/index.html">horse designer</a> does,
         so nothing about a gene is written into a page and there is no per-gene
         recipe to keep in step.
@@ -378,22 +419,37 @@
 
 <p>
     A <strong>research paper</strong> (<code>item/ResearchPaperItem</code>)
-    carries a <code>research_gene</code> component. Right-clicking it adds the
-    gene to the reader&rsquo;s database, unlocks its carrot line, and consumes
-    the paper. Three sources: <strong>chest loot</strong>
+    carries a <code>research_gene</code> component holding one gene and one
+    <a href="item-research-papers.html#pair">allele pair</a>.
+    <strong>Right-clicking it does nothing</strong> &mdash; the database above is
+    earned by owning a living horse, never by reading, so a paper is an
+    ingredient. Four sources: <strong>chest loot</strong>
     (<code>data/loot/AddResearchPaperModifier</code>, a global loot modifier that
-    seeds papers into ~8 chest tables weighted by <code>GeneRarity</code>),
-    other players, and <strong>writing one</strong> from your own database at the
-    cost of a book &mdash; but <b>you do not choose which gene</b>. See below.
+    seeds papers into <em>every</em> chest table in every namespace, the gene
+    weighted by <code>GeneRarity</code>), the
+    <a href="villagers.html">equestrian supplier</a>, other players, and
+    <strong>writing one off a horse</strong> at the cost of a book &mdash; but
+    <b>you do not choose which pair</b>. See below.
+</p>
+
+<p>
+    A chest and the supplier deal in <strong>carrier and true-breeding pairs
+    only</strong> (<code>ResearchTopic.lootPool</code>): for each variant allele,
+    <code>X/n</code> and <code>X/X</code>. Not every combination the locus allows
+    &mdash; a forty-allele gene has eight hundred pairs and drawing one of those out
+    of a chest is noise rather than a find. A <strong>horse</strong> is the only
+    thing that hands over a compound <code>X/Y</code>, which is what makes an odd
+    animal worth a book even once you know the gene.
 </p>
 
 <h3 id="book-on-horse">A book on a horse</h3>
 
 <p>
     Right-click a horse holding a book and you get a research paper for
-    <strong>one gene that horse carries, chosen at random</strong> from every
-    locus where it is not simply the plain baseline. An entirely ordinary horse
-    has nothing to teach and costs you no book.
+    <strong>one allele pair that horse carries, chosen at random</strong> from every
+    locus where it is not simply the plain baseline &mdash; and it is the pair the
+    animal really has, down to both tokens. An entirely ordinary horse has nothing
+    to teach and costs you no book.
 </p>
 
 <p>
@@ -401,9 +457,17 @@
     button in the Horse Browser: pick the gene, spend a book, get exactly that
     paper &mdash; which meant a paper was never a discovery, only paperwork once
     you already knew. Now the horse decides, so a paper is something an animal
-    told you. Discovery is <b>not</b> required: reading the paper is what adds
-    the gene to your database, so gating it on the database would make it unable
-    to teach you anything.
+    told you. Discovery is <b>not</b> required and a paper does not grant it
+    either: the database is earned by <em>owning</em> a living example, so gating
+    this on the database would only stop a horse teaching you what it plainly
+    carries.
+</p>
+
+<p>
+    It is also the <strong>only</strong> route to a compound pair. A chest and the
+    supplier hand over carriers and true-breeders; two different variants at one
+    locus is something a horse has and a loot table does not, so an unusual animal
+    is worth a book long after you know its genes.
 </p>
 
 <p>
@@ -523,10 +587,11 @@
     <strong>Everything still planned for breeding carrots and the gene database, in one
     place.</strong> This section used to live on the main <a href="roadmap.html">roadmap</a> and
     was moved here whole, so that what the carrots do, how they are built and what is still
-    planned for them are read together. The other half of the knowledge loop &mdash; papers that
-    name an <em>allele</em> rather than a whole gene, which is what would retire the
-    homozygous-by-default rule in <a href="#known">&sect;Known Gene Splice carrots</a> &mdash; is
-    planned on <a href="item-research-papers.html#allele-papers">research papers</a>.
+    planned for them are read together. The other half of the knowledge loop &mdash; papers
+    naming a pair rather than a whole gene, which is what retired the homozygous-by-default
+    rule in <a href="#known">&sect;Known Gene Splice carrots</a> &mdash; <strong>shipped on
+    2026-09-24</strong>; it is written up on
+    <a href="item-research-papers.html#component">research papers</a>.
 </p>
 
 <hr>

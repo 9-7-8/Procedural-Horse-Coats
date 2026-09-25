@@ -2883,15 +2883,21 @@ wiki/item-jumps.html#use	gameplay	What it is for
 wiki/item-jumps.html#uvlock	coding	The crossrails are not UV-locked
 wiki/item-jumps.html#why-cosmetic	science	Why style is cosmetic
 wiki/item-jumps.html#why-stacking	science	Stacking, and the height that was added beside it
+wiki/item-research-papers.html#carrot-tooltip	coding	The carrot says which pair it carries
 wiki/item-research-papers.html#component	coding	The component and the routes
 wiki/item-research-papers.html#gaps	coding	Known gaps
 wiki/item-research-papers.html#get	gameplay	Four ways to get one
+wiki/item-research-papers.html#pair	gameplay	A pair, not a gene
+wiki/item-research-papers.html#pools	coding	Which pairs a source may hand out
+wiki/item-research-papers.html#recipe	coding	The recipe reads the pair off the paper
+wiki/item-research-papers.html#shelf-key	coding	The shelf keys on the pair
+wiki/item-research-papers.html#topic	coding	Why it is strings, and where it normalises
 wiki/item-research-papers.html#use	gameplay	What it does
 wiki/item-research-papers.html#verified	coding	Verified
 wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
 wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
 wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
-wiki/item-research-shelf.html#storage	coding	Real slots, one paper per gene
+wiki/item-research-shelf.html#storage	coding	Real slots, one paper per allele pair
 wiki/item-research-shelf.html#use	gameplay	What it does
 wiki/item-research-shelf.html#verified	coding	Verified
 wiki/item-seed-jars.html#gaps	coding	Known gaps

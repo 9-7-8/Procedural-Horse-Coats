@@ -1,0 +1,250 @@
+2026-09-24, after the stasis bank — a research paper names an allele pair, not a gene, and every
+paper already written still works
+
+    The owner's brief, in her own words:
+
+        Can you please implement the swap for gene books to allele pair books, following all the
+        advice in the intake folder? This DOES need to be backwards compatible, so convert all
+        existing allele books into homozygous non-wild allele pair books for that gene
+
+    "Gene books" is her word for research papers — settled on 2026-09-24 in the chest-loot
+    session and recorded on item-research-papers.html so nobody goes looking for an item that
+    does not exist. The advice is the "research papers as allele-pair books" proposal at the
+    end of intake/Implementation advice.txt.
+
+The plan on the wiki and the plan in intake/ were not the same plan
+
+    item-research-papers.html already carried a Roadmap tab for this, and it is worth writing
+    down that the two differed, because the shipped shape is the intake one and the wiki tab's
+    predictions therefore did not all come true.
+
+        Roadmap tab: a paper carries ONE allele. The research shelf's Copy tab lets you pick
+        TWO of them and binds them into one book. That book is what the carrot recipe takes.
+        Consequence it predicted: Gene.geneCarrotHomozygous() and CarrotEffect.defaultSpliceFor
+        both stop being needed and should go.
+
+        intake/: a paper IS a pair. One item, one normalized pair key, keyed by geneId +
+        alleleA + alleleB.
+
+    The owner's prompt says "allele pair books" and asks for existing papers to become
+    "homozygous non-wild allele pair books", which is the intake shape — one item holding a
+    pair, not two items bound together. Built that way. The Roadmap tab was deleted rather
+    than marked shipped, per the hard rule, and the divergence written onto the Coding tab,
+    because the two names it said would die did not (see below).
+
+Two decisions put to the owner before any code, both of which change the game
+
+    Neither had a defensible default, and both are gameplay-facing rather than structural.
+
+        Which pairs may a chest or a villager hand out? Her call: carrier and true-breeding
+        only — X/n and X/X for each variant allele, so a locus has roughly twice as many papers
+        as it has alleles. The alternative the intake note implies literally is every viable
+        pair, which on the forty-allele particle locus is about eight hundred papers, and one
+        of them turning up in a chest is noise rather than a find. Compound pairs still exist
+        and still craft; a HORSE is the only thing that hands you one, which is the route that
+        was supposed to be interesting anyway.
+
+        Does the shelf's Copy list stay a flat list of pairs? Her call: yes. Rows read
+        "Agouti: A/a", sorted by gene name then pair, in the same five-row scrolling list. The
+        alternative was grouping pairs under a gene heading, which reads better on a full shelf
+        and needs new row-type handling in both the screen and the menu sync. Set aside, not
+        rejected — it is on the shelf page's Verification tab as what to do if the flat list
+        turns out unusable in play.
+
+What was already built, which is most of it
+
+    The load-bearing half had shipped earlier: CarrotEffect.KnownGeneSplice has named both
+    alleles for a while (token known:<gene>:<a>:<b>), and its javadoc already complained that a
+    whole-gene paper could only ever reach alleles().get(0) — "no carrot could ever hand over a
+    soul flame, and KIT could only ever hand over one of its thirteen". So this session is the
+    other half: getting a real pair into the recipe.
+
+common/genetics/ResearchTopic — the new type
+
+    A record of three STRINGS: geneKey, alleleA, alleleB. Strings rather than Allele objects
+    because a paper outlives the gene it names (a datapack gene removed, a world opened without
+    the mod that added it), and a paper for a retired gene must be inert, not an exception
+    thrown inside somebody's inventory. gene(), pair() and splice() all answer null.
+
+    Normalization was free. AllelePair has always sorted its two slots by declaration order so
+    that a pair equals its reverse and a genotype code round-trips; the record's constructor
+    just hands the two tokens to it when the gene is registered and knows both. So A/a and a/A
+    are equal, produce the same token(), and stack. A pair this build cannot resolve keeps the
+    order it arrived in, so its token still round-trips unchanged rather than being silently
+    rewritten.
+
+    token() is "<geneKey>|<a>|<b>" — flat, because it has to be a component value, a menu sync
+    string and a block entity's saved pick, and a record in three more places is three more
+    codecs. A bar is safe: ResearchTopicTest asserts no registered gene key or allele token
+    contains one, the same guarantee KnownGeneSpliceTest already made about the colon the
+    carrot token splits on.
+
+    lootPool(gene) is the owner's carrier/true-breeding rule, filtered through canOccur AND
+    sexConsistent. breedsTruePool(gene) is its homozygous half, which is what the supplier's
+    top tier and the loot function's `homozygous` flag narrow to.
+
+The back-compat, which is the one deliberate exception in the repo
+
+    CLAUDE.md hard rule 6 is "no legacy or back-compat code". The owner overrode it by name for
+    this, so it is written down as an exception rather than smuggled in:
+
+        The component keeps its old registry id, research_gene. Renaming it to research_topic
+        would be tidier and would drop the component off every existing paper, leaving blanks.
+
+        Its persistent codec is Codec.either(record, string). A stored bare string decodes
+        through ResearchTopic.wholeGene, which reads it as the HOMOZYGOUS NON-WILD pair — the
+        owner's instruction, and the strongest thing a whole-gene paper could have meant.
+
+        wholeGene falls back to the carrier pair on a locus whose homozygote the gene forbids
+        (a KIT lethal, met/met). A paper naming an impossible pair would craft an inert carrot,
+        which is worse than a slightly weaker one. ResearchTopicTest asserts that EVERY gene
+        with a carrot migrates to a pair that still crafts.
+
+        Encoding always writes the map form, so a world loaded once never writes a bare string
+        again.
+
+    This could not be unit-tested, and that is not a cop-out — it is the reason the failure
+    mattered. A component whose persistent codec refuses its stored value is DROPPED on load,
+    with a warning nobody reads and no crash: the paper becomes Blank, files into no shelf and
+    crafts no carrot. And the NeoForge module's test classpath deliberately carries no
+    Minecraft (build.gradle says so, for MaterialScan's sake), so NbtOps and a real ItemStack
+    only exist inside a booted game. So it is a GAMETEST: old_papers_still_read, which decodes
+    the legacy StringTag through the real component codec, asserts it equals wholeGene's answer,
+    then does the whole thing again through ItemStack.CODEC with a hand-built components tag and
+    checks the result is accepted by the research shelf. runGameTest: "All 10 required tests
+    passed".
+
+What each source now writes
+
+    GeneBookFromHorse — the pair the horse ACTUALLY carries at the chosen locus. This is the
+    only route to a compound pair, and the reason an odd animal stays worth a book after you
+    already know its genes.
+
+    AddResearchPaperModifier — gene weighted by rarity as before, then a flat draw over
+    lootPool.
+
+    SetRandomGeneFunction (target: "paper", the supplier's two trades) — the same pool;
+    `homozygous` narrows it to breedsTruePool. Its javadoc used to say the flag was
+    "carrots only"; it now means something on both.
+
+    SpliceRecipeDisplay.researchPaper(gene) — an EXAMPLE paper, ResearchTopic.defaultFor, since
+    that display has a gene and no paper.
+
+    EquineResearchShelfBlockEntity.copyOf — the filed paper's own topic.
+
+KnownGeneSpliceRecipe reads the pair, and refuses rather than making a dud
+
+    resolve() returns a ResearchTopic instead of a Gene, and assemble() emits topic.splice().
+    The new condition is isResolved(): a paper naming a gene this build retired, or a pair the
+    locus says cannot occur, does not resolve at all. That is deliberate — refusing to resolve
+    is visible in the grid, and a carrot that does nothing when fed is not.
+
+What the Roadmap tab said would die, and why it did not
+
+    geneCarrotHomozygous() and defaultSpliceFor survive. The plan that predicted their death
+    had the shelf binding two single-allele papers, so by the time a carrot existed the player
+    had named both alleles. With the pair on the paper there are still three callers that have
+    a gene and no paper in hand:
+
+        menu/SpliceRecipeDisplay — the Horse Browser's recipe ghost;
+        web/DesignerApi.geneCarrotJson — the gene-carrot card on every gene page;
+        the scientist's CARROT trades, which draw a gene and never see a paper at all.
+
+    So defaultSpliceFor now delegates to ResearchTopic.defaultFor and both are documented as
+    an EXAMPLE pair rather than a claim about every carrot for the locus. The browser's row, the
+    wiki card and the carrots page all say "example" in those words.
+
+    While doing that, defaultFor gained the viability ladder wholeGene already had. It did not
+    have one before (nor did the old defaultSpliceFor), so it could name a pair the locus
+    forbids — harmless while the result was only a ghost item, and a visible lie now that the
+    gene-carrot card prints the pair in prose. Changes nothing today; stops the card lying the
+    first time a gene forbids its own homozygote.
+
+The shelf files by pair
+
+    Every static on the block entity went from a gene key to a token: topicOf, topicsIn,
+    holdsElsewhere, stores, displayName, copyTicks, the saved "selected" string, and
+    ShelfActionPayload (whose stringUtf8(256) budget a token comfortably fits). copyTicks is
+    still the GENE's rarity, not the pair's — what is rare is the locus, and a carrier paper is
+    no easier to transcribe than a true-breeding one.
+
+    canCopy gained a guard it did not need before: copyOf can now return EMPTY, because a token
+    that no longer parses has no paper to make. Without the guard, out.isEmpty() would be true,
+    canCopy would say yes, and tick would spend a book per cycle forever putting nothing in the
+    result slot.
+
+    A PICK saved before today is a bare gene key, which matches no filed paper, so the shelf
+    simply has nothing selected and the player picks again. The filed PAPERS migrate properly.
+
+The carrot tooltip, which the Roadmap tab said to do regardless
+
+    "A Known Gene Splice carrot already carries the right data and has never shown it — every
+    one of them looks identical in the inventory. That is worth doing whether or not the rest
+    lands." It is now the thing that makes the whole change visible: two carrots for one locus
+    that do different things and look the same is a guessing game, not a mechanic.
+
+    All eleven breeding carrots share one new item/BreedingCarrotItem whose only job is a
+    tooltip built from the carrot_effects tokens — so a combination carrot lists every effect it
+    merged, the four base carrots name themselves, and a carrot for a gene this build no longer
+    has says so in red rather than being quietly inert. DebugYardGameplay's Splice record needed
+    `Supplier<? extends Item>` to keep accepting them.
+
+    The paper's own tooltip changed too, and for the same reason the pair is the better unit: it
+    shows Expression.name() for THAT COMBINATION where it used to show Gene.description() for
+    the whole locus. "what A/a does", not "what agouti is".
+
+Open check 302 settled on the way past
+
+    The Gameplay tab said a paper grants nothing on reading; the Coding tab of the same page
+    still said "right-click it to add that gene to your gene database and unlock its carrot
+    line". Settled against the code: ResearchPaperItem has no use override at all, and
+    GeneDiscoveryHandler is the only writer of the database. The Coding tab was the stale one.
+    Two Java javadocs were carrying the same lie (GeneBookFromHorse's class note said "reading
+    the paper is what adds the gene to your database") and so was carrots.html; all fixed.
+    Moved off the Verification tab onto the Coding tab as #verified-tab-contradiction, and
+    known-gaps.html's compatibility anchor repointed there.
+
+Tests
+
+    ResearchTopicTest, 15 new tests in common/. The three contracts the item layer leans on and
+    cannot check itself: that A/a and a/A are one paper; that a pre-change paper still resolves
+    AND still crafts, for every gene with a carrot; and that every pair any source can hand out
+    is one the gene allows and the recipe accepts, including the sex-linked loci where a pair no
+    horse of either sex could carry is the easy mistake. Plus: the loot pool never offers the
+    plain baseline, has no duplicates, breedsTruePool is its homozygous subset, a wide locus is
+    reachable at more than ten of its alleles, a retired gene and a retired allele are both
+    inert rather than fatal, and defaultSpliceFor agrees with defaultFor.
+
+    KnownGeneSpliceTest untouched and still green (5).
+    GameteBiasTest, SpliceCategoryTest, SpliceOutcomeTest, SpliceSafetyTest all green (25).
+    The full :common: suite was NOT run — nothing here touches a gene's painter, so neither
+    golden moves; that is the one thing a full run would still cover.
+
+What a full check would still need
+
+    Everything in play. The pair swap is entirely unplayed and is on
+    item-research-papers.html's Verification tab, ordered invisible-first. The one that matters
+    most and that only the owner can do: her live server has been up since 16:33 and her own
+    save has papers written before this change. The gametest proves the codec; it cannot prove
+    her save.
+
+Regenerated
+
+    :web:bakeDesignerAssets + check-designer-boots (common/ changed, and defaultSpliceFor
+    delegating to ResearchTopic makes the new class reachable in the wasm — TeaVM compiles only
+    the reachable graph, so this was the build that could have surfaced a missing JDK method).
+    Boot green, nothing on the console.
+    bake-roadmap-index (a Roadmap tab was deleted: 48 pages -> 47).
+    bake-verification-index (two Verification tabs changed).
+    build-search-index, bake-agent-text, sync-page-views (the papers page lost a tab panel).
+    check-links, check-parity, check-recipes, check-block-models, check-progress-tasks,
+    check-gene-tabs, check-roadmap-execution: all green.
+
+Not done, deliberately
+
+    The intake proposal also sketches a much richer per-pair article — dominantOutcome,
+    recessiveOutcome, inheritanceSummary, interactionNotes, relatedGenes, a seven-section
+    structure, and pair pages resolving ahead of gene landing pages in wiki navigation. None of
+    that is built. The item is a tooltip, not a written book, and there is no page generator for
+    pairs. That is a separate piece of work and wants its own Roadmap tab before anybody starts
+    it; this session is the mechanism, which is what the carrot needed.

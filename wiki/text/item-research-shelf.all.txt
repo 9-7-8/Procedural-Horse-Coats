@@ -1,5 +1,5 @@
 Equine Research Shelf
 (Block / genes)
-A bookshelf that files research papers — one of each gene — and copies any of them onto blank books for as long as the original stays in it. It is what turns knowing a gene into owning it.
+A bookshelf that files research papers — one of each allele pair — and copies any of them onto blank books for as long as the original stays in it. It is what turns knowing a gene into owning it.
 
-Block / genes Equine Research Shelf A bookshelf that files research papers — one of each gene — and copies any of them onto blank books for as long as the original stays in it. It is what turns knowing a gene into owning it.
+Block / genes Equine Research Shelf A bookshelf that files research papers — one of each allele pair — and copies any of them onto blank books for as long as the original stays in it. It is what turns knowing a gene into owning it.

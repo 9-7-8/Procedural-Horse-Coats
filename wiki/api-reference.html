@@ -292,11 +292,53 @@ abstract class AbstractAbilityGene extends TwoAlleleGene   // paints nothing
     <code>GameteBias.NONE</code> on both sides is bit-for-bit the plain
     <code>breedWith(other, rng)</code>. <code>CarrotEffect</code> is the sealed
     set (<code>EpigeneticSplice</code> / <code>Stabilizer</code> / <code>Magnifier</code>
-    / <code>GeneSplice</code> / <code>KnownGeneSplice(geneKey, homozygous)</code> - the
+    / <code>GeneSplice</code> / <code>KnownGeneSplice(geneKey, alleleA, alleleB)</code> - the
     <em>Unknown Epigenetic Splice</em>, <em>Unknown Gene Splice</em> and
     <em>Known Gene Splice</em> carrots) with a flat
     <code>id()</code> string for serialisation and
     <code>fold(effects, parentGenotype, rng)</code> &rarr; one bias.
+</p>
+
+<h3><code>ResearchTopic</code> (<code>common/genetics/</code>)</h3>
+<p>
+    What one <a href="item-research-papers.html">research paper</a> is about: a gene key and
+    two allele <em>tokens</em>, normalised on construction through <code>AllelePair</code> so
+    <code>A/a</code> equals <code>a/A</code>.
+</p>
+<div class="codebox">
+<pre><code class="language-java">public record ResearchTopic(String geneKey, String alleleA, String alleleB);
+
+// building one
+static ResearchTopic of(Gene gene, AllelePair pair);   // what a horse teaches
+static ResearchTopic wholeGene(String geneKey);        // migrate a pre-2026-09-24 paper:
+                                                       // the homozygous non-wild pair
+static ResearchTopic defaultFor(Gene gene);            // the EXAMPLE pair for a gene with
+                                                       // no paper in hand
+static List&lt;ResearchTopic&gt; lootPool(Gene gene);        // carrier + true-breeding per variant
+static List&lt;ResearchTopic&gt; breedsTruePool(Gene gene);  // the homozygous half of that
+
+// serialisation - one flat string, so a component, a menu sync and a block
+// entity's saved pick are all just a String
+String token();                        // "&lt;geneKey&gt;|&lt;a&gt;|&lt;b&gt;"
+static ResearchTopic parse(String t);  // a bare gene key routes to wholeGene()
+
+// reading one - every resolution answers null rather than throwing, because a
+// paper outlives the gene it names and must be inert, not fatal
+Gene gene();                           // null if this build has no such gene
+AllelePair pair();                     // null if either token is not one of its alleles
+boolean isResolved();                  // gene, pair, and gene.canOccur(pair)
+CarrotEffect.KnownGeneSplice splice();  // null unless isResolved()
+boolean homozygous();
+String zygosity();                     // homozygous / heterozygous / hemizygous
+String pairLabel();                    // "A/a"
+String geneName();
+String label();                        // "Agouti: A/a"</code></pre>
+</div>
+<p>
+    <code>ResearchTopicCodecs</code> (NeoForge side) is the persistence, and holds
+    <a href="item-research-papers.html#component">the one piece of back-compat in this
+    repo</a>: the <code>research_gene</code> component was a bare <code>String</code> gene key,
+    and a stored string still decodes through <code>wholeGene</code>.
 </p>
 
 <h3><code>Allele</code> and <code>AllelePair</code></h3>
