@@ -1,0 +1,216 @@
+Gear screen inventory - implementation treatment
+
+The request
+============
+Owner, 2026-09-25, during a modded server session:
+
+  "the player's inventory must be visible on the right side of the gear screen, so
+   they can equip/unequip items"
+
+and, the same session:
+
+  "you should be able to click and drag the image of the horse on the gear screen"
+
+The second half is built and shipped (commit 9a52937c) - the paper doll turns under a
+drag now. This file is only about the first half, which was deferred because it is not a
+screen change at all. It is a menu where there has never been one.
+
+What already exists, so this session does not redo it
+======================================================
+- wiki/horse-gear.html already owns this. It carries Gameplay, Coding, Roadmap and
+  Verification tabs, and the Roadmap tab already has this written up as
+  #gear-inventory with its own note.roadmap-summary box, so bake-roadmap-index.mjs
+  already lists it. Extend that section; do not start a new page, and re-run
+  bake-roadmap-index.mjs if the summary sentence changes.
+- The nineteen slots, their layout, their backing and their item tags are all done and
+  are generic. entity/HorseTackSlot is the whole roster: on(horse), set(horse, stack),
+  accepts(horse, stack), usableOn(horse), tag(), anchorX()/anchorY(). SADDLE and BARDING
+  are real EquipmentSlots; the other seventeen are keys in the HORSE_GEAR attachment
+  (data/HorseGear, data/ModAttachments). HorseTackSlot.set is the single place that knows
+  which backing a slot has. None of this needs changing - a menu slot is a new front door
+  onto the same roster.
+- The server rules are already written and already correct. ModNetworking.handleTackSlot
+  (~line 504) is the authority: HorseTackSlot.byName for the slot, horse.closerThan(player,
+  8.0) for reach, HorseOwnership.isOwner for ownership, tack.accepts to decide whether the
+  held stack may go on, and on removal inventory.add(worn) falling back to player.drop -
+  never deleted. Every one of those rules has to survive into the menu; see "What must not
+  regress" below.
+- This repository already has a container screen with tabs, hidden slots and a scrolling
+  grid, and it is very close to what is wanted here: HorseStasisBankMenu /
+  HorseStasisBankScreen. Read both before designing anything. The bank's ChamberSlot
+  overrides isActive() as activeOnTab(Tab.CHAMBERS) && onScreen(getContainerSlot()), which
+  is how a menu whose slots belong to one tab of several behaves when another tab is
+  showing, and how a scrolled slot stops existing when it scrolls out of view. The player's
+  own inventory is added there as plain Slots at MARGIN + col * 18 against INV_Y and
+  HOTBAR_Y, and quickMoveStack is implemented. That is the template.
+- ModMenus already has the one awkward mechanism this will need. JumpMenu is built by
+  NeoForge's extra-data factory (IMenuTypeExtension.create) because a client menu is
+  handed only an id and an inventory, and that menu needs to know which block it is for.
+  A gear menu has the same problem with an entity id. ServerPlayer.openMenu(provider,
+  buf -> ...) is what fills it in.
+
+Why this is not a small change
+===============================
+client/HorseInfoScreen extends Screen. It is a plain screen with no menu behind it, and
+that is not an oversight - ModMenus' own class javadoc states the position:
+
+  "The Horse Browser used to be here too and deliberately is not any more - it has no
+   slots, so it is a plain screen with no server menu behind it. A menu is for a *block*
+   you stand in front of, which is exactly what this is."
+
+So this request reverses a settled design call for one tab of one screen. That is fine -
+the Gear tab does now have slots, which is exactly the condition that javadoc names - but
+it should be done knowing it is a reversal, and the javadoc should be corrected in the
+same change rather than left contradicting the code.
+
+Three facts make it worse than "add a menu", and they are the reason this file exists
+rather than a two-hour fix:
+
+1. The screen is opened from the client, four times over, and none of them can create a
+   menu. HorseInfoInteraction:126, HorseInfoKeyHandler:77, HorseInfoScreen:701 (following
+   a link to another horse) and HorseScreenHooks:86 all call
+   Minecraft.getInstance().setScreen(new HorseInfoScreen(...)). A container menu only
+   exists if the *server* opens it. Every one of those four sites becomes a packet to the
+   server asking it to open the menu, and the screen stops being something the client can
+   put up on its own.
+
+2. The screen routinely shows horses that are not loaded entities at all. Its horse field
+   is @Nullable (HorseInfoScreen:225) and clickTack already refuses when it is null. A
+   descendant clicked on the Offspring tab, a horse opened from the family tree or from the
+   browser's roster may be a record for an animal three thousand blocks away or dead. There
+   is no entity to hang a menu on, no stillValid() that can pass, and nothing to equip.
+   A menu cannot be a precondition of the screen opening.
+
+3. Following a link would become a server round trip. Clicking a companion, a rival or a
+   foal currently constructs the next screen on the client and remembers the one it came
+   from so Escape walks back. With a menu behind it, each step is close-menu,
+   ask-server-to-open-another, and the parent chain has to survive that.
+
+Vanilla hit problem 1 too, and the way it answered is worth knowing before reaching for a
+general mechanism, because there is not one. AbstractHorse.openCustomInventoryScreen calls
+player.openHorseInventory(horse, container) - a method that exists on Player purely for
+this, sitting next to openNautilusInventory, which exists purely for that. Vanilla adds a
+new open method per entity rather than generalising, because Player.openMenu takes a
+MenuProvider and a MenuProvider cannot say which entity it is for. So the options are
+vanilla's shape (a bespoke path, which a mod cannot add to Player) or NeoForge's
+extra-data menu, which is what JumpMenu already uses here and is the one to copy.
+
+The shape to avoid
+===================
+Drawing thirty-six inventory-looking squares on the existing screen and keeping the
+current click-to-toggle behind them. It would read as a real inventory and behave as a
+picture of one - no carried stack, no shift-click, no drag across slots, no cursor item -
+which is worse than the honest screen that is there now, because a player who sees an
+inventory will try to use it as one. It is also a dead end: none of it survives the menu
+being added underneath, so it is work that gets deleted rather than work that gets built
+on.
+
+Recommended shape, and the decision that gates it
+==================================================
+The recommendation is a *separate menu-backed Gear screen*, not a conversion of
+HorseInfoScreen. The Gear tab keeps its paper doll as the read-only view that works on any
+horse including an unloaded one, and gains a way into a real container screen - opened
+only when there is a live horse, the player owns it, and they are within the same 8 blocks
+handleTackSlot already demands.
+
+That is what fact 2 forces. HorseInfoScreen must keep working with no menu, so a design
+where the menu is mandatory cannot be right; and a screen that is sometimes a container
+screen and sometimes not is not a thing AbstractContainerScreen can be.
+
+This is the call the owner has to make before code is written, because both answers are
+defensible and they produce different work:
+
+  (a) A separate Gear screen. HorseInfoScreen is untouched. One new menu, one new screen,
+      one new open-packet. The cost is that the Gear tab becomes a preview with a button,
+      so dressing a horse is one click further away than it is today, and there are two
+      places that draw nineteen slots on a horse.
+
+  (b) Convert HorseInfoScreen wholesale. Every tab keeps working with all gear slots
+      isActive()-false except on Gear - which the bank proves is workable - but all four
+      open sites, the link navigation, the parent chain and the unloaded-horse case have to
+      be solved, and the screen is ~1800 lines of custom drawing that would then be living
+      inside a fixed-size container window.
+
+(a) is the recommendation. It is smaller, it does not put the read-only paths at risk, and
+if it turns out the extra click is the wrong trade, (b) is still reachable afterwards
+because the menu and its slot rules would already exist.
+
+What must not regress
+======================
+These are the rules handleTackSlot enforces today. In a menu they stop being one checked
+packet and become slot behaviour, which is a much wider surface - a Slot that is merely
+drawn in the wrong place is a dupe or a deletion rather than a cosmetic bug.
+
+- Ownership. HorseOwnership.isOwner, server-side, with no creative exception - the same
+  rule the stall signs, the seed jar and the transfer papers use. A stranger's horse and
+  the cowboy's string must be readable and not editable.
+- Reach. 8 blocks, re-checked continuously rather than once at open: this is what
+  stillValid() is for, and a menu that stays open while the player walks away is a menu
+  that can still equip a horse from any distance.
+- Per-slot acceptance. HorseTackSlot.accepts is the only authority on what fits; seventeen
+  of the nineteen tags are still empty on purpose, so those slots must refuse everything.
+  Slot.mayPlace has to delegate to it rather than restate it.
+- usableOn. A foal's saddle slot is a real slot that is not yet usable, and the current
+  screen draws it and declines the click. A menu slot must do the same rather than letting
+  a saddle onto a foal.
+- Nothing is destroyed on a full inventory. Today that is add-then-drop-at-feet.
+  quickMoveStack and the close path both need the same guarantee.
+- The two backings stay behind one call. HorseTackSlot.set is the only place that knows a
+  saddle is an EquipmentSlot and a boot is an attachment key. A menu Slot must not reach
+  past it into either.
+
+Build order
+============
+1. Decide (a) or (b) above. Nothing below is worth starting first.
+2. HorseGearMenu (illustrative name - grep confirms no such class exists yet) extending
+   AbstractContainerMenu, built by IMenuTypeExtension.create so the entity id can be
+   written into the open packet the way JumpMenu writes a BlockPos. Register it in
+   ModMenus beside the other four.
+3. A Container view over the horse rather than a new inventory. The gear already lives in
+   HORSE_GEAR and in two EquipmentSlots; the menu must not introduce a third copy that can
+   drift from them. The bank does this correctly - its menu keeps nothing itself and reads
+   the block entity's container - and that is the property to copy.
+4. Slots: nineteen tack slots positioned from HorseTackSlot.anchorX/anchorY exactly as
+   Cursor.gear does today, plus the player's thirty-six. mayPlace delegates to accepts and
+   usableOn; isActive follows the bank's pattern if the menu ends up backing more than the
+   one tab.
+5. quickMoveStack, which the current click-to-toggle has no equivalent of at all: shift-
+   clicking a saddle in the player's inventory should find the saddle slot, and shift-
+   clicking a worn piece should come back to the player.
+6. stillValid: horse alive, still owned, still within 8.
+7. Open path: a client-to-server packet naming the entity, server checks ownership and
+   reach and calls openMenu. Retire the direct setScreen for whichever sites the chosen
+   shape moves.
+8. Only once the menu works: decide whether click-to-toggle stays alongside dragging. It
+   is one gesture where a drag is two, and several of the nineteen anchors are small
+   targets on a doll that can now be rotated under them.
+
+Validation
+===========
+- Equip and unequip a saddle and iron barding by dragging, and confirm the horse actually
+  wears them - ride it between the two. The existing Verification item on
+  wiki/horse-gear.html only has the unequip half confirmed (owner, 2026-09-25).
+- Shift-click both ways.
+- Try every one of the seventeen empty slots with a stack in hand: nothing accepted,
+  nothing consumed, nothing duplicated, nothing in the log.
+- A foal: the saddle slot is drawn and refuses.
+- Someone else's horse and an untamed horse: no editing, and the read-only view still
+  works.
+- Walk out of range with the screen open: it closes, and nothing is left carried.
+- Close the screen with an item on the cursor - it must return to the player or drop, not
+  vanish.
+- A full inventory on removal: the piece lands at the player's feet.
+- Open the screen on a horse that is not loaded (from the Offspring tab or the family
+  tree) and confirm the read-only path is unaffected and nothing tries to open a menu.
+- A dedicated server, not only single-player. Everything here is a server-authority change
+  and the owner plays on a modded server.
+
+Open runtime check
+===================
+Whether a container window can hold the information screen's seven scrolling tabs at all
+is untested and is the thing most likely to force (a) even if (b) is chosen on paper.
+AbstractContainerScreen assumes a fixed imageWidth/imageHeight with the player inventory at
+a known offset; this screen currently sizes itself to the window and scrolls its content.
+Before committing to (b), put the bank screen and the information screen side by side at
+GUI scale 2, 3 and 4 and in a narrow window, and record what is observed on the
+Verification tab of wiki/horse-gear.html when this proposal is routed out of intake.
