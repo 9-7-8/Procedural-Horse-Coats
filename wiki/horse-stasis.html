@@ -15,7 +15,7 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow core">Gameplay <span class="sep">/</span> partly built</p>
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
 <h1 id="horse-stasis">Horse stasis: chambers and the bank</h1>
 <p class="lede">
     <strong>A cheap way to hold horses without them costing server tick time.</strong>
@@ -23,10 +23,11 @@
     many chambers and lets you read the horses inside them. The whole point is the cheapest
     tier, so a server with hundreds of horses can put most of them somewhere that costs
     nothing, instead of every horse being a real, ticking entity forever.
-    <strong>All four chambers are built and the bank does everything they buy</strong> &mdash; it
-    keeps them, reads them on its Browse tab, mends them from its feed and water, collects what
-    they drop, and breeds a pair you turn out at stud. What is still planned is the
-    self-triggering Emergency chamber.
+    <strong>The whole feature is built</strong> &mdash; five chambers, and a bank that keeps
+    them, reads them on its Browse tab, mends them from its feed and water, collects what they
+    drop, and breeds a pair you turn out at stud. The fifth chamber is the
+    <a href="#emergency-gameplay">Emergency</a> one, which is the only one you never use: it
+    catches a horse of yours that is about to die, by itself, while you are carrying it.
 </p>
 
 <section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
@@ -83,7 +84,9 @@
     <strong>Storage is free at every tier and always will be.</strong> What the upper tiers buy
     is what the bank may <em>do</em> with a horse. <strong>Upgrading an occupied chamber carries
     the horse across</strong> &mdash; you do not have to let it out first, so a Basic chamber is
-    never a dead end.
+    never a dead end. There is a fifth chamber that is not a rung on this ladder at all &mdash;
+    the <a href="#emergency-gameplay">Emergency</a> one, below, which is a Basic chamber that
+    uses itself.
 </p>
 <div class="note">
     <span class="label">Why one eye of ender buys two things</span>
@@ -95,6 +98,61 @@
         and nothing above it can search without healing or heal without searching.
     </p>
 </div>
+
+<h2 id="emergency-gameplay">The Emergency Horse Stasis Chamber</h2>
+<p>
+    The fifth chamber, and the only one you never use. Take a <strong>Basic</strong> chamber, put
+    it in the middle of a crafting grid and <strong>surround it with eight ender pearls</strong>.
+    Then carry the result. That is the whole of it: from that moment every horse you own is
+    insured, and <strong>the instant one of them falls below a tenth of its health the horse is
+    in the bottle</strong> &mdash; no click, no aim, nothing to remember in the middle of a fight.
+</p>
+<p>
+    It works wherever you are. The chamber does not have to be in your hand, only somewhere on
+    you, and <strong>you do not have to be anywhere near the horse</strong>: a mare being torn
+    apart by a pack of wolves three thousand blocks away is caught the same way, and the first
+    you hear of it is the line in your chat saying it happened. Because nothing can hurt a horse
+    inside a chamber, being caught is not a reprieve &mdash; it is the end of the incident.
+</p>
+<div class="note">
+    <span class="label">One chamber is one life</span>
+    <p>
+        If it already holds a horse and a second one of yours crosses the line,
+        <strong>it refuses and says so</strong> &mdash; one line naming the horse it could not
+        save. That horse takes its chances. The answer to wanting two saves is to
+        <strong>carry two chambers</strong> (owner's call, 2026-09-24): the alternatives were a
+        queue that goes stale the moment you log out, or swapping the healthier horse back into
+        the fight that is killing the other one.
+    </p>
+</div>
+<p>
+    <strong>It is not spent, and the horse is not stuck.</strong> Let the horse out and you have
+    the same emergency chamber back, empty and armed again for the next one. In every other
+    respect it is a Basic chamber: it files in a bank, it is counted and listed by name, and the
+    bank cannot look inside it. An eye of ender will upgrade it with the horse still in &mdash;
+    but that trades the emergency away, since what comes out is an ordinary Intermediate chamber.
+    Letting the horse out and filing it properly is the cheaper move.
+</p>
+<div class="note">
+    <span class="label">It sits below the bolt, on purpose</span>
+    <p>
+        A hurt horse already <a href="horse-care.html">runs for its life at a fifth of its
+        health</a> &mdash; it throws off its rider, drops the fight and bolts. The chamber is set
+        at <em>half</em> that, so the horse always gets its own chance to escape first and is only
+        swallowed when running did not work. Both numbers are settings
+        (<code>behaviour.emergency_stasis_fraction</code>, <code>behaviour.escape_health_fraction</code>);
+        setting the first to 0 turns the self-capture off entirely without stopping the chambers
+        working by hand.
+    </p>
+</div>
+<p>
+    Two things worth knowing before you rely on it. <strong>You have to be logged in</strong>
+    &mdash; the chamber is in your inventory, and an inventory that is not in the world cannot
+    catch anything, so a horse that gets into trouble overnight is on its own. And
+    <strong>if you are riding the horse it takes you off first</strong>: the horse vanishes from
+    under you and you land where it was standing. By then it has usually thrown you off anyway,
+    since it bolts at twice this health.
+</p>
 
 <h2 id="bank-gameplay">The Horse Stasis Bank</h2>
 <p>
@@ -400,12 +458,27 @@
     <tr><td><code>neoforge/&hellip;/item/StasisChamberItem.java</code></td>
         <td>One class, four registrations, parameterised by tier the way
             <code>TicketItem</code> is. Holds release (<code>useOn</code>) and the tooltip.</td></tr>
+    <tr><td><code>common/&hellip;/horse/StasisRescue.java</code></td>
+        <td>The emergency chamber's threshold and its two lines, as arithmetic and strings. No
+            Minecraft in it - <code>StasisRescueTest</code>, which also pins the rescue below
+            <code>Escape.DEFAULT_THRESHOLD</code> so the two can never cross.</td></tr>
+    <tr><td><code>neoforge/&hellip;/item/EmergencyStasisChamberItem.java</code></td>
+        <td>The fifth registration: a <code>StasisChamberItem</code> subclass at
+            <code>BASIC</code>, so everything downstream goes on seeing an ordinary Basic
+            chamber. Only the tooltip and the type differ.</td></tr>
+    <tr><td><code>neoforge/&hellip;/server/EmergencyStasisHandler.java</code></td>
+        <td><strong>The watching.</strong> One <code>LivingDamageEvent.Pre</code> subscriber at
+            <code>LOW</code>, the owner lookup that works across dimensions, the inventory walk,
+            and the throttled refusal.</td></tr>
     <tr><td><code>neoforge/&hellip;/server/HorseStasisHandler.java</code></td>
-        <td>Capture, release and the already-loose guard.</td></tr>
+        <td>Capture, release and the already-loose guard. <code>swallow</code> is the one place a
+            live horse becomes a data component, shared by the right-click and the rescue.</td></tr>
     <tr><td><code>neoforge/&hellip;/server/recipe/StasisChamberRecipe.java</code></td>
         <td>The Basic recipe, custom only so the water container comes back.</td></tr>
     <tr><td><code>neoforge/&hellip;/server/recipe/StasisUpgradeRecipe.java</code></td>
         <td>All three upgrades, custom so an occupied chamber keeps its horse.</td></tr>
+    <tr><td><code>neoforge/&hellip;/server/recipe/EmergencyChamberRecipe.java</code></td>
+        <td>The pearls, shaped three by three, custom for the same reason as the upgrades.</td></tr>
     <tr><td><code>neoforge/&hellip;/block/HorseStasisBankBlock.java</code></td>
         <td>The bank. <code>BaseEntityBlock</code>, no blockstate properties, opens the menu on
             <code>useWithoutItem</code>. A server-only ticker, the research shelf's
@@ -811,9 +884,9 @@
     the number of chambers the player marked is already their own cap.
 </p>
 
-<h2 id="two-custom-recipes">Why two of these are Java recipes</h2>
+<h2 id="two-custom-recipes">Why three of these are Java recipes</h2>
 <p>
-    Neither is a <code>CustomRecipe</code> for the fun of it, and both reasons are worth
+    None is a <code>CustomRecipe</code> for the fun of it, and the reasons are worth
     keeping:
 </p>
 <ul>
@@ -830,6 +903,12 @@
         <code>StasisUpgradeRecipe</code> copies the <code>stasis_snapshot</code> across. The
         JSON version of this feature is not a cheaper version of it; it is a data-loss bug with
         a crafting recipe attached.</li>
+    <li><strong>So must the ender pearls.</strong> <code>EmergencyChamberRecipe</code> is the
+        same hazard wearing a different shape &mdash; the chamber it converts sits in the middle
+        of the grid and may well have a horse in it &mdash; so it copies
+        <code>stasis_snapshot</code> too. It is shaped rather than shapeless because the
+        arrangement <em>is</em> the recipe's name: a shapeless nine-item match would also accept
+        the chamber in a corner, which reads like a different recipe that happens to work.</li>
 </ul>
 <div class="note warn">
     <span class="label">Both serializers are <code>unit</code> codecs, and that is load-bearing</span>
@@ -841,8 +920,8 @@
         one payload, <b>that is a login kick on every dedicated server</b> &mdash; which shipped
         once, in v0.5.014. Singleplayer never encodes a recipe, so nothing short of a real join
         catches it. See <a href="api-notes.html">api-notes.html</a>. The
-        <code>every_recipe_encodes</code> gametest is the cheap version of that join, and both
-        of these pass it.
+        <code>every_recipe_encodes</code> gametest is the cheap version of that join, and all
+        three of these pass it.
     </p>
 </div>
 
@@ -875,95 +954,115 @@
         tidy up an exception.</li>
 </ul>
 
-</section>
-
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
-
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>
-        One thing: the <strong>Emergency Horse Stasis Chamber</strong>, a carried chamber that
-        captures a horse of yours by itself the instant its health drops below a tenth.
-    </p>
-</div>
-
+<h2 id="emergency-coding">The emergency chamber: a subclass, and one event at <code>LOW</code></h2>
 <p>
-    Five of the six stages of the build order below have shipped, all on 2026-09-24: the chambers
-    and the capture/release path everything stands on, the bank itself, its Browse tab, the supply
-    slots it feeds and mends from, and then the drop buffer and in-bank breeding. Everything the
-    four chamber tiers advertise is built. What is left is not another thing the bank does &mdash;
-    it is an item that acts on a horse <em>in the world</em>, which is why it is last and why it
-    needs a piece of machinery none of the rest did.
+    Shipped 2026-09-24, and the smallest stage of the six by a distance &mdash; three new classes
+    and about a hundred lines, because the only genuinely new thing in it is <em>when</em> to
+    call <code>swallow</code>. Everything after that was already built.
 </p>
 
-<h2 id="emergency-chamber">Emergency Horse Stasis Chamber</h2>
+<h3 id="emergency-not-a-tier">Why it is a subclass and not a fifth tier</h3>
 <p>
-    A basic stasis chamber surrounded by ender pearls (exact shaped recipe still to decide).
-    Held or carried passively by its owner, it watches every horse that player owns and
-    <strong>automatically</strong> captures one into it the instant that horse's health drops
-    below 10% &mdash; the player does nothing, the capture is the save. A horse cannot take
-    damage while it is inside any stasis chamber, so entering one is a hard stop against dying.
+    <code>EmergencyStasisChamberItem</code> extends <code>StasisChamberItem</code> at
+    <code>StasisTier.BASIC</code>, and that one line is why <strong>nothing else in the feature
+    had to change at all</strong>. The bank's <code>isChamber</code> is an
+    <code>instanceof</code> on the superclass, so an emergency chamber files, counts, stacks,
+    lists and upgrades exactly as the Basic chamber it was built from;
+    <code>HorseStasisBankBlockEntity</code>, the menu, the Browse tab, the upkeep, the drop
+    buffer and <code>StasisStud</code> are all untouched, and none of them knows the class
+    exists.
+</p>
+<p>
+    A fifth <code>StasisTier</code> was the obvious alternative and is wrong twice over. The
+    ladder is four rungs of <em>what the bank may do with the horse</em>, cumulative and pinned
+    by <code>StasisTierTest</code>; self-capture is not that kind of capability at all, and the
+    chamber is built from the <em>cheapest</em> rung rather than sitting above the dearest one. A
+    rung costing eight ender pearls that bought no bank capability would be exactly the hole in
+    the ladder that test exists to prevent. The visible consequence is the right one:
+    <strong>an eye of ender upgrades an emergency chamber into an ordinary Intermediate</strong>,
+    horse and all, spending the emergency for the window. That is the escape hatch rather than
+    the intended path &mdash; releasing hands the armed chamber straight back &mdash; but it
+    means a rescued horse is never stuck somewhere the bank cannot read it.
+</p>
+
+<h3 id="emergency-hook">Where the hook had to go, against the plan</h3>
+<p>
+    The Roadmap tab expected to hang this off &ldquo;whatever handler ends up watching for the
+    buck-off-below-20% escape behaviour&rdquo;. <strong>There is no such handler.</strong> That
+    behaviour is <code>HorseEscapeGoal</code>, an AI goal that reads the health bar on its own
+    <code>canUse</code> tick, and a goal cannot see a blow coming &mdash; by the time it runs the
+    horse is already dead or not. So the model is <code>HorseLastStandHandler</code> instead,
+    which asks the same question at the same moment: <em>is this hit about to take the horse
+    somewhere it should not go?</em>
+</p>
+<p>
+    <code>LivingDamageEvent.Pre</code>, for the last stand's reason: it is the first point at
+    which <code>getNewDamage</code> is the number that will really come off the health, armour
+    and enchantments already taken out of it, so a horse in barding is not judged on a blow it
+    was never going to take in full.
 </p>
 <div class="note">
-    <span class="label">Settled: a second trigger is refused, out loud</span>
+    <span class="label"><code>LOW</code> priority, and that ordering is the feature</span>
     <p>
-        Owner, 2026-09-24. If the emergency chamber already holds a horse and a second one crosses
-        the threshold, <strong>it refuses and says so</strong> &mdash; one clear line naming the
-        horse it could not save. The second horse takes its chances. The alternatives were a queue
-        that survives logout and goes stale, or swapping the healthier horse out, which can drop an
-        animal into the fight that is killing the other one. Refusing keeps the item's value
-        legible: <strong>one chamber is one life</strong>, and the answer to wanting two is to
-        carry two.
+        Both handlers are on the same event, so the priority is not tidiness &mdash; it is how
+        the two compose. At <code>LOW</code> the rescue runs <em>after</em> the last stand: a
+        killing blow is caught by the last stand, which zeroes the damage and leaves the horse on
+        a sliver, and this then sees a horse on a sliver and takes it out of the fight. The
+        player gets the totem particles <em>and</em> the rescue, in that order, which is exactly
+        the story that happened. In the losing order the chamber would swallow a horse the last
+        stand was about to save anyway &mdash; spending the insurance on a blow that was never
+        going to land.
     </p>
 </div>
 
-<h2 id="watching-health">Watching health cheaply, and it is now the only open question</h2>
+<h3 id="emergency-cheap">The scan the roadmap was worried about does not exist</h3>
 <p>
-    The chamber needs to know when &ldquo;a horse this player owns&rdquo; crosses a tenth of its
-    bar, which is exactly the kind of per-tick server-wide scan the whole stasis system exists to
-    avoid. In practice it only has to watch <em>loaded, ticking</em> horses &mdash; an unloaded one
-    cannot be taking damage &mdash; so it is a hook on the existing damage/health-change path for
-    owned horses, not a scan of the world. Whatever handler ends up watching for the intake to-do
-    list's &ldquo;buck off below 20% health&rdquo; escape behaviour is the natural place to add a
-    second, lower threshold that captures instead of fleeing.
+    The open question this stage carried was cost: watching every owned horse's health sounds
+    like precisely the server-wide per-tick sweep the whole stasis feature exists to avoid. It is
+    not one, and the reason is almost too simple to write down &mdash; <strong>health only moves
+    when something moves it</strong>, so the question is asked on a damage event and nowhere
+    else. Past the two field reads that answer &ldquo;is this a horse, and is it low&rdquo;, the
+    only cost is one walk of one player's inventory, and only for a horse that is already about
+    to die. A world with no fighting in it pays nothing.
 </p>
 <p>
-    The other half of the hook is finding the <em>chamber</em>: the horse is the thing being
-    damaged, and the empty emergency chamber is somewhere in its owner's inventory. That is a walk
-    of one player's inventory on a damage event that has already passed a health threshold, so it
-    is cheap &mdash; but it has to run on the owner even when the owner is nowhere near, which is
-    the part to write carefully.
+    The owner is found by <code>HorseOwnership.ownerId</code> and then
+    <code>getPlayerList().getPlayer(uuid)</code>, <em>not</em> <code>horse.getOwner()</code>,
+    which answers only for an owner loaded in the same level &mdash; the gap
+    <code>HorseHurtNoticeHandler</code> documents and accepts. A chamber that only worked when
+    you were standing next to the horse would be worth very little, since you are usually not.
 </p>
 
-<h2 id="anticipated-files">Anticipated files</h2>
+<h3 id="emergency-details">Four small decisions</h3>
 <ul>
-    <li><code>neoforge/&hellip;/item/EmergencyStasisChamberItem.java</code> - the
-        self-triggering variant; a fifth registration of
-        <code>StasisChamberItem</code>&rsquo;s shape or a subclass of it, since capture itself is
-        already <code>HorseStasisHandler</code>&rsquo;s.</li>
-    <li>A hook in whatever handler owns the damage/health-change path for owned horses. Nothing
-        new is needed on the bank: an emergency chamber that has caught a horse is an ordinary
-        occupied chamber and can be filed, searched, mended and upgraded like any other.</li>
+    <li><strong>A state, not a crossing.</strong> <code>StasisRescue.rescues</code> asks where
+        the health <em>is</em>, not whether this blow moved it across the line. A horse already
+        under the threshold - because its owner was offline, or carrying nothing, when it first
+        got hurt - must still be caught by the next chamber that can reach it. Testing for a
+        crossing would make the rescue depend on who happened to be watching the moment it first
+        went low, which is not a thing a player can reason about.</li>
+    <li><strong>The rider is set down, not refused.</strong> An ordinary capture refuses a horse
+        with somebody on its back, because passengers would be discarded with it. Refusing here
+        would make the item useless in the exact situation it is bought for, so
+        <code>ejectPassengers</code> runs first and the horse vanishes from under them. It is the
+        uncommon path anyway: <code>HorseEscapeGoal</code> throws the rider off at twice this
+        health.</li>
+    <li><strong>The damage is zeroed <em>after</em> the capture</strong>, not before, so a horse
+        that somehow could not be stored takes its blow rather than being handed free
+        immunity.</li>
+    <li><strong>The refusal is throttled per horse, not per player.</strong> A full chamber
+        refuses on <em>every</em> blow, and a horse standing in a fire takes one every half
+        second. Ten seconds of quiet per horse, the same shape and the same sweep as
+        <code>HorseHurtNoticeHandler</code>'s - two horses in the same fire are two different
+        pieces of news.</li>
 </ul>
-
-<div class="note">
-    <span class="label">The rest of the build order</span>
-    <p>
-        <strong>1.</strong> <s>Capture/release and the chambers</s> &mdash; shipped 2026-09-24.
-        <strong>2.</strong> <s>The bank block/menu/screen as a filtered chest</s> &mdash; shipped
-        2026-09-24.
-        <strong>3.</strong> <s>The Browse tab, gated per row to what each chamber's tier
-        unlocks</s> &mdash; shipped 2026-09-24, with Intermediate's search.
-        <strong>4.</strong> <s>The supply slots and passive healing</s> &mdash; shipped
-        2026-09-24, gated on <code>StasisTier.heals()</code> and pipeable.
-        <strong>5.</strong> <s>Advanced's drop buffer, then Spacer's in-bank breeding</s> &mdash;
-        shipped 2026-09-24. The foal turned out not to need making from two tags at all: the
-        mare carries the pregnancy in her chamber and comes out to foal.
-        <strong>6.</strong> The Emergency Horse Stasis Chamber, once the health-threshold hook
-        exists.
-    </p>
-</div>
+<p>
+    The threshold itself lives in <code>common/</code> as <code>StasisRescue</code>, with the two
+    chat lines, so <code>StasisRescueTest</code> can pin them &mdash; including the one assertion
+    that is really about two features at once: <strong>the rescue fraction must stay below
+    <code>Escape.DEFAULT_THRESHOLD</code></strong>, or a horse would be swallowed before it was
+    ever given the chance to run.
+</p>
 
 </section>
 
@@ -973,15 +1072,62 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        The chambers, the bank and all four things it does compile, craft and pass the
+        The five chambers, the bank and everything it does compile, craft and pass the
         gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
         so the whole capture/release round trip, the water-container remainder for a modded
         bucket, the tier upgrade carrying an occupied chamber, every one of the bank's slots,
         drops and sync costs, every line the Browse tab draws, the healing upkeep and its hopper
-        plumbing, the drop buffer, and <strong>every part of in-bank breeding up to a mare
-        letting herself out to foal</strong> are all unplayed.
+        plumbing, the drop buffer, <strong>every part of in-bank breeding up to a mare
+        letting herself out to foal</strong>, and <strong>the emergency chamber firing at
+        all</strong> are unplayed.
     </p>
 </div>
+
+<h3 id="verify-emergency">The emergency chamber catches a horse (NOT played)</h3>
+<p>
+    Nothing about this has been watched happen. The threshold and the words are unit-tested and
+    the build is green, which proves neither that the event fires on the right horse nor that a
+    live animal survives being swallowed out of a blow. The <strong>first</strong> check is the
+    cheap one and settles most of it.
+</p>
+<ul>
+    <li><strong>It fires.</strong> Tame a horse, carry one empty emergency chamber, and hit the
+        horse down past a tenth of its bar. The horse should disappear, the chat should name it,
+        and the chamber in the inventory should now have that name on its tooltip. Then right-click
+        the ground and check the <em>same</em> horse comes back &mdash; name, bond, gear, papers.</li>
+    <li><strong>It fires with the owner far away.</strong> The whole value of the item is that it
+        works when you are not there. Shelve the check until there is a second player or a second
+        dimension to hand: leave a horse somewhere it will be attacked, walk (or portal) a long way
+        off, and confirm the line still arrives. This is the part <code>getOwner()</code> would
+        have got wrong and the player-list lookup is meant to fix.</li>
+    <li><strong>The last stand goes first.</strong> Hit a healthy horse with something that would
+        kill it outright. The expected order is <em>totem particles, then the rescue</em>: the last
+        stand saves it at half a heart and the chamber takes it in the same tick. If the chamber
+        swallows a horse that was never in danger, or the horse dies with an armed chamber in the
+        inventory, the <code>LOW</code> priority is not doing what this page says it does.</li>
+    <li><strong>The refusal says so, once.</strong> Carry one <em>full</em> emergency chamber and
+        no empty one, and take a second horse low. Expect one red line naming that horse, and
+        <em>not</em> a line every half second while it burns.</li>
+    <li><strong>A rider is set down, not deleted.</strong> Ride a horse down past the threshold
+        (or set <code>behaviour.escape_health_fraction</code> to 0 so it does not throw you off
+        first) and confirm you land where the horse was, unhurt, with the horse in the bottle.</li>
+    <li><strong>Off means off.</strong> Set <code>behaviour.emergency_stasis_fraction</code> to 0
+        and confirm the chamber stops catching anything but still works when right-clicked on a
+        horse by hand.</li>
+    <li><strong>The recipe converts an occupied chamber without eating the horse.</strong> Put a
+        <em>full</em> Basic chamber in the middle of eight ender pearls. The emergency chamber
+        that comes out must still name the horse. This is the one failure on the list that is
+        silent and permanent, so it is worth doing deliberately rather than hoping never to hit
+        it.</li>
+</ul>
+<p>
+    Two things are known and are not defects. An <strong>offline owner's horse is not
+    insured</strong> &mdash; the inventory is not in the world, and nothing goes rummaging in a
+    saved player file. And a <strong>donkey or mule cannot be caught</strong>, because a chamber
+    holds a <code>Horse</code> and capture and release are both written against
+    <code>EntityType.HORSE</code>; that is the same answer a right-click already gives, but it is
+    less obvious when the chamber is supposed to act on its own.
+</p>
 
 <h3 id="verify-upkeep">The bank actually mends a horse (NOT played)</h3>
 <p>

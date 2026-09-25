@@ -1,0 +1,133 @@
+2026-09-24 — stage six, the last one: the Emergency Horse Stasis Chamber, which uses itself
+
+    The sixth and final item on the build order on wiki/horse-stasis.html. A Basic chamber
+    surrounded by eight ender pearls; carry it and every horse you own is insured, because the
+    instant one falls below a tenth of its health it is in the bottle — wherever you are, and
+    whether or not the blow would have killed it. A horse inside a chamber cannot be hurt at
+    all, so the capture is not a reprieve, it is the end of the incident.
+
+    One bullet, per intake/START HERE.txt, which names this stage by name as the worked example
+    of how routing is meant to go. The horse-stasis Roadmap tab is now gone entirely and the
+    page has left wiki/roadmap.html by itself; roadmap-execution.html's coverage row went with
+    it, since that check hard-fails on a covered page that is no longer a roadmap page.
+
+The handler the roadmap expected to hang this off does not exist.
+
+    The Roadmap tab said to add a second, lower threshold to "whatever handler ends up watching
+    for the intake to-do list's buck-off-below-20% escape behaviour". There is no such handler.
+    That behaviour is HorseEscapeGoal — an AI goal, reading the health bar on its own canUse
+    tick — and a goal cannot see a blow coming; by the time it next runs the horse is dead or it
+    is not. So the model is HorseLastStandHandler instead, which asks the same question at the
+    same moment and gets it from LivingDamageEvent.Pre.
+
+    That is a case of the thing verify-a-prescribed-fix-first is about: the plan named a hook
+    site confidently and the hook site was a different shape from the one described. Ten minutes
+    of grep, not a wasted session, but only because it was checked before it was built on.
+
+LOW priority is not tidiness, it is how the two features compose.
+
+    HorseLastStandHandler is already on LivingDamageEvent.Pre at default priority. The emergency
+    handler is on the same event at EventPriority.LOW, deliberately, so it runs second. A killing
+    blow is caught by the last stand, which zeroes the damage and leaves the horse on half a
+    heart; the rescue then sees a horse on half a heart and takes it out of the fight. The player
+    gets the totem particles and then the rescue, in that order, which is the story that actually
+    happened.
+
+    In the losing order the chamber would swallow a horse the last stand was about to save
+    anyway — spending a one-shot insurance on a blow that was never going to land. Nothing in the
+    event bus would have reported that; it would just have felt wasteful, months later.
+
+A subclass, not a fifth tier, and that is why nothing else changed.
+
+    EmergencyStasisChamberItem extends StasisChamberItem at StasisTier.BASIC. The bank's
+    isChamber is an instanceof on the superclass, so the emergency chamber files, counts, stacks,
+    lists and upgrades exactly like the Basic chamber it was built from —
+    HorseStasisBankBlockEntity, the menu, the Browse tab, the upkeep, StasisDrops and StasisStud
+    are all untouched, and none of them knows the class exists.
+
+    A fifth StasisTier was the obvious alternative and is wrong twice. The ladder is four rungs
+    of what the bank may do with a horse, cumulative and pinned by StasisTierTest; self-capture
+    is not that kind of capability, and this chamber is built from the cheapest rung rather than
+    sitting above the dearest. A rung costing eight ender pearls that bought no bank capability
+    is exactly the hole in the ladder that test exists to catch.
+
+    The visible consequence is the right one: an eye of ender upgrades an emergency chamber into
+    an ordinary Intermediate, horse and all, spending the emergency for the window. That is the
+    escape hatch rather than the intended path — releasing hands the armed chamber straight back
+    — but it means a rescued horse is never stuck somewhere the bank cannot read it.
+
+The per-tick scan the roadmap was worried about does not exist either.
+
+    The tab's one open question was cost: watching every owned horse's health sounds like the
+    server-wide sweep the whole stasis feature exists to avoid. It is not one, for a reason
+    almost too simple to write down — health only moves when something moves it. The question is
+    asked on a damage event and nowhere else, and past the two field reads that answer "is this
+    a horse, and is it low", the only cost is one walk of one player's inventory, for a horse
+    that is already about to die. A world with no fighting in it pays nothing at all.
+
+    The owner is found with HorseOwnership.ownerId and getPlayerList().getPlayer(uuid), not
+    horse.getOwner(), which answers only for an owner loaded in the same level —
+    HorseHurtNoticeHandler documents and accepts that gap, and a chamber that only worked while
+    you stood next to the horse would be worth very little.
+
+Four smaller calls, each written up on the page.
+
+    A state, not a crossing. StasisRescue.rescues asks where the health is, not whether this blow
+    moved it across the line, so a horse already under the threshold when its owner logs back in
+    is still caught by the next blow. Testing for a crossing would make the rescue depend on who
+    was watching the moment it first went low.
+
+    The rider is set down, not refused. An ordinary capture refuses a horse with somebody on its
+    back because passengers would be discarded with it; refusing here would make the item useless
+    in the exact situation it is bought for, so ejectPassengers runs first. Uncommon anyway —
+    HorseEscapeGoal throws the rider off at twice this health.
+
+    The damage is zeroed after the capture, not before, so a horse that somehow could not be
+    stored takes its blow instead of being handed free immunity.
+
+    The refusal is throttled per horse, not per player, ten seconds, the same shape and sweep as
+    HorseHurtNoticeHandler's. A full chamber refuses on every blow and a horse in a fire takes
+    one every half-second; two horses in the same fire are two different pieces of news.
+
+The recipe is the third Java recipe in this feature, for the third time for the same reason.
+
+    EmergencyChamberRecipe is a CustomRecipe because the chamber in the middle of the grid may
+    have a horse in it, and a JSON recipe copies no components — so surrounding an occupied
+    chamber with pearls would hand back an empty one and delete a pedigreed animal, silently,
+    with nothing in the log. It copies stasis_snapshot across, exactly as StasisUpgradeRecipe
+    does. Shaped rather than shapeless because the arrangement is the recipe's name: a shapeless
+    nine-item match would also accept the chamber in a corner.
+
+    Both codecs are MapCodec.unit(INSTANCE) / StreamCodec.unit(INSTANCE) on one shared INSTANCE,
+    the shape whose absence was a login kick on every dedicated server in v0.5.014.
+
+What is where
+
+    common/…/horse/StasisRescue.java        the threshold, the quiet period, the two chat lines
+    common/…/horse/StasisRescueTest.java    and the assertion that the rescue stays below Escape
+    neoforge/…/item/EmergencyStasisChamberItem.java    the fifth registration and its tooltip
+    neoforge/…/server/EmergencyStasisHandler.java      the watching
+    neoforge/…/server/recipe/EmergencyChamberRecipe.java   the pearls
+    HorseStasisHandler.swallow             extracted: the one place a live horse becomes a
+                                           component, now shared by the right-click and the rescue
+    ServerConfig                           behaviour.emergency_stasis_fraction, default 0.1
+
+Not played, and the verification tab says so in seven bullets.
+
+    Nothing about this has been watched happen. The cheapest check settles most of it — carry one
+    empty chamber, hit a tamed horse past a tenth, and see whether it vanishes and comes back
+    whole. The two that are worth doing deliberately are the last-stand ordering (totem
+    particles, then the rescue, in that order) and converting an occupied Basic chamber with the
+    pearls, which is the one failure on the list that would be silent and permanent.
+
+    Two known non-defects, both written on the page: an offline owner's horse is not insured,
+    because the inventory is not in the world; and a donkey or mule cannot be caught, because a
+    chamber holds a Horse and both capture and release are written against EntityType.HORSE.
+
+One thing noticed and not chased, so it is not lost
+
+    The Coding tab says StasisStud.atStud re-checks the tier "because StasisUpgradeRecipe copies
+    components and a mark can therefore outlive the rung that bought it". The code does not: the
+    upgrade copies stasis_snapshot only, and drops STASIS_AT_STUD. The defensive check is still
+    right; the stated reason for it is wrong. Left alone as another bullet's work rather than
+    widened into this one.

@@ -2768,6 +2768,12 @@ wiki/horse-stasis.html#capture-release	coding	Capture and release: it is the lyc
 wiki/horse-stasis.html#chambers	gameplay	The four stasis-chamber tiers
 wiki/horse-stasis.html#drops-coding	coding	The drop buffer: the same ability verb, a different sink
 wiki/horse-stasis.html#drops-gameplay	gameplay	The drop buffer: what an Advanced chamber collects
+wiki/horse-stasis.html#emergency-cheap	coding	The scan the roadmap was worried about does not exist
+wiki/horse-stasis.html#emergency-coding	coding	The emergency chamber: a subclass, and one event at LOW
+wiki/horse-stasis.html#emergency-details	coding	Four small decisions
+wiki/horse-stasis.html#emergency-gameplay	gameplay	The Emergency Horse Stasis Chamber
+wiki/horse-stasis.html#emergency-hook	coding	Where the hook had to go, against the plan
+wiki/horse-stasis.html#emergency-not-a-tier	coding	Why it is a subclass and not a fifth tier
 wiki/horse-stasis.html#files	coding	What is where
 wiki/horse-stasis.html#pipes	coding	Why the goods slots are on the wire and the chambers are not
 wiki/horse-stasis.html#refusals	gameplay	What it refuses, and why it says so
@@ -2776,7 +2782,7 @@ wiki/horse-stasis.html#stud-coding	coding	In-bank breeding: the mark, the cover,
 wiki/horse-stasis.html#stud-gameplay	gameplay	Putting a horse to stud in the bank
 wiki/horse-stasis.html#supply-gameplay	gameplay	The Supply tab: feeding and mending what is in there
 wiki/horse-stasis.html#the-component-syncs-whole	coding	The component syncs the whole tag, on purpose
-wiki/horse-stasis.html#two-custom-recipes	coding	Why two of these are Java recipes
+wiki/horse-stasis.html#two-custom-recipes	coding	Why three of these are Java recipes
 wiki/horse-stasis.html#upkeep-coding	coding	The upkeep: four refusals, then one horse
 wiki/horse-traits.html#ability	all	11. Ability
 wiki/horse-traits.html#aura	all	5. Aura
