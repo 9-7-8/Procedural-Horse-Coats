@@ -165,10 +165,28 @@ public final class ModNetworking {
                     // a forged packet against a server that has not switched the
                     // tools on should still no-op. The client's debug.tools is the
                     // client's business; this one is the server's.
-                    if (!ServerConfig.debugTools()) return;
-                    if (context.player() instanceof ServerPlayer serverPlayer) {
-                        DebugPenManager.teleportAndGenerate(serverPlayer);
+                    //
+                    // OR AN OPERATOR, on any build. The hay portal goes to the public
+                    // horse realm now, so F6 is the only way into the debug corridor
+                    // and its test yard, and a release jar on a real server is exactly
+                    // where somebody needs it. LEVEL_GAMEMASTERS is the same bar
+                    // /testkit already sets, so this adds no reach a command did not
+                    // already have; an ordinary player gets told no rather than
+                    // silence, because a key that does nothing without saying why is
+                    // how a working feature gets reported as broken.
+                    if (!(context.player() instanceof ServerPlayer serverPlayer)) {
+                        return;
                     }
+                    boolean allowed = ServerConfig.debugTools()
+                            || net.minecraft.commands.Commands.LEVEL_GAMEMASTERS
+                                    .check(serverPlayer.permissions());
+                    if (!allowed) {
+                        serverPlayer.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                                "The debug horse dimension is for operators. A hay-bale portal "
+                                        + "takes you to the horse realm."));
+                        return;
+                    }
+                    DebugPenManager.teleportAndGenerate(serverPlayer);
                 })
         );
 

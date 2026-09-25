@@ -88,9 +88,13 @@ public final class PortalEventHandler {
         ItemStack held = event.getItemStack();
         Player player = event.getEntity();
 
-        boolean inDebugDim = level.dimension().equals(DebugPenManager.DEBUG_LEVEL);
+        // Neither generated dimension lets you light one. The debug corridor's
+        // portals are built with the plot, the realm's are a fixed grid, and in the
+        // realm you cannot place a hay bale to try it with in any case.
+        boolean generatedDim = level.dimension().equals(DebugPenManager.DEBUG_LEVEL)
+                || HorseRealm.isRealm(level);
 
-        if (state.is(Blocks.HAY_BLOCK) && held.is(Items.GOLDEN_CARROT) && !inDebugDim) {
+        if (state.is(Blocks.HAY_BLOCK) && held.is(Items.GOLDEN_CARROT) && !generatedDim) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             if (HorsePortalManager.tryLightPortal(level, pos)) {
@@ -170,14 +174,8 @@ public final class PortalEventHandler {
         spawnPortalSwirl(level, entity, dwell, threshold);
 
         if (entity instanceof ServerPlayer p) {
-            boolean leavingHorseDim = level.dimension().equals(DebugPenManager.DEBUG_LEVEL);
             if (dwell == 1) {
-                p.sendSystemMessage(Component.literal(leavingHorseDim
-                        ? "The hay-bale portal grabs hold. Stand still to leave the horse dimension - "
-                                + "anything you leave behind here is lost forever, but every tamed horse "
-                                + "comes back with you."
-                        : "The hay-bale portal grabs hold. Stand still to be pulled through to the "
-                                + "horse dimension."));
+                p.sendSystemMessage(Component.literal(firstWords(level)));
             }
             int secondsLeft = ceilDiv(threshold - dwell, 20);
             Integer shown = LAST_COUNTDOWN.get(id);
@@ -194,6 +192,25 @@ public final class PortalEventHandler {
             COOLDOWN.put(id, POST_TELEPORT_GRACE);
             HorsePortalManager.teleportThroughPortal(entity, level, at);
         }
+    }
+
+    /**
+     * What the portal says as it takes hold - and the three cases are genuinely
+     * different, which is why this is not one sentence with a flag in it. Leaving
+     * the realm is the only one where nothing is lost: the field is persistent and
+     * shared, so what you leave there is exactly what you meant to leave there.
+     */
+    private static String firstWords(ServerLevel level) {
+        if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+            return "The hay-bale portal grabs hold. Stand still to leave the horse dimension - "
+                    + "anything you leave behind here is lost forever, but every tamed horse "
+                    + "comes back with you.";
+        }
+        if (HorseRealm.isRealm(level)) {
+            return "The hay-bale portal grabs hold. Stand still to go home - your own tamed horses "
+                    + "nearby come with you, and anything you have released stays here, safe.";
+        }
+        return "The hay-bale portal grabs hold. Stand still to be pulled through to the horse realm.";
     }
 
     private static int ceilDiv(int a, int b) {

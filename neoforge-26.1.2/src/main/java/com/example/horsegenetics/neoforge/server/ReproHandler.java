@@ -117,7 +117,7 @@ public final class ReproHandler {
 
     /** Where a mare is now. Meaningless for a stallion - ask only of mares. */
     public static ReproState stateOf(Horse mare) {
-        return ReproRules.stateAt(of(mare), mare.level().getGameTime(), ServerConfig.reproTiming());
+        return ReproRules.stateAt(of(mare), HorseRealmRepro.reproTime(mare), ServerConfig.reproTiming());
     }
 
     public static boolean receptive(Horse mare) {
@@ -223,9 +223,12 @@ public final class ReproHandler {
                                                 Genome sireGenome, HorseRecord sireRecord, @Nullable Horse liveSire,
                                                 GameteBias damBias, GameteBias sireBias, String bredBy,
                                                 @Nullable Player breeder) {
-        long now = mare.level().getGameTime();
+        long now = HorseRealmRepro.reproTime(mare);
         ReproTiming t = ServerConfig.reproTiming();
-        int covers = liveSire == null ? 0 : of(liveSire).coversOn(now, t.dayTicks());
+        // The sire's covers are counted against HIS day, not hers: two horses in
+        // the realm can be on clocks that differ by a month (HorseRealmRepro).
+        int covers = liveSire == null ? 0
+                : of(liveSire).coversOn(HorseRealmRepro.reproTime(liveSire), t.dayTicks());
         Conception.Mating mating = new Conception.Mating(mareGenome, mareRecord.lineage(),
                 sireGenome, sireRecord.lineage(), sireRecord.id(), sireRecord.firstName(), sireRecord.lastName(),
                 sireRecord.generation(), damBias, sireBias, bredBy);
@@ -256,7 +259,7 @@ public final class ReproHandler {
 
     /** A cover or a jar fill, counted against his day. */
     public static void recordCover(Horse stallion) {
-        long now = stallion.level().getGameTime();
+        long now = HorseRealmRepro.reproTime(stallion);
         set(stallion, of(stallion).withCover(now, ServerConfig.reproTiming().dayTicks()));
     }
 
@@ -279,7 +282,7 @@ public final class ReproHandler {
 
     /** Why a mare cannot be bred right now, and how long until she can. Words: {@link ReproText}. */
     public static String notReceptive(Horse mare) {
-        return ReproText.notReceptive(nameOf(mare), of(mare), mare.level().getGameTime(), ServerConfig.reproTiming());
+        return ReproText.notReceptive(nameOf(mare), of(mare), HorseRealmRepro.reproTime(mare), ServerConfig.reproTiming());
     }
 
     /**
@@ -290,7 +293,7 @@ public final class ReproHandler {
         if (horse.isBaby() || !HorseRecords.hasRealRecord(horse) || HorseRecords.of(horse).sex() != Sex.FEMALE) {
             return "";
         }
-        return ReproText.breedingLine(of(horse), horse.level().getGameTime(), ServerConfig.reproTiming());
+        return ReproText.breedingLine(of(horse), HorseRealmRepro.reproTime(horse), ServerConfig.reproTiming());
     }
 
     /**
@@ -302,7 +305,7 @@ public final class ReproHandler {
         if (horse.isBaby() || !HorseRecords.hasRealRecord(horse) || HorseRecords.of(horse).sex() != Sex.FEMALE) {
             return "";
         }
-        return ReproText.glanceLine(of(horse), horse.level().getGameTime(), ServerConfig.reproTiming());
+        return ReproText.glanceLine(of(horse), HorseRealmRepro.reproTime(horse), ServerConfig.reproTiming());
     }
 
     /**
@@ -313,7 +316,7 @@ public final class ReproHandler {
      */
     public static List<String> vetReport(Horse horse) {
         HorseRecord record = HorseRecords.of(horse);
-        long now = horse.level().getGameTime();
+        long now = HorseRealmRepro.reproTime(horse);
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = of(horse);
         if (record.sex() == Sex.MALE) {
@@ -338,7 +341,7 @@ public final class ReproHandler {
                 || !HorseRecords.hasRealRecord(horse)) {
             return;
         }
-        long now = level.getGameTime();
+        long now = HorseRealmRepro.reproTime(horse);
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = of(horse);
         Optional<Pregnancy> pregnancy = r.pregnancy();
@@ -495,7 +498,7 @@ public final class ReproHandler {
      * foaled skips to foal heat. A mare already in heat is left alone - breed her.
      */
     public static void debugStep(Horse mare, Player player) {
-        long now = mare.level().getGameTime();
+        long now = HorseRealmRepro.reproTime(mare);
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = of(mare);
         String name = nameOf(mare);

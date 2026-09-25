@@ -1,0 +1,17 @@
+{
+  "type": "horsegenetics:horse_realm",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "horsegenetics:horse_realm",
+      "lakes": false,
+      "features": false,
+      "structure_overrides": [],
+      "layers": [
+        { "block": "minecraft:air", "height": 15 },
+        { "block": "minecraft:bedrock", "height": 1 },
+        { "block": "minecraft:dirt", "height": 1 }
+      ]
+    }
+  }
+}

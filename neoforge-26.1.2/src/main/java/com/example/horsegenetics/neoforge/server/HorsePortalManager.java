@@ -32,13 +32,16 @@ import java.util.UUID;
  * for the dwell timers):
  *
  * <ul>
- *   <li>An overworld portal sends a player to a fresh private plot in the horse
- *       dimension ({@link DebugPenManager#enter}), remembering this portal as
- *       the return point.</li>
- *   <li>The horse dimension's portal sends a player - and any horse pushed
- *       into it - back to exactly the linked overworld portal. As a player
+ *   <li>An overworld portal sends a player - or a horse led into it - to the
+ *       public {@link HorseRealm}, remembering this portal as the way home.</li>
+ *   <li>A realm portal sends a player back to exactly that portal, with their
+ *       own tamed horses standing near them ({@link HorseRealm#leave}). Any of
+ *       the realm's hundred exits does; they are interchangeable.</li>
+ *   <li>The debug corridor's portal sends a player - and any horse pushed into
+ *       it - back to the overworld portal its plot remembers. As a player
  *       leaves, their tamed horses come with them (see
- *       {@link DebugPenManager#evacuateTamedHorses}).</li>
+ *       {@link DebugPenManager#evacuateTamedHorses}). That dimension is reached
+ *       by F6 only now, not by a hay portal.</li>
  * </ul>
  *
  * <p><b>Not verified in-game:</b> cross-dimension entity teleport signature,
@@ -210,14 +213,22 @@ public final class HorsePortalManager {
             } else {
                 placeAt(entity, target, to);
             }
-        } else if (entity instanceof ServerPlayer player) {
-            HorseProgress.complete(player, ProgressTask.ENTER_DIMENSION);
-            DebugPenManager.enter(player, portalLevel.dimension(), portalPos.above());
+        } else if (portalLevel.dimension().equals(HorseRealm.REALM_LEVEL)) {
+            HorseRealm.leave(entity, portalLevel, portalPos);
+        } else {
+            // Into the public realm. Horses travel in as well as players, which is
+            // what makes the roped-horse shortcut in PortalEventHandler worth
+            // having: you lead a string of them into the frame and follow.
+            if (entity instanceof ServerPlayer player) {
+                HorseProgress.complete(player, ProgressTask.ENTER_DIMENSION);
+            }
+            if (entity instanceof ServerPlayer || entity instanceof AbstractHorse) {
+                HorseRealm.enter(entity, portalLevel, portalPos.above());
+            }
         }
-        // non-player entities in a non-debug portal: nothing (documented limitation)
     }
 
-    static void placeAt(Entity entity, ServerLevel target, BlockPos to) {
+    public static void placeAt(Entity entity, ServerLevel target, BlockPos to) {
         entity.teleportTo(target, to.getX() + 0.5, to.getY(), to.getZ() + 0.5,
                 Set.of(), entity.getYRot(), entity.getXRot(), false);
     }

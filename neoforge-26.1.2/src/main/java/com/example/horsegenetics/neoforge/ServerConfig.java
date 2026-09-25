@@ -76,6 +76,21 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * additionally {@code LEVEL_GAMEMASTERS}, so a player on someone else's server
  * cannot reach them even when a server owner turns this on.
  *
+ * <h2>realm.breeding_rate_percent</h2>
+ * <b>How fast reproduction runs in the horse realm, as a whole percent of
+ * normal.</b> 25 by default, meaning every reproductive timer takes four times
+ * as long there: heat, the once-a-heat retry, the stallion's day, and
+ * gestation. It is a <i>rate</i>, not a chance - 25 does not mean a quarter of
+ * covers take, it means the calendar runs at quarter speed, which is the
+ * difference between a realm that fills up slowly and one that fills up just as
+ * fast with three quarters of the horses disappointed.
+ *
+ * <p>0 stops it outright, existing pregnancies included. That is only possible
+ * because the pacing is a clock rather than a scale factor - see
+ * {@code server/HorseRealmRepro}, which also explains why an empty realm
+ * advances nothing at all whatever this is set to. Scoped to that one
+ * dimension; the Overworld and the debug corridor never read it.
+ *
  * <h2>What none of them can change</h2>
  * <b>All the health genetics are built and inherited regardless.</b> The genes
  * are registered in every world, they occupy the same slots in the genotype
@@ -209,6 +224,14 @@ public final class ServerConfig {
      */
     public static final long DEBUG_REPRO_DAY_TICKS = 1_200L;
 
+    /**
+     * <b>{@code realm.breeding_rate_percent}</b> - reproduction's speed in the
+     * horse realm, 0 to 100, as a whole percent of normal. Read through
+     * {@link #realmBreedingRatePercent()}, and applied by
+     * {@code server/HorseRealmRepro}, never here.
+     */
+    public static final ModConfigSpec.IntValue REALM_BREEDING_RATE;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -276,6 +299,16 @@ public final class ServerConfig {
                         "Game time, not the day counter: sleeping and /time set move nothing.")
                 .defineInRange("fertility.gestation_days",
                         com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
+        REALM_BREEDING_RATE = builder
+                .comment("How fast reproduction runs in the horse realm, as a whole percent. (default: 25)",
+                        "A rate, not a chance: 25 runs every reproduction timer at a quarter speed,",
+                        "so heat, the once-a-heat retry, a stallion's day and gestation all take four",
+                        "times as long. It does not mean one cover in four takes.",
+                        "0 pauses reproduction there completely, existing pregnancies included.",
+                        "Nothing advances at all while no player is in the realm, whatever this says -",
+                        "an empty field is a still one.",
+                        "The horse realm only. The Overworld, and the F6 debug dimension, ignore it.")
+                .defineInRange("realm.breeding_rate_percent", 25, 0, 100);
         NEARBY_HORSE_CAP = builder
                 .comment("How many other horses may be within 16 blocks of a mare and still let a",
                         "stallion cover her. (default: 50)",
@@ -529,6 +562,15 @@ public final class ServerConfig {
             return NEARBY_HORSE_CAP.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP;
+        }
+    }
+
+    /** {@code realm.breeding_rate_percent}, safely. */
+    public static int realmBreedingRatePercent() {
+        try {
+            return REALM_BREEDING_RATE.get();
+        } catch (IllegalStateException notLoaded) {
+            return 25;
         }
     }
 

@@ -188,6 +188,19 @@ public final class ModAttachments {
                     .serialize(LycanShift.MAP_CODEC)
                     .build());
 
+    // Where a PLAYER came into the horse realm from - the Overworld hay portal
+    // they stood in, remembered so that any of the realm's hundred exits can put
+    // them back at the one they used. Serialized, because a way home that a
+    // server restart loses strands somebody in a 16 000-block field; not synced,
+    // because nothing on the client reads it and the decision is the server's.
+    // Not copyOnDeath - it is on the player, and a player who dies in the realm
+    // respawns in their own world with the same way back.
+    public static final Supplier<AttachmentType<java.util.Optional<net.minecraft.core.GlobalPos>>> REALM_RETURN =
+            ATTACHMENT_TYPES.register("realm_return", () -> AttachmentType
+                    .<java.util.Optional<net.minecraft.core.GlobalPos>>builder(java.util.Optional::empty)
+                    .serialize(net.minecraft.core.GlobalPos.CODEC.optionalFieldOf("realm_return"))
+                    .build());
+
     private ModAttachments() {
     }
 }

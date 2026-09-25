@@ -95,6 +95,12 @@ public final class LethalFoalHandler {
         // minutes after birth, and this death handler had never been seen working.
         if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)
                 && Math.abs(horse.getBlockZ()) <= DebugPenManager.corridorWallZ()) return;
+        // THE HORSE REALM, all of it. Nothing dies there - it is the one promise
+        // the place makes, and a foal that was born wrong is still a horse
+        // somebody released a parent of. It does not merely survive: HorseRealmRules
+        // cancels the damage, so this handler would be asking for a death that
+        // could not happen anyway. Skipping it here is what stops the attempt.
+        if (HorseRealm.isRealm(level)) return;
         if (horse.tickCount % INTERVAL_TICKS != 0) return;
 
         HorseRecord record = HorseRecords.of(horse);

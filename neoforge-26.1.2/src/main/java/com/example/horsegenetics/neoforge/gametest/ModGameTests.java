@@ -644,6 +644,189 @@ public final class ModGameTests {
         }
     }
 
+    /**
+     * <b>The realm's origin cell comes out of the ground the shape it is supposed
+     * to be.</b> Its water where the water goes, its exit lit, and its edge one
+     * block outside the field.
+     *
+     * <p>Almost everything about {@code HorseRealm} is arithmetic on a chunk
+     * position, and arithmetic that is wrong by one produces a field that looks
+     * entirely convincing until somebody walks 1 600 blocks to an exit that is not
+     * there. None of it is visible from a diff, and all of it is a pure function
+     * of the chunk position, which is exactly the shape a test is good at.
+     *
+     * <p><b>It usually runs in the Overworld, and that is not a mistake.</b>
+     * {@code GameTestServer} builds its world with a hand-written three-dimension
+     * list and never reads the datapack's {@code dimension/} folder, so the realm
+     * <i>cannot</i> exist in this harness however correct its JSON is - the log
+     * shows the runner saving the overworld, the nether and the end and nothing
+     * else. {@link HorseRealmTerrain} does not care which level it writes into, so
+     * the geometry is asserted against whatever level is available and the two
+     * ground assertions, which belong to the dimension's flat generator rather
+     * than to this code, are asked only when the real one is there.
+     *
+     * <p>That leaves one thing this cannot see: whether the dimension loads at
+     * all. {@code runServer} answers that - its log names
+     * {@code ServerLevel[world]/horsegenetics:horse_realm} - and it is the check
+     * to repeat after any edit to the three JSON files, because a typo in them is
+     * silent everywhere else.
+     *
+     * <p>The decoration is invoked directly rather than waited for. In a running
+     * game it is queued from {@code ChunkEvent.Load} and applied on the next
+     * server tick; here that would cost a tick this test does not have, and the
+     * thing under test is what {@code HorseRealmTerrain} writes, not when the
+     * queue drains. It is idempotent by design, so calling it is safe whether or
+     * not the event already did.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HORSE_REALM_IS_BUILT =
+            TEST_FUNCTIONS.register("horse_realm_is_built", () -> ModGameTests::horseRealmIsBuilt);
+
+    private static void horseRealmIsBuilt(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        net.minecraft.server.level.ServerLevel realm =
+                server.getLevel(com.example.horsegenetics.neoforge.server.HorseRealm.REALM_LEVEL);
+        boolean theRealThing = realm != null;
+        if (!theRealThing) {
+            realm = server.overworld();     // see the note above - the harness has no realm
+        }
+
+        // The origin cell is a portal cell, a pool cell and a corner of the
+        // perimeter all at once, which is why it is the one worth generating.
+        net.minecraft.world.level.ChunkPos cell = new net.minecraft.world.level.ChunkPos(0, 0);
+        realm.getChunk(cell.x(), cell.z());
+        realm.getChunk(-1, 0);
+        com.example.horsegenetics.neoforge.server.HorseRealmTerrain.decorateNow(realm, cell);
+        com.example.horsegenetics.neoforge.server.HorseRealmTerrain.decorateNow(realm,
+                new net.minecraft.world.level.ChunkPos(-1, 0));
+
+        // 1. The ground. Bedrock at -1 and one dirt layer at 0 - away from the pool
+        // at the cell origin, which replaces it. This one belongs to the flat
+        // generator in dimension/horse_realm.json rather than to any Java here, so
+        // it is asked only of the real dimension; in the harness's overworld it
+        // would be asserting something about a plains biome.
+        if (theRealThing) {
+            BlockPos onGround = new BlockPos(40, 0, 40);
+            assertRealmBlock(helper, realm, onGround.below(), Blocks.BEDROCK, "the floor");
+            assertRealmBlock(helper, realm, onGround, Blocks.DIRT, "the surface");
+        }
+
+        // 2. The water. A hurt horse cannot heal away from it, so a field with no
+        // pools is a field that quietly sterilises everything in it (gap 258).
+        assertRealmBlock(helper, realm, new BlockPos(0, 0, 0), Blocks.WATER, "the cell's pool");
+        assertRealmBlock(helper, realm, new BlockPos(1, 0, 1), Blocks.WATER, "the cell's pool");
+
+        // 3. The exit, lit. An unlit frame is a hay wall.
+        BlockPos portal = new BlockPos(
+                com.example.horsegenetics.neoforge.server.HorseRealm.PORTAL_DX + 1, 1,
+                com.example.horsegenetics.neoforge.server.HorseRealm.PORTAL_DZ);
+        if (!realm.getBlockState(portal).is(
+                com.example.horsegenetics.neoforge.block.ModBlocks.HAY_PORTAL.get())) {
+            helper.fail("the realm's exit at " + portal.toShortString() + " is "
+                    + realm.getBlockState(portal).getBlock() + ", not a lit hay portal");
+        }
+
+        // 4. The edge. One block outside the field, and tall enough to matter.
+        // z = 8 rather than anywhere prettier because it has to lie inside chunk
+        // (-1, 0), which is the one decorated above - the wall is built per chunk,
+        // so asserting a column the test never asked for reads as a missing wall.
+        assertRealmBlock(helper, realm, new BlockPos(-1, 0, 8), Blocks.BARRIER, "the perimeter");
+        assertRealmBlock(helper, realm,
+                new BlockPos(-1, com.example.horsegenetics.neoforge.server.HorseRealm.WALL_HEIGHT - 1, 8),
+                Blocks.BARRIER, "the top of the perimeter");
+
+        // 5. None of it anywhere else. The debug corridor generates a single air
+        // layer and builds its own floor; a pool or a barrier turning up in it
+        // would mean a rule written against a Level rather than against a
+        // dimension, which is the failure this whole split exists to avoid.
+        net.minecraft.server.level.ServerLevel debug = server.getLevel(
+                com.example.horsegenetics.neoforge.server.DebugPenManager.DEBUG_LEVEL);
+        if (debug != null && debug.getBlockState(new BlockPos(0, 0, 0)).is(Blocks.WATER)) {
+            helper.fail("the realm's water grid reached the debug dimension");
+        }
+        helper.succeed();
+    }
+
+    private static void assertRealmBlock(GameTestHelper helper, net.minecraft.server.level.ServerLevel realm,
+                                         BlockPos at, net.minecraft.world.level.block.Block want, String what) {
+        BlockState found = realm.getBlockState(at);
+        if (!found.is(want)) {
+            helper.fail(what + " at " + at.toShortString() + " is " + found.getBlock() + ", not " + want);
+        }
+    }
+
+    /**
+     * <b>Every Overworld portal lands somewhere, always the same somewhere, and
+     * they are not all the same one.</b>
+     *
+     * <p>The realm's hundred exits are handed out by hashing the position of the
+     * portal you built, which buys the two properties the feature needs: the herd
+     * you released is where you left it next time, and two players do not pile
+     * onto one another. Both are silent when broken - a hash that drifted would
+     * strand somebody's horses out of reach with no error anywhere, and a hash
+     * that collapsed would put the whole server in one corner of a 16 000-block
+     * field and look, from inside, exactly like a popular meeting spot.
+     *
+     * <p>Pure arithmetic, so it needs no world; it is here rather than in JUnit
+     * only because the NeoForge module has no Minecraft on its test classpath and
+     * {@code BlockPos} is Minecraft's.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HORSE_REALM_GRID_IS_STABLE =
+            TEST_FUNCTIONS.register("horse_realm_grid_is_stable", () -> ModGameTests::horseRealmGridIsStable);
+
+    private static void horseRealmGridIsStable(GameTestHelper helper) {
+        int cells = com.example.horsegenetics.neoforge.server.HorseRealm.PORTAL_CELLS;
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        java.util.Random rng = new java.util.Random(20260925L);
+
+        for (int i = 0; i < 4000; i++) {
+            BlockPos portal = new BlockPos(rng.nextInt(-2_000_000, 2_000_000),
+                    rng.nextInt(-60, 300), rng.nextInt(-2_000_000, 2_000_000));
+            net.minecraft.world.level.ChunkPos cell =
+                    com.example.horsegenetics.neoforge.server.HorseRealm.arrivalCell(portal);
+
+            if (!com.example.horsegenetics.neoforge.server.HorseRealm.isPortalChunk(cell.x(), cell.z())) {
+                helper.fail("a portal at " + portal.toShortString() + " arrives at chunk "
+                        + cell + ", which carries no exit");
+                return;
+            }
+            if (!com.example.horsegenetics.neoforge.server.HorseRealm.arrivalCell(portal).equals(cell)) {
+                helper.fail("a portal at " + portal.toShortString() + " arrives somewhere different "
+                        + "the second time it is asked - the way back to a released herd is not stable");
+                return;
+            }
+            seen.add(cell.pack());
+        }
+
+        // Even coverage, not perfect coverage: 4 000 draws over 100 cells leaves
+        // an empty cell vanishingly unlikely, but the assertion that matters is
+        // that the hash has not collapsed onto a handful, so it is set well below
+        // the hundred rather than at it.
+        if (seen.size() < cells * cells * 3 / 4) {
+            helper.fail("4 000 portals only ever reached " + seen.size() + " of the "
+                    + (cells * cells) + " exits - the arrival hash has collapsed");
+            return;
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>The freedom stick crafts, and is drawable.</b> A feather, a stick and one
+     * horse hair. Same three flags as every other recipe here: an item that is
+     * craftable but not <i>findable</i> is an item nobody will ever make, and this
+     * one is the only door out of owning a horse.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> FREEDOM_STICK_CRAFTS =
+            TEST_FUNCTIONS.register("freedom_stick_crafts", () -> ModGameTests::freedomStickCrafts);
+
+    private static void freedomStickCrafts(GameTestHelper helper) {
+        craftsInto(helper, "the freedom stick",
+                CraftingInput.of(3, 1, List.of(
+                        new ItemStack(Items.FEATHER), new ItemStack(Items.STICK),
+                        new ItemStack(ModItems.HORSE_HAIR.get()))),
+                ModItems.FREEDOM_STICK.get());
+        helper.succeed();
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -688,6 +871,12 @@ public final class ModGameTests {
         register(event, environment, OLD_PAPERS_STILL_READ, 100);
         // Leash, untie, then five ticks for a ground drop to become visible.
         register(event, environment, WHISTLED_LEAD_COMES_BACK, 100);
+        // One chunk generated and decorated, then six block reads, in one tick.
+        register(event, environment, HORSE_REALM_IS_BUILT, 200);
+        // Four thousand hashes; no world touched at all.
+        register(event, environment, HORSE_REALM_GRID_IS_STABLE, 100);
+        // One recipe lookup in a single tick.
+        register(event, environment, FREEDOM_STICK_CRAFTS, 100);
     }
 
     /**

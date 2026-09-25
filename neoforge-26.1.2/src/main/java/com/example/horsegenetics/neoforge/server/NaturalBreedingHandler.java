@@ -133,7 +133,16 @@ public final class NaturalBreedingHandler {
         if (mareRecord.sex() != Sex.FEMALE) {
             return;
         }
-        long now = level.getGameTime();
+        if (HorseRealmRepro.reproductionPaused(mare)) {
+            // realm.breeding_rate_percent = 0. Her clock is frozen, so heat and
+            // gestation have already stopped on their own - but a mare who is
+            // standing IN heat with her one try unspent could still be covered
+            // on the tick the pause began. A paused realm is a still one.
+            return;
+        }
+        // Her own reproductive clock, not the world's - see HorseRealmRepro.
+        long now = HorseRealmRepro.reproTime(mare);
+        long realNow = level.getGameTime();
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = ReproHandler.of(mare);
         if (!ReproRules.mayTryNaturally(r, now, t)) {
@@ -173,7 +182,7 @@ public final class NaturalBreedingHandler {
         List<NaturalCover.Stallion> candidates = new ArrayList<>(near.size());
         for (Horse h : near) {
             candidates.add(new NaturalCover.Stallion(party(h), h.distanceToSqr(mare),
-                    ReproHandler.of(h).coversOn(now, t.dayTicks())));
+                    ReproHandler.of(h).coversOn(HorseRealmRepro.reproTime(h), t.dayTicks())));
         }
         NaturalCover.Crowd crowd = new NaturalCover.Crowd(level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS),
@@ -188,12 +197,16 @@ public final class NaturalBreedingHandler {
                 // seconds, as BreedGoal waits out loveTime >= 60 before it breeds.
                 Horse stallion = near.get(decision.stallion());
                 NaturalCover.Courtship before = COURTSHIPS.get(mare.getUUID());
+                // WALL-CLOCK, not her repro clock: the courtship is a three-second
+                // approach, a thing that happens in front of you. It is not part of
+                // the reproductive calendar and must not be slowed with it, or a
+                // quarter-rate realm would want a twelve-second stand-still.
                 NaturalCover.Courtship courtship = before == null
-                        ? NaturalCover.Courtship.start(stallion.getUUID(), now)
-                        : before.seen(stallion.getUUID(), now);
-                if (courtship.complete(now)) {
+                        ? NaturalCover.Courtship.start(stallion.getUUID(), realNow)
+                        : before.seen(stallion.getUUID(), realNow);
+                if (courtship.complete(realNow)) {
                     COURTSHIPS.remove(mare.getUUID());
-                    cover(level, mare, mareRecord, r, stallion, crowd, now);
+                    cover(level, mare, mareRecord, r, stallion, crowd, now, realNow);
                 } else {
                     COURTSHIPS.put(mare.getUUID(), courtship);
                 }
@@ -201,20 +214,20 @@ public final class NaturalBreedingHandler {
             case CROWDED -> {
                 // The owner hears it wherever she is standing; the log below is the
                 // debug record, and splits penned from wild for its own reasons.
-                tell(mare, CoverNotice.Reason.CROWDED, crowd, now);
+                tell(mare, CoverNotice.Reason.CROWDED, crowd, realNow);
                 if (!YardPens.inPen(mare)) {
                     // A WILD MARE GETS ONE SUMMARY, NOT A LINE (2026-09-14). Wild bands live
                     // eight to sixteen blocks, so nearly every wild mare is capped every heat,
                     // and a line each a minute was 2,900 of 3,400 fertility lines in a
                     // morning - burying the pen that tests the cap. They are counted instead.
                     if (wildCappedSince < 0L) {
-                        wildCappedSince = now;
-                    } else if (now - wildCappedSince >= WILD_CAP_SUMMARY_TICKS) {
+                        wildCappedSince = realNow;
+                    } else if (realNow - wildCappedSince >= WILD_CAP_SUMMARY_TICKS) {
                         ActionTrace.log("fertility", "crowding cap held back " + WILD_CAPPED.size()
                                 + " wild mares in the last 10 minutes (more than " + crowd.cap()
                                 + " horses within " + (int) ReproRules.NATURAL_CAP_RADIUS + " blocks)");
                         WILD_CAPPED.clear();
-                        wildCappedSince = now;
+                        wildCappedSince = realNow;
                     }
                     WILD_CAPPED.add(mare.getUUID());
                     break;
@@ -222,8 +235,8 @@ public final class NaturalBreedingHandler {
                 // Once a minute per mare: a capped paddock asks every two seconds, and
                 // eight mares saying so each time buries the log the cap is read from.
                 Long last = CROWDED_LOGGED.get(mare.getUUID());
-                if (last == null || now - last >= 1_200L) {
-                    CROWDED_LOGGED.put(mare.getUUID(), now);
+                if (last == null || realNow - last >= 1_200L) {
+                    CROWDED_LOGGED.put(mare.getUUID(), realNow);
                     ActionTrace.log("fertility", ActionTrace.describeShort(mare) + " not covered: "
                             + crowd.nearby() + " other horses within " + (int) ReproRules.NATURAL_CAP_RADIUS
                             + " blocks, the cap is " + crowd.cap());
@@ -245,7 +258,7 @@ public final class NaturalBreedingHandler {
                     why = CoverNotice.Reason.COWBOY_STOCK;
                 }
                 if (why != null) {
-                    tell(mare, why, crowd, now);
+                    tell(mare, why, crowd, realNow);
                 }
                 // ONLY HER HEALTH IS WORTH A LINE (gap 258). To get here she is already an
                 // adult mare in heat, with a try left and a stallion in reach, so the rest
@@ -254,8 +267,8 @@ public final class NaturalBreedingHandler {
                 // refused her silently, and a miscarriage costs half a heart.
                 if (!mareParty.healthyEnough()) {
                     Long saidAt = UNFIT_LOGGED.get(mare.getUUID());
-                    if (saidAt == null || now - saidAt >= 1_200L) {
-                        UNFIT_LOGGED.put(mare.getUUID(), now);
+                    if (saidAt == null || realNow - saidAt >= 1_200L) {
+                        UNFIT_LOGGED.put(mare.getUUID(), realNow);
                         ActionTrace.log("fertility", ActionTrace.describeShort(mare) + String.format(
                                 " not covered: hurt, %.1f/%.1f health - a natural cover needs %.0f%%",
                                 mare.getHealth(), mare.getMaxHealth(), ReproRules.COVER_HEALTH * 100.0));
@@ -268,8 +281,14 @@ public final class NaturalBreedingHandler {
         }
     }
 
+    /**
+     * {@code now} is the mare's own reproductive clock and {@code realNow} the
+     * world's - see {@link HorseRealmRepro}. The first spends her try this heat;
+     * the second is what every chat throttle and log stamp below wants, because a
+     * message is a thing a player reads in real time whatever the realm's pacing.
+     */
     private static void cover(ServerLevel level, Horse mare, HorseRecord mareRecord, Reproduction r, Horse stallion,
-                              NaturalCover.Crowd crowd, long now) {
+                              NaturalCover.Crowd crowd, long now, long realNow) {
         // Her one try this heat is spent whatever the roll says.
         ReproHandler.set(mare, r.withNaturalTry(now));
         HorseRecord stallionRecord = HorseRecords.of(stallion);
@@ -286,7 +305,7 @@ public final class NaturalBreedingHandler {
             case CONCEIVED -> CoverNotice.Reason.CONCEIVED;
             case DID_NOT_TAKE -> CoverNotice.Reason.DID_NOT_TAKE;
             case NOT_RECEPTIVE -> CoverNotice.Reason.NOT_RECEPTIVE;
-        }, crowd, now);
+        }, crowd, realNow);
         // Null for a wild mare, which HorseProgress swallows - a cover in a wild
         // band is nobody's achievement.
         HorseProgress.complete(ownerPlayer(mare), ProgressTask.NATURAL_COVER);

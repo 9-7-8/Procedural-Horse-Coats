@@ -181,6 +181,19 @@ public final class ModItems {
     @SuppressWarnings("deprecation") // Item(Properties) - see SeedJarItem
     public static final DeferredItem<Item> VET_KIT = register("vet_kit", p -> new Item(p.durability(64)));
 
+    // The freedom stick: right-click your own horse with it inside the horse
+    // realm and it goes wild again, healed, keeping its name, genome and
+    // pedigree. Behaviour in server/FreedomStickHandler; the place it works in
+    // is server/HorseRealm.
+    //
+    // Durable rather than consumed, at the same 64 as the vet's kit. The recipe
+    // is a feather, a stick and one horse hair, which is cheap enough that
+    // consuming it would be a tax rather than a cost - and the thing it is for
+    // is clearing out a whole stable of surplus, which is a job you do in one
+    // afternoon and not one horse at a time.
+    @SuppressWarnings("deprecation") // Item(Properties) - see SeedJarItem
+    public static final DeferredItem<Item> FREEDOM_STICK = register("freedom_stick", p -> new Item(p.durability(64)));
+
     /**
      * <b>Golden carrot seeds</b> - the only way to plant a golden carrot.
      *

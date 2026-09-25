@@ -877,6 +877,17 @@
       "count": 1
     },
     {
+      "id": "freedom_stick",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:feather",
+        "minecraft:stick",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:freedom_stick",
+      "count": 1
+    },
+    {
       "id": "golden_whistle",
       "kind": "shapeless",
       "in": [

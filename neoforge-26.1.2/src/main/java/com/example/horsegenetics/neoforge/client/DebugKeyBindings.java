@@ -83,9 +83,14 @@ public final class DebugKeyBindings {
         );
         event.register(diveHorse);
 
-        if (!ClientConfig.debugTools()) {
-            return;
-        }
+        // F6 IS NOT A DEV KEY ANY MORE. Now that the hay portal goes to the public
+        // horse realm, the debug corridor and its test yard have exactly one door,
+        // and it is this one - so it is registered in every build, including a
+        // release jar on somebody's server. Who may walk through it is the
+        // server's business, not the keybind's: ModNetworking admits an operator
+        // (LEVEL_GAMEMASTERS) or a world with debug.tools on, and tells anybody
+        // else no. A key that does nothing is a better failure than a door that
+        // does not exist, because the second one reads as the corridor being gone.
         generateDebugPens = new KeyMapping(
                 "key.horsegenetics.debug_pens",
                 KeyConflictContext.IN_GAME,
@@ -97,6 +102,10 @@ public final class DebugKeyBindings {
                 KeyMapping.Category.MISC
         );
         event.register(generateDebugPens);
+
+        if (!ClientConfig.debugTools()) {
+            return;
+        }
 
         showStalls = new KeyMapping(
                 "key.horsegenetics.show_stalls",

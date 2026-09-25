@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:feather",
+    "minecraft:stick",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "id": "horsegenetics:freedom_stick"
+  }
+}
