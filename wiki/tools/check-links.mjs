@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Every internal link in the wiki must resolve to a file that exists.
+// Every internal link in the wiki must resolve to a file that exists - and a
+// page's footer must not point somewhere its own subject is not.
 //
 // This exists because a wiki page is hand-written HTML and nothing has ever
 // checked its hrefs. A gene page linking to gene-foo.html when the gene is
@@ -16,6 +17,16 @@
 // Fragments (#anchor) are checked too: a link to page.html#section fails if
 // nothing on that page carries that id. That is the half most likely to rot,
 // because an id is invisible in the rendered page.
+//
+// The last two rules are about links that RESOLVE AND STILL LIE, which is the
+// failure no amount of href checking finds. A page's footer - its See-also row
+// and the blurb under it - sits OUTSIDE the tab panels, so every edit made at
+// tab level leaves it behind, and it is the one part of a page an author never
+// has open. horse-stasis.html shipped its last stage and still said "everything
+// on this page is built except the self-triggering emergency chamber", with a
+// See-also pointing at roadmap.html - a generated index the page had just left,
+// so the link worked and landed the reader on a list its subject was absent
+// from. See wiki/coding-notes.html#page-foot.
 
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
@@ -80,6 +91,87 @@ function duplicateIds(html) {
   return [...dupes];
 }
 
+// ---------------------------------------------------------------------------
+// The footer: a See-also, or a blurb, that resolves and still lies
+// ---------------------------------------------------------------------------
+
+/**
+ * The two generated indexes, and the tab a page must carry to belong in each.
+ * Both are built by their bake script from the tabs themselves
+ * (bake-roadmap-index.mjs, bake-verification-index.mjs), so a page without the
+ * tab is simply not on the list - and a See-also promising it is a link that
+ * works and arrives nowhere.
+ */
+const INDEXES = { "roadmap.html": "roadmap", "verification.html": "verification" };
+
+/**
+ * The words a footer uses to say there is work outstanding. Deliberately a
+ * closed, small vocabulary rather than anything clever: across 167 footers it
+ * matches three, and the point is to catch the page that says "except the X"
+ * after X shipped, not to grade prose.
+ */
+const OUTSTANDING =
+  /\bstill\s+(?:planned|unbuilt|open|to\s+\w+)\b|\bnot\s+(?:yet\s+)?built\b|\bunbuilt\b|\b(?:is|are)\s+planned\b|\bexcept\s+the\b|\bleft\s+to\s+(?:build|do|write)\b|\byet\s+to\s+be\b/i;
+
+/**
+ * <b>Is this page about the process rather than about a subject?</b> Such a
+ * page may link either index freely and may talk about unbuilt work in general
+ * - that is what it is for. Read off the page's own eyebrow rather than a list
+ * of filenames here, so a new Project page is exempt by being one and nothing
+ * has to be kept in step.
+ */
+function isProcessPage(html) {
+  const m = html.match(/class="eyebrow[^"]*">\s*([^<]*)/);
+  const kind = (m ? m[1] : "").trim().toLowerCase();
+  return kind.startsWith("project") || kind.startsWith("start here");
+}
+
+/** The page-foot block, from its opening div to the end of the article. */
+function footerOf(html) {
+  const at = html.indexOf('<div class="page-foot">');
+  if (at < 0) return null;
+  const rest = html.slice(at);
+  const end = rest.indexOf("</article>");
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
+function textOf(fragment) {
+  return fragment
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function footerProblems(html, from) {
+  const footer = footerOf(html);
+  if (!footer || isProcessPage(html)) return [];
+
+  const problems = [];
+  const seealso = footer.match(/<div class="seealso">([\s\S]*?)<\/div>/);
+
+  for (const m of (seealso ? seealso[1] : "").matchAll(/href="([^"#?]+)/g)) {
+    const file = m[1].split("/").pop();
+    const tab = INDEXES[file];
+    if (tab && !html.includes(`data-tab="${tab}"`)) {
+      problems.push(
+        `${from} -> ${file} in its See-also (file exists, but this page has no ` +
+          `${tab} tab, so ${file} does not list it - link the tab that holds it, or drop the row)`
+      );
+    }
+  }
+
+  const blurb = textOf(footer.replace(/<div class="seealso">[\s\S]*?<\/div>/, ""));
+  const claim = blurb.match(OUTSTANDING);
+  if (claim && !html.includes('data-tab="roadmap"')) {
+    problems.push(
+      `${from} footer blurb says "${claim[0]}" but this page has no roadmap tab - ` +
+        `either the work shipped and the blurb was not updated, or it needs a Roadmap tab`
+    );
+  }
+  return problems;
+}
+
 for (const page of pages) {
   const html = readFileSync(page, "utf8");
   const from = relative(ROOT, page).replaceAll("\\", "/");
@@ -87,6 +179,8 @@ for (const page of pages) {
   for (const id of duplicateIds(html)) {
     broken.push(`${from} has TWO elements with id="${id}" - an #anchor only ever reaches the first`);
   }
+
+  for (const problem of footerProblems(html, from)) broken.push(problem);
 
   for (const m of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
     const raw = m[1];
@@ -121,10 +215,13 @@ for (const page of pages) {
 }
 
 if (broken.length) {
-  console.error(`${broken.length} broken link(s):\n`);
+  console.error(`${broken.length} broken or misleading link(s):\n`);
   for (const b of broken.sort()) console.error("  " + b);
 } else {
-  console.log(`links OK - every internal href and src across ${pages.length} pages resolves`);
+  console.log(
+    `links OK - every internal href and src across ${pages.length} pages resolves, ` +
+      `and every footer points where its own tabs say it should`
+  );
 }
 
 if (process.argv.includes("--orphans")) {

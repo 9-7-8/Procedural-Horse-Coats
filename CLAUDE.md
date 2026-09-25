@@ -185,7 +185,7 @@ NeoForge module thin.** That is what makes a future `forge-1.12.2/` cheap.
 ./gradlew :common:bakeSpecFixtures             # what the real Java spec engine produces...
 node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS agree?
 ./gradlew :web:bakeDesignerAssets              # recompile common/ to wasm for the designer
-node wiki/tools/check-links.mjs                # every href, #fragment and id in the wiki
+node wiki/tools/check-links.mjs                # every href, #fragment, id and page footer
 node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
 node neoforge-26.1.2/tools/check-block-models.mjs # no blockstate points at a model nobody wrote
 node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
@@ -214,7 +214,7 @@ and fails *silently* when stale:
 | a gene's layers or masks | `*DeadLayerTest` (seconds) - a layer that paints nothing fails it; fix the gene, then **delete its line** | `common/src/test/resources/dead-layers.txt` |
 | **any file in `horsegenetics/genes/`, or any gene page's `<h1>`, tabs, or `Verified` block** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages`, `:common:bakeMarkingFacts`, `:common:bakeGeneCensus`, `:common:bakeUnverifiedGenes`, then `node wiki/tools/bake-gene-timeline.mjs` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html`, `wiki/timeline-of-genes.html`, `wiki/gene-census.html` (**every** gene's alleles, not only data-driven ones - a new gene is on it by existing, but only after the bake), `wiki/breed-designer/assets/marking-facts.json`, `common/.../horsegenetics/unverified-genes.txt` (the horse dimension's coat column - a stale one shows pens for confirmed genes and hides the rest) **and the generated spans of `wiki/pages.js` and `index.html`** |
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
-| **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages), then `node wiki/tools/bake-agent-text.mjs` | `wiki/search-index.js`, `wiki/text/` |
+| **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`, and a footer whose See-also or blurb outlived its tabs; `--orphans`), then `node wiki/tools/bake-agent-text.mjs` | `wiki/search-index.js`, `wiki/text/` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | **any Verification tab, or any Roadmap tab** - added, deleted, or its summary sentence reworded | `node wiki/tools/bake-verification-index.mjs` and `node wiki/tools/bake-roadmap-index.mjs` - each hard-fails on a tab with no summary box rather than write an index that omits a page | `wiki/verification.html`, `wiki/roadmap.html` |
 | **`ProgressTask`** - a checklist task added, deleted or retitled | `node neoforge-26.1.2/tools/bake-advancements.mjs` (a new task needs an icon in its `ICON` map first), then `check-progress-tasks.mjs`. Every task is also an advancement, and the bake is the only thing that makes it one | `neoforge-26.1.2/.../data/horsegenetics/advancement/` |

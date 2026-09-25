@@ -137,6 +137,7 @@ wiki/coding-notes.html#measure	all	Measure it; do not reason about it
 wiki/coding-notes.html#mirrors	all	The mirrors, and how much of each is actually gated
 wiki/coding-notes.html#missing-models	all	A green boot is not a clean boot — grep for missing models, not errors
 wiki/coding-notes.html#mixin-inherited	all	A mixin cannot inject into a method the target class does not declare
+wiki/coding-notes.html#page-foot	all	A page’s footer is outside its tabs, so every tab-level edit leaves it behind
 wiki/coding-notes.html#philosophy-numbers	all	Philosophy’s sections are cited by number, in prose, from code
 wiki/coding-notes.html#portability	all	The two hard portability rules now enforce themselves
 wiki/coding-notes.html#position	all	A mask's meaning depends on its position in the list

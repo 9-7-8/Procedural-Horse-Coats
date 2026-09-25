@@ -124,10 +124,64 @@ Not played, and the verification tab says so in seven bullets.
     because the inventory is not in the world; and a donkey or mule cannot be caught, because a
     chamber holds a Horse and both capture and release are written against EntityType.HORSE.
 
-One thing noticed and not chased, so it is not lost
+Noticed at the end, then chased on the owner's say-so
 
-    The Coding tab says StasisStud.atStud re-checks the tier "because StasisUpgradeRecipe copies
-    components and a mark can therefore outlive the rung that bought it". The code does not: the
-    upgrade copies stasis_snapshot only, and drops STASIS_AT_STUD. The defensive check is still
-    right; the stated reason for it is wrong. Left alone as another bullet's work rather than
-    widened into this one.
+    The Coding tab said StasisStud.atStud re-checks the tier "because StasisUpgradeRecipe copies
+    components and a mark can therefore outlive the rung that bought it". It cannot, twice over:
+    the upgrade copies stasis_snapshot and nothing else, so it never carries STASIS_AT_STUD; and
+    only a SPACER can be marked at all (clickMenuButton refuses any rung whose breedsInBank() is
+    false), while SPACER is the top rung and next() hands back null, so a marked chamber never
+    reaches an upgrade.
+
+    The check is right and stays — the mark is a bare boolean on an arbitrary stack and nothing
+    ties it to the rung allowed to set it, so a /give with the component spelled out, another
+    mod, or a later recipe can hand in a marked chamber that never passed the menu's gate. That
+    is now the stated reason, in both the page and the javadoc, and the forward-looking half sits
+    in StasisUpgradeRecipe.assemble, where someone adding a rung above SPACER would be standing.
+
+And that turned up the real one: nothing was looking at page footers
+
+    Chasing it meant re-baking wiki/text/, and horse-stasis.all.txt — which holds the page CHROME,
+    not a tab — had not changed. That is how the footer surfaced: it still said "everything on
+    this page is built except the self-triggering emergency chamber", an hour after the emergency
+    chamber shipped, with a See-also pointing at roadmap.html, an index the page had just left by
+    deleting its Roadmap tab.
+
+    Both were valid HTML and the link resolved. It survived the entire ending-a-session routine,
+    because every check in that routine asks whether a link works, and this was a link that works
+    and lies.
+
+    So check-links.mjs now reads two things off every page-foot and compares them with the page's
+    own tab panels:
+
+      - a See-also linking roadmap.html or verification.html requires the matching tab, since
+        both files are GENERATED from those tabs - no tab means no row, so the link is a promise
+        the destination does not keep;
+      - a blurb claiming work is outstanding ("still planned", "not built", "except the...")
+        requires a Roadmap tab, that being the only place a plan may live.
+
+    A page whose eyebrow reads Project or Start here is exempt from both, and the exemption is
+    read off the eyebrow rather than a list of filenames, so a new Project page is exempt by
+    being one. Across 167 footers the blurb vocabulary matches three, all of them legitimate. The
+    rule was then checked against the horse-stasis footer as it stood before the fix, by putting
+    it back: both halves fire on it.
+
+    It went into check-links.mjs rather than a new tool on purpose. That one already runs after
+    every prose change and is already named in CLAUDE.md's wiki row, so the check costs nobody a
+    new command to remember — and CLAUDE.md is at its 300-line budget, which a new row would have
+    broken for a check that might then never be run.
+
+Four more, found the day it was written
+
+    horse-body, horse-dimension, item-horse-hair and texture-resolution all linked roadmap.html
+    from footers whose pages have no plans on it. Rows dropped.
+
+    horse-dimension's promised "the planned split corridor" — a phrase that appears nowhere else
+    in the wiki and, on checking the history, never did. Whatever it was went with the roadmap
+    rewrite in 4b13c657, and the link has pointed at nothing since. Not reconstructed, because
+    guessing a design is worse than losing one: if the split corridor is still wanted it needs a
+    Roadmap tab on wiki/horse-dimension.html, written from what the owner remembers of it.
+    Flagged rather than invented.
+
+    Written up as technique on wiki/coding-notes.html#page-foot, under "Traps in the gaps between
+    pages", which is what this is: every page involved was individually correct.

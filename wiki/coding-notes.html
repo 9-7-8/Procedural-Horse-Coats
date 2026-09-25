@@ -347,6 +347,57 @@ could not find any targets matching 'canAddPassenger' in AbstractHorse</code></p
     them has an owning page.
 </p>
 
+<h3 id="page-foot">A page&rsquo;s footer is outside its tabs, so every tab-level edit leaves it behind</h3>
+
+<p>
+    The <code>page-foot</code> block &mdash; the <code>seealso</code> row and the blurb under it
+    &mdash; sits after the last <code>&lt;section class="tab-panel"&gt;</code>. Nothing about
+    working on a page brings it into view: you open the Gameplay tab to write the feature, the
+    Coding tab to explain it and the Verification tab to say what is unchecked, and the two lines
+    that summarise the whole page for a reader who has not scrolled are in none of them.
+</p>
+<p>
+    <strong>It bit on 2026-09-24.</strong> <a href="horse-stasis.html">Horse stasis</a> shipped
+    its last stage, its Roadmap tab was deleted and the page left
+    <a href="roadmap.html">roadmap.html</a> &mdash; and the footer went on saying
+    <em>&ldquo;everything on this page is built except the self-triggering emergency
+    chamber&rdquo;</em> with a See-also pointing at the roadmap. Both were valid HTML and the link
+    resolved; it simply landed the reader on a generated index that no longer had a row for the
+    page that sent them there. It survived the whole ending-a-session routine, because every check
+    in it was asking whether the link worked.
+</p>
+<div class="note">
+    <span class="label">What catches it now</span>
+    <p>
+        <code>check-links.mjs</code> reads two things off the footer and compares them with the
+        page&rsquo;s own tab panels. A <strong>See-also linking <code>roadmap.html</code> or
+        <code>verification.html</code></strong> requires the matching tab, because both files are
+        generated <em>from</em> those tabs &mdash; no tab means no row, so the link is a promise
+        the destination does not keep. And a <strong>blurb claiming work is outstanding</strong>
+        (&ldquo;still planned&rdquo;, &ldquo;not built&rdquo;, &ldquo;except the&hellip;&rdquo;)
+        requires a Roadmap tab, since that is the only place a plan is allowed to live.
+    </p>
+    <p>
+        A page whose eyebrow reads <strong>Project</strong> or <strong>Start here</strong> is
+        exempt from both: those pages are <em>about</em> the process and link the indexes on
+        purpose. The exemption is read off the eyebrow rather than a list of filenames, so a new
+        Project page is exempt by being one and there is nothing to keep in step.
+    </p>
+</div>
+<p>
+    It found four more the day it was written &mdash; <a href="horse-body.html">horse-body</a>,
+    <a href="horse-dimension.html">horse-dimension</a>,
+    <a href="item-horse-hair.html">item-horse-hair</a> and
+    <a href="texture-resolution.html">texture-resolution</a> all linked the roadmap from footers
+    whose pages had no plans on it. horse-dimension&rsquo;s row promised
+    <em>&ldquo;the planned split corridor&rdquo;</em>, a phrase that appears nowhere else in the
+    wiki and never did: the plan behind it was lost when the roadmap was rewritten by priority in
+    <code>4b13c657</code>, and the link had been pointing at nothing ever since. The rows are
+    gone; <strong>if the split corridor is still wanted it needs a Roadmap tab on
+    <a href="horse-dimension.html">its own page</a></strong>, written from whatever the owner
+    remembers of it.
+</p>
+
 <h3 id="philosophy-numbers">Philosophy&rsquo;s sections are cited by number, in prose, from code</h3>
 
 <p>
