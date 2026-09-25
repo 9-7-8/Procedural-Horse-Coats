@@ -192,7 +192,69 @@ WHAT IS NEWLY WAITING
         frightened and calmable, and the first that attacks its own owner while
         being ridden.
 
-    Neither breed has a dedicated test. The precedent says it should: the Dhampir
-    shipped with a 160-line DhampirBreedTest asserting its founders come out as
-    intended, and these two pin more loci than it does. Not written this session,
-    and worth being the next thing.
+    The pools themselves are no longer on that list: NetherBreedsTest answers
+    "is this the horse the file describes" without anybody launching the game.
+    What is left on those tabs is only what a test genuinely cannot see — whether
+    it renders, whether it behaves, and whether it is any fun.
+
+    Neither breed had a dedicated test, and the owner asked for one before the
+    session closed, so there are now two.
+
+
+THE TWO TESTS, AND THE CHECKER
+
+    NetherBreedsTest is the Dhampir's kind of test: five hundred founders of each
+    breed, and every claim the files make about the pool pinned — the pairs, that
+    the passification route really resolves to nether wart at adults-only and cake
+    at any age, that the colour bands land where they say, and that the
+    Nightmare's tail is *not* gold, which is the assertion a later tidy-up is most
+    likely to break by copying the mane's band across.
+
+    All seven cases passed first run, which is the moment to be suspicious rather
+    than pleased. Two deliberate mutations went in — the emberveins pair changed
+    to n/n, and a sclera band tightened past what any founder could satisfy — and
+    both failed, in the two separate test methods, so the assertions are live
+    rather than quietly reading empty values. Worth the sixty seconds every time.
+
+    BreedBandsReachTest is the general form of the inert-band defect, and it is
+    the more valuable of the two. For every breed in the catalogue it resolves the
+    expression each pinned pair actually produces and fails any band on a knob
+    none of them reads. This is only possible because "$hue" survives parsing as a
+    Value.FromKnob *index* rather than being resolved away into an opaque
+    supplier — had the spec engine been one step more eager, the check could not
+    have been written at all.
+
+    It was proved by putting the Nightmare's old hue band back and watching it go
+    red, and its message names the knobs those pairs *do* read, so whoever trips
+    it has somewhere to go rather than just a refusal. It sees data-driven genes
+    only — a hand-written gene reads its knobs in Java, where there is nothing to
+    walk — and it counts and reports what it skipped for that reason instead of
+    implying a coverage it does not have.
+
+    Then check-breed-heights.mjs, off the other loose end. Both wiki pages print a
+    height range per breed, both hand-typed, both derived from the same JSON
+    through BreedStatCurve.handsFor — and the two pages use *different*
+    conventions on purpose, stable notation on breeds.html and decimal hands in
+    the book, so one horse legitimately reads 16.1 on one page and 16.3 on the
+    other. The script checks each page under its own convention and does not
+    unify them.
+
+    It reads BASELINE_HH and BIG_GAMMA out of the Java at run time rather than
+    keeping a copy, and hard-fails if it cannot find them: a checker carrying its
+    own stale constant is precisely the defect it exists to catch, and it would
+    have gone green for exactly the wrong reason. It also fails on a breed with no
+    row at all, which is the other half of how the two new breeds went unnoticed.
+
+    One judgement call in it, made by the agent that wrote it and worth knowing:
+    the stored size is itself a rounding of an exact hand figure, so a strict port
+    demanded 13.7 where the Tarpan correctly prints 13.8. It therefore accepts any
+    figure some scale inside the stored value's own rounding interval formats to.
+    The cost is that it cannot see an error of a single step. The three it found
+    were all larger than that.
+
+    Which were: the Dhampir a whole hand too tall in the book (the one already
+    known), and then the Oldenburg and the Rocky Mountain Horse both a step short
+    in the table on breeds.html — neither suspected, both cross-confirmed by the
+    book already agreeing with the JSON. Three hand-typed derived numbers wrong on
+    two pages, found the first time anything recomputed them. That is the whole
+    argument for the rule about derived numbers, arriving unprompted.
