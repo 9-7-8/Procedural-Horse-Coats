@@ -48,8 +48,20 @@
     Press <kbd>H</kbd> and pick <strong>Log</strong>. It is a plain list of things that have
     happened to horses you own, <strong>newest at the top</strong>: every cover that went
     through and every one that did not, every foal, every death, every horse you tamed, bought,
-    were handed or lost. Each row carries the day and the time it happened, what kind of thing
-    it was, which horse it was about, and the result in a sentence.
+    were handed or lost, every horse an
+    <a href="horse-stasis.html#emergency-gameplay">emergency chamber</a> caught, and every horse a
+    <a href="item-rescuing-braid.html">rescuing braid</a> sent home. Each row carries the day and
+    the time it happened, what kind of thing it was, which horse it was about, and the result in
+    a sentence.
+</p>
+<p>
+    The two newest kinds &mdash; <strong>Rescues</strong> and <strong>Homings</strong>, each with
+    a filter chip of its own &mdash; are here for the tab's own reason, harder than the rest. A
+    chamber and a braid both fire <em>by themselves</em>, with nobody watching, possibly a
+    thousand blocks away; the chat line is the only thing that ever says so and it scrolls past
+    while you are busy with whatever was killing the horse. They are two kinds rather than one
+    because they leave you in different places: a rescued horse is in a bottle you now have to
+    find and open, and a homed one is standing in its stall.
 </p>
 
 <div class="note">
@@ -420,12 +432,14 @@
         needs permissions the player may not have, silently does nothing for them if they do not,
         and skips every check the whistle makes.</li>
     <li><strong>It must answer the unloaded case, which is most rows.</strong>
-        <code>HorseRoster.entry()</code> only fills <em>Where</em> for a horse in a loaded chunk;
-        everything else reads <em>not loaded</em>, and those are exactly the horses you would
-        want to summon. <strong><code>data/HorseWhereabouts</code> already exists</strong> as a
-        <code>SavedData</code> of last-seen dimension, position and death, and the roster does
-        not read it &mdash; wiring that in is the prerequisite and improves the column whether or
-        not the button is built.</li>
+        <code>HorseRoster.entry()</code> fills <em>Where</em> with a real position only for a
+        horse in a loaded chunk; everything else reads <em>not loaded</em>, and those are exactly
+        the horses you would want to summon. <code>data/HorseWhereabouts</code> is the
+        <code>SavedData</code> of last-seen dimension, position and death that would answer it,
+        and <strong>the roster now reads it</strong> &mdash; but only for the one case that is not
+        a position at all: a horse in a stasis chamber, which says so rather than claiming to be
+        somewhere you could ride to. Wiring the rest of it in is still the prerequisite, and still
+        improves the column whether or not the button is built.</li>
     <li><strong>It needs a cost or a gate.</strong> A free summon-any-horse-from-anywhere button
         makes whistles, tickets and holding pens redundant in one stroke. Whatever gates it
         &mdash; a bond tier, a cooldown, an item &mdash; should be decided

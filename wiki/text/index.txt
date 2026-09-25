@@ -2773,11 +2773,16 @@ wiki/horse-stasis.html#capture-release	coding	Capture and release: it is the lyc
 wiki/horse-stasis.html#chambers	gameplay	The four stasis-chamber tiers
 wiki/horse-stasis.html#drops-coding	coding	The drop buffer: the same ability verb, a different sink
 wiki/horse-stasis.html#drops-gameplay	gameplay	The drop buffer: what an Advanced chamber collects
+wiki/horse-stasis.html#emergency-bank	gameplay	Spare chambers in the bank count too
+wiki/horse-stasis.html#emergency-bank-coding	coding	The bank as a second place to look, without a world search
 wiki/horse-stasis.html#emergency-cheap	coding	The scan the roadmap was worried about does not exist
-wiki/horse-stasis.html#emergency-coding	coding	The emergency chamber: a subclass, and one event at LOW
+wiki/horse-stasis.html#emergency-coding	coding	The emergency chamber: a subclass, and one event at LOWEST
 wiki/horse-stasis.html#emergency-details	coding	Four small decisions
 wiki/horse-stasis.html#emergency-gameplay	gameplay	The Emergency Horse Stasis Chamber
+wiki/horse-stasis.html#emergency-grace	coding	A tick between the eject and the capture
 wiki/horse-stasis.html#emergency-hook	coding	Where the hook had to go, against the plan
+wiki/horse-stasis.html#emergency-log	gameplay	It writes it down as well as saying it
+wiki/horse-stasis.html#emergency-log-coding	coding	Why a rescue is a log row and not only a chat line
 wiki/horse-stasis.html#emergency-not-a-tier	coding	Why it is a subclass and not a fifth tier
 wiki/horse-stasis.html#files	coding	What is where
 wiki/horse-stasis.html#pipes	coding	Why the goods slots are on the wire and the chambers are not
@@ -2791,6 +2796,7 @@ wiki/horse-stasis.html#the-component-syncs-whole	coding	The component syncs the 
 wiki/horse-stasis.html#three-upgrade-files	coding	Why the upgrades became three recipes
 wiki/horse-stasis.html#two-custom-recipes	coding	Why three of these are Java recipes
 wiki/horse-stasis.html#upkeep-coding	coding	The upkeep: four refusals, then one horse
+wiki/horse-stasis.html#whereabouts-stasis	coding	How the browser knows a horse is in a chamber
 wiki/horse-traits.html#ability	all	11. Ability
 wiki/horse-traits.html#aura	all	5. Aura
 wiki/horse-traits.html#build-order	all	Build order
@@ -2887,6 +2893,20 @@ wiki/item-jumps.html#use	gameplay	What it is for
 wiki/item-jumps.html#uvlock	coding	The crossrails are not UV-locked
 wiki/item-jumps.html#why-cosmetic	science	Why style is cosmetic
 wiki/item-jumps.html#why-stacking	science	Stacking, and the height that was added beside it
+wiki/item-rescuing-braid.html#colour	gameplay	The colour
+wiki/item-rescuing-braid.html#colour-coding	coding	Why vanilla’s dye and not the mod’s tint
+wiki/item-rescuing-braid.html#files	coding	What is where
+wiki/item-rescuing-braid.html#no-component	coding	The item carries nothing
+wiki/item-rescuing-braid.html#refusals	gameplay	What it refuses
+wiki/item-rescuing-braid.html#rider	gameplay	You come with it
+wiki/item-rescuing-braid.html#state-not-crossing	coding	Why it tests a state, not a killing blow
+wiki/item-rescuing-braid.html#the-move	coding	The move, and the rider
+wiki/item-rescuing-braid.html#the-streak	coding	The streak is a mask, and the mask is baked
+wiki/item-rescuing-braid.html#three-on-one-event	coding	Three subscribers on one event
+wiki/item-rescuing-braid.html#two-slots	gameplay	Two slots, two lives
+wiki/item-rescuing-braid.html#what-happens	gameplay	What actually happens, in order
+wiki/item-rescuing-braid.html#what-it-is	gameplay	What it is
+wiki/item-rescuing-braid.html#where-it-sends	gameplay	Where it sends a horse
 wiki/item-research-papers.html#carrot-tooltip	coding	The carrot says which pair it carries
 wiki/item-research-papers.html#component	coding	The component and the routes
 wiki/item-research-papers.html#gaps	coding	Known gaps

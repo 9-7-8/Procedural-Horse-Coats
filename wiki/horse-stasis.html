@@ -56,6 +56,15 @@
         your diamond's worth twice.
     </p>
 </div>
+<p>
+    A shelved horse <strong>stays on your roster</strong>, and the
+    <a href="horse-browser.html">browser</a> now says where it is: the whereabouts column reads
+    <strong>in a stasis chamber</strong> rather than <em>not loaded</em>. That was worth fixing
+    rather than leaving &mdash; &ldquo;not loaded&rdquo; means <em>somewhere you cannot see right
+    now</em>, which reads as a horse you could go and fetch, and no amount of walking towards a
+    bottle will ever load it. It also means <code>stasis</code> is a word the filter box finds
+    horses by, so <em>which of my two hundred are shelved</em> is one search.
+</p>
 <table>
     <tr><th>Item</th><th>Recipe</th><th>Unlocks, in the bank</th></tr>
     <tr><td><strong>Basic Horse Stasis Chamber</strong></td>
@@ -147,11 +156,46 @@
 </div>
 <p>
     Two things worth knowing before you rely on it. <strong>You have to be logged in</strong>
-    &mdash; the chamber is in your inventory, and an inventory that is not in the world cannot
-    catch anything, so a horse that gets into trouble overnight is on its own. And
-    <strong>if you are riding the horse it takes you off first</strong>: the horse vanishes from
-    under you and you land where it was standing. By then it has usually thrown you off anyway,
-    since it bolts at twice this health.
+    &mdash; an inventory that is not in the world cannot catch anything, and neither can a bank
+    if its owner is offline, so a horse that gets into trouble overnight is on its own. And
+    <strong>if you are riding the horse you are set down first</strong>: you land on your feet
+    where it was standing, and the horse goes into the bottle from under you a tick later. By
+    then it has usually thrown you off anyway, since it bolts at twice this health.
+</p>
+
+<h3 id="emergency-bank">Spare chambers in the bank count too</h3>
+<p>
+    You do not have to be carrying one. <strong>An empty emergency chamber filed in a stasis bank
+    you placed insures your horses exactly as one in your pocket does</strong> &mdash; so a rack
+    of spare empties in the cabinet at home is worth having, and the day you ride out having
+    forgotten to take one is not the day your insurance lapses.
+</p>
+<p>
+    The one in your inventory is spent first (owner's call): the bottle on your belt is the one
+    you bought for this moment, and the bank is the backstop. If the carried one is full and a
+    bank has an empty, <strong>the bank's is used rather than the horse being refused</strong>.
+    The chat line tells you which happened, because the two leave you in different positions
+    &mdash; one of them means you are a bottle short in your pocket and the other does not.
+</p>
+<div class="note">
+    <span class="label">It is a bank you placed</span>
+    <p>
+        A bank is otherwise unowned &mdash; anybody who can reach it can open it, file a chamber
+        and take one out &mdash; but spending a stranger's emergency chamber would be theft, so
+        the block quietly remembers who put it down. <strong>A bank placed before this existed is
+        claimed the first time somebody opens it</strong>, which is the whole of what you need to
+        do to an old one. Owning a bank grants nothing else.
+    </p>
+</div>
+
+<h3 id="emergency-log">It writes it down as well as saying it</h3>
+<p>
+    A chamber fires with nobody watching, by design &mdash; that is most of what you are paying
+    eight ender pearls for. So a rescue is now a row on the
+    <a href="horse-browser.html">browser's Log tab</a> as well as a line in chat, under a
+    <strong>Rescues</strong> filter of its own. The chat line is the alarm and it scrolls away;
+    the row is the answer to &ldquo;what happened to my mare&rdquo; an hour later, when the horse
+    is a bottle in a cabinet with no story attached to it.
 </p>
 
 <h2 id="bank-gameplay">The Horse Stasis Bank</h2>
@@ -990,7 +1034,7 @@
         tidy up an exception.</li>
 </ul>
 
-<h2 id="emergency-coding">The emergency chamber: a subclass, and one event at <code>LOW</code></h2>
+<h2 id="emergency-coding">The emergency chamber: a subclass, and one event at <code>LOWEST</code></h2>
 <p>
     Shipped 2026-09-24, and the smallest stage of the six by a distance &mdash; three new classes
     and about a hundred lines, because the only genuinely new thing in it is <em>when</em> to
@@ -1038,16 +1082,26 @@
     was never going to take in full.
 </p>
 <div class="note">
-    <span class="label"><code>LOW</code> priority, and that ordering is the feature</span>
+    <span class="label"><code>LOWEST</code> priority, and that ordering is the feature</span>
     <p>
-        Both handlers are on the same event, so the priority is not tidiness &mdash; it is how
-        the two compose. At <code>LOW</code> the rescue runs <em>after</em> the last stand: a
-        killing blow is caught by the last stand, which zeroes the damage and leaves the horse on
-        a sliver, and this then sees a horse on a sliver and takes it out of the fight. The
-        player gets the totem particles <em>and</em> the rescue, in that order, which is exactly
-        the story that happened. In the losing order the chamber would swallow a horse the last
-        stand was about to save anyway &mdash; spending the insurance on a blow that was never
-        going to land.
+        Three handlers are now on this one event, so the priority is not tidiness &mdash; it is
+        how they compose. Running last, the rescue sees a horse the other two could not help: a
+        killing blow is caught by the <a href="horse-care.html#last-stand">last stand</a>, which
+        zeroes the damage and leaves the horse on a sliver; a
+        <a href="item-rescuing-braid.html">rescuing braid</a> at <code>LOW</code> takes that horse
+        home if it is wearing one; and only then does this see a horse still standing on a sliver
+        and take it out of the fight. The player gets the totem particles <em>and</em> the rescue,
+        in that order, which is exactly the story that happened. In the losing order the chamber
+        would swallow a horse the last stand was about to save anyway &mdash; spending the
+        insurance on a blow that was never going to land.
+    </p>
+    <p>
+        It dropped from <code>LOW</code> to <code>LOWEST</code> when the braid shipped, and the
+        reason is the same both times. <strong>A braid is the more specific instrument</strong>
+        &mdash; worn on one horse on purpose, where a chamber covers every horse you own &mdash;
+        so it spends itself first. Nothing is lost by that: a horse the braid has sent home is out
+        of the fight and takes no further blows, so the chamber it did not spend is still in your
+        pocket.
     </p>
 </div>
 
@@ -1098,6 +1152,108 @@
     that is really about two features at once: <strong>the rescue fraction must stay below
     <code>Escape.DEFAULT_THRESHOLD</code></strong>, or a horse would be swallowed before it was
     ever given the chance to run.
+</p>
+
+<h3 id="emergency-bank-coding">The bank as a second place to look, without a world search</h3>
+<p>
+    An empty emergency chamber filed in a bank insures its owner's horses too, and the obvious
+    way to implement that is the one thing this whole feature exists to avoid: finding a block
+    somewhere in some dimension means a search of the world, or a chunk load per bank per blow.
+</p>
+<p>
+    <code>StasisBankIndex</code> is what makes it cheap, and the trick is its <strong>second
+    field</strong>. A row is a bank's position and its owner &mdash; that much is only a phone
+    book. What matters is <code>armed</code>: the block entity publishes, every time its chamber
+    grid changes and again on <code>onLoad</code>, whether it is currently holding an
+    <em>empty emergency chamber</em>. So the usual answer &mdash; no, none of your banks can help
+    &mdash; is a walk of a short list in memory with <strong>no chunk touched at all</strong>. A
+    chunk is loaded only for a bank that says it is holding one, which is a horse's life against
+    one chunk load; paying that to find out the answer is <em>no</em> would not have been worth
+    it.
+</p>
+<ul>
+    <li><strong>The flag is last-known, and the reader copes.</strong> It is re-checked against
+        the real container rather than trusted, so a stale row costs one wasted chunk load and
+        finds nothing &mdash; which is the right way round for a cache that is deciding whether a
+        horse lives. The block, not the index, is also the authority on who owns a bank.</li>
+    <li><strong>The search shares the refusal's clock.</strong> <code>StasisRescue.dueAgain</code>
+        gates the bank walk as well as the sentence, so a horse burning to death with a stale row
+        against it cannot re-open the same chunk every half-second. A failed search starts the
+        quiet period even though it says nothing, which is the one place the two uses of that map
+        differ.</li>
+    <li><strong>Eight banks, at most, per rescue.</strong> A player with three never reaches
+        <code>MAX_BANKS_CONSULTED</code>; a player with two hundred does not get to turn a wolf
+        bite into two hundred chunk loads.</li>
+    <li><strong>A bank is claimed by placing it, or by opening an unclaimed one.</strong> That
+        second door is the entire migration story for a world that predates this, and it takes
+        nothing from anybody: an owned bank is untouched, and owning one grants no access that
+        opening it did not already give.</li>
+</ul>
+<p>
+    The chamber is filled <em>in place</em> inside the bank's grid, exactly as it is in an
+    inventory slot, and <code>chambers().setChanged()</code> is what re-derives the tick gate and
+    republishes the bank as no longer armed. That one call is the only thing the bank half adds to
+    <code>close</code>.
+</p>
+
+<h3 id="emergency-grace">A tick between the eject and the capture</h3>
+<p>
+    Owner's call: a rider is put down and the horse goes into the bottle on the <em>next</em>
+    server tick, rather than both happening inside one event and the client having to work out
+    where its feet went. The blow is refused up front in that path &mdash; unlike the immediate
+    one, where it is refused after the capture &mdash; because a horse left standing for a tick
+    still holding the blow that triggered all this would simply die of it.
+</p>
+<p>
+    And it is held harmless for that tick. A <code>CAUGHT</code> set of horse ids is checked on
+    the first line of <code>onBlow</code> and zeroes any damage to a horse mid-grace, so
+    <strong>the courtesy cannot be the thing that kills the horse</strong>. The deferral only
+    happens when there was a rider; an unridden horse goes in immediately and has no window to
+    protect.
+</p>
+<p>
+    Both failure modes leave the chamber empty and the player insured, which is the only safe way
+    round: a horse gone before the bottle closed, and a chamber somebody filled by hand in the one
+    tick it was reserved for, both abort with a trace line rather than spending anything.
+</p>
+
+<h3 id="emergency-log-coding">Why a rescue is a log row and not only a chat line</h3>
+<p>
+    <code>HorseEvent.Kind.RESCUE</code> is the eighth kind, and it is here for the reason the Log
+    tab exists at all: a chamber fires with nobody watching by design, possibly a thousand blocks
+    away, so the alarm that scrolls past was the only record there was. The row's
+    <code>line()</code> defers to <code>StasisRescue.saved</code> /
+    <code>savedInBank</code> rather than writing its own wording, the way a cover defers to
+    <code>CoverNotice</code> &mdash; the log is where you look when you missed the chat line, and
+    two different sentences about one event would leave the reader wondering whether they were two
+    events.
+</p>
+<p>
+    <code>HorseLog.rescued</code> takes ids rather than the entity, which is the exception among
+    its writers and is the feature rather than an awkwardness: by the time anything knows a rescue
+    happened, the horse has been <code>discard</code>ed and is a data component on an item.
+</p>
+
+<h3 id="whereabouts-stasis">How the browser knows a horse is in a chamber</h3>
+<p>
+    <code>HorseWhereabouts</code> records stasis the way it already records death, and for the
+    same reason. A horse in a chamber is neither alive in a chunk nor dead: it fires no
+    <code>LivingDeathEvent</code>, it will never be sighted again, and it therefore sat in the
+    roster reading <em>not loaded</em> for ever &mdash; the same wrong claim, in the same column,
+    that a dead horse used to make before the roster started dropping them.
+</p>
+<p>
+    The mark is written by <code>swallow</code> <em>before</em> the discard, while the horse still
+    has a position, and cleared by <code>release</code> once the entity is really in the world.
+    Those are the two moments that are certain; nothing is inferred, and an ordinary sighting
+    clears the mark too, since a horse something can see is out of the bottle however it got
+    there.
+</p>
+<p>
+    The label itself is <code>HorseListing.IN_STASIS</code> in <code>common/</code>, and the two
+    places the browser drew this column now both call <code>whereLabel</code> instead of writing
+    <code>loaded ? where : "not loaded"</code> by hand. That was the real defect: with the rule
+    written out twice, the second copy was always going to be the one that got missed.
 </p>
 
 <h2 id="special-recipes">Every chamber recipe was invisible, and that is not the same as broken</h2>
@@ -1172,9 +1328,65 @@
         plumbing, the drop buffer, <strong>every part of in-bank breeding up to a mare
         letting herself out to foal</strong>, <strong>the newly deepened grid and the scrolling
         that reaches it</strong>, and <strong>the emergency chamber firing at all</strong> are
-        unplayed.
+        unplayed &mdash; now including <strong>a chamber being spent out of a bank</strong>,
+        <strong>the tick a rider is set down for</strong>, and <strong>the whereabouts column
+        saying a horse is in a chamber</strong>.
     </p>
 </div>
+
+<h3 id="verify-bank-insurance">A bank's spare chamber saves a horse (2026-09-25, NOT played)</h3>
+<p>
+    The newest half of the emergency chamber, and the one with the most moving parts: a saved
+    index, a flag the block publishes about itself, a chunk loaded from inside a damage event, and
+    an owner recorded on a block that never had one. All written against the 26.1.2 sources; none
+    of it watched.
+</p>
+<ul>
+    <li><strong>The basic case.</strong> Place a bank, put one empty emergency chamber in it, carry
+        <em>nothing</em>, and get a horse of yours killed some distance away. Expect the horse
+        gone, a chat line naming <strong>your stasis bank</strong> rather than a carried chamber,
+        a <em>Rescues</em> row in the H screen's Log tab, and that chamber in the bank now holding
+        the horse.</li>
+    <li><strong>Then walk a long way off and do it again.</strong> The whole point is that the
+        bank's chunk need not be loaded, so this is the line that pays for a chunk load &mdash;
+        watch for a stutter on the tick it fires as well as for it working at all.</li>
+    <li><strong>An old bank.</strong> Find a bank placed before this update, <em>do not open
+        it</em>, and check it insures nothing. Then open it once and check it does. That is the
+        whole migration path and it has exactly one door.</li>
+    <li><strong>Somebody else's bank</strong> must never be spent on your horse.</li>
+    <li><strong>Inventory first.</strong> Carry an empty chamber <em>and</em> have one filed. The
+        carried one should go.</li>
+    <li><strong>A full carried chamber must not block the bank.</strong> Carry an occupied
+        emergency chamber with an empty one filed: the bank's should be used and you should
+        <em>not</em> see the refusal line.</li>
+    <li><strong>The bank should stop advertising itself</strong> once its last empty emergency
+        chamber is spent &mdash; the next rescue should not load its chunk at all. There is
+        nothing on screen for this; it is a <code>[stasis]</code> trace line or nothing.</li>
+</ul>
+
+<h3 id="verify-grace-tick">The tick you are set down for (2026-09-25, NOT played)</h3>
+<ul>
+    <li><strong>Ride a horse down past a tenth of its health with a chamber on you.</strong> You
+        should land on your feet where it was standing and the horse should vanish on the
+        <em>following</em> tick, not the same instant. Watch the camera through the change &mdash;
+        that one tick is the whole of it.</li>
+    <li><strong>Check the grace holds.</strong> Do it in a fire, or with several wolves on the
+        horse, so a second blow lands inside the window. The horse must not die in the tick it is
+        waiting.</li>
+</ul>
+
+<h3 id="verify-stasis-whereabouts">The browser says a horse is in a chamber (2026-09-25, NOT played)</h3>
+<ul>
+    <li><strong>Shelve a horse and open the H screen.</strong> Its whereabouts should read
+        <em>in a stasis chamber</em>, in full colour rather than dimmed as unknown.</li>
+    <li><strong>Type <code>stasis</code> into the filter box</strong> and check it returns exactly
+        the shelved ones.</li>
+    <li><strong>Let it out and refresh.</strong> The row must go back to a real position at once
+        rather than at the next slow sighting &mdash; a horse standing in front of you that the
+        screen says is in a bottle is worse than the bug this fixed.</li>
+    <li><strong>A mare the bank releases to foal</strong> goes through the same release, so her
+        row should clear itself too.</li>
+</ul>
 
 <h3 id="verify-jei">The recipes actually show up in JEI (2026-09-25, NOT seen)</h3>
 <p>

@@ -146,13 +146,16 @@
         not be carrying.</li>
 </ul>
 
-<div class="note warn"><span class="label">Seventeen of the nineteen are empty by design</span>
+<div class="note warn"><span class="label">Fifteen of the nineteen are empty by design</span>
     <p>
-        Only the <strong>saddle</strong> and the <strong>barding</strong> have
-        anything in the world that fits them today. The other seventeen accept
-        nothing &mdash; not because they are broken, but because the gear that
-        fills them has not been made. The tab says so on screen, so it reads as
-        unfinished rather than faulty.
+        The <strong>saddle</strong> and the <strong>barding</strong> have had
+        something that fits them all along, and the <strong>mane</strong> and
+        <strong>tail</strong> now take the
+        <a href="item-rescuing-braid.html">rescuing braid</a> &mdash; the first
+        piece of gear of this mod's own to fill a slot of this mod's own. The
+        other fifteen accept nothing: not because they are broken, but because
+        the gear that fills them has not been made. The tab says so on screen, so
+        it reads as unfinished rather than faulty.
     </p>
     <p>
         Each piece joins its slot as it is made, and nothing on this page needs
@@ -165,9 +168,12 @@
     <p>
         Cosmetic-only equipment is the thing this mod does not add. Breeding is
         the one place pure aesthetics are allowed; everything else must provide
-        utility, so tack, barding and hoof equipment carry real effects. That includes the
-        mane and tail slots: whatever eventually goes in them has to
-        <em>do</em> something, not merely look like a braid. The rule is
+        utility, so tack, barding and hoof equipment carry real effects. That included the
+        mane and tail slots, and the first thing to go in one is the test case: a
+        <a href="item-rescuing-braid.html">rescuing braid</a> looks exactly like a
+        decorative plait and is in fact the strongest save in the game, with the
+        colour &mdash; the only part of it that is decoration &mdash; riding on
+        top of a mechanic that had already paid for the slot. The rule is
         <a href="philosophy.html#utility-not-decoration">philosophy &sect; utility, not
         decoration</a>, and it reversed an earlier &ldquo;tack gets no
         stats&rdquo; call &mdash; see
@@ -213,11 +219,14 @@
 <p>
     Every gear slot reads an item tag named for it &mdash;
     <code>horsegenetics:gear/mane</code>,
-    one tag per non-vanilla slot, seventeen of them. <strong>All seventeen are empty.</strong>
-    A slot whose tag is empty
+    one tag per non-vanilla slot, seventeen of them. <strong>Two of them have an
+    entry</strong> &mdash; <code>gear/mane</code> and <code>gear/tail</code>, both holding the
+    <a href="item-rescuing-braid.html">rescuing braid</a> &mdash; and the other fifteen are
+    empty. A slot whose tag is empty
     correctly refuses everything rather than accepting dirt, which is exactly the
     behaviour wanted while the pieces do not exist. Shipping a piece means adding
-    it to its tag, and a datapack can do the same without touching Java.
+    it to its tag, and a datapack can do the same without touching Java: the braid
+    went in without a line of Java in <code>HorseTackSlot</code> changing.
 </p>
 
 <h2 id="attachment">Why an attachment and not a container</h2>
@@ -318,9 +327,12 @@
 
 <div class="note warn"><span class="label">Nothing is drawn on the horse yet</span>
     <p>
-        There is <strong>no render layer</strong> for any of the seventeen gear
-        slots, because there is nothing to render. The saddle and the barding draw
-        as they always have, through vanilla. Every piece past those two needs a
+        There is <strong>no render layer</strong> for fifteen of the seventeen
+        gear slots, because there is nothing to render. The saddle and the barding
+        draw as they always have, through vanilla, and the mane and tail are drawn
+        by <code>BraidLayer</code> &mdash; the first of these, and the worked
+        example of the shape: one submit of the whole model through a mask baked
+        from the mesh, tinted. Every piece past those needs a
         render layer of our own &mdash; the pattern this mod already has ten
         instances of &mdash; and the plan for deriving that geometry rather than
         modelling it by hand is on the Roadmap tab.

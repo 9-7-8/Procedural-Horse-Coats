@@ -15,127 +15,407 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
 <h1>Rescuing braid</h1>
 <p class="lede">
     A one-use piece of <a href="horse-gear.html">mane or tail gear</a> that turns a killing
-    blow into a trip home instead of just a reprieve: the moment it would break, the horse
-    (and its rider, if mounted) blinks back to a bound stall and comes up already fleeing.
-    <strong>None of it is built.</strong> This page exists so the plan has its own home rather
-    than a paragraph in the intake to-do list.
+    blow into a trip home instead of just a reprieve. The instant the horse would die the braid
+    breaks, and the horse &mdash; with you on it, if you were riding &mdash; is standing in its
+    own <a href="item-stall-signs.html">stall</a>, bolting. It is the first thing in the game
+    that goes in the mane or the tail.
 </p>
 
-<div class="note warn">
-    <span class="label">Nothing on this page exists in the game</span>
+<section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
+
+<h2 id="what-it-is">What it is</h2>
+<p>
+    Craft a braid from <strong>any wool, a horse hair and an ender pearl</strong>, work it into
+    a horse&rsquo;s mane or tail on the <a href="horse-gear.html">Gear tab</a>, and forget about
+    it. It does nothing at all until the day something is about to kill that horse, and then it
+    spends itself: the blow is refused, the braid is gone, and the horse is at home.
+</p>
+<p>
+    It is the second thing in the mod that saves a horse without being used, and the two are
+    deliberately different instruments. An
+    <a href="horse-stasis.html#emergency-gameplay">emergency stasis chamber</a> is <em>yours</em> &mdash;
+    carried, covering every horse you own, and it answers by taking the animal out of the world
+    into a bottle you then have to find and open. A braid is <em>the horse&rsquo;s</em> &mdash;
+    worn, covering only the animal wearing it, and it answers by putting it somewhere you will
+    walk past tomorrow, still an animal, still saddled, standing where it lives.
+</p>
+
+<h3 id="where-it-sends">Where it sends a horse</h3>
+<p>
+    To that horse&rsquo;s own stall. Failing that &mdash; no stall, or the stall has been built
+    over, filled up or pulled down since &mdash; to your
+    <a href="item-tickets.html#holding-pen">holding pen</a>. Those are the same two destinations,
+    picked in the same order, that the <a href="horse-browser.html">browser&rsquo;s</a>
+    <strong>Send home</strong> button already uses, and it lands the horse by the same rules a
+    <a href="item-tickets.html">ticket</a> does: it will not put an animal down inside a wall,
+    and it reaches across worlds.
+</p>
+<p>
+    <strong>A braid is not bound to anywhere.</strong> It works out where home is at the moment
+    it breaks, which means one in a chest works for whichever horse you put it on, a braid can
+    never be pointing at a stall you took down last week, and moving a horse to a new stall
+    needs nothing done to the braid. The price is that the item cannot tell you in advance where
+    it will send a horse &mdash; and that a horse with no stall <em>and</em> no holding pen is
+    wearing one for nothing. That last case is not silent: you get one line saying so, and
+    <strong>the braid is not spent</strong>. It is still in the hair the day you hang a sign up.
+</p>
+
+<h3 id="what-happens">What actually happens, in order</h3>
+<p>
+    Three separate things try to keep a horse alive now, and they run in a fixed order so they
+    add up rather than fight:
+</p>
+<ol>
+    <li><strong><a href="horse-care.html#last-stand">Last stand</a> goes first.</strong> A
+        horse&rsquo;s free once-per-recovery save refuses the blow, leaves it on half a heart and
+        gives it its few seconds of immunity, with the totem particles.</li>
+    <li><strong>Then the braid.</strong> It sees a horse standing on that sliver and takes it
+        home &mdash; so the horse arrives <em>inside</em> the immunity window, which is the whole
+        point of doing it in this order. A horse teleported out of a fight and then killed by the
+        first thing it lands beside has been moved rather than saved.</li>
+    <li><strong>Then the emergency chamber</strong>, if you are carrying one, as the net behind
+        both. It never sees a horse a braid has already sent home, so nothing is wasted by the
+        ordering &mdash; the bottle you did not spend is still in your pocket for the next
+        horse.</li>
+</ol>
+<p>
+    A braid still works when the last stand has nothing left to give &mdash; a horse that has not
+    healed back up since the last time it was saved &mdash; which is the case it matters most in.
+</p>
+
+<h3 id="rider">You come with it</h3>
+<p>
+    If you are riding when the braid breaks, you arrive too. That is the one thing this feature
+    must not get wrong: being separated from your horse by the item that was supposed to save you
+    both is worse than the blow. Within one world you simply travel with it; across worlds the
+    horse is re-created on the far side, so you are sent after it and put back on.
+</p>
+<p>
+    And it comes up <strong>bolting</strong>. A horse that has just been held on half a heart is
+    well under the health it <a href="horse-care.html#escape">runs for its life</a> at, and
+    whatever hurt it counts as a fresh threat for a few more seconds, so the ordinary escape
+    behaviour takes over the moment it lands &mdash; reins thrown, at a gallop, around its own
+    stall. It settles as soon as the fright wears off.
+</p>
+
+<h3 id="two-slots">Two slots, two lives</h3>
+<p>
+    A horse has a mane slot and a tail slot, and a braid in each is <strong>two independent
+    saves</strong>. The mane one goes first; the tail one is still there for the next time. That
+    is the same answer the emergency chamber gives to wanting a second save &mdash; carry two
+    &mdash; and it is what stops the second hair slot being a slot that exists and cannot be used
+    for the thing it is for.
+</p>
+
+<h3 id="colour">The colour</h3>
+<p>
+    A braid is drawn as a plait worked into the mane or the tail, in whatever colour it has been
+    dyed, and it is <strong>dyed exactly like leather armour</strong>: put it in a crafting grid
+    with any dye, or several, and wash it out in a cauldron if you change your mind. An undyed
+    one is the colour of horse hair.
+</p>
+<p>
+    The colour does nothing. It is the one place on a piece of tack this mod allows pure
+    decoration, because the item&rsquo;s job is already paid for &mdash; see
+    <a href="philosophy.html">utility, not decoration</a>, and the same split the
+    <a href="item-equestrian-bench.html">Tack Dyeing Bench</a> draws between what a saddle does
+    and what colour it is.
+</p>
+
+<h3 id="refusals">What it refuses</h3>
+<ul>
+    <li><strong>A foal wears nothing</strong>, braids included &mdash; every gear slot is closed
+        until a horse grows up.</li>
+    <li><strong>Only horses.</strong> A donkey or a mule gets the last stand like everything else,
+        but stalls are a horse&rsquo;s, so a braid has nowhere to send one.</li>
+    <li><strong>A wild horse is nobody&rsquo;s</strong>, so there is no holding pen to fall back
+        to and no stall to look up.</li>
+</ul>
+
+</section>
+
+<section id="coding" class="tab-panel" data-tab="coding" data-tab-label="Coding">
+
+<h2 id="three-on-one-event">Three subscribers on one event</h2>
+<p>
+    <code>RescuingBraidHandler</code> is the third thing in the mod hanging off
+    <code>LivingDamageEvent.Pre</code> to keep a horse alive, and the priorities are the
+    composition rather than tidiness:
+</p>
+<ul>
+    <li><code>HorseLastStandHandler</code> at <code>NORMAL</code> &mdash; refuses the blow, holds
+        the horse at <code>LastStand.healthLeft</code>, draws the particles.</li>
+    <li><strong><code>RescuingBraidHandler</code> at <code>LOW</code></strong> &mdash; sees a horse
+        on that floor and moves it.</li>
+    <li><code>EmergencyStasisHandler</code> at <code>LOWEST</code> &mdash; <strong>dropped from
+        <code>LOW</code> to make room</strong>. Its own comment used to explain <code>LOW</code>
+        as &ldquo;after the last stand&rdquo;; it now also means &ldquo;after the braid&rdquo;,
+        and the reason is the same both times.</li>
+</ul>
+<p>
+    The braid goes before the chamber because it is the <strong>more specific instrument</strong>
+    (owner&rsquo;s call): worn on one horse on purpose, where a chamber covers every horse its
+    carrier owns. Nothing is wasted by that ordering, which is what makes it safe &mdash; a horse
+    the braid has moved is out of the fight and takes no further blows, so the chamber never gets
+    asked and is never spent.
+</p>
+
+<h2 id="state-not-crossing">Why it tests a state, not a killing blow</h2>
+<p>
+    This is the trap in the whole feature and it would have shipped green. By the time the braid
+    is asked, the last stand above it has usually <em>already set the damage to zero</em> &mdash;
+    so <code>damage &gt;= health</code>, the obvious condition, answers <strong>no</strong> on
+    precisely the horses a braid exists for. Every test passes, the item crafts, the layer draws,
+    and the braid never fires.
+</p>
+<p>
+    So <code>RescuingBraid.fires</code> asks where the horse <em>is</em>: the blow is fatal,
+    <em>or</em> the horse is already sitting on the last stand&rsquo;s floor. That is the same
+    conclusion <code>StasisRescue</code> reached from the other end of the same event, for the
+    same reason, and <code>RescuingBraidTest</code> pins both halves &mdash; including one
+    assertion that is really about two features at once: a horse on that floor must still be
+    below <code>Escape.DEFAULT_THRESHOLD</code>, or the promise that it arrives bolting is not
+    kept by anything.
+</p>
+
+<h2 id="no-component">The item carries nothing</h2>
+<p>
+    <code>RescuingBraidItem</code> has no data component, no durability and no state beyond
+    vanilla&rsquo;s <code>dyed_color</code>, because the destination is resolved <strong>when it
+    breaks, not when it is made</strong> (owner&rsquo;s call, against the original plan, which
+    wanted a binding step and a bound-stall reference like <code>BoundHorse</code>).
+</p>
+<p>
+    What that buys: no binding UI to design, no component to sync, no braid pointing at a stall
+    that has been pulled down, and a spare in a chest that works for whichever horse you put it
+    on. What it costs is that the item cannot describe its own destination before it fires, which
+    is why the no-destination case is a chat line rather than a refusal at the point of wearing.
+</p>
+<p>
+    <code>resolve</code> asks <code>StallData.forHorse</code> then <code>StallData.penOf</code>,
+    and <code>TicketHandler.landingSpot</code> is what says yes &mdash; it re-reads the sign,
+    re-runs the stall detection <em>live</em> and finds a spot the horse fits in, so a stall
+    somebody has filled with hay bales refuses here rather than suffocating an animal. That is
+    <code>StallRecall</code>&rsquo;s rule verbatim: the Send home button makes exactly this
+    choice, and a braid making a different one would be a second answer to one question.
+</p>
+
+<h2 id="the-move">The move, and the rider</h2>
+<p>
+    <code>TicketHandler.arrive</code> is called rather than copied, so the braid gets the portal
+    particles, the enderman sound and <code>HorseLeads.untieFor</code> for free &mdash; and a
+    future change to how a horse travels reaches this without anyone remembering it exists.
+</p>
+<p>
+    The rider is the part that is genuinely new. Within one level, <code>teleportTo</code> carries
+    an entity&rsquo;s passengers &mdash; the property <code>GeneReactionHandler</code>&rsquo;s
+    blink already relies on. <strong>Across levels it does not</strong>: the entity is re-created
+    in the target and its passengers are put down. So <code>reseat</code> looks the horse up again
+    by id in the world it landed in, sends the rider after it, and remounts. Every other teleport
+    in the mod dodges this by refusing a ridden horse outright
+    (<code>TicketHandler</code>, <code>StallRecall</code>, <code>EnderWhistleCalls</code>); a
+    braid cannot, since being ridden is the situation it is bought for.
+</p>
+<p>
+    Nothing forces the escape behaviour, and nothing should. <code>HorseEscapeGoal</code> reads
+    the health bar and whether anything has hurt the horse lately on its own
+    <code>canUse</code> tick, and both are still true on the far side of the teleport &mdash;
+    <code>Escape.THREAT_LINGERS_TICKS</code> outlasts the trip by a wide margin. So the horse
+    comes up bolting through the goal&rsquo;s own door, which is the one that has been played,
+    rather than through a <code>forceStart</code> written for this.
+</p>
+
+<h2 id="the-streak">The streak is a mask, and the mask is baked</h2>
+<p>
+    <code>BraidLayer</code> is the structural twin of
+    <a href="pipeline.html">EmissiveCoatLayer</a>: one <code>submitModel</code> of the whole
+    horse through a texture that is transparent everywhere it must not paint. What differs is
+    that the texture is a <strong>mask</strong> &mdash; flat white where the mane or the tail is
+    &mdash; and the colour is passed as the submit&rsquo;s own tint, so one pair of files covers
+    every colour a player can mix rather than sixteen baked sheets.
+</p>
+<p>
+    <strong>The masks are baked from <code>HorseSkinGeometry</code>, not painted.</strong> The two
+    patches are at <code>texOffs(56, 36)</code> and <code>texOffs(42, 36)</code>, doubled onto the
+    sheet. Hand-painting two rectangles at those coordinates would work, and would silently paint
+    a horse&rsquo;s neck the day somebody moves a cube. <code>HairMaskTool</code> asks the mesh
+    instead and <em>hard-fails</em> on a part that covers no texel, because a mask nothing draws
+    through is a braid nobody can see and it would ship green. Re-run
+    <code>:common:bakeHairMasks</code> when the mesh moves.
+</p>
+<p>
+    Gear is a synced attachment, so <code>extractRenderState</code> reads the worn stacks off the
+    horse with no packet of this layer&rsquo;s own, and the two colours land on
+    <code>GeneticHorseRenderState</code> as plain ints &mdash; zero for nothing worn, which is the
+    answer for almost every horse on screen almost all the time.
+</p>
+
+<h2 id="colour-coding">Why vanilla&rsquo;s dye and not the mod&rsquo;s tint</h2>
+<p>
+    The mod already has a tack colour component, and the braid deliberately does not use it.
+    <code>tack_tint</code> is <code>SaddleTint(seat, bridle, metal)</code> &mdash; three zones,
+    because a saddle has a seat, a bridle and its fittings. A braid is one plait of one colour,
+    and forcing it through a three-zone record would mean a zone-names case, a tooltip that says
+    the same word three times, and a bench screen with two slots that do nothing.
+</p>
+<p>
+    So it is in <code>#minecraft:dyeable</code> and carries vanilla&rsquo;s
+    <code>dyed_color</code>, which buys the whole colour story for one tag file: dyeing in a
+    crafting grid, mixing several dyes, washing it out in a cauldron, the tooltip line and the
+    tinted inventory icon are all vanilla&rsquo;s code doing what it already does. The item
+    definition&rsquo;s <code>default</code> tint and <code>GeneticHorseRenderer.BRAID_UNDYED</code>
+    are a pair and must stay equal &mdash; a braid that looked one colour in the hand and another
+    on the horse would read as a bug.
+</p>
+
+<h2 id="files">What is where</h2>
+<table>
+<thead><tr><th>File</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>common/&hellip;/care/RescuingBraid.java</code></td>
+    <td>The rule and the three sentences. No Minecraft in it &mdash;
+        <code>RescuingBraidTest</code>.</td></tr>
+<tr><td><code>common/&hellip;/coat/skin/HairMaskTool.java</code></td>
+    <td>The two mask textures, off the mesh. <code>:common:bakeHairMasks</code>.</td></tr>
+<tr><td><code>neoforge/&hellip;/item/RescuingBraidItem.java</code></td>
+    <td>The item. A tooltip and nothing else.</td></tr>
+<tr><td><code>neoforge/&hellip;/server/RescuingBraidHandler.java</code></td>
+    <td>The trigger, the destination, the move, the rider, the refusal.</td></tr>
+<tr><td><code>neoforge/&hellip;/client/BraidLayer.java</code></td>
+    <td>The streak, tinted, through the baked masks.</td></tr>
+<tr><td><code>data/&hellip;/tags/item/gear/{mane,tail}.json</code></td>
+    <td>How the two slots come to accept it &mdash; the first entries either has ever had.</td></tr>
+<tr><td><code>data/minecraft/tags/item/dyeable.json</code></td>
+    <td>The whole of the colour story.</td></tr>
+</tbody>
+</table>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in game">
+
+<div class="note verify-summary">
+    <span class="label">What is waiting to be checked</span>
     <p>
-        Everything below is a plan. When a piece of it ships, it comes <em>off</em> this
-        Roadmap tab and is written up on a Gameplay and a Coding tab here instead &mdash; the
-        page grows tabs as the thing grows, the way every other gear page on the wiki does.
+        <strong>Nothing about the braid has been seen in a running game.</strong> It compiles, the
+        rule is unit-tested, the recipe bakes and a dedicated server loads it &mdash; but no horse
+        has worn one, no braid has broken, no rider has been carried across a world boundary, and
+        <strong>nobody has looked at the streak or the item icon</strong>, both of which were
+        generated rather than drawn.
     </p>
 </div>
 
+<h3 id="verify-fires">It fires at all, and at the right moment (NOT played)</h3>
+<p>
+    The whole feature turns on <code>RescuingBraid.fires</code> being asked <em>after</em> the last
+    stand has zeroed the damage &mdash; see <a href="#state-not-crossing">the Coding tab</a>. The
+    test pins the arithmetic; it cannot pin the event order in a running server.
+</p>
+<ul>
+    <li><strong>Wear one and get a horse killed.</strong> Tame a horse, give it a stall, braid its
+        mane, and hit it down past zero. Expect: totem particles, then the horse gone, then a chat
+        line naming the stall, then the horse standing in it at a gallop.</li>
+    <li><strong>Do it again with the last stand already spent</strong> &mdash; hurt the horse,
+        get it saved once, and kill it again before it heals back up. The braid should still fire.
+        This is the case it matters most in and the one the ordering makes least obvious.</li>
+    <li><strong>Check the chamber is not also spent.</strong> Carry an empty emergency chamber
+        while a braided horse is killed. The braid should go and the chamber should still be
+        empty in your inventory.</li>
+</ul>
+
+<h3 id="verify-rider">The rider arrives with the horse (NOT played)</h3>
+<p>
+    <code>reseat</code> is the one genuinely new mechanism here and the one nothing in the
+    repository corroborates &mdash; every other teleport in the mod refuses a ridden horse rather
+    than solving this.
+</p>
+<ul>
+    <li><strong>Ride a braided horse to death in the same world.</strong> You should land in the
+        stall still mounted, and immediately be thrown off by the escape behaviour &mdash; which
+        is correct, not a bug.</li>
+    <li><strong>Then do it across a world boundary.</strong> Stall in the overworld, horse killed
+        in the Nether. This is the path <code>EnderWhistleCalls</code> also flags as unverified:
+        watch for being left behind, for the horse arriving riderless, or for the remount
+        throwing.</li>
+</ul>
+
+<h3 id="verify-streak">The streak, and the icon (NOT looked at)</h3>
+<ul>
+    <li><strong>Does a braid draw on the horse at all?</strong> The masks cover 544 texels of mane
+        and 880 of tail, which is the right order of magnitude, but nobody has seen the result.
+        A mask that is subtly off shows as colour on the neck or the rump.</li>
+    <li><strong>Does the tint reach it?</strong> Dye two braids different colours and put one in
+        each slot. The submit&rsquo;s colour parameter is used here for the first time in this
+        mod.</li>
+    <li><strong>Is the item icon recognisable as a braid?</strong> It was generated, not drawn
+        &mdash; a plait of two strands with a tie at the bottom, in greys so the dye multiplies
+        cleanly. If it reads as a rope or as noise it wants redrawing by hand.</li>
+    <li><strong>Does an undyed braid match itself?</strong> The icon&rsquo;s default and the
+        renderer&rsquo;s <code>BRAID_UNDYED</code> are written in two places and must agree.</li>
+</ul>
+
+<h3 id="verify-nowhere">The refusal, and that it does not spend the braid (NOT played)</h3>
+<ul>
+    <li>Braid a horse with <strong>no stall and no holding pen</strong> and get it killed. Expect
+        one red line, no teleport, and the braid <em>still in the slot</em> afterwards.</li>
+    <li>Then hang a holding pen sign up and do it again. It should work, with the pen named rather
+        than the stall.</li>
+    <li>Fill the stall with hay bales and try again &mdash; it should fall through to the pen
+        rather than refusing outright.</li>
+</ul>
+
+</section>
+
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
+         data-tab-hint="One piece still planned">
 
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        A mane-or-tail item that binds to a horse&rsquo;s <a href="item-stall-signs.html">stall</a>
-        (or a <a href="item-tickets.html#holding-pen">holding pen</a>), rendering as a dyed streak
-        in the hair, and that consumes itself the instant the horse&rsquo;s
-        <a href="horse-care.html#last-stand">last-stand</a> immunity would trigger &mdash;
-        teleporting the horse and any rider to the bound stall and dropping the horse straight
-        into its <a href="horse-care.html#escape">escape</a> behaviour, rather than leaving it
-        standing where it was hit.
+        Dyeing a braid at the <a href="item-equestrian-bench.html">Tack Dyeing Bench</a> rather
+        than only in a crafting grid, and a crafting recipe that takes its colour from the wool
+        that went into it.
     </p>
 </div>
 
-<h2 id="what-it-is">What it is</h2>
+<h3 id="plan-bench">The bench does not dye one</h3>
 <p>
-    A rescuing braid is worn in the <strong>mane</strong> or <strong>tail</strong> slot of the
-    <a href="horse-gear.html">nineteen-slot gear roster</a>, and does one thing: it is a second,
-    stronger save layered on top of the last-stand immunity every horse already gets for free.
-    Where last stand only buys six seconds standing in place, a worn braid spends itself to move
-    the horse (and rider) somewhere safer at the same instant &mdash; its own bound stall.
+    The original plan had the braid dyeable at the Tack Dyeing Bench and crafted in the colour of
+    whatever wool went in. Neither shipped, and both were dropped for the same reason: the bench
+    is built around <code>tack_tint</code>, which is three zones, and the braid is one. Making it
+    work means a zone-names case, a branch in <code>EquestrianBenchMenu.plan</code>, and a screen
+    that visibly does nothing with two of its three material slots &mdash; against a braid you can
+    already dye any colour in a crafting grid. It is worth doing when somebody is next in that
+    menu for another reason, not on its own.
 </p>
-
-<ul>
-    <li><strong>It needs a stall first.</strong> The braid has to be bound to one of the
-        horse&rsquo;s own <a href="item-stall-signs.html">stall signs</a>, or to its owner&rsquo;s
-        <a href="item-tickets.html#holding-pen">holding pen</a> &mdash; the same two destinations a
-        <a href="item-tickets.html">ticket</a> already sends a horse to. A horse with neither
-        cannot wear one, the same way it cannot be sent home by ticket.</li>
-    <li><strong>It triggers with last stand, not instead of it.</strong> The moment a blow would
-        take the horse to zero and last-stand immunity would normally hold it at half a heart in
-        place, a worn braid instead breaks, and the horse (and its rider, if one is aboard) is
-        teleported to the bound stall and enters the same fleeing behaviour
-        <a href="horse-care.html#escape">low-health escape</a> already gives a horse that survives
-        a killing blow.</li>
-    <li><strong>One use.</strong> The braid is destroyed the instant it fires. A horse saved this
-        way needs a fresh braid before it can be saved this way again &mdash; exactly the same
-        shape as last stand needing to heal back to full before it will save the horse a second
-        time.</li>
-    <li><strong>Dyed wool decides its colour.</strong> It renders as a streak worked into the mane
-        or tail, tinted to whatever wool went into it, purely cosmetic on top of a mechanical
-        item &mdash; the same split <a href="item-equestrian-bench.html">tack dyeing</a> already
-        draws between what an item does and how it looks.</li>
-    <li><strong>Craftable from wool, horse hair and an ender pearl.</strong> The wool supplies the
-        colour, the horse hair ties it to the rest of the item roster&rsquo;s one shared material,
-        and the ender pearl is the same &ldquo;this reaches somewhere else&rdquo; ingredient the
-        <a href="item-tickets.html">bound ticket</a> already uses for leaving a stall behind.</li>
-    <li><strong>Dyeable after crafting, at the <a href="item-equestrian-bench.html">Tack Dyeing
-        Bench</a></strong>, the same as a saddle&rsquo;s seat or a bridle&rsquo;s leather &mdash;
-        so a braid crafted from the wrong-coloured wool is not a wasted ender pearl.</li>
-</ul>
-
-<h2 id="open-questions">Open questions</h2>
-<ul>
-    <li><strong>Rider handling.</strong> A rider aboard at the moment of the save has to travel
-        with the horse rather than being left behind or unhorsed mid-teleport &mdash; the same
-        problem <a href="horse-care.html#escape">bolting</a> already solves by keeping the rider
-        mounted through the whole event, so the braid should reuse that path rather than invent a
-        second one.</li>
-    <li><strong>Order against last stand.</strong> Whether the braid replaces the six-second
-        immunity window entirely or rides on top of it (immune, teleported, <em>then</em>
-        fleeing) is a design call to make before the trigger hook is written, not after.</li>
-    <li><strong>Binding UX.</strong> Whether binding a braid to a stall is a right-click on the
-        stall sign (mirroring how a blank stall sign itself binds), or a right-click on the horse
-        while standing in its stall, needs settling against the existing stall-sign interaction
-        pattern.</li>
-    <li><strong>Which slot wins if both are worn.</strong> A horse has both a mane and a tail
-        slot; whether a braid in each is two independent saves or the second is refused while one
-        is already armed needs a rule before both slots can accept the item.</li>
-</ul>
-
-<h2 id="anticipated-files">Anticipated files</h2>
 <p>
-    Nothing here is settled, but the shape follows the existing stall/ticket/last-stand
-    machinery rather than inventing a parallel one:
+    The wool-decides-the-colour half needs a custom recipe for one reason only, which is to copy
+    the wool&rsquo;s dye onto the result. That is cheap; what is not cheap is that a
+    <code>CustomRecipe</code> is invisible to JEI and the recipe book unless both defaults are
+    overridden &mdash; the trap the
+    <a href="horse-stasis.html#special-recipes">stasis chamber recipes</a> spent a day in. The
+    plain JSON recipe ships instead, and the dye does the colour.
 </p>
-<ul>
-    <li>An item class beside <code>TicketItem.java</code>, holding a bound stall reference the
-        same way a ticket resolves one at use time rather than at craft time.</li>
-    <li>A hook into whatever fires <code>common/care/LastStand</code>&rsquo;s immunity window, so
-        the braid can intercept the same event rather than polling health every tick.</li>
-    <li>A tag entry in the mane and tail slots&rsquo; item tags
-        (<code>horsegenetics:gear/mane</code>, <code>horsegenetics:gear/tail</code>), per
-        <a href="horse-gear.html#tags">how every gear slot decides what it accepts</a>.</li>
-    <li>A recipe under <code>data/horsegenetics/recipe/</code>: wool (any colour, by tag) + horse
-        hair + ender pearl, picked up automatically by <code>bake-recipe-reference.mjs</code>.</li>
-</ul>
 
 </section>
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="horse-gear.html">Horse gear: the nineteen slots</a>
         <a href="horse-care.html#last-stand">Last stand</a>
+        <a href="horse-stasis.html#emergency-gameplay">The emergency stasis chamber</a>
         <a href="item-stall-signs.html">Stall signs</a>
         <a href="item-tickets.html">Tickets</a>
     </div>
-    The question to answer before a line is written is which event the braid actually hooks:
-    riding on last stand&rsquo;s own trigger, rather than a second health check running beside it.
+    The question the plan said to answer before a line was written &mdash; which event the braid
+    hooks &mdash; turned out to be the wrong half of the problem. The event was obvious; what was
+    not was that by the time the braid is asked on it, the killing blow has already been refused
+    by something else.
 </div>
 
 </article>

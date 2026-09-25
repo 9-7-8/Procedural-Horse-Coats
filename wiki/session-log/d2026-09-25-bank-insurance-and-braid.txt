@@ -1,0 +1,246 @@
+2026-09-25 — insurance you can leave at home, and the first thing that goes in a mane
+
+    Two asks, the second arriving mid-session. The first was three small-sounding
+    additions to the emergency stasis chamber; the second was "before you cut a new
+    version, can you implement the rescue braid too?" — a page that had been Roadmap-only
+    since it was written, with four open design questions on it.
+
+    Both shipped. Neither has been played.
+
+
+PART ONE — the emergency chamber
+
+    The ask, verbatim:
+
+        You should be able to put empty emergency stasis chambers into your stasis bank,
+        and they'll get used automatically if a horse triggers one, printing a message
+        both to your horse log in the H menu and to your chat that they've been used.
+        You'll be bucked off a tick before the horse gets sucked into the chamber in this
+        case. Also, in the H menu, for location, it should say "in a stasis chamber" for
+        all horses in stasis chambers.
+
+    The hard part was the first sentence, and it was not the part that looked hard.
+
+A bank is a block somewhere, and the whole feature exists to avoid looking for blocks
+
+    An emergency chamber in an inventory is found by walking 41 slots. One in a bank is
+    not: a bank is an unowned block in some dimension, quite possibly in a chunk nobody
+    has loaded for a week, and "find this player's banks" is either a world search or a
+    chunk load per bank per blow. Either would have contradicted the one promise the
+    stasis feature makes about itself.
+
+    Two questions went to the owner with options rather than being guessed at:
+
+        Q. How does the rescue find your bank?
+        A. Banks you placed, anywhere — the chunk is loaded for the instant it takes.
+           (Over: only while loaded, which stops working the moment you ride away from
+           base; or any loaded bank, which spends a stranger's chamber on a server.)
+
+        Q. Bank first or inventory first?
+        A. Inventory first, bank as fallback.
+
+    What made "anywhere" affordable is StasisBankIndex's second field. A row is a bank's
+    position and its owner — that much is only a phone book — plus `armed`: whether the
+    block was last seen holding an EMPTY emergency chamber. The block entity publishes
+    that every time its chamber grid changes and again on onLoad. So the usual answer,
+    that none of your banks can help, is a walk of a short list in memory with no chunk
+    touched at all. A chunk is loaded only for a bank that says it is holding one, which
+    is a horse's life against one chunk load. Paying that to learn the answer is "no"
+    would not have been worth it.
+
+    The flag is last-known rather than live, and the reader copes: it is re-checked
+    against the real container, so a stale row costs one wasted chunk load and finds
+    nothing. That is the right way round for a cache deciding whether a horse lives.
+
+    Three details that are easy to get wrong and were nearly got wrong:
+
+      - The search shares the refusal's clock. StasisRescue.dueAgain already throttled
+        the "your chamber is full" line to ten seconds per horse; it now gates the bank
+        walk too, and a FAILED search starts the quiet period even though it says
+        nothing. Without that, a horse burning to death with a stale index row against it
+        re-opens the same chunk every half-second.
+
+      - MAX_BANKS_CONSULTED is 8. Three banks never reaches it; two hundred banks does
+        not get to turn a wolf bite into two hundred chunk loads.
+
+      - A bank had no owner, because nothing had ever needed one. It now records its
+        placer — and claims an unowned one the first time somebody opens it, which is the
+        entire migration story for a world that predates this and has exactly one door.
+        Owning a bank grants nothing else; anyone who can reach it can still open it.
+
+The log row was not scope creep, it was the same argument the Log tab is made of
+
+    HorseEvent gained RESCUE, and then HOMED for the braid. Nine kinds now. Both are
+    there for the tab's own reason, harder than the rest of it: a chamber and a braid
+    both fire BY THEMSELVES, with nobody watching, possibly a thousand blocks away. The
+    chat line is the only thing that ever says so and it scrolls past while the player is
+    busy with whatever was killing the horse.
+
+    Two kinds rather than one, because they leave the player in different places — a
+    rescued horse is in a bottle you have to go and open, a homed one is standing in its
+    stall — and a filter that could not separate those is not a filter. Same argument the
+    three ownership kinds were split on.
+
+    RESCUE's line() defers to StasisRescue.saved / savedInBank rather than writing its
+    own wording, the way a cover defers to CoverNotice. The log is where you look when
+    you missed the chat line; two different sentences about one event would leave the
+    reader wondering whether they were two events.
+
+The tick before the bottle closes
+
+    ejectPassengers then swallow used to happen inside one event. Now, when there is a
+    rider, the player is set down, the blow is refunded up front, and the capture is
+    deferred one server tick.
+
+    The blow has to be refunded UP FRONT in that path — unlike the immediate one, where
+    it is refused after the capture so a horse that could not be stored still takes its
+    damage. A horse left standing for a tick still holding the blow that triggered all
+    this would simply die of it.
+
+    And the horse is held harmless for that tick: a CAUGHT set of ids is checked on the
+    first line of onBlow and zeroes any damage to a horse mid-grace. The courtesy of
+    setting the player down first must not be the thing that kills the horse.
+
+"in a stasis chamber" — and the defect underneath it
+
+    A horse in a chamber is discard()ed, not killed. It fires no LivingDeathEvent, it is
+    never sighted again, and it therefore sat in the browser reading "not loaded" for
+    ever. That is the wrong claim twice over — "not loaded" means "somewhere you cannot
+    see right now", which reads as a horse you could go and fetch, and no amount of
+    walking towards a bottle will ever load it. Exactly the wrong claim a dead horse used
+    to make in the same column before the roster started dropping them.
+
+    HorseWhereabouts now records stasis the way it already records death: written by
+    swallow BEFORE the discard, while the horse still has a position, and cleared by
+    release once the entity is really in the world. Two moments that are certain; nothing
+    inferred.
+
+    The real defect was next to it. The whereabouts column was drawn in two places and
+    both wrote `loaded ? where : "not loaded"` by hand — so the rule lived twice, and the
+    second copy was always going to be the one that got missed. It is HorseListing
+    .whereLabel(fallback) now, in common/, with the string as HorseListing.IN_STASIS and
+    a test. Free side effect: whereabouts are in the search haystack, so "stasis" is now
+    a word the filter box finds horses by.
+
+
+PART TWO — the rescuing braid
+
+    Four open questions on the page, answered by the owner:
+
+        Order against last stand   -> rides on top of the immunity window
+        Binding UX                 -> no binding at all; resolve at trigger time
+        Both hair slots worn       -> two independent saves
+        Render the streak now      -> yes, both
+
+    "No binding" was the answer that removed the most code. The plan wanted a bound-stall
+    reference like BoundHorse and an interaction to set it. Resolving at trigger time
+    means the item has NO data component at all, a braid can never point at a stall that
+    has been pulled down, and a spare in a chest works for whichever horse you put it on.
+    The price — the item cannot say in advance where it will send a horse — is paid by
+    the one refusal line, which does not spend the braid.
+
+The trap: it would have shipped green, and never fired
+
+    The obvious condition for a braid is "did this blow kill the horse". It is wrong, and
+    nothing in a test suite would have said so.
+
+    By the time the braid is asked, HorseLastStandHandler at NORMAL has already set the
+    damage to ZERO. So `damage >= health` answers NO on precisely the horses a braid
+    exists for. Every test passes, the item crafts, the layer draws, and the braid never
+    goes off.
+
+    RescuingBraid.fires therefore asks where the horse IS: the blow is fatal, OR the
+    horse is already on the last stand's floor. Same conclusion StasisRescue reached from
+    the other end of the same event, for the same reason. RescuingBraidTest pins both
+    halves, including one assertion that is really about two features at once — a horse
+    on that floor must still be below Escape.DEFAULT_THRESHOLD, or the promise that it
+    arrives bolting is not kept by anything.
+
+Three subscribers on LivingDamageEvent.Pre, and the priorities are the feature
+
+        NORMAL   HorseLastStandHandler   refuses the blow, holds it at healthLeft
+        LOW      RescuingBraidHandler    sees a horse on that floor, takes it home
+        LOWEST   EmergencyStasisHandler  the general net, behind both
+
+    The chamber dropped from LOW to LOWEST to make room. The braid goes first because it
+    is the MORE SPECIFIC instrument — worn on one horse on purpose, where a chamber covers
+    every horse its carrier owns. Nothing is wasted by that ordering, which is what makes
+    it safe: a horse the braid has moved is out of the fight and takes no further blows,
+    so the chamber is never asked and never spent.
+
+What was reused rather than rebuilt
+
+      - TicketHandler.arrive is CALLED, not copied: portal particles, enderman sound and
+        HorseLeads.untieFor for free, and a future change to how a horse travels reaches
+        this without anyone remembering it exists.
+      - TicketHandler.landingSpot is what says yes. It re-reads the sign and re-runs the
+        stall detection live, so a stall somebody has filled with hay bales refuses here
+        rather than suffocating an animal.
+      - Stall first, then the holding pen — StallRecall's rule verbatim, because the Send
+        home button already makes exactly this choice.
+      - Nothing forces the escape behaviour. HorseEscapeGoal reads the health bar and
+        recent harm on its own canUse tick and both survive the teleport
+        (Escape.THREAT_LINGERS_TICKS outlasts the trip), so the horse comes up bolting
+        through the goal's own door rather than a forceStart written for this.
+
+The rider is the genuinely new part
+
+    Within one level teleportTo carries passengers — the property GeneReactionHandler's
+    blink already relies on. ACROSS levels it does not: the entity is re-created in the
+    target and its passengers are put down. Every other teleport in the mod dodges this
+    by refusing a ridden horse outright (TicketHandler, StallRecall, EnderWhistleCalls).
+    A braid cannot, since being ridden is the situation it is bought for.
+
+    So reseat() looks the horse up again by id in the world it landed in, sends the rider
+    after it, and remounts. UNVERIFIED — nothing in this repository has watched a
+    passenger survive a cross-level teleport, and EnderWhistleCalls says the same about
+    its own version.
+
+The streak: a mask, and the mask is baked
+
+    BraidLayer is EmissiveCoatLayer's structural twin — one submitModel of the whole
+    horse through a texture that is transparent everywhere it must not paint. What
+    differs: the texture is a MASK (flat white over the mane or the tail) and the colour
+    is the submit's own tint, so one pair of files covers every colour a player can mix
+    rather than sixteen baked sheets.
+
+    The submit's colour parameter had to be found by probe: a deliberately-wrong call
+    made javac print all four overloads, and the ten-argument one carries an `int color`
+    after a nullable sprite. Used here for the first time in this mod.
+
+    The masks are baked from HorseSkinGeometry, not painted. The two patches are at
+    texOffs(56,36) and texOffs(42,36) doubled onto the 128px sheet — and hand-painting
+    two rectangles at those coordinates would work today and silently paint a horse's
+    neck the day somebody moves a cube. HairMaskTool asks the mesh, and HARD-FAILS on a
+    part covering no texel, because a mask nothing draws through is a braid nobody can
+    see and it would ship green. :common:bakeHairMasks.
+
+Two deviations from the plan, both stated on the page
+
+      - The Tack Dyeing Bench does not dye a braid. The bench is built around tack_tint,
+        which is three zones (seat, bridle, fittings) because a saddle has three; a braid
+        is one plait of one colour. Forcing it through would mean a zone-names case, a
+        tooltip saying the same word three times, and a screen with two slots that do
+        nothing. Instead the braid is in #minecraft:dyeable and carries vanilla's
+        dyed_color, which buys dyeing in a grid, mixing dyes, cauldron washing, the
+        tooltip line and the tinted icon for one tag file.
+      - The wool does not decide the colour. That needs a custom recipe to copy the dye
+        across, and a CustomRecipe is invisible to JEI and the recipe book unless both
+        defaults are overridden — the exact trap the stasis chamber recipes spent a day
+        in yesterday. Plain JSON recipe, and the dye does the colour. Both are on the
+        page's Roadmap tab.
+
+
+What was checked, and what was not
+
+    Green: :neoforge-26.1.2:build, the four affected common/ test classes, check-recipes,
+    check-links, check-designer-boots, and a dedicated server that loaded 1651 recipes
+    and 1729 advancements with no error in the log. (It never reached Done( — port 25565
+    was already held by something else on the machine. Mod load, registry freeze, datapack
+    load and world load all completed before that, which is the half that mattered.)
+
+    Not checked, and all of it on the two Verification tabs: every one of these behaviours
+    in a running game. Nothing has worn a braid, no braid has broken, no rider has crossed
+    a world boundary on one, no chamber has been spent out of a bank, and nobody has
+    looked at either the streak or the item icon — both of which were generated rather
+    than drawn.

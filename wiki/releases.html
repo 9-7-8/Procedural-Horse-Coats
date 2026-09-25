@@ -61,6 +61,85 @@
     </p>
 </div>
 
+<h2 id="v0-5-026">0.5.026 &mdash; insurance you can leave at home, a braid that takes a horse home, and horses that draw where they are going</h2>
+
+<p>
+    <strong>An empty <a href="horse-stasis.html#emergency-gameplay">emergency stasis chamber</a>
+    filed in a stasis bank now insures your horses</strong>, exactly as one in your pocket does.
+    A rack of spare empties in the cabinet at home is worth having, and the day you ride out
+    having forgotten to take one is not the day your insurance lapses. The carried one is still
+    spent first; if it is full and a bank has an empty, the bank's is used rather than the horse
+    being refused. A bank is one <em>you</em> placed &mdash; the block quietly remembers, and
+    <strong>claims an unclaimed one the first time somebody opens it</strong>, which is all you
+    need do to a bank you built before this.
+</p>
+<p>
+    A rescue is now <strong>a row in the H screen's Log tab</strong> as well as a chat line, under
+    a <em>Rescues</em> filter of its own. A chamber fires with nobody watching by design, which is
+    most of what you pay eight ender pearls for &mdash; so the alarm that scrolls past should not
+    have been the only record of it. And a horse in a chamber now says
+    <strong>&ldquo;in a stasis chamber&rdquo;</strong> where the browser used to say
+    <em>not loaded</em> for ever; <code>stasis</code> is a word the filter box finds horses by.
+    If you are riding when a chamber fires, <strong>you are set down a tick first</strong> and the
+    horse goes from under you on the next one, rather than both inside the same instant.
+</p>
+
+<h3 id="v0-5-026-braid">The rescuing braid</h3>
+<p>
+    <strong>A new item, and the first thing in the game that goes in a horse's mane or tail.</strong>
+    Craft a <a href="item-rescuing-braid.html">rescuing braid</a> from any wool, a horse hair and
+    an ender pearl, work it into a horse's hair, and forget about it. It does nothing until the
+    day something is about to kill that horse, and then it breaks: the blow is refused and the
+    horse &mdash; with you on it, if you were riding &mdash; is standing in its own stall,
+    bolting.
+</p>
+<ul>
+    <li><strong>It rides on top of the last stand</strong> rather than replacing it. The free save
+        holds the horse on half a heart with its totem particles, and the braid then takes that
+        horse home <em>inside</em> the immunity window. A horse teleported out of a fight and then
+        killed by the first thing it lands beside has been moved rather than saved.</li>
+    <li><strong>It works out where home is when it breaks</strong>, not when you make it: the
+        horse's own stall, or your holding pen. So a braid in a chest works for whichever horse
+        you put it on and can never be pointing at a stall you took down last week. A horse with
+        neither gets one line saying so, and <em>the braid is not spent</em>.</li>
+    <li><strong>A horse has two hair slots, and that is two saves.</strong> The mane goes first.</li>
+    <li><strong>Dyed like leather armour</strong> &mdash; any dye in a crafting grid, mixed dyes,
+        washed out in a cauldron &mdash; and drawn as a plait in that colour, worked into the
+        mane or the tail.</li>
+    <li>The <a href="horse-stasis.html#emergency-gameplay">emergency chamber</a> now runs
+        <em>after</em> it, as the net behind both. Nothing is wasted: a horse the braid has sent
+        home takes no further blows, so the bottle you did not spend is still in your pocket.</li>
+</ul>
+
+<h3 id="v0-5-026-rest">Also in this release</h3>
+<ul>
+    <li><strong>Every horse you own draws a line to where it is walking</strong>, and the browser
+        grew a <em>Send home</em> button that spends a ticket for you &mdash; the
+        <a href="horse-browser.html">H screen</a> has it.</li>
+    <li><strong>A cover can no longer happen through a wall.</strong> Covers turned out never to
+        have had a wall check at all; a barn's walls had been doing the job by accident until the
+        crowding cap went up.</li>
+    <li><strong>The stasis chamber recipes became visible.</strong> All five were present,
+        registered and working, and nothing in the game &mdash; not the recipe book, not JEI
+        &mdash; would show anybody what they were. The three upgrades are three recipes now, one
+        per rung. If you are on a modded server and could not craft a chamber, this is that.</li>
+    <li><strong>Shift-right-clicking a horse opens this mod's screen</strong>, which it had never
+        once done in any world.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">None of the new work has been played</span>
+    <p>
+        The bank's insurance, the braid in every one of its parts, the tick you are set down for,
+        and the whereabouts column all compile, pass their tests and load on a dedicated server
+        &mdash; and none of them has been watched happen. The braid's streak on the horse and its
+        item icon were <em>generated rather than drawn</em> and nobody has looked at either. What
+        to check, and in what order, is on the
+        <a href="item-rescuing-braid.html#verification">braid's</a> and the
+        <a href="horse-stasis.html#verification">stasis page's</a> Verification tabs.
+    </p>
+</div>
+
 <h2 id="v0-5-025">0.5.025 &mdash; a paper names a pair, the bank holds a stud farm, and your lead comes back</h2>
 
 <p>
