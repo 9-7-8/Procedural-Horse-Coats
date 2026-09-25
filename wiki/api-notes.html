@@ -151,7 +151,7 @@
 </li>
 <li id="pool-injection"><strong>There is no data-driven way to <em>append</em> to a vanilla template pool</strong>, and no NeoForge <code>StructureModifier</code> for one (the stock modifiers only touch spawns and such). A datapack can only replace the whole <code>template_pool</code> file, which hard-codes today's vanilla contents into your mod and silently drops other mods' additions. The append is a runtime edit of the live <code>StructureTemplatePool</code> on <code>ServerAboutToStartEvent</code>: add to <code>templates</code> (the weight-expanded <code>ObjectArrayList</code> the generator draws from), replace <code>rawTemplates</code> (what the codec would re-serialise and what other mods read), and reset the lazily cached <code>maxSize</code>. <strong>Make it idempotent</strong> - a single-player session that quits to title and loads again reuses the same frozen pool objects, so a blind append stacks a second copy every load.
 </li>
-<li id="access-transformer"><strong>The first access transformer in this repo</strong> lives at <code>neoforge-26.1.2/src/main/resources/META-INF/accesstransformer.cfg</code>. ModDevGradle 2.x <strong>auto-detects that exact path</strong> in any main-sourceset resource dir - no <code>build.gradle</code> change and no <code>mods.toml</code> entry. <code>public</code> widens; <code>public-f</code> also strips <code>final</code>, which is what an assignable field needs. Five lines: three on <code>StructureTemplatePool</code> for the pool append above, one on <code>AbstractHorse.generateSpeed</code> (protected static, so unreachable without extending it) so <code>HorseSpeedFloor</code> can ask the game for its own slowest horse instead of writing <code>0.1125</code> into prose, and one on <code>Villager.increaseMerchantCareer</code> for the dev-only clock shortcut that promotes an equestrian a tier. That last one is worth its own note, because the alternative looks available and is not - <code>setVillagerData(data.withLevel(n))</code> is public and raises the <em>number</em>, but re-rolling the trades to match needs <code>updateTrades</code> (protected) or a null offer list (<code>offers</code> is protected too, and <code>getOffers</code> only rebuilds when it is null). So a "levelled" villager keeps offering his old tier's trades, which is worse than not levelling him. Nothing in the shipped gameplay path calls it.
+<li id="access-transformer"><strong>The first access transformer in this repo</strong> lives at <code>neoforge-26.1.2/src/main/resources/META-INF/accesstransformer.cfg</code>. ModDevGradle 2.x <strong>auto-detects that exact path</strong> in any main-sourceset resource dir - no <code>build.gradle</code> change and no <code>mods.toml</code> entry. <code>public</code> widens; <code>public-f</code> also strips <code>final</code>, which is what an assignable field needs. Every entry carries a comment saying why, and the file is the list &mdash; three on <code>StructureTemplatePool</code> for the pool append above, one on <code>AbstractHorse.generateSpeed</code> (protected static, so unreachable without extending it) so <code>HorseSpeedFloor</code> can ask the game for its own slowest horse instead of writing <code>0.1125</code> into prose, and one on <code>Villager.increaseMerchantCareer</code> for the dev-only clock shortcut that promotes an equestrian a tier. That last one is worth its own note, because the alternative looks available and is not - <code>setVillagerData(data.withLevel(n))</code> is public and raises the <em>number</em>, but re-rolling the trades to match needs <code>updateTrades</code> (protected) or a null offer list (<code>offers</code> is protected too, and <code>getOffers</code> only rebuilds when it is null). So a "levelled" villager keeps offering his old tier's trades, which is worse than not levelling him. Nothing in the shipped gameplay path calls it.
 </li>
 <li id="biome-modifier-type"><strong>A biome modifier can be code, not only data.</strong> The stock <code>neoforge:add_spawns</code> takes a fixed <code>HolderSet&lt;Biome&gt;</code>; a modifier whose biome list is decided at runtime (every biome a loaded breed names) is a record implementing <code>BiomeModifier</code> - <code>modify(Holder&lt;Biome&gt;, Phase, ModifiableBiomeInfo.BiomeInfo.Builder)</code>, act only in <code>Phase.ADD</code>, and <code>builder.getMobSpawnSettings().addSpawn(MobCategory, weight, new MobSpawnSettings.SpawnerData(type, min, max))</code> (the weight is separate from <code>SpawnerData</code> in 26.1.2) - whose <code>MapCodec</code> is registered in a <code>DeferredRegister</code> on <code>NeoForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS</code>, then named by <code>"type"</code> in a <code>data/&lt;mod&gt;/neoforge/biome_modifier/*.json</code>. <code>Biome.LIST_CODEC</code> reads a biome list field. Modifiers run as a server starts, so anything loaded in the mod constructor is available. See <code>world/BreedHerdsBiomeModifier</code>.
 </li>
@@ -476,6 +476,40 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
 <p>
     <strong>Not verified in a running game.</strong> Read out of the NeoForge sources jar,
     2026-09-24; no real hopper has yet been pointed at the one block that uses it.
+</p>
+
+<h2 id="slot-position-final">A <code>Slot</code>&rsquo;s position is <code>final</code>, and read as a field</h2>
+
+<p>
+    <code>Slot.x</code> and <code>Slot.y</code> are <code>public final int</code>, and
+    <code>AbstractContainerScreen</code> reads them <em>as fields</em> &mdash;
+    <code>renderSlot</code>, <code>renderSlotContents</code> and <code>findSlot</code> all say
+    <code>slot.x</code> rather than calling anything. So <strong>a <code>Slot</code> subclass
+    cannot make itself movable</strong>: there is no accessor to override, and overriding one
+    would not help even if there were, because the callers do not go through it. Widening both
+    with <code>public-f</code> is the only route, and it is what the Horse Stasis Bank&rsquo;s
+    chamber grid scrolls on.
+</p>
+
+<p>
+    <strong>That is safer than it sounds, for a reason worth stating.</strong> A slot&rsquo;s
+    position is client-only data: the server builds its copy of the menu once and never reads
+    <code>x</code> or <code>y</code> again, because a click travels as a <em>slot index</em>.
+    Moving slots on the client therefore cannot desync what the player clicked from what the
+    server picks up &mdash; which is what makes moving the slots a better answer than the
+    obvious alternative of holding slots still and scrolling a <em>view</em> of the container
+    past them. That one needs both sides to agree on the offset before every click, and a scroll
+    packet overtaking a click packet acts on the wrong item.
+</p>
+
+<p>
+    Pair it with <code>isActive()</code>, which vanilla already honours in both
+    <code>findSlot</code> and the render loop: a slot scrolled out of the window returns
+    <code>false</code> and is neither drawn nor hit-tested, so the rows above and below the
+    window cost nothing and cannot be clicked through the frame. The same override is how that
+    screen&rsquo;s <em>tabs</em> hide two thirds of its slots, and for the same reason: on the
+    server it returns <code>true</code> unconditionally, since the server cannot know what the
+    player is looking at and does not need to.
 </p>
 
 <h2 id="at-overrides">An access transformer widens a declaration, not its overrides</h2>

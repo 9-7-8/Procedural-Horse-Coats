@@ -158,15 +158,19 @@
 <p>
     Craft one from <strong>five planks in a U, an ender pearl in the middle, an iron ingot in
     each top corner and a horse hair between them</strong> &mdash; any wood, so a plank you
-    already have on hand will do. Place it, right-click it, and you get a
-    <strong>double chest's worth of slots that take stasis chambers and nothing else</strong>.
+    already have on hand will do. Place it, right-click it, and you get
+    <strong>two hundred and seven slots that take stasis chambers and nothing else</strong>
+    &mdash; a double chest's six rows on screen at a time, and twenty-three rows behind them.
+    <strong>The grid scrolls</strong>: roll the wheel over it and the rows move, with a bar down
+    the right-hand edge saying where in the cabinet you are.
 </p>
 <p>
-    That is the first of its three tabs, and it is worth having on its own: fifty-four bottles in
-    an ordinary chest are fifty-four identical bottles, and this is where a stud farm's shelved
-    horses live instead. Chambers of any tier go in, full or empty &mdash; a rack of spare
-    empties beside the occupied ones is the obvious way to use one. The title bar counts what is
-    in there, so a glance tells you <em>nine horses of twelve</em> rather than nothing at all.
+    That is the first of its three tabs, and it is worth having on its own: two hundred bottles
+    in an ordinary chest are two hundred identical bottles, and this is where a stud farm's
+    shelved horses live instead. Chambers of any tier go in, full or empty &mdash; a rack of
+    spare empties beside the occupied ones is the obvious way to use one. The title bar counts
+    what is in there, so a glance tells you <em>nine horses of twelve</em> rather than nothing at
+    all.
 </p>
 
 <h2 id="browse-gameplay">The Browse tab: the bank as a list of horses</h2>
@@ -182,8 +186,9 @@
     <a href="horse-browser.html">the browser's own page</a> for the full language.
     <code>mare</code>, <code>gen&gt;2</code>, <code>gene:SB1</code>, <code>-lethal</code>, a bare
     word for a name or a breed; terms are ANDed and a <code>-</code> negates one. A bank you can
-    ask <em>which of these fifty-four are mares carrying sabino</em> is the reason the tab
-    exists.
+    ask <em>which of these two hundred are mares carrying sabino</em> is the reason the tab
+    exists &mdash; and the deeper the grid got, the more it is the reason, since twenty-three
+    rows of identical bottles is not something anybody is going to read by eye.
 </p>
 <div class="note">
     <span class="label">The tier gates each line, not the tab</span>
@@ -215,7 +220,7 @@
     <p>
         Every chamber drops when the bank is broken, the way a chest's contents do. It is also
         <strong>deliberately not flammable</strong>, unlike a chest: a chest that burns down
-        loses its diamonds, and a bank that burns down would lose fifty-four pedigreed horses to
+        loses its diamonds, and a bank that burns down would lose two hundred pedigreed horses to
         a lightning strike and drop them into the fire that did it.
     </p>
 </div>
@@ -241,10 +246,18 @@
     <p>
         The bank mends <strong>one horse at a time</strong>, in rotation, about a heart and a
         half every turn. A bank with one hurt horse in it heals that horse at roughly the rate a
-        field would; a bank with fifty gets round to each one far less often. That is the price
-        of the whole feature being cheap &mdash; a bank costs the server the same whether it
-        holds one chamber or fifty-four &mdash; and a horse in no hurry is exactly what a
-        shelved horse is.
+        field would; a bank with fifty gets round to each one far less often, and a
+        <em>full</em> one takes the better part of five minutes to come back round to any
+        particular horse. That is the price of the whole feature being cheap &mdash; a bank
+        costs the server the same whether it holds one chamber or every slot it has &mdash; and
+        a horse in no hurry is exactly what a shelved horse is.
+    </p>
+    <p>
+        <strong>The deep grid made that trade steeper, and it was taken on purpose.</strong>
+        Speeding the rotation up to match would mean a full bank doing four times the work of
+        the old one every tick, which is the one thing the feature is not allowed to do. If you
+        have a horse that actually needs mending, it mends fastest in a bank that is not also
+        storing two hundred others &mdash; or in a field.
     </p>
     <p>
         <strong>A bank with nothing to mend spends nothing.</strong> It will not touch the feed
@@ -534,8 +547,8 @@
         <strong>It is not flammable.</strong> Vanilla's chest takes
         <code>ignitedByLava()</code> and this does not, which is one omitted call: mod blocks are
         not in <code>FireBlock</code>'s flammability table unless they register themselves. A
-        chest that burns down loses its diamonds; a bank that burns down would drop fifty-four
-        pedigreed horses into the fire that did it.
+        chest that burns down loses its diamonds; a bank that burns down would drop a stud farm's
+        worth of pedigreed horses into the fire that did it.
     </p>
     <p>
         <strong>It is still not a <code>Container</code>.</strong> The block entity holds two
@@ -571,7 +584,9 @@
 <p>
     Only past all four does the bank open a bucket or take a mouthful. That ordering is what lets
     the feature keep its own promise: <strong>a bank must cost less than the horses it
-    replaced</strong>, and it has to hold that at fifty-four chambers as well as at one.
+    replaced</strong>, and it has to hold that at <code>HorseStasisBankBlockEntity.SLOTS</code>
+    chambers as well as at one. That promise is why the grid could be made this deep at all:
+    nothing in the turn scales with how many chambers are filed.
 </p>
 <p>
     Stage five added two more jobs to the same turn rather than a second clock, and each refuses
@@ -600,7 +615,7 @@
     <code>StasisCare</code> is the other half and does the tag surgery, because
     <strong>rebuilding an entity per turn is precisely the work the feature exists to avoid</strong>.
     <code>release</code> builds a real <code>Horse</code> and is right to; doing it once a turn
-    for a chamber nobody is looking at would make a full bank cost more than the fifty-four
+    for a chamber nobody is looking at would make a full bank cost more than the two hundred-odd
     ticking animals it replaced. So the arithmetic runs on four numbers and this class fetches
     and returns them.
 </p>
@@ -701,7 +716,7 @@
         <code>HorseRosterPayload.MAX_ENTRIES</code>. A chamber somebody else filled and handed
         over, or a stable past that cap, therefore has no row to match &mdash; so the tab draws
         that line by name and says it has no papers, and a search never returns it. The
-        alternative, decoding fifty-four entity tags to draw a list, buys those rows at the cost
+        alternative, decoding a bankful of entity tags to draw a list, buys those rows at the cost
         of the one thing the whole feature exists to avoid: doing work per horse that nobody is
         looking at. <strong>The name is never lost either way</strong>, because
         <code>StasisSnapshot</code> cached it at capture time for exactly this.
@@ -953,7 +968,7 @@
     is wrong, and the reason is creative mode: a creative pick-block sends the <em>client's</em>
     copy of a stack back to the server, so anything the client was never told is anything a
     creative player can quietly erase. The whole tag goes over the wire. Bandwidth is therefore
-    a real question for the bank, where fifty-four of them sit in one container &mdash; not for
+    a real question for the bank, where two hundred of them sit in one container &mdash; not for
     an item in a hand. <strong>The bank ships syncing all of it</strong>, deliberately: sending
     less is how a creative player silently erases a horse, and the reverse of that trade is a
     number to measure rather than a bug to fix. The measurement is on this page's Verification
@@ -1099,8 +1114,9 @@
         bucket, the tier upgrade carrying an occupied chamber, every one of the bank's slots,
         drops and sync costs, every line the Browse tab draws, the healing upkeep and its hopper
         plumbing, the drop buffer, <strong>every part of in-bank breeding up to a mare
-        letting herself out to foal</strong>, and <strong>the emergency chamber firing at
-        all</strong> are unplayed.
+        letting herself out to foal</strong>, <strong>the newly deepened grid and the scrolling
+        that reaches it</strong>, and <strong>the emergency chamber firing at all</strong> are
+        unplayed.
     </p>
 </div>
 
@@ -1414,11 +1430,46 @@
         the one place the two halves of the bank are supposed to meet.</li>
 </ul>
 
-<h3 id="verify-bank-bandwidth">What fifty-four horses cost on the wire (never measured)</h3>
+<h3 id="verify-bank-scroll">The scrolling chamber grid (NOT played)</h3>
+<p>
+    The grid is twenty-three rows behind a six-row window, scrolled by <em>moving the slots
+    themselves</em> &mdash; which needs <code>Slot.x</code> and <code>Slot.y</code> widened in
+    <code>accesstransformer.cfg</code>, on the reasoning that a slot's position is read only by
+    the client and a click travels as an index. That reasoning is sound on the decompiled source
+    and has not been watched work.
+</p>
+<ul>
+    <li><strong>Scroll down and put a chamber in.</strong> Roll the wheel to the bottom of the
+        grid, place a named chamber in a slot on the last row, close the bank and reopen it.
+        <strong>Pass:</strong> it is in that same slot. <strong>Fail:</strong> it lands in a
+        different slot, or in none &mdash; which would mean the client and the server disagree
+        about which container index a drawn slot is, and is the one way this could go wrong
+        expensively.</li>
+    <li><strong>Shift-click past the window.</strong> With the first six rows full, shift-click a
+        chamber in from the inventory. It should land on row seven, out of sight, and the title
+        count should go up by one &mdash; the count is what says so, since the slot it went to
+        is not on screen.</li>
+    <li><strong>Scroll, then switch tabs and come back.</strong> The grid should be where it was
+        left. <strong>Fail:</strong> it jumps to the top, or worse, the slots are drawn at one
+        offset and hit-tested at another &mdash; click a slot to find out, do not judge it by
+        eye.</li>
+    <li><strong>Break a bank that is holding horses below the visible rows.</strong> Every
+        chamber should drop, not only the fifty-four that were on screen.</li>
+    <li><strong>The last row is full-width.</strong> Twenty-three rows of nine is
+        <code>HorseStasisBankBlockEntity.SLOTS</code> exactly, so the bottom row should have no
+        gap in it.</li>
+</ul>
+
+<h3 id="verify-bank-bandwidth">What a full bank costs on the wire (never measured, and now four times the question)</h3>
 <p>
     Every chamber's component carries the horse's whole entity tag, on purpose (see the Coding
-    tab), and opening a full bank sends all fifty-four in one
-    <code>ClientboundContainerSetContentPacket</code>.
+    tab), and opening a full bank sends every one of
+    <code>HorseStasisBankBlockEntity.SLOTS</code> of them in a single
+    <code>ClientboundContainerSetContentPacket</code>. <strong>The grid went from
+    fifty-four slots to twenty-three rows of nine and this check did not get easier</strong>
+    &mdash; scrolling changes which rows are <em>drawn</em>, never which are <em>sent</em>, so
+    the packet on open is now roughly four times what it was when nobody had measured it either.
+    This is the first thing to look at in the next play session.
 </p>
 <ul>
     <li><strong>Open a full one on a real connection.</strong> Fill a bank with occupied
@@ -1426,7 +1477,16 @@
         network rather than in singleplayer &mdash; singleplayer never encodes it.
         <strong>Fail:</strong> a lag spike, or a disconnect, on open. The answer if it is bad is
         <em>not</em> a lossy stream codec, which is how a creative player silently erases a
-        horse; it is a smaller grid, or a paged one.</li>
+        horse; with the grid now scrolled rather than shown whole, the honest answer would be
+        <strong>sending the rows the player is looking at and no more</strong> &mdash; which is
+        a real piece of work, not a constant to turn down, because the creative pick-block
+        problem applies to every row the client holds.</li>
+    <li><strong>And there is a packet ceiling somewhere.</strong> Nobody has established what
+        size <code>ClientboundContainerSetContentPacket</code> a vanilla client will refuse. At
+        fifty-four this was a performance question; at two hundred it might be a hard failure,
+        and a hard failure on open would be the bank refusing to open at all rather than
+        being slow. <strong>Pass:</strong> a full bank opens over a network connection without
+        a disconnect.</li>
     <li><strong>And now it is not only on open.</strong> Every heal turn rewrites one chamber's
         snapshot component, which re-syncs that stack's whole entity tag to anyone with the bank
         open &mdash; one tag every <code>StasisUpkeep.HEAL_INTERVAL</code> ticks per bank, and

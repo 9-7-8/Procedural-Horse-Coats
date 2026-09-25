@@ -62,7 +62,7 @@ import java.util.List;
  * nothing is scanned, no tag is read, no supply is touched. (Owner's rule.) That
  * is what keeps the block honest about the premise of the whole feature:
  * shelving a horse has to be cheaper than leaving it in the world, and a bank
- * that woke up fifty-four times a second to find nothing to do would not be.
+ * that woke up once per chamber per tick to find nothing to do would not be.
  *
  * <h2>Slot-shaped, like the research shelf</h2>
  * Modelled on {@link EquineResearchShelfBlockEntity} down to the
@@ -84,16 +84,32 @@ import java.util.List;
  */
 public class HorseStasisBankBlockEntity extends BlockEntity {
 
-    /** A double chest's worth - six rows of nine, the shelf's grid. */
-    public static final int SLOTS = 54;
+    /**
+     * <b>Nine to a row - a chest's own pitch - and twenty-three rows of them.</b>
+     *
+     * <p>Far more rows than any window can show, which is the whole reason the
+     * Chambers tab scrolls: the grid is {@link #ROWS} rows deep and
+     * {@code HorseStasisBankMenu.VISIBLE_ROWS} of them are on screen at a time.
+     * The count is a multiple of {@link #COLS} on purpose - a ragged last row of
+     * two slots in a grid of nine reads as a bug rather than as a limit.
+     *
+     * <p>A bank this deep does not cost more to run: the tick still does
+     * <b>one chamber's worth of work per turn</b> ({@link #tick}), so the price
+     * of the extra rows is paid in how long a full bank takes to come round to
+     * any one horse, not in what it costs the server. What it <i>does</i> cost is
+     * bandwidth on open - see the page's Verification tab.
+     */
+    public static final int COLS = 9;
+    public static final int ROWS = 23;
+    public static final int SLOTS = COLS * ROWS;
 
     private final SimpleContainer chambers = new SimpleContainer(SLOTS) {
         @Override
         public void setChanged() {
             super.setChanged();
             // The one place the tick gate is recomputed: a chamber went in, came
-            // out, or was swapped. Fifty-four stacks looked at when the player
-            // moves one, rather than every tick forever.
+            // out, or was swapped. The whole grid looked at when the player moves
+            // one stack, rather than every tick forever.
             HorseStasisBankBlockEntity.this.working = anyWork(this);
             if (!anyAtStud(this)) {
                 // A bank with nothing at stud has no mare who could be waiting

@@ -1,0 +1,116 @@
+2026-09-24, after the three roadmap items — the stasis bank holds two hundred horses, which meant
+teaching a container grid to scroll
+
+    The owner asked:
+
+        Update the horse stasis bank to hold 200 horses, then create a new release
+
+    One sentence, and almost none of the work was the number.
+
+
+The constant was the small half
+
+    HorseStasisBankBlockEntity.SLOTS was 54 — "a double chest's worth", six rows of nine, and
+    the grid was drawn by the screen and placed by the menu at exactly those coordinates. Only
+    six places in the codebase read SLOTS at all, so changing the number compiles in a minute.
+
+    What does not work is drawing it. Two hundred slots is about twenty-three rows of nine,
+    which is roughly four hundred pixels of grid in a window that is two hundred and twenty-two
+    pixels tall, over a player inventory that has to stay on screen. So the real question put to
+    the owner was how the Chambers tab should show a grid it cannot fit, and the answers were:
+
+        scroll it (not page it), and 207 rather than 200
+
+    207 is twenty-three clean rows. 200 would have left a last row of two slots and seven gaps,
+    which reads as a bug rather than as a limit. The gameplay prose says "two hundred and seven"
+    once and "two hundred" thereafter.
+
+
+Scrolling a container grid: two designs, and the one that cannot desync
+
+    There are two ways to scroll slots in an AbstractContainerMenu, and they are not equally
+    safe.
+
+        Scroll a VIEW. Keep 54 slots at fixed positions and have them read a moving window of
+        the 207-slot container. This is what it sounds like it should be. It is wrong here:
+        the slot-to-container mapping now depends on the scroll offset, so the client and the
+        server must agree on that offset before every click. A scroll packet overtaking a click
+        packet files the player's horse in the wrong chamber, or takes the wrong one out. These
+        are pedigreed animals; "usually right" is not a specification.
+
+        Scroll the SLOTS. Keep all 207 slots, each permanently bound to its own container
+        index, and move where the client draws them. Slot index to container index never
+        changes, on either side. The offset is client-only, like the tab already is.
+
+    The second one is right, and it is right for a reason that is worth writing down: a Slot's
+    position is not shared state. The server places its copy of the menu once and never reads
+    x or y again, because a click travels as an index. So the two sides being at different
+    scroll offsets is not a desync — it is not information the server has or wants.
+
+    The catch is that Slot.x and Slot.y are `public final int`, and AbstractContainerScreen
+    reads them AS FIELDS — renderSlot, renderSlotContents and findSlot all say `slot.x`. So a
+    Slot subclass cannot make itself movable: there is no accessor to override, and overriding
+    one would not help, because nothing calls it. Two `public-f` lines in
+    accesstransformer.cfg, with the safety argument above written into the comment. Full
+    reasoning is now on wiki/api-notes.html#slot-position-final.
+
+    The other half is isActive(), which vanilla honours in BOTH findSlot and the render loop.
+    A slot scrolled out of the window returns false and is neither drawn nor hit-tested. This
+    was already the idiom in this exact file — it is how the three tabs hide each other's slots
+    — including the rule that the server returns true unconditionally, because the server
+    cannot know what the player is looking at and does not need to. Scrolling reuses it rather
+    than inventing anything.
+
+
+The scrollbar cost the window nothing
+
+    The Browse tab already draws a three-pixel wheel-only thumb, so the grid got the same one
+    rather than a new idiom. It fits in four pixels that were already spare: the last column's
+    well ends at MARGIN + 8*18 + 17 = 169, and the window's own shadow starts at WIDTH - 3 =
+    173. SCROLL_X and SCROLL_W are written as that arithmetic rather than as 169 and 4, so the
+    bar cannot drift off the gutter if the grid ever moves. The window is still 176 x 222, the
+    player inventory did not move, and nothing else on any of the three tabs was relaid out.
+
+    Neither bar can be dragged, on purpose and consistently: the thumb's job is to say there is
+    more below, and the wheel is how a player would reach it anyway.
+
+
+What got worse, and was shipped anyway
+
+    The bank's known-unmeasured bandwidth check got about four times bigger. Every chamber's
+    component carries the horse's WHOLE entity tag — deliberately, because a lossy stream codec
+    is how a creative pick-block silently erases a horse — and the entire grid goes to the
+    client in one ClientboundContainerSetContentPacket on open. Scrolling changes which rows are
+    DRAWN, never which are SENT.
+
+    So verify-bank-bandwidth was rewritten rather than left alone, and it now says two things it
+    did not say before. First, that the honest fix if it is bad is no longer "a smaller grid or a
+    paged one" — the grid is deliberately not smaller now — but sending only the rows the player
+    is looking at, which is real work and not a constant to turn down. Second, that nobody has
+    established what size ClientboundContainerSetContentPacket a vanilla client will refuse: at
+    54 chambers this was a performance question, and at 207 it might be a hard failure on open.
+    That is the first thing to look at in the next play session.
+
+    The healing rotation also got slower, and was left alone. The bank mends one chamber per
+    turn every StasisUpkeep.HEAL_INTERVAL ticks, so a full bank now takes the better part of
+    five minutes to come back round to any given horse. Speeding it up to compensate would mean
+    a full bank doing four times the work every tick, which is the one thing the whole feature
+    is built not to do — the promise is that a bank costs the server the same whether it holds
+    one chamber or all of them. The gameplay tab now says so plainly, including the advice that
+    a horse which actually needs mending mends faster in a field.
+
+
+Checks
+
+    :neoforge-26.1.2:build green. The build is itself the proof that the access transformer's
+    field descriptors are right, since `slot.x = ...` does not compile against a final field.
+
+    runServer was booted twice. The first attempt got as far as BindException — the owner had
+    their own dedicated server (a separate 26.1.2.109 install) on 25565 — which was already
+    enough to prove the AT applies at mod load, since a bad AT fails long before the port bind.
+    Re-run on 25599 to be sure: "Done (0.419s)" and zero [ERROR] lines in the whole log. Port
+    restored to 25565 afterwards.
+
+    Nothing about the grid has been seen in a game. wiki/horse-stasis.html#verify-bank-scroll is
+    the new check list, and the click-through-the-frame case is the one that matters: click the
+    slots, do not judge the offset by eye.

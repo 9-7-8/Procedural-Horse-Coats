@@ -10,6 +10,7 @@ wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration,
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
+wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
 wiki/api-notes.html#verified	all	Verified
 wiki/architecture.html#boot-progress	all	What happens when a browser loads the mod
 wiki/architecture.html#build	all	Build & test, in full

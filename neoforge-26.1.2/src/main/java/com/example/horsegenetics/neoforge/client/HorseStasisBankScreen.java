@@ -24,6 +24,16 @@ import java.util.Locale;
  * stasis chambers; <b>Browse</b>, the same chambers read as the horses inside
  * them; and <b>Supply</b>, the feed and water the bank mends them from.
  *
+ * <h2>Two scrolling lists, one idiom</h2>
+ * The Chambers grid is {@link HorseStasisBankBlockEntity#ROWS} rows deep behind
+ * a {@link HorseStasisBankMenu#VISIBLE_ROWS}-row window, and Browse is a list
+ * longer than its four rows. Both are moved by the wheel and both draw the same
+ * three-colour thumb; neither can be dragged, on purpose, because the thumb is
+ * there to say <i>there is more below</i> and the wheel is how a player would
+ * reach it anyway. <b>Where they differ is who holds the offset</b>: Browse's is
+ * a field here, because the rows are drawn by this class; the grid's lives on
+ * the menu, because scrolling it means moving real slots.
+ *
  * <h2>Browse is a reading, not a second inventory</h2>
  * Every row is a chamber the bank already holds, and the whole tab is one
  * {@link StasisBrowseRow} list rebuilt when the slots, the filter or the stable's
@@ -41,7 +51,7 @@ import java.util.Locale;
  * rather than letting a horse silently vanish from the list.
  *
  * <h2>Where the details come from</h2>
- * A chamber carries the horse's whole entity tag, and decoding fifty-four of
+ * A chamber carries the horse's whole entity tag, and decoding a bankful of
  * those to draw a list would be the expensive way round. The details come from
  * the stable's own papers instead - {@link ClientHorseRoster}, the same rows the
  * browser's <i>My horses</i> table sorts, matched on the {@code UUID} the
@@ -182,7 +192,21 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             scroll = Math.max(0, Math.min(scroll - (int) Math.signum(sy), maxScroll()));
             return true;
         }
+        // The chamber grid, a row a notch. Anywhere over the grid or its bar -
+        // the player is scrolling the list of horses, not one slot of it.
+        if (tab == HorseStasisBankMenu.Tab.CHAMBERS && sy != 0 && overGrid(mx, my)) {
+            this.menu.setChamberRow(this.menu.chamberRow() - (int) Math.signum(sy));
+            return true;
+        }
         return super.mouseScrolled(mx, my, sx, sy);
+    }
+
+    /** Over the chamber grid, scrollbar included. */
+    private boolean overGrid(double mx, double my) {
+        int l = leftPos + HorseStasisBankMenu.MARGIN;
+        int t = topPos + HorseStasisBankMenu.GRID_Y;
+        int r = leftPos + HorseStasisBankMenu.SCROLL_X + HorseStasisBankMenu.SCROLL_W;
+        return mx >= l && mx < r && my >= t && my < t + HorseStasisBankMenu.GRID_H;
     }
 
     /**
@@ -330,10 +354,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         VanillaPanel.window(g, leftPos, topPos, HorseStasisBankMenu.WIDTH, HorseStasisBankMenu.HEIGHT);
 
         if (tab == HorseStasisBankMenu.Tab.CHAMBERS) {
-            for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
-                VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + (i % 9) * 18,
-                        topPos + HorseStasisBankMenu.GRID_Y + (i / 9) * 18);
-            }
+            drawChambers(g);
         } else if (tab == HorseStasisBankMenu.Tab.BROWSE) {
             VanillaPanel.well(g, leftPos + HorseStasisBankMenu.MARGIN,
                     topPos + HorseStasisBankMenu.FILTER_Y,
@@ -351,6 +372,45 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.MARGIN + i * 18,
                     topPos + HorseStasisBankMenu.HOTBAR_Y);
         }
+    }
+
+    /**
+     * <b>The Chambers tab</b>: six rows of a grid that is
+     * {@link HorseStasisBankBlockEntity#ROWS} deep, and the bar that says so.
+     *
+     * <p>Only the wells actually on screen are drawn - the slots for the rows
+     * above and below have been moved out of the window by
+     * {@link HorseStasisBankMenu#setChamberRow} and report
+     * {@code isActive() == false}, so vanilla neither draws nor hit-tests them,
+     * and a well drawn under one would be a hole with nothing behind it.
+     */
+    private void drawChambers(GuiGraphicsExtractor g) {
+        int top = this.menu.chamberRow();
+        int first = top * HorseStasisBankBlockEntity.COLS;
+        int last = Math.min(HorseStasisBankBlockEntity.SLOTS,
+                first + HorseStasisBankMenu.VISIBLE_ROWS * HorseStasisBankBlockEntity.COLS);
+        for (int i = first; i < last; i++) {
+            VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.chamberX(i),
+                    topPos + HorseStasisBankMenu.chamberY(i, top));
+        }
+        drawGridScrollbar(g, top);
+    }
+
+    /**
+     * The grid's scrollbar - the Browse list's, in the four pixels between the
+     * last column and the window's shadow. Drawn rather than dragged, like that
+     * one: the wheel is how this list is moved, and a thumb nobody can grab is
+     * still the only thing that says there are rows below.
+     */
+    private void drawGridScrollbar(GuiGraphicsExtractor g, int top) {
+        int x = leftPos + HorseStasisBankMenu.SCROLL_X;
+        int y = topPos + HorseStasisBankMenu.GRID_Y;
+        int h = HorseStasisBankMenu.GRID_H;
+        int w = HorseStasisBankMenu.SCROLL_W;
+        int thumbH = Math.max(6, h * HorseStasisBankMenu.VISIBLE_ROWS / HorseStasisBankBlockEntity.ROWS);
+        int thumbY = y + (h - thumbH) * top / HorseStasisBankMenu.maxChamberRow();
+        g.fill(x, y, x + w, y + h, VanillaPanel.SHADOW);
+        g.fill(x, thumbY, x + w, thumbY + thumbH, VanillaPanel.FACE);
     }
 
     /**

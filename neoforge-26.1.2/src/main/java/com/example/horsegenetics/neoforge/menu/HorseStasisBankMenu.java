@@ -46,11 +46,17 @@ import java.util.List;
  * <h2>Every chamber's whole horse is on the wire</h2>
  * A chamber's {@code stasis_snapshot} component carries the entire entity tag,
  * for the creative pick-block reason {@code StasisSnapshot} explains, and this
- * menu can hold fifty-four of them. That is the one thing about the bank that is
- * genuinely more expensive than the item it stores, and it is on the page's
- * Verification tab as a thing to measure with a full bank rather than a thing to
- * fix by sending less - sending less is how a creative player silently erases a
- * horse.
+ * menu can hold {@link HorseStasisBankBlockEntity#SLOTS} of them. That is the
+ * one thing about the bank that is genuinely more expensive than the item it
+ * stores, and it is on the page's Verification tab as a thing to measure with a
+ * full bank rather than a thing to fix by sending less - sending less is how a
+ * creative player silently erases a horse.
+ *
+ * <p><b>The deep grid made that check four times more urgent, not less.</b> The
+ * whole grid still arrives in one {@code ClientboundContainerSetContentPacket}
+ * on open, scrolled or not: what the scrollbar changes is which rows are drawn,
+ * never which are sent. Nobody has yet opened a full bank over a real
+ * connection.
  */
 public final class HorseStasisBankMenu extends AbstractContainerMenu {
 
@@ -71,6 +77,23 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     public static final int HEIGHT = 222;
     public static final int MARGIN = 8;
     public static final int GRID_Y = 18;
+
+    /**
+     * <b>How many of the grid's {@link HorseStasisBankBlockEntity#ROWS} rows are
+     * on screen at once</b> - a double chest's six, so the window is the size a
+     * player already knows and the rows below it are reached by scrolling.
+     */
+    public static final int VISIBLE_ROWS = 6;
+    public static final int GRID_H = VISIBLE_ROWS * 18;
+
+    /**
+     * The chamber grid's scrollbar, in the gutter between the last column's well
+     * (which ends at {@code MARGIN + 8 * 18 + 17}) and the window's own shadow
+     * (which starts at {@code WIDTH - 3}). Four pixels, and they are exactly the
+     * four that were going spare - the window does not grow for this.
+     */
+    public static final int SCROLL_X = MARGIN + 8 * 18 + 17;
+    public static final int SCROLL_W = WIDTH - 3 - SCROLL_X;
 
     /** Browse tab: the filter field, then the list of horses under it. */
     public static final int FILTER_Y = 18;
@@ -108,6 +131,14 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
      * inactive. Only ever set on the client - see {@link #activeOnTab}.
      */
     private Tab tab = Tab.CHAMBERS;
+
+    /**
+     * <b>The top row of the chamber grid that is on screen.</b> Client-only, for
+     * the tab's own reason: a slot's position and whether it is drawn are both
+     * questions only the client has, and the server keeps every slot live so a
+     * click on any of them lands whatever this says.
+     */
+    private int chamberRow;
 
     /** The three tabs, in the order the screen draws them. */
     public enum Tab {
@@ -147,8 +178,12 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
                 : new SimpleContainerData(HorseStasisBankBlockEntity.DATA_COUNT);
         addDataSlots(this.data);
 
+        // Every row is placed where it would be if the whole grid fitted; the
+        // rows past the sixth land below the window, and setChamberRow slides
+        // them all up when the player scrolls. On the server these numbers are
+        // written once and never read.
         for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
-            addSlot(new ChamberSlot(chambers, i, MARGIN + (i % 9) * 18, GRID_Y + (i / 9) * 18));
+            addSlot(new ChamberSlot(chambers, i, chamberX(i), GRID_Y + (i / HorseStasisBankBlockEntity.COLS) * 18));
         }
         for (int i = 0; i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
             addSlot(new SupplySlot(supplies, i, supplyX(i), supplyY(i)));
@@ -190,8 +225,75 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
 
         @Override
         public boolean isActive() {
-            return activeOnTab(Tab.CHAMBERS);
+            return activeOnTab(Tab.CHAMBERS) && onScreen(getContainerSlot());
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Scrolling the chamber grid
+    // ------------------------------------------------------------------
+
+    /** Which column of the grid slot {@code i} sits in. The screen reads this too. */
+    public static int chamberX(int i) {
+        return MARGIN + (i % HorseStasisBankBlockEntity.COLS) * 18;
+    }
+
+    /** Where slot {@code i} is drawn with row {@code top} at the top of the window. */
+    public static int chamberY(int i, int top) {
+        return GRID_Y + (i / HorseStasisBankBlockEntity.COLS - top) * 18;
+    }
+
+    /** The top row on screen. */
+    public int chamberRow() {
+        return chamberRow;
+    }
+
+    /** How far down the grid can be scrolled - the rows that do not fit. */
+    public static int maxChamberRow() {
+        return HorseStasisBankBlockEntity.ROWS - VISIBLE_ROWS;
+    }
+
+    /**
+     * <b>Scroll the grid to put {@code row} at the top</b>, moving every chamber
+     * slot rather than remapping which container slot each one shows.
+     *
+     * <p>That is the choice worth being explicit about. Scrolling a <i>view</i> -
+     * fixed slots reading a moving window of the container - would mean the
+     * client and the server had to agree on the offset before every click, and
+     * a scroll packet overtaking a click packet would file the player's horse in
+     * the wrong chamber or take out the wrong one. Moving the slots instead
+     * keeps slot index to container index fixed and permanent on both sides;
+     * only where the client <i>draws</i> them changes, and the server neither
+     * knows nor needs to. See the note on {@code Slot.x} in
+     * {@code accesstransformer.cfg}.
+     */
+    public void setChamberRow(int row) {
+        int clamped = Math.max(0, Math.min(row, maxChamberRow()));
+        if (clamped == chamberRow) {
+            return;
+        }
+        chamberRow = clamped;
+        for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
+            Slot slot = slots.get(FIRST_CHAMBER_SLOT + i);
+            slot.x = chamberX(i);
+            slot.y = chamberY(i, chamberRow);
+        }
+    }
+
+    /**
+     * Is this chamber slot in the six rows the player can see?
+     *
+     * <p><b>Only asked on the client</b> - on the server every slot is live, for
+     * the reason {@link #activeOnTab} states: the server cannot know where the
+     * window is scrolled to, and it does not have to, because the client will
+     * not send a click on a slot it is not drawing.
+     */
+    private boolean onScreen(int index) {
+        if (!player.level().isClientSide()) {
+            return true;
+        }
+        int row = index / HorseStasisBankBlockEntity.COLS;
+        return row >= chamberRow && row < chamberRow + VISIBLE_ROWS;
     }
 
     /**
