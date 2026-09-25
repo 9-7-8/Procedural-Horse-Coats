@@ -1,0 +1,129 @@
+{
+  "id": "nightmare",
+  "name": "Nightmare",
+  "description": "A hand-sized, impossibly fast will-o'-the-wisp of a horse that flies true rather than gliding, and is gone the instant anything moves toward it. Cracked blood-red veins run under its coat, its hooves and its eyes burn gold, and its mane is spun gold too. It flees everything alive on sight; a cake will draw one close, and enough cake fed to a grown one buys a permanent truce. Milk it and the bottle comes back cursed - weak, and touched with something darker than any ordinary potion.",
+  "kind": "magical",
+  "commonness": "very_rare",
+  "spawn": ["wild", "spawn_egg"],
+  "biomes": [
+    "minecraft:nether_wastes",
+    "minecraft:crimson_forest",
+    "minecraft:warped_forest",
+    "minecraft:soul_sand_valley",
+    "minecraft:basalt_deltas"
+  ],
+  "price": [220, 400],
+  "stats": {
+    "speed": 5,
+    "jump": 10,
+    "size": [0.32, 0.42],
+    "pull": 1
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "Sh/ShD", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.skittish": [
+      { "pair": "Faa/Faa", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "Prm/Prm", "weight": 100 }
+    ],
+    "horsegenetics.fireproof": [
+      { "pair": "Frp/Frp", "weight": 100 }
+    ],
+    "horsegenetics.flying": [
+      { "pair": "Tf/Tf", "weight": 100 }
+    ],
+    "horsegenetics.potion_milk": [
+      { "pair": "Wkn/Drk", "weight": 100 }
+    ],
+    "horsegenetics.particle": [
+      { "pair": "Rflm/Rflm", "weight": 100 }
+    ],
+    "horsegenetics.emberveins": [
+      { "pair": "Emb/Emb", "weight": 100 }
+    ],
+    "horsegenetics.molten_hooves": [
+      { "pair": "MltC/MltC", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Gld/Gld", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Gld/Gld", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Cha/Cha", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Cha/Cha", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_left": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_right": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_sclera_left": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_sclera_right": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.mane_color": [
+      { "pair": "Mnsld/Mnsld", "weight": 100 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.eye_sclera_left": {
+      "eye_chaos_r": [200, 255],
+      "eye_chaos_g": [160, 215],
+      "eye_chaos_b": [0, 60]
+    },
+    "horsegenetics.eye_sclera_right": {
+      "eye_chaos_r": [200, 255],
+      "eye_chaos_g": [160, 215],
+      "eye_chaos_b": [0, 60]
+    },
+    "horsegenetics.mane_color": {
+      "hair_r": [200, 255],
+      "hair_g": [160, 215],
+      "hair_b": [0, 60]
+    },
+    "horsegenetics.molten_hooves": {
+      "color_r": [200, 255],
+      "color_g": [160, 215],
+      "color_b": [0, 60]
+    },
+    "horsegenetics.emberveins": {
+      "hue": [0, 10]
+    },
+    "horsegenetics.passification": {
+      "offering": 13,
+      "amount": [1, 3]
+    }
+  },
+  "notes": [
+    "Shares its liver-bay base (E/E, A/A, Sh/ShD) with the Netherhorse, since nothing else was asked for it - the two breeds are a matched family, not two unrelated designs. Emberveins is Emb/Emb like the Netherhorse's, but banded to hue 0-10 rather than left across the gene's full 0-40, which reads redder and less orange - 'similar, but brighter red' markings, on the same liver-bay base the veins are already drawn to show up against.",
+    "Skittish is Faa/Faa - flees everything, always (SkittishGene.Target.EVERYTHING) - and aggression is explicitly pinned to n/n so a wild default chance of the opposite temperament can never land on this breed; a nightmare only ever runs, never fights.",
+    "Passification is Prm/Prm: permanently passified, at any age (Window.ANY, unlike the Netherhorse's adults-only route) - a foal or a grown nightmare can both be won over the same way. The offering is banded to index 13 of PassificationGene.OFFERINGS, minecraft:cake, which this breed adds; duration and cooldown are left unbanded since Prm is a permanent route and never reads either. THIS ALSO NEEDED A CODE FIX: PassificationGene's veto (Passification.suppresses) was asked before a horse attacked a player but never before one fled a player, so a calmed nightmare would still have bolted from you. GeneAbilityHandler's flee() now asks it too, which is what lets 'tempted over, then permanently calmed, with cake' actually hold once bought.",
+    "True flight is Tf/Tf (FlyingGene) rather than the commoner gliding allele - hovers and flies wherever it is pointed, indefinitely, no wings required. It grants no fall protection of its own (that is bird-boned's locus, not named here).",
+    "Milk: PotionMilkGene's Wkn/Drk is a compound heterozygote (two different brew alleles), so the bottle carries BOTH effects at the weak grade in one drink - Weakness, as asked, and Darkness as the thematic second half. Darkness was picked over Nausea/Blindness because the effect is named for exactly what a 'Nightmare' should hand you: a vision that dims and crawls rather than one that merely spins. Both alleles (Wkn, Drk) are new - PotionMilkGene had no negative effects in its brew list at all before this breed, only buffs.",
+    "Particle is Rflm/Rflm - ParticleGene's 'Flame' variant, minecraft:flame, the same particle a torch burns - 'torch flame particles' as asked, not the Netherhorse's Lava embers.",
+    "Molten hooves is MltC/MltC, the same locus and pair as the Netherhorse, banded gold here instead of red - so the two breeds' glowing hoofprints read as a matched pair from a distance despite being unrelated combinations genetically.",
+    "Eyes and mane: Gld/Gld at both iris loci is EyeColourGene's fixed gold hue; there is no fixed gold sclera hue, so the whites use Cha/Cha (EyeHue.CHAOS) banded toward gold on eye_chaos_r/g/b, with Glo/Glo at every glow locus so the whole eye glows, matching the Netherhorse's red-glow treatment in gold. Only mane_color is named and banded gold - the tail was left wild since nothing was said about it, so a nightmare's tail is whatever its liver-bay base gives it rather than a second golden hair locus.",
+    "Stats: speed 5 is the plain baseline (no locus is forced when a resolved band sits inside BreedStatCurve.NEUTRAL_LO..NEUTRAL_HI, so 'average speed' really does mean nothing is pushing it). Jump 10 is the ceiling, about x3.43 of baseline. Pull 1 is the floor pull score, padded out with no curve (BreedStatCurve treats pull as the resolved number itself). Size [0.32, 0.42] is below even a Falabella's [0.38, 0.51] and well outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws its own tiny size true. No health or milk-volume locus is named, so both roll at the ordinary wild rate - nothing was asked about either.",
+    "Every biome named is in the Nether, for the same reason as the Netherhorse's: a horse still needs grass and light to spawn, so wild herds of this breed will rarely or never actually appear, and spawn_egg is the reliable way to obtain one.",
+    "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested."
+  ]
+}

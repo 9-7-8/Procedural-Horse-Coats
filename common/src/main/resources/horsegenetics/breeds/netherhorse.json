@@ -1,0 +1,134 @@
+{
+  "id": "netherhorse",
+  "name": "Netherhorse",
+  "description": "A liver-bay tank built for the Nether floor - nearly twice the size and health of an ordinary horse, slow and no jumper, fireproof, and hunting anything that comes near. Cracked orange veins run under its coat, its mane and tail burn bright red, and its eyes glow the same blood red all the way through the white. Feed a grown one nether wart and it stops seeing you as prey; nobody has found another way in.",
+  "kind": "magical",
+  "commonness": "very_rare",
+  "spawn": ["wild", "spawn_egg"],
+  "biomes": [
+    "minecraft:nether_wastes",
+    "minecraft:crimson_forest",
+    "minecraft:warped_forest",
+    "minecraft:soul_sand_valley",
+    "minecraft:basalt_deltas"
+  ],
+  "price": [220, 400],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 9,
+    "size": [1.85, 1.95],
+    "pull": 8
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "Sh/ShD", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "Aaa/Aaa", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "APr/APr", "weight": 100 }
+    ],
+    "horsegenetics.fireproof": [
+      { "pair": "Frp/Frp", "weight": 100 }
+    ],
+    "horsegenetics.milk": [
+      { "pair": "Lava/Lava", "weight": 100 }
+    ],
+    "horsegenetics.magic_milk_volume": [
+      { "pair": "Mlk/Mlk", "weight": 100 }
+    ],
+    "horsegenetics.particle": [
+      { "pair": "Lava/Lava", "weight": 100 }
+    ],
+    "horsegenetics.emberveins": [
+      { "pair": "Emb/Emb", "weight": 100 }
+    ],
+    "horsegenetics.molten_hooves": [
+      { "pair": "MltC/MltC", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Red/Red", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Red/Red", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Cha/Cha", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Cha/Cha", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_left": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_right": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_sclera_left": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_sclera_right": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.mane_color": [
+      { "pair": "Mnsld/Mnsld", "weight": 100 }
+    ],
+    "horsegenetics.tail_color": [
+      { "pair": "Tlsld/Tlsld", "weight": 100 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.eye_sclera_left": {
+      "eye_chaos_r": [210, 255],
+      "eye_chaos_g": [0, 30],
+      "eye_chaos_b": [0, 30]
+    },
+    "horsegenetics.eye_sclera_right": {
+      "eye_chaos_r": [210, 255],
+      "eye_chaos_g": [0, 30],
+      "eye_chaos_b": [0, 30]
+    },
+    "horsegenetics.mane_color": {
+      "hair_r": [200, 255],
+      "hair_g": [0, 25],
+      "hair_b": [0, 25]
+    },
+    "horsegenetics.tail_color": {
+      "hair_r": [200, 255],
+      "hair_g": [0, 25],
+      "hair_b": [0, 25]
+    },
+    "horsegenetics.passification": {
+      "offering": 12,
+      "amount": [2, 4]
+    },
+    "horsegenetics.molten_hooves": {
+      "color_r": [200, 255],
+      "color_g": [0, 30],
+      "color_b": [0, 30]
+    }
+  },
+  "notes": [
+    "Coat: E/E + A/A + Sh/ShD puts the shade score at about 2.5 before the per-horse roll (+/-0.75), which sits mid-band for BayShade.LIVER (1.5..3.0) - a liver bay, occasionally dark enough to read as a seal brown. That is the model working as intended, not a mistake: nothing here forces the seal-brown edge away.",
+    "Aggression is Aaa/Aaa - always, everything, its own owner included (AggressionGene.Target.EVERYTHING) - so it is dangerous to mobs and other horses even once tamed, not only to a stranger. Passification is APr/APr: permanently passified, but only once the horse is an adult (Window.ADULT) - a foal netherhorse cannot be talked down at all, which is deliberate, since the breed is meant to be found grown or not at all.",
+    "The passification offering is banded to index 12 of PassificationGene.OFFERINGS, which this breed adds: minecraft:nether_wart. Every other breed and every wild horse still only ever rolls the first twelve entries, so adding it here does not change what any existing horse wants.",
+    "Milk: Lava/Lava (MilkGene) makes any grown horse of this breed millable for lava rather than water or milk, and Mlk/Mlk (MagicMilkVolumeGene) reads the same 'milk' yield kind and grants extra fillings a day on top - four to seven from an average netherhorse instead of one.",
+    "Particle is Lava/Lava - the 'Lava embers' variant (ParticleGene), not a group allele, so it does not stack with anything else at the locus; a netherhorse always trails spitting lava embers and nothing more from this gene.",
+    "Fireproof is Frp/Frp (two copies, same as any other fireproof horse): neither the horse nor its rider takes fire damage, and it swims through lava rather than wading through it slowly.",
+    "Emberveins is Emb/Emb, the glowing form - cracked, molten-orange seams over the liver bay base, with drifting embers and a wandering thread of light along the flank. It is otherwise a LEGENDARY-rarity gene (about 1 in 200,000 wild for this exact pair); pinning it here is what makes the breed reliably look like one.",
+    "Eyes: Red/Red at both iris loci is the deep blood-red the Dhampir uses. There is no fixed 'red' sclera hue, so the whites are Cha/Cha (EyeHue.CHAOS, whose colour is epigenetic rather than fixed) banded hard toward red on eye_chaos_r/g/b, with Glo/Glo at both the iris and sclera glow loci so both parts of the eye glow - matched, not just similarly coloured.",
+    "Mane and tail colour (HairColorGene, via ManeColorGene/TailColorGene) draw a per-copy RGB rather than a named hue, so Mnsld/Mnsld and Tlsld/Tlstld are banded on hair_r/g/b toward bright red rather than left to roll freely; a foal will not show the mane colour until it grows up (ManeColorGene paints no foal mesh), but the tail colour shows from birth.",
+    "Speed 3 and jump 2 are both well below the score-5 baseline (BreedStatCurve's floor is roughly x0.2 at a score of 1); health 9 lands at about x1.995 of baseline - practically double - and pull 8 is this session's own call, not requested, for a horse meant to also serve as a nether draught animal. Size [1.85, 1.95] is outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws giants only.",
+    "Every biome named is in the Nether. A horse still needs grass and light to spawn, so wild herds of this breed will rarely or never actually appear - spawn_egg is the reliable way to obtain one, and that is a known limitation of the spawn system rather than something this file can work around.",
+    "Molten hooves is MltC/MltC (the colour form), banded on color_r/g/b toward red the same way the mane and tail are - so this horse leaves red hoofprints behind it as it moves, on top of the lava embers the particle locus already trails. The Nightmare breed shares this locus at the same MltC/MltC pair, banded gold instead, so the two breeds' hoofprints read as a matched pair from a distance.",
+    "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool."
+  ]
+}

@@ -16,14 +16,17 @@ import java.util.List;
 
 /**
  * <b>Passification</b> ({@code horsegenetics.passification}) - the way in to a
- * horse that would otherwise kill you.
+ * horse that would otherwise kill you, or that would otherwise never let you
+ * near it at all.
  *
  * <p>{@link AggressionGene} can produce a wild horse that attacks players on
- * sight, and a horse like that is not a difficult horse, it is an <b>enemy</b>:
- * it cannot be approached, so it cannot be fed, so it cannot be tamed, and the
- * allele is a dead end wherever it lands. This locus is the answer. It adds no
- * aggression of its own and it never makes a horse hostile; all it does is say
- * <i>what you can offer a horse to make it stop</i>.
+ * sight, and {@link SkittishGene} one that flees every player on sight; either
+ * way the horse cannot be approached, so it cannot be fed, so it cannot be
+ * tamed, and the allele is a dead end wherever it lands. This locus is the
+ * answer. It adds no aggression or fear of its own and it never changes a
+ * horse's temperament; all it does is say <i>what you can offer a horse to
+ * make it stop treating you as a threat</i>, whether that threat was one it
+ * meant to fight or one it meant to run from.
  *
  * <h2>It overrides every other aggression effect</h2>
  * Passification is a <b>veto</b>, not a competing behaviour: while it holds, the
@@ -109,7 +112,9 @@ public final class PassificationGene implements Gene {
             "minecraft:melon_slice",
             "minecraft:sweet_berries",
             "minecraft:beetroot",
-            "minecraft:pumpkin");
+            "minecraft:pumpkin",
+            "minecraft:nether_wart",
+            "minecraft:cake");
 
     /** Fewest and most of the offering a horse may ask for. */
     public static final double MIN_AMOUNT = 1.0;

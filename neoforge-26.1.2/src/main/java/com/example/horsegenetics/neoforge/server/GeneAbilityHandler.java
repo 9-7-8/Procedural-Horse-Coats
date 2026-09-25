@@ -2518,7 +2518,9 @@ public final class GeneAbilityHandler {
         double best = Double.MAX_VALUE;
         int considered = 0;
         for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box,
-                c -> c != horse && c.isAlive() && MobGroups.matches(te.towards(), c))) {
+                // passification suppresses fleeing from a calmed player too - same veto as targeting
+                c -> c != horse && c.isAlive() && MobGroups.matches(te.towards(), c)
+                        && !Passification.suppresses(horse, c))) {
             if (++considered > te.maxTargets()) {
                 break; // every radius effect here states a cap
             }

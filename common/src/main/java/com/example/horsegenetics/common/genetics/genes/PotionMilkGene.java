@@ -90,6 +90,8 @@ public final class PotionMilkGene implements Gene, AbilityContribution {
         brew("Inv", "minecraft:invisibility", "Invisibility");
         brew("Res", "minecraft:resistance", "Resistance");
         brew("Hst", "minecraft:haste", "Haste");
+        brew("Wkn", "minecraft:weakness", "Weakness");
+        brew("Drk", "minecraft:darkness", "Darkness");
 
         n = new Allele(KEY, brews.size(), "n", "Wild-type (n)");
         List<Allele> all = new ArrayList<>();

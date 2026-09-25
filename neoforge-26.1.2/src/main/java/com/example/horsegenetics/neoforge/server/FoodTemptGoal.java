@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.common.genetics.genes.PassificationGene;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntitySelector;
@@ -100,6 +101,7 @@ public final class FoodTemptGoal extends Goal {
     private boolean resolved;
     private String favourite;
     private HorseDiet diet = HorseDiet.NORMAL;
+    private List<PassificationGene.Route> passificationRoutes = List.of();
 
     public FoodTemptGoal(Horse horse) {
         this.horse = horse;
@@ -194,7 +196,7 @@ public final class FoodTemptGoal extends Goal {
     private Held heldBy(Player candidate) {
         Held best = Held.NOTHING;
         for (ItemStack stack : List.of(candidate.getMainHandItem(), candidate.getOffhandItem())) {
-            Held held = offering(stack);
+            Held held = offering(candidate, stack);
             if (held == Held.FAVOURITE) {
                 return Held.FAVOURITE;
             }
@@ -205,13 +207,19 @@ public final class FoodTemptGoal extends Goal {
         return best;
     }
 
-    private Held offering(ItemStack stack) {
+    private Held offering(Player candidate, ItemStack stack) {
         if (stack.isEmpty()) {
             return Held.NOTHING;
         }
         resolveGenetics();
+        String item = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        long now = horse.level().getGameTime();
+        if (passificationRoutes.stream().anyMatch(route -> route.item().equals(item)
+                && Passification.offerAvailable(horse, candidate, route, now))) {
+            return Held.FAVOURITE;
+        }
         if (favourite != null
-                && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals(favourite)) {
+                && item.equals(favourite)) {
             // The preference locus beats the diet locus here exactly as it does
             // on the interaction, so a carnivore with a taste for apples runs.
             return Held.FAVOURITE;
@@ -227,6 +235,7 @@ public final class FoodTemptGoal extends Goal {
         }
         favourite = FoodPreferenceHandler.favouriteOf(horse);
         diet = HorseDietHandler.dietOf(horse);
+        passificationRoutes = Passification.routesOf(horse);
         resolved = true;
     }
 }

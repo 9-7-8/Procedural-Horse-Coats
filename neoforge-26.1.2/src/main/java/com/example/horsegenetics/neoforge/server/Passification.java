@@ -38,6 +38,11 @@ import java.util.UUID;
  * rather than to unpick them one at a time afterwards. A gene added later that
  * targets a player and does not ask here is a bug in that gene.
  *
+ * <p><b>Fleeing asks too.</b> The temper verb's {@code flee} mood used to pick
+ * its nearest scary thing without asking this at all, so a horse could be
+ * calmed toward a player and still bolt from them - the same class of bug the
+ * paragraph above warns about, just not caught until a breed needed it.
+ *
  * <p><b>Targeting only.</b> A damaging aura goes on damaging; a player who walks
  * into one has not been betrayed by this gene. That is the owner's line and it
  * keeps the veto to one question.
@@ -69,6 +74,20 @@ public final class Passification {
         }
         return horse.getData(ModAttachments.PASSIFICATION.get())
                 .calm(player.getUUID(), horse.level().getGameTime());
+    }
+
+    /** Is this route currently worth approaching this player for? */
+    static boolean offerAvailable(Horse horse, Player player, PassificationGene.Route route, long now) {
+        if (!windowOpen(route, horse)) {
+            return false;
+        }
+        PassificationAttachment state = horse.getData(ModAttachments.PASSIFICATION.get());
+        UUID id = player.getUUID();
+        if (state.permanent(id) || (route.kind() == PassificationGene.Kind.TEMPORARY
+                && (state.calm(id, now) || !state.offAsCooldown(id, now, route.cooldownTicks())))) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -182,7 +201,7 @@ public final class Passification {
      * one that has not been through the spawn handler - offers nothing rather
      * than throwing.
      */
-    private static List<PassificationGene.Route> routesOf(Horse horse) {
+    static List<PassificationGene.Route> routesOf(Horse horse) {
         HorseRecord record = HorseRecords.of(horse);
         if (!record.hasName()) {
             return List.of();
