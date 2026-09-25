@@ -106,18 +106,29 @@ public final class HorseStasisHandler {
             return;
         }
 
-        StasisSnapshot snapshot = snapshot(horse, name);
-
-        // Filled in place rather than swapped for a new stack: chambers are
-        // stacksTo(1), so the one in hand is the one that fills, it stays in the
-        // hand that used it, and anything else riding on the stack survives.
-        stack.set(ModDataComponents.STASIS_SNAPSHOT.get(), snapshot);
-        horse.discard();
-
-        level.playSound(null, horse.blockPosition(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 0.7F, 1.4F);
+        swallow(level, horse, stack, name);
         say(player, name + " is in stasis.");
         ActionTrace.log("stasis", ActionTrace.describeShort(horse) + " captured into a "
                 + chamber.tier().id() + " chamber by " + player.getGameProfile().name());
+    }
+
+    /**
+     * <b>The horse goes in.</b> The one place a live animal becomes a data
+     * component, shared by the two ways that happens: a player right-clicking a
+     * horse with a chamber, and {@link EmergencyStasisHandler} catching one that
+     * is about to die. Every refusal has already been made by the time anything
+     * calls this.
+     *
+     * <p>The chamber is filled <b>in place</b> rather than swapped for a new
+     * stack: chambers are {@code stacksTo(1)}, so the one that fills is the one
+     * that was already there - in the hand that used it, or in the inventory
+     * slot the emergency walk found it in - and anything else riding on the
+     * stack survives.
+     */
+    public static void swallow(ServerLevel level, Horse horse, ItemStack chamber, String name) {
+        chamber.set(ModDataComponents.STASIS_SNAPSHOT.get(), snapshot(horse, name));
+        horse.discard();
+        level.playSound(null, horse.blockPosition(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 0.7F, 1.4F);
     }
 
     /**

@@ -34,6 +34,10 @@ public final class ModRecipes {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StasisUpgradeRecipe>> STASIS_UPGRADE =
             SERIALIZERS.register("stasis_upgrade", () -> StasisUpgradeRecipe.SERIALIZER);
 
+    /** The Emergency chamber - custom for the same reason as the upgrades. */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EmergencyChamberRecipe>> EMERGENCY_CHAMBER =
+            SERIALIZERS.register("emergency_chamber", () -> EmergencyChamberRecipe.SERIALIZER);
+
     public static void register(IEventBus modEventBus) {
         SERIALIZERS.register(modEventBus);
     }

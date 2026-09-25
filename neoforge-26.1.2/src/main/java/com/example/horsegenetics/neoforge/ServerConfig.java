@@ -165,6 +165,7 @@ public final class ServerConfig {
      * {@code server/HorseEscapeGoal}.
      */
     public static final ModConfigSpec.DoubleValue ESCAPE_HEALTH_FRACTION;
+    public static final ModConfigSpec.DoubleValue EMERGENCY_STASIS_FRACTION;
 
     /**
      * <b>Is a horse ever killed by a single blow?</b> Off, it is - vanilla's
@@ -322,6 +323,24 @@ public final class ServerConfig {
                         "0 turns the whole behaviour off; 1 makes a horse bolt from any blow.")
                 .defineInRange("behaviour.escape_health_fraction",
                         com.example.horsegenetics.common.care.Escape.DEFAULT_THRESHOLD, 0.0, 1.0);
+        EMERGENCY_STASIS_FRACTION = builder
+                .comment("How low a horse's health has to fall before an Emergency Horse Stasis",
+                        "Chamber its owner is carrying takes it, as a fraction of its own",
+                        "maximum. (default: 0.1, so a tenth)",
+                        "The owner does nothing: if the horse is theirs and they are online,",
+                        "anywhere in the world, the horse is simply in the bottle - and a horse",
+                        "inside a chamber cannot be hurt at all, so this is a hard stop against",
+                        "dying rather than a delay. It fires whether or not the blow would have",
+                        "been fatal, and whether or not they are anywhere near it.",
+                        "Deliberately below behaviour.escape_health_fraction, so a horse still",
+                        "gets to run for its life first and is swallowed only if running did not",
+                        "work. Raising it above that number takes that chance away.",
+                        "One chamber holds one horse: a second horse crossing the line while the",
+                        "chamber is full is refused, out loud, and takes its chances.",
+                        "0 turns the whole behaviour off - the chambers still craft and still",
+                        "work when used by hand.")
+                .defineInRange("behaviour.emergency_stasis_fraction",
+                        com.example.horsegenetics.common.horse.StasisRescue.DEFAULT_THRESHOLD, 0.0, 1.0);
         LAST_STAND = builder
                 .comment("Whether a horse can be killed by a single blow. (default: true, meaning it cannot)",
                         "On, damage that would take a horse to zero takes it to",
@@ -533,6 +552,15 @@ public final class ServerConfig {
             return ESCAPE_HEALTH_FRACTION.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.Escape.DEFAULT_THRESHOLD;
+        }
+    }
+
+    /** {@code behaviour.emergency_stasis_fraction}, safely. */
+    public static double emergencyStasisFraction() {
+        try {
+            return EMERGENCY_STASIS_FRACTION.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.horse.StasisRescue.DEFAULT_THRESHOLD;
         }
     }
 

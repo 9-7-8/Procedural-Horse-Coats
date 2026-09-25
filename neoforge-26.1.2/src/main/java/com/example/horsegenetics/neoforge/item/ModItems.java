@@ -208,7 +208,22 @@ public final class ModItems {
             register("spacer_stasis_chamber",
                     p -> new StasisChamberItem(p.stacksTo(1), StasisTier.SPACER));
 
-    /** The chamber item for one tier - what an upgrade recipe produces. */
+    /**
+     * The fifth chamber, and the only one that is not a rung: a Basic chamber
+     * that captures a horse of its owner's <b>by itself</b> when that horse is
+     * about to die. It is a subclass rather than a tier so that the bank and
+     * everything downstream of it go on seeing an ordinary Basic chamber - see
+     * {@link EmergencyStasisChamberItem} for why that is the right way round.
+     */
+    public static final DeferredItem<EmergencyStasisChamberItem> EMERGENCY_STASIS_CHAMBER =
+            register("emergency_stasis_chamber",
+                    p -> new EmergencyStasisChamberItem(p.stacksTo(1)));
+
+    /**
+     * The chamber item for one tier - what an upgrade recipe produces. Never the
+     * emergency chamber, which shares {@code BASIC} with the ordinary one: an
+     * upgraded emergency chamber is an ordinary Intermediate, on purpose.
+     */
     public static StasisChamberItem stasisChamber(StasisTier tier) {
         switch (tier) {
             case BASIC:
