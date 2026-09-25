@@ -65,6 +65,44 @@
     </tbody>
 </table>
 
+<h2 id="negatives">Two of the brews are not a gift</h2>
+
+<p>
+    Every allele at this locus used to hand back something a player wants
+    &mdash; swiftness, strength, regeneration, and so on down the list. On
+    2026-09-25 <code>Wkn</code> (Weakness) and <code>Drk</code> (Darkness)
+    joined it, and they are the <strong>first effects here that nobody would
+    drink on purpose</strong>. They were added for the
+    <a href="breeds.html">Nightmare</a>, whose whole idea is a mare whose milk
+    comes back cursed. Nothing about the horse, and nothing about the bottle,
+    says which sort you are holding: a cursed potion looks exactly like a good
+    one until you drink it.
+</p>
+
+<p>
+    The Nightmare is also the <strong>first breed ever to pin this locus</strong>.
+    Everything else that expresses potion milk does so because a wild carrier
+    passed it on, and the pair is whatever breeding happened to produce; the
+    Nightmare is <code>Wkn/Drk</code> on every founder. That is the compound
+    heterozygote from the table above, so one bottle from a nightmare mare comes
+    back carrying <em>both</em> Weakness and Darkness at the weak grade &mdash;
+    the first compound anybody can brew where getting both is the punishment
+    rather than the prize.
+</p>
+
+<h2 id="wild-negatives">An ordinary wild mare can hand you one</h2>
+
+<p>
+    The founder table spreads one fixed carrier share evenly across however many
+    brews the gene lists, so adding two did not make wild potion mares any
+    commoner &mdash; it made <em>each particular brew</em> rarer, and it put two
+    effects nobody wants into the pool a wild mare draws from. A wild mare found
+    in a meadow, with no connection to the Nether or to the Nightmare, can now
+    milk out weak Weakness or weak Darkness. It is not a defect and it is not
+    being fixed; it is written here because the horse gives no sign of it and the
+    only way to find out is to drink.
+</p>
+
 <h2 id="volume">How often</h2>
 
 <p>
@@ -106,6 +144,20 @@
     <span class="label">Everything else already exists</span>
     <p>
         <code>yield</code> already takes <code>consumes</code>, so <code>minecraft:glass_bottle</code> is expressible today. <code>minDose</code> already gates the stronger half on two copies &mdash; its javadoc names incomplete dominance as the reason it exists. And declaring <code>kind: potion</code> hands governance to <a href="gene-magic-milk-volume.html">milk volume</a> for free.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">The brew list is a divisor as well as a list</span>
+    <p>
+        The founder table is built as <code>double each = WILD_CARRIER_PERCENT / brews.size()</code>, with that same share given to every brew, so <strong>the length of the list is the wild rate of everything already in it</strong>. Appending is safe in the way <a href="gene-passification.html">passification</a>'s offering table is not &mdash; nothing here is an index the epigenome stores, so no existing horse is rewritten &mdash; but it is not free. The two brews added on 2026-09-25 diluted every brew that was already there, without a line changing anywhere near them. Quote <code>WILD_CARRIER_PERCENT</code> and <code>brews.size()</code> if you need the number; do not write it down.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Nothing here knows a curse from a blessing</span>
+    <p>
+        <code>Wkn</code> and <code>Drk</code> go through the same <code>bottle(...)</code> builder as every buff: the same <code>WEAK_DURATION</code> and <code>STRONG_DURATION</code>, the same <code>minDose</code> ladder, the same merge. So a matched <code>Wkn/Wkn</code> pair is a <em>stronger, longer</em> Weakness, and &ldquo;the clearest reason to double a brew line&rdquo; in the strong expression's own text is now written on two alleles where doubling is the opposite of a reward. That is the honest behaviour and it is deliberate &mdash; the gene has no opinion about which effects are nice &mdash; but it is the sort of sentence that reads as a bug when somebody meets it in play.
     </p>
 </div>
 
@@ -161,8 +213,45 @@
     <p>Potion milk&rsquo;s compound-heterozygote merge is now written &mdash;
     <code>GeneYieldHandler</code> collects every yield of one kind into one bottle &mdash; and nobody
     has ever bottled a two-effect mare to see it, which is the one outcome this page promises that
-    can silently be half delivered.</p>
+    can silently be half delivered; and since 2026-09-25 the locus can also hand back a
+    <em>curse</em>, which has been drunk by nobody at all &mdash; neither the Nightmare&rsquo;s
+    <code>Wkn/Drk</code> compound nor the wild single copy the diluted founder table now allows.</p>
 </div>
+
+<h3 id="negatives-0925">The first brews that hurt you (2026-09-25, NOT played)</h3>
+
+<p>
+    <code>Wkn</code> and <code>Drk</code> were added for the <a href="breeds.html">Nightmare</a>,
+    which pins them as a compound heterozygote. Both halves of that &mdash; a negative brew at all,
+    and two of them in one bottle &mdash; are new, and neither has been seen. This locus has no test
+    class of its own, only the suite-wide checks every registered gene gets, and
+    <code>BreedFilesTest</code> proves no more than that the Nightmare&rsquo;s file names a pair the
+    gene recognises. Nothing anywhere covers what arrives in the glass.
+</p>
+
+<ul>
+    <li><strong>A nightmare mare&rsquo;s bottle carries both curses, not one.</strong> Tame and grow a
+        <code>Wkn/Drk</code> mare to full health and bottle her. <strong>Pass:</strong> one potion
+        holding <em>both</em> Weakness and Darkness, each at the weak grade. <strong>Fail:</strong> a
+        single-effect potion &mdash; which is <a href="?view=coding#both">the merge</a> half-firing, and
+        is the same failure the <code>Spd/Str</code> check exists for, except that here it is even
+        easier to miss: nobody looks closely at a potion they did not want.</li>
+    <li><strong>Darkness actually resolves.</strong> <code>minecraft:darkness</code> is the newest of the
+        ids this gene names and the handler is written to log and skip an id the registry has never
+        heard of. <strong>Pass:</strong> the effect lands and the screen dims.
+        <strong>Fail:</strong> a potion holding only Weakness and a skipped-id line in the log, which
+        would look exactly like the merge failing and is not.</li>
+    <li><strong>A wild mare can roll one, and it is not a defect when she does.</strong> The founder
+        share is divided across the brew list, so Weakness and Darkness sit in the wild pool beside
+        the buffs. <strong>Pass:</strong> across a decent sample of wild expressing mares, a cursed
+        bottle turns up at about the rate any other single brew does.
+        <strong>Fail:</strong> never, which would mean the two new alleles are in the allele list but
+        not in the founder table.</li>
+    <li><strong>Doubling a curse makes it worse, as it is written to.</strong> Spawn a
+        <code>Wkn/Wkn</code> mare. <strong>Pass:</strong> one Weakness at the stronger grade and
+        roughly double the duration. This is the locus behaving correctly and reading like a bug; it
+        is here so that it is recognised as the former.</li>
+</ul>
 
 <h3 id="open-gene-potion-milk">Still open (NOT played)</h3>
 
@@ -214,6 +303,7 @@
         <a href="gene-milk.html">Milk</a>
         <a href="gene-magic-milk-volume.html">Magic milk volume</a>
         <a href="gene-lycan.html">Lycan</a>
+        <a href="breeds.html">Breeds</a>
         <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/PotionMilkGene.java</code>

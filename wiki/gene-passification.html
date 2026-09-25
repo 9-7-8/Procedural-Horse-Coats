@@ -47,6 +47,18 @@
     is the answer to it.
 </p>
 
+<p>
+    It is the answer to the opposite temperament too.
+    <a href="gene-skittish.html">Skittishness</a> produces a horse that runs from
+    every player it sees, and that is the same dead end reached from the other
+    side &mdash; you cannot get near it, so nothing that needs you near it can
+    happen. Since 2026-09-25 the veto covers fleeing as well as fighting, so one
+    offering answers both: the horse stops treating <em>you</em> as a threat,
+    whether the threat was one it meant to fight or one it meant to run from. It
+    still adds no aggression and no fear of its own, and it never changes a
+    horse's temperament toward anybody else.
+</p>
+
 <h2 id="what">The six ways in</h2>
 
 <table class="data">
@@ -93,11 +105,29 @@
 <h2 id="limits">What it does not do</h2>
 
 <p>
-    Passification is about <strong>targeting</strong>, and nothing else. A horse
-    with a damaging aura goes on damaging what stands near it; a player who walks
-    into one has not been betrayed by this gene. It is also
+    Passification is about <strong>how the horse treats you</strong> &mdash;
+    whether it comes for you and whether it runs from you &mdash; and nothing
+    else. A horse with a damaging aura goes on damaging what stands near it; a
+    player who walks into one has not been betrayed by this gene. Nor does it
+    make the animal brave: a calmed horse still bolts from fire, from freezing,
+    from a mob, and from any player who has not paid. It is
     <strong>per player</strong>: a horse you have calmed is still perfectly
-    willing to kill your friend.
+    willing to kill your friend, or to flee from them.
+</p>
+
+<h2 id="offering-pool">Two of the fourteen offerings are not overworld food</h2>
+
+<p>
+    The list a horse may ask from grew on 2026-09-25, when the
+    <a href="breeds.html">Netherhorse and the Nightmare</a> needed nether wart
+    and cake. Adding to that list is the only safe way to change it &mdash; see
+    the Coding tab &mdash; but it is not free, because a wild horse rolls its
+    offering uniformly across <em>the whole list</em>. So roughly
+    <strong>one passifiable wild horse in seven</strong> now asks for nether wart
+    or cake rather than something you can grow, and a horse that wants nether
+    wart is one you cannot buy off until you have been to the Nether. That is the
+    owner's call and it stands; it is written here because nothing in the game
+    says it.
 </p>
 
 </section>
@@ -116,14 +146,27 @@
 <div class="note danger">
     <span class="label">The veto has to be asked at every chokepoint, not unpicked afterwards</span>
     <p>
-        &ldquo;Will not select the player as a target <em>for any reason</em>&rdquo; only means something if each reason asks. <code>Passification.suppresses</code> is consulted in four places: the <code>temper</code> verb, <code>HorseAggroHandler.aggro</code> (hit-it-and-its-herd), <code>HerdGoals</code> (a dam defending her foal) and <code>GeneReactionHandler</code> (guardian's retaliation). <strong>A gene added later that targets a player and does not ask here is a bug in that gene.</strong>
+        &ldquo;Will not select the player as a target <em>for any reason</em>&rdquo; only means something if each reason asks. <code>Passification.suppresses</code> is consulted in five places: the <code>temper</code> verb's attacking mood, <code>GeneAbilityHandler.flee</code> (the same verb's fleeing mood), <code>HorseAggroHandler.aggro</code> (hit-it-and-its-herd), <code>HerdGoals</code> (a dam defending her foal) and <code>GeneReactionHandler</code> (guardian's retaliation). <strong>A gene added later that targets a player and does not ask here is a bug in that gene.</strong>
+    </p>
+    <p>
+        <code>flee</code> was the fifth, and it was missing for eight days after this box was written promising there were no more &mdash; the box was right about the principle and wrong about the count, which is the failure mode it exists to warn about. It went unnoticed because no breed pinned a skittish allele until the Nightmare did, so no horse had ever been both calmable and frightened at once.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">A flee is a path already issued, so the veto alone does not stop one</span>
+    <p>
+        The other four chokepoints guard a <em>target</em>, which is re-read every tick, so dropping it is enough. <code>flee</code> issues a <code>moveTo</code> <code>FLEE_DISTANCE</code> blocks away and only re-picks on the temper beat, so a horse calmed mid-flight would run the leg out and only then turn round. <code>Passification.forget</code> therefore calls <code>GeneAbilityHandler.stopFleeingFrom</code>, which drops the <code>FLEEING</code> entry <em>only</em> when it is keyed to that player &mdash; a horse running from two people is still running from the other one and re-picks it on the next beat. <code>flee</code>'s own no-candidate path stops the navigation too, but likewise only when it was the thing that started it: stopping unconditionally every beat would cut the legs off whatever goal has the navigation instead, <code>FoodTemptGoal</code> walking a calmed horse back over most of all.
     </p>
 </div>
 
 <div class="note danger">
     <span class="label">The item is an index, so the table may only grow at the end</span>
     <p>
-        The epigenome stores numbers, so &ldquo;the item this horse wants&rdquo; can only ever be a position in a list the gene owns (<code>PassificationGene.OFFERINGS</code>). Appending is free. <strong>Re-ordering it silently changes what every existing horse in every save is asking for</strong>, and nothing will tell you.
+        The epigenome stores numbers, so &ldquo;the item this horse wants&rdquo; can only ever be a position in a list the gene owns (<code>PassificationGene.OFFERINGS</code>). Appending is the only safe edit. <strong>Re-ordering it silently changes what every existing horse in every save is asking for</strong>, and nothing will tell you.
+    </p>
+    <p>
+        Appending is <em>safe</em>, not <em>free</em>. The schema is <code>EpiValue.category(ITEM, OFFERINGS.size())</code> and <code>EpiRoll</code> rolls <code>rng.nextInt((int) v.max())</code>, so the length of the list is the width of the wild roll: every entry added is an entry wild founders start asking for. The Netherhorse's own file claimed the opposite when it added two &mdash; that &ldquo;every wild horse still only ever rolls the first twelve entries&rdquo; &mdash; which was wrong, and is the reason a breed that only wants a band on <em>itself</em> still has to think about the whole population. <code>PotionMilkGene</code> has the same shape by a different route: it spreads a fixed <code>WILD_CARRIER_PERCENT</code> across however many brews exist, so appending dilutes every existing one.
     </p>
 </div>
 
@@ -182,13 +225,27 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A pacified horse must drop <em>you</em> as a target mid-charge and nobody else, and the veto has to hold at <strong>all four chokepoints</strong> &mdash; aggro, herd alert, dam defence, guardian &mdash; with temporary routes expiring and re-buyable and foal-only ones refusing an adult.</p>
+    <p>A pacified horse must drop <em>you</em> as a target mid-charge and nobody else, and the veto has to hold at <strong>all five chokepoints</strong> &mdash; aggro, flee, herd alert, dam defence, guardian &mdash; with temporary routes expiring and re-buyable, foal-only ones refusing an adult, and nether wart and cake really reachable as offerings.</p>
 </div>
+
+<h3 id="flee-veto-0925">The veto now covers fleeing (2026-09-25, NOT played)</h3>
+<p>Written for the Nightmare, which is the first horse that has ever been both frightened of you and calmable. Nothing here has been watched happening.</p>
+<ul>
+    <li><strong>A calmed player stops being a reason to run.</strong> <strong>Pass:</strong> a horse with a skittish allele that names players flees you; you feed it its offering; it stops fleeing you and does not pick you again. <strong>Fail:</strong> it keeps running, or it stops fleeing <em>everything</em> &mdash; a second, unpaid player must still set it off, and so must a mob.</li>
+    <li><strong>The leg already issued is dropped, not walked out.</strong> This is the half that is easy to get wrong and easy to misread as working, because the horse does turn round eventually either way. <strong>Pass:</strong> pay it <em>while it is running</em> and it stops where it stands. <strong>Fail:</strong> it carries on to roughly twelve blocks away first. Watch the feet, not the eventual position.</li>
+    <li><strong>Environmental panic is untouched.</strong> <strong>Pass:</strong> a fully calmed horse still runs from fire and from freezing. If it stands in a fire it is not this change working, it is this change having taken too much.</li>
+    <li><strong>The tempt lure gets you within reach at all.</strong> A skittish horse flees at 16 blocks; <code>FoodTemptGoal</code> notices a passification offering at 20 and re-issues its path every tick against the flee's every twenty, so on paper the lure wins. <strong>Pass:</strong> holding cake, an untamed Nightmare closes on you instead of retreating. <strong>Fail:</strong> it oscillates, or drifts away slowly &mdash; either means the two paths are fighting and the arithmetic above is wrong somewhere.</li>
+</ul>
+
+<h3 id="offerings-0925">Nether wart and cake joined the wild roll (2026-09-25, NOT played)</h3>
+<ul>
+    <li><strong>A wild horse can now ask for either.</strong> Not a defect &mdash; see <a href="#offering-pool">the Gameplay tab</a> &mdash; but unmeasured. <strong>Pass:</strong> across a decent sample of wild passifiable horses, nether wart and cake come up at about the same rate as apples, and feeding them works exactly like any other offering. <strong>Fail:</strong> an offering nothing can satisfy, or a horse that takes the item and never settles.</li>
+</ul>
 
 <h3 id="open-older-gene-passification">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>Passification, and its veto</strong> (a horse carrying <code>Prm</code> or <code>Tmp</code> and an aggression allele that names players). <strong>Pass:</strong> feeding it what it asks for, as many as it asks for, stops it targeting <em>you</em> and nobody else; it drops you as a target mid-charge rather than at its next scan. Then check the veto at all four chokepoints: hit it (aggro), hit it beside its herd (herd alert), let something hurt its foal (dam defence), and hurt its owner if it is a guardian. A temporary route must expire and be re-buyable after its cooldown; a foal-only route must refuse an adult.</li>
+    <li><strong>Passification, and its veto</strong> (a horse carrying <code>Prm</code> or <code>Tmp</code> and an aggression allele that names players). <strong>Pass:</strong> feeding it what it asks for, as many as it asks for, stops it targeting <em>you</em> and nobody else; it drops you as a target mid-charge rather than at its next scan. Then check the veto at the four targeting chokepoints (the fifth, fleeing, is above): hit it (aggro), hit it beside its herd (herd alert), let something hurt its foal (dam defence), and hurt its owner if it is a guardian. A temporary route must expire and be re-buyable after its cooldown; a foal-only route must refuse an adult.</li>
 </ul>
 
 </section>

@@ -28,6 +28,7 @@ wiki/body-space.html#local-frame	all	Asking a part what shape it is
 wiki/body-space.html#stripe-fields	all	Three stripe fields, and why they are three
 wiki/body-space.html#vanilla-model	all	The vanilla model underneath
 wiki/body-space.html#verified	all	Verified
+wiki/breed-book.html#burning	all	The burning country
 wiki/breed-book.html#cold	all	The cold country
 wiki/breed-book.html#desert	all	The dry country
 wiki/breed-book.html#elsewhere	all	The country that is nowhere
@@ -1912,6 +1913,7 @@ wiki/gene-passification.html#bargain	science	A bargain, not a switch
 wiki/gene-passification.html#dominance	gameplay	One copy is enough, and two different ones stack
 wiki/gene-passification.html#limits	gameplay	What it does not do
 wiki/gene-passification.html#offering	gameplay	What it wants is written on the horse
+wiki/gene-passification.html#offering-pool	gameplay	Two of the fourteen offerings are not overworld food
 wiki/gene-passification.html#perplayer	science	Why the calm is per player
 wiki/gene-passification.html#priority	coding	“Extremely high priority” is not the priority number
 wiki/gene-passification.html#split	coding	Why it is not an effect verb
@@ -1987,9 +1989,11 @@ wiki/gene-polymoon.html#outcomes	gameplay	What it can come out as
 wiki/gene-potion-milk.html#both	coding	Why the compound gives both
 wiki/gene-potion-milk.html#dose	science	Incomplete dominance without an expression language
 wiki/gene-potion-milk.html#health	gameplay	Health
+wiki/gene-potion-milk.html#negatives	gameplay	Two of the brews are not a gift
 wiki/gene-potion-milk.html#separate	coding	Two milk loci, deliberately
 wiki/gene-potion-milk.html#volume	gameplay	How often
 wiki/gene-potion-milk.html#what	gameplay	What it does
+wiki/gene-potion-milk.html#wild-negatives	gameplay	An ordinary wild mare can hand you one
 wiki/gene-ppib.html#at-a-glance	science	At a glance
 wiki/gene-ppib.html#beyond-skin	science	Beyond the skin, where the evidence thins
 wiki/gene-ppib.html#breeds	science	Breeds and prevalence
@@ -2248,6 +2252,7 @@ wiki/gene-skittish.html#health	gameplay	Health
 wiki/gene-skittish.html#path	coding	There is no vanilla avoid-goal to borrow
 wiki/gene-skittish.html#riding	gameplay	It does not stop when you get on
 wiki/gene-skittish.html#split	science	Fear is not negative aggression
+wiki/gene-skittish.html#taming	gameplay	If it runs from you, you may not be able to keep it either
 wiki/gene-skittish.html#verified	coding	Verified
 wiki/gene-skittish.html#what	gameplay	The grid
 wiki/gene-skittish.html#worst	gameplay	The one that is genuinely hard to keep

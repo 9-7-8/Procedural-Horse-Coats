@@ -2,4 +2,4 @@ Aggression
 (Magical gene / no coat effect)
 What a horse attacks, and when. One locus, one grid: a time of day crossed with what it goes for . Being in the saddle is not protection — a horse that hunts riders throws you off first.
 
-Magical gene / no coat effect Aggression What a horse attacks, and when. One locus, one grid: a time of day crossed with what it goes for . Being in the saddle is not protection — a horse that hunts riders throws you off first. Skittishness Passification Guardian Magic fighter What to check in-game Source: common/genetics/genes/AggressionGene.java
+Magical gene / no coat effect Aggression What a horse attacks, and when. One locus, one grid: a time of day crossed with what it goes for . Being in the saddle is not protection — a horse that hunts riders throws you off first. Skittishness Passification Guardian Magic fighter Breeds What to check in-game Source: common/genetics/genes/AggressionGene.java

@@ -1,0 +1,198 @@
+2026-09-25 — two Nether breeds arrived from somewhere else, and were checked rather than trusted
+
+    The ask was not "build something". It was:
+
+        I had copilot implement two breeds. Can you pull those, look at its
+        justification in intake, and make sure it did everything correctly?
+
+    So this is a review session, and the interesting thing about it is the shape of
+    what was wrong. The genetics — the part that looks hardest, and the part a
+    reviewer is most tempted to skim because it is 260 lines of JSON — were right.
+    Everything around the genetics was where the misses were.
+
+    Commit ac342df5 was the work under review. b886e6ed is the repair; this file and
+    the commit after it are the documentation that should have come with it.
+
+
+WHAT ARRIVED
+
+    Two magical breeds, deliberately built as a pair.
+
+    The Netherhorse is a liver-bay tank for the Nether floor: nearly twice the size
+    and health of an ordinary horse, slow, no jumper, fireproof, millable for lava,
+    and hunting everything that comes near it — its own owner included, even once
+    tamed. Feed a grown one nether wart and it stops seeing you as prey. A foal
+    cannot be talked down at all.
+
+    The Nightmare is the same liver-bay base and nothing else the same: hand-sized,
+    true-flying, fleeing everything alive on sight, unable to fight at all. Cake
+    draws it in and buys it permanently, at any age. Milk it and the bottle comes
+    back carrying Weakness and Darkness at once.
+
+    They share the molten-hooves locus at the same pair, banded red on one and gold
+    on the other, so the two breeds' glowing hoofprints read as a matched set from a
+    distance. That is a nice piece of design and it survived review untouched.
+
+    Alongside them: two new passification offerings (nether wart, cake), two new
+    potion-milk brews (Weakness, Darkness), and a fix to the passification veto so a
+    calmed player stops being a reason to run.
+
+
+WHAT WAS RIGHT, AND HOW THAT WAS ESTABLISHED
+
+    Every gene key, allele token and band key in both files resolves. That was
+    checked by hand against the Java and the spec genes rather than assumed —
+    `Aaa` and `Faa` are assembled from a prefix and a suffix rather than written
+    anywhere as literals, and `MltC`, `Tf`, `Rflm`, `Cha`, `Glo`, `Mnsld` and
+    `Tlsld` all had to be found individually. Every banded range sits inside its
+    knob's declared range. The offering indices 12 and 13 really are nether wart and
+    cake, and appending rather than inserting was the right call.
+
+    The strongest single piece of evidence was one the review nearly talked itself
+    out of needing: BreedFilesTest's first case is
+    `everyShippedFileLoadsWithNoErrorsAndNoWarnings`, and the breed parser *warns*
+    rather than throws on an unknown gene key or an unknown epi name. So the test
+    being green is not merely "it parsed" — it is "nothing in either file was
+    quietly skipped". Worth remembering: the parser's leniency is not a hole,
+    because the test closes it.
+
+    The one piece of integration that could have been badly wrong and was not: the
+    Nightmare has to be lured with cake while fleeing everything on sight, and those
+    are two systems commanding the same navigation. FoodTemptGoal notices a
+    passification offering at radius 20 and re-issues its path every tick;
+    GeneAbilityHandler's flee works at radius 16 and re-picks every twenty ticks.
+    The lure wins on both counts. That is not luck — it is the numbers happening to
+    be right — but it was not reasoned about anywhere in the handover, so it was
+    reasoned about here instead, and it is now written on the passification page's
+    Verification tab as the first thing to watch.
+
+
+THE FIVE THINGS THAT WERE WRONG
+
+    Two derived artefacts left stale, which is the failure this repo is most prone to
+    and the reason the Build & test table in CLAUDE.md is as long as it is.
+
+      - coat-bake-golden.txt never gained the two new potion-milk alleles, so
+        CoatBakeGoldenTest was red on main. Two rows, both hashing identically to
+        every other allele of a gene that paints nothing. Trivial — and red is red.
+
+      - web.wasm was never rebuilt after common/ changed, so the horse designer was
+        serving genetics from before Weakness and Darkness existed. A real 212-byte
+        change, not build noise. The tell is exactly the one CLAUDE.md names: a git
+        status showing common/ changed and wiki/horse-designer/wasm/ unchanged.
+
+    A half-implemented fix. The intake file asked for two things and got one.
+    `GeneAbilityHandler.flee` now asks `Passification.suppresses`, which stops the
+    horse *choosing* you again — but a flee is not a target. A target is re-read
+    every tick, so dropping it is enough; a flee is a `moveTo` twelve blocks away,
+    already issued, and it runs itself out regardless of whether the reason still
+    stands. So the Nightmare you had just paid in cake walked twelve blocks off
+    before turning round, which is not what "it stops the moment you pay" means to
+    anybody watching. `Passification.forget` now calls a new
+    `GeneAbilityHandler.stopFleeingFrom`, keyed to that player only.
+
+    That method is more careful than it looks, in two ways, and both were nearly got
+    wrong. It drops only the entry keyed to the player who paid — a horse running
+    from two people is still running from the other one, and picks it up on the next
+    beat rather than being told here where to go. And flee's own no-candidate path
+    stops the navigation *only when it was the thing that started it*: stopping
+    unconditionally every beat would cut the legs off whatever goal holds the
+    navigation instead, which on this breed is FoodTemptGoal walking a calmed horse
+    back over — the exact loop the fix exists to make work.
+
+    A false statement in shipped prose. netherhorse.json's own note said adding
+    nether wart "does not change what any existing horse wants", and that wild
+    horses "still only ever roll the first twelve entries". Neither is true. The
+    schema is `EpiValue.category(ITEM, OFFERINGS.size())` and EpiRoll takes
+    `rng.nextInt((int) v.max())`, so the length of the list *is* the width of the
+    wild roll. Roughly one passifiable wild horse in seven now asks for nether wart
+    or cake rather than a food you can grow, and a horse that wants nether wart is
+    one you cannot buy off until you have been to the Nether.
+
+    PotionMilkGene has the same shape by a different route. Its founder table
+    spreads a fixed WILD_CARRIER_PERCENT across however many brews exist, so
+    appending two dropped every existing brew's wild rate and put the locus's first
+    two *negative* effects into the wild population. Ordinary wild mares can now
+    hand back Weakness and Darkness milk.
+
+    Both were put to the owner with options. Both stand: "fine — just document it".
+    So they are documented, on gene-passification.html and gene-potion-milk.html,
+    and the breed file's note now says what the code does instead of the opposite.
+
+    This is the general lesson and it is not about this breed. A breed file looks
+    like a thing that only configures itself. Two of its lines reached out and
+    changed the wild population, and the author noticed neither — and then wrote a
+    confident sentence saying they had not. A claim about blast radius in a handover
+    note is a claim to check, not a claim to read.
+
+    A band that could not draw. nightmare.json banded emberveins' `hue` to 0–10,
+    with a note explaining that this reads redder and less orange than the gene's
+    full range. The `hue` knob is read only by the rust expression, `Emr/Emr`; the
+    glowing expression the breed actually carries, `Emb/Emb`, paints fixed hex and
+    never looks at it. So the band stored and inherited a number nothing on that
+    horse could draw, and the note described a difference that would not appear.
+    Removed, and the note now says why the two breeds' veins look the same.
+
+    Nothing about this was catchable by any tool in the repo: the gene key is real,
+    the knob name is real, the range is legal. It needed reading the gene's spec to
+    the end. Worth a thought if a "band is inert for this expression" check is ever
+    cheap to write.
+
+
+PROCESS, WHICH WAS THE OTHER HALF OF IT
+
+    The commit shipped no hand-written wiki prose at all — the two breeds appeared
+    in exactly two files under wiki/, and both are baked. Meanwhile 66 lines of
+    design rationale were appended to intake/Implementation advice.txt, which is
+    precisely backwards: intake is the inbox, it is meant to empty, and the wiki is
+    the source of truth. That content is now on the pages it belongs to, and the
+    appended block is gone.
+
+    intake/Passification fleeing.txt is deleted rather than marked done, per START
+    HERE step 3, now that both its required behaviours exist.
+
+    Pages that were actively *wrong* rather than merely silent, which is the worse
+    half of no-documentation:
+
+      - gene-passification.html promised the veto was asked at "four chokepoints".
+        Flee is the fifth. The box making that promise was right about the principle
+        and wrong about the count — which is the failure mode it exists to warn
+        about, sitting there for eight days.
+
+      - the same page's "What it does not do" said "Passification is about
+        targeting, and nothing else". The Java class doc was rewritten in the very
+        same commit to say the opposite.
+
+      - horse-care.html's tempt section said what counts as edible is genetic and
+        "a carnivore does not come over for a carrot". A passification offering is
+        now a favourite-tier lure whatever the diet says.
+
+      - breeds.html's "carries neither tolerance locus" sentence was stale again —
+        the identical defect the Enderpony session had to fix for Cloudtouched, on
+        the identical sentence, five days later. Twice is a pattern. If a third
+        breed lands without it, that sentence should be generated.
+
+
+WHAT IS NEWLY WAITING
+
+    Everything about both breeds, and both of the things they changed underneath
+    themselves. None of it has been in front of a player. The Verification tabs to
+    read, in the order the risk sits:
+
+      - gene-passification.html — the flee veto, the leg-drop (watch the feet, not
+        the eventual position), the tempt lure against the flee, and the two new
+        offerings appearing wild.
+      - breeds.html — the two breeds themselves, and the first-of-kind band
+        treatments: eye_chaos_* banded toward a colour, two different molten-hoof
+        colour bands, and the first breed pools ever to pin aggression,
+        skittishness, flying, milk or potion milk.
+      - gene-potion-milk.html — a compound of two negative brews has never been
+        drunk, and neither has a wild negative roll.
+      - gene-skittish.html and gene-aggression.html — the first horse that is both
+        frightened and calmable, and the first that attacks its own owner while
+        being ridden.
+
+    Neither breed has a dedicated test. The precedent says it should: the Dhampir
+    shipped with a 160-line DhampirBreedTest asserting its founders come out as
+    intended, and these two pin more loci than it does. Not written this session,
+    and worth being the next thing.

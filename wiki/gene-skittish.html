@@ -77,6 +77,44 @@
     simply own a horse that is only yours for half of each day.
 </p>
 
+<h2 id="taming">If it runs from you, you may not be able to keep it either</h2>
+
+<p>
+    A wild horse that flees every player it sees cannot be approached, so it
+    cannot be fed, so it cannot be tamed. That is the same dead end
+    <a href="gene-aggression.html#taming">aggression</a> reaches, walked from the
+    other side: the hunting horse will not let you near it because it is coming
+    for you, and this one will not let you near it because it is going the other
+    way, and neither can be caught. The way in is the same.
+    <a href="gene-passification.html">Passification</a> is a separate locus that
+    says what you can <em>offer</em> the animal, and since 2026-09-25 its veto
+    covers fleeing as well as fighting &mdash; pay a shy horse what it asks and
+    you stop being a reason to run, while everyone and everything else still is.
+    A horse with an <code>Fap</code> or <code>Faa</code> pair and no passification
+    allele is, in practice, a horse nobody will ever touch.
+</p>
+
+<p>
+    That combination has only just become possible to meet. The
+    <a href="breeds.html">Nightmare</a>, added on 2026-09-25, is the
+    <strong>first breed ever to pin this locus</strong> &mdash; <code>Faa/Faa</code>,
+    flees everything, always &mdash; and it carries <code>Prm/Prm</code> beside it,
+    so it is also the first horse in the mod that is frightened of you and
+    buyable at the same time. Until then every shy horse was a wild roll, and
+    nobody had bred one that had a way in; which is exactly why the flee half of
+    the veto was missing for eight days and nothing noticed.
+</p>
+
+<p>
+    Getting close enough to hand it the offering in the first place is the
+    <a href="horse-care.html#food-tempt">tempt goal</a>'s job: an item that is a
+    live passification route counts as a <em>favourite</em> whatever the horse
+    eats, which means the wider notice radius and a gallop rather than a drift.
+    The arithmetic is meant to beat the flee &mdash; the lure is noticed further
+    off than a shy horse's flee radius and re-issues its path every tick, where a
+    flee only re-picks on its beat &mdash; and it has never been watched doing so.
+</p>
+
 <h2 id="health">Health</h2>
 
 <p>
@@ -123,6 +161,26 @@
     the only thing that tells them apart.
 </p>
 
+<p>
+    The candidate predicate is not only <code>MobGroups.matches</code>. Since
+    2026-09-25 it also asks <code>!Passification.suppresses(horse, c)</code>, so a
+    player who has paid this horse is filtered out before the nearest match is
+    picked and cannot be the thing it runs from.
+    <a href="gene-passification.html">Passification</a> counts its chokepoints,
+    and <code>flee</code> is the fifth &mdash; it was missing while that page
+    promised there were four, which is worth knowing before adding a sixth.
+</p>
+
+<div class="note danger">
+    <span class="label">Dropping the reason is not enough here, because the leg is already issued</span>
+    <p>
+        Every other chokepoint guards a <em>target</em>, which is re-read each tick, so forgetting it is the whole fix. This one issues a <code>moveTo</code> <code>FLEE_DISTANCE</code> blocks away and only re-picks on the temper beat, so a horse calmed mid-flight would run the leg out and turn round at the far end &mdash; which looks, from across a paddock, almost exactly like it working. <code>Passification.forget</code> therefore calls <code>GeneAbilityHandler.stopFleeingFrom</code>, which stops the navigation <strong>only</strong> if the <code>FLEEING</code> entry it removes was keyed to that player: a horse running from two people is still running from the other one and re-picks it on the next beat.
+    </p>
+    <p>
+        <code>flee</code>'s own no-candidate branch stops the navigation on the same condition rather than unconditionally, and the condition is the point. Stopping every beat that finds nothing to run from would cut the legs off whichever goal has the navigation instead &mdash; <code>FoodTemptGoal</code> walking a calmed horse back over, most of all, which is the exact behaviour this change exists to allow.
+    </p>
+</div>
+
 <h3 id="verified">Verified</h3>
 
 <p id="verified-night-shy">
@@ -166,8 +224,37 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Gap 241 re-asked, after the equine exclusion moved into <code>MobGroups</code> and fleeing moved onto the shared <code>temper</code> verb: a <code>Fnc/Fnc</code> horse must flee <code>minecraft:cow</code> and never its own band &mdash; and a <strong>silent no-op</strong> is the failure to watch for.</p>
+    <p>Gap 241 re-asked, after the equine exclusion moved into <code>MobGroups</code> and fleeing moved onto the shared <code>temper</code> verb: a <code>Fnc/Fnc</code> horse must flee <code>minecraft:cow</code> and never its own band &mdash; and a <strong>silent no-op</strong> is the failure to watch for; and since 2026-09-25 a horse that has been paid must stop running from <em>that</em> player and nobody else, dropping the leg it is already on rather than walking it out.</p>
 </div>
+
+<h3 id="calmable-0925">A shy horse can now be bought off (2026-09-25, NOT played)</h3>
+
+<p>
+    The <a href="breeds.html">Nightmare</a> is the first breed to pin this locus, and the first
+    horse that is frightened of you and calmable at once &mdash; which is what turned up the
+    missing veto. The checks that belong to the veto itself are on
+    <a href="gene-passification.html#flee-veto-0925">passification's tab</a> and are not repeated
+    here; these are the ones about the <em>shy</em> half.
+</p>
+
+<ul>
+    <li><strong>The filter narrows the flee and does not empty it.</strong>
+        <strong>Pass:</strong> a calmed <code>Faa/Faa</code> horse stands its ground for you and
+        still bolts from a cow, a zombie and a second, unpaid player.
+        <strong>Fail:</strong> it stops fleeing everything, which would mean
+        <code>Passification.suppresses</code> is answering true for something that is not the
+        player who paid &mdash; and an <code>Faa/Faa</code> horse that has stopped running is
+        indistinguishable from one whose gene never loaded.</li>
+    <li><strong>The trace still fires on a change of quarry only.</strong> A horse calmed and then
+        set off again by something else should write one new <code>flee | ...</code> line, not a
+        line a beat. <strong>Fail:</strong> a wall of lines, meaning the <code>FLEEING</code>
+        entry is being removed and re-put every beat rather than held.</li>
+    <li><strong>An untamed shy horse can be reached at all.</strong> Hold its offering and stand
+        still. <strong>Pass:</strong> it comes at a gallop from further off than it flees.
+        <strong>Fail:</strong> it oscillates, or drifts slowly away &mdash; the tempt path and the
+        flee path fighting, which is the one outcome the radii are supposed to prevent and nothing
+        has measured.</li>
+</ul>
 
 <h3 id="open-older-gene-skittish">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
@@ -182,6 +269,7 @@
         <a href="gene-aggression.html">Aggression</a>
         <a href="gene-passification.html">Passification</a>
         <a href="gene-magic-night-watch.html">Magic night watch</a>
+        <a href="horse-care.html#food-tempt">Coming to food</a>
         <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/SkittishGene.java</code>
