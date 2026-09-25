@@ -1,0 +1,38 @@
+2026-09-24 — 0.5.024, cut over a day that had already shipped one release
+
+    Released as 0.5.024: horse stasis whole, the Log tab, bond decay, the
+    configurable crowding cap, the Enderpony, and the three deletions. Thirty-one
+    commits, all of them from the same day — 0.5.023 went out at 11:34 and this
+    one at 20:21, which is the widest range a release here has covered in nine
+    hours.
+
+    The audit is the work. The rule is that a release note covers the whole tag
+    range rather than the tagging session's own changes, and this session wrote no
+    code at all: everything in the note came out of reading thirty-one commit
+    bodies. That is worth saying plainly because the temptation at tag time is to
+    write up whatever is freshest in the conversation, and the freshest thing here
+    was the Cloudtouched commonness row — a two-line change sitting at the top of a
+    log whose actual headline was an entire storage feature six stages deep.
+
+    Nothing was trusted from a commit message. Each commit in the range claims its
+    own tests were green, and several claim the gametests specifically. Those claims
+    were re-run rather than quoted: :neoforge-26.1.2:build, all nine gametests
+    (1,648 recipes encoding for the join packet), a dedicated server to Done, and
+    check-parity at 7,163 checks across 60 cases. The jar's own
+    META-INF/neoforge.mods.toml was read back as 0.5.024 rather than inferred from
+    the filename, and the jar was opened to confirm enderpony.json is actually
+    inside it — the breed shipped hours earlier and a stale :common jar would have
+    been invisible otherwise.
+
+    The server-log grep matters more than the boot. Done() is not a clean boot;
+    the log was grepped for ERROR and FATAL and came back with none, and the only
+    horsegenetics WARN is the dev-environment refmap line. The port was moved to
+    25566 for the run because the owner's own server holds 25565, and moved back
+    afterwards — which means the next runServer on this box will fail to bind again
+    while that server is up. Left as found deliberately rather than quietly
+    re-pointing the owner's dev environment.
+
+    The release body carries the two removals in a box of their own. The
+    exploding allele and the fifteen lycan shapes are the only things in the range
+    that take something away from a world already running, so they are called out
+    rather than left as bullets among the additions.
