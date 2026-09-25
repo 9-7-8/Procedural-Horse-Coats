@@ -121,7 +121,7 @@ public final class TicketHandler {
                     + "that the stall is still closed in, and that it is big enough for this horse.");
             return;
         }
-        arrive(level, target, horse, landing);
+        arrive(level, target, horse, landing, player);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
@@ -175,7 +175,7 @@ public final class TicketHandler {
                     + "that the pen has a floor and two blocks of headroom.");
             return;
         }
-        arrive(level, target, horse, landing);
+        arrive(level, target, horse, landing, player);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
@@ -184,14 +184,21 @@ public final class TicketHandler {
         HorseProgress.complete(player, ProgressTask.USE_PEN_TICKET);
     }
 
-    /** Move the horse, with a puff and a sound at both ends so the player sees it go. */
-    private static void arrive(ServerLevel from, ServerLevel target, Horse horse, Vec3 landing) {
+    /**
+     * Move the horse, with a puff and a sound at both ends so the player sees it go.
+     *
+     * <p>{@code player} is here only to be handed the lead: an interdimensional
+     * ticket on a leashed horse used to leave the lead in the dimension it
+     * started in. See {@link HorseLeads}.
+     */
+    private static void arrive(ServerLevel from, ServerLevel target, Horse horse, Vec3 landing,
+                               Player player) {
         from.sendParticles(ParticleTypes.PORTAL, horse.getX(), horse.getY() + 0.8, horse.getZ(),
                 24, 0.4, 0.6, 0.4, 0.2);
         from.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.ENDERMAN_TELEPORT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
-        horse.dropLeash();
+        HorseLeads.untieFor(horse, player);
         horse.teleportTo(target, landing.x, landing.y, landing.z,
                 Set.of(), horse.getYRot(), horse.getXRot(), false);
 

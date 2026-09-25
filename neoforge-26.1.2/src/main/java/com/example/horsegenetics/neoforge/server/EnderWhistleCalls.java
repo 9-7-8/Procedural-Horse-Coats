@@ -207,9 +207,7 @@ public final class EnderWhistleCalls {
         if (horse == player.getVehicle()) {
             return;     // already under you
         }
-        if (horse.isLeashed()) {
-            horse.dropLeash();
-        }
+        HorseLeads.untieFor(horse, player);
         horse.getNavigation().stop();
 
         ServerLevel from = (ServerLevel) horse.level();

@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
+import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
 import net.minecraft.core.BlockPos;
@@ -450,6 +451,75 @@ public final class ModGameTests {
         register(event, environment, STASIS_TAG_IS_READABLE, 100);
         // Three codec round trips in one tick.
         register(event, environment, OLD_PAPERS_STILL_READ, 100);
+        // Leash, untie, then five ticks for a ground drop to become visible.
+        register(event, environment, WHISTLED_LEAD_COMES_BACK, 100);
+    }
+
+    /**
+     * <b>A lead survives the horse being whistled out from under it.</b>
+     *
+     * <p>Every path in this mod that teleports a horse has to untie it first, and
+     * vanilla's {@code dropLeash()} does that by dropping an {@code Items.LEAD}
+     * <i>where the horse was standing</i> - which for an ender whistle or an
+     * interdimensional ticket is a different dimension, where it is simply gone.
+     * {@link HorseLeads#untieFor} hands it to the player who caused the move
+     * instead; see {@code behaviour.leads_return}.
+     *
+     * <p><b>Here rather than in JUnit</b> for the usual reason: the NeoForge
+     * module's test classpath carries no Minecraft, and the whole assertion is
+     * about a real {@code Leashable}, a real inventory and whether an
+     * {@code ItemEntity} appeared in a real level.
+     *
+     * <p>It asserts the two halves separately, because passing one and failing
+     * the other is the shape of the bug: <b>no lead on the ground</b> (the leak
+     * this closes) and <b>a lead in the player's pack</b> (that it went
+     * somewhere rather than nowhere). Getting only the first would be worse than
+     * the behaviour it replaced.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WHISTLED_LEAD_COMES_BACK =
+            TEST_FUNCTIONS.register("whistled_lead_comes_back", () -> ModGameTests::whistledLeadComesBack);
+
+    private static void whistledLeadComesBack(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.leadsReturn()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.leads_return is off in this run's server config, so this test"
+                            + " asserts the wrong branch - turn it back on rather than deleting"
+                            + " the test"), 0);
+        }
+        // Not makeMockServerPlayerInLevel(): that one is @Deprecated(forRemoval)
+        // and really joins the player list. A leash holder needs to be an Entity
+        // and nothing more - Leashable.setLeashedTo never asks whether it is in
+        // the level - and this player's inventory is a real one.
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setLeashedTo(player, true);
+        if (!horse.isLeashed()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse would not take a leash at all - this test's premise is"
+                            + " broken, not HorseLeads"), 0);
+        }
+
+        HorseLeads.untieFor(horse, player);
+
+        if (horse.isLeashed()) {
+            throw new GameTestAssertException(Component.literal(
+                    "HorseLeads.untieFor left the horse leashed - a teleport would drag the"
+                            + " leash to a holder that is no longer anywhere near it"), 0);
+        }
+        if (!player.getInventory().contains(st -> st.is(Items.LEAD))) {
+            throw new GameTestAssertException(Component.literal(
+                    "the lead did not reach the player who whistled - it has been destroyed"
+                            + " rather than returned"), 0);
+        }
+        // Five ticks, because a spawnAtLocation on the tick under test would not
+        // necessarily be findable on that same tick - and this assertion is the
+        // one that passes wrongly if it is asked too early.
+        helper.runAfterDelay(5L, () -> {
+            helper.assertItemEntityNotPresent(Items.LEAD, BlockPos.ZERO, 16.0);
+            helper.succeed();
+        });
     }
 
     /**

@@ -173,6 +173,15 @@ public final class HorseBrowserScreen extends Screen {
      * a square cell either cropped the animal at the shoulders or shrank it
      * until the markings the gene exists to show were three pixels across.
      */
+    /**
+     * How long an automatic roster refresh waits after the last one, in
+     * milliseconds. Static, so it survives the screen being closed and reopened
+     * - which is exactly the gesture it is there to soak up. See
+     * {@link #requestRosterUnlessJustAsked()}.
+     */
+    private static final long ROSTER_REFRESH_COOLDOWN_MS = 2000L;
+    private static long lastRosterRequest;
+
     private static final int PREVIEW_W = 62;
     private static final int PREVIEW_H = 46;
     /** The sunken cell a preview horse stands in. */
@@ -775,10 +784,13 @@ public final class HorseBrowserScreen extends Screen {
         addRenderableWidget(openBreedsFolderButton);
 
         applyFilter();
-        if (tab == Tab.MY_HORSES && !ClientHorseRoster.received()) {
-            requestRoster();
+        // Asked for on every open, not only the first - see
+        // requestRosterUnlessJustAsked(). Birth and death pushes are still owed;
+        // they are on the browser's roadmap tab.
+        if (tab == Tab.MY_HORSES) {
+            requestRosterUnlessJustAsked();
         }
-        if (tab == Tab.LOG && !ClientHorseLog.received()) {
+        if (tab == Tab.LOG) {
             requestLog();
         }
     }
@@ -817,7 +829,32 @@ public final class HorseBrowserScreen extends Screen {
     }
 
     private void requestRoster() {
+        lastRosterRequest = System.currentTimeMillis();
         ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
+    }
+
+    /**
+     * <b>Refresh the roster unless we just did.</b> What opening the screen and
+     * switching onto a roster-backed tab both use.
+     *
+     * <p>Those two used to be guarded on {@code ClientHorseRoster.received()},
+     * which reads as "only the first time" but means <em>never again this
+     * session</em>: the cache is only dropped on disconnect. So a foal born, a
+     * horse tamed and a horse sold were all invisible until someone found the
+     * Refresh button.
+     *
+     * <p>Unguarded, though, every tab click would make the server walk the whole
+     * ancestry table ({@code HorseRoster.gather}), and flipping through the tab
+     * strip is a casual gesture in a way pressing Refresh is not. A couple of
+     * seconds is long enough that no realistic clicking costs more than one
+     * sweep, and far shorter than anything a player could do to change the
+     * stable in between. The Refresh button itself is deliberately <b>not</b>
+     * throttled - it exists to be believed.
+     */
+    private void requestRosterUnlessJustAsked() {
+        if (System.currentTimeMillis() - lastRosterRequest >= ROSTER_REFRESH_COOLDOWN_MS) {
+            requestRoster();
+        }
     }
 
     private void requestLog() {
@@ -1213,9 +1250,12 @@ public final class HorseBrowserScreen extends Screen {
                 // roster request is what makes the server sweep the stable into
                 // the allele collection, and without it the tab shows a stale
                 // count until something else asks for the roster.
-                if ((tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES)
-                        && !ClientHorseRoster.received()) {
-                    requestRoster();
+                // Re-asked on every switch onto one of them for the same reason
+                // as the one in init(): the client cache lives until disconnect,
+                // so the old "already received one" guard meant "never ask again
+                // this session".
+                if (tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES) {
+                    requestRosterUnlessJustAsked();
                 }
                 // Asked for every time the tab is opened, not only the first:
                 // unlike the roster, the log changes on its own while you are

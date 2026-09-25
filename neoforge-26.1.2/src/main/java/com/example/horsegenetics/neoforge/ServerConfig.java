@@ -186,6 +186,13 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue LAST_STAND_REARM_FRACTION;
 
     /**
+     * <b>Does a lead come back to you when this mod teleports the horse wearing
+     * it?</b> Off, it falls on the ground where the horse was, which is vanilla's
+     * rule for a broken leash. See {@code server/HorseLeads}.
+     */
+    public static final ModConfigSpec.BooleanValue LEADS_RETURN;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -388,6 +395,22 @@ public final class ServerConfig {
                         "allowed, since a server that types that has asked for it.")
                 .defineInRange("behaviour.last_stand_rearm_fraction",
                         com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION, 0.0, 1.0);
+        LEADS_RETURN = builder
+                .comment("Whether a lead comes back to you when this mod teleports the horse wearing it. (default: true)",
+                        "A whistle, an ender whistle and a ticket all have to untie a horse",
+                        "before moving it, and vanilla's rule for an untied leash is to drop the",
+                        "lead where the animal was standing. That is right for a leash that",
+                        "snapped and wrong for one you deliberately cut: the horse lands beside",
+                        "you and the lead stays where it was - up to 64 blocks off for an echo",
+                        "whistle, and in another dimension entirely for an ender whistle or an",
+                        "interdimensional ticket, where it is simply lost.",
+                        "On, the lead goes to the player who blew the whistle or used the ticket,",
+                        "or drops at their feet if their inventory is full.",
+                        "Off restores vanilla's behaviour exactly.",
+                        "The two portal paths are not covered either way: a horse that walked",
+                        "into a portal was untied next to whoever was holding it, so the lead is",
+                        "already at their feet.")
+                .define("behaviour.leads_return", true);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -588,6 +611,15 @@ public final class ServerConfig {
             return LAST_STAND_IMMUNITY_TICKS.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.LastStand.DEFAULT_IMMUNITY_TICKS;
+        }
+    }
+
+    /** {@code behaviour.leads_return}, safely. */
+    public static boolean leadsReturn() {
+        try {
+            return LEADS_RETURN.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
         }
     }
 

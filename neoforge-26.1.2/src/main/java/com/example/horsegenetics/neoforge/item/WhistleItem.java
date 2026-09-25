@@ -1,6 +1,8 @@
 package com.example.horsegenetics.neoforge.item;
 
 import java.util.List;
+import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -8,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityReference;
@@ -15,6 +18,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -58,6 +64,30 @@ public class WhistleItem extends Item {
         return radius <= 32 ? ProgressTask.WHISTLE_GOLDEN : ProgressTask.WHISTLE_ECHO;
     }
 
+    /**
+     * <b>What this tier actually reaches.</b> The three whistles are the same
+     * icon with three names, and nothing anywhere told the player the numbers:
+     * the recipe blurbs say &ldquo;further than the basic one&rdquo; without ever
+     * saying how far, so the only way to learn a radius was to walk out and
+     * count. The ender whistle set the shape for this line
+     * ({@code EnderWhistleItem#appendHoverText}) - one grey line, no interaction
+     * needed to read it.
+     *
+     * <p>The second line is the two outcomes players report as bugs: a ridden
+     * horse is deliberately left where it is, and a leashed one is untied. It
+     * stops short of saying where the lead <em>goes</em>, because that is
+     * {@code behaviour.leads_return} and a client on a dedicated server does not
+     * have the server's config to read.
+     */
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> adder, TooltipFlag flag) {
+        adder.accept(Component.literal("Calls your tamed horses within " + radius + " blocks.")
+                .withStyle(ChatFormatting.GRAY));
+        adder.accept(Component.literal("A ridden horse stays put; a leashed one is untied.")
+                .withStyle(ChatFormatting.DARK_GRAY));
+    }
+
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (level instanceof ServerLevel serverLevel) {
@@ -84,9 +114,7 @@ public class WhistleItem extends Item {
             if (horse.distanceToSqr(player) < ALREADY_HERE_SQR) {
                 continue;
             }
-            if (horse.isLeashed()) {
-                horse.dropLeash();
-            }
+            HorseLeads.untieFor(horse, player);
             horse.getNavigation().stop();
             BlockPos spot = spreadSpot(level, player, placed);
             horse.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getYRot(), 0.0F);
