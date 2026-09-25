@@ -93,6 +93,11 @@ public final class Passification {
     /**
      * Drop a target the horse is no longer allowed to have. Called when a calm
      * is granted, so the animal stops mid-charge rather than at its next scan.
+     *
+     * <p>A flee leg counts as something to drop too, and it is the harder half:
+     * a target is re-read every tick, but a flee is a path already issued and
+     * runs itself out regardless. Both go here so "it stops the moment you pay"
+     * means the same thing whichever way the horse was treating you.
      */
     private static void forget(Horse horse, Player player) {
         if (horse.getTarget() == player) {
@@ -101,6 +106,7 @@ public final class Passification {
         if (horse.getLastHurtByMob() == player) {
             horse.setLastHurtByMob(null);
         }
+        GeneAbilityHandler.stopFleeingFrom(horse, player);
     }
 
     // ------------------------------------------------------------------

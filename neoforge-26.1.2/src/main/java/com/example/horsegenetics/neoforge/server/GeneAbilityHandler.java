@@ -2501,6 +2501,23 @@ public final class GeneAbilityHandler {
     private static final double FLEE_DISTANCE = 12.0;
 
     /**
+     * Stop running from one player, now. Called the moment a calm is granted,
+     * because the beat below is up to {@link AggressionGene#INTERVAL_TICKS}
+     * ticks away and the leg already issued runs {@value #FLEE_DISTANCE} blocks
+     * whether or not the reason for it still stands - so without this the horse
+     * you just fed walks away from you and only then turns round.
+     *
+     * <p>Only the leg aimed at <i>this</i> player is dropped: a horse running
+     * from two people is still running from the other one, and picks it up on
+     * the next beat rather than being told here where to go.
+     */
+    static void stopFleeingFrom(Horse horse, Player player) {
+        if (FLEEING.remove(horse.getUUID(), player.getUUID())) {
+            horse.getNavigation().stop();
+        }
+    }
+
+    /**
      * Run from the nearest thing in the group: path to a point directly away,
      * and drop any target it had.
      *
@@ -2531,7 +2548,12 @@ public final class GeneAbilityHandler {
             }
         }
         if (nearest == null) {
-            FLEEING.remove(horse.getUUID());
+            // Only when it *was* running: stopping unconditionally every beat
+            // would cut the legs off whatever goal has the navigation instead -
+            // the tempt goal walking a calmed horse back over, most of all.
+            if (FLEEING.remove(horse.getUUID()) != null) {
+                horse.getNavigation().stop();
+            }
             return;
         }
 
