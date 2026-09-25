@@ -15,13 +15,14 @@ import java.util.List;
 /**
  * <b>The Equine Research Shelf's screen.</b> Two tabs across the top:
  * <b>Store</b>, a chest of research papers, and <b>Craft</b>, which copies a
- * gene the shelf holds onto a blank book.
+ * pair the shelf holds onto a blank book.
  *
  * <h2>Store opens first, and it is a chest</h2>
  * Six rows of nine, where a double chest's are. Put a paper in, take it out -
  * nothing takes time and nothing is consumed. It replaced a single filing slot
  * that swallowed the paper into a list, which the owner found did "nothing"
- * (2026-09-10). A paper for a gene the shelf already holds will not go in.
+ * (2026-09-10). A second paper for a pair the shelf already holds will not go in -
+ * but two pairs of the same gene are two different papers and both file.
  *
  * <h2>It is drawn as a Minecraft window</h2>
  * Face, bevel, sunken slots, dark text - see {@link VanillaPanel}. Every
@@ -93,10 +94,10 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         if (tab == Tab.CRAFT) {
             int row = rowAt(event.x(), event.y());
             if (row >= 0) {
-                String gene = stored().get(row);
-                this.menu.selectGene(gene); // the highlight, client-side
+                String topic = stored().get(row);
+                this.menu.selectTopic(topic); // the highlight, client-side
                 ClientPacketDistributor.sendToServer(
-                        new ShelfActionPayload(ShelfActionPayload.Action.SELECT, gene));
+                        new ShelfActionPayload(ShelfActionPayload.Action.SELECT, topic));
                 return true;
             }
         }
@@ -113,7 +114,7 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
     }
 
     private List<String> stored() {
-        return this.menu.storedGenes();
+        return this.menu.storedTopics();
     }
 
     private int maxScroll() {
@@ -208,11 +209,11 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
                     barX + 1 + Math.min(barW - 2, (barW - 2) * done / total), barY + 3, 0xFF3BA55D);
         }
 
-        String selected = this.menu.selectedGene();
+        String selected = this.menu.selectedTopic();
         int noteX = leftPos + ResearchShelfMenu.MARGIN;
         int noteY = topPos + ResearchShelfMenu.NOTE_Y;
         if (selected.isEmpty() || !stored().contains(selected)) {
-            drawFitted(g, "Pick a gene, then add a blank book",
+            drawFitted(g, "Pick a pair, then add a blank book",
                     noteX, noteY, ResearchShelfMenu.LIST_W, VanillaPanel.TEXT_DIM);
             return;
         }
@@ -231,29 +232,29 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         int h = ResearchShelfMenu.LIST_H;
         VanillaPanel.well(g, l - 1, t - 1, w + 2, h + 2);
 
-        List<String> genes = stored();
-        if (genes.isEmpty()) {
+        List<String> topics = stored();
+        if (topics.isEmpty()) {
             drawFitted(g, "No papers on this shelf yet.", l + 3, t + 2, w - 6, 0xFF3F3F3F);
             drawFitted(g, "Put some in on the Store tab.", l + 3, t + 2 + ROW_H, w - 6, 0xFF3F3F3F);
             return;
         }
         scroll = Math.max(0, Math.min(scroll, maxScroll()));
         int hovered = rowAt(mouseX, mouseY);
-        String selected = this.menu.selectedGene();
-        for (int i = scroll; i < genes.size() && i < scroll + ResearchShelfMenu.LIST_ROWS; i++) {
+        String selected = this.menu.selectedTopic();
+        for (int i = scroll; i < topics.size() && i < scroll + ResearchShelfMenu.LIST_ROWS; i++) {
             int ry = t + (i - scroll) * ROW_H;
-            boolean isSelected = genes.get(i).equals(selected);
+            boolean isSelected = topics.get(i).equals(selected);
             if (isSelected) {
                 g.fill(l, ry, l + w, ry + ROW_H, VanillaPanel.SELECTED);
             } else if (i == hovered) {
                 g.fill(l, ry, l + w, ry + ROW_H, VanillaPanel.HOVER);
             }
-            drawFitted(g, EquineResearchShelfBlockEntity.displayName(genes.get(i)),
+            drawFitted(g, EquineResearchShelfBlockEntity.displayName(topics.get(i)),
                     l + 3, ry + 2, w - 8, isSelected ? 0xFF202020 : 0xFF303030);
         }
         if (maxScroll() > 0) {
             int x1 = l + w - 3;
-            int thumbH = Math.max(6, h * ResearchShelfMenu.LIST_ROWS / genes.size());
+            int thumbH = Math.max(6, h * ResearchShelfMenu.LIST_ROWS / topics.size());
             int thumbY = t + (h - thumbH) * scroll / maxScroll();
             g.fill(x1, t, x1 + 3, t + h, VanillaPanel.SHADOW);
             g.fill(x1, thumbY, x1 + 3, thumbY + thumbH, VanillaPanel.FACE);

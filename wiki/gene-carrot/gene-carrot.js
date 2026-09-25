@@ -4,9 +4,9 @@
 // WHY IT IS NOT WRITTEN INTO THE PAGES. There is one parameterised recipe, not
 // one per gene (server/recipe/KnownGeneSpliceRecipe), so what actually differs
 // between two genes is small and exact: whether a carrot exists at all, which
-// rarity tier pays for it, whether the fed parent comes out heterozygous or
-// homozygous for that gamete, and whether the Unknown splice may land on the
-// locus. Those four are asked of the mod through the same wasm the preview
+// rarity tier pays for it, how many distinct research papers the locus has, and
+// whether the Unknown splice may land on it. Those four are asked of the mod
+// through the same wasm the preview
 // window and the horse designer run. Fifty pages holding their own copy would
 // be fifty pages to re-check the next time a gene was re-tiered - and the tier
 // is the recipe's price, so a stale one is a wrong recipe.
@@ -64,7 +64,7 @@ window.HG = window.HG || {};
   function slots(carrot) {
     return [
       { name: "Horse hair", note: "or hair cloth", mod: true },
-      { name: "Research paper", note: carrot.name, mod: true },
+      { name: "Research paper", note: carrot.name + " " + (carrot.examplePair || ""), mod: true },
       { name: "Golden carrot", note: "" },
       { name: RARITY_ITEM[carrot.rarity] || "Rarity item",
         note: (TIER_NAME[carrot.rarity] || "?") + " tier" },
@@ -152,19 +152,20 @@ window.HG = window.HG || {};
       + '<div class="gc-arrow" aria-hidden="true">&rarr;</div>'
       + '<div class="gc-out">'
       + '<span class="gc-item">Known Gene Splice carrot</span>'
-      + '<span class="gc-note">' + escapeHtml(carrot.name) + ', '
-      + (carrot.homozygous ? "homozygous" : "heterozygous") + '</span>'
+      + '<span class="gc-note">' + escapeHtml(carrot.name) + ' '
+      + escapeHtml(carrot.examplePair || "") + '</span>'
       + '</div>'
       + '</div>'
       + '<p class="gc-say">'
       + 'Shapeless, and <strong>exactly those four items</strong> - anything else in the '
-      + 'grid and it does not resolve. The gene is read off the paper at craft time, so '
-      + 'there is no per-gene recipe to register. Feeding the carrot to a parent makes '
-      + 'the game treat that parent as <strong>'
-      + (carrot.homozygous ? "homozygous" : "heterozygous")
-      + '</strong> for ' + escapeHtml(carrot.name) + ' when it forms that one gamete; '
-      + 'ordinary Mendelian rules take it from there, so two carrot-fed parents give the '
-      + 'usual 25/50/25. <a href="carrots.html#known">How the carrots work</a>.'
+      + 'grid and it does not resolve. There is no per-gene recipe to register: the '
+      + '<strong>allele pair is read off the paper</strong> at craft time. Feeding the '
+      + 'carrot to a parent makes the game treat that parent as carrying <strong>'
+      + escapeHtml(carrot.examplePair || "") + '</strong> for '
+      + escapeHtml(carrot.name) + ' when it forms that one gamete &mdash; or whichever '
+      + 'other pair the paper you spent names. Ordinary Mendelian rules take it from '
+      + 'there, so two carrot-fed parents give the usual 25/50/25. '
+      + '<a href="carrots.html#known">How the carrots work</a>.'
       + '</p>'
       + '<dl class="gc-facts">'
       + fact("Rarity tier", (TIER_NAME[carrot.rarity] || carrot.rarity)
@@ -174,7 +175,10 @@ window.HG = window.HG || {};
       // derived number that goes stale in prose.
       + fact("Paper loot weight", carrot.lootWeight
         + ' <span class="gc-dim">(relative &mdash; commoner genes turn up more often)</span>')
-      + fact("Effect token", '<code>' + escapeHtml(carrot.effect) + '</code>')
+      + fact("Distinct papers", carrot.paperCount
+        + ' <span class="gc-dim">(carrier and true-breeding per variant allele &mdash; '
+        + 'a horse can also teach you a compound pair)</span>')
+      + fact("Example effect token", '<code>' + escapeHtml(carrot.effect) + '</code>')
       + fact("Unknown Gene Splice", carrot.unknownSpliceable
         ? 'may roll this locus'
         : '<span class="gc-off">never rolls this locus</span> '

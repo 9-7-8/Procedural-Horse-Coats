@@ -1765,8 +1765,8 @@ public final class HorseBrowserScreen extends Screen {
             g.text(this.font, Component.literal("Not yet discovered"), l, y, EXPR_OFF, false);
             y += lineH;
             for (String line : GuiText.wrap(this.font,
-                    "Tame or breed a horse carrying this gene, or read a research paper, to fill "
-                            + "in its entry. Nothing about a horse is hidden - this list only tracks "
+                    "Tame or breed a horse carrying this gene to fill in its entry - a paper will "
+                            + "not do it. Nothing about a horse is hidden; this list only tracks "
                             + "what you have met.", w)) {
                 g.text(this.font, Component.literal(line), l, y, DESC, false);
                 y += lineH;
@@ -1957,8 +1957,9 @@ public final class HorseBrowserScreen extends Screen {
             // genes, and the only thing that changes between them is the gene.
             rows.add(new RecipeRow(gene.name() + " splice carrot", grid,
                     new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get()), true,
-                    "Needs that gene's research paper. The rarity ingot is set by "
-                            + "the gene's own rarity, so a rarer gene costs more.",
+                    "Needs a research paper for this gene - any pair of it. The carrot "
+                            + "grants whichever pair the paper names; the ghost above shows one "
+                            + "example. The rarity ingot is set by the gene's own rarity.",
                     true,
                     "Feed a parent to aim its contribution at " + gene.name()
                             + ", instead of the coin flip it would otherwise be."));

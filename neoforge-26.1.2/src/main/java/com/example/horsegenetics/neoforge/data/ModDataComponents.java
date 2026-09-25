@@ -71,11 +71,24 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()))
                     .build());
 
-    /** The gene a {@code research_paper} documents - a gene key ({@code <modid>.<gene>}). */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> RESEARCH_GENE =
-            TYPES.register("research_gene", () -> DataComponentType.<String>builder()
-                    .persistent(Codec.STRING)
-                    .networkSynchronized(ByteBufCodecs.STRING_UTF8)
+    /**
+     * <b>The gene and allele pair a {@code research_paper} documents</b> - one
+     * {@link com.example.horsegenetics.common.genetics.ResearchTopic}, which is
+     * the pair state a breeder is actually asking about rather than the whole
+     * locus.
+     *
+     * <p>It keeps the registry id {@code research_gene} it had when it was a bare
+     * gene-key {@code String}, because renaming it would drop the component off
+     * every paper already in the owner's world and leave blanks. A stored string
+     * still decodes - see {@link ResearchTopicCodecs}, which is where the one
+     * deliberate exception to the no-back-compat rule is written down.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<
+            com.example.horsegenetics.common.genetics.ResearchTopic>> RESEARCH_TOPIC =
+            TYPES.register("research_gene", () -> DataComponentType
+                    .<com.example.horsegenetics.common.genetics.ResearchTopic>builder()
+                    .persistent(ResearchTopicCodecs.CODEC)
+                    .networkSynchronized(ResearchTopicCodecs.STREAM_CODEC)
                     .build());
 
     /**

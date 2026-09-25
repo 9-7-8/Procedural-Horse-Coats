@@ -242,12 +242,12 @@ public final class ModNetworking {
                 ShelfActionPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
                     // The menu is the authority on which shelf, and it re-checks
-                    // the gene against the block entity - so a forged packet can
+                    // the pair against the block entity - so a forged packet can
                     // only ask for something absent, and get nothing.
                     if (context.player() instanceof ServerPlayer serverPlayer
                             && serverPlayer.containerMenu
                                     instanceof com.example.horsegenetics.neoforge.menu.ResearchShelfMenu menu) {
-                        menu.selectGene(payload.geneKey());
+                        menu.selectTopic(payload.topicToken());
                     }
                 })
         );

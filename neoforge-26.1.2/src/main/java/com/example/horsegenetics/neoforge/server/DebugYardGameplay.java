@@ -260,7 +260,7 @@ final class DebugYardGameplay {
     // ==================================================================
 
     /** One carrot: the item, the short name on the sign, and what it claims to do. */
-    private record Splice(java.util.function.Supplier<net.minecraft.world.item.Item> item,
+    private record Splice(java.util.function.Supplier<? extends net.minecraft.world.item.Item> item,
                           String name, String claim) {
     }
 

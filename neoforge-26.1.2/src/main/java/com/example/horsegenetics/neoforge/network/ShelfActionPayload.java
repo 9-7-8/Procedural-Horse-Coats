@@ -8,18 +8,18 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 /**
- * Client &rarr; server: the gene picked on an open Equine Research Shelf's Copy
+ * Client &rarr; server: the allele pair picked on an open Equine Research Shelf's Copy
  * tab. The only packet the shelf still needs - storing and taking papers back
  * are ordinary slot clicks now, which vanilla syncs.
  *
  * <p>The server looks the shelf up from the player's open menu and checks the
- * gene against the papers actually on it, so a forged packet can only pick
+ * pair against the papers actually on it, so a forged packet can only pick
  * something absent and get an empty result slot.
  */
-public record ShelfActionPayload(Action action, String geneKey) implements CustomPacketPayload {
+public record ShelfActionPayload(Action action, String topicToken) implements CustomPacketPayload {
 
     public enum Action {
-        /** Copy this gene next, if the shelf holds it and a book is in. */
+        /** Copy this pair next, if the shelf holds it and a book is in. */
         SELECT
     }
 
@@ -28,7 +28,7 @@ public record ShelfActionPayload(Action action, String geneKey) implements Custo
 
     public static final StreamCodec<ByteBuf, ShelfActionPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.idMapper(i -> Action.values()[i], Action::ordinal), ShelfActionPayload::action,
-            ByteBufCodecs.stringUtf8(256), ShelfActionPayload::geneKey,
+            ByteBufCodecs.stringUtf8(256), ShelfActionPayload::topicToken,
             ShelfActionPayload::new);
 
     @Override

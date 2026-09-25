@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server.recipe;
 
 import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.item.ResearchPaperItem;
@@ -19,13 +20,14 @@ import net.minecraft.world.level.Level;
 /**
  * The <b>one parameterised gene-carrot recipe</b> (roadmap wiki &sect;14.2):
  * golden carrot + a {@code research_paper} + a hair item + the rarity item for
- * that gene's tier + at least one flavour ingredient &rarr; a
- * {@code known_gene_splice_carrot} carrying that gene's
- * {@code known:<gene>:het|hom} effect.
+ * that gene's tier &rarr; a {@code known_gene_splice_carrot} carrying the
+ * {@code known:<gene>:<a>:<b>} effect for <b>the pair that paper names</b>.
  *
  * <p>One recipe rather than N generated per-gene recipes, so a drop-in gene
  * file gets its carrot the moment it registers - no datapack. The recipe reads
- * the gene off the paper at craft time.
+ * the pair off the paper at craft time, which is the point of a paper being a
+ * pair: two papers for one locus craft two different carrots, and a wide locus
+ * is reachable at every allele rather than only its first.
  */
 public class KnownGeneSpliceRecipe extends CustomRecipe {
 
@@ -50,9 +52,9 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
         return s.is(ModItems.HORSE_HAIR.get());
     }
 
-    /** The gene the paper in this grid documents, if the grid is otherwise a valid gene-carrot craft. */
-    private static Gene resolve(CraftingInput input) {
-        Gene gene = null;
+    /** The pair the paper in this grid documents, if the grid is otherwise a valid gene-carrot craft. */
+    private static ResearchTopic resolve(CraftingInput input) {
+        ResearchTopic topic = null;
         int gold = 0;
         int paper = 0;
         int hair = 0;
@@ -67,12 +69,18 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
                 gold++;
             } else if (s.getItem() instanceof ResearchPaperItem) {
                 paper++;
-                gene = ResearchPaperItem.geneOf(s);
+                topic = ResearchPaperItem.topicOf(s);
             } else if (isHair(s)) {
                 hair++;
             }
         }
-        if (gold != 1 || paper != 1 || hair != 1 || gene == null || !gene.hasGeneCarrot()) {
+        // isResolved() is the load-bearing half: a paper naming a gene this build
+        // retired, or a pair the locus says cannot occur, would craft a carrot
+        // that does nothing when fed. Refusing to resolve is visible; an inert
+        // carrot is not.
+        Gene gene = topic == null ? null : topic.gene();
+        if (gold != 1 || paper != 1 || hair != 1
+                || gene == null || !gene.hasGeneCarrot() || !topic.isResolved()) {
             return null;
         }
         // The default recipe is exactly four items: golden carrot + this gene's
@@ -86,7 +94,7 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
         if (rarity != 1 || filled != 4) {
             return null;
         }
-        return gene;
+        return topic;
     }
 
     @Override
@@ -96,8 +104,9 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
 
     @Override
     public ItemStack assemble(CraftingInput input) {
-        Gene gene = resolve(input);
-        if (gene == null) {
+        ResearchTopic topic = resolve(input);
+        CarrotEffect splice = topic == null ? null : topic.splice();
+        if (splice == null) {
             return ItemStack.EMPTY;
         }
         ItemStack out = new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get());
@@ -106,8 +115,7 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
         // spelled out here and in SetRandomGeneFunction, and when the token
         // gained the allele names both spellings compiled and silently stopped
         // parsing.
-        out.set(ModDataComponents.CARROT_EFFECTS.get(),
-                List.of(CarrotEffect.defaultSpliceFor(gene).id()));
+        out.set(ModDataComponents.CARROT_EFFECTS.get(), List.of(splice.id()));
         return out;
     }
 

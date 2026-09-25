@@ -2,9 +2,10 @@ package com.example.horsegenetics.neoforge.block;
 
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneRarity;
-import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.neoforge.item.ResearchPaperItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -32,16 +33,16 @@ import java.util.Set;
  * <h2>Slots, not a list</h2>
  * {@link #SLOTS} slots of research papers, put in and taken out by hand,
  * instantly - the owner asked for it to "just be a UI like a chest"
- * (2026-09-10). <b>One paper per gene</b>, enforced by {@link #holdsElsewhere}
+ * (2026-09-10). <b>One paper per allele pair</b>, enforced by {@link #holdsElsewhere}
  * from the menu's slots.
  *
  * <h2>Copying runs on the block, like a furnace</h2>
- * The book slot, the result slot, the gene picked and the progress all live
+ * The book slot, the result slot, the pair picked and the progress all live
  * here and {@link #tick} advances them whether or not anyone has the screen
  * open. They used to live on the menu, which exists only while a player is
  * looking - so a copy stopped the moment the screen closed (owner-reported the
  * same day). A finished copy spends one book and lands in the result slot,
- * where copies of the same gene stack; with more books in, the next one starts
+ * where copies of the same pair stack; with more books in, the next one starts
  * as soon as there is room. It needs the original still on the shelf, and
  * changing the pick or taking the original away starts the clock again.
  */
@@ -60,7 +61,7 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
     /** {@link ContainerData} indices - the furnace pattern. */
     public static final int DATA_PROGRESS = 0;
     public static final int DATA_TOTAL = 1;
-    /** Index of the picked gene in {@link #genesIn}'s order, or -1 - how the client learns the pick. */
+    /** Index of the picked pair in {@link #topicsIn}'s order, or -1 - how the client learns the pick. */
     public static final int DATA_SELECTED = 2;
     public static final int DATA_COUNT = 3;
 
@@ -93,7 +94,7 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         }
     };
 
-    private String selectedGene = "";
+    private String selectedTopic = "";
     private int progress;
 
     /** The furnace's dataAccess: what the menu syncs to the client every tick. */
@@ -102,8 +103,8 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         public int get(int index) {
             return switch (index) {
                 case DATA_PROGRESS -> progress;
-                case DATA_TOTAL -> selectedGene.isEmpty() ? 0 : copyTicks(selectedGene);
-                case DATA_SELECTED -> genesIn(papers).indexOf(selectedGene);
+                case DATA_TOTAL -> selectedTopic.isEmpty() ? 0 : copyTicks(selectedTopic);
+                case DATA_SELECTED -> topicsIn(papers).indexOf(selectedTopic);
                 default -> 0;
             };
         }
@@ -141,42 +142,50 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         return data;
     }
 
-    public String selectedGene() {
-        return selectedGene;
+    public String selectedTopic() {
+        return selectedTopic;
     }
 
-    /** Pick the gene to copy. A new pick restarts the clock; the same pick is a no-op. */
-    public void select(String geneKey) {
-        String next = geneKey == null ? "" : geneKey;
-        if (!next.equals(selectedGene)) {
-            selectedGene = next;
+    /** Pick the pair to copy. A new pick restarts the clock; the same pick is a no-op. */
+    public void select(String token) {
+        String next = token == null ? "" : token;
+        if (!next.equals(selectedTopic)) {
+            selectedTopic = next;
             progress = 0;
             setChanged();
         }
     }
 
-    /** Is this a research paper with a gene written on it - the only thing the shelf takes? */
+    /** Is this a research paper with a pair written on it - the only thing the shelf takes? */
     public static boolean isFiledPaper(ItemStack stack) {
-        return stack.is(ModItems.RESEARCH_PAPER.get()) && !geneOf(stack).isEmpty();
-    }
-
-    /** The gene a paper names, or {@code ""}. */
-    public static String geneOf(ItemStack stack) {
-        String key = stack.get(ModDataComponents.RESEARCH_GENE.get());
-        return key == null ? "" : key;
+        return stack.is(ModItems.RESEARCH_PAPER.get()) && !topicOf(stack).isEmpty();
     }
 
     /**
-     * Every gene the papers in {@code container} name, sorted by gene name - the
-     * Copy tab's list. Static and container-based so the client's copy of the
-     * menu, which has the synced slots but no block entity, reads the same list.
+     * The pair a paper names, as a {@link ResearchTopic#token()}, or {@code ""}.
+     *
+     * <p><b>A pair, not a gene.</b> The shelf files one paper per pair now, so a
+     * breeder can keep {@code Agouti: A/A} and {@code Agouti: A/a} side by side -
+     * which is the whole reason to file them, since those two craft different
+     * carrots.
      */
-    public static List<String> genesIn(Container container) {
+    public static String topicOf(ItemStack stack) {
+        ResearchTopic topic = stack.get(ModDataComponents.RESEARCH_TOPIC.get());
+        return topic == null ? "" : topic.token();
+    }
+
+    /**
+     * Every pair the papers in {@code container} name, sorted by gene name then
+     * pair - the Copy tab's list. Static and container-based so the client's copy
+     * of the menu, which has the synced slots but no block entity, reads the same
+     * list.
+     */
+    public static List<String> topicsIn(Container container) {
         Set<String> seen = new LinkedHashSet<>();
         for (int i = 0; i < container.getContainerSize(); i++) {
-            String key = geneOf(container.getItem(i));
-            if (!key.isEmpty()) {
-                seen.add(key);
+            String token = topicOf(container.getItem(i));
+            if (!token.isEmpty()) {
+                seen.add(token);
             }
         }
         List<String> out = new ArrayList<>(seen);
@@ -185,48 +194,56 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         return List.copyOf(out);
     }
 
-    /** Does any slot other than {@code exceptSlot} already hold a paper for {@code geneKey}? */
-    public static boolean holdsElsewhere(Container container, String geneKey, int exceptSlot) {
+    /** Does any slot other than {@code exceptSlot} already hold a paper for this pair? */
+    public static boolean holdsElsewhere(Container container, String token, int exceptSlot) {
         for (int i = 0; i < container.getContainerSize(); i++) {
-            if (i != exceptSlot && geneKey.equals(geneOf(container.getItem(i)))) {
+            if (i != exceptSlot && token.equals(topicOf(container.getItem(i)))) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean stores(String geneKey) {
-        return holdsElsewhere(papers, geneKey, -1);
+    public boolean stores(String token) {
+        return holdsElsewhere(papers, token, -1);
     }
 
-    /** The name a row shows: the gene's, or its raw key if this build has no such gene. */
-    public static String displayName(String geneKey) {
-        Gene gene = Genes.byKeyOrNull(geneKey);
-        return gene == null ? geneKey : gene.name();
+    /** The name a row shows - {@code Agouti: A/a}, or the raw token if nothing resolves. */
+    public static String displayName(String token) {
+        ResearchTopic topic = ResearchTopic.parse(token);
+        return topic == null ? token : topic.label();
     }
 
-    /** How long this gene takes to copy - see {@link #TICKS_PER_RARITY_TIER}. */
-    public static int copyTicks(String geneKey) {
-        Gene gene = Genes.byKeyOrNull(geneKey);
+    /**
+     * How long this paper takes to copy - see {@link #TICKS_PER_RARITY_TIER}. The
+     * gene's rarity, not the pair's: what is rare is the locus, and a carrier
+     * paper is no easier to transcribe than a true-breeding one.
+     */
+    public static int copyTicks(String token) {
+        ResearchTopic topic = ResearchTopic.parse(token);
+        Gene gene = topic == null ? null : topic.gene();
         GeneRarity rarity = gene == null ? GeneRarity.DEFAULT : gene.rarity();
         return (rarity.ordinal() + 1) * TICKS_PER_RARITY_TIER;
     }
 
     /** The copy the current job would produce. */
-    private ItemStack copyOf(String geneKey) {
-        ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
-        paper.set(ModDataComponents.RESEARCH_GENE.get(), geneKey);
-        return paper;
+    private ItemStack copyOf(String token) {
+        ResearchTopic topic = ResearchTopic.parse(token);
+        return topic == null ? ItemStack.EMPTY : ResearchPaperItem.of(topic);
     }
 
-    /** A gene picked and still on the shelf, a book in, and room for the copy. */
+    /** A pair picked and still on the shelf, a book in, and room for the copy. */
     private boolean canCopy() {
-        if (selectedGene.isEmpty() || !stores(selectedGene) || !book.getItem(0).is(Items.BOOK)) {
+        if (selectedTopic.isEmpty() || !stores(selectedTopic) || !book.getItem(0).is(Items.BOOK)) {
             return false;
+        }
+        ItemStack copy = copyOf(selectedTopic);
+        if (copy.isEmpty()) {
+            return false; // a token that no longer parses - never spend a book on it
         }
         ItemStack out = result.getItem(0);
         return out.isEmpty()
-                || (ItemStack.isSameItemSameComponents(out, copyOf(selectedGene))
+                || (ItemStack.isSameItemSameComponents(out, copy)
                         && out.getCount() < out.getMaxStackSize());
     }
 
@@ -248,11 +265,11 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
             return;
         }
         shelf.progress++;
-        if (shelf.progress >= copyTicks(shelf.selectedGene)) {
+        if (shelf.progress >= copyTicks(shelf.selectedTopic)) {
             shelf.progress = 0;
             ItemStack out = shelf.result.getItem(0);
             if (out.isEmpty()) {
-                shelf.result.setItem(0, shelf.copyOf(shelf.selectedGene));
+                shelf.result.setItem(0, shelf.copyOf(shelf.selectedTopic));
             } else {
                 out.grow(1);
                 shelf.result.setChanged();
@@ -282,7 +299,7 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         ContainerHelper.saveAllItems(output, papers.getItems());
         output.store("book", ItemStack.OPTIONAL_CODEC, book.getItem(0));
         output.store("result", ItemStack.OPTIONAL_CODEC, result.getItem(0));
-        output.putString("selected", selectedGene);
+        output.putString("selected", selectedTopic);
         output.putInt("progress", progress);
     }
 
@@ -293,7 +310,7 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         ContainerHelper.loadAllItems(input, papers.getItems());
         book.getItems().set(0, input.read("book", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
         result.getItems().set(0, input.read("result", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
-        selectedGene = input.getStringOr("selected", "");
+        selectedTopic = input.getStringOr("selected", "");
         progress = input.getIntOr("progress", 0);
     }
 }

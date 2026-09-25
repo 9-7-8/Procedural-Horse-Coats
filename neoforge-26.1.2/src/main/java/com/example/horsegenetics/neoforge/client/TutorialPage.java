@@ -828,8 +828,13 @@ public final class TutorialPage {
 
         genetics.add(new Step("Taking a gene off a horse",
                 List.of("Hold a book and right-click a horse. The book records one of that horse's "
-                                + "genes at random and becomes a research paper naming it. You cannot "
-                                + "pick which, and the horse keeps the gene.",
+                                + "gene pairs at random and becomes a research paper naming it - "
+                                + "\"Agouti: A/a\", not just \"Agouti\". You cannot pick which, and the "
+                                + "horse keeps what it has.",
+                        "The pair is the useful part. A paper saying A/a and a paper saying A/A are "
+                                + "different papers, and the carrot you craft from each hands on "
+                                + "exactly that combination - so a horse in front of you is the only "
+                                + "place an unusual pairing comes from.",
                         "A completely ordinary horse has nothing to give, and will not cost you the "
                                 + "book.",
                         "The paper is not something you read. It is a component: file it in a shelf to "
@@ -853,8 +858,8 @@ public final class TutorialPage {
         genetics.add(new Step("Keep them on a shelf",
                 List.of("A research paper is a thing you can lose. File it into an Equine Research "
                                 + "Shelf - a bookshelf and two horse hair - and it stops being one: "
-                                + "that shelf will copy the gene onto blank books for as long as the "
-                                + "original stays in it.",
+                                + "that shelf will copy the pair onto blank books for as long as the "
+                                + "original stays in it. One slot per pair, so A/a and A/A both file.",
                         "Copying is not instant. A common gene takes about ten seconds and a truly "
                                 + "rare one about a minute, so a shelf is something you set going. "
                                 + "Break the shelf and every paper in it drops, so moving one costs you "
@@ -869,11 +874,14 @@ public final class TutorialPage {
 
         genetics.add(new Step("Putting a gene into a foal",
                 List.of("Once a gene is in your database you can make its gene carrot - a golden "
-                                + "carrot, that gene's research paper, some horse hair, and an ingot "
+                                + "carrot, a research paper for it, some horse hair, and an ingot "
                                 + "whose metal depends on how rare the gene is.",
+                        "The carrot grants the pair the paper names, and the carrot's tooltip says "
+                                + "which. So which paper you spend decides what the carrot does: a "
+                                + "carrier paper hands on one copy, a true-breeding paper hands on two.",
                         "Feed the carrot to one of the parents, any time. It waits on that horse until "
                                 + "the next breeding that actually takes, and then that parent passes "
-                                + "the gene on instead of leaving it to a coin flip. Whether the foal "
+                                + "that pair on instead of leaving it to a coin flip. Whether the foal "
                                 + "shows it still depends on what the other parent brought - some genes "
                                 + "need two copies before they do anything at all.",
                         "Carrots can be combined by crafting them together into one carrot carrying "

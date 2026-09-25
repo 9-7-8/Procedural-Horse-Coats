@@ -1,8 +1,9 @@
 package com.example.horsegenetics.neoforge.menu;
 
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.neoforge.data.ModDataComponents;
+import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.neoforge.item.ResearchPaperItem;
 import com.example.horsegenetics.neoforge.server.recipe.RarityItems;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +40,13 @@ public final class SpliceRecipeDisplay {
         return out;
     }
 
-    /** A {@code research_paper} stack tagged for {@code gene}. */
+    /**
+     * A {@code research_paper} stack for {@code gene} - an <b>example</b> one,
+     * since a real paper names a pair and this display has only a gene. It shows
+     * the pair {@link ResearchTopic#defaultFor} picks, which is the gene's own
+     * {@code geneCarrotHomozygous()} convention; the recipe itself takes any pair.
+     */
     public static ItemStack researchPaper(Gene gene) {
-        ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
-        paper.set(ModDataComponents.RESEARCH_GENE.get(), gene.key());
-        return paper;
+        return ResearchPaperItem.of(ResearchTopic.defaultFor(gene));
     }
 }

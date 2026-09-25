@@ -34,11 +34,13 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *       five <b>themed</b> random splices ({@link #DILUTION_GENE_SPLICE_CARROT}
  *       and friends) that roll one slice of the pool instead of all of it.</li>
  *   <li><b>{@link #KNOWN_GENE_SPLICE_CARROT}</b> - one item parameterised by a
- *       {@code carrot_effects} component holding a {@code known:<gene>:het|hom}
- *       token, produced by the paper-driven {@code KnownGeneSpliceRecipe}.</li>
- *   <li><b>{@link #RESEARCH_PAPER}</b> ({@link ResearchPaperItem}) - carries a
- *       {@code gene} component; read to unlock that gene's carrot recipe, and
- *       the ingredient {@code KnownGeneSpliceRecipe} matches on.</li>
+ *       {@code carrot_effects} component holding a {@code known:<gene>:<a>:<b>}
+ *       token, produced by the paper-driven {@code KnownGeneSpliceRecipe} and
+ *       shown in the tooltip by {@link BreedingCarrotItem}.</li>
+ *   <li><b>{@link #RESEARCH_PAPER}</b> ({@link ResearchPaperItem}) - carries one
+ *       gene and one <b>allele pair</b> on a {@code research_gene} component. Not
+ *       read; it is the ingredient {@code KnownGeneSpliceRecipe} matches on, and
+ *       the pair on it is the pair the carrot grants.</li>
  *   <li><b>{@link #EMPTY_SEED_JAR} / {@link #STALLION_SEED_JAR}</b> - the
  *       assisted-reproduction vessels. Items only; no collection / pregnancy
  *       mechanic (owner: IVF is out of scope for now).</li>
@@ -69,6 +71,15 @@ public final class ModItems {
 
     private static DeferredItem<Item> simple(String name) {
         return register(name, Item::new);
+    }
+
+    /**
+     * A breeding carrot. All eleven share one class, because what a carrot does
+     * is its {@code carrot_effects} component and the only thing the class adds
+     * is a tooltip that reads it - see {@link BreedingCarrotItem}.
+     */
+    private static DeferredItem<BreedingCarrotItem> carrot(String name) {
+        return register(name, BreedingCarrotItem::new);
     }
 
     private static <T extends Item> DeferredItem<T> register(String name, Function<Item.Properties, ? extends T> factory) {
@@ -118,29 +129,30 @@ public final class ModItems {
     public static final DeferredItem<Item> HORSE_HAIR = simple("horse_hair");
 
     // --- the four breeding carrots (roadmap §14.1) -------------------------
-    public static final DeferredItem<Item> UNKNOWN_EPIGENETIC_SPLICE_CARROT = simple("unknown_epigenetic_splice_carrot");
-    public static final DeferredItem<Item> UNKNOWN_GENE_SPLICE_CARROT = simple("unknown_gene_splice_carrot");
-    public static final DeferredItem<Item> STABILIZER_CARROT = simple("stabilizer_carrot");
-    public static final DeferredItem<Item> MAGNIFIER_CARROT = simple("magnifier_carrot");
+    public static final DeferredItem<BreedingCarrotItem> UNKNOWN_EPIGENETIC_SPLICE_CARROT = carrot("unknown_epigenetic_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> UNKNOWN_GENE_SPLICE_CARROT = carrot("unknown_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> STABILIZER_CARROT = carrot("stabilizer_carrot");
+    public static final DeferredItem<BreedingCarrotItem> MAGNIFIER_CARROT = carrot("magnifier_carrot");
 
     // --- the themed random splices --------------------------------------
     // Each is an Unknown Gene Splice carrot narrowed to one slice of the safe
     // pool (common/genetics/SpliceCategory), refined from the plain one with a
     // themed reagent. The pool is a subset of the safe pool by construction, so
     // none of these can hand a player a damaged foal either.
-    public static final DeferredItem<Item> DILUTION_GENE_SPLICE_CARROT = simple("dilution_gene_splice_carrot");
-    public static final DeferredItem<Item> WHITE_GENE_SPLICE_CARROT = simple("white_gene_splice_carrot");
-    public static final DeferredItem<Item> MARKING_GENE_SPLICE_CARROT = simple("marking_gene_splice_carrot");
-    public static final DeferredItem<Item> PERFORMANCE_GENE_SPLICE_CARROT = simple("performance_gene_splice_carrot");
-    public static final DeferredItem<Item> MAGICAL_GENE_SPLICE_CARROT = simple("magical_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> DILUTION_GENE_SPLICE_CARROT = carrot("dilution_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> WHITE_GENE_SPLICE_CARROT = carrot("white_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> MARKING_GENE_SPLICE_CARROT = carrot("marking_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> PERFORMANCE_GENE_SPLICE_CARROT = carrot("performance_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> MAGICAL_GENE_SPLICE_CARROT = carrot("magical_gene_splice_carrot");
 
     // --- Known Gene Splice carrot (roadmap §14.2) - parameterised by a paper ---
-    public static final DeferredItem<Item> KNOWN_GENE_SPLICE_CARROT = simple("known_gene_splice_carrot");
+    public static final DeferredItem<BreedingCarrotItem> KNOWN_GENE_SPLICE_CARROT = carrot("known_gene_splice_carrot");
 
     // --- knowledge (roadmap §16.2) - the research paper -------------------
-    // Carries a `gene` component. Reading it adds the gene to the player's
-    // database and unlocks that gene's carrot recipe; it is also the
-    // ingredient the parameterised KnownGeneSpliceRecipe matches on.
+    // Carries one gene and one allele pair. NOT read - the gene database is
+    // earned by owning a living horse (GeneDiscoveryHandler); a paper is the
+    // ingredient the parameterised KnownGeneSpliceRecipe matches on, and the
+    // pair written on it is the pair the resulting carrot grants.
     public static final DeferredItem<ResearchPaperItem> RESEARCH_PAPER =
             register("research_paper", ResearchPaperItem::new);
 

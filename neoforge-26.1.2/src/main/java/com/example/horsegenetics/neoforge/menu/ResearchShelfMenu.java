@@ -23,8 +23,8 @@ import java.util.List;
  *
  * <ul>
  *   <li><b>Store</b> - {@link EquineResearchShelfBlockEntity#SLOTS} slots of
- *       research papers, like a chest. One paper per gene.</li>
- *   <li><b>Copy</b> - pick a gene the shelf holds, put blank books in
+ *       research papers, like a chest. One paper per allele pair.</li>
+ *   <li><b>Copy</b> - pick a pair the shelf holds, put blank books in
  *       {@link #BOOK_SLOT}, and copies arrive in {@link #RESULT_SLOT} one book
  *       at a time, by rarity.</li>
  * </ul>
@@ -146,8 +146,8 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     }
 
     /**
-     * A shelf slot: a research paper with a gene on it, one to a slot, and
-     * never a second paper for a gene another slot already holds.
+     * A shelf slot: a research paper with a pair on it, one to a slot, and
+     * never a second paper for a pair another slot already holds.
      */
     private final class PaperSlot extends Slot {
 
@@ -159,7 +159,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         public boolean mayPlace(ItemStack stack) {
             return EquineResearchShelfBlockEntity.isFiledPaper(stack)
                     && !EquineResearchShelfBlockEntity.holdsElsewhere(container,
-                            EquineResearchShelfBlockEntity.geneOf(stack), getContainerSlot());
+                            EquineResearchShelfBlockEntity.topicOf(stack), getContainerSlot());
         }
 
         @Override
@@ -185,27 +185,27 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     // What the shelf holds, and the copy
     // ------------------------------------------------------------------
 
-    /** Every gene the shelf can copy, in display order - read from the slots on either side. */
-    public List<String> storedGenes() {
-        return EquineResearchShelfBlockEntity.genesIn(papers);
+    /** Every pair the shelf can copy, in display order - read from the slots on either side. */
+    public List<String> storedTopics() {
+        return EquineResearchShelfBlockEntity.topicsIn(papers);
     }
 
-    /** The gene being copied: the server's word, synced as an index into {@link #storedGenes}. */
-    public String selectedGene() {
+    /** The pair being copied: the server's word, synced as an index into {@link #storedTopics}. */
+    public String selectedTopic() {
         if (shelf != null) {
-            return shelf.selectedGene();
+            return shelf.selectedTopic();
         }
         int i = data.get(EquineResearchShelfBlockEntity.DATA_SELECTED);
-        List<String> genes = storedGenes();
-        return i >= 0 && i < genes.size() ? genes.get(i) : clientPick;
+        List<String> topics = storedTopics();
+        return i >= 0 && i < topics.size() ? topics.get(i) : clientPick;
     }
 
     /** From the client's list click; on the server it goes to the block. */
-    public void selectGene(String geneKey) {
+    public void selectTopic(String token) {
         if (shelf != null) {
-            shelf.select(geneKey);
+            shelf.select(token);
         } else {
-            clientPick = geneKey == null ? "" : geneKey;
+            clientPick = token == null ? "" : token;
         }
     }
 

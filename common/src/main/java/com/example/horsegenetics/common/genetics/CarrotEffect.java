@@ -276,17 +276,15 @@ public sealed interface CarrotEffect {
     }
 
     /**
-     * The pair a carrot made for {@code gene} alone should name, while a
-     * research paper still documents a whole gene rather than one allele. The
-     * first-declared allele is the variant by convention, and
-     * {@link Gene#geneCarrotHomozygous()} decides whether the other copy is the
-     * same again or the wild type.
+     * The pair a carrot named for {@code gene} alone should name, for the two
+     * callers that have a gene and no paper in hand - the browser's recipe ghost
+     * and a gene's own wiki card. A <b>paper</b> names its own pair now
+     * ({@link ResearchTopic}); this is the convention for when there isn't one:
+     * the gene's variant allele, against itself or the wild type as
+     * {@link Gene#geneCarrotHomozygous()} says.
      */
     public static KnownGeneSplice defaultSpliceFor(Gene gene) {
-        String variant = gene.alleles().get(0).token();
-        String other = gene.geneCarrotHomozygous()
-                ? variant
-                : gene.defaultAllele().token();
-        return new KnownGeneSplice(gene.key(), variant, other);
+        ResearchTopic topic = ResearchTopic.defaultFor(gene);
+        return new KnownGeneSplice(topic.geneKey(), topic.alleleA(), topic.alleleB());
     }
 }

@@ -34,6 +34,7 @@ import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
 import com.example.horsegenetics.common.genetics.RandomizeMode;
+import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.common.genetics.SpliceSafety;
 import com.example.horsegenetics.common.horse.HorseFile;
 import com.example.horsegenetics.common.trait.Condition;
@@ -1187,7 +1188,11 @@ public final class DesignerApi {
         if (g == null) {
             return new Json().obj().kv("missing", true).kv("key", geneKey).endObj().toString();
         }
-        boolean hom = g.geneCarrotHomozygous();
+        // A research paper names one ALLELE PAIR, so what the carrot grants is the
+        // paper's, not the gene's. These two are the example the card shows -
+        // ResearchTopic.defaultFor, the same convention the Horse Browser's recipe
+        // ghost uses - and NOT a claim about every carrot for this locus.
+        ResearchTopic example = ResearchTopic.defaultFor(g);
         return new Json().obj()
                 .kv("missing", false)
                 .kv("key", g.key())
@@ -1198,7 +1203,12 @@ public final class DesignerApi {
                 // How often a research paper for this gene turns up, relative to
                 // the other tiers - the same weight the loot modifier uses.
                 .kv("lootWeight", g.rarity().lootWeight())
-                .kv("homozygous", hom)
+                // How many distinct papers this locus has: carrier and
+                // true-breeding per variant allele (ResearchTopic.lootPool). A
+                // derived number, which is why it is asked for rather than written.
+                .kv("paperCount", ResearchTopic.lootPool(g).size())
+                .kv("examplePair", example.pairLabel())
+                .kv("homozygous", example.homozygous())
                 // Built through defaultSpliceFor rather than by naming the pair here:
                 // the carrot token now carries both allele tokens, and this was
                 // the third place that knew its shape.

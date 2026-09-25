@@ -29,15 +29,17 @@ import java.util.Locale;
  *   "target": "carrot",          // or "paper"
  *   "min_rarity": "common",      // optional, default common
  *   "max_rarity": "uncommon",    // optional, default epic
- *   "homozygous": true }         // optional, default false; carrots only
+ *   "homozygous": true }         // optional, default false
  * </pre>
  *
  * <h2>{@code homozygous}</h2>
  * A {@code KnownGeneSplice} names <i>both</i> alleles of the gamete rather than
  * carrying a boolean, so "the carrot that breeds true" is not a separate concept
- * - it is the pair {@code X/X} instead of {@code n/X}. Normally which of the two
- * a carrot gets is the gene's own call ({@code Gene.geneCarrotHomozygous}); this
- * flag overrides it upward, and is what the scientist's master tier sells.
+ * - it is the pair {@code X/X} instead of {@code n/X}. On a <b>carrot</b>,
+ * which of the two it gets is normally the gene's own call
+ * ({@code Gene.geneCarrotHomozygous}) and this flag overrides it upward; that is
+ * what the scientist's master tier sells. On a <b>paper</b> it narrows the pair
+ * pool to the true-breeding half.
  *
  * <p><b>It cannot force a pair the gene forbids.</b> A locus whose homozygote is
  * lethal - or that otherwise fails {@code Gene.canOccur} - would make an inert
@@ -63,7 +65,7 @@ public class SetRandomGeneFunction extends LootItemConditionalFunction {
     public enum Which {
         /** A {@code known_gene_splice_carrot}: writes {@code carrot_effects}. */
         CARROT,
-        /** A {@code research_paper}: writes {@code research_gene}. */
+        /** A {@code research_paper}: writes {@code research_gene}, a gene and one pair. */
         PAPER;
 
         static final Codec<Which> CODEC = Codec.STRING.xmap(
@@ -117,7 +119,19 @@ public class SetRandomGeneFunction extends LootItemConditionalFunction {
             return ItemStack.EMPTY;
         }
         switch (target) {
-            case PAPER -> stack.set(ModDataComponents.RESEARCH_GENE.get(), gene.key());
+            case PAPER -> {
+                // The same carrier / true-breeding pool a chest draws from, so a
+                // bought paper and a found one are the same kind of thing;
+                // `homozygous` narrows it to the true-breeding half.
+                List<com.example.horsegenetics.common.genetics.ResearchTopic> pool = homozygous
+                        ? com.example.horsegenetics.common.genetics.ResearchTopic.breedsTruePool(gene)
+                        : com.example.horsegenetics.common.genetics.ResearchTopic.lootPool(gene);
+                if (pool.isEmpty()) {
+                    return ItemStack.EMPTY;
+                }
+                stack.set(ModDataComponents.RESEARCH_TOPIC.get(),
+                        pool.get(context.getRandom().nextInt(pool.size())));
+            }
             case CARROT -> stack.set(ModDataComponents.CARROT_EFFECTS.get(),
                     List.of(spliceFor(gene).id()));
         }

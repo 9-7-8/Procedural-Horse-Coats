@@ -448,6 +448,132 @@ public final class ModGameTests {
         register(event, environment, HAY_IS_STILL_A_BALE, 100);
         // One horse spawned, saved and read back, all inside a single tick.
         register(event, environment, STASIS_TAG_IS_READABLE, 100);
+        // Three codec round trips in one tick.
+        register(event, environment, OLD_PAPERS_STILL_READ, 100);
+    }
+
+    /**
+     * <b>A research paper written before papers named a pair still reads.</b>
+     *
+     * <p>{@code horsegenetics:research_gene} used to be a bare {@code String}
+     * gene key and is now a {@link com.example.horsegenetics.common.genetics.ResearchTopic}.
+     * The owner has papers in chests, on shelves and in villager windows holding
+     * the old shape, and the whole of the compatibility is one
+     * {@code Codec.either(record, string)} in
+     * {@link com.example.horsegenetics.neoforge.data.ResearchTopicCodecs} -
+     * documented as this repo's single deliberate exception to the
+     * no-back-compat rule.
+     *
+     * <p><b>It fails silently and could not be unit-tested.</b> A component whose
+     * persistent codec refuses its stored value is <i>dropped</i> on load, with a
+     * warning nobody reads and no crash: the paper becomes a blank, files into no
+     * shelf and crafts no carrot. That is also why the check is here rather than
+     * in JUnit - the NeoForge module's test classpath deliberately carries no
+     * Minecraft, so {@code NbtOps} and a real {@link ItemStack} only exist inside
+     * a booted game.
+     *
+     * <p>Three assertions, in the order they would break: the legacy string
+     * decodes at all; it decodes to the homozygous non-wild pair the owner asked
+     * for; and a real stack carrying the legacy tag comes back out of
+     * {@code ItemStack.CODEC} with a usable topic on it.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> OLD_PAPERS_STILL_READ =
+            TEST_FUNCTIONS.register("old_papers_still_read", () -> ModGameTests::oldPapersStillRead);
+
+    private static void oldPapersStillRead(GameTestHelper helper) {
+        com.example.horsegenetics.common.genetics.Gene gene =
+                com.example.horsegenetics.common.genetics.Genes.codeOrder().stream()
+                        .filter(com.example.horsegenetics.common.genetics.Gene::hasGeneCarrot)
+                        .findFirst()
+                        .orElseThrow(() -> new GameTestAssertException(Component.literal(
+                                "no gene in this build has a gene carrot - this test's premise is"
+                                        + " broken, not the codec"), 0));
+
+        // 1. The bare string a pre-change paper stored decodes at all.
+        com.example.horsegenetics.common.genetics.ResearchTopic decoded =
+                com.example.horsegenetics.neoforge.data.ResearchTopicCodecs.CODEC
+                        .parse(net.minecraft.nbt.NbtOps.INSTANCE,
+                                net.minecraft.nbt.StringTag.valueOf(gene.key()))
+                        .result()
+                        .orElse(null);
+        if (decoded == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "research_gene no longer decodes a bare gene-key string - every research paper"
+                            + " in the owner's world has just become blank. See"
+                            + " ResearchTopicCodecs.CODEC."), 0);
+        }
+
+        // 2. It decodes to what the owner asked for: the homozygous non-wild pair.
+        com.example.horsegenetics.common.genetics.ResearchTopic expected =
+                com.example.horsegenetics.common.genetics.ResearchTopic.wholeGene(gene.key());
+        if (!expected.equals(decoded)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a legacy paper for " + gene.key() + " decoded to " + decoded.token()
+                            + " instead of " + expected.token()), 0);
+        }
+
+        // 3. The same thing through a real item stack, which is the path the game
+        // actually takes - the component codec is only reached via ItemStack.CODEC.
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putString("id", "horsegenetics:research_paper");
+        tag.putInt("count", 1);
+        net.minecraft.nbt.CompoundTag components = new net.minecraft.nbt.CompoundTag();
+        components.putString("horsegenetics:research_gene", gene.key());
+        tag.put("components", components);
+
+        ItemStack revived = ItemStack.CODEC
+                .parse(helper.getLevel().registryAccess().createSerializationContext(
+                        net.minecraft.nbt.NbtOps.INSTANCE), tag)
+                .result()
+                .orElse(null);
+        if (revived == null || revived.isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a research paper stack holding the legacy research_gene string would not load"), 0);
+        }
+        com.example.horsegenetics.common.genetics.ResearchTopic onStack =
+                com.example.horsegenetics.neoforge.item.ResearchPaperItem.topicOf(revived);
+        if (onStack == null || !onStack.isResolved()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a loaded legacy paper carries no usable topic (" + onStack + ") - it would show"
+                            + " as Blank, file into no shelf and craft no carrot"), 0);
+        }
+        if (!com.example.horsegenetics.neoforge.block.EquineResearchShelfBlockEntity
+                .isFiledPaper(revived)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a loaded legacy paper is not accepted by the research shelf"), 0);
+        }
+
+        // 4. And the other direction, which is the mirror failure: a NEW paper
+        // has to survive being written and read back, or every paper in a chest
+        // is blank the next time the world loads. The compound pair is the case
+        // the legacy string could never have produced.
+        com.example.horsegenetics.common.genetics.ResearchTopic compound = null;
+        for (com.example.horsegenetics.common.genetics.ResearchTopic candidate
+                : com.example.horsegenetics.common.genetics.ResearchTopic.lootPool(gene)) {
+            if (!candidate.homozygous()) {
+                compound = candidate;
+                break;
+            }
+        }
+        com.example.horsegenetics.common.genetics.ResearchTopic written =
+                compound == null ? expected : compound;
+        var ops = helper.getLevel().registryAccess()
+                .createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+        net.minecraft.nbt.Tag encoded = ItemStack.CODEC
+                .encodeStart(ops, com.example.horsegenetics.neoforge.item.ResearchPaperItem.of(written))
+                .result()
+                .orElse(null);
+        ItemStack roundTripped = encoded == null ? null
+                : ItemStack.CODEC.parse(ops, encoded).result().orElse(null);
+        com.example.horsegenetics.common.genetics.ResearchTopic back = roundTripped == null ? null
+                : com.example.horsegenetics.neoforge.item.ResearchPaperItem.topicOf(roundTripped);
+        if (!written.equals(back)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a research paper for " + written.token() + " does not survive a save and load"
+                            + " (came back as " + back + ") - every paper in the world would blank"
+                            + " on the next reload"), 0);
+        }
+        helper.succeed();
     }
 
     /**
