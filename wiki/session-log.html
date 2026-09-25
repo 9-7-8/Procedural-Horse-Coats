@@ -21,6 +21,17 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-25-recipes-and-gesture.txt">2026-09-25 &mdash;
+        five bug reports off a modded server. The stasis chamber recipes were present,
+        registered and working, and <em>nothing in the game would show them to anybody</em>
+        &mdash; <code>CustomRecipe</code> is special and unplaceable by default, which costs
+        a recipe its book entry and everything JEI would have drawn. Shift-right-click on a
+        horse had never once opened this mod's screen, in any world, because the interact
+        packet is sent <em>before</em> either entity event fires and a class comment had
+        asserted the opposite since the day it was written. Twice the first diagnosis was
+        confidently wrong and was caught only by reading the patched source; the gear
+        inventory was written up in <code>intake/</code> rather than started, and one claim
+        in that write-up was corrected before it shipped</a></li>
     <li><a href="session-log/d2026-09-24-stasis-bank-deep.txt">2026-09-24, after the three roadmap
         items &mdash; the stasis bank was asked to hold two hundred horses, and almost none of
         the work was the number: two hundred slots do not fit in any window, so the Chambers tab

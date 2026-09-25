@@ -1,0 +1,195 @@
+2026-09-25 — five bug reports off a modded server: recipes nothing would show you, and a
+gesture that never once worked
+
+    The owner was playing, not testing, and the reports arrived one at a time while the
+    session was already reading code. That shape matters to what follows — twice the first
+    diagnosis was confidently wrong and was only caught by going to the decompiled source
+    instead of stopping at a plausible cause.
+
+    The queue, in the order it arrived:
+
+        it looks like the recipes for the stasis chambers never made it into the game-- the
+        modded server i'm playing on, I can't craft them. The stasis BANK has a recipe, but
+        not the chambers?
+
+        also, shift-right-clicking a horse STILL opens the vanilla menu, not our new menu
+
+        the list of companions needs to go onto a new line if it gets too long
+
+        you should be able to click and drag the image of the horse on the gear screen
+
+        offspring should also automatically refresh on a horse's page whenever you open it
+
+        the player's inventory must be visible on the right side of the gear screen, so they
+        can equip/unequip items
+
+    Plus two confirmations, which are worth as much as the reports: setting the barn name
+    now works, and clicking a saddle on the gear screen restores it to the inventory.
+
+The recipes were never missing. Nothing in the game would tell anyone what they were
+
+    All five chamber recipes were present in data/horsegenetics/recipe/, registered in
+    ModRecipes, and working. Laying the right grid out crafted the right item. The first
+    answer given to the owner was therefore "they craft, they are just invisible, here are
+    the patterns" — which was true and was not the answer. The correction came back:
+
+        I'm telling you they don't work: I have them in a modpack using JEI and when I click
+        them in JEI, it doesn't pop up their recipe
+
+    Same root cause, and the owner's framing was the more useful one. A recipe the game
+    will not show anybody is not a recipe that works; it is an item with a secret.
+
+    The cause is two defaults on CustomRecipe, which all five extend:
+
+        public abstract class CustomRecipe implements CraftingRecipe {
+            public boolean isSpecial() { return true; }
+            public PlacementInfo placementInfo() { return PlacementInfo.NOT_PLACEABLE; }
+
+    Between them: no recipe-book entry, no place-into-grid button, and nothing in JEI, which
+    skips special recipes on the entirely reasonable grounds that a recipe declaring no
+    ingredients has nothing to draw. The bank was unaffected only because it is an ordinary
+    shaped JSON — which is exactly why the report came in the shape "the bank has a recipe
+    but not the chambers".
+
+    Both are now overridden on all five. Matching is untouched: the water is still any
+    container in c:buckets/water and still comes back.
+
+The upgrades could not be fixed that way, and the reason generalises
+
+    One StasisUpgradeRecipe instance was matching all three rungs by reading tier().next()
+    off whatever chamber was in the grid. Tidy Java, and unfixable as it stood: a recipe
+    advertises exactly one set of ingredients, and there is no placementInfo() that says "a
+    chamber, and whichever item its own tier calls for". That instance could never have
+    described itself however the two flags were set.
+
+    So the tier is a field now, read from a "to" key in the recipe JSON, and there are three
+    files where there was one. Behaviour is deliberately identical — each file takes the rung
+    below its own, which is what the single instance did by a different route, emergency
+    chamber included, since that item is a StasisChamberItem at BASIC and the Intermediate
+    file asks for a tier rather than a class.
+
+    Side benefit worth noting: that serializer now has a real codec with a real field instead
+    of MapCodec.unit, which takes it out of the shared-instance trap documented on
+    CarrotCombineRecipe#INSTANCE — the one where StreamCodec.unit's identity check fails and
+    every joining client is kicked. There is nothing left for it to fail on.
+
+The gesture had never worked, and the wrong belief was written down as a certainty
+
+    "Shift-right-clicking a horse STILL opens the vanilla menu" — and the "still" is doing
+    real work, because d2026-09-21-menu-gesture.txt records this being built and documented
+    four days earlier. It was built. It had simply never functioned, anywhere, in any world.
+
+    The first diagnosis here was wrong too, and plausibly so: HorseInfoInteraction subscribed
+    only to EntityInteract, and CustomHorseSpawnEggClient's own class comment says
+    EntityInteractSpecific fires first. So the fix looked like a missing second handler. That
+    was written, and then checked against the patched source rather than assumed — which is
+    what turned it up:
+
+        public InteractionResult interact(Player player, Entity entity, EntityHitResult hit, InteractionHand hand) {
+            this.ensureHasSentCarriedItem();
+            Vec3 location = ...;
+            this.connection.send(new ServerboundInteractPacket(...));   // <- first line
+            if (this.localPlayerMode == GameType.SPECTATOR) return InteractionResult.PASS;
+            InteractionResult cancelResult = CommonHooks.onInteractEntityAt(player, entity, hit, hand);
+
+    The packet goes out before either event fires. So the server heard every click no matter
+    what the client decided, ran AbstractHorse.mobInteract, and sent an open-screen packet
+    that landed on top of the screen the client had just put up. The visible result is a
+    screen that flickers and is replaced, which reads as "it opened the wrong screen".
+
+    And the class comment asserted the opposite, in as many words: "Cancelling on the client
+    also stops the interaction packet ever being sent, so the server never opens the vanilla
+    inventory underneath this one." That sentence had stood since the feature was written and
+    was believed for as long as it stood. It is now replaced by the correction, and the
+    gesture is claimed on the server too — HorseInteractionHandler.onInfoGestureSpecific, on
+    conditions deliberately identical to the client's, because two cancels that disagree
+    about which clicks they take is the same bug in a different hat.
+
+    Two things to carry forward. A cancelled client-side interaction is not an interaction
+    that did not happen — it stops the client predicting and nothing more, so any gesture
+    this mod takes from vanilla has to be claimed on the server or vanilla will answer it.
+    And the Verification tab did its job here: it had this listed as unplayed all along. What
+    failed was a comment that stated a mechanism nobody had tested.
+
+The three small screen fixes
+
+    Companions wrap. The row laid every name along one line with no width check, so a horse
+    with a full band ran off the panel — and the names past the edge were not merely
+    unreadable but unclickable, since the hit box recorded for each was wherever it had been
+    drawn, which was outside the panel. The measure-as-you-draw rule is unchanged and is what
+    makes the wrap cheap.
+
+    The Gear doll turns under a drag. DOLL_YAW and DOLL_PITCH were static finals; they are
+    per-screen fields now, with the portrait's box recorded on the way past exactly as the
+    tack slots already were. Slots take the click first, so a drag starting on a boot still
+    equips — several of the nineteen anchors sit on top of the animal.
+
+    Offspring asks as the screen opens. This reverses a deliberate call: the walk is a pass
+    over the whole ancestry table per generation and was put behind a button for that reason.
+    The owner's argument wins on the player's side — the cost is once per screen, and an
+    unasked tab reads as "this horse has no foals" rather than "nothing has been asked",
+    which is a wrong answer rather than a missing one. init() guards it, since init() runs
+    again on every resize and a dragged window must not be a stream of ancestry walks.
+
+The test that was added, and what the old ones were not testing
+
+    EVERY_RECIPE_ENCODES already existed and proves every recipe reaches a joining client.
+    The class comments explained at length why each chamber recipe had to be Java rather than
+    JSON. All true, all beside the point: nothing asserted the thing a player needs, which is
+    that the recipe can be shown to them. A special recipe still crafts, so a test that laid
+    out the grid and checked the output would have passed throughout.
+
+    STASIS_CHAMBERS_CRAFT now asserts, for all five grids: the recipe resolves, it makes the
+    right item, it is not special, and it advertises real ingredients. The last two are the
+    half with teeth. All 12 gametests pass.
+
+    What no test here can check is JEI itself — this mod carries no JEI dependency, so "not
+    special, with real ingredients" is a well-founded inference about what JEI needs and not
+    an observation of it. That is on the Verification tab of horse-stasis.html as an open
+    check rather than being claimed as done.
+
+The gear inventory was not built, on purpose
+
+    "The player's inventory must be visible on the right side of the gear screen" is a menu
+    where there has never been one, and it was written up as intake/Gear screen inventory.txt
+    rather than started. Writing it turned up the fact that had been missed when it was first
+    called "a restructure": HorseInfoScreen's horse field is @Nullable, because the screen
+    routinely draws horses that are not loaded entities at all — a descendant off the
+    Offspring tab, a horse opened from the family tree. A container menu cannot exist for
+    those, so a menu cannot be a precondition of the screen opening, which rules out the
+    straightforward conversion.
+
+    It also turned up the opposite: HorseStasisBankMenu already solves tabs, per-tab hidden
+    slots via isActive(), a scrolling grid whose scroll moves real slots, and the player's
+    inventory as plain Slots. That is the template, and it answers the worry that a menu
+    whose slots are all hidden is something vanilla dislikes — the bank does exactly that.
+
+    One claim in that file was written wrong and corrected before it shipped: that
+    HorseInventoryMenu is vanilla's only entity-backed menu. Player also carries
+    openNautilusInventory. The accurate version is more useful anyway — vanilla adds a
+    bespoke method per entity rather than generalising, because MenuProvider cannot name an
+    entity, so there is no general API to reach for and NeoForge's extra-data menu (already
+    used by JumpMenu here) is the route.
+
+    The file ends on a decision only the owner can make: a separate menu-backed Gear screen,
+    or converting HorseInfoScreen wholesale. It recommends the former and says why.
+
+What the two confirmations closed
+
+    The barn-name box: confirmed on the owner's own modded dedicated server, which is the
+    environment the check asked for, the original bug having been in client-side state. That
+    settles the visibility fix and the live() re-read together. Three narrower branches
+    survive it — clearing the name, the gate refusing on somebody else's horse, and the
+    two-second mirror catching a horse tamed with the screen already open — and they stay on
+    the Verification tab, because none can be judged from the confirmed one.
+
+    The saddle: clicking it off the Gear tab returned it to the inventory, so the unequip
+    path through TackSlotPayload and HorseTackSlot.set works. The checklist item was narrowed
+    rather than deleted — riding between equip and unequip, iron barding, and the
+    full-inventory drop are all still unwatched, and a successful click cannot exercise them.
+
+Not done, and deliberately not
+
+    No release was cut. The fixes are on main and unreleased, so the owner's server is still
+    running 0.5.025 and still has all five bugs. Cutting 0.5.026 was offered and not taken up
+    in this session; it wants a runServer boot to Done( first, per the standing rule.
