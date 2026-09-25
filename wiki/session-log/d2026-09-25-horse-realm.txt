@@ -1,0 +1,61 @@
+2026-09-25 - the horse realm is designed as a safe commons, before implementation
+
+    No code. The request was to describe a way to handle the horse realm in intake,
+    not to build the dimension. The treatment was kept in
+    intake/Horse realm treatment.txt, and the design questions were resolved before
+    treating it as ready for implementation.
+
+The public realm is not the debug realm
+
+    Three requirements initially pulled against each other: an infinite field versus
+    a 1,000-by-1,000-chunk realm, released horses that do not breed versus a requested
+    breeding-rate modifier, and a public horse destination versus the existing realm's
+    debug purpose. The answers make the public realm a distinct dimension, bounded to
+    1,000 by 1,000 chunks, while the existing F6 dimension remains the unrestricted
+    debug realm. On production builds, F6 remains available only to operators and
+    players with command permission.
+
+    The public realm's terrain plane is Y=0: bedrock at -1 and one dirt layer at 0.
+    Chunk coordinates run from 0 through 999. The portal grid is anchored at (0, 0)
+    every 100 chunks; the water grid is anchored there every 5 chunks, each pool
+    replacing a 2-by-2 section of the surface. An invisible boundary keeps players
+    and horses within the finite field. Each realm portal returns the player to the
+    Overworld portal used to enter; if that portal was removed, recreate it at its
+    remembered position when safe, or use the nearest safe position.
+
+A protected population that can be shared
+
+    No entity other than horses may spawn in the public realm, by any spawn path.
+    It is eternally day. All horses inside it, including horses brought in by players,
+    are protected from damage and death and cannot despawn; those protections end
+    outside the dimension. Horses may form herds. A horse does not tick while no
+    player is in the dimension; when occupied, only normal loaded/ticking chunks
+    simulate.
+
+    A shapeless recipe using one feather, one stick, and one horse hair crafts one
+    freedom stick, using the existing horse-hair source. A successful use loses one
+    durability point; a failed use does not. Right-clicking a horse with it in the
+    realm immediately heals the horse to full health, removes its ownership, and
+    makes it wild. Its identity, genetics, and pedigree remain; after ordinary
+    Minecraft-style taming, the mod record returns and the tamer becomes its owner.
+
+Breeding is slow, configurable, and paused with the realm
+
+    Realm horses can breed, and foals are wild and protected. A server config uses
+    whole percentages from 0 to 100, defaulting to 25. It scales all reproduction
+    timers as a rate multiplier: 25 means one quarter normal rate, or four times the
+    duration. Zero pauses reproduction, including existing pregnancies. Config
+    changes take effect immediately. A pregnant mare gives birth only while she and
+    her chunk are ticking.
+
+    The earlier no-breeding rule was superseded by this configurable rule. It is
+    important not to let the debug dimension inherit any of the public realm's
+    spawn, tick, time, breeding, terrain, or protection rules.
+
+What remains
+
+    This session only specified the behavior. Implementation still needs to verify
+    the existing horse-hair source and prove that spawn denial, time control, horse
+    protection, and dormant ticking are scoped to the public dimension, while F6
+    continues to enter the unrestricted debug dimension for authorized players.
+    No code tests or game-runtime checks were run.

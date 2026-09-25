@@ -1,0 +1,87 @@
+Horse Realm - Treatment
+=======================
+
+Purpose
+=======
+A safe, shared release field where players can leave surplus horses without
+fear of harming them, and other players can find and tame them. This is a
+player-facing feature and must be separate from the existing F6 debug realm.
+
+Dimension separation
+====================
+- Create a new, technically distinct horse-realm dimension for the public
+  experience. The existing debug realm remains a different dimension.
+- The ordinary horse portal sends players to the new horse realm.
+- F6 continues to send operators and players with command permission to the
+  debug realm, including on production builds. Do not apply the public realm's
+  terrain, spawning, time, ticking, breeding, or horse-protection rules to it.
+- Scope every special rule to the new horse-realm dimension, never globally.
+
+World layout and travel
+=======================
+- The realm is a bounded square of 1,000 by 1,000 chunks. The earlier
+  description of an infinite field is superseded by this finite size.
+- Use a flat plane at Y=0: bedrock at Y=-1, and one dirt layer at Y=0.
+  Replace the dirt with water for each 2-by-2 pool in the 5-chunk grid.
+- Place horse portals on a grid spaced 100 chunks apart inside the realm.
+  These provide exits throughout the field so a player is not stranded far
+  from an exit. A returning player goes back to the Overworld portal they used
+  to enter.
+- Enforce the perimeter with an invisible barrier; players and horses cannot
+  leave the bounded field by crossing its edge.
+- Keep it eternally day.
+- The realm has no natural mob spawns. More strictly, no non-horse entity may
+  spawn in this dimension by any spawn path. Horses are the only allowed
+  spawns. The debug realm remains unrestricted.
+
+Released horses
+===============
+- Add a freedom stick crafted from a feather, a stick, and one piece of horse
+  hair. The exact recipe layout and horse-hair acquisition method remain
+  implementation details to settle against the existing item system.
+- Right-clicking a horse with the freedom stick while in the horse realm
+  removes its ownership and makes it wild. It must be tamed again by the
+  ordinary Minecraft horse process of riding and/or feeding it.
+- Releasing a horse immediately restores it to full health.
+- Preserve the horse's identity, genetics, and pedigree when unclaiming it.
+  When a player tames it again, restore its mod record and assign ownership to
+  the new player.
+- All horses in the horse realm, including player-owned horses brought in,
+  cannot take damage, die, or despawn while in that dimension. These guarantees
+  are dimension-scoped; ordinary behavior resumes outside it.
+- Horses can form herds. No other mob type spawns in the realm.
+
+Breeding and simulation
+=======================
+- Breeding is enabled in the horse realm. This supersedes the earlier request
+  that released horses not breed.
+- Add a server-side realm breeding-rate config expressed as a whole percent,
+  bounded from 0 to 100, with a default of 25. A value of 25 runs every
+  reproduction timer at 0.25 times its normal rate (four times the duration).
+  Apply the modifier to heat, conception retry/cooldown, and gestation timers;
+  do not treat it as a 25% conception-success chance.
+- A value of 0 pauses all reproduction, including progress of existing
+  pregnancies. At nonzero values, pregnancies progress and mares give birth
+  while the relevant horse and chunk are ticking.
+- Horses residing in the realm may breed. Foals are born wild/unclaimed and
+  receive the realm's protection while there.
+- No horse ticks while the realm has no player in it. When at least one player
+  is present, use normal loaded/ticking-chunk behavior; do not force-tick
+  distant or unloaded horse chunks solely because the dimension is occupied.
+  Thus an unclaimed pregnant mare still gives birth if she is ticking, but an
+  inactive realm does not advance her pregnancy.
+
+Implementation choices and checks
+=================================
+- Number realm chunks from 0 through 999. Anchor both grids at chunk (0, 0);
+  place each portal or pool at its grid interval origin.
+- If an entry portal has been removed, recreate it at its remembered location
+  when safe; otherwise place it at the nearest safe location.
+- Craft one freedom stick shapelessly from one feather, one stick, and one
+  horse hair. Use the existing horse-hair source. The stick loses durability
+  by one point on a successful release; failed attempts do not consume
+  durability.
+- Apply breeding-rate config changes immediately on the server.
+- Test that spawn denial, time control, horse protection, and dormant ticking
+  affect only the public horse realm, while F6 still enters the unrestricted
+  debug dimension for authorized players.
