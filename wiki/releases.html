@@ -61,6 +61,96 @@
     </p>
 </div>
 
+<h2 id="v0-5-025">0.5.025 &mdash; a paper names a pair, the bank holds a stud farm, and your lead comes back</h2>
+
+<p>
+    <strong>A research paper now names an allele <em>pair</em>, not just a gene</strong> &mdash;
+    which is the half that was missing for the Known Gene Splice carrot to be worth crafting. A
+    whole-gene paper could only ever build one pair, the first allele the locus declared, so on
+    the forty-allele particle locus <em>no carrot in the game</em> could hand over a soul flame,
+    and KIT could reach one of thirteen. Now the paper carries the pair and the carrot grants
+    that pair. A paper read off a horse writes down what the animal actually carries, which is
+    the only route to a compound pair; chests and the equestrian give carrier and true-breeding
+    pairs, deliberately not all eight hundred combinations of a wide locus. The research shelf
+    files one paper per pair, so <em>A/a</em> and <em>A/A</em> sit side by side &mdash; they
+    craft different carrots.
+    <a href="item-research-papers.html">Research papers</a> has the whole of it.
+</p>
+
+<div class="note">
+    <span class="label">Your existing papers still work</span>
+    <p>
+        The owner asked for this by name, and it is the one deliberate exception to this
+        project&rsquo;s no-back-compat rule. A paper written before this release decodes as the
+        homozygous pair for the gene it named (or the carrier pair, on a locus whose homozygote
+        is forbidden) rather than turning inert or vanishing. <strong>Worth hovering a few old
+        papers before doing anything else</strong>, though &mdash; only a live save that
+        predates the change can prove it, and the test suite proves the codec, not your
+        world.
+    </p>
+</div>
+
+<p>
+    <strong>The Horse Stasis Bank holds two hundred and seven chambers</strong>, up from
+    fifty-four. Six rows are on screen and the grid scrolls on the wheel, with a bar down the
+    right-hand edge saying where in the cabinet you are; the window is the same size it was.
+    Worth knowing what that does <em>not</em> change: the bank still mends one horse per turn in
+    rotation, so a full one takes the better part of five minutes to come back round to any
+    particular horse. That is the price of a bank costing the server the same whether it holds
+    one chamber or all of them &mdash; a horse that actually needs mending mends faster in a
+    field.
+</p>
+
+<h3>Three smaller things, each one a report</h3>
+
+<ul>
+    <li><strong>The area whistles have a tooltip at last.</strong> Three tiers, one icon, three
+        names, and nothing anywhere said how far any of them reached &mdash; the recipe blurbs
+        said &ldquo;further than the basic one&rdquo; without ever saying how far, so the only
+        way to learn a range was to walk out and count. The radius is on the item now, along
+        with the two outcomes players kept reporting as bugs: a ridden horse stays put, and a
+        leashed one is untied.</li>
+    <li><strong>The browser&rsquo;s <em>My horses</em> list refreshes.</strong> It was fetched
+        once per login and never again, so a player who bred a foal, tamed a horse or sold one
+        saw their stable as it was when they first pressed <kbd>H</kbd> &mdash; until they
+        happened to find the Refresh button. Opening the screen and switching to the tab both
+        re-ask now, throttled to one sweep every two seconds so that flipping through the tab
+        strip cannot make the server walk the whole ancestry table per click. The Refresh button
+        itself is deliberately <em>not</em> throttled: it exists to be believed.</li>
+    <li><strong>A lead comes back to you instead of being left behind.</strong> Every path that
+        teleports a horse has to untie it first, and vanilla drops the lead where the horse was
+        standing &mdash; right for a leash that snapped, wrong for one the mod cut. The horse
+        lands beside you and the lead stays put: sixty-four blocks away for an echo whistle, and
+        <em>in another dimension</em> for an ender whistle or an interdimensional ticket, where
+        it is simply gone. The lead is handed to whoever caused the move now, falling back to a
+        drop if their pack is full. The two portal paths are deliberately left alone &mdash; a
+        horse that walked into a portal was untied next to whoever held it, so the lead is
+        already at their feet.</li>
+</ul>
+
+<div class="note">
+    <span class="label">One new setting</span>
+    <p>
+        <code>behaviour.leads_return</code> in <code>server.toml</code>, default <strong>on</strong>.
+        Turning it off restores vanilla&rsquo;s behaviour exactly &mdash; the lead drops where
+        the horse was.
+    </p>
+</div>
+
+<p>
+    <strong>Not played.</strong> A dedicated server boots clean &mdash; <code>Done</code>, and
+    not one <code>ERROR</code> line &mdash; and the build is green. The stasis bank&rsquo;s new
+    depth is the untested surface here, and the check worth doing deliberately is the dull one:
+    <strong>scroll to the bottom of the grid, put a chamber in a slot down there, close the bank
+    and reopen it</strong>, and confirm it is in the same slot. Everything else about the deeper
+    grid is cosmetic if that holds and expensive if it does not. There is also a question this
+    release makes bigger rather than smaller: a bank sends every chamber&rsquo;s whole horse to
+    the client when you open it, and nobody has yet opened a <em>full</em> one over a real
+    network connection &mdash; at two hundred chambers that may be slow, or it may be a refusal
+    to open at all. <a href="horse-stasis.html#verification">The bank&rsquo;s own check list</a>
+    has both. Known bugs carry over unchanged from 0.5.023 below.
+</p>
+
 <h2 id="v0-5-024">0.5.024 &mdash; horses on a shelf, and a log of what happened while you were out</h2>
 
 <p>
