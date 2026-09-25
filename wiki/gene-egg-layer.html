@@ -51,6 +51,19 @@
     </tbody>
 </table>
 
+<h2 id="pearl">One of the alleles is worth having</h2>
+
+<p>
+    Eight of the items are things a chicken could be jealous of &mdash; an egg, a
+    feather, wool, a slime ball, an ink sac, string, a bone, leather. The ninth is
+    an <strong>ender pearl</strong>, and it is the reason the
+    <a href="breed-book.html#enderpony">Enderpony</a> is worth catching: every
+    horse of that breed is <code>Endp/Endp</code> and lays them in a paddock for
+    nothing. It is in the wild carrier spread with the other eight, so a pair of
+    ordinary carriers from opposite ends of a world can also throw a pearl layer
+    &mdash; the breed is the reliable way to one, not the only way.
+</p>
+
 <h2 id="third">The third way a horse gives you something</h2>
 
 <p>
@@ -90,7 +103,10 @@
 <div class="note danger">
     <span class="label">Open item ids mean a diamond-laying horse is expressible</span>
     <p>
-        The locus deliberately accepts any item id. That is the right call for expressiveness and it puts the balance burden entirely on the founder table: <strong>high-value alleles must never be rollable in the wild</strong>, and should be reachable only through the <a href="carrots.html">splice</a> layer.
+        The locus deliberately accepts any item id. That is the right call for expressiveness and it puts the balance burden entirely on the founder table, so <strong>what the wild may roll is a design decision every time an allele is added</strong> &mdash; not something the format decides for you.
+    </p>
+    <p>
+        The rule used to be absolute: nothing worth having was rollable at all, and anything valuable had to come through the <a href="carrots.html">splice</a> layer. <strong>The ender pearl is a deliberate exception to it</strong> (owner's call, 2026-09-24), because the <a href="breed-book.html#enderpony">Enderpony</a> is a whole breed built on laying pearls and the allele had to exist somewhere. It sits in the ordinary carrier spread, which is what makes a pearl layer breedable without ever meeting an Enderpony. Nothing further up the value scale has been let in, and the next one is the same decision again rather than a precedent already set.
     </p>
 </div>
 
@@ -161,9 +177,10 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Egg layer is confirmed laying and confirmed bounded, but only for one allele and only for the
+    <p>Egg layer is confirmed laying and confirmed bounded, but only for the egg and only for the
     matched pair: nobody has checked that a mismatched pair and a single copy lay <em>nothing</em>,
-    or that an allele other than the egg lays its own item.</p>
+    that an allele other than the egg lays its own item, or that the new ender pearl allele the
+    Enderpony is built on lays anything at all.</p>
 </div>
 
 <h3 id="open-gene-egg-layer">Still open (NOT played)</h3>
@@ -189,13 +206,22 @@
     <li><strong>An allele that is not the egg lays its own item.</strong> Spawn a matched pair of
         one of the other alleles &mdash; leather or slime ball, say &mdash; and wait out one
         interval. <strong>Pass:</strong> that item appears, not eggs. The item id is resolved
-        against the live registry per allele and only one of the eight has ever been watched
+        against the live registry per allele and only the egg has ever been watched
         working; a wrong id warns once through <code>warnUntranslated</code> and then lays nothing
         for ever.</li>
-    <li><strong>No wild horse lays.</strong> The founder table for a matched-pair locus puts
-        carriers in the wild and never the pair. <strong>Pass:</strong> over a lot of wild horses you
-        find carriers at roughly <code>EggLayerGene.WILD_CARRIER_PERCENT</code> and never one that
-        drops anything &mdash; the first layer in a world is one somebody bred.</li>
+    <li><strong>The ender pearl allele lays a pearl.</strong> <code>Endp/Endp</code> is the newest
+        allele and the only one anybody has a reason to breed for, so it is the one a wrong id would
+        be most embarrassing on. Spawn one from the custom horse spawn egg and wait out an interval.
+        <strong>Pass:</strong> an ender pearl on the floor, and nothing in the log from
+        <code>warnUntranslated</code>. Then do the same by catching an
+        <a href="breeds.html#commonness">Enderpony</a>, which is the route a player takes.</li>
+    <li><strong>No wild horse lays, and an Enderpony does.</strong> The founder table for a
+        matched-pair locus puts carriers in the wild and never the pair, but a breed pool overrides
+        the founder table and the Enderpony's names <code>Endp/Endp</code>. <strong>Pass:</strong>
+        over a lot of ordinary wild horses you find carriers at roughly
+        <code>EggLayerGene.WILD_CARRIER_PERCENT</code> spread over the alleles and never one that
+        drops anything &mdash; while every wild Enderpony does. The first layer in a world is either
+        one somebody bred or one somebody caught.</li>
     <li><strong>Two layers in one pen keep their own clocks.</strong> The interval is written on the
         allele copy, so two expressing horses should not lay in step.
         <strong>Pass:</strong> over a night their drops are not simultaneous, and a foal bred from

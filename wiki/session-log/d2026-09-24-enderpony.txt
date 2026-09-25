@@ -1,0 +1,112 @@
+2026-09-24, after the Emergency chamber — the Enderpony: a bad little horse that lays ender pearls
+
+    One bullet, per intake/START HERE.txt: intake/Enderpony.txt, a breed proposal, routed and
+    shipped. The file is gone from intake/ — the breed is in the catalogue and on the two breed
+    pages, which is where a breed lives.
+
+    What shipped: common/.../breeds/enderpony.json plus its index.json line, a ninth allele on
+    horsegenetics.egg_layer, a row in wiki/breeds.html#commonness, a new "country that is
+    nowhere" group in wiki/breed-book.html, and a Verification tab section on each of
+    wiki/breeds.html and wiki/gene-egg-layer.html. Green: bakeBreedFiles with no warnings,
+    BreedFilesTest, BreedSpecParserTest, CoatBakeGoldenTest, CoatPipelineGoldenTest, the whole
+    genetics and breed test packages (745 tests), :neoforge-26.1.2:build, check-parity,
+    check-designer-boots, check-links, check-roadmap-execution.
+
+Two things the proposal assumed and the code did not have
+
+    The proposal said to give the breed ender-pearl laying by "using the existing
+    horsegenetics.egg_layer gene with the item subject set to minecraft:ender_pearl", and said
+    the repo already supported that. It did not: the locus ships a fixed list of eight mundane
+    items and its own class note says so as a design position — "nothing valuable is rollable in
+    the wild; a horse that lays something worth having is one somebody engineered through the
+    splice layer". Worse, the base class spreads one wild-carrier percentage evenly over the
+    variants, so a ninth allele is automatically carried by ordinary wild horses and two
+    unrelated carriers can throw a pearl layer with no Enderpony anywhere in the story.
+
+    Put to the owner as three options (breed-only allele with an exclusion from the wild table /
+    plain ninth allele / ship the breed without it). Her call: the PLAIN NINTH ALLELE. So Endp →
+    minecraft:ender_pearl is in the ordinary carrier spread, the breed is the reliable source
+    rather than the only one, and the gene's class note and the "high-value alleles must never be
+    rollable in the wild" box on gene-egg-layer.html were rewritten to say what is now true
+    rather than left contradicting the code. The stance is not dead — it is now "what the wild
+    may roll is a decision every time an allele is added", and the next valuable item is that
+    decision again rather than a precedent already set.
+
+    The second was the purple nebula. The proposal asked for Nebula Light "with its palette or
+    breed band tuned to the purple/violet end". nebula_light.json has no hue knob at all: its
+    colour is a nine-entry PALETTE op running pink through violet to blue, a property of the gene
+    and shared by every horse carrying it, so there is nothing a breed band can reach and tuning
+    it purple would have repainted every nebula horse in the game. Options were ship-as-is /
+    add a hueShift knob / drop it. Her call: DROP IT. The purple identity is carried by the
+    marking strain instead, and the reason is written in the breed's notes so the next person
+    does not re-open it.
+
+The bake caught a sheet saying two contradictory things
+
+    First bakeBreedFiles printed:
+
+        enderpony.json: "stats.speed" is ignored wherever a pool names horsegenetics.magic_speed
+        enderpony.json: "stats.jump" is ignored wherever a pool names horsegenetics.magic_jump
+
+    The proposal asked for both a low speed score AND Magic Speed Sluggish/Sluggish, and those
+    are the same locus: magic_speed and magic_jump are two of the five body-stat genes, so a
+    pool naming one takes that axis away from the stats block. Dropped both pools and kept the
+    scores, because BreedFounder.bodyStatPair already resolves a below-baseline score to the
+    "down" allele homozygous — speed 2 IS Sluggish/Sluggish, with the magnitude drawn from the
+    score instead of fixed. Same horse, tunable number. Worth knowing generally: naming
+    magic_speed, magic_jump, magic_health, magic_pull or body_size in a pool silently overrides
+    the stats block for that axis, and the bake is the only thing that says so.
+
+The breed, in one paragraph
+
+    Magical, very rare, every overworld biome, any hour, and no country — the second breed with
+    that field blank after the Dhampir, because it is not from anywhere on earth. Fixed black
+    (E/E a/a) under a dark-leaning shade pool. Both irises Cha/Cha. Endp/Endp at the egg layer,
+    End/End ender echo, Prtl/Prtl portal motes. Rv/Rv on both weather loci, so rain is a double
+    penalty on a pony that is already slow and flat — the proposal's own asked-for check is that
+    a wet one is still recoverable and breedable, and nothing in the file touches health, pull or
+    the laying interval. Both watcher loci in the pool with all five alleles and no restriction,
+    night commoner than day. Speed 2, jump 2, health 3, pull 2, size 0.78–0.92.
+
+    Five marking strains — stars, wormholes, crescents, duskwing bands, polymoon — one
+    homozygous coloured pair each, never a plain allele and never a heterozygote. Strains rather
+    than five weighted pools because a strain is the only shape that can promise exactly one
+    marking: a gene named only by another strain rolls as unnamed, and an unnamed coat gene is
+    forced wild.
+
+It is the first breed file to band a hue, or an eye colour, at all
+
+    Every marking gene declares a hue knob over the whole 0–360° circle; the breed bands all
+    five to 265–290°, so a horse runs amethyst to violet and no further. Both iris loci band
+    eye_chaos_r/_g/_b into a purple box — chaos has no rgb of its own and reads one off the
+    allele copy. That is the part with no precedent: no shipped breed had banded a hue, an eye
+    colour, or a category (the particle site band, 1–2, is spine or hooves). It parses, the bake
+    warns about nothing, and BreedFilesTest is green, which proves the value NAMES resolve —
+    it does not prove a purple horse. That is the first thing to look at in game, and it is on
+    wiki/breeds.html's Verification tab with what a failure would look like (a rainbow of
+    ponies means the band is not reaching the knob).
+
+Two things found in passing, both fixed
+
+    GeneDescriptionCoverageTest was RED on a clean tree and had been since magic_pull shipped —
+    horsegenetics.magic_pull had no GeneDescriptions entry, so gene.description() was blank and
+    the gene said nothing in the browser or the spawn-screen tooltip. Nothing to do with this
+    session's change; confirmed by reading GeneDescriptions rather than by blaming the diff.
+    Written, four lines, in the shape of its three siblings.
+
+    Cloudtouched is missing from wiki/breeds.html#commonness, where every other shipped breed
+    including the Dhampir has a row, and was also missing from the "a breed not listed carries
+    neither tolerance locus" sentence. The sentence is fixed (it names Cloudtouched and the
+    Enderpony now). The table row is NOT written — it wants that breed's own numbers read off its
+    file rather than guessed in a session about a different breed — and is on wiki/breeds.html's
+    Verification tab as a documentation defect.
+
+What a full :common:test run would still have to check
+
+    The suite was not run whole (owner's rule). What ran: the genetics and breed packages entire,
+    both coat goldens, StasisProduceTest, and the four named above. What a full run covers that
+    this did not is everything under common/.../horse/, coat/ beyond the goldens, trait/, item/
+    and the spec fixtures — none of which reads an egg-layer allele list or a breed sheet, which
+    is why those were the two packages chosen. The one golden that moved was coat-bake-golden.txt,
+    by exactly one line: the new Endp row, carrying the same hash as the other eight because the
+    locus paints nothing.

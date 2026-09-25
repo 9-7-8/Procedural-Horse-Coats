@@ -29,6 +29,7 @@ wiki/body-space.html#vanilla-model	all	The vanilla model underneath
 wiki/body-space.html#verified	all	Verified
 wiki/breed-book.html#cold	all	The cold country
 wiki/breed-book.html#desert	all	The dry country
+wiki/breed-book.html#elsewhere	all	The country that is nowhere
 wiki/breed-book.html#entries	all	The breeds
 wiki/breed-book.html#hills	all	The high and windswept country
 wiki/breed-book.html#night	all	The night country
@@ -795,6 +796,7 @@ wiki/gene-ednrb.html#why-own-locus	science	Why frame has a locus to itself
 wiki/gene-egg-layer.html#ground	coding	On the ground, not into a chest
 wiki/gene-egg-layer.html#health	gameplay	Health
 wiki/gene-egg-layer.html#open	science	Opening the vocabulary
+wiki/gene-egg-layer.html#pearl	gameplay	One of the alleles is worth having
 wiki/gene-egg-layer.html#third	gameplay	The third way a horse gives you something
 wiki/gene-egg-layer.html#verb	coding	The new verb, and why it is shaped like this
 wiki/gene-egg-layer.html#verified	coding	Verified in the test yard
