@@ -190,7 +190,7 @@ public final class EmergencyStasisHandler {
      */
     private static void rescue(ServerLevel level, Horse horse, ServerPlayer owner,
                                LivingDamageEvent.Pre event) {
-        ItemStack armed = null;
+        ChamberSlot armed = null;
         boolean sawFull = false;
         Inventory inventory = owner.getInventory();
         // Indices past the 36 carried slots are the equipment ones, offhand
@@ -202,7 +202,7 @@ public final class EmergencyStasisHandler {
                 continue;
             }
             if (StasisChamberItem.snapshotOf(stack) == null) {
-                armed = stack;
+                armed = new ChamberSlot(inventory, slot);
                 break;      // the first empty one wins; carrying two is carrying two lives
             }
             sawFull = true;
@@ -271,7 +271,28 @@ public final class EmergencyStasisHandler {
     // ------------------------------------------------------------------
 
     /** An empty emergency chamber, and the bank it is filed in. */
-    private record Filed(HorseStasisBankBlockEntity bank, ItemStack chamber) {
+    private record Filed(HorseStasisBankBlockEntity bank, ChamberSlot chamber) {
+    }
+
+    /**
+     * <b>Where an armed chamber lives</b>, not merely which stack it is.
+     *
+     * <p>A chamber with a horse in it is a <i>different item</i> from an empty
+     * one, so filling one produces a new stack that has to be written back into
+     * the slot the old one came from. Holding the bare {@link ItemStack} - which
+     * is what this class used to do throughout - is no longer enough to put the
+     * result anywhere. See {@code StasisChamberItem.withHorse}.
+     */
+    private record ChamberSlot(net.minecraft.world.Container container, int index) {
+
+        ItemStack stack() {
+            return container.getItem(index);
+        }
+
+        /** Put the filled chamber back where the empty one was. */
+        void put(ItemStack filled) {
+            container.setItem(index, filled);
+        }
     }
 
     /**
@@ -312,7 +333,7 @@ public final class EmergencyStasisHandler {
             if (!owner.getUUID().equals(bank.placedBy())) {
                 continue;   // the index disagreed with the block; the block wins
             }
-            ItemStack chamber = armedIn(bank);
+            ChamberSlot chamber = armedIn(bank);
             if (chamber != null) {
                 return new Filed(bank, chamber);
             }
@@ -321,13 +342,13 @@ public final class EmergencyStasisHandler {
     }
 
     /** The first empty emergency chamber in a bank's grid, or {@code null}. */
-    private static @Nullable ItemStack armedIn(HorseStasisBankBlockEntity bank) {
+    private static @Nullable ChamberSlot armedIn(HorseStasisBankBlockEntity bank) {
         var chambers = bank.chambers();
         for (int slot = 0; slot < chambers.getContainerSize(); slot++) {
             ItemStack stack = chambers.getItem(slot);
             if (stack.getItem() instanceof EmergencyStasisChamberItem
                     && StasisChamberItem.snapshotOf(stack) == null) {
-                return stack;
+                return new ChamberSlot(chambers, slot);
             }
         }
         return null;
@@ -341,7 +362,7 @@ public final class EmergencyStasisHandler {
      * A capture that has been promised and not yet made. One tick long: the
      * rider has been put down and the horse goes in on the next server tick.
      */
-    private record Pending(int dueTick, ServerLevel level, Horse horse, ItemStack chamber,
+    private record Pending(int dueTick, ServerLevel level, Horse horse, ChamberSlot chamber,
                            @Nullable HorseStasisBankBlockEntity bank, ServerPlayer owner,
                            String name, boolean fromBank, String cause) {
     }
@@ -389,7 +410,7 @@ public final class EmergencyStasisHandler {
                     + " was gone before its emergency chamber could close - nothing was spent");
             return;
         }
-        if (StasisChamberItem.snapshotOf(p.chamber()) != null) {
+        if (StasisChamberItem.snapshotOf(p.chamber().stack()) != null) {
             // Somebody filled it by hand in the one tick it was reserved for.
             ActionTrace.log("stasis", "the emergency chamber promised to " + p.name()
                     + " was filled in the meantime - it takes its chances");
@@ -414,17 +435,17 @@ public final class EmergencyStasisHandler {
      * makes for covers and deaths applies harder here, because a chamber fires
      * with nobody watching by design.
      */
-    private static void close(ServerLevel level, Horse horse, ItemStack chamber,
+    private static void close(ServerLevel level, Horse horse, ChamberSlot chamber,
                               @Nullable HorseStasisBankBlockEntity bank, ServerPlayer owner,
                               String name, boolean fromBank, String cause) {
         float at = horse.getHealth();
         float max = horse.getMaxHealth();
         UUID horseId = horse.getUUID();
-        HorseStasisHandler.swallow(level, horse, chamber, name);
+        chamber.put(HorseStasisHandler.swallow(level, horse, chamber.stack(), name));
         if (bank != null) {
-            // The stack was filled in place inside the bank's grid, which the
-            // container has no way of noticing: this is what re-derives the tick
-            // gate and republishes the bank as no longer armed.
+            // The filled chamber was written straight into the bank's grid, which
+            // the container has no way of noticing: this is what re-derives the
+            // tick gate and republishes the bank as no longer armed.
             bank.chambers().setChanged();
         }
 

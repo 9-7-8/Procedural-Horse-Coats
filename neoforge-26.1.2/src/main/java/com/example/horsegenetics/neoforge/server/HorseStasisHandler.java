@@ -75,7 +75,7 @@ public final class HorseStasisHandler {
             return;
         }
         if (!event.getLevel().isClientSide() && horse.level() instanceof ServerLevel level) {
-            capture(level, horse, event.getEntity(), stack, chamber);
+            capture(level, horse, event.getEntity(), stack, chamber, event.getHand());
         }
         // Cancelled on both sides or the client predicts a mount it then has to
         // take back - see TicketHandler.
@@ -89,7 +89,8 @@ public final class HorseStasisHandler {
      * that silently does nothing is indistinguishable from a bug.
      */
     private static void capture(ServerLevel level, Horse horse, Player player, ItemStack stack,
-                                StasisChamberItem chamber) {
+                                StasisChamberItem chamber,
+                                net.minecraft.world.InteractionHand hand) {
         if (StasisChamberItem.snapshotOf(stack) != null) {
             say(player, "That chamber already has a horse in it.");
             return;
@@ -107,7 +108,9 @@ public final class HorseStasisHandler {
             return;
         }
 
-        swallow(level, horse, stack, name);
+        // A full chamber is a different item, so this is a swap in the hand
+        // rather than an edit to the stack the player is holding.
+        player.setItemInHand(hand, swallow(level, horse, stack, name));
         say(player, name + " is in stasis.");
         ActionTrace.log("stasis", ActionTrace.describeShort(horse) + " captured into a "
                 + chamber.tier().id() + " chamber by " + player.getGameProfile().name());
@@ -120,14 +123,17 @@ public final class HorseStasisHandler {
      * is about to die. Every refusal has already been made by the time anything
      * calls this.
      *
-     * <p>The chamber is filled <b>in place</b> rather than swapped for a new
-     * stack: chambers are {@code stacksTo(1)}, so the one that fills is the one
-     * that was already there - in the hand that used it, or in the inventory
-     * slot the emergency walk found it in - and anything else riding on the
-     * stack survives.
+     * <p><b>It returns the filled chamber, and the caller must put it back.</b>
+     * A chamber with a horse in it is a different item from an empty one (see
+     * {@code StasisChamberItem.withHorse}), and an {@code ItemStack} cannot
+     * change its own item, so this cannot fill in place the way it used to. The
+     * two callers each know where the stack lives - the hand that used it, or
+     * the inventory slot the emergency walk found it in - and each writes the
+     * result back there. Everything else riding on the stack is carried over by
+     * {@code transmuteCopy}.
      */
-    public static void swallow(ServerLevel level, Horse horse, ItemStack chamber, String name) {
-        chamber.set(ModDataComponents.STASIS_SNAPSHOT.get(), snapshot(horse, name));
+    public static ItemStack swallow(ServerLevel level, Horse horse, ItemStack chamber, String name) {
+        ItemStack filled = StasisChamberItem.withHorse(chamber, snapshot(horse, name));
         // Written before the discard, while the horse still has a position. This
         // is the last thing that will ever be recorded about where it is: a
         // discarded horse fires no death, leaves no entity to sight, and would
@@ -136,6 +142,7 @@ public final class HorseStasisHandler {
                 .enteredStasis(horse.getUUID(), level.dimension(), horse.blockPosition());
         horse.discard();
         level.playSound(null, horse.blockPosition(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 0.7F, 1.4F);
+        return filled;
     }
 
     /**

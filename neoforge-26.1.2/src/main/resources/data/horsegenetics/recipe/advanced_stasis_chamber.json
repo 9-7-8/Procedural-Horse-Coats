@@ -2,13 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "neoforge:ingredient_type": "neoforge:components",
-      "items": "horsegenetics:intermediate_stasis_chamber",
-      "components": {
-        "!horsegenetics:stasis_snapshot": {}
-      }
-    },
+    "horsegenetics:intermediate_stasis_chamber",
     "minecraft:gold_ingot"
   ],
   "result": {

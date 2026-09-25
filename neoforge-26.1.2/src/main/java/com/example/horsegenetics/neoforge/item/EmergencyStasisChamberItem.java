@@ -53,7 +53,11 @@ import net.minecraft.world.item.component.TooltipDisplay;
 public class EmergencyStasisChamberItem extends StasisChamberItem {
 
     public EmergencyStasisChamberItem(Properties properties) {
-        super(properties, StasisTier.BASIC);
+        super(properties, StasisTier.BASIC, false);
+    }
+
+    public EmergencyStasisChamberItem(Properties properties, boolean occupied) {
+        super(properties, StasisTier.BASIC, occupied);
     }
 
     @Override

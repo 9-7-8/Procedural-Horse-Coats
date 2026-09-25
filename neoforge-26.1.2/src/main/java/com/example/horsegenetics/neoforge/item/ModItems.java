@@ -3,8 +3,11 @@ package com.example.horsegenetics.neoforge.item;
 import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -86,6 +89,16 @@ public final class ModItems {
         DeferredItem<T> item = ITEMS.registerItem(name, factory);
         TAB_ITEMS.add(item);
         return item;
+    }
+
+    /**
+     * Registered, but kept out of the creative tab. For items that are only ever
+     * <i>made</i> from another one and are meaningless on their own - the
+     * occupied stasis chambers, which without a horse inside are broken objects.
+     */
+    private static <T extends Item> DeferredItem<T> registerHidden(
+            String name, Function<Item.Properties, ? extends T> factory) {
+        return ITEMS.registerItem(name, factory);
     }
 
     private static DeferredItem<net.minecraft.world.item.BlockItem> registerBlockItem(
@@ -231,6 +244,34 @@ public final class ModItems {
             register("emergency_stasis_chamber",
                     p -> new EmergencyStasisChamberItem(p.stacksTo(1)));
 
+    // --- the same five chambers, with a horse in them ---
+    // A CHAMBER WITH A HORSE IN IT IS A DIFFERENT ITEM, not the same item with a
+    // component on it. That is a safety property, not tidiness: the recipes that
+    // take a chamber as an input are plain JSON files naming a plain item id, and
+    // a plain ingredient cannot tell an occupied stack from an empty one. While
+    // the two shared an id, every one of those recipes would happily eat a
+    // pedigreed horse and hand back a fresh empty chamber - silently, with
+    // nothing in the log. Two ids makes that unrepresentable rather than merely
+    // guarded, so the simple recipes can stay simple. See StasisChamberItem.
+    //
+    // Deliberately NOT in the creative tab (registerHidden): an occupied chamber
+    // with no horse in it is a broken object, and the tab would hand out five.
+    public static final DeferredItem<StasisChamberItem> OCCUPIED_BASIC_STASIS_CHAMBER =
+            registerHidden("occupied_basic_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.BASIC, true));
+    public static final DeferredItem<StasisChamberItem> OCCUPIED_INTERMEDIATE_STASIS_CHAMBER =
+            registerHidden("occupied_intermediate_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.INTERMEDIATE, true));
+    public static final DeferredItem<StasisChamberItem> OCCUPIED_ADVANCED_STASIS_CHAMBER =
+            registerHidden("occupied_advanced_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.ADVANCED, true));
+    public static final DeferredItem<StasisChamberItem> OCCUPIED_SPACER_STASIS_CHAMBER =
+            registerHidden("occupied_spacer_stasis_chamber",
+                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.SPACER, true));
+    public static final DeferredItem<EmergencyStasisChamberItem> OCCUPIED_EMERGENCY_STASIS_CHAMBER =
+            registerHidden("occupied_emergency_stasis_chamber",
+                    p -> new EmergencyStasisChamberItem(p.stacksTo(1), true));
+
     /**
      * The chamber item for one tier - what an upgrade recipe produces. Never the
      * emergency chamber, which shares {@code BASIC} with the ordinary one: an
@@ -249,6 +290,66 @@ public final class ModItems {
             default:
                 throw new IllegalStateException("no chamber item for " + tier);
         }
+    }
+
+    /**
+     * <b>The single place the empty/occupied pairing lives.</b> Every other
+     * lookup is derived from this list, so a sixth chamber is one line here and
+     * nothing else.
+     */
+    private static List<DeferredItem<? extends StasisChamberItem>[]> chamberPairs() {
+        @SuppressWarnings("unchecked")
+        List<DeferredItem<? extends StasisChamberItem>[]> pairs = List.of(
+                new DeferredItem[] {BASIC_STASIS_CHAMBER, OCCUPIED_BASIC_STASIS_CHAMBER},
+                new DeferredItem[] {INTERMEDIATE_STASIS_CHAMBER, OCCUPIED_INTERMEDIATE_STASIS_CHAMBER},
+                new DeferredItem[] {ADVANCED_STASIS_CHAMBER, OCCUPIED_ADVANCED_STASIS_CHAMBER},
+                new DeferredItem[] {SPACER_STASIS_CHAMBER, OCCUPIED_SPACER_STASIS_CHAMBER},
+                new DeferredItem[] {EMERGENCY_STASIS_CHAMBER, OCCUPIED_EMERGENCY_STASIS_CHAMBER});
+        return pairs;
+    }
+
+    /**
+     * Built on first use rather than in a static initialiser: these resolve
+     * {@code DeferredItem}s, which are not populated while this class is still
+     * being loaded.
+     */
+    private static volatile @Nullable Map<Item, Item> occupiedForms;
+    private static volatile @Nullable Map<Item, Item> emptyForms;
+
+    private static void buildChamberForms() {
+        Map<Item, Item> toOccupied = new IdentityHashMap<>();
+        Map<Item, Item> toEmpty = new IdentityHashMap<>();
+        for (DeferredItem<? extends StasisChamberItem>[] pair : chamberPairs()) {
+            Item empty = pair[0].get();
+            Item occupied = pair[1].get();
+            toOccupied.put(empty, occupied);
+            toEmpty.put(occupied, empty);
+        }
+        occupiedForms = toOccupied;
+        emptyForms = toEmpty;
+    }
+
+    /**
+     * The occupied twin of a chamber item, or the item itself if it is already
+     * occupied (or is not a chamber at all).
+     */
+    public static Item occupiedChamber(Item chamber) {
+        Map<Item, Item> forms = occupiedForms;
+        if (forms == null) {
+            buildChamberForms();
+            forms = occupiedForms;
+        }
+        return forms == null ? chamber : forms.getOrDefault(chamber, chamber);
+    }
+
+    /** The empty twin of a chamber item, or the item itself if it is already empty. */
+    public static Item emptyChamber(Item chamber) {
+        Map<Item, Item> forms = emptyForms;
+        if (forms == null) {
+            buildChamberForms();
+            forms = emptyForms;
+        }
+        return forms == null ? chamber : forms.getOrDefault(chamber, chamber);
     }
 
     // --- stall signs (roadmap §11) - bind a horse, place on a stall wall ---

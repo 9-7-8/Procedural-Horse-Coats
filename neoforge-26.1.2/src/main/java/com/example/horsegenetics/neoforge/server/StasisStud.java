@@ -151,8 +151,13 @@ public final class StasisStud {
         if (mare == null) {
             return false;
         }
-        chamber.remove(ModDataComponents.STASIS_SNAPSHOT.get());
-        chamber.remove(ModDataComponents.STASIS_AT_STUD.get());
+        // She is out, so the chamber becomes the EMPTY item - a different id, not
+        // the same one minus a component. withoutHorse returns a new stack, so it
+        // goes back into the slot it came from; the at-stud mark is dropped with
+        // it, since an empty chamber is not standing at stud.
+        ItemStack emptied = StasisChamberItem.withoutHorse(chamber);
+        emptied.remove(ModDataComponents.STASIS_AT_STUD.get());
+        bank.chambers().setItem(slot, emptied);
         bank.setFoalingBlocked(false);
         level.playSound(null, mare.blockPosition(), SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 0.7F, 1.2F);
         ActionTrace.log("stasis", snapshot.horseName() + " came out of a bank at her due date"

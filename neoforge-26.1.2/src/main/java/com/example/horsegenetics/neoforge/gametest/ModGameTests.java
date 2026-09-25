@@ -358,17 +358,17 @@ public final class ModGameTests {
         carriesHorse(helper, "the Intermediate upgrade",
                 input -> CraftingInput.of(2, 1, List.of(input, new ItemStack(Items.BOOK))),
                 ModItems.BASIC_STASIS_CHAMBER.get(),
-                ModItems.INTERMEDIATE_STASIS_CHAMBER.get());
+                ModItems.OCCUPIED_INTERMEDIATE_STASIS_CHAMBER.get());
 
         carriesHorse(helper, "the Advanced upgrade",
                 input -> CraftingInput.of(2, 1, List.of(input, new ItemStack(Items.GOLD_INGOT))),
                 ModItems.INTERMEDIATE_STASIS_CHAMBER.get(),
-                ModItems.ADVANCED_STASIS_CHAMBER.get());
+                ModItems.OCCUPIED_ADVANCED_STASIS_CHAMBER.get());
 
         carriesHorse(helper, "the Spacer upgrade",
                 input -> CraftingInput.of(2, 1, List.of(input, new ItemStack(Items.DIAMOND))),
                 ModItems.ADVANCED_STASIS_CHAMBER.get(),
-                ModItems.SPACER_STASIS_CHAMBER.get());
+                ModItems.OCCUPIED_SPACER_STASIS_CHAMBER.get());
 
         carriesHorse(helper, "the Emergency chamber",
                 input -> CraftingInput.of(3, 3, List.of(
@@ -378,7 +378,7 @@ public final class ModGameTests {
                         new ItemStack(Items.ENDER_PEARL), new ItemStack(Items.ENDER_PEARL),
                         new ItemStack(Items.ENDER_PEARL), new ItemStack(Items.ENDER_PEARL))),
                 ModItems.BASIC_STASIS_CHAMBER.get(),
-                ModItems.EMERGENCY_STASIS_CHAMBER.get());
+                ModItems.OCCUPIED_EMERGENCY_STASIS_CHAMBER.get());
 
         // AND THE TWO BASIC RECIPES MUST NOT BOTH WANT THE VANILLA GRID.
         // StasisChamberRecipe subtracts minecraft:water_bucket from its tag for
@@ -465,8 +465,19 @@ public final class ModGameTests {
         com.example.horsegenetics.neoforge.data.StasisSnapshot snapshot =
                 new com.example.horsegenetics.neoforge.data.StasisSnapshot(
                         "Tripwire", java.util.UUID.randomUUID(), new net.minecraft.nbt.CompoundTag());
-        ItemStack occupied = new ItemStack(from);
-        occupied.set(com.example.horsegenetics.neoforge.data.ModDataComponents.STASIS_SNAPSHOT.get(), snapshot);
+        // A chamber with a horse in it is a DIFFERENT ITEM, so this is what the
+        // occupied half of each rung actually takes. Building it by hand through
+        // withHorse is also the cheapest check that the pairing is wired up: if
+        // occupiedChamber() does not know this item, the stack below is still the
+        // empty one and every assertion that follows fails.
+        ItemStack occupied = com.example.horsegenetics.neoforge.item.StasisChamberItem
+                .withHorse(new ItemStack(from), snapshot);
+        if (!(occupied.getItem() instanceof com.example.horsegenetics.neoforge.item.StasisChamberItem held
+                && held.occupied())) {
+            helper.fail(what + ": " + from + " has no occupied twin registered, so a horse put "
+                    + "into it would stay in the empty item and the plain JSON recipe would eat it");
+            return;
+        }
 
         CraftingInput input = grid.apply(occupied);
         MinecraftServer server = helper.getLevel().getServer();
@@ -489,10 +500,18 @@ public final class ModGameTests {
                 out.get(com.example.horsegenetics.neoforge.data.ModDataComponents.STASIS_SNAPSHOT.get());
         if (carried == null) {
             helper.fail(what + ", with a horse inside: the result carries no stasis_snapshot, so "
-                    + "the horse was deleted by crafting. A JSON recipe has claimed this grid - "
-                    + "check the '!horsegenetics:stasis_snapshot' removal patch in its ingredient");
-        } else if (!carried.horseId().equals(snapshot.horseId())) {
+                    + "the horse was deleted by crafting - a JSON recipe has claimed this grid");
+            return;
+        }
+        if (!carried.horseId().equals(snapshot.horseId())) {
             helper.fail(what + ", with a horse inside: the result carries a different horse");
+        }
+        // And the result must itself be an occupied item, or the horse is riding
+        // in a stack that every plain recipe downstream is free to eat.
+        if (!(out.getItem() instanceof com.example.horsegenetics.neoforge.item.StasisChamberItem made
+                && made.occupied())) {
+            helper.fail(what + ", with a horse inside: the result holds the horse but is the EMPTY "
+                    + "item, so the next upgrade's plain recipe would destroy it");
         }
     }
 

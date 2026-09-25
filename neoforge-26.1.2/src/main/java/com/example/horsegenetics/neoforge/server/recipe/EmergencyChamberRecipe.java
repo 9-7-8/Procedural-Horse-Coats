@@ -31,11 +31,14 @@ import org.jspecify.annotations.Nullable;
  *
  * <h2>This is the second of two recipes, and it takes only an occupied chamber</h2>
  * An <b>empty</b> Basic chamber is converted by an ordinary shaped JSON recipe,
- * {@code recipe/emergency_stasis_chamber.json}, whose centre key is a
- * {@code neoforge:data_component} ingredient carrying the removal patch
- * {@code "!horsegenetics:stasis_snapshot": {}} - so it matches a chamber with no
- * horse in it and nothing else. {@link #middle} here <b>requires</b> the snapshot
- * to be present, so the two never claim the same grid.
+ * {@code recipe/emergency_stasis_chamber.json}, whose centre key is the plain
+ * item id {@code horsegenetics:basic_stasis_chamber}. This one takes
+ * {@code occupied_basic_stasis_chamber}, <b>a different item</b>.
+ *
+ * <p>That is the whole safety argument, and it is worth stating plainly: the two
+ * cannot claim the same grid because the thing in the middle is not the same
+ * item. No ingredient has to be clever, no ordering has to be right, and no
+ * component has to be read. See {@code ModItems.OCCUPIED_BASIC_STASIS_CHAMBER}.
  *
  * <h2>Why the occupied half cannot be a shaped JSON file</h2>
  * The same reason {@link StasisUpgradeRecipe} gives, and it is worth repeating
@@ -89,7 +92,7 @@ public class EmergencyChamberRecipe extends CustomRecipe {
                     // Only the bottom rung. An Intermediate or better would be
                     // trading a capability away for this one, and an emergency
                     // chamber is already one of these.
-                    if (!slot.is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+                    if (!slot.is(ModItems.OCCUPIED_BASIC_STASIS_CHAMBER.get())) {
                         return null;
                     }
                     centre = slot;
@@ -98,13 +101,10 @@ public class EmergencyChamberRecipe extends CustomRecipe {
                 }
             }
         }
-        // Occupied chambers only. An empty one is the JSON twin's ring, and two
-        // recipes claiming one grid would be resolved by registry order, leaving
-        // the loser unreachable. This is the line that keeps them apart.
-        if (centre.isEmpty() || StasisChamberItem.snapshotOf(centre) == null) {
-            return null;
-        }
-        return centre;
+        // Occupied chambers only, and the item id above is what enforces it: an
+        // empty Basic chamber is a different item and therefore the JSON twin's
+        // ring, which cannot be confused for this one.
+        return centre.isEmpty() ? null : centre;
     }
 
     @Override
@@ -118,7 +118,7 @@ public class EmergencyChamberRecipe extends CustomRecipe {
         if (chamber == null) {
             return ItemStack.EMPTY;
         }
-        ItemStack out = new ItemStack(ModItems.EMERGENCY_STASIS_CHAMBER.get());
+        ItemStack out = new ItemStack(ModItems.OCCUPIED_EMERGENCY_STASIS_CHAMBER.get());
         // The horse rides the conversion. Without this line an occupied chamber
         // comes out empty and the animal is gone for good.
         StasisSnapshot inside = StasisChamberItem.snapshotOf(chamber);

@@ -31,13 +31,19 @@ import org.jspecify.annotations.Nullable;
  * <h2>This is the second of two recipes per rung, and it takes only occupied chambers</h2>
  * An <b>empty</b> chamber climbs by an ordinary shapeless JSON recipe -
  * {@code recipe/intermediate_stasis_chamber.json} and its two siblings - whose
- * chamber ingredient is a {@code neoforge:data_component} carrying the removal
- * patch {@code "!horsegenetics:stasis_snapshot": {}}, so it matches a chamber
- * with no horse in it and nothing else.
+ * chamber ingredient is a plain item id and nothing more. This class takes the
+ * {@code occupied_*} registrations, <b>which are different items</b>.
  *
- * <p>This class takes the other half: {@link #upgradable} now <b>requires</b> the
- * snapshot to be present. The two therefore never claim the same grid, which is
- * the whole reason the split is safe - see below.
+ * <p>That is the whole safety argument, and it is worth stating plainly: the two
+ * halves cannot claim the same grid because a chamber with a horse in it is not
+ * the same item as one without. Nothing depends on an ingredient being clever,
+ * on recipe ordering, or on a component being read correctly. The earlier
+ * attempt at this did depend on all three, and the one that mattered failed:
+ * when a player clicks an entry in the <b>recipe book</b>, the book passes that
+ * recipe back as a hint which {@code RecipeManager.getRecipeFor} honours
+ * <i>ahead of any priority</i> - so a plain recipe that merely lost a
+ * tie-break would still have eaten the horse. See
+ * {@code ModItems.OCCUPIED_BASIC_STASIS_CHAMBER}.
  *
  * <h2>Why the occupied half cannot be JSON</h2>
  * <b>Because a chamber may have a horse in it.</b> A vanilla shapeless recipe
@@ -185,7 +191,8 @@ public class StasisUpgradeRecipe extends CustomRecipe {
                 continue;
             }
             filled++;
-            if (s.getItem() instanceof StasisChamberItem held && held.tier() == from) {
+            if (s.getItem() instanceof StasisChamberItem held
+                    && held.tier() == from && held.occupied()) {
                 if (!chamber.isEmpty()) {
                     return null; // two chambers - which one is being upgraded?
                 }
@@ -203,10 +210,11 @@ public class StasisUpgradeRecipe extends CustomRecipe {
         if (!other.is(cost)) {
             return null;
         }
-        // Occupied chambers only. An empty one is the JSON twin's grid, and two
-        // recipes claiming one grid would be resolved by registry order - with
-        // the loser simply unreachable. This is the line that keeps them apart.
-        return StasisChamberItem.snapshotOf(chamber) != null ? chamber : null;
+        // OCCUPIED CHAMBERS ONLY, and it is the item id that says so - the loop
+        // above already refused anything but this rung's occupied registration.
+        // An empty chamber is a different item and therefore the JSON twin's
+        // grid, which no ingredient there can confuse for this one.
+        return chamber;
     }
 
     @Override
@@ -220,7 +228,9 @@ public class StasisUpgradeRecipe extends CustomRecipe {
         if (chamber == null) {
             return ItemStack.EMPTY;
         }
-        ItemStack out = new ItemStack(ModItems.stasisChamber(upgradeTo));
+        // The rung above, in its OCCUPIED form: the horse is still inside, so
+        // the result must be the item that means "holds a horse".
+        ItemStack out = new ItemStack(ModItems.occupiedChamber(ModItems.stasisChamber(upgradeTo)));
         // The horse rides the upgrade, and nothing else does. Without this line
         // an occupied chamber upgrades into an empty one and the animal is gone
         // for good.

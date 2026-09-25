@@ -52,20 +52,63 @@ import org.jspecify.annotations.Nullable;
 public class StasisChamberItem extends Item {
 
     private final StasisTier tier;
+    private final boolean occupied;
+
+    public StasisChamberItem(Properties properties, StasisTier tier) {
+        this(properties, tier, false);
+    }
 
     @SuppressWarnings("deprecation") // Item(Properties) - DeferredRegister supplies the id-carrying Properties
-    public StasisChamberItem(Properties properties, StasisTier tier) {
+    public StasisChamberItem(Properties properties, StasisTier tier, boolean occupied) {
         super(properties);
         this.tier = tier;
+        this.occupied = occupied;
     }
 
     public StasisTier tier() {
         return tier;
     }
 
+    /**
+     * Whether this is the <b>with-a-horse-in-it</b> registration of its tier.
+     *
+     * <p>Each chamber is two items, and which one a stack is <i>is</i> whether it
+     * holds a horse - see {@code ModItems.OCCUPIED_BASIC_STASIS_CHAMBER} for why
+     * that is an item id rather than a component. The short version: the recipes
+     * that consume a chamber are plain JSON naming a plain item id, a plain
+     * ingredient cannot see components, and so while one id meant both things
+     * every such recipe could eat a pedigreed horse in silence.
+     */
+    public boolean occupied() {
+        return occupied;
+    }
+
     /** The horse in this chamber, or {@code null} for an empty one. */
     public static @Nullable StasisSnapshot snapshotOf(ItemStack stack) {
         return stack.get(ModDataComponents.STASIS_SNAPSHOT.get());
+    }
+
+    /**
+     * <b>Put a horse in.</b> Returns the occupied twin of {@code chamber}
+     * carrying {@code snapshot}, with everything else about the stack preserved.
+     *
+     * <p>It returns a <b>new stack</b> rather than editing this one, because an
+     * {@link ItemStack} cannot change its own item. Every caller therefore has to
+     * put the result back where the old stack was - into the hand, the slot, the
+     * bank - and that is the whole cost of chambers being two items. Callers that
+     * forget leave the horse in a stack nobody is holding.
+     */
+    public static ItemStack withHorse(ItemStack chamber, StasisSnapshot snapshot) {
+        ItemStack out = chamber.transmuteCopy(ModItems.occupiedChamber(chamber.getItem()), 1);
+        out.set(ModDataComponents.STASIS_SNAPSHOT.get(), snapshot);
+        return out;
+    }
+
+    /** <b>Take the horse out.</b> The empty twin, with the snapshot removed. */
+    public static ItemStack withoutHorse(ItemStack chamber) {
+        ItemStack out = chamber.transmuteCopy(ModItems.emptyChamber(chamber.getItem()), 1);
+        out.remove(ModDataComponents.STASIS_SNAPSHOT.get());
+        return out;
     }
 
     @Override
@@ -107,8 +150,18 @@ public class StasisChamberItem extends Item {
             return InteractionResult.FAIL;
         }
 
-        // The chamber comes back empty rather than being spent.
-        stack.remove(ModDataComponents.STASIS_SNAPSHOT.get());
+        // The chamber comes back empty rather than being spent - and an empty
+        // chamber is a DIFFERENT ITEM, so this is a swap in the hand, not an
+        // edit to the stack. See withoutHorse.
+        if (ctx.getPlayer() != null) {
+            ctx.getPlayer().setItemInHand(ctx.getHand(), withoutHorse(stack));
+        } else {
+            // No player to hand it back to - a dispenser or a command. The horse
+            // is already out and safe, so the worst case here is an occupied
+            // chamber item left holding nothing, which reads as empty everywhere
+            // and refills normally.
+            stack.remove(ModDataComponents.STASIS_SNAPSHOT.get());
+        }
         serverLevel.playSound(null, horse.blockPosition(), SoundEvents.BOTTLE_EMPTY,
                 SoundSource.PLAYERS, 0.7F, 1.2F);
         return InteractionResult.SUCCESS;
