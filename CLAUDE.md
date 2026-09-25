@@ -62,7 +62,7 @@ the same change as the code, and never copy it back into here.
 | The item roster; then one page per item | `wiki/items.html`, `wiki/item-*.html` |
 | Breeding carrots, splices, the gene database, research papers | `wiki/carrots.html` |
 | The cowboy, the horseman, transfer papers, the barn | `wiki/villagers.html` |
-| Hay portals, the horse dimension, the pens | `wiki/horse-dimension.html` |
+| Hay portals; the public realm, then the F6 debug corridor and its pens | `wiki/horse-realm.html`, `wiki/horse-dimension.html` |
 | **Generated stables - and who made each building** | `wiki/stables.html` |
 | The breed file format - a breed is JSON, not Java | `wiki/breed-format.html` |
 | The wider (mostly unbuilt) trait / effect architecture | `wiki/horse-traits.html` |

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freedom stick &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> husbandry</p>
+<h1>Freedom stick</h1>
+<p class="lede">
+    Give a horse back. Used on your own horse in the
+    <a href="horse-realm.html">horse realm</a>, it heals it, unclaims it, and leaves it
+    standing there with its name, its genes and its whole pedigree intact for whoever tames
+    it next.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="making">Making one</h2>
+<p>
+    Shapeless: a <strong>feather</strong>, a <strong>stick</strong>, and one
+    <a href="item-horse-hair.html">horse hair</a>. It has 64 uses, and only a
+    <em>successful</em> release costs one &mdash; every refusal is free and says why.
+</p>
+
+<h2 id="using">Using it</h2>
+<p>
+    Lead the horse through a hay-bale portal into the horse realm, then right-click it with
+    the stick. It refuses in three cases, all of them on purpose:
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>If</th><th>Then</th></tr></thead>
+<tbody>
+<tr><td>You are not in the horse realm</td>
+    <td>Nothing. A horse released in the Overworld is a horse abandoned, not a horse given
+    away &mdash; it would be somebody&rsquo;s problem by morning and dead by the next
+    one.</td></tr>
+<tr><td>The horse is not yours</td>
+    <td>Nothing. The realm is shared; if anyone could unclaim anyone&rsquo;s horse it would
+    be the most dangerous place in the game to leave one.</td></tr>
+<tr><td>The horse is already wild</td>
+    <td>Nothing, and it says so.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="what-happens">What happens to the horse</h2>
+<ul>
+    <li><strong>It is healed to full.</strong> It is the last thing you will ever do for it,
+        and a hurt horse in a field may never breed and may take a long time to find
+        water.</li>
+    <li><strong>Its tack comes back to you</strong> &mdash; saddle and body armour, into your
+        inventory, or at your feet if it is full.</li>
+    <li><strong>It is wild.</strong> Not yours, not anybody&rsquo;s. It has to be tamed the
+        ordinary Minecraft way: ride it until it stops throwing you, or feed it.</li>
+    <li><strong>It is still itself.</strong> Same name, same genotype, same epigenome, same
+        breed, same parents, same generation, same place in every family tree. Whoever tames
+        it inherits all of that and becomes its owner.</li>
+    <li><strong>It joins a band</strong> with other released horses nearby, and breeds with
+        them &mdash; slowly. See <a href="horse-realm.html#breeding">the realm</a>.</li>
+</ul>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="handler">Where it lives</h2>
+<p>
+    <code>server/FreedomStickHandler</code>, a <code>PlayerInteractEvent.EntityInteract</code>
+    subscriber rather than an <code>Item.interactLivingEntity</code> override &mdash; the
+    house rule, because vanilla turns any item used on a tamed horse into a mount, so the
+    event has to be cancelled on <em>both</em> sides with the work done server-only. The item
+    itself is one line in <code>ModItems</code>: a plain durable <code>Item</code>, like the
+    <a href="item-vet-kit.html">vet&rsquo;s kit</a>.
+</p>
+
+<h2 id="three-changes">Un-taming is three calls, and the third is the one that matters</h2>
+<p>
+    <code>setTamed(false)</code>, <code>setOwner(null)</code>,
+    <strong><code>setTemper(0)</code></strong>.
+</p>
+<p>
+    The temper reset is what makes &ldquo;tame it again&rdquo; mean anything. Vanilla&rsquo;s
+    <code>RunAroundLikeCrazyGoal</code> rolls <code>nextInt(maxTemper) &lt; temper</code>, and
+    a horse that <em>was</em> tame is sitting at maximum &mdash; so without it the first
+    player to sit on the horse tames it on the first roll and the release is a formality
+    nobody would notice was broken.
+</p>
+<p>
+    The saddle has to come off for a structural reason rather than a generous one:
+    <code>AbstractHorse.canUseSlot(SADDLE)</code> asks <code>isTamed()</code>, so a saddle
+    left on a horse that has gone wild is a saddle quietly destroyed.
+</p>
+
+<h2 id="nothing-to-restore">Re-taming needed no code</h2>
+<p>
+    Nothing on <code>HorseRecord</code> or in <code>HorseAncestryData</code> is derived from
+    ownership, so releasing touches none of it and there is nothing to put back.
+    <code>HorseOwnerTrackingHandler</code> reconciles the record&rsquo;s owner mirror every
+    forty ticks and accepts null &mdash; its javadoc already listed <em>&ldquo;a horse going
+    wild again&rdquo;</em> as a case it handles, long before one existed. When somebody tames
+    it, <code>tameWithName</code> sets the owner and the same tracker mirrors it back.
+</p>
+<p>
+    <strong><code>tamedBy</code> is deliberately not cleared.</strong> It records who first
+    got a rope on this animal, it is written once, and a sale has never rewritten it either
+    (<a href="item-transfer-papers.html">transfer papers</a>). The cost is that the re-tamer
+    is not credited in <code>attribution()</code>; the alternative was losing a fact about
+    the horse&rsquo;s history to make a nicer line of text, which is the wrong trade on a page
+    whose entire subject is that the history survives.
+</p>
+
+<h2 id="wild-mark">The wild-spawn mark</h2>
+<p>
+    A release sets <code>BreedSpawnHandler.WILD_SPAWN_KEY</code> on the horse so the herd
+    systems will look at it. That is <em>not</em> sufficient on its own &mdash;
+    <code>HorseFoundingTickHandler</code> strips the mark from any horse that loads carrying a
+    record, which a released horse always does. The band actually comes from
+    <code>server/HorseRealmHerds</code>; see
+    <a href="horse-realm.html#herds">the realm&rsquo;s note on it</a>.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Never used in a game &mdash; and the assertion with teeth is that <strong>mounting a released horse throws you off</strong>, because a missed temper reset looks exactly like a working release right up until somebody re-tames it in one click.</p>
+</div>
+
+<h3 id="verify-stick">The stick (built 2026-09-25, NOT played)</h3>
+<p>Every step of this is on the realm's own list &mdash;
+<a href="horse-realm.html#verify-release">the freedom stick</a> &mdash; because the item and
+the place it works in cannot be checked apart.</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-realm.html">The horse realm</a>
+        <a href="item-horse-hair.html">Horse hair</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>server/FreedomStickHandler</code>; the item in <code>item/ModItems</code>.
+</div>
+
+</article>
+</main>
+</body>
+</html>

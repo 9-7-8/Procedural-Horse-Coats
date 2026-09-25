@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The horse realm &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Gameplay <span class="sep">/</span> world</p>
+<h1>The horse realm</h1>
+<p class="lede">
+    A flat, sunlit, bounded field where nothing can hurt a horse. Step through a hay-bale
+    portal, let your surplus go with a <a href="item-freedom-stick.html">freedom stick</a>,
+    and it stays there &mdash; healed, wild, keeping its name and its whole pedigree &mdash;
+    until somebody else tames it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="what">What it is for</h2>
+<p>
+    Breeding horses makes more horses than anyone wants. The honest ways to deal with the
+    rest are all bad: kill them, wall them up in a pen you stop visiting, or turn them loose
+    in the Overworld where a creeper, a drop or a hostile night finishes them. The realm is
+    the fourth answer. It is a <strong>commons</strong>: everybody&rsquo;s horses, in one
+    field, safe from everything including each other, and anybody may take one home.
+</p>
+<p>
+    It is not the <a href="horse-dimension.html">horse dimension</a> you may already know.
+    That one is a private test corridor full of pens, it is still there, and it is reached
+    by <strong>F6</strong> now rather than by a portal. The hay portal goes here instead.
+</p>
+
+<h2 id="getting-there">Getting there, and getting back</h2>
+<p>
+    Exactly as before: build a vertical rectangle of hay bales, right-click a frame block
+    with a <strong>golden carrot</strong>, and stand in it for ten seconds. Horses go through
+    on their own after three seconds, so the
+    <a href="horse-dimension.html#portals">roped-horse shortcut</a> still works &mdash;
+    right-click the portal while leading a string of them and they all go.
+</p>
+<p>
+    <strong>Your own portal always comes out in the same place.</strong> There are a hundred
+    portals in the field, on a grid, and the one you arrive at is decided by where in the
+    Overworld you built yours. That is the whole reason the field is usable: the horses you
+    released last week are where you left them, and two players who built their portals in
+    different places do not land on top of each other.
+</p>
+<p>
+    Any of the hundred takes you home again, to the exact portal you came in by. If somebody
+    mined it while you were away, it is put back. Your <em>own</em> tamed horses standing
+    within about fifty blocks of the exit come with you; everything you released stays.
+</p>
+
+<h2 id="the-field">The field</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Thing</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><strong>Size</strong></td>
+    <td>A thousand chunks square &mdash; sixteen thousand blocks on a side. Big, and
+    <em>finite</em>: you can walk it, search it, and lose nothing in it.</td></tr>
+<tr><td><strong>The ground</strong></td>
+    <td>One flat layer of dirt on bedrock. No hills, no caves, no trees, nothing to fall
+    into or get stuck behind.</td></tr>
+<tr><td><strong>Water</strong></td>
+    <td>A small pool every eighty blocks. Not decoration &mdash; a horse only
+    <a href="horse-care.html">heals near water</a>, so a dry field would be one
+    where a hurt horse never recovered.</td></tr>
+<tr><td><strong>Exits</strong></td>
+    <td>A hay portal every sixteen hundred blocks, a hundred of them, so you are never more
+    than about a thousand blocks from a way out.</td></tr>
+<tr><td><strong>The edge</strong></td>
+    <td>An invisible wall. Nothing walks, gallops or is led out of the field.</td></tr>
+<tr><td><strong>The sky</strong></td>
+    <td>Permanent day. It never gets dark, it never rains.</td></tr>
+<tr><td><strong>Everything else</strong></td>
+    <td>There isn&rsquo;t any. No mob but a horse can be in the realm &mdash; not spawned,
+    not summoned, not led in.</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    You cannot build or break there, and neither can anybody else. The field is shared and
+    it stays the way it is.
+</p>
+
+<h2 id="safety">Nothing happens to a horse here</h2>
+<p>
+    Every horse in the realm &mdash; released, or yours and just visiting &mdash;
+    <strong>cannot be hurt, cannot die and cannot despawn</strong>. Not by you, not by
+    another player, not by fall, fire, drowning, starvation or a lethal foal genotype. All of
+    it comes straight back the moment the horse leaves.
+</p>
+
+<h2 id="releasing">Letting one go</h2>
+<p>
+    Craft a <a href="item-freedom-stick.html">freedom stick</a> from a feather, a stick and
+    one <a href="item-horse-hair.html">horse hair</a>, and right-click your own horse with it
+    while you are both in the realm. It is healed to full, its tack comes back to you, and it
+    is wild.
+</p>
+<p>
+    <strong>It is still the same horse.</strong> Its name, its genes, its breed, its parents
+    and its whole family tree are untouched. Whoever tames it next &mdash; the ordinary way,
+    by riding it until it stops throwing them, or by feeding it &mdash; gets all of that, and
+    becomes its owner.
+</p>
+<p>
+    You cannot release a horse that is not yours, and the stick does nothing outside the
+    realm. It lasts 64 releases, and a refusal costs nothing.
+</p>
+
+<h2 id="breeding">They breed, slowly</h2>
+<p>
+    Released horses form bands and breed like wild horses, and their foals are born wild and
+    protected too &mdash; so a field that people keep adding to fills up on its own.
+</p>
+<p>
+    It runs at <strong>a quarter speed</strong> by default. Heat, the wait between covers and
+    the length of a pregnancy are all four times what they are at home. A server owner can
+    change that with <code>realm.breeding_rate_percent</code>, anywhere from 0 to 100; zero
+    stops it entirely, pregnancies included.
+</p>
+<p>
+    <strong>Nothing at all happens while nobody is there.</strong> A mare left pregnant in an
+    empty realm is exactly as pregnant when somebody next walks in, however long that took.
+    The field does not run in the background, and a server pays nothing for one nobody is
+    visiting.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="two-dimensions">Two dimensions, and why they share nothing</h2>
+<p>
+    <code>horsegenetics:horse_realm</code> is a second dimension beside
+    <code>horsegenetics:debug_pens</code>. Every rule on this page is keyed to the first one
+    and the debug corridor reads none of them &mdash; deliberately, and it is the constraint
+    that shaped the implementation.
+</p>
+<p>
+    The corridor is an <em>unrestricted test bench</em>. Horses die in its yard on purpose:
+    the blanket &ldquo;no horse damage&rdquo; rule was removed from it on 2026-09-13 because
+    it made six genes untestable, and its horses-only entity filter was switched off the day
+    before that because it deleted the zombies and cows two gene tests were about. Both rules
+    are exactly what the public realm needs. So they are written fresh, in
+    <code>server/HorseRealmRules</code>, against <code>HorseRealm.REALM_LEVEL</code>, rather
+    than generalised out of the corridor &mdash; which would have quietly undone two
+    deliberate decisions.
+</p>
+
+<h2 id="terrain">The terrain is arithmetic, not a saved layout</h2>
+<p>
+    There is no allocator, no plot registry and no saved map. Everything about a position in
+    the realm is a pure function of its chunk coordinates:
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Made by</th><th>What</th></tr></thead>
+<tbody>
+<tr><td><code>dimension/horse_realm.json</code></td>
+    <td>The ground. A <code>minecraft:flat</code> generator, fifteen air layers then bedrock
+    then dirt, so that with <code>min_y: -16</code> the bedrock lands at Y=&minus;1 and the
+    dirt at Y=0. <strong><code>min_y</code> must be a multiple of sixteen</strong>, which is
+    why it is not simply &minus;1.</td></tr>
+<tr><td><code>server/HorseRealmTerrain</code></td>
+    <td>The pools, the hundred portals and the perimeter. Queued from
+    <code>ChunkEvent.Load</code>, applied on the next server tick, and idempotent: it reads
+    before it writes, so a second load costs a handful of comparisons and a chunk generated
+    before a change to the class is corrected next time anybody walks into it.</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    <strong>Not a custom chunk generator</strong>, though that was the obvious answer. The
+    flat generator is a path this mod already runs on and a codec it does not have to
+    register; what it cannot do is a fixed grid (vanilla has no placement modifier meaning
+    &ldquo;at the origin of every fifth chunk&rdquo;) or a block with a block entity, which a
+    <code>ProtoChunk</code> makes awkward. Both are trivial against a live
+    <code>ServerLevel</code>, so that is where they happen. Most chunks do no block access at
+    all &mdash; the pool grid is one chunk in twenty-five, the portal grid one in ten
+    thousand.
+</p>
+
+<h2 id="eternal-day">Eternal day is an omission, not a setting</h2>
+<p>
+    <code>dimension_type/horse_realm.json</code> carries <code>default_clock</code> and
+    <strong>no <code>timelines</code> field</strong>. That is the whole of it. 26.1.2 reads
+    sky darkness off the <code>SKY_LIGHT_LEVEL</code> environment attribute, which only
+    varies with the clock when <code>timelines</code> says so, and the field defaults to
+    empty &mdash; so a dimension with a clock and no timelines has a sky that is bright
+    forever. This is the same fact the debug dimension was <em>debugged</em> for on
+    2026-09-12 (<a href="horse-dimension.html#the-watch">its night</a>); here it is the feature.
+</p>
+
+<h2 id="arrival">The arrival hash</h2>
+<p>
+    <code>HorseRealm.arrivalCell</code> mixes the Overworld portal&rsquo;s block position
+    (MurmurHash3&rsquo;s finalizer, twice, on X and Z) onto one of the hundred grid cells. A
+    hash rather than a scaled coordinate because the Overworld is millions of blocks wide and
+    the realm is sixteen thousand: any linear mapping puts every portal anyone will ever
+    build into one cell.
+</p>
+<p>
+    Both of its properties fail <em>silently</em> if broken. A hash that drifted would strand
+    a player&rsquo;s released horses out of reach with no error anywhere; one that collapsed
+    would put a whole server in one corner of a 16 000-block field and look, from inside,
+    exactly like a popular meeting spot. So <code>horse_realm_grid_is_stable</code> asserts
+    both over four thousand draws.
+</p>
+
+<h2 id="repro-clock">The breeding rate is a clock, not a scale factor</h2>
+<p>
+    <code>server/HorseRealmRepro</code>. This is the part worth reading before changing
+    anything about fertility.
+</p>
+<p>
+    <strong>Nothing in <code>common.repro</code> counts down.</strong> Every stage is
+    <em>derived</em> from an absolute anchor and the current game tick &mdash; where a mare is
+    in her cycle, whether she is due, whether she has spent her one try this heat, how many
+    covers a stallion has had today. There is no timer to divide by four. There is only the
+    reading of &ldquo;now&rdquo; that each derivation is handed.
+</p>
+<p>
+    So each horse keeps an <strong>offset</strong> in its persistent data: ticks it has lived
+    through that its reproduction did not. <code>HorseRealmRepro.reproTime(horse)</code> is
+    game time minus that offset, and every repro read and write for that horse goes through
+    it. One number, in one place. A horse that has never been in the realm has an offset of
+    zero and behaves precisely as it did before the class existed.
+</p>
+<p>That framing is what buys all four requirements at once:</p>
+<ul>
+    <li><strong>The rate.</strong> At 25, a quarter of each elapsed tick is credited and
+        three quarters deferred, so every stage takes four times as long. A rate, not a
+        conception chance.</li>
+    <li><strong>Zero pauses it</strong>, existing pregnancies included &mdash; which a
+        conception-chance reading of the same config could not have done.</li>
+    <li><strong>A dormant realm advances nothing.</strong> If nobody is there the horse is not
+        ticking, so no time is credited <em>and</em> all of it is deferred. The test is the
+        size of the gap since that horse was last scanned: late by more than three of its own
+        periods means it was not being simulated, not that it was being simulated slowly.</li>
+    <li><strong>It survives the trip home.</strong> The offset belongs to the horse, not to
+        where it is standing, so it stops growing on the way out and is never taken away.
+        Clearing it on exit would make a mare instantly, retroactively overdue.</li>
+</ul>
+<p>
+    The one place both clocks appear is <code>NaturalBreedingHandler</code>. Her cycle and her
+    one try use her repro clock; the three-second courtship, the chat throttles and the log
+    stamps use the world&rsquo;s, because a message is something a player reads in real time
+    whatever the realm&rsquo;s pacing.
+</p>
+
+<h2 id="release">What releasing actually changes</h2>
+<p>
+    <code>server/FreedomStickHandler</code>. Three things, and nothing else:
+    <code>setTamed(false)</code>, <code>setOwner(null)</code>, and
+    <strong><code>setTemper(0)</code></strong>. The last is the one that is easy to miss and
+    makes the whole feature real &mdash; vanilla&rsquo;s <code>RunAroundLikeCrazyGoal</code>
+    rolls against temper, and a horse that <em>was</em> tame is sitting at maximum, so without
+    the reset the first player to mount it tames it instantly.
+</p>
+<p>
+    Everything that makes the horse that horse is on the <code>HorseRecord</code> attachment
+    and in <code>HorseAncestryData</code>, and none of it is derived from ownership, so
+    releasing touches none of it. <code>HorseOwnerTrackingHandler</code> mirrors the
+    record&rsquo;s owner to null within two seconds on its own &mdash; its javadoc already
+    named &ldquo;a horse going wild again&rdquo; as a case it handles, a year before there was
+    one. Re-taming needs no restore code at all: <code>tameWithName</code> sets the owner and
+    the same tracker mirrors it back.
+</p>
+<p>
+    The tack comes off and goes to the player because
+    <code>AbstractHorse.canUseSlot(SADDLE)</code> asks <code>isTamed()</code> &mdash; leaving
+    a saddle on a horse that has gone wild would quietly destroy it.
+</p>
+
+<h2 id="herds">Released horses had to be taught to band</h2>
+<p>
+    <code>server/HorseRealmHerds</code>, and it exists because a released horse falls through
+    every existing gate. <code>HerdManager.assignFounder</code> returns immediately for
+    anything that already has a record, and the whole wild-herd path is gated on the
+    wild-spawn mark that <code>HorseFoundingTickHandler</code> strips from every horse that
+    arrives carrying one. A released horse is the opposite case in every respect: a fully
+    recorded animal, with a name and a pedigree and an owner it no longer has.
+</p>
+<p>
+    The band it forms is labelled <strong>Feral Mixed</strong>, not the lead&rsquo;s breed.
+    Whoever gathers here is whoever happened to be released nearby, and
+    <code>BreedLineage.FERAL</code> is the mod&rsquo;s existing word for <em>no herd
+    identity</em>. Each horse keeps its own breed on its own record.
+</p>
+
+<h2 id="f6">F6 is not a dev key any more</h2>
+<p>
+    Moving the hay portal here left the debug corridor and its test yard with exactly one
+    door, so F6 is registered in <strong>every</strong> build, release jars included. Who
+    walks through it is the server&rsquo;s business, not the keybind&rsquo;s:
+    <code>ModNetworking</code> admits a world with <code>debug.tools</code> on, or an operator
+    at <code>LEVEL_GAMEMASTERS</code> &mdash; the same bar <code>/testkit</code> already
+    sets, so it adds no reach a command did not already have. Anybody else is told no rather
+    than getting silence, because a key that does nothing without saying why is how a working
+    feature gets reported as broken.
+</p>
+
+<h2 id="edge">The perimeter is built twice on purpose</h2>
+<p>
+    <code>minecraft:barrier</code> blocks sixteen high, one block outside the field, built by
+    the same chunk pass &mdash; and a position clamp in <code>HorseRealmRules</code> for
+    anything that gets above them. Both halves are wanted. A clamp on its own reads as
+    teleport-stutter where a wall reads as a wall; a wall on its own has a lid missing. The
+    clamp zeroes horizontal motion as well as the position, or a player holding forward
+    against the boundary is teleported back every tick and calls it lag.
+</p>
+
+<h2 id="tests">What is tested, and what a test cannot reach</h2>
+<p>
+    Three in <code>ModGameTests</code> (<code>./gradlew :neoforge-26.1.2:runGameTest</code>):
+    <code>horse_realm_is_built</code> for the pools, the lit exit and the perimeter,
+    <code>horse_realm_grid_is_stable</code> for the arrival hash, and
+    <code>freedom_stick_crafts</code>.
+</p>
+<p>
+    <strong>The first of those usually runs in the Overworld, and that is not a mistake.</strong>
+    <code>GameTestServer</code> builds its world from a hand-written three-dimension list and
+    never reads the datapack&rsquo;s <code>dimension/</code> folder, so the realm cannot exist
+    in that harness however correct its JSON is. The geometry does not care which level it is
+    written into, so it is asserted against whatever level is available, and the two ground
+    assertions &mdash; which belong to the flat generator rather than to any Java &mdash; are
+    asked only when the real dimension is there.
+</p>
+<p>
+    That leaves one thing no test here can see: <strong>whether the dimension loads at
+    all</strong>. <code>runServer</code> answers it, and its log names
+    <code>ServerLevel[world]/horsegenetics:horse_realm</code>. Repeat that after any edit to
+    the three JSON files, because a typo in them is silent everywhere else.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The whole realm is <strong>unplayed</strong> &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it.</p>
+</div>
+
+<h3 id="verify-arrival">Getting in and out (built 2026-09-25, NOT played)</h3>
+<ul>
+    <li>Light a hay portal in the Overworld and stand in it. You should arrive beside a lit
+        hay frame on a flat dirt plain in permanent daylight, <strong>not</strong> in the pen
+        corridor.</li>
+    <li>Walk a few blocks and step back through. You should come out at the portal you built.
+        Then go back in: <strong>the same place as the first time</strong>. That is the
+        arrival hash, and its failure mode is a player never finding their horses again.</li>
+    <li>Lead two horses into the Overworld portal, then walk out of a realm portal with them
+        standing beside you. Both should come home; anything you released should not.</li>
+    <li>Mine your Overworld portal while standing in the realm, then leave. It should be put
+        back and you should land at it.</li>
+</ul>
+
+<h3 id="verify-field">The field itself (built 2026-09-25, NOT played)</h3>
+<ul>
+    <li>Walk to a water pool. There should be one within eighty blocks in some direction.</li>
+    <li>Walk (or fly) to an edge. The invisible wall should stop you on the ground and the
+        clamp should stop you above it &mdash; try both.</li>
+    <li>Try to break the dirt and to place a block. Both should refuse.</li>
+    <li>Wait out a night&rsquo;s worth of ticks. It should never get dark.</li>
+    <li>Throw a spawn egg. Nothing but a horse should appear.</li>
+    <li>Hit a horse. Nothing should happen to it.</li>
+</ul>
+
+<h3 id="verify-release">The freedom stick (built 2026-09-25, NOT played)</h3>
+<ul>
+    <li>Craft one: feather, stick, horse hair, shapeless.</li>
+    <li>Use it on your own horse <em>outside</em> the realm &mdash; refused, no durability
+        spent. On somebody else&rsquo;s horse &mdash; refused. On an already-wild horse
+        &mdash; refused.</li>
+    <li>Use it on your own saddled horse inside the realm. The saddle should come back to
+        you, the horse should read as wild, and <strong>mounting it once should throw you</strong>
+        rather than instantly re-taming it. That last one is the temper reset, and it is the
+        assertion with teeth.</li>
+    <li>Tame it again and check the info screen: same name, same genome, same parents, and
+        you as the owner.</li>
+</ul>
+
+<h3 id="verify-breeding">Breeding and the clock (built 2026-09-25, NOT played)</h3>
+<ul>
+    <li>Release a mare and a stallion together and leave them. They should band up within ten
+        seconds or so, and cover in about four times the usual time.</li>
+    <li>Leave a pregnant mare in the realm, go away for a long while in the Overworld, and
+        come back. <strong>Her pregnancy should not have moved.</strong> This is the one that
+        cannot be checked any other way, and the one most likely to be wrong.</li>
+    <li>Set <code>realm.breeding_rate_percent</code> to 0 with a pregnant mare standing
+        there. Nothing should progress. Set it back to 25 and it should resume.</li>
+    <li>Bring a mare who conceived in the realm back to the Overworld. Her pregnancy should
+        continue from where it was at ordinary speed, not jump.</li>
+</ul>
+
+<h3 id="verify-f6">F6 on a release build (built 2026-09-25, NOT played)</h3>
+<ul>
+    <li>On the real server, as an operator, press F6. You should reach the pen corridor.</li>
+    <li>As a non-operator with <code>debug.tools</code> off, press F6. You should get a chat
+        line pointing at the hay portal, not silence and not the corridor.</li>
+</ul>
+
+<h3 id="verify-load">A world that already exists</h3>
+<p>
+    The realm was added to a mod that is already on a live server. Datapack dimensions are
+    loaded afresh each start, so it should simply appear in the existing world &mdash; but
+    that has only been seen in a fresh dev world, and &ldquo;the new dimension is missing on
+    the real save&rdquo; is a failure that would look like the portal being broken.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-dimension.html">Hay portals &amp; the horse dimension</a>
+        <a href="item-freedom-stick.html">Freedom stick</a>
+        <a href="fertility.html">Fertility &amp; gestation</a>
+        <a href="horse-care.html">Care, bonds &amp; herds</a>
+    </div>
+    <code>server/HorseRealm</code>, <code>HorseRealmTerrain</code>,
+    <code>HorseRealmRules</code>, <code>HorseRealmRepro</code>, <code>HorseRealmHerds</code>,
+    <code>FreedomStickHandler</code>; the three JSON files under
+    <code>data/horsegenetics/</code>.
+</div>
+
+</article>
+</main>
+</body>
+</html>

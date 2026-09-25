@@ -251,6 +251,7 @@ wiki/fertility.html#real-horses	science	What real mares do
 wiki/fertility.html#real-nursing	science	Nursing does not stop conception
 wiki/fertility.html#real-pregnancy	science	Pregnancy and twins
 wiki/fertility.html#real-stallions	science	Stallions: no heat cycle
+wiki/fertility.html#realm-rate	gameplay	Slower, in the horse realm
 wiki/fertility.html#setting	gameplay	The settings
 wiki/fertility.html#settled	coding	Settled
 wiki/fertility.html#sources	science	Sources
@@ -2773,6 +2774,22 @@ wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
 wiki/horse-gear.html#using	gameplay	Putting something on
 wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
+wiki/horse-realm.html#arrival	coding	The arrival hash
+wiki/horse-realm.html#breeding	gameplay	They breed, slowly
+wiki/horse-realm.html#edge	coding	The perimeter is built twice on purpose
+wiki/horse-realm.html#eternal-day	coding	Eternal day is an omission, not a setting
+wiki/horse-realm.html#f6	coding	F6 is not a dev key any more
+wiki/horse-realm.html#getting-there	gameplay	Getting there, and getting back
+wiki/horse-realm.html#herds	coding	Released horses had to be taught to band
+wiki/horse-realm.html#release	coding	What releasing actually changes
+wiki/horse-realm.html#releasing	gameplay	Letting one go
+wiki/horse-realm.html#repro-clock	coding	The breeding rate is a clock, not a scale factor
+wiki/horse-realm.html#safety	gameplay	Nothing happens to a horse here
+wiki/horse-realm.html#terrain	coding	The terrain is arithmetic, not a saved layout
+wiki/horse-realm.html#tests	coding	What is tested, and what a test cannot reach
+wiki/horse-realm.html#the-field	gameplay	The field
+wiki/horse-realm.html#two-dimensions	coding	Two dimensions, and why they share nothing
+wiki/horse-realm.html#what	gameplay	What it is for
 wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest with a clock on it
 wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank
 wiki/horse-stasis.html#browse-coding	coding	The Browse tab reads the stable's papers, not the chamber
@@ -2863,6 +2880,13 @@ wiki/item-equestrian-posts.html#four	coding	Why four blocks and not one
 wiki/item-equestrian-posts.html#loot	coding	Loot tables
 wiki/item-equestrian-posts.html#poi	coding	They are POIs and nothing else
 wiki/item-equestrian-posts.html#use	gameplay	What they are for
+wiki/item-freedom-stick.html#handler	coding	Where it lives
+wiki/item-freedom-stick.html#making	gameplay	Making one
+wiki/item-freedom-stick.html#nothing-to-restore	coding	Re-taming needed no code
+wiki/item-freedom-stick.html#three-changes	coding	Un-taming is three calls, and the third is the one that matters
+wiki/item-freedom-stick.html#using	gameplay	Using it
+wiki/item-freedom-stick.html#what-happens	gameplay	What happens to the horse
+wiki/item-freedom-stick.html#wild-mark	coding	The wild-spawn mark
 wiki/item-horse-hair.html#chain	gameplay	There is no chain — hair goes in raw
 wiki/item-horse-hair.html#get	gameplay	How you get it
 wiki/item-horse-hair.html#removal	coding	The bundle, the rope and the cloth were removed

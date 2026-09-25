@@ -1,0 +1,5 @@
+Freedom stick
+(Item / husbandry)
+Give a horse back. Used on your own horse in the horse realm , it heals it, unclaims it, and leaves it standing there with its name, its genes and its whole pedigree intact for whoever tames it next.
+
+Item / husbandry Freedom stick Give a horse back. Used on your own horse in the horse realm , it heals it, unclaims it, and leaves it standing there with its name, its genes and its whole pedigree intact for whoever tames it next. The horse realm Horse hair All items server/FreedomStickHandler ; the item in item/ModItems .

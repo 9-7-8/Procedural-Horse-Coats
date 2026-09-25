@@ -1,0 +1,147 @@
+2026-09-25 - the horse realm is built, and the hay portal now goes there
+
+    The treatment written earlier the same day (d2026-09-25-horse-realm.txt) was
+    implemented. Four questions were put to the owner before any code: pool size (2x2
+    blocks), where a portal arrives (hashed from the Overworld portal, so the same one
+    every time), whether players may build there (no), and how many uses the freedom
+    stick has (64). Everything else came off the treatment unchanged.
+
+A second dimension, sharing nothing with the first
+
+    horsegenetics:horse_realm sits beside horsegenetics:debug_pens. The hay-bale portal
+    now arrives in the realm; the debug corridor and its test yard are reached by F6
+    and by nothing else.
+
+    Every rule is keyed to the realm's level and the corridor reads none of them, which
+    is the constraint that shaped the whole implementation rather than a nicety. The
+    corridor is an unrestricted test bench on purpose: its blanket "no horse damage"
+    rule was deleted on 2026-09-13 because it made six genes untestable, and its
+    horses-only entity filter was switched off the day before that because it deleted
+    the zombies and cows two gene tests were about. Both are exactly what the public
+    realm needs. They were therefore written fresh in server/HorseRealmRules rather
+    than generalised out of the corridor, which would have quietly undone two
+    deliberate decisions.
+
+    Because F6 became the corridor's only door, the keybind is now registered in every
+    build including release jars, and the server decides who may use it:
+    debug.tools on, or LEVEL_GAMEMASTERS - the same bar /testkit already sets. An
+    ordinary player is told where the hay portal goes instead of getting silence.
+
+The field is arithmetic; nothing about it is saved
+
+    1,000 by 1,000 chunks, chunk 0 to 999 on both axes. The ground is three lines of
+    minecraft:flat in dimension/horse_realm.json - fifteen air layers, bedrock, dirt -
+    which with min_y: -16 puts bedrock at Y=-1 and dirt at Y=0. min_y has to be a
+    multiple of sixteen, which is the only reason it is not simply -1.
+
+    server/HorseRealmTerrain adds the rest on chunk load, deferred one tick and
+    idempotent: a 2x2 water pool at every fifth chunk's origin, a lit hay portal at
+    every hundredth chunk's origin (a hundred of them), and a sixteen-high wall of
+    barrier blocks one block outside the field. A custom ChunkGenerator was the
+    obvious answer and was not used: flat is a path this mod already runs on and a
+    codec it does not have to register, and what flat cannot do - a fixed grid, and a
+    block with a block entity - is trivial against a live ServerLevel. Most chunks do
+    no block access at all.
+
+    The water is not decoration. Healing is gated on standing near water, so a dry
+    field is one where a hurt horse never recovers - the mistake the test yard made for
+    weeks (gap 258).
+
+    Eternal day is an omission rather than a setting: the dimension type carries
+    default_clock and no timelines field, and an empty timelines means sky darkness
+    never varies. That is the same 26.1.2 fact debug_pens was debugged FOR on
+    2026-09-12; here it is the feature.
+
+    Arrival is a hash of the Overworld portal's block position onto one of the hundred
+    exits, not a scaled coordinate - the Overworld is millions of blocks wide and the
+    realm is sixteen thousand, so any linear mapping puts every portal anyone will ever
+    build into one cell. Both of its properties fail silently when broken, which is why
+    they are a test rather than a comment.
+
+The breeding rate is a clock, and that is the part worth reading
+
+    Nothing in common.repro counts down. Pregnancy says so in its own header: every
+    time is an absolute game tick and every state is derived from an anchor and the
+    current tick. There is no timer to divide by four. There is only the reading of
+    "now" that each derivation is handed.
+
+    So each horse keeps an offset in its persistent data - ticks it lived through that
+    its reproduction did not - and HorseRealmRepro.reproTime(horse) is game time minus
+    that offset. Every repro read and write for that horse goes through it. One number,
+    one place, and a horse that has never been in the realm has an offset of zero and
+    behaves exactly as before.
+
+    That one framing buys all four requirements: the rate (25% credited, 75% deferred,
+    so everything takes four times as long), a true pause at zero including existing
+    pregnancies, no progress at all while the realm is empty (the horse is not ticking,
+    so nothing is credited and all of it is deferred), and correct behaviour on the way
+    home (the offset belongs to the horse, so it stops growing and is never taken away;
+    clearing it on exit would make a mare instantly, retroactively overdue).
+
+    NaturalBreedingHandler is the one place both clocks appear. Her cycle and her one
+    try this heat use her repro clock; the three-second courtship, the chat throttles
+    and the log stamps use the world's, because a message is something a player reads in
+    real time whatever the realm's pacing.
+
+The freedom stick, and the call that is easy to miss
+
+    A feather, a stick and one horse hair, shapeless, 64 uses, and a refusal costs
+    nothing. Used on your own horse in the realm it heals it, returns its tack, and
+    un-tames it.
+
+    Un-taming is three calls and the third is the one that matters: setTamed(false),
+    setOwner(null), setTemper(0). Without the temper reset the release is a formality -
+    vanilla's RunAroundLikeCrazyGoal rolls against temper and a horse that WAS tame sits
+    at maximum, so the first player to mount it tames it on the first roll. Nobody would
+    notice that was broken.
+
+    Re-taming needed no code. Nothing on HorseRecord or in HorseAncestryData is derived
+    from ownership, and HorseOwnerTrackingHandler reconciles the owner mirror every
+    forty ticks and accepts null - its javadoc already named "a horse going wild again"
+    as a case it handles, long before there was one.
+
+    The saddle has to come off for a structural reason rather than a generous one:
+    AbstractHorse.canUseSlot(SADDLE) asks isTamed(), so a saddle left on a horse that
+    has gone wild is a saddle quietly destroyed.
+
+    Two design calls were taken rather than asked, both recorded on the realm's coding
+    tab: the stick refuses a horse you do not own (a shared field where anyone can
+    unclaim anyone's horse is the opposite of a safe one), and a horse standing in a
+    realm portal alone does not travel (a released horse surfacing in a stranger's back
+    garden is the outcome the whole feature exists to prevent). Players enter with their
+    horses; only players, and their own tamed horses within fifty blocks, leave.
+
+Released horses had to be taught to band
+
+    server/HorseRealmHerds exists because a released horse falls through every gate the
+    herd system has. HerdManager.assignFounder returns immediately for anything that
+    already has a record, and the wild-herd path is gated on the wild-spawn mark that
+    HorseFoundingTickHandler strips from every horse loading with one. A released horse
+    is the opposite case in every respect. Its band is labelled Feral Mixed rather than
+    the lead's breed, because whoever gathers there is whoever was released nearby and
+    FERAL is already the mod's word for no herd identity.
+
+What was proven, and what was not
+
+    runServer boots clean and its log names ServerLevel[world]/horsegenetics:horse_realm,
+    which is the only available proof that the dimension JSON loads at all.
+
+    Three new gametests, and all fifteen pass: horse_realm_is_built (pools, a lit exit,
+    the perimeter), horse_realm_grid_is_stable (four thousand arrival hashes: always a
+    real exit, always the same one twice, and spread over at least 75 of the hundred),
+    and freedom_stick_crafts.
+
+    horse_realm_is_built usually runs in the Overworld and that is not a mistake:
+    GameTestServer builds its world from a hand-written three-dimension list and never
+    reads the datapack's dimension/ folder, so the realm cannot exist in that harness
+    however correct the JSON is - the runner saves the overworld, the nether and the end
+    and nothing else. The geometry does not care which level it writes into, so it is
+    asserted wherever it can be, and the two ground assertions, which belong to the flat
+    generator rather than to any Java, are asked only when the real dimension is there.
+
+    Nothing has been played. Nobody has walked into the realm, released a horse, come
+    back for one, or watched a foal born in it. The full list is the Verification tab of
+    wiki/horse-realm.html; the item's half of it is on wiki/item-freedom-stick.html.
+    The one check that cannot be made any other way, and is most likely to be wrong, is
+    leaving a pregnant mare in an empty realm for a long while and confirming her
+    pregnancy did not move.

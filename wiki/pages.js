@@ -36,6 +36,7 @@ window.HG.pages = {
                 { href: "carrots.html", text: "Breeding carrots & the gene database", kind: "magical", views: ["gameplay","coding"] },
                 { href: "items.html", text: "Items & recipes", kind: "core", views: ["gameplay","coding"] },
                 { href: "villagers.html", text: "Villagers & transfer papers", kind: "core", views: ["gameplay","coding"] },
+                { href: "horse-realm.html", text: "The horse realm", kind: "core", views: ["gameplay","coding"] },
                 { href: "horse-dimension.html", text: "Hay portals & the horse dimension", kind: "core", views: ["gameplay","coding"] },
                 { href: "stables.html", text: "Generated stables", kind: "core", views: ["gameplay","coding"] }
             ]
@@ -52,6 +53,7 @@ window.HG.pages = {
                 { href: "progression.html", text: "The checklist \u0026 the collection", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-seed-jars.html", text: "Seed jars", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-vet-kit.html", text: "Vet's kit", kind: "core", views: ["gameplay","coding"] },
+                { href: "item-freedom-stick.html", text: "Freedom stick", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-whistles.html", text: "Whistles", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-double-gates.html", text: "Double gates", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-jumps.html", text: "Jumps", kind: "core", views: ["gameplay","coding","science"] },

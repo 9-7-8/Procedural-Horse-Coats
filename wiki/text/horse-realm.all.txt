@@ -1,0 +1,5 @@
+The horse realm
+(Gameplay / world)
+A flat, sunlit, bounded field where nothing can hurt a horse. Step through a hay-bale portal, let your surplus go with a freedom stick , and it stays there — healed, wild, keeping its name and its whole pedigree — until somebody else tames it.
+
+Gameplay / world The horse realm A flat, sunlit, bounded field where nothing can hurt a horse. Step through a hay-bale portal, let your surplus go with a freedom stick , and it stays there — healed, wild, keeping its name and its whole pedigree — until somebody else tames it. Hay portals & the horse dimension Freedom stick Fertility & gestation Care, bonds & herds server/HorseRealm , HorseRealmTerrain , HorseRealmRules , HorseRealmRepro , HorseRealmHerds , FreedomStickHandler ; the three JSON files under data/horsegenetics/ .
