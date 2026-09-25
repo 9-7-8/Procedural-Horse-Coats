@@ -748,6 +748,7 @@
 <tr><td>Chilean Corralero</td><td>plains, meadow, savanna, savanna plateau, badlands, wooded badlands, windswept hills / gravelly hills, grove, river</td><td>13.2&ndash;14.2</td><td>7</td><td>5</td><td>9</td><td>Uncommon</td><td>dark and solid by preference &mdash; bay, dark bay and black lead, chestnut a minority, with low cream, dun, grey and roan. Cream is kept low enough that a double-cream founder is very uncommon, though breeding can still reach it: the real registry bars the washed-out coat, which is a rule, not a disorder. Light sabino for face and leg white only.</td></tr>
 <tr><td>Chincoteague Pony</td><td>beach, stony shore, mangrove swamp, swamp, plains</td><td>12.0&ndash;13.2</td><td>4</td><td>5</td><td>9</td><td>Rare</td><td>the most reliably pinto breed here &mdash; tobiano is the signature and <code>SW1</code> splash is heavy, so blue and part-blue eyes are common. Cream, flaxen, sabino and rabicano too. Two <a href="#strains">strains</a>, 8 traditional to 2 sport type, differing in how much white they carry.</td></tr>
 <tr><td>Cleveland Bay</td><td>plains, forest, meadow</td><td>16.0&ndash;16.2</td><td>6</td><td>6</td><td>8</td><td>Rare</td><td>fixed <code>A_</code> + E-heavy extension &rarr; always bay with black points, minimal white.</td></tr>
+<tr><td><a href="breed-book.html#cloudtouched">Cloudtouched</a></td><td>windswept hills / forest / gravelly hills, stony peaks, meadow, cherry grove &mdash; <strong>day only</strong></td><td>12.2&ndash;15.3</td><td>8</td><td>9</td><td>4</td><td>Rare</td><td>magical, and mostly grey &mdash; <code>G3</code> at 76%. <strong>No founder is a true flier</strong>: the <a href="gene-flying.html">flying</a> pool seeds <code>El/n</code>, <code>El/Tf</code> and <code>Tf/n</code> and never <code>Tf/Tf</code>, so 64 in 100 glide and the rest carry <code>Tf</code> silently. <a href="gene-bird-boned.html">Bird-boned</a> homozygous in 10. Both irises off the cool end with <a href="eye-colour.html">glowing</a> ones on every founder, rolled independently. Storm-leaning on both weather loci. Health 4 and pull 2 are what pays for the flight.</td></tr>
 <tr><td>Clydesdale</td><td>taiga, snowy taiga, grove, river</td><td>16.2&ndash;18.0</td><td>3</td><td>3</td><td>5</td><td>Uncommon</td><td>black-biased; tobiano; heavy sabino + splash &rarr; big white legs / face. Feathering not built.</td></tr>
 <tr><td>Colorado Ranger</td><td>plains, windswept hills, meadow, savanna, badlands</td><td>14.2&ndash;16.0</td><td>7</td><td>7</td><td>8</td><td>Rare</td><td>a pedigree registry, not a colour one, and the file says so with two <a href="#strains">strains</a>: 11 in 20 solid, 9 in 20 carrying the leopard complex. The solid strain forces <code>LP</code> and both PATN modifiers wild outright. Broad otherwise &mdash; cream, dun, grey, roan, silver, rare champagne, flaxen and rabicano &mdash; but <strong>pinto is barred by the registry</strong>, so no tobiano, frame, splash or dominant white. Leopard deliberately lighter than the Appaloosa's.</td></tr>
 <tr><td>Connemara Pony</td><td>windswept hills / gravelly hills / forest, stony shore</td><td>13.0&ndash;14.2</td><td>5</td><td>8</td><td>8</td><td>Moderate</td><td>often grey; occasional cream / dun.</td></tr>
@@ -1082,7 +1083,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the newest breed &mdash; the Enderpony, which is the first file to band a hue or an eye colour at all &mdash; the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, and a harem that should cap at four mares.</p>
+    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the newest breed &mdash; the Enderpony, which is the first file to band a hue or an eye colour at all &mdash; a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, and a harem that should cap at four mares.</p>
 </div>
 
 <h3 id="enderpony-0924">The Enderpony (2026-09-24, NOT played)</h3>
@@ -1132,17 +1133,28 @@
         either. <strong>Pass:</strong> motes from the back or the feet, never from the head or tail.</li>
 </ul>
 
-<h3 id="cloudtouched-table">Cloudtouched is missing from this page&rsquo;s own tables (2026-09-24)</h3>
+<h3 id="cloudtouched-rare">Cloudtouched is rare now, not very rare (2026-09-24, NOT played)</h3>
 
 <p>
-    Not a game defect &mdash; a documentation one, found while adding the Enderpony.
-    <a href="breed-book.html#cloudtouched">Cloudtouched</a> has no row in
-    <a href="#commonness">the commonness table</a>, where every other shipped breed including the
-    Dhampir has one. It was added to the &ldquo;carries neither tolerance locus&rdquo; sentence above
-    the <a href="#climate">tolerance table</a> at the same time, so that half is closed. The row wants
-    the breed&rsquo;s own numbers read off <code>cloudtouched.json</code> rather than guessed, which is
-    why it was not written blind in a session about a different breed.
+    A deliberate retier, one step up the <a href="#commonness">ladder</a> (owner's call): its wild
+    herds should now be founded about twice as often. Nothing else about the breed moved. It has
+    never been seen in a world at either tier, so this is not &ldquo;is the new rate right&rdquo; so
+    much as <strong>the first time anybody looks for one at all</strong> &mdash; and a breed that
+    loads but never heads a herd is indistinguishable from a rare one you have not met yet, which is
+    what makes this worth a deliberate look rather than a vibe.
 </p>
+<ul>
+    <li><strong>A Cloudtouched herd is founded.</strong> Ride windswept hills, stony peaks or a
+        cherry grove <em>by day</em> &mdash; it is <code>spawn_time: day</code>, so a night ride
+        proves nothing &mdash; and read <code>latest.log</code> for a <code>[Breeds]</code> founder
+        line naming it. <strong>Pass:</strong> the line appears without having to hunt for hours.
+        <strong>Fail looks like</strong> plenty of other breeds' lines and never this one, which
+        would mean the file loads but the biome list or the hours keep it out.</li>
+    <li><strong>It is noticeably easier to find than the Dhampir</strong>, which is still
+        <code>rare</code>, and than the Enderpony, which is <code>very_rare</code>. That comparison
+        is the cheapest read on whether the tier is being honoured at all, because the three are the
+        only magical breeds and two of them now sit on the same rung.</li>
+</ul>
 
 <h3 id="new-breeds-0915">Five new breeds, and a country on every breed (2026-09-15, NOT played)</h3>
 

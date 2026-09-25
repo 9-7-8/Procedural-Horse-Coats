@@ -94,12 +94,12 @@ Two things found in passing, both fixed
     session's change; confirmed by reading GeneDescriptions rather than by blaming the diff.
     Written, four lines, in the shape of its three siblings.
 
-    Cloudtouched is missing from wiki/breeds.html#commonness, where every other shipped breed
+    Cloudtouched was missing from wiki/breeds.html#commonness, where every other shipped breed
     including the Dhampir has a row, and was also missing from the "a breed not listed carries
-    neither tolerance locus" sentence. The sentence is fixed (it names Cloudtouched and the
-    Enderpony now). The table row is NOT written — it wants that breed's own numbers read off its
-    file rather than guessed in a session about a different breed — and is on wiki/breeds.html's
-    Verification tab as a documentation defect.
+    neither tolerance locus" sentence. The sentence was fixed at once (it names Cloudtouched and
+    the Enderpony now). The row was left open on wiki/breeds.html's Verification tab rather than
+    guessed at in a session about a different breed — and was then written an hour later, see
+    below, because the owner asked for the breed to be retiered in the same breath.
 
 What a full :common:test run would still have to check
 
@@ -110,3 +110,24 @@ What a full :common:test run would still have to check
     is why those were the two packages chosen. The one golden that moved was coat-bake-golden.txt,
     by exactly one line: the new Endp row, carrying the same hash as the other eight because the
     locus paints nothing.
+
+Then: Cloudtouched is rare now, and finally has a row
+
+    Asked for straight after, and the ask was ambiguous in a way worth recording — "add
+    cloudtouched as rare" could have meant "write the missing documentation row for the rare
+    breed Cloudtouched" or "retier it to rare and then write the row", and those differ by
+    whether wild herds get founded twice as often. Put as two options; her call was the RETIER.
+
+    So cloudtouched.json moves very_rare -> rare, one step up the ladder (0.75 -> 1.5 against a
+    moderate breed's 6.0). Nothing else about the breed moved. The row it never had is now in
+    breeds.html#commonness between Cleveland Bay and Clydesdale, and the breed-book tag and the
+    spawn-weight arithmetic in that page's own Verification tab were corrected to the new tier —
+    the second of those would otherwise have gone on reasoning from 0.75 for ever.
+
+    The "Cloudtouched is missing from this page's own tables" check is gone from breeds.html's
+    Verification tab rather than marked closed, per the rule that a Verification tab only ever
+    shrinks. What replaced it is the thing that is actually open now: the retier is unplayed, and
+    so was the old tier, so nobody has ever confirmed a Cloudtouched herd is founded at all. The
+    check says what a failure looks like — every other breed's founder line in latest.log and
+    never this one — because "I did not see one" is what a correctly-working rare breed also
+    looks like.
