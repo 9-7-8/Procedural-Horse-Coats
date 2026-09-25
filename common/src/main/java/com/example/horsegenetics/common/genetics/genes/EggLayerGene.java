@@ -20,10 +20,18 @@ import java.util.List;
  *
  * <h2>What may be laid, and what may be found</h2>
  * The verb accepts any item id. The balance therefore lives entirely in the
- * <b>founder table</b>, and this locus keeps to things a chicken could plausibly
- * be jealous of. Nothing valuable is rollable in the wild; a horse that lays
- * something worth having is one somebody engineered through the splice layer,
- * which is where an open item vocabulary belongs.
+ * <b>founder table</b>, and eight of the nine alleles keep to things a chicken
+ * could plausibly be jealous of.
+ *
+ * <p>The ninth is the <b>ender pearl</b>, and it is a deliberate exception
+ * rather than an oversight (owner's call). The locus used to hold nothing worth
+ * having, on the argument that a horse laying treasure should be one somebody
+ * engineered through the splice layer; the Enderpony is a whole breed built
+ * around laying pearls, so the allele had to exist somewhere, and it is here
+ * rather than in a bespoke second locus. It sits in the ordinary carrier spread
+ * with the other eight, so a pair of unrelated wild carriers can throw a pearl
+ * layer without an Enderpony ever being found - the breed is the reliable
+ * source, not the only one.
  *
  * <h2>On the ground, not into a chest</h2>
  * Laying into the horse's inventory is tidier and makes the accumulation hazard
@@ -59,7 +67,8 @@ public final class EggLayerGene extends AbstractMatchedPairGene {
                         new Variant0("Ink", "minecraft:ink_sac", "Ink sac"),
                         new Variant0("Str", "minecraft:string", "String"),
                         new Variant0("Bne", "minecraft:bone", "Bone"),
-                        new Variant0("Lthr", "minecraft:leather", "Leather")),
+                        new Variant0("Lthr", "minecraft:leather", "Leather"),
+                        new Variant0("Endp", "minecraft:ender_pearl", "Ender pearl")),
                 WILD_CARRIER_PERCENT,
                 "The horse produces nothing on its own.",
                 "One copy, and nothing is laid. The horse carries a laying allele and shows no "

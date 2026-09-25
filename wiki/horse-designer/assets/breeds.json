@@ -3111,6 +3111,220 @@
   ]
 },
 {
+  "id": "enderpony",
+  "name": "Enderpony",
+  "description": "A little black pony with amethyst eyes and a purple mark somewhere on it, trailing the same drifting motes an enderman does. It is slow, it cannot jump, rain makes both worse, and it flinches out of the world and back a few blocks away when something hits it. What it does that nothing else does is lay ender pearls on the ground while nobody is watching. Nobody keeps one to ride.",
+  "kind": "magical",
+  "commonness": "very_rare",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:bamboo_jungle",
+    "minecraft:beach",
+    "minecraft:birch_forest",
+    "minecraft:cherry_grove",
+    "minecraft:dark_forest",
+    "minecraft:desert",
+    "minecraft:eroded_badlands",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:frozen_peaks",
+    "minecraft:frozen_river",
+    "minecraft:grove",
+    "minecraft:ice_spikes",
+    "minecraft:jagged_peaks",
+    "minecraft:jungle",
+    "minecraft:mangrove_swamp",
+    "minecraft:meadow",
+    "minecraft:mushroom_fields",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:plains",
+    "minecraft:river",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:snowy_plains",
+    "minecraft:snowy_slopes",
+    "minecraft:snowy_taiga",
+    "minecraft:sparse_jungle",
+    "minecraft:stony_peaks",
+    "minecraft:stony_shore",
+    "minecraft:sunflower_plains",
+    "minecraft:swamp",
+    "minecraft:taiga",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_savanna",
+    "minecraft:wooded_badlands"
+  ],
+  "price": [20, 34],
+  "stats": {
+    "speed": 2,
+    "jump": 2,
+    "health": 3,
+    "size": [0.78, 0.92],
+    "pull": 2
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "Sh/ShD", "weight": 34 },
+      { "pair": "ShD/ShD", "weight": 46 },
+      { "pair": "Sh/Sh", "weight": 20 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Cha/Cha", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Cha/Cha", "weight": 100 }
+    ],
+    "horsegenetics.egg_layer": [
+      { "pair": "Endp/Endp", "weight": 100 }
+    ],
+    "horsegenetics.ender_echo": [
+      { "pair": "End/End", "weight": 100 }
+    ],
+    "horsegenetics.particle": [
+      { "pair": "Prtl/Prtl", "weight": 100 }
+    ],
+    "horsegenetics.weather_speed": [
+      { "pair": "Rv/Rv", "weight": 100 }
+    ],
+    "horsegenetics.weather_jump": [
+      { "pair": "Rv/Rv", "weight": 100 }
+    ],
+    "horsegenetics.magic_night_watch": [
+      { "pair": "Wst/Wst", "weight": 10 },
+      { "pair": "Wsi/Wsi", "weight": 10 },
+      { "pair": "Wnr/Wnr", "weight": 8 },
+      { "pair": "Wun/Wun", "weight": 8 },
+      { "pair": "Wbh/Wbh", "weight": 8 },
+      { "pair": "Wst/n", "weight": 7 },
+      { "pair": "Wsi/n", "weight": 7 },
+      { "pair": "Wnr/n", "weight": 7 },
+      { "pair": "Wun/n", "weight": 7 },
+      { "pair": "Wbh/n", "weight": 7 },
+      { "pair": "Wst/Wsi", "weight": 3 },
+      { "pair": "Wun/Wbh", "weight": 3 },
+      { "pair": "n/n", "weight": 15 }
+    ],
+    "horsegenetics.magic_day_watch": [
+      { "pair": "Wst/Wst", "weight": 5 },
+      { "pair": "Wsi/Wsi", "weight": 5 },
+      { "pair": "Wnr/Wnr", "weight": 4 },
+      { "pair": "Wun/Wun", "weight": 3 },
+      { "pair": "Wbh/Wbh", "weight": 3 },
+      { "pair": "Wst/n", "weight": 8 },
+      { "pair": "Wsi/n", "weight": 8 },
+      { "pair": "Wnr/n", "weight": 8 },
+      { "pair": "Wun/n", "weight": 8 },
+      { "pair": "Wbh/n", "weight": 8 },
+      { "pair": "n/n", "weight": 40 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Stars",
+      "weight": 26,
+      "genes": {
+        "horsegenetics.stars": [
+          { "pair": "Stc/Stc", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Wormholes",
+      "weight": 22,
+      "genes": {
+        "horsegenetics.wormholes": [
+          { "pair": "Wmc/Wmc", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Crescents",
+      "weight": 20,
+      "genes": {
+        "horsegenetics.crescents": [
+          { "pair": "Crc/Crc", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Duskwing",
+      "weight": 18,
+      "genes": {
+        "horsegenetics.duskwing_bands": [
+          { "pair": "Dwc/Dwc", "weight": 50 },
+          { "pair": "Dwb/Dwb", "weight": 30 },
+          { "pair": "Dwk/Dwk", "weight": 20 }
+        ]
+      }
+    },
+    {
+      "name": "Polymoon",
+      "weight": 14,
+      "genes": {
+        "horsegenetics.polymoon": [
+          { "pair": "Pmc/Pmc", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "bands": {
+    "horsegenetics.stars": {
+      "hue": [265, 290]
+    },
+    "horsegenetics.wormholes": {
+      "hue": [265, 290]
+    },
+    "horsegenetics.crescents": {
+      "hue": [265, 290]
+    },
+    "horsegenetics.duskwing_bands": {
+      "hue": [265, 290]
+    },
+    "horsegenetics.polymoon": {
+      "hue": [265, 290]
+    },
+    "horsegenetics.eye_colour_right": {
+      "eye_chaos_r": [110, 175],
+      "eye_chaos_g": [30, 90],
+      "eye_chaos_b": [180, 235]
+    },
+    "horsegenetics.eye_colour_left": {
+      "eye_chaos_r": [110, 175],
+      "eye_chaos_g": [30, 90],
+      "eye_chaos_b": [180, 235]
+    },
+    "horsegenetics.egg_layer": {
+      "interval": [10000, 14000]
+    },
+    "horsegenetics.particle": {
+      "site": [1, 2]
+    }
+  },
+  "notes": [
+    "THE PEARLS ARE THE BREED, AND THEY ARE TUNED SEPARATELY FROM THE HORSE. Every founder is Endp/Endp at the egg layer, so every Enderpony lays ender pearls on the ground where it is standing with nothing asked of you. The rate is the one number to reach for when the breed is worth too much or too little, and it is the interval band and nothing else: 10000 to 14000 ticks between layings, at the slow end of what the locus allows. Changing it cannot accidentally improve the mount, which is the whole reason it is banded here rather than expressed as a stat.",
+    "The ender pearl is a new allele on an existing locus, not a bespoke gene (owner's call). The egg layer used to hold nothing worth having on purpose; Endp joins the locus's ordinary wild carrier spread along with the other eight, so a pair of unrelated wild carriers can throw a pearl layer that is not an Enderpony. The breed is the reliable source rather than the only one.",
+    "Black is fixed, not likely: E/E and a/a on every founder, so no Enderpony is ever red, bay or buckskin and none of its foals can be either. Shade leans dark, because the purple markings read best on the deepest black the locus will give.",
+    "FIVE MARKING STRAINS, EXACTLY ONE EACH. A founder picks one of stars, wormholes, crescents, duskwing bands or polymoon and is homozygous for that gene's coloured allele - never the plain allele, never a heterozygote, never two markings at once. Strains are what buys that: a gene named only by another strain rolls as unnamed, and an unnamed coat gene is forced wild. Duskwing is the one strain with a choice inside it, because that locus has three coloured alleles.",
+    "Every marking gene's hue is banded to 265-290 degrees, so a horse runs from amethyst to violet and no further. Both irises are banded the same way in rgb, which is what a chaos eye takes. The two eyes are rolled independently, so two slightly different purples in one face is normal here and not a fault.",
+    "NEBULA LIGHT IS DELIBERATELY ABSENT (owner's call). The proposal asked for a purple nebula field across the barrel, and that gene's colour is a fixed palette running pink through violet to blue with no hue value a breed can band - it is a property of the gene, shared by every horse carrying it, so tuning it purple for this breed would have repainted all of them. The purple identity is carried by the marking strain instead.",
+    "SLUGGISH AND LEADEN ARE THE STAT SCORES, NOT A POOL. Magic speed and magic jump are two of the five body-stat loci, so a pool naming them wins over the stats block and takes the axis away from it - the sheet said both and the bake said so out loud. A speed of 2 and a jump of 2 already resolve to Sluggish/Sluggish and Leaden/Leaden with the magnitude drawn from the score, which is the same horse with a tunable number instead of a fixed allele.",
+    "Rain is the weather identity and it is doubled on purpose: Rv on both weather loci, so an already slow, flat-jumping pony gets worse in the wet on both axes at once. Neither copy touches health, pulling or the laying interval, so a wet Enderpony is slower and lower but not stranded, and it keeps laying and keeps breeding through the weather.",
+    "The watchers are unrestricted, which is the point. Both loci are in the pool with all five alleles, so an Enderpony may stand and stare, close on you, only move unseen, appear behind you, or do none of it, by night and independently by day - and only a matched pair shows anything, so the mixed and carrier pairs in the pool are horses that pass a watcher on without wearing one. Night is the commoner half.",
+    "It is not from anywhere on earth, so it has no country. That is a real answer in this format rather than a gap.",
+    "The Ender Echo carries its rider, so the flinch-teleport is survivable to sit through rather than a way of being thrown. It is flavour and an escape, not a reason the breed is strong: speed, jump, health and pull are all well under a breed anybody works."
+  ]
+},
+{
   "id": "exmoor_pony",
   "name": "Exmoor Pony",
   "country": "united_kingdom",

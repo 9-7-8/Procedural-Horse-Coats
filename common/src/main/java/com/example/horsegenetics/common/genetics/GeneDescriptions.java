@@ -240,6 +240,12 @@ public final class GeneDescriptions {
                     "The magical counterpart of jump strength: a Springy copy multiplies jump up, "
                             + "a Leaden copy multiplies it down, two copies add. Same shape as "
                             + "magic speed and magic health, and most wild horses carry a copy."),
+            Map.entry("horsegenetics.magic_pull",
+                    "The magical counterpart of pulling ability: a Strong copy multiplies how much "
+                            + "a horse can shift up, a Weak copy multiplies it down, two copies add. "
+                            + "Same shape as magic speed, health and jump, except that pulling is "
+                            + "stored on the same 1-10 scale a breed sheet is written in, so there "
+                            + "is no curve between the sheet and the horse."),
             Map.entry("horsegenetics.mane_color",
                     "A magical gene: the mane in any colour, solid or banded. The heterozygote "
                             + "shows both at once in two different colours - the one gene that "
