@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "#minecraft:wool",
+    "horsegenetics:horse_hair",
+    "minecraft:ender_pearl"
+  ],
+  "result": {
+    "id": "horsegenetics:rescuing_braid"
+  }
+}

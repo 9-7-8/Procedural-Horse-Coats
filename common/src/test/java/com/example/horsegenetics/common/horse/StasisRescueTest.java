@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -93,11 +94,25 @@ class StasisRescueTest {
         assertTrue(StasisRescue.dueAgain(9_000L, 5L));
     }
 
-    /** Both lines name the horse - that is the whole of what makes them useful. */
+    /** Every line names the horse - that is the whole of what makes them useful. */
     @Test
-    void bothLinesNameTheHorse() {
+    void everyLineNamesTheHorse() {
         assertTrue(StasisRescue.saved("Ennis").contains("Ennis"));
+        assertTrue(StasisRescue.savedInBank("Ennis").contains("Ennis"));
         assertTrue(StasisRescue.refused("Ennis").contains("Ennis"));
         assertEquals(StasisRescue.refused("Ennis"), StasisRescue.refused("Ennis"));
+    }
+
+    /**
+     * <b>The two saves are different sentences.</b> A chamber off your belt and
+     * one out of the cabinet leave the player in different positions - one of
+     * them is a bottle short in their pocket and the other is not - and a player
+     * who is told the same thing either way will pat the wrong one.
+     */
+    @Test
+    void theBankSaveSaysItWasTheBank() {
+        assertNotEquals(StasisRescue.saved("Ennis"), StasisRescue.savedInBank("Ennis"));
+        assertTrue(StasisRescue.savedInBank("Ennis").contains("bank"));
+        assertFalse(StasisRescue.saved("Ennis").contains("bank"));
     }
 }

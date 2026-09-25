@@ -263,6 +263,16 @@ public final class ModItems {
     public static final DeferredItem<HoldingPenTicketItem> HOLDING_PEN_TICKET =
             register("holding_pen_ticket", HoldingPenTicketItem::new);
 
+    // --- the rescuing braid - the stall ticket a horse wears --------------
+    // Mane or tail gear that spends itself to send the horse (and its rider)
+    // home the instant it would die. It resolves the destination when it
+    // breaks rather than being bound when it is made, so it is the same two
+    // destinations the tickets above reach and needs no component of its own.
+    // stacksTo(1) because a worn braid is one save and a stack of them in a
+    // slot would read as several. server/RescuingBraidHandler.
+    public static final DeferredItem<RescuingBraidItem> RESCUING_BRAID =
+            register("rescuing_braid", properties -> new RescuingBraidItem(properties.stacksTo(1)));
+
     // --- transfer papers - how a horse changes hands --------------------
     // A blank is bound to whoever crafted it and can only be signed against a
     // horse that player currently owns; signing it produces a signed paper,

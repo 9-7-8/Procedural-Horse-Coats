@@ -112,6 +112,20 @@ tasks.register<JavaExec>("bakeGeneIcons") {
     args(rootProject.layout.projectDirectory.dir("wiki/assets/gene-icons").asFile.absolutePath)
 }
 
+// The mane and tail patches of the texture sheet, as two white masks. The
+// rescuing braid is drawn through them, so they have to follow the mesh rather
+// than be painted at coordinates somebody wrote down once. See HairMaskTool.
+tasks.register<JavaExec>("bakeHairMasks") {
+    group = "horsegenetics"
+    description = "Write the braid's mane and tail mask textures from the mesh"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.coat.skin.HairMaskTool")
+    args(rootProject.layout.projectDirectory
+        .dir("neoforge-26.1.2/src/main/resources/assets/horsegenetics/textures/entity/horse")
+        .asFile.absolutePath)
+}
+
 // What every painting outcome does to a horse - coverage, parts, colour, what it
 // paints on - measured through the real pipeline for the breed designer's
 // markings filters. See MarkingFactsTool.

@@ -50,6 +50,9 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // The cutie-mark emblem, drawn last so it sits on top of the coat and
         // every white pattern (a no-op unless the horse is Cutmrk/Cutmrk).
         this.addLayer(new CutieMarkLayer(this));
+        // After the marks: a braid is worked into the hair and sits on top of
+        // everything the coat did, the same way the emissive pass does.
+        this.addLayer(new BraidLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,
@@ -102,8 +105,38 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                     geneticState.breedLabel, withinDetailDistance(renderState));
             geneticState.coatId = textures.coat();
             geneticState.emissiveCoatId = textures.glow();
+            // Gear is a synced attachment, so the client has the worn stacks
+            // without a packet of this layer's own - see HorseGear.
+            geneticState.braidMane = braidColour(horse,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE);
+            geneticState.braidTail = braidColour(horse,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.TAIL);
         }
     }
+
+    /**
+     * The opaque ARGB of the rescuing braid in this slot, or {@code 0} if there
+     * is not one. Vanilla's {@code dyed_color} is the whole of a braid's
+     * appearance - see {@code RescuingBraidItem} on why it is not the mod's own
+     * three-zone tint.
+     */
+    private static int braidColour(Horse horse,
+                                   com.example.horsegenetics.neoforge.entity.HorseTackSlot slot) {
+        net.minecraft.world.item.ItemStack worn = slot.on(horse);
+        if (!(worn.getItem() instanceof com.example.horsegenetics.neoforge.item.RescuingBraidItem)) {
+            return 0;
+        }
+        return 0xFF000000 | (net.minecraft.world.item.component.DyedItemColor.getOrDefault(
+                worn, BRAID_UNDYED) & 0x00FFFFFF);
+    }
+
+    /**
+     * What an undyed braid is: the colour of horse hair, which is what one is
+     * made of. Matches the {@code default} in the item's own model definition,
+     * and the two are a pair - a braid that looked one colour in the hand and
+     * another on the horse would read as a bug.
+     */
+    private static final int BRAID_UNDYED = 0xA05740;
 
     /**
      * <b>Close enough to be worth a coat of its own?</b> {@code distanceToCameraSq}

@@ -72,6 +72,22 @@ public record HorseListing(
     /** Bond is unknown until the entity is loaded; this is that, not "no bond". */
     public static final int BOND_UNKNOWN = -1;
 
+    /**
+     * <b>{@link #where} for a horse that is in a stasis chamber.</b>
+     *
+     * <p>The one whereabouts that is knowable without a loaded entity, and the
+     * one the table most needed: a horse in a chamber is not an entity at all,
+     * so before this it sat in the list for ever reading <i>not loaded</i> -
+     * which means "somewhere you cannot see right now" and reads as a horse you
+     * could go and fetch. It is in a bottle, and the bottle is the answer.
+     *
+     * <p>A plain sentence rather than a flag on the wire because {@link #where}
+     * is already a free-text column the table draws and {@link #haystack()}
+     * searches, so this costs nothing and makes {@code stasis} a word the filter
+     * box finds horses by.
+     */
+    public static final String IN_STASIS = "in a stasis chamber";
+
     public HorseListing {
         firstName = firstName == null ? "" : firstName;
         lastName = lastName == null ? "" : lastName;
@@ -135,6 +151,30 @@ public record HorseListing(
 
     public String ageLabel() {
         return adult ? "adult" : "foal";
+    }
+
+    /**
+     * <b>What the whereabouts column says.</b>
+     *
+     * <p>{@link #loaded} is not the question any more, which is why this is one
+     * method rather than the {@code loaded() ? where() : "not loaded"} the two
+     * drawing sites each used to write for themselves. A horse in a chamber is
+     * unloaded and its whereabouts are nonetheless known ({@link #IN_STASIS}),
+     * so the test is whether there is anything to say - and with two call sites
+     * doing it by hand, the second was always going to be the one that got
+     * missed.
+     *
+     * @param unknown what to say when nothing is known - the two sites word it
+     *                differently because one is a narrow column and the other a
+     *                sentence
+     */
+    public String whereLabel(String unknown) {
+        return where.isEmpty() ? unknown : where;
+    }
+
+    /** True when {@link #whereLabel} is saying something rather than shrugging. */
+    public boolean whereKnown() {
+        return !where.isEmpty();
     }
 
     /** Everything a bare filter word is matched against, lower-cased, once. */

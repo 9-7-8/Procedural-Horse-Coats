@@ -9,6 +9,11 @@ package com.example.horsegenetics.common.horse;
  * chamber cannot be hurt at all, so going in is a hard stop against dying - the
  * capture <b>is</b> the save, and the player does nothing to earn it.
  *
+ * <p>An empty one <b>filed in a stasis bank</b> counts too, and is the fallback
+ * for the chamber you forgot to take out: see {@link #savedInBank}. Which of the
+ * two caught the horse is the only thing that differs downstream, and it differs
+ * in exactly one sentence.
+ *
  * <p>This class is the arithmetic and the words. Which horse, whose, what is in
  * whose inventory and how a live animal becomes a data component are all
  * {@code neoforge/server/EmergencyStasisHandler}'s, the way {@code LastStand} and
@@ -78,6 +83,29 @@ public final class StasisRescue {
     public static String saved(String horseName) {
         return horseName + " was about to die - an emergency chamber has it.";
     }
+
+    /**
+     * The same news, when the chamber that took the horse was <b>filed in a
+     * stasis bank</b> rather than carried.
+     *
+     * <p>A separate sentence rather than the same one, because the two leave the
+     * player in different positions and the difference is actionable: a chamber
+     * off your belt is gone from your belt, and a chamber in a bank means the
+     * horse is already where the rest of the stable is and the bank is one
+     * empty short. Saying "an emergency chamber has it" for both would have the
+     * player patting their pocket for a bottle that is a thousand blocks away.
+     */
+    public static String savedInBank(String horseName) {
+        return horseName + " was about to die - an emergency chamber in your stasis bank has it.";
+    }
+
+    /**
+     * <b>Where the chamber that caught a horse was</b>, as the log row's
+     * {@code other} column reads it. Empty means carried; this means filed.
+     * Kept here beside the two sentences so the row and the chat line cannot
+     * come to disagree about which happened.
+     */
+    public static final String FROM_BANK = "your stasis bank";
 
     /**
      * What the owner is told when it could not. One clear line naming the horse,

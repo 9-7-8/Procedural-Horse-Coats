@@ -4,6 +4,8 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.common.horse.StasisUpkeep;
 import com.example.horsegenetics.neoforge.NeoRng;
+import com.example.horsegenetics.neoforge.data.StasisBankIndex;
+import com.example.horsegenetics.neoforge.item.EmergencyStasisChamberItem;
 import com.example.horsegenetics.neoforge.item.StasisChamberItem;
 import com.example.horsegenetics.neoforge.server.DietFoods;
 import com.example.horsegenetics.neoforge.server.StasisCare;
@@ -118,6 +120,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
                 // take her out and let her out by hand.
                 HorseStasisBankBlockEntity.this.foalingBlocked = false;
             }
+            HorseStasisBankBlockEntity.this.publish();
             HorseStasisBankBlockEntity.this.setChanged();
         }
 
@@ -259,8 +262,87 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
         }
     };
 
+    /**
+     * <b>Whoever placed this bank</b>, or first opened it while it was
+     * unclaimed. A bank is otherwise unowned, and the only thing this is for is
+     * the emergency chamber: an empty one filed here insures <i>this</i> player's
+     * horses, and spending a stranger's bottle would be theft. It grants nothing
+     * else - anyone who can reach the block can still open it, file a chamber and
+     * take one out, exactly as before.
+     */
+    private @Nullable java.util.UUID placedBy;
+
     public HorseStasisBankBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.HORSE_STASIS_BANK.get(), pos, state);
+    }
+
+    /**
+     * Set once, when the block is placed - {@link HorseStasisBankBlock#setPlacedBy}.
+     */
+    public void setPlacedBy(java.util.UUID player) {
+        placedBy = player;
+        publish();
+        setChanged();
+    }
+
+    /**
+     * <b>Claim an unowned bank by opening it.</b> The migration path, and the
+     * only one there is: a bank placed before any of this existed has nobody
+     * recorded against it, and would quietly never insure anything. Opening it
+     * once fixes that. A bank that already has an owner is untouched, so this
+     * cannot be used to take one over.
+     */
+    public void claimIfUnowned(java.util.UUID player) {
+        if (placedBy == null) {
+            setPlacedBy(player);
+        }
+    }
+
+    public @Nullable java.util.UUID placedBy() {
+        return placedBy;
+    }
+
+    /**
+     * <b>Tell {@link StasisBankIndex} where this bank is and whether it is
+     * insuring anything.</b> Called when the grid changes and when the bank
+     * loads, which between them are every moment the answer can move.
+     *
+     * <p>The flag is the whole reason the emergency chamber can consult a bank at
+     * all without searching the world: a rescue walks the index, and only a bank
+     * that said yes here is worth loading a chunk for.
+     */
+    private void publish() {
+        if (!(this.level instanceof ServerLevel server)) {
+            return;
+        }
+        StasisBankIndex.get(server.getServer())
+                .record(placedBy, server.dimension(), getBlockPos(), anyArmedEmergency(chambers));
+    }
+
+    /**
+     * <b>Is there an empty emergency chamber filed here?</b> The one question the
+     * index caches, asked over the grid the player can see rather than anything
+     * derived - an emergency chamber with a horse already in it is not insurance,
+     * it is storage.
+     */
+    public static boolean anyArmedEmergency(Container container) {
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack stack = container.getItem(i);
+            if (stack.getItem() instanceof EmergencyStasisChamberItem
+                    && StasisChamberItem.snapshotOf(stack) == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        // A bank that has never been touched since the index shipped, or one in a
+        // world restored from a backup, is right again from the first time its
+        // chunk loads.
+        publish();
     }
 
     public SimpleContainer chambers() {
@@ -638,6 +720,12 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
             Containers.dropContents(this.level, pos, chambers);
             Containers.dropContents(this.level, pos, supplies);
         }
+        if (this.level instanceof ServerLevel server) {
+            // Out of the index here rather than lazily on the next rescue: a
+            // stale row is a chunk loaded to look at a block that is not there,
+            // and this is the one moment it is certainly gone.
+            StasisBankIndex.get(server.getServer()).forget(server.dimension(), pos);
+        }
     }
 
     /**
@@ -658,6 +746,9 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
         }
         output.putInt("water", water);
         output.putInt("cursor", cursor);
+        if (placedBy != null) {
+            output.store("placed_by", net.minecraft.core.UUIDUtil.CODEC, placedBy);
+        }
     }
 
     @Override
@@ -677,6 +768,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
         }
         water = input.getIntOr("water", 0);
         cursor = Math.floorMod(input.getIntOr("cursor", 0), SLOTS);
+        placedBy = input.read("placed_by", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
         // The gate is derived, not saved: loading the grid does not go through
         // the container's setChanged, so it is recomputed here or a reloaded
         // bank would sit inert until somebody touched a slot.

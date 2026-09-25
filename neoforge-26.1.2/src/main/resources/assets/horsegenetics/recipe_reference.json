@@ -1565,6 +1565,17 @@
       "count": 1
     },
     {
+      "id": "rescuing_braid",
+      "kind": "shapeless",
+      "in": [
+        "#minecraft:wool",
+        "horsegenetics:horse_hair",
+        "minecraft:ender_pearl"
+      ],
+      "out": "horsegenetics:rescuing_braid",
+      "count": 1
+    },
+    {
       "id": "scientists_post",
       "kind": "shapeless",
       "in": [

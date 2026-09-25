@@ -37,4 +37,19 @@ public class GeneticHorseRenderState extends HorseRenderState {
      * {@link EmissiveCoatLayer} on top of the base coat.
      */
     public Identifier emissiveCoatId = null;
+
+    /**
+     * The colour of the <b>rescuing braid</b> worn in the mane, as opaque ARGB,
+     * or {@code 0} for none. Drawn by {@link BraidLayer}.
+     *
+     * <p>Zero rather than {@code -1} or a nullable Integer because it is read
+     * every frame for every horse on screen and the overwhelmingly common
+     * answer is "nothing is worn": a plain int field compared against zero costs
+     * nothing, and a fully transparent colour is not a braid anybody could see
+     * anyway.
+     */
+    public int braidMane = 0;
+
+    /** The same for the tail. The two slots are independent - see the handler. */
+    public int braidTail = 0;
 }

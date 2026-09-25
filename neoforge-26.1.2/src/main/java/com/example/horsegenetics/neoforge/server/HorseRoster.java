@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
@@ -119,7 +120,7 @@ public final class HorseRoster {
             if (out.size() >= HorseRosterPayload.MAX_ENTRIES) {
                 break;
             }
-            out.add(entry(server, record));
+            out.add(entry(server, record, whereabouts));
         }
         return List.copyOf(out);
     }
@@ -156,7 +157,8 @@ public final class HorseRoster {
         }
     }
 
-    private static HorseRosterPayload.Entry entry(MinecraftServer server, HorseRecord record) {
+    private static HorseRosterPayload.Entry entry(MinecraftServer server, HorseRecord record,
+                                                  HorseWhereabouts whereabouts) {
         AbstractHorse horse = live(server, record);
         boolean loaded = horse != null;
         HorseCareAttachment care = loaded ? horse.getData(ModAttachments.HORSE_CARE.get()) : null;
@@ -176,11 +178,25 @@ public final class HorseRoster {
                 loaded,
                 care == null ? HorseRosterPayload.BOND_UNKNOWN : care.bond(),
                 care != null && care.inHerd(),
-                loaded ? where(horse) : "",
+                loaded ? where(horse) : whereUnloaded(record, whereabouts),
                 record.tamedBy().orElse(""),
                 record.bredBy().orElse(""),
                 record.hasKnownParents(),
                 record.gelded());
+    }
+
+    /**
+     * <b>The one whereabouts an unloaded horse can still have.</b>
+     *
+     * <p>A horse in a chamber is not in an unloaded chunk - it is not an entity
+     * at all, and no amount of walking towards it will ever load it - so the
+     * table's "not loaded" was the wrong claim for it twice over, exactly as it
+     * was for the dead. Everything else genuinely is unknown until somebody goes
+     * and looks, and goes out empty rather than as a plausible guess; see
+     * {@link HorseRosterPayload}.
+     */
+    private static String whereUnloaded(HorseRecord record, HorseWhereabouts whereabouts) {
+        return whereabouts.inStasis(record.id()) ? HorseListing.IN_STASIS : "";
     }
 
     /** {@code "overworld 118, 71, -204"} - the dimension path, then the block it is standing on. */

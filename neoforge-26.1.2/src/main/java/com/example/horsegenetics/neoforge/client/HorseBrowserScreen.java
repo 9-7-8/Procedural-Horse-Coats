@@ -3503,7 +3503,7 @@ public final class HorseBrowserScreen extends Screen {
                 // the heading says Hands. The info screen has the full form.
                 BreedStatCurve.formatHands(BreedStatCurve.handsFor(row.scale())).replace(" hh", ""),
                 row.bond() < 0 ? "?" : Integer.toString(row.bond()),
-                row.loaded() ? row.where() : "not loaded"
+                row.whereLabel("not loaded")
         };
         int[] colours = {
                 row.lethal() ? BAD : plain,
@@ -3517,7 +3517,9 @@ public final class HorseBrowserScreen extends Screen {
                 statColour(row.jump(), HorseTraits.BASE_JUMP, plain),
                 plain,
                 row.bond() < 0 ? EXPR_OFF : plain,
-                row.loaded() ? plain : EXPR_OFF
+                // Dimmed on "nothing is known", not on "not loaded": a horse in
+                // a chamber is unloaded and its whereabouts are a fact.
+                row.whereKnown() ? plain : EXPR_OFF
         };
         for (int i = 0; i < COLUMNS.size(); i++) {
             if (i == SEND_COLUMN) {
@@ -3669,7 +3671,7 @@ public final class HorseBrowserScreen extends Screen {
         if (!row.bredBy().isEmpty()) {
             tail.append("  - bred by ").append(row.bredBy());
         }
-        tail.append("  - ").append(row.loaded() ? row.where() : "not loaded right now");
+        tail.append("  - ").append(row.whereLabel("not loaded right now"));
         if (!row.conditions().isEmpty()) {
             tail.append("  - ").append(String.join(", ", row.conditions()));
         }

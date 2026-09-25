@@ -66,6 +66,26 @@ public class HorseStasisBankBlock extends BaseEntityBlock {
         return new HorseStasisBankBlockEntity(pos, state);
     }
 
+    /**
+     * <b>Remember who placed it.</b> The one thing a bank needs an owner for is
+     * the emergency chamber: an empty one filed here insures that player's
+     * horses wherever they are, and a bank nobody is recorded against would
+     * either insure nobody or spend a stranger's bottle.
+     *
+     * <p>Ownership grants nothing else. Anyone who can reach the block can still
+     * open it, file a chamber and take one out - a bank is a cabinet, not a lock.
+     */
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state,
+                            @Nullable net.minecraft.world.entity.LivingEntity placer,
+                            net.minecraft.world.item.ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (placer instanceof Player player
+                && level.getBlockEntity(pos) instanceof HorseStasisBankBlockEntity bank) {
+            bank.setPlacedBy(player.getUUID());
+        }
+    }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, net.minecraft.world.phys.BlockHitResult hit) {
@@ -74,6 +94,11 @@ public class HorseStasisBankBlock extends BaseEntityBlock {
         }
         if (player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof HorseStasisBankBlockEntity bank) {
+            // The migration path for a bank that predates the emergency
+            // chamber's ability to use one - see claimIfUnowned. It takes
+            // nothing away from anyone: an owned bank is untouched, and owning
+            // one grants no access that opening it did not already give.
+            bank.claimIfUnowned(serverPlayer.getUUID());
             serverPlayer.openMenu(new SimpleMenuProvider(
                     (id, inv, p) -> new HorseStasisBankMenu(id, inv, bank),
                     Component.translatable("block.horsegenetics.horse_stasis_bank")));

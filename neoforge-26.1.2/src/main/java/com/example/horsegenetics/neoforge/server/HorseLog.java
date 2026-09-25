@@ -128,6 +128,36 @@ public final class HorseLog {
     }
 
     /**
+     * <b>An emergency stasis chamber caught a horse.</b>
+     *
+     * <p>Takes the ids rather than the entity, because by the time the caller
+     * knows it happened the horse has been {@code discard}ed - it is a data
+     * component on an item, and there is nothing left to ask for a name or a
+     * level. Every other writer here is handed a live animal; this one is the
+     * exception, and that is the feature rather than an awkwardness.
+     *
+     * @param inBank the chamber was filed in a stasis bank rather than carried
+     */
+    static void rescued(ServerLevel level, UUID owner, UUID horseId, String horseName,
+                        boolean inBank) {
+        write(level, owner, HorseEvent.rescued(stamp(level, level.getGameTime()),
+                horseId, clip(horseName, NAME_MAX), inBank));
+    }
+
+    /**
+     * <b>A rescuing braid broke and put a horse back in its stall.</b> Takes the
+     * ids for the same reason {@link #rescued} does - the caller is inside a
+     * damage event and the horse has just been moved to another world.
+     *
+     * @param destination where it landed, in words
+     */
+    static void homed(ServerLevel level, UUID owner, UUID horseId, String horseName,
+                      String destination) {
+        write(level, owner, HorseEvent.homed(stamp(level, level.getGameTime()),
+                horseId, clip(horseName, NAME_MAX), clip(destination, OTHER_MAX)));
+    }
+
+    /**
      * A horse changed hands on a transfer paper. Three rows, potentially two
      * players: the taker always gets one, and a horse that had an owner before
      * puts a matching row in <i>their</i> log, because losing a horse is news to

@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.log;
 
+import com.example.horsegenetics.common.care.RescuingBraid;
+import com.example.horsegenetics.common.horse.StasisRescue;
 import com.example.horsegenetics.common.repro.CoverNotice;
 import com.example.horsegenetics.common.repro.NaturalCover;
 
@@ -42,7 +44,7 @@ import java.util.UUID;
  *                  horse that is dead or sold cannot be asked later
  * @param other     the other party, kind-dependent and often empty: the parents
  *                  of a foal, what killed a horse, who a horse came from or
- *                  went to
+ *                  went to, or where the chamber that rescued one was filed
  * @param reason    for {@link Kind#COVER} only, how it ended; {@code null} on
  *                  every other kind
  * @param nearby    for {@link CoverNotice.Reason#CROWDED} only, the horses around
@@ -56,12 +58,26 @@ public record HorseEvent(Kind kind, long at, UUID horseId, String horseName,
     /**
      * <b>What happened</b>, and the word the filter chip carries.
      *
-     * <p>Seven kinds, and they are the seven the plan named: a cover, a birth, a
-     * death, a taming, and the three ways a horse changes hands. Ownership is
-     * three kinds rather than one because they are three different events to the
-     * person reading - buying from a dealer, being handed a horse, and losing one
-     * are not interchangeable - and because a filter that cannot separate "what
-     * did I buy" from "what did I lose" is not a filter.
+     * <p>Seven kinds were the seven the plan named: a cover, a birth, a death, a
+     * taming, and the three ways a horse changes hands. Ownership is three kinds
+     * rather than one because they are three different events to the person
+     * reading - buying from a dealer, being handed a horse, and losing one are
+     * not interchangeable - and because a filter that cannot separate "what did
+     * I buy" from "what did I lose" is not a filter.
+     *
+     * <p>{@link #RESCUE} and {@link #HOMED} are the eighth and ninth, and they
+     * are here for the reason the whole tab is: both an emergency stasis chamber
+     * and a rescuing braid fire <i>by themselves</i>, possibly a thousand blocks
+     * from the player and possibly while they are reading something else. The
+     * chat line is an alarm that scrolls away; these are the record that a horse
+     * of theirs nearly died and what paid for it.
+     *
+     * <p>Two kinds rather than one, though they are both "something saved a
+     * horse", because they leave the player in entirely different places: a
+     * rescued horse is in a bottle they now have to find and open, and a homed
+     * one is standing in its stall. A filter that could not separate <i>what do
+     * I have to go and let out</i> from <i>what walked home by itself</i> would
+     * be the same failure the three ownership kinds exist to avoid.
      */
     public enum Kind {
         COVER("Cover", "Covers"),
@@ -70,7 +86,9 @@ public record HorseEvent(Kind kind, long at, UUID horseId, String horseName,
         TAMED("Tamed", "Taming"),
         PURCHASE("Bought", "Purchases"),
         SALE("Sold", "Sales"),
-        TRANSFER("Transferred", "Transfers");
+        TRANSFER("Transferred", "Transfers"),
+        RESCUE("Rescued", "Rescues"),
+        HOMED("Sent home", "Homings");
 
         private final String label;
         private final String plural;
@@ -96,7 +114,7 @@ public record HorseEvent(Kind kind, long at, UUID horseId, String horseName,
         other = other == null ? "" : other;
     }
 
-    // --- the seven ways one gets made -------------------------------------
+    // --- the ways one gets made -------------------------------------------
     //
     // Factories rather than a public constructor with eight arguments, because
     // seven of the eight are empty on any given kind and a call site that reads
@@ -139,6 +157,30 @@ public record HorseEvent(Kind kind, long at, UUID horseId, String horseName,
         return new HorseEvent(Kind.TRANSFER, at, horse, horseName, from, null, 0, 0);
     }
 
+    /**
+     * An emergency stasis chamber caught this horse out of a blow that would
+     * have killed it.
+     *
+     * @param inBank whether the chamber that took it was filed in a stasis bank
+     *               rather than carried - which is the whole of what {@code other}
+     *               says, and the only thing the two sentences differ on
+     */
+    public static HorseEvent rescued(long at, UUID horse, String horseName, boolean inBank) {
+        return new HorseEvent(Kind.RESCUE, at, horse, horseName,
+                inBank ? StasisRescue.FROM_BANK : "", null, 0, 0);
+    }
+
+    /**
+     * A rescuing braid broke and put this horse back where it lives.
+     *
+     * @param destination where it landed, in words -
+     *                    {@link RescuingBraid#ITS_STALL} or
+     *                    {@link RescuingBraid#THE_HOLDING_PEN}
+     */
+    public static HorseEvent homed(long at, UUID horse, String horseName, String destination) {
+        return new HorseEvent(Kind.HOMED, at, horse, horseName, destination, null, 0, 0);
+    }
+
     // --- reading one ------------------------------------------------------
 
     /**
@@ -167,6 +209,16 @@ public record HorseEvent(Kind kind, long at, UUID horseId, String horseName,
                         : name + " died: " + other + ".";
             case TAMED:
                 return "You tamed " + name + ".";
+            case RESCUE:
+                // Deferred to StasisRescue for CoverNotice's reason: this row is
+                // read by somebody who missed the chat line, and a row that
+                // worded it differently would leave them wondering whether they
+                // were two separate pieces of news.
+                return other.isEmpty()
+                        ? StasisRescue.saved(name)
+                        : StasisRescue.savedInBank(name);
+            case HOMED:
+                return RescuingBraid.saved(name, other.isEmpty() ? RescuingBraid.ITS_STALL : other);
             case PURCHASE:
                 return other.isEmpty()
                         ? "You bought " + name + "."
@@ -234,6 +286,12 @@ public record HorseEvent(Kind kind, long at, UUID horseId, String horseName,
             case TAMED:
             case PURCHASE:
             case TRANSFER:
+            // A rescue is a near-miss, and it reads green on purpose: the horse
+            // is alive and safe, which is the outcome, and the alternative -
+            // amber for "something nearly went wrong" - is a colour the tab does
+            // not have and a distinction nobody asked for.
+            case RESCUE:
+            case HOMED:
                 return true;
             case COVER:
                 return reason != null && reason.good();

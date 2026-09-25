@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.log;
 
+import com.example.horsegenetics.common.horse.StasisRescue;
 import com.example.horsegenetics.common.repro.CoverNotice;
 import com.example.horsegenetics.common.repro.NaturalCover;
 import org.junit.jupiter.api.Test;
@@ -210,6 +211,24 @@ class HorseEventLogTest {
         NaturalCover.Crowd crowd = new NaturalCover.Crowd(12, 8);
         HorseEvent row = HorseEvent.cover(1_000L, MARE, "Mare", CoverNotice.Reason.CROWDED, crowd);
         assertEquals(CoverNotice.line("Mare", CoverNotice.Reason.CROWDED, crowd), row.line());
+    }
+
+    /**
+     * <b>And a rescue row must read as the chat line too</b>, for the same
+     * reason and harder: an emergency chamber fires with nobody watching by
+     * design, so the row is very often the <i>only</i> place the player ever
+     * reads about it. The two must also stay distinguishable - which chamber
+     * paid for the save is the actionable half.
+     */
+    @Test
+    void aRescueRowIsTheChatLineAndSaysWhichChamber() {
+        assertEquals(StasisRescue.saved("Mare"),
+                HorseEvent.rescued(1_000L, MARE, "Mare", false).line());
+        assertEquals(StasisRescue.savedInBank("Mare"),
+                HorseEvent.rescued(1_000L, MARE, "Mare", true).line());
+        assertTrue(HorseEvent.rescued(0L, MARE, "Mare", true).good());
+        assertFalse(HorseEvent.rescued(0L, MARE, "Mare", true).bad(),
+                "the horse lived - a near miss is not a loss");
     }
 
     @Test

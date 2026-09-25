@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.HorseWhereabouts;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.StasisSnapshot;
 import com.example.horsegenetics.neoforge.item.StasisChamberItem;
@@ -127,6 +128,12 @@ public final class HorseStasisHandler {
      */
     public static void swallow(ServerLevel level, Horse horse, ItemStack chamber, String name) {
         chamber.set(ModDataComponents.STASIS_SNAPSHOT.get(), snapshot(horse, name));
+        // Written before the discard, while the horse still has a position. This
+        // is the last thing that will ever be recorded about where it is: a
+        // discarded horse fires no death, leaves no entity to sight, and would
+        // otherwise sit in the browser reading "not loaded" for ever.
+        HorseWhereabouts.get(level.getServer())
+                .enteredStasis(horse.getUUID(), level.dimension(), horse.blockPosition());
         horse.discard();
         level.playSound(null, horse.blockPosition(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 0.7F, 1.4F);
     }
@@ -178,6 +185,12 @@ public final class HorseStasisHandler {
         if (!level.addFreshEntity(horse)) {
             return null;
         }
+        // Out of the bottle, and back to being a thing that can be seen. Cleared
+        // here rather than left for the slow sighting stagger, because until it
+        // is cleared the browser is telling the player their horse is in a
+        // chamber while it stands in front of them.
+        HorseWhereabouts.get(level.getServer())
+                .leftStasis(horse.getUUID(), level.dimension(), horse.blockPosition());
         return horse;
     }
 

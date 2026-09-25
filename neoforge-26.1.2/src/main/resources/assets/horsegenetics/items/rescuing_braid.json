@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "horsegenetics:item/rescuing_braid",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -6269120
+      }
+    ]
+  }
+}
