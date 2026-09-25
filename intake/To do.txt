@@ -2,6 +2,9 @@ Never delete this file. When everything in it is done or intaken to the road map
 
 Tuning stuff, from using this in my heavily modded server:
 
+Bugs:
+- Dyed leather horse armor should be very common in loot tables, and should appear in loot tables that contain normal human leather armor.
+
 Magical loci and modded content:
 - LYCAN is a hand-authored, compile-time list of vanilla mob ids (MobRoster.java). Rebuild it at runtime instead, scanning the live entity registry (including everything other mods add) and applying the same aquatic/flying/hostile blacklist the roster's habitat tag now applies by hand, rather than listing ids by hand.
 - Same runtime-registry treatment for the item-producing genes - EggLayerGene (lays an item) and MagicItemDropGene (drops an item on death) should be able to offer alleles for any item any installed mod adds, not just the hand-picked vanilla item ids they ship with now.
