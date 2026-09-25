@@ -144,7 +144,7 @@ window.HG.pages = {
                 { href: "model-parts.html", text: "Attached model parts", kind: "core", views: ["coding"] },
                 { href: "momentum-sprint.html", text: "Momentum sprint", kind: "magical", views: ["coding"] },
                 { href: "item-rescuing-braid.html", text: "Rescuing braid", kind: "core", views: ["coding"] },
-                { href: "rider-comfort.html", text: "Rider comfort", kind: "core", views: ["coding"] },
+                { href: "rider-comfort.html", text: "Rider comfort", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-stall-bars.html", text: "Stall bars", kind: "core", views: ["coding"] },
                 { href: "saddle-pads.html", text: "Saddle pads", kind: "core", views: ["coding"] },
                 { href: "storm-fed.html", text: "Storm fed", kind: "magical", views: ["coding"] },

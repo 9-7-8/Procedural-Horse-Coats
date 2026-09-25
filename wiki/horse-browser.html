@@ -128,6 +128,39 @@
 
 <section class="tab-panel" data-tab="coding">
 
+<h2 id="refresh-built">The roster refreshes on every open (2026-09-24)</h2>
+
+<p>
+    <code>HorseBrowserScreen.init()</code> and the tab-switch path both used to ask for the
+    roster only <code>if (!ClientHorseRoster.received())</code>. That reads as &ldquo;only the
+    first time&rdquo; and <strong>means never again this session</strong>:
+    <code>ClientHorseRoster.clear()</code> runs on disconnect and nowhere else, so a player who
+    bred a foal, tamed a horse or sold one saw the stable as it was the first time they pressed
+    <kbd>H</kbd> until they found the <em>Refresh</em> button. Both paths now re-ask.
+</p>
+
+<p>
+    <strong>Throttled, though, and that is the part worth knowing.</strong> Unguarded, every
+    click on the tab strip would make the server walk the whole ancestry table
+    (<code>HorseRoster.gather</code>, plus the allele and breed sweeps), and flipping through
+    tabs is a casual gesture in a way pressing <em>Refresh</em> is not.
+    <code>requestRosterUnlessJustAsked()</code> skips a sweep within two seconds of the last
+    one &mdash; long enough that no realistic clicking costs more than one, far shorter than
+    anything a player could do to change the stable in between. The cooldown is
+    <code>static</code>, so closing and reopening the screen does not reset it, which is
+    exactly the gesture it exists to soak up. The <em>Refresh</em> button is deliberately
+    <strong>not</strong> throttled: it exists to be believed.
+</p>
+
+<p>
+    <code>ClientHorseRoster.received()</code> is still read, and now only for what it was
+    always good for &mdash; telling <em>an empty stable</em> from <em>the answer has not
+    arrived yet</em>, which is the difference between &ldquo;no horses&rdquo; and
+    &ldquo;asking the server&hellip;&rdquo; in three places including
+    <code>HorseStasisBankScreen</code>. Birth and death pushes are still owed; see
+    <a href="#menu-refresh">the roadmap tab</a>.
+</p>
+
 <h2 id="log-coding">The Log tab, as built</h2>
 
 <p>
@@ -420,15 +453,10 @@
 
 <p>
     <strong>Asked for on three events &mdash; screen opened, a foal born, a horse died.</strong>
-    Today there is a <em>Refresh</em> button and a lazy first fetch:
-    <code>HorseBrowserScreen.init()</code> requests the roster only if the client has never
-    received one, and <code>HorseRoster.sendTo</code> has exactly one caller, the payload handler.
-    So a player who breeds a horse and opens the menu sees the world as it was when they last
-    pressed a button.
+    <a href="#refresh-built">The first of the three shipped on 2026-09-24</a>; the other two
+    are pushes and are the actual work.
 </p>
 <ul>
-    <li><strong>On open is trivial</strong> &mdash; drop the <code>!received()</code> guard, at
-        the cost of a round-trip every time the screen opens.</li>
     <li><strong>Birth and death are pushes, not pulls, and that is the actual work.</strong> The
         server has to notice and send, which means a hook in the foaling and death paths and a
         payload that says <em>what changed</em>. Re-sending the whole roster on every birth in a
@@ -501,8 +529,32 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach.</p>
+    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty.</p>
 </div>
+
+<h3 id="refresh-verify-0924">The roster re-asks on open (2026-09-24, NOT played)</h3>
+
+<p>
+    Client-side timing, so no test reaches it. Two ways it can be wrong and they pull in
+    opposite directions, which is why both are worth a look.
+</p>
+
+<ul>
+    <li><strong>It is actually fresh.</strong> Open <kbd>H</kbd> &rarr; My horses and note the
+        count. Close it, breed or tame a horse, reopen. <strong>Pass:</strong> the new horse is
+        there without touching <em>Refresh</em>. <strong>Fail:</strong> the old count, which
+        would mean the request is going out but the reply is not being applied.</li>
+    <li><strong>It is not chatty.</strong> Click quickly back and forth across the tab strip
+        for a few seconds on a large stable. <strong>Pass:</strong> no stutter, because the
+        two-second cooldown collapses that into one sweep. <strong>Fail:</strong> a visible
+        hitch per click, which would mean <code>requestRosterUnlessJustAsked</code> is being
+        bypassed somewhere &mdash; the <em>Refresh</em> button is supposed to be the only
+        unthrottled caller.</li>
+    <li><strong>The empty state still reads right.</strong> On a fresh character with no
+        horses, the table should say <em>asking the server&hellip;</em> for an instant and then
+        settle on the no-horses line &mdash; not sit on &ldquo;asking&rdquo; forever, which
+        would mean <code>received()</code> is never being set.</li>
+</ul>
 
 <h3 id="log-verify-0924">The Log tab records what happens (2026-09-24, NOT played)</h3>
 

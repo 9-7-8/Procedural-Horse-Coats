@@ -58,10 +58,12 @@
 
 <p>
     <strong>Asked for as a sweep, and the current surface is smaller than it looks.</strong>
-    Roughly fifteen hand-written options across
-    <code>ServerConfig</code> (health mode, body size, three riding numbers, gestation days, two
-    debug switches) and <code>ClientConfig</code> (scroll bar, sex symbol, tutorial, right-click
-    to open, two coat-rendering numbers), plus two generated blocks that are genuinely thorough
+    A handful of hand-written options across
+    <code>ServerConfig</code> (health mode, body size, three riding numbers, gestation days, the
+    last-stand block, the two bond-decay numbers, whether a lead comes back when a horse is
+    teleported, two debug switches) and <code>ClientConfig</code> (scroll bar, sex symbol,
+    tutorial, right-click to open, two coat-rendering numbers), plus two generated blocks that
+    are genuinely thorough
     &mdash; <code>BreedSpawningConfig</code> writes four options per shipped breed, and
     <code>CartsConfig</code> a block per <code>CartKind</code>.
 </p>
@@ -93,7 +95,11 @@
     <li><strong>Every new system on this page should ship its own switch.</strong> Cheapest when
         written with the feature and near-impossible to retrofit consistently &mdash;
         <a href="horse-gear.html#accessories-bench">the tack bench</a> is the model, where one switch disabling
-        the bench disables all horse-armour crafting with no per-recipe gating anywhere.</li>
+        the bench disables all horse-armour crafting with no per-recipe gating anywhere.
+        <a href="rider-comfort.html#leads">The returned lead</a> (2026-09-24) is the first
+        thing to ship under this rule rather than be retrofitted to it:
+        <code>behaviour.leads_return</code> was written in the same change as the behaviour,
+        and off it restores vanilla exactly rather than half-disabling anything.</li>
 </ul>
 
 </section>
@@ -102,7 +108,7 @@
     <div class="seealso">
         <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="genetics-model.html">The genetics model</a>
-        <a href="rider-comfort.html">Rider comfort &mdash; five switches waiting on this</a>
+        <a href="rider-comfort.html">Rider comfort &mdash; the switches waiting on this</a>
         <a href="known-gaps.html">Known gaps</a>
     </div>
     The thing to settle before the sweep starts is the convention rather than the option list

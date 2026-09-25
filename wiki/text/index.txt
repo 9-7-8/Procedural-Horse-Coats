@@ -2692,6 +2692,7 @@ wiki/horse-browser.html#log-packet	coding	The whole log, coalesced
 wiki/horse-browser.html#log-reason	coding	A refusal is a constant, not a string
 wiki/horse-browser.html#log-refresh	gameplay	Refresh
 wiki/horse-browser.html#log-strip	coding	It needed no new tab-strip work
+wiki/horse-browser.html#refresh-built	coding	The roster refreshes on every open (2026-09-24)
 wiki/horse-care.html#band-code	coding	Band life
 wiki/horse-care.html#bands	gameplay	3. Wild bands
 wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the top tier is for
@@ -2945,6 +2946,7 @@ wiki/item-whistles.html#call	coding	How a call finds a horse
 wiki/item-whistles.html#ender	gameplay	The ender whistle
 wiki/item-whistles.html#ender-code	coding	The ender whistle
 wiki/item-whistles.html#ender-gaps	coding	Known gaps
+wiki/item-whistles.html#leads	coding	The lead, when a whistle moves the horse
 wiki/item-whistles.html#reading	coding	The area whistles
 wiki/item-whistles.html#tiers	gameplay	The four whistles
 wiki/item-whistles.html#use	gameplay	What happens when you blow an area whistle
@@ -3010,6 +3012,8 @@ wiki/progression.html#checklist	gameplay	The checklist
 wiki/progression.html#collection-storage	coding	The collection is a second set, on purpose
 wiki/progression.html#tasks	coding	Tasks are an enum in common/
 wiki/progression.html#verified	coding	Verified
+wiki/rider-comfort.html#leads	gameplay	Your lead comes back
+wiki/rider-comfort.html#leads-coding	coding	How the lead is returned (2026-09-24)
 wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
 wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
 wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour

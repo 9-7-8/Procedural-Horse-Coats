@@ -15,28 +15,124 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
 <h1>Rider comfort</h1>
 <p class="lede">
     Five small things that make riding less irritating, borrowed from other mods that
-    already do them: four are additions nobody would argue with, and one &mdash; fading
-    the horse out as you look down &mdash; touches the coat itself and is the only one
-    with a real unknown in it. None touches genetics, and each is small enough to ship
-    alone. <strong>None of it is built.</strong> This page exists so that the plan has a
-    home of its own rather than a section on a shared list, and so that when the first
-    piece of it ships there is already a page to document it on.
+    already do them. None touches genetics, and each is small enough to ship alone.
+    <strong>One of the five has shipped</strong> &mdash; a lead now comes back to you
+    rather than being left on the ground when this mod teleports the horse wearing it.
+    The other four are still plans, and the last of them &mdash; fading the horse out as
+    you look down &mdash; touches the coat itself and is the only one with a real unknown
+    in it.
 </p>
 
-<div class="note warn">
-    <span class="label">Nothing on this page exists in the game</span>
+<div class="note">
+    <span class="label">Mostly still a plan</span>
     <p>
-        Everything below is a plan. It was moved here whole from the main
+        This page was moved here whole from the main
         <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
-        rather than a place plans are written. When a piece of this ships, it comes
-        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
-        here &mdash; the page grows tabs as the thing grows.
+        rather than a place plans are written. It grows tabs as the thing grows: the
+        Gameplay and Coding tabs carry the one piece that exists, and everything else is
+        on the Roadmap tab, where it is deleted from when it ships.
     </p>
 </div>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="leads">Your lead comes back</h2>
+
+<div class="plain">
+    <p>
+        A horse cannot stay leashed to a fence while it is being teleported across the
+        world, so anything that summons one has to untie it first. It used to leave the
+        <strong>lead lying on the ground where the horse had been standing</strong> &mdash;
+        which, when you had just called the horse to you from sixty blocks away, meant
+        walking back for it. With an <a href="item-whistles.html#ender">ender whistle</a> or
+        an interdimensional <a href="item-tickets.html">ticket</a> it was worse than that:
+        the lead was left in the dimension the horse started in, and you were unlikely to
+        ever see it again.
+    </p>
+    <p>
+        Now <strong>the lead goes into your pack</strong>, or drops at your own feet if your
+        pack is full. Nothing else changes: the horse still arrives, and it still arrives
+        untied.
+    </p>
+</div>
+
+<p>
+    It applies wherever this mod moves a horse on purpose &mdash; all three
+    <a href="item-whistles.html">area whistles</a>, the ender whistle, and both kinds of
+    <a href="item-tickets.html">ticket</a>. It does <em>not</em> apply when a horse walks into
+    a <a href="horse-dimension.html">portal</a> on its own: the person holding the lead is
+    standing right there in that case, so the lead lands at their feet already and
+    vanilla&rsquo;s own behaviour is the legible one.
+</p>
+
+<p>
+    Server owners who would rather have vanilla exactly can turn it off with
+    <a href="config.html"><code>behaviour.leads_return</code></a>, which puts the lead back
+    on the ground where the horse was.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="leads-coding">How the lead is returned (2026-09-24)</h2>
+
+<p>
+    <code>server/HorseLeads.untieFor(horse, player)</code>, and every path that teleports a
+    horse calls it instead of untying the horse itself.
+</p>
+
+<p>
+    The distinction it is built on is one method apart in vanilla.
+    <code>Leashable.dropLeash()</code> unties <em>and</em> spawns an <code>Items.LEAD</code>
+    at the animal&rsquo;s position; <code>Leashable.removeLeash()</code> is the same untie
+    with the drop suppressed &mdash; both are
+    <code>dropLeash(entity, sendPacket, dropLead)</code> with different arguments. So the
+    whole change is <code>removeLeash()</code> plus the same give-or-drop
+    <code>HorseDietHandler</code> uses for a bucket remainder. With the config off, or with no
+    player to give it to, it falls back to <code>dropLeash()</code> and vanilla is back exactly.
+</p>
+
+<p>
+    <strong>It is safe on an unleashed horse</strong> &mdash; it returns immediately &mdash; so
+    the call sites dropped their own <code>isLeashed()</code> guards rather than keeping a
+    second copy of the check. <code>TicketHandler.arrive</code> grew a <code>Player</code>
+    parameter for it, which is the only signature this touched.
+</p>
+
+<p>
+    The two portal paths, <code>server/PortalEventHandler</code> and
+    <code>server/HorsePortalManager</code>, are deliberately <strong>not</strong> converted and
+    still call <code>dropLeash()</code>. They untie a horse that walked into a portal itself,
+    with its holder standing next to it, so the lead is already within reach and
+    vanilla&rsquo;s behaviour is the one that reads correctly.
+</p>
+
+<p>
+    Guarded by the <code>whistled_lead_comes_back</code> gametest in
+    <code>gametest/ModGameTests</code> &mdash; in a gametest rather than JUnit because the
+    NeoForge module&rsquo;s test classpath carries no Minecraft, and the assertion is about a
+    real <code>Leashable</code>, a real inventory and whether an <code>ItemEntity</code>
+    appeared in a real level. It asserts the two halves <em>separately</em>: no lead on the
+    ground, and a lead in the player&rsquo;s pack. Passing the first while failing the second
+    would be worse than the behaviour it replaced, so one combined assertion would have been
+    the wrong test. It was confirmed to fail against the old <code>dropLeash()</code> before
+    being kept.
+</p>
+
+<p class="muted">
+    It uses <code>helper.makeMockPlayer</code> rather than
+    <code>makeMockServerPlayerInLevel</code>, which is <code>@Deprecated(forRemoval)</code> and
+    really joins the player list. A leash holder only has to be an <code>Entity</code> &mdash;
+    <code>Leashable.setLeashedTo</code> never asks whether it is in the level &mdash; and a mock
+    player&rsquo;s inventory is a real one.
+</p>
+
+</section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
@@ -44,9 +140,10 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        Five small borrowings from other mods, each shippable alone and each wanting a
-        config switch &mdash; no mining-speed debuff while mounted, an inventory keybind,
-        leads that return &mdash; plus <strong>fading the horse out as you look down</strong>,
+        Four small borrowings from other mods are left, each shippable alone and each wanting
+        a config switch &mdash; no mining-speed debuff while mounted, an inventory keybind, a
+        right-click that equips tack, and returning the leads <em>vanilla</em> drops, which has
+        no event to hang on &mdash; plus <strong>fading the horse out as you look down</strong>,
         which asks the coat pipeline for a transparency it has never had.
     </p>
 </div>
@@ -57,7 +154,9 @@
     Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster of the
     survey backlog</a>. None touches genetics, and each is small enough to
     ship on its own. <strong>Every one of them wants a config switch written with it</strong>, per
-    <a href="config.html#config-everything">the config sweep</a>.
+    <a href="config.html#config-everything">the config sweep</a> &mdash; the first to ship,
+    <a href="#leads">the returned lead</a>, shipped with <code>behaviour.leads_return</code>
+    beside it, which is the pattern the rest should follow.
 </p>
 
 <ul>
@@ -76,9 +175,14 @@
         coat is generated per horse, and a half-transparent procedural coat is a rendering case
         nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
         transparency before designing the feature around it.</li>
-    <li><strong>Leads return to your inventory</strong> instead of dropping on the ground, falling
-        back to a drop when the inventory is full. From Horse Tweaks. Pure annoyance removal and
-        nothing in this mod's design objects.</li>
+    <li><strong>Leads return to your inventory when <em>vanilla</em> drops one</strong> &mdash;
+        a leash that snaps at range, or a knot broken by hand. From Horse Tweaks.
+        <a href="#leads-coding">This mod&rsquo;s own half shipped on 2026-09-24</a>; what is left
+        is the vanilla cases, and they are harder than they look. NeoForge 26.1.2 publishes
+        <strong>no leash event at all</strong>, and <code>Leashable.dropLeash</code> spawns its
+        item through <code>Entity.spawnAtLocation</code> with nothing to hook &mdash; so the only
+        seams are a mixin or an <code>EntityJoinLevelEvent</code> filter that would have to tell
+        a snapped lead from one a player threw on the floor. Decide which before building it.</li>
     <li><strong>Right-click with a saddle or armour equips it</strong> rather than opening the
         horse screen. Also Horse Tweaks. <strong>The one most likely to collide with something we
         ship:</strong> <code>client/HorseScreenHooks</code>, the <code>i</code> button and the
@@ -94,6 +198,50 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The returned lead has been seen only by a gametest &mdash; and the branch the gametest cannot reach is the one that fires when your pack is full, where a lead that goes nowhere at all would be strictly worse than the ground drop it replaced.</p>
+</div>
+
+<h3 id="leads-verify">The lead comes back (2026-09-24, NOT played)</h3>
+
+<p>
+    <code>whistled_lead_comes_back</code> pins the ordinary case and was confirmed to fail
+    against the old behaviour, so the first check below is a confirmation rather than a
+    discovery. The rest are the branches no test reaches.
+</p>
+
+<ul>
+    <li><strong>The ordinary case.</strong> Leash a tamed horse of yours to a fence, walk
+        twenty blocks off, and blow a golden <a href="item-whistles.html">whistle</a>.
+        <strong>Pass:</strong> the horse arrives, the fence knot is gone, and a lead is in your
+        inventory. <strong>Fail:</strong> a lead on the ground where the horse was, which means
+        the helper is falling through to <code>dropLeash()</code>.</li>
+    <li><strong>A full pack &mdash; the branch the gametest does not reach.</strong> Fill your
+        inventory completely, then do the same thing. <strong>Pass:</strong> the lead drops at
+        <em>your</em> feet. <strong>Fail:</strong> no lead anywhere, which would be worse than
+        the behaviour this replaced and is the only way this change can lose one.</li>
+    <li><strong>The interdimensional ticket &mdash; the case that used to lose it for
+        good.</strong> Leash a horse in the overworld and
+        <a href="item-tickets.html">ticket</a> it to a stall in the Nether. The lead should be
+        on you, not left behind in the overworld.</li>
+    <li><strong>The ender whistle across dimensions</strong>, the same way.</li>
+    <li><strong>The switch works in both directions.</strong> Turn
+        <a href="config.html"><code>behaviour.leads_return</code></a> off and blow the whistle
+        again: the lead should fall on the ground where the horse was standing, exactly as
+        vanilla does. A switch that does nothing in one direction is the usual way a config
+        option is wrong.</li>
+    <li><strong>The portals are deliberately unchanged.</strong> Lead a horse through a
+        <a href="horse-dimension.html">hay portal</a> and through a Nether portal. The lead
+        should still pop off and drop at your feet, as before &mdash; if it starts arriving in
+        your inventory, one of the two portal paths was converted by accident.</li>
+</ul>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
@@ -101,9 +249,10 @@
         <a href="pipeline.html">The coat pipeline</a>
         <a href="compatibility.html">Living beside other mods</a>
     </div>
-    Four of these are an afternoon each and want nothing settled first; the fade is the one to
-    leave until the coat has actually been drawn half-transparent, because everything about how
-    it would be configured depends on whether it can be drawn at all.
+    The returned lead was the first of the five and took an afternoon. Of what is left, the
+    mining-speed debuff and the inventory keybind still want nothing settled first; the fade is
+    the one to leave until the coat has actually been drawn half-transparent, because everything
+    about how it would be configured depends on whether it can be drawn at all.
 </div>
 
 </article>

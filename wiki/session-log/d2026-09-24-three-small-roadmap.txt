@@ -1,0 +1,184 @@
+2026-09-24, after the pair papers — three small items off the roadmap: whistle tooltips, a roster
+that refreshes, and leads that come back
+
+    The owner asked, in two steps:
+
+        Look through the road map and find five small items that should be relatively simple
+        to implement
+
+    ...then, after the shortlist:
+
+        Following the advice of start here.txt, implement #1, 2, 4
+
+    So the first half of this session was a survey, not a build. Worth recording separately
+    from the build, because the survey found things the build did not touch.
+
+Finding five small items meant reading roadmap tabs, not the roadmap
+
+    wiki/roadmap.html is generated and carries one sentence per page — enough to guess from
+    and not enough to pick from. The actual work was pulling the Roadmap tab out of about a
+    dozen candidate pages and reading the bullets. Note that the roadmap tabs are NOT in
+    wiki/text/ (bake-agent-text.mjs does not emit a per-tab file for them), so this was done
+    by stripping tags out of the .html directly.
+
+    The shortlist put to the owner, in the order given:
+
+        1. A tooltip on the three area whistles           item-whistles.html
+        2. Refresh the roster when the browser opens      horse-browser.html
+        3. Detect Realistic Horse Genetics and warn       compatibility.html
+        4. Leads that return instead of dropping          rider-comfort.html
+        5. A natural/magical filter on the Breeds tab     horse-browser.html
+
+    She picked 1, 2 and 4. Runner-up offered and not taken: removing vanilla's mining-speed
+    debuff while mounted, which is the same size but ALTERS vanilla rather than adding, so
+    philosophy.html#vanilla-intact has a claim on it.
+
+The subagent's report was wrong about the one thing that mattered, and checking cost a minute
+
+    An Explore agent was used to verify the five claims against the source before recommending
+    them. It reported that WhistleItem "silently destroys" the lead — no item drop. That is
+    not what vanilla does. Leashable.dropLeash() is dropLeash(this, true, true), and the
+    second true IS the ground drop; the lead was being dropped where the horse stood, not
+    destroyed. The fix changes where the lead ends up, not whether it exists.
+
+    Read out of the decompiled Leashable.java in the neoformruntime cache rather than
+    believed. This is the memory "verify a prescribed fix first" earning its keep on a
+    report that was otherwise accurate on all six points.
+
+Item 1 — the area whistles had no tooltip at all
+
+    EnderWhistleItem has had appendHoverText since it was built; WhistleItem never did. So
+    three tiers, one shared icon, three names, and the numbers 16 / 32 / 64 appeared NOWHERE
+    a player could read them — the recipe blurbs say "further than the basic one" without
+    ever saying how far. The only way to learn a radius was to walk out and count.
+
+    It reads the radius field rather than taking a fourth constructor argument or a per-tier
+    lang key, for the same reason WhistleItem.task() does: the radius is already the only
+    thing distinguishing the three, and a second parallel field is a second thing that can
+    disagree with it.
+
+    Second line is "A ridden horse stays put; a leashed one is untied" — the two outcomes the
+    verification tab says get reported as bugs. It deliberately stops short of saying where
+    the lead GOES, because that became a server config in item 4 and a client on a dedicated
+    server has no copy of the server's config to read.
+
+    The whistles page's Roadmap tab had a bullet reading "A tooltip naming the horse, and a
+    texture that tells a bound whistle from an unbound one". The tooltip half was ALREADY
+    BUILT (the ender whistle names its horse) and had been sitting there as a plan. Deleted
+    that half and left the texture half, which is still real: the four are now only
+    indistinguishable in the hotbar, where nothing draws a tooltip.
+
+Item 2 — "only the first time" meant "never again this session"
+
+    HorseBrowserScreen.init() asked for the roster only if !ClientHorseRoster.received().
+    That reads as a lazy first fetch. It is not: ClientHorseRoster.clear() runs on disconnect
+    and nowhere else, so received() stays true for the whole login. A player who bred a foal,
+    tamed a horse or sold one saw the stable as it was the first time they pressed H, until
+    they found the Refresh button. The same guard was on the tab-switch path, so switching
+    onto My horses did not fix it either.
+
+    The roadmap called this "trivial — drop the !received() guard". Dropping it outright is
+    not quite right, because HorseRoster.gather walks the whole ancestry table plus the allele
+    and breed sweeps, and clicking across the tab strip is a casual gesture in a way pressing
+    Refresh is not. Added requestRosterUnlessJustAsked(), which skips a sweep within two
+    seconds of the last. The cooldown is static so closing and reopening the screen does not
+    reset it — that is exactly the gesture it exists to soak up. The Refresh button is
+    deliberately NOT throttled: it exists to be believed.
+
+    received() is still read, and now only for what it was always good for: telling an empty
+    stable from "the answer has not arrived yet", in three places including
+    HorseStasisBankScreen.
+
+    Birth and death pushes are still owed and stay on the roadmap tab. They are the actual
+    work — a hook in the foaling and death paths and a payload that says what changed.
+
+Item 4 — the lead was being left behind, and in one case in another dimension
+
+    Six places in the mod call dropLeash(). Every one of them is untying a horse before
+    teleporting it, because a leash across a teleport is a leash to nowhere. Vanilla's
+    dropLeash() drops the lead at the animal's position, which is right for a leash that
+    snapped and wrong for one we cut: the horse arrives beside you and the lead stays put.
+    Up to 64 blocks for an echo whistle. In ANOTHER DIMENSION for an ender whistle or an
+    interdimensional ticket, where it is simply gone.
+
+    server/HorseLeads.untieFor(horse, player) uses removeLeash() — the same untie with the
+    drop suppressed — and hands the lead to the player who caused the move, falling back to
+    a drop at their feet when their pack is full. Under behaviour.leads_return, default on,
+    off restores vanilla exactly.
+
+    Three of the six sites converted: WhistleItem, EnderWhistleCalls.deliver, and
+    TicketHandler.arrive (which grew a Player parameter, the only signature this touched).
+
+    The two portal paths were left alone ON PURPOSE and that is the interesting call.
+    PortalEventHandler and HorsePortalManager untie a horse that walked into a portal itself,
+    with whoever is holding the lead standing right next to it — so the lead is already at
+    their feet and vanilla's behaviour is the legible one. Converting them would have moved a
+    lead from "on the ground in front of you" to "in your pack" for no gain.
+
+    The sixth is DebugPenManager, a debug tool, left alone.
+
+    untieFor is safe on an unleashed horse, so the call sites dropped their own isLeashed()
+    guards rather than keeping a second copy of the check.
+
+    NOTE for whoever finishes the rider-comfort bullet: the GENERAL Horse Tweaks behaviour —
+    a lead returning whenever VANILLA drops one, e.g. a leash snapping at range — has no
+    clean seam. NeoForge 26.1.2 publishes no leash event at all (grepped its sources jar:
+    zero hits for leash/leashable outside a recipe file), and dropLeash spawns its item
+    through Entity.spawnAtLocation with nothing to hook. The options are a mixin or an
+    EntityJoinLevelEvent filter that would have to tell a snapped lead from one a player
+    threw on the floor. That is written onto the rider-comfort Roadmap tab so it is not
+    rediscovered.
+
+The gametest, and confirming it can fail
+
+    whistled_lead_comes_back in gametest/ModGameTests, the eleventh. In a gametest rather
+    than JUnit for the usual reason: the NeoForge module's test classpath carries no
+    Minecraft, and the assertion is about a real Leashable, a real inventory, and whether an
+    ItemEntity appeared in a real level.
+
+    It asserts the two halves SEPARATELY — no lead on the ground, and a lead in the player's
+    pack. Passing the first while failing the second is the shape of the bug and would be
+    worse than the behaviour it replaced, so one combined assertion would have been the wrong
+    test.
+
+    Then the step that is easy to skip: the helper was temporarily reverted to always call
+    dropLeash() and the suite re-run. It went red with exactly the intended message ("the
+    lead did not reach the player who whistled — it has been destroyed rather than
+    returned"), and green again on restore. A test that has never been seen to fail is not
+    yet a test.
+
+    Two things worth knowing for the next gametest:
+
+        makeMockPlayer(GameType) is the one to use, not makeMockServerPlayerInLevel(), which
+        is @Deprecated(forRemoval) and really joins the player list. A leash holder only has
+        to be an Entity — Leashable.setLeashedTo never asks whether it is in the level — and
+        a mock player's inventory is a real one.
+
+        The "no item on the ground" assertion runs five ticks later via runAfterDelay. An
+        assertion that something is ABSENT is the one that passes wrongly if asked too early.
+
+Checks run
+
+    :neoforge-26.1.2:build                     green
+    :neoforge-26.1.2:runGameTest               11/11, logged to a file not a pipe
+    check-parity.mjs                           7163 checks across 60 cases
+    check-recipes.mjs                          133 files
+    check-progress-tasks.mjs                   103 tasks, all advancements
+    the negative control described above       red on the old behaviour, as intended
+
+    Nothing in common/ changed, so no golden coats, no breed files, no wasm, no gene bakes.
+
+What the next session should pick up
+
+    Item 3 from the shortlist is still the cheapest thing on compatibility.html and is
+    untouched: a load-time warning when Realistic Horse Genetics is installed. Both mods
+    replace the horse and both own coat generation, so whoever registers last wins, and a
+    player currently discovers that as a half-broken world. compat/HorsePoweredCompat is the
+    pattern to clone almost exactly — a list of candidate mod ids, ModList.get().isLoaded,
+    one log line — and the only open question is whether a log line is enough for a player
+    who does not read logs.
+
+None of the three has been seen by a person
+
+    All three are on their pages' Verification tabs. The lead is the one that could be wrong
+    quietly, and the branch the gametest does not reach is the full-inventory fallback.

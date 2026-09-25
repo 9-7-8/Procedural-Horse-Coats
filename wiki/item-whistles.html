@@ -30,13 +30,22 @@
     <p>
         Every <strong>tamed horse you own</strong> within range, in the same dimension and
         not currently being ridden, teleports to a spot beside you. A leashed horse is
-        unleashed and comes. A chime plays and a chat line tells you how many answered.
+        untied and comes, and <strong>the lead goes into your pack</strong> rather than
+        falling where the horse was standing. A chime plays and a chat line tells you how
+        many answered.
     </p>
 </div>
 
 <p>
     Horses already within 3 blocks, and the one you are riding, are left where they are.
     There is a roughly <strong>3&nbsp;second cooldown</strong> between uses.
+</p>
+
+<p>
+    <strong>Each whistle says what it reaches.</strong> Hold one and the tooltip gives its
+    radius in blocks, and reminds you that a ridden horse stays put and a leashed one is
+    untied &mdash; the two outcomes that otherwise look like the whistle not working. The
+    ender whistle&rsquo;s tooltip <a href="#ender">names its horse</a> instead.
 </p>
 
 <h2 id="tiers">The four whistles</h2>
@@ -83,10 +92,11 @@
 <div class="note warn">
     <span class="label">All four look the same</span>
     <p>
-        The whistles share one texture, so the four tiers are only told apart by their names.
-        A bound ender whistle at least says <em>Bound to: &lt;horse&gt;</em> on its tooltip, and
-        an unbound one says how to bind it. Keep the area whistles apart in your hotbar, or
-        rename them at an anvil.
+        The whistles share one texture, so the four tiers are only told apart by their names
+        &mdash; and by their tooltips, which is what the tooltips are for. An area whistle
+        states its radius; a bound ender whistle says <em>Bound to: &lt;horse&gt;</em> and an
+        unbound one says how to bind it. In a hotbar, where no tooltip shows, they are still
+        four identical icons: keep them apart, or rename them at an anvil.
     </p>
 </div>
 </section>
@@ -98,6 +108,30 @@
     <code>item/WhistleItem</code>, one class and a radius per tier. Bond gating and pathing
     instead of teleporting are still open on
     <a href="#callable-horses">the roadmap tab</a>.
+</p>
+
+<p>
+    <strong><code>appendHoverText</code> reads the radius field</strong> rather than a fourth
+    constructor argument or a per-tier lang key, for the same reason
+    <code>WhistleItem.task()</code> does: the radius is already the only thing that
+    distinguishes the three, and a second parallel field is a second thing that can disagree
+    with it. Added 2026-09-24 &mdash; until then the three tiers had no tooltip at all, and
+    the numbers 16, 32 and 64 appeared nowhere a player could read them. The second line
+    (&ldquo;a ridden horse stays put; a leashed one is untied&rdquo;) deliberately stops short
+    of saying where the lead <em>goes</em>: that is
+    <a href="config.html"><code>behaviour.leads_return</code></a>, a server option, and a
+    client on a dedicated server has no copy of it to read.
+</p>
+
+<h2 id="leads">The lead, when a whistle moves the horse</h2>
+
+<p>
+    Neither whistle unties the horse itself any more. Both call
+    <code>server/HorseLeads.untieFor(horse, player)</code>, which suppresses vanilla&rsquo;s
+    ground drop and hands the lead to whoever blew the whistle &mdash; written up, with the
+    reasoning and the gametest that guards it, on
+    <a href="rider-comfort.html?view=coding#leads-coding">rider comfort</a>, which owns that
+    behaviour. <a href="item-tickets.html">Tickets</a> go through the same helper.
 </p>
 
 <h2 id="ender-code">The ender whistle</h2>
@@ -191,9 +225,12 @@
     <li><strong>Bound modes on the three area whistles</strong> (loaded chunk / same dimension
         / any dimension by tier). Superseded by the ender whistle unless someone wants the
         ladder back.</li>
-    <li><strong>A tooltip naming the horse</strong>, and a texture that tells a bound whistle
-        from an unbound one &mdash; see
-        <a href="#ender-gaps">the known gaps</a>.</li>
+    <li><strong>A texture that tells a bound whistle from an unbound one</strong> &mdash; see
+        <a href="#ender-gaps">the known gaps</a>. The tooltip half of this shipped: the ender
+        whistle <a href="#ender-code">names its horse</a> and the area whistles
+        <a href="#reading">state their radius</a>, so the four are now only indistinguishable
+        <em>in the hotbar</em>, where nothing draws a tooltip. That is what the texture is
+        still for.</li>
     <li><strong>An optional keybind</strong> to blow the held or first hotbar whistle.</li>
     <li><strong>Non-horse equines.</strong> Binding refuses donkeys, mules and llamas, because
         only a <code>Horse</code> carries a genome and an owner check.</li>
@@ -208,6 +245,27 @@
     <span class="label">What needs verifying here</span>
     <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; a bound whistle must also survive a reload holding its horse's name and crumble when that horse dies.</p>
 </div>
+
+<h3 id="tooltip-verify">The area whistle tooltips (2026-09-24, NOT played)</h3>
+
+<p>
+    A one-line change with nothing behind it, so it is near the bottom of what is worth
+    looking at &mdash; but nobody has held one.
+</p>
+<ul>
+    <li><strong>Hold each of the three.</strong> 16, 32 and 64 blocks respectively, then the
+        line about ridden and leashed horses. <strong>Fail:</strong> a tier stating another
+        tier&rsquo;s number, which would mean the radius field and the constructor argument
+        have come apart.</li>
+    <li><strong>The ender whistle must be unchanged.</strong> It has its own tooltip naming
+        its horse and must not have grown a second one underneath.</li>
+</ul>
+
+<p class="muted">
+    The lead a whistle hands back is checked on
+    <a href="rider-comfort.html#verification">rider comfort</a>, which is where that behaviour
+    is documented.
+</p>
 
 <h3 id="evening-0913">The ender whistle (built the evening of 2026-09-13, NOT played)</h3>
 
