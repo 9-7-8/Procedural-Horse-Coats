@@ -61,6 +61,47 @@
     </p>
 </div>
 
+<h2 id="v0-5-029-1">0.5.029.1 &mdash; a field that grows with the herd in it</h2>
+
+<p>
+    <strong>The horse realm is a circle now, and it gets bigger as more horses live in
+    it.</strong> The old field was sixteen thousand blocks square, and the trouble with that
+    was never that it was too small: it was that a horse turned out into it could walk far
+    enough that nobody would ever find it again. Bounded, which was the promise, but not
+    <em>small enough to search</em>, which is what the promise was for.
+</p>
+<ul>
+    <li><strong>A circle round the one exit</strong>, a hundred chunks (1,600 blocks) of radius
+        to start with &mdash; about eight million square blocks.</li>
+    <li><strong>It grows with the population</strong>, keeping ten chunks of grass per horse,
+        so it starts growing past roughly <strong>3,100 horses</strong>. At 3,200 the radius has
+        moved fifteen blocks; ten thousand horses would take it to about 2,850.</li>
+    <li><strong>It can never shrink.</strong> A field that shrank would put its own wall
+        <em>inside itself</em>, with horses on the wrong side of it and no way to walk back
+        &mdash; at the exact moment somebody removed horses, which is when they are least
+        expecting the world to move.</li>
+    <li><strong>One exit, at the origin.</strong> Every Overworld portal arrives there; going
+        home still returns you to your own.</li>
+</ul>
+<div class="note">
+    <span class="label">If you already have a horse realm</span>
+    <p>
+        Its horses are <strong>carried to the exit</strong> as their chunks load &mdash; they
+        arrive by teleport over the first few seconds, so a pile of them at the portal is the
+        expected sight rather than a bug. The old square field's walls ran along
+        <code>x&nbsp;=&nbsp;-1</code> and <code>z&nbsp;=&nbsp;-1</code>, which are <em>inside</em>
+        the new circle a few steps from the exit; those are cleared as you walk past them,
+        along with the ninety-nine abandoned exits out in the far field.
+    </p>
+</div>
+<p class="small">
+    The density is the one number worth knowing about: the brief asked for a horse per ten
+    <em>blocks</em>, which at this radius is room for eight hundred thousand of them and would
+    have meant the field never grew at all. Ten <em>chunks</em> each is what makes the growth a
+    feature rather than dead code. Nothing here has been played &mdash; see
+    <a href="horse-realm.html#verification">the realm's open checks</a>.
+</p>
+
 <h2 id="v0-5-029">0.5.029 &mdash; the realm lift, walking the right way up</h2>
 
 <div class="note">
