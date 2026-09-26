@@ -109,6 +109,14 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     private HorseStasisBankMenu.Tab tab = lastTab;
     private EditBox filterBox;
+
+    /** Width of the "▾" that opens the saved searches, taken out of the filter well. */
+    private static final int SAVED_BUTTON_W = 14;
+
+    private net.minecraft.client.gui.components.Button savedSearchButton;
+
+    /** Shared with the browser, reading one saved list - see SavedSearchPicker. */
+    private final SavedSearchPicker savedSearches = new SavedSearchPicker();
     private int scroll;
 
     /**
@@ -149,9 +157,11 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
         // Unbordered, like the equestrian bench's name field: the sunken well
         // drawn behind it is the frame, so the box draws no second one.
+        // Sixteen pixels of the well go to the saved-search button below, so the
+        // box is that much narrower than the frame drawn behind it.
         this.filterBox = new EditBox(this.font,
                 leftPos + HorseStasisBankMenu.MARGIN + 2, topPos + HorseStasisBankMenu.FILTER_Y + 3,
-                HorseStasisBankMenu.LIST_W - 4, HorseStasisBankMenu.FILTER_H - 5,
+                HorseStasisBankMenu.LIST_W - 4 - SAVED_BUTTON_W, HorseStasisBankMenu.FILTER_H - 5,
                 Component.literal("Filter"));
         this.filterBox.setBordered(false);
         // Dark text, because this panel is light. An EditBox defaults to the
@@ -159,8 +169,25 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         // query the player cannot read back.
         this.filterBox.setTextColor(VanillaPanel.TEXT);
         this.filterBox.setMaxLength(96);
-        this.filterBox.setHint(Component.literal("mare  gen>2  gene:SB1"));
+        this.filterBox.setHint(Component.literal("mare AND generation > 2"));
         this.addRenderableWidget(this.filterBox);
+
+        // The same menu the browser hangs under its own filter box, reading the
+        // same saved list - see SavedSearchPicker.
+        this.savedSearchButton = net.minecraft.client.gui.components.Button.builder(
+                        Component.literal("▾"), b -> this.savedSearches.open(
+                                this.savedSearchButton.getX(),
+                                this.savedSearchButton.getY() + this.savedSearchButton.getHeight(),
+                                this.filterBox.getValue(), this.width, this.height))
+                .bounds(leftPos + HorseStasisBankMenu.MARGIN + HorseStasisBankMenu.LIST_W
+                                - SAVED_BUTTON_W,
+                        topPos + HorseStasisBankMenu.FILTER_Y + 1,
+                        SAVED_BUTTON_W, HorseStasisBankMenu.FILTER_H - 2)
+                .build();
+        this.savedSearchButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.literal("Saved searches - shared with every other filter box in the mod.")));
+        this.addRenderableWidget(this.savedSearchButton);
+
         applyTab();
 
         // The rows are the stable's papers, which this client may never have
@@ -175,6 +202,16 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        // An open menu eats the next click wherever it lands, exactly as the
+        // browser's does - and before the tab strip, or clicking away from it
+        // changes tab as well as dismissing.
+        if (this.savedSearches.isOpen()) {
+            SavedSearchPicker.Pick pick = this.savedSearches.click(event.x(), event.y());
+            if (pick != null && this.filterBox != null) {
+                this.filterBox.setValue(pick.query());
+            }
+            return true;
+        }
         HorseStasisBankMenu.Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
             if (hit != tab && this.menu.getCarried().isEmpty()) {
@@ -249,6 +286,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (this.savedSearches.isOpen() && sy != 0 && this.savedSearches.scroll(sy)) {
+            return true;
+        }
         if (tab == HorseStasisBankMenu.Tab.BROWSE && sy != 0 && overList(mx, my)) {
             scroll = Math.max(0, Math.min(scroll - (int) Math.signum(sy), maxScroll()));
             return true;
@@ -282,6 +322,11 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
      */
     @Override
     public boolean keyPressed(KeyEvent event) {
+        // While the name field is up it owns the keyboard, or Escape closes the
+        // whole bank instead of the little menu on top of it.
+        if (this.savedSearches.isNaming()) {
+            return this.savedSearches.keyPressed(event.key());
+        }
         if (event.key() == InputConstants.KEY_ESCAPE) {
             if (this.filterBox != null && this.filterBox.isFocused()) {
                 this.filterBox.setFocused(false);
@@ -799,6 +844,26 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             return "";
         }
         return word.substring(0, 1).toUpperCase(Locale.ROOT) + word.substring(1);
+    }
+
+    /**
+     * The saved-search menu is drawn <b>after everything</b>, and in screen
+     * coordinates rather than the panel's - it hangs off the bottom of the
+     * filter well and over the slots, which nothing drawn inside
+     * {@code extractLabels}' translated space could do.
+     */
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        this.savedSearches.draw(g, this.font, mouseX, mouseY);
+    }
+
+    @Override
+    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        if (this.savedSearches.isNaming()) {
+            return this.savedSearches.charTyped(event.codepoint());
+        }
+        return super.charTyped(event);
     }
 
     /**

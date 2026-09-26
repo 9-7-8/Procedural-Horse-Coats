@@ -119,14 +119,30 @@ public final class HorseQuery {
     }
 
     public static List<HorseListing> filter(List<HorseListing> rows, String query) {
-        List<String> terms = terms(query);
+        QueryExpr.Node parsed = QueryExpr.parse(query);
         List<HorseListing> out = new ArrayList<>();
         for (HorseListing row : rows) {
-            if (matches(row, terms)) {
+            if (parsed.test(row, row.haystack())) {
                 out.add(row);
             }
         }
         return out;
+    }
+
+    /**
+     * One row against one query, parsing each time. For a caller with a single
+     * row to test; {@link #filter} parses once and is what a table should use.
+     */
+    public static boolean matches(HorseListing row, String query) {
+        return QueryExpr.parse(query).test(row, row.haystack());
+    }
+
+    /**
+     * Every zygosity word a gene column takes as its value:
+     * {@code healer = hom}. For the help line, beside {@link #keys()}.
+     */
+    public static List<String> zygosities() {
+        return List.of("hom", "het", "none", "any");
     }
 
     /**
@@ -160,6 +176,179 @@ public final class HorseQuery {
             }
         }
         return true;
+    }
+
+    // ------------------------------------------------------------------
+    // What the parser calls back into
+    // ------------------------------------------------------------------
+
+    /**
+     * A bare word - a flag like {@code mare}, or free text over the haystack.
+     * {@link QueryExpr}'s leaf for a word with no operator after it.
+     */
+    static boolean flagOrText(HorseListing row, String word, String haystack) {
+        return flag(row, word, haystack);
+    }
+
+    /**
+     * <b>{@code column op value}</b>, which is the whole of the language that is
+     * not a bare word. Three kinds of column, tried in this order:
+     *
+     * <ol>
+     *   <li>A <b>known key</b> - {@code generation}, {@code breed}, {@code bond}
+     *       and the rest of {@link #keys()}. These are the columns the old
+     *       {@code key:value} syntax had, and they behave identically, because
+     *       they run the same code.</li>
+     *   <li>A <b>gene</b>, when the value is a zygosity word. {@code healer = hom}
+     *       is the question this language existed to be unable to ask: there was
+     *       no way to say "homozygous at this locus" without already knowing and
+     *       spelling both allele tokens ({@code genotype:Fly/Fly}), which means
+     *       you could only ask it about genes you already knew the answer for.
+     *       See {@link #zygosity}.</li>
+     *   <li>A <b>gene</b> with an allele or a pair as the value.
+     *       {@code extension = e} is the old {@code gene:e}, and
+     *       {@code extension = 'E/e'} the old {@code genotype:E/e} - so a gene
+     *       name is now a column in its own right and the three old gene keys
+     *       are one idea rather than three.</li>
+     * </ol>
+     *
+     * <p>Anything that is none of those falls back to a substring search, which
+     * is what an unknown key has always done: a colon in a horse's name should
+     * find the horse, not nothing.
+     */
+    static boolean predicate(HorseListing row, String haystack,
+                             String column, String op, String value) {
+        String key = column.toLowerCase(Locale.ROOT);
+        if ("LIKE".equals(op)) {
+            return QueryExpr.like(textOf(row, key, haystack), value);
+        }
+        char symbol = op.isEmpty() ? '=' : op.charAt(0);
+        boolean orEqual = op.length() > 1;
+        if (isKnownKey(key)) {
+            return keyed(row, key, symbol, orEqual, value);
+        }
+        if (isZygosity(value)) {
+            return zygosity(row, key, value.toLowerCase(Locale.ROOT));
+        }
+        if (value.indexOf('/') > 0) {
+            // A pair, at a named gene: extension = 'E/e'.
+            return genotypeIs(row, value) && carries(row, column);
+        }
+        if (namesAGene(column)) {
+            return carries(row, value) && carries(row, column);
+        }
+        return keyed(row, key, symbol, orEqual, value);
+    }
+
+    /** The text a {@code LIKE} reads for this column. */
+    private static String textOf(HorseListing row, String key, String haystack) {
+        switch (key) {
+            case "name":
+                return row.displayName();
+            case "barn":
+                return row.barnName();
+            case "breed":
+                return row.breed();
+            case "coat":
+                return row.coat();
+            case "sex":
+                return row.sexLabel();
+            case "age":
+                return row.ageLabel();
+            case "by":
+                return row.tamedBy() + " " + row.bredBy();
+            case "where":
+                return row.where();
+            default:
+                return haystack;
+        }
+    }
+
+    private static boolean isKnownKey(String key) {
+        return keys().contains(key) || ALIASES.contains(key);
+    }
+
+    /** The spellings {@link #keyed} accepts that {@link #keys()} does not list. */
+    private static final List<String> ALIASES = List.of(
+            "generation", "disorder", "pair", "height", "scale");
+
+    private static boolean isZygosity(String value) {
+        String lower = value.toLowerCase(Locale.ROOT);
+        return "hom".equals(lower) || "het".equals(lower)
+                || "none".equals(lower) || "any".equals(lower);
+    }
+
+    /** Does this word name a registered gene, by name or by the tail of its key? */
+    private static boolean namesAGene(String word) {
+        String lower = word.toLowerCase(Locale.ROOT);
+        for (Gene gene : Genes.codeOrder()) {
+            if (equalsIgnoreCase(gene.name(), word)
+                    || gene.key().toLowerCase(Locale.ROOT).endsWith("." + lower)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * <b>How many copies of something this horse has at a named locus</b>, with
+     * no need to know what the alleles there are called.
+     *
+     * <ul>
+     *   <li>{@code hom} - both slots hold the same non-default allele. This is
+     *       the one a breeder actually wants: a horse homozygous at a locus
+     *       passes it to <i>every</i> foal.</li>
+     *   <li>{@code het} - exactly one slot is non-default. A carrier.</li>
+     *   <li>{@code any} - either of the above; the same question the old
+     *       {@code gene:} key asked.</li>
+     *   <li>{@code none} - the locus is at baseline.</li>
+     * </ul>
+     *
+     * <p>The <b>reserved slot</b> in a stallion's X-linked pair is not an allele
+     * he has, so it is skipped rather than counted - without that, every
+     * stallion alive would read as heterozygous at every sex-linked locus. That
+     * is the same trap {@link #carries} carries a comment about, and it is why
+     * this counts real alleles rather than comparing the two slots directly with
+     * {@code AllelePair.homozygous()}.
+     */
+    private static boolean zygosity(HorseListing row, String geneWord, String want) {
+        String lower = geneWord.toLowerCase(Locale.ROOT);
+        boolean sawTheGene = false;
+        for (Gene gene : Genes.codeOrder()) {
+            if (!equalsIgnoreCase(gene.name(), geneWord)
+                    && !gene.key().toLowerCase(Locale.ROOT).endsWith("." + lower)) {
+                continue;
+            }
+            sawTheGene = true;
+            AllelePair pair = row.genotype().pair(gene);
+            if (pair == null) {
+                continue;
+            }
+            int copies = 0;
+            int real = 0;
+            for (Allele allele : new Allele[]{pair.first(), pair.second()}) {
+                if (allele == null || gene.isPlaceholder(allele)) {
+                    continue;
+                }
+                real++;
+                if (allele != gene.defaultAllele()) {
+                    copies++;
+                }
+            }
+            boolean hit = switch (want) {
+                case "hom" -> copies >= 2 || (copies == 1 && real == 1);
+                case "het" -> copies == 1 && real > 1;
+                case "any" -> copies > 0;
+                case "none" -> copies == 0;
+                default -> false;
+            };
+            if (hit) {
+                return true;
+            }
+        }
+        // A word that is not a gene and not a key: fall back to free text, the
+        // way an unknown key always has.
+        return !sawTheGene && row.haystack().contains(lower + want);
     }
 
     // ------------------------------------------------------------------

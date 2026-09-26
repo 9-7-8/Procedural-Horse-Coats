@@ -3,6 +3,9 @@ package com.example.horsegenetics.neoforge;
 import com.example.horsegenetics.common.name.NamingPolicy;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Client-only settings for this mod: how the Family Tree screen handles a chart
  * taller than the window, whether a horse's nameplate carries a sex symbol, and
@@ -47,6 +50,19 @@ public final class ClientConfig {
      * <b>Has this player been shown the Getting Started tab?</b> Set the first
      * time they leave it, so the browser opens on it once and never again.
      */
+    /**
+     * <b>{@code search.saved}</b> - the player's saved searches, as
+     * {@code name=query} lines. Read through {@link #savedSearches()} and
+     * written by {@link #saveSearch} / {@link #forgetSearch}.
+     *
+     * <p>Client-side and per-player (owner, 2026-09-26). Every horse search box
+     * in the mod filters <i>already-synced</i> data on the client through
+     * {@code HorseQuery}, so a saved search needs no packet and no world - which
+     * also means it follows the player into every world and every server rather
+     * than being stranded in the one they wrote it in.
+     */
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> SAVED_SEARCHES;
+
     public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
 
     /**
@@ -108,6 +124,24 @@ public final class ClientConfig {
                         "the symbol never reaches a transfer paper, the browser or a rename",
                         "box - and two players on one server may disagree about it.")
                 .define("nameplate.sexSymbol", true);
+        SAVED_SEARCHES = builder
+                .comment("Searches you have saved, as \"name=query\" lines. Every horse search",
+                        "box in the mod reads this one list - My horses, Horse realm, the",
+                        "breeding pickers and the stasis bank - so a search saved in any of",
+                        "them is offered in all of them.",
+                        "A query is a SQL WHERE clause: AND OR NOT ( ) IN LIKE, columns for",
+                        "the table's own fields, and a gene name as a column whose value is",
+                        "hom / het / none / any. For example:",
+                        "  keepers=mare AND generation > 2 AND NOT lethal",
+                        "  breed on=sabino = hom AND (flaxen = het OR flaxen = hom)",
+                        "The name is whatever you typed when you saved it, or the query",
+                        "itself if you did not type one. An '=' in a name is not allowed,",
+                        "since it is what separates the two halves.",
+                        "Yours alone, and on this machine: it is a client preference, not",
+                        "something the world or the server knows about.")
+                .defineList("search.saved", new ArrayList<String>(),
+                        () -> "keepers=mare AND NOT lethal",
+                        entry -> entry instanceof String line && line.indexOf('=') > 0);
         TUTORIAL_SEEN = builder
                 .comment("Whether the Horse Browser has already opened on its Getting Started",
                         "tab. It does that once, and sets this the first time you leave the tab.",
@@ -181,6 +215,114 @@ public final class ClientConfig {
             return TUTORIAL_SEEN.get();
         } catch (IllegalStateException notLoaded) {
             return false;
+        }
+    }
+
+    /**
+     * <b>The player's saved searches, in the order they saved them.</b> Never
+     * throws and never returns null: it is read while drawing a dropdown.
+     *
+     * <p>A query is its own label. A separate name would be better to read in
+     * the picker and would cost a name-entry step at the moment of saving -
+     * which is the moment a player is least willing to be interrupted, having
+     * just got a query right. The queries are short enough to recognise and the
+     * config file is where you go to shorten one.
+     */
+    public static List<SavedSearch> savedSearches() {
+        List<SavedSearch> out = new ArrayList<>();
+        List<? extends String> lines;
+        try {
+            lines = SAVED_SEARCHES.get();
+        } catch (IllegalStateException notLoaded) {
+            return out;
+        }
+        for (String line : lines) {
+            int cut = line == null ? -1 : line.indexOf('=');
+            if (cut > 0 && cut < line.length() - 1) {
+                out.add(new SavedSearch(line.substring(0, cut), line.substring(cut + 1)));
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Save one. An empty name means the query is its own name, which is the
+     * default a player gets by pressing Enter without typing anything (owner,
+     * 2026-09-26) - so naming is there when it is worth it and never in the way
+     * when it is not.
+     *
+     * <p>Saving under a name that already exists <b>replaces</b> it: that is
+     * what re-saving a search you have just corrected means.
+     */
+    public static void saveSearch(String name, String query) {
+        String cleanQuery = query == null ? "" : query.trim();
+        if (cleanQuery.isEmpty()) {
+            return;
+        }
+        // '=' separates the halves on disk, so it cannot be in a name.
+        String cleanName = (name == null ? "" : name).replace('=', ' ').trim();
+        if (cleanName.isEmpty()) {
+            cleanName = cleanQuery;
+        }
+        List<String> lines = new ArrayList<>();
+        for (SavedSearch saved : savedSearches()) {
+            if (!saved.name().equalsIgnoreCase(cleanName)) {
+                lines.add(saved.name() + "=" + saved.query());
+            }
+        }
+        lines.add(cleanName + "=" + cleanQuery);
+        write(lines);
+    }
+
+    /** Drop one by name. */
+    public static void forgetSearch(String name) {
+        List<String> lines = new ArrayList<>();
+        for (SavedSearch saved : savedSearches()) {
+            if (!saved.name().equalsIgnoreCase(name)) {
+                lines.add(saved.name() + "=" + saved.query());
+            }
+        }
+        write(lines);
+    }
+
+    /** Is this exact query already saved, under any name? */
+    public static boolean isSaved(String query) {
+        String clean = query == null ? "" : query.trim();
+        for (SavedSearch saved : savedSearches()) {
+            if (saved.query().equalsIgnoreCase(clean)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The name this query is saved under, or empty. */
+    public static String nameOf(String query) {
+        String clean = query == null ? "" : query.trim();
+        for (SavedSearch saved : savedSearches()) {
+            if (saved.query().equalsIgnoreCase(clean)) {
+                return saved.name();
+            }
+        }
+        return "";
+    }
+
+    /** One saved search: what the player called it, and what it says. */
+    public record SavedSearch(String name, String query) {
+
+        /** How it reads in the picker - the name, and the query when they differ. */
+        public String label() {
+            return name.equals(query) ? query : name + "  -  " + query;
+        }
+    }
+
+    private static void write(List<String> lines) {
+        try {
+            SAVED_SEARCHES.set(lines);
+            SAVED_SEARCHES.save();
+        } catch (IllegalStateException notLoaded) {
+            // Config not up yet. Nothing is lost that the player can see -
+            // there is no screen to have saved from.
         }
     }
 

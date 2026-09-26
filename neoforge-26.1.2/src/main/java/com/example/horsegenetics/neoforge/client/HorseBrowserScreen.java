@@ -507,6 +507,11 @@ public final class HorseBrowserScreen extends Screen {
     private static RecipeCategory recipeCategory = RecipeCategory.OTHER;
     private boolean recipeMenuOpen;
     private Button refreshRosterButton;
+
+    /** The saved-search menu, shared with the stasis bank - see SavedSearchPicker. */
+    private final SavedSearchPicker savedSearches = new SavedSearchPicker();
+
+    private Button savedSearchButton;
     private Button settledToggle;
     /** Breeds tab: opens the drop-in breed folder in the OS file browser. */
     private Button openBreedsFolderButton;
@@ -760,7 +765,7 @@ public final class HorseBrowserScreen extends Screen {
         horseFilterBox = new EditBox(this.font, fsLeft() + 1, contentTop(),
                 Math.max(160, (fsRight() - fsLeft()) / 2), 16, Component.literal("Filter"));
         horseFilterBox.setMaxLength(96);
-        horseFilterBox.setHint(Component.literal("mare  gen>2  genotype:E/e  -lethal"));
+        horseFilterBox.setHint(Component.literal("mare AND generation > 2 AND NOT lethal"));
         horseFilterBox.setValue(horseFilter);
         addRenderableWidget(horseFilterBox);
 
@@ -769,7 +774,7 @@ public final class HorseBrowserScreen extends Screen {
         breedingFilterBox = new EditBox(this.font, listX() + 1, contentTop() + 18, listW() - 2, 16,
                 Component.literal("Filter"));
         breedingFilterBox.setMaxLength(96);
-        breedingFilterBox.setHint(Component.literal("gene:SB1  genotype:E/e"));
+        breedingFilterBox.setHint(Component.literal("sabino = hom AND NOT lethal"));
         breedingFilterBox.setValue(breedingFilter);
         addRenderableWidget(breedingFilterBox);
 
@@ -795,6 +800,17 @@ public final class HorseBrowserScreen extends Screen {
                 "Filter by one allele. Pick a gene first to narrow the list.")));
         allelePickButton.visible = false;
         addRenderableWidget(allelePickButton);
+
+        savedSearchButton = Button.builder(Component.literal("Saved..."), b ->
+                        savedSearches.open(savedSearchButton.getX(),
+                                savedSearchButton.getY() + savedSearchButton.getHeight(),
+                                activeFilter(), this.width, this.height))
+                .bounds(0, 0, buttonW("Saved..."), 16).build();
+        savedSearchButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.literal("Searches you have saved, from any of the mod's filter "
+                        + "boxes - and where you save this one.")));
+        savedSearchButton.visible = false;
+        addRenderableWidget(savedSearchButton);
 
         refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> refresh())
                 .bounds(listX(), contentTop() - 1, buttonW("Refresh"), 18).build();
@@ -907,6 +923,32 @@ public final class HorseBrowserScreen extends Screen {
 
     private void requestLog() {
         ClientPacketDistributor.sendToServer(HorseLogRequestPayload.INSTANCE);
+    }
+
+    /** Which filter box the saved-search menu is acting on, for this tab. */
+    private String activeFilter() {
+        if (tab == Tab.BREEDING_PREVIEW) {
+            return breedingFilter;
+        }
+        return horseFilter;
+    }
+
+    /** Put a picked saved search into whichever box that is. */
+    private void applySavedSearch(String query) {
+        if (tab == Tab.BREEDING_PREVIEW) {
+            breedingFilter = query;
+            if (breedingFilterBox != null) {
+                breedingFilterBox.setValue(query);
+            }
+            mareScroll = 0;
+            stallionScroll = 0;
+            return;
+        }
+        horseFilter = query;
+        if (horseFilterBox != null) {
+            horseFilterBox.setValue(query);
+        }
+        horseScroll = 0;
     }
 
     /**
@@ -1195,6 +1237,23 @@ public final class HorseBrowserScreen extends Screen {
             int w = buttonW("Open breeds folder");
             openBreedsFolderButton.setRectangle(w, 14, detailR() - w, contentTop() - 1);
         }
+        if (savedSearchButton != null) {
+            // Wherever the active filter box is: under the table on the roster
+            // tabs, under the picker's own box on Breeding preview.
+            boolean show = roster || breeding;
+            savedSearchButton.visible = show;
+            savedSearchButton.active = show;
+            int w = buttonW("Saved...");
+            if (roster && horseFilterBox != null) {
+                savedSearchButton.setRectangle(w, 16,
+                        horseFilterBox.getX() + horseFilterBox.getWidth() + 148, contentTop());
+            } else if (breeding) {
+                savedSearchButton.setRectangle(w, 16, listX() + 1, contentTop() + 36);
+            }
+            if (!show) {
+                savedSearches.close();
+            }
+        }
         if (horseFilterBox != null) {
             horseFilterBox.visible = roster;
             horseFilterBox.active = roster;
@@ -1234,6 +1293,12 @@ public final class HorseBrowserScreen extends Screen {
      */
     @Override
     public boolean keyPressed(KeyEvent event) {
+        // Before super: while the name field is up it owns the keyboard, or
+        // Escape closes the whole browser instead of the little menu on top of
+        // it, and a letter reaches the tab strip.
+        if (savedSearches.isNaming()) {
+            return savedSearches.keyPressed(event.key());
+        }
         if (super.keyPressed(event)) {
             return true;
         }
@@ -1241,6 +1306,14 @@ public final class HorseBrowserScreen extends Screen {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        if (savedSearches.isNaming()) {
+            return savedSearches.charTyped(event.codepoint());
+        }
+        return super.charTyped(event);
     }
 
     /** Is a text field focused, i.e. is the player mid-word? */
@@ -1302,6 +1375,13 @@ public final class HorseBrowserScreen extends Screen {
         // An open picker owns the next click, wherever it lands - picking an
         // entry or dismissing itself. Before everything else, or the table
         // underneath takes a click aimed at a menu drawn over it.
+        if (savedSearches.isOpen()) {
+            SavedSearchPicker.Pick pick = savedSearches.click(event.x(), event.y());
+            if (pick != null) {
+                applySavedSearch(pick.query());
+            }
+            return true;
+        }
         if (geneDd != GeneDd.NONE) {
             return pickFromGeneDd(event.x(), event.y());
         }
@@ -1563,6 +1643,9 @@ public final class HorseBrowserScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
         // An open picker takes the wheel, so a long list is reachable.
+        if (savedSearches.isOpen() && sy != 0 && savedSearches.scroll(sy)) {
+            return true;
+        }
         if (geneDd != GeneDd.NONE && sy != 0) {
             int max = Math.max(0, geneDdLabels().size() - GDD_VISIBLE);
             geneDdScroll = Math.max(0, Math.min(geneDdScroll - (int) sy, max));
@@ -1713,8 +1796,9 @@ public final class HorseBrowserScreen extends Screen {
             case RECIPES -> drawRecipes(g, mouseX, mouseY);
         }
 
-        // Last, so it covers the table it is anchored over.
+        // Last, so they cover the table they are anchored over.
         drawGeneDd(g, mouseX, mouseY);
+        savedSearches.draw(g, this.font, mouseX, mouseY);
     }
 
     private void drawTabStrip(GuiGraphicsExtractor g) {
@@ -3559,7 +3643,10 @@ public final class HorseBrowserScreen extends Screen {
         }
         int countW = this.font.width(count);
         g.text(this.font, Component.literal(count), l + 2, contentTop() + 20, LABEL, false);
-        drawFitted(g, "keys: " + String.join(" ", HorseQuery.keys()),
+        // The columns, then the fact that a gene name is one too - which is the
+        // half of the language a player has no other way to discover.
+        drawFitted(g, "columns: " + String.join(" ", HorseQuery.keys())
+                        + "  |  <gene> = " + String.join("/", HorseQuery.zygosities()),
                 l + countW + 14, contentTop() + 20, r - l - countW - 80, TAG);
 
         // Headings - clickable, and the sorted one carries the direction.
@@ -3827,8 +3914,9 @@ public final class HorseBrowserScreen extends Screen {
         int w = r - l;
         int second = y + this.font.lineHeight + 2;
         if (row == null) {
-            drawFitted(g, "click a heading to sort, a row to read it; terms are ANDed and "
-                            + "-term excludes, e.g. \"mare gen>2 gene:SB1 -lethal\"",
+            drawFitted(g, "click a heading to sort, a row to read it; the box is a SQL "
+                            + "WHERE clause - AND OR NOT ( ) IN LIKE, e.g. "
+                            + "\"sabino = hom AND (generation > 2 OR bond >= 50)\"",
                     l + 2, y, w, TAG);
             // The realm list is never cut - it is the whole field, arriving in
             // batches - so this belongs to the stable alone.
