@@ -269,6 +269,21 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     mod.
 </p>
 
+<p>
+    <strong>Spawning the two component items.</strong> Everything this mod adds is
+    <code>/give</code>-able by item id except two: a <b>Known Gene Splice carrot</b> and a
+    <b>research paper</b> are one item each parameterised by a data component, so the
+    interesting half &mdash; which gene, which allele pair &mdash; is not in the id.
+    <code>/testkit splice &lt;gene&gt; [&lt;a&gt; &lt;b&gt;]</code> and
+    <code>/testkit paper &lt;gene&gt; [&lt;a&gt; &lt;b&gt;]</code> tab-complete the gene and
+    both alleles off the live registry and refuse a pair the locus cannot have; with no pair
+    they give that gene's example pair. The raw <code>/give</code> forms, and the shape of
+    both tokens, are written on <code>item/BreedingCarrotItem</code> and
+    <code>item/ResearchPaperItem</code> &mdash; worth knowing because a mistyped token is not
+    an error: it is an item that looks right, parses to nothing and does nothing, which you
+    find out one breeding later.
+</p>
+
 <p><code>runServer</code> here does not auto-stop - it sits at the console after <code>Done</code>. Kill it (<code>taskkill</code>, or a PowerShell <code>Stop-Process</code> on the recent <code>java</code> pids) when the smoke test has printed <code>Done (...)! For help</code>.</p>
 
 <h2 id="gradle">Build setup notes</h2>

@@ -10,6 +10,7 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.NeoRng;
@@ -18,11 +19,18 @@ import com.example.horsegenetics.neoforge.data.StoredGenome;
 import com.example.horsegenetics.neoforge.item.BreedSpawnEggItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.item.PresetHorseSpawnEggItem;
+import com.example.horsegenetics.neoforge.item.ResearchPaperItem;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.component.DataComponents;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.world.entity.animal.equine.Horse;
@@ -290,7 +298,33 @@ public final class DebugTestWorldHandler {
                 .then(Commands.literal("rain")
                         .executes(c -> setWeather(c.getSource().getPlayerOrException(), "rain")))
                 .then(Commands.literal("clear")
-                        .executes(c -> setWeather(c.getSource().getPlayerOrException(), "clear"))));
+                        .executes(c -> setWeather(c.getSource().getPlayerOrException(), "clear")))
+                // THE TWO ITEMS THAT CANNOT BE SPAWNED BY NAME. Everything else
+                // this mod adds is /give-able as an item id; a Known Gene Splice
+                // carrot and a research paper are one item each parameterised by
+                // a data component, so spawning a particular one means typing a
+                // token exactly right with no completion and no error if you get
+                // it wrong - you get an inert item and find out a foal later.
+                // These two subcommands complete the gene and both alleles off
+                // the live registry. The raw /give form is on BreedingCarrotItem.
+                .then(Commands.literal("splice")
+                        .then(Commands.argument("gene", StringArgumentType.word())
+                                .suggests(GENE_NAMES)
+                                .executes(c -> giveTopic(c, true, false))
+                                .then(Commands.argument("a", StringArgumentType.word())
+                                        .suggests(ALLELES)
+                                        .then(Commands.argument("b", StringArgumentType.word())
+                                                .suggests(ALLELES)
+                                                .executes(c -> giveTopic(c, true, true))))))
+                .then(Commands.literal("paper")
+                        .then(Commands.argument("gene", StringArgumentType.word())
+                                .suggests(GENE_NAMES)
+                                .executes(c -> giveTopic(c, false, false))
+                                .then(Commands.argument("a", StringArgumentType.word())
+                                        .suggests(ALLELES)
+                                        .then(Commands.argument("b", StringArgumentType.word())
+                                                .suggests(ALLELES)
+                                                .executes(c -> giveTopic(c, false, true)))))));
 
         event.getDispatcher().register(Commands.literal("bond")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -667,6 +701,14 @@ public final class DebugTestWorldHandler {
         tell(player, command("/testkit day", "and back to day"));
         tell(player, command("/testkit census", "print every watched pen to the log now - the "
                 + "check to run before leaving it overnight"));
+        // The two component items. Listed here because a command you cannot
+        // remember is a command you do not have, and these are the only two
+        // things in the mod that /give cannot spawn by name.
+        tell(player, command("/testkit splice ", "a Known Gene Splice carrot for any gene - "
+                + "tab-completes the gene, then both alleles. No pair given = that gene's "
+                + "example pair"));
+        tell(player, command("/testkit paper ", "the research paper for the same, if you want "
+                + "to cut the carrots yourself or test the shelf"));
     }
 
     /** Empty the hotbar and fill it with batch {@code n} (1-based), then say what each slot is for. */
@@ -1111,6 +1153,157 @@ public final class DebugTestWorldHandler {
         Pair<BlockPos, Holder<Structure>> hit = level.getChunkSource().getGenerator()
                 .findNearestMapStructure(level, HolderSet.direct(village), from, VILLAGE_SEARCH_CHUNKS, false);
         return hit == null ? null : hit.getFirst();
+    }
+
+    // ------------------------------------------------------------------
+    // /testkit splice <gene> [<a> <b>]  and  /testkit paper <gene> [<a> <b>]
+    // ------------------------------------------------------------------
+
+    /**
+     * Every registered gene, by its <b>short</b> name - {@code flying} rather
+     * than {@code horsegenetics.flying}. Typing the namespace on every one of
+     * these is the friction the command exists to remove, and
+     * {@link #geneNamed} accepts either.
+     */
+    private static final SuggestionProvider<CommandSourceStack> GENE_NAMES = (ctx, builder) -> {
+        String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
+        for (Gene gene : Genes.all()) {
+            String name = shortGeneName(gene);
+            if (name.toLowerCase(Locale.ROOT).startsWith(typed)) {
+                builder.suggest(name, Component.literal(gene.name()));
+            }
+        }
+        return builder.buildFuture();
+    };
+
+    /**
+     * The alleles of whichever gene is already typed, so the second and third
+     * arguments cannot be guessed wrong. Suggesting nothing when the gene does
+     * not resolve is correct: there is no such thing as a gene-free allele, and
+     * an empty list is the signal that the first argument is wrong.
+     */
+    private static final SuggestionProvider<CommandSourceStack> ALLELES = (ctx, builder) -> {
+        // getString throws if "gene" is not parsed yet, and a suggestion callback
+        // that throws takes the whole completion down rather than offering less.
+        String typedGene;
+        try {
+            typedGene = StringArgumentType.getString(ctx, "gene");
+        } catch (IllegalArgumentException e) {
+            return builder.buildFuture();
+        }
+        Gene gene = geneNamed(typedGene);
+        if (gene != null) {
+            String typed = builder.getRemaining();
+            for (Allele allele : gene.alleles()) {
+                if (allele.token().startsWith(typed)) {
+                    builder.suggest(allele.token(), Component.literal(allele.label()));
+                }
+            }
+        }
+        return builder.buildFuture();
+    };
+
+    /** {@code horsegenetics.flying} &rarr; {@code flying}. */
+    private static String shortGeneName(Gene gene) {
+        String key = gene.key();
+        int dot = key.lastIndexOf('.');
+        return dot < 0 ? key : key.substring(dot + 1);
+    }
+
+    /**
+     * A gene by whatever the player typed: the full key, the short name, or the
+     * display name, case-insensitively. {@code null} if nothing matches.
+     */
+    private static @Nullable Gene geneNamed(String typed) {
+        Gene exact = Genes.byKeyOrNull(typed);
+        if (exact != null) {
+            return exact;
+        }
+        for (Gene gene : Genes.all()) {
+            if (shortGeneName(gene).equalsIgnoreCase(typed) || gene.name().equalsIgnoreCase(typed)) {
+                return gene;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Hand over the carrot ({@code carrot = true}) or the research paper for one
+     * gene and pair. With no pair given, {@link ResearchTopic#defaultFor} picks
+     * the gene's own example - the same one the browser's recipe ghost shows.
+     *
+     * <p>Both items are the same shape of problem: one item id, the interesting
+     * half in a data component. So both are built through {@link ResearchTopic}
+     * rather than by writing a token here, which is the rule the recipe follows
+     * for the same reason ({@code KnownGeneSpliceRecipe.assemble}).
+     */
+    private static int giveTopic(CommandContext<CommandSourceStack> ctx, boolean carrot, boolean paired)
+            throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String typed = StringArgumentType.getString(ctx, "gene");
+        Gene gene = geneNamed(typed);
+        if (gene == null) {
+            tell(player, Component.literal("No gene called '" + typed + "'. Tab-complete the "
+                    + "first argument - it lists every registered gene.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        ResearchTopic topic = paired
+                ? new ResearchTopic(gene.key(),
+                        StringArgumentType.getString(ctx, "a"),
+                        StringArgumentType.getString(ctx, "b"))
+                : ResearchTopic.defaultFor(gene);
+
+        // isResolved covers both ways this goes wrong: a token that is not one
+        // of this gene's alleles, and a pair the locus says cannot occur (a KIT
+        // lethal, met/met). Refusing is the whole point of the command - the
+        // /give form hands over an item that looks right and does nothing.
+        if (!topic.isResolved()) {
+            tell(player, Component.literal("Not a pair " + gene.name() + " can have: "
+                    + topic.pairLabel() + ". Its alleles are " + alleleList(gene) + ".")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        if (carrot && !gene.hasGeneCarrot()) {
+            tell(player, Component.literal(gene.name() + " has no gene carrot - the recipe "
+                    + "refuses a paper naming it, so there is nothing to spawn. The paper "
+                    + "itself still exists: /testkit paper " + shortGeneName(gene) + ".")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        ItemStack stack;
+        if (carrot) {
+            stack = new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get());
+            stack.set(ModDataComponents.CARROT_EFFECTS.get(), List.of(topic.splice().id()));
+        } else {
+            stack = ResearchPaperItem.of(topic);
+        }
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
+
+        tell(player, Component.literal((carrot ? "Known Gene Splice carrot: " : "Research paper: ")
+                + topic.label() + " (" + topic.zygosity() + ")").withStyle(ChatFormatting.GREEN));
+        if (carrot) {
+            tell(player, Component.literal("Feed it to one parent. It waits on that horse until "
+                    + "the next breeding that takes. For a guaranteed homozygous foal, feed a "
+                    + "true-breeding carrot to BOTH parents - one alone only fixes half the draw.")
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        ActionTrace.log("testkit", player.getGameProfile().name() + " spawned a "
+                + (carrot ? "splice carrot" : "research paper") + " for " + topic.token());
+        return 1;
+    }
+
+    /** {@code El, Tf, n} - a gene's allele tokens, for an error message. */
+    private static String alleleList(Gene gene) {
+        List<String> tokens = new ArrayList<>();
+        for (Allele allele : gene.alleles()) {
+            tokens.add(allele.token());
+        }
+        return String.join(", ", tokens);
     }
 
     private static void tell(ServerPlayer player, Component message) {

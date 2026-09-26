@@ -31,6 +31,23 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * equestrian supplier, and writing one off a live horse with a book
  * ({@code server/GeneBookFromHorse}) - which is the only route that can hand you
  * a compound pair, because it copies down what the animal actually carries.
+ *
+ * <h2>HOW TO SPAWN ONE FOR A PARTICULAR PAIR</h2>
+ * <b>{@code /testkit paper <gene> [<a> <b>]}</b>, which tab-completes the gene
+ * and both alleles off the live registry ({@code server/DebugTestWorldHandler},
+ * needs {@code debug.tools}). By hand it is the {@code research_gene} component,
+ * whose value is {@link ResearchTopic#token()} - {@code <geneKey>|<a>|<b>}, bars
+ * rather than the carrot token's colons:
+ *
+ * <pre>
+ * /give &#64;s horsegenetics:research_paper[horsegenetics:research_gene="horsegenetics.flying|Tf|Tf"]
+ * </pre>
+ *
+ * <p>The pair <b>normalises</b> on construction, so {@code a|A} and {@code A|a}
+ * are one paper and both stack; a token this build cannot resolve stays as typed
+ * and the paper is inert, which is exactly the failure the command exists to
+ * prevent. The allele spellings are the {@code token} strings in the gene's own
+ * JSON, case-sensitive. Full note on the carrot: {@link BreedingCarrotItem}.
  */
 public class ResearchPaperItem extends Item {
 

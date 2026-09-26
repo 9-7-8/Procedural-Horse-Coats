@@ -30,6 +30,48 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * carrot ({@code CarrotCombineRecipe}) lists every effect it merged and the four
  * base carrots each name themselves. Nothing here is per item: the same class
  * serves all eleven, and the token list is the only thing it reads.
+ *
+ * <h2>HOW TO SPAWN ONE FOR A PARTICULAR GENE</h2>
+ * Ten of the eleven carrots are plain items and {@code /give} takes them by id:
+ *
+ * <pre>
+ * /give &#64;s horsegenetics:unknown_gene_splice_carrot
+ * /give &#64;s horsegenetics:magical_gene_splice_carrot
+ * /give &#64;s horsegenetics:stabilizer_carrot
+ * </pre>
+ *
+ * <p>The eleventh - {@code known_gene_splice_carrot} - is <b>one item
+ * parameterised by a component</b>, so its gene is not in its id. Spawning a
+ * specific one by hand means writing the component yourself:
+ *
+ * <pre>
+ * /give &#64;s horsegenetics:known_gene_splice_carrot[horsegenetics:carrot_effects=["known:horsegenetics.flying:Tf:Tf"]]
+ * </pre>
+ *
+ * <p>The token is <b>{@code known:<geneKey>:<alleleA>:<alleleB>}</b>
+ * ({@link CarrotEffect.KnownGeneSplice#id()}), and each part has to be exact:
+ *
+ * <ul>
+ *   <li><b>{@code geneKey}</b> is {@link Gene#key()} in full, namespace
+ *       included - {@code horsegenetics.flying}, {@code horsegenetics.kit}.</li>
+ *   <li><b>the alleles</b> are the {@code token} strings from the gene's own
+ *       file, case-sensitive: {@code Tf}, {@code El}, {@code n}. Read them off
+ *       {@code common/src/main/resources/horsegenetics/genes/<gene>.json}, or
+ *       off the gene's wiki page.</li>
+ *   <li>the two may differ ({@code X:Y} is a compound pair), and
+ *       {@code X:X} versus {@code X:n} is the whole homozygous / carrier
+ *       distinction - a <b>homozygous carrot fed to each parent is the only way
+ *       to guarantee a homozygous foal</b>.</li>
+ * </ul>
+ *
+ * <p><b>Prefer {@code /testkit splice <gene> [<a> <b>]}</b>
+ * ({@code server/DebugTestWorldHandler}). It tab-completes the gene and both
+ * alleles off the live registry and refuses a pair the locus cannot have, where
+ * a mistyped {@code /give} hands over a carrot that looks perfectly normal,
+ * carries a token nothing parses, and does nothing at all - which you find out
+ * one breeding later. {@code /testkit paper} is the same for the research paper,
+ * whose {@code research_gene} component has the same problem. Both need
+ * {@code debug.tools} on in the server config.
  */
 public class BreedingCarrotItem extends Item {
 
