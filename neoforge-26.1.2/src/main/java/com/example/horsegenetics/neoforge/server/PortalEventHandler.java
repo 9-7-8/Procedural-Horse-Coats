@@ -35,7 +35,7 @@ import java.util.Map;
  *
  * <ul>
  *   <li><b>Golden carrot on a hay bale</b> (outside the debug dim): light a frame.</li>
- *   <li><b>Standing in a portal:</b> 10 s teleports a player, 3 s teleports a
+ *   <li><b>Standing in a portal:</b> 5 s teleports a player, 3 s teleports a
  *       horse. Both directions. While the timer runs, portal particles swirl
  *       around the entity and a player sees a per-second countdown in chat.</li>
  *   <li><b>Right-click a portal while leading horses:</b> each leashed horse is
@@ -50,7 +50,13 @@ import java.util.Map;
 @EventBusSubscriber
 public final class PortalEventHandler {
 
-    private static final int PLAYER_DWELL_TICKS = 200; // 10 s
+    // 10 s for a player was long enough to feel like the portal was broken -
+    // you stand in it, nothing happens, and the countdown is the only thing
+    // telling you it is working. 5 s is still long enough to step back out of
+    // one you walked into by accident. (Owner's call.) The horse timer is
+    // deliberately left shorter than the player's: you push a led horse in and
+    // follow it, so it has to be through before you are.
+    private static final int PLAYER_DWELL_TICKS = 100; // 5 s
     private static final int HORSE_DWELL_TICKS = 60;   // 3 s
     private static final int POST_TELEPORT_GRACE = 100;
 

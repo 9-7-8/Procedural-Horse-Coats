@@ -341,6 +341,37 @@
     holding pen).
 </p>
 
+<h3 id="roster-membership">What counts as one of your horses</h3>
+
+<p>
+    <strong>Current ownership, not who tamed it once.</strong> <code>HorseRoster</code> asks two
+    sources, and both are about <em>now</em>: the horse record's <code>ownerId</code>, which
+    <code>HorseOwnerTrackingHandler</code> re-mirrors off the live entity about every two seconds
+    and <em>clears</em> when a horse is untamed, and the live entity itself when it happens to be
+    loaded. The record catches the horse you left at home; the entity catches the one you were
+    handed in the last two seconds, before the mirror caught up.
+</p>
+
+<p>
+    It used to ask <code>tamedBy</code> instead, and that was wrong in one direction only:
+    <strong>horses never left</strong>. <code>tamedBy</code> is written once and never rewritten
+    &mdash; deliberately, it is a history field, and it is still on the record &mdash; so a horse you
+    tamed and then signed away on a <a href="item-transfer-papers.html">transfer paper</a>, sold, or
+    released into the <a href="horse-realm.html">horse realm</a> stayed on the table for ever, and so
+    did every untamed horse you had ever touched. The table answers &ldquo;what is in my
+    stable&rdquo;, so a horse that is now wild or now somebody else's does not belong on it.
+    (Owner's call.)
+</p>
+
+<p>
+    Nothing is lost by dropping them. The <a href="carrots.html#database">allele collection</a> is
+    swept from this same list, but <code>GeneDatabaseData.collect</code> only ever <em>adds</em> to a
+    set, so what you learned from a horse stays learned after you sell it &mdash; what you have met
+    and what you own are different questions, and only the second one is this table. The ancestry
+    database keeps the departed and the dead either way, because a pedigree with holes in it is not
+    a pedigree.
+</p>
+
 <div class="note danger">
     <span class="label">The owned-horse index is still owed, and the horse list is running without it</span>
     <p>

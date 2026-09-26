@@ -3,8 +3,10 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.block.HayPortalBlock;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -34,14 +36,16 @@ import java.util.UUID;
  * <ul>
  *   <li>An overworld portal sends a player - or a horse led into it - to the
  *       public {@link HorseRealm}, remembering this portal as the way home.</li>
- *   <li>A realm portal sends a player back to exactly that portal, with their
- *       own tamed horses standing near them ({@link HorseRealm#leave}). Any of
- *       the realm's hundred exits does; they are interchangeable.</li>
+ *   <li>A realm portal sends a player back to exactly that portal, and
+ *       <b>nothing else with them</b> ({@link HorseRealm#leave}). Any of the
+ *       realm's hundred exits does; they are interchangeable.</li>
  *   <li>The debug corridor's portal sends a player - and any horse pushed into
- *       it - back to the overworld portal its plot remembers. As a player
- *       leaves, their tamed horses come with them (see
- *       {@link DebugPenManager#evacuateTamedHorses}). That dimension is reached
- *       by F6 only now, not by a hay portal.</li>
+ *       it - back to the overworld portal its plot remembers. <b>Neither exit
+ *       gathers up horses any more</b> (owner's call): a horse comes home only
+ *       by being led or ridden through the frame. The corridor warns about what
+ *       is left behind, because its plot is torn down (see
+ *       {@link DebugPenManager#countOwnedTamedHorses}); the realm keeps what you
+ *       leave. That dimension is reached by F6 only now, not by a hay portal.</li>
  * </ul>
  *
  * <p><b>Not verified in-game:</b> cross-dimension entity teleport signature,
@@ -209,9 +213,13 @@ public final class HorsePortalManager {
 
     /**
      * Move {@code entity} through the portal at {@code portalPos}. From the
-     * horse dimension: back to the linked overworld portal - and, for a
-     * player, their tamed horses come too. From anywhere else: only players
-     * act, and they enter a fresh plot.
+     * horse dimension: back to the linked overworld portal, <b>and nothing else
+     * comes with it</b> - a horse returns only by being led or ridden through.
+     * From anywhere else: only players act, and they enter a fresh plot.
+     *
+     * <p>Both exits used to gather up a leaving player's own tamed horses. They
+     * do not; see the note at the debug branch below and
+     * {@code HorseRealm.leave}.
      */
     static void teleportThroughPortal(Entity entity, ServerLevel portalLevel, BlockPos portalPos) {
         MinecraftServer server = portalLevel.getServer();
@@ -228,10 +236,24 @@ public final class HorsePortalManager {
             }
             BlockPos to = plot != null ? plot.returnPos : target.getRespawnData().pos();
 
+            // NOTHING IS EVACUATED. A portal takes the player and whatever they
+            // are leading; horses left standing in the plot stay there, and the
+            // plot is torn down behind them, so they are gone. That is the
+            // owner's call and it is the same rule as the public realm's - but
+            // unlike the realm, this dimension does not keep what you leave, so
+            // say so plainly rather than emptying a pen in silence.
             if (entity instanceof ServerPlayer player && plot != null) {
-                boolean lastPerson = portalLevel.players().stream().noneMatch(p -> p != player);
-                UUID onlyOwner = lastPerson ? null : player.getUUID();
-                DebugPenManager.evacuateTamedHorses(portalLevel, plot, onlyOwner, target, to);
+                int leftBehind = DebugPenManager.countOwnedTamedHorses(portalLevel, plot, player.getUUID());
+                if (leftBehind > 0) {
+                    player.sendSystemMessage(Component.literal(
+                            leftBehind == 1
+                                    ? "You left a horse of your own in the test corridor. The plot is cleared "
+                                            + "when you leave, so it is gone - lead one through the frame next time."
+                                    : "You left " + leftBehind + " horses of your own in the test corridor. The "
+                                            + "plot is cleared when you leave, so they are gone - lead them "
+                                            + "through the frame next time.")
+                            .withStyle(ChatFormatting.RED));
+                }
             }
             if (entity instanceof Mob mob && mob.isLeashed()) {
                 mob.dropLeash();

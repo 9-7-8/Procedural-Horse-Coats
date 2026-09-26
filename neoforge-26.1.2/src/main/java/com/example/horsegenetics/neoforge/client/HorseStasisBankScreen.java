@@ -192,7 +192,16 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         if (tab == HorseStasisBankMenu.Tab.BROWSE) {
             int row = rowAt(event.x(), event.y());
             if (row >= 0) {
-                toggleStud(shown.get(row));
+                // LEFT takes the horse out, RIGHT turns it out at stud. Left used
+                // to be the stud toggle and nothing withdrew at all: the tab lists
+                // horses, so the obvious click has to be the obvious verb - "give
+                // me that one" - and the standing instruction is the secondary
+                // gesture. (Owner's call.)
+                if (event.button() == 1) {
+                    toggleStud(shown.get(row));
+                } else {
+                    withdraw(shown.get(row));
+                }
                 return true;
             }
         }
@@ -200,7 +209,24 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     }
 
     /**
-     * <b>A click on a row turns that horse out at stud, or brings it back in.</b>
+     * <b>Take the chamber out of the bank and into your inventory.</b> What a
+     * plain click on a row does.
+     *
+     * <p>Nothing is checked here beyond there being a horse in it: unlike stud,
+     * which is gated on the tier, any occupied chamber may be picked up, and the
+     * server re-checks that much anyway.
+     */
+    private void withdraw(StasisBrowseRow row) {
+        note = "";
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId,
+                    HorseStasisBankBlockEntity.SLOTS + row.slot());
+        }
+    }
+
+    /**
+     * <b>A right-click on a row turns that horse out at stud, or brings it back
+     * in.</b>
      *
      * <p>The server is the one that decides - it re-checks the tier and the horse
      * on the other end of {@code clickMenuButton} - so this only refuses the
@@ -701,7 +727,11 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     private String studLine() {
         int stud = StasisBrowseRow.atStud(rows);
         if (stud == 0) {
-            return anySpacer() ? "Click a spacer row to put that horse to stud." : "";
+            // Both verbs, because a left-click no longer does what this line used
+            // to promise: plain click takes the horse out, right-click studs it.
+            return anySpacer()
+                    ? "Click a row to take that horse out; right-click a spacer row to put it to stud."
+                    : "Click a row to take that horse out.";
         }
         if (stud == 1) {
             return "1 at stud - a mare and a stallion both, to breed.";

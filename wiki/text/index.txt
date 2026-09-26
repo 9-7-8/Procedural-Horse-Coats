@@ -207,6 +207,8 @@ wiki/compatibility.html#swem	all	SWEM and SWEM Lite
 wiki/compatibility.html#third-party-genes	all	Third-party genes are supported, and are the right seam
 wiki/compatibility.html#unverified	all	Unverified
 wiki/compatibility.html#unverified-generated	all	What the generated content has and has not been shown to do
+wiki/compatibility.html#waystones	all	Waystones — and the setting that cannot work
+wiki/compatibility.html#waystones-build	all	Three dependencies, and a fourth that is not where you would look
 wiki/decisions.html#compatibility-anchors	all	Former anchors
 wiki/decisions.html#decisions	all	Current owners
 wiki/decisions.html#settled	all	Settled owners

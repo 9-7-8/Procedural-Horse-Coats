@@ -19,6 +19,9 @@ public final class ModBiomeModifiers {
 
     public static void register(IEventBus modEventBus) {
         SERIALIZERS.register(modEventBus);
+        // The other half of "a breed file says where it lives": the modifier adds
+        // the spawn, this lets a horse actually stand there. See HorseSpawnGround.
+        HorseSpawnGround.listen(modEventBus);
     }
 
     private ModBiomeModifiers() {

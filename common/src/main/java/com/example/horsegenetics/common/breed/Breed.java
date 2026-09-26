@@ -79,7 +79,8 @@ public record Breed(
         SpawnTime spawnTime,
         List<Strain> strains,
         boolean magicalVariant,
-        BreedHerd herd) {
+        BreedHerd herd,
+        SpawnGround spawnGround) {
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
@@ -232,6 +233,7 @@ public record Breed(
         spawnTime = spawnTime == null ? SpawnTime.ANY : spawnTime;
         strains = strains == null ? List.of() : List.copyOf(strains);
         herd = herd == null ? BreedHerd.DEFAULT : herd;
+        spawnGround = spawnGround == null ? SpawnGround.NONE : spawnGround;
     }
 
     private static Map<String, List<Combo>> ordered(Map<String, List<Combo>> pools) {
@@ -411,6 +413,7 @@ public record Breed(
         private final List<Strain> strains = new ArrayList<>();
         private boolean magicalVariant = true;
         private BreedHerd herd = BreedHerd.DEFAULT;
+        private SpawnGround spawnGround = SpawnGround.NONE;
 
         private Builder(String id, String name) {
             this.id = id;
@@ -646,12 +649,22 @@ public record Breed(
             return this;
         }
 
+        /**
+         * Extra floors its wild herds may stand on, and whether they need the
+         * light there - see {@link SpawnGround}. Additive: vanilla's lit-grass
+         * rule still applies wherever this says nothing.
+         */
+        public Builder spawnGround(SpawnGround ground) {
+            this.spawnGround = ground == null ? SpawnGround.NONE : ground;
+            return this;
+        }
+
         public Breed build() {
             return new Breed(id, name, country, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size, pull), bands.build(),
                     notes, price,
-                    description, spawnTime, strains, magicalVariant, herd);
+                    description, spawnTime, strains, magicalVariant, herd, spawnGround);
         }
     }
 }

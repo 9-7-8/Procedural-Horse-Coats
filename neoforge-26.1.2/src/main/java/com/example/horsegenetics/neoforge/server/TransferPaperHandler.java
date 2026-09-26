@@ -149,7 +149,19 @@ public final class TransferPaperHandler {
 
     private static void sign(Player player, Horse horse, ItemStack blank) {
         PaperBearer bearer = TransferPaperItem.bearerOf(blank);
-        if (bearer == null || !bearer.id().equals(player.getUUID())) {
+        // An UNBOUND blank binds to whoever first signs with it, rather than
+        // being refused. onCrafted is the only thing that ever bound one, so
+        // every blank from any other source - /give, a creative tab, a loot
+        // table, a kit, another mod handing one out - arrived dead, and the
+        // refusal read as "not your paper" about a paper nobody owned. The
+        // binding was never the thing keeping this safe: the ownership check
+        // below is, and it is unchanged. Binding on use keeps a *crafted*
+        // paper yours (someone else's blank out of a chest still refuses) and
+        // costs nothing on one that had no owner to protect.
+        if (bearer == null) {
+            bearer = new PaperBearer(player.getUUID(), player.getGameProfile().name());
+            blank.set(ModDataComponents.PAPER_BEARER.get(), bearer);
+        } else if (!bearer.id().equals(player.getUUID())) {
             say(player, "message.horsegenetics.transfer.not_your_paper");
             return;
         }

@@ -126,8 +126,13 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
 
         @Override
         public int getMaxStackSize() {
-            // Chambers are stacksTo(1) anyway - see ModItems. Saying so here as
-            // well keeps a shift-click from ever trying to merge two horses.
+            // OCCUPIED chambers are stacksTo(1) - see ModItems - but EMPTY ones
+            // stack, so this is no longer merely belt and braces: it is the only
+            // thing keeping a stack of empties out of a chamber slot. That
+            // matters because EmergencyStasisHandler writes a filled chamber
+            // straight back into the slot it found an empty one in, which would
+            // destroy the rest of the stack. A slot that holds at most one is
+            // what makes that write safe.
             return 1;
         }
     };

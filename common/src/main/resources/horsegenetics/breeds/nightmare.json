@@ -12,6 +12,17 @@
     "minecraft:soul_sand_valley",
     "minecraft:basalt_deltas"
   ],
+  "spawn_ground": [
+    "minecraft:netherrack",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:magma_block"
+  ],
+  "spawn_in_dark": true,
   "price": [220, 400],
   "stats": {
     "speed": 5,
@@ -120,7 +131,7 @@
     "Molten hooves is MltC/MltC, the same locus and pair as the Netherhorse, banded gold here instead of red - so the two breeds' glowing hoofprints read as a matched pair from a distance despite being unrelated combinations genetically.",
     "Eyes and mane: Gld/Gld at both iris loci is EyeColourGene's fixed gold hue; there is no fixed gold sclera hue, so the whites use Cha/Cha (EyeHue.CHAOS) banded toward gold on eye_chaos_r/g/b, with Glo/Glo at every glow locus so the whole eye glows, matching the Netherhorse's red-glow treatment in gold. Only mane_color is named and banded gold - the tail was left wild since nothing was said about it, so a nightmare's tail is whatever its liver-bay base gives it rather than a second golden hair locus.",
     "Stats: speed 5 is the plain baseline (no locus is forced when a resolved band sits inside BreedStatCurve.NEUTRAL_LO..NEUTRAL_HI, so 'average speed' really does mean nothing is pushing it). Jump 10 is the ceiling, about x3.43 of baseline. Pull 1 is the floor pull score, padded out with no curve (BreedStatCurve treats pull as the resolved number itself). Size [0.32, 0.42] is below even a Falabella's [0.38, 0.51] and well outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws its own tiny size true. No health or milk-volume locus is named, so both roll at the ordinary wild rate - nothing was asked about either.",
-    "Every biome named is in the Nether, for the same reason as the Netherhorse's: a horse still needs grass and light to spawn, so wild herds of this breed will rarely or never actually appear, and spawn_egg is the reliable way to obtain one.",
+    "Every biome named is in the Nether, and carries the same spawn_ground / spawn_in_dark block as the Netherhorse for the same reason: vanilla's animal rule wants minecraft:grass_block underfoot and brightness above 8, generated Nether terrain has neither, and until those fields existed neither breed could spawn wild at all. See SpawnGround, and the Netherhorse's note. The two share the floor list deliberately - they are one founder pool as far as the ground is concerned, and in the Nether they are the only two wild breeds, so a herd founded there is always one or the other and never Feral Mixed (Feral.DEFAULT gives it herdWeight 0, which means 'only where no breed may spawn').",
     "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested."
   ]
 }

@@ -6545,6 +6545,17 @@
     "minecraft:soul_sand_valley",
     "minecraft:basalt_deltas"
   ],
+  "spawn_ground": [
+    "minecraft:netherrack",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:magma_block"
+  ],
+  "spawn_in_dark": true,
   "price": [220, 400],
   "stats": {
     "speed": 3,
@@ -6660,7 +6671,7 @@
     "Eyes: Red/Red at both iris loci is the deep blood-red the Dhampir uses. There is no fixed 'red' sclera hue, so the whites are Cha/Cha (EyeHue.CHAOS, whose colour is epigenetic rather than fixed) banded hard toward red on eye_chaos_r/g/b, with Glo/Glo at both the iris and sclera glow loci so both parts of the eye glow - matched, not just similarly coloured.",
     "Mane and tail colour (HairColorGene, via ManeColorGene/TailColorGene) draw a per-copy RGB rather than a named hue, so Mnsld/Mnsld and Tlsld/Tlsld are banded on hair_r/g/b toward bright red rather than left to roll freely; a foal will not show the mane colour until it grows up (ManeColorGene paints no foal mesh), but the tail colour shows from birth.",
     "Speed 3 and jump 2 are both well below the score-5 baseline (BreedStatCurve's floor is roughly x0.2 at a score of 1); health 9 lands at about x1.995 of baseline - practically double - and pull 8 is this session's own call, not requested, for a horse meant to also serve as a nether draught animal. Size [1.85, 1.95] is outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws giants only.",
-    "Every biome named is in the Nether. A horse still needs grass and light to spawn, so wild herds of this breed will rarely or never actually appear - spawn_egg is the reliable way to obtain one, and that is a known limitation of the spawn system rather than something this file can work around.",
+    "Every biome named is in the Nether, and for a long time that meant the breed could not spawn at all - not rarely, never. Vanilla's animal rule tests the position, not the biome: the block underfoot must be in #minecraft:animals_spawnable_on, which in this SDK is the single entry minecraft:grass_block, and the raw brightness must be above 8. Generated Nether terrain has no grass block anywhere, so all five biomes duly got the spawn added by BreedHerdsBiomeModifier and rejected every position in it. That is what spawn_ground and spawn_in_dark are for (see SpawnGround): the eight blocks listed are the Nether floors, and the flag waives the light over them only. Both are additive - this horse still spawns on lit grass like any other, so an overworld hay portal or a grass platform down here works as it always did.",
     "Molten hooves is MltC/MltC (the colour form), banded on color_r/g/b toward red the same way the mane and tail are - so this horse leaves red hoofprints behind it as it moves, on top of the lava embers the particle locus already trails. The Nightmare breed shares this locus at the same MltC/MltC pair, banded gold instead, so the two breeds' hoofprints read as a matched pair from a distance.",
     "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool."
   ]
@@ -6823,6 +6834,17 @@
     "minecraft:soul_sand_valley",
     "minecraft:basalt_deltas"
   ],
+  "spawn_ground": [
+    "minecraft:netherrack",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:magma_block"
+  ],
+  "spawn_in_dark": true,
   "price": [220, 400],
   "stats": {
     "speed": 5,
@@ -6931,7 +6953,7 @@
     "Molten hooves is MltC/MltC, the same locus and pair as the Netherhorse, banded gold here instead of red - so the two breeds' glowing hoofprints read as a matched pair from a distance despite being unrelated combinations genetically.",
     "Eyes and mane: Gld/Gld at both iris loci is EyeColourGene's fixed gold hue; there is no fixed gold sclera hue, so the whites use Cha/Cha (EyeHue.CHAOS) banded toward gold on eye_chaos_r/g/b, with Glo/Glo at every glow locus so the whole eye glows, matching the Netherhorse's red-glow treatment in gold. Only mane_color is named and banded gold - the tail was left wild since nothing was said about it, so a nightmare's tail is whatever its liver-bay base gives it rather than a second golden hair locus.",
     "Stats: speed 5 is the plain baseline (no locus is forced when a resolved band sits inside BreedStatCurve.NEUTRAL_LO..NEUTRAL_HI, so 'average speed' really does mean nothing is pushing it). Jump 10 is the ceiling, about x3.43 of baseline. Pull 1 is the floor pull score, padded out with no curve (BreedStatCurve treats pull as the resolved number itself). Size [0.32, 0.42] is below even a Falabella's [0.38, 0.51] and well outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws its own tiny size true. No health or milk-volume locus is named, so both roll at the ordinary wild rate - nothing was asked about either.",
-    "Every biome named is in the Nether, for the same reason as the Netherhorse's: a horse still needs grass and light to spawn, so wild herds of this breed will rarely or never actually appear, and spawn_egg is the reliable way to obtain one.",
+    "Every biome named is in the Nether, and carries the same spawn_ground / spawn_in_dark block as the Netherhorse for the same reason: vanilla's animal rule wants minecraft:grass_block underfoot and brightness above 8, generated Nether terrain has neither, and until those fields existed neither breed could spawn wild at all. See SpawnGround, and the Netherhorse's note. The two share the floor list deliberately - they are one founder pool as far as the ground is concerned, and in the Nether they are the only two wild breeds, so a herd founded there is always one or the other and never Feral Mixed (Feral.DEFAULT gives it herdWeight 0, which means 'only where no breed may spawn').",
     "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested."
   ]
 },

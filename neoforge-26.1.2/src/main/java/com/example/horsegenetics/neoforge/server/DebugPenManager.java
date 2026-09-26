@@ -1170,46 +1170,38 @@ public final class DebugPenManager {
     }
 
     /**
-     * Teleport tamed horses out of {@code plot} to {@code destPos} in
-     * {@code dest}, dropped in the air on a small grid with a brief spell of
-     * invulnerability (see {@link HorsePortalManager#placeReturningHorse}).
-     * {@code onlyOwner != null}
-     * restricts it to horses that player tamed (used when other players are
-     * still in the dimension); {@code null} takes every tamed horse (the
-     * leaving player is the last one out). Returns how many were moved.
+     * <b>How many horses {@code owner} would lose by walking out now.</b>
+     *
+     * <p>This used to be {@code evacuateTamedHorses}, which walked them home
+     * instead. It does not any more: a portal takes the player and whatever they
+     * are leading, and nothing else (owner's call - the same change was made to
+     * {@code HorseRealm.leave}). What is left behind here is <b>destroyed</b>,
+     * because {@link #tearDown} clears the plot on the way out and a plot is one
+     * visit's worth of corridor - so the count is what the exit message is made
+     * of, and the player is told rather than quietly emptied.
+     *
+     * <p>TAMED AND OWNED, not merely tamed, and that distinction is load-bearing
+     * in both directions. The test yard stocks its pens with tamed horses on
+     * purpose - vanilla will not breed an untamed one, and half the yard's tests
+     * want a foal - but those are scenery, set tame by {@code setTamed(true)}
+     * with no owner behind it. Counting plain "tamed" would have warned about two
+     * dozen pieces of furniture every time anybody left. A horse a player tamed
+     * has an owner ({@code tameWithName} sets one); the yard's do not, and that
+     * is the line between somebody's horse and the furniture.
+     *
+     * @param owner whose horses to count, or {@code null} for every owned one
      */
-    public static int evacuateTamedHorses(ServerLevel debug, Plot plot, UUID onlyOwner,
-                                          ServerLevel dest, BlockPos destPos) {
-        // TAMED AND OWNED, not merely tamed. The test yard stocks its pens with
-        // tamed horses on purpose - vanilla will not breed an untamed one, and
-        // half the yard's tests want a foal - but those are scenery, set tame
-        // by setTamed(true) with no owner behind it. Taking "tamed" as the test
-        // walked the entire yard out into the overworld every time the player
-        // left: two dozen horses at the portal, a breeding field's worth of
-        // them if it had been running, and an emptied yard on the way back in.
-        // A horse a player tamed has an owner (tameWithName sets one); the
-        // yard's do not, and that is the line between somebody's horse and the
-        // furniture.
+    public static int countOwnedTamedHorses(ServerLevel debug, Plot plot, UUID owner) {
         List<AbstractHorse> horses = debug.getEntitiesOfClass(AbstractHorse.class, plotBox(plot),
                 h -> h.isAlive() && h.isTamed() && h.getOwnerReference() != null);
-        List<BlockPos> spots = new ArrayList<>();
-        int moved = 0;
+        int count = 0;
         for (AbstractHorse horse : horses) {
-            if (onlyOwner != null) {
-                EntityReference<LivingEntity> owner = horse.getOwnerReference();
-                if (owner == null || !onlyOwner.equals(owner.getUUID())) {
-                    continue;
-                }
+            EntityReference<LivingEntity> ref = horse.getOwnerReference();
+            if (owner == null || (ref != null && owner.equals(ref.getUUID()))) {
+                count++;
             }
-            if (horse.isLeashed()) {
-                horse.dropLeash();
-            }
-            // dropped in the air just above the return portal, spread on a grid,
-            // with a few seconds of invulnerability to cover the short fall
-            HorsePortalManager.placeReturningHorse(horse, dest, destPos, spots);
-            moved++;
         }
-        return moved;
+        return count;
     }
 
     // --- teardown ---
@@ -1220,9 +1212,10 @@ public final class DebugPenManager {
      * database too - otherwise every visit would leave hundreds of throwaway
      * gallery records in the save forever. (Records that merely *reference* a
      * forgotten horse as a parent are left alone; {@code ancestorsOf} already
-     * skips ancestors it can't find.) Tamed horses have already been moved out
-     * by {@link #evacuateTamedHorses} before this runs, so they're never caught
-     * here.
+     * skips ancestors it can't find.) <b>A player's own tamed horses are caught
+     * here too, and that is the point</b>: nothing evacuates them any more (see
+     * {@link #countOwnedTamedHorses}), so a horse you leave standing in a plot is
+     * cleared with the plot. The exit warns before this runs.
      *
      * <p>The <b>blocks are deliberately left standing</b>. The corridor's
      * geometry is fixed ({@link #PEN_COUNT} pens, fixed {@link #PLOT_BASE_Y}),

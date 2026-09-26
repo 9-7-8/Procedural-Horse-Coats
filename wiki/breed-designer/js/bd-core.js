@@ -88,7 +88,7 @@ window.HG = window.HG || {};
       id: "", name: "", country: "", description: "",
       kind: undefined, magical_variant: undefined, commonness: undefined, spawn: undefined,
       spawn_time: undefined, herd: undefined,
-      biomes: [], price: undefined,
+      biomes: [], spawn_ground: [], spawn_in_dark: undefined, price: undefined,
       // Health, speed and jump are always asked, so they always have a score;
       // size starts as "an ordinary horse" rather than unset, because an unset
       // size is not an obvious thing to leave alone.
@@ -122,6 +122,14 @@ window.HG = window.HG || {};
     // no key at all (BreedSpecWriter's rule again).
     if (s.herd && Object.keys(s.herd).length) out.herd = s.herd;
     if (s.biomes.length) out.biomes = s.biomes;
+    // Straight after the biomes, BreedSpecWriter's order. spawn_in_dark is only
+    // ever written alongside a floor list: the parser rejects it on its own,
+    // because waiving the light over vanilla's grass is a far bigger claim than
+    // the field looks like making.
+    if (s.spawn_ground && s.spawn_ground.length) {
+      out.spawn_ground = s.spawn_ground;
+      if (s.spawn_in_dark) out.spawn_in_dark = true;
+    }
     if (s.price) out.price = s.price;
     if (Object.keys(s.stats).length) out.stats = s.stats;
     var pools = {};
@@ -151,9 +159,10 @@ window.HG = window.HG || {};
   bd.fromJson = function (text) {
     var parsed = JSON.parse(text);
     var s = bd.blank();
-    ["id", "name", "country", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price"]
+    ["id", "name", "country", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price", "spawn_in_dark"]
       .forEach(function (k) { if (parsed[k] !== undefined) s[k] = parsed[k]; });
     s.biomes = parsed.biomes || [];
+    s.spawn_ground = parsed.spawn_ground || [];
     s.stats = parsed.stats || {};
     // The file is the truth, including about the eyes: a breed file that names
     // no eye locus gets none named here either.

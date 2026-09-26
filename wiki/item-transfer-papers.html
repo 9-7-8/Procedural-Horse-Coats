@@ -82,7 +82,8 @@
 <tr>
     <td><strong>Blank transfer paper</strong></td>
     <td><strong>Shaped:</strong> 8 &times; paper around 1 &times; horse hair</td>
-    <td><code>paper_bearer</code> &mdash; the crafter, stamped on at the bench</td>
+    <td><code>paper_bearer</code> &mdash; the crafter, stamped on at the bench; absent on a
+        blank from anywhere else, and filled in by the first player to sign with it</td>
 </tr>
 <tr>
     <td><strong>Signed transfer paper</strong></td>
@@ -108,6 +109,12 @@
     <li><strong>The blank is bound; the signed one is not.</strong> Only the bound
         player can sign, and only against a horse they currently own. After that it is
         a bearer instrument and anyone may redeem it.</li>
+    <li><strong>An unbound blank binds to whoever first signs with it.</strong> Crafting
+        was once the only thing that bound one, so a blank from a creative tab,
+        <code>/give</code>, a loot table or a test kit had no bearer and was refused
+        outright &mdash; with a message about it not being your paper when it was nobody's.
+        It is not a hole: what keeps a paper safe is the check on the <em>horse</em>, which
+        still has to be one you own. Someone else's blank out of a chest is still refused.</li>
 </ul>
 
 <p>
@@ -130,13 +137,20 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Paper binding is what goes wrong unseen: a crafted blank should name you as bearer while a <code>/give</code> blank refuses to sign at all, and a cowboy must <strong>stop offering a horse the moment its paper is bought</strong>, even if the paper is never redeemed.</p>
+    <p>Paper binding is what goes wrong unseen: a crafted blank should name you as bearer, a <code>/give</code> blank should now bind to you the moment you sign with it rather than refusing, and a cowboy must <strong>stop offering a horse the moment its paper is bought</strong>, even if the paper is never redeemed.</p>
 </div>
 
 <h3 id="open-older-item-transfer-papers">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>A cowboy's horse, papers and taming.</strong> A crafted blank says <em>Bound to &lt;you&gt;</em>, and a <code>/give</code> blank refuses to sign. Climbing on a cowboy's horse refuses with his name and no rubber-banding. After you buy a paper he no longer offers that horse, even if it is never redeemed. The paper round trip itself is <a href="villagers.html#verified-barn">verified</a>.</li>
+    <li><strong>A cowboy's horse, papers and taming.</strong> A crafted blank says <em>Bound to &lt;you&gt;</em>. Climbing on a cowboy's horse refuses with his name and no rubber-banding. After you buy a paper he no longer offers that horse, even if it is never redeemed. The paper round trip itself is <a href="villagers.html#verified-barn">verified</a>.</li>
+    <li><strong>A spawned-in blank works.</strong> New, and the reason the line above no longer
+        says a <code>/give</code> blank refuses. <strong>Pass:</strong> a blank from the creative
+        tab reads <em>Unbound &mdash; it becomes yours when you sign it</em>, and right-clicking a
+        horse you own with it produces a signed paper and leaves the blank stamped with your name.
+        <strong>Fail looks like</strong> the old refusal (&ldquo;not your paper&rdquo;), or &mdash;
+        the one that would matter &mdash; a blank signing a horse you do <em>not</em> own, which
+        would mean the ownership check was lost along with the bearer check.</li>
 </ul>
 
 </section>

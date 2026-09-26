@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The breed registry: the files the mod ships, any a player has dropped in, and
@@ -318,6 +319,47 @@ public final class Breeds {
      */
     public static boolean anythingMaySpawn(String biomeId, boolean dark) {
         return settings.feral().allowedIn(biomeId) || !wildCandidates(biomeId, dark).isEmpty();
+    }
+
+    /**
+     * <b>May a wild horse spawn on {@code floorBlockId} in {@code biomeId} at
+     * this light?</b> - the question vanilla's own animal rule cannot be asked,
+     * and the reason {@link SpawnGround} exists.
+     *
+     * <p>This is the <i>additional</i> permission only. It says nothing about
+     * lit grass, which vanilla already allows everywhere and which the host must
+     * keep allowing: the host ORs this with vanilla's rule rather than replacing
+     * it. So a {@code false} here is not "no horse may spawn", it is "this
+     * position is not one of the extra ones any breed of this biome asked for".
+     *
+     * <p>Deliberately <b>not</b> filtered by {@code spawn_time}, unlike
+     * {@link #wildCandidates}. The hour is read when a herd is <i>founded</i>,
+     * one tick later and by breed; this is read per <i>position</i>, before
+     * there is a horse to found anything with. Pinning the hour here as well
+     * would mean a night breed's floors stopped being walkable at dawn for a
+     * herd that was already spawning.
+     *
+     * @param bright the host's reading of vanilla's own light test at the position
+     */
+    public static boolean wildGroundAllows(String biomeId, String floorBlockId, boolean bright) {
+        if (floorBlockId == null || floorBlockId.isEmpty()) {
+            return false;
+        }
+        for (Breed b : forBiome(biomeId, BreedSource.WILD)) {
+            if (b.spawnGround().allows(floorBlockId, bright)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Every extra floor block named by a wild breed of {@code biomeId}. For a
+     * debug line and for the host to decide whether a biome is worth asking
+     * about at all; the spawn test itself is {@link #wildGroundAllows}.
+     */
+    public static Set<String> wildFloors(String biomeId) {
+        return SpawnGround.floorsOf(forBiome(biomeId, BreedSource.WILD));
     }
 
     /** Every breed allowed to come from {@code source}, in registration order. */

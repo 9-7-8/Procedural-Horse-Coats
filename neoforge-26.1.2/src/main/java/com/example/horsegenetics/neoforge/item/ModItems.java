@@ -228,23 +228,33 @@ public final class ModItems {
 
     // --- stasis chambers - a horse held as data, not as a ticking entity ---
     // One class, four tiers, differing only in what the (unbuilt) Horse Stasis
-    // Bank may do with the horse inside. stacksTo(1) for the same reason the
-    // signed transfer paper is: a chamber is about one specific horse, and a
-    // stack of them could not show you which is which. Empty ones would stack
-    // harmlessly, but an item cannot change its own stack limit once a horse is
-    // in it. See StasisChamberItem / server.HorseStasisHandler.
+    // Bank may do with the horse inside.
+    //
+    // EMPTY CHAMBERS STACK; occupied ones do not. The old comment here said they
+    // were stacksTo(1) "for the same reason the signed transfer paper is - a
+    // chamber is about one specific horse", and that an empty one could not stack
+    // because "an item cannot change its own stack limit once a horse is in it".
+    // That second half stopped being true when a chamber with a horse in it
+    // became a DIFFERENT ITEM (see the occupied block below): an empty chamber
+    // can never come to hold a horse, because filling one swaps it for the
+    // occupied twin, which has its own limit of 1. An empty chamber is about no
+    // horse at all and is interchangeable with every other empty one of its
+    // tier, so carrying a dozen is just carrying stationery.
+    // The one thing this needs from the code: HorseStasisHandler.capture takes
+    // ONE off the held stack rather than replacing it.
+    // See StasisChamberItem / server.HorseStasisHandler.
     public static final DeferredItem<StasisChamberItem> BASIC_STASIS_CHAMBER =
             register("basic_stasis_chamber",
-                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.BASIC));
+                    p -> new StasisChamberItem(p, StasisTier.BASIC));
     public static final DeferredItem<StasisChamberItem> INTERMEDIATE_STASIS_CHAMBER =
             register("intermediate_stasis_chamber",
-                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.INTERMEDIATE));
+                    p -> new StasisChamberItem(p, StasisTier.INTERMEDIATE));
     public static final DeferredItem<StasisChamberItem> ADVANCED_STASIS_CHAMBER =
             register("advanced_stasis_chamber",
-                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.ADVANCED));
+                    p -> new StasisChamberItem(p, StasisTier.ADVANCED));
     public static final DeferredItem<StasisChamberItem> SPACER_STASIS_CHAMBER =
             register("spacer_stasis_chamber",
-                    p -> new StasisChamberItem(p.stacksTo(1), StasisTier.SPACER));
+                    p -> new StasisChamberItem(p, StasisTier.SPACER));
 
     /**
      * The fifth chamber, and the only one that is not a rung: a Basic chamber
@@ -255,7 +265,7 @@ public final class ModItems {
      */
     public static final DeferredItem<EmergencyStasisChamberItem> EMERGENCY_STASIS_CHAMBER =
             register("emergency_stasis_chamber",
-                    p -> new EmergencyStasisChamberItem(p.stacksTo(1)));
+                    p -> new EmergencyStasisChamberItem(p));
 
     // --- the same five chambers, with a horse in them ---
     // A CHAMBER WITH A HORSE IN IT IS A DIFFERENT ITEM, not the same item with a

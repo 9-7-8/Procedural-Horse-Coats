@@ -12,6 +12,17 @@
     "minecraft:soul_sand_valley",
     "minecraft:basalt_deltas"
   ],
+  "spawn_ground": [
+    "minecraft:netherrack",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:magma_block"
+  ],
+  "spawn_in_dark": true,
   "price": [220, 400],
   "stats": {
     "speed": 3,
@@ -127,7 +138,7 @@
     "Eyes: Red/Red at both iris loci is the deep blood-red the Dhampir uses. There is no fixed 'red' sclera hue, so the whites are Cha/Cha (EyeHue.CHAOS, whose colour is epigenetic rather than fixed) banded hard toward red on eye_chaos_r/g/b, with Glo/Glo at both the iris and sclera glow loci so both parts of the eye glow - matched, not just similarly coloured.",
     "Mane and tail colour (HairColorGene, via ManeColorGene/TailColorGene) draw a per-copy RGB rather than a named hue, so Mnsld/Mnsld and Tlsld/Tlsld are banded on hair_r/g/b toward bright red rather than left to roll freely; a foal will not show the mane colour until it grows up (ManeColorGene paints no foal mesh), but the tail colour shows from birth.",
     "Speed 3 and jump 2 are both well below the score-5 baseline (BreedStatCurve's floor is roughly x0.2 at a score of 1); health 9 lands at about x1.995 of baseline - practically double - and pull 8 is this session's own call, not requested, for a horse meant to also serve as a nether draught animal. Size [1.85, 1.95] is outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws giants only.",
-    "Every biome named is in the Nether. A horse still needs grass and light to spawn, so wild herds of this breed will rarely or never actually appear - spawn_egg is the reliable way to obtain one, and that is a known limitation of the spawn system rather than something this file can work around.",
+    "Every biome named is in the Nether, and for a long time that meant the breed could not spawn at all - not rarely, never. Vanilla's animal rule tests the position, not the biome: the block underfoot must be in #minecraft:animals_spawnable_on, which in this SDK is the single entry minecraft:grass_block, and the raw brightness must be above 8. Generated Nether terrain has no grass block anywhere, so all five biomes duly got the spawn added by BreedHerdsBiomeModifier and rejected every position in it. That is what spawn_ground and spawn_in_dark are for (see SpawnGround): the eight blocks listed are the Nether floors, and the flag waives the light over them only. Both are additive - this horse still spawns on lit grass like any other, so an overworld hay portal or a grass platform down here works as it always did.",
     "Molten hooves is MltC/MltC (the colour form), banded on color_r/g/b toward red the same way the mane and tail are - so this horse leaves red hoofprints behind it as it moves, on top of the lava embers the particle locus already trails. The Nightmare breed shares this locus at the same MltC/MltC pair, banded gold instead, so the two breeds' hoofprints read as a matched pair from a distance.",
     "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool."
   ]

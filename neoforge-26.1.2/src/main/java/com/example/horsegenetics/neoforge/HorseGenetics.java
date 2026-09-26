@@ -113,6 +113,10 @@ public final class HorseGenetics {
         // One log line if an animal-labour mod is installed, saying how to make
         // it respect horse genetics. Reads nothing, patches nothing.
         com.example.horsegenetics.neoforge.compat.HorsePoweredCompat.announce();
+        // A ridden horse travels with its rider through a waystone. No-op when
+        // Waystones is absent, and its own guard runs before anything in that
+        // mod's packages is loaded - see the class note.
+        com.example.horsegenetics.neoforge.compat.WaystonesCompat.init();
         // HorseGeneticsEventHandler, ModNetworking, ClientSetup, DebugKeyBindings,
         // DebugKeyHandler, and DebugPenTickHandler are all @EventBusSubscriber-
         // annotated and pick themselves up automatically - nothing else to wire

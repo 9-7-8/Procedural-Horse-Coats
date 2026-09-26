@@ -76,6 +76,26 @@ public record PassificationAttachment(Map<String, Long> until,
     }
 
     /**
+     * <b>Has this horse been permanently settled by anybody at all?</b>
+     *
+     * <p>The one question in this class that is deliberately <i>not</i> per
+     * player, and the reason is a rule rather than an optimisation: a permanent
+     * calm switches a horse's temperament off outright - it stops fleeing and
+     * stops being aggressive toward <b>everything</b>, not only toward whoever
+     * fed it (owner's call). A temporary calm stays per player, because it is a
+     * bargain rather than a change of character. See
+     * {@code Passification.suppresses}.
+     */
+    public boolean permanentForAnyone() {
+        for (Long end : until.values()) {
+            if (Long.valueOf(FOREVER).equals(end)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Is a fresh temporary calm allowed yet? Always true if none has ever been
      * bought - the absent case, written out rather than inferred from a
      * subtraction, for the reason {@code HorseCooldownsAttachment.last} spells

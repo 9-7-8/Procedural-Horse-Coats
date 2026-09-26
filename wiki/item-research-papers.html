@@ -202,10 +202,19 @@
         &ldquo;gene books&rdquo;, after what
         <a href="item-research-shelf.html">the shelf</a> copies them onto.</li>
     <li><strong>Off a horse</strong> &mdash; <code>server/GeneBookFromHorse</code>, on
-        <code>EntityInteract</code> with a book. It collects every locus the horse is not
-        homozygous-baseline at (the same test discovery uses) and picks one uniformly,
-        <strong>writing down the pair the horse actually carries</strong>. No JSON recipe: the
-        result depends on the animal, and this is the only source of a compound pair.</li>
+        <code>EntityInteract</code> <em>and</em> <code>EntityInteractSpecific</code> with a book.
+        It collects every locus the horse is not homozygous-baseline at (the same test discovery
+        uses) and picks one uniformly, <strong>writing down the pair the horse actually
+        carries</strong>. No JSON recipe: the result depends on the animal, and this is the only
+        source of a compound pair.
+        <br><strong>Any horse will do</strong>, and it needs no taming: your own, a stranger's,
+        one of the cowboy's branded string, or one released into the
+        <a href="horse-realm.html">horse realm</a>. Ownership gates <em>keeping</em> a horse, not
+        looking at one. Both listeners sit at <code>HIGHEST</code> on purpose &mdash; at the
+        default priority the cowboy case worked only because this class sorts earlier in the jar
+        than <code>TransferPaperHandler</code>, which cancels any held item on a branded horse,
+        and NeoForge skips a default listener outright once an event is cancelled. A book on the
+        cowboy's string was one class rename from silently doing nothing.</li>
     <li><strong>The equestrian supplier</strong> &mdash;
         <code>data/loot/SetRandomGeneFunction</code> with <code>target: "paper"</code>, run as a
         trade&rsquo;s <code>given_item_modifiers</code> so the offer is rolled once per restock

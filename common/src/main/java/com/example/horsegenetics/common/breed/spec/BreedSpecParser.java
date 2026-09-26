@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.breed.BreedHerd;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Commonness;
+import com.example.horsegenetics.common.breed.SpawnGround;
 import com.example.horsegenetics.common.breed.SpawnTime;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.Gene;
@@ -59,7 +60,7 @@ public final class BreedSpecParser {
     private static final Set<String> KEYS = Set.of(
             "id", "name", "country", "description", "kind", "commonness", "spawn_weight", "biomes",
             "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes", "magical_variant",
-            "herd");
+            "herd", "spawn_ground", "spawn_in_dark");
 
     private BreedSpecParser() {
     }
@@ -193,6 +194,35 @@ public final class BreedSpecParser {
                         + token + "\"");
             }
             b.spawnTime(time);
+        }
+
+        // --- where the herd may stand ------------------------------------
+        // Two fields, one object: see SpawnGround for why block light and the
+        // world clock above are not the same question. "spawn_in_dark" without
+        // "spawn_ground" is the one combination that cannot mean anything - it
+        // would waive the light over vanilla's grass, which is a change to every
+        // biome the breed names rather than to the floors it asked for - so it
+        // is a hard error rather than a silent no-op.
+        List<String> floors = strings(root, "spawn_ground");
+        boolean inDark = false;
+        if (root.containsKey("spawn_in_dark")) {
+            if (!(root.get("spawn_in_dark") instanceof Boolean on)) {
+                throw new IllegalArgumentException("\"spawn_in_dark\" is true or false");
+            }
+            inDark = on;
+        }
+        if (inDark && floors.isEmpty()) {
+            throw new IllegalArgumentException("\"spawn_in_dark\" needs \"spawn_ground\": it waives the light "
+                    + "only over the floors this breed names, and none are named");
+        }
+        for (String floor : floors) {
+            if (floor.indexOf(':') < 0) {
+                throw new IllegalArgumentException("\"spawn_ground\" wants namespaced block ids, got \""
+                        + floor + "\" (did you mean \"minecraft:" + floor + "\"?)");
+            }
+        }
+        if (!floors.isEmpty()) {
+            b.spawnGround(new SpawnGround(floors, inDark));
         }
 
         if (root.containsKey("price")) {

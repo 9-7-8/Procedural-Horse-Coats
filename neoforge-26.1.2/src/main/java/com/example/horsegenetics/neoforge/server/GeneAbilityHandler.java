@@ -2518,6 +2518,22 @@ public final class GeneAbilityHandler {
     }
 
     /**
+     * <b>Stop running from anything, now.</b> The blanket version, for a
+     * <i>permanent</i> calm - which switches the temperament off entirely rather
+     * than striking a bargain with one person, so there is nothing left it is
+     * allowed to be running from. See {@code Passification.suppresses}.
+     *
+     * <p>Unlike {@link #stopFleeingFrom} there is no quarry to name: whatever leg
+     * was issued, and whoever it was aimed at, is dropped. The next beat will not
+     * re-pick one, because the veto is asked there too.
+     */
+    static void stopFleeing(Horse horse) {
+        if (FLEEING.remove(horse.getUUID()) != null) {
+            horse.getNavigation().stop();
+        }
+    }
+
+    /**
      * Run from the nearest thing in the group: path to a point directly away,
      * and drop any target it had.
      *

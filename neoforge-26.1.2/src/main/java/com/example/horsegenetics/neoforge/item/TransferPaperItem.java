@@ -16,9 +16,17 @@ import java.util.function.Consumer;
  * the bench to whoever crafted it ({@code TransferPaperHandler.onCrafted}).
  *
  * <p>Right-click one of your own horses with it and it becomes a
- * {@link SignedTransferPaperItem signed} paper naming that animal. The binding
- * is what makes that safe - a blank is not a blank cheque anyone can fill in,
- * it is <i>your</i> stationery, and it will only write out a horse you own.
+ * {@link SignedTransferPaperItem signed} paper naming that animal. What makes
+ * that safe is the <b>ownership check on the horse</b> - a paper will only ever
+ * write out an animal you own. The binding is a smaller thing on top: it stops
+ * someone lifting <i>your</i> blank out of a chest and using it.
+ *
+ * <p><b>An unbound blank binds to whoever first signs with it.</b> Crafting was
+ * once the only thing that bound one, so a blank from anywhere else - a creative
+ * tab, {@code /give}, a loot table, a test kit - arrived with no bearer and was
+ * refused outright, with a message about it not being your paper when it was
+ * nobody's. It is not a hole: there was no owner to protect, and the horse still
+ * has to be yours.
  *
  * <p>The signing itself is in {@code TransferPaperHandler} rather than here,
  * because it is a right-click on an <b>entity</b>, and the mod already routes

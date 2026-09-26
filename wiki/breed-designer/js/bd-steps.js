@@ -976,13 +976,41 @@ window.HG = window.HG || {};
     if (!on && at >= 0) st.biomes.splice(at, 1);
   }
 
+  // The floors worth one click, because they are whole terrains rather than
+  // blocks: everything the generator actually lays down as the surface there.
+  // Anything else is the text box.
+  var FLOOR_PRESETS = [
+    ["the Nether", ["minecraft:netherrack", "minecraft:crimson_nylium", "minecraft:warped_nylium",
+      "minecraft:soul_sand", "minecraft:soul_soil", "minecraft:basalt", "minecraft:blackstone",
+      "minecraft:magma_block"]],
+    ["the End", ["minecraft:end_stone"]],
+    ["sand and red sand", ["minecraft:sand", "minecraft:red_sand"]],
+    ["stone and gravel", ["minecraft:stone", "minecraft:gravel", "minecraft:andesite",
+      "minecraft:coarse_dirt"]],
+    ["snow and ice", ["minecraft:snow_block", "minecraft:powder_snow", "minecraft:packed_ice",
+      "minecraft:ice"]]
+  ];
+
+  function setFloor(id, on) {
+    var st = s();
+    if (!st.spawn_ground) st.spawn_ground = [];
+    var at = st.spawn_ground.indexOf(id);
+    if (on && at < 0) st.spawn_ground.push(id);
+    if (!on && at >= 0) st.spawn_ground.splice(at, 1);
+    // The light waiver cannot outlive the last floor: the parser refuses
+    // spawn_in_dark on its own, so a file saved in that state would not load.
+    if (!st.spawn_ground.length) st.spawn_in_dark = undefined;
+  }
+
   function renderHome(host) {
     var st = s();
     host.appendChild(el("h3", { text: "Biomes" }));
     host.appendChild(el("p", { "class": "hint", text:
-      "Tick every biome its wild herds live in. Herds need grass and light, so a desert or the badlands " +
-      "will see one only rarely. New herds appear as new chunks are generated. With no biome ticked the " +
-      "breed never heads a wild herd - it can still come from the other places below." }));
+      "Tick every biome its wild herds live in. By default a herd needs grass underfoot and light, so a " +
+      "desert or the badlands will see one only rarely - and somewhere with no grass at all, like the " +
+      "Nether, never. Name the blocks it stands on under Ground below to change that. New herds appear " +
+      "as new chunks are generated. With no biome ticked the breed never heads a wild herd - it can " +
+      "still come from the other places below." }));
     var grid = el("div", { "class": "biomes" });
     BIOME_GROUPS.forEach(function (g) {
       var ids = g[1].map(function (b) { return "minecraft:" + b; });
@@ -1039,6 +1067,60 @@ window.HG = window.HG || {};
       "The id is the one F3 shows in-game when you stand in the biome. A biome the game does not have is " +
       "ignored, so a breed file can list modded biomes and still load without the mod." }));
     host.appendChild(other);
+
+    host.appendChild(el("h3", { text: "Ground" }));
+    host.appendChild(el("p", { "class": "hint", text:
+      "Leave this empty and the breed spawns the ordinary way: on lit grass, wherever its biomes are. " +
+      "Name blocks here and it may also stand on those - which is the only way a breed in a biome with " +
+      "no grass can ever be found wild. This only ever adds places; lit grass keeps working either way." }));
+    var ground = el("fieldset", { "class": "biome-group wide" }, [el("legend", { text: "Stands on" })]);
+    (st.spawn_ground || []).forEach(function (id) {
+      var c = el("input", { type: "checkbox" });
+      c.checked = true;
+      c.addEventListener("change", function () { setFloor(id, false); bd.changed(); bd.rerender(); });
+      ground.appendChild(el("label", { "class": "check biome" }, [c, el("code", { text: " " + id })]));
+    });
+    FLOOR_PRESETS.forEach(function (p) {
+      var on = p[1].every(function (id) { return (st.spawn_ground || []).indexOf(id) >= 0; });
+      ground.appendChild(el("button", { type: "button", "class": "btn tiny",
+        text: (on ? "remove " : "add ") + p[0], onclick: function () {
+          p[1].forEach(function (id) { setFloor(id, !on); });
+          bd.changed();
+          bd.rerender();
+        } }));
+    });
+    var floorIn = el("input", { type: "text", placeholder: "modid:block_name, e.g. minecraft:red_sand" });
+    var floorBad = el("span", { "class": "warn" });
+    var addFloor = function () {
+      var v = floorIn.value.trim().toLowerCase();
+      if (!v) return;
+      if (v.indexOf(":") < 0) v = "minecraft:" + v;
+      if (!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(v)) {
+        floorBad.textContent = "A block id is namespace:name - lower case letters, digits and _ . / -";
+        return;
+      }
+      setFloor(v, true);
+      bd.changed();
+      bd.rerender();
+    };
+    floorIn.addEventListener("keydown", function (e) { if (e.key === "Enter") addFloor(); });
+    ground.appendChild(el("div", { "class": "biome-add" }, [floorIn,
+      el("button", { type: "button", "class": "btn small", text: "Add", onclick: addFloor })]));
+    ground.appendChild(floorBad);
+    var darkBox = el("input", { type: "checkbox" });
+    darkBox.checked = !!st.spawn_in_dark;
+    darkBox.disabled = !(st.spawn_ground || []).length;
+    darkBox.addEventListener("change", function () {
+      st.spawn_in_dark = darkBox.checked ? true : undefined;
+      bd.changed();
+    });
+    ground.appendChild(el("label", { "class": "check" }, [darkBox, " and needs no light there"]));
+    ground.appendChild(el("p", { "class": "hint", text:
+      "The light box only applies to the blocks above, never to grass, which is why it needs one named " +
+      "first. It is not the same as day or night below: that is the world clock when a herd is founded, " +
+      "this is how dark the spot itself may be. A breed with no skylight where it lives - anything in " +
+      "the Nether - wants this ticked." }));
+    host.appendChild(ground);
 
     host.appendChild(el("h3", { text: "When" }));
     host.appendChild(el("div", { "class": "chips" }, [["any", "day or night"], ["day", "day only"], ["night", "night only"]]
@@ -1160,6 +1242,10 @@ window.HG = window.HG || {};
     var st = s();
     var bits = [];
     if (st.biomes.length) bits.push(st.biomes.map(biomeName).join(", "));
+    if (st.spawn_ground && st.spawn_ground.length) {
+      bits.push("stands on " + st.spawn_ground.length + " extra block"
+        + (st.spawn_ground.length === 1 ? "" : "s") + (st.spawn_in_dark ? ", unlit" : ""));
+    }
     if (st.spawn_time) bits.push(st.spawn_time + " only");
     if (st.commonness) bits.push(st.commonness.replace(/_/g, " "));
     if (st.spawn) bits.push("from " + (st.spawn.length ? st.spawn.join(", ") : "nowhere"));

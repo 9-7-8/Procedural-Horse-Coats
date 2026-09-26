@@ -47,11 +47,26 @@ import java.util.UUID;
  * into one has not been betrayed by this gene. That is the owner's line and it
  * keeps the veto to one question.
  *
- * <h2>Per player, not per horse</h2>
- * Passifying is a bargain between an animal and the person who fed it. A horse
- * calmed by one player is still perfectly willing to kill their friend, which is
- * also what stops one tamed horse defusing an aggressive line for a whole
- * server.
+ * <h2>Per player - unless it is permanent</h2>
+ * A <b>temporary</b> calm is a bargain between an animal and the person who fed
+ * it. A horse calmed by one player is still perfectly willing to kill their
+ * friend, which is also what stops one tamed horse defusing an aggressive line
+ * for a whole server.
+ *
+ * <p>A <b>permanent</b> calm ({@code Kind.PERMANENT} - {@code Prm}, {@code FPr},
+ * {@code APr}) is not a bargain, it is a change of character, and it shuts the
+ * temperament off <b>completely</b>: no fleeing and no aggression toward
+ * anything at all, player or mob or another horse, whoever struck the deal.
+ * (Owner's call, 2026-09-25: <i>"passification (when the permanent allele)
+ * should permanently shut off all fleeing or aggression genes (not remove them,
+ * but disable them)"</i>.) That is the only way {@link #suppresses} is ever true
+ * of a non-player.
+ *
+ * <p><b>Disabled, not removed</b>, and the distinction is load-bearing. A
+ * permanently calmed Netherhorse still carries {@code Aaa/Aaa}, still shows it in
+ * the browser's Alleles tab, still writes it onto a research paper, and still
+ * passes it to every foal - which then has to be calmed itself. Nothing about the
+ * genome changes; the veto is asked at the moment of acting and the answer is no.
  *
  * <p><b>Not verified in-game.</b> Written against 26.1.2 sources; the interaction
  * event and {@code broadcastEntityEvent} feedback in particular are the shapes
@@ -64,16 +79,31 @@ public final class Passification {
     }
 
     /**
-     * <b>Is this horse forbidden from targeting that creature?</b> Only ever
-     * true of a player - nothing else can be passified, because nothing else can
-     * offer anything.
+     * <b>Is this horse forbidden from targeting that creature?</b>
+     *
+     * <p>True of a <b>player</b> who holds a calm with it, and true of
+     * <b>anything at all</b> once the horse has been permanently calmed by
+     * somebody - see the class note on why those two are different rules.
      */
     public static boolean suppresses(Horse horse, LivingEntity target) {
+        PassificationAttachment state = horse.getData(ModAttachments.PASSIFICATION.get());
+        // A PERMANENT calm is not a bargain with one person, it is a change of
+        // character: the horse stops fleeing and stops picking fights with
+        // ANYTHING, player or mob or another horse (owner's call). So it is
+        // answered before the player test, and it is the only branch that can be
+        // true of a non-player target.
+        //
+        // The genes are not removed, only vetoed. A permanently calmed Netherhorse
+        // still carries Aaa/Aaa and still passes it to its foals; it simply never
+        // acts on it. That matters for breeding, for the browser's Alleles tab,
+        // and for what a research paper written off it says.
+        if (state.permanentForAnyone()) {
+            return true;
+        }
         if (!(target instanceof Player player)) {
             return false;
         }
-        return horse.getData(ModAttachments.PASSIFICATION.get())
-                .calm(player.getUUID(), horse.level().getGameTime());
+        return state.calm(player.getUUID(), horse.level().getGameTime());
     }
 
     /** Is this route currently worth approaching this player for? */
@@ -100,6 +130,19 @@ public final class Passification {
      * means the same thing whichever way the horse was treating you.
      */
     private static void forget(Horse horse, Player player) {
+        // A PERMANENT calm has just switched the temperament off entirely, so
+        // there is nothing left it is allowed to be chasing or running from -
+        // not only this player. Dropping just the payer would leave a
+        // permanently calmed horse still mid-charge at the mob or the horse it
+        // had picked a moment earlier, and nothing would ever re-select it, so
+        // the stale leg would simply run to its end looking like the veto had
+        // not worked.
+        if (horse.getData(ModAttachments.PASSIFICATION.get()).permanentForAnyone()) {
+            horse.setTarget(null);
+            horse.setLastHurtByMob(null);
+            GeneAbilityHandler.stopFleeing(horse);
+            return;
+        }
         if (horse.getTarget() == player) {
             horse.setTarget(null);
         }

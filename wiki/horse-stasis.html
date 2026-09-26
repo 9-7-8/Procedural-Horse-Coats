@@ -280,10 +280,15 @@
     into <em>3 of 9</em>.
 </p>
 <p>
-    <strong>The rows are also buttons.</strong> Clicking one turns that horse out
-    <a href="#stud-gameplay">at stud</a>, if it is in a Spacer chamber; the line under the list
-    says how many are, or invites you to try it, and a click on a chamber that cannot be marked
-    says which rung can.
+    <strong>The rows are also buttons.</strong> <strong>Click a row and that horse's chamber
+    goes into your inventory</strong> &mdash; the tab lists horses, so the obvious click is
+    &ldquo;give me that one&rdquo; rather than hunting the right square of the Chambers grid for
+    it. A chamber that was <a href="#stud-gameplay">at stud</a> is brought in first, so it does
+    not resume breeding the moment it goes into some other bank.
+    <strong>Right-click</strong> turns a horse out at stud instead, if it is in a Spacer chamber;
+    the line under the list says how many are, or invites you to try it, and a right-click on a
+    chamber that cannot be marked says which rung can. (Left-click used to be the stud toggle and
+    nothing withdrew at all &mdash; owner's call.)
 </p>
 <div class="note">
     <span class="label">Breaking it gives everything back, and it will not burn</span>
@@ -413,9 +418,10 @@
 <h2 id="stud-gameplay">Putting a horse to stud in the bank</h2>
 <p>
     A <strong>Spacer</strong> chamber can be turned out <strong>at stud</strong>: open the Browse
-    tab and <strong>click the row</strong>. The right-hand corner of the row changes from
-    <em>Spacer</em> to <em>at stud</em>, and clicking again brings it back in. Nothing else on
-    the row moves, and a click on any lower tier says so rather than doing nothing.
+    tab and <strong>right-click the row</strong>. The right-hand corner of the row changes from
+    <em>Spacer</em> to <em>at stud</em>, and right-clicking again brings it back in. Nothing else
+    on the row moves, and a right-click on any lower tier says so rather than doing nothing.
+    A plain left-click takes the chamber out of the bank altogether.
 </p>
 <p>
     <strong>A bank with a mare and a stallion at stud is a paddock.</strong> Both horses stay
@@ -795,9 +801,17 @@
     </p>
 </div>
 <p>
-    Chambers are <code>stacksTo(1)</code> in <code>ModItems</code> already;
-    <code>ChamberSlot.getMaxStackSize()</code> and the container's both say so again, so no
-    shift-click can ever try to merge two horses into one stack. The slot predicate takes
+    <strong>Occupied</strong> chambers are <code>stacksTo(1)</code> in <code>ModItems</code>;
+    <strong>empty ones stack</strong>, so <code>ChamberSlot.getMaxStackSize()</code> and the
+    container's are no longer belt and braces but the only thing keeping a stack of empties out
+    of a chamber slot &mdash; which matters because <code>EmergencyStasisHandler</code> writes a
+    filled chamber straight back into the slot it found an empty one in, and would destroy the
+    rest of the stack. Empties stack because a chamber with a horse in it is a
+    <a href="#occupied-is-an-item">different item</a>: an empty one can never come to hold a horse, so it
+    is about no horse at all and is interchangeable with every other empty of its tier. The one
+    thing the code owes that is <code>HorseStasisHandler.capture</code> taking <em>one</em> off
+    the held stack rather than replacing it &mdash; a plain <code>setItemInHand</code> there would
+    turn five chambers into one. The slot predicate takes
     <strong>any tier, empty or occupied</strong> &mdash; a bank that refused a Basic chamber
     would have inverted the whole ladder, since the bottom rung is the one that has to be worth
     using.

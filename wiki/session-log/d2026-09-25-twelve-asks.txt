@@ -1,0 +1,330 @@
+2026-09-25 — twelve asks off one bug report, and four of them were not the bug
+
+
+    It started as one sentence:
+
+        I don't see either of the nether horse breeds in the nether
+
+    and then eleven more arrived while that one was being fixed, queued one at a
+    time. What follows is in the order they were asked, not the order they were
+    done. The common thread, and the reason this file is worth keeping, is that
+    FOUR of the twelve were not the thing the report described — the report was
+    a symptom of something else, or the feature was already correct and only
+    accidentally so. Those four are marked.
+
+
+1. THE NETHER BREEDS COULD NEVER SPAWN. NOT RARELY — NEVER.
+
+    Both breed files already said so in their own notes, and breeds.html said it
+    too, so this was documented and simply never fixed.
+
+    The mod's half was right. BreedHerdsBiomeModifier does add the horse spawn
+    to all five Nether biomes, because Breeds.forBiome("minecraft:nether_wastes",
+    WILD) returns both breeds and nothing on that path is dimension-aware.
+
+    Vanilla's half rejected every position. EntityType.HORSE is registered with
+    Animal::checkAnimalSpawnRules, which is:
+
+        level.getBlockState(pos.below()).is(BlockTags.ANIMALS_SPAWNABLE_ON)
+            && brightEnoughToSpawn
+
+    and #minecraft:animals_spawnable_on in this SDK holds exactly ONE block:
+    minecraft:grass_block. Generated Nether terrain has none. The light half
+    (raw brightness > 8, block light only since there is no skylight) is
+    sometimes satisfiable near lava, so THE TAG IS THE WALL, not the light.
+
+    The fix is a new pair of breed-file fields rather than a special case:
+
+        "spawn_ground": [ ...block ids... ]      extra floors it may stand on
+        "spawn_in_dark": true                    waive the light over THOSE only
+
+    common/breed/SpawnGround.java holds them; Breeds.wildGroundAllows is the
+    per-position accessor; neoforge world/HorseSpawnGround.java hands it to
+    EntityType.HORSE with RegisterSpawnPlacementsEvent.Operation.OR.
+
+    OR and not REPLACE, deliberately: vanilla's rule keeps running underneath, so
+    this can only ever ADD a legal position. Lit grass still works for every
+    horse everywhere, a world with no breed naming a floor behaves exactly as
+    before, and this class never becomes responsible for reimplementing the
+    vanilla rule correctly.
+
+    Both fields are additive and there is no migration and no off switch, because
+    emptying the list IS the off switch.
+
+    THE SECOND HALF, WHICH NOBODY ASKED FOR AND WHICH WOULD HAVE RUINED IT:
+    the herd modifier had one weight for everything — weight 10, min 3, max 6,
+    the density of a plains herd. The Nether has almost no other land CREATURE
+    spawn entry to compete with, so unblocking the placement would have made two
+    VERY RARE breeds the commonest animal down there, in herds of six. The
+    modifier now carries a second, quieter rate (breed_weight 2, 1–3) used for
+    any biome it reaches ONLY because a breed lives there, rather than from its
+    own list. Listed biomes are unchanged, so no overworld herd moved.
+
+    Owner chose the data-driven route over three alternatives (widen the vanilla
+    tag globally; place herds at worldgen; accept it and strip the biomes), and
+    the flat second weight over a per-breed one.
+
+
+2. BLANK TRANSFER PAPERS COULD NOT BE SPAWNED IN.
+
+    TransferPaperHandler.sign() refused any blank with no bearer, and
+    onCrafted was the only thing that ever set one — so every blank from a
+    creative tab, /give, a loot table or a test kit arrived dead, and the refusal
+    said "not your paper" about a paper that was nobody's. The tooltip key
+    transfer_paper.unbound already existed and said "remake it at a bench".
+
+    An unbound blank now BINDS to whoever first signs with it. Not a hole: what
+    keeps a paper safe is the ownership check on the HORSE, which is untouched.
+    Someone else's crafted blank out of a chest is still refused.
+
+
+3. EMPTY STASIS CHAMBERS NOW STACK — AND THIS ONE WAS HIDING A BUG.  [not the bug]
+
+    The comment on ModItems said they were stacksTo(1) because "a chamber is
+    about one specific horse", and that an empty one could not stack because "an
+    item cannot change its own stack limit once a horse is in it". That second
+    half stopped being true when a chamber with a horse in it became a DIFFERENT
+    ITEM. An empty chamber can never come to hold a horse — filling one swaps it
+    for the occupied twin, which keeps its own limit of 1.
+
+    But making empties stack on its own would have DESTROYED ITEMS. capture()
+    did:
+
+        player.setItemInHand(hand, swallow(level, horse, stack, name));
+
+    which replaces the WHOLE held stack with one occupied chamber. Holding five
+    chambers and catching one horse would have silently binned four. It now takes
+    one off the stack and adds the filled chamber separately.
+
+    The emergency path was already safe, and it is worth knowing why: both
+    HorseStasisBankBlockEntity's container and HorseStasisBankMenu's slot pin
+    chamber slots to getMaxStackSize() == 1, so a stack of empties can never
+    reach a bank slot — which is what makes EmergencyStasisHandler's
+    write-back-into-the-slot safe. That was belt and braces before; it is now the
+    only thing holding.
+
+
+4. NEITHER PORTAL EXIT TAKES HORSES ANY MORE.
+
+    HorseRealm.leave gathered every tamed horse you owned within 48 blocks
+    (EVACUATE_RADIUS, now deleted) and dropped them at your overworld portal. The
+    debug corridor did the same through DebugPenManager.evacuateTamedHorses.
+
+    Both are gone. A horse comes home only by being led or ridden through the
+    frame. The point of the realm is to be somewhere you LEAVE horses, and
+    walking out with a herd in tow made it a stable you emptied every visit.
+
+    The two exits are NOT symmetrical and the owner was told so before choosing
+    "both": the realm has no teardown and keeps what you leave, but the debug
+    corridor tears its plot down on exit (tearDown discards every entity and
+    drops each horse from the ancestry database). So a horse left in a debug pen
+    is DESTROYED. evacuateTamedHorses became countOwnedTamedHorses, and the exit
+    now prints a red line naming how many you just lost. Owner accepted that.
+
+    Four stale doc references to evacuateTamedHorses were repointed —
+    DebugPenManager, DebugTestYard, DebugYardCombat, HorsePortalManager — plus
+    HorseRealm's class header, which still promised the old behaviour.
+
+
+5. A CLICK IN THE BANK'S BROWSE TAB TAKES THE HORSE OUT.
+
+    The tab lists horses, so the obvious click should be "give me that one". It
+    was the at-stud toggle instead and nothing withdrew at all. Left-click now
+    withdraws, right-click keeps the stud toggle, and the hint line says both.
+
+    clickMenuButton carries the second verb as an offset id (SLOTS + slot),
+    checked rather than trusted. A chamber at stud is brought in first, so it
+    does not resume breeding the moment it enters another bank.
+
+
+6. RESEARCH BOOKS ALREADY WORKED ON ALL FOUR HORSE TYPES — BY ACCIDENT.  [not the bug]
+
+    The ask was to make books work on a horse you own, one someone else owns, one
+    the cowboy owns, and one donated to the horse dimension. Tracing all 29
+    PlayerInteractEvent.EntityInteract listeners found that a book already reached
+    GeneBookFromHorse for all four: it has no ownership test, and nothing at
+    HIGHEST or HIGH cancels for a plain book.
+
+    But it worked for the cowboy's string only because GeneBookFromHorse sorts
+    EARLIER IN THE JAR than TransferPaperHandler, which cancels ANY held item on
+    a branded horse (isBranded -> consume). Both were at default NORMAL priority,
+    and within one priority NeoForge's bus dispatches in registration order,
+    which is jar entry order. Nothing in the API promises that. And a listener
+    with default receiveCanceled is SKIPPED once an event is cancelled — verified
+    in bus 8.0.5's SubscribeEventListener.invoke — so the failure would have been
+    the book doing nothing at all, one class rename away.
+
+    Both listeners are now HIGHEST. Safe, because this claims strictly less than
+    the two already there: both of those need an empty hand, this needs a Horse
+    and a book. Also now subscribes to EntityInteractSpecific, so an aimed click
+    cannot be lost upstream; and a horse with no founded record gets its own
+    message instead of "entirely ordinary", which it was indistinguishable from.
+
+
+7. UNTAMED AND SOLD HORSES ARE OFF THE H MENU.
+
+    HorseRoster matched `username.equals(record.tamedBy())`. tamedBy is written
+    once and NEVER rewritten — deliberately, it is a history field — so a horse
+    you tamed and then signed away, sold, or released into the realm stayed on
+    your My horses table for ever, as did every untamed horse you had touched.
+
+    It now reads the record's ownerId, which HorseOwnerTrackingHandler re-mirrors
+    off the live entity every ~2s and CLEARS when a horse is untamed, plus the
+    live entity for the two-second gap before the mirror catches up.
+
+    Checked before changing it: the allele collection is swept off this same
+    list, and GeneDatabaseData.collect only ever add()s to a LinkedHashSet — so
+    what you learned from a horse stays learned after you sell it. The comment
+    there warning that dropping a horse would "un-collect her alleles" is
+    over-cautious; it cannot.
+
+
+8. THE PORTAL DWELL IS 5 SECONDS, NOT 10.
+
+    PLAYER_DWELL_TICKS 200 -> 100. The horse timer stays at 60 on purpose: you
+    push a led horse in and follow, so it has to be through before you are. Three
+    places that said "ten seconds" were corrected — the class doc, TutorialPage,
+    and horse-realm.html.
+
+
+9. WAYSTONES: A RIDDEN HORSE COMES WITH YOU — AND NO SETTING COULD HAVE DONE IT.  [not the bug]
+
+    Read entirely out of waystones-neoforge-26.1.2-26.1.2.15.jar with javap. The
+    live server at ~/26.1.2-neoforge-server has the same jar and was NOT touched;
+    the copy read was the ATM11 CurseForge instance.
+
+    Waystones has two rules for bringing animals along:
+
+        transportLeashed   scans Mob            -> a LEASHED horse already travels
+        transportPets      scans TamableAnimal  -> can NEVER move a horse
+
+    A vanilla horse is not a TamableAnimal. It is
+    AbstractHorse extends Animal implements PlayerRideableJumping,
+    HasCustomInventoryScreen, OwnableEntity. Wolves, cats and parrots are
+    TamableAnimal; equines are not. So setting transportPets = ENABLED does
+    nothing at all for a stable. The setting exists, reads as though it covers
+    this, and cannot — which is why this is filed as a finding and not a config
+    tip.
+
+    The real gap is the RIDDEN horse: Waystones builds its batch by walking DOWN
+    from the traveller with getPassengers() and never up to getVehicle(), so the
+    animal you are sitting on is left at the departure stone.
+
+    compat/WaystonesCompat hooks WaystoneTeleportEvent.Prepare and calls
+    context.addAdditionalEntity(vehicle). Waystones' own EntityTeleportBatch
+    already restores riding with getVehicle/startRiding, so you arrive mounted.
+    Only the direct vehicle — gathering loose horses is transportPets' job and
+    turning that on by proxy is not this mod's call.
+
+    THE BUILD SIDE COST MORE THAN THE CODE. Three compileOnly coordinates, and a
+    fourth that is not where you would look:
+
+      - Modrinth version strings carry the GAME version too:
+        "26.1.2.15+neoforge-26.1.2", not Jade's bare "+neoforge". A wrong one
+        fails resolution rather than falling back.
+      - SHOGI SHIPS ITS API AS A JARJAR-NESTED JAR
+        (META-INF/jarjar/net.blay09.mods.shogi-api-*.jar) and Gradle never
+        unpacks those onto a compile classpath. The Modrinth artifact resolves,
+        looks correct, and is missing the one type the Waystones API is built out
+        of — WaystoneTeleportContext extends shogi.context.ShogiContext, and
+        javac must walk that to type-check any call on the context. It surfaces
+        as "cannot access ShogiContext", not as a missing dependency. Fixed with
+        net.blay09.mods:shogi-api from maven.twelveiterations.com, which is the
+        second repository block in the module's build.gradle and exists for that
+        one artifact.
+
+    Second time the no-reaching-in rule bends, on the same terms as Jade: a
+    published, versioned API is not a guess. Compile-only, nothing shipped
+    (checked: 0 net.blay09 classes in the jar), and the API usage sits in a
+    nested Hook class behind ModList.isLoaded so nothing in those packages is
+    loaded when Waystones is absent.
+
+    NOT RUN. Not one line has executed — the dev instance has no Waystones.
+
+
+10. LAST STAND ON A HIGH FALL: NOT REPRODUCED, MADE DIAGNOSABLE INSTEAD.  [not the bug]
+
+    Report: a horse that fell from a high place died instantly.
+
+    Everything checked out and nothing explained it:
+
+      - minecraft:fall is NOT in #minecraft:bypasses_invulnerability (read the
+        tag, did not assume), so unsurvivable() does not exempt it.
+      - AbstractHorse.causeFallDamage makes exactly one hurt() call.
+      - Both handlers ARE subscribed at runtime — confirmed in the owner's own
+        debug.log.
+      - behaviour.last_stand = true in run/phc/server.toml.
+      - HorseCooldownsAttachment.last() returns Long.MIN_VALUE for an absent key,
+        so armed() is true for a horse that has never been saved.
+      - FlightFallGuard, the only other fall-damage handler, only ever cancels.
+
+    The owner's log covered a startup only, so there was no evidence of the
+    event. The actual defect found was in OBSERVABILITY: the save wrote an
+    ActionTrace line on SUCCESS and said NOTHING on any refusal, so a failure and
+    a feature that was never reached looked identical. Every refusal path now
+    logs, and only when the blow would have been fatal — so the log stays quiet
+    until a horse actually dies and then says which of the four reasons it was.
+    The likeliest innocent explanation, and the one the new line will name, is a
+    save already spent and not re-armed because the horse never healed to full.
+
+    Still open. Next fall answers it.
+
+
+11. A PERMANENT CALM NOW SWITCHES THE TEMPERAMENT OFF ENTIRELY.
+
+    Passification.suppresses was per-player and only ever true of a Player. For
+    the PERMANENT kinds (Prm, FPr, APr) it is now true of ANYTHING — player, mob,
+    another horse. A temporary calm stays per player, because that is a bargain;
+    a permanent one is a change of character.
+
+    DISABLED, NOT REMOVED, which was the explicit ask. A permanently calmed
+    Netherhorse still carries Aaa/Aaa, still shows it on the Alleles tab, still
+    writes it onto a research paper, and still passes it to every foal — which
+    then has to be calmed itself.
+
+    forget() had to widen too: it dropped only the paying player's target and
+    flee leg, which would have left a permanently calmed horse still mid-charge
+    at the mob it had picked, with nothing ever re-selecting it — the stale leg
+    running to its end looking exactly like the veto not working. New
+    GeneAbilityHandler.stopFleeing(horse) is the blanket version beside
+    stopFleeingFrom.
+
+
+12. FLIGHT IS NOW FULL FALL IMMUNITY.
+
+    Report: pressing F to land a flying horse could still deal damage. That is
+    inherent to what the guard tested. FlightFallGuard gated on
+    HorseFlight.active — "is it flying this instant" — so F clears the toggle and
+    the horse is no longer flying the MOMENT IT STARTS DROPPING. The guard
+    switched off at the top of the fall.
+
+    Gliding had the same hole from the other side: GLIDE is only active while
+    getControllingPassenger() != null, so dismounting mid-air or stalling fell
+    unprotected.
+
+    Now tests HorseFlight.of(horse).flies() — does it carry flight at all. A
+    horse with the flying gene takes no fall damage ever, and neither does anyone
+    riding it. No toggle state, no airborne test, no ordering to get right. This
+    does overlap bird_boned for a flier, deliberately.
+
+
+WHAT IS NEWLY WAITING
+
+    breeds.html         a wild Nether herd existing at all, and the three
+                        distinguishable ways it can fail (none / far too many /
+                        ordinary horses down there); plus that nothing else
+                        gained a floor
+    compatibility.html  the whole Waystones hook, written from a jar and never
+                        run — including the claim most likely to rot, that
+                        transportPets cannot move a horse
+    item-transfer-papers.html   a spawned-in blank signing a horse you own, and
+                        NOT one you do not
+
+    Nos. 3, 5, 7, 8, 11 and 12 are all unplayed too, and all six are the kind
+    that only a real session shows.
+
+
+WHAT THE NEXT SESSION SHOULD PICK UP FIRST
+
+    Last Stand (no. 10). It is the only one still genuinely unexplained, the new
+    log lines are there to answer it, and it is a horse dying when it should not.

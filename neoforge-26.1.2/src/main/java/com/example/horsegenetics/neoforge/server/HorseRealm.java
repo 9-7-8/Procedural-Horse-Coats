@@ -12,17 +12,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -76,10 +70,13 @@ import java.util.Set;
  * <h2>What is deliberately not here</h2>
  * A horse standing in a realm portal on its own does <b>not</b> travel. Entry is
  * open to horses - that is how you bring them in, led through an Overworld
- * portal - but the exit is players only, plus the tamed horses they own standing
- * near them. A released horse that wandered into an exit and surfaced in a
- * stranger's back garden would be the one outcome this whole feature exists to
- * prevent.
+ * portal - but <b>the exit is players only, and nothing else</b>. A released
+ * horse that wandered into an exit and surfaced in a stranger's back garden
+ * would be the one outcome this whole feature exists to prevent.
+ *
+ * <p>It used to be "players, plus the tamed horses they own standing near them",
+ * which quietly made the field a stable you emptied on the way out instead of a
+ * place horses live. See the note where {@code EVACUATE_RADIUS} used to be.
  *
  * <p><b>Not verified in-game.</b> Nothing on this page has been seen running.
  */
@@ -142,15 +139,14 @@ public final class HorseRealm {
     /** How far south of the plane an arriving traveller is put down. */
     static final int ARRIVE_DZ = PORTAL_DZ + 3;
 
-    /**
-     * How far from the portal a leaving player's own horses are gathered. The
-     * debug dimension takes every tamed horse in the plot, because a plot is one
-     * visit's worth of corridor. This realm is 16 000 blocks across and shared,
-     * so "yours" has to mean "the ones standing with you", not "every horse you
-     * own in the dimension" - otherwise walking out drags a herd you left here
-     * on purpose back home with you.
-     */
-    static final double EVACUATE_RADIUS = 48.0;
+    // A LEAVING PLAYER TAKES NO HORSES. There was an EVACUATE_RADIUS here - 48
+    // blocks, within which a leaving player's own tamed horses were gathered up
+    // and dropped at their overworld portal. It is gone, and so is the radius:
+    // the point of the realm is to be somewhere you LEAVE horses. Walking out
+    // with a herd in tow made it a stable you had to empty every time rather
+    // than a place they live, and the radius was only ever an attempt to guess
+    // which of them you meant. A horse comes home the way it came: led or
+    // ridden through the frame. (Owner's call.)
 
     public static boolean isRealm(Level level) {
         return level != null && REALM_LEVEL.equals(level.dimension());
@@ -299,9 +295,13 @@ public final class HorseRealm {
     }
 
     /**
-     * Take {@code player} home through any of the realm's exits, and their own
-     * tamed horses within {@value #EVACUATE_RADIUS} blocks with them. Returns
-     * silently for anything that is not a player - see the class note.
+     * Take {@code player} home through any of the realm's exits - <b>and nothing
+     * else</b>. Returns silently for anything that is not a player, which is
+     * also what stops a horse walking into an exit frame from following: see the
+     * class note, and the note where {@code EVACUATE_RADIUS} used to be.
+     *
+     * <p>A horse only comes home if you lead or ride it through, the same way it
+     * got here. Nothing standing near the frame is collected.
      */
     static void leave(Entity entity, ServerLevel realm, BlockPos portalPos) {
         if (!(entity instanceof ServerPlayer player)) {
@@ -322,29 +322,10 @@ public final class HorseRealm {
         }
         BlockPos to = home == null ? target.getRespawnData().pos() : safeReturn(target, home.pos());
 
-        // Their horses first, so the player lands last and sees them already there.
-        List<BlockPos> used = new ArrayList<>();
-        for (AbstractHorse horse : ownedHorsesNear(realm, player, portalPos)) {
-            if (horse.isLeashed()) {
-                horse.dropLeash();
-            }
-            HorsePortalManager.placeReturningHorse(horse, target, to, used);
-        }
         if (entity instanceof Mob mob && mob.isLeashed()) {
             mob.dropLeash();
         }
         HorsePortalManager.placeAt(player, target, to);
-    }
-
-    private static List<AbstractHorse> ownedHorsesNear(ServerLevel realm, ServerPlayer player, BlockPos portalPos) {
-        AABB box = new AABB(portalPos).inflate(EVACUATE_RADIUS);
-        return realm.getEntitiesOfClass(AbstractHorse.class, box, horse -> {
-            if (!horse.isAlive() || !horse.isTamed()) {
-                return false;
-            }
-            EntityReference<LivingEntity> owner = horse.getOwnerReference();
-            return owner != null && player.getUUID().equals(owner.getUUID());
-        });
     }
 
     /**

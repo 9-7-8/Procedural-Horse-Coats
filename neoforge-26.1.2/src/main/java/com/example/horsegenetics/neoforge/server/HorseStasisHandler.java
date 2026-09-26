@@ -108,9 +108,22 @@ public final class HorseStasisHandler {
             return;
         }
 
-        // A full chamber is a different item, so this is a swap in the hand
-        // rather than an edit to the stack the player is holding.
-        player.setItemInHand(hand, swallow(level, horse, stack, name));
+        // A full chamber is a different item, so this is a swap rather than an
+        // edit to the stack the player is holding - and EMPTY CHAMBERS STACK, so
+        // it is one off the stack rather than the stack. While it was a plain
+        // setItemInHand and empties were stacksTo(1), the two facts agreed; the
+        // moment empties stacked, holding five and catching one horse would have
+        // replaced all five with a single occupied chamber and silently destroyed
+        // four. The filled one goes to the hand only when it was the last.
+        ItemStack filled = swallow(level, horse, stack, name);
+        stack.shrink(1);
+        if (stack.isEmpty()) {
+            player.setItemInHand(hand, filled);
+        } else if (!player.getInventory().add(filled)) {
+            // Nowhere to put it: drop it rather than leak the horse. The animal
+            // is already discarded by this point, so losing the stack loses it.
+            player.drop(filled, false);
+        }
         say(player, name + " is in stasis.");
         ActionTrace.log("stasis", ActionTrace.describeShort(horse) + " captured into a "
                 + chamber.tier().id() + " chamber by " + player.getGameProfile().name());

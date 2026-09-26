@@ -189,6 +189,22 @@
     <td>none, so the breed never heads a wild herd wherever <code>spawn</code> says.</td>
 </tr>
 <tr>
+    <td><code>spawn_ground</code></td>
+    <td>namespaced <em>block</em> ids - any block, modded ones included</td>
+    <td>none, so the breed spawns only where vanilla already allows it: on a lit
+        <code>minecraft:grass_block</code>. Naming blocks here lets its herds stand on those
+        too - see <a href="#where">where a breed may come from</a>. Purely additive; grass
+        keeps working either way.</td>
+</tr>
+<tr>
+    <td><code>spawn_in_dark</code></td>
+    <td><code>true</code> or <code>false</code></td>
+    <td><code>false</code>. <code>true</code> waives the light requirement <strong>over the
+        blocks named in <code>spawn_ground</code> only</strong>, never over grass. It is a hard
+        error without <code>spawn_ground</code>, since on its own it would quietly change every
+        biome the breed names.</td>
+</tr>
+<tr>
     <td><code>price</code></td>
     <td><code>[min, max]</code> emeralds</td>
     <td><code>HorsePrices.DEFAULT_PRICE</code>, which owns the number. What a signed
@@ -432,9 +448,57 @@
     included. The mod's herd spawn is a biome modifier of its own
     (<code>BreedHerdsBiomeModifier</code>) that adds the spawn to its listed vanilla biomes
     <em>and</em> to every biome a registered breed lists - so a breed dropped into the folder
-    that lives in a dark forest or a modded biome gets herds there on the next start. A horse
-    still needs grass and light to spawn, so a desert or Nether breed will rarely or never be
-    seen wild.
+    that lives in a dark forest or a modded biome gets herds there on the next start.
+</p>
+
+<p>
+    <strong>A named biome is not automatically a liveable one.</strong> Vanilla's animal rule
+    tests the <em>position</em>, not the biome: the block underfoot must be in
+    <code>#minecraft:animals_spawnable_on</code> - which in this SDK is the single entry
+    <code>minecraft:grass_block</code> - and the raw brightness must be above 8. So a desert
+    breed is rarely seen, and a breed in a biome with no grass at all was never seen: the two
+    Nether breeds named five biomes each, had the spawn duly added to all ten, and could not
+    spawn in any of them.
+</p>
+
+<p>
+    <code>spawn_ground</code> is the answer. List the blocks the breed's herds may stand on and
+    they may stand on those as well as on lit grass; add <code>spawn_in_dark</code> and the
+    light test is waived over <em>those blocks only</em>. Both are <strong>additive</strong> -
+    they can only ever let a horse spawn somewhere it previously could not, which is why they
+    need no migration and no setting to switch off. Emptying the list is the off switch. The
+    host half is <code>HorseSpawnGround</code>, which adds the rule to
+    <code>EntityType.HORSE</code> with <code>Operation.OR</code> so vanilla's own rule keeps
+    running underneath it.
+</p>
+
+<pre><code class="language-json">  "biomes": [
+    "minecraft:nether_wastes", "minecraft:crimson_forest", "minecraft:warped_forest",
+    "minecraft:soul_sand_valley", "minecraft:basalt_deltas"
+  ],
+  "spawn_ground": [
+    "minecraft:netherrack", "minecraft:crimson_nylium", "minecraft:warped_nylium",
+    "minecraft:soul_sand", "minecraft:soul_soil", "minecraft:basalt",
+    "minecraft:blackstone", "minecraft:magma_block"
+  ],
+  "spawn_in_dark": true</code></pre>
+
+<p>
+    That is the <a href="breed-book.html#netherhorse">Netherhorse</a>'s and the
+    <a href="breed-book.html#nightmare">Nightmare</a>'s block, verbatim, and the two share it
+    deliberately: as far as the ground is concerned they are one founder pool. Eight blocks
+    rather than just netherrack because the generator lays all eight down as a surface
+    somewhere in those five biomes.
+</p>
+
+<p>
+    Herds in a biome the modifier reaches <em>only</em> because a breed named it are also
+    <strong>thinner</strong> than herds in its own listed biomes - <code>breed_weight</code>
+    rather than <code>weight</code> in
+    <code>data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json</code>. Without that,
+    unblocking the Nether would have made two <em>very rare</em> breeds the commonest animal
+    down there, since the Nether has almost no other land <code>CREATURE</code> spawn to
+    compete with.
 </p>
 
 <p>
@@ -442,6 +506,15 @@
     breed is not a candidate and the biome's other breeds share the draw. It only speaks for
     <code>wild</code>. Vanilla will not spawn an animal in the dark on a chunk near a player,
     so a night breed's herds mostly come from chunks generated at night.
+</p>
+
+<p>
+    <strong><code>spawn_time</code> and <code>spawn_in_dark</code> are different questions</strong>,
+    and easy to confuse. <code>spawn_time</code> is the <em>world clock</em>, read when a herd is
+    founded: &ldquo;this breed's herds form at night&rdquo;. <code>spawn_in_dark</code> is
+    <em>block light at the spawn position</em>, read by the placement test: &ldquo;this breed does
+    not need a lit floor&rdquo;. A Nether breed wants the flag and has no opinion on the hour; the
+    Dhampir wants <code>spawn_time: night</code> and still needs lit grass.
 </p>
 
 <h2 id="herd-shape">The shape of a founded herd</h2>

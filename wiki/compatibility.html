@@ -1319,6 +1319,96 @@
     <a href="compatibility.html#jade-0918">verification</a>.
 </p>
 
+<h2 id="waystones">Waystones &mdash; and the setting that cannot work</h2>
+
+<p>
+    <strong>Ride a horse onto a waystone and it arrives with you.</strong> It did not before, and
+    <em>no Waystones setting could have made it</em> &mdash; which is the interesting part.
+</p>
+
+<p>
+    Waystones has two rules for bringing animals along, and only one of them can ever see a horse:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Rule</th><th>What it scans for</th><th>Does it move a horse?</th></tr></thead>
+<tbody>
+<tr><td><code>transportLeashed</code></td><td><code>Mob</code></td>
+    <td><strong>Yes.</strong> A horse on a lead has always travelled. Nothing here changes that.</td></tr>
+<tr><td><code>transportPets</code></td><td><code>TamableAnimal</code></td>
+    <td><strong>No, and it never can.</strong> See below.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>A vanilla horse is not a <code>TamableAnimal</code>.</strong> It is
+    <code>AbstractHorse extends Animal implements PlayerRideableJumping,
+    HasCustomInventoryScreen, OwnableEntity</code>. Wolves, cats and parrots are
+    <code>TamableAnimal</code>; horses, donkeys, mules, llamas and camels are not &mdash; tamed
+    equines keep their owner through a different interface entirely. So switching
+    <code>transportPets</code> to <code>ENABLED</code> does nothing at all for a stable. That is a
+    trap rather than a bug: the setting exists, reads as though it covers this, and cannot.
+</p>
+
+<p>
+    The real gap was the <strong>ridden</strong> horse. Waystones builds its teleport batch by
+    walking <em>down</em> from the traveller with <code>getPassengers()</code> and never up to
+    <code>getVehicle()</code>, so the animal a player is sitting on is not in the batch: the rider
+    goes and the horse stays at the departure stone.
+</p>
+
+<p>
+    <code>compat/WaystonesCompat</code> adds it. <code>WaystoneTeleportEvent.Prepare</code> hands
+    out the <code>WaystoneTeleportContext</code>, which has <code>addAdditionalEntity</code> for
+    exactly this; Waystones' own <code>EntityTeleportBatch</code> already restores riding
+    relationships at the far end with <code>getVehicle</code> / <code>startRiding</code>, so you
+    arrive still mounted rather than in a heap beside the horse. Any
+    <code>AbstractHorse</code> counts, so donkeys and mules come too, and <strong>only the direct
+    vehicle</strong> &mdash; gathering up loose horses standing nearby is what
+    <code>transportPets</code> is for, and turning that on by proxy is not this mod's call.
+</p>
+
+<div class="note">
+    <span class="label">This is the second time the no-reaching-in rule bends, and on the same terms</span>
+    <p>
+        <a href="#jade">Jade</a> is the first. The rule
+        <code>compat/HorsePoweredCompat</code> states is about <em>guessing</em> &mdash; a patch
+        written against names nobody promised fails silently the first time they rename something.
+        Waystones publishes <code>net.blay09.mods.waystones.api</code> and versions it, so building
+        against it is the opposite of a guess. It is compile-only, the jars are never shipped, and
+        the API usage lives in a nested <code>Hook</code> class behind a
+        <code>ModList.isLoaded</code> guard so that with Waystones absent nothing in the
+        <code>net.blay09</code> packages is ever loaded or verified. A Waystones that moves the API
+        logs a warning naming the consequence, because the alternative failure is a horse silently
+        left behind and nobody would connect that to a mod update.
+    </p>
+</div>
+
+<h3 id="waystones-build">Three dependencies, and a fourth that is not where you would look</h3>
+
+<p>
+    Worth writing down, because it cost an afternoon's worth of wrong turns. The integration needs
+    <code>waystones</code>, <code>balm</code> (the event lives on Balm's
+    <code>BidirectionalEventMapper</code>) and <code>shogi</code> (the context extends Shogi's
+    <code>ShogiContext</code>) &mdash; and then a fourth:
+</p>
+
+<ul>
+    <li><strong>Modrinth's version strings carry the game version too.</strong>
+        <code>26.1.2.15+neoforge-26.1.2</code>, not Jade's bare <code>+neoforge</code>. A wrong one
+        fails resolution rather than falling back, which is at least honest.</li>
+    <li><strong>Shogi ships its API as a JarJar-nested jar</strong> &mdash;
+        <code>META-INF/jarjar/net.blay09.mods.shogi-api-*.jar</code> &mdash; and Gradle never
+        unpacks those onto a compile classpath. So the Modrinth artifact resolves, looks correct,
+        and is missing the one type the Waystones API is built out of. It surfaces as
+        <code>cannot access ShogiContext</code> rather than as a missing dependency. The fix is
+        <code>net.blay09.mods:shogi-api</code> from
+        <code>maven.twelveiterations.com</code>, which is the second repository block in
+        <code>neoforge-26.1.2/build.gradle</code> and exists for that one artifact.</li>
+</ul>
+
 <h2 id="combat-controls">Horse Combat Controls</h2>
 
 <p>
@@ -1889,8 +1979,42 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, and a hay-bale tag lookup that would silently stop every horse in the world eating hay &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
+    <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, a hay-bale tag lookup that would silently stop every horse in the world eating hay, and a <a href="compatibility.html#verify-waystones">Waystones hook</a> written entirely by reading a jar &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
 </div>
+
+<h3 id="verify-waystones">A ridden horse through a waystone (NOT played, needs three more mods)</h3>
+
+<p>
+    <code>compat/WaystonesCompat</code> was written entirely by reading
+    <code>waystones-neoforge-26.1.2-26.1.2.15.jar</code> with <code>javap</code>. It compiles
+    against the real API, and <strong>that is the whole of the evidence</strong>: the dev instance
+    has no Waystones, so not one line of it has executed. See
+    <a href="#waystones">Waystones</a>.
+</p>
+
+<ul>
+    <li><strong>Pass:</strong> ride a horse onto a waystone, warp, and arrive
+        <em>still mounted</em> at the far end &mdash; in the same dimension and across one. The horse
+        keeps its name, coat and pedigree, since it is the same entity moved rather than a new one.</li>
+    <li><strong>Fail looks like</strong> four distinguishable things, and which one matters:
+        <em>the horse is left behind</em> (the hook never registered &mdash; check the log for the
+        &ldquo;Waystones found&rdquo; line, and for the warning that says the API did not match);
+        <em>you arrive beside it rather than on it</em> (the entity came but the riding relationship
+        was not restored, which is Waystones' own <code>EntityTeleportBatch</code>, not this);
+        <em>a crash or a NoClassDefFoundError on startup with Waystones absent</em> (the
+        <code>Hook</code> split failed to keep the <code>net.blay09</code> classes unloaded, which
+        would be the one regression that hurts players who do not have the mod); or
+        <em>the horse duplicates</em>.</li>
+    <li><strong>Also worth a look:</strong> a horse on a <em>lead</em> still travels, which is
+        Waystones' own <code>transportLeashed</code> and must not have been disturbed &mdash; and a
+        <em>loose</em> owned horse standing nearby still does <strong>not</strong> travel, which is
+        deliberate.</li>
+    <li><strong>The claim most likely to be wrong</strong> is not in the code at all: that
+        <code>transportPets</code> cannot move a horse because a horse is not a
+        <code>TamableAnimal</code>. That was read off the bytecode of one version. If a future
+        Waystones widens its pet scan to <code>OwnableEntity</code>, this hook becomes redundant for
+        the loose case and should be re-read rather than trusted.</li>
+</ul>
 
 <h3 id="pseudowoods-0919">287 modded woods become 39 (2026-09-19, NOT played, needs the big pack)</h3>
 

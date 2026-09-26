@@ -128,9 +128,12 @@ final class DebugYardCombat {
         // UNTAMED, WHICH IS THE OPPOSITE OF EVERY OTHER PEN IN THE YARD - and
         // it is the fix for "guardian does not react to me being damaged at
         // all" (owner, 2026-09-13). The yard stocks its horses TAMED WITH NO
-        // OWNER on purpose: DebugPenManager.evacuateTamedHorses walks tamed AND
-        // owned horses back to the overworld when you leave, so an owned yard
-        // is a yard that empties itself into the portal. That convention
+        // OWNER on purpose: the yard's horses are scenery, and tamed-AND-owned
+        // is the line between scenery and somebody's horse everywhere in the
+        // corridor - DebugPenManager.countOwnedTamedHorses is what reads it now.
+        // (It used to walk owned horses back to the overworld on the way out, so
+        // an owned yard was a yard that emptied itself into the portal; the walk
+        // is gone, the convention is not.) That convention
         // silently breaks this one gene, because GeneReactionHandler.onOwnerHurt
         // scans for horses whose owner is the hurt player and a horse with no
         // owner matches nobody.

@@ -139,12 +139,13 @@ processResources {
 // only repository block in this module - ModDevGradle injects the NeoForge and
 // Mojang ones, so there was never a reason for one before.
 //
-// It is here rather than in settings.gradle.kts because it exists for exactly
-// one dependency: Jade's published plugin API. That is the line this does not
-// cross - `compat/HorsePoweredCompat` refuses to reach into another mod's
-// classes because it would be guessing at names that can be renamed without
-// warning, and an API a mod publishes and versions for this purpose is the
-// opposite of a guess.
+// It is here rather than in settings.gradle.kts because it exists for the
+// published APIs of other mods and nothing else: Jade's plugin API, and now
+// Waystones' teleport API (with Balm and Shogi, whose types it is built out
+// of). That is the line this does not cross - `compat/HorsePoweredCompat`
+// refuses to reach into another mod's internals because it would be guessing at
+// names that can be renamed without warning, and an API a mod publishes and
+// versions for this purpose is the opposite of a guess.
 repositories {
     maven {
         url = "https://api.modrinth.com/maven"
@@ -153,6 +154,22 @@ repositories {
             // should fail loudly rather than quietly pull some other artifact
             // of the same name off Modrinth.
             includeGroup("maven.modrinth")
+        }
+    }
+    // Waystones' author's own maven, for ONE artifact Modrinth cannot give:
+    // shogi-api. Modrinth serves the shipped mod jar, and Shogi ships its API as
+    // a JARJAR-NESTED jar (META-INF/jarjar/net.blay09.mods.shogi-api-*.jar),
+    // which Gradle never unpacks onto a compile classpath. So the Modrinth
+    // artifact resolves, looks right, and is missing exactly the one type
+    // Waystones' own API is built out of - WaystoneTeleportContext extends
+    // net.blay09.mods.shogi.context.ShogiContext, and javac must walk that to
+    // type-check any call on the context. It fails as "cannot access
+    // ShogiContext", not as a missing dependency, which is what made it worth
+    // this comment.
+    maven {
+        url = "https://maven.twelveiterations.com/repository/maven-public/"
+        content {
+            includeGroup("net.blay09.mods")
         }
     }
 }
@@ -165,6 +182,30 @@ dependencies {
     // it is annotated @WailaPlugin and Jade itself is what scans for that.
     // 26.1.11 is the newest Jade built for game version 26.1.2.
     compileOnly "maven.modrinth:jade:26.1.11+neoforge"
+
+    // Waystones, compile-only, and the second published API this project builds
+    // against - same reasoning as Jade above, same rule about not guessing at
+    // another mod's internals. `compat/WaystonesCompat` is the only class that
+    // touches it, it is loaded from a guarded ModList check, and the jar is
+    // never shipped.
+    //
+    // THREE coordinates for one integration, because the API's own types come
+    // from all three: WaystoneTeleportEvent.Prepare hangs its listener off
+    // Balm's BidirectionalEventMapper, and WaystoneTeleportContext extends
+    // Shogi's ShogiContext. Versions are what Waystones 26.1.2.15 declares as
+    // its own minimums in neoforge.mods.toml.
+    // Pinned to the versions actually installed alongside this mod (the ATM11
+    // instance ships waystones 26.1.2.15 / balm 26.1.2.13), not to the newest.
+    // Modrinth's version strings carry the loader AND game version as a suffix -
+    // "+neoforge-26.1.2", not Jade's bare "+neoforge" - and a wrong one fails
+    // resolution rather than falling back, which is what caught this.
+    compileOnly "maven.modrinth:waystones:26.1.2.15+neoforge-26.1.2"
+    compileOnly "maven.modrinth:balm:26.1.2.13+neoforge-26.1.2"
+    compileOnly "maven.modrinth:shogi:26.1.2.8+neoforge-26.1.2"
+    // ...and Shogi's API, which is NOT inside the artifact above - see the
+    // second repository block for why. Without it the Waystones API compiles
+    // to "cannot access ShogiContext".
+    compileOnly "net.blay09.mods:shogi-api:26.1.2.8"
 
     // Plain JUnit, no Minecraft. The only thing tested here is compat's
     // MaterialScan, which deliberately imports nothing from Minecraft or

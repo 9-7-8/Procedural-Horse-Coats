@@ -502,21 +502,28 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     }
 
     /**
-     * <b>Turn a chamber out at stud, or bring it back in.</b> The button id is
-     * the chamber slot the player clicked on the Browse tab - nothing else needs
-     * to travel, because the mark itself lives on the item and syncs with the
-     * slot.
+     * <b>Two actions on a Browse row</b>, told apart by the button id: an id
+     * below {@link HorseStasisBankBlockEntity#SLOTS} turns that chamber out at
+     * stud or brings it back in, and an id {@code SLOTS} higher takes the whole
+     * chamber out of the bank and into the player's inventory. Nothing else needs
+     * to travel, because both the mark and the horse live on the item and sync
+     * with the slot.
      *
      * <p>{@code clickMenuButton} rather than a payload of its own, which is the
      * rule {@code BenchNamePayload}'s comment states from the other side: an
-     * int fits here and a string does not. The screen only offers the click on a
-     * row it can see, and the server checks the tier and the horse again anyway
-     * - a menu button is a packet, and a packet is whatever somebody sent.
+     * int fits here and a string does not. The offset is the standard way to
+     * carry a second verb through an int, and it is checked below rather than
+     * trusted: the screen only offers the click on a row it can see, and the
+     * server re-checks the slot, the tier and the horse anyway - a menu button is
+     * a packet, and a packet is whatever somebody sent.
      */
     @Override
     public boolean clickMenuButton(Player who, int id) {
         if (who.level().isClientSide()) {
             return true;
+        }
+        if (id >= HorseStasisBankBlockEntity.SLOTS && id < 2 * HorseStasisBankBlockEntity.SLOTS) {
+            return withdrawChamber(who, id - HorseStasisBankBlockEntity.SLOTS);
         }
         if (id < 0 || id >= HorseStasisBankBlockEntity.SLOTS) {
             return false;
@@ -536,6 +543,42 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         // Through the container, so the block's tick gate is recomputed: a bank
         // whose only work is a pair at stud must start ticking when they are
         // marked and stop when they are not.
+        chambers.setChanged();
+        return true;
+    }
+
+    /**
+     * <b>Take an occupied chamber out of the bank and hand it to the player.</b>
+     * What a click on a Browse row does: the tab lists horses rather than slots,
+     * so "I want that one" should end with the horse in your pocket, not with you
+     * hunting the right square of the Chambers grid for it.
+     *
+     * <p>Only ever an <b>occupied</b> chamber. An empty one is not a Browse row
+     * in the first place, and the grid is where those are managed; refusing here
+     * as well means a forged packet cannot use this to strip a bank of its
+     * stationery.
+     *
+     * <p>A chamber at stud is <b>brought in first</b> rather than refused. The
+     * mark is a standing instruction to the bank, and a chamber sitting in a
+     * player's inventory still carrying it would resume breeding the moment it
+     * went back into any bank - which is not what taking a horse out means.
+     */
+    private boolean withdrawChamber(Player who, int slot) {
+        ItemStack chamber = chambers.getItem(slot);
+        if (chamber.isEmpty() || StasisChamberItem.snapshotOf(chamber) == null) {
+            return false;
+        }
+        chamber.remove(ModDataComponents.STASIS_AT_STUD.get());
+        if (!who.getInventory().add(chamber)) {
+            // A full inventory drops it at their feet rather than refusing: the
+            // horse is data on an item either way, and a refusal here reads as
+            // the button being broken.
+            who.drop(chamber, false);
+        }
+        chambers.setItem(slot, ItemStack.EMPTY);
+        // Through the container, so the tick gate is recomputed and the bank
+        // republishes: a bank whose only pair at stud just left must stop
+        // ticking, and the Browse roster must lose the row.
         chambers.setChanged();
         return true;
     }

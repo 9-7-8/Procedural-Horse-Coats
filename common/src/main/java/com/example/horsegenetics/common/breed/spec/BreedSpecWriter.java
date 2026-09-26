@@ -79,6 +79,15 @@ public final class BreedSpecWriter {
         if (!breed.biomes().isEmpty()) {
             fields.add(field("biomes", blockArray(quoteAll(breed.biomes()), 2)));
         }
+        // Straight after the biomes, because the two answer one question: a
+        // biome a horse cannot stand up in is a biome the breed does not really
+        // live in. See SpawnGround.
+        if (!breed.spawnGround().isEmpty()) {
+            fields.add(field("spawn_ground", blockArray(quoteAll(breed.spawnGround().floors()), 2)));
+            if (breed.spawnGround().inDark()) {
+                fields.add(field("spawn_in_dark", "true"));
+            }
+        }
         Optional<Breed.PriceRange> price = breed.price();
         if (price.isPresent()) {
             fields.add(field("price", inlineArray(List.of(

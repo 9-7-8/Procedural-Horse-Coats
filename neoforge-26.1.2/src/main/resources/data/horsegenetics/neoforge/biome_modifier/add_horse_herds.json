@@ -41,5 +41,8 @@
   ],
   "weight": 10,
   "min_count": 3,
-  "max_count": 6
+  "max_count": 6,
+  "breed_weight": 2,
+  "breed_min_count": 1,
+  "breed_max_count": 3
 }

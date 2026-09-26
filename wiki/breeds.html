@@ -87,8 +87,22 @@
     file. <code>add_horse_loners.json</code> adds a thin weight-1 1&ndash;1 trickle to every
     overworld surface biome (a strong bias to packs). So horses appear in taiga, jungle,
     badlands, swamp, the snowy biomes and mushroom fields, none of which spawn them in
-    vanilla. A horse still needs grass and light to spawn, so a breed that names a desert
-    or the Nether will rarely or never be seen wild.
+    vanilla.
+</p>
+<p>
+    <strong>Ground and light.</strong> A named biome is not automatically a liveable one:
+    vanilla's animal rule tests the position, wanting a <code>minecraft:grass_block</code>
+    underfoot (the whole of <code>#minecraft:animals_spawnable_on</code> in this SDK) and a raw
+    brightness above 8. That is why a desert or badlands breed is scarce - and why the two
+    Nether breeds, until <code>spawn_ground</code> existed, could not spawn at all: not rarely,
+    never. A breed may now list the blocks its herds stand on, and set
+    <code>spawn_in_dark</code> to waive the light over <em>those</em> blocks; both are additive,
+    so lit grass keeps working for everything. See
+    <a href="breed-format.html#where">the breed file format</a> and
+    <code>HorseSpawnGround</code>. Herds in a biome reached only through a breed are also
+    thinner than herds in the modifier's own listed biomes, which is what keeps a
+    <em>very rare</em> Nether breed rare in a dimension with almost nothing else competing for
+    the creature spawn.
 </p>
 <p>
     <strong>Day and night.</strong> A breed's <code>spawn_time</code> (<code>any</code>,
@@ -1123,7 +1137,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament, a milk or true flight at all, and the first whose biomes may never legitimately found a herd &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, and a harem that should cap at four mares.</p>
+    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament, a milk or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, and a harem that should cap at four mares.</p>
 </div>
 
 <h3 id="nether-breeds-0925">The Netherhorse and the Nightmare (2026-09-25, NOT played)</h3>
@@ -1134,11 +1148,33 @@
     true flight at all</strong>. Almost every check below is the first time that gene has met a
     founder pool, so a failure here is a gene that was only ever exercised by hand.
     <strong>Neither has been seen in a world</strong>, and neither is likely to be met in one by
-    accident: they name the five Nether biomes, and a horse still needs grass and light to spawn,
-    so the <a href="items.html">breed egg</a> is the honest route to the animal and the wild herd
-    is a separate question with a much longer answer.
+    accident. They name the five Nether biomes, and until <code>spawn_ground</code> existed a
+    horse needed grass and light to spawn, so neither could appear in any of them - the
+    <a href="items.html">breed egg</a> was the only route to the animal. Both now carry the
+    eight Nether floor blocks and <code>spawn_in_dark</code>, so <strong>wild herds are newly
+    possible and entirely unobserved</strong>; see the check below.
 </p>
 <ul>
+    <li><strong>A wild Nether herd exists at all.</strong> This is the first thing to look at,
+        because until now the answer was flatly no and every check below it was reachable only
+        through a <a href="items.html">breed egg</a>. Both breeds now carry
+        <code>spawn_ground</code> (the eight Nether floor blocks) and
+        <code>spawn_in_dark</code>, and <code>HorseSpawnGround</code> adds that to
+        <code>EntityType.HORSE</code> as an <code>Operation.OR</code> branch beside vanilla's
+        own rule. <strong>Pass:</strong> walk a freshly generated Nether and find horses on
+        netherrack, nylium, soul sand or basalt, in herds of one to three, each one a Netherhorse
+        or a Nightmare and never a Feral Mixed or an ordinary breed. <strong>Fail looks like</strong>
+        three different things worth telling apart: <em>none at all</em> (the OR branch is not
+        being consulted, or the biome modifier never added the spawn), <em>far too many</em>
+        (<code>breed_weight</code> is not being applied and they are spawning at the listed-biome
+        rate of 3&ndash;6), or <em>ordinary horses down there</em> (the floor permission is being
+        read as a blanket one rather than per-breed). Worth a control: the overworld must be
+        unchanged, and no horse may spawn on stone or gravel in a dark overworld cave.</li>
+    <li><strong>Nothing else gained a floor.</strong> The permission is additive and per-biome,
+        so an overworld breed should be exactly as it was. <code>SpawnGroundTest</code> asserts
+        no overworld biome grants extra floors, but that is a test about the shipped files rather
+        than about the running game. <strong>Fail looks like</strong> animals on netherrack or
+        sand anywhere, which would mean the predicate is answering for vanilla's tag.</li>
     <li><strong>The sclera bands reach the sclera loci.</strong> Both breeds run
         <code>Cha/Cha</code> whites banded on <code>eye_chaos_r</code>, <code>_g</code> and
         <code>_b</code> &mdash; red on the Netherhorse, gold on the Nightmare &mdash; and no breed

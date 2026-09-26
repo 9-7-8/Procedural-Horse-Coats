@@ -921,7 +921,7 @@ public final class TutorialPage {
 
         genetics.add(new Step("A door made of hay",
                 List.of("Build a frame of cobblestone the way you would build a nether portal, light it "
-                                + "with a golden carrot, and stand in it for ten seconds.",
+                                + "with a golden carrot, and stand in it for five seconds.",
                         "On the other side is a corridor of two thousand pens, each holding a mare and "
                                 + "a stallion of one rolled genotype, each signed with the genes they "
                                 + "carry. It is a showroom rather than a place to live - it is there so "

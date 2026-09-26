@@ -145,16 +145,43 @@ public final class HorseLastStandHandler {
         if (!(horse.level() instanceof ServerLevel level)) {
             return;
         }
+        // EVERY REFUSAL IS LOGGED FROM HERE DOWN, and only when the blow would
+        // have been fatal - so the log stays quiet until a horse actually dies,
+        // and then says which of the four reasons it was.
+        //
+        // Added because "last stand didn't fire, it just died instantly" was
+        // reported off a high fall (owner, 2026-09-25) and there was no way to
+        // tell from the log which branch had declined: the save writes an
+        // ActionTrace line on SUCCESS and said nothing on any refusal, so a
+        // failure and a feature that was never reached looked identical. Fall
+        // damage is not in minecraft:bypasses_invulnerability and the arithmetic
+        // checks out on paper, so the next occurrence is what has to say.
+        float blow = event.getNewDamage();
+        boolean wouldBeFatal = LastStand.fatal(blow, horse.getHealth());
         if (!ServerConfig.lastStand() || unsurvivable(event.getSource())) {
+            if (wouldBeFatal) {
+                ActionTrace.log("last-stand", ActionTrace.describeShort(horse) + " was NOT saved from "
+                        + event.getSource().getMsgId() + " (" + blow + " vs " + horse.getHealth()
+                        + " health): " + (ServerConfig.lastStand()
+                                ? "that damage type is exempt"
+                                : "behaviour.last_stand is off in phc/server.toml"));
+            }
             return;
         }
-        float blow = event.getNewDamage();
-        if (!LastStand.fatal(blow, horse.getHealth())) {
+        if (!wouldBeFatal) {
             return;
         }
         HorseCooldownsAttachment cooldowns = horse.getData(ModAttachments.HORSE_COOLDOWNS.get());
         if (!LastStand.armed(cooldowns.last(KEY))) {
-            return;     // spent, and not healed since - this one lands
+            // Spent, and not healed since - this one lands. The commonest
+            // legitimate reason a save "did not fire", and the one that reads as
+            // a bug because the previous save may have been minutes ago.
+            ActionTrace.log("last-stand", ActionTrace.describeShort(horse) + " was NOT saved from "
+                    + event.getSource().getMsgId() + " (" + blow + " vs " + horse.getHealth()
+                    + " health): its save was already spent at tick " + cooldowns.last(KEY)
+                    + " and it has not healed back to "
+                    + ServerConfig.lastStandRearmFraction() + " of maximum since");
+            return;
         }
 
         long now = level.getGameTime();

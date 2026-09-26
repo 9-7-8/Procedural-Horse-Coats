@@ -46,6 +46,8 @@ class BreedSpecParserTest {
                 "no herd block leaves the game's own founding shape");
         assertEquals(BreedSource.ALL, b.sources(), "a breed that names no source gets every source");
         assertTrue(b.biomes().isEmpty());
+        assertEquals(SpawnGround.NONE, b.spawnGround(),
+                "no spawn_ground leaves vanilla's lit-grass rule alone");
         assertTrue(b.price().isEmpty(), "an unpriced breed is priced by HorsePrices, not here");
         assertTrue(b.scores().isEmpty(), "no stats block leaves every axis wild");
         assertTrue(b.genePools().isEmpty());
@@ -173,6 +175,8 @@ class BreedSpecParserTest {
                 {"id": "x", "name": "X", "kind": "magical", "commonness": "rare",
                  "spawn": ["cowboy", "spawn_egg"],
                  "biomes": ["minecraft:plains"],
+                 "spawn_ground": ["minecraft:netherrack", "minecraft:basalt"],
+                 "spawn_in_dark": true,
                  "price": [8, 14],
                  "country": "norway",
                  "description": "A test breed.", "spawn_time": "night",
@@ -194,6 +198,38 @@ class BreedSpecParserTest {
         assertEquals(once.scores(), twice.scores());
         assertEquals(once.genePools(), twice.genePools());
         assertEquals(once.notes(), twice.notes());
+        assertEquals(once.spawnGround(), twice.spawnGround());
+        assertEquals(List.of("minecraft:netherrack", "minecraft:basalt"), twice.spawnGround().floors(),
+                "the floor order is the author's, not a hash order - it is written back to a checked-in file");
+        assertTrue(twice.spawnGround().inDark());
         assertEquals(0.55, twice.bands().forGene("horsegenetics.ednrb").get("cover").lo());
+    }
+
+    // ---- spawn_ground --------------------------------------------------
+
+    @Test
+    void spawnInDarkWithoutAFloorIsRefused() {
+        // It would waive the light over vanilla's grass in every biome the breed
+        // names, which is a much bigger claim than the field looks like making.
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> parse("{\"id\": \"x\", \"name\": \"X\", \"spawn_in_dark\": true}"));
+        assertTrue(e.getMessage().contains("spawn_ground"), e.getMessage());
+    }
+
+    @Test
+    void aFloorMustBeNamespaced() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> parse("{\"id\": \"x\", \"name\": \"X\", \"spawn_ground\": [\"netherrack\"]}"));
+        assertTrue(e.getMessage().contains("minecraft:netherrack"),
+                "the message should suggest the fix: " + e.getMessage());
+    }
+
+    @Test
+    void floorsWithoutTheDarkFlagStillWantLight() {
+        Breed b = parse("{\"id\": \"x\", \"name\": \"X\", \"spawn_ground\": [\"minecraft:sand\"]}");
+        assertFalse(b.spawnGround().inDark(), "the flag is opt-in, not implied by naming a floor");
+        assertTrue(b.spawnGround().allows("minecraft:sand", true));
+        assertFalse(b.spawnGround().allows("minecraft:sand", false),
+                "\"I will stand on sand, in the light\" is a real thing to mean");
     }
 }

@@ -153,10 +153,18 @@ public final class BreedSpawnSettings {
         return copy(original, o.biomes(), o.spawnWeight(), sources, o.spawnTime());
     }
 
+    /**
+     * The breed with the four settings-governed fields replaced and every other
+     * one carried across. {@link Breed} is a positional record, so a component
+     * added there and forgotten here does not fail to compile - it silently
+     * resets to its default for every shipped breed in any world that has a
+     * {@code phc/breed-spawning.toml}, which is every world after first launch.
+     * Anything new on {@link Breed} belongs in this argument list.
+     */
     private static Breed copy(Breed b, List<String> biomes, double weight, Set<BreedSource> sources,
                               SpawnTime time) {
         return new Breed(b.id(), b.name(), b.country(), b.magical(), biomes, weight, sources, b.genePools(),
                 b.scores(), b.bands(), b.notes(), b.price(), b.description(), time, b.strains(), b.magicalVariant(),
-                b.herd());
+                b.herd(), b.spawnGround());
     }
 }

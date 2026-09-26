@@ -23,15 +23,24 @@ import java.util.List;
  * <b>Which horses a player owns</b>, gathered for the browser's <i>My horses</i>
  * table and its <i>Breeding preview</i> pickers.
  *
- * <h2>Two signals, because one is not enough</h2>
- * A {@link HorseRecord} remembers who <i>tamed</i> it, which is the durable
- * answer and survives the horse being unloaded on the far side of the world -
- * but it is not the same as who owns it now, because a transfer paper changes
- * the entity's owner without rewriting history. So a horse is on the roster if
- * <b>either</b> its record names this player as the tamer <b>or</b> the live
- * entity is loaded and owned by them. Neither alone is right, and the union is:
- * the record catches the horse you left at home, the entity catches the horse
- * you were given this morning.
+ * <h2>Owned now, not tamed once</h2>
+ * The test is <b>current ownership</b>, from two sources: the record's
+ * {@code ownerId}, which {@code HorseOwnerTrackingHandler} re-mirrors off the
+ * live entity every ~2s and <i>clears</i> when a horse is untamed, and the live
+ * entity itself when it happens to be loaded. The record catches the horse you
+ * left at home; the entity catches the horse you were given in the last two
+ * seconds, before the mirror caught up.
+ *
+ * <p><b>It used to be {@code tamedBy} instead of {@code ownerId}, and that was
+ * wrong in one direction only: horses never left.</b> {@code tamedBy} is written
+ * once and never rewritten - deliberately, it is a history field - so a horse you
+ * tamed and then signed away on a transfer paper, sold, or released into the
+ * horse realm stayed on your <i>My horses</i> table for ever, as did every
+ * untamed horse you had ever touched. The table is the answer to "what is in my
+ * stable", so a horse that is now wild or now somebody else's does not belong on
+ * it. Nothing is lost by dropping them: {@code tamedBy} is still on the record,
+ * the ancestry database still keeps the dead and the departed, and the allele
+ * collection below is additive and never gives back what it learned.
  *
  * <p>The roster is not a permission check - it reads genotypes and writes
  * nothing - so the filter exists to make the list usable, not to keep a secret.
@@ -60,14 +69,13 @@ public final class HorseRoster {
         if (server == null) {
             return List.of();
         }
-        String username = player.getGameProfile().name();
         List<HorseRecord> mine = new ArrayList<>();
         HorseWhereabouts whereabouts = HorseWhereabouts.get(server);
         for (HorseRecord record : HorseAncestryData.get(server).all()) {
             if (!record.hasGenome()) {
                 continue; // nothing to breed from - see HorseRecord.unassigned
             }
-            if (username.equals(record.tamedBy().orElse(null)) || ownedNow(server, record, player)) {
+            if (ownsNow(record, player) || ownedNow(server, record, player)) {
                 mine.add(record);
             }
         }
@@ -220,8 +228,22 @@ public final class HorseRoster {
     }
 
     /**
+     * <b>Does the record say this player owns it?</b> The durable half, and the
+     * only one that works for a horse nobody has loaded.
+     *
+     * <p>An <b>absent</b> {@code ownerId} means untamed - wild, released, or left
+     * in the realm for somebody else to find - and is not a match for anyone.
+     * That is the whole of the fix: {@code HorseOwnerTrackingHandler} clears the
+     * field rather than leaving the last owner on it, so "no owner" is a real
+     * answer here and not a missing one.
+     */
+    private static boolean ownsNow(HorseRecord record, ServerPlayer player) {
+        return record.ownerId().isPresent() && record.ownerId().get().equals(player.getUUID());
+    }
+
+    /**
      * Is the live entity for this record loaded somewhere and owned by this
-     * player?
+     * player? Covers the gap before the record's mirror next runs.
      */
     private static boolean ownedNow(MinecraftServer server, HorseRecord record, ServerPlayer player) {
         AbstractHorse horse = live(server, record);

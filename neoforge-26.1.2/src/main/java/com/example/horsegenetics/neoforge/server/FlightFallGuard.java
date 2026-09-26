@@ -9,8 +9,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
- * <b>Flying down is not falling.</b> Cancels fall damage on a horse that is actually flying, and on whoever is riding
- * it.
+ * <b>Flying down is not falling.</b> Cancels fall damage on any horse that carries the flying gene, and on whoever is
+ * riding it.
  *
  * <h2>Why this is an event cancel and not a fall-distance reset</h2>
  * It was a reset twice, and it was wrong twice, for the same reason both times: <b>the damage lands before the reset
@@ -26,10 +26,23 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
  * There is no ordering left to get right. Cancelling the damage is the only version that cannot be beaten to it -
  * and it is what {@code bird_boned} does, for exactly this reason.
  *
- * <h2>This is not fall immunity</h2>
- * It holds only while {@link HorseFlight#active} - a horse in true flight with the toggle on, or a glider that is
- * airborne. Cut the flight and the horse falls like any other animal without {@code bird_boned}, which is the
- * owner's design call: a glider that stalls at height dies unless that gene has been bred in too.
+ * <h2>It IS fall immunity, for a horse that flies at all</h2>
+ * The test is {@link HorseFlight.Flight#flies()} - <b>does this horse carry flight</b> - and not
+ * {@link HorseFlight#active}, which is "is it flying this instant".
+ *
+ * <p>It was {@code active} until 2026-09-25, and the owner's report is what changed it:
+ * <i>"using f to land a flying horse can still deal damage"</i>. That is inherent to gating on
+ * {@code active}. Pressing F clears the toggle, so the horse is <b>no longer flying</b> the moment
+ * it starts dropping - the guard switches off at the top of the fall and the ground arrives with
+ * nothing protecting it. The same hole is in gliding: {@code GLIDE} is only active while
+ * {@code getControllingPassenger() != null}, so dismounting in mid-air, or a glider that stalls,
+ * falls unprotected. Every one of those reads as the flight gene failing rather than as a rule.
+ *
+ * <p>So the rule is now the simple one the owner asked for: <b>a horse with the flying gene takes
+ * no fall damage, ever, and neither does anyone riding it.</b> No toggle state, no airborne test,
+ * nothing to get the ordering of. That does overlap {@code bird_boned} for a flier - a flier no
+ * longer needs it - which is a deliberate widening and not an oversight; bird-boned still does its
+ * own job for every horse that cannot fly.
  */
 @EventBusSubscriber
 public final class FlightFallGuard {
@@ -51,14 +64,17 @@ public final class FlightFallGuard {
         }
         Entity hurt = event.getEntity();
         if (hurt instanceof Horse horse) {
-            if (HorseFlight.active(horse)) {
+            // flies(), not active() - see the class note. A horse that carries
+            // flight is immune whether or not it is using it, because the moment
+            // it stops using it is exactly when it is falling.
+            if (HorseFlight.of(horse).flies()) {
                 event.setCanceled(true);
                 horse.resetFallDistance();
             }
             return;
         }
         // The rider: their fall damage is the horse's, handed down.
-        if (hurt.getVehicle() instanceof Horse mount && HorseFlight.active(mount)) {
+        if (hurt.getVehicle() instanceof Horse mount && HorseFlight.of(mount).flies()) {
             event.setCanceled(true);
             hurt.resetFallDistance();
             mount.resetFallDistance();

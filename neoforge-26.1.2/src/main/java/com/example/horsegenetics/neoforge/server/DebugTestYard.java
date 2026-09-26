@@ -1218,8 +1218,10 @@ final class DebugTestYard {
      * the failure this class keeps rediscovering: an instruction ("breed a
      * starburst pair in the yard") that nothing in the world could carry out.
      * A tamed horse with no <i>owner</i> is deliberate and load-bearing - see
-     * {@code DebugPenManager.evacuateTamedHorses}, which takes the player's
-     * horses home on the way out and must not take the scenery with them.
+     * {@code DebugPenManager.countOwnedTamedHorses}, which counts what a leaving
+     * player is about to lose and must not count the scenery. (It used to walk
+     * those horses home; it does not any more, but the owner-vs-scenery line is
+     * the same line and matters for the same reason.)
      *
      * <p>The genotype names <i>only</i> that locus; every other gene falls to
      * its default. So what is standing there is a plain horse that does one

@@ -21,6 +21,24 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-25-twelve-asks.txt">2026-09-25, last &mdash; twelve asks
+        off one bug report, and <strong>four of them were not the bug</strong>. The Nether
+        breeds could never spawn &mdash; not rarely, never: vanilla's animal rule wants a
+        <code>grass_block</code> underfoot and generated Nether terrain has none, so a new
+        <code>spawn_ground</code> / <code>spawn_in_dark</code> pair on the breed file fixes it,
+        with a second quieter herd weight so two <em>very rare</em> breeds do not become the
+        commonest animal down there. Then: an unbound transfer paper binds on first use; empty
+        stasis chambers stack, which turned out to be hiding a five-chambers-become-one item
+        loss; neither portal exit gathers up horses any more; a Browse row hands you the
+        chamber; research books were already working on the cowboy's string <em>by jar entry
+        order</em> and are now HIGHEST by contract; the H menu reads who owns a horse now
+        rather than who tamed it once; the portal dwell drops to five seconds; a ridden horse
+        survives a waystone, which <strong>no Waystones setting could ever have done</strong>
+        because a horse is not a <code>TamableAnimal</code>; a permanent calm switches the
+        temperament off entirely rather than per-player; and flight becomes real fall immunity,
+        because gating on &ldquo;is it flying <em>now</em>&rdquo; switches the guard off at the
+        top of the fall. Last Stand on a high fall is <em>not</em> reproduced &mdash; every
+        branch checked out, so the refusal paths learned to log instead.</li>
     <li><a href="session-log/d2026-09-25-jars-and-a-lifted-field.txt">2026-09-25 &mdash; a
         horse you can see in the jar, and a field lifted out from under itself. Occupied
         stasis chambers get a window and the bank draws the horse behind it; <em>Send
