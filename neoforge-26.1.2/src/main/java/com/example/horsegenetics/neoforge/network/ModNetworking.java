@@ -182,7 +182,7 @@ public final class ModNetworking {
                                     .check(serverPlayer.permissions());
                     if (!allowed) {
                         serverPlayer.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                "The debug horse dimension is for operators. A hay-bale portal "
+                                "The debug horse dimension is for operators. A cobblestone portal "
                                         + "takes you to the horse realm."));
                         return;
                     }

@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.block;
 
+import com.example.horsegenetics.neoforge.server.HorsePortalManager;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
@@ -111,13 +112,15 @@ public class HayPortalBlock extends BaseEntityBlock {
         return true;
     }
 
-    /** Portal blocks, then a hay bale. Anything else, or nothing, means broken. */
+    /** Portal blocks, then the frame. Anything else, or nothing, means broken. */
     private static boolean reachesFrame(LevelReader level, BlockPos from, Direction dir) {
         BlockPos.MutableBlockPos probe = from.mutable();
         for (int i = 0; i < MAX_REACH; i++) {
             probe.move(dir);
             BlockState state = level.getBlockState(probe);
-            if (state.is(Blocks.HAY_BLOCK)) {
+            // What a frame is made of lives in one place - HorsePortalManager.
+            // It is no longer hay, because a horse ate one.
+            if (HorsePortalManager.isFrame(state)) {
                 return true;
             }
             if (!state.is(ModBlocks.HAY_PORTAL.get())) {

@@ -55,7 +55,7 @@ import java.util.Set;
  *       {@code HorseCareHandler}'s healing is gated on standing near water, so a
  *       dry field is a field where a hurt horse never recovers - the mistake the
  *       test yard made for weeks (gap 258).</li>
- *   <li><b>A hay portal</b> at the origin of every
+ *   <li><b>A portal</b> at the origin of every
  *       {@value #PORTAL_GRID_CHUNKS}-chunk cell: {@value #PORTAL_CELLS} by
  *       {@value #PORTAL_CELLS} of them, so wherever you are, an exit is within
  *       about 1 130 blocks.</li>
@@ -65,11 +65,10 @@ import java.util.Set;
  * </ul>
  *
  * <h2>Where a portal comes out</h2>
- * An Overworld portal always arrives at the <i>same</i> one of the hundred, hashed
- * from its own block position. That is what makes the realm usable rather than
- * merely large: the herd you released is where you left it, every time, and two
- * players who built their portals in different places do not land on top of each
- * other. Going home is the reverse - any of the hundred returns you to the portal
+ * <b>Every portal arrives at the middle exit</b>, whoever built it and wherever
+ * it is - see {@link #arrivalCell}. The field is shared and the horses in it are
+ * the point, so everyone landing in one place is what puts the horses in one
+ * place. Going home is the reverse - any of the hundred returns you to the portal
  * you came in by ({@link ModAttachments#REALM_RETURN}), which is why the grid
  * needs no destination wiring of its own.
  *
@@ -93,8 +92,21 @@ public final class HorseRealm {
     /** Blocks on a side. The field is {@code [0, SIZE)} on both X and Z. */
     public static final int SIZE = CHUNKS * 16;
 
-    public static final int BEDROCK_Y = -1;
-    public static final int GROUND_Y = 0;
+    /**
+     * <b>The surface.</b> Everything the realm builds is measured from here, and
+     * <b>{@code data/horsegenetics/dimension/horse_realm.json} has to agree</b>:
+     * its flat layers are air up to {@code BEDROCK_Y - 1}, then one bedrock, then
+     * one grass block. Nothing checks that at build time, and the tell that they
+     * have drifted is a realm that generates with its floor in the wrong place -
+     * which {@code ModGameTests.horse_realm_terrain} does catch, since it asserts
+     * the two blocks by name at these coordinates.
+     *
+     * <p>It was {@code 0} until the lift; see {@link HorseRealmLift}, which is
+     * what carries a world that was generated before this moved. If it moves
+     * again, that class's own recorded offset is what makes a second lift safe.
+     */
+    public static final int GROUND_Y = 64;
+    public static final int BEDROCK_Y = GROUND_Y - 1;
     /** Where a standing entity's feet go. */
     public static final int STAND_Y = GROUND_Y + 1;
 
@@ -110,7 +122,7 @@ public final class HorseRealm {
     // portal is never split across two chunks and can be built from one decoration
     // pass. The plane runs along X at local z = PORTAL_DZ, so you walk into it
     // from north or south.
-    public static final int PORTAL_DX = 6;          // west edge of the hay frame
+    public static final int PORTAL_DX = 6;          // west edge of the frame
     public static final int PORTAL_DZ = 8;          // the plane
     static final int PORTAL_INNER_W = 2;
     static final int PORTAL_INNER_H = 3;
@@ -146,29 +158,37 @@ public final class HorseRealm {
 
     // --- the exit grid ---
 
+    /** The middle cell of the {@value #PORTAL_CELLS}x{@value #PORTAL_CELLS} grid. */
+    public static final int CENTRE_CELL = PORTAL_CELLS / 2;
+
     /**
-     * Which of the {@value #PORTAL_CELLS}x{@value #PORTAL_CELLS} exits an
-     * Overworld portal at {@code from} arrives at. A hash rather than a scaled
-     * coordinate: the Overworld is millions of blocks wide and the realm is
-     * sixteen thousand, so any linear mapping puts every portal anyone will ever
-     * build into one cell. Stable for the life of a world, because it reads only
-     * the block position.
+     * <b>Every portal arrives at the same exit - the one in the middle of the
+     * field.</b>
+     *
+     * <p>This used to hash the Overworld portal's own block position, so each
+     * portal had its own one of the hundred and two players' portals could not
+     * land on top of each other. <b>That was the wrong answer to the wrong
+     * question</b> (owner's call). Landing apart does not keep two players out of
+     * each other's way in a field this size; it keeps their <i>horses</i> apart,
+     * scattered across sixteen thousand blocks in hundred-chunk pockets that never
+     * meet. A shared field whose whole point is that horses live in it wants them
+     * <b>in one place</b> - grazing together, banding together
+     * ({@link HorseRealmHerds}), and findable by whoever comes looking.
+     *
+     * <p>The other ninety-nine exits are still built and still work. They are a
+     * way home for somebody who has walked a long way, which is what the grid was
+     * always genuinely for; they are simply no longer where anyone <i>starts</i>.
+     * Going home is unaffected either way - any exit returns you to the portal you
+     * came in by, from {@link ModAttachments#REALM_RETURN}.
+     *
+     * @param from kept in the signature because the caller has it and a future
+     *             change of heart is then one method deep, not a call-site sweep
      */
     public static ChunkPos arrivalCell(BlockPos from) {
-        long h = mix(BlockPos.asLong(from.getX(), 0, from.getZ()));
-        int gx = (int) Math.floorMod(h, (long) PORTAL_CELLS);
-        int gz = (int) Math.floorMod(mix(h ^ 0x5DEECE66DL), (long) PORTAL_CELLS);
-        return new ChunkPos(gx * PORTAL_GRID_CHUNKS, gz * PORTAL_GRID_CHUNKS);
+        return new ChunkPos(CENTRE_CELL * PORTAL_GRID_CHUNKS, CENTRE_CELL * PORTAL_GRID_CHUNKS);
     }
 
-    /** MurmurHash3's finalizer - even in the low bits, which {@code floorMod} takes. */
-    private static long mix(long z) {
-        z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
-        z = (z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L;
-        return z ^ (z >>> 33);
-    }
-
-    /** True if this chunk carries one of the grid's hay portals. */
+    /** True if this chunk carries one of the grid's portals. */
     public static boolean isPortalChunk(int cx, int cz) {
         return cx >= 0 && cz >= 0 && cx < CHUNKS && cz < CHUNKS
                 && cx % PORTAL_GRID_CHUNKS == 0 && cz % PORTAL_GRID_CHUNKS == 0;
@@ -180,7 +200,7 @@ public final class HorseRealm {
                 && cx % POOL_GRID_CHUNKS == 0 && cz % POOL_GRID_CHUNKS == 0;
     }
 
-    /** The block a portal chunk's hay frame is measured from (its north-west ground corner). */
+    /** The block a portal chunk's frame is measured from (its north-west ground corner). */
     static BlockPos portalAnchor(ChunkPos cell) {
         return new BlockPos(cell.getMinBlockX(), GROUND_Y, cell.getMinBlockZ());
     }
@@ -271,7 +291,7 @@ public final class HorseRealm {
      * The remembered Overworld portal, put back if it has gone. A portal is a
      * player-built thing and a player can mine it, so the way home is the one
      * piece of this feature that can be taken away while you are standing in
-     * another dimension. If the hay frame is still there, this is a no-op and
+     * another dimension. If the frame is still there, this is a no-op and
      * you step out where you stepped in.
      */
     private static BlockPos safeReturn(ServerLevel target, BlockPos remembered) {

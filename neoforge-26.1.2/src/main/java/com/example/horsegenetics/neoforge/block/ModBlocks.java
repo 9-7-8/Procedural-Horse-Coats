@@ -13,10 +13,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * Block registry.
  *
  * <ul>
- *   <li><b>{@code hay_portal}</b> - the hay-bale portal plane. It has no
+ *   <li><b>{@code hay_portal}</b> - the horse portal plane. It has no
  *       {@code BlockItem}: it is never placed by hand, only by
  *       {@link com.example.horsegenetics.neoforge.server.HorsePortalManager}
- *       when a hay frame is lit with a golden carrot.</li>
+ *       when a cobblestone frame is lit with a golden carrot. <b>The id is a
+ *       fossil</b>: the frame was hay until a horse ate one, and renaming a
+ *       registered block rewrites every world that has one placed.</li>
  *   <li><b>the four <code>*_post</code> blocks</b> - one workstation per
  *       equestrian, each behind a POI of the same name. Ordinary placeable
  *       blocks; the POI is what turns an unemployed villager standing next to

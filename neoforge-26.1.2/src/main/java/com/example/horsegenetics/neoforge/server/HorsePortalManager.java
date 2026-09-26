@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Hay-bale portals. A rectangular hay-bale frame (nether-portal rules: inner
+ * Horse portals. A rectangular cobblestone frame (nether-portal rules: inner
  * width 2..21, inner height 3..21, built vertically) lit by right-clicking any
  * of its hay blocks with a <b>golden carrot</b> fills with {@link HayPortalBlock}. Standing
  * in the portal plane long enough teleports you (see {@link PortalEventHandler}
@@ -50,6 +50,42 @@ import java.util.UUID;
  */
 public final class HorsePortalManager {
 
+    /**
+     * <b>What a portal frame is made of.</b> One answer, in one place, because
+     * the question is asked from five: this class's flood fill, the portal
+     * block's own "am I still enclosed" ray, the realm's two frame builders, and
+     * the right-click that lights one. It was a bare
+     * {@code state.is(Blocks.HAY_BLOCK)} in each of them, and that is exactly the
+     * shape of thing that drifts.
+     *
+     * <h2>Why it is not hay any anymore</h2>
+     * <b>A horse ate a portal.</b> A hay bale is food in this mod - the largest
+     * single meal in the game, which a hungry horse will cross a paddock for and
+     * eat <i>out of the world</i> ({@code HayBales}, {@code DietFoods}) - so a
+     * frame built out of hay is a frame a horse standing next to it will
+     * eventually demolish, collapsing the portal and stranding whoever was
+     * through it. That is not a bug in the portal; it is two correct features
+     * meeting, and the fix is for the frame to be something inedible. Cobblestone
+     * is the obvious one: early, infinite, and the block a player has most of.
+     *
+     * <p>The <b>golden carrot still lights it</b>. The carrot was never the part
+     * a horse could eat off the wall, and it is the half of the ritual worth
+     * keeping - see {@code PortalEventHandler}.
+     *
+     * <p>The portal block itself is still registered as {@code hay_portal} and
+     * its class is still {@code HayPortalBlock}. Renaming a block id rewrites
+     * every world that has one placed, and there is one of those with people in
+     * it; the name is wrong and the id is load-bearing, so the id stays.
+     */
+    public static boolean isFrame(BlockState state) {
+        return state.is(Blocks.COBBLESTONE);
+    }
+
+    /** The block the realm's own frames are built out of. Pairs with {@link #isFrame}. */
+    public static BlockState frameBlock() {
+        return Blocks.COBBLESTONE.defaultBlockState();
+    }
+
     private static final int MIN_INNER_W = 2;
     private static final int MAX_INNER_W = 21;
     private static final int MIN_INNER_H = 3;
@@ -59,7 +95,7 @@ public final class HorsePortalManager {
     private record Rect(int constCoord, int minH, int minV, int w, int h) {}
 
     /**
-     * Try to light a hay frame that {@code hayPos} is part of. Returns true and
+     * Try to light a frame that {@code hayPos} is part of. Returns true and
      * fills the interior with portal blocks on success.
      */
     static boolean tryLightPortal(ServerLevel level, BlockPos hayPos) {
@@ -119,8 +155,8 @@ public final class HorsePortalManager {
                     }
                     air.add(n);
                     queue.add(n);
-                } else if (!s.is(Blocks.HAY_BLOCK)) {
-                    return null; // the opening touches something that isn't hay
+                } else if (!isFrame(s)) {
+                    return null; // the opening touches something that isn't frame
                 }
             }
         }

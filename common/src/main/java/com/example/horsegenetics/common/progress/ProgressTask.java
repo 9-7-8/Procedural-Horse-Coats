@@ -326,8 +326,8 @@ public enum ProgressTask {
                     + "than recolour it."),
     CARROT_PERFORMANCE(Group.GENETICS, "Use a performance splice carrot",
             "Speed, jump and height - and only ever upward."),
-    LIGHT_PORTAL(Group.GENETICS, "Light a hay portal",
-            "Build a frame of hay bales like a nether portal and right-click it with a golden carrot."),
+    LIGHT_PORTAL(Group.GENETICS, "Light a horse portal",
+            "Build a frame of cobblestone like a nether portal and right-click it with a golden carrot."),
     ENTER_DIMENSION(Group.GENETICS, "Visit the horse dimension",
             "Stand in the lit portal for ten seconds. Two thousand pens, every one a different genotype, "
                     + "each signed with what it carries - a showroom for genes you have not bred yet."),

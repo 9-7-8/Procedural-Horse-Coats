@@ -90,11 +90,13 @@ public final class PortalEventHandler {
 
         // Neither generated dimension lets you light one. The debug corridor's
         // portals are built with the plot, the realm's are a fixed grid, and in the
-        // realm you cannot place a hay bale to try it with in any case.
+        // realm you cannot place a block to try it with in any case.
         boolean generatedDim = level.dimension().equals(DebugPenManager.DEBUG_LEVEL)
                 || HorseRealm.isRealm(level);
 
-        if (state.is(Blocks.HAY_BLOCK) && held.is(Items.GOLDEN_CARROT) && !generatedDim) {
+        // Cobblestone, not hay - a horse ate a frame. The carrot is unchanged;
+        // see HorsePortalManager.isFrame for the whole of that decision.
+        if (HorsePortalManager.isFrame(state) && held.is(Items.GOLDEN_CARROT) && !generatedDim) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             if (HorsePortalManager.tryLightPortal(level, pos)) {
@@ -103,10 +105,10 @@ public final class PortalEventHandler {
                     held.shrink(1);
                 }
                 level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.6F, 1.6F);
-                player.sendSystemMessage(Component.literal("The hay-bale portal flares open."));
+                player.sendSystemMessage(Component.literal("The portal flares open."));
             } else {
                 player.sendSystemMessage(Component.literal(
-                        "No valid hay-bale frame here - build a vertical rectangle of hay bales "
+                        "No valid frame here - build a vertical rectangle of cobblestone "
                                 + "(inside 2-21 wide, 3-21 tall) and click a frame block with a golden carrot."));
             }
             return;
@@ -202,15 +204,15 @@ public final class PortalEventHandler {
      */
     private static String firstWords(ServerLevel level) {
         if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
-            return "The hay-bale portal grabs hold. Stand still to leave the horse dimension - "
+            return "The portal grabs hold. Stand still to leave the horse dimension - "
                     + "anything you leave behind here is lost forever, but every tamed horse "
                     + "comes back with you.";
         }
         if (HorseRealm.isRealm(level)) {
-            return "The hay-bale portal grabs hold. Stand still to go home - your own tamed horses "
+            return "The portal grabs hold. Stand still to go home - your own tamed horses "
                     + "nearby come with you, and anything you have released stays here, safe.";
         }
-        return "The hay-bale portal grabs hold. Stand still to be pulled through to the horse realm.";
+        return "The portal grabs hold. Stand still to be pulled through to the horse realm.";
     }
 
     private static int ceilDiv(int a, int b) {

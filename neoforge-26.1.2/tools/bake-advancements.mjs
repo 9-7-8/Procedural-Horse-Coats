@@ -218,7 +218,7 @@ const ICON = {
   CARROT_WHITE: "horsegenetics:white_gene_splice_carrot",
   CARROT_MARKING: "horsegenetics:marking_gene_splice_carrot",
   CARROT_PERFORMANCE: "horsegenetics:performance_gene_splice_carrot",
-  LIGHT_PORTAL: "minecraft:hay_block",
+  LIGHT_PORTAL: "minecraft:cobblestone",
   ENTER_DIMENSION: "minecraft:ender_pearl",
   BRING_HORSE_HOME: "minecraft:ender_eye",
 

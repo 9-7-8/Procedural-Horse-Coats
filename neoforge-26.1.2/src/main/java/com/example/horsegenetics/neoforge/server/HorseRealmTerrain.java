@@ -22,7 +22,7 @@ import java.util.Deque;
  * and written when that chunk loads.
  *
  * <h2>Why a chunk-load pass and not a chunk generator</h2>
- * The ground itself - bedrock at Y={@value HorseRealm#BEDROCK_Y}, dirt at
+ * The ground itself - bedrock at Y={@value HorseRealm#BEDROCK_Y}, grass at
  * Y={@value HorseRealm#GROUND_Y} - is three lines of {@code minecraft:flat} in
  * {@code dimension/horse_realm.json}, which is a path this mod already runs on
  * and a codec it does not have to register. What flat cannot do is a fixed grid:
@@ -103,6 +103,10 @@ public final class HorseRealmTerrain {
     }
 
     private static void decorate(ServerLevel realm, ChunkPos at) {
+        // Always first. A chunk built on the old floor would otherwise get a new
+        // portal at the new surface and then have its old one dropped on top of
+        // it when the lift caught up - see HorseRealmLift.
+        HorseRealmLift.liftNow(realm, at);
         if (HorseRealm.isPoolChunk(at.x(), at.z())) {
             pool(realm, at);
         }
@@ -119,7 +123,7 @@ public final class HorseRealmTerrain {
     /**
      * A {@value HorseRealm#POOL_SIZE}x{@value HorseRealm#POOL_SIZE} source-block
      * pool sunk into the surface course at the cell origin. One block deep,
-     * flush with the dirt and bounded by it on all four sides, so it cannot
+     * flush with the grass and bounded by it on all four sides, so it cannot
      * flow, cannot drown a foal, and is not a step up onto anything.
      */
     private static void pool(ServerLevel realm, ChunkPos at) {
@@ -137,7 +141,7 @@ public final class HorseRealmTerrain {
     // --- exits ---
 
     /**
-     * One of the hundred. A hay frame with a {@value HorseRealm#PORTAL_INNER_W}
+     * One of the hundred. A cobblestone frame with a {@value HorseRealm#PORTAL_INNER_W}
      * by {@value HorseRealm#PORTAL_INNER_H} opening already lit, standing on the
      * plane at chunk-local z={@value HorseRealm#PORTAL_DZ} with its axis along X.
      *
@@ -158,8 +162,7 @@ public final class HorseRealmTerrain {
         if (centre.is(ModBlocks.HAY_PORTAL.get())) {
             return;     // already standing
         }
-        BlockState hay = Blocks.HAY_BLOCK.defaultBlockState()
-                .setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState hay = HorsePortalManager.frameBlock();
         for (int dx = 0; dx < w; dx++) {
             for (int dy = 0; dy < h; dy++) {
                 boolean edge = dx == 0 || dx == w - 1 || dy == 0 || dy == h - 1;
@@ -195,13 +198,12 @@ public final class HorseRealmTerrain {
         for (int dx = 0; dx < w; dx++) {
             for (int dy = 0; dy < h; dy++) {
                 BlockState there = level.getBlockState(new BlockPos(x0 + dx, y0 + dy, z));
-                if (!there.isAir() && !there.canBeReplaced() && !there.is(Blocks.HAY_BLOCK)) {
+                if (!there.isAir() && !there.canBeReplaced() && !HorsePortalManager.isFrame(there)) {
                     return false;
                 }
             }
         }
-        BlockState hay = Blocks.HAY_BLOCK.defaultBlockState()
-                .setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState hay = HorsePortalManager.frameBlock();
         BlockState portal = ModBlocks.HAY_PORTAL.get().defaultBlockState()
                 .setValue(HayPortalBlock.AXIS, Direction.Axis.X);
         for (int dx = 0; dx < w; dx++) {

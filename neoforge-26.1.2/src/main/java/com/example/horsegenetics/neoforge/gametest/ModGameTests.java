@@ -6,6 +6,7 @@ import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
+import com.example.horsegenetics.neoforge.server.HorseRealm;
 import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
 import net.minecraft.core.BlockPos;
@@ -705,33 +706,35 @@ public final class ModGameTests {
         // it is asked only of the real dimension; in the harness's overworld it
         // would be asserting something about a plains biome.
         if (theRealThing) {
-            BlockPos onGround = new BlockPos(40, 0, 40);
+            BlockPos onGround = new BlockPos(40, HorseRealm.GROUND_Y, 40);
             assertRealmBlock(helper, realm, onGround.below(), Blocks.BEDROCK, "the floor");
-            assertRealmBlock(helper, realm, onGround, Blocks.DIRT, "the surface");
+            assertRealmBlock(helper, realm, onGround, Blocks.GRASS_BLOCK, "the surface");
         }
 
         // 2. The water. A hurt horse cannot heal away from it, so a field with no
         // pools is a field that quietly sterilises everything in it (gap 258).
-        assertRealmBlock(helper, realm, new BlockPos(0, 0, 0), Blocks.WATER, "the cell's pool");
-        assertRealmBlock(helper, realm, new BlockPos(1, 0, 1), Blocks.WATER, "the cell's pool");
+        assertRealmBlock(helper, realm, new BlockPos(0, HorseRealm.GROUND_Y, 0),
+                Blocks.WATER, "the cell's pool");
+        assertRealmBlock(helper, realm, new BlockPos(1, HorseRealm.GROUND_Y, 1),
+                Blocks.WATER, "the cell's pool");
 
         // 3. The exit, lit. An unlit frame is a hay wall.
-        BlockPos portal = new BlockPos(
-                com.example.horsegenetics.neoforge.server.HorseRealm.PORTAL_DX + 1, 1,
-                com.example.horsegenetics.neoforge.server.HorseRealm.PORTAL_DZ);
+        BlockPos portal = new BlockPos(HorseRealm.PORTAL_DX + 1, HorseRealm.STAND_Y,
+                HorseRealm.PORTAL_DZ);
         if (!realm.getBlockState(portal).is(
                 com.example.horsegenetics.neoforge.block.ModBlocks.HAY_PORTAL.get())) {
             helper.fail("the realm's exit at " + portal.toShortString() + " is "
-                    + realm.getBlockState(portal).getBlock() + ", not a lit hay portal");
+                    + realm.getBlockState(portal).getBlock() + ", not a lit portal");
         }
 
         // 4. The edge. One block outside the field, and tall enough to matter.
         // z = 8 rather than anywhere prettier because it has to lie inside chunk
         // (-1, 0), which is the one decorated above - the wall is built per chunk,
         // so asserting a column the test never asked for reads as a missing wall.
-        assertRealmBlock(helper, realm, new BlockPos(-1, 0, 8), Blocks.BARRIER, "the perimeter");
+        assertRealmBlock(helper, realm, new BlockPos(-1, HorseRealm.GROUND_Y, 8),
+                Blocks.BARRIER, "the perimeter");
         assertRealmBlock(helper, realm,
-                new BlockPos(-1, com.example.horsegenetics.neoforge.server.HorseRealm.WALL_HEIGHT - 1, 8),
+                new BlockPos(-1, HorseRealm.GROUND_Y + HorseRealm.WALL_HEIGHT - 1, 8),
                 Blocks.BARRIER, "the top of the perimeter");
 
         // 5. None of it anywhere else. The debug corridor generates a single air

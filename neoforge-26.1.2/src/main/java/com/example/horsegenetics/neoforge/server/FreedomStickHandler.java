@@ -97,7 +97,7 @@ public final class FreedomStickHandler {
     private static boolean release(ServerLevel level, Horse horse, Player player) {
         if (!HorseRealm.isRealm(level)) {
             refuse(player, "A horse can only be set free in the horse realm. Lead it through a "
-                    + "hay-bale portal first.");
+                    + "portal first.");
             return false;
         }
         if (!HorseRecords.hasRealRecord(horse)) {
@@ -115,49 +115,15 @@ public final class FreedomStickHandler {
         }
 
         HorseRecord record = HorseRecords.of(horse);
-        returnTack(horse, player);
-        horse.ejectPassengers();
-        if (horse.isLeashed()) {
-            horse.dropLeash();
-        }
-        horse.setHealth(horse.getMaxHealth());
-        horse.setTamed(false);
-        horse.setOwner(null);
-        horse.setTemper(0);
-        HorseRecords.setOwner(horse, null);
-        // It stays loaded whatever happens to the mob cap: an Animal does not
-        // despawn in vanilla, but "the horse you left here is still here" is the
-        // promise this whole dimension makes, and it should not rest on that.
-        horse.setPersistenceRequired();
-        // Let it join a band. HerdManager only considers horses carrying the wild
-        // -spawn mark, so without this a released horse would stand alone in a
-        // field of herds - and "horses can form herds" is part of the brief.
-        horse.getPersistentData().putBoolean(BreedSpawnHandler.WILD_SPAWN_KEY, true);
+        // What "wild" means lives in one place now, because walking out of the
+        // realm does it too and with nobody standing there - see HorseRelease.
+        HorseRelease.makeWild(level, horse, player);
 
-        level.playSound(null, horse.blockPosition(), SoundEvents.HORSE_BREATHE, SoundSource.NEUTRAL, 0.8F, 1.1F);
         player.sendSystemMessage(Component.literal(record.displayName()
                         + " is free. Whoever tames it next keeps its name and its pedigree.")
                 .withStyle(ChatFormatting.GREEN));
         ActionTrace.log("realm", ActionTrace.describeShort(horse) + " released by " + player.getGameProfile().name());
         return true;
-    }
-
-    /**
-     * Take the saddle and body armour off and hand them back. Dropped at the
-     * player's feet if their inventory is full, which is the ordinary way this
-     * mod returns something a player is owed.
-     */
-    private static void returnTack(Horse horse, Player player) {
-        for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.SADDLE, EquipmentSlot.BODY}) {
-            ItemStack worn = horse.getItemBySlot(slot);
-            if (worn.isEmpty()) {
-                continue;
-            }
-            horse.setItemSlot(slot, ItemStack.EMPTY);
-            if (!player.getInventory().add(worn.copy())) {
-                player.drop(worn.copy(), false);
-            }
-        }
     }
 
     private static void refuse(Player player, String why) {

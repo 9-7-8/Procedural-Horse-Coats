@@ -565,7 +565,7 @@ public final class DebugTestWorldHandler {
      * hotbar of eggs is a test somebody has to set up first.
      */
     private static void tellYard(ServerPlayer player) {
-        tell(player, Component.literal("The TEST YARD is most of the mod now: hay portal, then "
+        tell(player, Component.literal("The TEST YARD is most of the mod now: portal, then "
                         + "right off the arrival road, and it runs in rows either side of "
                         + "the walkway all the way to the back wall.")
                 .withStyle(ChatFormatting.GOLD));
@@ -648,7 +648,7 @@ public final class DebugTestWorldHandler {
         }
         DebugWorldWatch.censusNow(debug);
         tell(player, Component.literal("Census written to the log - grep [watch]. If it says "
-                        + "nothing is being watched, go through the hay portal first: the yard "
+                        + "nothing is being watched, go through the portal first: the yard "
                         + "registers its pens as it builds them.")
                 .withStyle(ChatFormatting.GOLD));
         return 1;
@@ -813,7 +813,7 @@ public final class DebugTestWorldHandler {
                 tellYard(player);
                 tell(player, Component.literal("BEFORE YOU LEAVE IT RUNNING - four things, in this "
                                 + "order:").withStyle(ChatFormatting.GOLD));
-                tell(player, Component.literal("  1. Go through the hay portal. The yard only "
+                tell(player, Component.literal("  1. Go through the portal. The yard only "
                                 + "exists once you do, and so does the watch.")
                         .withStyle(ChatFormatting.WHITE));
                 tell(player, command("/testkit census", "2. run this - it prints every pen to the "

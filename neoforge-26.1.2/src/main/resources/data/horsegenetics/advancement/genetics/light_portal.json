@@ -10,13 +10,13 @@
   },
   "display": {
     "icon": {
-      "id": "minecraft:hay_block"
+      "id": "minecraft:cobblestone"
     },
     "title": {
-      "text": "Light a hay portal"
+      "text": "Light a horse portal"
     },
     "description": {
-      "text": "Build a frame of hay bales like a nether portal and right-click it with a golden carrot."
+      "text": "Build a frame of cobblestone like a nether portal and right-click it with a golden carrot."
     },
     "frame": "goal"
   }

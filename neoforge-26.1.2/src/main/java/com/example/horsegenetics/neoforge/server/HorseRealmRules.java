@@ -180,6 +180,19 @@ public final class HorseRealmRules {
             return;
         }
         Vec3 at = entity.position();
+        if (at.y < FLOOR_Y) {
+            // Under the floor. Two ways to get here and the fix is the same for
+            // both: a world that has just been lifted (HorseRealmLift moves the
+            // blocks, not the animals standing on them, which may be in an entity
+            // section that has not loaded yet), or the older gap that this
+            // dimension has a bedrock sheet and nothing whatever under it, so
+            // anything that got through it fell forever. A horse cannot die here
+            // and so would have fallen forever quietly.
+            entity.setDeltaMovement(Vec3.ZERO);
+            entity.teleportTo(clamp(at.x), HorseRealm.STAND_Y, clamp(at.z));
+            entity.resetFallDistance();
+            return;
+        }
         if (HorseRealm.inBounds(at.x, at.z)) {
             return;
         }
@@ -188,6 +201,15 @@ public final class HorseRealmRules {
         entity.setDeltaMovement(0.0, Math.min(0.0, entity.getDeltaMovement().y), 0.0);
         entity.teleportTo(x, at.y, z);
     }
+
+    /**
+     * <b>Below this is nowhere.</b> A few blocks under the bedrock, so ordinary
+     * play never brushes it and anything genuinely through the floor is put back
+     * on the grass. Not the bedrock's own level: an entity is briefly inside a
+     * block when it is pushed into one, and a floor set there would fight that
+     * instead of catching a fall.
+     */
+    private static final int FLOOR_Y = HorseRealm.BEDROCK_Y - 4;
 
     private static double clamp(double v) {
         if (v < CLAMP_INSET) {

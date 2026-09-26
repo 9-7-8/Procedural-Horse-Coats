@@ -920,7 +920,7 @@ public final class TutorialPage {
                         ProgressTask.CARROT_MARKING, ProgressTask.CARROT_PERFORMANCE)));
 
         genetics.add(new Step("A door made of hay",
-                List.of("Build a frame of hay bales the way you would build a nether portal, light it "
+                List.of("Build a frame of cobblestone the way you would build a nether portal, light it "
                                 + "with a golden carrot, and stand in it for ten seconds.",
                         "On the other side is a corridor of two thousand pens, each holding a mare and "
                                 + "a stallion of one rolled genotype, each signed with the genes they "
@@ -928,7 +928,7 @@ public final class TutorialPage {
                                 + "you can see what a gene actually looks like on a horse without "
                                 + "breeding for a week to find out.",
                         "Bring your own horses through and they come home with you."),
-                List.of(new ItemStack(Items.HAY_BLOCK), new ItemStack(Items.GOLDEN_CARROT)), Art.NONE,
+                List.of(new ItemStack(Items.COBBLESTONE), new ItemStack(Items.GOLDEN_CARROT)), Art.NONE,
                 List.of(ProgressTask.LIGHT_PORTAL, ProgressTask.ENTER_DIMENSION,
                         ProgressTask.BRING_HORSE_HOME)));
 
