@@ -61,6 +61,68 @@
     </p>
 </div>
 
+<h2 id="v0-5-032">0.5.032 &mdash; a reaper that waits for the crop, and a gate it stops eating</h2>
+
+<p>
+    <strong>The reaper cut a crop because it was a crop, not because it was
+    ready.</strong> Drive one over a field you sowed this morning and you harvested
+    seedlings. It now takes a crop only at its last growth stage, so you can run it over
+    a part-grown field and come back for the rest; grass, flowers, saplings and bushes
+    have no age to be at and are still cut on sight. The same test reads any modded
+    crop's growth stage without that mod knowing anything about this one.
+</p>
+<p>
+    <strong>It also leaves melon and pumpkin stalks alone.</strong> The stem is in the
+    crop tag and the melon is not, so the reaper was tearing out the vine and leaving
+    the fruit &mdash; destroying the one part of the field you were growing it for.
+</p>
+<div class="note warn">
+    <p class="label">It has been destroying your fence gates</p>
+    <p>
+        The reaper's harvest tag pulled in a vanilla tag that contains
+        <code>#minecraft:fence_gates</code>, so <strong>every reaper driven past a fence
+        has been breaking the gates in it</strong> &mdash; since carts shipped, silently,
+        and a broken gate logs nothing and looks like something else did it. Nobody
+        reported this because there is no way to notice it as a reaper problem. It is
+        fixed, and nothing was lost with the tag entry.
+    </p>
+</div>
+<p>
+    <strong>Hitch a supply cart behind a reaper and it gathers the swath as you cut
+    it</strong>, which turns harvesting from two trips into one. Only in that pairing: a
+    cart that hoovered up every drop wherever it went would be one you could not park
+    beside your things. And the thing that was never written down &mdash;
+    <strong>to couple two carts, sit on the front one and press R</strong>. It hitches to
+    whatever you are riding, which is why the lead cart needs a seat, and why the plow and
+    the seed drill can never head a train.
+</p>
+<ul>
+    <li><strong>Carts sinking into hillsides.</strong> A hitched cart had no vertical
+        steering at all, so nothing ever pulled one back up out of the ground. It now
+        climbs out. This treats the symptom &mdash; the burial was reported from play and
+        never reproduced from the code &mdash; so tell us if it still happens.</li>
+    <li><strong>Search and sort on pulling ability.</strong> <code>pull&gt;=6</code> in
+        any horse search box (<code>draft</code> and <code>draught</code> work too), and a
+        sortable <em>Pull</em> column on <em>My horses</em>. It is the fifth body stat and
+        the table was the last place that did not treat it as one.</li>
+    <li><strong>Pin the Genes tab to the genes you care about.</strong> A multi-select
+        list on a horse's Genes tab &mdash; pick Flight, Healer and Waterborn and that is
+        all you see, on every horse. Alphabetical, type a few letters to jump, and
+        <strong>it remembers what you picked</strong> after you close the screen and after
+        you restart.</li>
+    <li><strong>Wandering traders buy horses, at twice what a cowboy pays.</strong> Crouch
+        and click one while leading a horse; an upright click still just shops and quotes
+        a price. He ties it behind him and walks off with it, so <em>you cannot buy it
+        back</em> &mdash; which is the risk the better price is paying for.</li>
+    <li>A horse payout is no longer capped at one stack, and is handed over in as many
+        stacks as it takes. The cap was the shop's constraint applied to the till.</li>
+    <li><strong>An owned horse that dies is kept for an hour</strong>, and an operator can
+        put it back with <code>/horseresurrect</code>. It is the same animal, not a copy:
+        the UUID survives, so every foal's pedigree, stall sign and bound whistle still
+        point at something that exists. The window is counted in <em>your own time
+        online</em>, so logging off before you noticed does not spend it.</li>
+</ul>
+
 <h2 id="v0-5-031">0.5.031 &mdash; the realm's whole field, and a search language</h2>
 
 <p>
