@@ -61,6 +61,7 @@ wiki/breeding.html#my-horses-filter	coding	The filter language: a SQL WHERE clau
 wiki/breeding.html#naming-policy	coding	Whose rule, and where it lives
 wiki/breeding.html#picker-filter	coding	The breeding pickers speak the same language (2026-09-24)
 wiki/breeding.html#play	gameplay	Breeding, as a player sees it
+wiki/breeding.html#query-tab	coding	The Query tab: building one without knowing the language
 wiki/breeding.html#rename	coding	D. Name-tag rename
 wiki/breeding.html#saved-searches	coding	Saved searches
 wiki/breeding.html#science-cycle	science	How horses actually reproduce

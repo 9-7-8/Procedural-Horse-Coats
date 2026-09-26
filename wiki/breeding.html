@@ -1572,6 +1572,50 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     real query to pin it.
 </p>
 
+<h4 id="query-tab">The Query tab: building one without knowing the language</h4>
+<p>
+    A <code>WHERE</code> clause is the right thing for somebody who knows what to type and no
+    help at all to somebody who does not &mdash; the vocabulary is twenty columns plus
+    <em>every gene in the registry</em>, which no help line can list. The browser's
+    <strong>Query</strong> tab is the other way in: a row of dropdowns per clause
+    (<em>join, NOT, column, operator, value</em>), the query written out underneath as you
+    build it, and a <strong>live count of what it would match</strong>. <em>Use it</em> puts it
+    in the table's filter box and takes you there; <em>Save...</em> hands it to the
+    saved-search menu.
+</p>
+<p>
+    The value dropdown knows what the column is: a gene offers <code>hom</code> /
+    <code>het</code> / <code>none</code> / <code>any</code> and its own allele tokens, a breed
+    offers your breeds, <code>sex</code> offers the sexes. That is the point of the tab
+    &mdash; a player who does not know that <code>hom</code> is a word is shown it.
+</p>
+<div class="note">
+    <span class="label">It writes text, and that is deliberate</span>
+    <p>
+        The builder's output is <strong>a string in the same language a player could have
+        typed</strong>, so there is one query language and not two. A structured form only
+        this tab could produce would be a second dialect the saved list, the other screens and
+        <code>HorseQuery</code> would all have to learn &mdash; and a query you could look at,
+        understand, and then not be able to edit by hand. Building and typing make the same
+        artefact.
+    </p>
+    <p>
+        It lives <strong>here and nowhere else</strong>. The stasis bank and the cowboy's
+        counter are vanilla-sized panels with no room for it, so those get the other two ways
+        in: type it, or pick one you saved here. Build in the roomy screen, use anywhere.
+    </p>
+</div>
+<p>
+    <strong>Every dropdown in the mod is alphabetical and takes type-to-jump</strong> &mdash;
+    press a letter and it goes to the first entry starting with it, press the same letter again
+    to walk the Bs, arrows to step, Enter to take it. There are five of them (the gene and
+    allele pickers, the gear slots, the saved searches, the builder's own), they are
+    hand-rolled because vanilla has no anchored list widget, and rather than unify five
+    screens' worth of drawing the <em>behaviour</em> they were all missing is one object
+    (<code>TypeAhead</code>) that each of them holds. A list of three hundred genes is not
+    usable without it.
+</p>
+
 <h4 id="saved-searches">Saved searches</h4>
 <p>
     The <strong>Saved...</strong> button beside any filter box lists the searches you have
@@ -1875,7 +1919,7 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p><strong>Sneak-and-use on a horse opened the vanilla menu instead of this mod's screen for as long as the gesture has existed, and the fix is a server-side cancel nobody has watched work</strong> &mdash; everything else on the information screen is downstream of that click landing, the newly wrapping companion row, the draggable Gear doll and the Offspring tab that now fills itself included; the barn-name box was invisible to every player for seventeen days and is the next thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, a <em>My horses</em> filter whose allele tokens just became case-sensitive so that <code>genotype:E/e</code> could exist at all &mdash; the one change here that will look like a regression if it is wrong &mdash; the same language newly driving the breeding pickers, where the thing to watch is that a clicked row is still the row drawn, a foal-naming rule that is now one policy <em>per player</em> and can only really be judged on a second client and on a birth that happens while its owner is logged out, and a long unplayed browser list. Newest: <strong>every filter box became a SQL <code>WHERE</code> clause</strong> with saved searches shared between them, which is a parser under four screens that were working.</p>
+    <p><strong>Sneak-and-use on a horse opened the vanilla menu instead of this mod's screen for as long as the gesture has existed, and the fix is a server-side cancel nobody has watched work</strong> &mdash; everything else on the information screen is downstream of that click landing, the newly wrapping companion row, the draggable Gear doll and the Offspring tab that now fills itself included; the barn-name box was invisible to every player for seventeen days and is the next thing to look for, since the ownership test behind it now feeds anything else the client gates on &ldquo;is this horse mine&rdquo; &mdash; the greyed-out sold horse below included; under those sit the two horse-menu gestures on a tamed horse as well as a wild one, a mutation detector that could be reading inheritance as novelty, gap 245&rsquo;s missing <code>H/H</code>, a <em>My horses</em> filter whose allele tokens just became case-sensitive so that <code>genotype:E/e</code> could exist at all &mdash; the one change here that will look like a regression if it is wrong &mdash; the same language newly driving the breeding pickers, where the thing to watch is that a clicked row is still the row drawn, a foal-naming rule that is now one policy <em>per player</em> and can only really be judged on a second client and on a birth that happens while its owner is logged out, and a long unplayed browser list. Newest: <strong>every filter box became a SQL <code>WHERE</code> clause</strong> with saved searches shared between them, which is a parser under four screens that were working; a <strong>Query</strong> tab builds one from dropdowns; every dropdown in the mod now sorts and takes type-to-jump; and the <strong>cowboy's filter box, which never once appeared</strong>, does now.</p>
 </div>
 
 <h3 id="verify-query-lang">The WHERE-clause filter language (2026-09-26, NOT played)</h3>
@@ -1901,6 +1945,48 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
         which should still be showing the left-hand side's results.</li>
     <li><strong>The same query in all four boxes</strong> &mdash; My horses, Horse realm, a
         breeding picker, the stasis bank &mdash; should select the same horses.</li>
+</ul>
+
+<h3 id="verify-cowboy-filter">The cowboy's filter box, which never appeared (2026-09-26, NOT played)</h3>
+<p>
+    Reported as &ldquo;just broken and doesn't do anything&rdquo;, and it was: the box was
+    created only if the menu's offers looked like a cowboy's, and <strong>at screen-init there
+    are no offers</strong> &mdash; the open-screen packet and the offer list are two packets in
+    that order. So <code>sellsHorses</code> answered false every time and no box was ever made.
+    It is now built for every merchant screen and shown once the offers arrive.
+</p>
+<ul>
+    <li><strong>Open any cowboy.</strong> A box should appear above the window within a tick or
+        two of the trades filling in. That it appears <em>slightly after</em> the window is
+        expected and is the fix working.</li>
+    <li><strong>Filter down to nothing</strong> and check the box is <em>still there</em>. The
+        cowboy-ness is latched for exactly this reason; if it un-latches, the player is
+        stranded with an empty shop and no way to clear the filter.</li>
+    <li><strong>It speaks the new language now.</strong> <code>galaxy = any</code> should work
+        at an arcane dealer, and <code>generation &gt; 2</code> at any cowboy &mdash; neither
+        meant anything here before, because the counter had its own smaller engine.
+        <code>HorseSearch</code> is deleted; if some old query stops working, that is why.</li>
+    <li><strong>Buy something while filtered.</strong> The one that would be expensive to get
+        wrong: the row you click must be the horse you get. The server rebuilds and resends the
+        list so indices cannot drift, and this is the check that proves it.</li>
+    <li>Open a <em>non</em>-cowboy villager and confirm no box appears.</li>
+</ul>
+
+<h3 id="verify-query-tab">The Query tab and the dropdowns (2026-09-26, NOT played)</h3>
+<ul>
+    <li>Build your example &mdash; a gene <code>= hom</code>, then a second clause
+        <code>IN (het, hom)</code> &mdash; and check the written query underneath matches what
+        you meant, and the match count moves as you build.</li>
+    <li><strong>Use it</strong> should land the query in <em>My horses</em> and switch there;
+        <strong>Save...</strong> should open the naming field.</li>
+    <li><strong>Type-ahead in all five dropdowns</strong>: gene picker, allele picker, gear
+        slot, saved searches, and the builder's column/value menus. A letter jumps, the same
+        letter again walks, arrows step, Enter takes. The gene list is the one that matters
+        &mdash; three hundred entries is unusable without it.</li>
+    <li>Check a letter typed at an open dropdown does not <em>also</em> reach the screen behind
+        it (changing tab, closing the window).</li>
+    <li>The builder's state is deliberately kept when the browser closes; check a half-built
+        query is still there when you reopen.</li>
 </ul>
 
 <h3 id="verify-saved-searches">Saved searches (2026-09-26, NOT played)</h3>
