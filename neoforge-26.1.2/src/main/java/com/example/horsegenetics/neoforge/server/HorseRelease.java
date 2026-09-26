@@ -1,5 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -7,6 +9,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -79,6 +82,55 @@ public final class HorseRelease {
         horse.getPersistentData().putBoolean(BreedSpawnHandler.WILD_SPAWN_KEY, true);
         level.playSound(null, horse.blockPosition(), SoundEvents.HORSE_BREATHE,
                 SoundSource.NEUTRAL, 0.8F, 1.1F);
+        // Last, so the fee lands after everything it is a fee for - and, since
+        // both callers announce the release themselves immediately after this
+        // returns, one line ahead of the sentence it belongs to. Close enough
+        // to read as one thing; putting it first read as being paid for
+        // something that had not happened yet.
+        pay(player);
+    }
+
+    /**
+     * <b>A flat fee for turning a horse out</b>, {@code realm.release_emeralds}
+     * a head, whatever the horse is. (Owner, 2026-09-26.)
+     *
+     * <h2>Why flat</h2>
+     * The realm's proposition is that it takes <i>anybody's surplus</i>. A fee
+     * that read the horse would be the realm forming an opinion about which
+     * surplus was worth having, which is both a value judgement on a horse
+     * (&sect;4 of the philosophy) and the wrong incentive - it would pay most for
+     * exactly the horses a player has least reason to be rid of. Two emeralds
+     * for a horse, any horse, is the same offer the field itself makes.
+     *
+     * <h2>Why here, and why only sometimes</h2>
+     * This is the one method every release funnels through, so the fee cannot be
+     * missed by a path somebody adds later. But it pays only when there is
+     * somebody to pay: {@code HorseRealmFeral} passes {@code null} on purpose,
+     * because it fires precisely when a horse's owner has <i>gone</i> - walked
+     * out, logged off, or died - and a horse you abandoned is not a horse you
+     * sold. That asymmetry is also the only thing stopping the fee from being
+     * collectable by leaving horses lying about.
+     *
+     * <p>Emeralds go to the inventory and to the floor if it is full, the same
+     * give-or-drop the tack above uses. Never deleted.
+     *
+     * <p><b>Not verified in-game.</b>
+     */
+    private static void pay(@Nullable Player player) {
+        int fee = ServerConfig.realmReleaseEmeralds();
+        if (player == null || fee <= 0) {
+            return;
+        }
+        ItemStack emeralds = new ItemStack(Items.EMERALD, fee);
+        if (!player.getInventory().add(emeralds.copy())) {
+            player.drop(emeralds.copy(), false);
+        }
+        // Deliberately does not name the horse: both callers have just said its
+        // name in their own line, and this is the second half of that sentence,
+        // not a second sentence about the same thing.
+        player.sendSystemMessage(Component.literal(
+                "+" + fee + (fee == 1 ? " emerald" : " emeralds") + " for the trouble.")
+                .withStyle(net.minecraft.ChatFormatting.GREEN));
     }
 
     /**

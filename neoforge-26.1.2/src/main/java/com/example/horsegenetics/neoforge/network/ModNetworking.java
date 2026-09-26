@@ -572,6 +572,9 @@ public final class ModNetworking {
      * opens on <i>any</i> horse - a stranger's, a cowboy's string - so "near
      * enough to read" stopped being "yours to tack up" the day that landed; see
      * {@code handleSetBarnName}, which guards the same gap.
+     *
+     * <p>The payload names an inventory index rather than meaning "the hand";
+     * see {@link TackSlotPayload} for why that changed.
      */
     private static void handleTackSlot(TackSlotPayload payload, net.minecraft.world.entity.player.Player player) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
@@ -589,17 +592,32 @@ public final class ModNetworking {
             return;
         }
 
-        ItemStack held = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
+        // The index names a stack in the player's OWN inventory, and is checked
+        // here rather than trusted: the picker that produced it ran on the
+        // client, over a container the server is the authority on, and against a
+        // tag the client could be a reload behind on. A bad index or an item
+        // this slot does not take is simply dropped - there is nothing to tell
+        // the player, because no honest client can produce one.
+        int index = payload.inventorySlot();
+        ItemStack putOn = ItemStack.EMPTY;
+        if (index != TackSlotPayload.TAKE_OFF) {
+            if (index < 0 || index >= serverPlayer.getInventory().getContainerSize()) {
+                return;
+            }
+            putOn = serverPlayer.getInventory().getItem(index);
+            if (!tack.accepts(horse, putOn)) {
+                return;
+            }
+        }
         ItemStack worn = tack.on(horse);
-        boolean putting = tack.accepts(horse, held);
-        if (!putting && worn.isEmpty()) {
+        if (putOn.isEmpty() && worn.isEmpty()) {
             return; // nothing to take off and nothing that would go on
         }
 
         // One call for both backings: the saddle and the barding are real
         // equipment slots, the other seventeen are keys in the HORSE_GEAR
         // attachment, and HorseTackSlot.set is the only place that knows which.
-        tack.set(horse, putting ? held.split(1) : ItemStack.EMPTY);
+        tack.set(horse, putOn.isEmpty() ? ItemStack.EMPTY : putOn.split(1));
         if (!worn.isEmpty()) {
             // Back to the player, and on the floor at their feet if there is no
             // room - never deleted.

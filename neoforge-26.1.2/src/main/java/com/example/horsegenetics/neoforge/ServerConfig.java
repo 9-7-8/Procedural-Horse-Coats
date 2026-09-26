@@ -232,6 +232,20 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.IntValue REALM_BREEDING_RATE;
 
+    /**
+     * <b>{@code realm.release_emeralds}</b> - what turning a horse out into the
+     * realm pays. Read through {@link #realmReleaseEmeralds()}, and paid by
+     * {@code server/HorseRelease}, never here.
+     *
+     * <p>It is a config value rather than a constant because it is the one
+     * number in the mod that makes horses into income, and the loop it opens -
+     * breed, tame, turn out, repeat - is one a settled paddock runs on its own.
+     * Whether 2 a head is generous or nothing depends entirely on how fast that
+     * paddock is, which is a question about somebody's world and not one this
+     * mod can answer. 0 turns it off and gives back the old behaviour exactly.
+     */
+    public static final ModConfigSpec.IntValue REALM_RELEASE_EMERALDS;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -309,6 +323,16 @@ public final class ServerConfig {
                         "an empty field is a still one.",
                         "The horse realm only. The Overworld, and the F6 debug dimension, ignore it.")
                 .defineInRange("realm.breeding_rate_percent", 25, 0, 100);
+        REALM_RELEASE_EMERALDS = builder
+                .comment("Emeralds paid for turning one horse out into the horse realm. (default: 2)",
+                        "Flat, per horse, whatever the horse is - the realm takes anybody's surplus",
+                        "and does not ask what it is worth.",
+                        "Paid by the freedom stick and the turnout ticket, which are the two ways a",
+                        "player is standing there to be paid. A horse you simply walk away from in",
+                        "the realm still goes wild on its own and pays nothing: by the time that",
+                        "fires you have left the dimension and there is nobody to hand emeralds to.",
+                        "0 turns the payment off.")
+                .defineInRange("realm.release_emeralds", 2, 0, 64);
         NEARBY_HORSE_CAP = builder
                 .comment("How many other horses may be within 16 blocks of a mare and still let a",
                         "stallion cover her. (default: 50)",
@@ -571,6 +595,15 @@ public final class ServerConfig {
             return REALM_BREEDING_RATE.get();
         } catch (IllegalStateException notLoaded) {
             return 25;
+        }
+    }
+
+    /** {@code realm.release_emeralds}, safely. */
+    public static int realmReleaseEmeralds() {
+        try {
+            return REALM_RELEASE_EMERALDS.get();
+        } catch (IllegalStateException notLoaded) {
+            return 2;
         }
     }
 

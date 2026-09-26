@@ -604,9 +604,17 @@ public final class HorseInfoScreen extends Screen {
     }
 
     /**
-     * A click on a tack slot. One click swaps that slot with what is in your
-     * hand - the server decides which direction and refuses anything that is
-     * not yours; see {@code ModNetworking.handleTackSlot}.
+     * A click on a tack slot opens {@linkplain #openGearPicker the picker} for
+     * it - what you are carrying that would go there, and what is there now.
+     *
+     * <p>It used to send the swap straight away, against whatever was in your
+     * hand. That is one gesture fewer and it was the wrong one: a slot whose tag
+     * is empty refuses everything, and refusing silently is indistinguishable
+     * from a broken screen. Nineteen slots, most of which currently take nothing
+     * at all, cannot be discovered by holding items up to them one at a time.
+     * (Owner, 2026-09-26.) The picker answers the question the click was really
+     * asking - <i>what goes here?</i> - and answers it even when the answer is
+     * nothing.
      */
     private boolean clickTack(double mx, double my) {
         if (horse == null || !ownsHorse() || my < pageTop() - 2 || my > panelBottom() - PAD) {
@@ -617,12 +625,179 @@ public final class HorseInfoScreen extends Screen {
                 if (!hit.slot().usableOn(horse)) {
                     return true; // a foal's saddle slot: a real slot, and not yet usable
                 }
-                ClientPacketDistributor.sendToServer(
-                        new TackSlotPayload(horse.getId(), hit.slot().name()));
+                openGearPicker(hit.slot(), hit.x(), hit.y() + SLOT);
                 return true;
             }
         }
         return false;
+    }
+
+    // ------------------------------------------------------------------
+    // The gear picker
+    //
+    // Deliberately the same widget as HorseBrowserScreen's gene dropdown, down
+    // to the field names: an anchored list, height from its own contents, no
+    // separate "is it open" flag (a null slot is closed), drawn last so it
+    // covers what it is anchored over, and eating the next click wherever that
+    // click lands. Two dropdowns in one mod that behave differently is worse
+    // than either of them being slightly wrong.
+    //
+    // It is NOT the inventory panel on this page's roadmap tab. That is a real
+    // AbstractContainerMenu with thirty-six slots and a carried stack, it is
+    // how gear should eventually move, and the thing it warns against is
+    // drawing a picture of an inventory and keeping click-to-toggle behind it.
+    // A per-slot list of what fits is not that picture - it is a menu, it says
+    // something the grid could not (which of these items this slot accepts),
+    // and none of it is in the way when the container menu is built.
+    // ------------------------------------------------------------------
+
+    private static final int PICK_ROW_H = 18;
+    private static final int PICK_VISIBLE = 8;
+    private static final int PICK_W = 168;
+    private static final int PICK_BORDER = 0xFF20242E;
+    private static final int PICK_FILL = 0xFF12141A;
+    private static final int PICK_HOVER = 0xFF2E3542;
+
+    /** Which slot's picker is open, or null for none. */
+    private @Nullable HorseTackSlot pickerSlot;
+    private int pickerX;
+    private int pickerY;
+    private int pickerScroll;
+
+    /**
+     * One line of the picker. {@code index} is the player inventory slot the
+     * stack came from, or {@link TackSlotPayload#TAKE_OFF} for the take-off row
+     * at the top; {@code stack} is what to draw beside the label.
+     */
+    private record PickRow(int index, ItemStack stack, String label) {
+    }
+
+    private void openGearPicker(HorseTackSlot slot, int anchorX, int anchorY) {
+        pickerSlot = slot;
+        pickerScroll = 0;
+        pickerX = Math.max(4, Math.min(anchorX, this.width - PICK_W - 4));
+        int h = Math.min(PICK_VISIBLE, Math.max(1, pickerRows().size())) * PICK_ROW_H;
+        pickerY = Math.max(4, Math.min(anchorY, this.height - h - 4));
+    }
+
+    private void closeGearPicker() {
+        pickerSlot = null;
+    }
+
+    /**
+     * What this slot could be given, built fresh each time it is asked rather
+     * than cached: the player's inventory changes underneath an open picker -
+     * another screen, a hopper, a mob picking something up - and a list built
+     * once would offer an index that has since become something else. The server
+     * re-checks the index anyway, so a stale row is refused rather than
+     * mis-equipped, but it should not be offered in the first place.
+     *
+     * <p>Stacks of the same item are <b>not</b> merged. One row per inventory
+     * slot keeps the index the row's own property, which is the whole reason the
+     * click has anything to send; and two stacks of the same item are rarely
+     * identical anyway once a name or an enchantment is on one of them.
+     */
+    private List<PickRow> pickerRows() {
+        List<PickRow> rows = new ArrayList<>();
+        if (pickerSlot == null || horse == null) {
+            return rows;
+        }
+        ItemStack worn = pickerSlot.on(horse);
+        if (!worn.isEmpty()) {
+            rows.add(new PickRow(TackSlotPayload.TAKE_OFF, worn,
+                    "Take off " + worn.getHoverName().getString()));
+        }
+        var player = Minecraft.getInstance().player;
+        if (player == null) {
+            return rows;
+        }
+        var inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (pickerSlot.accepts(horse, stack)) {
+                rows.add(new PickRow(i, stack, stack.getHoverName().getString()));
+            }
+        }
+        return rows;
+    }
+
+    /**
+     * Drawn outside the content scissor and after the scrollbar, so it may hang
+     * below the panel and over anything else on the page.
+     */
+    private void drawGearPicker(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (pickerSlot == null) {
+            return;
+        }
+        List<PickRow> rows = pickerRows();
+        int shown = Math.min(PICK_VISIBLE, Math.max(1, rows.size()));
+        int h = shown * PICK_ROW_H;
+        g.fill(pickerX - 1, pickerY - 1, pickerX + PICK_W + 1, pickerY + h + 1, PICK_BORDER);
+        g.fill(pickerX, pickerY, pickerX + PICK_W, pickerY + h, PICK_FILL);
+
+        if (rows.isEmpty()) {
+            // The useful empty state. "Nothing fits" and "this slot takes
+            // nothing at all yet" are different sentences and the player cannot
+            // tell them apart by looking at the horse.
+            drawFitted(g, hasAnyGearFor(pickerSlot)
+                            ? "nothing you are carrying fits here"
+                            : "nothing takes this slot yet",
+                    pickerX + 4, pickerY + (PICK_ROW_H - this.font.lineHeight) / 2,
+                    PICK_W - 8, DIM_TEXT);
+            return;
+        }
+
+        for (int i = 0; i < shown && pickerScroll + i < rows.size(); i++) {
+            PickRow row = rows.get(pickerScroll + i);
+            int ry = pickerY + i * PICK_ROW_H;
+            if (mouseX >= pickerX && mouseX < pickerX + PICK_W
+                    && mouseY >= ry && mouseY < ry + PICK_ROW_H) {
+                g.fill(pickerX, ry, pickerX + PICK_W, ry + PICK_ROW_H, PICK_HOVER);
+            }
+            g.item(row.stack(), pickerX + 1, ry + 1);
+            g.itemDecorations(this.font, row.stack(), pickerX + 1, ry + 1);
+            drawFitted(g, row.label(), pickerX + 21,
+                    ry + (PICK_ROW_H - this.font.lineHeight) / 2, PICK_W - 25,
+                    row.index() == TackSlotPayload.TAKE_OFF ? LABEL : VALUE);
+        }
+        if (rows.size() > PICK_VISIBLE) {
+            drawFitted(g, "scroll for " + (rows.size() - PICK_VISIBLE) + " more",
+                    pickerX + 4, pickerY + h + 2, PICK_W - 8, DIM_TEXT);
+        }
+    }
+
+    /**
+     * Is there anything in the game at all that this slot takes? Most of the
+     * nineteen tags are still empty, so "nothing you are carrying fits here"
+     * would be a half-truth that sends a player looking for an item that has
+     * not been made. The saddle and the barding are vanilla slots with no tag
+     * of their own and always have something that fits.
+     */
+    private boolean hasAnyGearFor(HorseTackSlot slot) {
+        return slot.isVanilla()
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        .getTagOrEmpty(slot.tag()).iterator().hasNext();
+    }
+
+    private boolean pickFromGearPicker(double mx, double my) {
+        List<PickRow> rows = pickerRows();
+        int shown = Math.min(PICK_VISIBLE, Math.max(1, rows.size()));
+        int picked = -1;
+        if (mx >= pickerX && mx < pickerX + PICK_W
+                && my >= pickerY && my < pickerY + shown * PICK_ROW_H) {
+            int hit = pickerScroll + (int) ((my - pickerY) / PICK_ROW_H);
+            if (hit >= 0 && hit < rows.size()) {
+                picked = hit;
+            }
+        }
+        HorseTackSlot slot = pickerSlot;
+        closeGearPicker();
+        if (picked < 0 || slot == null || horse == null) {
+            return true;    // clicked away, or clicked the empty-state line
+        }
+        ClientPacketDistributor.sendToServer(new TackSlotPayload(
+                horse.getId(), slot.name(), rows.get(picked).index()));
+        return true;
     }
 
     private void submitBarnName() {
@@ -796,6 +971,12 @@ public final class HorseInfoScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        // Before everything, including the tab strip: an open picker eats the
+        // next click wherever it lands, so clicking away dismisses it rather
+        // than dismissing it and doing something else as well.
+        if (pickerSlot != null) {
+            return pickFromGearPicker(event.x(), event.y());
+        }
         Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
             select(hit);
@@ -859,6 +1040,7 @@ public final class HorseInfoScreen extends Screen {
             tab = hit;
             lastTab = hit;
             scroll = 0f;
+            closeGearPicker();  // it is anchored to a slot that is no longer drawn
             applyTabWidgets();
         }
     }
@@ -888,6 +1070,13 @@ public final class HorseInfoScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        // An open picker owns the wheel. Scrolling the page under it would slide
+        // the slot out from under a list that is anchored to where it was.
+        if (pickerSlot != null) {
+            int max = Math.max(0, pickerRows().size() - PICK_VISIBLE);
+            pickerScroll = Math.max(0, Math.min(pickerScroll - (int) sy, max));
+            return true;
+        }
         if (maxScroll > 0f) {
             scroll = Math.max(0f, Math.min(maxScroll, scroll - (float) sy * 18f));
             return true;
@@ -957,6 +1146,9 @@ public final class HorseInfoScreen extends Screen {
         maxScroll = Math.max(0f, contentH - (bottom - top));
         scroll = Math.max(0f, Math.min(scroll, maxScroll));
         drawScrollbar(g, pr, top, bottom, contentH);
+        // Outside the scissor and last of the page's own drawing, so it may hang
+        // below a slot near the bottom edge and cover whatever it is over.
+        drawGearPicker(g, mouseX, mouseY);
 
         super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
@@ -1345,7 +1537,8 @@ public final class HorseInfoScreen extends Screen {
                     + "horse should not be carrying, so every slot is closed until it grows up.",
                     DESC, 0);
         } else {
-            c.wrapped("Click a slot to put on what you are holding, or to take off what is there.",
+            c.wrapped("Click a slot to see what you are carrying that would go in it, "
+                            + "and what is in it now.",
                     DESC, 0);
         }
 
