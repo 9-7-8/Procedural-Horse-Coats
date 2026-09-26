@@ -121,9 +121,11 @@ The floor moved to 64, and the rules had to bend once
     again, and it means there is no migration marker that can drift from the blocks it
     claims to describe.
 
-    Source and destination ranges do not overlap, because the offset is larger than
-    anything the realm builds, so one ascending pass is safe. Worth re-checking if the
-    floor ever moves by a smaller step.
+    The first version of the copy walked ASCENDING, with a comment claiming the
+    source and destination ranges do not overlap. They do - source -16..63,
+    destination 48..127 - and it shipped in 0.5.028 before that was caught. See
+    the addendum at the foot of this file; it is a memmove and the direction is
+    the whole of its correctness.
 
 The horses are not moved by the lift, and that found an older bug
 
@@ -185,3 +187,79 @@ WHAT WAS NOT DONE, DELIBERATELY
     terrain, and the frame change will collapse portals that are currently standing in
     hay frames - both are on the realm page's Verification tab, and the lift is the
     first thing on it.
+
+
+ADDENDUM - THE FIELD BECOMES A CIRCLE THAT GROWS
+
+    Asked after the release was already cut, and folded back into it rather than
+    given a number of its own (owner's call).
+
+    The brief: start at a 100-chunk radius circle, grow with the horse
+    population at one horse per ten square blocks, never shrink; move the portal
+    to 0,0, point every overworld portal at it, and move all living entities
+    near it.
+
+The density number did not survive contact with a calculator
+
+    A 100-chunk radius is 1600 blocks, so the starting circle is pi*1600^2 =
+    8,042,477 square blocks. At one horse per ten blocks that is room for
+    804,248 horses - a threshold no server reaches, which would have made the
+    whole growth mechanism dead code on arrival. Even 100,000 horses only needs
+    a 564-block radius, well inside the start.
+
+    Put to the owner as three thresholds side by side; they took ten CHUNKS per
+    horse (2,560 blocks each), which puts the first growth at 3,141 horses.
+    That is the number this feature lives or dies on and it is worth writing
+    down: the brief was internally inconsistent, not wrong, and the useful thing
+    was showing the arithmetic rather than picking one reading and building it.
+
+Three things that are easy to miss, and one that is not
+
+    GROWING MOVES THE WALL, AND THE OLD ONE IS STILL THERE. A grown field leaves
+    its previous ring of barriers standing inside itself - an invisible fence
+    across the middle of somebody's paddock. HorseRealmSize keeps a list of
+    retired radii and the terrain pass takes those rings down as the chunks
+    load. Nothing in the brief mentioned this and it is the defect that would
+    have been hardest to diagnose from a bug report.
+
+    THE WALL IS THE EIGHT-NEIGHBOUR BOUNDARY. A ring at d == r, or a
+    four-neighbour boundary, has corner gaps that an entity moving continuously
+    walks straight through. The clamp in HorseRealmRules should be the second
+    line of defence, not the first.
+
+    THE OLD SQUARE'S WALL RUNS THROUGH THE NEW FIELD. The realm was a
+    16,000-block square with its CORNER at the origin; the circle is CENTRED on
+    it. So two of the old four walls, along x = -1 and z = -1, are now inside
+    the new circle a few steps from the exit. That is the one piece of old
+    terrain a player would actually walk into, and eraseOldField clears it.
+
+    THE ANIMALS NEED NO MIGRATION PASS. keepInsideTheField already runs on
+    everything that ticks in the realm; it now separates "just outside the wall"
+    (leaning on it - put back against it) from "far outside" (stranded where the
+    field used to be - carried to the exit). A horse in an unloaded chunk is
+    handled the moment anything loads it. Same trick as HorseRealmFeral, third
+    time this session.
+
+The census cannot use the thing that exists for this
+
+    HorseWhereabouts is the mod's answer to "where is every horse" and it only
+    records TAMED horses - and the realm's population is precisely the ones that
+    are not. So HorseRealmCensus keeps its own set of UUIDs, maintained by the
+    horses themselves: ticking in the realm adds you, ticking anywhere else
+    removes you. A horse in an unloaded chunk keeps its place, which is the
+    behaviour that matters - most of the field is unloaded most of the time, and
+    a census that counted only what it could see would shrink whenever a player
+    logged off and size the field for nobody.
+
+    Known drift, in the safe direction: a horse carried out inside a stasis
+    chamber never ticks anywhere again and stays counted.
+
+Modelled before shipping, because of what happened three hours earlier
+
+    The lift bug earlier in this session shipped because a confident paragraph
+    about overlapping ranges went unchecked. So the circle's geometry and size
+    rule were modelled outside Minecraft first: monotonicity, the density floor,
+    the density promise at 200,000 horses, wall watertightness at four radii,
+    and that no wall column falls in a chunk the terrain pass would skip. All
+    green before the first compile. That is the lesson from the morning applied
+    the same afternoon.

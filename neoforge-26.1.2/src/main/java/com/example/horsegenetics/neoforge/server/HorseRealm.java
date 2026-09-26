@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,9 +58,8 @@ import java.util.Set;
  *       dry field is a field where a hurt horse never recovers - the mistake the
  *       test yard made for weeks (gap 258).</li>
  *   <li><b>A portal</b> at the origin of every
- *       {@value #PORTAL_GRID_CHUNKS}-chunk cell: {@value #PORTAL_CELLS} by
- *       {@value #PORTAL_CELLS} of them, so wherever you are, an exit is within
- *       about 1 130 blocks.</li>
+ *       <b>one exit, at the origin</b>, which every Overworld portal arrives
+ *       at - so the horses are all within walking distance of one place.</li>
  *   <li><b>An invisible barrier</b> one block outside each edge. Barrier blocks
  *       for the walking case, and {@link HorseRealmRules} clamps anything that
  *       gets over them.</li>
@@ -87,10 +88,24 @@ public final class HorseRealm {
     public static final ResourceKey<Level> REALM_LEVEL = ResourceKey.create(
             Registries.DIMENSION, Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "horse_realm"));
 
-    /** Chunks on a side. Chunk coordinates run 0..{@code CHUNKS - 1}. */
-    public static final int CHUNKS = 1000;
-    /** Blocks on a side. The field is {@code [0, SIZE)} on both X and Z. */
-    public static final int SIZE = CHUNKS * 16;
+    /**
+     * <b>The field is a circle centred on the origin, and it grows.</b> How big
+     * it is right now lives in {@link HorseRealmSize}, because it is a fact about
+     * one world rather than a constant - see that class for the density rule and
+     * for why it may never shrink.
+     *
+     * <p>It used to be a {@code 1000}-chunk square with its origin corner at
+     * {@code (0, 0)}, which is why anything that has to read a saved position
+     * from before the reshape is reading coordinates that are now a long way
+     * outside the field. {@code HorseRealmRules} is what carries those home.
+     */
+    public static int radius(MinecraftServer server) {
+        return HorseRealmSize.get(server).radius();
+    }
+
+    /** The old square field, kept only so the reshape knows what to clean up. */
+    public static final int OLD_CHUNKS = 1000;
+    public static final int OLD_SIZE = OLD_CHUNKS * 16;
 
     /**
      * <b>The surface.</b> Everything the realm builds is measured from here, and
@@ -110,8 +125,6 @@ public final class HorseRealm {
     /** Where a standing entity's feet go. */
     public static final int STAND_Y = GROUND_Y + 1;
 
-    public static final int PORTAL_GRID_CHUNKS = 100;
-    public static final int PORTAL_CELLS = CHUNKS / PORTAL_GRID_CHUNKS;
     public static final int POOL_GRID_CHUNKS = 5;
     public static final int POOL_SIZE = 2;
 
@@ -152,14 +165,41 @@ public final class HorseRealm {
         return entity != null && isRealm(entity.level());
     }
 
-    public static boolean inBounds(double x, double z) {
-        return x >= 0.0 && x < SIZE && z >= 0.0 && z < SIZE;
+    /** Inside the field: within {@code radius} of the origin. */
+    public static boolean inBounds(double x, double z, int radius) {
+        return x * x + z * z < (double) radius * radius;
+    }
+
+    /** The same, for a whole block column. */
+    public static boolean inBounds(int x, int z, int radius) {
+        return (double) x * x + (double) z * z < (double) radius * radius;
+    }
+
+    /**
+     * <b>Is this column the wall?</b> Outside the field, but touching it - the
+     * eight-neighbour boundary, so the ring is watertight against a diagonal.
+     * A four-neighbour ring has corner gaps an entity moving continuously can
+     * slip through, and {@code HorseRealmRules}' clamp should be the second line
+     * of defence rather than the first.
+     */
+    public static boolean isWall(int x, int z, int radius) {
+        if (inBounds(x, z, radius)) {
+            return false;
+        }
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if ((dx != 0 || dz != 0) && inBounds(x + dx, z + dz, radius)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // --- the exit grid ---
 
-    /** The middle cell of the {@value #PORTAL_CELLS}x{@value #PORTAL_CELLS} grid. */
-    public static final int CENTRE_CELL = PORTAL_CELLS / 2;
+    /** The one exit. Chunk {@code (0, 0)}, so the frame is at the origin. */
+    public static final ChunkPos PORTAL_CELL = new ChunkPos(0, 0);
 
     /**
      * <b>Every portal arrives at the same exit - the one in the middle of the
@@ -185,24 +225,46 @@ public final class HorseRealm {
      *             change of heart is then one method deep, not a call-site sweep
      */
     public static ChunkPos arrivalCell(BlockPos from) {
-        return new ChunkPos(CENTRE_CELL * PORTAL_GRID_CHUNKS, CENTRE_CELL * PORTAL_GRID_CHUNKS);
+        return PORTAL_CELL;
     }
 
-    /** True if this chunk carries one of the grid's portals. */
+    /** True if this chunk carries the exit. There is exactly one. */
     public static boolean isPortalChunk(int cx, int cz) {
-        return cx >= 0 && cz >= 0 && cx < CHUNKS && cz < CHUNKS
-                && cx % PORTAL_GRID_CHUNKS == 0 && cz % PORTAL_GRID_CHUNKS == 0;
+        return cx == PORTAL_CELL.x() && cz == PORTAL_CELL.z();
     }
 
-    /** True if this chunk carries one of the grid's watering holes. */
-    static boolean isPoolChunk(int cx, int cz) {
-        return cx >= 0 && cz >= 0 && cx < CHUNKS && cz < CHUNKS
-                && cx % POOL_GRID_CHUNKS == 0 && cz % POOL_GRID_CHUNKS == 0;
+    /**
+     * True if this chunk carries a watering hole. The same grid as before, now
+     * clipped to the circle - and to the whole circle, so a chunk that only
+     * becomes field when the realm grows gets its pool the first time it loads
+     * after that.
+     */
+    static boolean isPoolChunk(int cx, int cz, int radius) {
+        if (Math.floorMod(cx, POOL_GRID_CHUNKS) != 0 || Math.floorMod(cz, POOL_GRID_CHUNKS) != 0) {
+            return false;
+        }
+        return inBounds(cx * 16, cz * 16, radius);
     }
 
     /** The block a portal chunk's frame is measured from (its north-west ground corner). */
     static BlockPos portalAnchor(ChunkPos cell) {
         return new BlockPos(cell.getMinBlockX(), GROUND_Y, cell.getMinBlockZ());
+    }
+
+    /** The block a traveller is put down on, just south of the one exit. */
+    public static BlockPos arrivalBlock() {
+        return portalAnchor(PORTAL_CELL).offset(PORTAL_DX + 1, STAND_Y - GROUND_Y, ARRIVE_DZ);
+    }
+
+    /**
+     * <b>Where the field's one entrance puts you</b>, as a position rather than a
+     * block - what {@code HorseRealmRules} carries a stranded animal to. Named
+     * once here so the arrival, the reshape and the wall all agree on where the
+     * middle of this dimension is.
+     */
+    public static Vec3 arrivalSpot() {
+        BlockPos at = arrivalBlock();
+        return new Vec3(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
     }
 
     // --- travel ---
@@ -233,9 +295,7 @@ public final class HorseRealm {
             player.setData(ModAttachments.REALM_RETURN,
                     Optional.of(GlobalPos.of(from.dimension(), portalPos)));
         }
-        BlockPos anchor = portalAnchor(cell);
-        HorsePortalManager.placeAt(entity, realm,
-                anchor.offset(PORTAL_DX + 1, STAND_Y - GROUND_Y, ARRIVE_DZ));
+        HorsePortalManager.placeAt(entity, realm, arrivalBlock());
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -179,6 +180,11 @@ public final class HorseRealmRules {
         if (!HorseRealm.isRealm(entity.level()) || entity.level().isClientSide() || entity.isPassenger()) {
             return;
         }
+        MinecraftServer server = entity.level().getServer();
+        if (server == null) {
+            return;
+        }
+        int radius = HorseRealm.radius(server);
         Vec3 at = entity.position();
         if (at.y < FLOOR_Y) {
             // Under the floor. Two ways to get here and the fix is the same for
@@ -189,18 +195,42 @@ public final class HorseRealmRules {
             // anything that got through it fell forever. A horse cannot die here
             // and so would have fallen forever quietly.
             entity.setDeltaMovement(Vec3.ZERO);
-            entity.teleportTo(clamp(at.x), HorseRealm.STAND_Y, clamp(at.z));
+            entity.teleportTo(at.x, HorseRealm.STAND_Y, at.z);
             entity.resetFallDistance();
             return;
         }
-        if (HorseRealm.inBounds(at.x, at.z)) {
+        if (HorseRealm.inBounds(at.x, at.z, radius)) {
             return;
         }
-        double x = clamp(at.x);
-        double z = clamp(at.z);
+
+        // Far outside is a different problem from just outside, and they must
+        // not be answered the same way. Just outside is somebody leaning on the
+        // wall: put them back against it. FAR outside is a horse standing where
+        // the field USED to be - the realm was a 16 000-block square with its
+        // corner at the origin before it became a circle around it, so every
+        // animal in it is now thousands of blocks into the void. Those are
+        // carried to the portal, which is the reshape's whole migration and
+        // needs no pass of its own: a horse in an unloaded chunk is dealt with
+        // the moment anything loads it. See HorseRealmSize.
+        double dist = Math.sqrt(at.x * at.x + at.z * at.z);
         entity.setDeltaMovement(0.0, Math.min(0.0, entity.getDeltaMovement().y), 0.0);
-        entity.teleportTo(x, at.y, z);
+        if (dist > radius + STRANDED_BEYOND) {
+            Vec3 home = HorseRealm.arrivalSpot();
+            entity.teleportTo(home.x, home.y, home.z);
+            entity.resetFallDistance();
+            return;
+        }
+        double scale = (radius - CLAMP_INSET) / dist;
+        entity.teleportTo(at.x * scale, at.y, at.z * scale);
     }
+
+    /**
+     * How far past the wall counts as <b>lost</b> rather than <b>leaning</b>.
+     * Generous, because the cost of getting it wrong in one direction is a horse
+     * teleported across the field for touching a fence, and in the other is a
+     * horse left in the void until somebody notices.
+     */
+    private static final double STRANDED_BEYOND = 256.0;
 
     /**
      * <b>Below this is nowhere.</b> A few blocks under the bedrock, so ordinary
@@ -211,13 +241,6 @@ public final class HorseRealmRules {
      */
     private static final int FLOOR_Y = HorseRealm.BEDROCK_Y - 4;
 
-    private static double clamp(double v) {
-        if (v < CLAMP_INSET) {
-            return CLAMP_INSET;
-        }
-        double far = HorseRealm.SIZE - CLAMP_INSET;
-        return v > far ? far : v;
-    }
 
     private HorseRealmRules() {
     }

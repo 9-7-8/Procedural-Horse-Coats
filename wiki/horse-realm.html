@@ -61,13 +61,12 @@
     </p>
 </div>
 <p>
-    <strong>Every portal comes out in the same place</strong> &mdash; the exit in the middle
-    of the field. It used to be one of the hundred, picked from where in the Overworld you
-    built yours, so that two players never landed on top of each other. That turned out to be
-    the wrong thing to want: in a field sixteen thousand blocks across, landing apart does not
-    keep players out of each other's way, it keeps <em>their horses</em> apart, in pockets
-    that never meet. A shared field whose whole point is the horses living in it wants them
-    together.
+    <strong>Every portal comes out in the same place</strong> &mdash; the one exit, at the
+    centre of the field. It used to be one of a hundred, picked from where in the Overworld
+    you built yours, so that two players never landed on top of each other. That turned out to
+    be the wrong thing to want: landing apart does not keep players out of each other's way,
+    it keeps <em>their horses</em> apart, in pockets that never meet. A shared field whose
+    whole point is the horses living in it wants them together.
 </p>
 <p>
     Any of the hundred takes you home again, to the exact portal you came in by. If somebody
@@ -81,8 +80,10 @@
 <thead><tr><th>Thing</th><th>What it is</th></tr></thead>
 <tbody>
 <tr><td><strong>Size</strong></td>
-    <td>A thousand chunks square &mdash; sixteen thousand blocks on a side. Big, and
-    <em>finite</em>: you can walk it, search it, and lose nothing in it.</td></tr>
+    <td>A <strong>circle</strong> round the exit, a hundred chunks across its radius to begin
+    with &mdash; and it <strong>gets bigger as more horses live in it</strong>, never smaller.
+    Small enough to walk and to search, which is the point; see
+    <a href="#growing">how big, and when</a>.</td></tr>
 <tr><td><strong>The ground</strong></td>
     <td>One flat layer of grass on bedrock, at <strong>y&nbsp;64</strong> &mdash; the height
     the Overworld's own sea level sits at, so the sky is where your eye expects it. No hills,
@@ -91,10 +92,9 @@
     <td>A small pool every eighty blocks. Not decoration &mdash; a horse only
     <a href="horse-care.html">heals near water</a>, so a dry field would be one
     where a hurt horse never recovered.</td></tr>
-<tr><td><strong>Exits</strong></td>
-    <td>A portal every sixteen hundred blocks, a hundred of them, so you are never more
-    than about a thousand blocks from a way out. You always <em>arrive</em> at the middle
-    one; the rest are there for walking home from.</td></tr>
+<tr><td><strong>The exit</strong></td>
+    <td>One, at the centre, where you arrive and where you leave from. Everything in the
+    field is within one radius of it.</td></tr>
 <tr><td><strong>The edge</strong></td>
     <td>An invisible wall. Nothing walks, gallops or is led out of the field.</td></tr>
 <tr><td><strong>The sky</strong></td>
@@ -108,6 +108,34 @@
 <p>
     You cannot build or break there, and neither can anybody else. The field is shared and
     it stays the way it is.
+</p>
+
+<h2 id="growing">How big it is, and when it grows</h2>
+<p>
+    The field starts as a circle <strong>a hundred chunks in radius</strong> &mdash; 1,600
+    blocks from the exit to the wall in any direction. That is about eight million square
+    blocks, which is <strong>room for roughly 3,100 horses</strong>.
+</p>
+<p>
+    Put more than that in and <strong>the circle grows</strong>, keeping ten chunks of grass
+    per horse. It is checked every ten seconds or so, and it is not sudden: at 3,200 horses
+    the radius has moved by fifteen blocks. Ten thousand horses would take it to about 2,850.
+</p>
+<div class="note">
+    <span class="label">It can never get smaller</span>
+    <p>
+        Take horses out and the field stays the size it was. A field that shrank would put its
+        own wall <em>inside itself</em>, with horses on the wrong side of it and no way to walk
+        back &mdash; and it would do that at the exact moment somebody removed horses, which is
+        when they are least expecting the world to move.
+    </p>
+</div>
+<p>
+    Why bounded at all, and why <em>this</em> bounded: the old field was sixteen thousand
+    blocks square, and the trouble with that was never that it was too small. It was that a
+    horse turned out into it could walk far enough that nobody would ever find it again. It was
+    bounded, which was the promise, but not <strong>small enough to search</strong>, which is
+    what the promise was for.
 </p>
 
 <h2 id="safety">Nothing happens to a horse here</h2>
@@ -244,29 +272,112 @@
     2026-09-12 (<a href="horse-dimension.html#the-watch">its night</a>); here it is the feature.
 </p>
 
-<h2 id="arrival">Everybody arrives at the middle</h2>
+<h2 id="arrival">One exit, at the origin</h2>
 <p>
-    <code>HorseRealm.arrivalCell</code> returns one cell &mdash; the centre of the
-    ten-by-ten grid &mdash; whatever portal is asking.
+    <code>HorseRealm.arrivalCell</code> returns chunk <code>(0,&nbsp;0)</code> for every portal, and
+    <code>isPortalChunk</code> is true for that chunk and no other.
 </p>
 <p>
-    It used to hash the Overworld portal's own block position onto one of the hundred
-    (MurmurHash3's finalizer, twice), so that each portal had its own exit and two players
-    never landed on top of each other, and <code>horse_realm_grid_is_stable</code> asserted
-    that over four thousand draws. <strong>The hash was correct and the goal was
-    wrong</strong> (owner's call). In a field sixteen thousand blocks across, spreading
-    arrivals does not keep players out of each other's way; it keeps their
-    <em>horses</em> apart, in hundred-chunk pockets that never meet, in a dimension whose
-    entire purpose is horses living together. Bands cannot form across that distance
-    &mdash; <code>HorseRealmHerds</code> looks thirty-two blocks &mdash; and a field nobody
-    can find anybody in is a worse outcome than a crowded gate.
+    It used to hash the Overworld portal's own block position onto one of a hundred cells
+    (MurmurHash3's finalizer, twice), so each portal had its own exit and two players could not
+    land on top of each other, and <code>horse_realm_grid_is_stable</code> asserted that over
+    four thousand draws. <strong>The hash was correct and the goal was wrong</strong> (owner's
+    call). Spreading arrivals does not keep players out of each other's way; it keeps their
+    <em>horses</em> apart, in pockets that never meet, in a dimension whose entire purpose is
+    horses living together. Bands cannot form across that distance &mdash;
+    <code>HorseRealmHerds</code> looks thirty-two blocks.
 </p>
 <p>
-    <strong>The other ninety-nine exits are still built and still work.</strong> They are
-    what the grid was genuinely for: a way home for somebody who has walked a long way. The
-    parameter stays in the signature so a change of heart is one method deep rather than a
-    call-site sweep.
+    <code>arrivalBlock()</code> and <code>arrivalSpot()</code> name that one place once, so the
+    arrival, the reshape's rescue and the wall all agree on where the middle of this dimension
+    is.
 </p>
+
+<h2 id="circle">The field is a circle, and it grows</h2>
+<p>
+    <code>HorseRealmSize</code> is the whole of it: a radius, the rings it has outgrown, and a
+    set of the horses living here. The shape is a circle rather than a square because the field
+    has <em>one</em> entrance now, and a circle is the shape where everywhere is about the same
+    distance from it &mdash; the corners of a square are forty per cent further out than its
+    edges, and the corners are exactly where a lost horse ends up.
+</p>
+<p>
+    <strong>The density number is a decision, not arithmetic.</strong> The brief asked for one
+    horse per ten <em>blocks</em>; at the starting radius that is room for eight hundred
+    thousand horses, so the growth would have been dead code. Ten <em>chunks</em> each puts the
+    first growth at about 3,100 &mdash; a number a real stud farm arrives at. The owner picked
+    that after seeing the three thresholds side by side.
+</p>
+<div class="note">
+    <span class="label">Growing moves the wall, and the old one has to come down</span>
+    <p>
+        This is the part that is easy to miss. A grown field leaves its previous ring of
+        barriers standing <em>inside</em> itself &mdash; an invisible fence across the middle of
+        somebody's paddock. So <code>HorseRealmSize.retiredRings</code> keeps the radii whose
+        walls are still up, and <code>HorseRealmTerrain.clearRing</code> takes them down as
+        those chunks load. Growth is rare, so the list is short.
+    </p>
+</div>
+<p>
+    <strong>The wall is the eight-neighbour boundary</strong>, not a one-block-thick ring at
+    <code>d&nbsp;==&nbsp;r</code>. A four-neighbour ring has corner gaps that an entity moving continuously
+    slips straight through, and the clamp in <code>HorseRealmRules</code> should be the second
+    line of defence rather than the first. The game test walks the whole boundary at four
+    radii and fails on a single hole.
+</p>
+
+<h2 id="census">Counting horses that are not there</h2>
+<p>
+    <code>HorseRealmCensus</code>. It cannot use <code>HorseWhereabouts</code>, which is the
+    mod's answer to <em>where is every horse</em>, because that only records <strong>tamed</strong>
+    horses &mdash; and the realm's population is precisely the ones that are not.
+</p>
+<p>
+    So it is a set of UUIDs kept by the horses themselves: <strong>a horse ticking in the realm
+    adds itself; a horse ticking anywhere else removes itself.</strong> The same shape as
+    <a href="#feral">the feral rule</a>, and for the same reason &mdash; there is no single
+    event meaning <em>this horse has left</em>, and a condition covers every exit where a hook
+    covers whichever ones somebody remembered.
+</p>
+<p>
+    <strong>A horse in an unloaded chunk keeps its place in the count</strong>, which is the
+    behaviour that matters most: most of the field is unloaded most of the time, and a census
+    that only counted what it could see would shrink every time a player logged off and size
+    the field for nobody.
+</p>
+<p>
+    One known drift, in the safe direction: a horse taken out of the realm <em>inside a stasis
+    chamber</em> never ticks anywhere again, so it stays counted. The field ends up slightly
+    larger than it needs to be, and it never shrinks anyway.
+</p>
+
+<h2 id="reshape">Carrying the old square field across</h2>
+<p>
+    The realm was a 16,000-block square with its <em>corner</em> at the origin. The circle is
+    centred on the origin. So every horse in an existing realm is now thousands of blocks into
+    the void, and the old field's furniture &mdash; a hundred exits, a pool every five chunks, a
+    wall right round it &mdash; is scattered across country that is no longer field.
+</p>
+<p>
+    <strong>The animals need no migration pass.</strong>
+    <code>HorseRealmRules.keepInsideTheField</code> already runs on everything that ticks in the
+    realm, and it now separates two cases that must not be answered the same way: just outside
+    the wall is somebody leaning on it, and gets put back against it; <em>far</em> outside is
+    something stranded where the field used to be, and gets carried to the exit. A horse in an
+    unloaded chunk is dealt with the moment anything loads it, which is the first moment it
+    could matter.
+</p>
+<div class="note">
+    <span class="label">The one piece of old terrain that is not merely untidy</span>
+    <p>
+        Two of the old square's four walls ran along <code>x = -1</code> and <code>z = -1</code>
+        &mdash; which are <strong>inside the new circle</strong>, a few steps from the exit. Left
+        alone they would be a pair of invisible walls straight through the middle of the new
+        field. <code>eraseOldField</code> clears them, along with the ninety-nine abandoned
+        exits and the old perimeter, wherever a chunk that carried one loads. The game test
+        asserts air at <code>(-1, 8)</code> for exactly this reason.
+    </p>
+</div>
 
 <h2 id="lift">Moving the floor, in a world that already has one</h2>
 <p>
@@ -544,8 +655,52 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong> &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>.</p>
+    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>.</p>
 </div>
+
+<h3 id="verify-reshape">The field is a circle now, and the old one has to let go (2026-09-25, NOT played)</h3>
+<p>
+    The realm changed <em>shape</em>, not just height, and an existing realm's contents are
+    all in the wrong place by thousands of blocks. The arithmetic is modelled and tested; what
+    no test here can see is whether it feels like a field.
+</p>
+<ul>
+    <li><strong>A fresh realm.</strong> Walk in, walk out to the wall in a straight line. It
+        should be about 1,600 blocks in every direction, and you should hit barrier, not
+        void &mdash; at a diagonal as well as along an axis, which is the case a
+        four-neighbour ring would have got wrong.</li>
+    <li><strong>An existing realm.</strong> Horses left in the old square should be carried to
+        the exit as their chunks load. <strong>Watch the first few seconds</strong>: they
+        arrive by teleport, one per tick as each is noticed, and a pile of them at the portal
+        is the expected sight rather than a bug.</li>
+    <li><strong>The old wall near the origin is gone.</strong> Walk a few steps west and north
+        of the exit. The old square's walls ran along <code>x&nbsp;=&nbsp;-1</code> and
+        <code>z&nbsp;=&nbsp;-1</code>; if <code>eraseOldField</code> has not run there you will
+        walk into an invisible wall almost immediately.</li>
+    <li><strong>Everything in the far field is cleaned up</strong> as you visit it &mdash;
+        though almost nothing will, since it is outside the circle and there is no reason to
+        go.</li>
+</ul>
+
+<h3 id="verify-growth">The field grows, and the old wall comes down (2026-09-25, NOT played)</h3>
+<p>
+    The hardest thing here to reach in play: it needs about 3,100 horses. Worth forcing with a
+    creative stack of spawn eggs rather than waiting for it.
+</p>
+<ul>
+    <li><strong>It grows at all.</strong> Past ~3,100 horses in the realm the radius should
+        move, and the log says so.</li>
+    <li><strong>The retired ring is taken down.</strong> The critical one. After a growth, walk
+        out to where the wall <em>used</em> to be. There must be nothing there &mdash; a
+        leftover ring is an invisible fence across the middle of the field, and it is only
+        cleared as those chunks load, so it may take a walk to find.</li>
+    <li><strong>The new wall is built</strong> further out, all the way round.</li>
+    <li><strong>It never shrinks.</strong> Take the horses away again; the field must stay
+        big.</li>
+    <li><strong>The census is roughly right.</strong> It counts horses in unloaded chunks too,
+        which is the point; a count that collapses when you log off would size the field for
+        nobody.</li>
+</ul>
 
 <h3 id="verify-lift">The lift, on a world that already has a realm (2026-09-25, NOT played)</h3>
 <p>

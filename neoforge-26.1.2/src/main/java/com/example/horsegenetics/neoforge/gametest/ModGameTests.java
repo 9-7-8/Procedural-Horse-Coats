@@ -6,6 +6,7 @@ import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
+import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.server.HorseRealm;
 import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
@@ -691,14 +692,19 @@ public final class ModGameTests {
             realm = server.overworld();     // see the note above - the harness has no realm
         }
 
-        // The origin cell is a portal cell, a pool cell and a corner of the
-        // perimeter all at once, which is why it is the one worth generating.
+        // The origin chunk is the exit AND a pool, which is why it is the one
+        // worth generating. The wall is no longer anywhere near it: the field is
+        // a circle round the origin now, so the perimeter is a whole radius
+        // away and needs a chunk of its own.
+        int radius = com.example.horsegenetics.neoforge.data.HorseRealmSize.get(server).radius();
+        int wallChunk = radius / 16;
         net.minecraft.world.level.ChunkPos cell = new net.minecraft.world.level.ChunkPos(0, 0);
+        net.minecraft.world.level.ChunkPos edge =
+                new net.minecraft.world.level.ChunkPos(wallChunk, 0);
         realm.getChunk(cell.x(), cell.z());
-        realm.getChunk(-1, 0);
+        realm.getChunk(edge.x(), edge.z());
         com.example.horsegenetics.neoforge.server.HorseRealmTerrain.decorateNow(realm, cell);
-        com.example.horsegenetics.neoforge.server.HorseRealmTerrain.decorateNow(realm,
-                new net.minecraft.world.level.ChunkPos(-1, 0));
+        com.example.horsegenetics.neoforge.server.HorseRealmTerrain.decorateNow(realm, edge);
 
         // 1. The ground. Bedrock at -1 and one dirt layer at 0 - away from the pool
         // at the cell origin, which replaces it. This one belongs to the flat
@@ -727,15 +733,35 @@ public final class ModGameTests {
                     + realm.getBlockState(portal).getBlock() + ", not a lit portal");
         }
 
-        // 4. The edge. One block outside the field, and tall enough to matter.
-        // z = 8 rather than anywhere prettier because it has to lie inside chunk
-        // (-1, 0), which is the one decorated above - the wall is built per chunk,
-        // so asserting a column the test never asked for reads as a missing wall.
-        assertRealmBlock(helper, realm, new BlockPos(-1, HorseRealm.GROUND_Y, 8),
-                Blocks.BARRIER, "the perimeter");
+        // 4. The edge, and tall enough to matter. Found rather than guessed at:
+        // the wall is a circle, so "one block outside the field" is a column the
+        // geometry has to name. It has to lie in the chunk decorated above,
+        // since the wall is built per chunk and asserting a column the test
+        // never asked for reads as a missing wall.
+        BlockPos wall = null;
+        for (int x = edge.getMinBlockX(); x <= edge.getMaxBlockX() && wall == null; x++) {
+            for (int z = edge.getMinBlockZ(); z <= edge.getMaxBlockZ(); z++) {
+                if (HorseRealm.isWall(x, z, radius)) {
+                    wall = new BlockPos(x, HorseRealm.GROUND_Y, z);
+                    break;
+                }
+            }
+        }
+        if (wall == null) {
+            helper.fail("no column of chunk " + edge + " is wall at radius " + radius
+                    + " - the test is looking in the wrong place, or isWall is");
+            return;
+        }
+        assertRealmBlock(helper, realm, wall, Blocks.BARRIER, "the perimeter");
         assertRealmBlock(helper, realm,
-                new BlockPos(-1, HorseRealm.GROUND_Y + HorseRealm.WALL_HEIGHT - 1, 8),
+                wall.above(HorseRealm.WALL_HEIGHT - 1),
                 Blocks.BARRIER, "the top of the perimeter");
+
+        // ...and the middle of the field is NOT walled. The old square's west
+        // wall ran along x = -1, which is now well inside the circle; a barrier
+        // there would be an invisible fence a few steps from the portal.
+        assertRealmBlock(helper, realm, new BlockPos(-1, HorseRealm.GROUND_Y, 8),
+                Blocks.AIR, "the old square's wall, inside the new field");
 
         // 5. None of it anywhere else. The debug corridor generates a single air
         // layer and builds its own floor; a pool or a barrier turning up in it
@@ -774,6 +800,13 @@ public final class ModGameTests {
      * <p>Kept rather than deleted for that reason: a hash creeping back in would
      * otherwise be noticed only by a player wondering where the herd went.
      *
+     * <p>It now also carries <b>the field's own shape</b>: that the size rule
+     * never shrinks, never goes under the floor and always covers its own
+     * density promise, and that the circular wall is watertight against a
+     * diagonal. All of those are silent when broken - a field that shrinks
+     * strands horses outside their own wall, and a wall with corner gaps is a
+     * bounded dimension that is not bounded.
+     *
      * <p>Pure arithmetic, so it needs no world; it is here rather than in JUnit
      * only because the NeoForge module has no Minecraft on its test classpath and
      * {@code BlockPos} is Minecraft's.
@@ -810,12 +843,72 @@ public final class ModGameTests {
                     + "them is supposed to arrive at the middle of the field");
             return;
         }
-        int middle = HorseRealm.CENTRE_CELL * HorseRealm.PORTAL_GRID_CHUNKS;
         net.minecraft.world.level.ChunkPos only = net.minecraft.world.level.ChunkPos.unpack(
                 seen.iterator().next());
-        if (only.x() != middle || only.z() != middle) {
-            helper.fail("portals arrive at " + only + ", not at the middle cell ("
-                    + middle + ", " + middle + ")");
+        if (only.x() != 0 || only.z() != 0) {
+            helper.fail("portals arrive at " + only + ", not at the origin");
+            return;
+        }
+
+        // --- the field's shape and how it grows -------------------------
+        // Pure arithmetic and the cheapest thing in this file, but every one of
+        // these is silent when broken: a field that can shrink strands horses
+        // outside their own wall, and a wall with a diagonal gap in it is a
+        // bounded dimension that is not bounded.
+        int start = HorseRealmSize.START_RADIUS;
+        if (HorseRealmSize.radiusFor(0) != start || HorseRealmSize.radiusFor(1) != start) {
+            helper.fail("an empty field is not the starting size");
+            return;
+        }
+        int last = start;
+        for (int horses = 0; horses <= 40_000; horses += 137) {
+            int r = HorseRealmSize.radiusFor(horses);
+            if (r < start) {
+                helper.fail(horses + " horses gave a radius of " + r + ", under the floor of " + start);
+                return;
+            }
+            if (r < last) {
+                helper.fail("the field shrank: " + horses + " horses want " + r
+                        + " after a smaller count wanted " + last);
+                return;
+            }
+            // The density it promises: area must cover every horse.
+            double area = Math.PI * (double) r * r;
+            if (area < (double) horses * HorseRealmSize.BLOCKS_PER_HORSE) {
+                helper.fail(horses + " horses in a radius of " + r + " is denser than the rule allows");
+                return;
+            }
+            last = r;
+        }
+
+        // The wall is watertight against a diagonal. Walk the boundary band and
+        // check no in-bounds column touches an out-of-bounds one without a wall
+        // column between them - eight-neighbour, because entities move
+        // continuously and a four-neighbour ring has corner gaps.
+        int r = 200;
+        for (int x = -r - 3; x <= r + 3; x++) {
+            for (int z = -r - 3; z <= r + 3; z++) {
+                if (!HorseRealm.inBounds(x, z, r)) {
+                    continue;
+                }
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        int nx = x + dx;
+                        int nz = z + dz;
+                        if (!HorseRealm.inBounds(nx, nz, r) && !HorseRealm.isWall(nx, nz, r)) {
+                            helper.fail("a gap in the wall: (" + x + ", " + z + ") is field and its "
+                                    + "neighbour (" + nx + ", " + nz + ") is neither field nor wall");
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // And the one exit is inside the field it is the exit from.
+        if (!HorseRealm.inBounds(HorseRealm.arrivalBlock().getX(),
+                HorseRealm.arrivalBlock().getZ(), start)) {
+            helper.fail("the arrival spot is outside the starting field");
             return;
         }
         helper.succeed();

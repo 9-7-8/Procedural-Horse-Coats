@@ -1,9 +1,11 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.block.HayPortalBlock;
+import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -64,8 +66,13 @@ public final class HorseRealmTerrain {
         if (!(event.getLevel() instanceof ServerLevel level) || !HorseRealm.isRealm(level)) {
             return;
         }
+        MinecraftServer server = level.getServer();
+        if (server == null) {
+            return;
+        }
+        HorseRealmSize size = HorseRealmSize.get(server);
         ChunkPos at = event.getChunk().getPos();
-        if (interesting(at.x(), at.z())) {
+        if (interesting(at.x(), at.z(), size.radius(), size.retiredRings())) {
             PENDING.add(at.pack());
         }
     }
@@ -93,13 +100,27 @@ public final class HorseRealmTerrain {
 
     /** Decorate a chunk right now - used on arrival, so nobody lands beside a missing exit. */
     public static void decorateNow(ServerLevel realm, ChunkPos at) {
-        if (interesting(at.x(), at.z())) {
+        MinecraftServer server = realm.getServer();
+        if (server == null) {
+            return;
+        }
+        HorseRealmSize size = HorseRealmSize.get(server);
+        if (interesting(at.x(), at.z(), size.radius(), size.retiredRings())) {
             decorate(realm, at);
         }
     }
 
-    private static boolean interesting(int cx, int cz) {
-        return HorseRealm.isPoolChunk(cx, cz) || HorseRealm.isPortalChunk(cx, cz) || touchesPerimeter(cx, cz);
+    private static boolean interesting(int cx, int cz, int radius, java.util.List<Integer> retired) {
+        if (HorseRealm.isPoolChunk(cx, cz, radius) || HorseRealm.isPortalChunk(cx, cz)
+                || touchesRing(cx, cz, radius) || touchesOldField(cx, cz)) {
+            return true;
+        }
+        for (int old : retired) {
+            if (touchesRing(cx, cz, old)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void decorate(ServerLevel realm, ChunkPos at) {
@@ -107,14 +128,33 @@ public final class HorseRealmTerrain {
         // portal at the new surface and then have its old one dropped on top of
         // it when the lift caught up - see HorseRealmLift.
         HorseRealmLift.liftNow(realm, at);
-        if (HorseRealm.isPoolChunk(at.x(), at.z())) {
+
+        MinecraftServer server = realm.getServer();
+        if (server == null) {
+            return;
+        }
+        HorseRealmSize size = HorseRealmSize.get(server);
+        int radius = size.radius();
+
+        // Take things down before putting things up, so a chunk that is both an
+        // old wall and a new one ends with the new one standing.
+        if (touchesOldField(at.x(), at.z())) {
+            eraseOldField(realm, at, radius);
+        }
+        for (int old : size.retiredRings()) {
+            if (touchesRing(at.x(), at.z(), old)) {
+                clearRing(realm, at, old, radius);
+            }
+        }
+
+        if (HorseRealm.isPoolChunk(at.x(), at.z(), radius)) {
             pool(realm, at);
         }
         if (HorseRealm.isPortalChunk(at.x(), at.z())) {
             portal(realm, at);
         }
-        if (touchesPerimeter(at.x(), at.z())) {
-            perimeter(realm, at);
+        if (touchesRing(at.x(), at.z(), radius)) {
+            perimeter(realm, at, radius);
         }
     }
 
@@ -232,7 +272,7 @@ public final class HorseRealmTerrain {
      * into it and stop - and {@link HorseRealmRules} covers the dishonest half,
      * anything that gets above {@value HorseRealm#WALL_HEIGHT} blocks.
      */
-    private static void perimeter(ServerLevel realm, ChunkPos at) {
+    private static void perimeter(ServerLevel realm, ChunkPos at, int radius) {
         BlockState barrier = Blocks.BARRIER.defaultBlockState();
         int minX = at.getMinBlockX();
         int minZ = at.getMinBlockZ();
@@ -240,7 +280,7 @@ public final class HorseRealmTerrain {
             for (int dz = 0; dz < 16; dz++) {
                 int x = minX + dx;
                 int z = minZ + dz;
-                if (!onPerimeter(x, z)) {
+                if (!HorseRealm.isWall(x, z, radius)) {
                     continue;
                 }
                 for (int y = HorseRealm.GROUND_Y; y < HorseRealm.GROUND_Y + HorseRealm.WALL_HEIGHT; y++) {
@@ -253,22 +293,126 @@ public final class HorseRealmTerrain {
         }
     }
 
-    /** The ring of blocks one outside the field, corners included. */
-    private static boolean onPerimeter(int x, int z) {
-        boolean xEdge = x == -1 || x == HorseRealm.SIZE;
-        boolean zEdge = z == -1 || z == HorseRealm.SIZE;
-        boolean xIn = x >= -1 && x <= HorseRealm.SIZE;
-        boolean zIn = z >= -1 && z <= HorseRealm.SIZE;
+    /**
+     * <b>Take down a wall the field has outgrown.</b> When the realm grows, the
+     * ring it used to stop at is still standing - <i>inside</i> the field now,
+     * which is an invisible fence across the middle of somebody's paddock. This
+     * clears the columns that were wall at {@code oldRadius} and are not wall
+     * now.
+     *
+     * <p>Only barriers are removed, and only in the wall's own sixteen-block
+     * band, so this cannot eat anything else that happens to be standing there.
+     */
+    private static void clearRing(ServerLevel realm, ChunkPos at, int oldRadius, int radius) {
+        int minX = at.getMinBlockX();
+        int minZ = at.getMinBlockZ();
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = minX + dx;
+                int z = minZ + dz;
+                if (!HorseRealm.isWall(x, z, oldRadius) || HorseRealm.isWall(x, z, radius)) {
+                    continue;
+                }
+                for (int y = HorseRealm.GROUND_Y; y < HorseRealm.GROUND_Y + HorseRealm.WALL_HEIGHT; y++) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    if (realm.getBlockState(p).is(Blocks.BARRIER)) {
+                        realm.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * <b>Erase what the old square field left here.</b> The realm used to be a
+     * {@value HorseRealm#OLD_CHUNKS}-chunk square with its corner at the origin,
+     * carrying a hundred exits, a pool every five chunks and a wall right round
+     * it. Almost all of that is now outside the circle and unreachable, and the
+     * owner's call was to clean it up rather than leave it lying in the dark.
+     *
+     * <p><b>The part that is not merely tidiness</b> is the old wall. Two of its
+     * four sides ran along {@code x = -1} and {@code z = -1}, which are
+     * <i>inside</i> the new circle - a pair of invisible walls straight through
+     * the middle of the new field, a few steps from the portal. That is the one
+     * piece of this that a player would actually walk into.
+     */
+    private static void eraseOldField(ServerLevel realm, ChunkPos at, int radius) {
+        int minX = at.getMinBlockX();
+        int minZ = at.getMinBlockZ();
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = minX + dx;
+                int z = minZ + dz;
+                if (!onOldPerimeter(x, z) || HorseRealm.isWall(x, z, radius)) {
+                    continue;
+                }
+                for (int y = HorseRealm.GROUND_Y; y < HorseRealm.GROUND_Y + HorseRealm.WALL_HEIGHT; y++) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    if (realm.getBlockState(p).is(Blocks.BARRIER)) {
+                        realm.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        }
+        // An old exit, if this chunk carried one. The frame and its portal sheet
+        // both go; the ground under them is left, since it is ordinary field.
+        if (isOldPortalChunk(at.x(), at.z()) && !HorseRealm.isPortalChunk(at.x(), at.z())) {
+            int x0 = at.getMinBlockX() + HorseRealm.PORTAL_DX;
+            int z = at.getMinBlockZ() + HorseRealm.PORTAL_DZ;
+            int w = HorseRealm.PORTAL_INNER_W + 2;
+            int h = HorseRealm.PORTAL_INNER_H + 2;
+            for (int ddx = 0; ddx < w; ddx++) {
+                for (int ddy = 0; ddy < h; ddy++) {
+                    BlockPos p = new BlockPos(x0 + ddx, HorseRealm.GROUND_Y + ddy, z);
+                    BlockState there = realm.getBlockState(p);
+                    if (there.is(ModBlocks.HAY_PORTAL.get()) || HorsePortalManager.isFrame(there)
+                            || there.is(Blocks.HAY_BLOCK)) {
+                        realm.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        }
+    }
+
+    /** The old square field's wall: the ring one block outside {@code [0, OLD_SIZE]}. */
+    private static boolean onOldPerimeter(int x, int z) {
+        boolean xEdge = x == -1 || x == HorseRealm.OLD_SIZE;
+        boolean zEdge = z == -1 || z == HorseRealm.OLD_SIZE;
+        boolean xIn = x >= -1 && x <= HorseRealm.OLD_SIZE;
+        boolean zIn = z >= -1 && z <= HorseRealm.OLD_SIZE;
         return (xEdge && zIn) || (zEdge && xIn);
     }
 
-    private static boolean touchesPerimeter(int cx, int cz) {
-        int lastChunk = HorseRealm.CHUNKS;      // chunk index of the ring outside the field
-        boolean xRing = cx == -1 || cx == lastChunk;
-        boolean zRing = cz == -1 || cz == lastChunk;
-        boolean xIn = cx >= -1 && cx <= lastChunk;
-        boolean zIn = cz >= -1 && cz <= lastChunk;
-        return (xRing && zIn) || (zRing && xIn);
+    /** One of the old hundred, on the 100-chunk grid inside the old square. */
+    private static boolean isOldPortalChunk(int cx, int cz) {
+        return cx >= 0 && cz >= 0 && cx < HorseRealm.OLD_CHUNKS && cz < HorseRealm.OLD_CHUNKS
+                && cx % 100 == 0 && cz % 100 == 0;
+    }
+
+    /** Does this chunk hold any column of the wall at {@code radius}? */
+    private static boolean touchesRing(int cx, int cz, int radius) {
+        // Nearest and furthest corner of the chunk from the origin. If the ring's
+        // radius falls between them (with a block of slack either side for the
+        // eight-neighbour band), some column in here is wall.
+        int x0 = cx * 16;
+        int z0 = cz * 16;
+        int x1 = x0 + 15;
+        int z1 = z0 + 15;
+        double nearX = x0 > 0 ? x0 : (x1 < 0 ? -x1 : 0);
+        double nearZ = z0 > 0 ? z0 : (z1 < 0 ? -z1 : 0);
+        double farX = Math.max(Math.abs((double) x0), Math.abs((double) x1));
+        double farZ = Math.max(Math.abs((double) z0), Math.abs((double) z1));
+        double near = Math.sqrt(nearX * nearX + nearZ * nearZ);
+        double far = Math.sqrt(farX * farX + farZ * farZ);
+        return near <= radius + 2 && far >= radius - 2;
+    }
+
+    /** Does this chunk hold anything the old square field left behind? */
+    private static boolean touchesOldField(int cx, int cz) {
+        int last = HorseRealm.OLD_CHUNKS;
+        boolean onWall = (cx == -1 || cx == last || cz == -1 || cz == last)
+                && cx >= -1 && cx <= last && cz >= -1 && cz <= last;
+        return onWall || isOldPortalChunk(cx, cz);
     }
 
     private HorseRealmTerrain() {
