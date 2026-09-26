@@ -1,0 +1,218 @@
+2026-09-26 — a blank tab, and the search language that came out of it
+
+
+    It started as one sentence:
+
+        the horse realm tab shows literally nothing while I'm in the horse realm
+
+    and by the end the mod had a SQL search language, a query builder, and a
+    command that rains emeralds on people. What follows is roughly in the order
+    it was asked. The thread worth keeping is that THREE of the day's bugs were
+    invisible for the same reason — something that looked like a feature doing
+    nothing was actually a feature that had never been constructed at all.
+
+
+1. THE REALM TAB DREW NOTHING, AND IT WAS NOT A COMPILE ERROR
+
+    HorseBrowserScreen's render switch:
+
+        switch (tab) {
+            case MY_HORSES -> drawMyHorses(g, mouseX, mouseY);
+            ...                              <- REALM absent
+
+    An arrow-form switch STATEMENT over an enum need not be exhaustive. Only a
+    switch EXPRESSION must be. So this compiled clean, the tab strip carried an
+    entry, and clicking it painted an empty panel.
+
+    Its filter box, Refresh button and scroll wheel were all gated on
+    `tab == Tab.MY_HORSES` for the same reason and were dark with it.
+
+    WORTH REMEMBERING: a missing enum case in a statement switch is silent.
+    Three of this codebase's per-tab behaviours were gated on one tab each,
+    which is the pattern that made one omission into five.
+
+
+2. THE REALM TABLE COULD ONLY EVER HAVE SHOWN A FRACTION OF THE FIELD
+
+    Fixing (1) exposed the bigger problem. RealmRoster walked the realm level's
+    LIVE ENTITIES, which is the natural shape for "what is in the field right
+    now" and wrong for one reason: most of the field is unloaded most of the
+    time. The realm is 1,600 blocks in radius; a player loads a dozen chunks of
+    it. The tab listed the horses within sight of whoever opened it.
+
+    The fix was to stop asking the world. HorseRealmSize's census already knew
+    WHO is in the field — it is maintained by the horses themselves and keeps a
+    horse nobody has loaded for a week. The ancestry database already knew WHAT
+    they are. Between them a row can be built for a horse on the far side of the
+    field with no chunk loaded anywhere; a horse that happens to be loaded
+    overlays bond, age and position on top.
+
+    THE NUMBER THAT SHAPED THE REST: a full genotype code is 5,612 characters,
+    and every row carries one because the table sorts and filters on it. Three
+    thousand rows do not fit in a packet at any cap. So the roster is sent in
+    batches of a hundred, the table draws itself as it fills, and — after the
+    owner asked why it was being re-fetched at all — it is pushed once when a
+    player walks in and kept current by one-horse deltas.
+
+    The server-wide record already existed. What was missing was anyone telling
+    the clients when it changed.
+
+    COST: the census had to start recording WHERE each horse stands, so that
+    claiming an unloaded one has a chunk to pull in. That changed its saved
+    shape, so an existing world loads with the field's radius intact and its
+    census empty. The radius was the half that had to survive — losing it would
+    put the wall inside the field. One lap of the field rebuilds the rest.
+
+
+3. HORSES WERE NOT SPAWNING IN THE REALM. THEY WERE WALKING IN.
+
+    Reported as two things:
+
+        there's horses spawning in the horse realm? nothing should spawn there
+        horses should not be able to go through the horse portal by standing in it
+
+    They were one line. PortalEventHandler gave the dwell timer to ANY horse
+    whose feet were in a portal block, with no check on who put it there. So a
+    lit portal was a drain in both directions: wild Overworld horses grazed
+    across one and were pulled in three seconds later, and unclaimed realm
+    horses let themselves out of the field somebody left them in for safekeeping.
+
+    A horse now needs escorting — ridden, on a player's lead, or snapped in by
+    the roped-horse right-click, which seeds the dwell map itself and so still
+    works. A horse tied to a FENCE beside a portal is parked, not travelling.
+
+    NOT THE BUG IT LOOKED LIKE. "Horses are spawning" had no spawn in it at all.
+    The realm's biome has empty spawner lists in every category; nothing was
+    ever spawning. A `nothingSpawnsHere` rule went in anyway, because that is a
+    fact about a JSON file and the promise is worth more than one file.
+
+
+4. THE COWBOY'S FILTER BOX HAD NEVER EXISTED
+
+        Because right now it's just broken and doesn't do anything
+
+    It was created only if the merchant menu's offers looked like a cowboy's:
+
+        if (!(event.getScreen() instanceof MerchantScreen screen) || !sellsHorses(screen))
+
+    and at ScreenEvent.Init.Post THERE ARE NO OFFERS. The server sends the
+    open-screen packet and the offer list as two packets in that order, so the
+    client builds the screen against an empty MerchantMenu and fills it a moment
+    later. sellsHorses answered false every single time. There was never a box.
+
+    Now built for every merchant screen and shown once the offers arrive — and
+    that answer is LATCHED, which is not an optimisation: filtering down to no
+    matches empties the offer list, which would un-answer the question and take
+    away the very box the player needs to clear the filter with.
+
+    SAME SHAPE AS (1). "The feature does nothing" and "the feature was never
+    constructed" look identical from the player's side.
+
+
+5. THE FOURTH SEARCH ENGINE
+
+    Asked to make the search boxes share one function. Two surprises:
+
+      - the three the owner named ALREADY shared HorseQuery. The realm table is
+        the My horses renderer; the stasis bank wraps the same function.
+      - there was no search box in the horse dimension at all, and never had been.
+
+    What was actually unshared was the COWBOY, which used HorseSearch — a second
+    engine doing space-separated substrings over a HorseRecord. So `gen>2` meant
+    nothing at a counter while working in a browser two keys away. It now builds
+    the row HorseQuery expects. HorseSearch and its test are deleted.
+
+    So "unify the search" turned into "give them a language worth sharing".
+
+
+6. THE LANGUAGE
+
+    Asked for AND / NOT / OR, then for something "more like a SQL query". Settled
+    on the WHERE clause alone: there is one table and you always want every
+    column of it, so SELECT and FROM are ceremony you would type into a one-line
+    box before every search, for ever. The box IS the clause.
+
+    THE PART THAT LET IT GO IN UNDER A SCREENFUL OF GREEN TESTS: adjacent terms
+    are implicitly ANDed, which is exactly what the box did when it had no
+    operators. So `mare gen>2 -lethal` still means what it always meant, `-term`
+    is still NOT, `:` is still `=`. HorseQueryTest's twenty tests are UNCHANGED
+    and still pass; QueryExprTest adds twenty-four for the grammar.
+
+    THE GENUINELY NEW THING: a gene name is a column. `healer = hom`. Before
+    this, zygosity was unaskable without already knowing the answer —
+    `genotype:Fly/Fly` requires both allele tokens spelled out, so you could only
+    ask it about genes you had already looked up.
+
+    `hom` counts REAL ALLELES rather than comparing the two slots. The reserved
+    slot in a stallion's X-linked pair is not an allele he has, so
+    AllelePair.homozygous() would read every stallion alive as homozygous at
+    every sex-linked locus. That is the same trap carries() already carried a
+    comment about, which is why it was spotted.
+
+    The parser never throws, and the test walks EVERY PREFIX of a real query to
+    pin it: a search box is typed one character at a time, so every prefix of a
+    valid query is one somebody is a keystroke away from having. A dangling AND
+    deliberately keeps filtering on what came before it — a table that empties
+    itself the moment you type AND reads as broken.
+
+
+7. A DESIGN CALL THAT WAS NOT MINE TO MAKE
+
+    Asked for the cowboy to pay more for rare and especially homozygous genes.
+    That runs straight into philosophy §4 — "no rarity tier, no this is the good
+    one" — which HorsePrices' own javadoc cites as settled reasoning.
+
+    Raised it rather than implementing it. The owner's answer was better than
+    either option offered: a flat base, plus more for HOW MANY genes a horse
+    carries and how many it breeds true at, EVEN BAD ONES.
+
+    That keeps §4 intact. Counting is not ranking: a lethal and a dished face
+    count the same because both are material, and a homozygous carrier of
+    something ruinous fetches more because it is more RELIABLE, not nicer. He is
+    buying breeding stock by weight.
+
+    The numbers are measured, not guessed — 600 rolled founders across every
+    breed average 11.7 carried loci and 5.4 homozygous, over 333 registered
+    genes. Re-measure before moving the constants; the mean shifts every time a
+    gene joins the registry.
+
+
+8. SMALLER THINGS
+
+    - Clicking a gear slot now lists what fits it. Fifteen of the seventeen gear
+      tags are empty, so most slots say "nothing takes this slot yet" — which is
+      a different sentence from "nothing you are carrying fits here", and the
+      difference is whether it is worth going to look for the item.
+    - Turning a horse out pays two emeralds; /horsebounty back-pays everyone who
+      gave a horse to the field before it did. Idempotent PER HORSE, not per run.
+      The release fee writes into the same ledger, or an operator running the
+      command after a session would pay twice for everything turned out in it.
+    - A Query tab builds a search from dropdowns. It emits TEXT, so there is one
+      language and not two — a structured form only that tab could produce would
+      be a second dialect every other screen would have to learn, and a query you
+      could read but not hand-edit.
+    - Every dropdown sorts and takes type-to-jump. There are five, all
+      hand-rolled because vanilla has no anchored list widget; rather than unify
+      five screens' drawing, the BEHAVIOUR they were all missing is one object
+      each of them holds.
+
+
+9. ONE THING FOUND AND NOT FIXED
+
+    CLAUDE.md hard rule 2 says common/ "uses no Java 9+ APIs". The module uses
+    List.of 457 times, records in 95 files, arrow switch expressions in 56, and
+    String.strip in 5 — and its build.gradle.kts targets Java 17. The rule as
+    written is not what the code does; the real constraint is narrower and is
+    what its own examples are (System.getLogger, Long.parseUnsignedLong — things
+    TeaVM's class library lacks).
+
+    Raised with the owner, left alone. Narrowing a hard rule is theirs to do.
+    Recorded on architecture.html's Verification tab.
+
+
+WHAT SHIPPED: 0.5.031, jar attached to the GitHub release.
+
+WHAT IS WAITING: everything above is unplayed. The realm page, breeding.html
+and villagers.html carry the checks. The first one that matters is the census
+reset in (2) — read the table before walking the field and it will look like
+the realm lost horses.

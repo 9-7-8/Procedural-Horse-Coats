@@ -498,8 +498,35 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Two v0.5.014 faults that singleplayer could not show &mdash; a login kick and an emptied Building Blocks tab &mdash; are fixed and have still never been seen from a client seat; unproven alongside them are a production jar booting with the gametest registry attached, and a jar carrying no <code>*Tool</code> classes.</p>
+    <p>Two v0.5.014 faults that singleplayer could not show &mdash; a login kick and an emptied Building Blocks tab &mdash; are fixed and have still never been seen from a client seat; unproven alongside them are a production jar booting with the gametest registry attached, and a jar carrying no <code>*Tool</code> classes; and <strong>CLAUDE.md's hard rule 2 does not describe what <code>common/</code> actually does</strong>, which is a decision waiting rather than a defect.</p>
 </div>
+
+<h3 id="verify-java-level">What Java level is <code>common/</code> really held to? (2026-09-26, a decision, not a check)</h3>
+<p>
+    Hard rule 2 says <code>common/</code> &ldquo;uses no Java 9+ APIs&rdquo;, framed around TeaVM and
+    an eventual Java 8 target. The module does not obey that and never has:
+</p>
+<ul>
+    <li><code>List.of</code> (Java 9) &mdash; 457 call sites, including <code>HorseQuery.keys()</code>.</li>
+    <li><code>record</code> (Java 16) &mdash; 95 files, including <code>HorseListing</code> and <code>AllelePair</code>.</li>
+    <li>Arrow <code>switch</code> expressions (Java 14) &mdash; 56 files.</li>
+    <li><code>String.strip</code> (Java 11), <code>List.copyOf</code> (Java 10), <code>var</code>, text blocks.</li>
+    <li><code>common/build.gradle.kts</code> sets <code>JavaLanguageVersion.of(17)</code>.</li>
+</ul>
+<p>
+    All of it compiles through TeaVM today, so the <em>real</em> constraint is narrower than the
+    headline and is exactly what the rule's own examples are: specific JDK methods TeaVM's class
+    library lacks (<code>System.getLogger</code>, <code>Long.parseUnsignedLong</code>), which is why
+    <code>CommonLog</code> and <code>Epigenome.parseUnsignedHex</code> exist.
+</p>
+<p>
+    <strong>Two ways to settle it, and both are the owner's.</strong> Narrow the rule's wording to the
+    APIs that actually break, which is what the code has been doing for months &mdash; or decide the
+    457 call sites are the bug and a Java 8 target is still wanted, in which case this is a large
+    piece of work that should be known about before it is started. What must not continue is a hard
+    rule that every new file in the module quietly breaks, because a rule nobody can follow stops
+    being read.
+</p>
 
 <h3 id="join-and-tab-0918-server-join">A join on a real client (2026-09-18, NOT played)</h3>
 

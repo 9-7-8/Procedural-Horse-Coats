@@ -21,6 +21,25 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-26-a-blank-tab-and-a-language.txt">2026-09-26
+        &mdash; <strong>a blank tab, and the search language that came out of it</strong>.
+        It opened on &ldquo;the horse realm tab shows literally nothing&rdquo; &mdash; a
+        missing enum case in an arrow-form switch <em>statement</em>, which need not be
+        exhaustive and so compiled clean. Fixing it exposed that the table could only ever
+        have listed horses in <strong>loaded chunks</strong>, in a field 1,600 blocks across;
+        it is now built from the census and the ancestry database, arrives in batches because
+        a genotype code is 5,612 characters, and is kept current by deltas. Three of the day's
+        bugs were the same shape: <strong>a feature that looked like it did nothing had never
+        been constructed at all</strong> &mdash; the realm tab, the cowboy's filter box (built
+        only when the merchant's offers had arrived, which at screen-init they never have),
+        and &ldquo;horses spawning in the realm&rdquo;, which was horses <em>walking in</em>
+        through a portal that took anything standing on it. Then the language: every filter
+        box became a <strong>SQL WHERE clause</strong> with a gene name as a column
+        (<code>healer = hom</code>), which went in under twenty unchanged tests because
+        adjacent terms were already ANDed. Plus a Query tab, saved searches, type-ahead in
+        every dropdown, a dealer who buys horses by the pound &mdash; a &sect;4 question the
+        owner answered better than either option offered &mdash; and
+        <strong>0.5.031</strong>.</li>
     <li><a href="session-log/d2026-09-25-eight-asks-and-a-release.txt">2026-09-25, last
         &mdash; <strong>eight asks, queued one at a time, and 0.5.030</strong>. It opened as a
         question about breeding for true flight, and the answer's own cost was the first ask:
