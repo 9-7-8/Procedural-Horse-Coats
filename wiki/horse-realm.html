@@ -43,10 +43,16 @@
 <h2 id="getting-there">Getting there, and getting back</h2>
 <p>
     Build a vertical rectangle of <strong>cobblestone</strong>, right-click a frame block
-    with a <strong>golden carrot</strong>, and stand in it for five seconds. Horses go through
-    on their own after three seconds, so the
-    <a href="horse-dimension.html#portals">roped-horse shortcut</a> still works &mdash;
-    right-click the portal while leading a string of them and they all go.
+    with a <strong>golden carrot</strong>, and stand in it for five seconds. A horse takes
+    three, but only one you are <strong>taking through</strong> &mdash; ridden, or on your
+    lead. The <a href="horse-dimension.html#portals">roped-horse shortcut</a> is the quick
+    way: right-click the portal while leading a string of them and they all go.
+</p>
+<p>
+    A horse that merely <em>walks onto</em> a portal stays where it is. A lit portal is
+    otherwise a hole in the fence in both directions &mdash; wild horses wander into the realm
+    from the Overworld side, and horses nobody has claimed let themselves out of the field
+    somebody left them in for safekeeping.
 </p>
 <div class="note">
     <span class="label">It used to be hay, and a horse ate one</span>
@@ -267,6 +273,19 @@
     <code>server/HorseRealmRules</code>, against <code>HorseRealm.REALM_LEVEL</code>, rather
     than generalised out of the corridor &mdash; which would have quietly undone two
     deliberate decisions.
+</p>
+<p>
+    The entity filter is <strong>two rules, not one</strong>, because the two questions it
+    is really answering are different. <code>horsesOnly</code> refuses any
+    <code>Mob</code> that is not a horse, whatever made it; horses it waves through, since
+    nearly every horse joining this level is one somebody sent. <code>nothingSpawnsHere</code>
+    covers what that cannot see &mdash; <code>EntityJoinLevelEvent</code> carries no spawn
+    reason &mdash; and refuses a <code>NATURAL</code>, <code>CHUNK_GENERATION</code> or
+    <code>SPAWNER</code> horse at <code>FinalizeSpawnEvent</code>. Nothing produces one today,
+    because the realm's biome has empty spawner lists in every category; that is a fact about
+    a JSON file, and the promise that the field holds what was put in it and what was born to
+    it should not rest on one. A summon, a breed egg and a foal all carry other reasons and
+    are untouched.
 </p>
 
 <h2 id="terrain">The terrain is arithmetic, not a saved layout</h2>
@@ -687,6 +706,17 @@
     bearing for the terrain and the wall. Spreading out is something the horses do
     afterwards, which is also the version that keeps working when a band wanders.
 </p>
+<div class="note">
+    <span class="label">Seen working, 2026-09-26</span>
+    <p>
+        The owner turned horses out and watched the field: <em>&ldquo;horses do spread out now
+        in their bands in the horse realm&rdquo;</em>. So the intake cap is biting &mdash; the
+        field holds several bands rather than one &mdash; and <code>BandSpacing</code>&rsquo;s
+        nudge settles against <code>WildHerdGoal</code>&rsquo;s cohesion instead of fighting
+        it. The two failure modes this was watched for, one ball and visible jitter, are both
+        ruled out.
+    </p>
+</div>
 
 <h2 id="f6">F6 is not a dev key any more</h2>
 <p>
@@ -742,40 +772,55 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: bands are meant to <strong>spread out</strong> rather than pile into one ball, and <kbd>H</kbd> in there opens a <strong>table of the whole field</strong> you can buy a horse out of for a holding pen ticket.</p>
+    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of the whole field</strong> you can buy a horse out of for a holding pen ticket &mdash; which drew nothing at all until 2026-09-26 and has still not been seen with rows in it &mdash; and a horse now only goes through a portal when a player is <strong>taking it through</strong>.</p>
 </div>
 
-<h3 id="verify-spacing">Do the bands actually spread out? (2026-09-25, NOT played)</h3>
+<h3 id="verify-no-spawns">Nothing arrives in the field that nobody sent (2026-09-26, NOT played)</h3>
 <p>
-    The whole point of the change, and the one thing a build cannot answer. Turn out a few
-    dozen horses &mdash; <code>/testkit</code>'s tickets, or the turnout ticket &mdash; and
-    leave the realm loaded for a while.
+    Reported alongside the portal drain below, and worth checking separately once that is
+    shut: <em>&ldquo;it should basically be a holding area for unwanted horses&rdquo;</em>.
+    Every horse in the field should be one released or turned out there, or a foal born to
+    two of those.
 </p>
 <ul>
-    <li><strong>Pass:</strong> several separate groups with open ground between them, each
-        roughly a stallion and a handful of mares, and no pair of groups sitting closer than
-        about forty blocks for long.</li>
-    <li><strong>Fail, the interesting way:</strong> still one ball. That would mean the intake
-        cap is not biting &mdash; check whether <code>HerdSocialHandler.bandMembers</code> is
-        seeing the whole band, since it only counts <em>loaded</em> members within 48 blocks
-        and a band read as smaller than it is would keep absorbing.</li>
-    <li><strong>Fail, the other way:</strong> horses visibly jittering, or edging along for
-        ever without settling. That would mean the spacing shove and
-        <code>WildHerdGoal</code>'s cohesion are fighting rather than balancing, and the step
-        (10 blocks per 100 ticks) wants shortening or the spacing (40) tightening.</li>
-    <li>Watch one band <strong>stay a band</strong> while it moves. If members are dropped
-        behind and then dragged back by <code>keepBandWhole</code>, the nudge is too long.</li>
+    <li>Open the realm table (<kbd>H</kbd>) on a field you stocked yourself and read the
+        names. Anything whose pedigree you do not recognise came from somewhere, and the
+        portal is the first suspect.</li>
+    <li><code>nothingSpawnsHere</code> is a belt on braces &mdash; the biome already has no
+        spawn entries &mdash; so it should never fire. If it does, something is adding
+        spawns to this dimension and that is the thing to find.</li>
 </ul>
+
+<h3 id="verify-escort">Only an escorted horse goes through a portal (2026-09-26, NOT played)</h3>
 <p>
-    Nothing here has a test. The herd tests in <code>common/</code> are all pure model &mdash;
-    familiarity, rank, composition &mdash; and there is no spatial or behavioural coverage of
-    banding anywhere, so this is judged by standing in the field and looking.
+    Reported by the owner the first time the realm was played: horses were <em>appearing</em>
+    in the field, and unclaimed ones were letting themselves out of it. Both were the same
+    line &mdash; the dwell timer was handed to any horse whose feet were in a portal block,
+    so a portal was a drain in both directions. <code>PortalEventHandler.escorted</code> now
+    asks who is taking it through.
 </p>
+<ul>
+    <li><strong>Still works:</strong> riding one through; leading a string in and
+        right-clicking the portal; a horse you lead in on a single lead.</li>
+    <li><strong>Should now refuse:</strong> a wild Overworld horse grazing across a lit
+        portal, and a loose realm horse walking over the exit &mdash; it should stand there
+        with no particles and no countdown, indefinitely.</li>
+    <li>A horse <strong>tied to a fence</strong> next to a portal is parked, not travelling:
+        it must not go either.</li>
+    <li>Watch the Overworld side over a few days near a portal you leave lit. The realm's
+        table (below) is the cheap way to check nothing arrived that you did not send.</li>
+</ul>
 
 <h3 id="verify-realm-tab">The realm table, and buying a horse out of it (2026-09-25, NOT played)</h3>
 <ul>
+    <li><strong>It draws at all.</strong> The tab was left out of the browser's render switch,
+        which is not a compile error, so it was a blank panel &mdash; reported 2026-09-26,
+        &ldquo;shows literally nothing while I'm in the horse realm&rdquo;. Fixed; nobody has
+        yet seen a row in it, so everything below this line is still unplayed.</li>
     <li><kbd>H</kbd> <strong>inside the realm</strong> opens on the Horse realm tab; <kbd>H</kbd>
         anywhere else opens where you left it, and the tab is still there to click.</li>
+    <li>The filter box, the sortable headings, the scroll wheel and <strong>Refresh</strong>
+        all belong to this tab too, and were dark with it.</li>
     <li>The table lists horses that are <em>in the field now</em> &mdash; walk one out through
         the exit, refresh, and it should be gone.</li>
     <li><strong>Bring home</strong> with no holding pen ticket: the button is grey and says
