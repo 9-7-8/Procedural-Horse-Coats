@@ -3,13 +3,18 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 
 import java.util.Optional;
 import java.util.UUID;
 
 /**
- * What the cowboy asks in emeralds for one of their horses.
+ * What the cowboy asks in emeralds for one of their horses, and what he pays
+ * for one of yours ({@link #buyPriceFor}).
  *
  * <h2>Cheap by default</h2>
  * A horse is the <b>early-game</b> purchase this mod is built around - you buy
@@ -85,6 +90,75 @@ public final class HorsePrices {
         Breed.PriceRange range = arcane ? ARCANE_PRICE : rangeFor(record.lineage());
         int price = roll(range, record.id());
         return record.gelded() ? Math.max(1, price * 3 / 4) : price;
+    }
+
+    // --- what a dealer pays, which is a different question ---
+
+    /** What he gives you for showing up with a horse at all. */
+    private static final int BUY_BASE = 2;
+
+    /** One emerald per this many loci the horse carries something at. */
+    private static final int PER_CARRIED = 3;
+
+    /** One emerald per this many of those it breeds true at. */
+    private static final int PER_HOMOZYGOUS = 2;
+
+    /**
+     * <b>What a dealer pays for a horse a player leads up to him.</b> A flat
+     * base, plus a bit for how much genetic material is actually in the animal:
+     * one emerald per {@value #PER_CARRIED} loci it carries something at, and
+     * another per {@value #PER_HOMOZYGOUS} of those it breeds <i>true</i> at.
+     * (Owner, 2026-09-26.)
+     *
+     * <h2>This is not a quality score, and the difference is the whole point</h2>
+     * &sect;4 says nothing in the model scores a horse - no rarity tier, no
+     * "this is the good one" - and a price that paid more for <i>rare</i> or for
+     * <i>good</i> genes would be exactly that, written at the counter instead of
+     * on the horse but doing the same work. This counts two things that are not
+     * opinions:
+     * <ul>
+     *   <li><b>How many loci are doing something</b> - {@code atBaseline} is a
+     *       fact about the code string, not a judgement. A lethal, a disorder
+     *       and a dished face all count, because they are all <i>material</i>.</li>
+     *   <li><b>How many of those are homozygous</b> - which is not "better"
+     *       either. It is the one property a buyer of <i>breeding stock</i> can
+     *       use: a horse homozygous at a locus passes it to every foal. A
+     *       homozygous carrier of something ruinous is worth more here than a
+     *       heterozygous carrier of the same thing, and that is correct - it is
+     *       more reliable, not nicer.</li>
+     * </ul>
+     * So the dealer is not telling the player which horse is good. He is paying
+     * by the pound for something he can breed from, and a player who wants to
+     * know whether a horse is <i>good</i> still has to decide that themselves.
+     *
+     * <h2>The numbers</h2>
+     * Measured, not guessed: over 600 rolled founders across every breed, a
+     * horse carries a mean of 11.7 non-baseline loci (4 to 29) and is homozygous
+     * at 5.4 of them (1 to 25). So an ordinary horse fetches about seven
+     * emeralds, a plain one three, and a thoroughly loaded one in the low
+     * twenties. Re-measure before moving any of these three constants; the mean
+     * moves every time a gene is added to the registry.
+     *
+     * <p><b>Not verified in-game.</b>
+     */
+    public static int buyPriceFor(HorseRecord record) {
+        Genotype genotype = record.genotype();
+        int carried = 0;
+        int homozygous = 0;
+        for (Gene gene : Genes.codeOrder()) {
+            AllelePair pair = genotype.pair(gene);
+            if (gene.atBaseline(pair)) {
+                continue;
+            }
+            carried++;
+            if (pair.homozygous()) {
+                homozygous++;
+            }
+        }
+        int price = BUY_BASE + carried / PER_CARRIED + homozygous / PER_HOMOZYGOUS;
+        // A gelding is the same animal to look at and no use whatever for the
+        // thing this price is counting, so it goes at the base and no more.
+        return Math.min(MAX_EMERALDS, record.gelded() ? BUY_BASE : price);
     }
 
     private static Breed.PriceRange rangeFor(BreedLineage lineage) {

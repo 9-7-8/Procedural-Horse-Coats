@@ -480,6 +480,22 @@ public class Cowboy extends AbstractVillager {
             player.awardStat(Stats.TALKED_TO_VILLAGER);
         }
         if (!level().isClientSide()) {
+            // Before the sold-out check, deliberately: a dealer with nothing
+            // left to sell is exactly the one you want to sell TO, and bouncing
+            // off "sold out" while leading a horse up to him would read as the
+            // horse not being seen. Crouched sells, upright only quotes and then
+            // carries on into the shop - see CowboySale.quote for why it takes
+            // two different gestures.
+            if (player instanceof ServerPlayer seller
+                    && level() instanceof ServerLevel serverLevel) {
+                if (seller.isShiftKeyDown()
+                        && com.example.horsegenetics.neoforge.server.CowboySale
+                                .sell(this, serverLevel, seller)) {
+                    return InteractionResult.CONSUME;
+                }
+                com.example.horsegenetics.neoforge.server.CowboySale
+                        .quote(this, serverLevel, seller);
+            }
             this.offers = null; // the herd may have changed since the last look
             if (getOffers().isEmpty()) {
                 if (player instanceof ServerPlayer serverPlayer) {

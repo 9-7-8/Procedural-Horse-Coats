@@ -158,6 +158,22 @@ public final class HorseLog {
     }
 
     /**
+     * <b>A horse sold to a dealer.</b> One row, in the seller's log, and no
+     * matching row anywhere for the buyer - a cowboy is not a player and has no
+     * log to write into. {@link #changedHands} would have done the seller's half
+     * correctly and then written the buyer's half against a villager's UUID,
+     * which is a row nobody can ever read.
+     */
+    static void soldToDealer(Horse horse, UUID seller, String dealer) {
+        if (!(horse.level() instanceof ServerLevel level)) {
+            return;
+        }
+        long at = stamp(level, level.getGameTime());
+        write(level, seller, HorseEvent.sale(at, horse.getUUID(), name(horse),
+                clip(dealer, OTHER_MAX)));
+    }
+
+    /**
      * A horse changed hands on a transfer paper. Three rows, potentially two
      * players: the taker always gets one, and a horse that had an owner before
      * puts a matching row in <i>their</i> log, because losing a horse is news to
