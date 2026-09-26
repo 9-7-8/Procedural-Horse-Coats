@@ -28,8 +28,13 @@ import java.util.UUID;
  * and happens <b>here, at conception</b>, because that is the only moment both
  * genomes and any carrot bias are in hand.
  *
- * <p>Plain golden-carrot breeding does not come through here. It stays instant,
- * and the only thing fertility does to it is {@link #vanillaFoalChance}.
+ * <p><b>Plain golden-carrot breeding does not come through here at all</b>, and
+ * nothing in this file touches it. It is instant, it always works, and the only
+ * limits on it are that both horses are adults of opposite sex (owner) - so
+ * there is no conception to attempt, no cycle to consult, and fertility does
+ * nothing to it. There used to be a {@code vanillaFoalChance} here that halved
+ * its odds per {@code sf/sf} parent; it is deleted, and {@code FertilityGene}
+ * reaches breeding only through {@link ReproRules} now.
  */
 public final class Conception {
 
@@ -134,14 +139,4 @@ public final class Conception {
                 m.sireId(), m.sireFirstName(), m.sireLastName(), m.sireGeneration(), sireSample, m.bredBy());
     }
 
-    /**
-     * <b>The chance plain golden-carrot breeding produces a foal at all.</b> 1
-     * unless a parent is {@code sf/sf}. Only the allele counts here - the
-     * epigenetic number never touches vanilla breeding - so every horse nobody
-     * bred for subfertility breeds exactly as vanilla does.
-     */
-    public static double vanillaFoalChance(Genotype dam, Genotype sire) {
-        return Genes.FERTILITY.alleleFactor(dam.pair(Genes.FERTILITY))
-                * Genes.FERTILITY.alleleFactor(sire.pair(Genes.FERTILITY));
-    }
 }

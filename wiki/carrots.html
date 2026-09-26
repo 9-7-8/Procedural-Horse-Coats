@@ -86,7 +86,9 @@
     <strong>arms</strong> it: the carrot&rsquo;s effect tokens go into an
     <code>ArmedCarrotsAttachment</code>, and stay there until that horse is part of a
     breeding that <strong>takes</strong>. They do not expire. They stay through a heat, out
-    of heat, and through a breeding that did not take. Several carrots stack. A carrot does
+    of heat, and through a breeding that did not take - though on the golden-carrot path
+    every breeding takes, so there they are spent on the next foal. Several carrots stack.
+    A carrot does
     <strong>not</strong> put the horse in love; breeding is still a golden carrot, a seed jar
     or a stallion left with her in heat. Each carrot shows a differently coloured particle burst
     and a line on the action bar. (Owner, 2026-09-13. It used to be a 30-second window that
@@ -94,12 +96,22 @@
 </p>
 
 <p>
-    An armed parent turns golden-carrot breeding into a
-    <a href="fertility.html">pregnancy</a>. <code>ReproHandler.breed</code> folds each
-    parent&rsquo;s effects into one <code>GameteBias</code>
-    (<code>CarrotEffect.fold</code>), draws the embryo with them at conception, and clears
-    both horses only if the mare conceives. Filling a seed jar from an armed stallion moves
-    his effects into the jar, and they act on his side when the jar is used.
+    <strong>A golden carrot spends the effects on an instant foal</strong>;
+    <code>ReproHandler.breed</code> folds them into a <code>GameteBias</code> at conception
+    for the two paths that make a <a href="fertility.html">pregnancy</a> instead - the seed
+    jar and a stallion left with a mare - and either way both horses are cleared only if it
+    took. Filling a seed jar from an armed stallion moves his effects into the jar, and they
+    act on his side when the jar is used.
+</p>
+
+<p>
+    An armed parent <em>used</em> to turn golden-carrot breeding into a pregnancy, and that
+    was the single biggest way a carrot could silently do nothing: conception is gated on
+    the mare&rsquo;s cycle, so an armed pair out of heat - <strong>sixteen days in
+    twenty-one</strong> - stood there eating golden carrots with no foal, no pregnancy and
+    the carrots still armed. Now the bias goes into the foal the golden carrot was always
+    going to produce, so a splice works the moment you feed it. The cycle still means
+    everything on the paths where a mare is left to herself.
 </p>
 
 <h2 id="four">The four breeding carrots</h2>

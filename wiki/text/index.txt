@@ -3003,6 +3003,7 @@ wiki/item-tickets.html#classes	coding	Where it lives
 wiki/item-tickets.html#gaps	coding	Known gaps
 wiki/item-tickets.html#holding-pen	gameplay	The holding pen ticket, and its sign
 wiki/item-tickets.html#tiers	gameplay	The four tiers
+wiki/item-tickets.html#turnout	gameplay	The turnout ticket - the one that does not bring a horse home
 wiki/item-tickets.html#using	gameplay	Using one
 wiki/item-tickets.html#verified	coding	Verified
 wiki/item-transfer-papers.html#components	coding	What each one carries

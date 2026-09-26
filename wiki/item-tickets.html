@@ -101,6 +101,41 @@
     <li>Like every ticket it is one use, and it refuses - and is not spent - when the horse
         is not yours, you have no pen yet, or the pen has no room to stand.</li>
 </ul>
+
+<h2 id="turnout">The turnout ticket - the one that does not bring a horse home</h2>
+
+<p>
+    A <strong>turnout ticket</strong> (a blank ticket, horse hair and a feather) sends a
+    horse you own to the <a href="horse-realm.html">horse realm</a> and <strong>gives it
+    up there</strong>. It arrives at the realm's one entrance and is wild from that moment:
+    untamed, unowned, healed, its tack handed back to you, and marked as a wild spawn so a
+    band will take it in. It works from any world, and it is the only ticket with a
+    destination you did not build.
+</p>
+
+<p>
+    <strong>It is the retirement route.</strong> A <a href="item-freedom-stick.html">freedom
+    stick</a> already turns a horse out, but only while you are standing in the realm with
+    it - so retiring a horse honestly meant leading it through a portal first. This is that
+    trip in one right-click.
+</p>
+
+<ul>
+    <li><strong>It is not reversible.</strong> Nothing fetches the horse back; if you want
+        it again you catch and tame it like any wild horse.</li>
+    <li><strong>Its stall is freed.</strong> A stall sign bound to it is unbound, so the
+        stall can take another horse. No other release path does this, because no other
+        one can reach a horse that still has a stall.</li>
+    <li><strong>An ender whistle bound to it stops answering.</strong> That binding is
+        permanent by design and is not refunded - see <a href="item-whistles.html">the
+        whistles</a>.</li>
+    <li><strong>The horse loses nothing of itself.</strong> Name, genotype, epigenome,
+        breed, pedigree, generation and bond all stay, which is what makes turning one out
+        into a shared field a gift rather than a deletion - whoever tames it next gets the
+        animal <em>and</em> its papers.</li>
+    <li>One use, and it refuses - unspent - when the horse is not yours, when it is being
+        ridden, or when the realm is not loaded.</li>
+</ul>
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -149,6 +184,24 @@
     goes through <code>StallSignHandler.onSignBroken</code>, which now releases a pen as
     well as a stall. The ticket&rsquo;s texture is the ticket&rsquo;s art hue-rotated, as a
     placeholder.
+</p>
+
+<p>
+    <code>item/TurnoutTicketItem</code> is handled in <code>TicketHandler.turnOut</code>,
+    and is deliberately two existing pieces bolted together rather than a third
+    implementation of either: <code>arrive</code> for the travel (the same particles, sound
+    and lead handling as every other ticket) and <code>server/HorseRelease.makeWild</code>
+    for the release, which is the <strong>single</strong> definition of what wild means and
+    the only thing that remembers the temper reset and the wild-spawn mark. The order is
+    load-bearing - <strong>move first, release second</strong> - so the tack is handed to a
+    player still standing in the world the horse left, rather than dropped on the realm
+    floor where they cannot reach it. It is also the only release that clears the horse&rsquo;s
+    <code>StallRecord</code>: the freedom stick works only inside the realm and
+    <code>HorseRealmFeral</code> only fires on a horse already there, so neither can ever
+    meet a horse that still has a stall. It has no destination to measure - the realm has
+    one entrance at <code>HorseRealm.arrivalSpot()</code> on ground the dimension
+    guarantees - so it is the one ticket with nothing that can fail late. It shares the
+    ticket texture too.
 </p>
 
 <h2 id="gaps">Known gaps</h2>

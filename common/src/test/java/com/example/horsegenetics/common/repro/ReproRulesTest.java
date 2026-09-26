@@ -341,15 +341,22 @@ class ReproRulesTest {
         }
     }
 
+    /**
+     * The subfertile allele reaches breeding through {@link ReproRules} alone.
+     * It used to have a second route - {@code Conception.vanillaFoalChance},
+     * which halved a golden-carrot pairing's odds per {@code sf/sf} parent -
+     * and that is deleted: a golden carrot always works now, so the locus can
+     * slow a herd left to itself and can no longer make a hand-fed pairing come
+     * to nothing.
+     */
     @Test
-    void vanillaIsUntouchedUnlessAParentIsSubfertile() {
+    void subfertilityActsOnlyThroughTheCycle() {
         Genotype wild = Genotype.wildType();
         Genotype carrier = wild.with(new AllelePair(Genes.FERTILITY.sf, Genes.FERTILITY.n));
         Genotype sf = wild.with(new AllelePair(Genes.FERTILITY.sf, Genes.FERTILITY.sf));
-        assertEquals(1.0, Conception.vanillaFoalChance(wild, wild));
-        assertEquals(1.0, Conception.vanillaFoalChance(carrier, carrier));
-        assertEquals(0.5, Conception.vanillaFoalChance(sf, wild));
-        assertEquals(0.25, Conception.vanillaFoalChance(sf, sf));
+        assertEquals(1.0, Genes.FERTILITY.alleleFactor(wild.pair(Genes.FERTILITY)));
+        assertEquals(1.0, Genes.FERTILITY.alleleFactor(carrier.pair(Genes.FERTILITY)));
+        assertEquals(0.5, Genes.FERTILITY.alleleFactor(sf.pair(Genes.FERTILITY)));
     }
 
     // ------------------------------------------------------------------

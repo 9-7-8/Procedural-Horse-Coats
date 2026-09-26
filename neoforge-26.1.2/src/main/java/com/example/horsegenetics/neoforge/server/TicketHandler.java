@@ -6,6 +6,7 @@ import com.example.horsegenetics.neoforge.data.StallRecord;
 import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.item.TicketItem;
+import com.example.horsegenetics.neoforge.item.TurnoutTicketItem;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -59,6 +60,13 @@ public final class TicketHandler {
         if (stack.getItem() instanceof HoldingPenTicketItem) {
             if (!event.getLevel().isClientSide() && horse.level() instanceof ServerLevel level) {
                 sendToPen(level, horse, event.getEntity(), stack);
+            }
+            consume(event);
+            return;
+        }
+        if (stack.getItem() instanceof TurnoutTicketItem) {
+            if (!event.getLevel().isClientSide() && horse.level() instanceof ServerLevel level) {
+                turnOut(level, horse, event.getEntity(), stack);
             }
             consume(event);
             return;
@@ -182,6 +190,63 @@ public final class TicketHandler {
         String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
         say(player, name + " is in your holding pen.");
         HorseProgress.complete(player, ProgressTask.USE_PEN_TICKET);
+    }
+
+    /**
+     * <b>A turnout ticket</b>: any horse the player owns, to the horse realm's
+     * arrival field, <b>and given up there</b> - see {@link TurnoutTicketItem}.
+     *
+     * <p>It is the only ticket with no destination of its own to find. Every
+     * other one lands on a stall or a pen the player built, and refuses when
+     * that is gone; the realm has exactly one entrance
+     * ({@link HorseRealm#arrivalSpot}) and it is flat ground the dimension
+     * guarantees, so there is nothing here that can fail late.
+     *
+     * <p><b>Order matters.</b> The horse is moved first and released second, so
+     * {@code HorseRelease.makeWild} hands the tack back to a player who is
+     * standing in the world the horse just left - rather than dropping a saddle
+     * on the realm floor where they cannot reach it. Everything else about what
+     * "wild" means is that method's business and deliberately not repeated here.
+     */
+    private static void turnOut(ServerLevel level, Horse horse, Player player, ItemStack stack) {
+        MinecraftServer server = level.getServer();
+        if (server == null) {
+            return;
+        }
+        if (!ownedBy(horse, player.getUUID())) {
+            say(player, notYours(horse));
+            return;
+        }
+        ServerLevel realm = server.getLevel(HorseRealm.REALM_LEVEL);
+        if (realm == null) {
+            say(player, "The horse realm is not loaded on this server.");
+            return;
+        }
+        if (horse.isVehicle()) {
+            say(player, "Get off first - a horse cannot travel with a rider.");
+            return;
+        }
+
+        String name = HorseRecords.hasRealRecord(horse)
+                ? HorseRecords.of(horse).displayName()
+                : (horse.hasCustomName() ? horse.getCustomName().getString() : "The horse");
+
+        arrive(level, realm, horse, HorseRealm.arrivalSpot(), player);
+        HorseRelease.makeWild(realm, horse, player);
+        // A stall bound to a horse that is no longer yours is a sign nobody can
+        // rebind. Neither existing release path clears one, because neither can
+        // reach a horse that HAS one: the freedom stick only works inside the
+        // realm and HorseRealmFeral only fires on a horse already there. This
+        // one starts wherever the horse lives, so it is the first release that
+        // has to tidy up after itself.
+        StallData.get(server).removeHorse(horse.getUUID());
+
+        if (!player.getAbilities().instabuild) {
+            stack.shrink(1);
+        }
+        say(player, name + " is loose in the horse realm, and is nobody's now.");
+        ActionTrace.log("ticket", player.getGameProfile().name() + " turned out "
+                + ActionTrace.describeShort(horse) + " into the realm - unowned, stall binding cleared");
     }
 
     /**

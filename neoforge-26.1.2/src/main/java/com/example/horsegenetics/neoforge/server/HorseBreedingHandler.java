@@ -3,12 +3,14 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.GameteBias;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.SpliceOutcome;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
@@ -24,7 +26,6 @@ import com.example.horsegenetics.common.name.NamingPolicy;
 import com.example.horsegenetics.neoforge.data.HorseNamingData;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.common.progress.ProgressTask;
-import com.example.horsegenetics.common.repro.Conception;
 import com.example.horsegenetics.common.repro.Embryo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -37,18 +38,30 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
- * Real breeding. <b>Plain golden carrots give a foal at once; a breeding
- * carrot on either parent gives a pregnancy instead</b> ({@link ReproHandler},
- * {@code common.repro}), and so do the seed jar and a stallion left with a mare
- * ({@link NaturalBreedingHandler}). Both kinds of foal are finished by the same {@link #populateFoal}. On {@link BabyEntitySpawnEvent} (fired from
+ * Real breeding. <b>A golden carrot gives a foal at once, always</b>; the seed
+ * jar and a stallion left with a mare give a pregnancy instead
+ * ({@link ReproHandler}, {@code common.repro},
+ * {@link NaturalBreedingHandler}). Both kinds of foal are finished by the same {@link #populateFoal}. On {@link BabyEntitySpawnEvent} (fired from
  * {@code Animal#spawnChildFromBreeding} before the foal is added to the
  * world):
  *
  * <ul>
- *   <li>same-sex pairings are cancelled - breeding needs a mare and a stallion;</li>
+ *   <li>same-sex pairings are cancelled - breeding needs a mare and a stallion,
+ *       and with the owner's rule that a golden carrot always works this and
+ *       being an adult are the <b>only</b> two limits left on this path: no
+ *       cooldown, no taming, no full health, no gelding, no subfertility, no
+ *       heat cycle, and a pregnant mare breeds anyway (her pregnancy is left
+ *       alone - the foal here is instant, so there is nothing to overwrite).
+ *       The rest of that rule is in {@link BreedingCooldownHandler} and
+ *       {@code mixin/HorseAlwaysParentMixin};</li>
+ *   <li>a <b>breeding carrot</b> on either parent is folded into this foal
+ *       rather than diverting to a pregnancy, and used up on it. It used to
+ *       divert, which meant a splice carrot did nothing at all for the 16 days
+ *       in 21 the mare was out of heat;</li>
  *   <li>the foal's <b>genome</b> is {@link GeneticCodeCombiner#combine}d from
  *       the parents - Mendelian alleles, each one carrying the priority and
  *       epigenetic seed of the exact parent copy it came from, so a foal that
@@ -106,59 +119,102 @@ public final class HorseBreedingHandler {
         Horse damHorse = aIsDam ? parentA : parentB;
         Horse sireHorse = aIsDam ? parentB : parentA;
 
-        // A GELDING SIRES NOTHING. Vanilla love does not know it, so a mare and a
-        // gelding fed golden carrots court like any pair and arrive here.
-        if (sireRecord.gelded()) {
-            ReproHandler.overlay(event.getCausedByPlayer(), sireRecord.displayName() + " is a gelding - no foal.",
-                    ChatFormatting.YELLOW);
-            event.setCanceled(true);
-            return;
-        }
+        // A GELDING SIRES NOTHING - except on this path. The owner's rule is
+        // that a golden carrot always works and the only limits are age and
+        // sex, and gelding is neither. It still means everything on every other
+        // path: NaturalCover.entireStallion refuses a gelding outright, so a
+        // cut stallion left in a paddock covers nothing, which is what gelding
+        // one is for. This is the deliberate override, and it takes a player
+        // standing there with two golden carrots.
 
         Genome damGenome = genomeOf(damHorse, damRecord, rng);
         Genome sireGenome = genomeOf(sireHorse, sireRecord, rng);
         Player breeder = event.getCausedByPlayer();
 
-        // A mare already carrying is not bred again. Breeding foods are refused
-        // before this (BreedingCooldownHandler); this catches love from anywhere else.
-        if (ReproHandler.of(damHorse).pregnant()) {
-            event.setCanceled(true);
-            return;
-        }
+        // A PREGNANT MARE BREEDS ANYWAY, and the pregnancy is not touched
+        // (owner): the foal below is instant and the one she is carrying
+        // arrives on its own clock. Nothing is overwritten because nothing
+        // conceives - see the next paragraph.
+        //
+        // A CARROT-ARMED PARENT NO LONGER DIVERTS TO A PREGNANCY. It used to
+        // (owner, 2026-09-13), and that was the single biggest way a golden
+        // carrot could silently do nothing: conception is gated on the estrus
+        // cycle, so a carrot-armed pair out of heat - 16 days in 21 - stood
+        // there eating carrots with no foal and no pregnancy. Now the carrot's
+        // bias is folded into THIS foal instead, so a splice carrot works the
+        // moment you feed it and there is nothing to wait for. Gestation
+        // belongs to natural cover and the seed jar, which is where the cycle
+        // is worth having.
+        java.util.List<CarrotEffect> damCarrots = CarrotEffect.parseList(ReproHandler.armedTokens(damHorse));
+        java.util.List<CarrotEffect> sireCarrots = CarrotEffect.parseList(ReproHandler.armedTokens(sireHorse));
+        GameteBias damBias = CarrotEffect.fold(damCarrots, damGenome.genotype(), rng);
+        GameteBias sireBias = CarrotEffect.fold(sireCarrots, sireGenome.genotype(), rng);
 
-        // A CARROT-ARMED PARENT MAKES THIS A PREGNANCY, not a foal (owner,
-        // 2026-09-13) - either parent. A mare out of heat simply does not take,
-        // and the carrots stay armed for next time. Cancelling is what vanilla
-        // expects: Animal.spawnChildFromBreeding resets both parents' love and
-        // sets their 6000-tick cooldown on a cancelled BabyEntitySpawnEvent
-        // (checked in the patched 26.1.2 source).
-        if (ReproHandler.armed(damHorse) || ReproHandler.armed(sireHorse)) {
-            Conception.Result result = ReproHandler.breed(damHorse, damRecord, damGenome,
-                    sireGenome, sireRecord, sireHorse, java.util.List.of(), breeder);
-            ReproHandler.announce(damHorse, breeder, result);
-            event.setCanceled(true);
-            return;
-        }
-
-        // PLAIN GOLDEN CARROTS STAY INSTANT. The one thing fertility may do here
-        // is the subfertile allele, and it is only rolled when it could matter,
-        // so a pair nobody bred for it draws exactly the foal it always did.
-        double foalChance = Conception.vanillaFoalChance(damGenome.genotype(), sireGenome.genotype());
-        if (foalChance < 1.0 && rng.nextFloat() >= foalChance) {
-            ReproHandler.overlay(breeder, "It didn't take - no foal this time.", ChatFormatting.YELLOW);
-            ActionTrace.log("fertility", ActionTrace.describeShort(damHorse) + " x "
-                    + ActionTrace.describeShort(sireHorse) + ": a subfertile pairing missed (chance "
-                    + foalChance + ")");
-            event.setCanceled(true);
-            return;
-        }
+        // No subfertility roll either: sf/sf halved the odds of a foal here and
+        // nowhere the player could see why. The locus still does its work on
+        // every other path (ReproRules reads FertilityGene.alleleFactor at
+        // conception), so breeding for fertility still means something - it
+        // just cannot make a deliberate, hand-fed pairing come to nothing.
 
         boolean born = applyBredFoal(child, damHorse,
-                damGenome, damRecord, sireGenome, sireRecord, breeder, rng);
-        if (!born) {
+                damGenome, damRecord, sireGenome, sireRecord, breeder, rng,
+                damBias, sireBias);
+        if (born) {
+            // Used up only if it took, the same rule the pregnancy path follows.
+            if (!damCarrots.isEmpty()) {
+                ReproHandler.disarm(damHorse);
+            }
+            if (!sireCarrots.isEmpty()) {
+                ReproHandler.disarm(sireHorse);
+            }
+            announceFoal(damHorse, damRecord, sireRecord, breeder, damCarrots, sireCarrots,
+                    damBias, sireBias);
+        } else {
             // the drawn genotype was an embryonic lethal - the embryo never
             // implants, so there is no foal to add to the world
             event.setCanceled(true);
+        }
+    }
+
+    /**
+     * <b>Say that a foal was born, in chat and in the log</b> (owner: "the
+     * golden carrot should still trigger pregnancy messages to the log and
+     * chat").
+     *
+     * <p>This path used to say nothing at all on success. Everything it could
+     * have said went through {@code ReproHandler.overlay}, which writes to the
+     * <b>action bar</b> and only to the player who caused it - a line that is
+     * gone in two seconds, is not in the chat history, and is not in the log
+     * either, so "did that breeding do what I think it did" was answerable only
+     * by catching the horse and reading it. The pregnancy path at least
+     * announces conception and foaling; the instant path announced neither.
+     *
+     * <p>Chat rather than the action bar, and {@link ActionTrace} for the log,
+     * which is the file a bug report is answered from.
+     */
+    private static void announceFoal(Horse damHorse, HorseRecord damRecord, HorseRecord sireRecord,
+                                     @Nullable Player breeder,
+                                     List<CarrotEffect> damCarrots, List<CarrotEffect> sireCarrots,
+                                     GameteBias damBias, GameteBias sireBias) {
+        String pairing = damRecord.displayName() + " and " + sireRecord.displayName();
+        if (breeder != null) {
+            breeder.sendSystemMessage(Component.literal(pairing + " had a foal.")
+                    .withStyle(ChatFormatting.GREEN));
+        }
+        ActionTrace.log("repro", pairing + " bred with a golden carrot - an instant foal, no "
+                + "pregnancy" + (ReproHandler.of(damHorse).pregnant()
+                        ? ", and she is still carrying the one she was already pregnant with" : ""));
+        // The carrots are the half most worth a line: feeding one and seeing its
+        // effect are separated by a breeding, and on this path they are now
+        // separated by nothing at all - so if a splice did not land, this says
+        // whether it was even armed.
+        if (!damCarrots.isEmpty() || !sireCarrots.isEmpty()) {
+            ActionTrace.log("carrot", pairing + " bred with carrot effects on "
+                    + (damCarrots.isEmpty() ? "" : "the mare ")
+                    + (!damCarrots.isEmpty() && !sireCarrots.isEmpty() ? "and " : "")
+                    + (sireCarrots.isEmpty() ? "" : "the sire ")
+                    + (damBias.isNone() && sireBias.isNone()
+                            ? "- which folded to NO bias" : "- used up on this foal"));
         }
     }
 
@@ -174,6 +230,9 @@ public final class HorseBreedingHandler {
      * @param child    the foal entity vanilla has just made
      * @param damHorse the live dam - only its tame state / owner is read here
      * @param breeder  the player who caused the breeding, or {@code null}
+     * @param damBias  the fed carrots' effect on the dam's gamete, or
+     *                 {@link GameteBias#NONE}
+     * @param sireBias the same for the sire
      * @return {@code false} if the drawn genotype is an embryonic lethal, in
      *         which case nothing was written to {@code child} and the caller
      *         must not add it to the world
@@ -181,15 +240,26 @@ public final class HorseBreedingHandler {
     static boolean applyBredFoal(Horse child, Horse damHorse,
                                  Genome damGenome, HorseRecord damRecord,
                                  Genome sireGenome, HorseRecord sireRecord,
-                                 @Nullable Player breeder, Rng rng) {
-        // No carrot bias on this path: an armed parent never reaches it.
+                                 @Nullable Player breeder, Rng rng,
+                                 GameteBias damBias, GameteBias sireBias) {
+        // AN ARMED PARENT REACHES THIS PATH NOW. It used to divert to a
+        // pregnancy, so this took no bias and said so; a golden carrot is
+        // instant whatever is armed, so the bias has to be applied here or a
+        // splice carrot fed before one would silently do nothing.
         Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng,
-                GameteBias.NONE, GameteBias.NONE);
+                damBias, sireBias);
 
         // The foal's breed label: same-breed -> that breed, two breeds -> a
         // "A x B cross", cross-of-the-same-pair stays that cross, anything
         // messier -> "Mixed" (see BreedLineage.combine).
         BreedLineage childLineage = BreedLineage.combine(damRecord.lineage(), sireRecord.lineage());
+        // A SPLICE THAT LANDS MARKS THE FOAL FOR GOOD, on this path exactly as
+        // on the pregnancy one (Conception.draw). The question is about the
+        // foal, not the carrot: an allele neither parent carried.
+        if (SpliceOutcome.spliceReached(childGenome.genotype(), damGenome.genotype(),
+                sireGenome.genotype(), damBias, sireBias)) {
+            childLineage = childLineage.spliced();
+        }
 
         // The draw happens first and is never conditioned on viability - it is
         // the ordinary Mendelian one, and this only reads its result. That is

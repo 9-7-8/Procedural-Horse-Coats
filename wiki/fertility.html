@@ -33,11 +33,12 @@
 <table>
 <thead><tr><th>You do this</th><th>You get</th></tr></thead>
 <tbody>
-<tr><td>Feed two horses <strong>golden carrots</strong> (neither has eaten a breeding carrot)</td>
-    <td>A foal <strong>at once</strong>, as in vanilla. Heat does not matter.</td></tr>
-<tr><td>Feed golden carrots to a pair where either horse has eaten a
-    <a href="carrots.html">breeding carrot</a></td>
-    <td>A <strong>pregnancy</strong>, if the mare is in heat and it takes.</td></tr>
+<tr><td>Feed two horses <strong>golden carrots</strong></td>
+    <td>A foal <strong>at once</strong>, always. Two adults of opposite sex is the only
+    condition - heat, health, taming, gelding, cooldown and subfertility all stop
+    mattering, and a pregnant mare breeds anyway without losing the one she is carrying.
+    Any <a href="carrots.html">breeding carrot</a> either of them has eaten is folded into
+    that foal.</td></tr>
 <tr><td>Use a <a href="item-seed-jars.html">seed jar</a> on your mare</td>
     <td>A <strong>pregnancy</strong>, if she is in heat and it takes.</td></tr>
 <tr><td>Leave a <strong>stallion with mares</strong></td>
@@ -95,7 +96,9 @@
         make it longer.</li>
     <li>Her Breeding line says <em>Pregnant &ndash; about 14 min to go</em>. In the last
         third she is <strong>15% slower</strong>, and the line adds <em>heavy and slow</em>.</li>
-    <li>A pregnant mare <strong>refuses golden carrots</strong>.</li>
+    <li>A pregnant mare still takes a <strong>golden carrot</strong> and still gives an
+        instant foal from it. She does not conceive twice - nothing about the pregnancy she
+        is carrying changes, and it arrives on its own clock.</li>
     <li>She foals where she stands. The foal belongs to whoever owns her <em>then</em>, and
         is credited as bred by whoever arranged the breeding.</li>
     <li>If she is somewhere unloaded when she is due, she foals as soon as you come back.</li>
@@ -180,8 +183,12 @@
 
 <p>
     A <a href="item-vet-kit.html">vet&rsquo;s kit</a>, used while sneaking on your own
-    stallion or colt, gelds him for good. A gelding never breeds, never fills a seed jar, and
-    sires nothing from golden carrots. He does not spar, guard mares or go looking for a mare
+    stallion or colt, gelds him for good. A gelding never covers a mare and never fills a seed
+    jar, which is the whole point of cutting one: left in a paddock with mares he sires
+    nothing, ever. He will still give a foal if you stand there and feed the pair
+    <strong>golden carrots</strong> - that path takes no notice of anything but age and sex
+    (owner&rsquo;s call), and it takes a deliberate act by a player holding two carrots.
+    He does not spar, guard mares or go looking for a mare
     in heat, and he bonds with you a quarter faster. His information screen says
     <em>Gelding</em> and his nameplate symbol is grey. About half a cowboy&rsquo;s males are
     geldings, and they cost a little less.
@@ -245,7 +252,7 @@
 <tr><td><code>common/repro/Reproduction</code></td><td>The attachment value: cycle phase, optional <code>Pregnancy</code>, last foaling tick, the foals being nursed, when they were last all away, and a stallion&rsquo;s covers today. Holds no current state.</td></tr>
 <tr><td><code>common/repro/ReproRules</code></td><td><code>stateAt(record, now, timing)</code>, the odds, twins, early loss, the late slowdown, weaning. Every constant the owner settled.</td></tr>
 <tr><td><code>common/repro/Pregnancy</code>, <code>Embryo</code></td><td>What she carries. An embryo is the foal&rsquo;s genome already drawn, its breed label, whether it is lost early, and the sire&rsquo;s id, names, generation and whole <code>GenomeSample</code>.</td></tr>
-<tr><td><code>common/repro/Conception</code></td><td><code>attempt(mating, mare, now, timing, sireCovers, health, lethals, rng)</code>: the one draw every pregnancy path uses. Also <code>vanillaFoalChance</code>, the only thing fertility does to plain golden carrots.</td></tr>
+<tr><td><code>common/repro/Conception</code></td><td><code>attempt(mating, mare, now, timing, sireCovers, health, lethals, rng)</code>: the one draw every pregnancy path uses. Golden-carrot breeding does not come through here at all and fertility does nothing to it &mdash; there was a <code>vanillaFoalChance</code> that halved its odds per <code>sf/sf</code> parent, and it is deleted.</td></tr>
 <tr><td><code>common/repro/NaturalCover</code></td><td><code>decide(mare, record, now, timing, stallions, othersNearby)</code>: every rule of a natural cover, as a verdict (<code>COVER</code>, <code>NOT_A_BREEDING_MARE</code>, <code>NOT_NOW</code>, <code>NO_STALLION</code>, <code>CROWDED</code>) plus which stallion. <code>NaturalBreedingHandler</code> only gathers the facts.</td></tr>
 <tr><td><code>common/repro/CoverNotice</code></td><td>The owner-facing line for a cover that did not happen, and the quiet period that stops it repeating. A <code>Reason</code> per sentence: the cap, hurt, ridden, leashed, cowboy stock, and the three ways a cover itself ends. <code>dueAgain</code> always lets a <em>changed</em> reason through.</td></tr>
 <tr><td><code>common/repro/ReproText</code></td><td>Every sentence: durations, refusals, the info screen's Breeding line, the vet's kit report. Tested, above all, so that twins show only through the kit.</td></tr>
@@ -271,14 +278,15 @@
 <h2 id="hooks">The hooks</h2>
 
 <ul>
-    <li><strong><code>HorseBreedingHandler.onBabySpawn</code></strong>: a pregnant dam
-        cancels the event. An <a href="carrots.html#window">armed</a> parent sends the pair
-        to <code>ReproHandler.breed</code> and cancels. The patched
-        <code>Animal.spawnChildFromBreeding</code> resets love and sets both 6000-tick
-        cooldowns on a cancel. Otherwise the instant foal goes through
-        <code>applyBredFoal</code>, after one roll against
-        <code>vanillaFoalChance</code> made only when it is below 1, so a wild-type pair
-        draws exactly what it used to.</li>
+    <li><strong><code>HorseBreedingHandler.onBabySpawn</code></strong>: same-sex pairings
+        cancel, and nothing else does. A pregnant dam, a gelded sire, an
+        <a href="carrots.html#window">armed</a> parent and a subfertile pair all used to,
+        and all four are gone: the foal goes straight through <code>applyBredFoal</code>,
+        with any armed carrot&rsquo;s <code>GameteBias</code> folded into the draw and spent
+        on it. The one remaining cancel is the draw coming out an embryonic lethal. The
+        patched <code>Animal.spawnChildFromBreeding</code> resets love and sets both
+        6000-tick cooldowns on a cancel &mdash; which no longer strands anyone, since
+        <code>BreedingCooldownHandler</code> zeroes the cooldown on the next feed.</li>
     <li><strong><code>StallionSeedJarHandler</code></strong>: filling counts a cover and moves
         the stallion&rsquo;s armed carrots into the jar. Using it requires
         <code>ReproHandler.receptive</code> instead of vanilla love.</li>
@@ -316,9 +324,13 @@
         rivalry, the jar and <code>onBabySpawn</code>. <code>VetKitHandler</code> gelds and
         examines (<code>ReproHandler.vetReport</code>). See
         <a href="known-gaps.html#gap-229">gap 229</a> for what still reads sex alone.</li>
-    <li><strong><code>BreedingCooldownHandler</code></strong> refuses vanilla love items to a
-        pregnant mare, server side only; see
-        <a href="known-gaps.html#gap-226">gap 226</a>.</li>
+    <li><strong><code>BreedingCooldownHandler</code></strong> is what makes "a golden carrot
+        always works" true at the feed: it zeroes the vanilla breeding cooldown and puts an
+        <em>untamed</em> adult in love itself, which vanilla&rsquo;s
+        <code>handleEating</code> will not do. It used to refuse love items to a pregnant
+        mare and report the cooldown remaining; both are gone with the rules they
+        described. The tamed-and-full-health half of the same rule is
+        <code>mixin/HorseAlwaysParentMixin</code>.</li>
     <li><strong>Birth</strong> is <code>HorseBreedingHandler.bornFromPregnancy</code>, which
         shares <code>populateFoal</code> with the instant foal. The breeder is looked up by
         name, and only gets checklist ticks and gene discovery if they are online.</li>
@@ -439,14 +451,19 @@
     which the heat system deliberately leaves alone. The yard's GOLD TIMER pen does what a player's carrots do, on a
     clock: it clears the vanilla cooldown and puts both horses in love, then counts the pen 300 ticks later. In the
     09:09 run it took five tries out of five, twice with <code>ReproHandler.receptive</code> saying the mare was
-    <em>not</em> in heat.
+    <em>not</em> in heat. Since 2026-09-25 the pen is doing less than it looks: clearing the cooldown is what a feed
+    itself does now.
 </p>
 
 <p id="verified-subfertile">
-    <strong>A subfertile pair takes about one time in four</strong> (2026-09-15). The yard's SUBFERTILE TIMER pen puts an
-    <code>sf/sf</code> pair in love twelve times, the way golden carrots would, clearing the vanilla cooldown each time.
-    In the 09:09 run three tries gave a foal and nine did not. Each miss logged <code>a subfertile pairing missed (chance
-    0.25)</code>, the message a player sees as <em>It didn't take - no foal this time</em>.
+    <strong>A subfertile pair took about one time in four - and no longer does</strong> (measured 2026-09-15, the rule
+    retired 2026-09-25). The yard's SUBFERTILE TIMER pen put an <code>sf/sf</code> pair in love twelve times, the way
+    golden carrots would, clearing the vanilla cooldown each time; in the 09:09 run three tries gave a foal and nine did
+    not, each miss logging <code>a subfertile pairing missed (chance 0.25)</code>. The measurement was right and the
+    behaviour is gone on purpose: a golden carrot always works now, so <code>Conception.vanillaFoalChance</code> is
+    deleted and the locus reaches breeding only through the cycle. It still halves a mare's odds at every natural cover,
+    which is where a fertility gene belongs - breeding for it slows a herd left to itself and can no longer make a
+    pairing you arranged by hand come to nothing.
 </p>
 
 <p id="verified-weaning">
@@ -494,11 +511,29 @@
 <p>
     The owner&rsquo;s standing rule is that this mod adds to vanilla and does not take
     vanilla away, and a pregnancy replaces the instant foal outright. So the pregnancy lives
-    only on paths vanilla never had: the jar, the carrots and the gene. The one thing
-    fertility may do to plain breeding is the subfertile allele, which takes two copies in a
-    parent. An unbred horse is never <code>sf/sf</code>, so unbred stock breeds exactly as
-    vanilla does. The epigenetic number is kept off that path for the same reason. The three
-    options this was chosen from, and every other call, are under
+    only on paths vanilla never had: the jar and a stallion left with mares.
+</p>
+
+<p>
+    <strong>That rule has since been taken all the way</strong> (owner, 2026-09-25): a golden
+    carrot does not merely stay instant, it always works, and the only limits are that both
+    horses are adults of opposite sex. Everything that could make one come to nothing is off
+    this path - the vanilla cooldown, the taming and full-health tests, gelding, the
+    subfertile allele, the cycle, and a mare already in foal. Two things moved with it.
+    <strong>A breeding carrot no longer diverts to a pregnancy</strong>, which is the change
+    that matters most in play: conception is gated on the cycle, so an armed pair out of heat
+    - sixteen days in twenty-one - produced nothing at all, and a splice carrot could sit on
+    a horse for most of a week doing nothing visible. Its bias goes into the instant foal
+    instead. And <strong>the fertility locus lost its only hold on this path</strong>; it
+    still works everywhere a mare is left to herself.
+</p>
+
+<p>
+    What is left of vanilla&rsquo;s own behaviour is the shape, not the conditions: a golden
+    carrot, hearts, a foal. The conditions were the part no player could see. A horse one
+    heart down from a fall reads as perfectly ordinary and simply does not breed, and vanilla
+    has no message for it; the subfertile roll looked identical to bad luck. The three options
+    this was chosen from, and every other call, are under
     <a href="decisions.html#settled">settled decisions</a>.
 </p>
 
@@ -1000,10 +1035,12 @@
 </ul>
 
 <p>
-    <strong>One call to confirm or overturn:</strong> a cover arranged by hand &mdash; a
-    golden carrot, or the seed jar &mdash; still reports only on the action bar, as it
-    always has, on the grounds that the player just acted and is looking at the horse. If
-    that flash is too easy to miss, the same line should go to chat there too.
+    <strong>That call is half made</strong> (owner, 2026-09-25). A golden-carrot foal now
+    says so <em>in chat</em> and writes a line to the log, because the action-bar flash was
+    the only report there was and it is gone in two seconds, is not in the chat history, and
+    is not in the log either - so "did that breeding do what I think it did" could only be
+    answered by catching the horse. The seed jar still reports on the action bar alone, and
+    the same argument applies to it.
 </p>
 
 <h3 id="identical-twins-0917">One twin pregnancy in ten is identical (2026-09-17, NOT played)</h3>
@@ -1103,9 +1140,10 @@
         Leaving the horse dimension tears the yard down, which is why this is not a pen.</li>
     <li><strong>Save and reload mid-pregnancy.</strong> The Breeding line still says
         <em>Pregnant</em>, and she still foals.</li>
-    <li><strong>A pregnant mare refuses golden carrots, with no flicker.</strong> Gap 226's fix syncs
-        the pregnancy to the client, so there should be no mount or eat animation before the yellow
-        line.</li>
+    <li><strong>A pregnant mare fed a golden carrot gives an instant foal and stays pregnant.</strong>
+        She used to refuse the carrot; since 2026-09-25 nothing on that path refuses anything. Check
+        the foal arrives, that her Breeding line still reads <em>Pregnant</em> with the time it read
+        before, and that the foal she was carrying arrives later as well.</li>
     <li><strong>A seed jar or a clock on a horse never starts you mounting it</strong>, on a
         dedicated server and in single-player. The server decides; the client only cancels
         (<a href="known-gaps.html#gap-231">gap 231</a>). An adult stallion clicked with the clock

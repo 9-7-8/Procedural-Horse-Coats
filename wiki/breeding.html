@@ -764,12 +764,16 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <p>
     <code>HorseBreedingHandler.onBabySpawn</code> on
     <code>BabyEntitySpawnEvent</code> (fired <em>before</em> the foal is added to the
-    world). This is <strong>plain golden-carrot breeding</strong>, and it is the only path
-    left that makes a foal at once. Before step 5: a pregnant dam cancels the event; a parent
-    armed with a breeding carrot turns the pair into a
-    <a href="fertility.html#hooks">pregnancy attempt</a> and cancels; and a
-    <a href="gene-fertility.html">subfertile</a> pair may miss. What follows is the instant
-    foal:
+    world). This is <strong>golden-carrot breeding</strong>, the only path that makes a foal
+    at once - and it <strong>always</strong> makes one. Two adults of opposite sex is the
+    whole of it (owner): no cooldown, no taming, no full health, no gelding check, no
+    <a href="gene-fertility.html">subfertility</a> roll, no heat cycle, and a pregnant mare
+    breeds anyway - her pregnancy is untouched, because nothing here conceives. A parent
+    armed with a breeding carrot no longer diverts to a
+    <a href="fertility.html#hooks">pregnancy attempt</a> either: the carrot&rsquo;s bias is
+    folded into this foal and spent on it. The one thing that can still stop a foal is the
+    draw itself being an embryonic lethal, which is genetics rather than a gate. What
+    follows is the instant foal:
 </p>
 
 <ol>
@@ -1742,8 +1746,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         heat and nursing are all implemented &mdash; <code>common/repro</code> and
         <code>server/ReproHandler</code> &mdash; and are described on
         <a href="fertility.html">fertility &amp; gestation</a>. Golden-carrot breeding still
-        exists alongside them and is still an instant foal, <em>unless</em> a parent is
-        carrying a breeding carrot, which turns it into a pregnancy instead.
+        exists alongside them, is still an instant foal, and is now the deliberate override:
+        it always works, whatever the cycle says and whatever either parent is carrying.
     </p>
     <p>
         What is <strong>not</strong> built is the list immediately above this note: a body

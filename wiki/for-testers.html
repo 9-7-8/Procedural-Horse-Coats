@@ -64,7 +64,7 @@
     <li><strong>Saddling and barding:</strong> also on Overview &mdash; two slots under <em>Tack</em>. Hold the saddle and click the slot to put it on; click it with an empty hand to take it off again.</li>
     <li><strong>Taming:</strong> ride a wild horse until hearts appear, the normal Minecraft way &mdash; press <strong>Ride</strong>, get thrown off, repeat. Some horses also come to you if you crouch while holding food.</li>
     <li><strong>The vet's kit</strong> tells you about a horse. Use it on a horse <em>without</em> crouching: it says whether a mare is in heat, whether she is pregnant (and with twins), or how many times a stallion has bred today. Crouch-using it on your own stallion turns him into a gelding, so be careful.</li>
-    <li><strong>Heat and pregnancy:</strong> a mare is in heat for one Minecraft day (20 real minutes), then out of heat for one day. A pregnancy lasts one Minecraft day. Plain golden carrots still make an instant foal, like normal Minecraft.</li>
+    <li><strong>Heat and pregnancy:</strong> a mare is in heat for one Minecraft day (20 real minutes), then out of heat for one day. A pregnancy lasts one Minecraft day. <strong>Golden carrots always make an instant foal</strong> and ignore all of that: two adults of opposite sex is the only requirement, so no cooldown, no taming, no full health, no gelding and no waiting for heat. Everything else - a stallion left with mares, a seed jar - goes by the cycle.</li>
     <li><strong>Making a horse with a particular gene:</strong> in creative mode, open the <em>Horse Genetics</em> creative tab and take the <strong>Custom Horse Spawn Egg</strong>. Right-click the ground to open its editor. Type the gene's name into the search box, add the gene, and set both of its buttons to the variant the test names. Then press <strong>Spawn</strong>. A test that says "a <em>Holy ward</em> horse" means a horse made this way.</li>
 </ul>
 
@@ -411,15 +411,16 @@
 <h2 id="breeding">2. Breeding</h2>
 
 <div class="tester-test" id="t-golden">
-<h3>Plain golden carrots still make an instant foal</h3>
-<p class="tester-need"><strong>You need:</strong> a tamed mare, a tamed stallion and golden carrots.</p>
+<h3>Golden carrots always make an instant foal</h3>
+<p class="tester-need"><strong>You need:</strong> a mare, a stallion and a pocketful of golden carrots. They do <em>not</em> need to be tamed, healed or rested.</p>
 <ol>
-    <li>Feed the mare a golden carrot.</li>
-    <li>Feed the stallion a golden carrot.</li>
+    <li>Feed the mare a golden carrot, then the stallion.</li>
+    <li>Do it again straight away with the same two - no waiting.</li>
+    <li>Now try the awkward pairs, one at a time: two <strong>wild</strong> horses; a horse you have hurt and not healed; a <strong>gelding</strong> and a mare; a mare who is already <strong>pregnant</strong>.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> a foal appears right away.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> no foal appears.</p>
-<button type="button" class="report-btn" data-report="Plain golden carrots still make an instant foal">Report a problem with this test</button>
+<p class="tester-pass"><strong>It works if:</strong> every one of them gives a foal, right away, with no waiting between attempts - and a green chat line names the pair. The pregnant mare should give her instant foal <em>and</em> still say <em>Pregnant</em> with the same time to go afterwards.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> any pairing gives no foal, or you are told to wait, or the pregnant mare's Breeding line changes.</p>
+<button type="button" class="report-btn" data-report="Golden carrots always make an instant foal">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-natural">
@@ -454,16 +455,18 @@
 </div>
 
 <div class="tester-test" id="t-pregnant-refuse">
-<h3>A pregnant mare refuses golden carrots cleanly</h3>
-<p class="tester-need"><strong>You need:</strong> a pregnant mare and a golden carrot. A server too, if you can.</p>
+<h3>A pregnant mare keeps her pregnancy through a golden carrot</h3>
+<p class="tester-need"><strong>You need:</strong> a pregnant mare, a stallion and golden carrots. A server too, if you can.</p>
 <ol>
-    <li>Hold a golden carrot.</li>
-    <li>Right-click the pregnant mare.</li>
+    <li>Read her Breeding line first and note the time it gives.</li>
+    <li>Feed her and the stallion a golden carrot each.</li>
+    <li>Read her Breeding line again.</li>
+    <li>Wait for the pregnancy to run out.</li>
     <li>If you can, do the same on a server.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> a yellow message says no, and you do not start climbing on her or see her eat.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> you start to mount her, or she eats the carrot.</p>
-<button type="button" class="report-btn" data-report="A pregnant mare refuses golden carrots cleanly">Report a problem with this test</button>
+<p class="tester-pass"><strong>It works if:</strong> the instant foal arrives, her Breeding line still says <em>Pregnant</em> with roughly the time it said before, and the foal she was carrying arrives later as well. Two foals in total.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the pregnancy disappears, its timer restarts, or the second foal never comes - any of those means the instant breeding overwrote what she was carrying.</p>
+<button type="button" class="report-btn" data-report="A pregnant mare keeps her pregnancy through a golden carrot">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-jar">
@@ -499,13 +502,12 @@
     <li>Look at the symbol on his nameplate.</li>
     <li>Open his information screen.</li>
     <li>Try to fill a seed jar from him.</li>
-    <li>Feed golden carrots to him and to a mare.</li>
     <li>Leave him with a mare in heat for one Minecraft day.</li>
     <li>Press <kbd>H</kbd>, open <em>My horses</em>, and type <code>gelding</code> in the filter.</li>
     <li>Type <code>stallion</code> in the filter instead.</li>
     <li>Open the browser's breeding preview (see <a href="#t-breeding-preview">the breeding preview test</a>) and look through the stallion list.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the wild stallion, the other player's stallion and the mare all refuse; your stallion "is now a gelding"; his symbol turns grey and his screen says Gelding; the jar and the golden carrots both say he is a gelding; he never breeds the mare; the <code>gelding</code> filter finds him and <code>stallion</code> does not; he is not in the breeding preview's stallion list.</p>
+<p class="tester-pass"><strong>It works if:</strong> the wild stallion, the other player's stallion and the mare all refuse; your stallion "is now a gelding"; his symbol turns grey and his screen says Gelding; the jar says he is a gelding; he never covers the mare; the <code>gelding</code> filter finds him and <code>stallion</code> does not; he is not in the breeding preview's stallion list.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> any of those does not happen.</p>
 <button type="button" class="report-btn" data-report="Gelding a stallion with the vet's kit">Report a problem with this test</button>
 </div>

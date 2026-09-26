@@ -1,8 +1,5 @@
 package com.example.horsegenetics.neoforge.server;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
@@ -11,36 +8,48 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
- * <b>Refuse a breeding food while the horse is still on its breeding cooldown,
- * and say how long is left.</b>
+ * <b>A golden carrot always works.</b> Feed one to each of two adult horses of
+ * opposite sex and you get a foal - there is no other condition, and this class
+ * is what clears the two that vanilla imposes before the food is even eaten.
  *
- * <h2>The bug this closes</h2>
- * Vanilla eats the item and does nothing. {@code Animal.mobInteract} only puts
- * a horse in love when {@code getAge() == 0}, but the food is consumed on the
- * way past regardless - so feeding a golden carrot to a horse that bred four
- * minutes ago costs you the carrot, produces no hearts, and tells you nothing
- * at all. Playtesters read that as breeding being broken, which is a fair
- * reading of what they were shown.
+ * <h2>The rule (owner, and it is the whole design)</h2>
+ * <blockquote>The golden carrot should ALWAYS make two horses have a baby - the
+ * only limit being age (both adults) and being opposite sex.</blockquote>
  *
- * <p>So: the interaction is cancelled before vanilla can eat anything, and the
- * player is told <i>which</i> horse, and <i>how long</i>. The horse keeps its
- * cooldown and the player keeps their carrot.
+ * So: no breeding cooldown, no taming, no full-health requirement, no gelding,
+ * no subfertility roll, no heat cycle, and a mare who is already pregnant
+ * breeds anyway. The other half of that is in
+ * {@code HorseBreedingHandler.onBabySpawn} (which drops the gelding, pregnancy
+ * and fertility gates) and {@code mixin/HorseAlwaysParentMixin} (which drops
+ * vanilla's tamed + full-health test). <b>A golden carrot never makes a
+ * pregnancy either</b> - it makes a foal, instantly, even from a mare who is
+ * carrying one; the gestation system belongs to natural cover and the seed jar.
  *
- * <h2>Where the number comes from</h2>
- * Vanilla stores an adult's breeding cooldown in {@code AgeableMob.age} as a
- * <b>positive</b> tick count that counts down one per tick ({@code setAge(6000)}
- * on each parent after a successful breeding). So {@code getAge()} <i>is</i> the
- * remaining cooldown in ticks, and it is only positive while the cooldown is
- * running - a foal's age is negative and an ordinary adult's is zero. No state
- * of our own is needed, which is why this reads vanilla's field rather than
- * keeping a timer beside it.
+ * <h2>What this class does, in order</h2>
+ * <ol>
+ *   <li><b>Zeroes the cooldown.</b> Vanilla stores an adult's breeding cooldown
+ *       in {@code AgeableMob.age} as a positive tick count ({@code setAge(6000)}
+ *       on each parent after a foal), and {@code handleEating} only sets love
+ *       when {@code getAge() == 0}. Setting it to zero is therefore the whole
+ *       of "no cooldown" - no state of our own, and nothing to keep in step.</li>
+ *   <li><b>Puts an untamed adult in love itself.</b> Vanilla's
+ *       {@code AbstractHorse.handleEating} sets love only on a
+ *       <i>tamed</i> horse, so a wild one eats the carrot for the temper and
+ *       nothing happens. There is no hook inside that method worth taking for
+ *       one boolean, so this does the feed for that case: love, consume,
+ *       cancel.</li>
+ * </ol>
  *
- * <h2>What counts as a breeding food</h2>
- * Vanilla's love items ({@link DietFoods#isVanillaLoveItem}). This mod's
- * breeding carrots used to count too, because each one opened a short window
- * and was wasted on a horse that could not breed in it. Since 2026-09-13 a
- * carrot arms the horse until its next conception, so there is no wrong moment
- * to feed one and nothing here stops it.
+ * <p>A tamed horse is left entirely to vanilla - it already does the right
+ * thing once the age is zero - so the common path adds one field write and no
+ * behaviour of its own.
+ *
+ * <h2>What this used to do</h2>
+ * It refused the feed and reported the time remaining ("4m 12s to go"), and
+ * refused a pregnant mare outright. Both were right when a cooldown was a rule;
+ * with the rule gone they are a message about a thing that no longer happens.
+ * The bug that motivated it is still closed, differently: vanilla ate the item
+ * and did nothing, and now there is no state in which feeding does nothing.
  *
  * <p><b>{@link EventPriority#HIGH}</b> so this runs before the diet and yield
  * handlers: the point is that nothing else gets to consume the stack first.
@@ -60,56 +69,40 @@ public final class BreedingCooldownHandler {
         if (!isBreedingFood(stack)) {
             return;
         }
-        // A PREGNANT MARE REFUSES EVERY BREEDING FOOD, golden carrots included
-        // (owner, 2026-09-13), and keeps it. Both sides answer: the client from the
-        // synced PREGNANT flag, so it never predicts a feed the server takes back.
-        if (ReproHandler.pregnantEitherSide(horse)) {
-            if (!event.getLevel().isClientSide()) {
-                event.getEntity().sendSystemMessage(Component.literal(ReproHandler.notReceptive(horse))
-                        .withStyle(ChatFormatting.YELLOW));
+        // A foal's age is NEGATIVE and counts up to zero as it grows. Only a
+        // positive age is a cooldown, and only that is cleared: "both adults"
+        // is a limit the owner kept, so a baby must stay a baby.
+        if (horse.isBaby()) {
+            return;
+        }
+        if (horse.getAge() > 0) {
+            horse.setAge(0);
+        }
+        if (event.getLevel().isClientSide()) {
+            return;
+        }
+        // The untamed case. Vanilla will not set love here, so nothing below
+        // would ever happen and the carrot would be eaten for the temper alone.
+        if (!horse.isTamed() && !horse.isInLove()) {
+            horse.setInLove(event.getEntity());
+            if (!event.getEntity().getAbilities().instabuild) {
+                stack.shrink(1);
             }
+            // Cancelled on BOTH sides: the client must not predict a mount, and
+            // the server must not let anything downstream eat the stack twice.
+            // See HorseInteractionHandler for the same rule.
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.SUCCESS);
-            return;
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
         }
-        // A foal's age is negative - that is "too young", not "on cooldown",
-        // and vanilla's own baby path already handles being fed. Only a
-        // positive age is a cooldown.
-        int remaining = horse.getAge();
-        if (remaining <= 0) {
-            return;
-        }
-        if (!event.getLevel().isClientSide()) {
-            event.getEntity().sendSystemMessage(Component.literal(
-                            horse.getName().getString() + " cannot breed yet - "
-                                    + describe(remaining) + " to go.")
-                    .withStyle(ChatFormatting.YELLOW));
-        }
-        // Cancelled on BOTH sides: the client must not predict a mount or an
-        // eat, and the server must not let anything downstream swallow the
-        // stack. See HorseInteractionHandler for the same rule.
-        event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.SUCCESS);
     }
 
     /**
-     * Vanilla's love items, plus every breeding carrot this mod adds. The
-     * Known Gene Splice carrot is matched by its component rather than by
-     * identity, because it is one item parameterised by {@code carrot_effects}.
+     * Vanilla's love items ({@link DietFoods#isVanillaLoveItem}). This mod's
+     * breeding carrots are not here: one arms the horse until its next
+     * conception ({@code BreedingCarrotHandler}), so there is no wrong moment to
+     * feed one and nothing to clear before it.
      */
     private static boolean isBreedingFood(ItemStack stack) {
         return DietFoods.isVanillaLoveItem(stack);
-    }
-
-    /**
-     * Ticks as something a player can act on. Minecraft ticks are 20 a second,
-     * and the cooldown is minutes, so this rounds to whole seconds and only
-     * mentions minutes when there is at least one - "4m 12s", "38s".
-     */
-    static String describe(int ticks) {
-        int seconds = Math.max(1, (ticks + 19) / 20);
-        int minutes = seconds / 60;
-        int rest = seconds % 60;
-        return minutes > 0 ? minutes + "m " + rest + "s" : rest + "s";
     }
 }

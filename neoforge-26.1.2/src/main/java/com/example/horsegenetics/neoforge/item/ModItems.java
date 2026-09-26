@@ -387,6 +387,11 @@ public final class ModItems {
     public static final DeferredItem<HoldingPenTicketItem> HOLDING_PEN_TICKET =
             register("holding_pen_ticket", HoldingPenTicketItem::new);
 
+    // The one ticket with no destination the player built: it sends a horse to
+    // the realm's arrival field and gives it up there. TurnoutTicketItem.
+    public static final DeferredItem<TurnoutTicketItem> TURNOUT_TICKET =
+            register("turnout_ticket", TurnoutTicketItem::new);
+
     // --- the rescuing braid - the stall ticket a horse wears --------------
     // Mane or tail gear that spends itself to send the horse (and its rider)
     // home the instant it would die. It resolves the destination when it

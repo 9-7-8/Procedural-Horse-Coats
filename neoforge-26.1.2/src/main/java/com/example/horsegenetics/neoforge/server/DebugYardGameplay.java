@@ -147,7 +147,11 @@ final class DebugYardGameplay {
                 stack(ModItems.ECHO_WHISTLE.get(), 1),
                 stack(ModItems.INTERDIMENSIONAL_TICKET.get(), 4),
                 stack(ModItems.BASIC_TICKET.get(), 4),
-                stack(ModItems.BLANK_TICKET.get(), 4)));
+                stack(ModItems.BLANK_TICKET.get(), 4),
+                // The one that does not bring a horse home: it sends one to the
+                // realm and gives it up there. Four, because the interesting
+                // half is what the realm does with the horse afterwards.
+                stack(ModItems.TURNOUT_TICKET.get(), 4)));
 
         chest(level, gy, x0 + 8, z0 + 2, "SEED JARS + HAY", List.of(
                 stack(ModItems.EMPTY_SEED_JAR.get(), 4),
