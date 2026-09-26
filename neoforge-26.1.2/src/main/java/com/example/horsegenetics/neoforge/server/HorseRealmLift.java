@@ -48,13 +48,25 @@ import java.util.Deque;
  * into it. It is {@link HorseRealmTerrain}'s own argument for having no
  * "decorated" flag, and it is the same argument.
  *
- * <h2>Why the copy needs no care about order</h2>
- * The source range ends at {@link HorseRealm#GROUND_Y}{@code  - 1} and the
- * destination starts one block above that, so <b>the two do not overlap at
- * all</b> and a single ascending pass cannot overwrite something it has not
- * read yet. That is not luck - it is what picking an offset bigger than the
- * height of anything the realm builds buys, and it is worth checking again if
- * the surface ever moves by a smaller step.
+ * <h2>It is a memmove, and the direction is the whole of its correctness</h2>
+ * <b>The source and destination overlap.</b> The source is the whole column
+ * below the new surface - {@code minY} to {@link HorseRealm#GROUND_Y}{@code  - 1},
+ * so &minus;16&nbsp;..&nbsp;63 - and the destination is that plus
+ * {@value #OFFSET}, so 48&nbsp;..&nbsp;127. They share 48&nbsp;..&nbsp;63.
+ *
+ * <p>So this walks <b>top down</b>. An ascending walk moves the old bedrock from
+ * y&nbsp;&minus;1 up to y&nbsp;63, then <i>reaches</i> y&nbsp;63 later in the
+ * same pass, finds it and moves it again to y&nbsp;127 - leaving the new grass
+ * with no bedrock under it and a bedrock ceiling over the field. It would also
+ * be <b>unrecoverable</b>, because the "does this chunk need lifting" probe
+ * reads the bedrock at y&nbsp;&minus;1 that the pass has just cleared, so a
+ * second pass would decline to fix it.
+ *
+ * <p>The reasoning that produced the ascending version was that the offset is
+ * larger than anything the realm <i>builds</i>, which is true and is about the
+ * content. The ranges are about the <i>column this iterates</i>, which is the
+ * whole of it. Worth re-deriving, not re-remembering, if the surface ever moves
+ * again.
  *
  * <p>Empty sections are skipped whole ({@link LevelChunkSection#hasOnlyAir}),
  * which is what keeps this from being twenty thousand block reads a chunk: an
@@ -170,7 +182,10 @@ public final class HorseRealmLift {
         BlockPos.MutableBlockPos src = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos dst = new BlockPos.MutableBlockPos();
 
-        for (int y = realm.getMinY(); y <= srcTop; y += 16) {
+        // TOP DOWN, and it has to be. See the class doc: the source and the
+        // destination DO overlap, so this is a memmove and the direction is the
+        // whole of its correctness.
+        for (int y = srcTop - (Math.floorMod(srcTop, 16)); y >= realm.getMinY(); y -= 16) {
             int index = chunk.getSectionIndex(y);
             if (index < 0 || index >= chunk.getSections().length) {
                 continue;
@@ -180,7 +195,7 @@ public final class HorseRealmLift {
                 continue;       // the whole point - most of the column is nothing
             }
             int sectionBottom = chunk.getSectionYFromSectionIndex(index) << 4;
-            for (int dy = 0; dy < 16; dy++) {
+            for (int dy = 15; dy >= 0; dy--) {
                 int fromY = sectionBottom + dy;
                 if (fromY < realm.getMinY() || fromY > srcTop) {
                     continue;

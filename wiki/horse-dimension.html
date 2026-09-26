@@ -881,8 +881,32 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Start here, because in 0.5.004 walking through a portal crashed the game outright: confirm the dimension can be entered at all, then that the rebuilt two-sided corridor <strong>ends in a wall rather than the void</strong> and that a given pen holds the same four horses, and the same breed, every visit.</p>
+    <p>Start here, because in 0.5.004 walking through a portal crashed the game outright: confirm the dimension can be entered at all, then that the rebuilt two-sided corridor <strong>ends in a wall rather than the void</strong> and that a given pen holds the same four horses, and the same breed, every visit &mdash; plus one defect found by reading rather than playing: <strong>the WEANING AWAY foal is built above the plot box that sweeps and evacuates everything else</strong>.</p>
 </div>
+
+<h3 id="away-foal-above-the-plot-box">The WEANING AWAY foal sits outside the plot box (2026-09-25, found by reading, not played)</h3>
+<p>
+    Found while grepping every hardcoded Y in this dimension for an unrelated change to the
+    <a href="horse-realm.html">horse realm</a>, and <strong>not caused by it</strong> &mdash;
+    this has been true for as long as both numbers have existed.
+</p>
+<p>
+    <code>DebugYardHands</code> builds the WEANING AWAY platform at
+    <code>plot.baseY&nbsp;+&nbsp;36</code>, which is y&nbsp;164. <code>DebugPenManager.plotBox</code>
+    caps the plot's bounding box at <code>baseY&nbsp;+&nbsp;WALL_TOP_DY&nbsp;+&nbsp;2</code>,
+    which is y&nbsp;140. That box is what <code>tearDown</code> sweeps and what
+    <code>evacuateTamedHorses</code> walks home &mdash; its own comment says
+    <em>&ldquo;anything built outside it leaks&rdquo;</em> &mdash; so the away foal and its
+    stone platform are twenty-four blocks above everything that is supposed to clean up after
+    them. <strong>That foal is neither swept on teardown nor evacuated when you leave.</strong>
+</p>
+<p>
+    It is the same class of leak the Z-extent fix was written for, left open on Y. The two
+    numbers move independently, so raising <code>WALL_TOP_DY</code> or
+    <code>PLOT_BASE_Y</code> will not close it by accident. <strong>To check:</strong> visit
+    the yard, leave, come back, and see whether a foal is standing at y&nbsp;164 above your
+    old plot &mdash; and whether plots accumulate them over several visits.
+</p>
 
 <h3 id="corridor-two-columns-0917">The horse dimension becomes two lists: coats to check, and every breed (2026-09-17, NOT played)</h3>
 

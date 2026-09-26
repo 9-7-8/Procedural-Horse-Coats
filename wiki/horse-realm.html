@@ -300,13 +300,36 @@
     &ldquo;decorated&rdquo; flag, applied again.
 </p>
 <p>
-    The copy needs no care about ordering because <strong>the source and destination ranges
-    do not overlap at all</strong> &mdash; the source ends one block below the new surface and
-    the destination starts at it. That is not luck; it is what an offset larger than anything
-    the realm builds buys, and it is the thing to re-check if the floor ever moves by a
-    smaller step. Empty sections are skipped whole, so an old realm chunk is two sections of
+    <strong>It is a memmove, and the direction is the whole of its correctness.</strong> The
+    source is the entire column below the new surface (&minus;16&nbsp;to&nbsp;63) and the
+    destination is that plus sixty-four (48&nbsp;to&nbsp;127), so <strong>the two
+    overlap</strong> on 48&nbsp;to&nbsp;63. The walk therefore goes <strong>top
+    down</strong>. Empty sections are skipped whole, so an old realm chunk is two sections of
     work rather than twenty thousand block reads.
 </p>
+<div class="note">
+    <span class="label">This shipped wrong in 0.5.028, and here is the shape of the mistake</span>
+    <p>
+        The first version walked <em>up</em>, on the reasoning that the offset is larger than
+        anything the realm builds. That is true, and it is about the <em>content</em>; the
+        ranges are about the <strong>column the loop iterates</strong>, which is the whole
+        thing. Walking up moves the old bedrock from y&nbsp;&minus;1 to y&nbsp;63, then
+        <em>reaches</em> y&nbsp;63 later in the same pass, finds it, and moves it again to
+        y&nbsp;127 &mdash; leaving the new grass with no bedrock under it and a bedrock
+        ceiling over the field.
+    </p>
+    <p>
+        It would also have been <strong>unrecoverable</strong>: the &ldquo;does this chunk
+        need lifting&rdquo; probe reads the bedrock at y&nbsp;&minus;1 that the pass has just
+        cleared, so a second pass would have declined to fix it. The idempotence that makes
+        this design safe is the same property that would have made the bug permanent.
+    </p>
+    <p>
+        Caught by modelling the column walk outside Minecraft and printing both directions,
+        which took less time than the paragraph that got it wrong. <strong>Re-derive this if
+        the surface ever moves again</strong>, rather than trusting the sentence above.
+    </p>
+</div>
 <p>
     <strong>The horses are not moved by it.</strong> An entity can be in an entity section
     that has not loaded when its blocks do, so moving them from there would miss exactly
@@ -550,6 +573,17 @@
         is the expected path, but it should last a tick, not be visible.</li>
     <li><strong>Twice is the same as once.</strong> Walk out, let the chunks unload, walk back
         in. Nothing should move a second time.</li>
+    <li><strong>The bedrock is under the grass, not over your head.</strong> This is the one
+        that shipped wrong in 0.5.028 and was fixed in 0.5.029 &mdash; an ascending walk left
+        the grass with nothing beneath it and a bedrock ceiling at y&nbsp;127. Stand in a
+        lifted chunk and look up. If anyone ran 0.5.028 against a realm, that world needs
+        looking at by hand: the lift will not re-run on it, because the probe it uses was
+        cleared by the bad pass.</li>
+    <li><strong>A crash mid-chunk is the one gap left.</strong> The probe reads a single
+        column, and the walk clears that column first, so a server killed between the two
+        would leave a chunk that claims to be lifted and is not. Unsaved chunk changes are
+        lost on a crash anyway, which is why this is a note rather than more code &mdash; but
+        it is what to suspect if exactly one chunk looks wrong.</li>
     <li><strong>It does not stutter.</strong> Two chunks a tick, two sections each. Fly across
         unlifted country and watch the tick time.</li>
 </ul>

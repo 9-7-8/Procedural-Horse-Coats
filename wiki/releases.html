@@ -61,6 +61,34 @@
     </p>
 </div>
 
+<h2 id="v0-5-029">0.5.029 &mdash; the realm lift, walking the right way up</h2>
+
+<div class="note">
+    <span class="label">Use this instead of 0.5.028</span>
+    <p>
+        <strong>0.5.028's horse-realm lift moved blocks in the wrong direction</strong> and
+        would have left the new grass with no bedrock under it and a sheet of bedrock at
+        y&nbsp;127 over the whole field. Nothing else in 0.5.028 was affected, and everything
+        it added is in here.
+    </p>
+    <p>
+        <strong>If 0.5.028 ever loaded a world that already had a horse realm, that realm
+        needs looking at by hand</strong> &mdash; the lift will not re-run on it, because the
+        marker it reads (bedrock at the old floor) was cleared by the bad pass. A realm that
+        had not been generated yet, or was generated fresh on 0.5.028, is fine.
+    </p>
+</div>
+<p>
+    The source column and the destination overlap, which the first version's comment
+    confidently said they did not: the source is everything below the new surface
+    (&minus;16&nbsp;to&nbsp;63) and the destination is that plus sixty-four
+    (48&nbsp;to&nbsp;127). Walking up therefore moved the old bedrock to y&nbsp;63, then
+    caught up with it and moved it again to y&nbsp;127. It walks down now, which is the
+    ordinary rule for a copy that overlaps itself. See
+    <a href="horse-realm.html#lift">the realm's own page</a>, which carries the mistake as
+    well as the fix.
+</p>
+
 <h2 id="v0-5-028">0.5.028 &mdash; a horse ate the portal, the field moves up, and you can see which horse is in which jar</h2>
 
 <div class="note">
