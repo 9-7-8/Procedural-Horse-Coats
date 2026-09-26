@@ -297,18 +297,6 @@ public final class ReproHandler {
     }
 
     /**
-     * <b>The look-at tooltip's words</b> - "Pregnant", "In heat", "Nursing", or
-     * nothing. Empty for a stallion or a foal, exactly as {@link #breedingLine}
-     * is, so a glance never says more about a horse than its own screen would.
-     */
-    public static String glanceLine(Horse horse) {
-        if (horse.isBaby() || !HorseRecords.hasRealRecord(horse) || HorseRecords.of(horse).sex() != Sex.FEMALE) {
-            return "";
-        }
-        return ReproText.glanceLine(of(horse), HorseRealmRepro.reproTime(horse), ServerConfig.reproTiming());
-    }
-
-    /**
      * <b>What the vet's kit says</b> - everything the info screen's one line
      * leaves out: twins, where in her heat she is and when it ends, and a
      * stallion's covers today. It does not diagnose a lethal embryo; that is

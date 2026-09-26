@@ -31,13 +31,25 @@ import snownee.jade.api.config.IPluginConfig;
  * in this mod refers to this class. Jade finds it by scanning for
  * {@link WailaPlugin}, so with Jade absent the class is simply never loaded.
  *
- * <h2>Why it says so little</h2>
- * This mod has three readouts about breeding and they are deliberately
- * unequal: the <b>vet's kit</b> reveals twins and which half of a heat she is
- * in, the <b>information screen</b> gives a sentence with a countdown, and this
- * gives a word. Anything more here would make the kit pointless, which is a
- * settled decision - see {@code ReproText.glanceLine} for what each one
- * withholds and why.
+ * <h2>What it says, and what it used to</h2>
+ * It shows the <b>information screen's own breeding line</b>
+ * ({@code ReproText.breedingLine}): <i>In heat - best time now</i>, <i>Not in
+ * heat - about 12 min to go</i>, <i>Pregnant - about 4 min to go, heavy and
+ * slow</i>, with <i>nursing</i> appended when she is.
+ *
+ * <p>It used to show a state word alone - a separate, shorter
+ * {@code ReproText.glanceLine} that gave no countdown and said <b>nothing at
+ * all</b> for a mare merely between heats, on the argument that a glance asked
+ * no question and a number in the corner of the eye would tick. The owner asked
+ * for the countdown and for "not in heat" (2026-09-25), which is the reverse of
+ * that call, and it is the better one: a mare between heats is exactly the case
+ * a breeder is looking for an answer to, and "nothing" is indistinguishable from
+ * "this mod is not reporting". {@code glanceLine} had no other caller and is
+ * deleted with the argument it served.
+ *
+ * <p>The three readouts are still unequal, which is the part that mattered: the
+ * <b>vet's kit</b> alone reveals twins and which half of a heat she is in. This
+ * now says exactly what the information screen says, and no more.
  *
  * <p>It is not owner-gated, and that is not an oversight: the same breeding
  * line is already on the information screen of any horse a player can look at,
@@ -91,7 +103,7 @@ public class JadeHorsePlugin implements IWailaPlugin {
         @Override
         public void appendServerData(CompoundTag tag, EntityAccessor accessor) {
             if (accessor.getEntity() instanceof Horse horse) {
-                String line = ReproHandler.glanceLine(horse);
+                String line = ReproHandler.breedingLine(horse);
                 if (!line.isEmpty()) {
                     // Absent rather than empty: an empty string would still cost
                     // a tag and a packet on every horse a player looks at, and

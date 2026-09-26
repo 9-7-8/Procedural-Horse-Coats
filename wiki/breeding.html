@@ -1153,6 +1153,25 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             drained in a <code>while</code> for vanilla's own reason: two presses in a tick
             would otherwise leave the second to open vanilla's screen on top of this one.
         </p></li>
+    <li><strong><kbd>E</kbd> while <em>looking</em> at a horse opens it as well</strong>
+        (owner, 2026-09-25) &mdash; <code>HorseInventoryKeyHandler</code>, which is
+        <code>HorseInfoKeyHandler</code> with one line changed: the horse is
+        <code>crosshairPickEntity</code> rather than the one you are riding. So the three
+        routes divide by where you are standing &mdash; the horse within arm's reach
+        (sneak-and-use), the horse underneath you (<kbd>E</kbd> riding), and the horse you
+        are looking at (<kbd>E</kbd> on foot), which reaches across a paddock and needs
+        neither a free hand nor a modifier held.
+
+        <p>
+            <strong>The rider case wins by construction, not by priority.</strong> On a
+            horse, this one bails on <code>isPassenger()</code> before it touches the key,
+            so looking at a second horse from the saddle cannot open the wrong animal's
+            window. Two subscribers draining one key in one tick is a thing to make
+            impossible rather than to order carefully. Everything else &mdash; taking the
+            key rather than swapping the screen, <code>ClientTickEvent.Pre</code>, the
+            drain loop, and bailing <em>without</em> consuming the press when there is no
+            record &mdash; is the same as above and for the same reasons.
+        </p></li>
     <li><strong>Every other horse named on the screen is a link.</strong> A companion or a
         rival on Overview, a descendant on the Offspring tab &mdash; click one and you get
         that horse's own copy of this screen, with the one you came from as its parent, so
@@ -1863,10 +1882,11 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <h4>The part that is a discoverability problem, not a bug</h4>
 <ul>
-    <li><strong>The way in is a 14px unlabelled <code>i</code> button hanging off the left edge
-        of the vanilla horse inventory</strong>, and sneak-right-click only opens the info
-        screen on horses you <em>cannot</em> name. Worth deciding whether that is good enough
-        before the next tester meets it.</li>
+    <li><strong>The way in was a 14px unlabelled <code>i</code> button hanging off the left
+        edge of the vanilla horse inventory</strong>, plus a sneak-right-click that only
+        opened the info screen on horses you <em>cannot</em> name. <kbd>E</kbd> at a horse you
+        are looking at is the answer to that (2026-09-25): it is the key a player already
+        presses, and it needs nothing discovered. Still worth watching a tester find it.</li>
     <li><strong>The screen reopens on whichever tab you last closed it on</strong>
         (<code>lastTab</code> is static). Leave it on Genes, come back, and the barn-name box
         is simply not there with nothing saying it lives on Overview.</li>
@@ -1879,7 +1899,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     Sneak and right-click any horse with an empty hand and this mod's screen opens, which has
     grown saddle and armour slots and a Ride button (<a href="#H">&sect;H</a>). The plain click
     mounts, as vanilla's does &mdash; it opened the screen for a day and the owner rejected
-    that. <kbd>E</kbd> from the saddle now opens it as well, and every other horse named on
+    that. <kbd>E</kbd> opens it as well &mdash; from the saddle, and (since 2026-09-25) while
+    simply looking at a horse &mdash; and every other horse named on
     it is a link to that horse's own page. The tack slots themselves are checked on
     <a href="horse-gear.html#advancements-0920-tack">horse gear</a>. None of this has been in
     front of a player.

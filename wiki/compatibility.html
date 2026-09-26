@@ -1243,9 +1243,11 @@
 <h2 id="jade">Jade &mdash; and the rule this one breaks</h2>
 
 <p>
-    <strong>Point at a mare with Jade installed and her state appears in the tooltip:</strong>
-    <em>Pregnant</em>, <em>In heat</em>, <em>Nursing</em>, or no line at all. Nothing to switch
-    on. Stallions and foals say nothing, exactly as they say nothing on the information screen.
+    <strong>Point at a mare with Jade installed and her breeding line appears in the
+    tooltip:</strong> <em>In heat - best time now</em>, <em>Not in heat - about 12 min to
+    go</em>, <em>Pregnant - about 4 min to go, heavy and slow</em>, with <em>nursing</em>
+    appended when she is. Nothing to switch on. Stallions and foals say nothing, exactly as
+    they say nothing on the information screen.
 </p>
 
 <div class="note warn">
@@ -1267,21 +1269,22 @@
     </p>
 </div>
 
-<h3 id="jade-detail">Why it says a word and not a sentence</h3>
+<h3 id="jade-detail">It says the whole line - and used to say one word</h3>
 
 <p>
-    There are now <strong>three</strong> readouts about breeding, and they are deliberately
-    unequal:
+    There are <strong>three</strong> readouts about breeding, and they are still unequal -
+    but the tooltip is now level with the information screen rather than below it:
 </p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Where</th><th>What it tells you</th><th>What it costs</th></tr></thead>
 <tbody>
-<tr><td>Jade tooltip</td><td><em>Pregnant</em> / <em>In heat</em> / <em>Nursing</em></td>
+<tr><td>Jade tooltip</td><td>her state <strong>and how long it has to run</strong> &mdash;
+    including <em>not in heat</em></td>
     <td>a glance</td></tr>
 <tr><td><a href="fertility.html">Information screen</a></td>
-    <td>the same, plus how long is left and which heat she is in</td>
+    <td>the same line, exactly</td>
     <td>opening her screen</td></tr>
 <tr><td><a href="item-vet-kit.html">The vet&rsquo;s kit</a></td>
     <td><strong>twins</strong>, where in the heat she is, whether a stallion has covered her</td>
@@ -1291,13 +1294,17 @@
 </div>
 
 <p>
-    <strong>No countdowns in the tooltip</strong>, and nothing at all for a mare simply between
-    heats. A tooltip is on screen whenever you glance at a horse, so a ticking
-    &ldquo;about 4 min to go&rdquo; would churn in the corner of your eye across a whole
-    paddock &mdash; and in a world with <code>debug.tools</code> on, where a heat lasts a
-    minute, it would never sit still. A glance asked no question, so it gets no answer unless
-    there is something worth saying. <code>ReproTextTest</code> pins both the words and the
-    silences.
+    <strong>It used to be the state word alone</strong> &mdash; no countdown, and nothing at
+    all for a mare simply between heats &mdash; on the argument that a tooltip is on screen
+    whenever you glance at a horse, so a ticking &ldquo;about 4 min to go&rdquo; would churn
+    in the corner of your eye across a whole paddock, and that a glance asked no question so
+    it should get no answer. <strong>The owner reversed that</strong> (2026-09-25) and asked
+    for the countdown and for <em>not in heat</em>, which is the better call: a mare between
+    heats is precisely the case a breeder is looking at the paddock to find out about, and a
+    blank tooltip is indistinguishable from the mod not reporting at all. The separate short
+    readout had no other caller and is deleted with the argument it served;
+    <code>ReproTextTest</code> now pins that every state answers, and that twins still stay
+    the vet kit&rsquo;s alone.
 </p>
 
 <p>

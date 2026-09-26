@@ -45,45 +45,41 @@ class ReproTextTest {
     }
 
     /**
-     * The glance line is the shortest of the three readouts, and what it
-     * <i>withholds</i> is the point: no countdown to tick in the corner of a
-     * player's eye, and nothing at all for a mare who is merely between heats.
+     * <b>Every state answers, including the boring one.</b> There used to be a
+     * second, shorter readout - {@code glanceLine} - that gave a state word with
+     * no countdown and said nothing at all for a mare between heats. The owner
+     * asked for the countdown and for "not in heat" on the Jade tooltip
+     * (2026-09-25), which left it with no callers, so it and the argument behind
+     * it are gone. This is what the tooltip shows now.
      */
     @Test
-    void theGlanceLineIsAStateWordAndNeverANumber() {
+    void everyStateGetsALineAndABetweenHeatsMareGetsACountdown() {
         Reproduction pregnant = inHeatFromZero().withPregnancy(pregnancy(1, 0, DAY));
-        assertEquals("Pregnant", ReproText.glanceLine(pregnant, DAY / 4, T));
-        // The info line for the same mare does carry a countdown - that is the
-        // difference between asking and glancing.
+        assertTrue(ReproText.breedingLine(pregnant, DAY / 4, T).startsWith("Pregnant"));
         assertTrue(ReproText.breedingLine(pregnant, DAY / 4, T).contains("to go"));
 
-        assertEquals("In heat", ReproText.glanceLine(inHeatFromZero(), 0, T));
+        assertTrue(ReproText.breedingLine(inHeatFromZero(), 0, T).startsWith("In heat"));
 
-        for (long now = 0; now < DAY * 3; now += DAY / 12) {
-            String glance = ReproText.glanceLine(inHeatFromZero(), now, T);
-            assertFalse(glance.contains("about"), "a countdown leaked at " + now + ": " + glance);
-            assertFalse(glance.toLowerCase().contains("twin"), "twins leaked at " + now + ": " + glance);
-        }
-    }
-
-    @Test
-    void aMareBetweenHeatsGetsNoLineAtAll() {
-        // DIESTRUS says "Not in heat - about N min to go" on the info screen and
-        // nothing here: a glance asked no question, so an answer on every horse
-        // in the paddock is noise.
+        // The case the old readout was silent on, and the one a breeder is
+        // actually asking about: she is not in heat, and here is how long.
         Reproduction resting = inHeatFromZero().withCyclePhase(0.5);
-        String info = ReproText.breedingLine(resting, 0, T);
-        assertTrue(info.startsWith("Not in heat"), info);
-        assertEquals("", ReproText.glanceLine(resting, 0, T));
+        String between = ReproText.breedingLine(resting, 0, T);
+        assertTrue(between.startsWith("Not in heat"), between);
+        assertTrue(between.contains("to go"), between);
+
+        // Twins stay the vet kit's alone, on every state and at every moment.
+        for (long now = 0; now < DAY * 3; now += DAY / 12) {
+            String line = ReproText.breedingLine(inHeatFromZero(), now, T);
+            assertFalse(line.toLowerCase().contains("twin"), "twins leaked at " + now + ": " + line);
+        }
     }
 
     @Test
     void nursingRidesAlongsideWhateverElseIsTrue() {
         Reproduction nursing = inHeatFromZero().foaled(0, List.of(new UUID(9L, 9L)));
         assertTrue(nursing.lactating());
-        // Just foaled, so POSTPARTUM: no state word of its own here, but she is
-        // still visibly nursing.
-        assertEquals("Nursing", ReproText.glanceLine(nursing, 1, T));
+        // Just foaled, so POSTPARTUM - and still visibly nursing.
+        assertTrue(ReproText.breedingLine(nursing, 1, T).endsWith("nursing"));
     }
 
     @Test

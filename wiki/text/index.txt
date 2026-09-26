@@ -191,7 +191,7 @@ wiki/compatibility.html#horse-tack	all	Horse Tack
 wiki/compatibility.html#horseman	all	Horseman
 wiki/compatibility.html#icys	all	Icy’s Better Horses
 wiki/compatibility.html#jade	all	Jade — and the rule this one breaks
-wiki/compatibility.html#jade-detail	all	Why it says a word and not a sentence
+wiki/compatibility.html#jade-detail	all	It says the whole line - and used to say one word
 wiki/compatibility.html#jade-server	all	With Jade on the client only
 wiki/compatibility.html#known	all	Known-good and known-bad
 wiki/compatibility.html#modded-ground-food	all	Another mod’s crops and fruit, off the floor

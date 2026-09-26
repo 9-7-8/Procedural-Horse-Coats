@@ -68,46 +68,6 @@ public final class ReproText {
         return r.lactating() ? line + " • nursing" : line;
     }
 
-    /**
-     * <b>The state word alone</b>, for a look-at tooltip that has one line and
-     * is on screen whenever the player glances at a horse.
-     *
-     * <p>Deliberately the shortest of the three readouts, and not merely
-     * {@link #breedingLine} with the numbers filed off:
-     *
-     * <ul>
-     *   <li><b>No countdowns.</b> A tooltip redraws constantly, so "about 4 min
-     *       to go" would tick down in the corner of a player's eye all the way
-     *       across a paddock - and in a world with {@code debug.tools} on, where
-     *       a whole heat lasts a minute, it would churn.</li>
-     *   <li><b>Nothing for a mare who is simply between heats.</b> The screen
-     *       says "Not in heat" because a player asked it a question; a glance
-     *       asked nothing, and a line on every horse you look at is noise. Empty
-     *       means nothing worth saying, not nothing known.</li>
-     *   <li><b>Foal heat reads as "In heat".</b> Which heat she is in is a
-     *       distinction the vet's kit draws, and the whole point of this being
-     *       the short readout is that it does not.</li>
-     * </ul>
-     *
-     * <p>Twins are not here for the same reason they are not on the info line:
-     * that is the kit's job, and it has to keep one.
-     *
-     * @return the words, or {@code ""} when there is nothing worth a line
-     */
-    public static String glanceLine(Reproduction r, long now, ReproTiming t) {
-        List<String> words = new ArrayList<>();
-        ReproState state = ReproRules.stateAt(r, now, t);
-        if (state == ReproState.PREGNANT) {
-            words.add("Pregnant");
-        } else if (state.receptive()) {
-            words.add("In heat");
-        }
-        if (r.lactating()) {
-            words.add("Nursing");
-        }
-        return String.join(" • ", words);
-    }
-
     /** What the vet's kit says about a mare or filly. */
     public static List<String> vetMare(String name, boolean adult, Reproduction r, long now, ReproTiming t) {
         List<String> lines = new ArrayList<>();
