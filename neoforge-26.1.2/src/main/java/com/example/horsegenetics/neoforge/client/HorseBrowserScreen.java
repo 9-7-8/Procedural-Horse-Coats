@@ -967,6 +967,13 @@ public final class HorseBrowserScreen extends Screen {
             horseFilterBox.setValue(query);
         }
         horseScroll = 0;
+        // Picking a saved search on the Query tab has nowhere to show itself -
+        // that tab draws no table - so it goes to the one it was picked for.
+        // Doing nothing visible is indistinguishable from not working.
+        if (tab == Tab.QUERY) {
+            tab = Tab.MY_HORSES;
+            applyTabWidgetsForQuery();
+        }
     }
 
     /**
@@ -3699,6 +3706,12 @@ public final class HorseBrowserScreen extends Screen {
 
     /** Use it, or save it. Both need the screen rather than the builder. */
     private void handleBuilderAction(QueryBuilderTab.Action action) {
+        // Most clicks on this tab are NONE - adding a clause, opening a menu,
+        // picking from one. Falling through on those opened the save menu on
+        // every click anywhere on the tab.
+        if (action == QueryBuilderTab.Action.NONE) {
+            return;
+        }
         String text = builder.query();
         if (text.isEmpty()) {
             return;
@@ -3710,9 +3723,13 @@ public final class HorseBrowserScreen extends Screen {
             }
             horseScroll = 0;
             // Onto the table it was built for, because a query you cannot see
-            // the results of is a query you cannot tell is right.
-            tab = ClientRealmWatch.inRealm() && showingRealm() ? Tab.REALM : Tab.MY_HORSES;
+            // the results of is a query you cannot tell is right. In the realm
+            // that is the field, since that is the table the count was over.
+            tab = ClientRealmWatch.inRealm() ? Tab.REALM : Tab.MY_HORSES;
             applyTabWidgetsForQuery();
+            if (tab == Tab.REALM) {
+                requestRealmUnlessCached();
+            }
             return;
         }
         savedSearches.open(fsLeft() + 2, contentTop() + 40, text, this.width, this.height);

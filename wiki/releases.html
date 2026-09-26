@@ -61,6 +61,72 @@
     </p>
 </div>
 
+<h2 id="v0-5-031">0.5.031 &mdash; the realm's whole field, and a search language</h2>
+
+<p>
+    <strong>The Horse realm tab drew nothing at all</strong>, which is how this release
+    started. It had been left out of the browser's render switch &mdash; not a compile error,
+    since a switch <em>statement</em> over an enum need not be exhaustive &mdash; so the tab
+    strip carried an entry that painted an empty panel. Fixing it turned out to be the small
+    half: the table it drew could only ever have listed the horses in loaded chunks, and the
+    realm is 1,600 blocks across.
+</p>
+<p>
+    <strong>It now lists every horse in the field</strong>, built from the realm census and
+    the ancestry database rather than from a scan of what happens to be loaded, and you can
+    buy any of them &mdash; the claim pulls in the chunk the horse was last standing in. A
+    full genotype is 5,612 characters, so thousands of rows cannot fit in one packet: the
+    roster arrives in batches, is pushed the moment you walk in rather than asked for, and is
+    kept up to date by one-horse deltas instead of being re-fetched. The tab is hidden outside
+    the realm.
+</p>
+<p>
+    <strong>Every horse search box is now a SQL <code>WHERE</code> clause.</strong>
+    <code>healer = hom AND flyer IN (het, hom)</code> &mdash; <code>AND</code>,
+    <code>OR</code>, <code>NOT</code>, brackets, <code>IN</code>, <code>LIKE</code>. A gene
+    name is a column whose value is <code>hom</code> / <code>het</code> / <code>none</code> /
+    <code>any</code>, which is a question the old language could not ask without already
+    knowing the answer. <strong>Everything you have typed before still works</strong>: two
+    terms side by side are still ANDed and <code>-term</code> is still NOT.
+</p>
+<ul>
+    <li><strong>A portal is not a hole in the fence any more.</strong> Any horse standing in
+        one was teleported after three seconds, so wild Overworld horses wandered into the
+        realm and unclaimed realm horses let themselves out. A horse goes through only when
+        you are taking it &mdash; ridden, on your lead, or pushed in by the roped-horse
+        right-click.</li>
+    <li><strong>Turning a horse out pays two emeralds</strong>
+        (<code>realm.release_emeralds</code>), and <code>/horsebounty</code> back-pays
+        everybody who gave a horse to the field before it did, raining the emeralds on them.
+        It is idempotent per horse, so it can be run again later for whatever has arrived
+        since.</li>
+    <li><strong>The cowboy buys horses.</strong> Lead one up and crouch-click. He pays a flat
+        base plus more for the loci the horse carries and the ones it breeds true at &mdash;
+        by the pound, not by an opinion of which genes are good.</li>
+    <li><strong>The cowboy's filter box now exists.</strong> It was only ever created if the
+        merchant's offers looked like a cowboy's, and at screen-init there are no offers yet
+        &mdash; so it was never built, and the feature read as doing nothing. It also speaks
+        the same query language as everywhere else now.</li>
+    <li><strong>Clicking a gear slot lists what fits it</strong>, from your pack, instead of
+        silently swapping whatever was in your hand. Most slots will say &ldquo;nothing takes
+        this slot yet&rdquo;, which is the honest answer &mdash; fifteen of the seventeen gear
+        tags are still empty.</li>
+    <li><strong>A Query tab builds a search from dropdowns</strong>, with a live count of what
+        it matches, and <strong>saved searches</strong> are one list shared by every filter box
+        in the mod. Every dropdown sorts alphabetically and takes type-to-jump.</li>
+</ul>
+<div class="note warn">
+    <span class="label">Walk the realm once before you trust its table</span>
+    <p>
+        The realm census changed shape to record where each horse is standing, so an existing
+        world loads with the <strong>field's radius intact and its census empty</strong> &mdash;
+        the radius was the half that had to survive, since losing it would put the wall inside
+        the field. It rebuilds itself as horses tick, so one lap of the field restores it.
+        Do that before reading the table or running <code>/horsebounty</code>, or both will see
+        fewer horses than are really there.
+    </p>
+</div>
+
 <h2 id="v0-5-030">0.5.030 &mdash; a golden carrot that always works</h2>
 
 <p>
