@@ -50,7 +50,7 @@ import net.minecraft.world.entity.animal.equine.AbstractHorse;
  * "race one".
  *
  * <p>Kept on the Minecraft side and off {@code common/} for the same reason
- * {@link HorsePrices} and {@code RarityItems} are: it is a playability decision
+ * {@link HorsePrices} and {@code DietFoods} are: it is a playability decision
  * about this game, not a fact about a horse's biology. The browser designer
  * shows the genetic number, and should - it is showing genetics.
  */

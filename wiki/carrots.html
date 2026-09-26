@@ -264,7 +264,9 @@
     <strong>One per allele pair, and you pick which.</strong> Feeding it makes the
     game treat that parent as carrying <strong>exactly the pair its research paper
     named</strong> for that one gene&rsquo;s gamete; normal Mendelian rules apply
-    from there, so two carrier-carrot parents give the ordinary 25/50/25.
+    from there, so two carrier-carrot parents give the ordinary 25/50/25 &mdash; and
+    two <em>true-breeding</em> carrots, one fed to each parent, give a homozygous foal
+    <strong>every time</strong>, which is the only way to guarantee one.
     (<code>CarrotEffect.KnownGeneSplice</code>, effect token
     <code>known:&lt;geneKey&gt;:&lt;a&gt;:&lt;b&gt;</code>.)
 </p>
@@ -315,9 +317,8 @@
 <p>
     <strong>The recipe is one parameterised <code>CustomRecipe</code></strong>
     (<code>server/recipe/KnownGeneSpliceRecipe</code>), not N generated recipes:
-    <strong>exactly four items</strong> &mdash; golden carrot + a
-    <a href="#database">research paper</a> + a hair item (<code>horse_hair</code>
-    ) + the rarity item for that gene&rsquo;s tier
+    <strong>exactly three items</strong> &mdash; golden carrot + a
+    <a href="#database">research paper</a> + a hair item (<code>horse_hair</code>)
     &rarr; a <code>known_gene_splice_carrot</code> carrying the paper&rsquo;s
     <strong>pair</strong>. The recipe reads it off the paper at craft time, so a
     drop-in gene file gets its carrot the moment it registers &mdash; no datapack,
@@ -325,26 +326,37 @@
 </p>
 
 <p class="muted">
-    The design originally called for a fifth &ldquo;flavour&rdquo; slot, letting each
-    gene name an ingredient that <em>reads</em> as it. The recipe now requires
-    exactly the four, and per-gene flavour lists are still unwritten &mdash; a
+    The design originally called for a &ldquo;flavour&rdquo; slot, letting each
+    gene name an ingredient that <em>reads</em> as it. The recipe requires
+    exactly the three, and per-gene flavour lists are still unwritten &mdash; a
     <code>carrot.flavour</code> block exists in the
     <a href="making-a-gene.html#the-shape">gene format</a> and no built-in fills it. See
     <a href="#carrot-content">the carrot content pass</a> on the roadmap tab.
 </p>
 
-<div class="table-wrap">
-<table>
-<thead><tr><th>Rarity tier</th><th>Item (<code>server/recipe/RarityItems</code>)</th></tr></thead>
-<tbody>
-<tr><td>common</td><td>iron ingot</td></tr>
-<tr><td>uncommon <em>(default &mdash; the gold-ingot tier)</em></td><td>gold ingot</td></tr>
-<tr><td>rare</td><td>diamond</td></tr>
-<tr><td>epic</td><td>emerald</td></tr>
-<tr><td>legendary</td><td>netherite ingot</td></tr>
-<tr><td>mythic</td><td>nether star</td></tr>
-</tbody>
-</table>
+<div class="note" id="no-rarity-charge">
+    <span class="label">The rarity tier is no longer a price</span>
+    <p>
+        A fourth slot used to charge the ingot for the gene&rsquo;s
+        <code>GeneRarity</code> &mdash; iron, gold, diamond, emerald, netherite,
+        and a <strong>nether star</strong> at mythic. It is retired (owner&rsquo;s
+        call), and <code>server/recipe/RarityItems</code> is deleted with it.
+    </p>
+    <p>
+        It was prohibitive at exactly the tiers people want the carrot for. The
+        natural use is <em>two</em> carrots, one per parent, because that is what
+        guarantees a homozygous foal &mdash; so a mythic locus like
+        <a href="gene-flying.html">flying</a> asked two nether stars for one
+        deliberate foal, on top of the paper you had to find first.
+    </p>
+    <p>
+        The tier still prices the <strong>paper</strong>: it weights what turns up
+        in a chest (<code>GeneRarity.lootWeight()</code>) and how long the
+        <a href="item-equestrian-bench.html">Equine Research Shelf</a> takes to copy
+        one. So rarity now says how hard a gene is to <em>learn</em>, never how hard
+        it is to spend once learnt &mdash; and a player who has earned the paper can
+        cut as many carrots from it as they have hair and golden carrots for.
+    </p>
 </div>
 
 <p>
@@ -359,7 +371,7 @@
     <p>
         <code>wiki/gene-carrot/</code> is a card that any gene page carries in one
         line, and it <strong>asks the mod</strong> for the four things that differ
-        per gene: whether a carrot exists at all, the rarity tier that prices it,
+        per gene: whether a carrot exists at all, how rare its paper is,
         how many distinct research papers the locus has, and whether the
         <a href="#blacklist">Unknown splice</a> may land on it. It runs the
         same wasm the <a href="horse-designer/index.html">horse designer</a> does,
@@ -367,12 +379,13 @@
         recipe to keep in step.
     </p>
     <p>
-        Two things about the recipe are <em>not</em> per-gene and so are held in
-        the card itself: the four-slot layout, whose canonical form is
+        One thing about the recipe is <em>not</em> per-gene and so is held in
+        the card itself: the three-slot layout, whose canonical form is
         <code>menu/SpliceRecipeDisplay</code> (what the browser ghosts into the
-        grid), and the tier&rarr;item table above, whose authority is
-        <code>server/recipe/RarityItems</code>. <strong>Change either and
+        grid). <strong>Change it and
         <code>wiki/gene-carrot/gene-carrot.js</code> changes with it.</strong>
+        There used to be a second such copy &mdash; the tier&rarr;item table &mdash;
+        and retiring the charge took it with it.
     </p>
 </div>
 
@@ -489,7 +502,7 @@
 
 <ul>
     <li><code>rarity()</code> &mdash; a <code>GeneRarity</code> tier (default
-        <code>UNCOMMON</code>, the gold-ingot tier).</li>
+        <code>UNCOMMON</code>). It prices the paper, not the carrot.</li>
     <li><code>hasGeneCarrot()</code> / <code>geneCarrotHomozygous()</code>
         &mdash; the opt-out flag and the het/hom behaviour.</li>
     <li><code>spliceTable()</code> &mdash; an <code>Optional&lt;FounderTable&gt;</code>,
@@ -609,17 +622,18 @@
         The parameterised recipe means a gene <em>can</em> have a carrot; it does not mean the
         carrot is <em>balanced</em>. Today <strong>every</strong> built-in falls back to the
         minimal recipe and the uniform splice draw. Each gene wants a hand-tuned
-        <code>carrot</code> block: a <strong>rarity tier</strong> matching how strong the gene
-        is, <strong>flavour ingredients that read as the gene</strong> (a nether wart for
+        <code>carrot</code> block:
+        <strong>flavour ingredients that read as the gene</strong> (a nether wart for
         <a href="gene-milk.html">lava milk</a>, a glow ink sac for
         <a href="gene-light.html">light</a>, an amethyst shard for a
         <a href="gene-lut.html">LUT palette</a>&hellip;), and a <code>splice</code> table
         producing a sensible outcome rather than a coin-flip on a many-allele locus.
     </p>
     <p>
-        Note the recipe currently takes <strong>exactly four items</strong> with no flavour
+        Note the recipe currently takes <strong>exactly three items</strong> with no flavour
         slot, so shipping flavour lists means re-opening the recipe as well as writing the
-        data.
+        data. A flavour ingredient is a <em>reading</em>, not a price &mdash; the rarity
+        charge was the price and it is gone.
     </p>
 </div>
 

@@ -1171,16 +1171,14 @@ public final class DesignerApi {
      * <p>Every field here is the gene's own answer. The recipe is one
      * parameterised {@code CustomRecipe} rather than N generated ones, so what
      * varies from gene to gene is exactly this: whether a carrot exists at all,
-     * which rarity tier pays for it, whether feeding it makes the parent
-     * heterozygous or homozygous for that gamete, and whether the <i>Unknown</i>
-     * splice may land on the locus. A page that wrote any of those down would be
-     * wrong the next time a gene was re-tiered, and wrong silently across fifty
-     * pages at once.
+     * how rare its paper is, whether feeding it makes the parent heterozygous or
+     * homozygous for that gamete, and whether the <i>Unknown</i> splice may land
+     * on the locus. A page that wrote any of those down would be wrong the next
+     * time a gene was re-tiered, and wrong silently across fifty pages at once.
      *
-     * <p>The tier&rarr;item mapping is deliberately <b>not</b> here: it lives on
-     * the recipe side ({@code server/recipe/RarityItems}) so a third-party gene
-     * cannot invent its own currency, and {@code common/} must not know what an
-     * iron ingot is. The card names the tier and renders the item.
+     * <p>The recipe itself is the <b>same three items at every tier</b> - the
+     * rarity item it used to charge is retired - so {@code rarity} here is what
+     * the paper costs to find and copy, not what the carrot costs to cut.
      */
     @JSExport
     public static String geneCarrotJson(String geneKey) {

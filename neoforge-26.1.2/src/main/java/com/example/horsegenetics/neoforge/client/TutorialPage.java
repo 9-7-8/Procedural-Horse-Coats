@@ -874,8 +874,9 @@ public final class TutorialPage {
 
         genetics.add(new Step("Putting a gene into a foal",
                 List.of("Once a gene is in your database you can make its gene carrot - a golden "
-                                + "carrot, a research paper for it, some horse hair, and an ingot "
-                                + "whose metal depends on how rare the gene is.",
+                                + "carrot, a research paper for it, and some horse hair. Those three "
+                                + "however rare the gene is: the rarity is in finding the paper, and "
+                                + "one paper on a shelf cuts as many carrots as you like.",
                         "The carrot grants the pair the paper names, and the carrot's tooltip says "
                                 + "which. So which paper you spend decides what the carrot does: a "
                                 + "carrier paper hands on one copy, a true-breeding paper hands on two.",
@@ -890,8 +891,8 @@ public final class TutorialPage {
                                 + "their own list."),
                 List.of(new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get()),
                         new ItemStack(ModItems.HORSE_HAIR.get()),
-                        new ItemStack(Items.GOLD_INGOT),
-                        new ItemStack(Items.DIAMOND)), Art.NONE,
+                        new ItemStack(Items.GOLDEN_CARROT),
+                        new ItemStack(ModItems.RESEARCH_PAPER.get())), Art.NONE,
                 List.of(ProgressTask.GENE_CARROT, ProgressTask.USE_GENE_CARROT)));
 
         genetics.add(new Step("The splice carrots",

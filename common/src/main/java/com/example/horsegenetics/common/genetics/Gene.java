@@ -89,11 +89,10 @@ public interface Gene {
     // ------------------------------------------------------------------
 
     /**
-     * How rare this gene is - the axis the gene-carrot recipe cost, the
-     * research-paper loot weighting and the villager stock all sort on. A real
-     * enum; the tier&rarr;rarity-item mapping stays on the recipe side. The
-     * default is {@link GeneRarity#DEFAULT}, the gold-ingot tier (settled,
-     * &sect;21).
+     * How rare this gene is - the axis the research-paper loot weighting, the
+     * shelf's copy time and the villager stock all sort on. It is not a price:
+     * the gene carrot costs the same three items at every tier. The default is
+     * {@link GeneRarity#DEFAULT} (settled, &sect;21).
      */
     default GeneRarity rarity() {
         return GeneRarity.DEFAULT;

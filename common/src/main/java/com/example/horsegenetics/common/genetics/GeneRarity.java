@@ -4,17 +4,18 @@ import java.util.Locale;
 
 /**
  * How rare a gene is - the one axis the whole gameplay economy sorts on
- * (roadmap wiki &sect;19): the gene-carrot recipe cost, research-paper loot
- * weighting, villager stock and pools, random jars.
+ * (roadmap wiki &sect;19): research-paper loot weighting, how long the Equine
+ * Research Shelf takes to copy a paper, villager stock and pools, random jars.
  *
- * <p>Six tiers, in ascending rarity. The <b>tier &rarr; rarity-item</b> mapping
- * (iron / gold / diamond / emerald / netherite ingot / nether star) lives once
- * on the recipe side ({@code server/recipe/RarityItems}), never on the gene, so
- * retuning the economy is a one-line change and a third-party gene cannot
- * invent its own currency.
+ * <p>Six tiers, in ascending rarity. <b>A tier is not a price.</b> It used to
+ * map to a rarity item the gene-carrot recipe charged - iron through nether
+ * star - and that is retired (owner's call; see {@code KnownGeneSpliceRecipe}):
+ * the carrot costs a paper, a golden carrot and a hair whatever the locus is,
+ * and the tier prices the <i>paper</i> instead, by making it rarer to find and
+ * slower to copy. Rarity therefore says how hard a gene is to <b>learn</b>, and
+ * never how hard it is to spend once learnt.
  *
- * <p>A gene that declares nothing is {@link #DEFAULT} - the <b>gold-ingot
- * tier</b> (settled, &sect;21).
+ * <p>A gene that declares nothing is {@link #DEFAULT} (settled, &sect;21).
  */
 public enum GeneRarity {
     COMMON,
@@ -24,7 +25,7 @@ public enum GeneRarity {
     LEGENDARY,
     MYTHIC;
 
-    /** The tier a gene falls into when it declares no rarity - the gold-ingot tier. */
+    /** The tier a gene falls into when it declares no rarity. */
     public static final GeneRarity DEFAULT = UNCOMMON;
 
     /**

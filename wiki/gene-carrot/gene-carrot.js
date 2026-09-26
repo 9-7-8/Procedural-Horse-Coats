@@ -3,26 +3,24 @@
 //
 // WHY IT IS NOT WRITTEN INTO THE PAGES. There is one parameterised recipe, not
 // one per gene (server/recipe/KnownGeneSpliceRecipe), so what actually differs
-// between two genes is small and exact: whether a carrot exists at all, which
-// rarity tier pays for it, how many distinct research papers the locus has, and
+// between two genes is small and exact: whether a carrot exists at all, how
+// rare its paper is, how many distinct research papers the locus has, and
 // whether the Unknown splice may land on it. Those four are asked of the mod
 // through the same wasm the preview
 // window and the horse designer run. Fifty pages holding their own copy would
-// be fifty pages to re-check the next time a gene was re-tiered - and the tier
-// is the recipe's price, so a stale one is a wrong recipe.
+// be fifty pages to re-check the next time a gene was re-tiered.
 //
-// WHAT THIS FILE DOES HOLD, AND THE TWO PLACES IT ANSWERS TO:
+// WHAT THIS FILE DOES HOLD, AND THE PLACE IT ANSWERS TO:
 //
-//   * the SLOT LAYOUT - hair, paper, golden carrot, rarity item, in grid order.
+//   * the SLOT LAYOUT - hair, paper, golden carrot, in grid order.
 //     menu/SpliceRecipeDisplay is canonical (it is what the Horse Browser
 //     ghosts into the crafting grid); this is the wiki's rendering of it, and a
 //     change there lands here.
-//   * the TIER -> ITEM table. server/recipe/RarityItems is the authority and
-//     deliberately lives on the recipe side, where common/ - and so the wasm -
-//     cannot see it. wiki/carrots.html carries the same six rows in prose.
 //
-// Neither varies per gene, which is why a copy is tolerable here and a copy of
-// the per-gene facts is not.
+// It does not vary per gene, which is why a copy is tolerable here and a copy
+// of the per-gene facts is not. There used to be a second copied table here -
+// tier -> the rarity item the recipe charged - and that charge is retired, so
+// the recipe is three items whatever the locus is.
 //
 // USING IT. Two lines on a gene page:
 //
@@ -42,33 +40,20 @@ window.HG = window.HG || {};
   })();
   var WIKI = HERE + "../";
 
-  // GeneRarity tier -> what the recipe charges. See the header: RarityItems is
-  // the authority, this is the label for it.
-  var RARITY_ITEM = {
-    COMMON: "Iron ingot",
-    UNCOMMON: "Gold ingot",
-    RARE: "Diamond",
-    EPIC: "Emerald",
-    LEGENDARY: "Netherite ingot",
-    MYTHIC: "Nether star"
-  };
-
   var TIER_NAME = {
     COMMON: "common", UNCOMMON: "uncommon", RARE: "rare",
     EPIC: "epic", LEGENDARY: "legendary", MYTHIC: "mythic"
   };
 
-  // The four filled slots, in grid order, as menu/SpliceRecipeDisplay lays them
-  // out. `rarity` is filled in per gene; everything else is the same for every
-  // gene there is.
+  // The three filled slots, in grid order, as menu/SpliceRecipeDisplay lays
+  // them out. Only the paper's note is per gene; the recipe is the same three
+  // items for every gene there is.
   function slots(carrot) {
     return [
-      { name: "Horse hair", note: "or hair cloth", mod: true },
+      { name: "Horse hair", note: "", mod: true },
       { name: "Research paper", note: carrot.name + " " + (carrot.examplePair || ""), mod: true },
       { name: "Golden carrot", note: "" },
-      { name: RARITY_ITEM[carrot.rarity] || "Rarity item",
-        note: (TIER_NAME[carrot.rarity] || "?") + " tier" },
-      null, null, null, null, null
+      null, null, null, null, null, null
     ];
   }
 
@@ -157,19 +142,22 @@ window.HG = window.HG || {};
       + '</div>'
       + '</div>'
       + '<p class="gc-say">'
-      + 'Shapeless, and <strong>exactly those four items</strong> - anything else in the '
+      + 'Shapeless, and <strong>exactly those three items</strong> - anything else in the '
       + 'grid and it does not resolve. There is no per-gene recipe to register: the '
       + '<strong>allele pair is read off the paper</strong> at craft time. Feeding the '
       + 'carrot to a parent makes the game treat that parent as carrying <strong>'
       + escapeHtml(carrot.examplePair || "") + '</strong> for '
       + escapeHtml(carrot.name) + ' when it forms that one gamete &mdash; or whichever '
       + 'other pair the paper you spent names. Ordinary Mendelian rules take it from '
-      + 'there, so two carrot-fed parents give the usual 25/50/25. '
+      + 'there, so what two carrot-fed parents give depends on the papers: two carrier '
+      + 'papers are the usual 25/50/25, and two true-breeding ones are a homozygous '
+      + 'foal every time - which is the only way to guarantee one. '
       + '<a href="carrots.html#known">How the carrots work</a>.'
       + '</p>'
       + '<dl class="gc-facts">'
       + fact("Rarity tier", (TIER_NAME[carrot.rarity] || carrot.rarity)
-        + ' &mdash; ' + escapeHtml(RARITY_ITEM[carrot.rarity] || "?"))
+        + ' <span class="gc-dim">(what the <em>paper</em> costs to find and to copy &mdash; '
+        + 'the recipe is the same three items at every tier)</span>')
       // The weight itself is the gene's, off GeneRarity.lootWeight(). What the
       // other tiers weigh is not written down here - that is exactly the kind of
       // derived number that goes stale in prose.

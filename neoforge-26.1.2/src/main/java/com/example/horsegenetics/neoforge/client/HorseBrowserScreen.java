@@ -2017,7 +2017,8 @@ public final class HorseBrowserScreen extends Screen {
                     new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get()), true,
                     "Needs a research paper for this gene - any pair of it. The carrot "
                             + "grants whichever pair the paper names; the ghost above shows one "
-                            + "example. The rarity ingot is set by the gene's own rarity.",
+                            + "example. Three items at every rarity: the tier prices the paper, "
+                            + "not the carrot cut from it.",
                     true,
                     "Feed a parent to aim its contribution at " + gene.name()
                             + ", instead of the coin flip it would otherwise be."));

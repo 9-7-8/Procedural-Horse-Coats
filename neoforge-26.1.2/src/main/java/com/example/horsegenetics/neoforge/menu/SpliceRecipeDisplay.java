@@ -4,7 +4,6 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.item.ResearchPaperItem;
-import com.example.horsegenetics.neoforge.server.recipe.RarityItems;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.world.item.ItemStack;
@@ -16,9 +15,11 @@ import net.minecraft.world.item.Items;
  * exactly what {@link com.example.horsegenetics.neoforge.server.recipe.KnownGeneSpliceRecipe}
  * requires, in grid-slot order.
  *
- * <p>The default recipe is four items and nothing else: horse hair, this
- * gene's research paper, a golden carrot, and the rarity ingot (gold at the
- * default tier).
+ * <p>The recipe is three items and nothing else: horse hair, this gene's
+ * research paper, and a golden carrot. It is the same three for every gene -
+ * the rarity ingot that used to sit in a fourth slot is retired (see
+ * {@code KnownGeneSpliceRecipe}), so what varies between two genes is only
+ * which paper you spent.
  *
  * <p>Client-safe: it only names vanilla items and this mod's own.
  */
@@ -33,7 +34,6 @@ public final class SpliceRecipeDisplay {
         out.add(new ItemStack(ModItems.HORSE_HAIR.get()));
         out.add(researchPaper(gene));
         out.add(new ItemStack(Items.GOLDEN_CARROT));
-        out.add(new ItemStack(RarityItems.forRarity(gene.rarity())));
         while (out.size() < 9) {
             out.add(ItemStack.EMPTY);
         }

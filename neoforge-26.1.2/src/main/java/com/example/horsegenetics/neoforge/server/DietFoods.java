@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * <b>The {@link Diet} &rarr; item table</b>, and deliberately on this side of
  * the split: {@code common/} names categories, the game module names items -
- * the same division {@code RarityItems} makes for the gene-carrot tiers, and
+ * the same division {@code HorsePrices} makes for what a horse costs, and
  * for the same reason (a backport re-points this file and touches nothing
  * else).
  *

@@ -19,15 +19,24 @@ import net.minecraft.world.level.Level;
 
 /**
  * The <b>one parameterised gene-carrot recipe</b> (roadmap wiki &sect;14.2):
- * golden carrot + a {@code research_paper} + a hair item + the rarity item for
- * that gene's tier &rarr; a {@code known_gene_splice_carrot} carrying the
- * {@code known:<gene>:<a>:<b>} effect for <b>the pair that paper names</b>.
+ * golden carrot + a {@code research_paper} + a hair item &rarr; a
+ * {@code known_gene_splice_carrot} carrying the {@code known:<gene>:<a>:<b>}
+ * effect for <b>the pair that paper names</b>.
  *
  * <p>One recipe rather than N generated per-gene recipes, so a drop-in gene
  * file gets its carrot the moment it registers - no datapack. The recipe reads
  * the pair off the paper at craft time, which is the point of a paper being a
  * pair: two papers for one locus craft two different carrots, and a wide locus
  * is reachable at every allele rather than only its first.
+ *
+ * <h2>The rarity tier used to be charged here, and no longer is</h2>
+ * A fourth slot took the ingot for the gene's {@code GeneRarity} - iron up to a
+ * nether star. Owner's call: it priced the carrot out of reach at the top of
+ * the ladder, where a mythic locus wanted a nether star <i>per carrot</i> and
+ * the natural use is two of them, one per parent. The tier still prices the
+ * paper - it weights what drops in a chest and how long the Equine Research
+ * Shelf takes to copy one - so a rare gene is still work; the work is finding
+ * the paper, not farming a boss for every carrot cut from it.
  */
 public class KnownGeneSpliceRecipe extends CustomRecipe {
 
@@ -83,15 +92,9 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
                 || gene == null || !gene.hasGeneCarrot() || !topic.isResolved()) {
             return null;
         }
-        // The default recipe is exactly four items: golden carrot + this gene's
-        // paper + a hair item + the gene's rarity ingot. Nothing else in the grid.
-        int rarity = 0;
-        for (int i = 0; i < input.size(); i++) {
-            if (input.getItem(i).is(RarityItems.forRarity(gene.rarity()))) {
-                rarity++;
-            }
-        }
-        if (rarity != 1 || filled != 4) {
+        // The recipe is exactly three items: golden carrot + this gene's paper
+        // + a hair item. Nothing else in the grid.
+        if (filled != 3) {
             return null;
         }
         return topic;

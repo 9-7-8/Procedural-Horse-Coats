@@ -15,8 +15,8 @@ package com.example.horsegenetics.common.genetics;
  * <h2>Which items count is not decided here</h2>
  * This is {@code common/}, so it names no item. Each value is a
  * <b>category</b>, and the NeoForge module holds the category&rarr;item table
- * ({@code server.DietFoods}) exactly the way {@code RarityItems} holds the
- * rarity&rarr;item one. {@link #variants()} is the one number the two sides have
+ * ({@code server.DietFoods}) exactly the way {@code server.HorsePrices} holds
+ * what a horse costs. {@link #variants()} is the one number the two sides have
  * to agree on: a diet with {@code n} variants is really {@code n} diets - the
  * horse eats <i>one</i> metal, not metal in general - and which one is a
  * per-horse roll off the allele copy, so the game module must offer exactly
