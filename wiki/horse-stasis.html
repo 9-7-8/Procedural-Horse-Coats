@@ -217,6 +217,32 @@
     all.
 </p>
 
+<h2 id="jars-gameplay">You can see which horse is in which jar</h2>
+<p>
+    <strong>An occupied chamber is a bottle with a horse in it, and it is drawn that way.</strong>
+    A chamber with a horse inside has a window in it &mdash; the tier's colour drops to a band of
+    liquid in the base, and above that you can see through the glass &mdash; and on the
+    <em>Chambers</em> tab the bank draws that horse's own coat behind the window. Not a generic
+    horse: the real one, in the colour it really is, so a grey and a chestnut are two different
+    bottles at a glance and an <em>empty</em> chamber is obvious from across the grid.
+</p>
+<p>
+    It is a small window, and that is the point &mdash; you are meant to read
+    <em>occupied</em>, <em>that one's the spotted one</em>, <em>that row is all empties</em>
+    without opening anything. To actually look at a horse, use the
+    <a href="#browse-gameplay">Browse tab</a>, where every row now carries a proper portrait
+    beside it, the same one the Horse Browser's <em>My horses</em> table draws.
+</p>
+<div class="note">
+    <span class="label">A horse with no papers is a dark window</span>
+    <p>
+        The coat comes from <strong>your stable's records</strong>, not from the chamber &mdash;
+        the same papers the Browse tab reads. So a chamber somebody else filled and handed you
+        shows an empty window rather than a horse: the bank knows there is an animal in there,
+        and does not know what it looks like. It is still listed by name on Browse.
+    </p>
+</div>
+
 <h2 id="browse-gameplay">The Browse tab: the bank as a list of horses</h2>
 <p>
     The second tab is the same chambers read as <em>animals</em>. Every occupied chamber is a
@@ -268,6 +294,33 @@
         a lightning strike and drop them into the fire that did it.
     </p>
 </div>
+<h2 id="send-home-gameplay">Sending a horse home without going to fetch the bottle</h2>
+<p>
+    The Horse Browser's <em>My horses</em> table has a <strong>Send home</strong> button on every
+    row, which spends a ticket and puts that horse in its stall. <strong>It now works on a horse
+    that is in a stasis chamber</strong>: the horse comes out of the chamber straight into its
+    stall, and <strong>the empty jar is left exactly where the full one was</strong> &mdash; in
+    the bank slot it was filed in, or in your pack if you were carrying it.
+</p>
+<p>
+    It finds the chamber in <strong>your pockets, or in one of your own banks</strong>, wherever
+    that bank is &mdash; another world, a chunk nobody has loaded in a week. A chamber in a chest
+    somewhere, or in somebody else's bank, it cannot reach, and it says so rather than doing
+    nothing.
+</p>
+<div class="note">
+    <span class="label">It still costs a ticket, and it still refuses safely</span>
+    <p>
+        The same ticket as any other <em>Send home</em> &mdash; the cheapest one in your pack that
+        reaches &mdash; and the same destination rule: the horse's own stall, or your holding pen
+        if it has none. <strong>Every refusal leaves the horse in the chamber.</strong> No stall,
+        no room in the stall, no ticket that reaches, the sign taken down: you get the line saying
+        which, the ticket is unspent, and the bottle is as full as it was. A release that is
+        followed by a refusal would be a horse standing in somebody's cellar with the chamber
+        spent, which is worse than not pressing the button.
+    </p>
+</div>
+
 <h2 id="supply-gameplay">The Supply tab: feeding and mending what is in there</h2>
 <p>
     The third tab is <strong>feed</strong>, <strong>water</strong>, the <strong>empties</strong>
@@ -559,7 +612,23 @@
         <td>All three tabs, drawn with <code>VanillaPanel</code> and no texture: the chamber
             grid, the Browse list and its filter box, the supply row, the drop buffer and their
             status lines, and the count on the title row. Owns the click that marks a row and
-            the one spare line the list has room for.</td></tr>
+            the one spare line the list has room for &mdash; and
+            <a href="#jars-coding">the horse behind each jar's window</a>, whose four
+            <code>GLASS_*</code> constants are a copy of the PNG.</td></tr>
+    <tr><td><code>neoforge/&hellip;/data/StasisBankIndex.java</code></td>
+        <td>Where each player's banks are, whether each is <em>armed</em> with a spare emergency
+            chamber, and <em>which horses</em> it holds. Two questions, one list, and neither
+            costs a chunk to answer no to. <a href="#finding-the-jar">Send home</a> and
+            <a href="#emergency-bank-coding">the emergency chamber</a> are its two readers.</td></tr>
+    <tr><td><code>neoforge/&hellip;/server/StallRecall.java</code></td>
+        <td>The browser's <em>Send home</em> button. <code>fromChamber</code> is the stasis half:
+            find the jar, restore the horse without placing it, measure, spend, place, and
+            <a href="#measure-then-place">leave the empty chamber in the slot</a>. The
+            <code>Home</code> record is the destination both halves share.</td></tr>
+    <tr><td><code>neoforge/&hellip;/client/HorsePortrait.java</code></td>
+        <td>Not the stasis feature's, but what both new drawings are: one horse, drawn small, in
+            the coat it really has. Paired with <code>ClientHorseCoats</code>, which is keyed by
+            <strong>record</strong> id and so answers for an animal with no entity.</td></tr>
     <tr><td><code>neoforge/&hellip;/gametest/ModGameTests.java</code></td>
         <td><code>stasis_tag_is_readable</code> &mdash; the tripwire for every NBT key
             <code>StasisCare</code> reaches for, since all of them fail silently. It ends by
@@ -1112,7 +1181,121 @@
         <code>load</code> throws, nothing is consumed and the chamber is unchanged, so a later
         build may still be able to read it. The alternative is destroying a pedigreed animal to
         tidy up an exception.</li>
+    <li><strong>It is two halves, and the seam is load-bearing.</strong>
+        <code>restore</code> builds the horse and <code>place</code> puts it down;
+        <code>release</code> is the two called together, which is what the right-click and the
+        foaling path still use. The seam exists for
+        <a href="#send-home-coding">Send home</a>, which has to <em>measure</em> the animal
+        before it knows where to put it &mdash; see below.</li>
 </ul>
+
+<h2 id="send-home-coding">Send home, out of a chamber</h2>
+<p>
+    The browser's <em>Send home</em> button is <code>StallRecall</code>, and until now it could
+    not reach a chambered horse at all. Its two ways of finding a horse were
+    <em>is it loaded</em> and <em>pull in the chunk where it was last seen</em>, and
+    <strong>neither can ever work here</strong>: a horse in stasis is not unloaded, it is not an
+    entity, so no amount of waiting will load it; and the sighting
+    <code>HorseWhereabouts.enteredStasis</code> wrote is where it went <em>in</em>, which is
+    precisely a place it is not. So the stasis case is asked before the sighting is read, and
+    branches into <code>fromChamber</code>.
+</p>
+
+<h3 id="finding-the-jar">Finding the jar is the index's second question</h3>
+<p>
+    The pockets first, which is an inventory walk and free. Then
+    <code>StasisBankIndex.bankHolding</code>, which is <a href="#bank-insurance-index">the armed
+    flag</a> asked the other way round: every bank publishes <strong>which horse ids it is
+    holding</strong>, on the same two occasions it publishes whether it is armed &mdash; the grid
+    changing, and the block loading. The ids come off the snapshot component, which is the whole
+    reason <code>StasisSnapshot</code> unpacks an id at all, so publishing costs a field read per
+    slot and no tag is decoded. The flag itself is
+    <a href="#emergency-bank-coding">the emergency chamber's</a>, and this is its shape reused.
+</p>
+<p>
+    What that buys is the same thing the armed flag buys: the usual answer &mdash; <em>not in any
+    of your banks</em> &mdash; is a walk of a short list in memory and <strong>no chunk is touched
+    at all</strong>, and the answer <em>yes</em> names exactly one chunk to load. Like the flag,
+    it is last-known and the real container is re-read rather than trusted; a stale row costs a
+    wasted look and finds nothing, which is the right way round.
+</p>
+
+<h3 id="measure-then-place">Why the horse is built before the stall is measured</h3>
+<p>
+    <code>TicketHandler.landingSpot</code> sizes a stall <strong>against the animal's own
+    bounding box</strong> &mdash; a shire does not fit where a Shetland does &mdash; so the horse
+    has to exist before the destination can be checked. But it must not be <em>in the world</em>
+    yet, because everything after that point can still say no.
+</p>
+<p>
+    Hence the <code>restore</code> / <code>place</code> split. The order is: find the chamber,
+    confirm the horse is not already loose, resolve home, restore the horse unplaced, check it
+    answers to this player, measure the stall against it, choose a ticket &mdash; and only then
+    <code>place</code>, swap the stack for <code>withoutHorse</code>, and spend the ticket.
+    <strong>Every one of those refusals leaves the chamber as full as it was</strong>, which is
+    the promise <code>StasisChamberItem.useOn</code> already makes. The alternative shape
+    &mdash; release somewhere, then teleport &mdash; is a real horse standing in the room with
+    the bank for a tick, and on a refusal a bottle opened for nothing.
+</p>
+<div class="note">
+    <span class="label">One destination, not two copies of one</span>
+    <p>
+        The stall-then-pen choice and the three sentences that go with it
+        (<em>&ldquo;that stall's world is not loaded&rdquo;</em>, <em>&ldquo;there is nowhere in
+        that stall this horse fits&rdquo;</em>, <em>&ldquo;is back in its stall&rdquo;</em>) moved
+        into a <code>Home</code> record when the second caller appeared. That is the same rule
+        this class already follows about <code>TicketHandler</code>: the two paths look separable
+        and are not, and a drift between them would be a horse teleported into a wall or a player
+        told to check a sign that was never the problem.
+    </p>
+</div>
+<p>
+    The trip is measured <strong>from where the bottle is</strong>, not from where the horse went
+    in, so the ticket tier has to reach from the bank's world &mdash; which is the honest
+    question, since that is where the animal actually re-appears from.
+</p>
+
+<h2 id="jars-coding">Drawing the horse in the jar</h2>
+<p>
+    An occupied chamber is a different item from an empty one already &mdash;
+    <a href="#two-custom-recipes">it has to be</a>, since recipe ingredients cannot see
+    components &mdash; so it could simply be given a different texture, and that is the whole of
+    the art change: <code>occupied_*_stasis_chamber.png</code> is the tier's own bottle with a
+    <strong>window cut out of the upper body</strong>. The tier colour survives as the liquid in
+    the base, deliberately, because a bank of Basic chambers still has to read <em>blue</em>
+    across a grid of fifty-four.
+</p>
+<p>
+    Behind that window the screen draws <code>HorsePortrait</code>, the browser's own row
+    portrait, with the coat from <code>ClientHorseCoats</code> &mdash; which is keyed by
+    <strong>record</strong> UUID and answered from <code>HorseAncestryData</code>, so it works
+    perfectly well for an animal that does not exist anywhere. The chamber grid is drawn in the
+    background pass, so the portrait lands <em>under</em> the item icon and shows through the
+    hole without anything being drawn over the jar.
+</p>
+<div class="note">
+    <span class="label">Clipped, not shrunk &mdash; and the four numbers are a copy</span>
+    <p>
+        The portrait is drawn at the slot's <strong>full sixteen pixels</strong> and scissored to
+        the window. A five-pixel portrait is a smudge; five pixels of a sixteen-pixel horse is
+        that horse's barrel at the size the rest of the mod draws it, which is enough to say
+        <em>chestnut</em>, <em>grey</em>, <em>spotted</em> at a glance. The dark well the portrait
+        fills first is clipped with it, so the hole reads as the inside of a bottle.
+    </p>
+    <p>
+        <strong><code>GLASS_X0/Y0/X1/Y1</code> in <code>HorseStasisBankScreen</code> are where the
+        PNG is transparent</strong>, and the two must agree. Every pixel of that rectangle has to
+        be inside the glass, or the dark fill spills onto the panel beside the jar. Redraw the
+        bottles and those four numbers move with them.
+    </p>
+</div>
+<p>
+    The pose is fixed at a three-quarter view rather than following the cursor, which the
+    browser's rows do: fifty-four horses all turning together would be a wall of jars that
+    ripples when the mouse moves, and a specimen in a bottle holds still. The Browse tab's own
+    portraits <em>do</em> follow the cursor &mdash; there are four of them, and they are the ones
+    you are looking <em>at</em>.
+</p>
 
 <h2 id="emergency-coding">The emergency chamber: a subclass, and one event at <code>LOWEST</code></h2>
 <p>
@@ -1241,7 +1424,7 @@
     somewhere in some dimension means a search of the world, or a chunk load per bank per blow.
 </p>
 <p>
-    <code>StasisBankIndex</code> is what makes it cheap, and the trick is its <strong>second
+    <code>StasisBankIndex</code> is what makes it cheap, and the trick is its <strong id="bank-insurance-index">second
     field</strong>. A row is a bank's position and its owner &mdash; that much is only a phone
     book. What matters is <code>armed</code>: the block entity publishes, every time its chamber
     grid changes and again on <code>onLoad</code>, whether it is currently holding an
@@ -1424,8 +1607,10 @@
         letting herself out to foal</strong>, <strong>the newly deepened grid and the scrolling
         that reaches it</strong>, and <strong>the emergency chamber firing at all</strong> are
         unplayed &mdash; now including <strong>a chamber being spent out of a bank</strong>,
-        <strong>the tick a rider is set down for</strong>, and <strong>the whereabouts column
-        saying a horse is in a chamber</strong>.
+        <strong>the tick a rider is set down for</strong>, <strong>the whereabouts column
+        saying a horse is in a chamber</strong>, and newest of all <strong>the horse drawn
+        through the jar's new window</strong> and <strong>Send home taking a horse out of a
+        chamber and leaving the empty one behind</strong>.
     </p>
 </div>
 
@@ -1548,14 +1733,54 @@
         two item ids exist to close, and the one a priority file could not.</li>
 </ul>
 
-<h3 id="verify-occupied-art">The occupied chambers have no art of their own (2026-09-25, known)</h3>
+<h3 id="verify-jars">The horse shows through the jar (2026-09-25, NOT played)</h3>
 <p>
-    All five reuse their empty twin's texture, so a chamber with a horse in it looks identical to
-    one without and only the tooltip says which is which. That is deliberate for now rather than
-    overlooked &mdash; it is five 16&times;16 PNGs and no code &mdash; but it is a real gap in a
-    feature whose whole point is telling your horses apart. Filed here rather than as a plan
-    because the fix is art, not a decision.
+    The five occupied chambers have their own art now &mdash; a window cut in the upper body
+    &mdash; and the bank draws the horse's coat behind it. Nothing about this has been looked at
+    in a running game, and it is the kind of change that goes wrong <em>visibly</em> rather than
+    silently, so it is one screenshot to settle.
 </p>
+<ul>
+    <li><strong>The window lines up with the hole.</strong>
+        <code>GLASS_X0/Y0/X1/Y1</code> are a copy of where the PNG is transparent. If they
+        disagree, the tell is a <strong>dark rectangle spilling onto the grey panel</strong>
+        beside a jar, or a horse that is visibly clipped off-centre. Fill a bank with a few
+        chambers and look at the grid as a whole, not at one slot.</li>
+    <li><strong>The horse is the right horse.</strong> Two chambers holding two obviously
+        different coats &mdash; a grey and a chestnut &mdash; should be two obviously different
+        bottles. If both windows show the same animal, the slot&rarr;row map is wrong.</li>
+    <li><strong>A foal reads as a foal</strong>, and a chamber whose horse has no stable record
+        shows an <em>empty</em> window rather than a black square or a default black horse.</li>
+    <li><strong>The scissor holds under the entity draw.</strong> Precedent says it does
+        (<code>FamilyTreeScreen</code> draws horses inside one), but this is the first time it is
+        used at fifty-four boxes on one frame &mdash; watch for a frame-rate drop on a
+        <em>full</em> bank with the Chambers tab open, which is the one cost nobody has
+        measured.</li>
+    <li><strong>The Browse tab's portraits</strong> follow the cursor, sit clear of the names,
+        and do not push a long name off the row.</li>
+</ul>
+
+<h3 id="verify-send-home-chamber">Send home takes a horse out of a chamber (2026-09-25, NOT played)</h3>
+<p>
+    The whole path is new and it spends a ticket, so the failure that matters is
+    <strong>a ticket spent with the horse still in the bottle</strong>, or the reverse.
+</p>
+<ul>
+    <li><strong>Out of your pack.</strong> Bind a stall, put the horse in a chamber, carry it,
+        press <em>Send home</em>. The horse should be in the stall and the chamber in your pack
+        should be the <em>empty</em> item of the same tier &mdash; not gone, not still full.</li>
+    <li><strong>Out of a bank, in another world.</strong> The case the index exists for. File the
+        chamber in a bank, walk away far enough that its chunk is unloaded, and press the button.
+        A bank the player does not own must not be reachable at all.</li>
+    <li><strong>Every refusal leaves it full.</strong> Wall the stall up, or hold no ticket, or
+        take the sign down, and check the chamber is unchanged and the ticket unspent each
+        time.</li>
+    <li><strong>The at-stud mark goes with the horse</strong>, so a mare turned out at stud and
+        then sent home leaves a chamber that is empty <em>and</em> unmarked.</li>
+    <li><strong>The bank notices.</strong> After the swap, the Browse tab's count and the index's
+        held list should both have dropped by one &mdash; the emptied slot goes through the
+        container's own <code>setChanged</code>, which is what republishes it.</li>
+</ul>
 
 <h3 id="verify-emergency">The emergency chamber catches a horse (NOT played)</h3>
 <p>

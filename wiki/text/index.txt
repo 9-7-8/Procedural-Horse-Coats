@@ -2810,10 +2810,16 @@ wiki/horse-stasis.html#emergency-log	gameplay	It writes it down as well as sayin
 wiki/horse-stasis.html#emergency-log-coding	coding	Why a rescue is a log row and not only a chat line
 wiki/horse-stasis.html#emergency-not-a-tier	coding	Why it is a subclass and not a fifth tier
 wiki/horse-stasis.html#files	coding	What is where
+wiki/horse-stasis.html#finding-the-jar	coding	Finding the jar is the index's second question
+wiki/horse-stasis.html#jars-coding	coding	Drawing the horse in the jar
+wiki/horse-stasis.html#jars-gameplay	gameplay	You can see which horse is in which jar
+wiki/horse-stasis.html#measure-then-place	coding	Why the horse is built before the stall is measured
 wiki/horse-stasis.html#occupied-is-an-item	coding	A chamber with a horse in it is a different item
 wiki/horse-stasis.html#pipes	coding	Why the goods slots are on the wire and the chambers are not
 wiki/horse-stasis.html#refusals	gameplay	What it refuses, and why it says so
 wiki/horse-stasis.html#release-details	coding	Small decisions inside release
+wiki/horse-stasis.html#send-home-coding	coding	Send home, out of a chamber
+wiki/horse-stasis.html#send-home-gameplay	gameplay	Sending a horse home without going to fetch the bottle
 wiki/horse-stasis.html#special-recipes	coding	Every chamber recipe was invisible, and that is not the same as broken
 wiki/horse-stasis.html#stud-coding	coding	In-bank breeding: the mark, the cover, and coming out to foal
 wiki/horse-stasis.html#stud-gameplay	gameplay	Putting a horse to stud in the bank
