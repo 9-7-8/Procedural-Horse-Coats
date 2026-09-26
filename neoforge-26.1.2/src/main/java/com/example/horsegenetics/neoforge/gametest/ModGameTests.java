@@ -982,6 +982,118 @@ public final class ModGameTests {
         register(event, environment, HORSE_REALM_GRID_IS_STABLE, 100);
         // One recipe lookup in a single tick.
         register(event, environment, FREEDOM_STICK_CRAFTS, 100);
+        // Spawn, ten ticks to be founded, kill, raise - then read the result.
+        register(event, environment, A_DEAD_HORSE_COMES_BACK_WHOLE, 200);
+    }
+
+    /**
+     * <b>A resurrected horse is the same horse, alive, and wearing nothing.</b>
+     *
+     * <p>{@code /horseresurrect} rests on three things that are each invisible
+     * when they break, and this is the only place that can see any of them.
+     *
+     * <p><b>The identity.</b> The whole point of keeping an entity tag rather
+     * than rebuilding from the {@code HorseRecord} is that the tag carries the
+     * UUID, and the UUID is what every pedigree, stall sign and bound whistle
+     * keys on. A resurrection that quietly minted a new id would look perfect -
+     * right name, right coat, right stats - and would have orphaned every foal
+     * the horse ever had. Nothing in the game would say so.
+     *
+     * <p><b>The health.</b> The snapshot is taken in {@link LivingDeathEvent},
+     * so the tag says zero. {@code HorseResurrection.revive} refills it from the
+     * genotype; without that the horse stands up and dies again inside a tick,
+     * and the death loop would read as "the command does nothing".
+     *
+     * <p><b>The gear.</b> This is the one that is a <i>dupe</i>. The snapshot is
+     * taken before vanilla drops the saddle and the armour, so both are in the
+     * tag <b>and</b> on the ground. {@code revive} empties the slots, and if
+     * that ever stops matching where a horse keeps its tack - the saddle moved
+     * to its own equipment slot once already - the test fails here instead of a
+     * player quietly printing saddles.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> A_DEAD_HORSE_COMES_BACK_WHOLE =
+            TEST_FUNCTIONS.register("a_dead_horse_comes_back_whole",
+                    () -> ModGameTests::aDeadHorseComesBackWhole);
+
+    private static void aDeadHorseComesBackWhole(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        // Founded on a later tick, not the one it spawned on - the same wait
+        // STASIS_TAG_IS_READABLE has to make, and for the same reason.
+        helper.runAfterDelay(10L, () -> killAndRaise(helper, horse));
+    }
+
+    private static void killAndRaise(GameTestHelper helper,
+                                     net.minecraft.world.entity.animal.equine.Horse horse) {
+        if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the spawned horse still has no record ten ticks in - this test's premise is"
+                            + " broken, not the resurrection"), 0);
+        }
+        // Only an OWNED horse is kept, so give it one. A plain UUID rather than
+        // a real player: HorseAfterlifeHandler reads the record's ownerId and
+        // nothing else, and a gametest has no players in it.
+        java.util.UUID owner = java.util.UUID.randomUUID();
+        com.example.horsegenetics.neoforge.server.HorseRecords.setOwner(horse, owner);
+        horse.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE,
+                new ItemStack(Items.SADDLE));
+
+        java.util.UUID id = horse.getUUID();
+        String name = com.example.horsegenetics.neoforge.server.HorseRecords.of(horse).displayName();
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+
+        horse.kill(level);
+
+        com.example.horsegenetics.neoforge.data.HorseAfterlife afterlife =
+                com.example.horsegenetics.neoforge.data.HorseAfterlife.get(level.getServer());
+        com.example.horsegenetics.neoforge.data.HorseAfterlife.Wake wake =
+                afterlife.lookup(id).orElse(null);
+        if (wake == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "an owned horse died and nothing was kept - /horseresurrect will never have"
+                            + " anything to offer. Check HorseAfterlifeHandler.onHorseDeath and"
+                            + " whether the record still carries an ownerId at death."), 0);
+        }
+
+        // The entity is discarded by now, so the id is free for it to take back.
+        net.minecraft.world.entity.animal.equine.Horse raised =
+                com.example.horsegenetics.neoforge.server.HorseResurrection.raise(
+                        level, helper.absoluteVec(net.minecraft.world.phys.Vec3.ZERO), 0.0F,
+                        wake.snapshot());
+        if (raised == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "the kept snapshot of " + name + " could not be raised at all"), 0);
+        }
+
+        if (!raised.getUUID().equals(id)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the resurrected horse has a NEW id (" + raised.getUUID() + " was " + id
+                            + "). It looks like the same horse and is not one: every foal's"
+                            + " pedigree, every stall sign and any bound whistle still point at"
+                            + " the dead id. Check that StasisSnapshot is still carrying the"
+                            + " entity's UUID through saveWithoutId."), 0);
+        }
+        if (!raised.isAlive() || raised.getHealth() <= 0.0F) {
+            throw new GameTestAssertException(Component.literal(
+                    name + " came back at " + raised.getHealth() + " health and will die again"
+                            + " immediately. HorseResurrection.revive is meant to refill it from"
+                            + " the genotype - see applyTraitsToEntity(.., true)."), 0);
+        }
+        ItemStack saddle = raised.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.SADDLE);
+        if (!saddle.isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    name + " came back still wearing its saddle. It also dropped one when it"
+                            + " died, so that is a duplication bug. HorseResurrection.revive"
+                            + " clears every EquipmentSlot; check the saddle has not moved to a"
+                            + " container the slots do not cover."), 0);
+        }
+        String raisedName = com.example.horsegenetics.neoforge.server.HorseRecords.of(raised).displayName();
+        if (!raisedName.equals(name)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the resurrected horse is called \"" + raisedName + "\" and the dead one was \""
+                            + name + "\" - the record did not survive the tag round trip"), 0);
+        }
+        helper.succeed();
     }
 
     /**

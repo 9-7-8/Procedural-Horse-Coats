@@ -254,6 +254,36 @@ public final class ModDataComponents {
                     .build());
 
     /**
+     * <b>A dead horse, in an egg, on its way back.</b> The same
+     * {@link StasisSnapshot} payload as {@link #STASIS_SNAPSHOT} - the whole
+     * entity, UUID and attachments included - written onto a
+     * {@code preset_horse_spawn_egg} by {@code /horseresurrect ... egg} so an
+     * operator can hand somebody their horse instead of placing it for them.
+     *
+     * <p><b>A component of its own rather than reusing {@link #STASIS_SNAPSHOT}</b>,
+     * even though the type is identical. The two mean different things to the
+     * item that carries them: a chamber holding a snapshot is a full chamber and
+     * its whole state machine turns on that, and an egg is not a chamber. Sharing
+     * the key would make {@code StasisChamberItem.snapshotOf} answer yes about an
+     * egg the day anything asked it generically, and the saving would be one
+     * registration line.
+     *
+     * <p><b>Present wins over {@link #STORED_GENOME}.</b> An egg carrying this is
+     * one particular horse coming back, not a genotype being spawned; the preset
+     * egg checks for it first. Nothing writes both.
+     *
+     * <p>The horse leaves {@link HorseAfterlife} when the egg is made, so the
+     * snapshot exists in exactly one place and cannot be spent twice. That is
+     * also why the egg does not expire: it is no longer the save's problem, it is
+     * an item somebody is holding.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<StasisSnapshot>> RESURRECTION =
+            TYPES.register("resurrection", () -> DataComponentType.<StasisSnapshot>builder()
+                    .persistent(StasisSnapshot.CODEC)
+                    .networkSynchronized(StasisSnapshot.STREAM_CODEC)
+                    .build());
+
+    /**
      * <b>This chamber is turned out into the Horse Stasis Bank's paddock.</b>
      * Present and true, the bank may breed the horse inside it against another
      * marked chamber; absent, it may not.

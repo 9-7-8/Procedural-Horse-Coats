@@ -2675,6 +2675,18 @@ wiki/genetics-model.html#noncoat	all	Genes that never paint
 wiki/genetics-model.html#registry	all	The forty-eight registered genes
 wiki/genetics-model.html#sex-linked	all	Sex-linked inheritance
 wiki/genetics-model.html#verified	all	Verified
+wiki/horse-afterlife.html#clock	coding	The clock is the owner, and it counts up
+wiki/horse-afterlife.html#command	gameplay	The command
+wiki/horse-afterlife.html#corpse	coding	The corpse has to go first (2026-09-26)
+wiki/horse-afterlife.html#egg	gameplay	The resurrection egg
+wiki/horse-afterlife.html#egg-coding	coding	The egg is the preset egg
+wiki/horse-afterlife.html#pieces	coding	The four pieces
+wiki/horse-afterlife.html#revive	coding	Undoing the death, not just the absence
+wiki/horse-afterlife.html#snapshot	coding	It is the stasis chamber's payload, pointed at a death
+wiki/horse-afterlife.html#what-comes-back	gameplay	What comes back, and what does not
+wiki/horse-afterlife.html#what-happens	gameplay	What happens when a horse dies
+wiki/horse-afterlife.html#whereabouts	coding	One exception, written down
+wiki/horse-afterlife.html#window	gameplay	How long you have
 wiki/horse-body.html#attributes	all	Reaching the game
 wiki/horse-body.html#baselines	all	The baselines
 wiki/horse-body.html#body-size	all	body.size — may the size loci resize the horse?

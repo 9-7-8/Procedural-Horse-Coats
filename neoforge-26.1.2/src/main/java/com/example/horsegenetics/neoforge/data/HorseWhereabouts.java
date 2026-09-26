@@ -129,6 +129,21 @@ public final class HorseWhereabouts extends SavedData {
     }
 
     /**
+     * <b>It was dead, and it is not any more.</b> The single exception to
+     * {@link #seen}'s rule that a dead horse stays dead - and the rule is worth
+     * keeping precisely because this is the only caller entitled to break it.
+     *
+     * <p>Written by {@code server/HorseResurrection}, the operator's undo. A
+     * horse that has been brought back is standing in front of somebody, so
+     * leaving the mark would have the browser and the ender whistle insisting it
+     * is dead while its owner is riding it.
+     */
+    public void seenAlive(UUID horse, ResourceKey<Level> dimension, BlockPos pos) {
+        byHorse.put(horse, new Seen(horse, dimension, pos.immutable(), false, false));
+        setDirty();
+    }
+
+    /**
      * <b>It went into a stasis chamber.</b> The horse is not an entity any more,
      * so nothing else will ever write another sighting for it - which is exactly
      * why this has to be written at the moment it goes in, and why the browser

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bringing a dead horse back &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Gameplay <span class="sep">/</span> operator tooling</p>
+<h1 id="horse-afterlife">Bringing a dead horse back</h1>
+<p class="lede">
+    <strong>An operator's undo for the one loss nothing else can reverse.</strong>
+    Every other way of losing a horse has a tool that finds it: sold, turned out, bottled,
+    stabled, lost across a dimension. A horse that <em>died</em> had nothing, and the thing that
+    dies is not a stack of items &mdash; it is an animal with a name somebody chose, a bond they
+    spent weeks on and a pedigree three generations deep. So a dead horse is now
+    <strong>kept whole for a while</strong>, and <code>/horseresurrect</code> spends that:
+    the horse that stands back up is the <em>same horse</em>, same id, and every foal's pedigree
+    still points at it. It is an operator's command and nothing a player can reach.
+</p>
+
+<section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
+
+<h2 id="what-happens">What happens when a horse dies</h2>
+<p>
+    If the horse had an <strong>owner</strong>, the whole animal is kept &mdash; not a
+    description of it, the animal: its name, its bond, its hunger, its pedigree, its breed, a
+    pregnancy in progress, the lot. Its owner is told, if they are online, that it can still be
+    brought back and that they should ask an operator soon.
+</p>
+<p>
+    Nothing else changes. It still drops what it was going to drop, the death notice still goes
+    out, the pedigree still records it. <strong>A wild horse is not kept at all</strong> &mdash;
+    there is nobody to ask for it, and between the horse realm and ordinary worldgen they die in
+    numbers that would make this the largest thing in the save.
+</p>
+<div class="note">
+    <span class="label">This is the last resort, and three things come first</span>
+    <p>
+        A horse only reaches this page when everything else failed. The
+        <a href="horse-care.html">last stand</a> refuses to let a single blow kill one; a
+        <a href="items.html">rescuing braid</a> sends a braided horse home; the
+        <a href="horse-stasis.html#emergency-gameplay">Emergency Stasis Chamber</a> bottles any
+        horse its owner insured, before the blow lands. All three are better than this one,
+        because the player keeps playing through them. Resurrection is what is left.
+    </p>
+</div>
+
+<h2 id="window">How long you have</h2>
+<p>
+    <code>ops.resurrect_grace_minutes</code>, sixty by default &mdash; but counted in
+    <strong>the owner's own time online</strong>, not wall clock. Somebody who logged off ten
+    seconds before a creeper found their mare has not spent a minute of their window, because
+    the window is <em>their chance to notice and ask</em> and they were not in the room. An hour
+    of real time while they are asleep would spend a window they never had.
+</p>
+<p>
+    Set it to <strong>0 to keep every dead horse for ever</strong>. That is a real option and a
+    real cost: a kept horse is a whole entity in the world save, per horse, indefinitely. The
+    elapsed count keeps running while it is 0, so turning a limit back on later starts expiring
+    the backlog rather than sparing it.
+</p>
+
+<h2 id="command">The command</h2>
+<p>
+    <code>/horseresurrect</code>, permission level 2 (game masters), like
+    <code>/horsebounty</code>.
+</p>
+<table>
+    <thead>
+        <tr><th>Command</th><th>What it does</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>/horseresurrect list [player]</code></td>
+            <td>What is still recoverable, whose it was, how long ago it died and how much of
+                its window is left. With no arguments, <code>/horseresurrect</code> does this.</td>
+        </tr>
+        <tr>
+            <td><code>/horseresurrect &lt;horse&gt;</code></td>
+            <td>It stands up in front of you.</td>
+        </tr>
+        <tr>
+            <td><code>/horseresurrect &lt;horse&gt; at &lt;player&gt;</code></td>
+            <td>In front of somebody else &mdash; the usual one, since the owner is generally
+                stood there asking.</td>
+        </tr>
+        <tr>
+            <td><code>/horseresurrect &lt;horse&gt; site</code></td>
+            <td>Where it died. Loads that chunk. <strong>This is the one that can put a horse
+                back in the lava that killed it</strong>, which is why it is never the
+                default.</td>
+        </tr>
+        <tr>
+            <td><code>/horseresurrect &lt;horse&gt; egg &lt;player&gt;</code></td>
+            <td>Into their inventory as an egg, to place where they want it.</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    <code>&lt;horse&gt;</code> is the horse's <strong>name</strong> &mdash; what the death notice
+    said and what its owner will call it &mdash; and tab-completes from what is actually being
+    kept. Two dead horses called Pepper are <strong>refused with both ids listed</strong> rather
+    than resolved to the more recent one: that is exactly the case where guessing wrong means
+    resurrecting the wrong animal and spending the other one's window while its owner waits.
+</p>
+
+<h2 id="egg">The resurrection egg</h2>
+<p>
+    <code>egg</code> hands the player a <a href="items.html">preset horse spawn egg</a> with
+    their horse inside it, and the tooltip says <em>&ldquo;brought back whole &mdash; the same
+    horse, not a copy&rdquo;</em> so nobody mistakes it for the ordinary genotype egg. Right-click
+    the ground and the horse is there.
+</p>
+<p>
+    <strong>The horse moves out of the server's keeping and into the item</strong> at the moment
+    the egg is made. So it stops expiring &mdash; it is no longer the save's problem, it is
+    something somebody is holding &mdash; and there is only ever one copy. The egg is consumed
+    even in creative, for that reason.
+</p>
+
+<h2 id="what-comes-back">What comes back, and what does not</h2>
+<p>
+    <strong>The same horse.</strong> Not a clone with the same coat: the same id, so its foals'
+    family trees, its stall records and any whistle bound to it all still point at an animal that
+    exists. Its name, its bond, its breed, its pedigree, its epigenome and its age come back
+    exactly as they were.
+</p>
+<p>
+    <strong>Not its tack.</strong> The saddle and the armour dropped on the ground where it fell,
+    and giving them back as well would mint a second set. They are where it died; the horse comes
+    back bare.
+</p>
+<p>
+    Nor does whatever killed it come back on it. The fire is out, the effects are gone, its lungs
+    are full and its health is refilled to what its genes say it should be.
+</p>
+
+</section>
+
+<section id="coding" class="tab-panel" data-tab="coding" data-tab-label="Coding">
+
+<h2 id="pieces">The four pieces</h2>
+<table>
+    <thead>
+        <tr><th>Class</th><th>Job</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>data/HorseAfterlife</code></td>
+            <td><code>SavedData</code>, server-global, id <code>horsegenetics:horse_afterlife</code>.
+                A map of horse id to <code>Wake</code>. Holds the snapshot, the owner, where and
+                when it died, and the owner-online ticks spent so far.</td>
+        </tr>
+        <tr>
+            <td><code>server/HorseAfterlifeHandler</code></td>
+            <td>The writing half: <code>LivingDeathEvent</code> takes the snapshot, and a
+                <code>ServerTickEvent.Post</code> sweep spends the window.</td>
+        </tr>
+        <tr>
+            <td><code>server/HorseResurrection</code></td>
+            <td>The one place a dead horse is put back on its feet, shared by the command and
+                the egg so the two cannot disagree.</td>
+        </tr>
+        <tr>
+            <td><code>server/HorseResurrectCommand</code></td>
+            <td><code>/horseresurrect</code>, and nothing else reads the store.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 id="snapshot">It is the stasis chamber's payload, pointed at a death</h2>
+<p>
+    A <code>Wake</code> carries a <code><a href="horse-stasis.html#coding">StasisSnapshot</a></code>
+    &mdash; the dead animal's complete <code>Entity.saveWithoutId</code> tag, which on NeoForge
+    takes the data attachments with it. That is the same payload a stasis chamber holds and the
+    same one the <a href="gene-lycan.html">lycan gene</a> has been carrying a horse through the
+    night inside since it shipped, so this is a third caller on a proven mechanism rather than a
+    fourth way to freeze a horse.
+</p>
+<p>
+    <strong>The tag is what keeps the UUID</strong>, and the UUID is the whole argument for this
+    design. Rebuilding the horse from its <code>HorseRecord</code> instead would have been
+    easier and would have produced an animal with the right coat, the right name, the right stats
+    and the wrong identity &mdash; every foal it ever had orphaned, every stall sign pointing at
+    a horse that no longer exists, and nothing anywhere saying so. The
+    <a href="#verification">gametest</a> exists because that failure is invisible.
+</p>
+<p>
+    It is not a second copy of the ancestry database.
+    <a href="breeding.html">HorseAncestryData</a> keeps a dead horse's record for ever on purpose,
+    because the pedigree needs it, and nothing here duplicates that. What is kept here is the part
+    the ancestry data deliberately does not hold: the live entity, as it stood.
+</p>
+
+<h2 id="clock">The clock is the owner, and it counts up</h2>
+<p>
+    <code>Wake.ownerTicks</code> counts <strong>up</strong> and is compared against the setting
+    when it is read, rather than counting a budget down from whatever the setting was at death.
+    That is what lets a config change apply to horses that are already dead &mdash; in both
+    directions, including to &ldquo;for ever&rdquo; and back.
+</p>
+<p>
+    <code>HorseAfterlife.spend</code> is only ever called for a player who is logged in, which is
+    what makes the clock theirs; the sweep walks the online players every 200 ticks.
+    <code>dropExpired</code> runs in the same sweep and is <em>not</em> redundant with it: a horse
+    belonging to somebody who never comes back would otherwise sit in the save for ever under a
+    window it is already past, the moment an operator lowered the setting.
+</p>
+<div class="note">
+    <span class="label">The consequence to know about</span>
+    <p>
+        An owner who never logs in again never spends their window, so their horses are kept
+        indefinitely. That is the design working as asked &mdash; the clock is their chance to
+        ask &mdash; but it means the store's floor is set by departed players rather than by the
+        setting. Nothing trims it today.
+    </p>
+</div>
+
+<h2 id="revive">Undoing the death, not just the absence</h2>
+<p>
+    A stasis snapshot is of a healthy horse somebody chose to bottle. This one is of an animal in
+    the instant it died, and the tag is honest about that. <code>HorseResurrection.revive</code>
+    runs before the horse is placed, so it never exists in the world in the state it died in:
+</p>
+<ul>
+    <li><strong>The gear is cleared</strong>, through the entity's own <code>EquipmentSlot</code>s
+        rather than by deleting NBT keys &mdash; the keys move between versions, and a rename
+        would fail silently as a duplicated saddle rather than as a crash. The snapshot is taken
+        before vanilla drops the tack, so it is in the tag <em>and</em> on the ground.</li>
+    <li><strong>Effects, fire and air</strong> are reset. A horse that died of wither would
+        otherwise stand up and die again, which reads as the command not working.</li>
+    <li><strong>The health is refilled from the genotype</strong>, not from the tag &mdash; the
+        tag says zero. The same <code>applyTraitsToEntity(.., true)</code> a newborn foal gets.</li>
+</ul>
+
+<h2 id="corpse">The corpse has to go first (2026-09-26)</h2>
+<p>
+    A horse does not leave the world the instant it dies: it falls over for twenty ticks and is
+    removed at the end of that. For the whole of that second <strong>the corpse still holds the
+    UUID</strong>, so <code>addFreshEntity</code> refuses the resurrected horse with
+    <em>&ldquo;UUID of added entity already exists&rdquo;</em> &mdash; a warning in the log, a
+    null return, and an operator told the horse could not be read.
+</p>
+<p>
+    That is the <em>most likely</em> resurrection there is: the one typed while the owner is still
+    shouting about it. <code>HorseResurrection.clearCorpse</code> discards any entity with that id
+    that is not <code>isAlive()</code>, across every level, before restoring. Its loot has already
+    dropped by then, so nothing is destroyed but the animation. A genuinely living horse with that
+    id is a different matter and is refused by <code>alreadyAlive</code> instead.
+</p>
+<p>
+    This was found by the gametest below, on its first run, and not by reading the code.
+</p>
+
+<h2 id="egg-coding">The egg is the preset egg</h2>
+<p>
+    <code>ModDataComponents.RESURRECTION</code> is a <code>StasisSnapshot</code> on a
+    <code>preset_horse_spawn_egg</code>, and <code>PresetHorseSpawnEggItem.useOn</code> checks for
+    it before <code>STORED_GENOME</code>. Reusing that item rather than adding one is the same
+    call <code>GeneDeathHandler.cloneEgg</code> already makes for the death drop: the two are the
+    same thing arrived at from different directions, and one of them already has a model, a
+    tooltip and a spawner behind it.
+</p>
+<p>
+    It is a component of its own rather than <code>STASIS_SNAPSHOT</code> even though the type is
+    identical, because the two mean different things to the item carrying them &mdash; a chamber
+    holding a snapshot is a <em>full chamber</em> and its whole state machine turns on that. The
+    saving would have been one registration line.
+</p>
+
+<h2 id="whereabouts">One exception, written down</h2>
+<p>
+    <code>HorseWhereabouts.seen</code> refuses to un-kill a horse, on purpose, so that a stale
+    sighting cannot. <code>seenAlive</code> is the single caller entitled to say otherwise, and
+    exists so the browser and the ender whistle stop insisting a horse is dead while its owner is
+    riding it.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Nothing on this page has been played: the round trip is proven by a gametest and by nothing else, so the first check is the plain one &mdash; own a horse, name it, get its bond up, let it die, and confirm <code>/horseresurrect list</code> shows it and <code>/horseresurrect &lt;name&gt; at &lt;player&gt;</code> hands back an animal whose bond, name and pedigree are all still there and whose foals still list it as a parent; the saddle is the one that would be a duplication bug rather than a disappointment, so kill a <strong>tacked</strong> horse and check the saddle is on the ground and not also on the horse; the owner-online clock has never been watched over a real hour and the thing to confirm is the half that is easy to get backwards &mdash; that a horse dies, its owner logs off for an hour, and it is <em>still</em> there when they come back; the <code>site</code> placement can put a horse back in the lava that killed it and wants somebody to try exactly that on purpose; and the store has no size ceiling at all, so a busy server is the only thing that can say whether sixty minutes of owner time is the right default or whether the save grows faster than anybody expected.</p>
+</div>
+
+<h3 id="verify-round-trip">The round trip, with a real horse (not played)</h3>
+<p>
+    The gametest <code>horsegenetics:a_dead_horse_comes_back_whole</code> asserts the id, the
+    health, the empty saddle slot and the record, and it is the only thing that has ever exercised
+    any of this. It runs in a bare test level against a horse ten ticks old with a
+    <code>UUID.randomUUID()</code> for an owner, which is not a player, not bonded, and not
+    carrying anything.
+</p>
+<ul>
+    <li><strong>Tame a horse, bond it past 50, breed a foal from it, then kill it and bring it
+        back.</strong> <strong>Pass:</strong> same name, bond intact, and the foal's family tree
+        still draws the parent box. <strong>Fail:</strong> if the family tree greys the parent
+        out, the id did not survive and the gametest is asserting something narrower than it
+        looks.</li>
+    <li><strong>Kill a saddled, armoured horse and resurrect it.</strong>
+        <strong>Pass:</strong> one saddle, on the ground. <strong>Fail:</strong> two saddles is
+        the duplication bug <code>revive</code> exists to prevent.</li>
+</ul>
+
+<h3 id="verify-clock">The owner-online clock (not played)</h3>
+<ul>
+    <li><strong>Kill an owned horse, log its owner off for well over an hour, log back in.</strong>
+        <strong>Pass:</strong> <code>/horseresurrect list</code> still shows it with its window
+        untouched. <strong>Fail:</strong> if it has expired, the sweep is charging wall clock
+        somewhere and the whole argument for the design is not being honoured.</li>
+    <li><strong>Watch one expire.</strong> Set <code>ops.resurrect_grace_minutes</code> to 2, kill
+        a horse, and stay online. <strong>Pass:</strong> it is gone from the listing at about two
+        minutes and the save shrinks. <strong>Fail:</strong> the sweep interval or the tick
+        arithmetic is wrong.</li>
+    <li><strong>Lower the setting with a backlog waiting.</strong> Keep several, then drop the
+        setting below their elapsed time. <strong>Pass:</strong> the next sweep drops them even
+        for owners who are offline &mdash; that is what <code>dropExpired</code> is for.</li>
+</ul>
+
+<h3 id="verify-egg">The egg (not played)</h3>
+<ul>
+    <li><strong>Hand one over and place it.</strong> <strong>Pass:</strong> the tooltip names the
+        horse, the horse appears, the egg is gone even in creative, and the horse is no longer in
+        <code>/horseresurrect list</code>. <strong>Fail:</strong> an egg that survives its use is a
+        UUID duplicator.</li>
+    <li><strong>Copy the egg in creative and use both.</strong> <strong>Pass:</strong> the second
+        one refuses, out loud, because the horse is already alive.</li>
+</ul>
+
+<h3 id="verify-site">Placement (not played)</h3>
+<ul>
+    <li><strong><code>site</code> into lava, on purpose.</strong> The command warns and then does
+        it. <strong>Pass:</strong> the horse appears and burns, and the operator was told it
+        might. <strong>Fail:</strong> if it silently fails instead, the chunk force-load is not
+        doing what <code>atSite</code> assumes.</li>
+    <li><strong><code>site</code> into an unloaded chunk in another dimension.</strong>
+        <strong>Pass:</strong> the horse is there when somebody walks to it.</li>
+</ul>
+
+<h3 id="verify-scale">Nothing bounds the store (not played)</h3>
+<p>
+    There is no cap on how many horses are kept, and an owner who never returns never spends their
+    window. On a server with turnover, the floor is set by departed players. Nobody has measured
+    what that costs; the honest check is to run it on a real server for a week and look at the
+    size of <code>horse_afterlife.dat</code>.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="verification.html">Verification &mdash; every page with open checks</a>
+        <a href="horse-stasis.html">Horse stasis, whose snapshot this reuses</a>
+        <a href="horse-care.html">Horse care: the last stand, bond, healing</a>
+        <a href="breeding.html">Breeding &amp; pedigree &mdash; why the id matters</a>
+        <a href="config.html">Server settings</a>
+        <a href="items.html">The item roster</a>
+    </div>
+    Death was the only loss in this mod with nothing behind it. The mechanism to undo it turned
+    out to be one the mod already had and had already proven twice &mdash; a whole horse in a tag
+    &mdash; so the work was almost entirely in deciding who may spend it, for how long, and on
+    whose clock. All of it is built; none of it has been played.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

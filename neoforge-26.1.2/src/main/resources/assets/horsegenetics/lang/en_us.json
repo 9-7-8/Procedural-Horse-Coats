@@ -148,6 +148,7 @@
   "item.horsegenetics.plow.tooltip1": "Tills the ground, makes dirt paths, or strips logs as the horse walks",
   "item.horsegenetics.plow.tooltip2": "Needs the matching tool inside; right-click to toggle",
   "item.horsegenetics.preset_horse_spawn_egg": "Preset Horse Spawn Egg",
+  "item.horsegenetics.preset_horse_spawn_egg.resurrection": "Brought back whole - the same horse, not a copy",
   "item.horsegenetics.preset_horse_spawn_egg.stale": "Made with a different gene list - unusable",
   "item.horsegenetics.reaper.tooltip1": "Harvests mature crops it is drawn over",
   "item.horsegenetics.reaper.tooltip2": "Only works while a player is sitting on it",

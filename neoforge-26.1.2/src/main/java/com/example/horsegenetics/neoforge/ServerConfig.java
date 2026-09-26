@@ -246,6 +246,36 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.IntValue REALM_RELEASE_EMERALDS;
 
+    /**
+     * <b>{@code ops.resurrect_grace_minutes}</b> - how long a dead horse is kept
+     * resurrectable, counted <b>only while its owner is logged in</b>. Read
+     * through {@link #resurrectGraceTicks()}, spent by
+     * {@code server/HorseAfterlifeHandler} and honoured by
+     * {@code server/HorseResurrectCommand}, never here.
+     *
+     * <p>It is a number of minutes rather than a flag because of what is being
+     * kept. A resurrectable horse is a whole entity tag - every attachment, the
+     * gear, the pedigree, the bond - and that is real bytes in the world save,
+     * per dead horse, for ever, if nothing ever throws it away. The window is
+     * therefore a <b>storage budget first</b> and a gameplay rule second: it is
+     * the answer to "how long should the server carry a corpse around on the
+     * chance somebody asks for it back".
+     *
+     * <p><b>Why owner-online time and not wall clock.</b> The grace exists so a
+     * player who loses a horse has a chance to notice and ask. Somebody who
+     * logs off ten seconds before a creeper finds their mare has had no such
+     * chance, and an hour of real time while they are asleep spends a window
+     * they were never in the room for. Counting their own time online is the
+     * only clock that measures the thing the window is for. It also means the
+     * store cannot be aged out by a server simply being left running.
+     *
+     * <p><b>0 keeps every dead horse for ever</b> - an operator who would rather
+     * spend the disk than ever say no. The count is still kept, so turning the
+     * limit back on later starts expiring the backlog rather than
+     * grandfathering it.
+     */
+    public static final ModConfigSpec.IntValue RESURRECT_GRACE_MINUTES;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -333,6 +363,17 @@ public final class ServerConfig {
                         "fires you have left the dimension and there is nobody to hand emeralds to.",
                         "0 turns the payment off.")
                 .defineInRange("realm.release_emeralds", 2, 0, 64);
+        RESURRECT_GRACE_MINUTES = builder
+                .comment("How long a dead horse can still be brought back by /horseresurrect. (default: 60)",
+                        "Counted in minutes of the OWNER'S OWN TIME ONLINE since the horse died, not",
+                        "wall clock: a player who was logged off when it happened has not spent any",
+                        "of their window, because the window is their chance to notice and ask.",
+                        "While it lasts, the whole horse is kept in the world save - every attachment,",
+                        "its gear, its pedigree, its bond - so this is a disk budget as much as a rule.",
+                        "Only owned horses are kept at all; a wild one has nobody to ask for it.",
+                        "0 keeps every dead horse for ever. The elapsed count is still kept while it",
+                        "is 0, so turning a limit back on expires the backlog rather than sparing it.")
+                .defineInRange("ops.resurrect_grace_minutes", 60, 0, 10_080);
         NEARBY_HORSE_CAP = builder
                 .comment("How many other horses may be within 16 blocks of a mare and still let a",
                         "stallion cover her. (default: 50)",
@@ -605,6 +646,21 @@ public final class ServerConfig {
         } catch (IllegalStateException notLoaded) {
             return 2;
         }
+    }
+
+    /**
+     * {@code ops.resurrect_grace_minutes} as <b>ticks</b>, safely - {@code 0}
+     * meaning "for ever", which every caller has to test for rather than treat
+     * as an expired window.
+     */
+    public static int resurrectGraceTicks() {
+        int minutes;
+        try {
+            minutes = RESURRECT_GRACE_MINUTES.get();
+        } catch (IllegalStateException notLoaded) {
+            minutes = 60;
+        }
+        return minutes * 60 * 20;
     }
 
     /**

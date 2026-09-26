@@ -4,8 +4,10 @@ import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
+import com.example.horsegenetics.neoforge.data.StasisSnapshot;
 import com.example.horsegenetics.neoforge.data.StoredGenome;
 import com.example.horsegenetics.neoforge.server.HorseEggSpawner;
+import com.example.horsegenetics.neoforge.server.HorseResurrection;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -37,6 +39,20 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Made in the editor, never crafted, and creative-only to make - but not to
  * <b>use</b>. Handing one to a survival player is the point of it being an item.
+ *
+ * <h2>It is also the resurrection egg</h2>
+ * An egg carrying {@link ModDataComponents#RESURRECTION} holds a whole dead
+ * horse rather than a genotype, and using it brings <b>that</b> horse back - the
+ * same UUID, the same pedigree, the same bond - instead of spawning a founder
+ * that looks like it. That is {@code /horseresurrect ... egg}, an operator
+ * handing somebody their horse to put down where they want it.
+ *
+ * <p>It reuses this item rather than introducing one of its own, on the same
+ * argument {@code GeneDeathHandler.cloneEgg} already makes for the death drop:
+ * the two are the same thing arrived at from different directions, and one of
+ * them already has a model, a tooltip and a spawner behind it. The tooltip says
+ * which of the two an egg is, because the difference matters enormously to
+ * whoever is holding it and nothing else on the item shows it.
  */
 public class PresetHorseSpawnEggItem extends Item {
 
@@ -47,6 +63,23 @@ public class PresetHorseSpawnEggItem extends Item {
 
     public static @Nullable StoredGenome genomeOf(ItemStack stack) {
         return stack.get(ModDataComponents.STORED_GENOME.get());
+    }
+
+    /** The dead horse this egg brings back, or {@code null} for an ordinary preset egg. */
+    public static @Nullable StasisSnapshot resurrectionOf(ItemStack stack) {
+        return stack.get(ModDataComponents.RESURRECTION.get());
+    }
+
+    /**
+     * <b>One named dead horse, in an egg</b> - what {@code /horseresurrect ...
+     * egg} hands over. The snapshot has already been taken out of
+     * {@code HorseAfterlife} by the time this is called, so the horse exists in
+     * this stack and nowhere else.
+     */
+    public static ItemStack resurrecting(StasisSnapshot snapshot) {
+        ItemStack stack = new ItemStack(ModItems.PRESET_HORSE_SPAWN_EGG.get());
+        stack.set(ModDataComponents.RESURRECTION.get(), snapshot);
+        return stack;
     }
 
     private static boolean isBaby(ItemStack stack) {
@@ -66,8 +99,9 @@ public class PresetHorseSpawnEggItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
+        StasisSnapshot resurrection = resurrectionOf(ctx.getItemInHand());
         StoredGenome stored = genomeOf(ctx.getItemInHand());
-        if (stored == null) {
+        if (resurrection == null && stored == null) {
             return InteractionResult.PASS;
         }
         Level level = ctx.getLevel();
@@ -80,6 +114,10 @@ public class PresetHorseSpawnEggItem extends Item {
         BlockPos target = level.getBlockState(at).getCollisionShape(level, at).isEmpty()
                 ? at : at.relative(face);
         Vec3 pos = new Vec3(target.getX() + 0.5, target.getY(), target.getZ() + 0.5);
+
+        if (resurrection != null) {
+            return resurrect(ctx, serverLevel, pos, resurrection);
+        }
 
         Horse horse;
         try {
@@ -105,9 +143,54 @@ public class PresetHorseSpawnEggItem extends Item {
         return InteractionResult.SUCCESS;
     }
 
+    /**
+     * <b>Bring back the horse this egg holds.</b> The egg is consumed even in
+     * creative: unlike a preset egg, which is a reusable stamp of a genotype,
+     * this one holds the only copy of a particular animal and a second use would
+     * be a second entity claiming one UUID.
+     */
+    private static InteractionResult resurrect(UseOnContext ctx, ServerLevel level, Vec3 pos,
+                                               StasisSnapshot snapshot) {
+        if (HorseResurrection.alreadyAlive(level.getServer(), snapshot)) {
+            if (ctx.getPlayer() != null) {
+                ctx.getPlayer().sendSystemMessage(Component.literal(
+                                snapshot.horseName() + " is already alive somewhere. "
+                                        + "This egg has been spent.")
+                        .withStyle(ChatFormatting.RED));
+            }
+            return InteractionResult.FAIL;
+        }
+        Horse horse = HorseResurrection.raise(level, pos,
+                ctx.getPlayer() == null ? 0.0F : ctx.getPlayer().getYRot(), snapshot);
+        if (horse == null) {
+            // restore() has already logged why. Nothing has been consumed, so
+            // the horse is still in the egg and the player can try elsewhere.
+            if (ctx.getPlayer() != null) {
+                ctx.getPlayer().sendSystemMessage(Component.translatable(
+                        "message.horsegenetics.preset_egg.unreadable", snapshot.horseName()));
+            }
+            return InteractionResult.FAIL;
+        }
+        ctx.getItemInHand().shrink(1);
+        if (ctx.getPlayer() != null) {
+            ctx.getPlayer().sendSystemMessage(Component.literal(
+                            snapshot.horseName() + " is back.")
+                    .withStyle(ChatFormatting.GREEN));
+        }
+        return InteractionResult.SUCCESS;
+    }
+
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> adder, TooltipFlag flag) {
+        StasisSnapshot resurrection = resurrectionOf(stack);
+        if (resurrection != null) {
+            adder.accept(Component.literal(resurrection.horseName())
+                    .withStyle(ChatFormatting.GOLD));
+            adder.accept(Component.translatable("item.horsegenetics.preset_horse_spawn_egg.resurrection")
+                    .withStyle(ChatFormatting.DARK_GRAY));
+            return;
+        }
         StoredGenome stored = genomeOf(stack);
         if (stored == null) {
             adder.accept(Component.literal("Blank").withStyle(ChatFormatting.DARK_GRAY));
