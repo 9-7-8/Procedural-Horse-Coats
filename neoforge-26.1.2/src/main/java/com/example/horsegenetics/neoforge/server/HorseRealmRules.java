@@ -2,15 +2,18 @@ package com.example.horsegenetics.neoforge.server;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -126,6 +129,44 @@ public final class HorseRealmRules {
         }
         // Everything that is not a Mob - the player, an item, an arrow, a boat,
         // a lightning bolt - passes. "No mob spawns" is not "no entities".
+    }
+
+    /**
+     * <b>...and no horse is <i>born out of the ground</i> either.</b>
+     * {@link #horsesOnly} deliberately waves horses through, because almost every
+     * horse joining this level is one somebody sent - released, turned out,
+     * claimed back, or foaled here. That leaves one gap it cannot see, since
+     * {@code EntityJoinLevelEvent} does not carry a spawn reason: a horse the
+     * <b>world</b> made.
+     *
+     * <p>Today nothing does, because the realm's biome has empty spawner lists
+     * for every category. But that is a fact about a JSON file, and the promise -
+     * <i>the field contains what was put in it and what was born to it</i> - is
+     * worth more than one data file's contents. A biome modifier from this mod or
+     * another, a spawn egg dispensed by something clever, or a future datapack
+     * edit would each quietly break it, and the symptom would be horses nobody
+     * recognises accumulating in a shared commons. (Owner, 2026-09-26: "nothing
+     * should spawn there".)
+     *
+     * <p>Player-made horses are untouched, which is the distinction that matters:
+     * {@code /summon}, a breed egg and a vanilla spawn egg all carry their own
+     * reasons, and a foal is {@code BREEDING}. Only the three the world itself
+     * uses are refused.
+     *
+     * <p><b>Not verified in-game.</b>
+     */
+    @SubscribeEvent
+    static void nothingSpawnsHere(FinalizeSpawnEvent event) {
+        EntitySpawnReason reason = event.getSpawnType();
+        if (reason != EntitySpawnReason.NATURAL
+                && reason != EntitySpawnReason.CHUNK_GENERATION
+                && reason != EntitySpawnReason.SPAWNER) {
+            return;
+        }
+        if (event.getLevel() instanceof ServerLevelAccessor accessor
+                && HorseRealm.isRealm(accessor.getLevel())) {
+            event.setSpawnCancelled(true);
+        }
     }
 
     // --- a field nobody may rearrange ---

@@ -906,12 +906,15 @@ public final class HorseBrowserScreen extends Screen {
     /**
      * What the Refresh button asks for, which depends on which tab it is sitting
      * on. One button rather than two, because "refresh" means the same thing to
-     * a player on all three tabs and a second button in the same place with a
+     * a player on every tab that carries it and a second button in the same place with a
      * different name would only raise the question of what the difference is.
      */
     private void refresh() {
         if (tab == Tab.LOG) {
             requestLog();
+        } else if (tab == Tab.REALM) {
+            // The field, not the stable - and unthrottled, like the tab click.
+            ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
         } else {
             requestRoster();
         }
@@ -1110,6 +1113,10 @@ public final class HorseBrowserScreen extends Screen {
         }
         boolean breeding = tab == Tab.BREEDING_PREVIEW;
         boolean mine = tab == Tab.MY_HORSES;
+        // Both tables drawn by drawMyHorses. The gene and allele pickers stay on
+        // `mine` alone - they are built from ClientHorseRoster, so on the realm
+        // tab they would offer the genes of horses that are not on screen.
+        boolean roster = mine || tab == Tab.REALM;
         int refreshW = buttonW("Refresh");
         if (genePickButton != null && allelePickButton != null) {
             genePickButton.visible = mine;
@@ -1130,11 +1137,11 @@ public final class HorseBrowserScreen extends Screen {
             // Both roster tabs want it, and so does the Log; it sits in the same
             // place on each, and asks for whatever that tab reads - see refresh().
             boolean log = tab == Tab.LOG;
-            boolean show = breeding || mine || log;
+            boolean show = breeding || roster || log;
             refreshRosterButton.visible = show;
             refreshRosterButton.active = show;
             refreshRosterButton.setRectangle(refreshW, 18,
-                    mine || log ? fsRight() - refreshW : listX(), contentTop() - 1);
+                    roster || log ? fsRight() - refreshW : listX(), contentTop() - 1);
         }
         if (settledToggle != null) {
             settledToggle.visible = breeding;
@@ -1155,9 +1162,9 @@ public final class HorseBrowserScreen extends Screen {
             openBreedsFolderButton.setRectangle(w, 14, detailR() - w, contentTop() - 1);
         }
         if (horseFilterBox != null) {
-            horseFilterBox.visible = mine;
-            horseFilterBox.active = mine;
-            if (!mine) {
+            horseFilterBox.visible = roster;
+            horseFilterBox.active = roster;
+            if (!roster) {
                 horseFilterBox.setFocused(false);
             }
         }
@@ -1527,7 +1534,7 @@ public final class HorseBrowserScreen extends Screen {
             }
             return true;
         }
-        if (tab == Tab.MY_HORSES) {
+        if (tab == Tab.MY_HORSES || tab == Tab.REALM) {
             int max = Math.max(0, horseRows.size() - horseVisibleRows());
             horseScroll = Math.max(0, Math.min(max, horseScroll - (int) Math.signum(sy) * 3));
             return true;
@@ -1630,7 +1637,11 @@ public final class HorseBrowserScreen extends Screen {
         drawTabStrip(g);
 
         switch (tab) {
-            case MY_HORSES -> drawMyHorses(g, mouseX, mouseY);
+            // One renderer, two rosters - see showingRealm(). Leaving REALM out
+            // of this switch is not a compile error (an arrow-form switch
+            // *statement* over an enum need not be exhaustive), and what it
+            // looks like in game is a tab that draws literally nothing.
+            case MY_HORSES, REALM -> drawMyHorses(g, mouseX, mouseY);
             case LOG -> drawLog(g, mouseX, mouseY);
             case GENE_DATABASE -> {
                 drawGeneList(g, mouseX, mouseY, contentBottom());

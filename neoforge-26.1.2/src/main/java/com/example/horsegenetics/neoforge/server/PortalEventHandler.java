@@ -175,6 +175,13 @@ public final class PortalEventHandler {
             return;
         }
 
+        // A horse goes through because somebody took it through, never because it
+        // wandered onto the block. See escorted().
+        if (!isPlayer && !DWELL.containsKey(id) && !escorted(entity)) {
+            LAST_COUNTDOWN.remove(id);
+            return;
+        }
+
         int threshold = isPlayer ? PLAYER_DWELL_TICKS : HORSE_DWELL_TICKS;
         int dwell = DWELL.merge(id, 1, Integer::sum);
 
@@ -200,6 +207,45 @@ public final class PortalEventHandler {
             COOLDOWN.put(id, POST_TELEPORT_GRACE);
             HorsePortalManager.teleportThroughPortal(entity, level, at);
         }
+    }
+
+    /**
+     * <b>Is a player taking this horse through, as opposed to the horse merely
+     * standing there?</b>
+     *
+     * <p>The dwell timer used to be handed to any horse whose feet were in a
+     * portal block, which made a lit portal a <b>one-way drain on both sides</b>.
+     * In the Overworld a wild horse grazing past a frame was pulled into the
+     * realm three seconds later, which is how horses nobody put there turned up
+     * in a field that is meant to have exactly what was released into it. In the
+     * realm it is worse: the exits are a fixed grid a loose band walks over all
+     * day, so unclaimed horses let themselves out into somebody's Overworld, and
+     * the realm's whole promise is that what you leave there stays there.
+     * (Owner, 2026-09-26.)
+     *
+     * <p>Three ways to be escorted, which are the three ways a player actually
+     * moves a horse:
+     * <ul>
+     *   <li><b>Ridden.</b> You are on it.</li>
+     *   <li><b>On a lead held by a player.</b> Not a fence: a horse tied to a
+     *       post beside a portal is parked, not travelling.</li>
+     *   <li><b>Already counting down</b> - which is the right-click shortcut
+     *       above, and only that. It snaps the horse onto the block, drops the
+     *       lead and seeds {@link #DWELL} itself, so the horse it just untied is
+     *       still escorted by the click that untied it. Nothing else writes to
+     *       that map before the threshold, so an unescorted horse can never have
+     *       an entry to continue from.</li>
+     * </ul>
+     *
+     * <p><b>Not verified in-game.</b>
+     */
+    private static boolean escorted(Entity entity) {
+        for (Entity rider : entity.getPassengers()) {
+            if (rider instanceof Player) {
+                return true;
+            }
+        }
+        return entity instanceof Mob mob && mob.isLeashed() && mob.getLeashHolder() instanceof Player;
     }
 
     /**
