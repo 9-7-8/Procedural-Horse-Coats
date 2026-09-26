@@ -309,6 +309,38 @@ public final class ModNetworking {
                 })
         );
 
+        // The horse realm tab: the same table, asked about the field instead of
+        // the stable. Separate payloads both ways so arriving in the realm never
+        // overwrites the client's idea of what is in the player's own stable.
+        registrar.playToServer(
+                RealmRosterRequestPayload.TYPE,
+                RealmRosterRequestPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.RealmRoster.sendTo(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToClient(
+                RealmRosterPayload.TYPE,
+                RealmRosterPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientRealmRoster.accept(payload.entries()))
+        );
+
+        // Every check that matters is on the far side of this - see RealmClaim.
+        registrar.playToServer(
+                ClaimRealmHorsePayload.TYPE,
+                ClaimRealmHorsePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.RealmClaim.request(
+                                serverPlayer, payload.horseId());
+                    }
+                })
+        );
+
         registrar.playToClient(
                 HorseLogPayload.TYPE,
                 HorseLogPayload.STREAM_CODEC,

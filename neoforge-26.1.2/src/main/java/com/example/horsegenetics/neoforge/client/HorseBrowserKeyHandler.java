@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.neoforge.server.ActionTrace;
+import com.example.horsegenetics.neoforge.server.HorseRealm;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,6 +39,12 @@ public final class HorseBrowserKeyHandler {
         }
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen == null && mc.player != null) {
+            // In the horse realm the key opens the realm's own table rather than
+            // the remembered tab (owner): standing in the field, what is in the
+            // field is the question, and your own stable is in another world.
+            if (mc.player.level().dimension().equals(HorseRealm.REALM_LEVEL)) {
+                HorseBrowserScreen.openOnRealmTab();
+            }
             mc.setScreen(new HorseBrowserScreen());
         }
     }

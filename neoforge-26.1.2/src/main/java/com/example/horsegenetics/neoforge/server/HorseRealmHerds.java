@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.breed.BandType;
+import com.example.horsegenetics.common.breed.BreedHerd;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -98,7 +99,35 @@ public final class HorseRealmHerds {
                 care.withWildHerd(lead, BreedLineage.FERAL_ID, band));
     }
 
-    /** The nearest already-banded wild horse within {@value #JOIN_RADIUS} blocks, or null. */
+    /**
+     * <b>How many horses one band will take in before the next arrival founds
+     * its own instead.</b> The stallion and his harem
+     * ({@link BreedHerd#MAX_HAREM_MARES}), plus the same again for the foals and
+     * the hangers-on a band of that size accumulates - so the number lives with
+     * the harem rule rather than beside it.
+     *
+     * <p><b>This is the whole reason the realm was one ball of horses.</b> Every
+     * portal lands on the same block by design (see {@code HorseRealm}), so every
+     * new arrival had a banded horse within {@link #JOIN_RADIUS} and joined it -
+     * the same band, every time, for ever. Cohesion then held that band together
+     * as one mass, and no amount of spacing between bands could help, because
+     * there was only ever one band. A band that can be full is what makes the
+     * second one exist.
+     */
+    private static final int BAND_FULL = (BreedHerd.MAX_HAREM_MARES + 1) * 2;
+
+    /**
+     * The nearest already-banded wild horse within {@value #JOIN_RADIUS} blocks
+     * <b>whose band has room</b>, or null - in which case the caller founds a new
+     * band.
+     *
+     * <p>Room is counted over the loaded members of that band near the candidate,
+     * which is the same reach {@code HerdSocialHandler} uses for everything else
+     * about a band. A band whose far half is unloaded therefore reads as smaller
+     * than it is; the consequence is a band that grows a little past
+     * {@link #BAND_FULL} rather than one that never fills, and a slightly large
+     * band is a much smaller problem than a single planetary one.
+     */
     private static Horse bandNearby(ServerLevel level, Horse horse) {
         List<Horse> near = level.getEntitiesOfClass(Horse.class,
                 horse.getBoundingBox().inflate(JOIN_RADIUS),
@@ -106,12 +135,21 @@ public final class HorseRealmHerds {
                         && other.getData(ModAttachments.HORSE_CARE.get()).inWildHerd());
         Horse best = null;
         double bestDist = Double.MAX_VALUE;
+        java.util.Map<UUID, Boolean> hasRoom = new java.util.HashMap<>();
         for (Horse other : near) {
             double d = other.distanceToSqr(horse);
-            if (d < bestDist) {
-                bestDist = d;
-                best = other;
+            if (d >= bestDist) {
+                continue;
             }
+            UUID theirs = other.getData(ModAttachments.HORSE_CARE.get()).herd().orElse(other.getUUID());
+            // Counted once per band rather than once per candidate: a dozen
+            // horses of one band in range is one entity query, not a dozen.
+            if (!hasRoom.computeIfAbsent(theirs,
+                    id -> HerdSocialHandler.bandMembers(level, id, other).size() < BAND_FULL)) {
+                continue;
+            }
+            bestDist = d;
+            best = other;
         }
         return best;
     }

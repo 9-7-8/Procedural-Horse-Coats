@@ -188,10 +188,51 @@
     realm. It lasts 64 releases, and a refusal costs nothing.
 </p>
 
+<p>
+    A <a href="item-tickets.html#turnout">turnout ticket</a> does the same thing from
+    anywhere, on a horse you are not standing next to: it sends the horse here and gives it
+    up in one right-click, rather than making you lead it through a portal first.
+</p>
+
+<h2 id="taking-one-home">Taking one home, without catching it</h2>
+<p>
+    Press <kbd>H</kbd> in the realm and the browser opens on the <strong>Horse realm</strong>
+    tab: every horse standing in the field, as a table you can sort and filter exactly like
+    your own stable &mdash; by speed, by breed, by gene. The tab is there from anywhere, so
+    you can look the field over from home before deciding to walk in.
+</p>
+<p>
+    Each row has a <strong>Bring home</strong> button. It spends one
+    <a href="item-tickets.html#holding-pen">holding pen ticket</a>: the horse becomes yours
+    and arrives in your holding pen, tame, with its name, its genes and its whole pedigree.
+    You need a pen sign hung up, and the button is grey until you have a pen ticket in your
+    pocket.
+</p>
+<div class="note">
+    <span class="label">Why taming is bought rather than earned here</span>
+    <p>
+        Everywhere else, taming a horse is being thrown off it until it gives in, and that is
+        the right price for an animal standing in front of you. It cannot be the price here,
+        because the whole point of the field is that it holds <strong>more horses than anyone
+        will ever ride</strong>. A table that could only list them would be a catalogue you
+        cannot order from. So the ticket is the price &mdash; and it makes this the exact
+        inverse of the turnout ticket: one ticket out, one ticket back.
+    </p>
+</div>
+
 <h2 id="breeding">They breed, slowly</h2>
 <p>
     Released horses form bands and breed like wild horses, and their foals are born wild and
     protected too &mdash; so a field that people keep adding to fills up on its own.
+</p>
+<p>
+    <strong>Bands keep away from each other.</strong> A band that comes within about forty
+    blocks of another band drifts off, so a field left alone spreads into separate groups
+    with room between them rather than one crowd. Two things make that work and both had to
+    be built: a band now <strong>fills up</strong> and stops taking new members, so the
+    second band exists at all, and a wild horse actively walks away from horses that are not
+    its own band's. Before either, everything that arrived joined the one band standing on
+    the arrival block and the whole field was a single ball of horses.
 </p>
 <p>
     It runs at <strong>a quarter speed</strong> by default. Heat, the wait between covers and
@@ -601,6 +642,52 @@
     identity</em>. Each horse keeps its own breed on its own record.
 </p>
 
+<h2 id="one-ball">Why the field was one ball of horses, and the two things that fixed it</h2>
+<p>
+    Reported by the owner (2026-09-25): <em>&ldquo;they all stay in one giant ball. Since
+    they&rsquo;re wild, shouldn&rsquo;t they form bands and spread out?&rdquo;</em> Three
+    rules were compounding, and none of them was wrong on its own.
+</p>
+<ol>
+    <li><strong>Everything arrives on the same block.</strong> <code>arrivalCell</code>
+        ignores where a traveller came from and always answers the origin cell &mdash;
+        deliberately, <a href="#arrival">see above</a>, and pinned by the
+        <code>horse_realm_grid_is_stable</code> gametest. So every horse released or turned
+        out begins its life in the realm standing exactly where every other one did.</li>
+    <li><strong>A band had no size.</strong> <code>HorseRealmHerds</code> put a new arrival
+        into the nearest band within 32 blocks, and there was always one, and it was always
+        the same one. The field therefore did not contain several bands standing close
+        together &mdash; it contained <strong>one band</strong>, of everything.</li>
+    <li><strong>Cohesion had no counter-force.</strong> <code>WildHerdGoal</code> closes every
+        member to within five blocks of its lead and <code>StallionGuard</code> drags strays
+        back inside fourteen, against nothing but vanilla&rsquo;s random stroll at the same
+        goal priority.</li>
+</ol>
+<p>
+    The fix is (2) and (3), and the order matters: <strong>repulsion between bands does
+    nothing while there is only one band</strong>, so capping a band's intake is what makes
+    the spacing rule have anything to act on. A band now fills at
+    <code>BreedHerd.MAX_HAREM_MARES + 1</code>, doubled for foals and hangers-on, after which
+    an arrival founds its own; and <code>server/BandSpacing</code> walks a wild banded horse
+    away from the nearest horse of a <em>different</em> band within forty blocks.
+</p>
+<p>
+    <strong>The spacing is a per-horse nudge, not a band manoeuvre</strong>, and that is what
+    makes it cheap. Cohesion is per-horse too, so the two are the same kind of force and
+    settle against each other; a band whose members each edge away from a neighbour moves as
+    a band anyway, because its own cohesion keeps gathering it up as it goes. Nothing has to
+    compute a band centre, elect who decides, or keep band-level state. It runs on the same
+    hundred-tick scan as the rest of the social layer and actuates through
+    <code>BandLife.retreat</code>, the same short shove a horse gets for losing a fight.
+</p>
+<p>
+    <strong>Arrival is deliberately left alone.</strong> Scattering horses as they land would
+    be the obvious third fix and it is the one not taken: that single arrival point is a
+    property the realm's gametest asserts on four thousand random portals, and it is load
+    bearing for the terrain and the wall. Spreading out is something the horses do
+    afterwards, which is also the version that keeps working when a band wanders.
+</p>
+
 <h2 id="f6">F6 is not a dev key any more</h2>
 <p>
     Moving the hay portal here left the debug corridor and its test yard with exactly one
@@ -655,8 +742,50 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>.</p>
+    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: bands are meant to <strong>spread out</strong> rather than pile into one ball, and <kbd>H</kbd> in there opens a <strong>table of the whole field</strong> you can buy a horse out of for a holding pen ticket.</p>
 </div>
+
+<h3 id="verify-spacing">Do the bands actually spread out? (2026-09-25, NOT played)</h3>
+<p>
+    The whole point of the change, and the one thing a build cannot answer. Turn out a few
+    dozen horses &mdash; <code>/testkit</code>'s tickets, or the turnout ticket &mdash; and
+    leave the realm loaded for a while.
+</p>
+<ul>
+    <li><strong>Pass:</strong> several separate groups with open ground between them, each
+        roughly a stallion and a handful of mares, and no pair of groups sitting closer than
+        about forty blocks for long.</li>
+    <li><strong>Fail, the interesting way:</strong> still one ball. That would mean the intake
+        cap is not biting &mdash; check whether <code>HerdSocialHandler.bandMembers</code> is
+        seeing the whole band, since it only counts <em>loaded</em> members within 48 blocks
+        and a band read as smaller than it is would keep absorbing.</li>
+    <li><strong>Fail, the other way:</strong> horses visibly jittering, or edging along for
+        ever without settling. That would mean the spacing shove and
+        <code>WildHerdGoal</code>'s cohesion are fighting rather than balancing, and the step
+        (10 blocks per 100 ticks) wants shortening or the spacing (40) tightening.</li>
+    <li>Watch one band <strong>stay a band</strong> while it moves. If members are dropped
+        behind and then dragged back by <code>keepBandWhole</code>, the nudge is too long.</li>
+</ul>
+<p>
+    Nothing here has a test. The herd tests in <code>common/</code> are all pure model &mdash;
+    familiarity, rank, composition &mdash; and there is no spatial or behavioural coverage of
+    banding anywhere, so this is judged by standing in the field and looking.
+</p>
+
+<h3 id="verify-realm-tab">The realm table, and buying a horse out of it (2026-09-25, NOT played)</h3>
+<ul>
+    <li><kbd>H</kbd> <strong>inside the realm</strong> opens on the Horse realm tab; <kbd>H</kbd>
+        anywhere else opens where you left it, and the tab is still there to click.</li>
+    <li>The table lists horses that are <em>in the field now</em> &mdash; walk one out through
+        the exit, refresh, and it should be gone.</li>
+    <li><strong>Bring home</strong> with no holding pen ticket: the button is grey and says
+        why. With a ticket but no pen sign hung: it refuses, in chat, and <strong>does not
+        spend the ticket</strong>.</li>
+    <li>With both: the horse is tamed to you, is in your pen, the ticket is gone, and it kept
+        its name, genes and pedigree. Check its information screen says you own it.</li>
+    <li>Claiming a horse <strong>somebody else owns</strong> is refused; so is one being
+        ridden.</li>
+</ul>
 
 <h3 id="verify-reshape">The field is a circle now, and the old one has to let go (2026-09-25, NOT played)</h3>
 <p>

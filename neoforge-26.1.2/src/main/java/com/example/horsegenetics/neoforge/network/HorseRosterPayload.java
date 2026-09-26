@@ -80,7 +80,10 @@ public record HorseRosterPayload(List<Entry> entries) implements CustomPacketPay
      * is written by hand. Straight-line reads and writes in the same order -
      * the one rule is that they stay in the same order.
      */
-    private static final StreamCodec<ByteBuf, Entry> ENTRY_STREAM_CODEC =
+    // Package-private, not private: RealmRosterPayload sends the same rows for
+    // a different question and must use THIS codec rather than a second copy of
+    // it - a field added to Entry has to reach both tables or neither.
+    static final StreamCodec<ByteBuf, Entry> ENTRY_STREAM_CODEC =
             new StreamCodec<ByteBuf, Entry>() {
                 @Override
                 public Entry decode(ByteBuf buf) {

@@ -2789,11 +2789,13 @@ wiki/horse-realm.html#getting-there	gameplay	Getting there, and getting back
 wiki/horse-realm.html#growing	gameplay	How big it is, and when it grows
 wiki/horse-realm.html#herds	coding	Released horses had to be taught to band
 wiki/horse-realm.html#lift	coding	Moving the floor, in a world that already has one
+wiki/horse-realm.html#one-ball	coding	Why the field was one ball of horses, and the two things that fixed it
 wiki/horse-realm.html#release	coding	What releasing actually changes
 wiki/horse-realm.html#releasing	gameplay	Letting one go
 wiki/horse-realm.html#repro-clock	coding	The breeding rate is a clock, not a scale factor
 wiki/horse-realm.html#reshape	coding	Carrying the old square field across
 wiki/horse-realm.html#safety	gameplay	Nothing happens to a horse here
+wiki/horse-realm.html#taking-one-home	gameplay	Taking one home, without catching it
 wiki/horse-realm.html#terrain	coding	The terrain is arithmetic, not a saved layout
 wiki/horse-realm.html#tests	coding	What is tested, and what a test cannot reach
 wiki/horse-realm.html#the-field	gameplay	The field

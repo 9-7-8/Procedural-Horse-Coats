@@ -26,7 +26,9 @@ import com.example.horsegenetics.neoforge.item.TicketItem;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.HorseLogRequestPayload;
 import com.example.horsegenetics.neoforge.network.HorseRecallPayload;
+import com.example.horsegenetics.neoforge.network.ClaimRealmHorsePayload;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
+import com.example.horsegenetics.neoforge.network.RealmRosterRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -132,6 +134,10 @@ public final class HorseBrowserScreen extends Screen {
         GETTING_STARTED("Getting started"),
         RECIPES("Recipes"),
         MY_HORSES("My horses"),
+        // The same table asked about the field instead of the stable. It is
+        // always here rather than only inside the realm: looking at what is out
+        // there is exactly what you want to do from home, before deciding to go.
+        REALM("Horse realm"),
         BREEDING_PREVIEW("Breeding preview"),
         LOG("Log"),
         GENE_DATABASE("Gene database"),
@@ -515,6 +521,13 @@ public final class HorseBrowserScreen extends Screen {
     private List<HorseListing> horseRows = List.of();
     private int horseRowsVersion = -1;
     private String horseRowsQuery = null;
+    /**
+     * Which table {@link #horseRows} was built for. The stable and the realm
+     * share one row list because they are never on screen together - but they
+     * are two different lists, so the cache key has to say which, or switching
+     * tabs shows the other one's rows until something else invalidates them.
+     */
+    private Tab horseRowsTab = null;
 
     // --- Log tab ---
     /**
@@ -597,6 +610,22 @@ public final class HorseBrowserScreen extends Screen {
      */
     private static Tab initialTab() {
         return ClientConfig.tutorialSeen() ? Tab.MY_HORSES : Tab.GETTING_STARTED;
+    }
+
+    /**
+     * <b>Open on the realm's own table.</b> What the browser key does while the
+     * player is standing in the horse realm (owner, 2026-09-25: "clicking H in
+     * the horse dimension pops up the horse dimension menu"): in there, the
+     * field is what you are looking at, and your stable is somewhere else
+     * entirely.
+     *
+     * <p>It only ever <i>moves</i> to that tab - it does not pin it - so the
+     * remembered tab still works the way it does everywhere else once you click
+     * off it, and the browser opened from the realm the second time is wherever
+     * you left it.
+     */
+    public static void openOnRealmTab() {
+        tab = Tab.REALM;
     }
 
     /** Drop the parts of the remembered position that belong to one world. */
@@ -795,6 +824,13 @@ public final class HorseBrowserScreen extends Screen {
         // they are on the browser's roadmap tab.
         if (tab == Tab.MY_HORSES) {
             requestRosterUnlessJustAsked();
+        }
+        // Opened straight onto the realm table - which is what the browser key
+        // does inside the realm - so it has to be asked for here as well as on
+        // the tab click, or the first thing a player sees in there is an empty
+        // field.
+        if (tab == Tab.REALM) {
+            ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
         }
         if (tab == Tab.LOG) {
             requestLog();
@@ -1263,6 +1299,12 @@ public final class HorseBrowserScreen extends Screen {
                 if (tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES) {
                     requestRosterUnlessJustAsked();
                 }
+                // The realm is a field of loose horses walking about, so its
+                // list is a snapshot in a way the stable's is not - asked for
+                // every time the tab is opened, with no "just asked" guard.
+                if (tab == Tab.REALM) {
+                    ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
+                }
                 // Asked for every time the tab is opened, not only the first:
                 // unlike the roster, the log changes on its own while you are
                 // elsewhere in the menu, and a stale one is the failure this tab
@@ -1280,7 +1322,7 @@ public final class HorseBrowserScreen extends Screen {
             }
             return super.mouseClicked(event, doubleClick);
         }
-        if (tab == Tab.MY_HORSES) {
+        if (tab == Tab.MY_HORSES || tab == Tab.REALM) {
             HorseQuery.Sort column = columnAt(event.x(), event.y());
             if (column != null) {
                 // Click a heading to sort by it; click the one you are already
@@ -1298,8 +1340,10 @@ public final class HorseBrowserScreen extends Screen {
             // and the more specific target has to win.
             HorseListing send = horseSendAt(event.x(), event.y());
             if (send != null) {
-                if (holdsTicket()) {
-                    ClientPacketDistributor.sendToServer(new HorseRecallPayload(send.id()));
+                if (holdsTicket(showingRealm())) {
+                    ClientPacketDistributor.sendToServer(showingRealm()
+                            ? new ClaimRealmHorsePayload(send.id())
+                            : new HorseRecallPayload(send.id()));
                 }
                 // A click on the greyed button is still swallowed: it should not
                 // fall through and select the row, which would look like the
@@ -3392,16 +3436,39 @@ public final class HorseBrowserScreen extends Screen {
      * term walks every locus of every horse, which is nothing once and far too
      * much sixty times a second.
      */
+    // --- the two tables ---------------------------------------------
+    // MY_HORSES and REALM are one renderer over two rosters: the stable, and
+    // the horse realm's field. Everything below asks "which" exactly once, here,
+    // so a column or a sort added to one is in both by construction.
+
+    private boolean showingRealm() {
+        return tab == Tab.REALM;
+    }
+
+    private List<HorseListing> rosterAll() {
+        return showingRealm() ? ClientRealmRoster.all() : ClientHorseRoster.all();
+    }
+
+    private int rosterVersion() {
+        return showingRealm() ? ClientRealmRoster.version() : ClientHorseRoster.version();
+    }
+
+    private boolean rosterReceived() {
+        return showingRealm() ? ClientRealmRoster.received() : ClientHorseRoster.received();
+    }
+
     private void rebuildHorseRows() {
-        horseRows = HorseQuery.apply(ClientHorseRoster.all(), horseFilter, sort, sortDescending);
-        horseRowsVersion = ClientHorseRoster.version();
+        horseRows = HorseQuery.apply(rosterAll(), horseFilter, sort, sortDescending);
+        horseRowsVersion = rosterVersion();
+        horseRowsTab = tab;
         horseRowsQuery = horseFilter;
         horseScroll = Math.max(0, Math.min(horseScroll,
                 Math.max(0, horseRows.size() - horseVisibleRows())));
     }
 
     private void drawMyHorses(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        if (horseRowsVersion != ClientHorseRoster.version() || !horseFilter.equals(horseRowsQuery)) {
+        if (horseRowsVersion != rosterVersion() || horseRowsTab != tab
+                || !horseFilter.equals(horseRowsQuery)) {
             rebuildHorseRows();
         }
 
@@ -3410,7 +3477,7 @@ public final class HorseBrowserScreen extends Screen {
         int top = tableTop();
         int bottom = tableBottom();
 
-        int total = ClientHorseRoster.all().size();
+        int total = rosterAll().size();
         String count = horseRows.size() == total
                 ? total + (total == 1 ? " horse" : " horses")
                 : horseRows.size() + " of " + total + " horses";
@@ -3426,7 +3493,8 @@ public final class HorseBrowserScreen extends Screen {
             if (column.sort() == null) {
                 // An action column has no sort and no arrow - just a heading
                 // that says what the controls under it do.
-                drawFitted(g, "Send home", columnX(i), tableHeadY() + 1, columnW(i), LABEL);
+                drawFitted(g, showingRealm() ? "Bring home" : "Send home",
+                        columnX(i), tableHeadY() + 1, columnW(i), LABEL);
                 continue;
             }
             boolean on = column.sort() == sort;
@@ -3438,7 +3506,7 @@ public final class HorseBrowserScreen extends Screen {
         g.enableScissor(l - 2, top, r + 2, bottom);
         // Once per frame, not once per row: the answer is the same for every
         // row and the scan walks the whole inventory.
-        boolean hasTicket = holdsTicket();
+        boolean hasTicket = holdsTicket(showingRealm());
         List<HorseListing> onScreen = new ArrayList<>();
         for (int i = horseScroll; i < horseRows.size() && i < horseScroll + horseVisibleRows(); i++) {
             HorseListing row = horseRows.get(i);
@@ -3469,8 +3537,10 @@ public final class HorseBrowserScreen extends Screen {
         ClientHorseCoats.request(onScreen);
 
         if (horseRows.isEmpty()) {
-            String note = !ClientHorseRoster.received() ? "asking the server..."
-                    : total == 0 ? "no horses on record yet - tame or breed one"
+            String note = !rosterReceived() ? "asking the server..."
+                    : total == 0 ? (showingRealm()
+                            ? "nothing is standing in the horse realm"
+                            : "no horses on record yet - tame or breed one")
                     : "nothing matches \"" + horseFilter + "\"";
             g.text(this.font, Component.literal(note), l + 4, top + 4, EXPR_OFF, false);
         }
@@ -3561,6 +3631,20 @@ public final class HorseBrowserScreen extends Screen {
      * worked.
      */
     private static boolean holdsTicket() {
+        return holdsTicket(false);
+    }
+
+    /**
+     * Any ticket, or specifically a holding pen one.
+     *
+     * <p>The realm tab asks for the narrow answer because it is the narrow item
+     * that pays: claiming a wild horse out of the field puts it in your
+     * <i>pen</i>, and a stall ticket cannot do that - a horse nobody has ever
+     * owned has no stall to be sent to. Greying the button is the honest
+     * version of a refusal the server would otherwise have to make after the
+     * click.
+     */
+    private static boolean holdsTicket(boolean penOnly) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
             return false;
@@ -3568,7 +3652,7 @@ public final class HorseBrowserScreen extends Screen {
         Inventory inventory = player.getInventory();
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             Item item = inventory.getItem(slot).getItem();
-            if (item instanceof TicketItem || item instanceof HoldingPenTicketItem) {
+            if (item instanceof HoldingPenTicketItem || (!penOnly && item instanceof TicketItem)) {
                 return true;
             }
         }
@@ -3589,7 +3673,7 @@ public final class HorseBrowserScreen extends Screen {
         g.fill(x, y, x + 1, y + h, BORDER);
         g.fill(x + w - 1, y, x + w, y + h, BORDER);
 
-        String label = "Send home";
+        String label = showingRealm() ? "Bring home" : "Send home";
         int textX = x + Math.max(2, (w - this.font.width(label)) / 2);
         drawFitted(g, label, textX, y + (h - this.font.lineHeight) / 2 + 1, w - 4,
                 enabled ? NAME : EXPR_OFF);
@@ -3598,14 +3682,23 @@ public final class HorseBrowserScreen extends Screen {
             // A horse in a chamber is sent home out of the chamber, and the
             // button says so: the alternative is a player wondering why their
             // bottle emptied itself, which is the same surprise either way round.
-            String said = !enabled
-                    ? "You have no tickets. A written ticket sends a horse to its stall; "
-                            + "a holding pen ticket sends it to your pen."
-                    : inStasis
-                            ? "Spend a ticket to take this horse out of its stasis chamber and put it "
-                                    + "in its stall. The empty chamber is left where it was."
-                            : "Spend a ticket to send this horse to its stall - or to your holding pen, "
-                                    + "if it has no stall of its own.";
+            String said;
+            if (showingRealm()) {
+                said = !enabled
+                        ? "You have no holding pen tickets. A blank ticket and wheat makes one, "
+                                + "and you need a holding pen sign hung up to send a horse to."
+                        : "Spend a holding pen ticket to tame this horse and put it in your holding pen. "
+                                + "It keeps its name, its genes and its whole pedigree.";
+            } else {
+                said = !enabled
+                        ? "You have no tickets. A written ticket sends a horse to its stall; "
+                                + "a holding pen ticket sends it to your pen."
+                        : inStasis
+                                ? "Spend a ticket to take this horse out of its stasis chamber and put it "
+                                        + "in its stall. The empty chamber is left where it was."
+                                : "Spend a ticket to send this horse to its stall - or to your holding pen, "
+                                        + "if it has no stall of its own.";
+            }
             g.setTooltipForNextFrame(Component.literal(said), mouseX, mouseY);
         }
     }
