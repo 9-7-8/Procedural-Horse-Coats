@@ -511,9 +511,10 @@
 <tr>
     <td>The <code>common/</code> constraint</td>
     <td colspan="2" class="warn">Whatever the parameterisation looks like it must stay
-        inside <a href="architecture.html">the rules</a>: no Minecraft imports, no Java 9+
-        APIs. Plain fields and constructor parameters &mdash; no records-with-defaults
-        cleverness, nothing from <code>java.util.concurrent</code> that postdates 8.</td>
+        inside <a href="architecture.html">the rules</a>: no Minecraft imports, and no JDK
+        API TeaVM's class library lacks. Records and <code>List.of</code> are fine; the
+        thing to check is anything from <code>java.util.concurrent</code>, which TeaVM is
+        largely single-threaded about.</td>
 </tr>
 <tr>
     <td>Custom entity models in the wild</td>

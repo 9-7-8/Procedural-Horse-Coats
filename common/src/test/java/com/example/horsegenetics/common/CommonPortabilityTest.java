@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <h2>Why a source scan rather than a bytecode or classpath check</h2>
  * Because two of the three rules are about <i>which API was written</i>, not
  * about what the JVM ended up linking. {@code common/} is compiled against a
- * modern JDK for the NeoForge target, so a Java 9+ call is perfectly legal here
- * and only breaks the TeaVM and (one day) Java 8 targets. A compiler that is
+ * modern JDK for the NeoForge target, so a call TeaVM cannot supply is
+ * perfectly legal here and breaks only in the browser. A compiler that is
  * happy is exactly the situation these rules exist for.
  *
  * <p>Reading the source is crude and it is honest about being crude: it will
@@ -148,24 +148,26 @@ class CommonPortabilityTest {
     }
 
     /**
-     * <b>Hard rule 2, the rest: the named Java 9+ APIs that were removed once
-     * and must not come back.</b>
+     * <b>Hard rule 2, the rest: the named JDK calls TeaVM has no implementation
+     * of, removed once and not to come back.</b>
      *
-     * <p>The list is short and specific on purpose. This is not an attempt to
-     * police the whole Java 8 surface &mdash; that wants a real
-     * {@code --release 8} build, which is roadmap &mdash; it is a tripwire on
-     * the exact calls that were found and removed, so re-introducing one is
-     * loud rather than silent.
+     * <p>The list is short and specific because <b>that is the whole rule</b>.
+     * It is not policing a Java language level: {@code common/} compiles at 17
+     * and uses records, {@code List.of} and arrow {@code switch} throughout,
+     * which is settled (see {@code architecture.html#verified-java-level}). What
+     * it guards is the browser target, so it is a tripwire on the exact calls
+     * that were found and removed, and re-introducing one is loud rather than
+     * silent.
      */
     @Test
-    void commonAvoidsTheJavaNinePlusApisThatWereRemoved() {
+    void commonAvoidsTheJdkCallsTeavmCannotSupply() {
         List<String> banned = List.of("System.getLogger", "Long.parseUnsignedLong");
         List<Line> bad = lines().stream()
                 .filter(CommonPortabilityTest::isCode)
                 .filter(l -> banned.stream().anyMatch(b -> l.text().contains(b)))
                 .toList();
         assertEquals(List.of(), bad,
-                "common/ has three targets - NeoForge, TeaVM and one day Java 8 - and these calls "
-                        + "were removed for the last two. See CommonLog and Epigenome.parseUnsignedHex.");
+                "TeaVM's class library has no implementation of these, and common/ compiles to the "
+                        + "browser. See CommonLog and EpiCodec.parseUnsignedHex.");
     }
 }

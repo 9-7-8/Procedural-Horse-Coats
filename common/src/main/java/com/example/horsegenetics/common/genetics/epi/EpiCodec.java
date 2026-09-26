@@ -110,8 +110,8 @@ public final class EpiCodec {
     /**
      * A double, to {@value #DECIMALS} places with trailing zeros trimmed and no
      * exponent. Hand-rolled rather than {@code String.format} because
-     * {@code common/} compiles to WebAssembly and to a Java 8 backport, and
-     * because a locale-sensitive decimal separator would make a code string
+     * {@code common/} compiles to WebAssembly, where formatting support is thin,
+     * and because a locale-sensitive decimal separator would make a code string
      * unreadable on half the machines that opened it.
      */
     public static String num(double d) {

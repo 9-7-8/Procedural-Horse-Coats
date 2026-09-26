@@ -5,13 +5,14 @@ import java.util.function.Consumer;
 /**
  * The one way {@code common/} says something went wrong.
  *
- * <p><b>Why this exists rather than {@code System.getLogger}.</b> That API is
- * Java 9+, and this module's whole reason for being is that it runs anywhere:
- * the stated long-term aim is a 1.12.2 backport, which is <b>Java 8</b>, and
- * the wiki's browser tools now compile this module to JavaScript with TeaVM,
- * whose class library does not have {@code java.lang.System.Logger} either.
- * A logging call is not worth costing the module either of those, so the
- * dependency is gone and the substitution is done here.
+ * <p><b>Why this exists rather than {@code System.getLogger}.</b> The wiki's
+ * browser tools compile this module with TeaVM, whose class library does not
+ * have {@code java.lang.System.Logger}. A logging call is not worth costing the
+ * module the browser, so the dependency is gone and the substitution is done
+ * here. (Not because the API is Java 9+: {@code common/} is version-independent
+ * of <i>Minecraft</i>, not of Java, and compiles at 17 - hard rule 2. An
+ * eventual Java 8 backport would want this gone too, but that is a consequence,
+ * not the reason.)
  *
  * <p>It is deliberately tiny. {@code common/} has exactly four warnings in it -
  * two about a gene declaring a priority outside its phase's band, two about

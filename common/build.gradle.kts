@@ -9,10 +9,13 @@ plugins {
 
 java {
     toolchain {
-        // Match whatever the *lowest* Minecraft version you plan to support needs.
-        // 1.12.2 mods traditionally target Java 8; NeoForge 26.1.2 requires Java 25.
-        // Since common has no MC dependency, target the lowest common denominator
-        // so both version modules can consume it without toolchain conflicts.
+        // 17, and deliberately not 8. This module's portability is from *Minecraft*,
+        // not from Java (hard rule 2, settled 2026-09-26 - wiki/architecture.html
+        // #verified-java-level): what it must avoid is a JDK API TeaVM's class library
+        // lacks, which is a method-level constraint, not a language level. Records and
+        // List.of are used throughout and compile to wasm fine. 17 rather than 25
+        // because TeaVM 0.15 needs 17+ and nothing here wants anything newer; a 1.12.2
+        // backport would run on Java 8 and pays a source downgrade, mostly the records.
         languageVersion.set(JavaLanguageVersion.of(17))
     }
 }

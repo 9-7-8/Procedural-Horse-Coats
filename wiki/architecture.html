@@ -30,7 +30,7 @@
 <p><strong>Three-module</strong> Gradle project, split deliberately:</p>
 
 <ul>
-<li><strong><code>common/</code></strong> - pure Java, <strong>zero</strong> Minecraft/NeoForge imports (not even DFU <code>Codec</code>s). Since 2026-09-06 it is also <strong>kept free of Java 9+ APIs</strong>, because it now has two targets that lack them: the intended Java 8 1.12.2 backport, and TeaVM, which compiles it for the browser. <code>System.getLogger</code> and <code>Long.parseUnsignedLong</code> have both been removed for that reason - see <code>CommonLog</code> and <code>Epigenome.parseUnsignedHex</code>. Subpackages by concern:
+<li><strong><code>common/</code></strong> - pure Java, <strong>zero</strong> Minecraft/NeoForge imports (not even DFU <code>Codec</code>s). What it is independent of is <strong>Minecraft, not Java</strong> (<a href="#verified-java-level">settled 2026-09-26</a>): it is held to two constraints, no third-party library and <strong>no JDK API TeaVM's class library lacks</strong>, and the language level is whatever the module compiles at - currently 17. <code>System.getLogger</code>, <code>Long.parseUnsignedLong</code> and the empty <code>Map.of()</code> were removed on the TeaVM ground alone - see <code>CommonLog</code>, <code>EpiCodec.parseUnsignedHex</code> and <code>CommonMaps</code>. Subpackages by concern:
 
 <ul>
 <li><code>genetics/</code> - <code>Gene</code> + <code>Allele</code> + <code>AllelePair</code>, <code>Expression</code> (one outcome a gene can produce, with its own paint function - what replaced <code>DominancePattern</code>), <code>FounderTable</code> + <code>FounderContext</code> (the wild-population weight per allele combination - what replaced <code>Gene.randomPair</code>), <code>Genotype</code> (+ <code>breedWith</code>), <code>Epigenome</code> / <code>AlleleEpigenetics</code> (the priority + the literal per-copy values), <code>epi/</code> (<code>EpiValue</code> / <code>EpiSchema</code> / <code>EpiValues</code> / <code>EpiRoll</code> / <code>EpiDrift</code> / <code>EpiCodec</code> - what a gene declares it writes on an allele copy, the numbers themselves, and the rolling, drift and text codec over them), <code>Genome</code> (the two together, and the breeding that keeps them aligned), <code>GenomeSample</code> (a <code>Genome</code> frozen to code strings and taken off the horse - what the stallion seed jar carries; <code>breedInto(mareGenome, rng)</code> runs the ordinary draw), <code>ShowcaseGenotypes</code> (a founder draw with a floor under it - the horse dimension's stock; see the pens section), <code>AbilityContribution</code> (the capability a built-in gene implements to grant <em>game behaviour</em>, using the same <code>GeneAbility</code> vocabulary a data-driven gene's <code>effects</code> block parses into) and its per-horse twin <strong><code>EpigeneticAbilityContribution</code></strong> (the effect's <em>magnitude</em> is on the allele copy - the particle locus), <strong><code>GeneEpigenetics</code></strong> (one gene&rsquo;s per-horse numbers, by expressing copy or by slot; it lives here rather than in <code>trait/</code> so both the trait and the ability sides can use it without the two packages depending on each other), <code>GeneRarity</code> (the §19 tier enum), <code>GameteBias</code> (a per-parent modifier on <code>Genome.breedWith</code> - what a breeding carrot does, <code>wiki/carrots.html</code>) + <code>CarrotEffect</code> (the sealed effect set + <code>fold</code> -&gt; <code>GameteBias</code>), <strong><code>LutContribution</code></strong> (the capability a gene implements to swap the phase-2 colour LUT - <strong>exactly one gene, the LUT locus, and permanently so</strong>; a new palette is a new allele, never a new gene), <strong><code>WhiteLockContribution</code></strong> (the capability a gene implements to make a white texel <em>final</em> - also exactly one gene, and deliberately not a priority: it applies at every step of phase 3 at once rather than taking a slot in it), <code>CoatPhenotype</code>, <code>GeneticCodeCombiner</code>, <strong><code>BreedingPreview</code></strong> (the per-locus Punnett square behind the browser's Breeding preview tab, with the grouping derived from <code>TraitBreakdown</code> and <code>Gene.coatDependsOn()</code> rather than from a list), <strong><code>BreedingReport</code></strong> (one line per gene describing a draw that already happened - the dev build's breeding log) and <strong><code>EpigenomeReadout</code></strong> (the shared formatter for a copy's stored numbers, so every screen that shows epigenetics shows it identically).
@@ -52,7 +52,7 @@
 </li>
 <li><code>Rng</code> - the randomness seam (<code>nextFloat</code> / <code>nextBoolean</code> / <code>nextInt(bound)</code> / <code>nextLong</code>), implemented by <code>NeoRng</code> (wraps <code>RandomSource</code>) and, in tests, <code>FakeRng</code>.
 </li>
-<li><code>CommonLog</code> - the one way <code>common/</code> says something went wrong. Four warnings use it. It exists because <code>System.getLogger</code> is Java 9+ and this module has to run on Java 8 and in a browser; a host may take the messages over with <code>setSink</code>.
+<li><code>CommonLog</code> - the one way <code>common/</code> says something went wrong. Four warnings use it. It exists because TeaVM's class library has no <code>System.Logger</code>, so the module cannot call <code>System.getLogger</code> and still run in the browser; a host may take the messages over with <code>setSink</code>.
 </li>
 </ul>
 </li>
@@ -431,6 +431,24 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     <code>run/saves/</code> holds only the running world.
 </p>
 
+<p id="verified-java-level">
+    <strong><code>common/</code> is version-independent of Minecraft, not of Java</strong>
+    (settled 2026-09-26, owner's call). Hard rule 2 used to read &ldquo;uses no Java 9+
+    APIs&rdquo;, with an eventual Java 8 target as half its justification; the module has never
+    obeyed that &mdash; <code>List.of</code> at several hundred call sites, <code>record</code>
+    across ninety-odd files, arrow <code>switch</code>, <code>String.strip</code>, and
+    <code>JavaLanguageVersion.of(17)</code> in its own build script. <strong>The rule was narrowed
+    to what the code has done for months</strong>: no third-party library, and no JDK API TeaVM's
+    class library lacks. The evidence that this is the real constraint is that it is the only half
+    anything ever enforced &mdash; <code>CommonPortabilityTest</code> bans three specific calls,
+    not a language level, and says so in its own javadoc. <code>CommonLog</code>,
+    <code>EpiCodec.parseUnsignedHex</code> and <code>CommonMaps</code> are unaffected: each stands
+    on its TeaVM ground alone. A 1.12.2 backport still means Java 8 &mdash; Forge 1.12.2 runs on
+    nothing higher &mdash; so it pays a source downgrade, and the cost is concentrated in the
+    record types, which have no source-level desugaring. That is a known, bounded bill rather than
+    a rule every new file breaks.
+</p>
+
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
 
@@ -498,35 +516,8 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Two v0.5.014 faults that singleplayer could not show &mdash; a login kick and an emptied Building Blocks tab &mdash; are fixed and have still never been seen from a client seat; unproven alongside them are a production jar booting with the gametest registry attached, and a jar carrying no <code>*Tool</code> classes; and <strong>CLAUDE.md's hard rule 2 does not describe what <code>common/</code> actually does</strong>, which is a decision waiting rather than a defect.</p>
+    <p>Two v0.5.014 faults that singleplayer could not show &mdash; a login kick and an emptied Building Blocks tab &mdash; are fixed and have still never been seen from a client seat; unproven alongside them are a production jar booting with the gametest registry attached, and a jar carrying no <code>*Tool</code> classes.</p>
 </div>
-
-<h3 id="verify-java-level">What Java level is <code>common/</code> really held to? (2026-09-26, a decision, not a check)</h3>
-<p>
-    Hard rule 2 says <code>common/</code> &ldquo;uses no Java 9+ APIs&rdquo;, framed around TeaVM and
-    an eventual Java 8 target. The module does not obey that and never has:
-</p>
-<ul>
-    <li><code>List.of</code> (Java 9) &mdash; 457 call sites, including <code>HorseQuery.keys()</code>.</li>
-    <li><code>record</code> (Java 16) &mdash; 95 files, including <code>HorseListing</code> and <code>AllelePair</code>.</li>
-    <li>Arrow <code>switch</code> expressions (Java 14) &mdash; 56 files.</li>
-    <li><code>String.strip</code> (Java 11), <code>List.copyOf</code> (Java 10), <code>var</code>, text blocks.</li>
-    <li><code>common/build.gradle.kts</code> sets <code>JavaLanguageVersion.of(17)</code>.</li>
-</ul>
-<p>
-    All of it compiles through TeaVM today, so the <em>real</em> constraint is narrower than the
-    headline and is exactly what the rule's own examples are: specific JDK methods TeaVM's class
-    library lacks (<code>System.getLogger</code>, <code>Long.parseUnsignedLong</code>), which is why
-    <code>CommonLog</code> and <code>Epigenome.parseUnsignedHex</code> exist.
-</p>
-<p>
-    <strong>Two ways to settle it, and both are the owner's.</strong> Narrow the rule's wording to the
-    APIs that actually break, which is what the code has been doing for months &mdash; or decide the
-    457 call sites are the bug and a Java 8 target is still wanted, in which case this is a large
-    piece of work that should be known about before it is started. What must not continue is a hard
-    rule that every new file in the module quietly breaks, because a rule nobody can follow stops
-    being read.
-</p>
 
 <h3 id="join-and-tab-0918-server-join">A join on a real client (2026-09-18, NOT played)</h3>
 

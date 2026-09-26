@@ -58,8 +58,9 @@ public final class SeededRng implements Rng {
      * why it was left as the owner's call rather than done as a tidy-up.
      *
      * <p>Written out rather than calling {@code SplittableRandom}: this module
-     * targets TeaVM and one day Java 8, so it uses no Java 9+ API and nothing
-     * that a browser backend has to supply.
+     * compiles to the browser through TeaVM, so it leans on nothing a wasm
+     * backend has to supply. (Not a language-level matter -
+     * {@code SplittableRandom} is Java 8 itself; see hard rule 2.)
      */
     private static long scramble(long seed) {
         long z = seed + 0x9E3779B97F4A7C15L;

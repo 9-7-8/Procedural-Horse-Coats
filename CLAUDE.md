@@ -94,17 +94,17 @@ file under `wiki/session-log/` from its index; those files are not baked.
 1. **`common/` imports nothing from Minecraft or NeoForge.** Not even DFU
    codecs. This is what makes the backport cheap; if you want to import
    something Minecraft-related there, stop and put it in the NeoForge module.
-2. **`common/` uses no Java 9+ APIs.** It has three targets - NeoForge, TeaVM
-   (the browser), and one day Java 8. `System.getLogger` and
-   `Long.parseUnsignedLong` were both removed for this; see `CommonLog` and
-   `Epigenome.parseUnsignedHex`. TeaVM compiles only the *reachable* graph, so
-   adding an `@JSExport` can surface a missing JDK method that was always there
-   - build after adding one.
+2. **`common/`'s portability is from *Minecraft*, not from Java.** Two
+   constraints: no third-party library, and no JDK API TeaVM lacks -
+   `System.getLogger`, `Long.parseUnsignedLong` and empty `Map.of()` went for
+   that, and `CommonPortabilityTest` guards them. Java 17 is fine; a Java 8
+   backport pays a source downgrade, mostly the records.
 3. **Never port a gene to JavaScript.** The horse designer compiles `common/` to
    WebAssembly (`:web`), so the browser runs the real thing. The hand-written
    ports under `wiki/gene-creator/js/` are legacy the creator still depends on -
    do not extend them, and do not add a second one. If something in the browser
-   seems to need genetics, it needs an `@JSExport` on `web/DesignerApi`.
+   seems to need genetics, it needs an `@JSExport` on `web/DesignerApi` - and
+   TeaVM compiles only the *reachable* graph, so build `:web` after adding one.
 4. **Never pre-generate a subset of coats and render only those.** The premise
    of the mod is a functionally infinite space; a tool that ships 900 baked
    horses quietly asserts otherwise. (Owner's call.)

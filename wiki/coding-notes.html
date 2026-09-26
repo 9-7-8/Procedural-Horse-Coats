@@ -820,13 +820,14 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
 
 <p>
     <code>CommonPortabilityTest</code> scans the sources of <code>common/</code> for
-    Minecraft, NeoForge and Mojang imports (hard rule 1) and for the Java 9+ APIs that
-    have already been removed once (hard rule 2). This matters because <strong>the
-    compiler will not catch either</strong>: <code>common/</code> builds against a full
-    JDK and the NeoForge classpath is right there, so the day the backport starts is
-    the day you would otherwise find out. Note that a non-empty <code>Map.of(k, v)</code>
-    is deliberately allowed &mdash; the ban is on the zero-argument and
-    <code>copyOf</code> forms outside <code>CommonMaps</code>.
+    Minecraft, NeoForge and Mojang imports (hard rule 1) and for the three specific JDK
+    calls TeaVM cannot take, which is all hard rule 2 has ever asked for
+    (<a href="architecture.html#verified-java-level">narrowed to say so, 2026-09-26</a>).
+    This matters because <strong>the compiler will not catch either</strong>:
+    <code>common/</code> builds against a full JDK and the NeoForge classpath is right
+    there, so the browser is where you would otherwise find out. Note that a non-empty
+    <code>Map.of(k, v)</code> is deliberately allowed &mdash; the ban is on the
+    zero-argument and <code>copyOf</code> forms outside <code>CommonMaps</code>.
 </p>
 
 <p>
@@ -1156,9 +1157,9 @@ done</code></pre>
 <p id="verified-portability-test">
     <strong>The portability rules are a test</strong> (2026-09-08). <code>CommonPortabilityTest</code> scans
     <code>common/</code> sources for a Minecraft / NeoForge / Mojang import (hard rule 1), for <code>Map.of()</code> or
-    <code>Map.copyOf(</code> outside <code>CommonMaps</code> (the TeaVM empty-map trap), and for the two removed Java 9+
-    calls. It is a source scan, blind to reflection, and it allows a non-empty <code>Map.of(k, v, &hellip;)</code>, which
-    light ships and the browser exercises on every preview.
+    <code>Map.copyOf(</code> outside <code>CommonMaps</code> (the TeaVM empty-map trap), and for the two removed calls
+    TeaVM has no implementation of. It is a source scan, blind to reflection, and it allows a non-empty
+    <code>Map.of(k, v, &hellip;)</code>, which light ships and the browser exercises on every preview.
 </p>
 
 <p id="verified-creator-parity">

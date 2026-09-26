@@ -24,8 +24,8 @@ import java.util.Map;
  * <p>So: any map in {@code common/} that is <b>read by key</b> and may be empty
  * is built here instead. The copy is a {@link LinkedHashMap} - ordinary,
  * lazily-tabled, and correct empty on both targets - wrapped so callers still
- * cannot write to it. (This is also what {@code common/}'s Java 8 target wants;
- * see hard rule 2 in {@code CLAUDE.md}.)
+ * cannot write to it. (The constraint is TeaVM's class library, not a Java
+ * language level; see hard rule 2 in {@code CLAUDE.md}.)
  */
 public final class CommonMaps {
 

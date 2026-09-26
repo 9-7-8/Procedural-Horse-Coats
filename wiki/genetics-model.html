@@ -1148,7 +1148,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     <strong><code>SeededRng</code> scrambles its seed</strong> (2026-09-09). <code>java.util.Random</code>'s seed handling
     is a single XOR, so the first <code>nextFloat()</code> off seeds 0..3999 spanned only 0.58 to 0.95 (mean 0.77), and
     <code>EyeSpread.roll</code>'s 62/22/16 split measured 100/0/0. The constructor now runs the seed through splitmix64's
-    finaliser (written out, for TeaVM and Java 8): 0.0002 to 0.9999, mean 0.5043. Every horse moved: 883 of 1056 pipeline
+    finaliser (written out, so TeaVM has nothing to supply): 0.0002 to 0.9999, mean 0.5043. Every horse moved: 883 of 1056 pipeline
     golden lines and 218 of 623 bake golden lines, exactly the genes that store epigenetics. The same fault had made
     positions in neighbouring seeds correlated (magic jump's mean over 3000 seeds came out 1.7% high, fifteen standard
     errors); neighbour covariance at positions 0, 1, 5 and 20 fell from about 0.013 to 0.001, and
