@@ -130,10 +130,17 @@
 
 <h2 id="using">Putting something on</h2>
 <ul>
-    <li><strong>One click is a swap with your hand.</strong> Click a slot to put
-        on what you are holding, or to take off what is there. There is no
-        dragging: this is a plain screen with no container behind it, so there is
-        no carried stack to drag with.</li>
+    <li><strong>Click a slot and it tells you what fits.</strong> A short list
+        drops under it: everything in your pack that this slot accepts, each with
+        its picture, and a <em>Take off</em> line at the top for whatever is in
+        there now. Click a line to put it on, click anywhere else to close the
+        list. There is no dragging: this is a plain screen with no container
+        behind it, so there is no carried stack to drag with.</li>
+    <li><strong>An empty list still answers the question.</strong>
+        &ldquo;Nothing you are carrying fits here&rdquo; and &ldquo;nothing takes
+        this slot yet&rdquo; are different sentences, and which one you get is
+        the difference between going to find the item and not bothering. Most
+        slots say the second &mdash; see the box below.</li>
     <li><strong>Nothing is ever deleted.</strong> What comes off goes to your
         inventory, or on the floor at your feet if there is no room.</li>
     <li><strong>Your horse, and within eight blocks.</strong> The screen opens on
@@ -276,14 +283,36 @@
 
 <h2 id="click">The click path</h2>
 <p>
-    Unchanged in shape from the two-slot version, and still <em>one</em> packet.
-    <code>HorseInfoScreen.clickTack</code> sends
-    <code>TackSlotPayload(entityId, slotName)</code>;
+    Still <em>one</em> packet. <code>HorseInfoScreen.clickTack</code> opens the
+    picker; picking a line sends
+    <code>TackSlotPayload(entityId, slotName, inventorySlot)</code>;
     <code>ModNetworking.handleTackSlot</code> checks the horse is the
     player&rsquo;s and within eight blocks, then calls
     <code>HorseTackSlot.set</code> &mdash; the one place that knows which backing
     a slot has. A vanilla slot also gets <code>setGuaranteedDrop</code>, so tack
     a player put on is tack they get back.
+</p>
+<p>
+    <strong>The index is re-checked, not trusted.</strong> The payload used to
+    mean <em>the hand</em> implicitly, which needed no validation because the
+    server could read the hand itself. An index into the player&rsquo;s inventory
+    is a claim about a container the server is the authority on, so
+    <code>handleTackSlot</code> bounds-checks it and runs the same
+    <code>HorseTackSlot.accepts</code> the picker filtered on before equipping
+    anything. A bad index is dropped in silence &mdash; no honest client can
+    produce one, so there is nobody to tell.
+</p>
+<p>
+    <strong>The picker is the browser&rsquo;s gene dropdown, field for field</strong>
+    &mdash; a null slot means closed, the height comes from the contents, it is
+    drawn last so it covers what it hangs over, it owns the wheel, and it eats
+    the next click wherever that click lands. Two dropdowns in one mod that
+    behave differently is worse than either being slightly wrong. It is
+    <em>not</em> the inventory panel on the Roadmap tab and does not stand in its
+    way: that is a real container menu with a carried stack, and what it warns
+    against is drawing a picture of an inventory with click-to-toggle behind it.
+    A list of what fits is not a picture of an inventory &mdash; it is a menu,
+    and it says the one thing a grid of thirty-six squares could not.
 </p>
 
 <h2 id="doll">The paper doll</h2>
@@ -1094,9 +1123,39 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         The tack row became a nineteen-slot <strong>Gear</strong> tab that no client has
         opened, so the saddle and barding still working through their new write path is the
         regression to check first, and the seventeen empty slots must refuse an item rather
-        than eat one.
+        than eat one. Since 2026-09-26 a click opens a <strong>picker</strong> instead of
+        swapping with the hand, and the packet carries an inventory index rather than meaning
+        &ldquo;the hand&rdquo; &mdash; so the write path changed again, underneath a screen
+        nobody had confirmed the first version of.
     </p>
 </div>
+
+<h3 id="verify-picker">The gear picker (2026-09-26, NOT played)</h3>
+<p>
+    Asked for by the owner &mdash; <em>&ldquo;clicking in any of the gear slots should show a
+    dropdown of everything in your inventory that can be put in that gear slot&rdquo;</em>
+    &mdash; and built as an anchored list rather than as the inventory panel on the Roadmap
+    tab. Nothing below has been seen running.
+</p>
+<ul>
+    <li><strong>The saddle slot is the one that proves it.</strong> Carry two or three saddles
+        and a set of horse armour: the saddle slot should list the saddles and not the armour,
+        the barding slot the reverse. Put one on from the list, then open it again and check
+        the <em>Take off</em> line names what you just put on.</li>
+    <li><strong>The empty states.</strong> A boot slot should say &ldquo;nothing takes this
+        slot yet&rdquo; whatever you are carrying, because its tag is empty. The mane slot
+        with no <a href="item-rescuing-braid.html">rescuing braid</a> on you should say
+        &ldquo;nothing you are carrying fits here&rdquo;, because that tag is not.
+        Getting these two the wrong way round is the failure worth catching.</li>
+    <li><strong>It closes properly.</strong> Click away, change tab, press Escape &mdash; and
+        the wheel should scroll the list, not the page behind it, while it is open.</li>
+    <li><strong>The index survives a moving inventory.</strong> Open the picker, then have
+        something change what you are carrying, then pick a line. The worst case is equipping
+        the wrong item; the server re-checks <code>accepts</code>, so it should refuse
+        instead. Hard to stage deliberately &mdash; worth a thought if anyone ever reports
+        putting on something they did not choose.</li>
+    <li><strong>A foal, and a stranger's horse.</strong> Neither should open a picker at all.</li>
+</ul>
 
 <p class="lede">
     <strong>Built on 2026-09-21, and not yet opened in a game.</strong> Ordered the way

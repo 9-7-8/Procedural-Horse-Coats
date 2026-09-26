@@ -577,6 +577,54 @@
     themselves is worth nothing in particular, and that is correct.
 </div>
 
+<h2 id="selling">Selling him a horse</h2>
+<p>
+    <strong>Lead one up to him and crouch-click.</strong> He takes it into his string,
+    pays for it, and it is in his window as a signed paper from then on &mdash; the same
+    stock, the same price, as one he bred himself. It keeps its name, genes and pedigree,
+    because nothing in this mod ever takes those off a horse.
+</p>
+<p>
+    An ordinary right-click still just opens the shop; if you are leading a horse he
+    <em>quotes</em> for it and leaves it at that. The sale is the crouched click and only
+    the crouched click, because shopping is a gesture people make constantly and a
+    version of it that sold whatever was tied behind them would part a player from a mare
+    they were keeping, with no undo and no way to buy her back at the price he paid.
+</p>
+<div class="note">
+    <span class="label">He pays by the pound, not by the opinion</span>
+    <p>
+        <code>HorsePrices.buyPriceFor</code> is a flat base plus one emerald per three
+        loci the horse <em>carries something at</em>, plus one per two of those it breeds
+        <strong>true</strong> at. That is roughly seven emeralds for an ordinary horse,
+        three for a plain one and the low twenties for a thoroughly loaded one &mdash;
+        measured over six hundred rolled founders, which average 11.7 carried loci and
+        5.4 homozygous. A gelding goes at the base and no further, being no use at all
+        for the thing that count is counting.
+    </p>
+    <p>
+        <strong>This is not &sect;4 being reversed</strong>, and the difference is the
+        whole reason it is built this way. A price that paid more for <em>rare</em> or for
+        <em>good</em> genes would be a rarity tier written at the counter instead of on
+        the horse, doing the same forbidden work. Counting is not ranking: a lethal, a
+        disorder and a dished face all count, because they are all material, and a
+        homozygous carrier of something ruinous fetches more than a heterozygous one
+        because it is more <em>reliable</em>, not nicer. He is buying breeding stock by
+        weight. Which horse is <em>good</em> is still nobody's business but the player's.
+        (Owner, 2026-09-26.)
+    </p>
+</div>
+<p>
+    He will not buy back a horse already in his own herd &mdash; without that, his stock
+    is a loop you can walk round the barn &mdash; nor take a foal, nor take more than
+    <code>MAX_HERD</code> unsold horses at once, which is what stops an unbounded string
+    from being an unbounded emerald tap. The horse arrives untamed, unowned and branded,
+    which is exactly the state <code>CowboyHandler.settle</code> leaves one he bred in.
+    Deliberately <em>not</em> <code>HorseRelease.makeWild</code>: a sale is not a release,
+    and that path marks a wild spawn and pays a realm fee. See
+    <code>server/CowboySale</code>.
+</p>
+
 <p>
     He is named from <code>arcane-alpha.txt</code> and <code>arcane-beta.txt</code>
     &mdash; witch and wizard names, both halves off those tables. Not a
@@ -1927,8 +1975,38 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Four equestrians replaced one horseman, each with its own POI and a five-tier ladder, and <strong>none has been met in a world</strong> &mdash; so the failures to hunt are a post that never hands out its job, a Master still offering Novice trades, and a scientist whose breed eggs ignore the local cowboy's region; and nobody has yet tried to rob one and been kicked for it.</p>
+    <p>Four equestrians replaced one horseman, each with its own POI and a five-tier ladder, and <strong>none has been met in a world</strong> &mdash; so the failures to hunt are a post that never hands out its job, a Master still offering Novice trades, and a scientist whose breed eggs ignore the local cowboy's region; nobody has yet tried to rob one and been kicked for it; and since 2026-09-26 the cowboy <strong>buys</strong> as well as sells, on a gesture nobody has made.</p>
 </div>
+
+<h3 id="verify-selling">Selling the cowboy a horse (2026-09-26, NOT played)</h3>
+<p>
+    The first player&rarr;villager sale in the mod, and the first price that reads the
+    horse rather than the seller. Nothing below has been seen running.
+</p>
+<ul>
+    <li><strong>The gesture.</strong> Lead a horse up and right-click <em>upright</em>: the
+        shop opens and he quotes a price in chat. Crouch-click: he buys it. The upright
+        click must never sell &mdash; that is the whole safety of it, and the failure would
+        cost somebody a horse.</li>
+    <li><strong>What it becomes.</strong> The horse should go untamed and unowned on the
+        spot, and be in his window as a signed paper on the next look. Buy it back and
+        check the paper names <em>that</em> horse and that redeeming it returns the name,
+        genes and pedigree intact. Your saddle and barding should come back to you, not go
+        with it.</li>
+    <li><strong>The price should track the horse.</strong> Sell a plain feral and a
+        heavily-bred one to the same dealer and check the numbers differ in the direction
+        the count says &mdash; roughly three against the low twenties. A gelding should
+        quote the base, whatever else it carries.</li>
+    <li><strong>The three refusals</strong>, each with its own line: his own horse back
+        again, a foal, and a full string. The full-string one is the throttle; if it does
+        not bite, the sale is an unbounded emerald tap.</li>
+    <li><strong>The seller's log</strong> gets a sale row and nothing anywhere gets a
+        matching purchase row &mdash; a cowboy has no log. Check the Log tab in the browser
+        after selling.</li>
+    <li>Watch whether buy-low-sell-high works across <em>two</em> dealers. The refusal is
+        per-cowboy by design; two barns within reach of each other may be a loop worth
+        closing later.</li>
+</ul>
 
 <h3 id="robbery-0924">Robbing the cowboy (2026-09-24, NOT played)</h3>
 

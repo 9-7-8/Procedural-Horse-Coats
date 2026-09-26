@@ -159,6 +159,23 @@
     band. Nothing to craft and nothing to remember &mdash; if you took it home it is yours,
     and if you left it behind you left it behind.
 </p>
+<div class="note">
+    <span class="label">Turning one out pays two emeralds</span>
+    <p>
+        Use a <a href="item-freedom-stick.html">freedom stick</a> or a
+        <a href="item-tickets.html">turnout ticket</a> and you are paid a flat
+        <strong>two emeralds</strong> a head. Flat, whatever the horse is: the realm takes
+        anybody's surplus and does not form an opinion about whose was worth having. A fee
+        that read the horse would pay most for exactly the ones you have least reason to be
+        rid of.
+    </p>
+    <p>
+        <strong>Walking away pays nothing.</strong> That release fires later, with you already
+        out of the dimension and nobody standing there to be paid &mdash; and it is also what
+        stops the fee being collected by leaving horses lying about. The amount is
+        <code>realm.release_emeralds</code> in the server config; 0 turns it off.
+    </p>
+</div>
 <p>
     Horses standing <strong>near you when you step into the exit come home with you</strong>
     (about fifty blocks), so this only ever catches the ones you genuinely left. And it is
@@ -774,6 +791,19 @@
     <span class="label">What needs verifying here</span>
     <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of the whole field</strong> you can buy a horse out of for a holding pen ticket &mdash; which drew nothing at all until 2026-09-26 and has still not been seen with rows in it &mdash; and a horse now only goes through a portal when a player is <strong>taking it through</strong>.</p>
 </div>
+
+<h3 id="verify-release-fee">Turning a horse out pays, and only when somebody is there (2026-09-26, NOT played)</h3>
+<ul>
+    <li>Freedom stick in the realm, and turnout ticket anywhere: <strong>two emeralds</strong>,
+        in the inventory, or on the floor at your feet with a full one. The release line and
+        the <code>+2 emeralds</code> line should read as one thing.</li>
+    <li><strong>Walk away instead.</strong> Leave a horse in the realm, step out, come back:
+        it is wild and you were paid <em>nothing</em>. This is the half that has to hold, or
+        the fee is farmable by abandonment.</li>
+    <li>Set <code>realm.release_emeralds</code> to 0 and check both paths go back to silent.</li>
+    <li>Worth watching over a few sessions whether a settled paddock makes this an income
+        stream rather than a courtesy. It is config precisely because nobody knows yet.</li>
+</ul>
 
 <h3 id="verify-no-spawns">Nothing arrives in the field that nobody sent (2026-09-26, NOT played)</h3>
 <p>

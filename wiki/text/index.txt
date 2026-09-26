@@ -3165,6 +3165,7 @@ wiki/villagers.html#rebaking	all	Re-baking the piece
 wiki/villagers.html#restock	all	Restocking and rotation
 wiki/villagers.html#robbery	all	Robbing the cowboy
 wiki/villagers.html#routine	all	Their day
+wiki/villagers.html#selling	all	Selling him a horse
 wiki/villagers.html#tack-tint	all	Dyed tack, on a ladder you can see
 wiki/villagers.html#three-connectors	all	Why three, and what one was costing
 wiki/villagers.html#trade-filter	all	The filter box, on every cowboy's window
