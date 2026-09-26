@@ -1,9 +1,10 @@
 2026-09-26 — four asks from the field, and two bugs nobody reported
 
 
-    A queue session. Four requests arrived one after another while work was
-    already running, none of them related, and all four shipped. Nothing was
-    played: everything below is build-green and written up as unplayed.
+    A queue session. Requests arrived one after another while work was already
+    running — four in the first breath and three more mid-turn, none of them
+    related — and all of them shipped. Nothing was played: everything below is
+    build-green and written up as unplayed.
 
         1. the reaper should only break fully-grown crops, and ignore
            melon/pumpkin stalks
@@ -235,3 +236,43 @@ WHAT IS NEWLY UNPLAYED
     The single most valuable thing to check first is the >64 payout, because it
     is the one that silently takes money off the player, and the one whose
     failure mode is "the number was just a bit lower than you expected".
+
+
+9. CUT 0.5.032
+
+    Tagged and released at the end of the same session, jar attached — a tag
+    without the jar is not a release, and there are outside testers on these.
+
+    The range was six commits, and only three of them are player-facing: this
+    session's two, plus the previous sitting's hour-long resurrection window.
+    The other three were the hard-rule-2 narrowing and its logs, which change
+    nothing anybody can play. Worth restating the habit: the release note is an
+    audit of v0.5.031..HEAD, not a writeup of the tagging session, and this time
+    the tagging session happened to be most of it.
+
+    Gates before the tag, in order:
+
+        build green
+        runServer to "Done ("            — and then grepped for ERROR, because a
+                                           successful boot is not a clean boot.
+                                           Two hits, both benign: a Windows
+                                           sysctl note and the dev refmap
+                                           warning that says to ignore itself.
+        jar opened and checked           — version 0.5.032 in neoforge.mods.toml,
+                                           the fence-gate tag entry gone from the
+                                           shipped reaper_harvestable.json,
+                                           TraderSale and GeneFilterPicker
+                                           present as classes
+
+    That third gate is worth keeping. The new jar came out byte-for-byte the
+    same SIZE as 0.5.031, which looks exactly like a stale build; it is not, the
+    two version strings are the same length. Opening the jar is two seconds and
+    settles it, where reasoning about the size does not.
+
+    The published asset's size was checked against the local file after upload.
+
+    Note for whoever ships next: the local build/libs/horsegenetics-0.5.031.jar
+    is NOT what was released as 0.5.031 — it was rebuilt mid-session with this
+    session's changes in it, while the published asset is the older bytes. The
+    directory is a build output, not an archive of what shipped. The releases
+    themselves are the archive.
