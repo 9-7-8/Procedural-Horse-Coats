@@ -1,0 +1,191 @@
+2026-09-26 — a hard rule nobody followed, narrowed to the one it always was
+
+
+    A short session, one subject, no gameplay. The previous session had ended by
+    flagging that CLAUDE.md's hard rule 2 — "common/ uses no Java 9+ APIs" —
+    did not describe what common/ does, and left it as the owner's call. This
+    session was the question "what are the implications of that?", the answer,
+    and the settlement.
+
+    The outcome: the rule was NARROWED rather than the code being changed. Its
+    new form is the one sentence the owner wrote back —
+
+        common/ is version-independent from *Minecraft*, not from Java
+
+    — which is also the shortest correct statement of what the module split has
+    always bought.
+
+
+1. WHAT THE MEASUREMENT SAID, RECOUNTED
+
+    The counts moved even overnight, which is itself the argument for not
+    putting them in CLAUDE.md:
+
+        List.of              476 call sites   (was written 457 the day before)
+        record                92 files        (was written 95)
+        instanceof pattern    55
+        Set.of                22
+        String.isBlank/strip/lines  20
+        String.repeat          7
+        sealed                 4 files
+        var                    4 files
+        text blocks            2
+        Map.of                 3   <- the interesting one, see (3)
+
+    And common/build.gradle.kts set JavaLanguageVersion.of(17) under a comment
+    saying it targeted the LOWEST COMMON DENOMINATOR so both version modules
+    could consume it. The comment and the line directly contradicted each other,
+    in the same block, and had for months.
+
+
+2. THE RULE BUNDLED TWO CONSTRAINTS THAT WERE NOT EQUALLY TRUE
+
+    Rule 2 gave two justifications and they had completely different status.
+
+        "no JDK API TeaVM's class library lacks"
+            Real. It is the one that has ever bitten — System.getLogger,
+            Long.parseUnsignedLong, the empty Map.of(). It is a METHOD-level
+            constraint. Nothing about it implies a language level.
+
+        "one day Java 8"
+            Aspirational, and the half the 600-odd sites break. Nothing
+            enforced it: no options.release, no animal-sniffer, no toolchain
+            below 17.
+
+    So the rule was documentation-only from the day it was written, which is
+    exactly how it drifted that far without a single red build. Even the real
+    half is only partly enforced and enforced LATE, because TeaVM compiles the
+    reachable graph — an unreachable missing method is silent until somebody
+    adds an @JSExport, which rule 2 itself warned about.
+
+    WORTH REMEMBERING: a rule with two justifications of different strength
+    decays to the weaker one's enforcement, which here was none.
+
+
+3. THE EVIDENCE WAS ALREADY IN THE TREE
+
+    The decisive fact was not the count. It was that CommonPortabilityTest —
+    the thing that actually enforces rule 2 — has ONLY EVER implemented the
+    narrow version. It bans three specific calls:
+
+        System.getLogger
+        Long.parseUnsignedLong
+        Map.of() / Map.copyOf(  outside CommonMaps
+
+    and its own javadoc said so out loud: "This is not an attempt to police the
+    whole Java 8 surface". Not one of its three checks is about a language
+    level. The enforcement had been quietly running the narrow rule the whole
+    time; only the prose was wrong.
+
+    That is also why Map.of is at 3 sites and List.of at 476. The one that was
+    guarded stayed down.
+
+    WORTH REMEMBERING: when prose and an enforcing test disagree about a rule,
+    the test is the rule. Read it before arguing from the prose.
+
+
+4. WHAT A JAVA 8 BACKPORT WOULD ACTUALLY COST
+
+    Worth writing down, because the settlement is not "the backport is off" —
+    it is "the bill is known and deferred".
+
+        List.of / Set.of / Map.of / List.copyOf — ~500 sites, but MECHANICAL,
+            and CommonMaps already exists as the home for the helper. Wide and
+            cheap. The scary number is the cheap part.
+
+        arrow switch, instanceof patterns, var, text blocks, String.strip /
+            repeat / isBlank — mechanical, or one helper each.
+
+        record — 92 files, and this is the ENTIRE cost. Records need
+            java.lang.Record at runtime, so no source-level desugarer (Jabel
+            and friends) reaches Java 8. Every one becomes a hand-written class
+            with equals/hashCode/accessors, in the data model everything else
+            is written against.
+
+    And the escape hatch is closed: Forge 1.12.2 does not run above Java 8, so
+    "backport and use a newer JVM" is not available.
+
+    What the module split actually buys is NO MINECRAFT COUPLING — the
+    expensive half, and rule 1 really is obeyed and really is tested. Language
+    level was always the cheap half. So narrowing rule 2 costs the backport
+    story much less than 600 sites make it look.
+
+
+5. WHAT CHANGED
+
+    CLAUDE.md
+        Rule 2 rewritten to the two real constraints, naming
+        CommonPortabilityTest as the guard, and saying Java 17 is fine and a
+        Java 8 backport pays a source downgrade mostly in the records.
+
+        Rule 2 was 6 lines and the honest rewrite was 7. Rather than trim words
+        to squeeze under, the @JSExport / reachable-graph warning MOVED to rule
+        3 — which is the rule that tells you to add an @JSExport, so it is a
+        better home for it anyway. The file is still exactly 300 lines.
+
+    architecture.html
+        The module-split bullet and the CommonLog bullet restated on TeaVM
+        grounds. The decision moved off the Verification tab onto the Verified
+        section as #verified-java-level (hard rule 9: it MOVES, it is not marked
+        closed). Page drops from 13 open checks to 8.
+
+    coding-notes.html, texture-resolution.html, genetics-model.html
+        The three other places that asserted "no Java 9+ APIs" as a live rule.
+        texture-resolution's constraint row had specifically warned off
+        "records-with-defaults cleverness"; it now points at java.util.concurrent
+        instead, which is the real TeaVM risk there.
+
+    CommonLog, CommonMaps, EpiCodec.num, SeededRng
+        Javadoc now names TeaVM as the reason instead of citing Java 8 as a live
+        one. EpiCodec.parseUnsignedHex already had this right — TeaVM primary,
+        Java 8 as "also one fewer JDK method" — and was left alone.
+
+    CommonPortabilityTest
+        Method renamed commonAvoidsTheJavaNinePlusApisThatWereRemoved ->
+        commonAvoidsTheJdkCallsTeavmCannotSupply, javadoc and assertion message
+        rewritten to say what it has always done.
+
+    common/build.gradle.kts
+        No longer claims to target the lowest common denominator while setting
+        17. Says why 17 and not 8, and why 17 and not 25 (TeaVM 0.15 needs 17+).
+
+
+6. THREE THINGS FOUND ON THE WAY, ALL NOW FIXED
+
+    a. The rule pointed at Epigenome.parseUnsignedHex. That method lives in
+       EpiCodec. The pointer was wrong in CLAUDE.md, in architecture.html and
+       in the test's own failure message — three copies of one wrong fact,
+       which is what copying a pointer costs.
+
+    b. SeededRng's comment justified hand-rolling splitmix64 with "uses no Java
+       9+ API". SplittableRandom, the thing it was avoiding, IS Java 8. The
+       justification was wrong on its own terms; the real reason was always
+       that TeaVM would have to supply it.
+
+    c. CommonPortabilityTest's javadoc said a real --release 8 build "is
+       roadmap". Nothing on any Roadmap tab anywhere promised it — grep for
+       "release 8" across the wiki returns nothing. A claim that something is
+       planned, with nothing planning it. Removed rather than promoted, since
+       under the settlement it is not wanted.
+
+    WORTH REMEMBERING: (c) is the shape to watch for. "That is roadmap" inside
+    a code comment is unverifiable at the point you read it and there is no
+    tool that checks it. bake-roadmap-index.mjs only collects Roadmap TABS.
+
+
+7. NOTHING NEW TO PLAY
+
+    No runtime behaviour changed — javadoc, prose, one test method name, one
+    build comment. Nothing was added to any Verification tab, and that is the
+    honest outcome rather than an omission: this session only removed an open
+    item.
+
+    Green at the end: CommonPortabilityTest, :common:compileTestJava,
+    :neoforge-26.1.2:build, check-links.mjs. Rebaked: the verification and
+    roadmap indexes, the search index, wiki/text/. No wasm rebake — nothing in
+    common/ changed semantically, and the wasm build is not reproducible, so
+    rebuilding it for a comment edit would commit 2 MB of noise.
+
+
+    NEXT SESSION: nothing is queued from this one. It closed an item and added
+    none.

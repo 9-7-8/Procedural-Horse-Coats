@@ -21,7 +21,25 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
-    <li><a href="session-log/d2026-09-26-a-blank-tab-and-a-language.txt">2026-09-26
+    <li><a href="session-log/d2026-09-26-a-rule-nobody-followed.txt">2026-09-26, last
+        &mdash; <strong>a hard rule nobody followed, narrowed to the one it always was</strong>.
+        One subject, no gameplay. CLAUDE.md's hard rule 2 said <code>common/</code> &ldquo;uses no
+        Java 9+ APIs&rdquo;; the module has never obeyed it, and the owner settled it by narrowing
+        the rule to the sentence <strong><code>common/</code> is version-independent from
+        <em>Minecraft</em>, not from Java</strong>. The decisive evidence was already in the tree:
+        <code>CommonPortabilityTest</code>, the thing that actually enforces the rule, has only
+        ever banned three specific calls and said in its own javadoc that it was not policing a
+        language level &mdash; so <strong>the enforcement had been running the narrow rule all
+        along and only the prose was wrong</strong>, which is also why <code>Map.of</code> sits at
+        three sites and <code>List.of</code> at 476. A Java 8 backport's bill is now written down
+        rather than implied: the huge <code>List.of</code> count is the cheap, mechanical half, and
+        the whole cost is the <code>record</code> types, which have no source-level desugaring.
+        Three wrong facts fell out on the way &mdash; a pointer to
+        <code>Epigenome.parseUnsignedHex</code> (it is in <code>EpiCodec</code>) copied into three
+        files, a comment avoiding <code>SplittableRandom</code> for being &ldquo;Java 9+&rdquo; when
+        it is Java 8, and a test javadoc calling a <code>--release 8</code> build
+        &ldquo;roadmap&rdquo; when nothing anywhere planned it.</li>
+    <li><a href="session-log/d2026-09-26-a-blank-tab-and-a-language.txt">2026-09-26, earlier
         &mdash; <strong>a blank tab, and the search language that came out of it</strong>.
         It opened on &ldquo;the horse realm tab shows literally nothing&rdquo; &mdash; a
         missing enum case in an arrow-form switch <em>statement</em>, which need not be
