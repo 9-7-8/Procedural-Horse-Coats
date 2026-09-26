@@ -42,18 +42,32 @@
 
 <h2 id="getting-there">Getting there, and getting back</h2>
 <p>
-    Exactly as before: build a vertical rectangle of hay bales, right-click a frame block
+    Build a vertical rectangle of <strong>cobblestone</strong>, right-click a frame block
     with a <strong>golden carrot</strong>, and stand in it for ten seconds. Horses go through
     on their own after three seconds, so the
     <a href="horse-dimension.html#portals">roped-horse shortcut</a> still works &mdash;
     right-click the portal while leading a string of them and they all go.
 </p>
+<div class="note">
+    <span class="label">It used to be hay, and a horse ate one</span>
+    <p>
+        A hay bale is <a href="horse-care.html">the largest single meal in the mod</a> and a
+        horse eats it <em>out of the world</em>, not out of your hand &mdash; so a portal
+        framed in hay is a portal the animals standing next to it will eventually eat,
+        collapsing it and stranding whoever was on the far side. That is two features working
+        correctly and meeting, which is why the answer is a frame nothing wants to eat rather
+        than a rule about grazing. <strong>The golden carrot is unchanged</strong>: it was
+        never the part a horse could take off the wall.
+    </p>
+</div>
 <p>
-    <strong>Your own portal always comes out in the same place.</strong> There are a hundred
-    portals in the field, on a grid, and the one you arrive at is decided by where in the
-    Overworld you built yours. That is the whole reason the field is usable: the horses you
-    released last week are where you left them, and two players who built their portals in
-    different places do not land on top of each other.
+    <strong>Every portal comes out in the same place</strong> &mdash; the exit in the middle
+    of the field. It used to be one of the hundred, picked from where in the Overworld you
+    built yours, so that two players never landed on top of each other. That turned out to be
+    the wrong thing to want: in a field sixteen thousand blocks across, landing apart does not
+    keep players out of each other's way, it keeps <em>their horses</em> apart, in pockets
+    that never meet. A shared field whose whole point is the horses living in it wants them
+    together.
 </p>
 <p>
     Any of the hundred takes you home again, to the exact portal you came in by. If somebody
@@ -70,15 +84,17 @@
     <td>A thousand chunks square &mdash; sixteen thousand blocks on a side. Big, and
     <em>finite</em>: you can walk it, search it, and lose nothing in it.</td></tr>
 <tr><td><strong>The ground</strong></td>
-    <td>One flat layer of dirt on bedrock. No hills, no caves, no trees, nothing to fall
-    into or get stuck behind.</td></tr>
+    <td>One flat layer of grass on bedrock, at <strong>y&nbsp;64</strong> &mdash; the height
+    the Overworld's own sea level sits at, so the sky is where your eye expects it. No hills,
+    no caves, no trees, nothing to fall into or get stuck behind.</td></tr>
 <tr><td><strong>Water</strong></td>
     <td>A small pool every eighty blocks. Not decoration &mdash; a horse only
     <a href="horse-care.html">heals near water</a>, so a dry field would be one
     where a hurt horse never recovered.</td></tr>
 <tr><td><strong>Exits</strong></td>
-    <td>A hay portal every sixteen hundred blocks, a hundred of them, so you are never more
-    than about a thousand blocks from a way out.</td></tr>
+    <td>A portal every sixteen hundred blocks, a hundred of them, so you are never more
+    than about a thousand blocks from a way out. You always <em>arrive</em> at the middle
+    one; the rest are there for walking home from.</td></tr>
 <tr><td><strong>The edge</strong></td>
     <td>An invisible wall. Nothing walks, gallops or is led out of the field.</td></tr>
 <tr><td><strong>The sky</strong></td>
@@ -104,10 +120,34 @@
 
 <h2 id="releasing">Letting one go</h2>
 <p>
-    Craft a <a href="item-freedom-stick.html">freedom stick</a> from a feather, a stick and
-    one <a href="item-horse-hair.html">horse hair</a>, and right-click your own horse with it
-    while you are both in the realm. It is healed to full, its tack comes back to you, and it
-    is wild.
+    <strong>Leave it there and walk out.</strong> A horse of yours still standing in the
+    realm a few seconds after you have gone is wild: healed to full, unowned, free to join a
+    band. Nothing to craft and nothing to remember &mdash; if you took it home it is yours,
+    and if you left it behind you left it behind.
+</p>
+<p>
+    Horses standing <strong>near you when you step into the exit come home with you</strong>
+    (about fifty blocks), so this only ever catches the ones you genuinely left. And it is
+    not a trap: there are a few seconds in which nothing has happened yet, so stepping back
+    through by mistake costs you nothing.
+</p>
+<div class="note">
+    <span class="label">It is not only the portal</span>
+    <p>
+        Logging out in the realm, dying there, or being teleported out all count as leaving
+        &mdash; and so does a horse of yours sitting in country nobody has loaded for a week,
+        which goes wild the moment somebody walks back into it. The rule is not <em>&ldquo;when
+        you use the exit&rdquo;</em>; it is <strong>a tamed horse in the realm whose owner is
+        not also in the realm</strong>, which is true in all of those cases without any of
+        them being handled.
+    </p>
+</div>
+<p>
+    The <a href="item-freedom-stick.html">freedom stick</a> is still there for doing it
+    <em>now</em>, deliberately, while you are standing next to the animal &mdash; feather,
+    stick and one <a href="item-horse-hair.html">horse hair</a>, right-clicked on your own
+    horse in the realm. It is the same release, only immediate, and it hands you the saddle
+    back rather than dropping it in the grass.
 </p>
 <p>
     <strong>It is still the same horse.</strong> Its name, its genes, its breed, its parents
@@ -204,21 +244,102 @@
     2026-09-12 (<a href="horse-dimension.html#the-watch">its night</a>); here it is the feature.
 </p>
 
-<h2 id="arrival">The arrival hash</h2>
+<h2 id="arrival">Everybody arrives at the middle</h2>
 <p>
-    <code>HorseRealm.arrivalCell</code> mixes the Overworld portal&rsquo;s block position
-    (MurmurHash3&rsquo;s finalizer, twice, on X and Z) onto one of the hundred grid cells. A
-    hash rather than a scaled coordinate because the Overworld is millions of blocks wide and
-    the realm is sixteen thousand: any linear mapping puts every portal anyone will ever
-    build into one cell.
+    <code>HorseRealm.arrivalCell</code> returns one cell &mdash; the centre of the
+    ten-by-ten grid &mdash; whatever portal is asking.
 </p>
 <p>
-    Both of its properties fail <em>silently</em> if broken. A hash that drifted would strand
-    a player&rsquo;s released horses out of reach with no error anywhere; one that collapsed
-    would put a whole server in one corner of a 16 000-block field and look, from inside,
-    exactly like a popular meeting spot. So <code>horse_realm_grid_is_stable</code> asserts
-    both over four thousand draws.
+    It used to hash the Overworld portal's own block position onto one of the hundred
+    (MurmurHash3's finalizer, twice), so that each portal had its own exit and two players
+    never landed on top of each other, and <code>horse_realm_grid_is_stable</code> asserted
+    that over four thousand draws. <strong>The hash was correct and the goal was
+    wrong</strong> (owner's call). In a field sixteen thousand blocks across, spreading
+    arrivals does not keep players out of each other's way; it keeps their
+    <em>horses</em> apart, in hundred-chunk pockets that never meet, in a dimension whose
+    entire purpose is horses living together. Bands cannot form across that distance
+    &mdash; <code>HorseRealmHerds</code> looks thirty-two blocks &mdash; and a field nobody
+    can find anybody in is a worse outcome than a crowded gate.
 </p>
+<p>
+    <strong>The other ninety-nine exits are still built and still work.</strong> They are
+    what the grid was genuinely for: a way home for somebody who has walked a long way. The
+    parameter stays in the signature so a change of heart is one method deep rather than a
+    call-site sweep.
+</p>
+
+<h2 id="lift">Moving the floor, in a world that already has one</h2>
+<p>
+    The surface moved from y&nbsp;0 to <strong>y&nbsp;64</strong> and from dirt to grass.
+    Every number in Java was already derived from <code>HorseRealm.GROUND_Y</code>, so that
+    half was one constant; the flat layers in <code>dimension/horse_realm.json</code> are
+    <strong>not</strong> derived and had to move with it, and the game test had four bare
+    literals that are now derived too.
+</p>
+<div class="note">
+    <span class="label">This is back-compat code, which the hard rules forbid</span>
+    <p>
+        <code>HorseRealmLift</code> exists because the owner asked for it by name, and
+        because the standing rule's <em>premise</em> has expired rather than the rule being
+        overridden on a whim. <em>&ldquo;No saves worth keeping&rdquo;</em> was true when
+        there was one tester and a dev world; there is now a shared server with other people
+        on it and a field of horses living in this dimension, and regenerating it would
+        delete them.
+    </p>
+</div>
+<p>
+    <strong>It asks the chunk instead of remembering anything.</strong> A chunk generated on
+    the old floor has bedrock at y&nbsp;&minus;1; one generated since has air there, because
+    the flat layers put bedrock at 63 now. So the test is one block read, it is exact, and it
+    answers <em>no</em> for every chunk of every world that never saw the old layout &mdash;
+    including every world made from here on. It is also <strong>idempotent by
+    construction</strong>, which a saved flag would not be: a lifted chunk no longer has
+    bedrock down there, so a second pass does nothing, there is no migration marker to drift
+    from the blocks it describes, and a chunk that was somehow missed is caught the next time
+    anybody walks into it. That is <code>HorseRealmTerrain</code>'s own argument against a
+    &ldquo;decorated&rdquo; flag, applied again.
+</p>
+<p>
+    The copy needs no care about ordering because <strong>the source and destination ranges
+    do not overlap at all</strong> &mdash; the source ends one block below the new surface and
+    the destination starts at it. That is not luck; it is what an offset larger than anything
+    the realm builds buys, and it is the thing to re-check if the floor ever moves by a
+    smaller step. Empty sections are skipped whole, so an old realm chunk is two sections of
+    work rather than twenty thousand block reads.
+</p>
+<p>
+    <strong>The horses are not moved by it.</strong> An entity can be in an entity section
+    that has not loaded when its blocks do, so moving them from there would miss exactly
+    the ones that matter. <code>HorseRealmRules</code> floors anything in the realm below the
+    bedrock instead &mdash; which catches them whenever they turn up, and closes an older gap
+    nobody had noticed: the realm is a bedrock sheet with <em>nothing under it</em> and had no
+    floor check, so anything through it fell forever. Quietly, since a horse here cannot die.
+</p>
+
+<h2 id="frame">The frame is cobblestone, because a horse ate a portal</h2>
+<p>
+    A hay bale is the largest single meal in the mod and a horse eats it out of the world
+    (<code>HayBales</code>, <code>DietFoods</code>), so a frame built of hay is a frame the
+    animals standing beside it demolish &mdash; which collapses the portal through
+    <code>HayPortalBlock.updateShape</code> and strands whoever was on the far side. Neither
+    feature is wrong; they simply meet, and the fix is a frame nothing wants to eat.
+</p>
+<p>
+    What a frame is made of was a bare <code>state.is(Blocks.HAY_BLOCK)</code> in
+    <strong>five</strong> places &mdash; the flood fill, the portal block's own
+    &ldquo;am I still enclosed&rdquo; ray, the realm's two frame builders and the right-click
+    that lights one. It is now <code>HorsePortalManager.isFrame</code> and
+    <code>frameBlock()</code>, because five copies of one answer is the exact shape of thing
+    that drifts. The <strong>golden carrot is unchanged</strong>.
+</p>
+<div class="note">
+    <span class="label">The id stays <code>hay_portal</code>, and so does the class name</span>
+    <p>
+        Renaming a registered block rewrites every world that has one placed, and there is one
+        of those with people in it. The name is wrong and the id is load-bearing, so the id
+        stays and the comment says why &mdash; the same expired premise as the lift above.
+    </p>
+</div>
 
 <h2 id="repro-clock">The breeding rate is a clock, not a scale factor</h2>
 <p>
@@ -263,10 +384,17 @@
 
 <h2 id="release">What releasing actually changes</h2>
 <p>
-    <code>server/FreedomStickHandler</code>. Three things, and nothing else:
-    <code>setTamed(false)</code>, <code>setOwner(null)</code>, and
-    <strong><code>setTemper(0)</code></strong>. The last is the one that is easy to miss and
-    makes the whole feature real &mdash; vanilla&rsquo;s <code>RunAroundLikeCrazyGoal</code>
+    <code>server/HorseRelease.makeWild</code>, and the reason it is its own class is that
+    there are now <strong>two ways it happens with nothing else in common</strong>. A freedom
+    stick is a player standing next to a horse deciding, which can hand the tack back and say
+    something. Walking out of the realm is the horse being noticed, later, with nobody there.
+    If each wrote its own version, the second would be the one that quietly forgot the temper,
+    or the persistence, or the wild-spawn mark.
+</p>
+<p>
+    Three of them are vanilla's: <code>setTamed(false)</code>, <code>setOwner(null)</code>,
+    and <strong><code>setTemper(0)</code></strong>. The last is the one that is easy to miss
+    and makes the whole feature real &mdash; vanilla's <code>RunAroundLikeCrazyGoal</code>
     rolls against temper, and a horse that <em>was</em> tame is sitting at maximum, so without
     the reset the first player to mount it tames it instantly.
 </p>
@@ -274,15 +402,53 @@
     Everything that makes the horse that horse is on the <code>HorseRecord</code> attachment
     and in <code>HorseAncestryData</code>, and none of it is derived from ownership, so
     releasing touches none of it. <code>HorseOwnerTrackingHandler</code> mirrors the
-    record&rsquo;s owner to null within two seconds on its own &mdash; its javadoc already
+    record's owner to null within two seconds on its own &mdash; its javadoc already
     named &ldquo;a horse going wild again&rdquo; as a case it handles, a year before there was
     one. Re-taming needs no restore code at all: <code>tameWithName</code> sets the owner and
     the same tracker mirrors it back.
 </p>
 <p>
-    The tack comes off and goes to the player because
-    <code>AbstractHorse.canUseSlot(SADDLE)</code> asks <code>isTamed()</code> &mdash; leaving
-    a saddle on a horse that has gone wild would quietly destroy it.
+    The tack comes off because <code>AbstractHorse.canUseSlot(SADDLE)</code> asks
+    <code>isTamed()</code> &mdash; leaving a saddle on a horse that has gone wild would
+    quietly destroy it. With a player there it goes to them; <strong>with nobody there it is
+    dropped where the horse stands</strong>, which is the only honest answer, since the gear
+    is theirs and this dimension does not delete things.
+</p>
+
+<h2 id="feral">Leaving is a condition, not an event</h2>
+<p>
+    <code>HorseRealmFeral</code>. The obvious build is a hook on leaving &mdash; find the
+    player's horses, release them &mdash; and it is <strong>wrong in four ways at
+    once</strong>, each of which is a horse that stays tame forever in a field it was turned
+    out into:
+</p>
+<ul>
+    <li>A player who <strong>logs out</strong> in the realm fires no dimension change.</li>
+    <li>One who <strong>dies</strong> there respawns without one either &mdash; the debug
+        corridor needed a separate <code>PlayerRespawnEvent</code> subscriber for exactly
+        this.</li>
+    <li>One <strong>teleported</strong> out by a command or another mod goes through nothing
+        at all.</li>
+    <li>A horse in an <strong>unloaded chunk</strong> at the moment of any of those cannot be
+        found to release &mdash; and in a field sixteen thousand blocks across that is the
+        normal case, not the corner.</li>
+</ul>
+<p>
+    So the rule is stated as a property of the horse instead: <strong>a tamed horse in the
+    realm whose owner is not also in the realm is wild.</strong> All four cases satisfy it
+    without being handled, and a horse in unloaded country is released the moment somebody
+    loads it &mdash; the first moment it could possibly matter, since until then nobody can
+    see it.
+</p>
+<p>
+    The owner check is a walk of the player list rather than resolving the horse's
+    <code>EntityReference</code>: resolving one can load a chunk in another dimension to find
+    a player who is plainly not here, and the question is only ever <em>is that UUID in this
+    level</em>. The scan is every five seconds per horse, staggered by entity id &mdash;
+    <strong>half <code>HorseRealmHerds</code>' period</strong>, so a horse is turned out
+    before it is asked to join a band rather than a cycle after, since that tick ignores a
+    tamed horse. The delay is also what keeps the rule from being a trap: step back through
+    by mistake and nothing has happened yet.
 </p>
 
 <h2 id="herds">Released horses had to be taught to band</h2>
@@ -327,7 +493,9 @@
 <p>
     Three in <code>ModGameTests</code> (<code>./gradlew :neoforge-26.1.2:runGameTest</code>):
     <code>horse_realm_is_built</code> for the pools, the lit exit and the perimeter,
-    <code>horse_realm_grid_is_stable</code> for the arrival hash, and
+    <code>horse_realm_grid_is_stable</code> &mdash; which now asserts the
+    <em>opposite</em> of what it was written to assert, that every portal reaches the
+    <strong>same</strong> middle cell rather than spreading across the hundred &mdash; and
     <code>freedom_stick_crafts</code>.
 </p>
 <p>
@@ -353,8 +521,85 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong> &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it.</p>
+    <p>The whole realm is <strong>unplayed</strong> &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>.</p>
 </div>
+
+<h3 id="verify-lift">The lift, on a world that already has a realm (2026-09-25, NOT played)</h3>
+<p>
+    <strong>The most dangerous thing in this release.</strong> It rewrites terrain in a
+    dimension somebody may be keeping horses in, and it runs by itself the moment a chunk
+    loads. Everything else here can be wrong and merely look wrong; this can be wrong and
+    lose a field.
+</p>
+<ul>
+    <li><strong>A world that has never seen the realm.</strong> Make one, walk in, and check
+        the lift does <em>nothing</em> &mdash; the log line naming the old floor must not
+        appear. The floor should be grass at y&nbsp;64 with bedrock under it, straight from
+        the flat generator.</li>
+    <li><strong>A world generated on the old floor.</strong> The log says it is lifting;
+        the grass, the pools, the perimeter wall and the exit all arrive sixty-four blocks
+        up, intact and in the same relative places; <strong>nothing is left behind at
+        y&nbsp;0</strong>.</li>
+    <li><strong>The surface is grass, not dirt.</strong> A lifted world's floor was dirt and
+        is converted on the way up. Only the surface course &mdash; a dirt block at another
+        height, if one ever exists, is left alone.</li>
+    <li><strong>The horses come up too.</strong> They are not moved by the lift; the floor
+        check in <code>HorseRealmRules</code> catches them. So: leave a horse in an old-floor
+        realm, update, go back, and it should be standing on the new grass rather than
+        falling. <strong>Watch for one that is briefly under the world</strong> &mdash; that
+        is the expected path, but it should last a tick, not be visible.</li>
+    <li><strong>Twice is the same as once.</strong> Walk out, let the chunks unload, walk back
+        in. Nothing should move a second time.</li>
+    <li><strong>It does not stutter.</strong> Two chunks a tick, two sections each. Fly across
+        unlifted country and watch the tick time.</li>
+</ul>
+
+<h3 id="verify-frame">A cobblestone frame lights, and nothing eats it (2026-09-25, NOT played)</h3>
+<ul>
+    <li><strong>It lights.</strong> A cobblestone rectangle plus a golden carrot. And a
+        <strong>hay</strong> rectangle plus a golden carrot must now do <em>nothing</em>.</li>
+    <li><strong>An existing portal survives the update.</strong> This is the one that matters
+        on the live server: a portal already standing in a hay frame will have its frame fail
+        <code>isFrame</code> the moment a neighbour update runs, and
+        <code>HayPortalBlock.updateShape</code> collapses a portal whose frame it cannot find.
+        <strong>Expect standing portals to vanish and need rebuilding in cobblestone.</strong>
+        Check whether that is what happens, and whether anybody standing in one is left
+        somewhere sensible.</li>
+    <li><strong>The realm's own hundred exits</strong> are rebuilt in cobblestone by the
+        terrain pass. An old one in hay should be replaced, not doubled.</li>
+</ul>
+
+<h3 id="verify-centre">Everybody lands in the same place (2026-09-25, NOT played)</h3>
+<ul>
+    <li>Two portals built far apart in the Overworld arrive at the <em>same</em> exit.</li>
+    <li>Going home from there still returns each player to their <em>own</em> portal &mdash;
+        that half is unchanged and is the half a shared arrival could plausibly have
+        broken.</li>
+    <li>Horses released by different people end up within sight of each other, which is the
+        entire point, and band up (<code>HorseRealmHerds</code>, thirty-two blocks).</li>
+    <li><strong>Is the gate crowded?</strong> With a hundred exits it never was. If arriving
+        on top of somebody else is unpleasant, the fix is a wider landing area, not the hash
+        back.</li>
+</ul>
+
+<h3 id="verify-feral">A horse left behind goes wild (2026-09-25, NOT played)</h3>
+<ul>
+    <li><strong>The basic case.</strong> Take two horses in, leave one fifty blocks away,
+        walk out through the exit. The near one comes home; the far one is wild within about
+        five seconds &mdash; check it is healed, unowned, and has dropped its saddle on the
+        grass rather than losing it.</li>
+    <li><strong>It is not a trap.</strong> Step out and straight back in. The horse standing
+        there should still be yours.</li>
+    <li><strong>Logging out counts.</strong> Log out in the realm with a horse beside you; log
+        back in and it should be wild.</li>
+    <li><strong>Unloaded country counts.</strong> Leave one far from the exit, leave the
+        realm, come back and walk to it. It goes wild as it loads.</li>
+    <li><strong>It does not fire on you while you are there</strong> &mdash; the failure that
+        would make the realm unusable. Ride around for a few minutes with several horses and
+        check none of them lets go.</li>
+    <li><strong>Somebody else being in the realm is not you.</strong> Two players, one leaves:
+        only the leaver's horses should turn out.</li>
+</ul>
 
 <h3 id="verify-arrival">Getting in and out (built 2026-09-25, NOT played)</h3>
 <ul>

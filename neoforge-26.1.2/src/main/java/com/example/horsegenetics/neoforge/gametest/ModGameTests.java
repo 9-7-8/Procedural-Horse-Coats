@@ -758,16 +758,21 @@ public final class ModGameTests {
     }
 
     /**
-     * <b>Every Overworld portal lands somewhere, always the same somewhere, and
-     * they are not all the same one.</b>
+     * <b>Every Overworld portal lands at the middle exit, and the middle exit is
+     * a chunk that actually carries one.</b>
      *
-     * <p>The realm's hundred exits are handed out by hashing the position of the
-     * portal you built, which buys the two properties the feature needs: the herd
-     * you released is where you left it next time, and two players do not pile
-     * onto one another. Both are silent when broken - a hash that drifted would
-     * strand somebody's horses out of reach with no error anywhere, and a hash
-     * that collapsed would put the whole server in one corner of a 16 000-block
-     * field and look, from inside, exactly like a popular meeting spot.
+     * <p>This test's assertion is now the <i>reverse</i> of the one it was
+     * written with, and that is the interesting thing about it. The hundred exits
+     * used to be handed out by hashing the portal's position, and this asserted
+     * the hash <b>spread</b> - a collapse onto a handful of cells would have put
+     * a whole server in one corner of a 16 000-block field and looked, from
+     * inside, exactly like a popular meeting spot. It turned out that spreading
+     * arrivals scattered the <i>horses</i>, which is the one thing the realm
+     * exists to keep together, so everybody arrives at the centre now and the
+     * property to defend is that they all still do.
+     *
+     * <p>Kept rather than deleted for that reason: a hash creeping back in would
+     * otherwise be noticed only by a player wondering where the herd went.
      *
      * <p>Pure arithmetic, so it needs no world; it is here rather than in JUnit
      * only because the NeoForge module has no Minecraft on its test classpath and
@@ -777,36 +782,40 @@ public final class ModGameTests {
             TEST_FUNCTIONS.register("horse_realm_grid_is_stable", () -> ModGameTests::horseRealmGridIsStable);
 
     private static void horseRealmGridIsStable(GameTestHelper helper) {
-        int cells = com.example.horsegenetics.neoforge.server.HorseRealm.PORTAL_CELLS;
         java.util.Set<Long> seen = new java.util.HashSet<>();
         java.util.Random rng = new java.util.Random(20260925L);
 
         for (int i = 0; i < 4000; i++) {
             BlockPos portal = new BlockPos(rng.nextInt(-2_000_000, 2_000_000),
                     rng.nextInt(-60, 300), rng.nextInt(-2_000_000, 2_000_000));
-            net.minecraft.world.level.ChunkPos cell =
-                    com.example.horsegenetics.neoforge.server.HorseRealm.arrivalCell(portal);
+            net.minecraft.world.level.ChunkPos cell = HorseRealm.arrivalCell(portal);
 
-            if (!com.example.horsegenetics.neoforge.server.HorseRealm.isPortalChunk(cell.x(), cell.z())) {
+            if (!HorseRealm.isPortalChunk(cell.x(), cell.z())) {
                 helper.fail("a portal at " + portal.toShortString() + " arrives at chunk "
                         + cell + ", which carries no exit");
-                return;
-            }
-            if (!com.example.horsegenetics.neoforge.server.HorseRealm.arrivalCell(portal).equals(cell)) {
-                helper.fail("a portal at " + portal.toShortString() + " arrives somewhere different "
-                        + "the second time it is asked - the way back to a released herd is not stable");
                 return;
             }
             seen.add(cell.pack());
         }
 
-        // Even coverage, not perfect coverage: 4 000 draws over 100 cells leaves
-        // an empty cell vanishingly unlikely, but the assertion that matters is
-        // that the hash has not collapsed onto a handful, so it is set well below
-        // the hundred rather than at it.
-        if (seen.size() < cells * cells * 3 / 4) {
-            helper.fail("4 000 portals only ever reached " + seen.size() + " of the "
-                    + (cells * cells) + " exits - the arrival hash has collapsed");
+        // ONE cell, and it is the middle one. This assertion is the exact
+        // reverse of the one it replaces - the grid used to be asked to spread
+        // arrivals evenly and is now asked to put every one of them in the same
+        // place, because spreading them scattered the HORSES (see the realm
+        // page). Left as a test rather than deleted: "everybody lands together"
+        // is now the load-bearing property, and a hash creeping back in would
+        // otherwise be noticed only by a player wondering where the herd went.
+        if (seen.size() != 1) {
+            helper.fail("4 000 portals reached " + seen.size() + " different exits - every one of "
+                    + "them is supposed to arrive at the middle of the field");
+            return;
+        }
+        int middle = HorseRealm.CENTRE_CELL * HorseRealm.PORTAL_GRID_CHUNKS;
+        net.minecraft.world.level.ChunkPos only = net.minecraft.world.level.ChunkPos.unpack(
+                seen.iterator().next());
+        if (only.x() != middle || only.z() != middle) {
+            helper.fail("portals arrive at " + only + ", not at the middle cell ("
+                    + middle + ", " + middle + ")");
             return;
         }
         helper.succeed();

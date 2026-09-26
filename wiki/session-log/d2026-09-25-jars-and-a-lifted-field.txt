@@ -1,0 +1,187 @@
+2026-09-25 - a horse you can see in the jar, and a field lifted out from under itself
+
+    Two unrelated briefs in one session, queued one after another while the first was
+    being built. The stasis half was asked as a sentence ("the stasis chamber should
+    have little drawings of the horses, and hitting teleport to home should suck them
+    out of the stasis chamber and leave the empty jar in there"); the realm half arrived
+    as four more messages over the following hour, one of which turned out to be a bug
+    report wearing a feature request.
+
+
+PART ONE - THE STASIS CHAMBER
+
+The bank's own page had already written the complaint down
+
+    HorseStasisBankScreen's countLine carried the comment: "a bank with forty spare
+    chambers in it and a bank with forty horses in it look identical otherwise, since
+    every tier shares one item model". So the drawing half was not a new idea, it was a
+    known gap with a Verification entry (verify-occupied-art) filed as "the fix is art,
+    not a decision". That entry is now deleted and the decision is on the Coding tab,
+    per the rule about where a closed check goes.
+
+Everything needed already existed
+
+    HorsePortrait draws one horse small, keeps two throwaway entities for a whole
+    screen, and falls back to a flat coat swatch. ClientHorseCoats fetches a coat by
+    RECORD uuid, answered from HorseAncestryData - so it works perfectly for an animal
+    that has no entity anywhere, which is exactly what a chambered horse is. The two
+    together were maybe fifteen lines at each of the two draw sites.
+
+    What took the thinking was the size. A slot is sixteen pixels and the jar's body
+    is eight of them; a portrait drawn into a five-pixel hole is a smudge. The answer
+    was to draw the portrait at the slot's FULL size and scissor it to the hole, so what
+    shows is five pixels OF a sixteen-pixel horse - its barrel, at the scale the rest of
+    the mod draws a horse at. FamilyTreeScreen already draws entities inside a scissor,
+    so the composition was proven rather than hoped for.
+
+The first texture cut too much out
+
+    The five chambers share one glass bottle and differ only in the colour of the
+    opaque body, which is how a tier is read. The first occupied texture cut a window
+    through the middle of that body, and the preview showed the obvious: the tier had
+    become a one-pixel outline and every jar looked the same. The second cut the window
+    out of the UPPER body instead and left the colour as a band of liquid in the base -
+    which reads as a specimen jar, keeps the tier legible across a grid of fifty-four,
+    and gives the horse a taller window than the first attempt did. Rendered both and
+    looked at them before writing any screen code, which is the only reason the first
+    one did not ship.
+
+Send home had to find a jar, and the index already knew how
+
+    A horse in a chamber defeats both of StallRecall's ways of finding a horse. It is
+    not unloaded - it is not an entity - so waiting for a chunk will never produce it;
+    and HorseWhereabouts recorded where it went IN, which is precisely a place it is
+    not. The branch therefore had to come before the sighting is read, not after.
+
+    Finding the jar was the part that looked expensive and was not. StasisBankIndex
+    already publishes, per bank, whether it holds an empty emergency chamber - a flag
+    that exists so the emergency chamber can consult a bank without searching the
+    world. Asking it "which horses are in there" is the same trick with a subject: the
+    ids come off the snapshot component, which StasisSnapshot unpacks for exactly this
+    class of question, so publishing is a field read per slot and the common answer
+    costs no chunk at all.
+
+The order of operations is the whole feature
+
+    TicketHandler.landingSpot measures a stall against the horse's own bounding box, so
+    the animal has to exist before the destination can be checked - but it must not be
+    in the world yet, because everything after that point can still refuse. So release
+    was split into restore (build it, do not place it) and place, and the sequence is:
+    find the chamber, check it is not already loose, resolve home, restore unplaced,
+    check ownership, measure, choose a ticket, and only then place and swap the stack.
+
+    The shape this replaces - release somewhere, then teleport - is a real horse
+    standing in the room with the bank for a tick, and on a refusal a bottle opened for
+    nothing. Every refusal here leaves the chamber as full as it was, which is the
+    promise StasisChamberItem.useOn already made and which the new path had to keep
+    rather than restate.
+
+    The destination and its three sentences moved into one Home record when the second
+    caller appeared, on the class's own existing doctrine about TicketHandler: the two
+    paths look separable and are not.
+
+
+PART TWO - THE HORSE REALM
+
+"A horse ate the portal and now I'm trapped" is not a feature request
+
+    The message asked for the portal to be cobblestone. The reason given in passing was
+    the whole finding: a hay bale is the largest single meal in this mod and a horse
+    eats it OUT OF THE WORLD (HayBales, DietFoods), so a portal framed in hay is a
+    portal the animals standing beside it demolish - collapsing it through
+    HayPortalBlock.updateShape and stranding whoever was on the far side. Neither
+    feature is wrong. They simply meet, and nothing in either of them could have caught
+    it, because each is behaving correctly.
+
+    What a frame is made of was a bare Blocks.HAY_BLOCK test in FIVE places - the flood
+    fill, the portal block's enclosure ray, the realm's two frame builders, and the
+    right-click that lights one. It is one method now. The golden carrot is unchanged;
+    it was never the part a horse could take off the wall.
+
+    The block id stays hay_portal and the class stays HayPortalBlock. Renaming a
+    registered block rewrites every world that has one placed, and there is one of those
+    with people in it.
+
+The floor moved to 64, and the rules had to bend once
+
+    Every Y in Java was already derived from HorseRealm.GROUND_Y, so that half was one
+    constant. The flat layers in dimension/horse_realm.json are NOT derived and had to
+    move with it, and the game test had four bare literals, now derived.
+
+    HorseRealmLift is back-compat code, which hard rule 6 forbids. The owner asked for
+    it by name. The defensible reason is not that the owner overrode the rule but that
+    the rule's PREMISE has expired: "no saves worth keeping" was true with one tester
+    and a dev world, and there is now a shared server with other people on it and a
+    field of horses living in this dimension.
+
+    It stores nothing. A chunk built on the old floor has bedrock at y=-1; one generated
+    since has air there. One block read, exact, idempotent by construction - a lifted
+    chunk no longer answers yes - and silent on every world that never saw the old
+    layout. That is HorseRealmTerrain's own argument against a "decorated" flag, used
+    again, and it means there is no migration marker that can drift from the blocks it
+    claims to describe.
+
+    Source and destination ranges do not overlap, because the offset is larger than
+    anything the realm builds, so one ascending pass is safe. Worth re-checking if the
+    floor ever moves by a smaller step.
+
+The horses are not moved by the lift, and that found an older bug
+
+    An entity can be in an entity section that has not loaded when its blocks do, so
+    releasing them from the lift would miss exactly the ones that matter. Flooring
+    anything below the bedrock in HorseRealmRules catches them whenever they turn up -
+    and closes a gap nobody had filed: the realm is a bedrock sheet with NOTHING under
+    it and had no floor check at all, so anything through it fell forever. Quietly,
+    since a horse in the realm cannot die.
+
+Everybody arrives at the middle, and a test now asserts the reverse of itself
+
+    The arrival hash was correct and the goal was wrong. Spreading arrivals across a
+    hundred cells does not keep two players out of each other's way in a field sixteen
+    thousand blocks across; it keeps their HORSES apart, in hundred-chunk pockets that
+    never meet, in a dimension whose entire purpose is horses living together. Bands
+    look thirty-two blocks.
+
+    horse_realm_grid_is_stable used to assert the hash SPREAD - a collapse onto a
+    handful of cells would have looked, from inside, exactly like a popular meeting
+    spot. It now asserts every draw reaches the same middle cell. Kept rather than
+    deleted, because "everybody lands together" is now the load-bearing property and a
+    hash creeping back would otherwise be noticed only by a player wondering where the
+    herd went.
+
+Leaving is a condition, not an event
+
+    The obvious build - hook leaving, find the player's horses, release them - is wrong
+    in four ways at once, and each one is a horse that stays tame forever in a field it
+    was turned out into. Logging out fires no dimension change. Dying respawns without
+    one (the debug corridor needed a separate subscriber for exactly this). Being
+    teleported out goes through nothing. And a horse in an unloaded chunk cannot be
+    found by any hook - which, in a field this size, is the normal case rather than the
+    corner.
+
+    So the rule is a property of the horse: a tamed horse in the realm whose owner is
+    not also in the realm is wild. All four cases satisfy it without being handled, and
+    a horse in unloaded country is released the moment somebody loads it - the first
+    moment it could possibly matter. The scan is half HorseRealmHerds' period so a
+    horse is turned out before it is asked to join a band, and the few seconds of delay
+    are also what keep the rule from being a trap.
+
+    What "wild" means moved into HorseRelease, shared with the freedom stick. The stick
+    stays (owner's call) as the deliberate, immediate version that hands the saddle back
+    rather than dropping it in the grass.
+
+
+WHAT WAS NOT DONE, DELIBERATELY
+
+    Nothing was touched on the owner's live server. It is at
+    C:\Users\Isabel\26.1.2-neoforge-server, it has other players on it, and a separate
+    Claude instance manages it; the fix reaches her as a release she installs herself.
+    Its console.log was read for diagnosis and nothing else.
+
+    No backup code was added around the lift (owner's call): SimpleBackups is already
+    backing that world up, so a bad lift is recoverable from a backup that exists.
+
+    Nothing in this session has been seen in a running game. The realm half rewrites
+    terrain, and the frame change will collapse portals that are currently standing in
+    hay frames - both are on the realm page's Verification tab, and the lift is the
+    first thing on it.

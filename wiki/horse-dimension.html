@@ -27,15 +27,15 @@
 </p>
 
 <div class="note">
-    <span class="label">The hay portal does not come here any more</span>
+    <span class="label">The portal does not come here any more</span>
     <p>
-        Since 2026-09-25 a hay-bale portal arrives in the
+        Since 2026-09-25 a lit portal arrives in the
         <a href="horse-realm.html">horse realm</a> &mdash; the public, protected field
         where players leave horses for each other. <strong>This</strong> dimension is the
         test corridor, and <strong>F6 is now its only door</strong>. That door is open in
         every build, release jars included: the server admits an operator
         (<code>LEVEL_GAMEMASTERS</code>) or a world with <code>debug.tools</code> on, and
-        tells anybody else where the hay portal goes instead.
+        tells anybody else where the portal goes instead.
     </p>
     <p>
         Everything on this page still describes the corridor. Read it alongside the realm
@@ -61,7 +61,7 @@
 <h3>Lighting one</h3>
 
 <p>
-    Build a <strong>vertical</strong> frame of hay bales around an empty rectangle, at
+    Build a <strong>vertical</strong> frame of cobblestone around an empty rectangle, at
     nether-portal inner sizes (2&ndash;21 wide, 3&ndash;21 tall), <em>outside</em> the
     horse dimension. Right-click any frame block with a <strong>golden carrot</strong>.
 </p>
@@ -253,7 +253,7 @@
 <h3 id="rest-stops">A way out every twenty-five pens</h3>
 
 <p>
-    <strong>Every 25th segment carries no pens. It is a break with a hay-bale portal
+    <strong>Every 25th segment carries no pens. It is a break with a portal
     home.</strong> The corridor is thousands of blocks end to end and until now
     had exactly <em>one</em> way out, the return portal at the entrance &mdash; so
     anybody who walked in a few hundred pens to look at something had to walk all the way
@@ -412,7 +412,7 @@
     carried out to <code>originX - 1</code> so the corner has no gap. An earlier version
     made <code>originX - 1</code> a full-height gravel column with no base; it fell into
     the void and left a hole, which is why everything now stands on bedrock and dirt. The
-    return portal itself (hay frame + <code>hay_portal</code>, axis Z) is at
+    return portal itself (cobblestone frame + <code>hay_portal</code>, axis Z) is at
     <code>originX + 1</code>, and the entrance sign three blocks in front of it at
     <code>originX + 4</code>.
 </p>
@@ -881,7 +881,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Start here, because in 0.5.004 walking through a hay portal crashed the game outright: confirm the dimension can be entered at all, then that the rebuilt two-sided corridor <strong>ends in a wall rather than the void</strong> and that a given pen holds the same four horses, and the same breed, every visit.</p>
+    <p>Start here, because in 0.5.004 walking through a portal crashed the game outright: confirm the dimension can be entered at all, then that the rebuilt two-sided corridor <strong>ends in a wall rather than the void</strong> and that a given pen holds the same four horses, and the same breed, every visit.</p>
 </div>
 
 <h3 id="corridor-two-columns-0917">The horse dimension becomes two lists: coats to check, and every breed (2026-09-17, NOT played)</h3>
@@ -1010,7 +1010,7 @@
 <h3 id="open-older-horse-dimension">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>The corridor's rest stops</strong> (tester guide, <em>The hay portal and the horse pens</em>; <a href="horse-dimension.html#rest-stops">horse dimension</a>). <strong>Pass:</strong> there is a break with a hay portal after every 25 pens and the numbers never skip. Stepping through a rest-stop portal takes you and your tamed horses home. That is <code>plotContaining</code> resolving the plot from the portal's X, which has only ever been exercised at the entrance. Walking the road never clips the portal, the floor and walls are unbroken across a break, and pen 2,000 and the end cap still exist.</li>
+    <li><strong>The corridor's rest stops</strong> (tester guide, <em>The portal and the horse pens</em>; <a href="horse-dimension.html#rest-stops">horse dimension</a>). <strong>Pass:</strong> there is a break with a portal after every 25 pens and the numbers never skip. Stepping through a rest-stop portal takes you and your tamed horses home. That is <code>plotContaining</code> resolving the plot from the portal's X, which has only ever been exercised at the entrance. Walking the road never clips the portal, the floor and walls are unbroken across a break, and pen 2,000 and the end cap still exist.</li>
     <li><strong>Hay portals tear down and relight.</strong> Break one hay bale out of a lit portal: the whole interior vanishes. Then light a fresh overworld portal and the horse dimension's return portal, since a portal block now deletes itself when not enclosed and is briefly unenclosed while filling in.</li>
     <li><strong>The corridor's far end.</strong> Pen 2,000, about 7,000 blocks out, ends in a wall. (Gap 243 found the unbuilt far end open to the void, so check where the built corridor stops.)</li>
     <li><strong>No plain pens, and about half magical.</strong> <code>ShowcaseGenotypes.random</code> guarantees one expressing coat gene past extension and agouti and flips a coin per pen for a magical gene. A unit test over a few thousand draws settles both, and each pen's sign should name exactly what its pair carries.</li>
@@ -1031,7 +1031,7 @@
 <h4>Nothing here needs looking at to judge &mdash; do this first</h4>
 
 <ul>
-    <li><strong>The horse dimension can be entered.</strong> Light a hay portal, stand in
+    <li><strong>The horse dimension can be entered.</strong> Light a portal, stand in
         it, and go through. <strong>Pass:</strong> you arrive standing on the road with the
         corridor in front of you, and no crash report is written. This is the whole of the
         0.5.004 blocker: <code>CoatCheckPlan.Pen.sex()</code> threw on the first pen built,

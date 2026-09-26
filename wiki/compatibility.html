@@ -1120,8 +1120,10 @@
     fed twice or fed the wrong amount. A wheat-eater and an eat-anything horse both take a
     bale (a bale carries no <code>FOOD</code> data component, so
     <code>DietFoods.isEdible</code> misses it &mdash; that is the one tag exception in an
-    otherwise list-defined file). The <a href="horse-dimension.html">hay portal</a> still
-    wants real hay bales; a sugar cane bale is food, not a doorway.
+    otherwise list-defined file). The <a href="horse-dimension.html">portal</a> is framed in
+    <strong>cobblestone</strong> now, so the question of whether a modded bale is also a
+    doorway has gone away entirely &mdash; a bale from another mod is food and nothing else,
+    which is what this page always wanted it to be.
 </p>
 
 <h3 id="modded-ground-food">Another mod&rsquo;s crops and fruit, off the floor</h3>
@@ -1952,7 +1954,7 @@
     <li><strong>Hand a hay bale to a full-health adult.</strong> Nothing should happen and
         the bale should <em>not</em> be eaten. Unchanged vanilla behaviour, worth confirming
         once because the new handler deliberately reproduces it.</li>
-    <li><strong>A hay portal still lights from real hay bales.</strong> Untouched, but it is
+    <li><strong>A portal still lights from cobblestone.</strong> Untouched, but it is
         the nearest thing to this change.</li>
 </ul>
 
