@@ -326,7 +326,16 @@ public final class ModNetworking {
                 RealmRosterPayload.TYPE,
                 RealmRosterPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
-                        com.example.horsegenetics.neoforge.client.ClientRealmRoster.accept(payload.entries()))
+                        com.example.horsegenetics.neoforge.client.ClientRealmRoster.accept(
+                                payload.entries(), payload.first(), payload.last()))
+        );
+
+        registrar.playToClient(
+                RealmRosterDeltaPayload.TYPE,
+                RealmRosterDeltaPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientRealmRoster.applyDelta(
+                                payload.added(), payload.removed()))
         );
 
         // Every check that matters is on the far side of this - see RealmClaim.

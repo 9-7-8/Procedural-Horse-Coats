@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.data;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -10,9 +11,10 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -72,6 +74,19 @@ import java.util.UUID;
  * unloaded chunk keeps its place in the count - which is right, since it is
  * still out there taking up room.
  *
+ * <h2>It also remembers where each one was standing</h2>
+ * Added 2026-09-26, and it turns the census from a number into an <b>index</b>.
+ * The realm's table is meant to list every horse in the field and let a player
+ * buy any of them, and most of the field is unloaded most of the time - so both
+ * halves need to reach a horse no chunk is holding. The row itself comes from
+ * the ancestry database, which knows every horse that ever existed; what it
+ * cannot say is <i>where</i>, and without that {@code RealmClaim} has nothing to
+ * load in order to fetch the animal.
+ *
+ * <p>A position is exact rather than stale, which is the part that makes this
+ * work at all: an unloaded entity does not move. The last tick before it
+ * unloaded is where it still is, however long ago that was.
+ *
  * <p>One known drift, in the safe direction: a horse taken out of the realm
  * <i>inside a stasis chamber</i> never ticks anywhere again, so it stays
  * counted. That makes the field slightly larger than it needs to be, and the
@@ -87,15 +102,46 @@ public final class HorseRealmSize extends SavedData {
     /** Square blocks of field per horse - ten chunks each. See the class doc. */
     public static final int BLOCKS_PER_HORSE = 2560;
 
+    /**
+     * One horse in the field, and the block it was last seen standing on.
+     * {@code at} is only ever read by {@code RealmClaim}, to know which chunk to
+     * pull in when somebody buys a horse out of country nobody has loaded.
+     */
+    public record Resident(UUID horse, BlockPos at) {
+
+        public static final Codec<Resident> CODEC = RecordCodecBuilder.create(i -> i.group(
+                UUIDUtil.CODEC.fieldOf("id").forGetter(Resident::horse),
+                BlockPos.CODEC.fieldOf("at").forGetter(Resident::at)
+        ).apply(i, Resident::new));
+    }
+
     private int radius = START_RADIUS;
     private final List<Integer> retired = new ArrayList<>();
-    private final Set<UUID> horses = new LinkedHashSet<>();
+
+    /**
+     * Insertion-ordered on purpose: it is the order the realm table arrives in,
+     * and an order that wandered between two refreshes would reshuffle a list
+     * somebody is reading. Oldest resident first, which is also the stablest
+     * thing available - nothing about a wild horse changes to move it.
+     */
+    private final Map<UUID, BlockPos> horses = new LinkedHashMap<>();
 
     public static final Codec<HorseRealmSize> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.INT.optionalFieldOf("radius", START_RADIUS).forGetter(HorseRealmSize::radius),
             Codec.INT.listOf().optionalFieldOf("retired", List.of()).forGetter(s -> s.retired),
-            UUIDUtil.CODEC.listOf().optionalFieldOf("horses", List.of())
-                    .forGetter(s -> List.copyOf(s.horses))
+            // "residents", not the old "horses": the field changed shape from a
+            // bare UUID list to UUID-plus-position, and a new name means an
+            // existing save loads CLEANLY with an empty census rather than
+            // failing to parse the file that also holds the field's radius.
+            // Losing the radius would put the wall inside the field.
+            //
+            // The census does then have to be rebuilt, and it rebuilds itself:
+            // HorseRealmCensus enrols any horse that ticks in the realm. That
+            // covers every horse somebody loads, and only that - a horse in
+            // country nobody walks back into stays missing from the table until
+            // they do. One lap of the field fixes it.
+            Resident.CODEC.listOf().optionalFieldOf("residents", List.of())
+                    .forGetter(HorseRealmSize::residents)
     ).apply(i, HorseRealmSize::new));
 
     public static final SavedDataType<HorseRealmSize> TYPE = new SavedDataType<>(
@@ -106,10 +152,12 @@ public final class HorseRealmSize extends SavedData {
     private HorseRealmSize() {
     }
 
-    private HorseRealmSize(int radius, List<Integer> retired, List<UUID> horses) {
+    private HorseRealmSize(int radius, List<Integer> retired, List<Resident> horses) {
         this.radius = Math.max(START_RADIUS, radius);
         this.retired.addAll(retired);
-        this.horses.addAll(horses);
+        for (Resident resident : horses) {
+            this.horses.put(resident.horse(), resident.at());
+        }
     }
 
     public static HorseRealmSize get(MinecraftServer server) {
@@ -124,6 +172,20 @@ public final class HorseRealmSize extends SavedData {
     /** How many horses the census believes are living in the realm. */
     public int horseCount() {
         return horses.size();
+    }
+
+    /** Every horse in the field and where it was last standing, oldest first. */
+    public List<Resident> residents() {
+        List<Resident> out = new ArrayList<>(horses.size());
+        for (Map.Entry<UUID, BlockPos> entry : horses.entrySet()) {
+            out.add(new Resident(entry.getKey(), entry.getValue()));
+        }
+        return out;
+    }
+
+    /** Where this horse was last seen standing, if the census has it. */
+    public Optional<BlockPos> where(UUID horse) {
+        return Optional.ofNullable(horses.get(horse));
     }
 
     /** Rings that are still standing and should not be - see the class doc. */
@@ -142,20 +204,34 @@ public final class HorseRealmSize extends SavedData {
     // The census
     // ------------------------------------------------------------------
 
-    /** This horse is in the realm. Returns true if that is news. */
-    public boolean note(UUID horse) {
-        if (horses.add(horse)) {
+    /**
+     * This horse is in the realm, standing here. Returns true if the horse
+     * itself is news - a horse that has merely <i>moved</i> is not.
+     *
+     * <p>The position is written every time regardless, because it costs a map
+     * put and being wrong about it costs a claim. {@link #setDirty} is only
+     * raised for a genuinely new resident or a real move, so a field of
+     * stationary horses does not re-save the whole census every scan.
+     */
+    public boolean note(UUID horse, BlockPos at) {
+        BlockPos was = horses.put(horse, at);
+        if (was == null) {
             setDirty();
             return true;
+        }
+        if (!was.equals(at)) {
+            setDirty();
         }
         return false;
     }
 
-    /** This horse is somewhere else now. */
-    public void forget(UUID horse) {
-        if (horses.remove(horse)) {
+    /** This horse is somewhere else now. Returns true if that is news. */
+    public boolean forget(UUID horse) {
+        if (horses.remove(horse) != null) {
             setDirty();
+            return true;
         }
+        return false;
     }
 
     // ------------------------------------------------------------------

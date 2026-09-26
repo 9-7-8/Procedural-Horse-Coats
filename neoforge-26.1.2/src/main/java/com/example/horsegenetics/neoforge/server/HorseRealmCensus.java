@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -76,10 +77,17 @@ public final class HorseRealmCensus {
             return;
         }
         HorseRealmSize size = HorseRealmSize.get(server);
+        // The census is the server's record of the field, and these two calls
+        // are the only two moments it changes - so they are also where everyone
+        // standing in the realm is told. See RealmRoster: the full roster goes
+        // out once on arrival and is kept in step by these deltas rather than
+        // re-derived by each client on a timer.
         if (HorseRealm.isRealm(level)) {
-            size.note(horse.getUUID());
-        } else {
-            size.forget(horse.getUUID());
+            if (size.note(horse.getUUID(), horse.blockPosition()) && horse instanceof Horse h) {
+                RealmRoster.entered(h);
+            }
+        } else if (size.forget(horse.getUUID())) {
+            RealmRoster.left(server, horse.getUUID());
         }
     }
 

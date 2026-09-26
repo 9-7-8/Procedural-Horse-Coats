@@ -42,6 +42,7 @@ public final class ClientLifecycleHandler {
         ClientProgress.clear();
         ClientHorseRoster.clear();
         ClientRealmRoster.clear();
+        ClientRealmWatch.forget();
         ClientHorseLog.clear();
         ClientHorseCoats.clear();
         ClientOffspring.clear();

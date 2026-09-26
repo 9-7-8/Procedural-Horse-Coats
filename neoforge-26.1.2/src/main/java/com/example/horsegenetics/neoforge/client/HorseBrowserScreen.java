@@ -825,12 +825,18 @@ public final class HorseBrowserScreen extends Screen {
         if (tab == Tab.MY_HORSES) {
             requestRosterUnlessJustAsked();
         }
+        // The realm tab is gone the moment you leave the field, so a remembered
+        // one has to be let go of too - otherwise the browser opens on a tab
+        // that is not in the strip and draws a table it cannot refresh.
+        if (tab == Tab.REALM && !ClientRealmWatch.inRealm()) {
+            tab = Tab.MY_HORSES;
+        }
         // Opened straight onto the realm table - which is what the browser key
         // does inside the realm - so it has to be asked for here as well as on
         // the tab click, or the first thing a player sees in there is an empty
         // field.
         if (tab == Tab.REALM) {
-            ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
+            requestRealmUnlessCached();
         }
         if (tab == Tab.LOG) {
             requestLog();
@@ -904,6 +910,32 @@ public final class HorseBrowserScreen extends Screen {
     }
 
     /**
+     * <b>Ask for the field, unless we already have it.</b>
+     *
+     * <p>The other two rosters are re-asked on a timer, because a stable changes
+     * under you and a stale one is the failure. The realm's list is the opposite
+     * trade. It is <i>every horse in the field</i> - thousands of rows, each
+     * carrying a whole genotype, gathered from the census and the ancestry
+     * database and sent over several seconds - and it is thrown away the moment
+     * the player leaves. Re-fetching that on every tab click would mean the tab
+     * spent most of its life re-filling.
+     *
+     * <p>So it is fetched <b>once per visit to the realm</b> and kept until the
+     * player walks out (owner, 2026-09-26). What changes underneath it while
+     * they are in there - a foal born, a horse claimed - is what
+     * <b>Refresh</b> is for, and {@code RealmClaim} pushes a fresh one after a
+     * purchase without being asked.
+     */
+    private void requestRealmUnlessCached() {
+        // Received covers "we have it"; loading covers "a run is already on its
+        // way", which asking again would abandon and restart from nothing.
+        if (ClientRealmRoster.received() || ClientRealmRoster.loading()) {
+            return;
+        }
+        ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
+    }
+
+    /**
      * What the Refresh button asks for, which depends on which tab it is sitting
      * on. One button rather than two, because "refresh" means the same thing to
      * a player on every tab that carries it and a second button in the same place with a
@@ -913,7 +945,9 @@ public final class HorseBrowserScreen extends Screen {
         if (tab == Tab.LOG) {
             requestLog();
         } else if (tab == Tab.REALM) {
-            // The field, not the stable - and unthrottled, like the tab click.
+            // The field, not the stable. Unthrottled and unconditional, unlike
+            // the tab click: Refresh is the one gesture that means "I know it is
+            // cached, fetch it again anyway" - see requestRealmUnlessCached.
             ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
         } else {
             requestRoster();
@@ -1306,11 +1340,8 @@ public final class HorseBrowserScreen extends Screen {
                 if (tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES) {
                     requestRosterUnlessJustAsked();
                 }
-                // The realm is a field of loose horses walking about, so its
-                // list is a snapshot in a way the stable's is not - asked for
-                // every time the tab is opened, with no "just asked" guard.
                 if (tab == Tab.REALM) {
-                    ClientPacketDistributor.sendToServer(RealmRosterRequestPayload.INSTANCE);
+                    requestRealmUnlessCached();
                 }
                 // Asked for every time the tab is opened, not only the first:
                 // unlike the roster, the log changes on its own while you are
@@ -1425,10 +1456,38 @@ public final class HorseBrowserScreen extends Screen {
         return super.mouseReleased(event);
     }
 
+    /**
+     * <b>The tabs that exist right now.</b> All of them but one, always; the
+     * <i>Horse realm</i> tab is only there while the player is standing in the
+     * horse realm (owner, 2026-09-26).
+     *
+     * <p>That reverses the original call, which was that the field is exactly
+     * what you want to look at <i>from home</i>, before deciding to go. It is
+     * not a free tab any more: it is thousands of rows the server encodes and
+     * sends on request, about horses you cannot reach and cannot buy without a
+     * pen and a ticket, and the list is dropped the moment you leave. A tab that
+     * costs that much to fill should not be sitting there inviting a click from
+     * the other side of a portal.
+     *
+     * <p>Every measurement of the strip goes through this - the width, the
+     * hit-test and the drawing - so the three cannot disagree about which tab a
+     * click landed on. That is the entire bug class this method exists to
+     * prevent.
+     */
+    private static List<Tab> visibleTabs() {
+        List<Tab> out = new ArrayList<>(Tab.values().length);
+        for (Tab t : Tab.values()) {
+            if (t != Tab.REALM || ClientRealmWatch.inRealm()) {
+                out.add(t);
+            }
+        }
+        return out;
+    }
+
     /** Every tab laid end to end, including the gap after the last one. */
     private int tabStripWidth() {
         int total = 0;
-        for (Tab t : Tab.values()) {
+        for (Tab t : visibleTabs()) {
             total += this.font.width(t.label) + 24 + 4;
         }
         return total;
@@ -1482,7 +1541,7 @@ public final class HorseBrowserScreen extends Screen {
             return null;
         }
         int tx = tabStripLeft();
-        for (Tab t : Tab.values()) {
+        for (Tab t : visibleTabs()) {
             int w = this.font.width(t.label) + 24;
             if (mx >= tx && mx <= tx + w) {
                 return t;
@@ -1666,7 +1725,7 @@ public final class HorseBrowserScreen extends Screen {
         // Scissored, so a tab scrolled half off is cut cleanly at the margin
         // rather than running under the window's edge.
         g.enableScissor(viewL, TAB_TOP, viewL + viewW, TAB_TOP + TAB_H);
-        for (Tab t : Tab.values()) {
+        for (Tab t : visibleTabs()) {
             int w = this.font.width(t.label) + 24;
             boolean on = t == tab;
             g.fill(tx, TAB_TOP, tx + w, TAB_TOP + TAB_H, on ? TAB_ON : TAB_OFF);
@@ -3492,6 +3551,12 @@ public final class HorseBrowserScreen extends Screen {
         String count = horseRows.size() == total
                 ? total + (total == 1 ? " horse" : " horses")
                 : horseRows.size() + " of " + total + " horses";
+        // The field arrives over several seconds, so the count is a running
+        // total until it stops. Saying so is the difference between a table
+        // that is filling and a table that is wrong.
+        if (showingRealm() && ClientRealmRoster.loading()) {
+            count += " so far...";
+        }
         int countW = this.font.width(count);
         g.text(this.font, Component.literal(count), l + 2, contentTop() + 20, LABEL, false);
         drawFitted(g, "keys: " + String.join(" ", HorseQuery.keys()),
@@ -3548,11 +3613,14 @@ public final class HorseBrowserScreen extends Screen {
         ClientHorseCoats.request(onScreen);
 
         if (horseRows.isEmpty()) {
-            String note = !rosterReceived() ? "asking the server..."
+            String note = !rosterReceived()
+                    ? (showingRealm() ? "counting the field..." : "asking the server...")
                     : total == 0 ? (showingRealm()
                             ? "nothing is standing in the horse realm"
                             : "no horses on record yet - tame or breed one")
-                    : "nothing matches \"" + horseFilter + "\"";
+                    : "nothing matches \"" + horseFilter + "\""
+                            + (showingRealm() && ClientRealmRoster.loading()
+                                    ? " - still loading the rest" : "");
             g.text(this.font, Component.literal(note), l + 4, top + 4, EXPR_OFF, false);
         }
 
@@ -3750,14 +3818,21 @@ public final class HorseBrowserScreen extends Screen {
      * columns had no room for, or how to drive the tab when nothing is picked.
      */
     private void drawHorseFooter(GuiGraphicsExtractor g, int l, int r, int y) {
-        HorseListing row = ClientHorseRoster.byId(selectedHorseId);
+        // The roster the TABLE is drawn from, not the stable's - a realm horse
+        // is nearly never one of the player's own, so reading the stable here
+        // left the footer blank for almost every row the realm tab can select.
+        HorseListing row = showingRealm()
+                ? ClientRealmRoster.byId(selectedHorseId)
+                : ClientHorseRoster.byId(selectedHorseId);
         int w = r - l;
         int second = y + this.font.lineHeight + 2;
         if (row == null) {
             drawFitted(g, "click a heading to sort, a row to read it; terms are ANDed and "
                             + "-term excludes, e.g. \"mare gen>2 gene:SB1 -lethal\"",
                     l + 2, y, w, TAG);
-            if (ClientHorseRoster.truncated()) {
+            // The realm list is never cut - it is the whole field, arriving in
+            // batches - so this belongs to the stable alone.
+            if (!showingRealm() && ClientHorseRoster.truncated()) {
                 drawFitted(g, "You own more horses than the roster holds - it is showing the "
                         + "most recent generations.", l + 2, second, w, EXPR_OFF);
             }

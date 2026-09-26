@@ -87,7 +87,7 @@ public final class HorseRelease {
         // returns, one line ahead of the sentence it belongs to. Close enough
         // to read as one thing; putting it first read as being paid for
         // something that had not happened yet.
-        pay(player);
+        pay(level, horse, player);
     }
 
     /**
@@ -116,10 +116,21 @@ public final class HorseRelease {
      *
      * <p><b>Not verified in-game.</b>
      */
-    private static void pay(@Nullable Player player) {
+    private static void pay(ServerLevel level, Horse horse, @Nullable Player player) {
         int fee = ServerConfig.realmReleaseEmeralds();
         if (player == null || fee <= 0) {
             return;
+        }
+        // Written into the back-payment ledger as well as handed over. That
+        // command pays for every horse in the field it has not settled, and it
+        // cannot tell a horse released before the fee existed from one released
+        // a minute ago - so the fee has to say "this one is done". Without it,
+        // an operator running /horsebounty after a session pays a second time
+        // for everything turned out during it.
+        if (level.getServer() != null) {
+            com.example.horsegenetics.neoforge.data.RealmBounty.get(level.getServer())
+                    .settle(horse.getUUID(), player.getUUID(),
+                            player.getGameProfile().name(), fee, true);
         }
         ItemStack emeralds = new ItemStack(Items.EMERALD, fee);
         if (!player.getInventory().add(emeralds.copy())) {

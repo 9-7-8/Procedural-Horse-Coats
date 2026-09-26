@@ -1,9 +1,11 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.data.PenRecord;
 import com.example.horsegenetics.neoforge.data.StallData;
 import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -12,7 +14,13 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -42,6 +50,7 @@ import java.util.UUID;
  * ({@link HorseRealmFeral}) but a player standing in their own realm keeps
  * theirs, so a tamed horse in the field belongs to whoever is there with it.
  */
+@EventBusSubscriber
 public final class RealmClaim {
 
     private RealmClaim() {
@@ -58,9 +67,11 @@ public final class RealmClaim {
             return;
         }
         if (!(realm.getEntity(horseId) instanceof Horse horse) || !horse.isAlive()) {
-            // Not an error worth dressing up: the table is a snapshot, and a
-            // horse can walk out through a portal between the draw and the click.
-            say(player, "That horse is not in the realm any more.");
+            // Almost every horse in the table is in an unloaded chunk - the
+            // field is 1,600 blocks across and a player loads a dozen chunks of
+            // it - so this is the normal path, not the error one. Pull the chunk
+            // in and try again in a moment.
+            fetch(player, realm, horseId);
             return;
         }
         if (horse.isTamed()) {
@@ -116,6 +127,117 @@ public final class RealmClaim {
         ActionTrace.log("realm", player.getGameProfile().name() + " claimed "
                 + ActionTrace.describeShort(horse) + " out of the realm for a holding pen ticket");
         RealmRoster.sendTo(player);
+    }
+
+    // ------------------------------------------------------------------
+    // Fetching a horse nobody has loaded
+    // ------------------------------------------------------------------
+
+    /**
+     * How many ticks a forced chunk is given to produce its horse. Entity
+     * sections are read off disk asynchronously after the chunk ticket takes
+     * effect, so the entity is not there on the tick the force is applied and
+     * there is no callback that means "and its animals are here too". Two
+     * seconds is far longer than a local disk needs and short enough that a
+     * player who clicked on something genuinely gone is told so while they still
+     * remember clicking.
+     */
+    private static final int FETCH_TICKS = 40;
+
+    /**
+     * One outstanding fetch. The chunk coordinates are kept so the force can be
+     * lifted again whichever way this ends - an un-lifted forced chunk is a
+     * chunk the server tickets for the life of the world.
+     */
+    private record Fetch(UUID player, UUID horse, int chunkX, int chunkZ, int deadline) {
+    }
+
+    private static final List<Fetch> PENDING = new ArrayList<>();
+
+    /**
+     * <b>Load the chunk a horse was last standing in, then claim it.</b>
+     *
+     * <p>The realm table lists the whole field, from the census and the ancestry
+     * database, so nearly every row is a horse no chunk is holding
+     * ({@code RealmRoster}). "Bring home" has to work on those or the catalogue
+     * is one you cannot order from - which was the point of having it.
+     *
+     * <p>The position comes from {@link HorseRealmSize}, which records where each
+     * horse was last seen ticking. That is exact rather than stale: an unloaded
+     * entity does not move, so wherever it was when the chunk last unloaded is
+     * where it still is.
+     *
+     * <p><b>Unverified API usage.</b> {@code setChunkForced} is being used to
+     * make an entity appear, and entity loading is a consequence of the chunk
+     * reaching a ticking level rather than something this asks for directly.
+     * That is why this polls to a deadline instead of doing the work on the next
+     * tick: if the timing assumption is wrong the player gets a refusal and
+     * keeps their ticket, rather than a claim that silently did nothing.
+     */
+    private static void fetch(ServerPlayer player, ServerLevel realm, UUID horseId) {
+        MinecraftServer server = realm.getServer();
+        BlockPos at = HorseRealmSize.get(server).where(horseId).orElse(null);
+        if (at == null) {
+            // The census has never seen it. Either it left the realm and
+            // something forgot it, or the table is showing a row it should not.
+            say(player, "That horse is not in the realm any more.");
+            return;
+        }
+        for (Fetch fetch : PENDING) {
+            if (fetch.horse().equals(horseId)) {
+                say(player, "Somebody is already fetching that one.");
+                return;
+            }
+        }
+        int chunkX = at.getX() >> 4;
+        int chunkZ = at.getZ() >> 4;
+        realm.setChunkForced(chunkX, chunkZ, true);
+        PENDING.add(new Fetch(player.getUUID(), horseId, chunkX, chunkZ,
+                server.getTickCount() + FETCH_TICKS));
+        say(player, "Sending for it...");
+    }
+
+    /**
+     * Retry every pending fetch, and give up on the ones that have run out of
+     * time. The chunk force is lifted in both cases and in one place, so there
+     * is no path that leaves one on.
+     */
+    @SubscribeEvent
+    static void onServerTick(ServerTickEvent.Post event) {
+        if (PENDING.isEmpty()) {
+            return;
+        }
+        MinecraftServer server = event.getServer();
+        ServerLevel realm = server.getLevel(HorseRealm.REALM_LEVEL);
+        if (realm == null) {
+            PENDING.clear();
+            return;
+        }
+        Iterator<Fetch> it = PENDING.iterator();
+        while (it.hasNext()) {
+            Fetch fetch = it.next();
+            ServerPlayer player = server.getPlayerList().getPlayer(fetch.player());
+            boolean arrived = realm.getEntity(fetch.horse()) instanceof Horse horse && horse.isAlive();
+            boolean expired = server.getTickCount() >= fetch.deadline();
+            if (!arrived && !expired && player != null) {
+                continue;
+            }
+            it.remove();
+            realm.setChunkForced(fetch.chunkX(), fetch.chunkZ(), false);
+            if (player == null) {
+                continue;   // they logged out mid-fetch; the force is lifted, that is all
+            }
+            if (!arrived) {
+                say(player, "Could not find that horse where the field last saw it. "
+                        + "Your ticket is untouched.");
+                continue;
+            }
+            // Straight back into the front door, now that the horse is real.
+            // Every refusal and the whole price live there and must not be
+            // duplicated here - this method's only job was to make the entity
+            // exist.
+            request(player, fetch.horse());
+        }
     }
 
     /** The first holding pen ticket in the player's inventory, or {@code -1}. */
