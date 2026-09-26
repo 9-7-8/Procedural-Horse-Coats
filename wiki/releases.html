@@ -61,6 +61,94 @@
     </p>
 </div>
 
+<h2 id="v0-5-030">0.5.030 &mdash; a golden carrot that always works</h2>
+
+<p>
+    <strong>Feed two adult horses of opposite sex a golden carrot each and you get a foal.
+    There is no other condition.</strong> Not a cooldown, not taming, not full health, not
+    gelding, not the fertility gene, not where a mare is in her cycle &mdash; and a mare who
+    is already pregnant breeds anyway and keeps the foal she is carrying. Three of those were
+    invisible rather than unfair: a horse one heart down from a fall reads as perfectly
+    ordinary, eats the carrot, shows hearts and then simply does not breed, and vanilla has no
+    message for it.
+</p>
+<p>
+    The one that mattered most in play: <strong>a breeding carrot no longer turns a
+    golden-carrot pairing into a pregnancy.</strong> Conception is gated on the heat cycle, so
+    an armed pair out of heat &mdash; sixteen days in twenty-one &mdash; stood there eating
+    carrots with nothing to show for it. A splice carrot now works the moment you feed it: its
+    effect goes into the instant foal. Pregnancies come from a stallion left with a mare, or a
+    seed jar, which is where a cycle is worth having. Every golden-carrot foal is now announced
+    in chat and written to the log, where before the path said nothing at all.
+</p>
+<ul>
+    <li><strong>Gene carrots cost no rarity item.</strong> A Known Gene Splice carrot is a
+        golden carrot, a research paper and a horse hair &mdash; three slots, at every tier. The
+        fourth slot used to take the gene's ingot, up to a <em>nether star</em>, which priced it
+        out of reach exactly where people want it: the natural use is two carrots, one per
+        parent, because that is what guarantees a homozygous foal. The tier still prices the
+        <em>paper</em> &mdash; how often it turns up in a chest, and how long a shelf takes to
+        copy one.</li>
+    <li><strong>Bands spread out in the horse realm.</strong> The field was one enormous ball of
+        horses. A band now fills up and stops taking members, so there is more than one band at
+        all, and a wild horse walks away from horses that are not its own band's. A field left
+        alone should settle into separate groups with room between them.</li>
+    <li><strong>Press <kbd>H</kbd> in the realm</strong> and the browser opens on a table of
+        <em>every horse standing in the field</em> &mdash; sortable and filterable like your own
+        stable, by speed, breed or gene. Each row has a <strong>Bring home</strong> button:
+        one holding pen ticket tames that horse and puts it in your pen, with its name, its
+        genes and its pedigree intact.</li>
+    <li><strong>A turnout ticket</strong> (blank ticket, horse hair, feather) is the other
+        direction: right-click your horse from any world and it goes to the realm and stops
+        being yours. The freedom stick only ever worked while you were standing in the realm
+        with it, so retiring a horse used to mean leading it through a portal first.</li>
+    <li><strong>Press <kbd>E</kbd> while looking at a horse</strong> to open its menu. It was
+        sneak-and-click, or <kbd>E</kbd> from the saddle; now it is also the horse you are
+        looking at, which reaches across a paddock and needs no free hand.</li>
+    <li><strong>Jade says how long.</strong> Pointing at a mare gave one word; it now gives the
+        information screen's whole line &mdash; <em>In heat, best time now</em>, <em>Not in heat,
+        about 12 min to go</em>, <em>Pregnant, about 4 min to go, heavy and slow</em>. "Not in
+        heat" is the case a breeder is actually scanning a paddock for, and it used to say
+        nothing at all.</li>
+</ul>
+<p class="small">
+    Dev convenience, if you are testing genes: <code>/testkit splice &lt;gene&gt; [&lt;a&gt;
+    &lt;b&gt;]</code> and <code>/testkit paper &lt;gene&gt; [&lt;a&gt; &lt;b&gt;]</code>
+    tab-complete the gene and both alleles and refuse a pair the locus cannot have. They are
+    the only two items <code>/give</code> cannot spawn by name, because the gene lives in a
+    data component rather than the item id.
+</p>
+
+<p><strong>Also in this release, from the session before it:</strong></p>
+<ul>
+    <li><strong>The Nether breeds can spawn at all.</strong> They never could &mdash; not
+        rarely, never: vanilla's placement rule wants grass underfoot and generated Nether
+        terrain has none. A breed file may now name the floors its herds stand on
+        (<code>spawn_ground</code>) and waive the light over those floors
+        (<code>spawn_in_dark</code>), and both are additive, so a breed that says nothing
+        behaves exactly as before.</li>
+    <li><strong>An unbound blank transfer paper binds to whoever signs it</strong>, so a blank
+        from a loot table or a creative tab is no longer dead on arrival.</li>
+    <li><strong>Empty stasis chambers stack</strong> &mdash; which was hiding an item-destroying
+        bug: catching one horse while holding five chambers would have binned four.</li>
+    <li><strong>A ridden horse survives a waystone.</strong> No Waystones setting could have
+        done this; it takes a compile-only compat class, behind a mod-list guard.</li>
+    <li><strong>Flight is real fall immunity</strong>, for a horse that <em>carries</em> flight
+        rather than one that happens to be flying &mdash; the old test switched the guard off at
+        the top of the fall, which is exactly what pressing F does.</li>
+    <li>A permanent calm switches the temperament off entirely; the portal dwell is five seconds
+        rather than ten; research books work on a branded horse by contract rather than by jar
+        order; neither portal exit gathers up your horses, and the debug corridor's exit now
+        says how many you left.</li>
+</ul>
+<p class="small">
+    <strong>None of this has been played.</strong> Every item above is unwatched code, and the
+    two biggest &mdash; the breeding rule and the band spacing &mdash; can fail in ways a build
+    cannot see. What to look for is on
+    <a href="fertility.html#verification">fertility's open checks</a> and
+    <a href="horse-realm.html#verification">the realm's</a>.
+</p>
+
 <h2 id="v0-5-029-1">0.5.029.1 &mdash; a field that grows with the herd in it</h2>
 
 <p>

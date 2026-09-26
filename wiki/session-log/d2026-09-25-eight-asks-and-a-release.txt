@@ -1,0 +1,303 @@
+2026-09-25 — eight asks, queued one at a time, and 0.5.030
+
+
+    It opened as a gameplay question, not a task:
+
+        How do I make a true flight gene splice carrot? I have tf/tf book
+        learned, if I make two copies, can I make two tf/tf carrots, and
+        guarantee a tf/tf baby?
+
+    The answer was yes — a Known Gene Splice substitutes the pair one parent's
+    gamete is drawn from, so a Tf/Tf carrot makes that parent contribute Tf with
+    certainty, and one fed to each parent is a guaranteed Tf/Tf foal. Reading the
+    code to answer it turned up two sentences that were no longer true, and the
+    first ask followed from the answer's own cost: a mythic locus wanted TWO
+    NETHER STARS for one deliberate foal.
+
+    Seven more arrived while that was being done. What follows is in the order
+    they were asked. Three of the eight were not really the thing they looked
+    like, and those are marked.
+
+
+1. RETIRE THE GENE CARROT'S RARITY CHARGE.
+
+    A Known Gene Splice carrot is now golden carrot + research paper + horse
+    hair. Three slots, at every tier.
+
+    The fourth slot took the ingot for the gene's GeneRarity — iron, gold,
+    diamond, emerald, netherite, nether star. It was prohibitive at exactly the
+    tiers people want the carrot for, and the arithmetic above is why: the
+    natural use is two carrots, because two is what guarantees a homozygous
+    foal.
+
+    server/recipe/RarityItems is DELETED rather than left unused, and the
+    javadoc in four other files that used it as the worked example of "a table
+    that lives on the game side" now points at DietFoods and HorsePrices.
+
+    The tier still prices the PAPER — GeneRarity.lootWeight() for chest loot,
+    and the research shelf's copy time. So rarity now says how hard a gene is to
+    LEARN and never how hard it is to spend once learnt. That distinction is
+    written into GeneRarity's own javadoc, because the enum previously opened by
+    calling itself "the gene-carrot recipe cost".
+
+    NOT THE ASK, found on the way: the gene-page carrot card still said "two
+    carrot-fed parents give the usual 25/50/25", which stopped being true when a
+    paper started naming a PAIR — two true-breeding carrots are 100%, which is
+    the whole of the question that opened the session. Its hair slot also still
+    offered "or hair cloth", an item that no longer exists.
+
+
+2. MAKE IT EASIER TO SPAWN SPLICE CARROTS, AND WRITE DOWN HOW.
+
+    /testkit splice <gene> [<a> <b>] and /testkit paper <gene> [<a> <b>].
+
+    These two items are the only things in the mod /give cannot spawn by name:
+    each is ONE item parameterised by a data component, so the gene is not in
+    the id. By hand it means typing
+
+        known:horsegenetics.flying:Tf:Tf
+
+    exactly right, with no completion — and a mistyped token is not an error. It
+    is an item that looks perfectly normal, parses to nothing and does nothing,
+    which you find out one breeding later. Both subcommands complete the gene
+    (short name or full key) and then both alleles off the live registry, and
+    refuse a pair the locus says cannot occur.
+
+    The write-up went on BreedingCarrotItem and ResearchPaperItem — the raw
+    /give forms, the shape of both tokens (colons for the carrot, BARS for the
+    paper, which normalises so a|A and A|a are one paper), and a note to prefer
+    the command and why.
+
+    The owner was asked where "comments in the jar" should live, with options.
+    Command-plus-javadoc was chosen, and the scope widened to the paper as well.
+
+
+3. THE GOLDEN CARROT SHOULD ALWAYS WORK.
+
+    Asked as: "the golden carrot should ALWAYS make two horses have a baby — the
+    only limit being age (both adults) and being opposite sex."
+
+    A full gate map was taken first, and it found EIGHT reasons a golden-carrot
+    pairing could fail. The owner was given them as options and chose the
+    literal reading, then refined it twice unprompted:
+
+        the golden carrot should still trigger pregnancy messages to the log and
+        chat
+
+        the golden carrot actually shouldn't result in a pregnancy at all, it
+        should instantly create a baby, even if the mom is currently pregnant
+
+    That second line settled a hazard the options had flagged: a pregnant mare
+    conceiving again would have OVERWRITTEN the embryo she was carrying. Since
+    the golden carrot never conceives, there is nothing to overwrite — she gets
+    the instant foal and the one she was already carrying, on its own clock.
+
+    What went: the vanilla 6000-tick cooldown (BreedingCooldownHandler zeroes
+    the age on the feed), vanilla's isTamed() and getHealth() >= getMaxHealth()
+    tests (mixin/HorseAlwaysParentMixin, guarded to Horse so donkeys and llamas
+    are untouched), the gelding check, the sf/sf subfertility roll, the estrus
+    cycle, and the pregnant-mare refusal. An untamed adult is put in love by the
+    feed handler itself, because vanilla's handleEating will not.
+
+    Three of those were INVISIBLE rather than unfair, which is the argument
+    worth keeping. A horse one heart down from a fall reads as perfectly
+    ordinary, eats the carrot, shows hearts and does not breed — and vanilla has
+    no message for it, so the mod cannot add one to a condition it never
+    evaluates. The subfertile roll looked exactly like bad luck.
+
+    THE BIG ONE, and it was not in the ask: a carrot-armed parent used to divert
+    the whole pairing to a PREGNANCY. Conception is gated on the cycle, so an
+    armed pair out of heat — sixteen days in twenty-one — stood there eating
+    golden carrots with no foal, no pregnancy, and the carrots still armed. A
+    splice carrot could sit on a horse for most of a week doing nothing visible.
+    The bias now folds into the instant foal, splice lineage mark and all.
+
+    Conception.vanillaFoalChance is deleted with the rule it served, and its
+    test is rewritten to pin that FertilityGene reaches breeding only through
+    ReproRules now.
+
+    Kept: same-sex, either parent a baby, and a draw that comes out an embryonic
+    lethal. The last is genetics rather than a gate — it is what met/met and the
+    KIT lethals are FOR — and the commit says so explicitly so the owner can
+    overrule it.
+
+    About twenty now-false sentences were corrected across fertility.html,
+    breeding.html, carrots.html, gene-fertility, gene-census, horse-dimension,
+    item-vet-kit and the tester scripts. Two of those were VERIFIED records
+    describing measurements that were correct and are now history: the
+    subfertile pen's one-in-four, and the gold-timer pen's cooldown clearing.
+    They say so rather than being deleted.
+
+
+4. A TICKET THAT SENDS A HORSE TO THE REALM AND UNCLAIMS IT.
+
+    The turnout ticket: blank ticket, horse hair, feather.
+
+    It is two existing halves bolted together and DELIBERATELY not a third
+    implementation of either — TicketHandler.arrive for the travel, and
+    HorseRelease.makeWild for the release, which is the single definition of
+    what "wild" means and the only thing that remembers the temper reset and the
+    wild-spawn mark (without which a released horse never finds a band).
+
+    Order is load-bearing: MOVE FIRST, RELEASE SECOND, so makeWild hands the
+    tack to a player still standing in the world the horse left rather than
+    dropping a saddle on the realm floor where they cannot reach it.
+
+    It is also the first release that clears the horse's StallRecord. The other
+    two paths can never meet a horse that still has a stall — the freedom stick
+    only works inside the realm, and HorseRealmFeral only fires on a horse
+    already there — so a stall sign bound to a horse nobody owns was not
+    previously reachable.
+
+
+5. E WHILE LOOKING AT A HORSE OPENS ITS MENU.
+
+    NOT WHAT IT FIRST LOOKED LIKE. The obvious reading is vanilla's horse
+    inventory, and the first attempt was a payload asking the server to open
+    one. Both halves of that were wrong: this mod's horse menu is
+    HorseInfoScreen, whose Gear tab holds the saddle and barding that screen
+    used to, and it opens CLIENT-SIDE off ClientHorseRecordCache with no packet
+    at all. The payload was deleted rather than left in.
+
+    HorseInventoryKeyHandler is HorseInfoKeyHandler with one line changed, and
+    that is the point: every hard-won detail in that class applies unchanged —
+    take the key in ClientTickEvent.Pre rather than swap the screen afterwards
+    (vanilla's is a CONTAINER screen the server opened, so swapping leaves a
+    menu bound to the player with nothing to close it), drain the clicks in a
+    loop, and bail WITHOUT consuming the press when there is no record so
+    vanilla still opens for a donkey.
+
+    The rider case wins by construction rather than by priority: this one bails
+    on isPassenger() before touching the key, so looking at a second horse from
+    the saddle cannot open the wrong animal's window. Two subscribers draining
+    one key in one tick is a thing to make impossible, not to order carefully.
+
+
+6. HEAT STATUS ON JADE, INCLUDING NOT IN HEAT AND HOW LONG TO GO.
+
+    A DELIBERATE REVERSAL, and worth recording as one. Jade showed a state word
+    alone — "Pregnant", "In heat", or nothing — from a separate, shorter
+    ReproText.glanceLine whose javadoc argued the case at length: no countdown
+    to tick in the corner of a player's eye, and nothing at all for a mare
+    merely between heats, because "a glance asked no question".
+
+    The owner asked for the countdown and for "not in heat". That is the better
+    call: a mare between heats is precisely the case a breeder scans a paddock
+    to find out about, and a blank tooltip is indistinguishable from the mod not
+    reporting at all.
+
+    glanceLine had no other caller, so it is deleted along with the argument it
+    served, and its tests are rewritten to pin that every state answers and that
+    twins still stay the vet kit's alone. The reversal is written down in both
+    JadeHorsePlugin and compatibility.html, because the old reasoning was good
+    enough that a future session would otherwise reinstate it.
+
+
+7. WILD HORSES CLUMP INTO ONE GIANT BALL.
+
+    Asked as: "shouldn't they form bands and spread out? Can you add some
+    motivator that drives wild horses to not want to be near other bands?"
+
+    A map of the herd system found THREE rules compounding, none wrong alone:
+
+      - Every portal lands on the same block. Deliberate, documented, and pinned
+        by the horse_realm_grid_is_stable gametest over four thousand portals.
+      - HorseRealmHerds put every arrival into the nearest band within 32 blocks
+        — and there always was one, and it was always the same one.
+      - WildHerdGoal closes each member to within five blocks of its lead and
+        StallionGuard drags strays back inside fourteen, against nothing but
+        vanilla's random stroll at the same goal priority.
+
+    THE LOAD-BEARING INSIGHT: the field did not hold several bands standing
+    close together. It held ONE band, of everything. So the motivator asked for
+    would have done nothing whatsoever on its own.
+
+    So a band now FILLS UP — BreedHerd.MAX_HAREM_MARES + 1, doubled for foals
+    and hangers-on — after which an arrival founds its own. That is what makes
+    the second band exist. Then server/BandSpacing is the motivator: a wild
+    banded horse walks away from the nearest horse of a DIFFERENT band within
+    forty blocks.
+
+    It is a per-horse nudge rather than a band manoeuvre, and that is what makes
+    it cheap. Cohesion is per-horse too, so the two are the same kind of force
+    and settle against each other instead of fighting for the navigation; a band
+    whose members each edge away from a neighbour moves AS A BAND, because its
+    own cohesion keeps gathering it up as it goes. Nothing computes a band
+    centre, elects who decides, or keeps band-level state. It rides the same
+    hundred-tick social scan and actuates through BandLife.retreat — the same
+    short shove a horse already gets for losing a fight.
+
+    Arrival is deliberately LEFT ALONE. Scattering horses as they land is the
+    obvious third fix and it is the one not taken: that property is what the
+    gametest asserts, and it is load bearing for the terrain and the wall.
+    Spreading out is something the horses do afterwards, which is also the
+    version that keeps working when a band wanders.
+
+
+8. H IN THE REALM LISTS THE WHOLE FIELD.
+
+    A Horse realm tab: every horse standing in the realm, in the same sortable,
+    filterable table as My horses, with a Bring home button that spends one
+    holding pen ticket to tame the horse and put it in the player's pen. In the
+    realm, H opens straight onto it.
+
+    It is ONE RENDERER over two rosters rather than a second table —
+    showingRealm() is asked once and the source, the version, the received flag,
+    the empty-state note, the column heading, the button label, the ticket test
+    and the click target all read through it. A column added to the stable is in
+    both by construction. RealmRosterPayload reuses the stable's hand-written
+    entry codec for the same reason, and that codec went from private to
+    package-private with a comment saying why.
+
+    They are separate payloads and separate client caches only so that arriving
+    in the realm cannot overwrite what the client knows about the player's own
+    stable.
+
+    THE DESIGN CALL WORTH RECORDING: taming is BOUGHT here rather than earned.
+    Everywhere else, taming a horse is being thrown off it until it gives in,
+    and that is the right price for an animal standing in front of you. It
+    cannot be the price here, because the point of the field is that it holds
+    MORE HORSES THAN ANYONE WILL EVER RIDE — a table that could only list them
+    would be a catalogue you cannot order from. The ticket is the price, which
+    makes this the exact inverse of ask 4: one ticket out, one ticket back.
+
+    RealmClaim tames first and travels second, and spends the ticket only after
+    the horse has actually moved, so no failure can leave a wild horse in
+    somebody's pen or a ticket spent on nothing.
+
+
+WHAT WENT WRONG IN THE SESSION ITSELF
+
+    THE FIRST runServer NEVER EXITED. Its Gradle wrapper reported exit 0 and the
+    log ended with "All chunks are saved", which reads exactly like a clean
+    shutdown — it was an autosave, and the JVM sat at the console for half an
+    hour holding the world's DirectoryLock. The next boot failed with an
+    IOException that looks identical to the owner's own client being open, which
+    is the documented cause and was the wrong diagnosis here. The tell is
+    -Dfml.modFolders in the command line of a java process that should be gone.
+
+    The owner's LIVE SERVER was running throughout (PID 8448, three hours of
+    CPU, real players on it) and was not touched. The dev run directory is on
+    port 25599, so there was never a collision to manage.
+
+
+VERIFIED THIS SESSION
+
+    Nothing in-game. Everything above is unwatched code.
+
+    What was actually checked: :neoforge-26.1.2:build green throughout;
+    runServer to "Done (0.351s)" on 0.5.030 with no ERROR line, and the log
+    confirming "Mixing HorseAlwaysParentMixin ... into AbstractHorse", which is
+    the only proof a mixin applied at all; check-recipes green at 143 files;
+    check-links green; ReproRulesTest, ReproTextTest, FertilityGeneTest and
+    HorseRecordTest green; and the gene-carrot card rendered in headless Chrome
+    against the real wasm, showing three slots and no rarity item.
+
+    A full :common:test run would still need to check the coat goldens, which
+    nothing this session should have moved — no gene, no painter and no geometry
+    was touched.
+
+    The two biggest changes can fail in ways a build cannot see, and both have
+    what to look for written on the owning page: the breeding rule on
+    fertility.html's Verification tab, the band spacing and the realm table on
+    horse-realm.html's.
