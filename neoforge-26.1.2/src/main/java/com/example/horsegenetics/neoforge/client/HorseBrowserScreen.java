@@ -3458,7 +3458,8 @@ public final class HorseBrowserScreen extends Screen {
             HorsePortrait.draw(g, ClientHorseCoats.get(row.id()), !row.adult(),
                     l, ry + 1, PORTRAIT_W, HORSE_ROW_H - 2, mouseX, mouseY);
             drawHorseRow(g, row, ry + (HORSE_ROW_H - this.font.lineHeight) / 2, sel);
-            drawSendButton(g, ry, hasTicket, mouseX, mouseY);
+            drawSendButton(g, ry, hasTicket, HorseListing.IN_STASIS.equals(row.where()),
+                    mouseX, mouseY);
         }
         g.disableScissor();
         // Only the rows actually on screen, and only once each - see
@@ -3574,7 +3575,7 @@ public final class HorseBrowserScreen extends Screen {
     }
 
     private void drawSendButton(GuiGraphicsExtractor g, int rowY, boolean enabled,
-                                int mouseX, int mouseY) {
+                                boolean inStasis, int mouseX, int mouseY) {
         int x = columnX(SEND_COLUMN);
         int w = columnW(SEND_COLUMN);
         int y = sendButtonY(rowY);
@@ -3593,11 +3594,18 @@ public final class HorseBrowserScreen extends Screen {
                 enabled ? NAME : EXPR_OFF);
 
         if (hover) {
-            g.setTooltipForNextFrame(Component.literal(enabled
-                    ? "Spend a ticket to send this horse to its stall - or to your holding pen, "
-                            + "if it has no stall of its own."
-                    : "You have no tickets. A written ticket sends a horse to its stall; "
-                            + "a holding pen ticket sends it to your pen."), mouseX, mouseY);
+            // A horse in a chamber is sent home out of the chamber, and the
+            // button says so: the alternative is a player wondering why their
+            // bottle emptied itself, which is the same surprise either way round.
+            String said = !enabled
+                    ? "You have no tickets. A written ticket sends a horse to its stall; "
+                            + "a holding pen ticket sends it to your pen."
+                    : inStasis
+                            ? "Spend a ticket to take this horse out of its stasis chamber and put it "
+                                    + "in its stall. The empty chamber is left where it was."
+                            : "Spend a ticket to send this horse to its stall - or to your holding pen, "
+                                    + "if it has no stall of its own.";
+            g.setTooltipForNextFrame(Component.literal(said), mouseX, mouseY);
         }
     }
 

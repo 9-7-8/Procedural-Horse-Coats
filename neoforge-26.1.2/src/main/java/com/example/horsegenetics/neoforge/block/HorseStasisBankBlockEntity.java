@@ -316,7 +316,26 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
             return;
         }
         StasisBankIndex.get(server.getServer())
-                .record(placedBy, server.dimension(), getBlockPos(), anyArmedEmergency(chambers));
+                .record(placedBy, server.dimension(), getBlockPos(),
+                        anyArmedEmergency(chambers), heldHorses(chambers));
+    }
+
+    /**
+     * <b>Which horses are filed here</b>, for the index - the browser's
+     * <i>Send home</i> button is what asks. The ids come off the snapshot
+     * component, which is already on every stack, so this decodes no entity tag:
+     * the whole reason {@code StasisSnapshot} unpacks the id at all is so a
+     * question like this costs a field read per slot.
+     */
+    public static java.util.List<java.util.UUID> heldHorses(Container container) {
+        java.util.List<java.util.UUID> out = new java.util.ArrayList<>();
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            var snapshot = StasisChamberItem.snapshotOf(container.getItem(i));
+            if (snapshot != null) {
+                out.add(snapshot.horseId());
+            }
+        }
+        return out;
     }
 
     /**

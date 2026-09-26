@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.StasisBrowseRow;
 import com.example.horsegenetics.common.horse.StasisTier;
 import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
@@ -16,8 +17,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * <b>The Horse Stasis Bank's screen.</b> Three tabs: <b>Chambers</b>, a chest of
@@ -73,6 +76,31 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     private static final int LINE_H = 10;
 
     /**
+     * <b>The hole in an occupied chamber's texture</b>, as an offset into the
+     * sixteen-pixel slot. <b>These four numbers are a copy</b>: they are the
+     * window cut out of {@code occupied_*_stasis_chamber.png}, and the two must
+     * agree or the horse is drawn behind paint - or, worse, outside the jar,
+     * since the dark well the portrait fills first is clipped to exactly this
+     * rectangle and every pixel of it has to be inside the glass. If the jars are
+     * ever redrawn, these move with them.
+     *
+     * <p>The window is the <i>upper</i> half of the body, so the tier's colour
+     * survives as the liquid it is standing in - a bank of Basic chambers still
+     * reads blue across the grid.
+     */
+    private static final int GLASS_X0 = 5;
+    private static final int GLASS_Y0 = 8;
+    private static final int GLASS_X1 = 11;
+    private static final int GLASS_Y1 = 12;
+
+    /** Three-quarter view, standing still - see {@link #drawThroughGlass}. */
+    private static final float GLASS_YAW = 50.0F;
+    private static final float GLASS_PITCH = 0.0F;
+
+    /** The Browse row's portrait, square, at the left of the row. */
+    private static final int PORTRAIT_W = HorseStasisBankMenu.ROW_H - 2;
+
+    /**
      * The tab the bank opens on: whichever was showing last time, for the rest
      * of the session - the research shelf's rule, and for its reason. The
      * question is "what was I doing", not "what was this bank".
@@ -93,6 +121,13 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     /** Every horse in the bank, and the subset the filter leaves showing. */
     private List<StasisBrowseRow> rows = List.of();
     private List<StasisBrowseRow> shown = List.of();
+
+    /**
+     * The same rows again, by the chamber slot they came from - what the grid
+     * needs to draw a horse behind a jar. Built with {@link #rows}, from the same
+     * walk, rather than searched per slot per frame.
+     */
+    private Map<Integer, StasisBrowseRow> bySlot = Map.of();
 
     /** What {@link #rows} was built from, so it is rebuilt only when one moves. */
     private int builtFrom = Integer.MIN_VALUE;
@@ -283,11 +318,16 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         }
         if (contents != builtFrom || version != builtVersion) {
             List<StasisBrowseRow> built = new ArrayList<>();
+            Map<Integer, StasisBrowseRow> slots = new HashMap<>();
             for (HorseStasisBankMenu.Stored stored : this.menu.stored()) {
-                built.add(new StasisBrowseRow(stored.slot(), stored.snapshot().horseName(), stored.tier(),
-                        ClientHorseRoster.byId(stored.snapshot().horseId()), stored.atStud()));
+                StasisBrowseRow row = new StasisBrowseRow(stored.slot(), stored.snapshot().horseName(),
+                        stored.tier(), ClientHorseRoster.byId(stored.snapshot().horseId()),
+                        stored.atStud());
+                built.add(row);
+                slots.put(stored.slot(), row);
             }
             rows = List.copyOf(built);
+            bySlot = Map.copyOf(slots);
         }
         shown = StasisBrowseRow.filter(rows, query);
         builtFrom = contents;
@@ -354,7 +394,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         VanillaPanel.window(g, leftPos, topPos, HorseStasisBankMenu.WIDTH, HorseStasisBankMenu.HEIGHT);
 
         if (tab == HorseStasisBankMenu.Tab.CHAMBERS) {
-            drawChambers(g);
+            drawChambers(g, mouseX, mouseY);
         } else if (tab == HorseStasisBankMenu.Tab.BROWSE) {
             VanillaPanel.well(g, leftPos + HorseStasisBankMenu.MARGIN,
                     topPos + HorseStasisBankMenu.FILTER_Y,
@@ -384,16 +424,64 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
      * {@code isActive() == false}, so vanilla neither draws nor hit-tests them,
      * and a well drawn under one would be a hole with nothing behind it.
      */
-    private void drawChambers(GuiGraphicsExtractor g) {
+    private void drawChambers(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int top = this.menu.chamberRow();
         int first = top * HorseStasisBankBlockEntity.COLS;
         int last = Math.min(HorseStasisBankBlockEntity.SLOTS,
                 first + HorseStasisBankMenu.VISIBLE_ROWS * HorseStasisBankBlockEntity.COLS);
+        List<HorseListing> wanted = null;
         for (int i = first; i < last; i++) {
-            VanillaPanel.slot(g, leftPos + HorseStasisBankMenu.chamberX(i),
-                    topPos + HorseStasisBankMenu.chamberY(i, top));
+            int sx = leftPos + HorseStasisBankMenu.chamberX(i);
+            int sy = topPos + HorseStasisBankMenu.chamberY(i, top);
+            VanillaPanel.slot(g, sx, sy);
+            StasisBrowseRow row = bySlot.get(i);
+            if (row != null && row.listing() != null) {
+                if (wanted == null) {
+                    wanted = new ArrayList<>();
+                }
+                wanted.add(row.listing());
+                drawThroughGlass(g, row, sx, sy, mouseX, mouseY);
+            }
+        }
+        if (wanted != null) {
+            ClientHorseCoats.request(wanted);
         }
         drawGridScrollbar(g, top);
+    }
+
+    /**
+     * <b>The horse in the jar.</b> An occupied chamber's item texture has a hole
+     * cut in its body - {@code occupied_*_stasis_chamber.png} - and this is what
+     * is behind it: the same {@link HorsePortrait} the browser's tables draw, at
+     * the slot's full sixteen pixels, <b>scissored to the hole</b>.
+     *
+     * <p>Clipped rather than drawn small, which is the whole trick. A five-pixel
+     * portrait is a smudge; five pixels of a sixteen-pixel horse is that horse's
+     * barrel at the size the rest of the mod draws it, which is enough to say
+     * <i>chestnut</i>, <i>grey</i>, <i>spotted</i> at a glance across a bankful of
+     * jars. The dark well the portrait fills first is clipped with it, so the
+     * hole reads as the inside of a bottle and nothing bleeds onto the panel.
+     *
+     * <p>The pose is fixed rather than following the cursor: fifty-four horses
+     * all turning together would be a bank of jars that ripples when the mouse
+     * moves, and a stationary animal is what a specimen in a bottle looks like
+     * anyway. Three-quarter view, the angle {@code HorsePortrait} names as the
+     * one that separates the legs.
+     */
+    private void drawThroughGlass(GuiGraphicsExtractor g, StasisBrowseRow row,
+                                  int slotX, int slotY, int mouseX, int mouseY) {
+        var coat = ClientHorseCoats.get(row.listing().id());
+        if (coat == null) {
+            return;     // no papers, or they have not arrived - the empty hole says so
+        }
+        g.enableScissor(slotX + GLASS_X0, slotY + GLASS_Y0, slotX + GLASS_X1, slotY + GLASS_Y1);
+        // The box is pushed down so the horse's middle sits in the middle of the
+        // window rather than above it - a portrait box is centred on the animal,
+        // and the window is not centred on the slot.
+        int drop = (GLASS_Y0 + GLASS_Y1) / 2 - 8;
+        HorsePortrait.drawPosed(g, coat, !row.listing().adult(), slotX, slotY + drop, 16, 16,
+                GLASS_YAW, GLASS_PITCH);
+        g.disableScissor();
     }
 
     /**
@@ -531,21 +619,40 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         }
 
         int hovered = rowAt(mouseX, mouseY);
+        // The text starts past the portrait. A row with no papers still keeps
+        // the gutter, so the names down the list stay in one column.
+        int textL = l + 3 + PORTRAIT_W + 3;
+        int textW = w - (textL - l);
+        List<HorseListing> wanted = null;
         for (int i = scroll; i < shown.size() && i < scroll + HorseStasisBankMenu.LIST_ROWS; i++) {
             int ry = t + (i - scroll) * HorseStasisBankMenu.ROW_H;
             if (i == hovered) {
                 g.fill(l, ry, l + w, ry + HorseStasisBankMenu.ROW_H, VanillaPanel.HOVER);
             }
             StasisBrowseRow row = shown.get(i);
+            // Big enough to read the coat, which is the whole reason it is here -
+            // the same portrait, at the same size, as the browser's My horses.
+            if (row.listing() != null) {
+                if (wanted == null) {
+                    wanted = new ArrayList<>();
+                }
+                wanted.add(row.listing());
+                HorsePortrait.draw(g, ClientHorseCoats.get(row.listing().id()),
+                        !row.listing().adult(), l + 3, ry + 1, PORTRAIT_W, PORTRAIT_W,
+                        mouseX, mouseY);
+            }
             // A row at stud is necessarily a Spacer, so saying so costs no
             // information: the one word the corner had is implied by the one it
             // has instead.
             boolean stud = row.atStud() && row.mayStud();
             int rightW = drawRight(g, stud ? "at stud" : capitalise(row.tier().id()),
                     l + w - 4, ry + 3, stud ? 0xFF2F5F2F : 0xFF4A4A4A);
-            drawFitted(g, row.displayName(), l + 3, ry + 3, w - 10 - rightW, 0xFF202020);
+            drawFitted(g, row.displayName(), textL, ry + 3, textW - 7 - rightW, 0xFF202020);
             rightW = drawRight(g, row.origin(), l + w - 4, ry + 3 + LINE_H, 0xFF4A4A4A);
-            drawFitted(g, row.detail(), l + 3, ry + 3 + LINE_H, w - 10 - rightW, 0xFF3F3F3F);
+            drawFitted(g, row.detail(), textL, ry + 3 + LINE_H, textW - 7 - rightW, 0xFF3F3F3F);
+        }
+        if (wanted != null) {
+            ClientHorseCoats.request(wanted);
         }
 
         // One spare row's worth of explanation, in the first empty row rather

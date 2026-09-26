@@ -1,19 +1,28 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
 import com.example.horsegenetics.neoforge.data.HorseWhereabouts;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.PenRecord;
 import com.example.horsegenetics.neoforge.data.StallData;
 import com.example.horsegenetics.neoforge.data.StallRecord;
+import com.example.horsegenetics.neoforge.data.StasisBankIndex;
+import com.example.horsegenetics.neoforge.data.StasisSnapshot;
 import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
+import com.example.horsegenetics.neoforge.item.StasisChamberItem;
 import com.example.horsegenetics.neoforge.item.TicketItem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Inventory;
@@ -62,6 +71,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * the last place the horse was seen, then wait a few seconds for it to load and
  * act when it does ({@link EnderWhistleCalls#call}). Nothing is spent and
  * nothing is promised until the horse is actually in hand.
+ *
+ * <h2>Horses that are not entities at all</h2>
+ * A horse in a stasis chamber will never load, however long the button waits for
+ * it, and its last sighting is where it went <i>in</i> rather than where the jar
+ * ended up. So that case branches early into {@link #fromChamber}, which finds
+ * the chamber, takes the horse out of it <b>into its stall</b> and leaves the
+ * empty jar where the full one was. It is the same rules downstream - the same
+ * destination, the same live stall measure, the same ticket spend - because the
+ * only thing that differs is where the horse was before it travelled.
  */
 @EventBusSubscriber
 public final class StallRecall {
@@ -112,6 +130,14 @@ public final class StallRecall {
         Horse loaded = findLoaded(server, horseId);
         if (loaded != null) {
             send(player, loaded);
+            return;
+        }
+        // A horse in a chamber is not unloaded, it is not an entity at all, so
+        // no amount of pulling chunks in will ever find one. Asked before the
+        // sighting is read, because the sighting for a chambered horse is where
+        // it went IN - which is a place it is emphatically not.
+        if (HorseWhereabouts.get(server).inStasis(horseId)) {
+            fromChamber(player, horseId);
             return;
         }
         var seen = HorseWhereabouts.get(server).lookup(horseId);
@@ -174,43 +200,29 @@ public final class StallRecall {
             return;
         }
 
-        // Its own stall first; the holding pen only when it has none. A horse
-        // with a stall is never sent to the pen, even if a pen ticket is the
-        // cheaper spend - the stall is where that horse belongs.
-        StallData stalls = StallData.get(server);
-        StallRecord stall = stalls.forHorse(horse.getUUID());
-        PenRecord pen = stall == null ? stalls.penOf(player.getUUID()) : null;
-        if (stall == null && pen == null) {
+        Home home = homeOf(player, horse.getUUID());
+        if (home == null) {
             say(player, "That horse has no stall, and you have no holding pen. Bind a stall sign to "
                     + "it, or hang a holding pen sign, and try again.");
             return;
         }
-
-        ResourceKey<Level> destination = stall != null ? stall.dimension() : pen.dimension();
-        BlockPos signPos = stall != null ? stall.signPos() : pen.signPos();
-        ServerLevel target = server.getLevel(destination);
+        ServerLevel target = server.getLevel(home.dimension());
         if (target == null) {
-            say(player, stall != null
-                    ? "That stall's world is not loaded."
-                    : "Your holding pen's world is not loaded.");
+            say(player, home.worldGoneLine());
             return;
         }
 
-        ItemStack ticket = chooseTicket(player, from.dimension(), destination, stall == null);
+        ItemStack ticket = chooseTicket(player, from.dimension(), home.dimension(), home.pen());
         if (ticket == null) {
-            say(player, noTicketReason(from.dimension(), destination));
+            say(player, noTicketReason(from.dimension(), home.dimension()));
             return;
         }
 
-        Vec3 landing = TicketHandler.landingSpot(target, signPos, horse);
+        Vec3 landing = TicketHandler.landingSpot(target, home.signPos(), horse);
         if (landing == null) {
             // Nothing spent, nothing moved - see TicketHandler, where a guessed
             // landing spot once suffocated a horse inside a wall.
-            say(player, stall != null
-                    ? "There is nowhere in that stall this horse fits - check the sign is still up, "
-                            + "that the stall is still closed in, and that it is big enough."
-                    : "There is no room to stand in your holding pen - check the sign is still up and "
-                            + "that the pen has a floor and two blocks of headroom.");
+            say(player, home.noRoomLine());
             return;
         }
 
@@ -219,10 +231,62 @@ public final class StallRecall {
             ticket.shrink(1);
         }
         String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
-        say(player, stall != null
-                ? name + " is back in its stall."
-                : name + " is in your holding pen.");
+        say(player, name + home.arrivedLine());
 
+        creditTicket(player, ticket);
+    }
+
+    // ------------------------------------------------------------------
+    // Where home is
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Where a horse belongs, and the three sentences that go with it.</b>
+     *
+     * <p>Its own stall first; the holding pen only when it has none. A horse with
+     * a stall is never sent to the pen, even if a pen ticket is the cheaper spend
+     * - the stall is where that horse belongs.
+     *
+     * <p>The wording travels with the destination rather than being chosen again
+     * at each refusal, because there are now two callers - a horse standing in a
+     * field and a horse in a bottle - and "check the sign is still up" has to be
+     * the same advice from both.
+     */
+    private record Home(ResourceKey<Level> dimension, BlockPos signPos, boolean pen) {
+
+        String worldGoneLine() {
+            return pen ? "Your holding pen's world is not loaded." : "That stall's world is not loaded.";
+        }
+
+        String noRoomLine() {
+            return pen
+                    ? "There is no room to stand in your holding pen - check the sign is still up and "
+                            + "that the pen has a floor and two blocks of headroom."
+                    : "There is nowhere in that stall this horse fits - check the sign is still up, "
+                            + "that the stall is still closed in, and that it is big enough.";
+        }
+
+        String arrivedLine() {
+            return pen ? " is in your holding pen." : " is back in its stall.";
+        }
+    }
+
+    private static @Nullable Home homeOf(ServerPlayer player, UUID horseId) {
+        MinecraftServer server = player.level().getServer();
+        if (server == null) {
+            return null;
+        }
+        StallData stalls = StallData.get(server);
+        StallRecord stall = stalls.forHorse(horseId);
+        if (stall != null) {
+            return new Home(stall.dimension(), stall.signPos(), false);
+        }
+        PenRecord pen = stalls.penOf(player.getUUID());
+        return pen == null ? null : new Home(pen.dimension(), pen.signPos(), true);
+    }
+
+    /** The checklist tasks a spent ticket ticks off, whichever path spent it. */
+    private static void creditTicket(ServerPlayer player, ItemStack ticket) {
         HorseProgress.complete(player, ProgressTask.USE_TICKET);
         if (ticket.getItem() instanceof HoldingPenTicketItem) {
             HorseProgress.complete(player, ProgressTask.USE_PEN_TICKET);
@@ -236,6 +300,176 @@ public final class StallRecall {
                 }
             }
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Out of the bottle
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Send home a horse that is in a stasis chamber.</b> The chamber is found,
+     * the horse comes out of it directly into its stall, and the <b>empty jar is
+     * left where the full one was</b> - in the bank slot it was filed in, or in
+     * the pocket it was being carried in.
+     *
+     * <h2>Why it is not "release, then send"</h2>
+     * Because a release that is followed by a refusal is a horse standing in
+     * somebody's cellar with the bottle spent. Everything that can say no is asked
+     * <b>before</b> {@link HorseStasisHandler#place} is called: the chamber is
+     * found, the destination resolved, the horse {@link
+     * HorseStasisHandler#restore restored} but not put down, the stall measured
+     * against that horse's real box, and the ticket chosen. Any of those failing
+     * leaves the chamber exactly as full as it was, which is the same promise
+     * {@code StasisChamberItem.useOn} makes.
+     *
+     * <p>The horse has to exist to be measured, which is why the restore happens
+     * in the middle rather than at the end - {@code TicketHandler.landingSpot}
+     * sizes the room against the animal, and a shire does not fit where a
+     * Shetland does.
+     */
+    private static void fromChamber(ServerPlayer player, UUID horseId) {
+        MinecraftServer server = player.level().getServer();
+        if (server == null) {
+            return;
+        }
+        Chamber chamber = findChamber(server, player, horseId);
+        if (chamber == null) {
+            say(player, "That horse is in a stasis chamber, and the chamber is not on you or in one "
+                    + "of your banks. Bring it back, or let the horse out by hand.");
+            return;
+        }
+        StasisSnapshot snapshot = StasisChamberItem.snapshotOf(chamber.stack());
+        if (snapshot == null) {
+            say(player, "That chamber is empty.");   // the index was stale; the container wins
+            return;
+        }
+        if (HorseStasisHandler.alreadyLoose(server, snapshot)) {
+            say(player, snapshot.horseName() + " is already out in the world - that chamber is a copy.");
+            return;
+        }
+
+        Home home = homeOf(player, horseId);
+        if (home == null) {
+            say(player, "That horse has no stall, and you have no holding pen. Bind a stall sign to "
+                    + "it, or hang a holding pen sign, and try again.");
+            return;
+        }
+        ServerLevel target = server.getLevel(home.dimension());
+        if (target == null) {
+            say(player, home.worldGoneLine());
+            return;
+        }
+
+        Horse horse = HorseStasisHandler.restore(target, snapshot);
+        if (horse == null) {
+            say(player, snapshot.horseName() + " could not be let out - the chamber is unchanged.");
+            return;
+        }
+        if (!HorseOwnership.isOwner(horse, player.getUUID())) {
+            say(player, "That horse does not answer to you.");
+            return;
+        }
+        Vec3 landing = TicketHandler.landingSpot(target, home.signPos(), horse);
+        if (landing == null) {
+            say(player, home.noRoomLine());
+            return;
+        }
+        // The trip starts where the bottle is, not where the horse went in, and
+        // that is what the tier has to reach across.
+        ItemStack ticket = chooseTicket(player, chamber.dimension(), home.dimension(), home.pen());
+        if (ticket == null) {
+            say(player, noTicketReason(chamber.dimension(), home.dimension()));
+            return;
+        }
+
+        if (HorseStasisHandler.place(target, horse, landing, horse.getYRot()) == null) {
+            say(player, snapshot.horseName() + " could not be let out - the chamber is unchanged.");
+            return;
+        }
+        chamber.empty();
+        if (!player.getAbilities().instabuild) {
+            ticket.shrink(1);
+        }
+        target.sendParticles(ParticleTypes.PORTAL, landing.x, landing.y + 0.8, landing.z,
+                24, 0.4, 0.6, 0.4, 0.2);
+        target.playSound(null, landing.x, landing.y, landing.z, SoundEvents.ENDERMAN_TELEPORT,
+                SoundSource.NEUTRAL, 1.0F, 1.0F);
+        say(player, snapshot.horseName() + home.arrivedLine() + " The chamber is empty again.");
+        ActionTrace.log("stasis", snapshot.horseName() + " sent home out of a chamber "
+                + chamber.where() + " -> " + (home.pen() ? "holding pen" : "stall") + " at "
+                + home.signPos().toShortString());
+        creditTicket(player, ticket);
+    }
+
+    /**
+     * One chamber, wherever it is sitting - a slot of the player's inventory or a
+     * slot of one of their banks' grids. Both are {@link Container}s, so the only
+     * thing that genuinely differs is which world the jar is in and what to call
+     * the place in a trace line.
+     */
+    private record Chamber(Container container, int slot, ResourceKey<Level> dimension, String where) {
+
+        ItemStack stack() {
+            return container.getItem(slot);
+        }
+
+        /**
+         * <b>Leave the empty jar in there.</b> An empty chamber is a different
+         * item from a full one, so this is a swap in the slot rather than an edit
+         * - see {@code StasisChamberItem.withoutHorse}. The at-stud mark goes with
+         * the horse: an empty bottle is not standing at stud.
+         */
+        void empty() {
+            ItemStack emptied = StasisChamberItem.withoutHorse(stack());
+            emptied.remove(ModDataComponents.STASIS_AT_STUD.get());
+            container.setItem(slot, emptied);
+        }
+    }
+
+    /**
+     * <b>Find the jar.</b> The player's own pockets first, which costs a walk of
+     * an inventory and touches no disk; then the one bank {@link StasisBankIndex}
+     * says has that horse filed in it, which costs exactly one chunk load.
+     *
+     * <p>The index is re-checked against the real grid rather than trusted, for
+     * the reason its own doc gives: a stale row costs a wasted look and finds
+     * nothing, which is the right way round.
+     */
+    private static @Nullable Chamber findChamber(MinecraftServer server, ServerPlayer player,
+                                                 UUID horseId) {
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            StasisSnapshot snapshot = StasisChamberItem.snapshotOf(inventory.getItem(slot));
+            if (snapshot != null && horseId.equals(snapshot.horseId())) {
+                return new Chamber(inventory, slot, player.level().dimension(), "in your pack");
+            }
+        }
+
+        StasisBankIndex index = StasisBankIndex.get(server);
+        StasisBankIndex.Bank record = index.bankHolding(player.getUUID(), horseId);
+        if (record == null) {
+            return null;
+        }
+        ServerLevel level = server.getLevel(record.dimension());
+        if (level == null) {
+            index.forget(record.dimension(), record.pos());
+            return null;
+        }
+        // Loads the chunk - the one expensive thing here, spent only on a bank
+        // that has said it is holding this exact horse.
+        if (!(level.getBlockEntity(record.pos()) instanceof HorseStasisBankBlockEntity bank)) {
+            index.forget(record.dimension(), record.pos());
+            return null;
+        }
+        Container chambers = bank.chambers();
+        for (int slot = 0; slot < chambers.getContainerSize(); slot++) {
+            StasisSnapshot snapshot = StasisChamberItem.snapshotOf(chambers.getItem(slot));
+            if (snapshot != null && horseId.equals(snapshot.horseId())) {
+                return new Chamber(chambers, slot, record.dimension(),
+                        "in the bank at " + record.pos().toShortString());
+            }
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------

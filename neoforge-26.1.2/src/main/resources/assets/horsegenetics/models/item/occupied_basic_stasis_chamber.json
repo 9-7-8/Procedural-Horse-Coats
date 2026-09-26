@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "horsegenetics:item/basic_stasis_chamber"
+    "layer0": "horsegenetics:item/occupied_basic_stasis_chamber"
   }
 }

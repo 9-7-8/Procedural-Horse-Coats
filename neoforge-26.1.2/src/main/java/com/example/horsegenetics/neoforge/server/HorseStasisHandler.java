@@ -168,6 +168,27 @@ public final class HorseStasisHandler {
      *         the chamber full rather than lose the horse.
      */
     public static @Nullable Horse release(ServerLevel level, Vec3 pos, float yRot, StasisSnapshot snapshot) {
+        Horse horse = restore(level, snapshot);
+        return horse == null ? null : place(level, horse, pos, yRot);
+    }
+
+    /**
+     * <b>The horse a chamber holds, built but not put anywhere.</b> It belongs to
+     * {@code level} and carries its whole record, but nothing in the world can
+     * see it yet and {@link #place} has still to be called.
+     *
+     * <p>Split out of {@link #release} for the browser's <i>Send home</i> button,
+     * which has to <b>measure the horse before it knows where to put it</b>:
+     * {@code TicketHandler.landingSpot} sizes a stall against the animal's own
+     * bounding box, and a draught horse does not fit where a pony does. Releasing
+     * it somewhere first and teleporting it afterwards would mean a real horse
+     * standing in the room with the bank for a tick - and, when the stall turns
+     * out to be full, a horse let out of a bottle nobody asked to open.
+     *
+     * @return {@code null} if the tag could not be read, in which case nothing has
+     *         happened at all and the caller must leave the chamber full
+     */
+    public static @Nullable Horse restore(ServerLevel level, StasisSnapshot snapshot) {
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.LOAD);
         if (horse == null) {
             return null;
@@ -180,6 +201,17 @@ public final class HorseStasisHandler {
                     snapshot.horseName(), unreadable);
             return null;
         }
+        return horse;
+    }
+
+    /**
+     * <b>Put a {@link #restore}d horse down.</b> Everything that makes a chambered
+     * horse a live one again, and the half that must not happen until the spot is
+     * known to be good.
+     *
+     * @return the horse, or {@code null} if the level refused it
+     */
+    public static @Nullable Horse place(ServerLevel level, Horse horse, Vec3 pos, float yRot) {
         // The tag's position is wherever it was captured, which may be a world
         // away. Where the chamber was opened is where the horse wakes up.
         horse.snapTo(pos.x, pos.y, pos.z, yRot, 0.0F);

@@ -42,6 +42,11 @@ import java.util.UUID;
  * answer - no, none of your banks can help - is a walk of a short list in memory
  * and <b>no chunk is touched at all</b>.
  *
+ * <p>{@link Bank#held} is that same trick asked the other way round - <i>which
+ * horses are in there</i> - published on the same two occasions, for
+ * {@link #bankHolding}. It is a list rather than a flag because the question has
+ * a subject; everything else about it is the armed flag's reasoning verbatim.
+ *
  * <p>A chunk is loaded only for a bank this index says is armed, which is the
  * moment a horse is about to die and there is genuinely a bottle waiting for it.
  * That is a price worth paying once; paying it to find out the answer is no is
@@ -65,16 +70,23 @@ public final class StasisBankIndex extends SavedData {
      * @param owner whoever placed it, or claimed it by opening it while it was
      *              unclaimed; {@code null} for a bank nobody has done either to
      * @param armed it held an empty emergency chamber when it was last looked at
+     * @param held  the horses filed here when it was last looked at - see
+     *              {@link #bankHolding}
      */
     public record Bank(@Nullable UUID owner, ResourceKey<Level> dimension, BlockPos pos,
-                       boolean armed) {
+                       boolean armed, List<UUID> held) {
+        public Bank {
+            held = held == null ? List.of() : List.copyOf(held);
+        }
+
         public static final Codec<Bank> CODEC = RecordCodecBuilder.create(i -> i.group(
                 UUIDUtil.CODEC.optionalFieldOf("owner").forGetter(b -> Optional.ofNullable(b.owner())),
                 ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(Bank::dimension),
                 BlockPos.CODEC.fieldOf("pos").forGetter(Bank::pos),
-                Codec.BOOL.optionalFieldOf("armed", false).forGetter(Bank::armed)
-        ).apply(i, (owner, dimension, pos, armed) ->
-                new Bank(owner.orElse(null), dimension, pos, armed)));
+                Codec.BOOL.optionalFieldOf("armed", false).forGetter(Bank::armed),
+                UUIDUtil.CODEC.listOf().optionalFieldOf("held", List.of()).forGetter(Bank::held)
+        ).apply(i, (owner, dimension, pos, armed, held) ->
+                new Bank(owner.orElse(null), dimension, pos, armed, held)));
     }
 
     public static final Codec<StasisBankIndex> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -123,15 +135,16 @@ public final class StasisBankIndex extends SavedData {
      * loading a bank must not un-claim it.
      */
     public void record(@Nullable UUID owner, ResourceKey<Level> dimension, BlockPos pos,
-                       boolean armed) {
+                       boolean armed, List<UUID> held) {
         String k = key(dimension, pos);
         Bank before = banks.get(k);
         UUID keep = owner != null ? owner : (before == null ? null : before.owner());
         if (before != null && before.armed() == armed
-                && java.util.Objects.equals(before.owner(), keep)) {
+                && java.util.Objects.equals(before.owner(), keep)
+                && before.held().equals(held)) {
             return;
         }
-        banks.put(k, new Bank(keep, dimension, pos.immutable(), armed));
+        banks.put(k, new Bank(keep, dimension, pos.immutable(), armed, held));
         setDirty();
     }
 
@@ -167,5 +180,34 @@ public final class StasisBankIndex extends SavedData {
         }
         java.util.Collections.reverse(out);
         return out;
+    }
+
+    /**
+     * <b>Which of this player's banks has that horse filed in it</b>, or
+     * {@code null} if none of them says so.
+     *
+     * <p>The browser's <i>Send home</i> button is what this is for: a horse in a
+     * chamber has no entity to reach for and its last sighting is where it went
+     * <i>in</i>, not where the bottle ended up, so without this the only way from
+     * a row in a table to the jar holding it would be to load every bank the
+     * player owns and look. {@link Bank#held} is the same trick as
+     * {@link Bank#armed} pointed at a different question: the bank publishes what
+     * it is holding every time its grid changes, so the usual answer - no, not in
+     * any of them - is a walk of a short list in memory and <b>no chunk is
+     * touched at all</b>, and the answer yes names exactly one chunk to load.
+     *
+     * <p>Like the armed flag, this is <b>last-known and the caller re-reads the
+     * real container</b>: a bank that says it holds a horse may have been emptied
+     * by something that did not go through its own {@code setChanged}, and the
+     * only honest check is opening the grid and looking.
+     */
+    public @Nullable Bank bankHolding(UUID owner, UUID horse) {
+        Bank found = null;
+        for (Bank bank : banks.values()) {
+            if (owner.equals(bank.owner()) && bank.held().contains(horse)) {
+                found = bank;   // newest wins, as armedBanksOf prefers it
+            }
+        }
+        return found;
     }
 }
