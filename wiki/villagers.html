@@ -603,6 +603,19 @@
         for the thing that count is counting.
     </p>
     <p>
+        Those are <em>his</em> figures. <code>buyPriceFor</code> takes a
+        <code>rate</code> &mdash; what this buyer pays over the odds &mdash; and the
+        cowboy's is one. A <a href="#trader">wandering trader</a> pays double. Nothing is
+        capped: the clamp to one stack that used to sit here was the <em>sell</em> side's
+        constraint borrowed where it does not apply, since emeralds paid <b>to</b> a
+        player go into an inventory while emeralds a player is <b>charged</b> are an
+        <code>ItemCost</code> a merchant screen cannot draw above 64. (Owner, 2026-09-26:
+        &ldquo;don't cap either&rdquo;.) That is also why <code>CowboySale.pay</code> now
+        hands the money over in batches of 64 &mdash; a single <code>ItemStack</code> of
+        128 emeralds is not a thing, and it would have been silently trimmed on the way
+        into the inventory.
+    </p>
+    <p>
         <strong>This is not &sect;4 being reversed</strong>, and the difference is the
         whole reason it is built this way. A price that paid more for <em>rare</em> or for
         <em>good</em> genes would be a rarity tier written at the counter instead of on
@@ -741,6 +754,51 @@
     <a href="#restock">restocking</a> is for.
 </p>
 
+
+<h2 id="trader">The wandering trader will take one too, at double</h2>
+
+<p>
+    <strong>Crouch and click a wandering trader while leading a horse and he buys
+    it</strong>, for twice what the cowboy would pay. An upright click is his ordinary
+    shop and only quotes a price, exactly as the cowboy's does and for the same reason
+    (&sect;<a href="#selling">above</a>): an ordinary right-click on a trader is a click
+    people make without looking, and one that sold whatever was tied behind them would
+    part a player from a mare they were keeping with no way back.
+    (Owner, 2026-09-26: &ldquo;wandering traders buy horses at double the rate of a
+    cowboy.&rdquo;)
+</p>
+
+<div class="note">
+    <p class="label">Why he pays over the odds</p>
+    <p>
+        The cowboy is a fixture. He is at the barn, he will be there tomorrow, and his
+        string is capped &mdash; so his price is the price and you can take it or come
+        back next week. The trader is passing through and <strong>will not come
+        again</strong>, has no string to fill and no reputation to keep. The premium is
+        for catching him, and it is on the man rather than the animal, which is the same
+        split <code>emeraldsFor(record, arcane)</code> already makes and the one &sect;4
+        of the <a href="philosophy.html">philosophy</a> requires: nothing in the model
+        scores a horse.
+    </p>
+</div>
+
+<p>
+    <strong>The horse is tied behind him and walks off.</strong> He has no herd, no brand
+    and nothing to re-list it from &mdash; he is not a dealer &mdash; so the animal goes
+    on a rope exactly as his trader llamas already do, and leaves the world when he does.
+    <strong>You cannot buy it back.</strong> That is the risk that makes the better price
+    a decision rather than free money: the cowboy's stock stands in a pen you can walk to
+    with emeralds in hand, and this horse is gone.
+</p>
+
+<p>
+    He refuses a horse with no papers, a foal, and anything that is not yours. There is
+    no capacity limit, because there is nothing to fill and he removes himself. The horse
+    is left untamed, unowned, out of whatever herd it was in and marked persistent so it
+    does not quietly despawn on the walk. See <code>server/TraderSale</code>; the shared
+    half &mdash; finding the led horse, handing back the tack, counting out the emeralds
+    &mdash; is reused from <code>server/CowboySale</code> rather than copied.
+</p>
 
 <h2 id="barn">The barn, and how it lands on the outskirts</h2>
 
@@ -1975,7 +2033,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Four equestrians replaced one horseman, each with its own POI and a five-tier ladder, and <strong>none has been met in a world</strong> &mdash; so the failures to hunt are a post that never hands out its job, a Master still offering Novice trades, and a scientist whose breed eggs ignore the local cowboy's region; nobody has yet tried to rob one and been kicked for it; and since 2026-09-26 the cowboy <strong>buys</strong> as well as sells, on a gesture nobody has made.</p>
+    <p>Four equestrians replaced one horseman, each with its own POI and a five-tier ladder, and <strong>none has been met in a world</strong> &mdash; so the failures to hunt are a post that never hands out its job, a Master still offering Novice trades, and a scientist whose breed eggs ignore the local cowboy's region; nobody has yet tried to rob one and been kicked for it; and since 2026-09-26 the cowboy <strong>buys</strong> as well as sells, on a gesture nobody has made &mdash; as, since the same day, does the wandering trader, at double the price and with the horse leashed away where it cannot be bought back.</p>
 </div>
 
 <h3 id="verify-selling">Selling the cowboy a horse (2026-09-26, NOT played)</h3>
@@ -2006,6 +2064,39 @@
     <li>Watch whether buy-low-sell-high works across <em>two</em> dealers. The refusal is
         per-cowboy by design; two barns within reach of each other may be a loop worth
         closing later.</li>
+</ul>
+
+<h3 id="verify-trader">Selling a wandering trader a horse (2026-09-26, NOT played)</h3>
+<p>
+    Same gesture, a different counterparty, and the first place a payout can exceed one
+    stack. <a href="#trader">&sect;The wandering trader</a> is the page.
+</p>
+<ul>
+    <li><strong>The gesture, again.</strong> Upright click opens his ordinary shop and
+        quotes nothing unless you are leading a horse; crouch-click sells. Check the
+        upright click <em>never</em> sells, and that the crouch-click does not <em>also</em>
+        open his trade screen on top of the sale &mdash; the handler cancels the event to
+        stop that, and a screen appearing over a completed sale is the visible symptom of
+        it not working.</li>
+    <li><strong>Double, and uncapped.</strong> Sell one horse to a cowboy and an
+        equivalent one to a trader and check the trader's figure is twice the cowboy's.
+        Then find a heavily-loaded horse whose doubled price clears 64 and <strong>count
+        the emeralds</strong>: they must arrive as more than one stack and total the
+        quoted number. This is the case <code>CowboySale.pay</code> was rewritten for, and
+        a short payout is the failure it is guarding against.</li>
+    <li><strong>The horse leaves on a rope.</strong> It should be leashed to him, untamed
+        and unowned, and should follow him as he wanders. Then the part no test can reach:
+        when he despawns, <strong>the horse must go with him and not be left standing
+        there</strong> as an unowned persistent animal accumulating in the world. Watch one
+        out, or chunk-unload and come back.</li>
+    <li><strong>The three refusals</strong>, each with its own line: no papers, a foal, and
+        a horse that is not yours.</li>
+    <li><strong>Nothing regressed at the cowboy.</strong> His price must be
+        <em>unchanged</em> &mdash; the rate parameter defaults to one, but the cap coming
+        off <code>buyPriceFor</code> could move a very loaded horse that was previously
+        clamped to 64. That would show up as the cowboy suddenly paying more than he used
+        to for the best horses, which is a real behaviour change and may want its own
+        decision.</li>
 </ul>
 
 <h3 id="robbery-0924">Robbing the cowboy (2026-09-24, NOT played)</h3>

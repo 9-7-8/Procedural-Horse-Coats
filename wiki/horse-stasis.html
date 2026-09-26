@@ -254,7 +254,8 @@
     Above it is a filter box, and <strong>it takes the same query language as the Horse
     Browser's <em>My horses</em> table</strong> (the <kbd>H</kbd> screen) &mdash; see
     <a href="horse-browser.html">the browser's own page</a> for the full language.
-    <code>mare</code>, <code>gen&gt;2</code>, <code>gene:SB1</code>, <code>-lethal</code>, a bare
+    <code>mare</code>, <code>gen&gt;2</code>, <code>gene:SB1</code>, <code>pull&gt;=6</code>,
+    <code>-lethal</code>, a bare
     word for a name or a breed; terms are ANDed and a <code>-</code> negates one. A bank you can
     ask <em>which of these two hundred are mares carrying sabino</em> is the reason the tab
     exists &mdash; and the deeper the grid got, the more it is the reason, since twenty-three
@@ -2017,8 +2018,12 @@
         the roster never arrived - the screen asks for it on open, so watch for that.</li>
     <li><strong>The search is the browser's search.</strong> <code>mare</code>,
         <code>gen&gt;2</code>, <code>arabian</code>, <code>gene:SB1</code>,
-        <code>-lethal</code> each cut the list the way the <kbd>H</kbd> screen cuts it for the
-        same horses, and the corner count turns into <em>3 of 9</em>.</li>
+        <code>pull&gt;=6</code>, <code>-lethal</code> each cut the list the way the
+        <kbd>H</kbd> screen cuts it for the
+        same horses, and the corner count turns into <em>3 of 9</em>. The bank takes
+        <code>HorseQuery</code> verbatim, so a term added for the browser works here
+        without anything being wired up &mdash; <code>pull</code> is the first one to test
+        that claim.</li>
     <li><strong>The Basic chamber never comes back from a search</strong>, not even for its own
         name, and the list says how many rows it could not reach. <strong>Fail:</strong> a Basic
         horse appearing in a filtered list is the tier ladder not being enforced; a Basic horse

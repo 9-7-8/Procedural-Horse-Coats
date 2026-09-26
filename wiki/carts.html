@@ -207,6 +207,29 @@
         horse pays for <strong>all</strong> of it &mdash; the loads of every
         vehicle in the chain add up on the animal at the front.</li>
 </ul>
+<div class="note">
+    <p class="label">How you actually couple two carts</p>
+    <p>
+        R hitches the nearest cart to <strong>you, or to whatever you are sitting
+        on</strong> &mdash; and that second half is the whole trick. To put cart
+        B behind cart A:
+    </p>
+    <ol>
+        <li>Hitch cart A to the horse as usual.</li>
+        <li><strong>Sit on cart A</strong> (right-click it).</li>
+        <li>Park cart B within about two blocks of cart A and <strong>press
+            R</strong>. B is now pulled by A rather than by you.</li>
+    </ol>
+    <p>
+        Which means <strong>the lead cart has to be one you can sit on</strong>:
+        the wagon, the reaper, the supply cart and the animal cart have seats,
+        and the plow and the seed drill do not, so nothing can be coupled behind
+        those two. The <a href="#reaper">reaper</a> and a
+        <a href="#supply">supply cart</a> are the pairing this exists for, and
+        the reaper needs a rider anyway &mdash; you are already in the seat the
+        coupling is made from.
+    </p>
+</div>
 <p>
     It comes unhitched on its own when the cart is dragged too far from the
     puller, when a block comes between the two &mdash; drive between two trees
@@ -392,20 +415,30 @@
     trapdoor clunk when it is.
 </p>
 <p>
-    It cuts what a scythe would: <strong>crops, grass and dry grass, ferns,
+    It cuts what a scythe would: <strong>ripe crops, grass and dry grass, ferns,
     bushes, dead bushes, flowers and saplings</strong>, and anything else tagged
     as harvestable. Everything drops on the ground where it fell &mdash; the
-    reaper has no inventory of its own, so bring a
-    <a href="#supply">supply cart</a> behind it if you do not fancy walking the
-    field twice.
+    reaper has no inventory of its own, so <strong>hitch a
+    <a href="#supply">supply cart</a> behind it</strong> and the cart gathers the
+    swath as you cut it (&sect;9). Without one you are walking the field twice.
 </p>
-<p class="note warn">
-    <span class="label">It does not check ripeness</span>
-    The reaper cuts a crop block because it is a crop, not because it is ready.
-    Drive one over a field you planted this morning and you will harvest seedlings.
-    Recorded in <a href="known-gaps.html">known gaps</a>; until it is fixed, the
-    <a href="#drill">seed drill</a> and the reaper want to be run in that order
-    and not the other way round.
+<p>
+    <strong>It takes a crop only when the crop is ready.</strong> A wheat plant
+    at its last growth stage is cut; the same plant this morning is driven past
+    and left standing, so you may run the reaper over a field that is only
+    partly grown and come back for the rest. Anything <em>without</em> an age to
+    be at &mdash; grass, flowers, saplings, bushes &mdash; is cut on sight,
+    because "is it ripe" is not a question about a dandelion. The same test
+    reads any modded crop's growth stage without that mod knowing anything about
+    this one.
+</p>
+<p class="note">
+    <span class="label">Melon and pumpkin stalks are left alone</span>
+    They are in the crop tag, so the reaper used to tear them out &mdash; and the
+    melon itself is <em>not</em> in the tag, so it cut down the vine and left the
+    fruit sitting there, destroying the one part of the field you were growing.
+    A stem is the plant rather than the harvest, so the cutting bar now drives
+    past it. Pick the melons yourself.
 </p>
 <p>
     <strong>Somebody has to be sitting on it.</strong> Right-click to climb on;
@@ -456,6 +489,26 @@
     practice, because it is the one you actually fill to the top. A full supply
     cart asks half again what an empty one does, which puts it level with a plow.
     It will also fly a <a href="#banners">banner</a>.
+</p>
+<p class="note">
+    <span class="label">Behind a reaper, it gleans</span>
+    Hitch a supply cart <strong>directly behind a <a href="#reaper">reaper</a></strong>
+    and it picks up everything lying within about two blocks of it as it goes,
+    which is the swath the reaper has just cut. That turns harvesting from two
+    trips into one, and it is the reason the reaper has no inventory of its own:
+    the cart is the inventory.
+    <br>
+    <strong>Only in that combination.</strong> A supply cart pulled by a horse,
+    by you, or by any other vehicle picks up nothing at all &mdash; a cart that
+    hoovered up every drop wherever it went would be a cart you could not park
+    beside your things, and every death near one would feed it your inventory.
+    The gathering belongs to the pairing, not to the cart. A third vehicle
+    further down the train is being pulled by the cart rather than by the
+    reaper, so it does nothing either.
+    <br>
+    When the cart fills, the rest stays on the ground: you come back to a full
+    cart and a field that is not clear, which is the readable version of running
+    out of room.
 </p>
 
 <h2 id="animals">10. The animal cart</h2>
@@ -1083,16 +1136,67 @@ node neoforge-26.1.2/tools/check-recipes.mjs</code></pre>
 
 <h3 id="gap-286" data-check-kind="open-gap">Open check 286</h3>
 <div class="open-check">
-<strong>Open, found 2026-09-19: the reaper does not check whether a crop is
-    ripe.</strong> <code>ReaperCartEntity.harvest</code> tests the block against
-    <code>horsegenetics:reaper_harvestable</code>, which includes
-    <code>#minecraft:crops</code> &mdash; a tag on the block, with nothing in it about age. So a
-    reaper drawn over a field planted this morning destroys the seedlings and drops one seed
-    each, and the item tooltip's &ldquo;harvests mature crops&rdquo; is wrong. The fix is a
-    <code>CropBlock.isMaxAge</code> test before the break, with the non-crop entries of the tag
-    (grass, flowers, saplings) exempt from it since they have no age to be at. It was left alone
-    in the sitting that found it because the tag is shared with the plow's clearing lists and
-    the change wants its own look. <a href="carts.html#reaper">Carts &sect;7</a>.
+<strong>Written 2026-09-26, never played: the reaper's ripeness gate.</strong>
+    <code>ReaperCartEntity.cuttable</code> now refuses a crop that is not at its last age,
+    refuses a melon or pumpkin stem outright, and cuts anything with no age property on sight.
+    Plant a field, drive over it half-grown, and check the seedlings are <em>still there</em>
+    and the ripe rows are gone; then check a melon patch keeps its stems.
+    <strong>One correction to the note this replaces:</strong> it claimed the tag was shared
+    with the plow's clearing lists and that the change therefore wanted its own look. It is
+    not &mdash; <code>reaper_harvestable</code> is read from exactly one line
+    (<code>ReaperCartEntity</code>), and the plow reads three separate
+    <code>plow_breakable/*</code> tags. Do not let that sentence stop the next change either.
+    <a href="carts.html#reaper">Carts &sect;7</a>.
+</div>
+
+<h3 id="gap-305" data-check-kind="open-gap">Open check 305</h3>
+<div class="open-check">
+<strong>Written 2026-09-26, never played: the reaper no longer mows down fence
+    gates.</strong> <code>reaper_harvestable</code> included
+    <code>#minecraft:maintains_farmland</code>, which in vanilla holds
+    <code>#minecraft:fence_gates</code> and <code>moving_piston</code> as well as the attached
+    melon and pumpkin stems &mdash; so a reaper drawn along a fence line was destroying the
+    gates in it, silently and with no way to tell what had happened. The tag entry is gone and
+    nothing was lost with it (everything else it contributed is already in
+    <code>#minecraft:crops</code> or <code>#minecraft:flowers</code>). <strong>Drive a reaper
+    past a fence gate and confirm it survives</strong>, and that a field beside a fence still
+    cuts normally. Found while fixing check 286, not reported from play, so it may have been
+    eating gates since the carts landed. <a href="carts.html#reaper">Carts &sect;7</a>.
+</div>
+
+<h3 id="gap-306" data-check-kind="open-gap">Open check 306</h3>
+<div class="open-check">
+<strong>Written 2026-09-26, never played: a supply cart behind a reaper gathers the
+    swath.</strong> <code>SupplyCartEntity.pulledTick</code> picks up loose items within two
+    blocks, but <em>only</em> while its puller is a <code>ReaperCartEntity</code>. Two things to
+    check and they fail in opposite directions: that the pairing <strong>does</strong> gather
+    (hitch cart behind reaper &mdash; see &sect;3 for how to couple them &mdash; cut a field,
+    and the drops should end up in the cart rather than on the ground), and that a supply cart
+    in <em>any</em> other arrangement gathers <strong>nothing</strong>. Park one on a pile of
+    your own items, pull it about with a horse and on foot, and confirm the pile is untouched:
+    a cart that eats your things wherever it goes is far worse than one that never gleans.
+    Also worth one look at a full cart &mdash; the overflow is meant to stay on the ground.
+    <a href="carts.html#supply">Carts &sect;9</a>.
+</div>
+
+<h3 id="gap-307" data-check-kind="open-gap">Open check 307</h3>
+<div class="open-check">
+<strong>Written 2026-09-26, never played, and not a proven root cause: carts sinking into
+    the ground on a slope.</strong> Reported from play &mdash; a reaper &ldquo;kept getting
+    stuck underground whenever we went up or down an elevation level&rdquo;. A hitched cart has
+    no vertical steering at all: <code>pulledTick</code> zeroes the vertical component of the
+    target vector whenever the puller is on the ground, so nothing ever pulls a cart <em>up</em>
+    and a cart that gets into terrain stays in it.
+    <code>AbstractDrawnEntity.climbOut</code> now lifts a cart whose box is inside blocks, by
+    the least that frees it, up to 1.25 blocks.
+    <strong>This treats the symptom.</strong> The burial was not reproduced from the code, so
+    the fix is a recovery rather than a diagnosis &mdash; drive a cart up and down a hillside
+    and over one-block steps and see whether it still buries. If it does, the next suspect is
+    <code>CartInterpolationHandler</code>, which applies its final lerped position with a bare
+    <code>setPos</code> and no collision test. Also watch that the recovery does not make a cart
+    parked against a fence or a wall bob upward &mdash; the box is deflated before the test
+    precisely to stop that, and that guard is untested.
+    <a href="carts.html#hitching">Carts &sect;3</a>.
 </div>
 </section>
 

@@ -3185,6 +3185,7 @@ wiki/villagers.html#tack-tint	all	Dyed tack, on a ladder you can see
 wiki/villagers.html#three-connectors	all	Why three, and what one was costing
 wiki/villagers.html#trade-filter	all	The filter box, on every cowboy's window
 wiki/villagers.html#trade-table	all	The four trade tables
+wiki/villagers.html#trader	all	The wandering trader will take one too, at double
 wiki/villagers.html#trades	all	What they sell
 wiki/villagers.html#verified	all	Verified
 wiki/villagers.html#workstation	all	Five posts, one texture

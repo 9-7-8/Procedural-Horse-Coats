@@ -1,0 +1,237 @@
+2026-09-26 — four asks from the field, and two bugs nobody reported
+
+
+    A queue session. Four requests arrived one after another while work was
+    already running, none of them related, and all four shipped. Nothing was
+    played: everything below is build-green and written up as unplayed.
+
+        1. the reaper should only break fully-grown crops, and ignore
+           melon/pumpkin stalks
+        2. a supply cart behind a reaper should pick up what it cuts
+        3. how do you attach two carts together?
+        4. the reaper kept getting stuck underground on elevation changes
+        5. you should be able to search on pulling ability
+        6. filter the Genes tab to specific genes, remembered between openings
+        7. wandering traders buy horses at double the rate of a cowboy
+
+    Two of these turned out to be documentation failures rather than code
+    failures, and two turned up defects that were never reported because they
+    are invisible when they happen.
+
+
+1. THE REAPER, AND THE FENCE GATES NOBODY MISSED
+
+    The ripeness bug was already known — carts.html open check 286, found
+    2026-09-19 — and its note prescribed the fix. Two things in that note were
+    wrong, and one of them had been the reason it was left alone:
+
+        "the tag is shared with the plow's clearing lists and the change wants
+         its own look"
+
+    It is not shared. horsegenetics:reaper_harvestable is read from exactly one
+    line (ReaperCartEntity:152) and the plow reads three separate
+    plow_breakable/* tags. A sentence written to defer a change had deferred it
+    for a week on a fact that was never true. Verified by grep before writing
+    anything, which is the only reason it was caught.
+
+    The real find was underneath. The tag included #minecraft:maintains_farmland,
+    and in 26.1.2 that vanilla tag contains:
+
+        pumpkin_stem, attached_pumpkin_stem, melon_stem, attached_melon_stem,
+        beetroots, carrots, potatoes, torchflower_crop, torchflower,
+        pitcher_crop, wheat, moving_piston, #minecraft:fence_gates
+
+    #minecraft:fence_gates. THE REAPER HAS BEEN DESTROYING FENCE GATES it was
+    driven past, since the carts landed, silently — a broken gate logs nothing
+    and looks like something else did it. Nobody reported it because there is no
+    way to notice it as a reaper problem. Removing the tag entry costs nothing:
+    everything else it contributed is already in #minecraft:crops or
+    #minecraft:flowers.
+
+    The ripeness gate itself is ReaperCartEntity.cuttable, three answers for the
+    three kinds of thing in the tag:
+
+        stem or attached stem  -> never cut
+        CropBlock              -> only at isMaxAge
+        has an "age" property  -> only at its maximum   (pitcher crop, modded)
+        anything else          -> cut on sight          (grass, flowers, saplings)
+
+    The stem case has to be explicit and first, because StemBlock extends
+    VegetationBlock and NOT CropBlock — so the generic age test would have
+    happily cut a fully-grown stem, which is the exact thing being fixed. The
+    owner's reasoning for ignoring stems is better than "it is unripe": the
+    melon itself is not in the tag, so the reaper was cutting down the vine and
+    leaving the fruit — destroying the one part of the field you were growing.
+
+    The item tooltip has said "Harvests mature crops it is drawn over" the whole
+    time. It is now true.
+
+
+2. THE SUPPLY CART GLEANS, AND ONLY BEHIND A REAPER
+
+    SupplyCartEntity.pulledTick picks up ItemEntities within two blocks, gated
+    on getPulling() instanceof ReaperCartEntity.
+
+    The gate is the design, not an optimisation. A cart that hoovered up every
+    drop wherever it went would be a cart you cannot park next to your things,
+    and every death near one would feed it your inventory. The behaviour belongs
+    to the PAIRING — reaper in front, cart behind — and so it is tested on the
+    puller rather than granted to the cart. A third vehicle further down a train
+    is pulled by the cart rather than the reaper, so it does nothing.
+
+    Overflow stays on the ground: you come back to a full cart and a field that
+    is not clear, which is the readable version of running out of room.
+
+
+3. "HOW DO YOU ATTACH TWO CARTS" WAS A DOCUMENTATION BUG
+
+    It already worked. carts.html §3 said "Hitch a second vehicle to the back of
+    the first and you have a train" and never said how, which is not an
+    instruction.
+
+    The mechanism is in ActionKeyPayload: R hitches the nearest cart to the
+    player OR TO THE PLAYER'S VEHICLE. So a train is made by sitting on the lead
+    cart and pressing R. Two consequences worth writing down, and now written:
+
+      - the lead cart must be one you can sit on, so the plow and the seed drill
+        can never head a train;
+      - the reaper needs a rider anyway, so for the reaper + supply cart pairing
+        you are already sitting in the seat the coupling is made from.
+
+
+4. THE UNDERGROUND CART — A RECOVERY, NOT A DIAGNOSIS
+
+    Not reproduced from the code, and the writeup says so. What WAS confirmed is
+    a real defect one level up: a hitched cart has no vertical steering at all.
+    pulledTick zeroes the vertical component of the target vector whenever the
+    puller is on the ground (AbstractDrawnEntity:164-166) — deliberately, it is
+    what stops a jumping horse yanking the cart into the air — with the
+    consequence that NOTHING EVER PULLS A CART UP. Once its box is inside
+    terrain the only exits are the 1.2-block step assist, which needs a
+    horizontal collision to fire, and the hitch breaking.
+
+    A first theory was wrong and was dropped: that tick()'s gravity accumulator
+    (deltaMovement.y -= 0.08 every tick, X and Z hard-zeroed) was never reset.
+    Reading the decompiled Entity.move settled it — vertical collision does not
+    zero deltaMovement there, but it calls updateEntityMovementAfterFallOn,
+    whose default Block implementation multiplies Y by zero. Gravity is reset on
+    landing. Checking beat guessing by a wide margin; the "fix" for that theory
+    would have been a no-op at best.
+
+    AbstractDrawnEntity.climbOut lifts a cart whose box intersects blocks, by
+    the smallest step that frees it, up to 1.25. The box is deflated 1/16 first
+    so that a cart resting against a fence — a legitimate touch — is not read as
+    stuck and set bobbing. That guard is itself untested.
+
+    If it still buries after this, the next suspect is named on the check:
+    CartInterpolationHandler applies its final lerped position with a bare
+    setPos and no collision test.
+
+
+5. PULLING ABILITY IS A COLUMN AND A SEARCH TERM
+
+    pull is now a HorseQuery key with draft and draught as aliases, and
+    Sort.PULL is a sortable column in My horses.
+
+    The interesting part was that HorseListing — the row model the whole filter
+    language reads — resolved traits.pull() and then THREW IT AWAY, keeping only
+    speed/health/jump/scale. So "search on pulling ability" was one component on
+    a record away the whole time. No packet change: HorseRosterPayload sends the
+    genetic code and the client rebuilds the listing, so traits are recomputed
+    client-side and pull came along for free.
+
+    TOTAL_WEIGHT in HorseBrowserScreen is hand-summed from the COLUMNS weights
+    and had to move 626 -> 656. It is commented as a known trap and it is the
+    second time it has been paid; worth deriving one day.
+
+
+6. THE GENES TAB PINS TO NAMED LOCI
+
+    "just show me what alleles the horse has for Flight, Healer, Waterborn."
+
+    GeneFilterPicker, built like SavedSearchPicker and driven by the existing
+    TypeAhead. Multi-select, so a click toggles and the menu STAYS OPEN — three
+    genes is three clicks, not three round trips, which is the one way this
+    differs from every other dropdown in the mod.
+
+    Three decisions worth keeping:
+
+      - A pin overrides both existing rules INCLUDING the extension/agouti/shade
+        exemption. Being asked for Flight and given the base colour as well is
+        the filter declining to do the one thing it was asked; the base colour
+        is on the Coat tab anyway.
+      - The offered list is RosterGenetics.genesPresent(herd) UNIONED with the
+        viewed horse's own variant genes. Every horse carries every registered
+        gene, so the honest full list is the whole registry and is unusable; but
+        this screen opens on strangers' horses and the cowboy's stock, which are
+        in no roster, and a picker that cannot offer the gene on the horse in
+        front of you is broken in the case you are looking at it.
+      - The selection is on DISK, ClientConfig genes.filter, as gene KEYS. On
+        disk because "remember it between me closing" was the request. Keys
+        because a name is a label and horsegenetics.flight is the identity; an
+        unresolvable key is dropped on read, so uninstalling a datapack costs
+        the pin and nothing else.
+
+    This is the first thing HorseInfoScreen writes to disk, and the first time
+    it has needed the roster — so it now requests it in init() the way it
+    already requested descendants. Without that, the menu came up empty on any
+    session where the browser had not been opened.
+
+
+7. THE WANDERING TRADER BUYS, AT DOUBLE
+
+    HorsePrices.buyPriceFor gained a rate parameter, mirroring the existing
+    emeraldsFor(record, arcane) split: the markup is on the man, not the animal,
+    which is what §4 of the philosophy requires. The cowboy's rate is 1 and
+    TraderSale.RATE is 2.
+
+    Two owner calls shaped it:
+
+      - THE HORSE IS LEASHED TO THE TRADER and walks off, as his trader llamas
+        already do. He has no herd and nothing to re-list from, so there is no
+        buying it back — which is the risk that makes the better price a
+        decision rather than free money.
+      - NO CAP. buyPriceFor used to clamp to MAX_EMERALDS. That was the SELL
+        side's constraint borrowed where it does not apply: emeralds paid TO a
+        player go into an inventory, while emeralds a player is CHARGED are an
+        ItemCost a merchant screen cannot draw above 64. The clamp stays in
+        roll(), which feeds the merchant offers, and is gone from the payout.
+
+    That last change had a tail nobody asked about: CowboySale.pay built a
+    single ItemStack(EMERALD, n). Above 64 that is not a valid stack and would
+    have been silently trimmed on the way in — the player would simply have been
+    short, with no error. pay() now hands the money over in batches of 64.
+
+    Also: the trader handler cancels the interact event on a completed sale, so
+    his trade screen does not open on top of it.
+
+
+8. A BAKE THAT OWNS A FILE YOU HAND-EDITED
+
+    The supply cart's tooltip was edited directly in lang/en_us.json. That key
+    is owned by tools/bake-carts.mjs, which merges into the same merged lang
+    file — so the edit would have been silently reverted by the next bake of
+    anything cart-shaped. Caught by the end-of-session regeneration table, not
+    by anything failing.
+
+    Fixed at source and re-baked. The bake then rewrote 78 lines, which looked
+    alarming; comparing the KEY SETS before and after showed them identical and
+    exactly one VALUE changed. The file had simply drifted out of the bake's
+    canonical sort order at some earlier point. Worth remembering that a big
+    diff from a bake is not by itself evidence of a big change — and that
+    checking is two minutes.
+
+
+WHAT IS NEWLY UNPLAYED
+
+    carts.html         checks 286 (rewritten), 305 (fence gates), 306 (gleaning),
+                       307 (climbOut)
+    villagers.html     verify-trader — the doubled price, the >64 payout arriving
+                       as two stacks, and whether the leashed horse actually
+                       leaves with the trader instead of being left standing
+    breeding.html      the pinned-loci menu, and that the pins survive a reopen
+    genetics-model.html  that a pin drops extension/agouti/shade
+
+    The single most valuable thing to check first is the >64 payout, because it
+    is the one that silently takes money off the player, and the one whose
+    failure mode is "the number was just a bit lower than you expected".

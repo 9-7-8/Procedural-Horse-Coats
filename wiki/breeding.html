@@ -1229,7 +1229,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         </p></li>
     <li><code>HorseInfoScreen</code> is an eight-tab full-window overlay in the same dark
         chrome as the horse browser: <strong>Overview</strong> (name, the barn-name
-        editor, sex, generation, breed, the four live body numbers, bond, conditions, and
+        editor, sex, generation, breed, the five live body numbers, bond, conditions, and
         who bred / tamed / owns it), <strong><a href="horse-gear.html">Gear</a></strong>
         (the nineteen slots), <strong>Genes</strong>, <strong>Health</strong>
         (each gene's <em>own</em> contribution to speed / health / jump / size, from
@@ -1254,6 +1254,37 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             a heterozygote showing nothing is the single most interesting thing this
             screen can tell a breeder, and a filter that read the expression would throw
             exactly those rows away.
+        </p>
+
+        <p>
+            <strong>Under it is a second filter that pins the tab to named loci.</strong>
+            (Owner, 2026-09-26: &ldquo;just show me what alleles the horse has for Flight,
+            Healer, Waterborn, and so on.&rdquo;) <em>Genes: N pinned</em> opens
+            <code>GeneFilterPicker</code>, a multi-select menu built like
+            <code>SavedSearchPicker</code> and driven by the same <code>TypeAhead</code> as
+            every other dropdown here: alphabetical by display name, type a few letters to
+            jump, click to toggle, and it <strong>stays open</strong> because picking three
+            genes should be three clicks rather than three round trips.
+        </p>
+
+        <p>
+            Three decisions in it are worth keeping. <b>A pin overrides both of the rules
+            above</b>, the extension / agouti / shade exemption included &mdash; being asked
+            for Flight and given the base colour as well is the filter declining to do the
+            one thing it was asked, and the base colour is on the Coat tab anyway. <b>The
+            menu offers the genes your herd carries a variant of</b>
+            (<code>RosterGenetics.genesPresent</code>) <em>unioned with the viewed horse's
+            own</em>, because every horse carries every registered gene so the honest full
+            list is the whole registry, and because this screen opens on strangers' horses
+            and the cowboy's stock, which are in no roster. <b>The selection is on disk</b>,
+            in <code>ClientConfig</code>'s <code>genes.filter</code> as gene <em>keys</em>,
+            so it survives closing the screen &mdash; which was the request &mdash; and a
+            restart. Keys rather than names because a name is a label and
+            <code>horsegenetics.flight</code> is the identity; a key no installed gene
+            answers to is dropped on read, so uninstalling a datapack costs the pin and
+            nothing else. This is the first thing on this screen that is written to disk at
+            all, and it is why the screen now asks for the roster in <code>init()</code> the
+            way it already asked for the descendants.
         </p>
 
         <p>
@@ -1575,8 +1606,9 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
 <h4 id="query-tab">The Query tab: building one without knowing the language</h4>
 <p>
     A <code>WHERE</code> clause is the right thing for somebody who knows what to type and no
-    help at all to somebody who does not &mdash; the vocabulary is twenty columns plus
-    <em>every gene in the registry</em>, which no help line can list. The browser's
+    help at all to somebody who does not &mdash; the vocabulary is every column in
+    <code>HorseQuery.keys()</code> plus <em>every gene in the registry</em>, which no
+    help line can list. The browser's
     <strong>Query</strong> tab is the other way in: a row of dropdowns per clause
     (<em>join, NOT, column, operator, value</em>), the query written out underneath as you
     build it, and a <strong>live count of what it would match</strong>. <em>Use it</em> puts it
@@ -1700,9 +1732,9 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     <strong>Sorting is on the headings</strong>, which had spare width and no behaviour. A click steps to
     the next order and takes that order&rsquo;s natural direction &mdash; the same
     <code>defaultDescending()</code> the <em>My horses</em> columns use, so a number comes fastest-first
-    and a word A to Z &mdash; and shift-click turns the current one round. The cycle is nine of
-    <code>HorseQuery.Sort</code>&rsquo;s twelve: <em>Where</em> and <em>Bond</em> are not drawn on a
-    picker row, and a list that reorders for no visible reason is worse than no sort at all. Both
+    and a word A to Z &mdash; and shift-click turns the current one round. The cycle is
+    <code>PICKER_SORTS</code>, a subset of <code>HorseQuery.Sort</code>: <em>Where</em>,
+    <em>Bond</em> and <em>Pull</em> are not drawn on a picker row, and a list that reorders for no visible reason is worse than no sort at all. Both
     headings drive one shared order, and each says what it is &mdash; <em>by Gen&nbsp;^</em>.
 </p>
 
@@ -1926,9 +1958,9 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
 <p>
     A parser went in under four search boxes that already worked, so the first question is not
     whether the new syntax works but whether the <strong>old</strong> one still does.
-    <code>HorseQueryTest</code>'s twenty tests are unchanged and green, and
-    <code>QueryExprTest</code> adds twenty-four for the grammar &mdash; but no query has been
-    typed into a real box.
+    <code>HorseQueryTest</code> and <code>QueryExprTest</code> are green &mdash; but no query
+    has been typed into a real box. <code>HorseQueryTest</code> gained two cases on
+    2026-09-26 for the <code>pull:</code> term and the <em>Pull</em> sort.
 </p>
 <ul>
     <li><strong>Type an old query first.</strong> <code>mare gen&gt;2 -lethal</code> in
@@ -2397,7 +2429,7 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     <li><strong>A horse held still by its information screen</strong> (<a href="known-gaps.html#gap-77">gap 77</a>). Open <strong>i</strong> on a walking horse: it stands, and walks again within a second or two of closing. A ridden horse still steers. Open it, then <code>/kill</code> yourself or Alt-F4: the horse moves again within about three seconds.</li>
     <li><strong>Back to a working inventory</strong> (<a href="known-gaps.html#gap-71">gap 71</a>). Done or Escape on the information screen returns to the horse inventory, and moving the saddle to your inventory still works. The family tree's Done returns to the information screen.</li>
     <li><strong>My horses lists every horse you own.</strong> One left in another dimension and one in an unloaded chunk show <em>not loaded</em>, <code>?</code> bond and adult. Tame a horse with the screen shut: it appears on open and again after Refresh. Clicking a heading sorts and reverses it, and an unknown bond sorts to one end.</li>
-    <li><strong>The My horses filter.</strong> Try <code>mare</code>, <code>foal</code>, <code>-lethal</code>, <code>gen&gt;2</code>, <code>bond&gt;50</code>, <code>breed:shire</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code> and <code>mare gen&gt;2</code>. Half-typed <code>speed&gt;</code> or <code>gene:</code> filters to nothing without throwing. <code>gene:&lt;token&gt;</code> lists a silent carrier that <code>expresses:</code> does not. The exact-pair key and the case rule that came with it are newer and have <a href="#genotype-filter-0924">their own checks</a>.</li>
+    <li><strong>The My horses filter.</strong> Try <code>mare</code>, <code>foal</code>, <code>-lethal</code>, <code>gen&gt;2</code>, <code>bond&gt;50</code>, <code>breed:shire</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code>, <code>pull&gt;=6</code> and <code>mare gen&gt;2</code>. <code>draft</code> and <code>draught</code> are the same key as <code>pull</code>, and the bare word <code>pull</code> is not a flag &mdash; it should match nothing rather than everything. Half-typed <code>speed&gt;</code> or <code>gene:</code> filters to nothing without throwing. <code>gene:&lt;token&gt;</code> lists a silent carrier that <code>expresses:</code> does not. The exact-pair key and the case rule that came with it are newer and have <a href="#genotype-filter-0924">their own checks</a>.</li>
     <li><strong>The Offspring tab.</strong> It is empty until Refresh and says so. On a horse you have bred from, foals and grandfoals sit under their own headings, and a horse bred back into its line appears once without looping. Refresh on horse A then on B shows B's descendants, not A's.</li>
     <li><strong>The information screen's round trips.</strong> Type a barn name, press Set, close and reopen: it stuck. Copy the Genes tab's full code into the custom spawn egg: the horse that appears is this one. Owner now shows only on a <a href="item-transfer-papers.html">transferred</a> horse.</li>
     <li><strong>The breeding preview's roster and odds.</strong> Your horses are in both lists, including one you were given a transfer paper for. A mare and a stallion that share a recessive read <code>1 in 4</code>.</li>
@@ -2407,7 +2439,8 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     <li><strong>Save and reload keeps the horse.</strong> Before quitting to title, note a strongly marked horse's markings and one epigenetic value, a stallion, a big horse's size, speed and jump, an injured horse's health, and a bonded pair's bond and herd. After reloading, all of it matches. Any repaint means the quantised epigenome did not round-trip, and an injured horse must not come back healed.</li>
     <li><strong>Family tree scroll mode.</strong> Set <code>familyTree.scrollBar = true</code> in <code>phc/client.toml</code>: the wheel and the right-edge thumb scroll the tree. Shrink-to-fit is <a href="breeding.html#verified-family-tree">verified</a>.</li>
     <li><strong>A foal's stats against its parents.</strong> A bred foal's speed and health land on its attributes, and the information screen's comparison against <code>parentStats</code> reads the right way round.</li>
-    <li><strong>The browser at GUI scale 2, 3 and 4 and in a narrow window.</strong> The thirteen My horses columns squeeze but stay legible, especially Name, Breed, Coat and Where. The coat column reads like <em>Bay, tobiano, silver</em>. No button sits on text: check Only what varies, Refresh, the filter box, and the Genes filter and Offspring Refresh on the information screen.</li>
+    <li><strong>The browser at GUI scale 2, 3 and 4 and in a narrow window.</strong> Every <em>My horses</em> column squeezes but stays legible, especially Name, Breed and Where. <code>TOTAL_WEIGHT</code> is hand-summed from the <code>COLUMNS</code> weights and went to 656 when <em>Pull</em> was added on 2026-09-26; if it is wrong every column is silently a little off rather than anything visibly breaking, so this is the check that catches it. No button sits on text: check Only what varies, Refresh, the filter box, and on the information screen <strong>both</strong> Genes-tab buttons &mdash; the carrier filter and the <em>Genes: N pinned</em> menu stacked under it &mdash; plus Offspring Refresh.</li>
+    <li><strong>The pinned-loci menu on the Genes tab.</strong> Open it, pick two or three genes, and the list shows those and <em>nothing else</em> &mdash; including dropping extension, agouti and shade, which the carrier filter always keeps. Type a few letters and it should jump to that gene. Close the screen, reopen it, and <strong>the pins must still be there</strong>; that is the whole point of it and it is the half that is on disk (<code>genes.filter</code>). Then check the list it offers is genes your herd actually carries, and that opening the screen on a <em>stranger's</em> horse still offers that horse's own genes.</li>
     <li><strong>The portraits.</strong> Row portraits fill in a moment after the row, without the row jumping, and never trigger a request per frame (a stutter that grows). A loaded foal draws as a foal, and a horse you can see matches its row. Breeding preview portraits sit in both pickers and above the squares, scrolling with the pane. Offspring descendants draw in their real coats at once.</li>
     <li><strong>The information screen's chrome.</strong> The <strong>i</strong> button hangs off the left edge and is still on screen at GUI scale 4 in a small window. The barn-name box is framed and turns blue on focus, not washed-out grey. Coat, Health and Other genes have faint hairline dividers. Health reads green above the baseline and red below, and <em>0.164</em> is legible on the dark panel.</li>
     <li><strong>The family tree draws ancestors' real coats.</strong> A bay, grey or splash ancestor shows the same markings in the tree as in the world.</li>

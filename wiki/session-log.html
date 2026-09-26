@@ -21,7 +21,30 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
-    <li><a href="session-log/d2026-09-26-a-rule-nobody-followed.txt">2026-09-26, last
+    <li><a href="session-log/d2026-09-26-four-asks-from-the-field.txt">2026-09-26, last
+        &mdash; <strong>four asks from the field, and two bugs nobody reported</strong>.
+        A queue session: seven unrelated requests arrived while work was running and all
+        shipped, none played. Two were documentation failures rather than code failures
+        &mdash; <em>&ldquo;how do you attach two carts&rdquo;</em> already worked and
+        &sect;3 simply never said that R hitches to <strong>whatever you are sitting
+        on</strong>, and the reaper's known ripeness gap had been deferred for a week on a
+        note claiming its tag was shared with the plow's, which it never was. Two defects
+        fell out that nobody could have reported: <code>reaper_harvestable</code> pulled in
+        <code>#minecraft:maintains_farmland</code>, which contains
+        <strong><code>#minecraft:fence_gates</code></strong> &mdash; the reaper has been
+        destroying gates it drove past, silently, since carts landed &mdash; and uncapping
+        the horse payout exposed that <code>CowboySale.pay</code> built a single
+        <code>ItemStack</code> of <var>n</var> emeralds, which above 64 would have been
+        trimmed on the way in and simply shorted the player. A first theory about the
+        underground-cart bug (an unreset gravity accumulator) was <em>wrong</em> and was
+        dropped after reading the decompiled <code>Entity.move</code>; the real confirmed
+        defect is that a hitched cart has no vertical steering at all, so nothing ever
+        pulls one up, and the fix shipped is an honest recovery rather than a diagnosis.
+        Also: <code>pull</code> as a search term and a sortable column &mdash;
+        <code>HorseListing</code> had been resolving pulling ability and throwing it away
+        &mdash; a persisted multi-select gene pin on the Genes tab, and wandering traders
+        buying horses at double, leashing them away where they cannot be bought back.</li>
+    <li><a href="session-log/d2026-09-26-a-rule-nobody-followed.txt">2026-09-26, later
         &mdash; <strong>a hard rule nobody followed, narrowed to the one it always was</strong>.
         One subject, no gameplay. CLAUDE.md's hard rule 2 said <code>common/</code> &ldquo;uses no
         Java 9+ APIs&rdquo;; the module has never obeyed it, and the owner settled it by narrowing

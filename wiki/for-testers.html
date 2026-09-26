@@ -992,7 +992,8 @@
     <li>Type <code>mare</code> in the filter box.</li>
     <li>Type <code>foal</code> instead.</li>
     <li>Type <code>bond&gt;50</code> instead.</li>
-    <li>Try these filters one at a time: <code>-lethal</code>, <code>gen 2</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code>.</li>
+    <li>Try these filters one at a time: <code>-lethal</code>, <code>gen 2</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code>, <code>pull&gt;=6</code>.</li>
+    <li>Click the <strong>Pull</strong> column heading to sort by it, then click it again to turn the order round.</li>
     <li>Type something half-finished, like <code>gene:</code> on its own.</li>
     <li>Click the Bond column heading, then click it again.</li>
     <li>Close the browser, tame a new horse, and open My horses again.</li>
@@ -1055,10 +1056,13 @@
     <li>Open the Health tab on a horse with several health conditions, and read the numbers.</li>
     <li>Open the Coat tab on a horse with <em>EDNRB (frame overo)</em>, and look at the rows of numbers.</li>
     <li>Open the information screen of a horse with the <em>Waterborn</em> gene and read the short gene code.</li>
+    <li>Open the <strong>Genes</strong> tab and click <strong>Genes: all</strong> under the first filter button. Pick two or three genes from the list, then click away to close it.</li>
+    <li>Close the whole screen, open it again, and go back to the Genes tab.</li>
+    <li>Open that menu again and click the top row to clear it.</li>
     <li>Crouch and right-click the tamed foal.</li>
     <li>Change your GUI scale to 4 and look for the <strong>i</strong> button.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> there are eight tabs (Gear is the second); the barn name stays; Done goes back to a working inventory where the saddle moves normally; the family tree's Done goes back to the information screen; Offspring lists each foal once; the health numbers are sensible and fit on the screen; the coat rows all fit; the short code includes Waterborn; the foal's inventory has no saddle slot but still has <strong>i</strong>; the <strong>i</strong> button is on screen at scale 4.</p>
+<p class="tester-pass"><strong>It works if:</strong> there are eight tabs (Gear is the second); the barn name stays; Done goes back to a working inventory where the saddle moves normally; the family tree's Done goes back to the information screen; Offspring lists each foal once; the health numbers are sensible and fit on the screen; the coat rows all fit; the short code includes Waterborn; picking genes cuts the Genes tab down to <em>only</em> those genes, <strong>the picks are still there after closing and reopening</strong>, and the top row puts every locus back; the foal's inventory has no saddle slot but still has <strong>i</strong>; the <strong>i</strong> button is on screen at scale 4.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the name is lost, the saddle cannot be moved, text runs over the edge, Waterborn is missing from the code, or a button is off the screen.</p>
 <button type="button" class="report-btn" data-report="The information screen">Report a problem with this test</button>
 </div>

@@ -452,7 +452,7 @@
 <h3 id="menu-teleport">Teleport the horse to you, from the Where column</h3>
 
 <p>
-    <strong>The column exists and is inert.</strong> &ldquo;Where&rdquo; is the twelfth column on
+    <strong>The column exists and is inert.</strong> &ldquo;Where&rdquo; is the last column on
     <em>My horses</em> and already prints <code>overworld 118, 71, -204</code>, built server-side
     by <code>HorseRoster.where</code>. Clicking it should attempt to bring the horse to you.
 </p>
@@ -576,7 +576,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty; and the <em>My horses</em> table has changed shape twice over, losing its dead and trading its coat column for a button that spends a ticket.</p>
+    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty; and the <em>My horses</em> table has changed shape three times over, losing its dead, trading its coat column for a button that spends a ticket, and gaining a sortable <em>Pull</em> column.</p>
 </div>
 
 <h3 id="dead-leave-roster-0925">Dead horses leave the roster (2026-09-25, NOT played)</h3>
@@ -611,9 +611,11 @@
 <p>
     The coat column is now a per-row button that spends a ticket and sends the horse to
     its own stall, or to the holding pen when it has none. None of it has been pressed in
-    game. The layout half is the cheap thing to get wrong: <code>TOTAL_WEIGHT</code> was
-    hand-edited from 658 to 626 alongside the column swap, and forgetting it would not
-    break anything visibly &mdash; every column would just be slightly the wrong width.
+    game. The layout half is the cheap thing to get wrong: <code>TOTAL_WEIGHT</code> is
+    hand-summed from the <code>COLUMNS</code> weights rather than derived from them, so it
+    has to be edited by hand every time a column moves &mdash; 658 to 626 alongside the
+    column swap, and 626 to 656 when <em>Pull</em> was added on 2026-09-26. Forgetting it
+    would not break anything visibly; every column would just be slightly the wrong width.
 </p>
 
 <ul>

@@ -62,8 +62,10 @@
     <code>ServerConfig</code> (health mode, body size, three riding numbers, gestation days, the
     last-stand block, the two bond-decay numbers, whether a lead comes back when a horse is
     teleported, two debug switches) and <code>ClientConfig</code> (scroll bar, sex symbol,
-    tutorial, right-click to open, two coat-rendering numbers), plus two generated blocks that
-    are genuinely thorough
+    tutorial, right-click to open, two coat-rendering numbers, two naming preferences, and two
+    <em>lists</em> &mdash; <code>search.saved</code> and <code>genes.filter</code>, which are
+    remembered UI state rather than settings anybody goes looking for), plus two generated
+    blocks that are genuinely thorough
     &mdash; <code>BreedSpawningConfig</code> writes four options per shipped breed, and
     <code>CartsConfig</code> a block per <code>CartKind</code>.
 </p>
@@ -87,7 +89,7 @@
         <code>genes/index.json</code> is a killswitch, which is why that file is never
         regenerated from the folder (<a href="known-gaps.html#gap-162">gap 162</a>) &mdash; and
         that is the precedent to read before designing a runtime one.</li>
-    <li><strong>Do it as one pass with a convention, not option by option.</strong> Fifteen
+    <li><strong>Do it as one pass with a convention, not option by option.</strong> A drawerful of
         scattered scalars is what a config grows into when each is added where it was needed; a
         sweep is the chance to fix the shape &mdash; one file per concern, generated blocks where
         the roster is data, and a rule about what may be a server option versus a client
