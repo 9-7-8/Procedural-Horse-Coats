@@ -63,6 +63,26 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.ConfigValue<List<? extends String>> SAVED_SEARCHES;
 
+    /**
+     * <b>The loci the horse screen's Genes tab is pinned to</b>, as gene keys.
+     * Empty means "every locus the other filter allows". Read through
+     * {@link #geneFilter()} and written by {@link #setGeneFilter}.
+     *
+     * <p>Gene <i>keys</i> rather than display names, because a name is a label
+     * that may be retranslated or reworded while {@code horsegenetics.flight}
+     * is the identity - and a key that no longer resolves is dropped on read
+     * rather than crashing the screen, so uninstalling a datapack loses the pin
+     * and nothing else.
+     *
+     * <p>On disk rather than a static field, because the point of the thing is
+     * that it is still there tomorrow: a breeder watching one cross does not
+     * want to re-pick Flight, Healer and Waterborn every time they open a
+     * horse. It is per-player and per-machine for the same reason
+     * {@link #SAVED_SEARCHES} is - it filters already-synced data on the client
+     * and so needs no packet and no world.
+     */
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> GENE_FILTER;
+
     public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
 
     /**
@@ -142,6 +162,20 @@ public final class ClientConfig {
                 .defineList("search.saved", new ArrayList<String>(),
                         () -> "keepers=mare AND NOT lethal",
                         entry -> entry instanceof String line && line.indexOf('=') > 0);
+        GENE_FILTER = builder
+                .comment("Loci the horse information screen's Genes tab is pinned to, as gene",
+                        "keys - one per line, for example:",
+                        "  horsegenetics.flight",
+                        "  horsegenetics.healer",
+                        "An empty list is the normal state and shows every locus the tab's",
+                        "other filter allows. While it is not empty the tab shows these loci",
+                        "and nothing else, including the three base-colour loci.",
+                        "Pick them with the \"Genes\" button on the tab rather than by hand;",
+                        "a key no installed gene answers to is ignored and dropped.",
+                        "Yours alone, and on this machine.")
+                .defineList("genes.filter", new ArrayList<String>(),
+                        () -> "horsegenetics.agouti",
+                        entry -> entry instanceof String key && !key.isBlank());
         TUTORIAL_SEEN = builder
                 .comment("Whether the Horse Browser has already opened on its Getting Started",
                         "tab. It does that once, and sets this the first time you leave the tab.",
@@ -313,6 +347,47 @@ public final class ClientConfig {
         /** How it reads in the picker - the name, and the query when they differ. */
         public String label() {
             return name.equals(query) ? query : name + "  -  " + query;
+        }
+    }
+
+    /**
+     * The pinned loci, as gene keys, in the order they were picked. Never
+     * throws and never returns null - it is read from a render loop.
+     *
+     * <p>Keys are handed back raw rather than resolved to {@code Gene}s: the
+     * caller is the one that knows whether an unresolvable key should be
+     * dropped quietly or noticed, and {@code Genes.byKeyOrNull} is the way to
+     * ask.
+     */
+    public static List<String> geneFilter() {
+        List<String> out = new ArrayList<>();
+        List<? extends String> keys;
+        try {
+            keys = GENE_FILTER.get();
+        } catch (IllegalStateException notLoaded) {
+            return out;
+        }
+        for (String key : keys) {
+            if (key != null && !key.isBlank()) {
+                out.add(key);
+            }
+        }
+        return out;
+    }
+
+    /** Replace the pinned loci. An empty list is how the pin is cleared. */
+    public static void setGeneFilter(List<String> keys) {
+        List<String> clean = new ArrayList<>();
+        for (String key : keys == null ? List.<String>of() : keys) {
+            if (key != null && !key.isBlank() && !clean.contains(key)) {
+                clean.add(key);
+            }
+        }
+        try {
+            GENE_FILTER.set(clean);
+            GENE_FILTER.save();
+        } catch (IllegalStateException notLoaded) {
+            // Config not up yet. There is no screen to have picked from.
         }
     }
 

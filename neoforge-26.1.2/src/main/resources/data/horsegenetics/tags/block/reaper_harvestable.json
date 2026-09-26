@@ -12,7 +12,6 @@
     "minecraft:firefly_bush",
     "#minecraft:flowers",
     "#minecraft:saplings",
-    "#minecraft:crops",
-    "#minecraft:maintains_farmland"
+    "#minecraft:crops"
   ]
 }

@@ -78,6 +78,7 @@ public final class HorseQuery {
         SPEED("Speed"),
         HEALTH("Health"),
         JUMP("Jump"),
+        PULL("Pull"),
         SIZE("Hands"),
         BOND("Bond"),
         WHERE("Where");
@@ -99,7 +100,7 @@ public final class HorseQuery {
     /** Every {@code key:} a filter term understands, for the tab's help line. */
     public static List<String> keys() {
         return List.of("name", "barn", "breed", "coat", "sex", "age", "by", "where",
-                "gen", "bond", "speed", "health", "jump", "hands", "size",
+                "gen", "bond", "speed", "health", "jump", "hands", "size", "pull",
                 "gene", "carries", "genotype", "expresses", "condition");
     }
 
@@ -270,7 +271,7 @@ public final class HorseQuery {
 
     /** The spellings {@link #keyed} accepts that {@link #keys()} does not list. */
     private static final List<String> ALIASES = List.of(
-            "generation", "disorder", "pair", "height", "scale");
+            "generation", "disorder", "pair", "height", "scale", "draft", "draught");
 
     private static boolean isZygosity(String value) {
         String lower = value.toLowerCase(Locale.ROOT);
@@ -436,6 +437,12 @@ public final class HorseQuery {
             case "size":
             case "scale":
                 return compare(row.scale(), op, orEqual, value);
+            case "pull":
+            case "draft":
+            case "draught":
+                // The 1-10 score the information screen shows, not a multiplier
+                // and not a cart speed - "pull>=6" is the two-rider threshold.
+                return compare(row.pull(), op, orEqual, value);
             default:
                 // Not a key at all - a colon in a horse's name, say. Fall back
                 // to the substring search rather than silently matching nothing.
@@ -638,6 +645,7 @@ public final class HorseQuery {
             case SPEED -> c = Comparator.comparingDouble(HorseListing::speed);
             case HEALTH -> c = Comparator.comparingDouble(HorseListing::health);
             case JUMP -> c = Comparator.comparingDouble(HorseListing::jump);
+            case PULL -> c = Comparator.comparingDouble(HorseListing::pull);
             case SIZE -> c = Comparator.comparingDouble(HorseListing::scale);
             case BOND -> c = Comparator.comparingInt(HorseListing::bond);
             case WHERE -> c = Comparator.comparing(HorseListing::where, String.CASE_INSENSITIVE_ORDER);

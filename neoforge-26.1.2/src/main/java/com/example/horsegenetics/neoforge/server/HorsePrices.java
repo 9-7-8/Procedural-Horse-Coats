@@ -59,7 +59,15 @@ public final class HorsePrices {
      */
     public static final Breed.PriceRange ARCANE_PRICE = new Breed.PriceRange(12, 28);
 
-    /** Vanilla's merchant screen cannot show a cost above one stack. */
+    /**
+     * Vanilla's merchant screen cannot show a cost above one stack.
+     *
+     * <p>This is a constraint on what a player can be <b>charged</b> - an
+     * {@code ItemCost} the screen has to draw - and not on what a player can be
+     * <b>paid</b>, which is emeralds going into an inventory. {@link #roll} is
+     * the only thing that should clamp to it; {@link #buyPriceFor} used to and
+     * no longer does.
+     */
     private static final int MAX_EMERALDS = 64;
 
     private HorsePrices() {
@@ -142,6 +150,28 @@ public final class HorsePrices {
      * <p><b>Not verified in-game.</b>
      */
     public static int buyPriceFor(HorseRecord record) {
+        return buyPriceFor(record, 1);
+    }
+
+    /**
+     * The same price, times what this buyer pays over the odds.
+     *
+     * <p>{@code rate} is the man, not the animal - the same split as
+     * {@link #emeraldsFor(HorseRecord, boolean)}, and for the same reason: §4
+     * of the philosophy is that nothing in the model scores a horse, so what an
+     * animal is worth is a fact about who is at the counter. A wandering trader
+     * pays {@value com.example.horsegenetics.neoforge.server.TraderSale#RATE}
+     * times what a cowboy does because he is passing through and will not get
+     * another chance, not because the horse is better when he looks at it.
+     *
+     * <p><b>Not capped</b> (owner, 2026-09-26). The cowboy's payout used to be
+     * clamped to one stack, which was the sell side's constraint borrowed
+     * where it does not apply: emeralds paid <i>to</i> a player go into an
+     * inventory and may be any number, while emeralds a player is <i>charged</i>
+     * are an {@code ItemCost} in a merchant screen that cannot render past 64.
+     * That cap still stands where it belongs, in {@link #roll}.
+     */
+    public static int buyPriceFor(HorseRecord record, int rate) {
         Genotype genotype = record.genotype();
         int carried = 0;
         int homozygous = 0;
@@ -158,7 +188,7 @@ public final class HorsePrices {
         int price = BUY_BASE + carried / PER_CARRIED + homozygous / PER_HOMOZYGOUS;
         // A gelding is the same animal to look at and no use whatever for the
         // thing this price is counting, so it goes at the base and no more.
-        return Math.min(MAX_EMERALDS, record.gelded() ? BUY_BASE : price);
+        return Math.max(1, rate) * (record.gelded() ? BUY_BASE : price);
     }
 
     private static Breed.PriceRange rangeFor(BreedLineage lineage) {

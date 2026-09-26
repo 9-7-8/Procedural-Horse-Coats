@@ -56,6 +56,7 @@ public record HorseListing(
         double health,
         double jump,
         double scale,
+        double pull,
         int bond,
         boolean inHerd,
         boolean loaded,
@@ -101,7 +102,7 @@ public record HorseListing(
     }
 
     /**
-     * Build a row, resolving the coat description, the four body numbers and the
+     * Build a row, resolving the coat description, the five body numbers and the
      * disorder list from {@code genotype} once. Health genetics are resolved
      * <b>on</b> regardless of the server setting, for the same reason the
      * information screen does it: carrying a lethal is a fact about the alleles,
@@ -126,7 +127,7 @@ public record HorseListing(
         }
         return new HorseListing(id, firstName, lastName, barnName, breed, generation,
                 genotype.sex(), adult, tamed,
-                traits.speed(), traits.health(), traits.jump(), traits.scale(),
+                traits.speed(), traits.health(), traits.jump(), traits.scale(), traits.pull(),
                 bond, inHerd, loaded, where, tamedBy, bredBy, hasParents,
                 describeCoat(genotype), conditions, lethal, genotype, gelded);
     }

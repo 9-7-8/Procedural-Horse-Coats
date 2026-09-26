@@ -101,6 +101,30 @@ class HorseQueryTest {
     }
 
     @Test
+    void pullIsANumericKeyUnderThreeSpellings() {
+        // Every horse in the fixture is wild type at the pulling locus, so they
+        // all carry the same score and the useful assertions are the bounds.
+        // What this pins is that `pull` reaches the number at all: before the
+        // row carried it, `pull>0` fell through to the substring search and
+        // quietly matched nothing, which looks identical to "no strong horses".
+        assertEquals(3, HorseQuery.filter(stable(), "pull>0").size());
+        assertTrue(HorseQuery.filter(stable(), "pull>100").isEmpty());
+        assertEquals(3, HorseQuery.filter(stable(), "pull<100").size());
+        // draft/draught are the words a breeder actually reaches for.
+        assertEquals(3, HorseQuery.filter(stable(), "draft>0").size());
+        assertTrue(HorseQuery.filter(stable(), "draught>100").isEmpty());
+        // The bare word is not a flag and must not match everything.
+        assertTrue(HorseQuery.filter(stable(), "pull").isEmpty());
+        assertTrue(HorseQuery.keys().contains("pull"));
+    }
+
+    @Test
+    void pullSortsWithoutThrowing() {
+        assertEquals(3, HorseQuery.apply(stable(), "", HorseQuery.Sort.PULL, false).size());
+        assertEquals(3, HorseQuery.apply(stable(), "", HorseQuery.Sort.PULL, true).size());
+    }
+
+    @Test
     void bondFiltersSkipHorsesWhoseBondIsNotKnown() {
         List<HorseListing> rows = List.of(
                 row("Unloaded", "Arabian", bay(), true, 1, HorseListing.BOND_UNKNOWN));

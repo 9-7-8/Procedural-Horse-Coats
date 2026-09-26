@@ -161,7 +161,7 @@ public final class CowboySale {
     }
 
     /** Horses on a rope in this player's hand, nearest first. */
-    private static List<Horse> led(ServerLevel level, Player player) {
+    static List<Horse> led(ServerLevel level, Player player) {
         return level.getEntitiesOfClass(Horse.class,
                         player.getBoundingBox().inflate(LEAD_RADIUS),
                         h -> h.isAlive() && h.isLeashed() && h.getLeashHolder() == player)
@@ -217,7 +217,7 @@ public final class CowboySale {
      * horse, not your tack - and his own string is never saddled, so leaving it
      * on would also put gear into his shop window that is not for sale.
      */
-    private static void returnTack(Horse horse, ServerPlayer seller) {
+    static void returnTack(Horse horse, ServerPlayer seller) {
         for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[] {
                 net.minecraft.world.entity.EquipmentSlot.SADDLE,
                 net.minecraft.world.entity.EquipmentSlot.BODY}) {
@@ -230,17 +230,29 @@ public final class CowboySale {
         }
     }
 
-    private static void pay(ServerPlayer player, int emeralds) {
-        giveOrDrop(player, new ItemStack(Items.EMERALD, emeralds));
+    /**
+     * <b>Handed over one stack at a time.</b> A price may now exceed 64 - the
+     * payout cap came off when the wandering trader started paying double - and
+     * a single {@code ItemStack} of 128 emeralds is not a thing: the count is
+     * above the item's own max, so it would be silently trimmed on the way into
+     * the inventory and the player would be short.
+     */
+    static void pay(ServerPlayer player, int emeralds) {
+        int left = emeralds;
+        while (left > 0) {
+            int batch = Math.min(left, Items.EMERALD.getDefaultMaxStackSize());
+            giveOrDrop(player, new ItemStack(Items.EMERALD, batch));
+            left -= batch;
+        }
     }
 
-    private static void giveOrDrop(ServerPlayer player, ItemStack stack) {
+    static void giveOrDrop(ServerPlayer player, ItemStack stack) {
         if (!player.getInventory().add(stack.copy())) {
             player.drop(stack.copy(), false);
         }
     }
 
-    private static boolean refuse(ServerPlayer player, String why) {
+    static boolean refuse(ServerPlayer player, String why) {
         player.sendSystemMessage(Component.literal(why).withStyle(ChatFormatting.YELLOW));
         return true;
     }

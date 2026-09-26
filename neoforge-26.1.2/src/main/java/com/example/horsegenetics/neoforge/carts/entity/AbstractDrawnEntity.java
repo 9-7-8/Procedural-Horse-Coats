@@ -57,6 +57,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -183,6 +184,7 @@ public abstract class AbstractDrawnEntity extends Entity {
             return;
         }
         this.addStats(this.getX() - startX, this.getY() - startY, this.getZ() - startZ);
+        this.climbOut();
         if (this.level().isClientSide()) {
             for (final CartWheel wheel : this.wheels) {
                 wheel.tick();
@@ -196,6 +198,53 @@ public abstract class AbstractDrawnEntity extends Entity {
         this.updatePassengers();
         if (this.drawn != null) {
             this.drawn.pulledTick();
+        }
+    }
+
+    /** How far {@link #climbOut} will lift a cart in one tick, in blocks. */
+    private static final double MAX_CLIMB_OUT = 1.25D;
+
+    /** The step it tries, smallest first, so a cart rises by the least that frees it. */
+    private static final double CLIMB_OUT_STEP = 0.125D;
+
+    /**
+     * <b>Lifts a cart back out of the ground it has ended up inside.</b>
+     *
+     * <p>A hitched cart has no vertical steering at all: {@link #pulledTick}
+     * throws away the vertical component of the target vector whenever the
+     * puller is on the ground, so the cart is only ever corrected in X and Z.
+     * That is deliberate - it is what stops a jumping horse yanking the cart
+     * into the air behind it - but it means <b>nothing ever pulls a cart back
+     * up</b>. Gravity and the horizontal correction can between them walk a cart
+     * into a hillside as the ground rises or falls, and once its box is inside
+     * terrain the only ways out are the 1.2-block step assist, which needs a
+     * horizontal collision to trigger, or the hitch breaking. Neither happens
+     * reliably, so the cart stays buried and is dragged along underground.
+     *
+     * <p>This is the missing recovery and nothing else: it does not fire while
+     * the cart is in open air, so it cannot change how a cart drives on the
+     * flat. The box is deflated slightly before the test so that resting
+     * against a fence or a wall - a legitimate touch, not a burial - does not
+     * count as stuck and set the cart hopping.
+     *
+     * <p><b>Not the proven root cause.</b> The burial was reported from play and
+     * has not been reproduced from the code, so this treats the symptom, which
+     * is worth doing on its own - a cart that cannot get out of the ground is
+     * the bug the player actually meets. If it still happens after this, the
+     * next place to look is {@code CartInterpolationHandler}, which applies its
+     * final lerped position with a bare {@code setPos} and no collision test.
+     */
+    private void climbOut() {
+        final AABB box = this.getBoundingBox().deflate(0.0625D);
+        if (this.level().noCollision(this, box)) {
+            return;
+        }
+        for (double lift = CLIMB_OUT_STEP; lift <= MAX_CLIMB_OUT; lift += CLIMB_OUT_STEP) {
+            if (this.level().noCollision(this, box.move(0.0D, lift, 0.0D))) {
+                this.setPos(this.getX(), this.getY() + lift, this.getZ());
+                this.setDeltaMovement(this.getDeltaMovement().x, 0.0D, this.getDeltaMovement().z);
+                return;
+            }
         }
     }
 

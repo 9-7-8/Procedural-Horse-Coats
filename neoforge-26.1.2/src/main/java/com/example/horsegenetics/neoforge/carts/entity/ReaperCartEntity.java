@@ -31,8 +31,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AttachedStemBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -149,7 +154,7 @@ public class ReaperCartEntity extends AbstractDrawnEntity {
             final BlockPos blockPos = new BlockPos((int) Math.round(x - 0.5), (int) Math.round(this.getY() - 0.75D), (int) Math.round(z - 0.5));
             BlockPos pos = blockPos.above();
             BlockState state = level().getBlockState(pos);
-            if (state.is(HorseCarts.REAPER_HARVESTABLE)) {
+            if (state.is(HorseCarts.REAPER_HARVESTABLE) && cuttable(state)) {
                 if (level().removeBlock(pos, false)) {
                     level().destroyBlock(pos, false);
                     if (!state.requiresCorrectToolForDrops()) {
@@ -158,6 +163,48 @@ public class ReaperCartEntity extends AbstractDrawnEntity {
                 }
             }
         }
+    }
+
+    /**
+     * <b>Is this block one the cutting bar should take?</b> The tag says what the
+     * reaper is <i>allowed</i> to cut; this says whether it is worth cutting yet.
+     *
+     * <p>Three answers, because the tag holds three kinds of thing:
+     *
+     * <ul>
+     * <li><b>A melon or pumpkin stem is never cut.</b> The fruit is not in the
+     *     tag and the vine is, so cutting it destroyed the plant that makes the
+     *     crop and left the melon sitting there - the reaper harvesting the one
+     *     part of the field you wanted kept. A stem is not a thing you harvest,
+     *     it is the plant, so the reaper drives past it. Note a stem is
+     *     <i>not</i> a {@link CropBlock} - it is a {@link StemBlock}, which is
+     *     why the ripeness test below would happily have cut a grown one.</li>
+     * <li><b>Anything with an age is cut only at its last one.</b>
+     *     {@link CropBlock} answers for itself; the generic age lookup after it
+     *     catches {@code pitcher_crop} (which is a double plant, not a crop) and
+     *     any modded crop, without that mod knowing anything about this one.</li>
+     * <li><b>Everything else is cut on sight</b> - grass, ferns, flowers,
+     *     saplings, bushes. They have no age to be at, so "is it ripe" is not a
+     *     question about them, and clearing them is what a scythe is for.</li>
+     * </ul>
+     */
+    private static boolean cuttable(BlockState state) {
+        if (state.getBlock() instanceof StemBlock || state.getBlock() instanceof AttachedStemBlock) {
+            return false;
+        }
+        if (state.getBlock() instanceof CropBlock crop) {
+            return crop.isMaxAge(state);
+        }
+        for (Property<?> property : state.getProperties()) {
+            if (property instanceof IntegerProperty age && "age".equals(age.getName())) {
+                int ripe = 0;
+                for (int value : age.getPossibleValues()) {
+                    ripe = Math.max(ripe, value);
+                }
+                return state.getValue(age) >= ripe;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.common.horse.RosterGenetics;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.GeneCategory;
 import com.example.horsegenetics.common.trait.HorseTraits;
@@ -20,9 +21,11 @@ import com.example.horsegenetics.common.cart.CartDraft;
 import com.example.horsegenetics.common.cart.CartKind;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.HorseTackSlot;
 import com.example.horsegenetics.neoforge.network.FamilyTreeRequestPayload;
+import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
 import com.example.horsegenetics.neoforge.network.HorseSocialSyncPayload;
 import com.example.horsegenetics.neoforge.network.MountHorsePayload;
 import com.example.horsegenetics.neoforge.network.TackSlotPayload;
@@ -158,8 +161,13 @@ public final class HorseInfoScreen extends Screen {
     /** Overview's fixed header: the horse's name, then the barn-name editor. */
     private static final int HEADER_H = 42;
 
-    /** Genes' fixed header: the locus count, and the filter button beside it. */
-    private static final int GENES_HEADER_H = 24;
+    /**
+     * Genes' fixed header: two lines of text on the left - the short genotype
+     * and the locus count - and two stacked buttons on the right, the baseline
+     * toggle over the pinned-loci menu. Deep enough for the lower button's 16
+     * pixels plus the rule under it.
+     */
+    private static final int GENES_HEADER_H = 42;
 
     /** Offspring's fixed header: the Refresh button and what it last found. */
     private static final int OFFSPRING_HEADER_H = 24;
@@ -235,7 +243,22 @@ public final class HorseInfoScreen extends Screen {
     private EditBox barnBox;
     private Button setBarnButton;
     private Button baselineFilterButton;
+    private Button geneFilterButton;
     private Button offspringRefreshButton;
+
+    /**
+     * The pinned-loci menu. Its selection lives in
+     * {@link ClientConfig#geneFilter()} rather than in a field here, so it
+     * survives the screen closing - which is the whole request.
+     */
+    private final GeneFilterPicker genePicker = new GeneFilterPicker();
+
+    /** Cached against {@link ClientHorseRoster#version()}, like the browser's. */
+    private List<Gene> herdGenes = List.of();
+    private int herdGenesVersion = -1;
+
+    /** Set once the roster has been asked for; see {@link #init()}. */
+    private boolean rosterAsked;
 
     /** Set once the opening ancestry walk has been asked for; see {@link #init()}. */
     private boolean offspringAsked;
@@ -404,6 +427,16 @@ public final class HorseInfoScreen extends Screen {
             requestOffspring();
         }
 
+        // And the roster, which the pinned-loci menu reads to know which genes
+        // are worth offering. Nothing else on this screen needs it, and until
+        // now the screen never asked - so on a session where the browser had
+        // not been opened the menu would have come up empty on a herd full of
+        // interesting horses. Guarded for the same reason as above.
+        if (!rosterAsked) {
+            rosterAsked = true;
+            ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
+        }
+
         addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
                 .bounds(this.width / 2 - 50, this.height - 26, 100, 20)
                 .build());
@@ -435,6 +468,21 @@ public final class HorseInfoScreen extends Screen {
                 .bounds(contentRight() - filterW, contentTop() - 2, filterW, 16)
                 .build();
         addRenderableWidget(baselineFilterButton);
+
+        // Under it, the pinned-loci menu: "show me Flight, Healer and Waterborn
+        // and nothing else". The label counts rather than names them, because
+        // three gene names do not fit and the list is one click away.
+        geneFilterButton = Button.builder(geneFilterLabel(), b -> {
+                    if (genePicker.isOpen()) {
+                        genePicker.close();
+                        return;
+                    }
+                    genePicker.open(b.getX(), b.getY() + b.getHeight() + 1,
+                            this.width, this.height, offeredGenes());
+                })
+                .bounds(contentRight() - filterW, contentTop() + 16, filterW, 16)
+                .build();
+        addRenderableWidget(geneFilterButton);
 
         offspringRefreshButton = Button.builder(Component.literal("Refresh"), b -> requestOffspring())
                 .bounds(contentRight() - buttonW("Refresh"), contentTop() - 2, buttonW("Refresh"), 16)
@@ -471,6 +519,54 @@ public final class HorseInfoScreen extends Screen {
 
     private Component baselineFilterLabel() {
         return Component.literal(hideBaseline ? "Only what it carries" : "Every locus");
+    }
+
+    private Component geneFilterLabel() {
+        int pinned = pinnedGenes().size();
+        return Component.literal(pinned == 0 ? "Genes: all"
+                : pinned == 1 ? "Genes: 1 pinned"
+                : "Genes: " + pinned + " pinned");
+    }
+
+    /**
+     * <b>The loci the tab is pinned to</b>, resolved and in the order they were
+     * picked. A key no installed gene answers to is dropped rather than
+     * complained about: removing a datapack should cost you the pin on its
+     * genes and nothing else.
+     */
+    private List<Gene> pinnedGenes() {
+        List<Gene> out = new ArrayList<>();
+        for (String key : ClientConfig.geneFilter()) {
+            Gene gene = Genes.byKeyOrNull(key);
+            if (gene != null) {
+                out.add(gene);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * <b>What the menu may offer</b>: the genes some horse you own carries a
+     * variant of, plus the ones this horse does.
+     *
+     * <p>The union matters. Every horse carries every registered gene, so the
+     * roster answer is the only one that is a usable list - but this screen
+     * opens on a stranger's horse, a wild one and the cowboy's stock, none of
+     * which are in your roster. A picker that cannot offer the gene on the
+     * horse in front of you is broken in the case you are looking at it.
+     */
+    private List<Gene> offeredGenes() {
+        if (herdGenesVersion != ClientHorseRoster.version()) {
+            herdGenes = RosterGenetics.genesPresent(ClientHorseRoster.all());
+            herdGenesVersion = ClientHorseRoster.version();
+        }
+        List<Gene> out = new ArrayList<>(herdGenes);
+        for (Gene gene : Genes.codeOrder()) {
+            if (!out.contains(gene) && !gene.atBaseline(genotype.pair(gene))) {
+                out.add(gene);
+            }
+        }
+        return out;
     }
 
     /** What {@link #ownsHorse()} said when the widgets were last applied. */
@@ -510,6 +606,14 @@ public final class HorseInfoScreen extends Screen {
         if (baselineFilterButton != null) {
             baselineFilterButton.visible = genes;
             baselineFilterButton.active = genes;
+        }
+        if (geneFilterButton != null) {
+            geneFilterButton.visible = genes;
+            geneFilterButton.active = genes;
+            geneFilterButton.setMessage(geneFilterLabel());
+        }
+        if (!genes) {
+            genePicker.close();     // anchored under a button that is not drawn
         }
         boolean offspring = tab == Tab.OFFSPRING;
         if (offspringRefreshButton != null) {
@@ -979,6 +1083,11 @@ public final class HorseInfoScreen extends Screen {
             closeGearPicker();
             return true;
         }
+        if (genePicker.isOpen() && genePicker.keyPressed(event.key())) {
+            geneFilterButton.setMessage(geneFilterLabel());
+            scroll = 0f;
+            return true;
+        }
         if (super.keyPressed(event)) {
             return true; // includes Escape, which Screen turns into onClose()
         }
@@ -996,6 +1105,9 @@ public final class HorseInfoScreen extends Screen {
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         if (pickerSlot != null && pickerTyped(event.codepoint())) {
+            return true;
+        }
+        if (genePicker.charTyped(event.codepoint())) {
             return true;
         }
         return super.charTyped(event);
@@ -1026,6 +1138,13 @@ public final class HorseInfoScreen extends Screen {
         // than dismissing it and doing something else as well.
         if (pickerSlot != null) {
             return pickFromGearPicker(event.x(), event.y());
+        }
+        if (genePicker.isOpen()) {
+            if (genePicker.click(event.x(), event.y())) {
+                geneFilterButton.setMessage(geneFilterLabel());
+                scroll = 0f;    // a shorter list must not stay scrolled past its end
+            }
+            return true;
         }
         Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
@@ -1091,6 +1210,7 @@ public final class HorseInfoScreen extends Screen {
             lastTab = hit;
             scroll = 0f;
             closeGearPicker();  // it is anchored to a slot that is no longer drawn
+            genePicker.close();
             applyTabWidgets();
         }
     }
@@ -1125,6 +1245,9 @@ public final class HorseInfoScreen extends Screen {
         if (pickerSlot != null) {
             int max = Math.max(0, pickerRows().size() - PICK_VISIBLE);
             pickerScroll = Math.max(0, Math.min(pickerScroll - (int) sy, max));
+            return true;
+        }
+        if (genePicker.scroll(sy)) {
             return true;
         }
         if (maxScroll > 0f) {
@@ -1201,6 +1324,9 @@ public final class HorseInfoScreen extends Screen {
         drawGearPicker(g, mouseX, mouseY);
 
         super.extractRenderState(g, mouseX, mouseY, partialTick);
+        // After super, so the menu covers the buttons it hangs under rather
+        // than the widget layer painting over the top of it.
+        genePicker.draw(g, this.font, mouseX, mouseY);
     }
 
     private void drawTabStrip(GuiGraphicsExtractor g) {
@@ -1622,10 +1748,17 @@ public final class HorseInfoScreen extends Screen {
         g.text(this.font, Component.literal(GuiText.clip(GeneCodeDisplay.shortForm(genotype), 56)),
                 x, y, ALLELE_TOK, false);
         y += lineH() + 1;
-        g.text(this.font, Component.literal(shown == total
-                        ? "all " + total + " loci, in code order"
-                        : shown + " of " + total + " loci - the rest are plain baseline"),
-                x, y, DIM_TEXT, false);
+        int pinned = pinnedGenes().size();
+        String count;
+        if (pinned > 0) {
+            count = shown + " of " + total + " loci - pinned to "
+                    + (pinned == 1 ? "one gene" : pinned + " genes");
+        } else if (shown == total) {
+            count = "all " + total + " loci, in code order";
+        } else {
+            count = shown + " of " + total + " loci - the rest are plain baseline";
+        }
+        g.text(this.font, Component.literal(count), x, y, DIM_TEXT, false);
         g.fill(x, contentTop() + GENES_HEADER_H - 5, contentRight(),
                 contentTop() + GENES_HEADER_H - 4, RULE);
     }
@@ -1651,6 +1784,14 @@ public final class HorseInfoScreen extends Screen {
      * them.
      */
     private boolean showsLocus(Gene gene) {
+        // A pin overrides both of the rules below, including the base-colour
+        // exemption. Asking for Flight and Healer and being given Extension,
+        // Agouti and Shade as well is the filter declining to do the one thing
+        // it was asked to do - and the base colour is on the Coat tab anyway.
+        List<Gene> pinned = pinnedGenes();
+        if (!pinned.isEmpty()) {
+            return pinned.contains(gene);
+        }
         if (!hideBaseline || isBaseCoatLocus(gene)) {
             return true;
         }

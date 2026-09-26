@@ -152,7 +152,7 @@ Object.assign(lang, {
   [`item.${NS}.seed_drill.tooltip1`]: 'Plants seeds on farmland it is drawn over',
   [`item.${NS}.seed_drill.tooltip2`]: 'Holds nine stacks of seeds',
   [`item.${NS}.supply_cart.tooltip1`]: 'Holds 54 stacks, and shows what is in it',
-  [`item.${NS}.supply_cart.tooltip2`]: 'One seat, a banner, and the fuller it is the harder it pulls',
+  [`item.${NS}.supply_cart.tooltip2`]: 'One seat, a banner - and hitched behind a reaper it gathers the cut',
   [`item.${NS}.animal_cart.tooltip1`]: 'Two seats for players or animals, and it can fly a banner',
   [`item.${NS}.animal_cart.tooltip2`]: 'Small animals climb in by themselves, and their weight is felt',
   [`stat.${NS}.ride_cart_cm`]: 'Distance by Cart',

@@ -3585,6 +3585,7 @@ public final class HorseBrowserScreen extends Screen {
             new Column(HorseQuery.Sort.SPEED, 40),
             new Column(HorseQuery.Sort.HEALTH, 40),
             new Column(HorseQuery.Sort.JUMP, 34),
+            new Column(HorseQuery.Sort.PULL, 30),
             new Column(HorseQuery.Sort.SIZE, 34),
             new Column(HorseQuery.Sort.BOND, 30),
             new Column(HorseQuery.Sort.WHERE, 64));
@@ -3600,7 +3601,7 @@ public final class HorseBrowserScreen extends Screen {
      * of that is exactly one failure mode: forget it and every column silently
      * changes width rather than anything visibly breaking.
      */
-    private static final int TOTAL_WEIGHT = 626;
+    private static final int TOTAL_WEIGHT = 656;
 
     /** The heading strip, one row tall, above the rows themselves. */
     private int tableHeadY() {
@@ -3883,6 +3884,9 @@ public final class HorseBrowserScreen extends Screen {
                 String.format("%.3f", row.speed()),
                 String.format("%.1f", row.health()),
                 String.format("%.2f", row.jump()),
+                // The 1-10 score, not its cart arithmetic - the information
+                // screen is where "what does that buy me in harness" lives.
+                String.format("%.1f", row.pull()),
                 // Hands in horseman's notation, "hh" dropped to fit the column -
                 // the heading says Hands. The info screen has the full form.
                 BreedStatCurve.formatHands(BreedStatCurve.handsFor(row.scale())).replace(" hh", ""),
@@ -3899,6 +3903,7 @@ public final class HorseBrowserScreen extends Screen {
                 statColour(row.speed(), HorseTraits.BASE_SPEED, plain),
                 statColour(row.health(), HorseTraits.BASE_HEALTH, plain),
                 statColour(row.jump(), HorseTraits.BASE_JUMP, plain),
+                statColour(row.pull(), HorseTraits.BASE_PULL, plain),
                 plain,
                 row.bond() < 0 ? EXPR_OFF : plain,
                 // Dimmed on "nothing is known", not on "not loaded": a horse in
