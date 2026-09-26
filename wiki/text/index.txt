@@ -2799,6 +2799,7 @@ wiki/horse-realm.html#taking-one-home	gameplay	Taking one home, without catching
 wiki/horse-realm.html#terrain	coding	The terrain is arithmetic, not a saved layout
 wiki/horse-realm.html#tests	coding	What is tested, and what a test cannot reach
 wiki/horse-realm.html#the-field	gameplay	The field
+wiki/horse-realm.html#the-table	coding	The table is the census, not a scan
 wiki/horse-realm.html#two-dimensions	coding	Two dimensions, and why they share nothing
 wiki/horse-realm.html#what	gameplay	What it is for
 wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest with a clock on it

@@ -176,6 +176,26 @@
         <code>realm.release_emeralds</code> in the server config; 0 turns it off.
     </p>
 </div>
+<div class="note">
+    <span class="label">Paying for the ones given away before it paid</span>
+    <p>
+        <code>/horsebounty</code> (operator) back-pays everybody who put a horse in the field
+        before turning one out paid anything, and <strong>rains the emeralds down on
+        them</strong>. A horse in the realm is wild, so its record's owner has been cleared on
+        purpose &mdash; that clearing <em>is</em> the donation &mdash; and the giver has to be
+        recovered from what is left: <strong>who tamed it</strong>, and failing that
+        <strong>who bred it</strong>. Those are names written for a pedigree to print, so a
+        name only pays if the server knows it as a real player; a cowboy's does not.
+    </p>
+    <p>
+        It is idempotent <strong>per horse</strong> rather than per run, so running it again
+        next month pays only what has arrived since. <code>/horsebounty preview</code> shows
+        what would happen and pays nothing; <code>/horsebounty list</code> prints who has been
+        paid. Somebody offline is recorded as owed and paid on their next login. A horse that
+        still has an owner is somebody <em>visiting</em> rather than donating, so it is
+        skipped and left for a later run.
+    </p>
+</div>
 <p>
     Horses standing <strong>near you when you step into the exit come home with you</strong>
     (about fifty blocks), so this only ever catches the ones you genuinely left. And it is
@@ -303,6 +323,57 @@
     a JSON file, and the promise that the field holds what was put in it and what was born to
     it should not rest on one. A summon, a breed egg and a foal all carry other reasons and
     are untouched.
+</p>
+
+<h2 id="the-table">The table is the census, not a scan</h2>
+<p>
+    <kbd>H</kbd> in the realm opens the browser on a <strong>Horse realm</strong> tab listing
+    <em>every horse in the field</em> &mdash; sortable, filterable and buyable exactly like
+    <em>My horses</em>. The tab is only there while you are standing in the realm.
+</p>
+<p>
+    The first version walked the realm level's live entities, which is the natural shape for
+    &ldquo;what is in the field right now&rdquo; and was wrong for the one reason that
+    matters: <strong>most of the field is unloaded most of the time</strong>. It is 1,600
+    blocks in radius, a player loads a dozen chunks of it, and so the tab listed the horses
+    within sight of whoever opened it and called that the field. A catalogue that omits
+    everything you have not already walked past is not a catalogue.
+</p>
+<p>
+    So the rows come from two things that need no chunk loaded. <code>HorseRealmSize</code>'s
+    <strong>census</strong> answers <em>who</em> &mdash; it is maintained by the horses
+    themselves and deliberately keeps a horse nobody has loaded for a week. The
+    <strong>ancestry database</strong> answers <em>what</em>: a name, a breed, a generation
+    and a genotype for every horse that ever existed. A horse that happens to be loaded then
+    overlays the handful of facts only an entity can answer &mdash; bond, foal-or-grown, herd,
+    exact position &mdash; exactly as the stable's roster does.
+</p>
+<div class="note">
+    <span class="label">Why it arrives in pieces, and only once</span>
+    <p>
+        A full genotype code is <strong>5,612 characters</strong>, and a row carries one
+        because the table sorts and filters on it. Three thousand rows will not fit in a
+        packet at any cap, so the roster is sent as a run of
+        <code>RealmRosterPayload</code>s, a hundred rows each, and the table draws itself as
+        it fills &mdash; which is the honest thing to show while it is filling.
+    </p>
+    <p>
+        It is sent <strong>once, unasked, when you walk in</strong>, so that pressing
+        <kbd>H</kbd> finds it already there; after that the server keeps everyone in the field
+        in step with one-horse deltas rather than making each client re-derive thousands of
+        rows on a timer. The server-wide record was already there &mdash; it is the census,
+        and its <code>note</code> and <code>forget</code> are the only two moments the field
+        changes. The client keeps its copy for as long as you are in the realm and drops it on
+        the way out; <strong>Refresh</strong> is how you ask again.
+    </p>
+</div>
+<p>
+    <strong>Bring home works on a horse nobody has loaded</strong>, which is nearly all of
+    them. The census records where each horse was last seen standing &mdash; exact rather than
+    stale, since an unloaded entity does not move &mdash; so the claim forces that chunk in,
+    waits up to two seconds for the animal to appear, and then runs the ordinary claim with
+    all its ordinary refusals. If it does not appear you are told so and your ticket is
+    untouched.
 </p>
 
 <h2 id="terrain">The terrain is arithmetic, not a saved layout</h2>
@@ -789,7 +860,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of the whole field</strong> you can buy a horse out of for a holding pen ticket &mdash; which drew nothing at all until 2026-09-26 and has still not been seen with rows in it &mdash; and a horse now only goes through a portal when a player is <strong>taking it through</strong>.</p>
+    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of every horse in the field</strong>, built from the census rather than from what is loaded, that you can buy any horse out of for a holding pen ticket &mdash; it drew nothing at all until 2026-09-26 and has still not been seen with rows in it; a horse now only goes through a portal when a player is <strong>taking it through</strong>; turning one out <strong>pays</strong>, with <code>/horsebounty</code> to settle up for the ones given away before it did; and <strong>the census itself starts empty on an existing world</strong>, which is the thing to read first.</p>
 </div>
 
 <h3 id="verify-release-fee">Turning a horse out pays, and only when somebody is there (2026-09-26, NOT played)</h3>
@@ -803,6 +874,31 @@
     <li>Set <code>realm.release_emeralds</code> to 0 and check both paths go back to silent.</li>
     <li>Worth watching over a few sessions whether a settled paddock makes this an income
         stream rather than a courtesy. It is config precisely because nobody knows yet.</li>
+</ul>
+
+<h3 id="verify-bounty">The back-payment command (2026-09-26, NOT played)</h3>
+<p>
+    <code>/horsebounty</code> pays for every horse given to the field before giving one paid
+    anything. It moves emeralds to real people on a real server, so <strong>preview
+    first</strong> &mdash; and after the census reset above, walk the field before either.
+</p>
+<ul>
+    <li><code>/horsebounty preview</code> must pay nothing and change nothing. Run it twice
+        and read the same numbers.</li>
+    <li>Then <code>/horsebounty</code>, and the emeralds should <strong>fall</strong> on each
+        recipient who is online rather than appearing in the pack &mdash; a full inventory
+        must not swallow a back-payment silently.</li>
+    <li><strong>Run it again immediately.</strong> The right answer is &ldquo;nobody is owed
+        anything&rdquo;. Paying twice is the failure this ledger exists to prevent.</li>
+    <li>Check the attribution ladder on a horse you know the history of: tamed-by should win
+        over bred-by, and a horse bred by a <em>cowboy</em> and tamed by nobody should land in
+        the &ldquo;could not be traced&rdquo; count rather than paying anyone.</li>
+    <li>An offline recipient should be listed as owed, and the emeralds should rain on them at
+        their next login.</li>
+    <li>Turn a horse out <em>after</em> a run, then run it again: it must not pay for that
+        one, since the release already did. The release fee writes its horse into the same
+        ledger for exactly this reason &mdash; the command cannot otherwise tell a horse
+        released before the fee existed from one released a minute ago.</li>
 </ul>
 
 <h3 id="verify-no-spawns">Nothing arrives in the field that nobody sent (2026-09-26, NOT played)</h3>
@@ -841,18 +937,55 @@
         table (below) is the cheap way to check nothing arrived that you did not send.</li>
 </ul>
 
-<h3 id="verify-realm-tab">The realm table, and buying a horse out of it (2026-09-25, NOT played)</h3>
+<h3 id="verify-census-reset">The census starts empty on an existing world (2026-09-26, NOT played)</h3>
+<p>
+    <strong>Read this before testing anything else on this page.</strong> The census changed
+    from a list of ids to a list of ids <em>and positions</em>, under a new key, so a world
+    that already had a realm loads with the field's <strong>radius intact and its census
+    empty</strong>. The radius was the thing that had to survive &mdash; losing it would put
+    the wall inside the field.
+</p>
+<ul>
+    <li>It rebuilds itself: every horse that ticks in the realm enrols. So <strong>one lap of
+        the field</strong> restores it, and anything standing near the exit is back within
+        seconds.</li>
+    <li>Until then the table is short and <code>/horsebounty</code> sees fewer horses than are
+        really there. That is the order to do it in: walk the field, <em>then</em> run the
+        bounty.</li>
+    <li>A horse in country nobody walks back into stays missing. If the table's count settles
+        below what you expect, that is where the difference is.</li>
+</ul>
+
+<h3 id="verify-realm-tab">The realm table: every horse, and buying one (2026-09-26, NOT played)</h3>
 <ul>
     <li><strong>It draws at all.</strong> The tab was left out of the browser's render switch,
         which is not a compile error, so it was a blank panel &mdash; reported 2026-09-26,
         &ldquo;shows literally nothing while I'm in the horse realm&rdquo;. Fixed; nobody has
         yet seen a row in it, so everything below this line is still unplayed.</li>
-    <li><kbd>H</kbd> <strong>inside the realm</strong> opens on the Horse realm tab; <kbd>H</kbd>
-        anywhere else opens where you left it, and the tab is still there to click.</li>
+    <li><strong>It should list the whole field, not what you can see.</strong> The test is a
+        horse you know is a thousand blocks away in unloaded country: it must be in the table.
+        This is the change the rest of the tab exists for, and the old behaviour looked
+        perfectly plausible while being wrong.</li>
+    <li><strong>The tab is only there inside the realm</strong> and gone outside it. Leave
+        while it is open and the strip should lose it without the browser misdrawing; a
+        remembered realm tab should fall back to <em>My horses</em> on the next open.</li>
+    <li><strong>It fills rather than blocking.</strong> A big field should count up
+        &mdash; &ldquo;N horses so far...&rdquo; &mdash; over a second or two. Watch for a
+        server hitch while it does; the batches are meant to stop that.</li>
+    <li><strong>It is not re-fetched.</strong> Switch away and back, close and reopen: no new
+        count-up. Then turn a horse out or claim one and watch the table change <em>without</em>
+        a reload &mdash; that is the delta path. <strong>Refresh</strong> should still force a
+        full re-count.</li>
+    <li><kbd>H</kbd> <strong>inside the realm</strong> opens on the Horse realm tab.</li>
     <li>The filter box, the sortable headings, the scroll wheel and <strong>Refresh</strong>
-        all belong to this tab too, and were dark with it.</li>
-    <li>The table lists horses that are <em>in the field now</em> &mdash; walk one out through
-        the exit, refresh, and it should be gone.</li>
+        all belong to this tab too, and were dark with it. The footer should describe a
+        selected realm horse &mdash; it used to read the stable's roster, so it was blank for
+        almost every row here.</li>
+    <li><strong>Bring home on an unloaded horse.</strong> The one to watch: pick a horse far
+        from you, buy it, and it should say &ldquo;sending for it...&rdquo; and then arrive.
+        If it says it could not be found, the chunk force is not producing the entity &mdash;
+        that API use is flagged unverified in <code>RealmClaim.fetch</code>. Your ticket must
+        survive that failure.</li>
     <li><strong>Bring home</strong> with no holding pen ticket: the button is grey and says
         why. With a ticket but no pen sign hung: it refuses, in chat, and <strong>does not
         spend the ticket</strong>.</li>
