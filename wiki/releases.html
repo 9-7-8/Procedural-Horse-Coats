@@ -61,6 +61,78 @@
     </p>
 </div>
 
+<h2 id="v0-5-028">0.5.028 &mdash; a horse ate the portal, the field moves up, and you can see which horse is in which jar</h2>
+
+<div class="note">
+    <span class="label">Read this before you update</span>
+    <p>
+        <strong>Portals are framed in cobblestone now, not hay.</strong> Any portal currently
+        standing in a hay frame will stop being a portal &mdash; rebuild the frame in
+        cobblestone and light it again with a golden carrot. And <strong>the horse realm's
+        floor moves from y&nbsp;0 to y&nbsp;64</strong>; if you already have one, it is lifted
+        in place, a chunk at a time, as you walk through it. Nothing is deleted, but it is a
+        real rewrite of that dimension's terrain, so it is worth having a backup you trust.
+    </p>
+</div>
+
+<p>
+    <strong>A hay bale is the biggest meal in this mod, and a horse eats it straight off the
+    ground.</strong> Which means a portal framed in hay is a portal the horses standing next to
+    it will eventually eat &mdash; and when the frame goes, the portal goes, with whoever was
+    on the far side still on the far side. Neither half of that was a bug. They just met.
+</p>
+<p>
+    So <strong>the frame is cobblestone</strong>. Build the same upright rectangle you always
+    did, light it with the same <strong>golden carrot</strong>, and nothing wants to eat it.
+</p>
+
+<h3>The horse realm</h3>
+<ul>
+    <li><strong>The floor is at y&nbsp;64 and it is grass</strong>, not dirt at y&nbsp;0. The
+        sky is where your eye expects it. A realm you had already generated is carried up
+        without losing anything that was in it.</li>
+    <li><strong>Everybody arrives at the same exit</strong> &mdash; the one in the middle of
+        the field. It used to be one of a hundred, picked from where you built your Overworld
+        portal, so two players never landed together. That turned out to keep the
+        <em>horses</em> apart instead, scattered across sixteen thousand blocks in pockets that
+        never meet, which is the opposite of what a shared field full of horses is for. The
+        other ninety-nine exits are all still there to walk home from.</li>
+    <li><strong>A horse you leave behind goes wild on its own.</strong> No item, nothing to
+        remember: walk out, and anything of yours still standing in the field is nobody's a few
+        seconds later &mdash; healed, free, ready to join a band. Horses standing near you when
+        you leave still come home with you, so it only catches the ones you actually left.
+        Logging out, dying, or being teleported out all count as leaving, and a horse out in
+        country nobody has loaded goes wild the moment somebody walks back to it.</li>
+    <li>The <a href="item-freedom-stick.html">freedom stick</a> still works, as the deliberate
+        version: it turns one horse out on the spot and hands you its saddle back.</li>
+    <li><strong>You can no longer fall out of the world there.</strong> The realm was a sheet
+        of bedrock with nothing underneath and no floor check, so anything that got through it
+        fell forever &mdash; silently, since a horse in the realm cannot die.</li>
+</ul>
+
+<h3>Stasis chambers</h3>
+<ul>
+    <li><strong>You can see the horse in the jar.</strong> A chamber with a horse in it has a
+        window in its glass now, and in a <a href="horse-stasis.html">Horse Stasis Bank</a> the
+        grid draws that horse's own coat behind the window &mdash; the real horse, in the
+        colour it really is. A bank of forty horses and a bank of forty empties no longer look
+        identical. The tier's colour stays, as the liquid the horse is standing in.</li>
+    <li><strong>The Browse tab has portraits</strong> beside every row, the same ones the horse
+        browser's <em>My horses</em> table draws.</li>
+    <li><strong><em>Send home</em> reaches into a chamber.</strong> The button on every row of
+        <em>My horses</em> now works on a horse that is in stasis: it comes out of the chamber
+        straight into its stall, and <strong>the empty jar is left exactly where the full one
+        was</strong> &mdash; in the bank slot, or in your pack. It finds the chamber on you or
+        in any of your own banks, wherever in the world they are. Still costs a ticket, and
+        every refusal leaves the horse in the bottle with the ticket unspent.</li>
+</ul>
+
+<p class="small">
+    None of this has been played yet &mdash; see
+    <a href="horse-realm.html#verification">the realm's open checks</a> and
+    <a href="horse-stasis.html#verification">the bank's</a>.
+</p>
+
 <h2 id="v0-5-027">0.5.027 &mdash; a field where a horse cannot be lost, two breeds out of the Nether, and the recipe flag that was still wrong</h2>
 
 <p>
