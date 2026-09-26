@@ -2,6 +2,8 @@ package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.network.CowboyFilterPayload;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
@@ -43,6 +45,22 @@ import org.jspecify.annotations.Nullable;
  * what is being sold rather than by who is selling it. That also means the box
  * appears for <b>every</b> cowboy, which is what was asked for: the arcane
  * dealer needs it most, and the ordinary one is no worse for having it.
+ *
+ * <h2>Why the box never appeared, until 2026-09-26</h2>
+ * It was decided <i>at screen init</i>, by reading the menu's offers - and at
+ * screen init <b>there are no offers</b>. The server sends the open-screen
+ * packet and the offer list as two packets in that order, so the client builds
+ * the screen against an empty {@code MerchantMenu} and fills it a moment later.
+ * {@code sellsHorses} therefore answered false every single time, the box was
+ * never created, and the feature read as "the filter does nothing" because
+ * there was nothing on screen to do it with. (Owner, 2026-09-26.)
+ *
+ * <p>So the box is now built for <b>every</b> merchant screen and shown when the
+ * offers turn out to be a cowboy's, which is a question asked each tick until it
+ * is answered. Once it <b>is</b> answered the answer is <b>latched</b>, and that
+ * is not an optimisation: filtering down to no matches empties the offer list,
+ * which would un-answer the question and take away the very box the player needs
+ * to clear the filter with.
  */
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class CowboyTradeFilterHooks {
@@ -51,7 +69,20 @@ public final class CowboyTradeFilterHooks {
     private static final int BOX_H = 14;
     private static final int GAP = 4;
 
+    /** The "▾" that opens the saved searches, beside the box. */
+    private static final int SAVED_W = 14;
+
     private static @Nullable EditBox filterBox;
+
+    /** The screen the box belongs to, so a tick knows whether it is still up. */
+    private static @Nullable MerchantScreen owner;
+
+    /** Have the offers arrived and proved this a cowboy? Latched - see the class note. */
+    private static boolean confirmed;
+
+    private static final SavedSearchPicker SAVED = new SavedSearchPicker();
+
+    private static @Nullable Button savedButton;
 
     private CowboyTradeFilterHooks() {
     }
@@ -59,7 +90,11 @@ public final class CowboyTradeFilterHooks {
     @SubscribeEvent
     static void onScreenInit(ScreenEvent.Init.Post event) {
         filterBox = null;
-        if (!(event.getScreen() instanceof MerchantScreen screen) || !sellsHorses(screen)) {
+        savedButton = null;
+        owner = null;
+        confirmed = false;
+        SAVED.close();
+        if (!(event.getScreen() instanceof MerchantScreen screen)) {
             return;
         }
         int left = ((AbstractContainerScreen<?>) screen).getGuiLeft();
@@ -69,11 +104,76 @@ public final class CowboyTradeFilterHooks {
         // with no spare pixels, the way the horse screen's i button found out.
         EditBox box = new EditBox(screen.getMinecraft().font,
                 left, top - BOX_H - GAP, BOX_W, BOX_H, Component.literal("Filter"));
-        box.setHint(Component.literal("breed, gene or allele"));
+        box.setHint(Component.literal("mare AND galaxy = any"));
         box.setMaxLength(CowboyFilterPayload.MAX_QUERY);
         box.setResponder(query -> ClientPacketDistributor.sendToServer(new CowboyFilterPayload(query)));
+        // Hidden until the offers arrive and say this is a cowboy.
+        box.visible = false;
+        box.active = false;
         filterBox = box;
         event.addListener(box);
+
+        // No room here for a query builder, so this window gets the other two
+        // ways in: type it, or pick one you saved somewhere roomier.
+        Button saved = Button.builder(Component.literal("▾"), b -> SAVED.open(
+                        left + BOX_W + GAP, top - GAP, box.getValue(),
+                        screen.width, screen.height))
+                .bounds(left + BOX_W + GAP, top - BOX_H - GAP, SAVED_W, BOX_H)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                        "Saved searches - the same list the horse browser uses.")))
+                .build();
+        saved.visible = false;
+        saved.active = false;
+        savedButton = saved;
+        event.addListener(saved);
+        owner = screen;
+    }
+
+    /**
+     * Ask, until it is answered, whether the offers make this a cowboy's window.
+     * A tick rather than a render because the answer changes at most once.
+     */
+    @SubscribeEvent
+    static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        MerchantScreen screen = owner;
+        if (screen == null || filterBox == null) {
+            return;
+        }
+        if (net.minecraft.client.Minecraft.getInstance().screen != screen) {
+            return;
+        }
+        if (!confirmed && sellsHorses(screen)) {
+            confirmed = true;
+            filterBox.visible = true;
+            filterBox.active = true;
+            if (savedButton != null) {
+                savedButton.visible = true;
+                savedButton.active = true;
+            }
+        }
+    }
+
+    /** The saved-search menu is drawn over the window, so it goes on last. */
+    @SubscribeEvent
+    static void onRender(ScreenEvent.Render.Post event) {
+        if (owner != null && SAVED.isOpen()
+                && event.getScreen() == owner
+                && event.getGuiGraphics() instanceof GuiGraphicsExtractor g) {
+            SAVED.draw(g, owner.getMinecraft().font, event.getMouseX(), event.getMouseY());
+        }
+    }
+
+    /** An open menu eats the next click, wherever it lands. */
+    @SubscribeEvent
+    static void onClick(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (owner == null || !SAVED.isOpen() || event.getScreen() != owner) {
+            return;
+        }
+        SavedSearchPicker.Pick pick = SAVED.click(event.getMouseX(), event.getMouseY());
+        if (pick != null && filterBox != null) {
+            filterBox.setValue(pick.query());   // the responder sends it
+        }
+        event.setCanceled(true);
     }
 
     /**
@@ -92,6 +192,23 @@ public final class CowboyTradeFilterHooks {
      * GLFW's character callback is separate, so {@code charTyped} still delivers
      * the letter and the text still types.
      */
+    /** The saved menu takes the keyboard while it is open - arrows, Escape, type-to-jump. */
+    @SubscribeEvent
+    static void onKeyPressedPre(ScreenEvent.KeyPressed.Pre event) {
+        if (owner != null && SAVED.isOpen() && event.getScreen() == owner
+                && SAVED.keyPressed(event.getKeyCode())) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    static void onCharTyped(ScreenEvent.CharacterTyped.Pre event) {
+        if (owner != null && SAVED.isOpen() && event.getScreen() == owner
+                && SAVED.charTyped(event.getCodePoint())) {
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     static void onKeyPressed(ScreenEvent.KeyPressed.Post event) {
         EditBox box = filterBox;
@@ -108,6 +225,10 @@ public final class CowboyTradeFilterHooks {
     static void onScreenClosed(ScreenEvent.Closing event) {
         if (event.getScreen() instanceof MerchantScreen) {
             filterBox = null;
+            savedButton = null;
+            owner = null;
+            confirmed = false;
+            SAVED.close();
         }
     }
 

@@ -664,6 +664,11 @@ public final class HorseInfoScreen extends Screen {
     private int pickerY;
     private int pickerScroll;
 
+    /** Alphabetical order plus type-to-jump, the same as every other menu. */
+    private final TypeAhead pickerType = new TypeAhead();
+
+    private int pickerCursor;
+
     /**
      * One line of the picker. {@code index} is the player inventory slot the
      * stack came from, or {@link TackSlotPayload#TAKE_OFF} for the take-off row
@@ -675,6 +680,8 @@ public final class HorseInfoScreen extends Screen {
     private void openGearPicker(HorseTackSlot slot, int anchorX, int anchorY) {
         pickerSlot = slot;
         pickerScroll = 0;
+        pickerCursor = 0;
+        pickerType.reset();
         pickerX = Math.max(4, Math.min(anchorX, this.width - PICK_W - 4));
         int h = Math.min(PICK_VISIBLE, Math.max(1, pickerRows().size())) * PICK_ROW_H;
         pickerY = Math.max(4, Math.min(anchorY, this.height - h - 4));
@@ -682,6 +689,7 @@ public final class HorseInfoScreen extends Screen {
 
     private void closeGearPicker() {
         pickerSlot = null;
+        pickerType.reset();
     }
 
     /**
@@ -712,13 +720,39 @@ public final class HorseInfoScreen extends Screen {
             return rows;
         }
         var inventory = player.getInventory();
+        List<PickRow> fits = new ArrayList<>();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (pickerSlot.accepts(horse, stack)) {
-                rows.add(new PickRow(i, stack, stack.getHoverName().getString()));
+                fits.add(new PickRow(i, stack, stack.getHoverName().getString()));
             }
         }
+        // By name, not by where it happens to sit in the pack - the pack's order
+        // is meaningless to the eye and makes the same list read differently
+        // every time something is picked up. The take-off row stays pinned.
+        fits.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.label(), b.label()));
+        rows.addAll(fits);
         return rows;
+    }
+
+    /** Type at the gear picker and it jumps to the item. */
+    private boolean pickerTyped(int codepoint) {
+        List<PickRow> rows = pickerRows();
+        List<String> labels = new ArrayList<>();
+        for (PickRow row : rows) {
+            labels.add(row.label());
+        }
+        int found = pickerType.accept(codepoint, labels, pickerCursor);
+        if (found < 0) {
+            return true;
+        }
+        pickerCursor = found;
+        if (found < pickerScroll) {
+            pickerScroll = found;
+        } else if (found >= pickerScroll + PICK_VISIBLE) {
+            pickerScroll = found - PICK_VISIBLE + 1;
+        }
+        return true;
     }
 
     /**
@@ -750,8 +784,9 @@ public final class HorseInfoScreen extends Screen {
         for (int i = 0; i < shown && pickerScroll + i < rows.size(); i++) {
             PickRow row = rows.get(pickerScroll + i);
             int ry = pickerY + i * PICK_ROW_H;
-            if (mouseX >= pickerX && mouseX < pickerX + PICK_W
-                    && mouseY >= ry && mouseY < ry + PICK_ROW_H) {
+            if ((mouseX >= pickerX && mouseX < pickerX + PICK_W
+                    && mouseY >= ry && mouseY < ry + PICK_ROW_H)
+                    || pickerScroll + i == pickerCursor) {
                 g.fill(pickerX, ry, pickerX + PICK_W, ry + PICK_ROW_H, PICK_HOVER);
             }
             g.item(row.stack(), pickerX + 1, ry + 1);
@@ -938,6 +973,12 @@ public final class HorseInfoScreen extends Screen {
      */
     @Override
     public boolean keyPressed(KeyEvent event) {
+        // Before super, so Escape closes the open picker rather than the screen
+        // it is drawn on top of.
+        if (pickerSlot != null && event.key() == 256) {
+            closeGearPicker();
+            return true;
+        }
         if (super.keyPressed(event)) {
             return true; // includes Escape, which Screen turns into onClose()
         }
@@ -949,6 +990,15 @@ public final class HorseInfoScreen extends Screen {
             return true;
         }
         return false;
+    }
+
+    /** Typing at an open gear picker jumps to the item, as every menu here does. */
+    @Override
+    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        if (pickerSlot != null && pickerTyped(event.codepoint())) {
+            return true;
+        }
+        return super.charTyped(event);
     }
 
     @Override

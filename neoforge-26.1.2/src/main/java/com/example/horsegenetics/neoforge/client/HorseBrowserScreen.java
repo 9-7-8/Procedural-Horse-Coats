@@ -138,6 +138,10 @@ public final class HorseBrowserScreen extends Screen {
         // always here rather than only inside the realm: looking at what is out
         // there is exactly what you want to do from home, before deciding to go.
         REALM("Horse realm"),
+        // Short on purpose: it sits in a strip that already overflows, and
+        // "Advanced query builder" would push two tabs off the end to say what
+        // one word says. (Owner, 2026-09-26.)
+        QUERY("Query"),
         BREEDING_PREVIEW("Breeding preview"),
         LOG("Log"),
         GENE_DATABASE("Gene database"),
@@ -487,6 +491,11 @@ public final class HorseBrowserScreen extends Screen {
     private int geneDdY;
     private int geneDdScroll;
 
+    /** Alphabetical order plus type-to-jump, the same as every other menu. */
+    private final TypeAhead geneDdType = new TypeAhead();
+
+    private int geneDdCursor;
+
     /** The gene the allele picker is currently about, or null for "any". */
     private Gene pickedGene;
 
@@ -510,6 +519,13 @@ public final class HorseBrowserScreen extends Screen {
 
     /** The saved-search menu, shared with the stasis bank - see SavedSearchPicker. */
     private final SavedSearchPicker savedSearches = new SavedSearchPicker();
+
+    /**
+     * The Query tab's model. Static, like the tab and the scroll positions, so
+     * that a half-built query survives closing the browser to go and look at a
+     * horse - which is exactly when somebody closes it.
+     */
+    private static final QueryBuilderTab builder = new QueryBuilderTab();
 
     private Button savedSearchButton;
     private Button settledToggle;
@@ -838,7 +854,9 @@ public final class HorseBrowserScreen extends Screen {
         // Asked for on every open, not only the first - see
         // requestRosterUnlessJustAsked(). Birth and death pushes are still owed;
         // they are on the browser's roadmap tab.
-        if (tab == Tab.MY_HORSES) {
+        // QUERY too: its live match count is read off the stable, and a count
+        // of zero because nobody asked for the roster reads as a broken query.
+        if (tab == Tab.MY_HORSES || tab == Tab.QUERY) {
             requestRosterUnlessJustAsked();
         }
         // The realm tab is gone the moment you leave the field, so a remembered
@@ -1056,10 +1074,13 @@ public final class HorseBrowserScreen extends Screen {
         int h = Math.min(GDD_VISIBLE, Math.max(1, geneDdLabels().size())) * GDD_ROW_H;
         geneDdY = Math.max(4, Math.min(anchorY, this.height - h - 4));
         geneDdScroll = 0;
+        geneDdCursor = 0;
+        geneDdType.reset();
     }
 
     private void closeGeneDd() {
         geneDd = GeneDd.NONE;
+        geneDdType.reset();
     }
 
     /**
@@ -1070,19 +1091,46 @@ public final class HorseBrowserScreen extends Screen {
         List<String> out = new ArrayList<>();
         switch (geneDd) {
             case GENE -> {
-                out.add("Any gene");
+                List<String> names = new ArrayList<>();
                 for (Gene gene : ddGenes) {
-                    out.add(gene.name());
+                    names.add(gene.name());
                 }
+                // "Any gene" stays pinned at the top: it is the way OUT of the
+                // narrowing, not one of the things to narrow to, and a row that
+                // moves about under the pointer is a row clicked by accident.
+                out.add("Any gene");
+                out.addAll(TypeAhead.sorted(names));
             }
             case ALLELE -> {
                 for (Allele allele : ddAlleles) {
                     out.add(allele.token() + "  -  " + allele.label());
                 }
+                out = TypeAhead.sorted(out);
             }
             default -> { }
         }
         return out;
+    }
+
+    /**
+     * Type at the gene picker and it jumps. The list is every gene the player's
+     * horses carry, which on a big stable is far past a screenful.
+     */
+    private boolean geneDdTyped(int codepoint) {
+        List<String> labels = geneDdLabels();
+        int found = geneDdType.accept(codepoint, labels, geneDdCursor);
+        if (found < 0) {
+            return true;
+        }
+        geneDdCursor = found;
+        if (found < geneDdScroll) {
+            geneDdScroll = found;
+        } else if (found >= geneDdScroll + GDD_VISIBLE) {
+            geneDdScroll = found - GDD_VISIBLE + 1;
+        }
+        geneDdScroll = Math.max(0, Math.min(geneDdScroll,
+                Math.max(0, labels.size() - GDD_VISIBLE)));
+        return true;
     }
 
     /**
@@ -1296,8 +1344,13 @@ public final class HorseBrowserScreen extends Screen {
         // Before super: while the name field is up it owns the keyboard, or
         // Escape closes the whole browser instead of the little menu on top of
         // it, and a letter reaches the tab strip.
-        if (savedSearches.isNaming()) {
-            return savedSearches.keyPressed(event.key());
+        // Whenever it is open, not only while naming: the list takes the
+        // arrows and Escape so type-to-jump can be finished from the keyboard.
+        if (savedSearches.isOpen() && savedSearches.keyPressed(event.key())) {
+            return true;
+        }
+        if (tab == Tab.QUERY && builder.menuOpen() && builder.keyPressed(event.key())) {
+            return true;
         }
         if (super.keyPressed(event)) {
             return true;
@@ -1310,8 +1363,14 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
-        if (savedSearches.isNaming()) {
-            return savedSearches.charTyped(event.codepoint());
+        if (savedSearches.isOpen() && savedSearches.charTyped(event.codepoint())) {
+            return true;
+        }
+        if (tab == Tab.QUERY && builder.menuOpen() && builder.charTyped(event.codepoint())) {
+            return true;
+        }
+        if (geneDd != GeneDd.NONE && geneDdTyped(event.codepoint())) {
+            return true;
         }
         return super.charTyped(event);
     }
@@ -1385,6 +1444,14 @@ public final class HorseBrowserScreen extends Screen {
         if (geneDd != GeneDd.NONE) {
             return pickFromGeneDd(event.x(), event.y());
         }
+        if (tab == Tab.QUERY && event.button() == 0) {
+            // Before the tab strip only when a menu is open, which owns the
+            // click; otherwise the strip still wins, so you can leave the tab.
+            if (builder.menuOpen() || !overTabStrip(event.x(), event.y())) {
+                handleBuilderAction(builder.click(event.x(), event.y()));
+                return true;
+            }
+        }
         if (recipeMenuClicked(event.x(), event.y())) {
             return true;
         }
@@ -1417,7 +1484,8 @@ public final class HorseBrowserScreen extends Screen {
                 // as the one in init(): the client cache lives until disconnect,
                 // so the old "already received one" guard meant "never ask again
                 // this session".
-                if (tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES) {
+                if (tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES
+                        || tab == Tab.QUERY) {
                     requestRosterUnlessJustAsked();
                 }
                 if (tab == Tab.REALM) {
@@ -1646,6 +1714,9 @@ public final class HorseBrowserScreen extends Screen {
         if (savedSearches.isOpen() && sy != 0 && savedSearches.scroll(sy)) {
             return true;
         }
+        if (tab == Tab.QUERY && sy != 0 && builder.scroll(sy)) {
+            return true;
+        }
         if (geneDd != GeneDd.NONE && sy != 0) {
             int max = Math.max(0, geneDdLabels().size() - GDD_VISIBLE);
             geneDdScroll = Math.max(0, Math.min(geneDdScroll - (int) sy, max));
@@ -1784,6 +1855,7 @@ public final class HorseBrowserScreen extends Screen {
             // *statement* over an enum need not be exhaustive), and what it
             // looks like in game is a tab that draws literally nothing.
             case MY_HORSES, REALM -> drawMyHorses(g, mouseX, mouseY);
+            case QUERY -> drawQueryBuilder(g, mouseX, mouseY);
             case LOG -> drawLog(g, mouseX, mouseY);
             case GENE_DATABASE -> {
                 drawGeneList(g, mouseX, mouseY, contentBottom());
@@ -1798,6 +1870,9 @@ public final class HorseBrowserScreen extends Screen {
 
         // Last, so they cover the table they are anchored over.
         drawGeneDd(g, mouseX, mouseY);
+        if (tab == Tab.QUERY) {
+            builder.drawMenu(g, this.font, mouseX, mouseY);
+        }
         savedSearches.draw(g, this.font, mouseX, mouseY);
     }
 
@@ -3597,6 +3672,60 @@ public final class HorseBrowserScreen extends Screen {
 
     private boolean showingRealm() {
         return tab == Tab.REALM;
+    }
+
+    /**
+     * <b>The Query tab.</b> The builder owns its own rows and menus; this draws
+     * a heading, hands it the space and the live match count, and turns its two
+     * actions into the two things only the screen can do - put the query in the
+     * roster box, or hand it to the saved-search menu.
+     */
+    private void drawQueryBuilder(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int l = fsLeft();
+        int top = contentTop() + 4;
+        drawFitted(g, "Build a search here, then use it on any tab - or save it and pick it "
+                        + "up in the stasis bank or at a cowboy's counter.",
+                l + 2, top, fsRight() - l - 4, LABEL);
+
+        // The count is live, over whichever roster the query would be used on.
+        String text = builder.query();
+        List<HorseListing> against = rosterAll();
+        int matched = text.isEmpty() ? against.size()
+                : HorseQuery.filter(against, text).size();
+
+        builder.draw(g, this.font, l + 2, top + 14, fsRight() - l - 4,
+                mouseX, mouseY, matched, against.size());
+    }
+
+    /** Use it, or save it. Both need the screen rather than the builder. */
+    private void handleBuilderAction(QueryBuilderTab.Action action) {
+        String text = builder.query();
+        if (text.isEmpty()) {
+            return;
+        }
+        if (action == QueryBuilderTab.Action.USE) {
+            horseFilter = text;
+            if (horseFilterBox != null) {
+                horseFilterBox.setValue(text);
+            }
+            horseScroll = 0;
+            // Onto the table it was built for, because a query you cannot see
+            // the results of is a query you cannot tell is right.
+            tab = ClientRealmWatch.inRealm() && showingRealm() ? Tab.REALM : Tab.MY_HORSES;
+            applyTabWidgetsForQuery();
+            return;
+        }
+        savedSearches.open(fsLeft() + 2, contentTop() + 40, text, this.width, this.height);
+    }
+
+    /** The tab changed from code rather than from a click on the strip. */
+    private void applyTabWidgetsForQuery() {
+        listScroll = 0;
+        detailScroll = 0f;
+        applyFilter();
+        if (tab == Tab.MY_HORSES) {
+            requestRosterUnlessJustAsked();
+        }
     }
 
     private List<HorseListing> rosterAll() {

@@ -1,9 +1,12 @@
 package com.example.horsegenetics.neoforge.entity;
 
+import com.example.horsegenetics.common.horse.HorseListing;
+import com.example.horsegenetics.common.horse.HorseQuery;
 import com.example.horsegenetics.common.horse.HorseRecord;
-import com.example.horsegenetics.common.horse.HorseSearch;
 import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.CowboyDoorGoal;
@@ -430,7 +433,7 @@ public class Cowboy extends AbstractVillager {
             // rather than by the screen drawing fewer rows: a trade comes back as
             // an index into this list, so a client that hid rows would be buying
             // by numbers the server does not share. See CowboyFilterPayload.
-            if (!HorseSearch.matches(record, offerFilter)) {
+            if (!matchesFilter(horse, record)) {
                 continue;
             }
             merchantOffers.add(new MerchantOffer(
@@ -440,6 +443,40 @@ public class Cowboy extends AbstractVillager {
                     0,   // they are not a levelling villager
                     0.0F));
         }
+    }
+
+    /**
+     * <b>The counter speaks the same language as every other search box.</b>
+     *
+     * <p>It used to use {@code HorseSearch}, a second engine that did a
+     * space-separated AND of substrings over a {@code HorseRecord} - so
+     * {@code galaxy = any} meant nothing here and {@code gen&gt;2} meant nothing
+     * here, while both worked in the browser two keys away. One language, one
+     * parser: this builds the row {@code HorseQuery} expects and asks it.
+     * (Owner, 2026-09-26.)
+     *
+     * <p>The horse is <b>always loaded</b> - {@code updateTrades} has just
+     * resolved the entity to get here - so the live half of a listing is real
+     * rather than unknown, which is what lets a dealer's string be filtered on
+     * age and bond as well as on genes.
+     */
+    private boolean matchesFilter(Horse horse, HorseRecord record) {
+        if (offerFilter.isEmpty()) {
+            return true;
+        }
+        return HorseQuery.matches(listingOf(horse, record), offerFilter);
+    }
+
+    /** One of the string as a table row, for the query language to read. */
+    private static HorseListing listingOf(Horse horse, HorseRecord record) {
+        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
+        return HorseListing.of(
+                record.id(), record.firstName(), record.lastName(), record.barnName().orElse(""),
+                record.lineage().displayName(), record.generation(),
+                com.example.horsegenetics.common.genetics.Genotype.parse(record.geneticCode()),
+                !horse.isBaby(), horse.isTamed(), care.bond(), care.inHerd(), true,
+                "for sale", record.tamedBy().orElse(""), record.bredBy().orElse(""),
+                record.hasKnownParents(), record.gelded());
     }
 
     /** The item one of their horses is sold as: a signed paper, named for the horse. */

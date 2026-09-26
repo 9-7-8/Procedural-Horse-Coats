@@ -324,8 +324,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     public boolean keyPressed(KeyEvent event) {
         // While the name field is up it owns the keyboard, or Escape closes the
         // whole bank instead of the little menu on top of it.
-        if (this.savedSearches.isNaming()) {
-            return this.savedSearches.keyPressed(event.key());
+        if (this.savedSearches.isOpen() && this.savedSearches.keyPressed(event.key())) {
+            return true;
         }
         if (event.key() == InputConstants.KEY_ESCAPE) {
             if (this.filterBox != null && this.filterBox.isFocused()) {
@@ -860,8 +860,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
-        if (this.savedSearches.isNaming()) {
-            return this.savedSearches.charTyped(event.codepoint());
+        if (this.savedSearches.isOpen() && this.savedSearches.charTyped(event.codepoint())) {
+            return true;
         }
         return super.charTyped(event);
     }

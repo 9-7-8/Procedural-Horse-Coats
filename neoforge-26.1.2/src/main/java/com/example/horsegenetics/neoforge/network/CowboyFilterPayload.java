@@ -9,7 +9,8 @@ import net.minecraft.resources.Identifier;
 
 /**
  * Client -&gt; server: filter the cowboy's offer list to the horses matching
- * {@code query} (breed, gene or allele - {@code HorseSearch}). Blank clears it.
+ * {@code query} - a SQL WHERE clause, the same language every other horse
+ * search box in the mod takes ({@code HorseQuery}). Blank clears it.
  *
  * <p><b>The filtering has to happen on the server</b>, which is the whole reason
  * this packet exists rather than the screen simply drawing fewer rows. A trade

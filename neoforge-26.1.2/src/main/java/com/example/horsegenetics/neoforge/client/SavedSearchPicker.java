@@ -59,6 +59,12 @@ public final class SavedSearchPicker {
 
     private boolean open;
     private boolean naming;
+
+    /** Alphabetical order plus type-to-jump, the same as every other menu. */
+    private final TypeAhead typeAhead = new TypeAhead();
+
+    /** Which row the type-ahead last landed on; 0 is the action row. */
+    private int cursor;
     private String typed = "";
     private int x;
     private int y;
@@ -84,6 +90,8 @@ public final class SavedSearchPicker {
         open = false;
         naming = false;
         typed = "";
+        cursor = 0;
+        typeAhead.reset();
     }
 
     /**
@@ -95,6 +103,8 @@ public final class SavedSearchPicker {
         naming = false;
         typed = "";
         scroll = 0;
+        cursor = 0;
+        typeAhead.reset();
         current = query == null ? "" : query.trim();
         x = Math.max(4, Math.min(anchorX, screenW - W - 4));
         int h = Math.min(VISIBLE, Math.max(1, rows().size())) * ROW_H;
@@ -106,10 +116,6 @@ public final class SavedSearchPicker {
      * saved search. Rebuilt on demand rather than cached - the list is a dozen
      * strings and it changes underneath the menu the moment a row is clicked.
      */
-    private List<ClientConfig.SavedSearch> saved() {
-        return ClientConfig.savedSearches();
-    }
-
     private List<String> rows() {
         List<String> out = new ArrayList<>();
         out.add(action());
@@ -117,6 +123,43 @@ public final class SavedSearchPicker {
             out.add(search.label());
         }
         return out;
+    }
+
+    /**
+     * The saved searches, alphabetically, with the action row left where it is.
+     * Sorting is what makes the type-ahead below navigable; the action row is
+     * not a search and must not move about under the pointer.
+     */
+    private List<ClientConfig.SavedSearch> saved() {
+        List<ClientConfig.SavedSearch> out = new ArrayList<>(ClientConfig.savedSearches());
+        out.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()));
+        return out;
+    }
+
+    /**
+     * Type a name and jump to it. Only meaningful once somebody has saved more
+     * than a screenful, which is exactly when it stops being optional.
+     */
+    public boolean charTyped(int codepoint) {
+        if (!open) {
+            return false;
+        }
+        if (naming) {
+            return type(codepoint);
+        }
+        List<String> rows = rows();
+        // Row 0 is the action, so the type-ahead searches from row 1 and the
+        // index it returns is already the row index.
+        int found = typeAhead.accept(codepoint, rows.subList(1, rows.size()), cursor - 1);
+        if (found >= 0) {
+            cursor = found + 1;
+            if (cursor < scroll) {
+                scroll = cursor;
+            } else if (cursor >= scroll + VISIBLE) {
+                scroll = cursor - VISIBLE + 1;
+            }
+        }
+        return true;
     }
 
     private String action() {
@@ -150,7 +193,8 @@ public final class SavedSearchPicker {
         for (int i = 0; i < shown && scroll + i < rows.size(); i++) {
             int index = scroll + i;
             int ry = y + i * ROW_H;
-            if (mouseX >= x && mouseX < x + W && mouseY >= ry && mouseY < ry + ROW_H) {
+            if ((mouseX >= x && mouseX < x + W && mouseY >= ry && mouseY < ry + ROW_H)
+                    || index == cursor) {
                 g.fill(x, ry, x + W, ry + ROW_H, HOVER);
             }
             boolean isAction = index == 0;
@@ -243,14 +287,11 @@ public final class SavedSearchPicker {
     }
 
     /**
-     * A letter, while the name field has the keyboard. Takes a codepoint rather
-     * than a char because that is what the event carries, and appending it as
-     * one keeps a name typed in a language outside the basic plane intact.
+     * A letter into the name field. Takes a codepoint rather than a char
+     * because that is what the event carries, and appending it as one keeps a
+     * name typed in a language outside the basic plane intact.
      */
-    public boolean charTyped(int codepoint) {
-        if (!isNaming()) {
-            return false;
-        }
+    private boolean type(int codepoint) {
         if (codepoint < ' ' || typed.length() >= NAME_MAX) {
             return true;    // swallowed: the field has the keyboard either way
         }
@@ -266,6 +307,23 @@ public final class SavedSearchPicker {
      * @return true when the key was the menu's
      */
     public boolean keyPressed(int key) {
+        if (open && !naming) {
+            // The list has the keyboard too, so that type-to-jump can be
+            // finished with Enter rather than having to reach for the mouse.
+            if (key == 256) {                       // Escape
+                close();
+                return true;
+            }
+            if (key == 264) {                       // Down
+                move(1);
+                return true;
+            }
+            if (key == 265) {                       // Up
+                move(-1);
+                return true;
+            }
+            return false;   // anything else belongs to the screen
+        }
         if (!isNaming()) {
             return false;
         }
@@ -283,6 +341,20 @@ public final class SavedSearchPicker {
             return true;
         }
         return true;
+    }
+
+    /** Arrow keys walk the list, for a jump that overshot by one. */
+    private void move(int by) {
+        int size = rows().size();
+        if (size == 0) {
+            return;
+        }
+        cursor = Math.max(0, Math.min(size - 1, cursor + by));
+        if (cursor < scroll) {
+            scroll = cursor;
+        } else if (cursor >= scroll + VISIBLE) {
+            scroll = cursor - VISIBLE + 1;
+        }
     }
 
     /** The wheel scrolls the list while it is open, and nothing behind it. */
