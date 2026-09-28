@@ -114,10 +114,7 @@ file under `wiki/session-log/` from its index; those files are not baked.
    `addRandom` / `enforceSexLinkage` by name; identical rules live once in
    `common/EditorRules`. `js/gui.js` copies the layout constants **by value**. A
    deliberate divergence goes in the comment on both files.
-6. **No legacy or back-compat code.** Dev only, single tester, no saves worth
-   keeping - when a format changes, change it and move on. No genotype-code
-   padding, no attachment field fallbacks.
-   **Never regenerate `genes/index.json` from the folder** - an absence in it is
+6. **Never regenerate `genes/index.json` from the folder** - an absence in it is
    a killswitch, and a rebuild turns a parked gene back on. Gap 162.
 7. **The wiki has one page list.** A new page goes in the `SECTIONS` array in
    `wiki/pages.js` - which the sidebar *and* the landing page both read - and
