@@ -1,0 +1,598 @@
+Undead horse conversion - treatment, spec and implementation guide
+
+Status: PLAN ONLY. Nothing here is built and no code was written for it.
+Nothing here has been checked in-game. Anything that touches a Minecraft or
+NeoForge API is marked UNVERIFIED and must be read out of the 26.1.2 sources
+(or proved in a gametest) before it is relied on - see CLAUDE.md hard rule 8.
+
+Where this goes: intake/ is an inbox, not a plan (START HERE.txt). When this is
+picked up it is routed onto wiki/undead-horses.html's Roadmap tab, and this file
+is deleted. Section 12 says exactly what goes where.
+
+
+1. What is being asked
+======================
+Vanilla has two undead equines, minecraft:zombie_horse and
+minecraft:skeleton_horse. They are not minecraft:horse, so this mod has never
+touched them. The owner's design (wiki/undead-horses.html) is that undeath
+becomes two loci - a skeleton gene and a zombie gene - carried by ANY breed on
+an ordinary minecraft:horse.
+
+This document adds the half that page does not have: what happens to the undead
+horses that already exist. A world saved before this ships contains vanilla
+zombie horses and skeleton horses - wild, tamed, saddled, armoured, named,
+ridden, leashed, sitting in a skeleton-trap field, or still unloaded in a chunk
+nobody has visited. Each of them must, when it next loads, quietly become a
+horse of this mod: a real record, a real genome expressing the matching undead
+gene, a coat, a name, a pedigree entry, resolved body stats, herd and care
+attachments. The player should notice that the horse looks different and has a
+name. They should not lose the saddle, the armour, the ownership, the lead, the
+rider, or the horse itself.
+
+"Backwards compatible" here means two things, and both are requirements:
+  (a) An old save opens and its undead horses convert on their own, with no
+      command, no migration screen and no data loss.
+  (b) The mod can be removed or the feature switched off (config) and the
+      vanilla undead horses go back to behaving as vanilla ones.
+
+
+2. One rule to reconcile first: CLAUDE.md hard rule 6
+=====================================================
+Rule 6 says "no legacy or back-compat code... no saves worth keeping". This
+plan is not that, and the difference should be stated so a later session does
+not delete it as such:
+  - Rule 6 is about this mod's OWN old formats (genotype-code padding,
+    attachment field fallbacks). The converter reads no old format of the mod's.
+  - The converter's input is a VANILLA entity, and that input never stops
+    arriving: spawn eggs, /summon, other mods' spawners, skeleton traps and any
+    save from before the feature all keep producing zombie_horse and
+    skeleton_horse for as long as the mod is installed. It is therefore a
+    permanent adapter, exactly like the path that gives an unrecorded vanilla
+    horse a founder record today (HorseFoundingTickHandler's third branch).
+  - wiki/compatibility.html already makes "horses in existing worlds just work"
+    a stated design goal of the attachment approach.
+Recommendation: build it as a permanent adapter, not a one-shot migration that
+is deleted later. Owner should confirm this reading (open decision D1).
+
+
+3. What already exists (checked against the source, not assumed)
+================================================================
+The mod adds no horse entity. Everything hangs off vanilla minecraft:horse as
+data attachments plus a renderer override (wiki/compatibility.html). That is
+why the design is cheap, and it fixes the shape of the answer.
+
+3.1 Nothing in common/ knows about undeath. There is no skeleton or zombie
+    gene, allele, breed or painter yet. Both genes are still to be written, and
+    the pipeline question (how a coat pipeline paints the absence of a coat) is
+    still open on the page's Verification tab.
+
+3.2 The founding path is the model to copy. HorseFoundingTickHandler runs on
+    EntityTickEvent.Post, never on the join event or a server.execute task,
+    because writing Attributes.SCALE can force-load a chunk and corrupt the
+    chunk ticket iterator (a hard NullPointerException in
+    DistanceManager.runAllUpdates). It handles each entity once per level load
+    (HANDLED set, cleared on EntityLeaveLevelEvent) and rations work with a
+    per-tick nanosecond budget (mayFound / charge). Any converter MUST live in
+    the same place, under the same budget, for the same reason. Do not convert
+    in EntityJoinLevelEvent.
+
+3.3 HerdManager.assignFounder(horse, rng) founds a horse: it picks a breed,
+    calls BreedFounder.roll(breed, rng, sex, magic), builds a HorseRecord via
+    HorseRecord.founder(uuid, first, last, genome, lineageToken), applies it with
+    HorseRecords.apply, resolves the body with
+    HorseRecords.applyTraitsToEntity, and syncs the coat. BreedFounder.roll
+    already has overloads that force allele pairs (List<AllelePair> forced, and
+    MagicalVariant = gene + pair for magical herds). Pinning an undead gene pair
+    onto a founder is therefore existing machinery, not new machinery.
+
+3.4 There is a precedent for swapping one entity for another: LycanthropyHandler.
+    It creates the new entity, copies position, baby flag, custom name and
+    health fraction, calls setPersistenceRequired, ejectPassengers, discards the
+    old one and addFreshEntity's the new one, all from an entity tick. It also
+    has the reverse direction, restoring a Horse from a saved tag with
+    horse.load(TagValueInput...), and a clearOfBlocks pass because a horse's
+    box is bigger than the animal it replaced (a converted horse needs the same
+    pass in reverse: a skeleton horse in a two-block gap).
+
+3.5 Undead horses already reach part of the mod. ModAttributes.HORSE_TYPES names
+    SKELETON_HORSE and ZOMBIE_HORSE (LAVA_MOVEMENT, DRAFT_POWER), the saddle
+    equipment asset carries skeleton_horse_saddle and zombie_horse_saddle with
+    the same dyeable layers, and every mixin targeting AbstractHorse (carts,
+    flight while ridden, instant jump, rearing, two riders, regeneration)
+    already applies to them. HorseRegenMixin's comment says it is for Horse
+    only. These are what becomes dead code if the vanilla entities are
+    suppressed - see section 9.
+
+3.6 GeneticHorseRenderer is registered for EntityType.HORSE only (ClientSetup).
+    Undead horses are drawn by vanilla's renderers today. Registering a second
+    renderer for the undead types is NOT part of this plan (section 5.2).
+
+3.7 BreedSpawnHandler (FinalizeSpawnEvent) only acts on Horse. It never sees the
+    undead types, which is the "spawning overhaul is the actual work" point on
+    the roadmap page.
+
+3.8 MobGroups resolves "undead" through the vanilla entity-type tag, so a
+    Horse carrying a skeleton or zombie gene is NOT in that group unless
+    something makes it so (section 8.4).
+
+
+4. Design summary
+=================
+- Undeath is two loci on a minecraft:horse. It is not an entity type.
+- A vanilla zombie_horse or skeleton_horse is treated as an unconverted horse:
+  seen on its first tick, replaced by a minecraft:horse whose founder genome
+  pins the matching gene to its expressing (recessive, homozygous) pair.
+- The replacement is atomic per entity, idempotent, and reversible by config.
+- Everything that identifies the animal to the player is carried across:
+  UUID, name, position, age, health fraction, tame state, owner, saddle,
+  armour, lead, passengers, persistence, team, custom tags.
+- Everything that came from the entity TYPE (skin, stats, sounds, hitbox,
+  tag-derived behaviours) is deliberately re-derived from the genome. That is
+  the resolved-not-rolled rule; the old stats are not preserved and there is
+  nothing to say they should be.
+
+
+5. The four decisions that shape everything
+===========================================
+Owner's calls. Recommendations first; none of these is settled.
+
+D1. Permanent adapter vs one-shot migration. (Section 2.)
+    Recommend: permanent adapter behind a config gate.
+
+D2. Do the conversion at all before the gene bundle question closes?
+    The Verification tab blocks both genes on "may one locus bundle several
+    effects" and on how the pipeline paints an absence. The converter needs a
+    gene to pin, so it cannot ship first. It CAN be designed now, and the
+    stages in section 10 are ordered so that nothing converts until the genes
+    render acceptably. Do not let the converter ship with a stopgap look:
+    a converted horse that renders as a plain white horse is a worse outcome
+    than a vanilla zombie horse.
+
+D3. Which breed does a converted horse get?
+    Vanilla undead horses carry no variant, no markings and no breed - nothing
+    to preserve. Options:
+      (a) Feral Mixed + forced undead pair. Matches how /summon and imported
+          horses are founded today, needs no biome logic, and is deterministic.
+          RECOMMENDED for conversion.
+      (b) Pick a breed by the biome the horse stands in, as a wild herd would.
+          Costs more, and reads oddly for a horse converted in a random chunk
+          on a server that later loads a far region.
+      (c) Let the breed sheet's own undead frequency decide (the roadmap's
+          "an undead Shire and an undead Falabella are different jokes").
+          That belongs to NEW spawns (section 9), not to conversion; keeping
+          the two apart avoids a save-load lottery.
+    Recommend (a) for conversion, (c) for fresh spawns.
+
+D4. Is the conversion allowed to change what the horse IS mechanically?
+    A vanilla zombie horse has default health and a zombie-type speed roll.
+    The zombie gene is designed as doubled hearts at a heavy speed cost, and
+    the skeleton gene heals without eating. After conversion the old numbers are
+    gone by design. Say so on the Gameplay tab in one honest sentence so the
+    player is not surprised, and do not attempt to preserve old stats.
+
+
+6. The conversion algorithm (neoforge module)
+=============================================
+New class, working name server/UndeadHorseConverter, subscribing to
+EntityTickEvent.Post exactly as HorseFoundingTickHandler does. Steps, in order.
+The order is the point: build and place the replacement BEFORE anything is
+taken from the original.
+
+6.1  Filter (cheap, first)
+     - Only SkeletonHorse and ZombieHorse instances, server side only.
+     - Config gate on (section 7). Off means return immediately and leave the
+       vanilla entity completely alone.
+     - Skip if the entity carries the marker tag "horsegenetics:converting"
+       (guards a re-entrant tick while the replacement exists).
+     - Skip if HANDLED contains its network id (same discipline as founding).
+     - Skip and retry later if any of the DEFER conditions in 6.2 hold.
+     - Skip if it is dead or dying (health <= 0, deathTime > 0): a corpse must
+       not be resurrected as a fresh horse.
+     - Skip if the entity is in a dimension the mod says is off limits
+       (horse dimension rules in HorseRealmRules; decide if realm/debug pens
+       convert - recommend yes, they are horse-only by design).
+
+6.2  Defer conditions (retry next tick, never convert now)
+     - Budget: reuse mayFound()/charge() so a chunk full of undead horses does
+       not spend more than the founding budget in one tick. The founding budget
+       is per tick across dimensions; share it, do not add a second one.
+     - A PLAYER is a passenger. Converting under a rider dismounts or
+       teleports the player and desyncs the client. Wait until the rider gets
+       off. (A server with someone permanently riding a zombie horse converts
+       it on their next login/chunk reload - acceptable, and stated in the
+       docs.)
+     - An unsprung skeleton trap (section 8.1).
+     - The entity is not fully loaded (removed flag, no level, position in an
+       unloaded chunk): do nothing, try again.
+
+6.3  Snapshot what must be carried (read only, from the old entity)
+     uuid, position/rotation/motion, isBaby and age, health and max health,
+     custom name and visibility, isTamed, owner UUID, temper, saddle item,
+     body armour item (both via the equipment slots), any other equipment,
+     leash holder (UNVERIFIED how leash is stored and re-attached in 26.1.2),
+     passengers, persistence flag / despawn state, team, entity tags
+     (scoreboard tags), Fire ticks, glowing/invulnerable flags, and the
+     persistent data compound (NeoForge getPersistentData - other mods'
+     markers live there).
+     UNVERIFIED: whether Mob.convertTo(EntityType, ConversionParams, ...)
+     exists in 26.1.2 and what it already copies (equipment, leash, team,
+     passengers). It is how vanilla turns a zombie into a drowned, and using it
+     would be less code than hand-copying. Read the decompiled source first; if
+     it discards the original itself, or skips tame/owner (likely, they are
+     AbstractHorse state), hand-copy those on top of it.
+
+6.4  Build the replacement
+     - EntityType.HORSE.create(level, EntitySpawnReason.CONVERSION). (LOAD is
+       what Lycanthropy and stasis use; CONVERSION is the honest reason here.
+       UNVERIFIED whether any 26.1.2 code path treats the two differently.)
+     - Give it the SAME UUID as the original. The ancestry database, stall
+       signs, the browser roster, HorseWhereabouts and any pedigree all key on
+       the horse UUID, and the original is about to be discarded so there is
+       no duplicate. The alreadyLoose() check in HorseStasisHandler exists
+       because two live entities on one UUID is a real failure - so this must be
+       done as: add new, THEN discard old, in one tick, and abort (leave the
+       old one alone) if addFreshEntity returns false. UNVERIFIED that
+       ServerLevel accepts a new entity with a UUID still held by an entity
+       that has not been removed yet; the alternative is discard-first with the
+       snapshot in hand. Prove which works in a gametest before choosing.
+     - Copy from the snapshot: position, baby/age, name, tame + owner (through
+       HorseRecords.setOwner so the record's ownerId mirrors it), saddle and
+       armour, leash, persistence, tags, team, persistent data (minus this
+       mod's own keys), fire/invulnerable flags.
+     - Set the seed for everything random from the UUID
+       (SeededRng(uuid.mostSig ^ uuid.leastSig, "undead-conversion") - the
+       pattern HerdManager already uses for magical herds). A conversion that is
+       replayed after a crash, or run on two servers from one save, then gives
+       the same horse.
+
+6.5  Found it
+     - Sex: coin flip from the seeded rng (matches assignFounder's non-natural
+       branch). A tamed horse keeps whatever sex it rolls; there is no sex on
+       the vanilla entity to preserve.
+     - Genome: BreedFounder.roll(Breeds.FERAL_MIXED, rng, sex,
+       List.of(<undead expressing pair>)), so the gene is expressed and
+       everything else rolls from Feral Mixed's founder tables. The sex-linkage
+       rules (EditorRules.enforceSexLinkage) and lethal-path rules still apply
+       to a forced pair; check the pair cannot roll a lethal outcome for the
+       CONVERSION case (a horse must not convert straight into a dead foal).
+     - Lineage token: BreedLineage.FERAL.toToken(), as assignFounder does.
+     - Name: HorseRecords.newNameParts(rng), unless the vanilla entity already
+       has a custom name - in which case KEEP the player's name. The record's
+       displayName is what shows on the nameplate, so check what happens when
+       the entity name and the record name disagree (HorseNotices,
+       ClientHorseRecordCache).
+     - HorseRecord.founder(...), HorseRecords.apply(...),
+       HorseRecords.applyTraitsToEntity(horse, record, true).
+       Careful: applyTraitsToEntity writes Attributes.SCALE - see 3.2; it is
+       safe here only because the whole conversion is running from the entity
+       tick.
+     - Health: preserve the FRACTION, not the points
+       (healthLeft * newMaxHealth, floor at 1), exactly as Lycanthropy does.
+       A near-dead zombie horse must not come out full health, and a doubled
+       max health must not leave it at half.
+     - Care: HORSE_CARE attachment - a tamed horse should start with a sensible
+       bond (owner decision: zero, or a small floor so a long-owned horse does
+       not read as a stranger. Recommend zero; bond is earned and the decay
+       rules would erase a gift quickly anyway). Hunger: start FULL, as the
+       stasis release does.
+
+6.6  Place and swap
+     - Clear the box: reuse the clearOfBlocks logic (extract it from
+       LycanthropyHandler into a shared helper rather than copy it; it is
+       currently private to that class).
+     - Move passengers: for every passenger, dismount from the old entity and
+       startRiding(new, true) (UNVERIFIED signature/force flag in 26.1.2).
+       Player passengers were already deferred in 6.2, so this is only
+       non-player riders - the four skeletons of a sprung trap, a baby zombie
+       jockey, a villager on a lead.
+     - addFreshEntity(new). If it returns false: abort, leave the original
+       untouched, log once, and retry next tick up to a small cap so a blocked
+       spot cannot loop forever.
+     - Only after it succeeds: discard the original (discard(), not kill(), so
+       no death event, no drops, no LivingDeathEvent, and HorseAfterlifeHandler
+       and HorseDeathNoticeHandler never think a horse died - both listen for
+       Horse only, which is right, but the vanilla ZombieHorse's own drops and
+       any other mod's death listeners must not fire either).
+     - Tell the ancestry database and roster the new founder
+       (HorseAncestryData.record - the existing ensureExistingRecordResolved
+       path already does this on the next tick, which is fine).
+     - Sync coat and record to trackers (CoatSyncPayload, the record payload,
+       HorseCareSyncPayload - onStartTracking in HorseGeneticsEventHandler
+       already re-sends these when a player begins tracking the entity, so a
+       player in range at conversion time needs the explicit send and a
+       player who arrives later gets it for free).
+     - Mark HANDLED.
+
+6.7  Failure policy
+     Any exception, any null from create(), any refusal from addFreshEntity:
+     the original stays exactly as it was, one WARN line names the entity, its
+     position and the reason, and the horse is retried a limited number of times
+     and then left as a vanilla undead horse for the rest of the session.
+     The failure mode of this feature must be "the horse is still there and
+     still vanilla", never "the horse is gone".
+
+
+7. Config
+=========
+ServerConfig gets a small group under an undead section. Server-authoritative;
+clients never decide.
+  - undead.convert : boolean. Whether existing and newly arriving vanilla undead
+    horses are converted. Recommend the shipped default ON only once the two
+    genes render acceptably (D2); until then default OFF, so the code can be
+    merged without changing any world.
+  - undead.convertModded : boolean, default OFF. Whether horses from other mods
+    that extend SkeletonHorse or ZombieHorse are converted. They are subclasses
+    of the vanilla classes, which the instanceof filter would catch, and they may
+    carry their own renderer, data or AI. Safer to convert only entities whose
+    type is EXACTLY the vanilla one (compare EntityType, not instanceof).
+    This is the "config gate from the start" the roadmap asks for.
+  - undead.suppressVanillaSpawns : boolean - the spawning half, section 9.
+Keep the three separate: "convert what exists" and "stop new ones appearing" are
+different promises and a server may want one without the other.
+Removing the mod, or setting undead.convert=false, leaves any converted horse
+as a plain minecraft:horse with orphaned attachment data. That is the same
+outcome every other horse of this mod has when the mod is removed, and it is
+not a regression this plan introduces.
+
+
+8. Edge cases (each one is a test case, section 11)
+===================================================
+8.1  Skeleton traps. A trap horse is a SkeletonHorse with its trap flag set; when
+     a player comes near, vanilla springs the trap (lightning, four skeletons,
+     one riding the horse) and the flag clears. UNVERIFIED in 26.1.2: the
+     field/tag names (SkeletonTrap, SkeletonTrapTime) and which class spawns the
+     trap horse. Converting an unsprung trap horse would silently disarm the
+     trap, and converting a sprung one mid-lightning would eject its skeleton
+     rider. Recommend: a trap horse is left alone until the trap has sprung and
+     the skeletons have been dealt with (isTrap() false), then converts like any
+     other. The trap remains a vanilla mechanic and only the horse it leaves
+     behind becomes this mod's. Owner to confirm (open decision D5).
+8.2  Ridden by a player: deferred (6.2). Tamed and saddled with nobody on it:
+     converts normally and keeps saddle and owner.
+8.3  Leashed to a fence or a player: the lead must survive (6.3). If it cannot
+     be re-attached reliably, drop the lead item at the horse's feet rather than
+     lose it, and log it. A destroyed lead is a small loss; a horse that stays
+     tied to nothing is a bug.
+8.4  "Undead" identity. Vanilla gives the two types tag-driven behaviour that a
+     Horse cannot inherit: healing and harming potions inverted, sunlight and
+     drowning rules, aggro rules from other mobs (skeletons ignoring skeleton
+     horses), breathing and swimming behaviour, the UNDEAD entity-type tag that
+     MobGroups reads. Each is a per-effect decision, not a given, and each is
+     UNVERIFIED as to which tags the vanilla types actually carry in 26.1.2 -
+     read data/minecraft/tags/entity_type/ in the vanilla jar. The mod's answer
+     for behaviour is the effects block (wiki/horse-traits.html), so each one
+     becomes an effect on the gene or is explicitly declared not to carry
+     over. Cleansing light and holy ward, both of which act on "the undead",
+     need a rule for whether a horse carrying the gene counts (MobGroups would
+     need an "expresses an undead gene" clause - keep it in one place).
+8.5  Foals. Baby skeleton and zombie horses exist. Copy isBaby and the age in
+     ticks; do not re-roll age. A converted foal is founded with no parents.
+8.6  Tamed horses that were bred by the player. Vanilla undead horses cannot
+     breed with each other, so there are no player-bred lineages to protect.
+     If another mod allows it, that horse is caught by undead.convertModded
+     and left alone by default.
+8.7  Unloaded chunks and other dimensions. Nothing runs against a chunk nobody
+     has loaded. Conversion is lazy - a horse converts on its first tick after
+     its chunk loads - which is the same "acquires a genome the first time it is
+     ticked, whenever that is" guarantee the attachment approach already makes.
+     There is deliberately NO world scan and NO migration command that walks
+     region files.
+8.8  Spawn eggs and other item-carried entities. A vanilla zombie or skeleton
+     horse spawn egg, or an item with saved entity data, spawns an undead entity
+     and reaches the tick converter like anything else. Whether to also cancel
+     it at spawn (section 9) is separate; the tick converter is the one
+     chokepoint that catches every route, and it is what makes an old save safe.
+8.9  Duplicate UUID / replayed conversion. If the game crashes between addFresh
+     and discard, the next load has two entities on one UUID. Vanilla resolves
+     duplicate UUIDs on chunk load by dropping one; UNVERIFIED which. The replay
+     rule (seeded rng, section 6.4) means both are identical apart from type, so
+     whichever survives is fine; but a gametest must prove it.
+8.10 Dimensions with their own rules: the horse realm and debug pens
+     (HorseRealm.isInRealm, DebugPenManager). Decide if undead horses in them
+     convert. Recommend yes - they are horse-only spaces - and check that the
+     realm's release/ownership rules do not treat a converted horse as a new,
+     unowned import.
+8.11 Multiplayer. Conversion runs server side, and the client sees a remove-entity
+     and an add-entity packet, not a mutation. A player standing next to it will
+     see the old horse vanish and the new one appear in the same tick. Sync the
+     coat and record BEFORE the client can render the new entity a white horse;
+     sendToPlayersTrackingEntity right after addFreshEntity, and verify there is
+     no visible white flash (GeneticCoatTextureFactory may need the coat before
+     first render; check ClientCoatCache).
+8.12 Other mods that key on the entity. A mod that holds a reference to the old
+     zombie horse (a waypoint, a mount-tracking list, a claim) loses it. Not
+     fixable from here; the README/compat page states that enabling
+     undead.convert replaces the entities, and undead.convert=false is the
+     escape hatch.
+
+
+9. The spawning overhaul (separate from conversion; do it second)
+=================================================================
+The roadmap's "spawning overhaul" is the forward-looking half: new undead horses
+should be founded as minecraft:horse carrying the gene, not as vanilla entities
+that then have to be converted.
+  - Skeleton trap horses come from ServerLevel's thunderstorm tick, not from
+    FinalizeSpawnEvent, and the zombie horse has no natural spawn at all.
+    UNVERIFIED which event, if any, is cancellable for the trap spawn in
+    26.1.2 (FinalizeSpawnEvent, EntityJoinLevelEvent, or the lightning event).
+    If none is cleanly cancellable, the tick converter of section 6 already
+    handles it a tick later and that is acceptable - suppression is an
+    optimisation, not a requirement.
+  - Fresh undead founders draw from the breed sheets: a per-breed undead
+    frequency, with the founder-table rule the roadmap states (a recessive gene
+    puts its EXPRESSING combinations into the wild population, not carriers,
+    otherwise nobody ever sees one). That is a breed-sheet edit and therefore a
+    :common:bakeBreedFiles + :common:bakeGeneCensus run, and BreedFilesTest /
+    *BreedsTest / BreedBandsReachTest checks (CLAUDE.md, Build & test).
+  - Wild herds of undead horses versus lone ones, and whether they fit the
+    night/biome rules, belong to BreedSpawnHandler and HerdManager - one new
+    branch each, not a parallel system.
+  - If vanilla spawns are suppressed AND undead.convert is on, the entity
+    special-casing listed in 3.5 (ModAttributes HORSE_TYPES entries, the two
+    saddle equipment entries) is reachable only by other mods' undead horses
+    left alone by undead.convertModded. So it is NOT dead code while that
+    switch exists: the roadmap page says to delete it "in the same change" only
+    on the assumption the vanilla entities are gone for good. Recommend keeping
+    it until the gate is removed, and recording the decision on the page.
+
+
+10. Staging (one bullet, one context window - START HERE.txt)
+==============================================================
+Each stage is one session, ends with the CLAUDE.md "Ending a session" routine,
+and leaves the game working. Nothing converts a world until stage 4.
+
+Stage 0 - resolve the two blockers on the page's Verification tab: the bundle
+          question (D-bundle) and the "how a coat pipeline paints a skeleton"
+          question. Both are the owner's. This plan does not decide them. Nothing
+          below starts until they are settled and written to
+          wiki/decisions or the owning page's Coding tab.
+Stage 1 - the genes in common/. The skeleton locus and the zombie locus (a
+          data-driven gene file each, per wiki/making-a-gene.html), their
+          painter or override, founder frequencies, the effects block. Pure
+          common/, no Minecraft. Regenerate per the CLAUDE.md table for a new
+          gene (golden files, gene bundle, icons, census, unverified-genes.txt,
+          wiki pages spans, designer wasm). Do NOT regenerate genes/index.json
+          from the folder (rule 6, gap 162). Apply hard rule 5: the horse
+          designer and CustomHorseSpawnScreen both get the gene.
+Stage 2 - the effects: diet inversion and healing without food (skeleton), the
+          stat penalty and carnivorous diet (zombie), the temper rules, the
+          bone / raw meat taming. All through the existing effects vocabulary
+          wherever it can express them; a new verb touches four or five files
+          (wiki/making-a-gene.html#contracts).
+Stage 3 - the converter (section 6), behind undead.convert defaulting OFF, with
+          its gametests (section 11). It can merge into main without touching a
+          world.
+Stage 4 - flip the default to ON, once stages 1-3 are seen in-game. Old saves
+          begin converting. This is the only stage that changes a player's world
+          and is therefore its own session and its own commit.
+Stage 5 - the spawning overhaul (section 9), and only then whatever dead-code
+          decision D-deadcode ends up as.
+
+Why the gate matters: it lets stage 3 ship, be tested on the owner's server, and
+be found wrong, without a single horse having been replaced.
+
+
+11. Tests
+=========
+Pure logic goes in common/ and is tested there with --tests, never the full
+suite (CLAUDE.md; owner's rule). The converter itself needs the game.
+
+common/ (seconds each):
+  - A founder built with the undead pair forced expresses the gene, and is
+    identical for identical seeds (determinism, section 6.4).
+  - The forced pair never produces a lethal outcome for a conversion founder.
+  - *CoatBakeGoldenTest / *CoatPipelineGoldenTest move with the new genes:
+    check WHICH rows moved and copy the actual back, as CLAUDE.md says.
+  - *DeadLayerTest for the new layers.
+
+neoforge-26.1.2 gametests (there is a gametest package; add to it, and mirror
+the cases as debug-yard rows only where a human needs to watch them):
+  - Plain skeleton horse and plain zombie horse convert; the result is a Horse
+    with a real record (HorseRecords.hasRealRecord), a coat, a name and the gene.
+  - Saddle, armour, owner, tame flag, custom name, age/baby flag, health
+    fraction and lead all survive.
+  - UUID is unchanged, and only ONE entity with that UUID exists afterwards.
+  - A player-ridden one does not convert until dismounted, then does.
+  - An unsprung trap horse is untouched; a sprung one converts and its
+    non-player passengers end up on the new horse.
+  - undead.convert=false converts nothing.
+  - A modded subclass (a test-only entity extending ZombieHorse) is left alone
+    with undead.convertModded=false and converted with it true.
+  - addFreshEntity refusing leaves the original untouched (inject a blocked
+    spot) and the retry cap is honoured.
+  - A batch of undead horses in one chunk respects the per-tick founding
+    budget (compare mayFound behaviour with the existing founding test if one
+    exists) and no tick spends unbounded time.
+  - Converting twice (leave and re-enter the level) does not double-convert.
+Also run node neoforge-26.1.2/tools/check-progress-tasks.mjs if a ProgressTask
+is added, and :neoforge-26.1.2:build before any push.
+
+
+12. Regenerate / document (CLAUDE.md tables, applied to this plan)
+====================================================================
+Code side, per the "Regenerate what you invalidate" table:
+  - any gene            : the two coat goldens; bakeGeneBundle, bakeGeneIcons,
+                          bakeGeneWikiPages, bakeMarkingFacts, bakeGeneCensus,
+                          bakeUnverifiedGenes, bake-gene-timeline.mjs, and the
+                          generated spans of wiki/pages.js and index.html.
+  - anything in common/ : :web:bakeDesignerAssets, then check-designer-boots.mjs
+                          (TeaVM compiles only the reachable graph).
+  - any breed edit      : :common:bakeBreedFiles then :common:bakeGeneCensus.
+  - both editors        : horse designer (web/HorseEditor) AND
+                          CustomHorseSpawnScreen (hard rule 5).
+  - do not port either gene to JS (hard rule 3), and keep the logic in common/;
+    the converter is the ONLY new NeoForge-side class of substance.
+Wiki side:
+  - wiki/undead-horses.html: the Roadmap tab (`data-tab="roadmap"`) takes this
+    plan: the conversion algorithm, config, staging. Each open question in this
+    file that is not settled goes on that page's Verification tab (one sentence
+    in the note verify-summary box, then the questions). When a stage ships it
+    MOVES to a Gameplay and a Coding tab on the same page; nothing "marked
+    shipped" stays behind (hard rule 9).
+  - wiki/compatibility.html: a row for the converter (touches vanilla undead
+    entities, config-gated, exact-type only by default), and a line under
+    "what this mod actually touches".
+  - wiki/horse-care.html / wiki/horse-body.html: only if the undead genes change
+    healing or the stat curve.
+  - wiki/decisions.html: it is no longer a source of truth; D1-D5 are recorded
+    on the owning page's Coding tab when settled.
+  - then: build-search-index.mjs, check-links.mjs, bake-agent-text.mjs,
+    sync-page-views.mjs, and bake-verification-index.mjs plus
+    bake-roadmap-index.mjs.
+  - README.md gets one player-facing line (what happens to your old zombie and
+    skeleton horses, and the config switch), nothing else.
+  - A dated session-log entry per stage. Nothing dated goes in CLAUDE.md.
+
+
+13. Verification list (for the page's Verification tab once built)
+===================================================================
+Things only a play session can settle. Do not write "confirmed" until the
+owner has seen it.
+  - Load a save that has a saddled, owned, named zombie horse and a saddled
+    skeleton horse: they convert on first load with tack, name and owner intact.
+  - Ride one across a chunk border and log in and out while riding it.
+  - Walk into a skeleton trap with undead.convert on: the trap still springs
+    and the horse afterwards converts.
+  - A herd's worth of undead horses loaded at once (a mob farm, a stable): no
+    stutter, and DebugAnnounce reports the founding budget deferring rather than
+    stalling the tick.
+  - No white-horse flash on conversion; the coat is right on the first frame.
+  - The server log shows no duplicate-UUID warnings and no "ProblemReporter"
+    complaints from loading the tag.
+  - A modded undead horse is left alone by default.
+  - Setting undead.convert=false and reloading leaves converted horses as
+    working minecraft:horse entities and never touches a vanilla undead one.
+  - Bond, hunger, stasis-chamber capture, transfer papers, the browser and the
+    afterlife/resurrect command all treat a converted horse as an ordinary one.
+
+
+14. Open decisions, gathered
+============================
+D1  permanent adapter vs one-shot migration            (recommend: permanent)
+D2  ship-order relative to the gene/pipeline blockers  (recommend: gated, default OFF until genes render)
+D3  breed of a converted horse                          (recommend: Feral Mixed + forced pair)
+D4  old stats are deliberately not preserved            (recommend: yes, say so on the Gameplay tab)
+D5  skeleton traps: convert only after the trap springs (recommend: yes)
+D6  do horses carrying the gene count as "undead" for
+    cleansing light, holy ward and inverted potions     (per-effect call; MobGroups is the one place)
+D7  vanilla-entity special-casing kept while the gate exists (recommend: keep)
+D8  bond a converted tamed horse starts with            (recommend: zero)
+Bundle question and pipeline-absence question: already open on the Verification
+tab; this plan depends on them and does not answer them.
+
+
+15. Risks, worst first
+======================
+1. Duplicate or lost horse from a half-finished swap. Mitigated by build-place-
+   then-discard, a seeded replay, a failure policy that keeps the original,
+   and gametests for the blocked-spot and crash-window cases.
+2. Chunk-system crash from doing the swap in the wrong event. Mitigated by
+   using the tick path only (3.2). This is the one place the mod has crashed
+   hard before; do not "simplify" to the join event.
+3. Converting horses a player is riding. Mitigated by deferral.
+4. Silently disarming skeleton traps. Mitigated by D5.
+5. Modded undead horses. Mitigated by exact-type-only default.
+6. Players surprised by changed stats. Mitigated by one sentence in the docs
+   and by the config gate.
+7. Shipping the converter before the genes look right. Mitigated by the stage
+   order and default-OFF gate.
