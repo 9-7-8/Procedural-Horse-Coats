@@ -112,20 +112,122 @@
     "Eyes (D29): pure black. Sclera Blk/Blk at both eyes is the existing black sclera allele. The iris needs EyeColourGene to gain a BLACK row (EyeHue.BLACK, token Blk, already exists for the sclera): append it, so no existing horse changes, and pin Blk/Blk at both iris loci. Vanilla's undead horses have plain black eyes; no glow loci are pinned, so the eyes do not glow.",
     "Particle (D30): Bflm/Bflm is ParticleGene's soul_fire_flame, blue soul flames. The site is banded to 2, the index of 'hooves' in ParticleGene.SITES (head, spine, hooves, front_hooves, back_hooves, tail), so the flames come off all four hooves. The band key is the epigenetic value name 'site' (EpiValue.category). Check the band accepts a category index the way passification's 'offering' does. Count and colour are left to the founder roll; colour is probably ignored by a fixed vanilla particle.",
     "Water (D32): Gil/Gil on horsegenetics.magic_water_breathing. This gene is GRADED (a percentage written on each copy, about a quarter a copy, 'usually'), not the absolute underwater_breathing traversal flag that simply refills air every tick. If 'a skeleton cannot drown' is the intent, the graded gene will not deliver it unless the copy's percentage is banded very high; decide between banding it, or an effects-block traversal flag. UNVERIFIED which of the two the owner meant.",
-    "Strains (D31): Bleached 65, Weathered 35. The strains are EMPTY: a strain's own genes and stats are where the two looks differ, and the coat is not written yet, so they differ in nothing today. Verify the parser and BreedFilesTest accept a strain with empty genes and stats; if not, give each a placeholder. Bleached is clean bone; Weathered is stained, darker bone. Both share the alpha mask (D27, D28)."
+    "Strains (D31, D38-D40). Bleached 65: white bone, and it is LOCKED clean. horsegenetics.magic_white Wm/Wm paints the whole horse white nose to tail (early in the magical phase); horsegenetics.extreme_white_dominant EWD/EWD paints nothing itself but makes that white final, so no magical gene can mark it (EWD alone would do nothing: it needs the Wm white under it, and Wm/n is only a silent carrier, so the pair is Wm/Wm). The natural white genes listed (tobiano, ednrb, pax3, mitf, kit) are HIDDEN CARRIERS: natural genes are painted before Wm covers them, so none show on this horse, but they pass to foals and later generations (owner). Only heterozygous pairs are listed, deliberately: ednrb O/O is lethal white, several kit W alleles and pax3 SW4/SW10, mitf SW3 are nonviable homozygous, so a founder pool must not be able to roll a homozygote. Weights are guesses (about a third of Bleached founders carry each).",
+    "Weathered 35: aged, dirtied bone. NO EWD (n/n pinned, otherwise a rare founder-rate EWD could land here) and NO Wm (n/n pinned). Natural base chosen to read as yellowed bone rather than a brown horse: extension e/e (chestnut) with dun D/D, a red dun, which has no black points (a bay dun's black legs, mane and tail would read as a dun horse with pieces missing, and the skeleton's cut-outs remove most of the body anyway). Over it: cracked_porcelain Cpk/Cpk (a crazed glaze worked in greys) and dust Dsk/Dsk (grey stipple on the pasterns, belly and muzzle). PREVIEW BEFORE COMMITTING TO THE BASE: build these in the horse designer (wiki/horse-designer) and compare with a bay dun (extension E/E, agouti A/A, dun D/D). The colour is a judgement call and unseen; the token pairs are checked against the gene files, the look is not.",
+    "The skeleton sheet's role (D38): ALPHA MASK ONLY. The copied vanilla skeleton sheet cuts the horse's shape; every colour and marking comes from these genes. So both strains are painted by the ordinary pipeline and then cut by the sheet's alpha."
   ],
   "strains": [
     {
       "name": "Bleached",
       "weight": 65,
       "stats": {},
-      "genes": {}
+      "genes": {
+        "horsegenetics.magic_white": [
+          {
+            "pair": "Wm/Wm",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.extreme_white_dominant": [
+          {
+            "pair": "EWD/EWD",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.tobiano": [
+          {
+            "pair": "to/to",
+            "weight": 65
+          },
+          {
+            "pair": "To/to",
+            "weight": 35
+          }
+        ],
+        "horsegenetics.ednrb": [
+          {
+            "pair": "N/N",
+            "weight": 70
+          },
+          {
+            "pair": "O/N",
+            "weight": 30
+          }
+        ],
+        "horsegenetics.pax3": [
+          {
+            "pair": "N/N",
+            "weight": 70
+          },
+          {
+            "pair": "SW2/N",
+            "weight": 30
+          }
+        ],
+        "horsegenetics.mitf": [
+          {
+            "pair": "N/N",
+            "weight": 75
+          },
+          {
+            "pair": "SW1/N",
+            "weight": 25
+          }
+        ],
+        "horsegenetics.kit": [
+          {
+            "pair": "N/N",
+            "weight": 75
+          },
+          {
+            "pair": "W1/N",
+            "weight": 25
+          }
+        ]
+      }
     },
     {
       "name": "Weathered",
       "weight": 35,
       "stats": {},
-      "genes": {}
+      "genes": {
+        "horsegenetics.magic_white": [
+          {
+            "pair": "n/n",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.extreme_white_dominant": [
+          {
+            "pair": "n/n",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.extension": [
+          {
+            "pair": "e/e",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.dun": [
+          {
+            "pair": "D/D",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.cracked_porcelain": [
+          {
+            "pair": "Cpk/Cpk",
+            "weight": 100
+          }
+        ],
+        "horsegenetics.dust": [
+          {
+            "pair": "Dsk/Dsk",
+            "weight": 100
+          }
+        ]
+      }
     }
   ]
 }

@@ -103,20 +103,35 @@
     "Coat: NOT written. Vanilla's zombie horse is the horse's coat with only a handful of pixels cut, so no mask is needed; it is the copied vanilla zombie sheet (D27, revised); waits on the copy and the stamping op.",
     "Eyes (D29): pure black. Sclera Blk/Blk at both eyes is the existing black sclera allele. The iris needs EyeColourGene to gain a BLACK row (EyeHue.BLACK, token Blk, already exists for the sclera): append it, so no existing horse changes, and pin Blk/Blk at both iris loci. Vanilla's undead horses have plain black eyes; no glow loci are pinned, so the eyes do not glow.",
     "Particle (D30): none. Water: not breathing (D32), no gene pinned. Sun: neither breed burns (D33), so SunSensitivityGene is not named.",
-    "Strains (D31): Fresh 60, Long-buried 40. Empty for now, for the same reason as the skeleton: they differ in the coat, which is not written yet. Fresh is the recolour with the least rot; Long-buried is greyer with more rot pixels. Verify empty strains are accepted."
+    "Strains (D31, D41). Fresh 60: the copied zombie sheet as it is (the rotted green-grey is not a natural pigment, so the sheet supplies the flesh colour; D38). dust n/n is pinned so a founder-rate dust cannot land on it. Long-buried 40: the same sheet with dust Dsk/Dsk, grey stipple up the pasterns, along the belly and over the muzzle, painted over it as grave dirt. Nothing else is pinned: any other gene rolls as it would for an unnamed locus.",
+    "The zombie sheet's role (D38): the copied vanilla zombie sheet is the BASE COAT, stamped in before the magical phase so a magical gene such as dust paints over it. This differs from the skeleton, where the sheet supplies only alpha."
   ],
   "strains": [
     {
       "name": "Fresh",
       "weight": 60,
       "stats": {},
-      "genes": {}
+      "genes": {
+        "horsegenetics.dust": [
+          {
+            "pair": "n/n",
+            "weight": 100
+          }
+        ]
+      }
     },
     {
       "name": "Long-buried",
       "weight": 40,
       "stats": {},
-      "genes": {}
+      "genes": {
+        "horsegenetics.dust": [
+          {
+            "pair": "Dsk/Dsk",
+            "weight": 100
+          }
+        ]
+      }
     }
   ]
 }

@@ -296,6 +296,25 @@ D27 ART (stage 0 (b)), REVISED by the owner: START BY COPYING vanilla's
         no art and honours a player's resource pack retexturing skeleton and
         zombie horses. Not chosen for the first pass; switching later changes
         only where the sheet is read from.
+D38 SHEET ROLES (owner): the skeleton's copied sheet is an ALPHA MASK ONLY; every
+    colour and marking on a skeleton comes from genes. The zombie's copied sheet
+    is its BASE COAT (its green-grey is not a natural pigment), stamped in before
+    the magical phase so genes paint over it. So the stamping op (D28) has two
+    modes: 'alpha only' (skeleton) and 'colour and alpha' (zombie). It runs
+    from the undeath locus (Skl/Skl and Zmb/Zmb respectively).
+D39 BLEACHED skeleton strain (owner): EWD/EWD, with magic_white Wm/Wm as the
+    white under it (EWD paints nothing and only locks white, so it needs a
+    white base; Wm/n is a silent carrier, so the pair is Wm/Wm), plus a random
+    selection of natural white genes as HIDDEN carriers that show on foals and
+    later generations. Heterozygous pairs only, so a founder cannot roll a
+    lethal homozygote. The locked horse is a fixed clean white bone.
+D40 WEATHERED skeleton strain: no Wm and no EWD (both pinned n/n). Natural base
+    plus cracked_porcelain Cpk/Cpk and dust Dsk/Dsk. The base is UNDECIDED
+    between a bay dun (the owner's idea) and a red dun (chestnut e/e + dun D/D,
+    my recommendation because a bay dun's black points would read as a dun
+    horse with holes rather than bone). Preview both in the horse designer.
+D41 ZOMBIE strains: Fresh 60 = the sheet as-is (dust n/n pinned); Long-buried
+    40 = the sheet plus dust Dsk/Dsk.
 D35 THIRD_PARTY_NOTICES.md MUST be updated in the same change as any copied
     Mojang art (owner). Two facts to put in it, neither of which it says now:
     (1) the mod already ships Mojang-derived art: horse_white.png and
@@ -334,11 +353,10 @@ D29 EYES: both breeds have pure black eyes (vanilla's undead horses do). Sclera
 D30 PARTICLES: skeleton trails soul flame from its hooves: Bflm/Bflm
     (minecraft:soul_fire_flame) on horsegenetics.particle, banded "site": 2
     (ParticleGene.SITES index of "hooves"). Zombie: none.
-D31 STRAINS: two each, hand-written JSON (the breed designer has no strain
+D31 STRAINS (now real, see D38-D41; they are no longer empty): two each, hand-written JSON (the breed designer has no strain
     editor). Skeleton: Bleached 65, Weathered 35. Zombie: Fresh 60, Long-buried
     40. Each conversion picks one by weight, seeded by the UUID, so a stable of
-    converted horses varies. They are EMPTY today (they differ in the coat,
-    which is not written); verify empty strains are accepted.
+    converted horses varies. The genes in each are in the two drafts.
 D32 WATER: the skeleton breathes water (Gil/Gil on magic_water_breathing); the
     zombie does not. That gene is graded, not absolute (see the draft's note);
     whether "cannot drown" means banding it very high or an effects-block
