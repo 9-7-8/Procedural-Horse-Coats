@@ -5,27 +5,29 @@ folder is packaged into the jar and nothing here ships in a release. These packs
 are kept here only so they are on hand if we decide to use something from them
 elsewhere in the game.
 
-Redistribution note. Keeping a pack in this repository is itself a form of
-redistribution, separate from shipping it in the jar. Each folder's own
-SOURCE-AND-LICENSE.txt says what that pack's licence permits. Read it before
-pushing, and before copying anything out of here into a module.
+Two packs, two very different rights
+====================================
+pixel-art-textures/      Texture tiles by FlakDeau. CC0 per the store page: free
+                         to use and redistribute. COMMITTED to git (about 32 MB).
+                         Read the discrepancy note in its SOURCE-AND-LICENSE.txt.
+raven-fantasy-hd-free/   Icons by Clockwork Raven Studios. Use in a free mod is
+                         allowed, redistribution of the pack is not. The IMAGES
+                         ARE NOT IN GIT: the owner places them on the host machine
+                         by hand; only the notes, the licence PDF and MANIFEST.txt
+                         are committed. .gitignore keeps the images out.
 
 The rule for using anything from here
 =====================================
-1. Copy ONLY the specific files you need out of the pack into the module that
-   uses them (a modified or unmodified copy is then a "content file in your
-   project", which is the use both licences below contemplate).
-2. Add each use to that pack's USAGE.txt in the same change - file name, where
-   it went in the mod, whether modified. Empty USAGE.txt means nothing from that
-   pack is in the game.
+1. Copy ONLY the specific files you need out of a pack into the module that
+   uses them.
+2. Add each use to that pack's USAGE.txt in the same change - file, where it
+   went, whether modified. Empty USAGE.txt means nothing from that pack is in
+   the game.
 3. Add the pack to THIRD_PARTY_NOTICES.md (which ships in the jar) the first
-   time anything from it is used, with whatever credit its licence asks for.
-   Credit is voluntary for pixel-art-textures and unconfirmed for raven-fantasy-hd
-   (see its file), so the default is to credit anyway.
-4. Never publish the pack itself (a release zip, a wiki download, a gene-creator
-   asset bundle). Only the individual files used.
-
-Packs
-=====
-raven-fantasy-hd-free/   Raven Fantasy HD Ultimate - free sampler (icons), Clockwork Raven Studios
-pixel-art-textures/      "PNG - Pixel Art Textures" (block-style texture tiles), author not named in the pack
+   time anything from it is used, with the credit line in its notes. For the
+   Raven icons the notice also has to say users may not reuse or redistribute
+   them, and the CC BY-NC grant must be carved back for those files.
+4. Never publish either pack whole (release zip, wiki download, editor asset
+   bundle). Only the individual files used.
+5. A session that finds the Raven images missing has not hit a bug. See
+   raven-fantasy-hd-free/MANIFEST.txt.

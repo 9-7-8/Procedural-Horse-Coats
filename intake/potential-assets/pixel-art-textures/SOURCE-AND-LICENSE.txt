@@ -1,59 +1,57 @@
-"PNG - Pixel Art Textures" - source, licence, credit
+Pixel Art Texture Pack (256x256) - source, licence, credit
 
 What it is
 ==========
-About a thousand block-style pixel-art texture tiles as PNGs, in folders under
+Over a thousand hand-drawn pixel-art tiles, every one 256x256, as PNGs under
 PNGs/: Bricks, Concrete, Debris, Decorations, Dirt, Doors, Fabric, Foliage,
 Glass, Grass, Gravel, Metal, Paper, Patterns, Pebbles, Rockface, Roofing, Sand,
-Snow, Stones, Tiles, Wall, Water, Windows, Wood. Files as received in
-"PNG - Pixel Art Textures.zip", unmodified.
+Snow, Stones, Tiles, Wall, Water, Windows, Wood. This is the free "PNG - Pixel
+Art Textures.zip" (26 MB on the page). The PSD sources are separate downloads
+and are not held here. Files as received, unmodified.
 
 Source
 ======
-Author: NOT NAMED anywhere in the pack. Its own licence text carries no name,
-link or contact, so do not invent one.
-Download location (given by the owner, a Google Drive share):
+Author: FlakDeau (itch.io: https://flakdeau19.itch.io).
+Pack page: https://flakdeau19.itch.io/pixel-art-texture-pack-256x256
+Google Drive copy the owner was given (a host, not the source):
   https://drive.google.com/file/d/126AltXMSr2suWyDWGpm4i7G90Zth3qtz/view?usp=sharing
-The Drive link is a host, not the author's page, and it could not be opened from
-the session that filed this pack (network policy). Dated file times inside the
-zip run 2022-2025.
-Received from the owner as a zip upload; date received 2026-09-29.
+Page read (pasted by the owner) 2026-09-29; the page was last updated with the
+"1000+ textures" post of Dec 19, 2025. Zip received 2026-09-29.
+Sound check for the future: zip sha256
+  66d9ba40ef79812ed1d0b13c875d361f1c23eeee441d86b69c208589d8e04fd0 ; 1,043 PNGs.
 
-TO DO (owner): if you know the author's name or store page, add it here.
-A name would let us credit them, which the licence does not require but is good
-practice and lets a future check confirm the licence at the source.
+Licence
+=======
+The store page states: "CC0 1.0 Universal. Feel free to use these assets in any
+personal or commercial projects." The author repeats in the comments that the
+textures may be edited and used in personal or commercial products.
+CC0 dedicates the work to the public domain: no credit, no restriction on
+modification or redistribution.
 
-Licence (verbatim from License.txt in the pack; a second identical copy is at
-PNGs/License.txt)
-=============================================================================
-    LICENSE:
-    This asset pack is free for use in commercial and non-commercial projects.
-    You are free to modify this asset pack however you please. No credit is required.
-
-    Do not redistribute, repackage or sell this asset, modified or unmodified, except if they are content files in your commercial or non-commercial project.
-
-Plain reading
-=============
-- Use in the mod (commercial or not): allowed. Modify freely: allowed.
-- Credit: not required.
-- Redistributing the pack itself, modified or not: NOT allowed. The single
-  exception is when the files are "content files in your project" - i.e. used as
-  part of the mod, not as a standalone collection.
-
-Redistribution here - READ THIS
-===============================
-Keeping the whole pack in intake/ of a public GitHub repository is publishing it
-as a standalone collection, which the last sentence above forbids, even though
-intake/ is not in the jar. The files in this folder are therefore NOT committed
-to git as of the session that filed them (only this notice and USAGE.txt are),
-pending the owner's decision. If you want the pack kept in the repo anyway, that
-is the owner's call and a knowing exception to the licence; the safe route is to
-keep the zip outside the repository and copy only the tiles the mod really uses
-into a module.
+DISCREPANCY TO KNOW ABOUT
+=========================
+The zip's own License.txt (dated 2024-08-19, an earlier release; a second copy
+sits in PNGs/) says something stricter: free for commercial and non-commercial
+use, modification allowed, no credit required, "Do not redistribute,
+repackage or sell this asset, modified or unmodified, except if they are
+content files in your commercial or non-commercial project." That is NOT CC0.
+It is kept verbatim in License.txt.
+The decision recorded here: the store page is the author's current, stated
+licence (CC0, updated Dec 2025, later than the file) and CC0 is a deliberate
+public-domain dedication, so this pack is treated as CC0 and IS committed to
+the repo's intake/. If the author ever says the stricter file governs, delete
+the PNGs from git and follow the Raven pack's handling (see ../raven-fantasy-hd-free/).
+Individual tiles copied into a module are unproblematic under either text.
 
 Credit
 ======
-Not required. Default to a line in THIRD_PARTY_NOTICES.md when anything is used:
-"Pixel-art texture tiles from the free 'PNG - Pixel Art Textures' pack (author
-unknown), used under its licence: free for commercial and non-commercial use,
-modification allowed, no credit required."
+Not required under either text. Default to a line in THIRD_PARTY_NOTICES.md
+anyway when a tile is first used:
+"Texture tiles by FlakDeau (flakdeau19.itch.io), Pixel Art Texture Pack 256x256,
+CC0 1.0 Universal."
+
+Size
+====
+About 32 MB in git history. Do not commit the PSD downloads.
+
+Where is it used? See USAGE.txt.
