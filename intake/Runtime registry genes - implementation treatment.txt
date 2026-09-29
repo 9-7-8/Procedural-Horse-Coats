@@ -2,7 +2,7 @@ Runtime registry genes - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "Open" lines are
 still to be settled; "UNVERIFIED" lines are facts this file has not proved and
-the building session must check first. Source of truth for what exists is the
+the building session must check first (each has a decided fallback). Source of truth for what exists is the
 five gene pages (wiki/gene-lycan.html, gene-pack-leader.html, gene-spawner.html,
 gene-egg-layer.html, gene-magic-item-drop.html). This file is the handoff for
 the two "To do.txt" lines it replaces (the LYCAN roster line and the
@@ -169,27 +169,37 @@ on top. Default is "allowed unless blocked", not opt-in.
   Recommendation: exclude everything in this mod's own namespace. The horse is
   not a source of the mod's own progression items.
 
-UNVERIFIED - the owner is to be asked about each before building
-=================================================================
-1. Whether the game lets the roster tell a peaceful modded mob from a hostile
-   one. Vanilla's habitat tag here is hand-written. At runtime the only real
-   signals are MobCategory (spawn category) and the instantiated animal's
-   navigation, which isWearable already uses. Pack leader needs "peaceful" and
-   nothing gives it for free.
-2. Whether a chaos seed has a legible display anywhere. The info screens show
-   allele labels; a chaos copy would read "Chaos" with no idea what it is. The
-   choices are showing the resolved thing ("would shift into: <mob>") on the
-   server-known horse, or a generic label.
-3. Whether the horse designer and the in-game custom spawn screen can offer
-   Chaos. The allele is in common/ so both will list it, but only the game can
-   resolve a seed. Hard rule 5 wants a deliberate divergence written in the
-   comment on BOTH files: the designer offers the allele and a seed field and
-   says "resolved in game".
-4. Whether FounderContext can carry "are modded mobs installed" (see piece A).
-5. Whether ServerConfig already has a list-of-strings option to copy for the
-   exclude lists.
-6. Whether an item's "creative-only" nature is readable at run time (see the
-   eligibility section).
+Assumptions the owner has now settled (fallbacks if they turn out false)
+=======================================================================
+Each was UNVERIFIED; the building session still confirms it first, and the owner
+has said what to do either way.
+1. Peaceful modded mobs (Pack leader, Spawner): Decided - use the game's spawn
+   category PLUS the same instance check Lycan's isWearable runs (swims, flies,
+   hunts on sight). One rule for all three loci; a modded mob that fails is
+   skipped. Pack leader keeps its peaceful-only rule; Spawner stays looser
+   (any modded mob, per piece A). If the instance check cannot be run for a
+   given entity type (it will not construct), skip that mob and log once.
+2. Display: Decided - on a horse the server knows, the info screen shows what
+   the seed resolves to (for example "would shift into: <mob>"). It follows the
+   loaded modpack, so it can change; say that on the Gameplay tab. Where the
+   client has no way to know (the designer, a horse whose record has not
+   arrived), the label is the generic "Chaos".
+3. Editors: Decided - the web designer and CustomHorseSpawnScreen BOTH offer
+   Chaos with a seed field, marked "resolved in game". Write the deliberate
+   divergence in the comment on both files (hard rule 5); the allele itself is
+   in common/, so no extra JSExport should be needed - UNVERIFIED, build :web
+   after adding it and run check-designer-boots.mjs.
+4. Creative-only items: Decided - if the registry cannot tell a creative-only
+   modded item from a survival one, the default blocklist is the hand-written
+   vanilla list plus this mod's own namespace, and the config exclude lists do
+   the rest. Modded operator items are the pack author's job; the Gameplay tab
+   and the config comment must say so plainly. Do not make modded items
+   opt-in and do not stop the item side over this.
+5. Founder context and config lists (the two remaining small checks): use the
+   recommendations already written - Chaos stays in the founder table even with
+   no modded mob installed (outcome text "no modded animal available"), and the
+   exclude lists copy an existing string-list option in ServerConfig. If either
+   turns out impossible, report it rather than improvising.
 
 Tests and checks
 ================
