@@ -1,0 +1,52 @@
+{
+  "id": "graveborn_warmblood",
+  "name": "Graveborn Warmblood",
+  "description": "A heavy, sturdy warmblood that looks like it was buried and did not stay. It is slow, hard to kill, eats raw meat and is hostile to anything that rides it after dark. Rotten flesh calms it for a while, and a calm horse can be tamed.",
+  "kind": "magical",
+  "magical_variant": false,
+  "commonness": "very_rare",
+  "spawn": ["spawn_egg"],
+  "stats": {
+    "speed": 2,
+    "jump": 4,
+    "health": 10,
+    "size": [0.95, 1.05],
+    "pull": 7
+  },
+  "genes": {
+    "horsegenetics.zombie": [
+      { "pair": "Zmb/Zmb", "weight": 100 }
+    ],
+    "horsegenetics.diet": [
+      { "pair": "Dmeat/Dmeat", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "Anp/Anp", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "Tmp/Tmp", "weight": 100 }
+    ],
+    "horsegenetics.magic_item_drop": [
+      { "pair": "Rot/Rot", "weight": 100 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.passification": {
+      "offering": 15,
+      "amount": [2, 4],
+      "duration": [1200, 3600],
+      "cooldown": [600, 1800]
+    }
+  },
+  "notes": [
+    "DRAFT. Not loadable yet: horsegenetics.zombie (Zmb) and the Rot drop allele do not exist. A breed file that names a gene or allele this build lacks is warned about and that locus alone is dropped, so copying this in early would give a plain horse, not an error. See intake/Undead horse conversion.txt.",
+    "Gene key and allele tokens for the undeath locus (horsegenetics.zombie, Zmb) are PROPOSED. Change them here and in the gene file together.",
+    "No spawn: cowboy or stable, so the breed is unsellable and never placed in a building (D23). No price, no biomes, no spawn_ground, no spawn_time: it heads no wild herd (D18). spawn_egg only. magical_variant is false so a magical herd is never rolled onto it.",
+    "Passification is Tmp/Tmp (D14): TEMPORARY, at any age, minecraft:rotten_flesh. NOT FTm: in PassificationGene FTm is 'temporary as a foal' only and ATm 'as an adult' only; Tmp is the any-age temporary route. offering 15 is the index rotten_flesh gets when appended after bone (14) and cake (13); it is an index into a closed list, so check it against PassificationGene.OFFERINGS when the gene is edited. amount [2,4], duration [1200,3600] ticks (one to three minutes), cooldown [600,1800] ticks (half a minute to a minute and a half) sit inside the gene's own limits (amount 1 to 6, duration 1200 to 12000, cooldown 600 to 6000). The player must tame inside the calm window; that is the intended contrast with the skeleton's permanent bone.",
+    "Aggression is Anp/Anp (D16): hostile to riders after dark. Passification's veto covers targeting AND fleeing (see nightmare.json's note); check that it holds for this allele and for a temporary route expiring mid-ride.",
+    "Diet is Dmeat/Dmeat (existing allele): raw meat. Feeding it breeding carrots is the open 'obligate carnivore' question on the undead-horses page; this file does not answer it.",
+    "Drops are Rot/Rot (D15): rotten flesh instead of leather. Proposed 1 to 3; needs the allele added to MagicItemDropGene. The locus key horsegenetics.magic_item_drop is MagicItemDropGene.KEY.",
+    "Stats: speed 2, jump 4 (slow, poor jumper), health 10 (about x2.24 the baseline of 5 by BreedStatCurve, which is as close to 'double hearts' as the curve reaches), pull 7 (sturdy). Size [0.95, 1.05] is an ordinary horse's height (D20). If a true x2 or more is wanted, that is a body-stat locus or a new effect, not this file.",
+    "Coat: NOT written, for the same reason as the skeleton: it depends on stage 0 and on the zombie locus's painter."
+  ]
+}

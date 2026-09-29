@@ -1,0 +1,51 @@
+{
+  "id": "great_valley_skeleton_horse",
+  "name": "Great Valley Skeleton Horse",
+  "description": "A horse the valley kept after everything else was taken back. It is light, quick and hollow, it eats only what it is made of, and it is hostile to anything that climbs on it after dark until somebody gives it a bone. One bone is enough, once, for good.",
+  "kind": "magical",
+  "magical_variant": false,
+  "commonness": "very_rare",
+  "spawn": ["spawn_egg"],
+  "stats": {
+    "speed": 8,
+    "jump": 7,
+    "health": 2,
+    "size": [0.95, 1.05],
+    "pull": 3
+  },
+  "genes": {
+    "horsegenetics.skeleton": [
+      { "pair": "Skl/Skl", "weight": 100 }
+    ],
+    "horsegenetics.diet": [
+      { "pair": "Dbone/Dbone", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "Anp/Anp", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "Prm/Prm", "weight": 100 }
+    ],
+    "horsegenetics.magic_item_drop": [
+      { "pair": "Bne/Bne", "weight": 100 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.passification": {
+      "offering": 14,
+      "amount": [1, 1]
+    }
+  },
+  "notes": [
+    "DRAFT. Not loadable yet: horsegenetics.skeleton (Skl), the Dbone diet allele and the Bne drop allele do not exist. A breed file that names a gene or allele this build lacks is warned about and that locus alone is dropped, so copying this in early would give a plain Feral-looking horse, not an error. See intake/Undead horse conversion.txt.",
+    "Gene key and allele tokens for the undeath locus (horsegenetics.skeleton, Skl) are PROPOSED. Change them here and in the gene file together; the token is the file format.",
+    "No spawn: cowboy or stable, so the breed is unsellable and never placed in a building (D23). No price, no biomes, no spawn_ground, no spawn_time: it heads no wild herd (D18). spawn_egg only. magical_variant is false so a magical herd is never rolled onto it.",
+    "Passification is Prm/Prm (D13): permanent, at any age, one minecraft:bone. offering 14 is the index minecraft:bone gets when it is appended to PassificationGene.OFFERINGS after cake (13). If anything else is appended first, this number moves - it is an index into a closed list, so check it against the list when the gene is edited. amount [1,1] pins 'one bone'. Duration and cooldown are left unbanded, as nightmare.json does, since a permanent route never reads them.",
+    "Aggression is Anp/Anp (D16): hostile to riders after dark. Passification's veto covers targeting AND fleeing (see nightmare.json's note); check that it holds for this allele.",
+    "Diet is Dbone/Dbone (D17): eats bones and heals from them the way a metal-eater eats one metal. It is the same item as the passification offering on purpose. Needs a new Diet entry and the DietGene token appended to TOKENS.",
+    "Drops are Bne/Bne (D15): bones instead of leather. Proposed 1 to 3 bones; needs the allele added to MagicItemDropGene. The locus key horsegenetics.magic_item_drop is MagicItemDropGene.KEY.",
+    "Stats: speed 8, jump 7 (light and quick), health 2 (fragile), pull 3. Size [0.95, 1.05] is an ordinary horse's height (D20). Health scores run from about 22.5 hp at 5 to 50.5 hp at 10 (BreedStatCurve), so health 2 is well under the baseline; tune it once seen in play.",
+    "Coat: NOT written. The look depends on stage 0 (does the skeleton share the horse mesh; how a coat is cut to alpha) and on the undeath locus's own painter. Do not pin base colours here to imitate bone until that is decided.",
+    "Eyes, mane, glow and every other cosmetic locus are left to the founder tables' defaults on purpose; they can be pinned once the look is designed."
+  ]
+}

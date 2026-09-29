@@ -196,7 +196,9 @@ D12 A breed names its undead pool with a field on the breed sheet (e.g.
     designer offers it, and joining a pool is editing that breed's file.
 
 D13 Skeleton passification: Prm/Prm (permanent) with minecraft:bone.
-D14 Zombie passification: FTm (temporary) with minecraft:rotten_flesh. The
+D14 Zombie passification: Tmp (temporary, any age) with minecraft:rotten_flesh.
+    CORRECTION: this was first written FTm, which in PassificationGene is
+    'temporary as a foal only'; Tmp is the any-age temporary route. The
     player must tame inside the calm window; that is the intended contrast.
     Both items are appended to PassificationGene.OFFERINGS (never reordered).
 D15 Drops REPLACE leather: skeleton drops bones, zombie drops rotten flesh
@@ -232,7 +234,7 @@ D24 First release includes: debug-yard rows (one per undead breed plus a
 
 D25 A converted horse that was ALREADY TAMED arrives passified: the converter
     marks its passification as satisfied and permanent for its owner, whatever
-    the breed's route (zombie's FTm included), so a horse the player owns and
+    the breed's route (zombie's Tmp included), so a horse the player owns and
     rides never turns on them after dark. Untamed conversions stay hostile
     until offered their item. Implementation: write the passification
     attachment (data/PassificationAttachment) in the same step as the tame and
@@ -268,7 +270,7 @@ plus a few alleles". Each row names the thing to copy.
   Counts as undead          MobGroups "undead" group                  one clause
 Passification, settled (D13, D14):
   - Skeleton: Prm/Prm (permanent), offering minecraft:bone.
-  - Zombie: FTm (temporary), offering minecraft:rotten_flesh.
+  - Zombie: Tmp (temporary, any age), offering minecraft:rotten_flesh.
   - Offering amount, duration and cooldown are epigenetic and banded per breed,
     as nightmare.json does.
   - Any aggression allele must be checked against PassificationGene's veto: it
@@ -1031,3 +1033,50 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())
 ----- END check_undead_meshes.py -----
+
+
+Appendix B - the two breed files (drafts)
+=========================================
+Drafted in intake/undead-breeds-draft/:
+  great_valley_skeleton_horse.json
+  graveborn_warmblood.json
+They follow wiki/breed-format.html and copy nightmare.json's passification
+pattern. They are NOT in common/.../breeds/ and NOT in breeds/index.json, on
+purpose: they name genes and alleles that do not exist yet, and a breed file
+that names one is warned about and loses that locus rather than failing, so
+dropping them in early would ship a plain horse. Do not regenerate index.json
+from the folder to add them (rule 6): add the two lines by hand.
+
+What each file needs before it loads as written:
+  - horsegenetics.skeleton (Skl) and horsegenetics.zombie (Zmb): the two new
+    undeath loci. Key and tokens are proposed; the token is the file format.
+  - DietGene: a bone diet (Dbone) - a new Diet entry plus the token appended to
+    DietGene.TOKENS. The zombie's Dmeat already exists.
+  - PassificationGene.OFFERINGS: append minecraft:bone then minecraft:rotten_flesh
+    after cake, giving indices 14 and 15 that the two files' "offering" bands
+    use. Append only; reordering rewrites every horse's offering.
+  - MagicItemDropGene: two alleles, Bne (bones) and Rot (rotten flesh), each
+    replacing leather (D15), proposed 1 to 3 items.
+  - Aggression Anp and passification Prm / Tmp already exist.
+
+Choices made in the drafts, all changeable:
+  - country left out (a real answer: from nowhere on earth); no price, and no
+    cowboy or stable in "spawn" (unsellable, D23); "spawn": ["spawn_egg"] only
+    (D18); no biomes, so neither heads a wild herd.
+  - kind "magical" (D22) and "magical_variant": false, so no magical herd ever
+    adds a random gene on top of an undead breed. Check what magical_variant
+    false implies elsewhere before release.
+  - stats: skeleton speed 8, jump 7, health 2, pull 3; zombie speed 2, jump 4,
+    health 10, pull 7; both size [0.95, 1.05] (D20). Health 10 is about x2.24
+    the baseline by BreedStatCurve, not a true doubling.
+  - the coat is deliberately not written; it waits on stage 0.
+  - zombie temporary calm: 1 to 3 minutes, cooldown half a minute to 1.5
+    minutes, 2 to 4 rotten flesh; skeleton: exactly one bone.
+
+After they are moved into the breeds folder: :common:bakeBreedFiles, then
+:common:bakeGeneCensus; *BreedsTest for each; BreedBandsReachTest (a band on a
+knob no pinned pair reads fails it - the passification bands read the pinned
+Prm/Tmp pairs, but the zombie's duration and cooldown bands only make sense on
+Tmp and the skeleton's must not band them); check-breed-heights.mjs for the
+size; the breed egg texture bake if an egg texture is added; and the breed-book
+lore entries (D24).
