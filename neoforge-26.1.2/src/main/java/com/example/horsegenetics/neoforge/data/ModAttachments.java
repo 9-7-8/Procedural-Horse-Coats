@@ -163,6 +163,21 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Who may ride this horse temporarily, and until when
+    // (data/RidingPassAttachment) - a jockey pass fed to it, or /horsejockey.
+    // The standing answers (owner, team, ally) are worked out live in
+    // server/HorseRiding and are not stored anywhere; only the borrowed
+    // permission needs a deadline written down. Not synced: the refusal happens
+    // on the server, and a client that knew would only be able to predict it
+    // wrong. copyOnDeath, so a resurrected horse does not strand the jockey who
+    // was on it.
+    public static final Supplier<AttachmentType<RidingPassAttachment>> RIDING_PASS =
+            ATTACHMENT_TYPES.register("riding_pass", () -> AttachmentType
+                    .builder(() -> RidingPassAttachment.DEFAULT)
+                    .serialize(RidingPassAttachment.MAP_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     // Everything a horse wears that vanilla has no equipment slot for - see
     // HorseGear. Synced, because the Gear tab draws the worn stacks on the
     // client and there is no container open to carry them; the click that

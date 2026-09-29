@@ -2943,6 +2943,13 @@ wiki/item-horse-shoes.html#shared-architecture	coding	Shared architecture
 wiki/item-horse-shoes.html#slot-layer	coding	Slot layer
 wiki/item-horse-shoes.html#what-they-are	gameplay	What they are
 wiki/item-horse-shoes.html#why-they-are-different	gameplay	Why they are different from boots
+wiki/item-jockey-passes.html#command	gameplay	The command — /horsejockey
+wiki/item-jockey-passes.html#deadlines	coding	A map of deadlines, not a set of names
+wiki/item-jockey-passes.html#order	coding	The pass is asked before the teams, deliberately
+wiki/item-jockey-passes.html#rules	gameplay	Things worth knowing
+wiki/item-jockey-passes.html#use	gameplay	How they work
+wiki/item-jockey-passes.html#where	coding	Where it lives
+wiki/item-jockey-passes.html#why	gameplay	Why this exists
 wiki/item-jumps.html#art	science	Why the art is ours
 wiki/item-jumps.html#building	gameplay	Building a course
 wiki/item-jumps.html#classes	coding	Where it lives

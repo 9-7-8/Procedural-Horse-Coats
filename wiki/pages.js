@@ -61,6 +61,7 @@ window.HG.pages = {
                 { href: "item-stall-signs.html", text: "Stall signs", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-tickets.html", text: "Tickets", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-transfer-papers.html", text: "Transfer papers", kind: "core", views: ["gameplay","coding"] },
+                { href: "item-jockey-passes.html", text: "Jockey passes", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-equestrian-posts.html", text: "The four posts", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-spawn-eggs.html", text: "Spawn eggs", kind: "tool", views: ["gameplay","coding"] },
                 { href: "horse-stasis.html", text: "Horse stasis: chambers and the bank", kind: "core", views: ["gameplay","coding"] }

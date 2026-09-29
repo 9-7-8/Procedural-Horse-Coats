@@ -90,7 +90,7 @@ public final class HorseGiveCommand {
         CommandSourceStack source = c.getSource();
         ServerPlayer giver = source.getPlayerOrException();
 
-        Horse horse = target(giver);
+        Horse horse = targetHorse(giver, REACH);
         if (horse == null) {
             say(source, "Get on the horse you want to give away, or look at it. "
                     + "Nothing within " + (int) REACH + " blocks.", ChatFormatting.RED);
@@ -135,6 +135,7 @@ public final class HorseGiveCommand {
         horse.setOwner(recipient);
         horse.setTamed(true);
         CowboyHandler.clearBrand(horse); // it has an owner now; it is not stock any more
+        clearJockeyPasses(horse);
         if (record.tamedBy().isEmpty()) {
             HorseRecords.setTamedBy(horse, recipient.getGameProfile().name());
         }
@@ -147,6 +148,23 @@ public final class HorseGiveCommand {
         ActionTrace.log("transfer", name + " given to " + recipient.getGameProfile().name()
                 + " by " + source.getTextName() + (owned ? "" : " [gamemaster, not their horse]"));
         return 1;
+    }
+
+    /**
+     * <b>Every borrowed pass on this horse dies with the sale.</b> A jockey pass
+     * is permission the <i>previous</i> owner gave; carrying it across would hand
+     * the new owner's horse to strangers they never agreed to, and they would
+     * have no way of even finding out who. Shared with
+     * {@code TransferPaperHandler}, which has to make exactly the same call.
+     */
+    static void clearJockeyPasses(Horse horse) {
+        var passes = horse.getData(
+                com.example.horsegenetics.neoforge.data.ModAttachments.RIDING_PASS.get());
+        if (!passes.isEmpty()) {
+            horse.setData(
+                    com.example.horsegenetics.neoforge.data.ModAttachments.RIDING_PASS.get(),
+                    passes.cleared());
+        }
     }
 
     // ------------------------------------------------------------------
@@ -162,8 +180,13 @@ public final class HorseGiveCommand {
      * different answers and the wrong one gives away somebody else's mare. The
      * box is inflated slightly the way vanilla's own entity pick is, so a horse
      * you are plainly aiming at is not missed by a pixel.
+     *
+     * <p>Public because {@link HorseJockeyCommand} asks the same question and
+     * the answer has to be the same one: two commands that pick a different
+     * horse from the same crosshair would be a genuinely nasty surprise, since
+     * one of them gives the animal away.
      */
-    private static Horse target(ServerPlayer player) {
+    public static Horse targetHorse(ServerPlayer player, double reach) {
         if (player.getVehicle() instanceof Horse ridden) {
             return ridden;
         }
@@ -171,8 +194,8 @@ public final class HorseGiveCommand {
             return null;
         }
         Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(REACH));
-        AABB search = player.getBoundingBox().expandTowards(player.getLookAngle().scale(REACH))
+        Vec3 end = eye.add(player.getLookAngle().scale(reach));
+        AABB search = player.getBoundingBox().expandTowards(player.getLookAngle().scale(reach))
                 .inflate(1.0);
         List<Horse> candidates = level.getEntitiesOfClass(Horse.class, search, Horse::isAlive);
 

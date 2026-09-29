@@ -21,6 +21,22 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-lending-a-horse.txt">2026-09-29, later
+        &mdash; <strong>lending a horse for an afternoon</strong>. The ask the morning's
+        riding rule made necessary the moment it shipped: ownership and teams are both
+        <em>standing</em> relationships and neither can say <em>this person, this horse,
+        this afternoon</em>. So a <a href="item-jockey-passes.html">jockey pass</a> &mdash;
+        made out to one animal by its owner, handed to whoever is riding, fed to that
+        animal, and good for a Minecraft day &mdash; plus <code>/horsejockey</code> for the
+        same lend without the crafting, with a <code>revoke</code> the item deliberately
+        does not have. The pass is asked <em>above</em> the teams in
+        <code>mayRide</code>, so turning teams off does not silently switch the item off
+        too. Three ways the deadline arithmetic could be wrong are all invisible from
+        inside the game &mdash; a second pass overwriting the first costs a day and looks
+        identical on the day it is fed &mdash; so it is the one part with a test, and the
+        test was checked against a deliberately broken <code>grant</code> to confirm it
+        bites rather than merely passing. A sale cancels every pass on the horse, in both
+        the places ownership can move.</li>
     <li><a href="session-log/d2026-09-29-three-asks-about-ownership.txt">2026-09-29
         &mdash; <strong>three asks about ownership, and a horse that stopped landing in the
         wall</strong>. Three queued requests that turned out to be one question from three

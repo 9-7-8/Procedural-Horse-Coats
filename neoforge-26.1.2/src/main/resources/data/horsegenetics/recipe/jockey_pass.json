@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "horsegenetics:horse_hair",
+    "minecraft:leather"
+  ],
+  "result": {
+    "id": "horsegenetics:jockey_pass"
+  }
+}
