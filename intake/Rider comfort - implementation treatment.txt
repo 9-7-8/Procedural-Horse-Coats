@@ -32,7 +32,7 @@ What already exists, so the building session does not redo it
   BARDING among its slots, each with an accepts() and an item tag. Piece 3 can
   ask a slot whether it takes a stack instead of hard-coding item ids.
 
-Four pieces (the fifth, fade-when-looking-down, is scoped out - see the end).
+Five pieces. Piece 5, the fade, is built last and starts with a spike.
 Build order is smallest blast radius first, and each is shippable alone.
 
 1. Remove the mining-speed debuff while mounted (smallest)
@@ -133,9 +133,14 @@ does: a snapped or hand-cut lead goes to the player's pack, not the ground.
   the thrown one. The building session still has to find the right seam - read
   Leashable.dropLeash / Entity.spawnAtLocation first, since dropLeash is an
   interface default and mixing into it is the unverified part.
-- Only a leash HOLDER who is a player and within reach should receive it. A horse
-  that drifted away from an offline owner has nobody to give it to and must fall
-  back to vanilla's drop, exactly as HorseLeads.untieFor already does.
+- Decided: the lead goes to the player who PLACED it, even if they are far
+  away or in another dimension. Not "the holder within reach". A lead on a
+  fence knot has no player holder, so the placer must be RECORDED when the lead
+  is attached (a small per-horse value: the attaching player's UUID, cleared
+  when the lead comes off). Nothing records it today, so this is new state.
+- Decided: if the placer is offline, in an unloaded place, or was never
+  recorded (a horse leashed before this shipped), fall back to vanilla's drop
+  on the ground. Never lose the lead, never hold it for later.
 - Ship it with behaviour.leads_return covering it (the option already exists and
   its comment says the vanilla cases are excluded - update the comment).
 
@@ -160,16 +165,28 @@ below apply.
   join, the way other synced data in this mod travels; do not make it a client
   config as well.
 
-Scoped out: fade the horse when looking down
-=============================================
-It needs the coat pipeline to draw a half-transparent horse, which nothing here
-has ever been asked to do. The page's own advice stands: prove the transparency
-before designing the feature. If the owner wants it scoped later, the treatment
-is a one-session SPIKE, not a feature: force a fixed alpha on the horse's
-render state in GeneticHorseRenderer for one horse, look at how the generated
-coat, the cutie-mark layer and any worn gear draw under it (do they fade
-together or leave a floating saddle?), and write only that finding on the
-Roadmap tab. No config until it can be drawn.
+5. Fade the horse as you look down
+-----------------------------------
+What the player feels: the mount stops blocking the view of the ground.
+- Decided: the horse NEVER goes fully invisible. Default floor 25% opacity.
+- Decided: only the horse you are RIDING fades. Other horses stay solid.
+- Decided: settings live in ClientConfig (visual, per player): enabled, minimum
+  opacity (default 0.25), the pitch it starts fading at, the pitch at which it
+  reaches the floor. Fade is a smooth ramp between the two pitches. No server
+  config, no payload.
+- Real unknown, unchanged: nothing here has ever drawn the generated coat at
+  partial alpha. So the FIRST step is a spike, before any config is written:
+  force a fixed alpha on the ridden horse's render state in
+  GeneticHorseRenderer, and look at how the generated coat, the cutie-mark
+  layer, the emissive layer and any worn gear draw under it (do they fade
+  together, or leave a floating saddle or a solid glow?). Translucency also
+  changes sort order and can show the horse's insides through itself; write the
+  finding on the Roadmap tab.
+- If the coat cannot be drawn cleanly at partial alpha: STOP AND REPORT. Do not
+  ship a fade that looks broken; ask the owner (e.g. fade only the base coat, or
+  drop the piece).
+- Build last: it is the only piece with a rendering risk, and 1-4 do not depend
+  on it.
 
 Not taken (page's own decline, unchanged): Horse Buff's step-height change.
 
