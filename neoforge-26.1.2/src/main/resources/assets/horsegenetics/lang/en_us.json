@@ -242,6 +242,7 @@
   "message.horsegenetics.potion_milk.stallion": "The stallion rears and kicks you. Only a mare gives potion milk.",
   "message.horsegenetics.preset_egg.unreadable": "[Preset Horse] this egg was made with a different set of genes: %1$s",
   "message.horsegenetics.rename.not_yours": "You can look this one over, but naming it is the owner's business.",
+  "message.horsegenetics.riding.not_yours": "%s doesn't know you.",
   "message.horsegenetics.shear.done": "You groomed %s. They leaned into it, and a cluster of loose hair came away in the brush.",
   "message.horsegenetics.shear.foal": "This foal's coat is too fine to brush out yet.",
   "message.horsegenetics.shear.regrowing": "You groomed this one recently - there's nothing loose in its coat.",

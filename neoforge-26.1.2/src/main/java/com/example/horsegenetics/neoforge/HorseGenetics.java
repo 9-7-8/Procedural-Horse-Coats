@@ -117,6 +117,11 @@ public final class HorseGenetics {
         // Waystones is absent, and its own guard runs before anything in that
         // mod's packages is loaded - see the class note.
         com.example.horsegenetics.neoforge.compat.WaystonesCompat.init();
+        // One log line saying whether teammates and allies may ride each other's
+        // horses. It registers nothing - FtbTeamsCompat is asked a question at
+        // mount time and nothing else - but a gate you cannot read is
+        // indistinguishable from a feature that does not work.
+        com.example.horsegenetics.neoforge.compat.FtbTeamsCompat.announce();
         // HorseGeneticsEventHandler, ModNetworking, ClientSetup, DebugKeyBindings,
         // DebugKeyHandler, and DebugPenTickHandler are all @EventBusSubscriber-
         // annotated and pick themselves up automatically - nothing else to wire

@@ -1393,6 +1393,52 @@
     </p>
 </div>
 
+<h3 id="waystones-landing">Where the horse comes out &mdash; the 3&times;3&times;3</h3>
+
+<p>
+    A waystone&rsquo;s arrival spot is chosen for a person: one block in front of the stone, two
+    blocks of air, no more. A horse is wider than that, and <em>this mod&rsquo;s</em> horses can be
+    considerably taller &mdash; a Shire at the top of the <a href="horse-body.html">size loci</a> is
+    a different animal from a Falabella. So a stone built against a hillside, inside a base, or in a
+    one-block doorway will happily put the rider somewhere fine and the horse inside the wall, and a
+    horse inside a wall suffocates.
+</p>
+
+<p>
+    <strong>So the arrival is checked, and moved if it has to be.</strong> When there is a horse in
+    the teleport batch at all &mdash; ridden, led, or the vehicle the hook above added &mdash;
+    <code>WaystoneTeleportEntityEvent.Pre</code> is used to find the <strong>nearest block with a
+    3&times;3&times;3 of pure air standing on it</strong>, within eight blocks of where Waystones
+    was going to put you, and the rider and the horse are both sent there. They get the same answer
+    because it is the same function of the same input, so Waystones&rsquo; own remount at the far
+    end still works.
+</p>
+
+<ul>
+    <li><strong>Nothing moves if the spot is already clear.</strong> The search starts by testing
+        the arrival Waystones chose, so an ordinary stone in the open is unaffected &mdash; and a
+        teleport with no horse in it is never touched at all.</li>
+    <li><strong>Up in the air counts.</strong> There is no requirement for ground underneath, which
+        is deliberate and was asked for in those words: a horse that falls two blocks is a horse, a
+        horse in a wall is a corpse.</li>
+    <li><strong>Air, not &ldquo;not solid&rdquo;.</strong> Water, a carpet, tall grass and a snow
+        layer are all things a horse can technically be put down in, and none of them are what a
+        clear spot means.</li>
+    <li><strong>If nothing within eight blocks is clear, the teleport happens anyway</strong>, at
+        Waystones&rsquo; own spot. A waystone that cannot be arrived at is a worse bug than a horse
+        in a tight spot, and this mod is not entitled to decide somebody&rsquo;s trip does not
+        happen.</li>
+</ul>
+
+<p>
+    The search itself &mdash; <code>WaystonesCompat.nearestClearance</code> &mdash; sits
+    <em>outside</em> the guarded <code>Hook</code> class, unlike everything else in that file. It
+    names no Waystones type, and the only piece of this integration with real logic in it is also
+    the only piece that can be silently wrong, so it is the one piece with a test:
+    <code>waystone_clearance_is_nearest</code> walls an arrival in, and measures what the shell
+    search returns against an exhaustive scan of the same box.
+</p>
+
 <h3 id="waystones-build">Three dependencies, and a fourth that is not where you would look</h3>
 
 <p>
@@ -1415,6 +1461,59 @@
         <code>maven.twelveiterations.com</code>, which is the second repository block in
         <code>neoforge-26.1.2/build.gradle</code> and exists for that one artifact.</li>
 </ul>
+
+<h2 id="ftbteams">FTB Teams &mdash; who else may ride your horse</h2>
+
+<p>
+    <strong>A horse refuses anybody but its owner</strong> &mdash; that rule is
+    <a href="horse-care.html#riding">this mod&rsquo;s own</a> and needs no other mod. What FTB Teams
+    supplies is the <em>exception</em>: on a server, &ldquo;mine&rdquo; is rarely one person, and a
+    rule with no way to say <em>and my team</em> is a rule that gets switched off on day one.
+</p>
+
+<p>
+    With FTB Teams installed, two more people may ride your horses: anyone in <strong>your
+    team</strong>, and anyone in a team you have marked an <strong>ally</strong>. Both are asked of
+    <code>dev.ftb.mods.ftbteams.api</code> &mdash; <code>arePlayersInSameTeam</code> and
+    <code>Team.getRankForPlayer(&hellip;).isAllyOrBetter()</code> &mdash; and both take
+    <strong>UUIDs</strong>, which is the reason this works at all: a horse&rsquo;s owner is usually
+    not online when somebody else tries to get on it.
+</p>
+
+<div class="note">
+    <span class="label">Why FTB Teams and not FTB Chunks</span>
+    <p>
+        The ask named FTB Chunks, which is the mod a player actually sees &mdash; the map, the
+        claims, the invite button. But a chunk claim is a relationship between a player and some
+        <em>ground</em>, not between two players. The relationship lives one mod down, in FTB Teams,
+        which is what FTB Chunks builds its claims out of and what its team screen is really
+        editing. A server running FTB Chunks has FTB Teams by definition: it is a hard dependency.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Vanilla scoreboard teams count too</strong>, with no mods at all. Same flag, same
+        rule &mdash; <code>/team join</code> is the oldest answer to this question and there was no
+        reason to ignore it. It matches on the owner&rsquo;s <em>name</em> rather than their id,
+        which is how scoreboard teams work, so an owner neither name cache has ever seen answers
+        <em>no</em> rather than <em>yes</em>.</li>
+    <li><strong>An ally is a property of the owner&rsquo;s team, not the rider&rsquo;s.</strong> It
+        is the owner who decided to trust them, and the two teams need not have allied each other
+        back.</li>
+    <li><strong>One flag switches all three</strong>: <code>behaviour.riding_allows_teams</code>.
+        Off, only the owner ever rides, however many teams anybody is in.</li>
+    <li><strong>FTB is not on Modrinth.</strong> The compile-only dependency comes from
+        <code>maven.ftb.dev/releases</code>, and <code>ftb-library</code> has to come with it:
+        <code>Team</code> declares <code>createParty(String, Color4I)</code>, and javac completes
+        every member of an interface before it can resolve a call on one. That is the same trap
+        <a href="#waystones-build">Shogi</a> set, with the same <code>cannot access</code> error.</li>
+</ul>
+
+<p>
+    <code>compat/FtbTeamsCompat</code> is the only class that names FTB, it is the same guarded
+    <code>Hook</code> split <a href="#waystones">Waystones</a> uses, and an FTB that moved the API
+    warns <em>once</em> and falls back to owner-only rather than throwing on every mount attempt.
+</p>
 
 <h2 id="combat-controls">Horse Combat Controls</h2>
 
@@ -1986,8 +2085,43 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, a hay-bale tag lookup that would silently stop every horse in the world eating hay, and a <a href="compatibility.html#verify-waystones">Waystones hook</a> written entirely by reading a jar &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
+    <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, a hay-bale tag lookup that would silently stop every horse in the world eating hay, and two whole integrations written entirely by reading a jar &mdash; the <a href="compatibility.html#verify-waystones">Waystones hook</a> and the <a href="compatibility.html#verify-ftbteams">FTB Teams one</a> &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
 </div>
+
+<h3 id="verify-ftbteams">Teams and allies riding each other&rsquo;s horses (NOT played, needs a second player)</h3>
+
+<p>
+    <code>compat/FtbTeamsCompat</code> was written by reading
+    <code>ftb-teams-neoforge-26.1.2.4.jar</code> with <code>javap</code>, exactly as the Waystones
+    hook above was. It compiles against the real API and <strong>has never executed</strong>. The
+    half that needs no mod at all &mdash; vanilla scoreboard teams &mdash; is equally unobserved,
+    and so is <a href="horse-care.html#riding">the refusal itself</a>, because every part of this
+    needs a second player and the dev instance has one. See
+    <a href="#ftbteams">FTB Teams</a>.
+</p>
+
+<ul>
+    <li><strong>Pass:</strong> a stranger tries to mount your tamed horse, the horse rears, and they
+        are told <em>&ldquo;&lt;name&gt; doesn&rsquo;t know you.&rdquo;</em> Put them on your team
+        (either kind) and they can ride it. Ally their team instead of recruiting them, and they
+        can still ride it.</li>
+    <li><strong>Fail looks like</strong> four things worth telling apart: <em>anybody can ride
+        anything</em> (<code>behaviour.owner_only_riding</code> read false, or the mount event is
+        not firing); <em>nobody can ride anything, including the owner</em> (the ownership read is
+        wrong &mdash; check an <em>untamed</em> horse still lets you on, because if it does not,
+        horses cannot be tamed at all and that is the serious version of this bug); <em>teammates
+        are refused</em> (look for the &ldquo;FTB Teams found&rdquo; line at startup, and for the
+        one-time warning that says the API did not match); or <em>a teammate is thrown off a second
+        after mounting</em>, which would mean the mount check and the tick sweep disagree.</li>
+    <li><strong>The thing most likely to be wrong</strong> is the offline owner. Both the FTB calls
+        take UUIDs and are safe, but the vanilla scoreboard half has to turn a UUID into a
+        <em>name</em> through the server&rsquo;s name caches first. Test it with the owner logged
+        out &mdash; that is the case the code is written for and the case nobody will think to
+        try.</li>
+    <li><strong>Also worth a look:</strong> that a <a href="item-transfer-papers.html#horsegive">horse
+        given away</a> under its rider throws that rider off, which is what the tick sweep is
+        for.</li>
+</ul>
 
 <h3 id="verify-waystones">A ridden horse through a waystone (NOT played, needs three more mods)</h3>
 
@@ -2021,6 +2155,20 @@
         <code>TamableAnimal</code>. That was read off the bytecode of one version. If a future
         Waystones widens its pet scan to <code>OwnableEntity</code>, this hook becomes redundant for
         the loose case and should be re-read rather than trusted.</li>
+    <li><strong>The arrival spot</strong> (<a href="#waystones-landing">the 3&times;3&times;3</a>)
+        is a second, separate thing to watch, and it has one half proven and one half not. The
+        search is tested &mdash; <code>waystone_clearance_is_nearest</code> walls an arrival in and
+        checks the answer against an exhaustive scan &mdash; but <strong>nothing has ever fired
+        <code>WaystoneTeleportEntityEvent.Pre</code></strong>, so whether
+        <code>setTargetPosition</code> is honoured, whether rider and horse really are given the
+        same position, and whether Waystones remounts them after being moved are all unobserved.
+        <em>Pass:</em> warp with a horse to a stone built flush against a cliff or inside a
+        one-block doorway and arrive, mounted, in open space near it. <em>Fail looks like</em> the
+        horse arriving inside the wall exactly as before (the listener never registered, or the
+        position is overwritten downstream), the rider and the horse landing in two different
+        places (they were given different targets, and the remount will not happen), or an arrival
+        several blocks away when the original spot was already fine (the &ldquo;test
+        <code>from</code> first&rdquo; branch is not doing what it should).</li>
 </ul>
 
 <h3 id="pseudowoods-0919">287 modded woods become 39 (2026-09-19, NOT played, needs the big pack)</h3>

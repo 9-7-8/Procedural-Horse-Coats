@@ -172,6 +172,16 @@ repositories {
             includeGroup("net.blay09.mods")
         }
     }
+    // FTB's own maven, for FTB Teams' published `dev.ftb.mods.ftbteams.api`
+    // package. It is NOT on Modrinth - FTB withdrew their mods from it, and the
+    // Modrinth coordinate simply 404s rather than resolving to something wrong,
+    // which is the good failure mode.
+    maven {
+        url = "https://maven.ftb.dev/releases"
+        content {
+            includeGroup("dev.ftb.mods")
+        }
+    }
 }
 
 dependencies {
@@ -206,6 +216,24 @@ dependencies {
     // second repository block for why. Without it the Waystones API compiles
     // to "cannot access ShogiContext".
     compileOnly "net.blay09.mods:shogi-api:26.1.2.8"
+
+    // FTB Teams, compile-only, and the third published API this project builds
+    // against. `compat/FtbTeamsCompat` is the only class that names it, behind
+    // the same ModList guard the Waystones hook uses, and the jar is never
+    // shipped. What it is for: FTB Chunks makes its claims out of FTB Teams
+    // parties, so "my team may ride my horse" is a question only this API can
+    // answer - `TeamManager.arePlayersInSameTeam(UUID, UUID)` and
+    // `Team.getRankForPlayer(UUID)`, both of which take ids and so answer for
+    // an owner who is offline.
+    //
+    // ftb-library comes too, and is not optional: `Team` declares
+    // `createParty(String, Color4I)`, and javac completes every member of an
+    // interface before it can resolve a call on one - the same trap the Shogi
+    // note above describes, with the same "cannot access" error. Pinned to what
+    // the ATM11 instance actually ships (ftb-teams 26.1.2.4, ftb-library
+    // 26.1.2.7) rather than to the newest.
+    compileOnly "dev.ftb.mods:ftb-teams-neoforge:26.1.2.4"
+    compileOnly "dev.ftb.mods:ftb-library-neoforge:26.1.2.7"
 
     // Plain JUnit, no Minecraft. The only thing tested here is compat's
     // MaterialScan, which deliberately imports nothing from Minecraft or
