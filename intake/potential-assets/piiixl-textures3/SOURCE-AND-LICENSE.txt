@@ -1,0 +1,101 @@
+piiixl "Textures" (textures3) - source, licence, credit
+
+*** NOT ON DISK. The owner queued this pack on 2026-09-29 but the downloads have
+not been supplied - only the store page text. This file records the terms, which
+are the reason to read it before fetching anything. ***
+
+Source
+======
+piiixl (itch.io: https://piiixl.itch.io).
+Store page: https://piiixl.itch.io/textures3  ("Textures")
+Page text and the full comment thread pasted by the owner 2026-09-29.
+Pricing: "name your own price" (free listing).
+
+What the page says it is
+  "Seamless textures sprite sheet, 16x16px."
+Two downloads:
+  sprite sheet 16x16px seamless textures.png    27 kB
+  2-bit.zip                                     641 kB
+GET IT: download both from the store page above. A session that needs these and
+finds none should PROMPT THE OWNER with this link. What is in 2-bit.zip is
+unknown until someone opens it - presumably a two-colour version of the same
+sheet - and whoever does should record the contents here, as the other packs'
+notes do.
+
+At 16x16 these are the smallest tiles of any pack here, and seamless, which is
+the combination the coat and mesh work actually wants. That is what makes the
+licence below worth settling rather than shrugging at.
+
+Licence - a real one this time, and it has teeth
+================================================
+Quoted verbatim from the store page:
+
+  "License: Custom Commercial Asset License.
+   This work is licensed under a custom license inspired by Creative Commons.
+   You are free to:
+   - Use - in personal and commercial projects.
+   - Modify - edit, adapt, and build upon the assets.
+   Under the following terms:
+   - No Redistribution (NR) - You may NOT sell, share, sublicense, or
+     distribute the assets as standalone files, whether original or modified.
+   - No Asset Packs - You may NOT include the assets in any asset pack,
+     library, or collection intended for redistribution or resale.
+   - No Extraction - You may not use the assets in a way that allows others to
+     extract and reuse them as standalone assets.
+   Attribution:
+   - Not required, but appreciated."
+
+The author (piiixl) wrote that text themselves, in the page's comments, after a
+commenter pressed them on what the licence was. They name it "CC-NR (Attribution
+Optional) - Custom". It is the author's own words, not a third party's guess, so
+treat it as the real terms. A later commenter asserting the pack is "clearly CC0"
+is wrong and is not a source.
+
+*** THE PROBLEM: "No Extraction" versus a Minecraft mod ***
+============================================================
+Read that third clause against what this project actually ships. A mod jar is a
+zip. Every texture in it is a PNG that any player can pull out with any archive
+tool, and resource-pack authors are expected to. Putting one of these tiles in
+`assets/horsegenetics/textures/` therefore does exactly what the No Extraction
+clause forbids: it distributes the asset as a standalone file, and it lets others
+extract and reuse it as one. "Whether original or modified" closes the obvious
+escape, so recolouring a tile or pasting it into a sheet does not clear it.
+
+Two further points, neither of them in our favour:
+  - This mod is CC BY-NC. Forks may redistribute what is in the repo. We cannot
+    pass on rights we do not hold, so a file from this pack in the repo would be
+    handing forks a permission the author explicitly withholds. Compare the Raven
+    pack, whose notes carve that back explicitly - but the Raven licence has a
+    MODS clause that contemplates exactly this and permits it on conditions.
+    This licence has no mods clause at all.
+  - The mod's own coat pipeline reads source PNGs out of the jar at runtime, so
+    even art that is only an input, never a shipped sheet, is still a standalone
+    file sitting in the archive.
+
+WHAT IS STILL CLEARLY ALLOWED
+  - Looking at them. "Use" and "Modify" are granted; it is only distribution
+    that is barred. They can sit on the machine and inform work.
+  - Redrawing. A tile studied and then drawn fresh by us is our file, and the
+    seamless 16x16 idiom is a technique, not the author's property.
+
+WHAT NEEDS THE AUTHOR'S PERMISSION FIRST
+  - Any tile, modified or not, that ends up inside the jar or the repo.
+    The ask is small and specific, and piiixl answers their comments: may these
+    textures be included in a free, open-source Minecraft mod, whose files are
+    necessarily extractable from the jar and whose own licence lets others
+    redistribute the mod? Paste the reply here verbatim. Until then the answer
+    is no, and this is a note in THIRD_PARTY_NOTICES.md we cannot write honestly.
+
+Handling on the machine
+=======================
+When the downloads arrive: unzip into this folder and record the file counts,
+the sha256 of both downloads, and what 2-bit.zip holds. The images do NOT go in
+git - the .gitignore rule for this folder keeps them out - and nothing is copied
+into a module while the paragraph above stands unresolved.
+
+Credit
+======
+Not required by the licence, but wanted if anything is ever used:
+"Textures by piiixl (piiixl.itch.io)."
+
+Where is it used? See USAGE.txt.

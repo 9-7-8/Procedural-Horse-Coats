@@ -86,6 +86,11 @@ intake/potential-assets/pixelated-patterns/*
 intake/potential-assets/internet-pattern-book/*
 !intake/potential-assets/internet-pattern-book/SOURCE-AND-LICENSE.txt
 !intake/potential-assets/internet-pattern-book/USAGE.txt
+# piiixl "Textures": the licence forbids redistributing the assets as standalone
+# files, original or modified, which is what a file in this repo would be.
+intake/potential-assets/piiixl-textures3/*
+!intake/potential-assets/piiixl-textures3/SOURCE-AND-LICENSE.txt
+!intake/potential-assets/piiixl-textures3/USAGE.txt
 
 # Python leaves these beside intake/tools/*.py; they are not source.
 __pycache__/

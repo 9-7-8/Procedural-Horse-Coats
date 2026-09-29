@@ -1,0 +1,8 @@
+Where this pack is used in the game
+
+Nothing - and nothing may be, yet. The pack is not on disk, and its licence's
+No Extraction clause is unresolved against shipping a texture inside a mod jar.
+See SOURCE-AND-LICENSE.txt before adding a line here.
+
+Keep one line per file used, in the same change that copies it:
+  <file in this pack>  ->  <path in the mod>  |  modified? y/n  |  what it is for  |  date
