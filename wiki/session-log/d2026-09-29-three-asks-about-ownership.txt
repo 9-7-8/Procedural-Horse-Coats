@@ -1,0 +1,263 @@
+2026-09-29 — three asks about ownership, and a horse that stopped landing in the wall
+
+
+    A queue session. Three requests, arriving one at a time while work was
+    already running, and all of them turned out to be the same question from
+    three directions: who does this horse belong to, and what follows from
+    that. Nothing was played. Everything below is build-green and written up
+    as unplayed; the one piece with a test has one.
+
+        1. people should not be able to ride a horse they don't own, it
+           should buck them off with a warning about "that horse doesn't
+           know you", but add in support for teams (like through ftb chunks,
+           which creates teams) or allyships, people that are not the owner
+           who are allowed to ride the horse
+        2. the waystone support should find the nearest open 3x3x3 of pure
+           air blocks to put the player on the horse in, even if that's up
+           in the air, to prevent the horse suffocating in a wall
+        3. create a command line command to transfer a horse to another
+           player (works like transfer papers) which can be disabled from
+           the config
+
+
+1. A HORSE THAT DOES NOT KNOW YOU
+
+    Vanilla has no rule here at all. A tamed horse is a saddle anybody can sit
+    in; ownership governs whether a lead works and who the horse follows, and
+    nothing else. That is invisible in single-player and is the difference
+    between a stable and a car park on a server — and this mod's horses are
+    worth a great deal more than a vanilla one, which is exactly what makes
+    the absence of the rule expensive.
+
+    server/HorseRiding now holds one question, mayRide(AbstractHorse, Player),
+    and both answers to it. In order, first yes wins:
+
+        behaviour.owner_only_riding off        -> yes (vanilla, exactly)
+        the horse is untamed                   -> yes
+        the owner                              -> yes
+        the owner's vanilla scoreboard team    -> yes, if teams are allowed
+        the owner's FTB team, or an ally of it -> yes, if teams are allowed
+
+    THE UNTAMED CASE IS NOT A LOOPHOLE AND IS THE MOST IMPORTANT LINE IN THE
+    CLASS. Climbing on a wild horse until it stops bucking is how a horse is
+    tamed. A rule that refused an untamed horse would not be a fussy horse; it
+    would be horses having become untameable, and it is the first thing on the
+    verification list for that reason.
+
+    Two enforcement points, because they catch two different failures:
+
+        EntityMountEvent, cancelled. Mounting is server-authoritative in this
+        version — AbstractHorse.mobInteract calls doPlayerRide behind an
+        isClientSide check — so there is no client prediction to undo.
+
+        A sweep on EntityTickEvent.Post, for a rider who is ALREADY up. The
+        mount check cannot cover this: a horse changes hands under its rider
+        (/horsegive, a redeemed paper), a team is disbanded, an operator edits
+        the config with somebody in the saddle. Guarded on isVehicle() as the
+        very first thing, so every horse in every paddock with nobody on it
+        costs one boolean, and staggered by entity id at 20 ticks the way
+        HorseCareHandler's scan is.
+
+    The Ride button on the information screen is the third caller. It reaches
+    startRiding by its own path and already had to repeat the cowboy brand
+    check for exactly the same reason.
+
+    Both refusals use makeMad() — the rear vanilla already has, which plays the
+    angry sound itself — or the sound alone when the horse is already standing,
+    since makeMad on a standing horse does nothing and a silent refusal reads
+    as a bug rather than as a rule.
+
+    No operator or creative exception, deliberately, and on precedent:
+    HorseOwnership's class note already settled this for binding items ("you
+    shouldn't be able to make any kind of bound item to a horse you don't own,
+    even in creative mode", owner, 2026-09-13). The reasoning carries over
+    intact, including the part that matters most — in the test yard the tester
+    is always in creative, so an exception would mean the rule never ran at
+    all. An operator who genuinely has to move somebody's horse has ask 3
+    instead, which leaves a log line.
+
+
+2. FTB TEAMS, AND WHY NOT FTB CHUNKS
+
+    The ask named FTB Chunks. FTB Chunks is the mod a player sees — the map,
+    the claims, the invite button — but a chunk claim is a relationship between
+    a player and some GROUND, not between two players. The relationship lives
+    one mod down, in FTB Teams, which is what FTB Chunks builds its claims out
+    of and what its team screen is really editing. FTB Chunks declares
+    ftbteams as a hard dependency, so a server running the one has the other.
+
+    compat/FtbTeamsCompat is the third published API this project builds
+    against, after Jade and Waystones, and takes the same deliberate exception
+    to HorsePoweredCompat's no-reaching-in rule for the same stated reason: the
+    rule is about GUESSING, and dev.ftb.mods.ftbteams.api is a package FTB
+    publishes, versions and ships a package-info for. Same guarded Hook split,
+    so with FTB absent nothing in dev.ftb is ever loaded or verified.
+
+    Two calls, both taking UUIDs:
+
+        TeamManager.arePlayersInSameTeam(UUID, UUID)
+        Team.getRankForPlayer(UUID).isAllyOrBetter(), on the OWNER's team
+
+    Taking UUIDs is the reason this works at all. A horse's owner is usually
+    not online when somebody else tries to get on it, and an API that needed
+    the owner's entity could only ever have answered for a horse whose owner
+    was stood next to it.
+
+    The ally direction is asked of the owner's team and not the rider's: it is
+    the owner who decided to trust them, and the two teams need not have allied
+    each other back.
+
+    Vanilla scoreboard teams count too, under the same flag, because /team is
+    the oldest answer to this question and works with no mods at all. That half
+    is NOT symmetrical with the FTB half and cannot be: a scoreboard team keys
+    its members on the player's NAME, so an offline owner goes through
+    HorseOwnership.ownerName — usercache.json, then NeoForge's UsernameCache,
+    never a network call. An owner neither cache has seen answers no. That is a
+    deliberate no: a horse whose owner has never been seen on this server is
+    precisely the horse that should not be handed to a stranger on a guess.
+
+    BUILD NOTE. FTB is not on Modrinth — they withdrew, and the Modrinth
+    coordinate 404s rather than resolving to something wrong, which is the good
+    failure mode. The artifact is dev.ftb.mods:ftb-teams-neoforge from
+    maven.ftb.dev/releases, pinned to 26.1.2.4, which is what the ATM11
+    instance actually ships. ftb-library-neoforge 26.1.2.7 has to come with it:
+    Team declares createParty(String, Color4I) and javac completes every member
+    of an interface before it can resolve a call on one. Same trap Shogi set
+    for the Waystones work, same "cannot access" error.
+
+
+3. THE 3x3x3
+
+    A waystone's arrival spot is chosen for a person standing up: one block in
+    front of the stone, two blocks of air, no more. A horse is wider than that,
+    and this mod's horses can be considerably taller — a Shire at the top of
+    the size loci is a different animal from a Falabella. So a stone built
+    against a hillside, inside a base, or in a one-block doorway puts the rider
+    somewhere fine and the horse inside the wall.
+
+    WaystoneTeleportEntityEvent.Pre carries setTargetPosition, which is the
+    hook. WaystoneTeleportContext itself has no destination setter — it extends
+    Shogi's ShogiContext, which is all readers — and that was worth half an
+    hour of looking before the per-entity event turned it up.
+
+    Four things about the implementation are deliberate:
+
+        Only when a horse is in the batch. Ridden, led, or the vehicle the
+        existing Prepare hook adds. An ordinary waystone hop with no horse in
+        it is left exactly where Waystones put it — relocating every arrival
+        on the server is a much larger claim than this integration is making.
+
+        Nothing moves if the spot is already clear. The search tests `from`
+        first, so the usual case is 27 block reads and no change. The x/z are
+        still re-centred on the block, because Waystones' own spot can be
+        off-centre and half a block of a three-wide space is not worth giving
+        away.
+
+        Air, not "not solid". The ask said pure air. Water, a carpet, tall
+        grass and a snow layer are all things a horse can technically be put
+        down in and none of them are what was asked for.
+
+        If nothing within eight blocks is clear, the teleport happens anyway
+        at Waystones' own spot. A waystone that cannot be arrived at is a worse
+        bug than a horse in a tight spot, and this mod is not entitled to
+        decide somebody's trip does not happen.
+
+    No ground requirement, per the ask — "even if that's up in the air". A
+    horse that falls two blocks is a horse; a horse in a wall is a corpse.
+
+    TWO THINGS THAT WOULD HAVE BEEN BUGS. First, below the world
+    getBlockState answers void_air, and isAir() says yes to void_air — so a
+    waystone near bedrock would have found a perfectly "clear" spot eight
+    blocks under the floor of the world and dropped the horse out of it.
+    isOutsideBuildHeight on both the feet and the top of the cube is not a
+    tidiness check. Second, a Chebyshev shell is not a sphere: a corner of
+    shell r is r*sqrt(3) away and can be further off than a face of shell r+1,
+    so the search finishes one shell past the first hit rather than returning
+    on it.
+
+    nearestClearance sits OUTSIDE the guarded Hook class, unlike everything
+    else in that file. It names no Waystones type — a BlockGetter and a
+    BlockPos — and the rule about Hook is that nothing in it may be loaded
+    without Waystones present. Keeping the one piece with real logic in it out
+    there is also what makes it testable, and it is the only piece of either
+    integration that can be silently wrong: everything else either throws or
+    visibly does nothing.
+
+    So it is the only piece with a test. Gametest
+    waystone_clearance_is_nearest walls an arrival into a solid 5x5x5, and
+    measures what the shell search returns against an exhaustive scan of the
+    same box — "found somewhere" and "found the nearest" being the two answers
+    it is between. All 17 gametests pass.
+
+
+4. /horsegive
+
+    The command twin of the transfer paper, and explicitly not its replacement.
+    The paper is an OBJECT: a claim the bearer has not collected yet, which can
+    be sold, handed on, bought from the cowboy or lost in a creeper hole, and
+    which is redeemed by going and finding the animal it names. None of that is
+    a command and the paper is the more interesting thing for it. The command
+    is for the case the paper is clumsy at — two players in one paddock, one of
+    whom wants the other to have the mare they are both looking at.
+
+    /horsegive <player> acts on the horse you are riding, or the one you are
+    looking at within eight blocks. Naming a horse by name was considered and
+    left out: a stable has four mares called Pepper sooner or later, and the
+    failure mode of guessing is giving away the wrong animal — which, unlike
+    almost everything else in this mod, the giver cannot undo on their own.
+
+    server/HorseGiveCommand does NOT get its own transfer rules. It repeats
+    TransferPaperHandler.redeem's: bredBy untouched, tamedBy filled in only
+    when blank, CowboyHandler.clearBrand, both sides written to
+    HorseLog.changedHands. Ownership is the one thing that moves.
+
+    Anybody may run it on a horse they own — giving away your own property
+    needs no permission, so it is a player's command and not an operator's. A
+    gamemaster may give away any horse at all, and that half is a moderation
+    tool: somebody has to be able to settle "he tamed my mare while I was
+    offline", and §1 deliberately left no operator exception for an op to ride
+    it away with instead. ActionTrace records when it was used that way.
+
+    commands.horse_give is read once in RegisterCommandsEvent and the node is
+    simply not added when it is off. A command that tab-completes and then says
+    no is a worse answer than one that was never offered — the same shape
+    debug.tools already uses.
+
+    PERMISSION API NOTE. CommandSourceStack.hasPermission(int) is gone in
+    26.1.2. It is Commands.LEVEL_GAMEMASTERS.check(source.permissions()) now —
+    LEVEL_GAMEMASTERS is a PermissionCheck, not an int, and Commands
+    .hasPermission() returns the predicate form the .requires() calls elsewhere
+    in this repo use. Written down because the compile error names neither.
+
+
+5. WHAT IS LEFT
+
+    Nothing here has been played, and almost none of it CAN be played alone:
+    every part of §1 and §4 needs a second player, and §2 and §3 need a client
+    with Waystones, Balm and Shogi, which the dev instance is not. Three new
+    verification entries say what to look at and, more usefully, what each way
+    of failing would mean:
+
+        horse-care.html#riding-0929           — the refusal, and the untamed
+                                                check that has to come first
+        compatibility.html#verify-ftbteams    — teams and allies, and the
+                                                offline-owner case nobody will
+                                                think to try
+        item-transfer-papers.html
+            #verify-horsegive                 — the command, including the one
+                                                thing most likely to be wrong,
+                                                which is not in the command
+
+    The Waystones entry gained the arrival spot as a second, separate thing to
+    watch: the search is tested, but nothing has ever fired
+    WaystoneTeleportEntityEvent.Pre, so whether setTargetPosition is honoured
+    and whether rider and horse really are given the same position are both
+    unobserved.
+
+    Config gained three settings: behaviour.owner_only_riding (true),
+    behaviour.riding_allows_teams (true), commands.horse_give (true).
+
+    The one to pick up first is not any of these. It is that the riding rule is
+    the largest behaviour change this project has shipped in a while, it is on
+    by default, and it changes what happens on an existing server the moment
+    the jar lands — so it wants a second player before a release, not after.

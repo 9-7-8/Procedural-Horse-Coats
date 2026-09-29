@@ -14,7 +14,9 @@ wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide w
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
 wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
+wiki/api-notes.html#source-permission	all	A command source no longer has hasPermission(int)
 wiki/api-notes.html#verified	all	Verified
+wiki/api-notes.html#void-air	all	Below the world, getBlockState answers air — and isAir() agrees
 wiki/architecture.html#boot-progress	all	What happens when a browser loads the mod
 wiki/architecture.html#build	all	Build & test, in full
 wiki/architecture.html#compat-flow	all	The other data flow: other mods' jars a pack on disk
@@ -175,6 +177,7 @@ wiki/compatibility.html#components-not-bound	all	Why it is not cleverer than tha
 wiki/compatibility.html#customfence	all	Custom Fences and Walls
 wiki/compatibility.html#decision	all	The decision: attachments, not a custom entity
 wiki/compatibility.html#draft-power	all	Our half of the patch is built
+wiki/compatibility.html#ftbteams	all	FTB Teams — who else may ride your horse
 wiki/compatibility.html#gaits	all	Gaits, for models with real legs
 wiki/compatibility.html#generated	all	The other direction: we read your other mods and build for them
 wiki/compatibility.html#generated-bench	all	And the bench takes the new materials
@@ -211,6 +214,7 @@ wiki/compatibility.html#unverified	all	Unverified
 wiki/compatibility.html#unverified-generated	all	What the generated content has and has not been shown to do
 wiki/compatibility.html#waystones	all	Waystones — and the setting that cannot work
 wiki/compatibility.html#waystones-build	all	Three dependencies, and a fourth that is not where you would look
+wiki/compatibility.html#waystones-landing	all	Where the horse comes out — the 3×3×3
 wiki/decisions.html#compatibility-anchors	all	Former anchors
 wiki/decisions.html#decisions	all	Current owners
 wiki/decisions.html#settled	all	Settled owners
@@ -2742,6 +2746,8 @@ wiki/horse-care.html#last-stand	gameplay	7. And when the blow lands anyway
 wiki/horse-care.html#last-stand-code	coding	Surviving a killing blow — two events, because they are two different refusals
 wiki/horse-care.html#mouth-reach	coding	…and only eats what it can get its mouth to
 wiki/horse-care.html#reachable-food	coding	A horse only walks to food it can reach
+wiki/horse-care.html#riding	gameplay	8. Whose horse is it to ride?
+wiki/horse-care.html#riding-code	coding	Refusing a rider — two enforcement points, for two different failures
 wiki/horse-care.html#roles	gameplay	Who is who
 wiki/horse-care.html#science-bachelors	science	Bachelor bands and how a stallion gets mares
 wiki/horse-care.html#science-bands	science	How free-roaming horses actually live
@@ -3025,6 +3031,8 @@ wiki/item-tickets.html#using	gameplay	Using one
 wiki/item-tickets.html#verified	coding	Verified
 wiki/item-transfer-papers.html#components	coding	What each one carries
 wiki/item-transfer-papers.html#gaps	coding	Known gaps
+wiki/item-transfer-papers.html#horsegive	gameplay	The command twin — /horsegive
+wiki/item-transfer-papers.html#horsegive-code	coding	What /horsegive shares with the paper, and what it does not
 wiki/item-transfer-papers.html#rules	gameplay	Things worth knowing
 wiki/item-transfer-papers.html#use	gameplay	How they work
 wiki/item-vet-kit.html#code	coding	Where it lives

@@ -21,6 +21,30 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-three-asks-about-ownership.txt">2026-09-29
+        &mdash; <strong>three asks about ownership, and a horse that stopped landing in the
+        wall</strong>. Three queued requests that turned out to be one question from three
+        directions. A tamed horse now <strong>refuses to carry anybody but its owner</strong>
+        &mdash; it rears, throws them, and says <em>&ldquo;&lt;name&gt; doesn't know
+        you&rdquo;</em> &mdash; with the owner's team and allies let through: vanilla
+        <code>/team</code> scoreboard teams, and <a href="compatibility.html#ftbteams">FTB
+        Teams</a> membership and allies, which is the third published API this project builds
+        against. The ask named FTB <em>Chunks</em>; a chunk claim is a relationship between a
+        player and some ground rather than between two players, and the relationship it is
+        really asking about lives one mod down. Two enforcement points, not one, because a
+        horse can change hands <em>under</em> its rider. The Waystones integration learned to
+        find the <a href="compatibility.html#waystones-landing">nearest clear
+        3&times;3&times;3</a> before putting a horse down, which turned up two bugs on the way:
+        below the world <code>getBlockState</code> answers <code>void_air</code> and
+        <code>isAir()</code> agrees, so a stone near bedrock would have dropped the horse out of
+        the world; and a Chebyshev shell is not a sphere, so the search has to finish one shell
+        past its first hit. That search is the only piece of either integration that can be
+        <em>silently</em> wrong, so it is the only piece with a test. And
+        <a href="item-transfer-papers.html#horsegive"><code>/horsegive</code></a>, the transfer
+        paper's command twin &mdash; a player's command on their own horse, a moderation tool in
+        a gamemaster's hands, and not registered at all when
+        <code>commands.horse_give</code> is off. Nothing was played, and almost none of it
+        <em>can</em> be alone: every part of it needs a second player or three more mods.</li>
     <li><a href="session-log/d2026-09-26-four-asks-from-the-field.txt">2026-09-26, last
         &mdash; <strong>four asks from the field, and two bugs nobody reported</strong>.
         A queue session: seven unrelated requests arrived while work was running and all

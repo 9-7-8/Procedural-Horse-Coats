@@ -61,6 +61,43 @@
         draws the right horse even if that horse is far away, sold on twice, or dead.</li>
 </ul>
 
+<h2 id="horsegive">The command twin &mdash; <code>/horsegive</code></h2>
+
+<p>
+    <code>/horsegive &lt;player&gt;</code> hands over the horse you are <strong>riding</strong>, or
+    the one you are <strong>looking at</strong> within eight blocks, to somebody who is online. It
+    is the same transfer a signed paper makes &mdash; ownership moves and nothing else does &mdash;
+    without the crafting and without the walk.
+</p>
+
+<p>
+    <strong>It does not replace the paper, and is not meant to.</strong> The paper is an
+    <em>object</em>: a claim the bearer has not collected yet, which can be sold, handed on, bought
+    from <a href="villagers.html">the cowboy</a> or lost in a creeper hole, and which is redeemed by
+    going and finding the animal it names. None of that is a command, and the paper is the more
+    interesting thing for it. What the command is for is the case the paper is clumsy at &mdash; two
+    players stood in the same paddock, one of whom wants the other to have the mare they are both
+    looking at, and neither of whom wants to craft eight paper and a horse hair first.
+</p>
+
+<ul>
+    <li><strong>Anybody may run it, on a horse they own.</strong> Giving away your own property
+        needs no permission, so it is a player&rsquo;s command and not an operator&rsquo;s.</li>
+    <li><strong>A gamemaster may give away any horse at all.</strong> That is the half that is a
+        moderation tool: somebody has to be able to settle <em>&ldquo;he tamed my mare while I was
+        offline&rdquo;</em>, and <a href="horse-care.html#riding">the riding rule</a> deliberately
+        has no operator exception for an op to simply ride it away with instead. The log says
+        whenever the command was used this way.</li>
+    <li><strong>No naming a horse by name.</strong> It was considered and left out: a stable has
+        four mares called Pepper sooner or later, and the failure mode of guessing is giving away
+        the wrong animal &mdash; which, unlike almost everything else in this mod, the giver cannot
+        undo on their own.</li>
+    <li><strong>Whoever is sitting on it gets off</strong>, at the moment it changes hands.</li>
+    <li><strong><code>commands.horse_give</code> turns it off entirely</strong> &mdash; not refused,
+        not registered, not tab-completed. A server that wants the paper to be the only way a horse
+        changes hands gets exactly that.</li>
+</ul>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Item</th><th>Recipe</th></tr></thead>
@@ -122,6 +159,38 @@
     papers</a>, which stays the source of truth for the trade itself.
 </p>
 
+<h2 id="horsegive-code">What <code>/horsegive</code> shares with the paper, and what it does not</h2>
+
+<p>
+    <code>server/HorseGiveCommand</code> does not get its own transfer rules. It repeats
+    <code>TransferPaperHandler.redeem</code>&rsquo;s: <code>bredBy</code> untouched,
+    <code>tamedBy</code> filled in only when it was blank, <code>CowboyHandler.clearBrand</code>,
+    and both sides written to <code>HorseLog.changedHands</code> so that a horse leaving your stable
+    is news you are told rather than something you discover. Ownership is the one thing that moves;
+    the genome, name, pedigree and generation are not consulted at all.
+</p>
+
+<p>
+    Two differences are worth naming.
+</p>
+
+<ul>
+    <li><strong>It is registered conditionally.</strong> <code>commands.horse_give</code> is read
+        once in <code>RegisterCommandsEvent</code> and the node is simply not added. A command that
+        tab-completes and then says no is a worse answer than one that was never offered, and this
+        is the same shape <code>debug.tools</code> already uses.</li>
+    <li><strong>Picking the horse is a real ray test</strong> against the hitbox, not &ldquo;the
+        nearest horse roughly in front&rdquo;. In a paddock those are very different answers and
+        the wrong one gives away somebody else&rsquo;s mare.</li>
+</ul>
+
+<p>
+    The ownership answer and the permission answer are both taken <em>before</em>
+    <code>setOwner</code> runs, since the first of them stops being true the moment it does &mdash;
+    which is also why the log line can still say whether a gamemaster was acting on a horse that was
+    not theirs.
+</p>
+
 <h2 id="gaps">Known gaps</h2>
 
 <ul>
@@ -137,8 +206,40 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Paper binding is what goes wrong unseen: a crafted blank should name you as bearer, a <code>/give</code> blank should now bind to you the moment you sign with it rather than refusing, and a cowboy must <strong>stop offering a horse the moment its paper is bought</strong>, even if the paper is never redeemed.</p>
+    <p>Paper binding is what goes wrong unseen: a crafted blank should name you as bearer, a <code>/give</code> blank should now bind to you the moment you sign with it rather than refusing, and a cowboy must <strong>stop offering a horse the moment its paper is bought</strong>, even if the paper is never redeemed &mdash; and there is now a <a href="item-transfer-papers.html#verify-horsegive">command</a> that makes the same transfer, which has never been run and needs a second player to run at all.</p>
 </div>
+
+<h3 id="verify-horsegive"><code>/horsegive</code> (2026-09-29, NOT played)</h3>
+
+<p>
+    <code>server/HorseGiveCommand</code>, built as
+    <a href="?view=gameplay#horsegive">the command twin</a>. It needs a second player, so none of it
+    has run.
+</p>
+
+<ul>
+    <li><strong>The ordinary case.</strong> Ride your horse, <code>/horsegive &lt;them&gt;</code>.
+        <strong>Pass:</strong> you are put on the ground, they are told the horse is theirs, you are
+        told who has it, and both of your <a href="horse-browser.html">horse logs</a> gain a row
+        &mdash; a <em>sold</em> row for you and a <em>gained</em> row for them.</li>
+    <li><strong>Looking at, rather than riding.</strong> Stand off the horse and aim at it.
+        <strong>Fail looks like</strong> the wrong horse in a crowded paddock, which is the ray test
+        not doing its job and is the reason it is a ray test.</li>
+    <li><strong>It refuses what it should.</strong> An untamed horse, a horse that is not yours (as
+        a non-operator), a horse that is already theirs, and nothing in front of you at all should
+        each say something different and change nothing.</li>
+    <li><strong>The gamemaster path.</strong> As an operator, give away a horse belonging to
+        somebody else. <strong>Pass:</strong> it works, and
+        <code>server/ActionTrace</code> records that it was not their horse.</li>
+    <li><strong>The switch.</strong> <code>commands.horse_give = false</code>, restart:
+        <code>/horsegive</code> should not tab-complete or exist.</li>
+    <li><strong>The thing most likely to be wrong</strong> is nothing in the command at all &mdash;
+        it is whether <code>HorseRecords</code> follows <code>setOwner</code>. The command writes
+        vanilla&rsquo;s owner and relies on <code>HorseOwnerTrackingHandler</code> to mirror it onto
+        the mod&rsquo;s own record, exactly as the paper does. Check the
+        <a href="horse-browser.html">browser</a> agrees with the horse an hour later, not one tick
+        later.</li>
+</ul>
 
 <h3 id="open-older-item-transfer-papers">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>

@@ -646,6 +646,13 @@ public final class ModNetworking {
      * is the half of riding this button most has to keep. A branded horse - a
      * cowboy's string - is refused, exactly as every other interaction with one
      * is.
+     *
+     * <p>A <b>tamed</b> horse somebody else owns is a different question, and
+     * it is asked here as well as on the mount itself: cancelling
+     * {@code EntityMountEvent} would catch this too, but the refusal message
+     * and the rear belong to the thing that refused, and a button that got as
+     * far as {@code startRiding} before being undone is a mount the client has
+     * already predicted. See {@code server/HorseRiding}.
      */
     private static void handleMountHorse(MountHorsePayload payload, net.minecraft.world.entity.player.Player player) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
@@ -657,6 +664,10 @@ public final class ModNetworking {
         }
         if (horse.isVehicle() || horse.isBaby() || serverPlayer.isPassenger()
                 || com.example.horsegenetics.neoforge.server.TransferPaperHandler.isBranded(horse)) {
+            return;
+        }
+        if (!com.example.horsegenetics.neoforge.server.HorseRiding.mayRide(horse, serverPlayer)) {
+            com.example.horsegenetics.neoforge.server.HorseRiding.refuse(horse, serverPlayer);
             return;
         }
         serverPlayer.closeContainer();

@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
+import com.example.horsegenetics.neoforge.compat.WaystonesCompat;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.data.HorseRealmSize;
@@ -39,6 +40,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Collection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -932,6 +934,129 @@ public final class ModGameTests {
         helper.succeed();
     }
 
+    /**
+     * <b>A horse arriving by waystone is not put inside the wall.</b>
+     *
+     * <p>{@code WaystonesCompat.nearestClearance} is the only piece of that
+     * integration with real logic in it, and it is the only piece that can be
+     * <i>silently</i> wrong: everything else either throws or visibly does
+     * nothing. A shell search that quietly returned the second-nearest spot, or
+     * that accepted a cube one block short, would look exactly like a working
+     * fix until somebody's Shire came out of a waystone in a hillside.
+     *
+     * <p>Three things are asserted, and the third is the one that matters most:
+     * <ol>
+     *   <li>An arrival in open air <b>does not move</b>.</li>
+     *   <li>An arrival walled in finds a spot, and the spot really is clear.</li>
+     *   <li>The spot it finds is the <b>nearest</b> clear one - checked by
+     *       measuring it against an exhaustive scan of the same box, because
+     *       "found somewhere" and "found the nearest" are the two answers the
+     *       shell search is between.</li>
+     * </ol>
+     *
+     * <p>It builds its own scratch box in the air well above the test structure
+     * and clears it again, rather than using the 1x1x1 template: the thing under
+     * test takes a {@code BlockGetter} and needs a few hundred blocks of world
+     * to have an opinion about.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WAYSTONE_CLEARANCE_IS_NEAREST =
+            TEST_FUNCTIONS.register("waystone_clearance_is_nearest",
+                    () -> ModGameTests::waystoneClearanceIsNearest);
+
+    /** Half-width of the scratch box, comfortably outside the search radius. */
+    private static final int SCRATCH = 12;
+
+    private static void waystoneClearanceIsNearest(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        // Up in the air above the structure, so nothing here touches the test's
+        // own 1x1x1 template or anything else in the batch.
+        BlockPos origin = helper.absolutePos(BlockPos.ZERO).above(40);
+        try {
+            fill(level, origin, Blocks.AIR.defaultBlockState());
+
+            // 1. Open air: the spot Waystones chose is kept exactly.
+            BlockPos open = WaystonesCompat.nearestClearance(level, origin);
+            if (!origin.equals(open)) {
+                helper.fail("a waystone arrival in open air was moved, to " + open
+                        + " instead of staying at " + origin
+                        + " - every ordinary hop on the server would be relocated.");
+            }
+
+            // 2 and 3. Wall it in: a solid 5x5x5 around the arrival, so the
+            // nearest clear cube is genuinely somewhere else and there is a
+            // right answer to get wrong.
+            for (int x = -2; x <= 2; x++) {
+                for (int y = -2; y <= 2; y++) {
+                    for (int z = -2; z <= 2; z++) {
+                        level.setBlock(origin.offset(x, y, z), Blocks.STONE.defaultBlockState(), 2);
+                    }
+                }
+            }
+            BlockPos found = WaystonesCompat.nearestClearance(level, origin);
+            if (found == null) {
+                helper.fail("a walled-in waystone arrival found no clear spot at all, "
+                        + "in a box that is otherwise nothing but air.");
+                return;
+            }
+            if (!clearIn(level, found)) {
+                helper.fail("the spot chosen for a walled-in arrival, " + found
+                        + ", is not actually a clear 3x3x3 - the horse would arrive "
+                        + "inside a block and suffocate, which is the whole bug.");
+            }
+            long best = Long.MAX_VALUE;
+            for (int x = -SCRATCH; x <= SCRATCH; x++) {
+                for (int y = -SCRATCH; y <= SCRATCH; y++) {
+                    for (int z = -SCRATCH; z <= SCRATCH; z++) {
+                        if (clearIn(level, origin.offset(x, y, z))) {
+                            best = Math.min(best, (long) x * x + (long) y * y + (long) z * z);
+                        }
+                    }
+                }
+            }
+            // Integer arithmetic throughout: BlockPos.distSqr answers a double,
+            // and comparing the search's answer to the scan's for EQUALITY is
+            // the point of the assertion.
+            long fx = found.getX() - origin.getX();
+            long fy = found.getY() - origin.getY();
+            long fz = found.getZ() - origin.getZ();
+            long chosen = fx * fx + fy * fy + fz * fz;
+            if (chosen != best) {
+                helper.fail("the shell search did not find the nearest clear spot: it chose "
+                        + found + ", " + chosen + " blocks squared away, and an exhaustive scan "
+                        + "of the same box found one at " + best + ".");
+            }
+        } finally {
+            // The scratch box goes back to air whatever happened, so a failure
+            // here does not leave stone hanging over the next test in the batch.
+            fill(level, origin, Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
+    /** {@link WaystonesCompat#nearestClearance}'s own clearance rule, spelled out again on purpose. */
+    private static boolean clearIn(ServerLevel level, BlockPos feet) {
+        for (int y = 0; y < 3; y++) {
+            for (int x = -1; x <= 1; x++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (!level.getBlockState(feet.offset(x, y, z)).isAir()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static void fill(ServerLevel level, BlockPos origin, BlockState state) {
+        for (int x = -SCRATCH; x <= SCRATCH; x++) {
+            for (int y = -SCRATCH; y <= SCRATCH; y++) {
+                for (int z = -SCRATCH; z <= SCRATCH; z++) {
+                    level.setBlock(origin.offset(x, y, z), state, 2);
+                }
+            }
+        }
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -984,6 +1109,8 @@ public final class ModGameTests {
         register(event, environment, FREEDOM_STICK_CRAFTS, 100);
         // Spawn, ten ticks to be founded, kill, raise - then read the result.
         register(event, environment, A_DEAD_HORSE_COMES_BACK_WHOLE, 200);
+        // Two scratch-box fills and an exhaustive scan, all inside one tick.
+        register(event, environment, WAYSTONE_CLEARANCE_IS_NEAREST, 200);
     }
 
     /**

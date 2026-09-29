@@ -276,6 +276,47 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.IntValue RESURRECT_GRACE_MINUTES;
 
+    /**
+     * <b>{@code behaviour.owner_only_riding}</b> - may a stranger get on your
+     * horse? Off (the default is {@code true}, meaning the rule is on) a horse
+     * refuses anybody but its owner, rears, and says so.
+     *
+     * <p>Owner, 2026-09-29: <i>"people should not be able to ride a horse they
+     * don't own, it should buck them off with a warning."</i> Vanilla has no
+     * such rule - a tamed horse is a saddle anybody can sit in - and on a
+     * server that is the difference between a stable and a car park.
+     *
+     * <p><b>An untamed horse is never refused.</b> Climbing on one until it
+     * stops bucking is how a horse is tamed at all, so the rule can only ever
+     * apply to a horse that already has an owner. Read through
+     * {@link #ownerOnlyRiding()}; enforced by {@code server/HorseRiding}.
+     */
+    public static final ModConfigSpec.BooleanValue OWNER_ONLY_RIDING;
+
+    /**
+     * <b>{@code behaviour.riding_allows_teams}</b> - does being on somebody's
+     * team count as knowing their horse? Three things answer yes, and all three
+     * are switched by this one flag: a shared <b>vanilla scoreboard team</b>,
+     * <b>FTB Teams</b> membership, and an FTB Teams <b>ally</b> of the owner's
+     * team. FTB Chunks creates its claims out of FTB Teams parties, which is
+     * the setup this was asked for.
+     *
+     * <p>Off, only the owner ever rides. It is separate from
+     * {@link #OWNER_ONLY_RIDING} because "nobody but me" and "my team" are
+     * different servers, and a server that uses scoreboard teams for chat
+     * colours alone would rather they did not hand out horses too.
+     */
+    public static final ModConfigSpec.BooleanValue RIDING_ALLOWS_TEAMS;
+
+    /**
+     * <b>{@code commands.horse_give}</b> - does {@code /horsegive} exist? It
+     * hands a horse to another player the way a signed transfer paper does,
+     * without the walk. A server that wants the paper to stay the only way a
+     * horse changes hands turns this off and the command is not registered at
+     * all. See {@code server/HorseGiveCommand}.
+     */
+    public static final ModConfigSpec.BooleanValue HORSE_GIVE_COMMAND;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -532,6 +573,31 @@ public final class ServerConfig {
                         "0 lets a horse forget you completely.")
                 .defineInRange("behaviour.bond_floor",
                         com.example.horsegenetics.common.care.Bond.DEFAULT_FLOOR, 0, 100);
+        OWNER_ONLY_RIDING = builder
+                .comment("Whether a horse refuses to be ridden by anybody but its owner. (default: true)",
+                        "A horse that refuses rears, throws the rider, and says so on the",
+                        "action bar. An UNTAMED horse is never refused, whatever this says -",
+                        "getting on one until it stops bucking is how a horse is tamed.",
+                        "Turn it off for vanilla's rule, where a tamed horse is a saddle",
+                        "anybody can sit in.")
+                .define("behaviour.owner_only_riding", true);
+        RIDING_ALLOWS_TEAMS = builder
+                .comment("Whether the owner's team may ride their horses too. (default: true)",
+                        "Three things count, and this one flag switches all three:",
+                        "  - a shared vanilla scoreboard team,",
+                        "  - FTB Teams membership (which is what FTB Chunks claims are made of),",
+                        "  - an FTB Teams ally of the owner's team.",
+                        "Off, only the owner ever rides. Does nothing when",
+                        "behaviour.owner_only_riding is off, since then everybody may ride.")
+                .define("behaviour.riding_allows_teams", true);
+        HORSE_GIVE_COMMAND = builder
+                .comment("Whether /horsegive exists. (default: true)",
+                        "It hands the horse you are on, or looking at, to another player -",
+                        "the same transfer a signed paper makes, without the walk. Ownership",
+                        "is the only thing that moves; who bred it never changes.",
+                        "Off, the command is not registered at all and the transfer paper",
+                        "stays the only way a horse changes hands.")
+                .define("commands.horse_give", true);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -742,6 +808,33 @@ public final class ServerConfig {
             return LAST_STAND_IMMUNITY_TICKS.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.LastStand.DEFAULT_IMMUNITY_TICKS;
+        }
+    }
+
+    /** {@code behaviour.owner_only_riding}, safely. */
+    public static boolean ownerOnlyRiding() {
+        try {
+            return OWNER_ONLY_RIDING.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code behaviour.riding_allows_teams}, safely. */
+    public static boolean ridingAllowsTeams() {
+        try {
+            return RIDING_ALLOWS_TEAMS.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code commands.horse_give}, safely. */
+    public static boolean horseGiveCommand() {
+        try {
+            return HORSE_GIVE_COMMAND.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
         }
     }
 
