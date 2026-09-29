@@ -139,6 +139,27 @@ does: a snapped or hand-cut lead goes to the player's pack, not the ground.
 - Ship it with behaviour.leads_return covering it (the option already exists and
   its comment says the vanilla cases are excluded - update the comment).
 
+Settled with the owner: what to do when an UNVERIFIED assumption is wrong
+=========================================================================
+Each of these answers a check the treatment above already marks UNVERIFIED. The
+building session tries the assumption first; only if it fails does the fallback
+below apply.
+- Piece 1 (mounted mining): if the slowdown is not vanilla's "not on the ground"
+  penalty, STOP AND REPORT. Do not ship a guess. Write what was found on the
+  Roadmap tab and ask the owner before choosing another fix.
+- Piece 3 (right-click equips): if vanilla already equips a saddle on
+  right-click, KEEP THE HANDLER for everything vanilla does not cover (armour,
+  the mod's own tack slots) and leave the saddle to vanilla. The owner-only and
+  never-swap rules still apply to what this mod adds. Do not take over the
+  saddle, and do not retire the piece.
+- Piece 2 (ALT+E): if the chord will not register or display properly in
+  NeoForge's Controls screen, fall back to a BARE default key that clashes with
+  nothing in this repo, and REPORT which key was picked.
+- Piece 1 config sync: the treatment assumes the server config syncs to clients
+  (mining needs both sides). If it does not, SEND THE SWITCH IN A PAYLOAD on
+  join, the way other synced data in this mod travels; do not make it a client
+  config as well.
+
 Scoped out: fade the horse when looking down
 =============================================
 It needs the coat pipeline to draw a half-transparent horse, which nothing here
