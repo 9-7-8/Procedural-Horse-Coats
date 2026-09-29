@@ -116,6 +116,25 @@
     from <code>canUse()</code> below their tier, rather than being added and
     removed as the number crosses a line, and both are inert while the horse is
     leashed or ridden.</p>
+<p><strong>A whistled horse outranks all of this.</strong>
+    <code>server/WhistleCallGoal</code> (2026-09-29) walks a horse to whoever blew a whistle
+    at it, and sits at priority 1 &mdash; above every goal on this page, above band life, and
+    above vanilla&rsquo;s breeding goal. It has to: a call the horse ignores because it was
+    grazing reads as the whistle being broken. It does not read bond at all, because a whistle
+    is an instruction rather than a relationship, and the reasoning for the number is on
+    <a href="item-whistles.html#walking-priority">the whistles page</a>. See
+    <a href="behaviour-hierarchy.html">the generated hierarchy</a> for where it lands against
+    everything else.</p>
+
+<p id="bond-gates"><strong>Bond is starting to gate things other than behaviour.</strong>
+    Tier 3 is what lets an owner steer a horse bareback
+    (<code>server/BarebackSteeringHandler</code>), and since 2026-09-29 <strong>tier 2 is what
+    an <a href="item-whistles.html#bond-gate">ender whistle</a> asks for before it will
+    bind</strong> &mdash; the same tier at which a horse starts coming toward you unasked, so
+    the whistle is a reward for a bond already built rather than something crafted ahead of
+    one. Each gate names a constant in its own class rather than reading a shared list; there
+    are two, and a registry of two is bureaucracy. If a third appears, that is the moment to
+    reconsider.</p>
 
 <h3>Gains &mdash; capped at +15 per Minecraft day</h3>
 <p id="bareback"><strong>Riding bareback bonds exactly as well as riding saddled.</strong>

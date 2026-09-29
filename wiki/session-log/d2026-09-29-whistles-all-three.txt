@@ -1,0 +1,89 @@
+2026-09-29 - three whistle pieces in one sitting, and a priority the plan got wrong
+
+
+    Two features in one session, which is not how START HERE says to work. The
+    first was rider comfort piece 1, written up in its own file. Then the owner
+    asked for the whistles, all pieces, and that overrides the one-bullet rule
+    by her own instruction. Piece 4 is art and was not touched.
+
+    Piece 1 - the bond gate. An ender whistle now refuses to bind below bond
+    tier 2. The gate is a NEW EnderWhistleCalls.bindRefusal that wraps
+    HorseOwnership.bindRefusal, rather than a test added to the latter: that
+    one is shared with bound stall signs, and a sign has no reason to want a
+    bond. Getting this wrong would have gated the sign silently, so the
+    Verification tab has "bind a stall sign to a low-bond horse" as an explicit
+    check. Nothing re-checks bond after binding - deliberate, and said on the
+    Gameplay tab, or a player reads the gate as retroactive.
+
+    Piece 2 - walk if near. This is the one with a real finding in it.
+
+    The treatment reasoned "below survival, above everything social" and
+    concluded goal priority 2. Reading the GENERATED behaviour-hierarchy rather
+    than that line: priority 2 is vanilla's BreedGoal, which claims MOVE, and
+    WrappedGoal.canBeReplacedBy requires a STRICTLY lower number - so an equal
+    priority never interrupts, and at 2 a horse in love mode would refuse the
+    whistle outright. That is the exact failure the treatment was warning about
+    ("an equal priority never interrupts"), behind a different goal than the one
+    it named; it named the werewolf temper goal, which the bake does not show at
+    2 at all. There is no integer between 1 and 2, so the goal sits at 1 and the
+    yield to panic and sun-shade - which arbitration would have given for free at
+    2 - is written by hand as a deliberately coarse inDanger check. The lesson
+    is the one CLAUDE.md already states and it was worth the re-learning: the
+    generated page is the authority, and a hand-written line about priorities in
+    a design document is not.
+
+    The other design call worth recording: the state machine is in the
+    server-tick sweep, NOT in the goal. A goal that never starts cannot end
+    itself, and a call that ends with the horse neither walking nor teleported
+    is the "the whistle ignored my horse" report with nothing in the log. So the
+    sweep owns all four endings and the goal is almost empty. Giving up
+    teleports, which is what makes a walked call never worse than the old
+    always-teleport behaviour; being in danger drops the call WITHOUT
+    teleporting, because the horse is in trouble rather than lost.
+
+    Route length, not distance: fifteen blocks away past a fence is eighty
+    blocks of walking. Because a route is never shorter than the straight line,
+    capping the route caps the distance too, so there is one number and not the
+    two the treatment had. Measured in path nodes, which is why the tooltip says
+    "about" - and the tooltip reads the constant rather than repeating 16.
+
+    Piece 3 - one key for every whistle. The rule (largest area whistle only,
+    every distinct binding, nothing twice) is pure, so it went in common/ with a
+    unit test. Writing that test caught a real defect in my own first version: I
+    had documented an ordering contract - area whistle first, so the cross-kind
+    dedupe has something to work with - that the code did not deliver, because it
+    preserved inventory order. Fixed the code, not the test. Without the ordering,
+    a horse with both an echo whistle and its own ender whistle in the pack would
+    teleport twice and chime twice, depending on which pocket the player used.
+
+    The payload carries no fields at all, which is the TackSlotPayload lesson:
+    the client says only that the key was pressed and the server scans the real
+    inventory. Both items' use() now delegate to a shared blow() that owns the
+    cooldown, so the key cannot be a way round one.
+
+    Three API claims in the treatment were wrong and are corrected in the file
+    and on the wiki. StreamCodec.unit was flagged "unverified, the mod's first
+    field-less payload" - it exists and DismountPayload already used it. The
+    action bar was given as displayClientMessage(msg, true) - it is
+    sendOverlayMessage in 26.1.2, which block/Jumps had already written down.
+    And the priority above. Checking each before writing it cost minutes and
+    would have cost a debugging session otherwise.
+
+    Both new gametests were mutated before being trusted: the bond one with
+    BIND_BOND_TIER lowered to 1 (bond 60 then passed, test went red on the right
+    assertion). All 20 gametests green, WhistleSelectionTest green, build and
+    creator parity green.
+
+    What is NOT checked: everything about piece 2 and piece 3 that needs a
+    person. Navigation, goal arbitration and a keybind cannot be unit-tested, so
+    item-whistles.html's Verification tab grew three blocks of reproductions -
+    the fence pair (gate ten blocks round teleports, gate four blocks round
+    walks) is the one that proves the cap, and "set a horse on fire, then
+    whistle" is the one that proves priority 1 is not starving panic.
+
+    Open for the next session: piece 4 is blocked on the owner drawing a second
+    whistle texture - the engineering is an item model conditional on
+    BOUND_HORSE and no Java. Otherwise the next intake bullet. The
+    dyed-leather-horse-armour bug from the earlier session is still open in its
+    second clause only (the loot condition matches a table's path, not its
+    contents).

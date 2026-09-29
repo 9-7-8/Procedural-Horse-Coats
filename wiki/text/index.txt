@@ -3052,7 +3052,12 @@ wiki/item-vet-kit.html#code	coding	Where it lives
 wiki/item-vet-kit.html#gaps	coding	Known gaps
 wiki/item-vet-kit.html#gelding	gameplay	What gelding does
 wiki/item-vet-kit.html#use	gameplay	How to use it
+wiki/item-whistles.html#blow-key	gameplay	One key blows every whistle you carry
+wiki/item-whistles.html#blow-key-code	coding	One key, every whistle (2026-09-29)
+wiki/item-whistles.html#bond-gate	gameplay	Binding an ender whistle needs the horse's trust
+wiki/item-whistles.html#bond-gate-code	coding	The bond gate on binding (2026-09-29)
 wiki/item-whistles.html#call	coding	How a call finds a horse
+wiki/item-whistles.html#declined	coding	Two things deliberately not built (2026-09-29)
 wiki/item-whistles.html#ender	gameplay	The ender whistle
 wiki/item-whistles.html#ender-code	coding	The ender whistle
 wiki/item-whistles.html#ender-gaps	coding	Known gaps
@@ -3060,6 +3065,10 @@ wiki/item-whistles.html#leads	coding	The lead, when a whistle moves the horse
 wiki/item-whistles.html#reading	coding	The area whistles
 wiki/item-whistles.html#tiers	gameplay	The four whistles
 wiki/item-whistles.html#use	gameplay	What happens when you blow an area whistle
+wiki/item-whistles.html#walking	gameplay	Near horses walk; far ones appear
+wiki/item-whistles.html#walking-code	coding	Walking a near horse in (2026-09-29)
+wiki/item-whistles.html#walking-priority	coding	Priority 1, and why not 2
+wiki/item-whistles.html#walking-sweep	coding	Why the state machine is not in the goal
 wiki/items.html#adding	coding	Adding an item
 wiki/items.html#art	coding	No two items look alike
 wiki/items.html#chest-loot	coding	Chest loot — every chest, any mod
