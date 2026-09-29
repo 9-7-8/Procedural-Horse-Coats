@@ -289,8 +289,9 @@ D27 ART (stage 0 (b)), REVISED by the owner: START BY COPYING vanilla's
         No existing gene op that stamps an image was found while reading; if
         there is none, that is the new op (D28 becomes 'an op that stamps a
         sheet, alpha included', a superset of 'write alpha 0').
-      - Strains (D31) start as a tint over the one sheet (Bleached / Weathered;
-        Fresh / Long-buried) until real second sheets exist.
+      - Strains are not tints of one sheet: they are gene sets over it (D38-D41).
+        The skeleton's sheet is an alpha mask only and the zombie's is its base
+        coat, so a strain is just the genes pinned in it.
       - Alternative, unchanged from wiki/texture-resolution.html: read
         minecraft:'s sheets at run time instead of shipping copies, which ships
         no art and honours a player's resource pack retexturing skeleton and
