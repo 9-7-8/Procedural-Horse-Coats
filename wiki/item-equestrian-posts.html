@@ -192,6 +192,39 @@
     <code>block/</code> and <code>village/</code> packages.
 </div>
 
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The five posts stopped sharing one texture on 2026-09-29 and <strong>none of the new art has been seen in a world</strong> &mdash; what to look for is a post that still looks like its neighbour, a face that came out upside down, or a hoop colour that does not match the hat of the villager standing at it.</p>
+</div>
+
+<h3 id="post-art-0929">The five posts, in a village (2026-09-29, NOT played)</h3>
+
+<p>
+    Place all five and stand back. Each should read as its trade from a block away: a hide
+    on the leatherworker&rsquo;s, a rack of tubes on the scientist&rsquo;s, a sack and
+    carrots on the supplier&rsquo;s, a horseshoe on the metalsmith&rsquo;s, a ring and a
+    coiled lariat on the cowboy&rsquo;s hitch. The 3D preview on the Coding tab is what
+    they are meant to look like, so a difference in game is a wiring fault rather than an
+    art one.
+</p>
+
+<p>
+    <strong>Three specific things to look at.</strong> The top face is a separate texture
+    from the sides, so a model that lost its <code>top</code> slot would show the side art
+    on the lid and be easy to miss. The underside is shared by all five on purpose and was
+    renamed <code>post_bottom.png</code> in the same change &mdash; a missing-texture
+    magenta underside would mean a model still pointing at the old name. And the hoops are
+    coloured to match each equestrian&rsquo;s hat, which can only be checked with the
+    villager actually standing at the post, so it wants a village where the professions
+    have been taken up rather than a creative-mode row of blocks.
+</p>
+
+</section>
+
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
