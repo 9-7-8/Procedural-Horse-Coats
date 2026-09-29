@@ -175,9 +175,70 @@ D-bundle  The breed sets the bundle. The undead gene is the visible undeath
     breed. No exception to "a concept is a breed, not a gene" is needed, and
     philosophy.html's live-test paragraph is rewritten to say so. This closes
     the first blocker on the Verification tab.
+D9  Diet and temper REUSE existing loci; no new diet or temper genes. Zombie
+    breed pins Diet=raw meat and an aggression allele. Skeleton breed pins a
+    new DIET ALLELE (eats nothing, heals on its own - blood diet is the
+    precedent for a horse fed by something other than food) and an aggression
+    allele. The only new genes are the two undeath loci.
+D10 Taming reuses PassificationGene (horsegenetics.passification). Both undead
+    breeds ship aggressive and are passified with "their item", then tamed as
+    normal. No new taming handler. (Details in section 5a.)
+D11 Drops: bones and rotten flesh, then the vanilla undead sounds. Drops extend
+    MagicItemDropGene with two alleles (its locus today has Dia, Egg, Swd and
+    wild type only, and no bone or flesh); sounds go through the existing sound
+    effect verb. Both UNVERIFIED as to fit - see 5a.
+D12 A breed names its undead pool with a field on the breed sheet (e.g.
+    "undeadOf": "skeleton" | "zombie"). BreedFilesTest validates it, the breed
+    designer offers it, and joining a pool is editing that breed's file.
+
 Still open, and not answered here: how the coat pipeline paints a skeleton (the
 absence of a coat) - see stage 1.
 
+
+5a. Reuse map: what already exists for each undead trait
+========================================================
+Read from the source. This is what turns "new system" into "two breed files
+plus a few alleles". Each row names the thing to copy.
+  Trait                     Existing machinery                      New work
+  ------------------------  --------------------------------------  ---------
+  Aggressive on sight       AggressionGene grid (when x who)        pick alleles
+  Passified with an item,   PassificationGene: Prm = permanent, FTm   add the two
+   then tamed as normal     = temporary; the offering is an INDEX     offerings
+                            into a closed OFFERINGS list, appended
+                            to freely (adding to the END is free,
+                            reordering rewrites every horse)
+  Breed pinned to a route   nightmare.json pins Prm/Prm and bands     copy it
+                            the offering index; its note records
+                            the veto fix the flee path needed
+  Zombie eats raw meat      DietGene raw-meat allele                  none
+  Skeleton eats nothing,    DietGene narrow diets; blood diet heals   one new
+   heals on its own          only by biting (a horse that heals off    allele +
+                            the normal food path)                     its healing
+  Double hearts, slow       breed "stats" block and stat targets      numbers
+  Bone / flesh drops        MagicItemDropGene (Dia, Egg, Swd, n)      two alleles
+  Vanilla undead sounds     the sound effect (meowing gene)           sound ids
+  Counts as undead          MobGroups "undead" group                  one clause
+Passification specifics to settle in stage 1 (proposed defaults, veto freely):
+  - Skeleton: Prm/Prm (permanent), offering minecraft:bone appended to
+    OFFERINGS. Matches the roadmap ("one bone, once, forever").
+  - Zombie: FTm (temporary), offering a raw-meat item appended to OFFERINGS
+    (minecraft:rotten_flesh is the natural zombie food; the roadmap says raw
+    meat). Matches the roadmap ("temporarily pacified... a rope you keep paying
+    out until the horse is yours"). Note the tension with D10's "tamed as
+    normal": a temporary calm lasts a window, so the player must tame inside it.
+  - Offering amount, duration and cooldown are epigenetic and banded per breed,
+    as nightmare.json does.
+  - Any aggression allele must be checked against PassificationGene's veto: it
+    vetoes TARGETING, not harmful auras, and a passified undead horse is still
+    an undead horse to cleansing light.
+Two things in this table are UNVERIFIED and one may not fit:
+  - MagicItemDropGene's alleles are "instead of leather" (diamonds, an egg, a
+    sword). Whether a drop that ADDS bones and flesh alongside leather, or that
+    replaces it, is what is wanted is not decided; and its runtime-registry
+    todo in To do.txt touches the same gene, so coordinate.
+  - The sound effect's vocabulary was not read; confirm it can name a vanilla
+    entity sound event (zombie_horse / skeleton_horse ambient, hurt, death) and
+    that it fires per-horse rather than per-gene.
 
 6. The conversion algorithm (neoforge module)
 =============================================
@@ -497,11 +558,13 @@ Stage 1 - the genes and the two breeds, in common/. The skeleton locus and the
           folder (rule 6, gap 162). Hard rule 5: the horse designer and
           CustomHorseSpawnScreen both get the genes. Add the back-compat test
           from section 2 (a pre-existing genotype code still parses).
-Stage 2 - the effects: diet inversion and healing without food (skeleton), the
-          stat penalty and carnivorous diet (zombie), the temper rules, the
-          bone / raw meat taming, and the MobGroups clause (D6). All through the
-          existing effects vocabulary wherever it can express them; a new verb
-          touches four or five files (wiki/making-a-gene.html#contracts).
+Stage 2 - wire the reused machinery (section 5a): the two OFFERINGS entries
+          (bone; a raw-meat item), the skeleton diet allele and its healing, the
+          aggression alleles, the two drop alleles and the sound ids, the
+          stat targets, and the MobGroups clause (D6). Append to OFFERINGS, never
+          reorder. A new effects verb touches four or five files
+          (wiki/making-a-gene.html#contracts), so avoid one; the skeleton's
+          heal-without-food is the only place a verb might be needed.
 Stage 3 - the converter (section 6), with its gametests (section 11), and the
           adapter registry. Land it with undead.convert defaulting true; do not
           release before stages 1-2 are seen in-game.
