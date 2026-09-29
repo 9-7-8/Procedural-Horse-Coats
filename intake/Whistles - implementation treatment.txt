@@ -232,12 +232,33 @@ Settled with the owner (was open)
    - Lang: add the two lines to en_us.json. Item tooltips could carry the same
      keybind text later; not in scope.
 
-Still open (settle at the start of the build session)
-=====================================================
-A. Path-length cap number for piece 2 (see 3 above).
-B. Whether the keybind also scans armour slots and modded containers;
-   recommended main inventory + offhand only. [piece 3]
-C. Notification frequency: every swap (recommended, action bar is brief and
-   unobtrusive) or only the first few times per world; and whether a client
-   config switch turns it off. [piece 3]
-D. Art for the bound/unbound texture, from the owner. [piece 4]
+Settled with the owner, second round
+====================================
+6. Prompt: every swap, plus a CLIENT config switch to turn it off. [piece 3]
+7. Path cap: the walking route itself must be no more than 16 blocks. Because a
+   route is never shorter than the straight line, this alone bounds the walk;
+   the 16-block straight-line rule in 2 becomes redundant but harmless. Anything
+   longer teleports. [piece 2]
+8. Keybind scan: main inventory + offhand AND modded containers. [piece 3]
+   This is the expensive one. Vanilla has no "all containers a player carries"
+   hook, so each mod's container needs its own lookup. Plan:
+   - Vanilla first: main, hotbar, offhand (player.getInventory()). Ship this
+     alone and it works.
+   - Then the modded containers as SOFT integrations, one per mod, each behind a
+     "is this mod loaded" guard so the mod never crashes without it, and each
+     recorded on wiki/compatibility.html (its Roadmap/Verification tabs) with the
+     mod's version checked. Curios / Accessories-style slots first (a whistle worn
+     on a lanyard is the obvious case); backpack mods second, one by one, only for
+     mods someone actually uses on the owner's server.
+   - Do NOT block piece 3 on the modded ones. Land vanilla, then add one
+     integration per session.
+   - A whistle found in a modded container still has to obey the same cooldowns
+     and the "already handled" dedupe.
+9. Bound-whistle texture: DEFERRED. Piece 4 stays on the roadmap; tooltips
+   already tell the tiers apart. Nothing to do now.
+
+Nothing left open before piece 1. Left to settle at build time only:
+- the exact number of ticks for the walk timeout and the stuck detection
+  (piece 2, tune in the play test);
+- which modded containers to support, and in what order (piece 3, after the
+  vanilla version ships).
