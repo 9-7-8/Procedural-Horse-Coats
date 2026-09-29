@@ -1,0 +1,26 @@
+2026-09-29 - scoping the troughs and salt licks
+
+
+    An intake session. One treatment written into intake/, no code touched,
+    nothing built or played. Every design call in it was put to the owner with
+    the question tool and is recorded there as Decided.
+
+    Troughs and salt licks (intake/Troughs and salt licks - implementation
+    treatment.txt). Three pieces, one per session: a plain-wood trough that
+    holds food items and that a hungry horse eats from a mouthful at a time,
+    as a new rung in HungerFoodGoal's search; connected segments that share
+    one inventory in any rectangle, with the connectivity rule in common/;
+    then the fill readout, a stall that feeds from a trough inside its own
+    volume, and the salt lick (a finite-use placed block, refilled with salt,
+    that speeds healing and never punishes its absence). Dye and paint are
+    left out on purpose, waiting for the shared dye extraction.
+
+    The find that shaped it: a hay bale is eaten whole and gone, so a pen has
+    to be re-fed by hand, and the goal picks by a fixed rung order - a trough
+    is a new rung, not a new goal. The other one: this mod appears to have no
+    block entity and no item-holding block, so piece 1 is likely its first;
+    the treatment says to confirm that before designing storage.
+
+    Open for the next session: read the horse-care Verification tab first.
+    The roadmap lane says troughs come after the feeding fixes, and a horse
+    leaning on a fence beside a trough would look exactly like a broken one.

@@ -1,0 +1,33 @@
+2026-09-29 - scoping rider comfort, and one allele that fills in the rest
+
+
+    An intake session. Two treatments written into intake/, no code touched,
+    nothing built or played. Every design call in them was put to the owner
+    with the question tool and is recorded there as Decided; the rest is a
+    short list of checks each treatment names for its building session.
+
+    Rider comfort (intake/Rider comfort - implementation treatment.txt).
+    Five pieces, one per session, smallest first: remove the mounted mining
+    slowdown (on by default, behind a config switch); an own-inventory
+    keybind (ALT+E, working on foot too); right-click equips tack into the
+    first empty slot that accepts it, owner only, never swapping; return
+    a snapped lead to whoever placed it, however far away, falling back to
+    vanilla's drop if they cannot be reached; and fade the ridden horse as you
+    look down, never below a floor, in the client config. The find that shaped
+    it: E while riding is already taken by HorseInfoKeyHandler, so the
+    inventory key cannot reuse it. The fade opens with a spike, because the
+    generated coat has never been drawn at partial alpha. The PR carrying it
+    merged into main.
+
+    Runtime registry genes (intake/Runtime registry genes - implementation
+    treatment.txt). The owner's To do asked for the werewolf roster and the
+    item genes to read the live registry. Reading the code turned up why one
+    allele per registry entry does not work: allele tokens live in saved
+    genotype codes, allele order is the list index, and a removed mod would
+    drop the whole locus segment of a saved horse. The answer is the pattern
+    the eye colour locus already uses, a Chaos allele whose seed rides on the
+    allele copy: modded mobs for Lycan, Pack leader and Spawner, and any
+    non-blocked item for the egg layer and magic item drop.
+
+    Open for the next session: build the first rider-comfort piece (the mining
+    fix), which starts by checking where the slowdown really comes from.
