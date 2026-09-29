@@ -216,6 +216,20 @@ D20 Body: average height for both. Zombie sturdier: high health band, slow
     speed band (double hearts, speed penalty). Skeleton light, fast, low
     health. Plain numbers in the two breed sheets, no new stat code.
 
+D21 Undead horses breed normally, no special rule. Undead x undead gives undead
+    foals; undead x normal gives carriers that look ordinary. Nothing to code.
+D22 Both breeds are kind "magical", like nightmare and netherhorse, whose
+    passification precedent is being copied. Check what "magical" turns on
+    (MagicalVariant, herd rolls, price and stable rules) before assuming it is
+    free of side effects.
+D23 Unsellable: no price (or zero) on either breed. Verify a breed with no
+    price is accepted by BreedFilesTest and skipped by cowboy stock, barn and
+    stable code rather than crashing.
+D24 First release includes: debug-yard rows (one per undead breed plus a
+    converted-vanilla case), breed-book lore entries for both, and gene wiki
+    pages for both undeath genes with a Science tab (check-gene-tabs.mjs
+    requires one for a natural gene page). Skipped for now: nothing else.
+
 Still open, and not answered here: how the coat pipeline paints a skeleton (the
 absence of a coat) - see stage 1.
 
