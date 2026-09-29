@@ -3061,6 +3061,8 @@ wiki/item-whistles.html#declined	coding	Two things deliberately not built (2026-
 wiki/item-whistles.html#ender	gameplay	The ender whistle
 wiki/item-whistles.html#ender-code	coding	The ender whistle
 wiki/item-whistles.html#ender-gaps	coding	Known gaps
+wiki/item-whistles.html#glint	gameplay	A bound whistle glimmers
+wiki/item-whistles.html#glint-code	coding	Telling a bound whistle apart, without art (2026-09-29)
 wiki/item-whistles.html#leads	coding	The lead, when a whistle moves the horse
 wiki/item-whistles.html#reading	coding	The area whistles
 wiki/item-whistles.html#tiers	gameplay	The four whistles

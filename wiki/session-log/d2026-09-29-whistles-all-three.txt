@@ -1,10 +1,11 @@
-2026-09-29 - three whistle pieces in one sitting, and a priority the plan got wrong
+2026-09-29 - all four whistle pieces, and a priority the plan got wrong
 
 
     Two features in one session, which is not how START HERE says to work. The
     first was rider comfort piece 1, written up in its own file. Then the owner
     asked for the whistles, all pieces, and that overrides the one-bullet rule
-    by her own instruction. Piece 4 is art and was not touched.
+    by her own instruction. Piece 4 was scoped as art and looked blocked; it
+    was not, in the end - see the last section.
 
     Piece 1 - the bond gate. An ender whistle now refuses to bind below bond
     tier 2. The gate is a NEW EnderWhistleCalls.bindRefusal that wraps
@@ -81,9 +82,33 @@
     walks) is the one that proves the cap, and "set a horse on fire, then
     whistle" is the one that proves priority 1 is not starving panic.
 
-    Open for the next session: piece 4 is blocked on the owner drawing a second
-    whistle texture - the engineering is an item model conditional on
-    BOUND_HORSE and no Java. Otherwise the next intake bullet. The
+    Piece 4, after all - and it took three lines. Piece 4 was scoped as ART
+    (a second sprite plus an item model conditional on BOUND_HORSE) and was
+    reported as blocked on the owner drawing it. Her answer was to make the
+    bound state shiny like an enchantment instead, which needs no art at all:
+    EnderWhistleItem.isFoil returns whether the component is present.
+
+    It is a better answer than the one it replaced, not just a cheaper one, and
+    the reason generalises. The glint is DERIVED, not stored - so every whistle
+    bound before this shipped glimmers the moment the class loads, with nothing
+    to migrate and no way to be left holding a dull bound whistle. The obvious
+    alternative, setting ENCHANTMENT_GLINT_OVERRIDE on bind, would have needed
+    a migration and would have silently skipped every existing one. A cosmetic
+    computed from saved data beats a cosmetic written into it.
+
+    Checked that isFoil is a live hook before overriding it, since overriding
+    one nothing calls looks exactly like the feature failing: ItemStack.hasFoil
+    falls through to it, and CuboidItemModelWrapper and SpecialModelWrapper
+    both read hasFoil.
+
+    With that, the whistles Roadmap tab is empty and was DELETED, the page left
+    wiki/roadmap.html by itself, and intake's whistle treatment is gone. Taking
+    the tab out orphaned a coverage row in roadmap-execution.html, which
+    check-roadmap-execution.mjs caught (pages=46, rows=47) - worth noting that
+    the check earned its keep on a deletion rather than an addition. Two other
+    pages linked the deleted anchor and were repointed.
+
+    Open for the next session: the next intake bullet. The
     dyed-leather-horse-armour bug from the earlier session is still open in its
     second clause only (the loot condition matches a table's path, not its
     contents).

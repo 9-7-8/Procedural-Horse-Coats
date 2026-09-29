@@ -33,13 +33,17 @@
         only own-art blocks may be previewed is enforced by a bake that hard-fails on a
         <code>minecraft:</code> texture rather than trusting anyone to remember it.</li>
     <li><a href="session-log/d2026-09-29-whistles-all-three.txt">2026-09-29
-        &mdash; <strong>three whistle pieces, and a priority the plan got wrong</strong>. The
+        &mdash; <strong>all four whistle pieces, and a priority the plan got wrong</strong>. The
         bond gate on binding, a near horse that walks in rather than teleporting, and one key
         that blows every whistle carried. The goal priority the design note concluded was
         wrong &mdash; priority 2 is vanilla&rsquo;s breeding goal and an equal priority never
         interrupts &mdash; which the generated behaviour hierarchy showed and the note did
         not. Writing the unit test caught an ordering contract the code did not keep, and
-        three API claims in the note turned out to be stale.</li>
+        three API claims in the note turned out to be stale. Then the fourth piece, scoped as
+        art and reported blocked, turned out to be three lines: the owner asked for an
+        enchantment glint instead of a second texture, and because the glint is
+        <em>derived</em> rather than stored, every whistle bound before it shipped glimmers
+        with nothing to migrate.</li>
     <li><a href="session-log/d2026-09-29-mining-from-the-saddle.txt">2026-09-29
         &mdash; <strong>mining from the saddle, and a guard written the other way
         round</strong>. Rider comfort piece 1: a rider on a standing horse now mines at the

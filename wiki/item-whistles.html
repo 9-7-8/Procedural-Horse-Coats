@@ -25,7 +25,8 @@
     and brings it to you from anywhere &mdash; even another dimension. A horse close enough
     to simply come <a href="#walking">walks in</a> rather than appearing, the ender whistle
     <a href="#bond-gate">asks for a bond</a> before it will bind, and
-    <a href="#blow-key">one key blows the lot</a>.
+    <a href="#blow-key">one key blows the lot</a>, and a bound ender whistle
+    <a href="#glint">glimmers</a> so you can pick it out of a hotbar.
 </p>
 
 <div class="item-art" data-items="basic_whistle,golden_whistle,echo_whistle,ender_whistle"></div>
@@ -177,14 +178,33 @@
         chunk nobody had loaded &mdash; nothing answers, and the whistle says so.</li>
 </ul>
 
-<div class="note warn">
-    <span class="label">All four look the same</span>
+<h2 id="glint">A bound whistle glimmers</h2>
+
+<div class="plain">
     <p>
-        The whistles share one texture, so the four tiers are only told apart by their names
-        &mdash; and by their tooltips, which is what the tooltips are for. An area whistle
-        states its radius; a bound ender whistle says <em>Bound to: &lt;horse&gt;</em> and an
-        unbound one says how to bind it. In a hotbar, where no tooltip shows, they are still
-        four identical icons: keep them apart, or rename them at an anvil.
+        An ender whistle that has been bound to a horse <strong>shimmers like an enchanted
+        item</strong>. An unbound one does not. That is the whole of it &mdash; you can see
+        at a glance, in a hotbar or a chest, which of your whistles are spoken for.
+    </p>
+</div>
+
+<p>
+    It costs nothing and needs no new art, which is why it won over the second texture that
+    was planned: the shimmer is worked out from whether the whistle is bound, so
+    <strong>whistles you bound before this update glimmer too</strong>, with nothing to
+    migrate and nothing to go and find.
+</p>
+
+<div class="note warn">
+    <span class="label">The three area tiers still look the same</span>
+    <p>
+        Basic, golden and echo share one texture and one icon, so they are told apart only by
+        their names and their tooltips &mdash; each states its radius, which is what the
+        tooltip is for. In a hotbar, where nothing draws a tooltip, they are three identical
+        icons: keep them in order, or rename them at an anvil. Only the ender whistle is now
+        distinguishable on sight, and only once it is bound.
+        <a href="#blow-key">The blow-everything key</a> takes most of the sting out of this,
+        since picking the right icon is no longer how you use them.
     </p>
 </div>
 </section>
@@ -193,9 +213,9 @@
 <h2 id="reading">The area whistles</h2>
 
 <p>
-    <code>item/WhistleItem</code>, one class and a radius per tier. Bond gating and pathing
-    instead of teleporting are still open on
-    <a href="#callable-horses">the roadmap tab</a>.
+    <code>item/WhistleItem</code>, one class and a radius per tier.
+    <a href="#walking-code">Pathing instead of teleporting</a> and
+    <a href="#bond-gate-code">the bond gate</a> both shipped on 2026-09-29.
 </p>
 
 <p>
@@ -411,6 +431,39 @@
     reads correctly after a rebind.
 </p>
 
+<h2 id="glint-code">Telling a bound whistle apart, without art (2026-09-29)</h2>
+
+<p>
+    <code>EnderWhistleItem.isFoil(stack)</code>, returning whether
+    <code>BOUND_HORSE</code> is present. Three lines.
+</p>
+
+<p>
+    <strong>This replaced a planned art job</strong>, and is a better answer than the one it
+    replaced rather than just a cheaper one. The plan was a second sprite plus an item model
+    conditional on the component; the owner asked for the enchantment glint instead. The
+    reason it is better is that <b>the glint is derived, not stored</b>. Every whistle bound
+    before this shipped glimmers the moment the class loads, because nothing was written to
+    any stack &mdash; "is this bound" keeps exactly one answer, the component, and the look
+    is computed from it.
+</p>
+
+<p>
+    The obvious alternative, setting <code>ENCHANTMENT_GLINT_OVERRIDE</code> on bind, would
+    have worked for whistles bound afterwards and left every existing one dull with no way to
+    find them. That is the general shape of the trap: a cosmetic written into saved data
+    needs a migration, and a cosmetic computed from saved data does not.
+</p>
+
+<p>
+    <code>ItemStack.hasFoil()</code> consults <code>isFoil</code> unless that override
+    component is present, and it is what <code>CuboidItemModelWrapper</code> and
+    <code>SpecialModelWrapper</code> actually read &mdash; checked in the 26.1.2 sources
+    rather than assumed, since overriding a hook nothing calls would look exactly like the
+    feature failing. The whistle carries no enchantment, so the default
+    (<code>isEnchanted()</code>) was false and nothing is being overridden away.
+</p>
+
 <h2 id="declined">Two things deliberately not built (2026-09-29)</h2>
 
 <p>
@@ -438,70 +491,16 @@
 <h2 id="ender-gaps">Known gaps</h2>
 
 <ul>
-    <li>All four whistles share one texture.</li>
-    <li>Nothing gates the area whistles or binding on bond.</li>
+    <li>The three <em>area</em> whistles share one texture. A bound ender whistle is now
+        <a href="#glint">told apart by its glint</a>; the tiers are not told apart at all.</li>
+    <li>Nothing gates the area whistles on bond &mdash; deliberately; they call horses you
+        already own. <a href="#bond-gate">Binding an ender whistle</a> is gated.</li>
     <li>The far-chunk wait and the cross-dimension teleport are written against 26.1.2
         sources and <strong>not seen working</strong> &mdash; see
         <a href="#verification">the verification tab</a>.</li>
     <li>A horse moved while its chunk was unloaded by something other than itself (a piston,
         another mod) is looked for where it was last seen, and not found.</li>
 </ul>
-</section>
-
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
-
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>
-        One piece of the callable-horse design is left: <strong>a texture that tells a bound
-        ender whistle from an unbound one</strong>, which is art and cannot start until it is
-        drawn. The walk-in, the bond gate and the blow-everything key all shipped on
-        2026-09-29; donkeys and the bound-mode ladder were declined.
-    </p>
-</div>
-
-<p class="lede">
-    <strong>Everything still planned for the whistles, in one place.</strong> This section used
-    to live on the main <a href="roadmap.html">roadmap</a> and was moved here whole, so that
-    what the whistles do, how they are built and what is still planned for them are read
-    together.
-</p>
-
-<hr>
-
-<h2 id="callable-horses">Callable horses &mdash; what is left after the ender whistle</h2>
-
-<p>
-    Calling one horse from anywhere is built, as the
-    <a href="#ender">ender whistle</a>. Of what was designed and not built, all that is left
-    is the one piece that needs a brush rather than a keyboard:
-</p>
-
-<ul>
-    <li><strong>A texture that tells a bound whistle from an unbound one</strong> &mdash; see
-        <a href="#ender-gaps">the known gaps</a>. The tooltip half of this shipped: the ender
-        whistle <a href="#ender-code">names its horse</a> and the area whistles
-        <a href="#reading">state their radius</a>, so the four are now only indistinguishable
-        <em>in the hotbar</em>, where nothing draws a tooltip. That is what the texture is
-        still for.
-        <br><strong>Blocked on art, not on code.</strong> The engineering is an item model
-        conditional on the <code>BOUND_HORSE</code> component pointing at a second texture,
-        and no Java at all &mdash; but there is no second texture, and inventing one is not
-        this repo&rsquo;s to do. <a href="#blow-key">The key</a> makes it matter less than it
-        did, since fewer blows now happen by picking an icon out of a hotbar.</li>
-</ul>
-
-<p class="muted">
-    <strong>Shipped off this list on 2026-09-29</strong>, and written up on the Gameplay and
-    Coding tabs: <a href="#walking">walk if near, teleport if far</a>,
-    <a href="#bond-gate">the bond gate on binding</a>, and
-    <a href="#blow-key">one key for every whistle carried</a> &mdash; which went further than
-    the &ldquo;blow the held or first hotbar whistle&rdquo; this list asked for.
-    <strong>Declined</strong>, and recorded <a href="#declined">on the Coding tab</a>: binding
-    donkeys, mules and llamas, and the bound-mode ladder on the three area whistles.
-</p>
-
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -669,7 +668,7 @@
     <div class="seealso">
         <a href="horse-care.html">Horse care &mdash; bond &amp; herds</a>
         <a href="item-transfer-papers.html">Transfer papers</a>
-        <a href="#callable-horses">Roadmap &mdash; callable horses</a>
+        <a href="behaviour-hierarchy.html">Where a called horse sits</a>
         <a href="items.html">All items</a>
     </div>
     Item objects in <code>item/ModItems.java</code>.

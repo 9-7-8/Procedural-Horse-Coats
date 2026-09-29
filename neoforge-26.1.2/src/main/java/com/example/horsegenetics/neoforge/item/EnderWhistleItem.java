@@ -87,6 +87,32 @@ public class EnderWhistleItem extends Item {
     }
 
     /**
+     * <b>A bound whistle glimmers.</b> The last piece of the callable-horse
+     * design was "a texture that tells a bound whistle from an unbound one",
+     * and it sat unbuilt because it was scoped as <i>art</i> - a second sprite
+     * and an item model conditional on the component. The owner's call
+     * (2026-09-29) is the enchantment glint instead, which needs neither.
+     *
+     * <p>It is the better answer for a reason worth writing down: the glint is
+     * <b>derived, not stored</b>. Every whistle bound before this shipped
+     * glimmers the moment the file lands, because nothing was written to the
+     * stack - the question "is this bound" has exactly one answer, the
+     * component, and the look is computed from it. Setting
+     * {@code ENCHANTMENT_GLINT_OVERRIDE} on bind would have worked too, and
+     * would have left every existing bound whistle dull with no way to find
+     * them.
+     *
+     * <p>{@code ItemStack.hasFoil()} consults this unless that override
+     * component is present, and it is what the item renderers actually read.
+     * The whistle carries no enchantment, so the default
+     * ({@code isEnchanted()}) is false and there is nothing to preserve.
+     */
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return stack.has(ModDataComponents.BOUND_HORSE.get());
+    }
+
+    /**
      * Who this whistle answers to. The same shape the bound stall sign uses, and
      * for the same reason: a bound whistle and an unbound one are the same item
      * with the same icon, so without this line the only way to tell them apart
