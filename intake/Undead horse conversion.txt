@@ -277,6 +277,29 @@ D28 Alpha op: a coat op that writes alpha 0 over a mask, and nothing else.
     is its first user. Not a painting gene at extreme priority and not a model
     swap: both were ruled out by Appendix C.
 
+D29 EYES: both breeds have pure black eyes (vanilla's undead horses do). Sclera
+    Blk/Blk at both eyes (existing allele). The iris gene has no pure black, so
+    EyeColourGene gains a BLACK row (EyeHue.BLACK, token Blk, which the sclera
+    gene already uses), appended so no existing horse changes; both breeds pin
+    Blk/Blk at both iris loci. No glow loci are pinned.
+D30 PARTICLES: skeleton trails soul flame from its hooves: Bflm/Bflm
+    (minecraft:soul_fire_flame) on horsegenetics.particle, banded "site": 2
+    (ParticleGene.SITES index of "hooves"). Zombie: none.
+D31 STRAINS: two each, hand-written JSON (the breed designer has no strain
+    editor). Skeleton: Bleached 65, Weathered 35. Zombie: Fresh 60, Long-buried
+    40. Each conversion picks one by weight, seeded by the UUID, so a stable of
+    converted horses varies. They are EMPTY today (they differ in the coat,
+    which is not written); verify empty strains are accepted.
+D32 WATER: the skeleton breathes water (Gil/Gil on magic_water_breathing); the
+    zombie does not. That gene is graded, not absolute (see the draft's note);
+    whether "cannot drown" means banding it very high or an effects-block
+    traversal flag is a small open call.
+D33 SUN: neither breed burns in daylight; SunSensitivityGene is not named.
+D34 EGGS: both use the generic fallback egg; no egg art (D24's yard rows and
+    lore still ship). UNVERIFIED that a breed with no texture under
+    textures/item/breed_egg/ falls back cleanly: bake-breed-eggs.mjs hard-fails
+    on a filename that is not a breed id, but a missing file was not checked.
+
 Answered by Appendix C and D26-D28: the skeleton is the horse's coat with a
 binary alpha mask cut out of it. Still open below: the art and the op's
 implementation.
@@ -1199,3 +1222,55 @@ What is now settled (owner, after this appendix):
   SETTLED  Art (D27): skeleton mask derived from vanilla as data, colours ours;
            zombie an authored recolour; a THIRD_PARTY_NOTICES entry.
   SETTLED  Size (D26): both breeds [0.86, 0.95].
+
+
+Appendix D - the two breeds, as sheets
+======================================
+Everything decided so far, one place per breed, plus a draft blurb each in the
+breed book's voice (a breed is an artefact of somebody choosing which colt to
+keep). The blurbs are DRAFTS for the owner to rewrite; the in-file "description"
+in the drafts is the short in-game version.
+
+Great Valley Skeleton Horse (great_valley_skeleton_horse)
+  kind magical, magical_variant false, very_rare, spawn_egg only, no country,
+  no price, no biomes. Size [0.86, 0.95]. Stats speed 8, jump 7, health 2,
+  pull 3. Undeath Skl/Skl (proposed key horsegenetics.skeleton). Diet Dbone
+  (new). Aggression Anp/Anp. Passification Prm/Prm, one bone (OFFERINGS
+  index 14, amount 1). Drops Bne/Bne (bones replace leather). Eyes all black.
+  Soul flame from the hooves. Water Gil/Gil (see D32). No sun burn.
+  Strains Bleached 65 / Weathered 35. Coat: binary alpha mask cut from the
+  horse's own coat (D27, D28); art not yet made.
+  Draft blurb: Named for a valley nobody goes to any more. Nobody can say who
+  kept a horse with nothing on its bones; the line survives because it needs
+  so little and gives so much. It is light, quick and hollow, it eats what it
+  is made of, and it will not carry anyone after dark who has not paid it a
+  bone. One bone, once, is enough.
+
+Graveborn Warmblood (graveborn_warmblood)
+  kind magical, magical_variant false, very_rare, spawn_egg only, no country,
+  no price, no biomes. Size [0.86, 0.95]. Stats speed 2, jump 4, health 10
+  (about x2.24 baseline), pull 7. Undeath Zmb/Zmb (proposed key
+  horsegenetics.zombie). Diet Dmeat/Dmeat (raw meat). Aggression Anp/Anp.
+  Passification Tmp/Tmp, rotten flesh (index 15, 2 to 4, calm 1 to 3 minutes,
+  cooldown half a minute to 1.5). Drops Rot/Rot (rotten flesh replaces
+  leather). Eyes all black. No particle, no water breathing, no sun burn.
+  Strains Fresh 60 / Long-buried 40. Coat: an authored recolour (D27), a few
+  cut pixels only; art not yet made.
+  Draft blurb: A warmblood in build, deep in the chest and heavy in the bone,
+  and by every account buried once and not kept. It is slow and very hard to
+  kill, it eats raw meat, and after dark it throws whoever is on its back.
+  Rotten flesh calms it for a while. A calm horse can be tamed, if you are
+  quick about it.
+
+Things both share: Anp aggression is hostile to riders after dark, and a horse
+that was ALREADY TAMED when it converted arrives passified (D25). Undead horses
+breed normally (D21), so undead x normal foals are carriers that look ordinary.
+
+Naming note: the proposed undeath allele tokens (Skl, Zmb) are per gene, so
+Skl does not collide with ParticleGene's own "Skl" (trial omen) in the file
+format, but both will read "Skl" in a gene browser. Consider Skel and Zomb.
+
+What still has to exist for these two to load: the two undeath genes, a bone
+diet allele, the Bne and Rot drop alleles, EyeColourGene's BLACK row,
+OFFERINGS entries 14 and 15, and (optionally) a way to make "cannot drown"
+real for the skeleton. The coat waits on the alpha op and the art.
