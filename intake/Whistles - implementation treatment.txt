@@ -345,6 +345,33 @@ Settled with the owner, second round
 9. Bound-whistle texture: DEFERRED. Piece 4 stays on the roadmap; tooltips
    already tell the tiers apart. Nothing to do now.
 
+Settled with the owner, third round (wording and small calls)
+==============================================================
+10. Bond refusal wording (piece 1): "<Horse> doesn't trust you enough yet. Spend
+    more time with it before binding a whistle." Uses the horse's name as the
+    other refusals do.
+11. Area-whistle tooltip (piece 2): add one line, "Horses within 16 blocks walk to
+    you; farther ones appear beside you." The number must come from the same
+    constant the code uses, not be typed a second time, or the tooltip can
+    disagree with the behaviour (the reason the radius tooltip reads its field).
+12. Sound when the key blows several whistles (piece 3): ONE CHIME PER WHISTLE,
+    each as it is blown, plus the ender whistle's own arrival sound at each
+    horse. If a stack of chimes is unpleasant in play, that is a tuning note, not
+    a redesign.
+13. Prompt switch (piece 3): a CLIENT config option, default ON. Name it to match
+    the existing client config conventions; read the client config class before
+    choosing the name.
+
+Coder defaults (not asked; change on request)
+=============================================
+- Action-bar text: "Press [key] to blow". If unbound: "Bind a key in Controls to
+  blow whistles."
+- Key pressed with no whistle found by the scan: one chat line, "You have no
+  whistles to blow."
+- Piece 1 test: a gametest for bond 60 refused / 61 accepted. First check that
+  the gametest harness can set a horse's bond; if it cannot, test the gate through
+  a small extracted check instead, and say so.
+
 Nothing left open before piece 1. Left to settle at build time only:
 - the exact number of ticks for the walk timeout and the stuck detection
   (piece 2, tune in the play test);
