@@ -21,6 +21,18 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-the-rider-gets-their-pack-back.txt">2026-09-29
+        &mdash; <strong>the rider gets their pack back, and a chord that suppresses
+        itself</strong>. Rider comfort piece 2: <kbd>ALT</kbd>+<kbd>E</kbd> opens your own
+        inventory, since this mod had taken <kbd>E</kbd> from the saddle and left a rider no
+        gesture for their own bag. Two pieces of prescribed code were deleted after reading
+        26.1.2 instead of writing them &mdash; <code>InventoryScreen</code> already swaps
+        itself out for the creative screen in <code>init</code>, so the planned game-mode
+        branch would have been a second copy of vanilla's rule; and
+        <code>KeyMappingLookup.getAll</code> only falls back to the unmodified bindings
+        <em>if the modified list came back empty</em>, so the mod's first key chord suppresses
+        the bare <kbd>E</kbd> it collides with at no cost. Both are readings rather than runs,
+        so both are flagged unverified with a pre-agreed fallback key named.</li>
     <li><a href="session-log/d2026-09-29-art-of-its-own.txt">2026-09-29
         &mdash; <strong>giving the blocks and items art of their own</strong>. An intake job
         for four third-party texture packs turned into an art session, because the audit the

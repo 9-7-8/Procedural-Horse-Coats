@@ -1,8 +1,8 @@
 Rider comfort - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "Open" lines
-are still to be settled. First piece to build: 2 (the inventory keybind), one
-piece per session per START HERE. Source of truth for what
+are still to be settled. First piece to build: 3 (right-click equips tack),
+one piece per session per START HERE. Source of truth for what
 exists is wiki/rider-comfort.html; this file is the handoff for the work its
 Roadmap tab lists, and it is retired (deleted, per START HERE step 3) as each
 piece ships and moves onto that page's Gameplay and Coding tabs.
@@ -16,14 +16,6 @@ What already exists, so the building session does not redo it
   behaviour.leads_return in ServerConfig, a safe accessor beside it
   (leadsReturn() catches IllegalStateException and returns the default), and a
   gametest in gametest/ModGameTests that asserts the halves separately.
-- client/HorseBrowserKeyBindings + HorseBrowserKeyHandler are the template for a
-  production keybind (RegisterKeyMappingsEvent, KeyConflictContext.IN_GAME,
-  KeyMapping.Category.MISC, drained in a ClientTickEvent).
-- THE COLLISION THAT SHAPES PIECE 2: client/HorseInfoKeyHandler already takes
-  the vanilla inventory key (E) while you ride a Horse and opens HorseInfoScreen
-  instead, in ClientTickEvent.Pre, before vanilla's handleKeybinds. So "open
-  your own inventory while riding" cannot be E, and cannot borrow the vanilla
-  keyInventory mapping. It needs its own mapping.
 - HorseInfoInteraction (HIGHEST) claims only sneak + EMPTY hand, and
   HorseScreenHooks.onFoalInventory (LOWEST) claims only sneak on a foal. A
   right-click with a saddle or armour in hand, not sneaking, is claimed by
@@ -32,35 +24,13 @@ What already exists, so the building session does not redo it
   BARDING among its slots, each with an accepts() and an item tag. Piece 3 can
   ask a slot whether it takes a stack instead of hard-coding item ids.
 
-Four pieces left of the original five. Piece 1 (mounted mining speed) shipped
-on 2026-09-29 and is now on wiki/rider-comfort.html - its Gameplay, Coding and
-Verification tabs. The numbering below is kept so the build order still reads.
+Three pieces left of the original five, and only two of them are buildable:
+piece 4 is still deferred behind a decision. Piece 1 (mounted mining speed) and
+piece 2 (the ALT+E inventory keybind) both shipped on 2026-09-29 and are now on
+wiki/rider-comfort.html - its Gameplay, Coding and Verification tabs. The
+numbering below is kept so the build order still reads.
 Piece 5, the fade, is built last and starts with a spike.
 Build order is smallest blast radius first, and each is shippable alone.
-
-2. A keybind to open your own inventory while riding
------------------------------------------------------
-- New KeyMapping in a new client class beside HorseBrowserKeyBindings, name
-  key.horsegenetics.rider_inventory, own KeyConflictContext.IN_GAME. The lang
-  key goes in en_us.json.
-- Handler: ClientTickEvent.Post like HorseBrowserKeyHandler. Guard: mc.screen == null,
-  no overlay (no riding guard - decided below). Open the player's own screen
-  client-side with no server round trip - the player's inventory menu is always
-  live on the server, so this needs no payload (the H browser made the same
-  simplification). Creative mode uses a different screen class than survival;
-  pick by game mode rather than always constructing the survival one.
-- Decided: works everywhere (all of IN_GAME), on foot too. Riding-only buys
-  nothing and makes "it doesn't open" ambiguous. Drop the riding guard above.
-- Decided: default ALT+E. NeoForge's KeyMapping takes a KeyModifier and this
-  repo uses none yet, so a chord is new API surface: verify in the Controls
-  screen that it registers and displays properly, flag the unverified API in a
-  comment, and fall back to a bare key (tell the owner which) if it does not.
-- Config: none. An unbound or rebound key IS the switch, and a config for a
-  keybind is a surface with no purpose (page 'config' wants a convention, not
-  more options). Say so on the Gameplay tab.
-- Test: nothing unit-testable; Verification tab: ride, press it, screen opens;
-  press E, this mod's horse screen still opens (the collision above);
-  a donkey or mule (no record, vanilla screen on E) is unchanged.
 
 3. Right-click with a saddle or armour equips it
 -------------------------------------------------
@@ -131,9 +101,6 @@ below apply.
   the mod's own tack slots) and leave the saddle to vanilla. The owner-only and
   never-swap rules still apply to what this mod adds. Do not take over the
   saddle, and do not retire the piece.
-- Piece 2 (ALT+E): if the chord will not register or display properly in
-  NeoForge's Controls screen, fall back to a BARE default key that clashes with
-  nothing in this repo, and REPORT which key was picked.
 - Piece 1 config sync: the treatment assumes the server config syncs to clients
   (mining needs both sides). If it does not, SEND THE SWITCH IN A PAYLOAD on
   join, the way other synced data in this mod travels; do not make it a client

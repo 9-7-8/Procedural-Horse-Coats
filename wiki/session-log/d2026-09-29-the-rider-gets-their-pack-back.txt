@@ -1,0 +1,91 @@
+2026-09-29 - the rider gets their pack back, and a chord that suppresses itself
+
+
+    One bullet, per intake/START HERE.txt. The session opened with the same
+    question the mining-from-the-saddle session opened with - "what is the
+    smallest thing in intake we can implement" - and this time the answer was
+    rider comfort piece 2, the inventory keybind, because the whistle pieces
+    that beat it last time have all shipped since.
+
+    The survey, briefly. Three bullets in To do.txt and seven treatment files.
+    Everything but the loot bullet is a whole system (troughs, horse shoes,
+    the gear screen, the runtime-registry genes, attached model parts, undead
+    conversion). Rider comfort piece 2 won on having every design call already
+    marked Decided in its own treatment, which no other candidate did.
+
+    The loot bullet was re-surveyed and the previous session's reading holds:
+    AddHorseTackModifier already injects dyed leather horse armour into every
+    chests/* table, but the bullet's second clause - "loot tables that CONTAIN
+    normal human leather armor" - is genuinely unbuilt, because
+    LootTableMatchesCondition matches a table's path and not its contents.
+    Expressing it needs a datapack-load scan of table contents, and the first
+    clause is a tuning number the owner deliberately set. That is a
+    conversation, not a small build, and it stays parked.
+
+    What shipped. client/RiderInventoryKeyBindings and
+    client/RiderInventoryKeyHandler, in the two-class shape
+    HorseBrowserKeyBindings/Handler already established, plus the
+    key.horsegenetics.rider_inventory lang key. ALT+E opens your own
+    inventory; E from the saddle still opens this mod's horse screen. No
+    config switch, on the owner's call: an unbound key is already the switch.
+    Works on foot too, also her call - a riding-only key makes "it didn't
+    open" ambiguous between unbound and guarded-out.
+
+    Two prescribed pieces of code were deleted after reading 26.1.2, and both
+    are worth recording because in each case the plan was reasonable and the
+    source said it was unnecessary.
+
+    Creative mode needs no branch. The treatment said to pick the screen
+    class by game mode. But InventoryScreen's init AND its containerTick both
+    open by checking player.hasInfiniteMaterials() and swapping themselves out
+    for a CreativeModeInventoryScreen - so constructing the survival screen is
+    what vanilla itself does in both modes, and a hand-rolled game-mode test
+    would have been a second copy of that rule, wrong the moment the first one
+    moved. Verification carries the check that the swap is invisible rather
+    than a one-frame flash.
+
+    The chord does not need coordinating with the key it collides with. This
+    was the session's real worry: HorseInfoKeyHandler drains vanilla's
+    keyInventory in ClientTickEvent.Pre while you ride, so ALT+E firing BOTH
+    mappings would put the horse screen on top and swallow the inventory - the
+    feature failing precisely where it was wanted, and looking like the key
+    not working. NeoForge already handles it. KeyMappingLookup.getAll collects
+    the bindings registered under the held modifier first and only then, "if
+    (releasing || matchingBindings.isEmpty())", adds the unmodified ones. A
+    live ALT+E match is a non-empty list, so the bare-E fallback never runs
+    and keyInventory.consumeClick() is never satisfied. Nothing in this mod
+    had to change for that.
+
+    Both of those are readings, not runs, so both are flagged UNVERIFIED in
+    the source per the house rule and both are on rider-comfort.html's
+    Verification tab. This is the mod's first KeyModifier - WhistleKeyBindings
+    says in as many words that it avoided a chord to keep the modifier API out
+    of it - so the tab also names the fallback the owner pre-agreed: a bare
+    key that clashes with nothing here (H, apostrophe, F, F6, F7, F8 are
+    taken), shipped and reported, rather than a chord left half-working.
+
+    One small departure from the repo's own convention, deliberately. The
+    category is KeyMapping.Category.INVENTORY where every other mapping here
+    uses MISC. Still a built-in category with nothing to register or localise,
+    so the stated reason for MISC is not violated - but it puts the row
+    directly beneath vanilla's "Open/Close Inventory", which is the part of
+    Controls a player is reading when they go looking for what happened to E.
+
+    No test, and that is not an omission. The whole of it is a keybind
+    registration and a setScreen on the client; the one claim worth checking
+    is a fact about NeoForge's input layer that only a real client exercises.
+    It is a Verification-tab item rather than a missing gametest, and the tab
+    says so.
+
+    Housekeeping. Piece 2's section is deleted from the treatment file per
+    START HERE step 3, along with the two "what already exists" bullets and
+    the one fallback note that only concerned it. The file's header now points
+    at piece 3 as the next to build.
+
+    Open for the next session: rider comfort piece 3, right-click with a
+    saddle or armour equips it. It is the one piece on this page with a design
+    question still in it - the treatment's first instruction is to read the
+    decompiled AbstractHorse.mobInteract and find out whether vanilla already
+    equips a saddle on right-click in 26.1.2, because if it does the piece
+    shrinks to armour only. Piece 5, the fade, is last and starts with a
+    rendering spike.

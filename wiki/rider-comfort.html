@@ -20,10 +20,11 @@
 <p class="lede">
     Five small things that make riding less irritating, borrowed from other mods that
     already do them. None touches genetics, and each is small enough to ship alone.
-    <strong>Two of the five have shipped</strong> &mdash; a lead now comes back to you
+    <strong>Three of the five have shipped</strong> &mdash; a lead now comes back to you
     rather than being left on the ground when this mod teleports the horse wearing it,
-    and you can mine from the saddle at the speed you would standing there. The other
-    three are still plans, and the last of them &mdash; fading the horse out as
+    you can mine from the saddle at the speed you would standing there, and
+    <kbd>ALT</kbd>+<kbd>E</kbd> opens your own pack from the saddle. The other
+    two are still plans, and the last of them &mdash; fading the horse out as
     you look down &mdash; touches the coat itself and is the only one with a real unknown
     in it.
 </p>
@@ -105,6 +106,44 @@
     <a href="config.html"><code>behaviour.mounted_mining_penalty_removed</code></a> is on by
     default, and turning it off restores vanilla exactly. It is a server setting, so on a
     server it is the server&rsquo;s answer that counts, not each player&rsquo;s.
+</p>
+
+<h2 id="rider-inventory">Your own inventory, from the saddle</h2>
+
+<div class="plain">
+    <p>
+        This mod takes <kbd>E</kbd> away while you are riding: instead of vanilla&rsquo;s
+        horse screen you get <a href="horse-gear.html#where">this mod&rsquo;s own horse
+        screen</a>, which
+        is a far better trade than it sounds &mdash; the screen it replaces held a saddle slot
+        and a barding slot and nothing else. But it left a rider with no way at all to open
+        <em>their own</em> bag without getting off the horse first.
+    </p>
+    <p>
+        <kbd>ALT</kbd>+<kbd>E</kbd> now opens your own inventory. <kbd>E</kbd> on its own
+        still opens the horse&rsquo;s screen, exactly as before.
+    </p>
+</div>
+
+<p>
+    <strong>It works on foot too</strong>, not only in the saddle. A key that only functions
+    while mounted would be one more thing to remember, and when it did nothing you would have
+    no way to tell whether the key was unbound or the game had decided you were not riding.
+</p>
+
+<p>
+    <strong>There is no config option for this one</strong>, which makes it the exception on
+    this page. Unbinding the key in <em>Options &rarr; Controls</em> already switches it off,
+    and it is listed there under <em>Inventory</em>, directly beneath vanilla&rsquo;s own
+    &ldquo;Open/Close Inventory&rdquo; &mdash; which is where you would be looking anyway if
+    you were wondering what happened to <kbd>E</kbd>. Rebind either of them, or swap the two
+    over, and the mod follows.
+</p>
+
+<p class="muted">
+    On a donkey or a mule nothing changed to begin with: this mod keeps no record of one, so
+    <kbd>E</kbd> opens vanilla&rsquo;s screen with its chest grid, as it always did. The new
+    key still works there, and gives you the same pack it gives you anywhere else.
 </p>
 
 </section>
@@ -227,6 +266,96 @@
     owns is that given each posture, the handler does the right thing.
 </p>
 
+<h2 id="rider-inventory-coding">How the inventory key is bound (2026-09-29)</h2>
+
+<p>
+    <code>client/RiderInventoryKeyBindings</code> and
+    <code>client/RiderInventoryKeyHandler</code>, the same two-class split as
+    <code>HorseBrowserKeyBindings</code> / <code>HorseBrowserKeyHandler</code>: the mapping is
+    registered on the mod bus from <code>RegisterKeyMappingsEvent</code>, the clicks are
+    drained on the game bus from <code>ClientTickEvent.Post</code>. No payload, no menu type,
+    no server code at all.
+</p>
+
+<p>
+    <strong>Nothing is sent to the server, and nothing needs to be.</strong> A player&rsquo;s
+    own <code>InventoryMenu</code> is not opened on demand &mdash; it is live for the whole
+    session &mdash; which is why vanilla&rsquo;s own <kbd>E</kbd> branch in
+    <code>Minecraft.handleKeybinds</code> calls <code>setScreen</code> rather than sending
+    anything. <code>HorseBrowserKeyHandler</code> made the same simplification.
+    The one case where vanilla <em>does</em> send a packet is
+    <code>MultiPlayerGameMode.isServerControlledInventory()</code>, which is true
+    <em>precisely</em> when you are riding something with a screen of its own &mdash; the
+    case this key exists to step around, so following vanilla there would have defeated it.
+</p>
+
+<p>
+    <strong>Creative mode gets no branch</strong>, and that is a deliberate departure from the
+    plan this was built from, which said to pick the screen class by game mode. Reading
+    26.1.2 says not to: <code>InventoryScreen</code>&rsquo;s own <code>init</code>
+    <em>and</em> its <code>containerTick</code> both open by checking
+    <code>player.hasInfiniteMaterials()</code> and swapping themselves out for a
+    <code>CreativeModeInventoryScreen</code>. Constructing the survival screen is therefore
+    what vanilla itself does in both modes, and a hand-rolled game-mode test would have been
+    a second copy of that rule &mdash; wrong the moment the first one moved.
+</p>
+
+<p>
+    <code>Post</code> rather than the <code>Pre</code> its neighbour uses.
+    <code>HorseInfoKeyHandler</code> has to run in <code>ClientTickEvent.Pre</code> because it
+    is <em>stealing</em> vanilla&rsquo;s <code>keyInventory</code> click and must get there
+    before <code>handleKeybinds</code> does. This handler steals nothing: it owns its own
+    mapping, so it runs in <code>Post</code> like the browser key.
+</p>
+
+<h3 id="rider-inventory-chord">The chord, and why it does not double-fire</h3>
+
+<p>
+    <strong>This is the mod&rsquo;s first <code>KeyModifier</code>.</strong> Every other
+    mapping here is a bare key, and <code>WhistleKeyBindings</code> says in as many words that
+    it avoided a chord to keep the modifier API out of it. The obvious worry is that
+    <kbd>ALT</kbd>+<kbd>E</kbd> would fire <em>both</em> mappings &mdash; this one and
+    vanilla&rsquo;s bare <code>keyInventory</code>, which
+    <code>HorseInfoKeyHandler</code> is sitting on &mdash; leaving you with the horse screen
+    on top and your own inventory swallowed.
+</p>
+
+<p>
+    It does not, and the reason is in
+    <code>neoforge/client/settings/KeyMappingLookup.getAll</code>. With <kbd>ALT</kbd> held it
+    collects the bindings registered <em>under</em> <kbd>ALT</kbd> first, and only then
+    <code>if (releasing || matchingBindings.isEmpty())</code> adds the unmodified ones. A live
+    ALT+E match is a non-empty list, so the bare-<kbd>E</kbd> fallback never runs and
+    <code>keyInventory.consumeClick()</code> is never satisfied. The suppression is
+    NeoForge&rsquo;s, not ours, and it is why this needed no coordination with
+    <code>HorseInfoKeyHandler</code> at all.
+</p>
+
+<p class="muted">
+    <strong>Flagged unverified in the source, per the house rule:</strong> that is a reading
+    of the 26.1.2 sources, not something a client has done yet, and it covers the Controls
+    screen too &mdash; whether the row draws as &ldquo;Alt + E&rdquo; or as a bare
+    <kbd>E</kbd> that looks like a conflict with vanilla&rsquo;s.
+    <a href="#rider-inventory-verify">The Verification tab owns both</a>, and names the
+    fallback if the chord will not hold.
+</p>
+
+<p>
+    The category is <code>KeyMapping.Category.INVENTORY</code>, where the rest of the mod uses
+    <code>MISC</code>. Still a built-in category with nothing to register or localise, so the
+    reason <code>MISC</code> was chosen elsewhere is not violated &mdash; but it puts the row
+    directly beneath vanilla&rsquo;s &ldquo;Open/Close Inventory&rdquo;, which is the part of
+    Controls a player is reading when they go looking for what happened to <kbd>E</kbd>.
+</p>
+
+<p class="muted">
+    <strong>No test.</strong> There is nothing here a gametest could hold: the whole of it is
+    a keybind registration and a <code>setScreen</code> on the client, and the one claim worth
+    checking &mdash; that the chord suppresses the bare key &mdash; is a fact about
+    NeoForge&rsquo;s input layer that only a real client exercises. It is a Verification-tab
+    item rather than a missing test.
+</p>
+
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -235,9 +364,9 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        Three small borrowings from other mods are left, each shippable alone and each wanting
-        a config switch &mdash; an inventory keybind, a right-click that equips tack, and
-        returning the leads <em>vanilla</em> drops, which has no event to hang on &mdash; plus
+        Two small borrowings from other mods are left, each shippable alone and each wanting
+        a config switch &mdash; a right-click that equips tack, and returning the leads
+        <em>vanilla</em> drops, which has no event to hang on &mdash; plus
         <strong>fading the horse out as you look down</strong>, which asks the coat pipeline
         for a transparency it has never had.
     </p>
@@ -248,18 +377,16 @@
 <p id="rider-comfort">
     Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster of the
     survey backlog</a>. None touches genetics, and each is small enough to
-    ship on its own. <strong>Every one of them wants a config switch written with it</strong>, per
-    <a href="config.html#config-everything">the config sweep</a> &mdash; both that have shipped,
+    ship on its own. <strong>Both of the two left want a config switch written with
+    them</strong>, per <a href="config.html#config-everything">the config sweep</a> &mdash;
     <a href="#leads">the returned lead</a> and
-    <a href="#mounted-mining">mining from the saddle</a>, went out with their switch written
-    beside them, which is the pattern the rest should follow.
+    <a href="#mounted-mining">mining from the saddle</a> both went out with their switch
+    written beside them, which is the pattern the rest should follow.
+    <a href="#rider-inventory">The inventory keybind</a> is the one exception and shipped
+    deliberately without one: an unbound key is already the switch.
 </p>
 
 <ul>
-    <li><strong>A keybind to open your own inventory while riding.</strong> Horse Buff binds it to
-        <kbd>ALT</kbd>+<kbd>E</kbd>. We already own <kbd>H</kbd> for the browser through
-        <code>client/HorseBrowserKeyBindings</code>, so the idiom and the registration exist. This
-        one adds a door rather than closing one.</li>
     <li><strong>Fade the horse out as you look down.</strong> Horse Buff fades the mount for
         sightlines, with an optional head-pitch offset of up to 45&deg;.
         <strong>This is the one with a real unknown in it:</strong> we are the only mod here whose
@@ -294,7 +421,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Two shipped pieces have been seen only by gametests &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; and the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires.</p>
+    <p>Three shipped pieces have been seen by no player &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires; and the new ALT+E inventory key is the mod's first key chord, resting on a reading of NeoForge's input layer that no client has yet run.</p>
 </div>
 
 <h3 id="leads-verify">The lead comes back (2026-09-24, NOT played)</h3>
@@ -375,6 +502,65 @@
         would mean the vehicle test is not actually restricting to horses.</li>
 </ul>
 
+<h3 id="rider-inventory-verify">The inventory key (2026-09-29, NOT played)</h3>
+
+<p>
+    Nothing here is unit-testable, so <strong>all of it is a hand check</strong>. Two
+    separate claims are being taken on trust, and they fail in different ways: that a
+    <code>KeyModifier</code> chord works at all in 26.1.2 &mdash; this is the mod&rsquo;s
+    first &mdash; and that it <em>suppresses</em> the bare key it is built on, which is
+    <a href="#rider-inventory-chord">read out of <code>KeyMappingLookup.getAll</code></a>
+    rather than seen.
+</p>
+
+<ul>
+    <li><strong>The suppression, which is the check that matters.</strong> Ride a tamed horse
+        of yours and press <kbd>ALT</kbd>+<kbd>E</kbd>. <strong>Pass:</strong> your own
+        inventory, and only your own inventory. <strong>Fail:</strong> the horse screen
+        appears instead, or appears on top &mdash; which means the bare-<kbd>E</kbd> fallback
+        in <code>KeyMappingLookup</code> ran anyway and both mappings fired. That is the whole
+        feature failing in exactly the place it was built for, and it looks like the key
+        simply not working.</li>
+    <li><strong>Nothing was taken from <kbd>E</kbd>.</strong> On the same horse, press
+        <kbd>E</kbd> alone. <strong>Pass:</strong> the horse screen, as before.
+        <strong>Fail:</strong> your own inventory, which would mean the chord registered with
+        no modifier and has quietly replaced the horse screen.</li>
+    <li><strong>On foot.</strong> Get off and press <kbd>ALT</kbd>+<kbd>E</kbd> standing in a
+        field. <strong>Pass:</strong> your inventory opens. This was the owner&rsquo;s call
+        &mdash; the key is not restricted to riding &mdash; so a failure here is a wrong
+        conflict context, not a missing guard.</li>
+    <li><strong>The Controls screen draws the chord.</strong> Open <em>Options &rarr;
+        Controls</em> and find it under <em>Inventory</em>, beneath vanilla&rsquo;s
+        &ldquo;Open/Close Inventory&rdquo;. <strong>Pass:</strong> the row reads
+        &ldquo;Alt + E&rdquo;. <strong>Fail:</strong> a bare <kbd>E</kbd>, or a conflict
+        warning against vanilla&rsquo;s row &mdash; either means the modifier was not stored,
+        and the suppression check above will be failing too.</li>
+    <li><strong>Rebinding survives.</strong> Rebind it to something else, restart the client,
+        and check the new binding is still there and still opens the right screen. A chord
+        that does not round-trip through <code>options.txt</code> is the usual way the
+        modifier API goes wrong.</li>
+    <li><strong>Creative mode.</strong> Press it in creative. <strong>Pass:</strong> the
+        creative item picker, not the survival inventory &mdash; this rests on
+        <code>InventoryScreen</code> swapping itself out in <code>init</code>, which is
+        <a href="#rider-inventory-coding">read from vanilla rather than reimplemented</a>. A
+        one-frame flash of the survival screen before the swap would also count as a fail
+        worth reporting.</li>
+    <li><strong>A donkey or a mule.</strong> Ride one and press both keys. <strong>Pass:</strong>
+        <kbd>E</kbd> gives vanilla&rsquo;s screen with its chest grid, unchanged, and
+        <kbd>ALT</kbd>+<kbd>E</kbd> gives your own pack.</li>
+    <li><strong>It does not reach through a screen.</strong> With the horse browser or the
+        horse screen already open, press <kbd>ALT</kbd>+<kbd>E</kbd>.
+        <strong>Pass:</strong> nothing happens. <strong>Fail:</strong> the inventory opens
+        over the top, which means the <code>mc.screen == null</code> guard is not holding.</li>
+</ul>
+
+<p class="muted">
+    <strong>If the chord will not hold</strong>, the fallback the owner already agreed is a
+    bare key that clashes with nothing in this repo &mdash; the taken ones are <kbd>H</kbd>,
+    <kbd>&rsquo;</kbd>, <kbd>F</kbd>, <kbd>F6</kbd>, <kbd>F7</kbd> and <kbd>F8</kbd>. Pick
+    one, ship it, and say which; do not leave a chord in that half-works.
+</p>
+
 </section>
 
 <div class="page-foot">
@@ -385,10 +571,11 @@
         <a href="compatibility.html">Living beside other mods</a>
     </div>
     The returned lead was the first of the five and took an afternoon; mining from the saddle
-    was the second and took less. Of what is left, the inventory keybind still wants nothing
-    settled first; the fade is the one to leave until the coat has actually been drawn
-    half-transparent, because everything about how it would be configured depends on whether it
-    can be drawn at all.
+    was the second and took less; the inventory keybind was the third and was two classes and
+    a lang key. Of the two left, the right-click that equips tack needs designing against the
+    <strong>i</strong> button rather than beside it; the fade is the one to leave until the
+    coat has actually been drawn half-transparent, because everything about how it would be
+    configured depends on whether it can be drawn at all.
 </div>
 
 </article>
