@@ -119,8 +119,8 @@ blown; every ender whistle is blown, since each is bound to a different horse.
   at all (a bare "blow" request); the server scans the sender's own inventory.
   Never send an inventory slot or a whistle id from the client - that is the
   TackSlotPayload lesson (a client index is a claim about another container).
-  Scan main inventory + offhand; decide in the building session whether armour
-  slots and a Curios/backpack-style modded container count (open, probably not).
+  Scan main inventory + offhand first; modded containers count too, added one
+  soft integration at a time (see 8 under "Settled").
 - Common-module home: the "which whistles are non-degenerate" rule is pure
   (a list of radii and a list of bound ids in, a list of picks out). Put it in
   common/, e.g. a small WhistleSelection class with a unit test, and keep the
