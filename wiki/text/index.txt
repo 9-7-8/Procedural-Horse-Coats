@@ -2920,6 +2920,7 @@ wiki/item-equestrian-posts.html#four	coding	Why four blocks and not one
 wiki/item-equestrian-posts.html#loot	coding	Loot tables
 wiki/item-equestrian-posts.html#poi	coding	They are POIs and nothing else
 wiki/item-equestrian-posts.html#use	gameplay	What they are for
+wiki/item-freedom-stick.html#art-0929	coding	The icon, since 2026-09-29
 wiki/item-freedom-stick.html#handler	coding	Where it lives
 wiki/item-freedom-stick.html#making	gameplay	Making one
 wiki/item-freedom-stick.html#nothing-to-restore	coding	Re-taming needed no code
@@ -3026,6 +3027,7 @@ wiki/item-splice-carrots.html#random	gameplay	Unknown Gene Splice — the random
 wiki/item-splice-carrots.html#recipe-type	coding	The Known Gene Splice is a custom recipe type
 wiki/item-splice-carrots.html#themed	gameplay	The five themed splices
 wiki/item-splice-carrots.html#verified	coding	Verified
+wiki/item-stall-signs.html#art-0929	coding	Three signs that are three different drawings
 wiki/item-stall-signs.html#detector	coding	The detector measures, it does not judge
 wiki/item-stall-signs.html#gaps	coding	Known gaps
 wiki/item-stall-signs.html#get	gameplay	How to get one
@@ -3045,6 +3047,7 @@ wiki/item-transfer-papers.html#horsegive	gameplay	The command twin — /horsegiv
 wiki/item-transfer-papers.html#horsegive-code	coding	What /horsegive shares with the paper, and what it does not
 wiki/item-transfer-papers.html#rules	gameplay	Things worth knowing
 wiki/item-transfer-papers.html#use	gameplay	How they work
+wiki/item-vet-kit.html#art-0929	coding	The icon, since 2026-09-29
 wiki/item-vet-kit.html#code	coding	Where it lives
 wiki/item-vet-kit.html#gaps	coding	Known gaps
 wiki/item-vet-kit.html#gelding	gameplay	What gelding does

@@ -419,6 +419,25 @@
     (<a href="compatibility.html#compat-0918">&sect;0-FK</a>).
 </p>
 
+<div class="note">
+    <span class="label">The vanilla planks are the point, and these will not get a 3D preview</span>
+    <p>
+        Every one of these wears the plank texture of the wood it is made of, straight from
+        Minecraft. That is deliberate and settled (owner, 2026-09-29): a birch gate should
+        look like birch, and drawing our own would make the family look wrong beside the
+        vanilla fences it stands in a line with.
+    </p>
+    <p>
+        The cost is that they can never appear in one of the wiki&rsquo;s
+        <a href="item-equestrian-posts.html">rotatable block previews</a>, because a preview
+        means committing Mojang&rsquo;s PNGs to this repository and that is not ours to do &mdash;
+        <code>wiki/tools/bake-block-previews.mjs</code> refuses them by name rather than
+        trusting anybody to remember. Written down so the absence reads as a decision rather
+        than an oversight. If it ever matters enough, the route is one neutral wood texture of
+        our own that only the wiki uses, not new art in the game.
+    </p>
+</div>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
