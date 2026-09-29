@@ -1,0 +1,213 @@
+Whistles - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; every "Open" line
+is a number or wording still to be settled before or during the session that
+builds it. Source of truth for what exists is wiki/item-whistles.html; this file
+is the handoff for the work its Roadmap tab lists, and it is retired (deleted,
+per START HERE step 3) as each piece ships and moves onto that page's Gameplay
+and Coding tabs.
+
+What already exists, so the building session does not redo it
+==============================================================
+- wiki/item-whistles.html already has Gameplay, Coding, a Roadmap tab (with its
+  note.roadmap-summary box) and a Verification tab. Extend it. Do not add a page.
+  If the Roadmap summary sentence changes, re-run bake-roadmap-index.mjs; if the
+  Verification tab changes, bake-verification-index.mjs.
+- item/WhistleItem.java: one class, radius 16/32/64. use() -> recall(): every
+  tamed, owned, unridden horse in the box that is not already within 3 blocks
+  gets HorseLeads.untieFor, navigation.stop(), then snapTo(spreadSpot). Always a
+  teleport. Cooldown 60 ticks.
+- item/EnderWhistleItem.java + server/EnderWhistleCalls.java: BOUND_HORSE
+  component, bind on EntityInteract using HorseOwnership.bindRefusal, call()
+  (loaded -> deliver; else portal ticket + PENDING wait), dust check once a
+  second. deliver() re-checks ownership at call time and teleports.
+- server/BondFollowGoal.java already walks a tier 2-3 horse to its owner using
+  ReachCheck (a real navigator path, not sight), MAX_FOLLOW 32 blocks. It is the
+  template for "walk in", and its canUse() refuses leashed, ridden and no-path
+  horses, which is exactly the rule a walked call needs too.
+- Bond tiers: HorseCareAttachment.behaviourTier() - 31 / 61 / 81 -> tier 1 / 2 / 3.
+  Bond decay floors at 31, so a bound horse can never fall below tier 1.
+- client/HorseBrowserKeyBindings.java is the template for a production
+  keybind (RegisterKeyMappingsEvent, KeyConflictContext.IN_GAME, KeyMapping.Category.MISC).
+  network/TackSlotPayload.java + ModNetworking is the template for a client ->
+  server payload that the server treats as a claim, not a fact.
+
+Four pieces, in build order
+============================
+The order is smallest blast radius first, and each is shippable alone.
+
+1. Bond gate on binding (small, server only)
+---------------------------------------------
+Decided: bond gates BINDING. Not calling, not the area whistles.
+- HorseOwnership.bindRefusal(horse, player, name) is shared with stall signs. Do
+  NOT add the bond test there - a bound stall sign has no reason to want it.
+  Give EnderWhistleCalls.onBind its own extra refusal after bindRefusal passes:
+  read HorseCareAttachment.behaviourTier() and refuse below the threshold with a
+  line that says the horse does not trust you enough yet and what to do
+  (the wiki's horse-care page owns how bond is earned; link the tier, do not
+  restate the numbers - CLAUDE.md, derived numbers stay in code).
+- Open: which tier. Recommendation is tier 2 (bond 61+, the tier at which a
+  horse starts coming toward you unasked) so a whistle is a reward for a bond
+  you have already built, not something to craft ahead of it. Tier 3 would make
+  the whistle the last thing a player earns; tier 1 would gate almost nothing.
+  Expose it as a named constant, not a literal, so the next tuning session is a
+  one-line change. Consider a server config (ServerConfig, behaviour.*) only if
+  the owner asks - a config for a single threshold is cheap but is a surface.
+- A whistle bound before this ships stays bound (nothing re-checks bond after
+  binding). Say so on the Gameplay tab, or a player will read the gate as
+  retroactive.
+- Test: a gametest in ModGameTests beside the existing whistle ones - bond 60
+  refused, 61 accepted. bindRefusal itself has unit coverage only for its two
+  existing refusals; the bond branch is new NeoForge-side code, so the gametest
+  is the check, not a common/ test.
+
+2. Walk if near, teleport if far (the real design piece)
+--------------------------------------------------------
+Decided: walk inside a radius, teleport beyond. The ender whistle STAYS
+teleport-only (its point is "from anywhere"; a walk cannot cross a dimension).
+So this changes WhistleItem only.
+- Per horse, in WhistleItem.recall(): if the horse is within WALK_RADIUS AND has
+  a real route to the player (reuse ReachCheck exactly as BondFollowGoal does;
+  do not write a second reachability rule), walk it; otherwise the existing
+  teleport path runs unchanged. That keeps every current behaviour as the
+  fallback, which is the safe direction.
+- Mechanism: a new goal, e.g. server/WhistleCallGoal, added once per horse next
+  to BondFollowGoal in HorseCareHandler (same reasoning as that class: adding and
+  removing goals on demand is fiddlier than a canUse() that returns false).
+  It claims Flag.MOVE and LOOK, and needs a priority ABOVE BondFollowGoal and
+  every herd goal, or a mare in heat wanders off mid-call. That is a new row in
+  the behaviour hierarchy: after adding it run
+  node wiki/tools/bake-behaviour-hierarchy.mjs (CLAUDE.md table).
+- Where the "you were called" state lives: the goal has to know the player and a
+  deadline. Prefer a small in-memory map keyed by horse UUID (like
+  EnderWhistleCalls.PENDING) over a new attachment - a call is a few seconds
+  long, must not survive a reload, and a saved half-finished call is a bug.
+- Stuck fallback (the part that decides whether this is better or worse than
+  today): the goal gives up after a deadline OR when the navigator reports no
+  progress for a couple of seconds, and the horse is then teleported exactly as
+  today. A whistle that ends with the horse stuck behind a fence and a chat line
+  saying "1 answered" is a regression from the current behaviour.
+- Untying the lead happens up front for a walked horse too (HorseLeads.untieFor),
+  or a leashed horse would refuse canUse() and silently not walk.
+- Chat line: today says "Whistled N horses to you." Once some walk it should
+  still count them all; do not split the message by method. Log the split to
+  ActionTrace / DebugAnnounce for testing instead.
+- Open: WALK_RADIUS. BondFollowGoal's own limit is 32 blocks; the basic whistle
+  reaches 16, so if WALK_RADIUS is >= 16 the basic whistle NEVER teleports a
+  reachable horse and the golden/echo whistles teleport only the far ones.
+  Recommendation: walk within 16 for every tier (the basic whistle's whole
+  reach), teleport further out. Say so in each tooltip's second line - the
+  current line ("a ridden horse stays put; a leashed one is untied") is written
+  to pre-empt bug reports and this is the next one it should pre-empt.
+- Open: how long is "too long a walk". A path 15 blocks away can be 80 blocks
+  of switchback. Recommendation: cap by path length as well as straight-line
+  distance, over the cap -> teleport. ReachCheck's API may need to expose the
+  path length; read it before promising this.
+- Verify in play (Verification tab, NOT unit-testable): a horse behind a
+  gate-less fence line, a horse on the far side of a river, a horse that is
+  hungry / in heat / mid-eat, a horse in a herd (does the herd goal pull it
+  back after the call ends - the call should end with it standing near you, not
+  resuming a wander at once).
+
+3. Keybind: blow every distinct whistle in the inventory
+---------------------------------------------------------
+Decided: one key blows ALL whistles in the inventory that are not degenerate
+to one another. Area tiers are degenerate to each other (a bigger radius
+contains a smaller), so from the area whistles only the LARGEST radius is
+blown; every ender whistle is blown, since each is bound to a different horse.
+- Selection lives on the SERVER. The client sends a payload with no item data
+  at all (a bare "blow" request); the server scans the sender's own inventory.
+  Never send an inventory slot or a whistle id from the client - that is the
+  TackSlotPayload lesson (a client index is a claim about another container).
+  Scan main inventory + offhand; decide in the building session whether armour
+  slots and a Curios/backpack-style modded container count (open, probably not).
+- Common-module home: the "which whistles are non-degenerate" rule is pure
+  (a list of radii and a list of bound ids in, a list of picks out). Put it in
+  common/, e.g. a small WhistleSelection class with a unit test, and keep the
+  NeoForge side to inventory scanning, cooldown and messages. (CLAUDE.md: as
+  much as possible in common/.)
+- Dedupe across the two kinds: if an area whistle call reaches a horse that a
+  bound ender whistle would ALSO call, the ender call must not teleport it a
+  second time or fire a second chime. Do the area call first, collect the
+  horses it handled (a set of UUIDs), and skip any ender whistle whose bound
+  horse is in that set. Also skip two ender whistles bound to the same horse
+  (possible: two crafted, both bound to it - binding is per whistle, not per
+  horse) - blow it once.
+- Cooldowns: use() sets a per-item cooldown on the stack (60 area, 100 ender).
+  The keybind path must respect and set the SAME cooldowns, by calling the same
+  code, not a copy of it - otherwise the key becomes a way round the cooldown
+  and blowing by hand then by key double-calls. Refactor use() so the item's
+  work is a static method taking (ServerPlayer, ItemStack), and have both
+  use() and the key call that.
+- One combined chat line instead of N lines: "Whistled 3 horses, and Biscuit
+  answered from far away." Building the lines from the same helpers the items
+  use keeps the wording in one place.
+- Key default: an unbound-by-default key is safest for a modpack server where
+  every key is already taken; a default that conflicts is worse than none. Open:
+  owner's preference. Rebindable either way (KeyMapping). Add a lang key and
+  it needs a Controls-screen name.
+- The payload registers in ModNetworking next to the tack-slot one. It is the
+  mod's first payload with NO fields - check StreamCodec.unit(...) exists on
+  26.1.2 before relying on it (unverified; flag it in a comment per hard rule 8,
+  and write the fact into wiki/api-notes.html once known).
+- The keybind works on a server with the mod but only if the CLIENT has the
+  mod. Nothing to do; noted because a vanilla client cannot send it.
+
+4. Texture that tells a bound ender whistle from an unbound one
+-----------------------------------------------------------------
+Still on the Roadmap tab, not discussed this session; scoped here only so it is
+not lost. It is ART, so it cannot be started without the owner drawing it.
+- Cheapest engineering route: an item-model conditional on the BOUND_HORSE
+  component being present (26.1.2 item definitions in assets/.../items/ use
+  select/condition types; check the exact condition for "has component" against
+  api-notes.html before writing it), pointing at a second texture. No code.
+- The four whistles sharing one texture (three area tiers + ender) is a
+  separate known gap; do not solve both with one art pass unless the owner
+  wants to. The keybind makes it matter less - fewer blows happen from a hotbar.
+
+Not doing (decided, put on wiki/decisions.html when the first piece ships)
+============================================================================
+- Binding donkeys, mules and llamas to the ender whistle. Area whistles already
+  call any AbstractHorse and stay as they are. The ender binding stays
+  horse-only because BoundHorse, HorseWhereabouts, the crumble-to-dust path and
+  the ancestry lookup all key on a genome-carrying Horse. Extending it touches
+  stall signs too (they share BOUND_HORSE). Record it as a decision so the
+  roadmap sentence about it can be deleted rather than left as a maybe.
+- Bound modes on the three area whistles (loaded chunk / same dimension / any
+  dimension by tier). Superseded by the ender whistle; the Roadmap tab already
+  says "unless someone wants the ladder back". Delete that bullet when piece 2
+  ships, since it is no longer an option to keep open.
+
+Wiki work the building sessions must do (CLAUDE.md, same change as the code)
+============================================================================
+- wiki/item-whistles.html: move each shipped piece OFF the Roadmap tab and onto
+  Gameplay (what a player sees) and Coding (how); add a Verification entry for
+  what could not be played; delete the Roadmap tab when nothing is left. Then:
+  bake-roadmap-index.mjs, bake-verification-index.mjs, build-search-index.mjs,
+  check-links.mjs, bake-agent-text.mjs, and sync-page-views.mjs if a tab moved.
+- A new ProgressTask is NOT needed (WHISTLE_BASIC/GOLDEN/ECHO/ENDER exist). If
+  the keybind should tick them too, it does so by calling the same item method,
+  for free - check that before adding anything to ProgressTask.
+- wiki/horse-care.html: the bond gate and the new goal belong there too (bond
+  tiers, the behaviour hierarchy).
+- The two decisions above -> wiki/decisions.html.
+- CLAUDE.md map row for the item pages is unchanged; no new page.
+
+Session shape (START HERE: one bullet, one context window)
+===========================================================
+Build ONE of pieces 1-3 per session, in order; piece 4 waits on art. Piece 1
+is small enough to share a session with nothing else. Piece 2 is the one that
+needs a play test, so it is the one to finish with a Verification-tab
+reproduction rather than widening the search. Run
+node wiki/tools/check-roadmap-execution.mjs before editing, and only
+--tests '*WhistleSelectionTest' (piece 3's common class) - never the full suite.
+
+Open items, collected (settle these before or at the start of the build)
+========================================================================
+1. Bond gate tier: 2 (61+) recommended. [piece 1]
+2. WALK_RADIUS, recommended 16 for every tier; and whether a path-length cap
+   applies. [piece 2]
+3. Default keybind: none/unbound recommended. [piece 3]
+4. Whether armour slots and modded containers are scanned by the keybind;
+   recommended main inventory + offhand only. [piece 3]
+5. Art for the bound/unbound texture, from the owner. [piece 4]
