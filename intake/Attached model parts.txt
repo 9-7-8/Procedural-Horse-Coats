@@ -1146,3 +1146,302 @@ horse is a plain box outline; head-local coordinates before the head_parts tilt.
 When routed: common-parts/ -> common/.../parts/, Check.java -> PartGeneratorTest (one
 class, so it runs with --tests '*PartGeneratorTest'), bake-part-sheet.py -> tools/,
 part_sheet.png -> assets/horsegenetics/textures/entity/horse/. Delete the folder then.
+
+
+13. Epigenome-driven shape: one gene, many horns, antlers and crystals
+=======================================================================
+Requested: can the epigenome control the SHAPE of a part (longer or shorter horn,
+more tines, more crystal points), all from the same gene, with performance in mind.
+Answer: yes, and the cheap way is to sort every shape number by what it costs to
+change, not by what it means. Nothing here is built or run; the Minecraft-side
+claims are UNVERIFIED and stage 0 must prove them (CLAUDE.md hard rule 8).
+
+13.1 Why the epigenome fits this exactly
+-----------------------------------------
+- A gene declares an EpiSchema of named numbers on each allele copy
+  (EpiValue.uniform / gaussian / power / category / seed / colour). Founders roll
+  them, EpiDrift nudges them at every breeding (median move 0.1% of the design
+  span), and the inspector and storage are generic. A part gene therefore needs
+  NO new machinery: it declares "length", "girth", "tines", ... and the epigenome
+  already inherits, drifts and stores them.
+- Drift is tiny and continuous for SCALARs, and rare and wholesale for SEEDs and
+  CATEGORYs. That maps onto geometry by itself: a scalar should move a part
+  smoothly (a line's horn grows longer over generations); a seed or category
+  should swap it for a different one (a re-rolled rack, a different crystal
+  habit) - a real event, exactly as the epigenome docs already say.
+- Mind the clamp. EpiValue's hard bound is +/-8 design spans by default, on
+  purpose ("a line bred for 300 generations may leave the wild range"). For a part
+  that is a horn a chunk long. Every part value gets .clampedTo(lo, hi) at the
+  schema AND a min/max in the mapping, so a drifted value is never a rendering
+  hazard. Design range = what a wild horse shows; clamp = the most the renderer
+  will ever draw.
+
+13.2 The rule: classify each number by what it costs to change
+----------------------------------------------------------------
+Tier A - FREE (pose-stack transform at submit time; no rebake, no allocation)
+  Overall length, girth, tilt, curve-of-the-whole, lean, tint (EpiValue.colour),
+  emissive on/off, scale with the horse. All are a poseStack.scale / rotate before
+  submitModel, and a PoseStack transform is copied into the submit node, so it is
+  safe with the deferred submit model. Non-uniform scale on the whole part is one
+  affine map of the finished shape, so a bent or spiral chain stays connected and
+  only its faces stretch. This tier alone gives "longer or shorter unicorn horn" and
+  "wider or slimmer", continuously, for zero cost.
+Tier B - CHEAP (visibility and per-child scale on a part baked once at its MAXIMUM)
+  Counts: tines, crystals, spines. Bake the part with every element it can ever
+  have, ordered so the first k are always a sensible k-element part, then show k.
+  Two consequences worth having:
+   1. THE CAP IS STRUCTURAL. A drifted "tines" value of 200 cannot draw 200
+      boxes; the model only contains MAX_NODES. Performance is bounded by
+      construction, not by a clamp someone remembers to write.
+   2. FRACTIONAL GROWTH. A count of 4.6 is four full elements plus a fifth at 60%
+      scale. Drift is continuous, so the look is continuous: no pop when a line
+      crosses an integer. (A count that should NEVER be fractional is a CATEGORY.)
+  Antlers: tines ordered base-to-tip on the beam, alternating sides only by mirror;
+  crystals: ordered centre-out, so 1 is a single spire and 7 is a druse. "More
+  points on a crystal" is the same trick on the point boxes of one crystal.
+Tier C - EXPENSIVE (topology changes: needs a different baked model)
+  Twist per segment, curve per segment, tip sharpness, branching pattern. Do NOT
+  rebake per horse. Quantise to a small fixed grid and cache by key:
+     Key(kind, styleBucket, seedVariant)     styleBucket 0..3, seedVariant 0..15
+  A seed or category picks the variant; a scalar in a tier C role is bucketed to 4
+  steps. Worst case the whole client ever holds kinds x 4 x 16 baked models (about
+  200 small models, built lazily, and in practice a handful). The draft's
+  Key(kind, (int)(size*15), (int)(seed&15)) is the same idea; the change here is to
+  stop putting size in the key, because size is tier A or B.
+HornSize's five classes fit this: NUB..NARWHAL are the tier C length CLASSES (a
+3-unit nub does not want the 24-unit horn's segment count, and squashing 14
+segments to 3 units leaves sub-1/16 boxes that shimmer), and tier A stretches
+0.8x-1.25x WITHIN a class so the slide between classes is smooth. Class from
+floor of a length value, stretch from its remainder - one epigenome number, no seam.
+
+13.3 The three parts, concretely (one gene each, numbers on the allele copy)
+------------------------------------------------------------------------------
+UNICORN HORN gene ("horn")
+  length     uniform 0..1 -> class (tier C, 5 steps) + stretch (tier A)
+  girth      uniform 0.7..1.3 -> tier A (x/z scale)
+  twist      category 4 -> smooth / loose / spiral / tight  (tier C bucket)
+  curve      uniform -> tier C bucket, plus tier A whole-part tilt
+  tilt       uniform -> tier A rotation
+  tip_r/g/b  EpiValue.colour -> tier A tint (pearl to gold; drifts as a lineage)
+  Cost per horse: one submit, 3-15 boxes. Emissive is a second submit of the same
+  model (HayPortalRenderer pattern) and doubles that, so only glowing horns pay it.
+ANTLER gene ("antlers")
+  rack       seed -> seedVariant 0..15 (tier C); rare re-roll = a new rack
+  tines      uniform 1..6 -> tier B visibility + fractional last tine
+  reach      uniform -> tier A beam-length scale
+  asymmetry  uniform -> second seed for the mirror only when past a threshold
+  Cost: up to MAX_NODES boxes baked, only the visible ones drawn; a typical horse
+  draws 10-20. The draft's worst case over 2000 seeds was 20 boxes.
+CRYSTAL gene ("crystals")
+  count      uniform 1..7 -> tier B visibility, centre-out, fractional last crystal
+  height     uniform -> tier A scale, and per-crystal jitter in the baked data
+  habit      category 3 (needle / stubby / cluster-fan) -> tier C
+  points     uniform 1..3 -> tier B on each crystal's cap boxes
+  tint       colour channels, tier A. Translucent = the one render type that costs
+             more per box (blending, and it cannot be batched with opaque); keep the
+             opaque cap and point in the opaque pass and only the shafts translucent
+             (section 12.5), so the expensive pass is the smallest.
+"All from the same gene": the three above are three PartKinds, but a single gene
+can own several as separate contributions and one "growth" schema can feed them
+(e.g. a horned line with a "vigour" number that lengthens horn AND adds a tine).
+Cross-modification is the CutieMarkContribution move: other genes fold over the
+contribution (a size gene scales it, a glow gene sets emissive) and it can only
+change a part that some gene has already granted.
+
+13.4 Performance budget
+------------------------
+The frame cost is a function of visible boxes and submits, so hold both down:
+1. RESOLVE ONCE, NOT PER FRAME. CutieMarkLayer calls markFor on every submit, and
+   markFor folds over Genes.codeOrder() each time. Fine for one emblem on a few
+   horses; wrong to copy for parts on a herd. Resolve the horse's parts in
+   extractRenderState (or better, cache the resolved list on the entity and
+   recompute only when its genotype/epigenome changes - the HORSE_GEAR attachment is
+   the precedent for per-entity client data) and hand the layer a ready, immutable
+   List<ResolvedPart>. Steady state allocates nothing.
+2. EARLY EXIT. A horse with no parts costs one isEmpty() on the first line, the way
+   BraidLayer does. Invisible horses and foals return before anything.
+3. SHARED MODELS. Baked models are shared across every horse with the same Key, so
+   memory scales with variety in the cache, not with the herd.
+4. DISTANCE LOD. Past roughly 24 blocks draw tier C models only (no fractional last
+   element, no second emissive pass); past roughly 48 skip the part. State carries a
+   camera distance (UNVERIFIED which field in 26.1.2's EntityRenderState).
+5. HARD BOX CAP. Total visible boxes per horse is bounded by structure (13.2 tier B)
+   and asserted in a common/ test over many seeds, as Check.java already does.
+6. NO PER-FRAME MUTATION OF A SHARED MODEL. Setting visible / scale on the cached
+   ModelPart and then submitting is the obvious tier B implementation and a trap:
+   the submit is deferred, so the next horse can overwrite it before the first is
+   drawn. Drive tier B from state inside the model's setupAnim (the vanilla
+   pattern), or keep a tiny per-count model variant in the Key. UNVERIFIED whether
+   26.1.2 calls setupAnim per submit or at collect time - stage 0 tests it with two
+   horses of different tine counts on screen in the same frame.
+7. MEASURE. Budget: 20 antlered horses in one pen, against the same pen without
+   parts. Look for a cliff, not a percentage.
+
+13.5 What needs proving before any of this is trusted (stage 0 additions)
+---------------------------------------------------------------------------
+- ModelPart / PoseStack non-uniform scale behaves as tier A assumes (poseStack.scale
+  is certain; ModelPart xScale/yScale/zScale existing in 26.1.2 is not verified, and
+  it is what per-element tier B scaling would use - the fallback is per-count model
+  variants in the Key).
+- Deferred submit and setupAnim ordering (13.4 item 6).
+- Scale composition: the part inherits the horse's genetic size scale only if the
+  parent transform includes it; check on a tiny and a huge horse.
+- A non-uniform-scaled part's lighting normals look right (PoseStack maintains a
+  normal matrix, but a strongly squashed part is worth looking at).
+
+13.6 Consequences for the plan and the earlier decisions
+----------------------------------------------------------
+- P4 ("does a part carry an epigenome value?") flips from "no for the first slice"
+  to "yes, and it is what makes the gene a gene". The concern behind the original NO
+  was a broken promise: a value the layer does not honour. The answer is the same
+  rule CutieMarkGene uses - every schema field has a row in 13.3 saying which tier
+  draws it, and a test fails when a declared value has no consumer.
+- Stage 2 (first gene = unicorn horn) declares the horn schema above. Ship tier A
+  and the class steps first; tier B and the antler/crystal counts are stage 3.
+- PartGenerators.build(kind, size, seed) becomes build(kind, PartParams, variant):
+  the generator builds the MAXIMUM part for a style bucket and variant, and
+  PartParams is what tier A/B read at draw time. Generators stay in common/, plain
+  arithmetic, so the wasm designer can preview a horn's silhouette from the same
+  numbers (hard rule 3: an @JSExport, not a JS port).
+- Designer parity (P6, rule 5): new editor-visible epigenome values appear in the
+  horse designer's epigenome list for free, since it walks the schema; only the
+  3D drawing is missing, and P6's "listed trait, not drawn" still stands.
+- The breed format (stage 4) can pin these numbers per breed the way it already pins
+  epigenetic values, so a "reindeer" breed is a band on "tines", not new code.
+- Known limit: boxes facet (12.5). Epigenome control changes proportions and
+  counts; it does not make a horn smooth. That needs submitCustomGeometry, which
+  would also make tier C unnecessary for horns (a mesh built from the numbers)
+  at the price of owning the vertex code. Not recommended for v1.
+
+13.7 Recommended order
+-----------------------
+1. Stage 0 as written, plus 13.5.
+2. Horn gene with the tier A numbers and the five classes; visible payoff, no
+   deferred-model risk.
+3. Antler rack variants (tier C seed) and tine count (tier B) - the first thing
+   that needs the setupAnim answer, so it is the natural second test.
+4. Crystals with the opaque/translucent split.
+5. Then the breed hook, so a breed's band on "tines" gives the reindeer.
+
+
+14. Batching parts like coats, and the performance switches
+============================================================
+Requested: batch the part renders the way the rest of the renders are batched, and
+give players a config way to turn the new visuals down or off. Disabling stops
+RENDERING only; the gene, the part, the inheritance and the horse are untouched.
+Read off the repo, not run: the mechanism to copy is GeneticCoatTextureFactory's
+(mayBake / timed / placeholder) and ClientConfig's coats.* keys.
+
+14.1 What "batched like coats" means here (four pieces, all already in the mod)
+--------------------------------------------------------------------------------
+1. DISTANCE GATE. Coats: withinDetailDistance() reads distanceToCameraSq (written by
+   vanilla's EntityRenderer.extractRenderState; the renderer's own javadoc says it was
+   checked in bytecode on 2026-09-13) against coats.detailDistance. Parts reuse the
+   same field with their own key. This SETTLES the "UNVERIFIED which camera-distance
+   field" in 13.4 item 4: use distanceToCameraSq, no new lookup.
+2. TIME BUDGET. Coats: mayBake() allows the first bake in each 50 ms window
+   unconditionally and further ones only while spentInWindow is under
+   coats.bakeBudgetMs; timed() charges each bake to the window and to session totals.
+   Every tier C bake (13.2) goes through the same shape: a PartBakeBudget with its own
+   window and its own key, first-in-window always runs so nothing is starved. The
+   stage 0 spike measures one bake; the default budget is set from that number.
+3. STAND-IN WHILE WAITING. Coats wear a shared wild-type placeholder that is exempt
+   from the budget. A part has no useful stand-in, so a horse whose part is over
+   budget simply DRAWS NO PART for that frame and picks it up the next window
+   (a one-to-few-frame pop-in). If stage 0 shows that reads badly, the fallback is
+   the nearest already-baked key of the same kind. Do not invent a placeholder model.
+4. SHARED, KEYED CACHE. Coats: CACHE.get(coatKey, loader). Parts: the Key(kind,
+   styleBucket, seedVariant) map of 13.2. Same reason - the cost belongs to the
+   variety, not the herd.
+Not batched, on purpose: tier A and tier B (13.2) are per-frame transforms and
+visibility, not bakes, so they never wait on a budget. Only tier C does.
+Also keep the submit side grouped: submit all parts of a kind consecutively with the
+same render type per frame is what collector.order(n) already gives (the draft uses
+order(1) for the body pass and order(2) for the emissive pass). Do not interleave
+translucent and opaque submits per horse; one order per pass.
+
+14.2 The config: a `parts.*` block in ClientConfig, beside coats.*
+-------------------------------------------------------------------
+Client-only, per player, per machine - the same reason coats.* is: nothing about the
+world changes, so two players on one server may disagree and still see the same
+horses. Same shape as coats.*: a static ModConfigSpec value, a DEFAULT_ constant, and
+a safe getter that returns the default on IllegalStateException (config not loaded).
+
+  parts.enabled          boolean, default true. MASTER. false: no attached part of any
+                         kind draws, and the layer returns on its first line.
+  parts.kinds.disabled   list of PartKind ids, default empty. Turns off horns, antlers,
+                         crystals, wings, ... one by one. A list of ids rather than one
+                         boolean per kind, so a NEW kind needs no config edit and no
+                         new key; an id that no longer resolves is dropped on read
+                         (the GENE_FILTER rule), never a crash.
+  parts.emissive         boolean, default true. false: the second, full-bright submit
+                         is skipped. The part still draws, lit normally. Removes one
+                         submit per glowing part.
+  parts.translucent      boolean, default true. false: a translucent part (crystals)
+                         draws in the opaque pass with its alpha forced to full. Saves
+                         the blended pass, which cannot be sorted or batched with
+                         opaque work. The look changes (solid crystal), the horse does
+                         not.
+  parts.detailDistance   int blocks, default a value picked after stage 0, range 8-256.
+                         Past it, no part draws. (Coats keep a made coat at any range
+                         because a swap flickers; a skipped part just is not drawn, so
+                         no such rule is needed.)
+  parts.bakeBudgetMs     int ms per 50 ms, range 0-50, 0 = "one bake at a time"
+                         (identical wording to coats.bakeBudgetMs).
+"Anything else": tier B's fractional-last-element growth and the foal case are not
+switches, because they cost nothing measurable. If stage 0 finds another expensive
+axis it becomes another key here, decided by a measurement, not in advance.
+Reading them: resolve ALL of these once in extractRenderState into plain booleans on
+GeneticHorseRenderState, never inside the per-part loop, so a disabled part costs one
+field test and a config read is not paid per box.
+
+14.3 The rule that makes "disable" safe
+----------------------------------------
+- Render-only. Every one of these keys gates a submit; none touches genotype,
+  epigenome, breeding, the inspector, the designer's listed trait (P6), the horse
+  browser or a save. A horse with a horn and horns switched off still HAS the horn:
+  it breeds, drifts and shows in the gene list, and comes back the moment the switch
+  does.
+- No gameplay coupling. A part must never move the hitbox, the size, the stats or the
+  riding position, or "disabled" would change the world for one player and not another.
+  State that in the layer's class comment and test it: nothing in the part path is
+  read by the server.
+- Not in any cache key. The switches decide whether to submit a model, never which
+  model exists, so flipping one needs no rebake and no restart, and the shared cache
+  is the same for every player.
+- Live. Read each frame in extract (one field read each), so the change applies as
+  soon as the config screen closes, with no world reload.
+- Server config is untouched. A dedicated server cannot read a client config and has
+  nothing to render; this is not a place for a server-side "parts off".
+
+14.4 The note for people with performance problems
+---------------------------------------------------
+Three places, each one line, written when stage 1 ships:
+- The config comments themselves (each key's comment says what it saves, the way
+  coats.detailDistance says "lower it if walking toward a big herd stutters").
+- README.md, in the section on performance or settings: "If horns, antlers or crystals
+  cost you frames, open the client config and set parts.enabled to false, or turn off
+  only parts.emissive / parts.translucent. Nothing about your horses changes." README
+  is user-facing only (CLAUDE.md), and this is exactly that.
+- wiki/model-parts.html's Gameplay tab when it grows one, and wiki/compatibility.html
+  for the shader-pack line (translucency and emissive are the parts most likely to
+  misbehave under a shader pack, and turning them off is the workaround).
+
+14.5 Changes to the plan and to verification
+---------------------------------------------
+- Stage 1 (registry and layer) also lands the parts.* block and PartBakeBudget, so a
+  tester can turn things off from the first playable build. It is where the measuring
+  is done, so the switches exist before the numbers do.
+- Stage 0 uses the switches as its measuring tool: the 20-horse pen, run with
+  parts.enabled off, then on, then emissive and translucent off one at a time. The
+  difference IS the per-axis cost, and the defaults are picked from it.
+- Verification tab gains: each switch toggled live with no restart; parts.enabled off
+  leaves a horse's gene list, breeding and save byte-for-byte unchanged; two players
+  with different settings on one server see the same horses drawn differently;
+  translucent off looks acceptable, not broken; a part over budget appears within a
+  few frames and never flickers; a stale id in parts.kinds.disabled is dropped, not a
+  crash.
+- Unit tests: the kinds list drops an unknown id; the getters return defaults before
+  the config loads (the IllegalStateException path).
+- Section 8's "20-horse herd: no frame-time cliff" becomes measurable on both sides of
+  the master switch.

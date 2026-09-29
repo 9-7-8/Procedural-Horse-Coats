@@ -1,0 +1,201 @@
+Rider comfort - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Open" lines
+are still to be settled. First piece to build: 1 (mounted mining speed), one
+piece per session per START HERE. Source of truth for what
+exists is wiki/rider-comfort.html; this file is the handoff for the work its
+Roadmap tab lists, and it is retired (deleted, per START HERE step 3) as each
+piece ships and moves onto that page's Gameplay and Coding tabs.
+
+What already exists, so the building session does not redo it
+==============================================================
+- wiki/rider-comfort.html already has Gameplay, Coding and Roadmap tabs (with
+  its note.roadmap-summary box). Extend it. Do not add a page. If the Roadmap
+  summary sentence changes, re-run bake-roadmap-index.mjs. The first piece
+  (the returned lead) shipped, so the page already shows the pattern to copy:
+  behaviour.leads_return in ServerConfig, a safe accessor beside it
+  (leadsReturn() catches IllegalStateException and returns the default), and a
+  gametest in gametest/ModGameTests that asserts the halves separately.
+- client/HorseBrowserKeyBindings + HorseBrowserKeyHandler are the template for a
+  production keybind (RegisterKeyMappingsEvent, KeyConflictContext.IN_GAME,
+  KeyMapping.Category.MISC, drained in a ClientTickEvent).
+- THE COLLISION THAT SHAPES PIECE 2: client/HorseInfoKeyHandler already takes
+  the vanilla inventory key (E) while you ride a Horse and opens HorseInfoScreen
+  instead, in ClientTickEvent.Pre, before vanilla's handleKeybinds. So "open
+  your own inventory while riding" cannot be E, and cannot borrow the vanilla
+  keyInventory mapping. It needs its own mapping.
+- HorseInfoInteraction (HIGHEST) claims only sneak + EMPTY hand, and
+  HorseScreenHooks.onFoalInventory (LOWEST) claims only sneak on a foal. A
+  right-click with a saddle or armour in hand, not sneaking, is claimed by
+  neither - piece 3 has an open lane, but see its notes on vanilla.
+- entity/HorseTackSlot already declares SADDLE (vanilla EquipmentSlot) and
+  BARDING among its slots, each with an accepts() and an item tag. Piece 3 can
+  ask a slot whether it takes a stack instead of hard-coding item ids.
+
+Five pieces. Piece 5, the fade, is built last and starts with a spike.
+Build order is smallest blast radius first, and each is shippable alone.
+
+1. Remove the mining-speed debuff while mounted (smallest)
+----------------------------------------------------------
+What the player feels: mining from horseback at a fifth of speed.
+- Mechanism (UNVERIFIED - confirm first, in a comment as CLAUDE.md rule 8
+  wants): vanilla's Player.getDestroySpeed divides by 5 when the player is not
+  on the ground, and a mounted player's onGround is false. If that reading is
+  wrong the fix does nothing, so the FIRST step is to read the decompiled
+  method and, in the game, time one block mounted vs standing.
+- Hook: NeoForge PlayerEvent.BreakSpeed, multiply newSpeed by 5 when the player
+  is a passenger of an AbstractHorse whose own onGround() is true. Gate on the
+  vehicle being on the ground, not just mounted, or a horse in mid-jump or a
+  flying/gliding horse would mine at full speed in the air, which is not the
+  request.
+- It must run on BOTH logical sides: the client predicts break progress from the
+  same number, so a server-only handler would show a bar that disagrees with the
+  block breaking. Server-type configs sync to the client in NeoForge, but that
+  is an API fact this file has not proved - check it, or the client reads its
+  own default and the two sides disagree with the switch off.
+- Config: behaviour.mounted_mining_penalty_removed, default ON,
+  with the leadsReturn()-style safe accessor. The page says this is the one piece
+  that alters rather than adds, so the comment on the option should say plainly
+  that on = not vanilla.
+- Decided: default ON. The page's argument that vanilla-intact has a claim is
+  answered by the switch: one line turns vanilla back.
+- Test: gametest for the multiplier maths is possible (fire BreakSpeed with a
+  mock rider on a horse); the real check is feel, on the Verification tab:
+  mine stone from horseback, from a jumping horse, and from a boat/minecart
+  (must be untouched).
+
+2. A keybind to open your own inventory while riding
+-----------------------------------------------------
+- New KeyMapping in a new client class beside HorseBrowserKeyBindings, name
+  key.horsegenetics.rider_inventory, own KeyConflictContext.IN_GAME. The lang
+  key goes in en_us.json.
+- Handler: ClientTickEvent.Post like HorseBrowserKeyHandler. Guard: mc.screen == null,
+  no overlay (no riding guard - decided below). Open the player's own screen
+  client-side with no server round trip - the player's inventory menu is always
+  live on the server, so this needs no payload (the H browser made the same
+  simplification). Creative mode uses a different screen class than survival;
+  pick by game mode rather than always constructing the survival one.
+- Decided: works everywhere (all of IN_GAME), on foot too. Riding-only buys
+  nothing and makes "it doesn't open" ambiguous. Drop the riding guard above.
+- Decided: default ALT+E. NeoForge's KeyMapping takes a KeyModifier and this
+  repo uses none yet, so a chord is new API surface: verify in the Controls
+  screen that it registers and displays properly, flag the unverified API in a
+  comment, and fall back to a bare key (tell the owner which) if it does not.
+- Config: none. An unbound or rebound key IS the switch, and a config for a
+  keybind is a surface with no purpose (page 'config' wants a convention, not
+  more options). Say so on the Gameplay tab.
+- Test: nothing unit-testable; Verification tab: ride, press it, screen opens;
+  press E, this mod's horse screen still opens (the collision above);
+  a donkey or mule (no record, vanilla screen on E) is unchanged.
+
+3. Right-click with a saddle or armour equips it
+-------------------------------------------------
+This is the one with a design question in it. Vanilla may ALREADY equip a
+saddle on a right-click in this version (equip-on-interact exists for some
+equippable items in recent versions). UNVERIFIED - read the decompiled
+AbstractHorse.mobInteract and the saddle/horse-armour item definitions FIRST.
+If vanilla already does it for the saddle, piece 3 shrinks to armour only, or
+to nothing, and the treatment should be retired with a note on the page rather
+than shipped as a duplicate.
+- Where: a new PlayerInteractEvent.EntityInteract handler in server/, next to
+  HorseInteractionHandler. Runs on the server; on the client, cancel the same
+  way HorseInteractionHandler.consume does (both sides), or the client predicts
+  vanilla's path and flickers. It ordinarily needs a priority below
+  HorseInfoInteraction (moot, that needs an empty hand) and above vanilla.
+- Claim only when: target is a tamed adult Horse, the player is not sneaking,
+  the held stack is accepted by an EMPTY slot, and the player is the
+  horse's OWNER (decided: owner only; HorseOwnership - same rule the Gear tab applies, see TackSlotPayload,
+  which treats the client's request as a claim). A refusal must say why in a
+  line, not just fall through to vanilla, or an ownership rule looks like a bug.
+- Decided: any HorseTackSlot that accepts() the stack, into the first empty
+  matching slot, so saddle pads and later gear come free. Decided: if the
+  matching slot is full, do nothing - never swap; the Gear tab is how you
+  change tack. Swapping on a right-click is how someone loses a saddle.
+- Shrinking the stack: consume one, respect creative mode (do not consume), give
+  nothing back.
+- Config: behaviour.rightclick_equips_tack, default ON (it only ever adds a
+  behaviour to a click that otherwise opens nothing useful). The page says every
+  piece wants a switch.
+- Test: gametest with a mock player and a tamed horse: saddle equips, second
+  saddle does not swap, untamed and foal refused, a non-owner refused.
+  Collision check by hand with the i button screen and shift-right-click.
+
+4. Return the leads vanilla drops (deferred - a decision first, not a build)
+-----------------------------------------------------------------------------
+Do not build this in the same session as anything above. What ships when it
+does: a snapped or hand-cut lead goes to the player's pack, not the ground.
+- The page's fact: NeoForge 26.1.2 publishes no leash event and dropLeash spawns
+  the item through Entity.spawnAtLocation, so there is nothing to hook. That is
+  from the page, not re-proved here.
+- Decided: a mixin at the drop (the repo already carries mixins, e.g.
+  HorseAlwaysParentMixin). Not an EntityJoinLevelEvent filter on ItemEntity: it
+  cannot tell a snapped lead from one a player threw, and would silently eat
+  the thrown one. The building session still has to find the right seam - read
+  Leashable.dropLeash / Entity.spawnAtLocation first, since dropLeash is an
+  interface default and mixing into it is the unverified part.
+- Decided: the lead goes to the player who PLACED it, even if they are far
+  away or in another dimension. Not "the holder within reach". A lead on a
+  fence knot has no player holder, so the placer must be RECORDED when the lead
+  is attached (a small per-horse value: the attaching player's UUID, cleared
+  when the lead comes off). Nothing records it today, so this is new state.
+- Decided: if the placer is offline, in an unloaded place, or was never
+  recorded (a horse leashed before this shipped), fall back to vanilla's drop
+  on the ground. Never lose the lead, never hold it for later.
+- Ship it with behaviour.leads_return covering it (the option already exists and
+  its comment says the vanilla cases are excluded - update the comment).
+
+Settled with the owner: what to do when an UNVERIFIED assumption is wrong
+=========================================================================
+Each of these answers a check the treatment above already marks UNVERIFIED. The
+building session tries the assumption first; only if it fails does the fallback
+below apply.
+- Piece 1 (mounted mining): if the slowdown is not vanilla's "not on the ground"
+  penalty, STOP AND REPORT. Do not ship a guess. Write what was found on the
+  Roadmap tab and ask the owner before choosing another fix.
+- Piece 3 (right-click equips): if vanilla already equips a saddle on
+  right-click, KEEP THE HANDLER for everything vanilla does not cover (armour,
+  the mod's own tack slots) and leave the saddle to vanilla. The owner-only and
+  never-swap rules still apply to what this mod adds. Do not take over the
+  saddle, and do not retire the piece.
+- Piece 2 (ALT+E): if the chord will not register or display properly in
+  NeoForge's Controls screen, fall back to a BARE default key that clashes with
+  nothing in this repo, and REPORT which key was picked.
+- Piece 1 config sync: the treatment assumes the server config syncs to clients
+  (mining needs both sides). If it does not, SEND THE SWITCH IN A PAYLOAD on
+  join, the way other synced data in this mod travels; do not make it a client
+  config as well.
+
+5. Fade the horse as you look down
+-----------------------------------
+What the player feels: the mount stops blocking the view of the ground.
+- Decided: the horse NEVER goes fully invisible. Default floor 25% opacity.
+- Decided: only the horse you are RIDING fades. Other horses stay solid.
+- Decided: settings live in ClientConfig (visual, per player): enabled, minimum
+  opacity (default 0.25), the pitch it starts fading at, the pitch at which it
+  reaches the floor. Fade is a smooth ramp between the two pitches. No server
+  config, no payload.
+- Real unknown, unchanged: nothing here has ever drawn the generated coat at
+  partial alpha. So the FIRST step is a spike, before any config is written:
+  force a fixed alpha on the ridden horse's render state in
+  GeneticHorseRenderer, and look at how the generated coat, the cutie-mark
+  layer, the emissive layer and any worn gear draw under it (do they fade
+  together, or leave a floating saddle or a solid glow?). Translucency also
+  changes sort order and can show the horse's insides through itself; write the
+  finding on the Roadmap tab.
+- If the coat cannot be drawn cleanly at partial alpha: STOP AND REPORT. Do not
+  ship a fade that looks broken; ask the owner (e.g. fade only the base coat, or
+  drop the piece).
+- Build last: it is the only piece with a rendering risk, and 1-4 do not depend
+  on it.
+
+Not taken (page's own decline, unchanged): Horse Buff's step-height change.
+
+After each piece ships
+========================
+Per CLAUDE.md's table: wiki prose (build-search-index.mjs, check-links.mjs,
+bake-agent-text.mjs), bake-roadmap-index.mjs (summary sentence moves), and
+bake-verification-index.mjs if a Verification tab was added for the feel-checks.
+A new lang key or keybind touches en_us.json only. Nothing here touches common/,
+genes, the designer or its wasm, so none of the gene bakes apply. Move each shipped
+piece off the Roadmap tab onto Gameplay and Coding, and delete its section from
+this file.

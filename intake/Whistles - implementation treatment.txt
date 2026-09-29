@@ -46,7 +46,7 @@ Decided: bond gates BINDING. Not calling, not the area whistles.
   line that says the horse does not trust you enough yet and what to do
   (the wiki's horse-care page owns how bond is earned; link the tier, do not
   restate the numbers - CLAUDE.md, derived numbers stay in code).
-- Open: which tier. Recommendation is tier 2 (bond 61+, the tier at which a
+- Decided: tier 2. The reasoning: tier 2 (bond 61+, the tier at which a
   horse starts coming toward you unasked) so a whistle is a reward for a bond
   you have already built, not something to craft ahead of it. Tier 3 would make
   the whistle the last thing a player earns; tier 1 would gate almost nothing.
@@ -92,14 +92,14 @@ So this changes WhistleItem only.
 - Chat line: today says "Whistled N horses to you." Once some walk it should
   still count them all; do not split the message by method. Log the split to
   ActionTrace / DebugAnnounce for testing instead.
-- Open: WALK_RADIUS. BondFollowGoal's own limit is 32 blocks; the basic whistle
+- Decided: WALK_RADIUS 16. Reasoning: BondFollowGoal's own limit is 32 blocks; the basic whistle
   reaches 16, so if WALK_RADIUS is >= 16 the basic whistle NEVER teleports a
   reachable horse and the golden/echo whistles teleport only the far ones.
   Recommendation: walk within 16 for every tier (the basic whistle's whole
   reach), teleport further out. Say so in each tooltip's second line - the
   current line ("a ridden horse stays put; a leashed one is untied") is written
   to pre-empt bug reports and this is the next one it should pre-empt.
-- Open: how long is "too long a walk". A path 15 blocks away can be 80 blocks
+- Decided: cap by path length too. The reason: A path 15 blocks away can be 80 blocks
   of switchback. Recommendation: cap by path length as well as straight-line
   distance, over the cap -> teleport. ReachCheck's API may need to expose the
   path length; read it before promising this.
@@ -108,6 +108,94 @@ So this changes WhistleItem only.
   hungry / in heat / mid-eat, a horse in a herd (does the herd goal pull it
   back after the call ends - the call should end with it standing near you, not
   resuming a wander at once).
+
+2b. Piece 2 in detail (design only - no code is written from this until the
+    owner says to build)
+----------------------------------------------------------------------
+Facts read from the code, so the plan stands on them:
+- Goal priorities on a horse today (lower wins): escape 0; sun shade and panic 1;
+  the werewolf temper goal 2; melee, blood hunt and the herd goals from 3 up;
+  bond follow 4 (its head-turning sibling Watch is lower priority still). The
+  generated wiki/behaviour-hierarchy.html is the authority - re-read it, do not
+  trust this line.
+- BondFollowGoal's ReachCheck is a cached (two seconds) yes/no "is there a path
+  that actually arrives" question against the OWNER, and treats a path that stops
+  short as a fence. It is built for a goal that runs every tick, so it is too
+  slow-witted to decide a whistle: a call needs a FRESH answer once, at blow time.
+- A navigator path has a node count. That count is what "route no longer than 16"
+  is measured with. It is an approximation of blocks (nodes are block steps, so a
+  diagonal counts one node for about 1.4 blocks): fine for a cap, and worth one
+  line in the tooltip wording ("about").
+
+The shape of a walked call
+1. Decide at blow time, per horse, once. Ask the horse's own navigator for a
+   fresh path to the player. Walk only if the path exists, actually arrives, and
+   its node count is within the 16 cap. Otherwise the horse takes the existing
+   teleport branch, unchanged. Nothing about the decision is re-made later.
+2. Mark the horse as "called by this player, until tick T". The marker is
+   in-memory only, keyed by horse id, cleared on reload and on dimension change.
+   A reload MID-CALL simply ends the call and the horse goes back to what it was
+   doing; that is acceptable for a few seconds of walking and avoids saved state.
+3. A dedicated goal (called something like the call goal) reads the marker. It
+   starts only for a marked horse, claims MOVE and LOOK, walks toward the player
+   at about a trot, and looks at them.
+4. Priority: below survival, above everything social. So it must yield to escape,
+   sun shade and panic (a horse on fire or fleeing should not walk calmly to you),
+   and beat the herd goals, hunger, food temptation and bond follow. That points
+   at the number 2. Check the two goals already at 2 (the werewolf temper goal)
+   for a shared flag; an equal priority never interrupts, and a called horse that
+   refuses because a werewolf mood holds MOVE would read as "the whistle failed".
+5. It ends in exactly one of four ways, and the design has an answer for each:
+   - ARRIVED: within about three blocks (the same "already here" distance the
+     current whistle uses). Clear the marker, stop the navigator, done.
+   - STUCK: no progress for a couple of seconds, or the deadline passes. Cancel
+     the walk and TELEPORT the horse beside the player, exactly as today. This is
+     the guarantee that a walked call is never worse than the old behaviour.
+   - PREEMPTED: a higher goal (panic, escape) took MOVE. The call is dropped and
+     NOT resumed; the horse is not teleported either, because it is in danger,
+     not lost. Log it for the debug trace so a "the whistle ignored my horse"
+     report is answerable.
+   - INVALIDATED: the player died, changed dimension, mounted the horse, or the
+     horse was leashed by someone else. Drop the call quietly.
+6. On arrival the horse is idle at the player's feet, then falls back into the
+   ordinary goals. It should not immediately wander back to the herd. Whether
+   the herd goals need a short "just called" grace so it lingers for a moment is
+   a play-test finding, not something to design blind; record it on the
+   Verification tab.
+
+The player-facing message stays one line and counts every horse, walked or
+teleported, so the count is the same either way. Which method each horse used
+goes to the debug trace only.
+
+Mixed calls: one blow can walk some horses and teleport others. They must not
+collide - walked horses head for the player, teleported ones land in the spread
+grid beside them; keep the grid, but make walked horses stop short of it rather
+than at the same spot, so the herd does not stack on arrival.
+
+Tooltips: the second line of the three area whistles today says a ridden horse
+stays put and a leashed one is untied. It should also say that a horse within
+reach walks to you and a farther one appears. Wording is the owner's; keep it to
+one short extra line, for the same reason the existing line was written (to
+pre-empt the bug reports).
+
+What to test by hand (goes on the Verification tab of item-whistles.html when
+this ships; it cannot be unit-tested because it is navigation and goal
+arbitration):
+- open field, one horse 10 blocks off: it walks and arrives, chat says 1.
+- the same horse behind a fence with no gate: it cannot path, so it teleports.
+- the same horse with a gate 10 blocks around: path too long, so it teleports;
+  then with the gate 4 blocks around: it walks.
+- across a river or ravine: teleports.
+- a horse mid-way through eating, in heat, or in a herd: the call wins, and after
+  arriving it does not instantly wander off.
+- a horse that becomes panicked while walking: the call drops, no teleport.
+- three horses at 5, 12 and 40 blocks with the echo whistle: two walk, one
+  teleports, chat says 3, nothing stacks.
+- reload the world mid-walk: no error, the horse just stops calling.
+- the ender whistle beside a walkable horse: still a teleport (decided).
+
+Not decided by this section, and deliberately left: the timeout length, the stuck
+threshold, and the exact walk speed. Tune them in the play test.
 
 3. Keybind: blow every distinct whistle in the inventory
 ---------------------------------------------------------
@@ -119,8 +207,8 @@ blown; every ender whistle is blown, since each is bound to a different horse.
   at all (a bare "blow" request); the server scans the sender's own inventory.
   Never send an inventory slot or a whistle id from the client - that is the
   TackSlotPayload lesson (a client index is a claim about another container).
-  Scan main inventory + offhand; decide in the building session whether armour
-  slots and a Curios/backpack-style modded container count (open, probably not).
+  Scan main inventory + offhand first; modded containers count too, added one
+  soft integration at a time (see 8 under "Settled").
 - Common-module home: the "which whistles are non-degenerate" rule is pure
   (a list of radii and a list of bound ids in, a list of picks out). Put it in
   common/, e.g. a small WhistleSelection class with a unit test, and keep the
@@ -142,10 +230,7 @@ blown; every ender whistle is blown, since each is bound to a different horse.
 - One combined chat line instead of N lines: "Whistled 3 horses, and Biscuit
   answered from far away." Building the lines from the same helpers the items
   use keeps the wording in one place.
-- Key default: an unbound-by-default key is safest for a modpack server where
-  every key is already taken; a default that conflicts is worse than none. Open:
-  owner's preference. Rebindable either way (KeyMapping). Add a lang key and
-  it needs a Controls-screen name.
+- Key default: the apostrophe, rebindable (see "Settled" below). Add a lang key and a Controls-screen name.
 - The payload registers in ModNetworking next to the tack-slot one. It is the
   mod's first payload with NO fields - check StreamCodec.unit(...) exists on
   26.1.2 before relying on it (unverified; flag it in a comment per hard rule 8,
@@ -202,12 +287,93 @@ reproduction rather than widening the search. Run
 node wiki/tools/check-roadmap-execution.mjs before editing, and only
 --tests '*WhistleSelectionTest' (piece 3's common class) - never the full suite.
 
-Open items, collected (settle these before or at the start of the build)
-========================================================================
-1. Bond gate tier: 2 (61+) recommended. [piece 1]
-2. WALK_RADIUS, recommended 16 for every tier; and whether a path-length cap
-   applies. [piece 2]
-3. Default keybind: none/unbound recommended. [piece 3]
-4. Whether armour slots and modded containers are scanned by the keybind;
-   recommended main inventory + offhand only. [piece 3]
-5. Art for the bound/unbound texture, from the owner. [piece 4]
+Settled with the owner (was open)
+=================================
+1. Bond gate: TIER 2 (bond 61+) to bind an ender whistle. [piece 1]
+2. Walk range: 16 blocks for every whistle tier; beyond that, teleport. [piece 2]
+3. Path length: ALSO capped. A horse whose walking route is too long teleports
+   like a far one. Read ReachCheck first; it may need to expose path length. The
+   cap number is not set yet - start from the same 16-block reach measured along
+   the path, or somewhat more, and let the play test tune it. [piece 2]
+4. Default key: the apostrophe, ' (GLFW_KEY_APOSTROPHE), a plain single key,
+   rebindable in Controls. Chosen over shift+C (shift dismounts a rider) and
+   ctrl+C (ctrl is sprint). No modifier means no KeyModifier API to verify and no
+   "no-op while mounted" rule: the key works from the saddle. The apostrophe sits
+   elsewhere on non-US layouts, so some players will rebind it; that is expected.
+   Use KeyConflictContext.IN_GAME and KeyMapping.Category.MISC like
+   HorseBrowserKeyBindings. The name is key.horsegenetics.blow_whistles.
+5. Swap notification: when the player switches to a whistle, show an action-bar
+   line "Press [key] to blow", where [key] is their CURRENT binding. [piece 3]
+   - Client only, no payload. Compare the held main-hand stack each client tick
+     (or on the selected-slot change) and fire when it goes from a non-whistle to
+     any whistle, or between two different whistles. Not every tick.
+   - Text: Component.translatable("...", Component.keybind("key.horsegenetics.
+     blow_whistles")) so the client resolves the live binding and a rebound key
+     is shown correctly. Send with Player.displayClientMessage(msg, true) for the
+     action bar. Both are the standard 1.21+ calls; check their 26.1.2 signatures
+     against api-notes.html and flag any not seen working (hard rule 8).
+   - If the key is unbound the keybind component reads as the unbound placeholder;
+     show a different line instead ("Bind a key in Controls to blow whistles").
+   - Applies to all four whistle items, area and ender (an unbound ender whistle
+     still says how to bind it; do not also show the blow prompt for it, since
+     there is nothing to blow yet).
+   - Lang: add the two lines to en_us.json. Item tooltips could carry the same
+     keybind text later; not in scope.
+
+Settled with the owner, second round
+====================================
+6. Prompt: every swap, plus a CLIENT config switch to turn it off. [piece 3]
+7. Path cap: the walking route itself must be no more than 16 blocks. Because a
+   route is never shorter than the straight line, this alone bounds the walk;
+   the 16-block straight-line rule in 2 becomes redundant but harmless. Anything
+   longer teleports. [piece 2]
+8. Keybind scan: main inventory + offhand AND modded containers. [piece 3]
+   This is the expensive one. Vanilla has no "all containers a player carries"
+   hook, so each mod's container needs its own lookup. Plan:
+   - Vanilla first: main, hotbar, offhand (player.getInventory()). Ship this
+     alone and it works.
+   - Then the modded containers as SOFT integrations, one per mod, each behind a
+     "is this mod loaded" guard so the mod never crashes without it, and each
+     recorded on wiki/compatibility.html (its Roadmap/Verification tabs) with the
+     mod's version checked. Curios / Accessories-style slots first (a whistle worn
+     on a lanyard is the obvious case); backpack mods second, one by one, only for
+     mods someone actually uses on the owner's server.
+   - Do NOT block piece 3 on the modded ones. Land vanilla, then add one
+     integration per session.
+   - A whistle found in a modded container still has to obey the same cooldowns
+     and the "already handled" dedupe.
+9. Bound-whistle texture: DEFERRED. Piece 4 stays on the roadmap; tooltips
+   already tell the tiers apart. Nothing to do now.
+
+Settled with the owner, third round (wording and small calls)
+==============================================================
+10. Bond refusal wording (piece 1): "<Horse> doesn't trust you enough yet. Spend
+    more time with it before binding a whistle." Uses the horse's name as the
+    other refusals do.
+11. Area-whistle tooltip (piece 2): add one line, "Horses within 16 blocks walk to
+    you; farther ones appear beside you." The number must come from the same
+    constant the code uses, not be typed a second time, or the tooltip can
+    disagree with the behaviour (the reason the radius tooltip reads its field).
+12. Sound when the key blows several whistles (piece 3): ONE CHIME PER WHISTLE,
+    each as it is blown, plus the ender whistle's own arrival sound at each
+    horse. If a stack of chimes is unpleasant in play, that is a tuning note, not
+    a redesign.
+13. Prompt switch (piece 3): a CLIENT config option, default ON. Name it to match
+    the existing client config conventions; read the client config class before
+    choosing the name.
+
+Coder defaults (not asked; change on request)
+=============================================
+- Action-bar text: "Press [key] to blow". If unbound: "Bind a key in Controls to
+  blow whistles."
+- Key pressed with no whistle found by the scan: one chat line, "You have no
+  whistles to blow."
+- Piece 1 test: a gametest for bond 60 refused / 61 accepted. First check that
+  the gametest harness can set a horse's bond; if it cannot, test the gate through
+  a small extracted check instead, and say so.
+
+Nothing left open before piece 1. Left to settle at build time only:
+- the exact number of ticks for the walk timeout and the stuck detection
+  (piece 2, tune in the play test);
+- which modded containers to support, and in what order (piece 3, after the
+  vanilla version ships).
