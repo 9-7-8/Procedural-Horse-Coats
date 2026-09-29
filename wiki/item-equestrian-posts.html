@@ -111,28 +111,47 @@
 </p>
 
 <p>
-    They are identical in every respect but their name and their recipe, down to a shared
-    <code>cube_bottom_top</code> model and one three-face texture set.
-    <strong>Making each look like the trade it belongs to is open work.</strong>
+    They are identical in every <em>mechanical</em> respect but their name and their recipe,
+    down to a shared <code>cube_bottom_top</code> model. <strong>What they no longer share is
+    their art.</strong> Until 2026-09-29 all five drew one three-face texture set, so five
+    different workstations were pixel-identical in world and no player could tell whose post
+    they were standing at.
 </p>
 
-<div class="note warn">
-    <span class="label">The texture files are named after a block that never existed</span>
+<p>
+    Each now carries its own trade on the same barrel carpentry: a hide stretched on the
+    leatherworker&rsquo;s, a rack of filled tubes on the scientist&rsquo;s, a grain sack and
+    carrots on the supplier&rsquo;s, a horseshoe on the metalsmith&rsquo;s, and a hitching
+    ring with a coiled lariat on the cowboy&rsquo;s. The iron hoops are recoloured to the
+    <a href="villagers.html#equestrians">hat</a> of the equestrian that post recruits &mdash;
+    russet, teal, olive, steel &mdash; so a player who has learned the hats has already
+    learned the posts; the hitch keeps the original black iron as the plain one of the five.
+    The art is baked by <code>tools/bake-villager-posts.mjs</code>, which stamps a pixel map
+    per trade onto pristine copies of the shared carpentry, so the barrel exists once and a
+    motif is edited a character at a time.
+</p>
+
+<p>
+    Only the underside is still shared, deliberately: it is the face of a block nobody sees,
+    and five copies of a plank texture would be five things to keep in step for nothing.
+</p>
+
+<div class="note">
+    <span class="label">The fossil texture name, and the moment it was fixed</span>
     <p>
-        All five posts draw <code>horse_traders_post_{top,side,bottom}.png</code>. There has
-        never been a block called a <em>Horse Trader&rsquo;s Post</em> &mdash; the old block
-        was <code>horsemans_table</code>, the &ldquo;Horseman&rsquo;s Table&rdquo;, and the
-        wiki called it a Horse Trader&rsquo;s Post in prose for a while without either of
-        them ever matching the art. That was odd when the name was one block out of date;
-        it is doubly odd now that the block those files were drawn for is retired and four
-        differently-named ones share them.
+        The shared set was called <code>horse_traders_post_{top,side,bottom}.png</code>, and
+        there has never been a block called a <em>Horse Trader&rsquo;s Post</em> &mdash; the
+        old block was <code>horsemans_table</code>, the &ldquo;Horseman&rsquo;s Table&rdquo;,
+        and the wiki called it a Horse Trader&rsquo;s Post in prose for a while without either
+        of them ever matching the art.
     </p>
     <p>
-        Left alone deliberately rather than missed: renaming a texture means touching every
-        model that references it and re-checking the atlas, for no change a player can see,
-        and the right moment to do it is when the four stop sharing one set. Written down
-        here so the next person to open those files knows the name is a fossil and not a
-        clue.
+        This page used to argue the rename was not worth doing on its own &mdash; it means
+        touching every model that references it and re-checking the atlas, for no change a
+        player can see &mdash; and that the right moment was <q>when the four stop sharing one
+        set</q>. That is exactly what happened: the top and side were replaced per post and
+        deleted, the bottom was renamed <code>post_bottom.png</code>, and every model was being
+        rewritten anyway. The fossil is gone.
     </p>
 </div>
 

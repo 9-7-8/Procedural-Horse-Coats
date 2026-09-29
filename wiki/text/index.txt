@@ -3204,4 +3204,4 @@ wiki/villagers.html#trade-table	all	The four trade tables
 wiki/villagers.html#trader	all	The wandering trader will take one too, at double
 wiki/villagers.html#trades	all	What they sell
 wiki/villagers.html#verified	all	Verified
-wiki/villagers.html#workstation	all	Five posts, one texture
+wiki/villagers.html#workstation	all	Five posts, five trades

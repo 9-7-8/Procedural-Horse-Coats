@@ -56,9 +56,13 @@ public final class ModBlocks {
      *
      * <p>Four separate blocks rather than one shared post because a POI hands out
      * exactly one profession - see {@code village/ModPoiTypes}. They are
-     * identical in every respect but their name and, for now, share the one post
-     * model and texture; making each look like the trade it belongs to is open
-     * work.
+     * identical in every mechanical respect but their name, and since 2026-09-29
+     * each one LOOKS like its trade: the same barrel carpentry carrying a hide, a
+     * rack of tubes, a sack and carrots, or a horseshoe, with the hoops in the
+     * colour of that equestrian's hat. Baked by
+     * {@code tools/bake-villager-posts.mjs}; only the underside is still shared,
+     * because it is an underside. Before that all five wore one texture and no
+     * player could tell whose post they were standing at.
      */
     public static final DeferredBlock<net.minecraft.world.level.block.Block> LEATHERWORKERS_POST =
             BLOCKS.registerSimpleBlock("leatherworkers_post", ModBlocks::workPost);
@@ -74,7 +78,9 @@ public final class ModBlocks {
 
     /**
      * The <b>Cowboy Hitch</b> - the cowboy's post, and the same block in every
-     * respect but its name.
+     * mechanical respect but its name. Its art is its own: a hitching ring on the
+     * side, a lariat coiled on the lid, and the plain black iron hoops the other
+     * four recolour.
      *
      * <p>A block of its own rather than a fifth equestrian post because one post
      * could not do two jobs. A single post had to hand out a cowboy and then a
