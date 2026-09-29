@@ -142,8 +142,7 @@ blown; every ender whistle is blown, since each is bound to a different horse.
 - One combined chat line instead of N lines: "Whistled 3 horses, and Biscuit
   answered from far away." Building the lines from the same helpers the items
   use keeps the wording in one place.
-- Key default: shift+C, rebindable (see "Settled" below for the two checks it
-  needs). Add a lang key and a Controls-screen name.
+- Key default: the apostrophe, rebindable (see "Settled" below). Add a lang key and a Controls-screen name.
 - The payload registers in ModNetworking next to the tack-slot one. It is the
   mod's first payload with NO fields - check StreamCodec.unit(...) exists on
   26.1.2 before relying on it (unverified; flag it in a comment per hard rule 8,
@@ -208,23 +207,37 @@ Settled with the owner (was open)
    like a far one. Read ReachCheck first; it may need to expose path length. The
    cap number is not set yet - start from the same 16-block reach measured along
    the path, or somewhat more, and let the play test tune it. [piece 2]
-4. Default key: SHIFT + C, rebindable. [piece 3] Two things to check before
-   coding it, because both can bite:
-   - Shift is also vanilla's sneak, and sneak DISMOUNTS a rider. So while riding
-     a horse, shift+C would drop you off it as the whistles blow. Decide whether
-     that is acceptable (the ridden horse is left alone by the whistle anyway),
-     or whether the key should do nothing while mounted, or should use a
-     different modifier. Recommendation: make it a no-op while riding.
-   - A key with a modifier needs NeoForge's KeyModifier on the KeyMapping
-     constructor (KeyModifier.SHIFT). That overload is unverified on 26.1.2 -
-     flag it in a comment and check api-notes.html before relying on it.
-   Also expect a clash with any other mod's shift+C (a common inventory / crafting
-   key in some packs); rebinding in Controls is the answer, not a code change.
+4. Default key: the apostrophe, ' (GLFW_KEY_APOSTROPHE), a plain single key,
+   rebindable in Controls. Chosen over shift+C (shift dismounts a rider) and
+   ctrl+C (ctrl is sprint). No modifier means no KeyModifier API to verify and no
+   "no-op while mounted" rule: the key works from the saddle. The apostrophe sits
+   elsewhere on non-US layouts, so some players will rebind it; that is expected.
+   Use KeyConflictContext.IN_GAME and KeyMapping.Category.MISC like
+   HorseBrowserKeyBindings. The name is key.horsegenetics.blow_whistles.
+5. Swap notification: when the player switches to a whistle, show an action-bar
+   line "Press [key] to blow", where [key] is their CURRENT binding. [piece 3]
+   - Client only, no payload. Compare the held main-hand stack each client tick
+     (or on the selected-slot change) and fire when it goes from a non-whistle to
+     any whistle, or between two different whistles. Not every tick.
+   - Text: Component.translatable("...", Component.keybind("key.horsegenetics.
+     blow_whistles")) so the client resolves the live binding and a rebound key
+     is shown correctly. Send with Player.displayClientMessage(msg, true) for the
+     action bar. Both are the standard 1.21+ calls; check their 26.1.2 signatures
+     against api-notes.html and flag any not seen working (hard rule 8).
+   - If the key is unbound the keybind component reads as the unbound placeholder;
+     show a different line instead ("Bind a key in Controls to blow whistles").
+   - Applies to all four whistle items, area and ender (an unbound ender whistle
+     still says how to bind it; do not also show the blow prompt for it, since
+     there is nothing to blow yet).
+   - Lang: add the two lines to en_us.json. Item tooltips could carry the same
+     keybind text later; not in scope.
 
 Still open (settle at the start of the build session)
 =====================================================
 A. Path-length cap number for piece 2 (see 3 above).
 B. Whether the keybind also scans armour slots and modded containers;
    recommended main inventory + offhand only. [piece 3]
-C. The keybind while mounted (see 4 above). [piece 3]
+C. Notification frequency: every swap (recommended, action bar is brief and
+   unobtrusive) or only the first few times per world; and whether a client
+   config switch turns it off. [piece 3]
 D. Art for the bound/unbound texture, from the owner. [piece 4]
