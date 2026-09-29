@@ -1,4 +1,5 @@
-// The five job-site posts, drawn so you can tell whose is whose.
+// The mod's own block art: the five job-site posts, the dyeing bench, the
+// research shelf.
 //
 // Owner, 2026-09-29: the five posts - cowboy_hitch, leatherworkers_post,
 // metalsmiths_post, scientists_post, suppliers_post - all pointed at the ONE
@@ -8,9 +9,15 @@
 // model and texture; making each look like the trade it belongs to is open work."
 // This is that work.
 //
-//   node neoforge-26.1.2/tools/bake-villager-posts.mjs
+//   node neoforge-26.1.2/tools/bake-block-art.mjs
 //
-// WHY A TOOL AND NOT TEN HAND-DRAWN PNGS. Same reason as
+// The bench and the shelf are here for a different reason than the posts. They
+// wore VANILLA art - the bench was the smithing table, the shelf was the
+// bookshelf - so a player who put a research shelf next to a bookshelf saw two
+// bookshelves, and neither block could have a 3D preview on the wiki, because
+// the wiki may not ship Mojang's textures. Drawing them fixes both at once.
+//
+// WHY A TOOL AND NOT HAND-DRAWN PNGS. Same reason as
 // `bake-item-recolours.mjs`: every post is the same piece of carpentry with a
 // different trade laid on it, so the carpentry should exist once. Redrawing the
 // barrel would mean redrawing it five times and keeping five copies in step. The
@@ -18,11 +25,13 @@
 // which is the honest way to author sixteen-square art in a file somebody has to
 // review later. Edit a letter, re-run, look at it.
 //
-// WHAT IS SHARED ON PURPOSE. The bottom face. All five keep post_bottom - which
-// is the old horse_traders_post_bottom.png, renamed in the same change. The wiki
-// page had argued the fossil name should be fixed "when the four stop sharing one
-// set", and this is that moment, with every model already being rewritten anyway.
-// It stays shared because it is the underside of a block, it is never seen,
+// WHAT IS SHARED ON PURPOSE. The plain plank face, plank_bottom.png. It is the
+// underside of the five posts and of the bench, and it is the plank grain every
+// other face here is drawn on top of. It has now been renamed twice in one day -
+// horse_traders_post_bottom -> post_bottom -> plank_bottom - and the second
+// rename is the admission that the first was right for a family of one and wrong
+// the moment a second family shared the file. It stays shared because an
+// underside is never seen,
 // and five copies of a plank texture would be five things to keep in step for
 // nothing. The duplicate that mattered was the one you could walk up to.
 //
@@ -47,7 +56,7 @@ const OUT = path.join(ROOT,
  * converted to 8-bit RGBA, because two of the three shipped as 4-bit indexed
  * PNGs and `png.mjs` refuses those.
  */
-const SRC = path.join(ROOT, 'neoforge-26.1.2/tools/villager-posts');
+const SRC = path.join(ROOT, 'neoforge-26.1.2/tools/block-art');
 
 /** The barrel's iron hoops, darkest first. Recoloured per post. */
 const HOOP = ['28221c', '302c29', '453f3b'].map(h => h.padStart(6, '0'));
@@ -284,6 +293,115 @@ const POSTS = [
   },
 ];
 
+
+/**
+ * <b>The two workstations.</b> Unlike the posts these are not a motif on a
+ * barrel - a bench is not a barrel - so each face is a full pixel map drawn over
+ * the plain plank grain, which is the one piece of carpentry worth sharing.
+ * Faces are named for the model slot they fill: `cube_bottom_top` wants top and
+ * side, `cube_column` wants end and side.
+ */
+const WORKSTATIONS = [
+  {
+    id: 'equestrian_bench',
+    // Dark oak frame, iron fittings, and the three dyes the bench actually uses
+    // on a saddle - one for the seat, one for the bridle, one for the metal.
+    palette: {
+      d: '4e3520', i: '6a6a72', I: '9aa0aa',
+      r: 'b03a3a', b: '3a5ab0', y: 'd2b23a',
+      L: '6e3820', l: 'a0522d',
+    },
+    faces: {
+      // Looking down at the bench: three open dye pots at the back, a saddle
+      // panel laid out at the front with its iron fittings showing.
+      top: [
+        '................',
+        '.dddd.dddd.dddd.',
+        '.drrd.dbbd.dyyd.',
+        '.drrd.dbbd.dyyd.',
+        '.dddd.dddd.dddd.',
+        '................',
+        '................',
+        '..LLLLLLLLLLLL..',
+        '..LllllllllllL..',
+        '..LlllddlllllL..',
+        '..LllllllllllL..',
+        '..LllllllllllL..',
+        '..LLLLLLLLLLLL..',
+        '................',
+        '................',
+        '................',
+      ],
+      // The front of it: a rail top and bottom, two drawers with iron pulls, and
+      // the dye that has got onto the boards underneath and stayed there.
+      side: [
+        'dddddddddddddddd',
+        'dddddddddddddddd',
+        '................',
+        '.dddddd..dddddd.',
+        '.d....d..d....d.',
+        '.d.II.d..d.II.d.',
+        '.d....d..d....d.',
+        '.dddddd..dddddd.',
+        '................',
+        '................',
+        '..rr...bb...yy..',
+        '..rr...bb...yy..',
+        '................',
+        '................',
+        'dddddddddddddddd',
+        'dddddddddddddddd',
+      ],
+    },
+  },
+  {
+    id: 'equine_research_shelf',
+    // Paper and ink against the same dark frame, so the two workstations read as
+    // a matched pair of furniture rather than two unrelated blocks.
+    palette: { d: '4e3520', P: 'e8e2cf', p: 'c3bda6', k: '2a2a35', t: 'a0522d' },
+    faces: {
+      // Two shelves of filed papers, some of them written on.
+      side: [
+        'dddddddddddddddd',
+        'dddddddddddddddd',
+        '.PpP.PpP.PpP.tP.',
+        '.PkP.PpP.PkP.tP.',
+        '.PpP.PkP.PpP.tP.',
+        '.PpP.PpP.PpP.tP.',
+        'dddddddddddddddd',
+        'dddddddddddddddd',
+        '..PpP.PkP.PpP...',
+        '..PkP.PpP.PpP...',
+        '..PpP.PpP.PkP...',
+        '..PpP.PpP.PpP...',
+        'dddddddddddddddd',
+        'dddddddddddddddd',
+        '................',
+        '................',
+      ],
+      // The top of the cabinet: a framed plank lid with one paper left on it.
+      end: [
+        'dddddddddddddddd',
+        'd..............d',
+        'd..............d',
+        'd...PPPPPP.....d',
+        'd...PkkkpP.....d',
+        'd...PppppP.....d',
+        'd...PkkppP.....d',
+        'd...PPPPPP.....d',
+        'd..............d',
+        'd..............d',
+        'd..............d',
+        'd..............d',
+        'd..............d',
+        'd..............d',
+        'd..............d',
+        'dddddddddddddddd',
+      ],
+    },
+  },
+];
+
 function stamp(base, rows, palette) {
   const px = Buffer.from(base.px);
   if (rows.length !== 16) throw new Error(`motif is ${rows.length} rows, want 16`);
@@ -342,15 +460,24 @@ const baseTop = readPng(path.join(SRC, 'post_top.png'));
 baseTop.px = unlatch(baseTop.px);
 const baseSide = readPng(path.join(SRC, 'post_side.png'));
 
+const basePlank = readPng(path.join(SRC, 'plank_bottom.png'));
+
 let wrote = 0;
 for (const p of POSTS) {
   for (const [face, base] of [['top', baseTop], ['side', baseSide]]) {
     const body = face === 'side' ? reHoop(base.px, p.hoop) : base.px;
     const px = stamp({ px: body }, p[face], p.palette);
-    const file = path.join(OUT, `${p.id}_${face}.png`);
-    writePng(file, 16, 16, px);
+    writePng(path.join(OUT, `${p.id}_${face}.png`), 16, 16, px);
     wrote++;
   }
 }
-console.log(`villager posts: wrote ${wrote} textures for ${POSTS.length} posts`);
-console.log('the bottom face stays shared - post_bottom, an underside nobody sees');
+for (const w of WORKSTATIONS) {
+  for (const [face, map] of Object.entries(w.faces)) {
+    const px = stamp({ px: basePlank.px }, map, w.palette);
+    writePng(path.join(OUT, `${w.id}_${face}.png`), 16, 16, px);
+    wrote++;
+  }
+}
+console.log(`block art: wrote ${wrote} textures for ${POSTS.length} posts `
+  + `and ${WORKSTATIONS.length} workstations`);
+console.log('plank_bottom.png stays shared - the undersides, and the grain the rest is drawn on');

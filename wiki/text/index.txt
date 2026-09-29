@@ -2903,6 +2903,7 @@ wiki/item-double-gates.html#why-subclass	coding	It extends FenceGateBlock on pur
 wiki/item-double-gates.html#woods	gameplay	One per wood, filed beside its own gate
 wiki/item-equestrian-bench.html#armour	gameplay	It does leather horse armour too
 wiki/item-equestrian-bench.html#armour-vanilla	gameplay	The crafting-grid recipe still works, and still does only the blanket
+wiki/item-equestrian-bench.html#art-0929	coding	The block finally looks like itself
 wiki/item-equestrian-bench.html#cost	gameplay	What it costs
 wiki/item-equestrian-bench.html#fittings	gameplay	The fifteen hand-picked fittings
 wiki/item-equestrian-bench.html#modded-fittings	gameplay	And whatever your other mods brought
@@ -2996,6 +2997,7 @@ wiki/item-research-papers.html#shelf-key	coding	The shelf keys on the pair
 wiki/item-research-papers.html#topic	coding	Why it is strings, and where it normalises
 wiki/item-research-papers.html#use	gameplay	What it does
 wiki/item-research-papers.html#verified	coding	Verified
+wiki/item-research-shelf.html#art-0929	coding	The block finally looks like itself
 wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
 wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
 wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each

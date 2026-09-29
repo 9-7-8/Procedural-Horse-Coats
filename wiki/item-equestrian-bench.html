@@ -10,6 +10,8 @@
 <script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
 <script defer src="search.js"></script>
+<script defer src="assets/block-preview/shapes.js"></script>
+<script defer src="block-preview.js"></script>
 </head>
 <body>
 <main class="content">
@@ -37,6 +39,25 @@
 </div>
 
 <section class="tab-panel" data-tab="gameplay">
+
+<aside class="infobox">
+    <p class="infobox-title">Tack Dyeing Bench</p>
+
+    <div class="block-preview" data-blocks="equestrian_bench"></div>
+
+    <p class="infobox-caption">
+        Drag to turn it, scroll to zoom, arrow keys once focused. Dye pots and a leather
+        panel on the top; two drawers and the dye that got into the boards on the front.
+    </p>
+
+    <dl class="infobox-facts">
+        <dt>Type</dt><dd>Block &mdash; a workstation you stand at</dd>
+        <dt>Crafted from</dt><dd>Crafting table + leather + 2 horse hair, shapeless</dd>
+        <dt>Dyes</dt><dd>Seat, bridle and metal fittings, separately</dd>
+        <dt>Art</dt><dd>Its own since 2026-09-29; it was the smithing table before</dd>
+    </dl>
+</aside>
+
 
 <h2 id="use">What it does</h2>
 
@@ -419,7 +440,26 @@
     that session. See <a href="#verification">the Verification tab</a>.
 </p>
 
+<h3 id="art-0929">The block finally looks like itself</h3>
+
+<p>
+    Until 2026-09-29 this block wore <strong>vanilla&rsquo;s smithing table</strong>, top and
+    sides, with oak planks underneath &mdash; so a bench standing next to a smithing table was
+    two smithing tables, and the wiki could not show it at all, since a preview would have
+    meant committing Mojang&rsquo;s textures to this repo. It has its own art now: dye pots
+    and a leather panel on the lid, two drawers with iron pulls on the front, and the dye
+    that has got into the boards under them.
+</p>
+
+<p>
+    Drawn by <code>tools/bake-block-art.mjs</code>, which stamps a pixel map &mdash; one
+    character per pixel, in the source &mdash; over the plain plank grain that the posts and
+    this block share. That shared grain is <code>plank_bottom.png</code>, which is also every
+    one of these blocks&rsquo; underside.
+</p>
+
 </section>
+
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Open checks">
@@ -588,6 +628,17 @@
     The trade that sells a dyed saddle is on
     <a href="villagers.html#dyeable-saddle-0916-trade">the villagers page</a>.
 </p>
+<h3 id="bench-art-0929">Its new art, in a world (2026-09-29, NOT played)</h3>
+
+<p>
+    The block stopped being the smithing table on 2026-09-29 and <strong>the new art has
+    not been seen in game</strong>. Stand one next to an actual smithing table: they should
+    no longer be mistakable. The top is a separate texture from the sides, so a model that
+    lost its <code>top</code> slot would wear the drawer front on the lid; and the underside
+    is the shared <code>plank_bottom.png</code>, so a magenta bottom face means the model is
+    still pointing at a name that moved.
+</p>
+
 </section>
 
 </article>

@@ -3,6 +3,6 @@
   "textures": {
     "top": "horsegenetics:block/metalsmiths_post_top",
     "side": "horsegenetics:block/metalsmiths_post_side",
-    "bottom": "horsegenetics:block/post_bottom"
+    "bottom": "horsegenetics:block/plank_bottom"
   }
 }
