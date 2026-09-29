@@ -1,0 +1,308 @@
+Attached model parts - treatment and implementation guide
+
+Status: PLAN ONLY. Nothing here is built and no code was written for it.
+Anything that touches a Minecraft or NeoForge API is marked UNVERIFIED and must be
+read out of the 26.1.2 sources (or proved in a running client) before it is relied
+on - CLAUDE.md hard rule 8. Nothing has been seen in-game.
+
+Where this goes: intake/ is an inbox, not a plan (START HERE.txt). When this is
+picked up it is routed onto wiki/model-parts.html's Roadmap tab (that page already
+exists, already has the tab and its summary box) and this file is deleted. Section 9
+says exactly what goes where.
+
+
+1. Why this one, and why now
+=============================
+Four separate plans are waiting on the same piece of machinery and each of them
+currently describes its own private version of it:
+- wiki/model-parts.html      horns, dorsal spines, crystals, wings, tusks, antlers.
+- Horse shoes.txt (step 4)   a HorseShoeLayer that has to find four hoof anchors.
+- wiki/saddle-pads.html      a pad drawn over the coat and under the saddle.
+- wiki/breed-book.html       the reindeer breeds - "content for machinery that does
+                             not exist yet" - need antlers and wings.
+roadmap-execution.html already lists "gear attachment and render contract" as a
+foundation to settle before a catalogue of tack, wings or model parts. The shoe
+treatment is the first thing that would write a bespoke layer if this is not
+scoped first, and the gear treatment's "render" line would be the second.
+
+The owner's own words on the page: a batch of these is "a HUGE win for how cool
+they look". High priority: unicorn horn, spikes / dorsal spines, crystalline
+growths - small, head- or spine-parented, big visual payoff. Lower: pegasus wings,
+lion and tufted tails, hoof feathering, tusks, antlers.
+
+This is the mod's first visual that is not a texture. That is the whole reason it
+is a foundation and not a content batch: the coat pipeline is texture-only, and
+this is the first time common/ has to say "this horse has a THING" rather than
+"this pixel is this colour".
+
+
+2. What already exists (so a session does not redo it)
+=======================================================
+Read these in this order; nothing else is needed to start.
+- wiki/model-parts.html - the plan, the wings-off-the-elytra research (texture
+  side transfers entirely, model and layer classes do not, mesh is a dozen lines to
+  copy), and two open questions left open on purpose (what drives wings; one
+  texture or many). The plain-layer-versus-GeckoLib question is SETTLED there in
+  the plain layer's favour. Do not reopen it. This treatment inherits that answer.
+- neoforge/client/CutieMarkLayer.java - the worked example of a body-parented
+  layer on THIS renderer. It gets getParentModel().root().getChild("body"), calls
+  body.translateAndRotate(poseStack) to inherit the animated transform, and then
+  works in body-local space (x in [-5,5], y in [-8,2], z in [-17,5], front is -z).
+  Every part in this treatment is that move with a different child name and offset.
+- neoforge/client/GeneticHorseRenderer.java - the layer list. Registration order is
+  draw order: EmissiveCoatLayer, CutieMarkLayer, BraidLayer, then vanilla's
+  body-armour and saddle SimpleEquipmentLayers. A new layer goes in here and the
+  position is a real decision (section 6, "Draw order").
+- neoforge/client/HdHorseModel.java - the horse's mesh. Named children present
+  today: body, head_parts, head, mane, tail, left_/right_hind_leg,
+  left_/right_front_leg, left_/right_ear. So head and leg anchors EXIST by name; the
+  shoe treatment's worry that "HorseModel does not expose named hoof ModelParts" is
+  about vanilla's HorseModel - the HD model already has the legs. (UNVERIFIED that
+  the foot end of a leg part is a usable anchor without a per-leg offset; the stage 0
+  spike proves it.)
+- common/.../genetics/CutieMarkContribution.java and EyePatchContribution - the
+  house pattern for "a gene has an opinion the renderer must honour": a record in
+  common/, folded over by the expressing gene, handed to the client, and its own
+  javadoc says the record's fields are exactly what the render layer knows how to
+  draw and both change in the same commit. Attached parts follow that shape.
+- GeneticHorseRenderState - where per-horse data crosses from extract to submit.
+  Everything a layer reads goes through it (see how braidMane is copied out of the
+  HorseGear attachment in extractRenderState).
+- HORSE_GEAR / HorseTackSlot - already the authority for anything the PLAYER puts on
+  a horse. Parts that are worn are gear; parts that are grown are genes. See 4.
+
+What does NOT exist: any Blockbench model, any baked LayerDefinition beyond the HD
+horse and its foal, any registry of parts, any way for common/ to name a part, any
+per-part tint or emissive path, any scale-with-the-horse rule for an attached mesh.
+
+
+3. The one-sentence outcome
+============================
+A gene or a breed can say "this horse has a unicorn horn", common/ carries that as
+an id and nothing else, and the client draws the horn parented to the animated head
+- with every part and every horse going through ONE layer, ONE registry and ONE
+placement contract, so the fiftieth part is a model file and a line of data.
+
+
+4. The design calls this treatment proposes (all need an owner answer)
+=======================================================================
+These go to wiki/decisions.html as D-entries when routed. They are proposals, in
+the order they block work. Each has a recommendation so the owner is choosing, not
+authoring.
+
+P1. Grown versus worn - one system or two?
+  Grown = gene- or breed-driven, part of the horse (horn, spines, wings, feathering,
+  tusks, antlers). Worn = a player item in a HorseTackSlot (shoes, and later any
+  tack). Recommendation: TWO SOURCES, ONE RENDERER. A grown part is resolved from
+  the genotype in common/; a worn part is resolved from the HORSE_GEAR attachment on
+  the client. Both reduce to the same thing by the time they reach the layer: a list
+  of "part id + anchor + tint + emissive". The layer does not know which kind it is
+  drawing. This is what stops the shoe layer, the horn layer and the pad layer
+  becoming three layers with three z-fighting rules.
+  Not settled by this treatment: whether a worn item may EVER replace a grown part
+  (a helmet over a horn). Recommendation: no, out of scope, note it as a known
+  interaction on the Verification tab the first time it is visible.
+
+P2. Where does a part get its geometry?
+  (a) Blockbench -> .json mesh loaded at run time as a LayerDefinition, or
+  (b) code-built meshes in the manner of the cart models (EasyMeshBuilder).
+  Recommendation: (a) for the art, with the SAME loader for every part, because the
+  owner's stated workflow is Blockbench and because (b) makes every new horn a Java
+  change. UNVERIFIED: whether 26.1.2 has a data-driven path for entity model parts
+  that survives resource-pack reload, or whether LayerDefinitions must be registered
+  at mod-init through EntityRenderersEvent.RegisterLayerDefinitions, as ClientSetup
+  does for HD_HORSE. If the latter, "a part is a data file" is not free and the
+  registry must be a compile-time list of ids with their model files - still one
+  line each, but a line of Java, not data. Stage 0 answers this before anything else.
+
+P3. How does common/ name a part?
+  Recommendation: a plain string id, like every other cross-module identity in this
+  mod ("ids are plain strings, resolved against the live registry" - the house
+  convention; gap 265 is the standing warning about bare-string duplicates, so the
+  id constants live in ONE class in common/, not typed at each use site). common/
+  declares a part by id and a slot; it never knows a mesh exists. This is the same
+  shape as GradientLut arriving in the renderer as an int[].
+  Proposed record, in common/genetics beside CutieMarkContribution:
+     AttachedPartContribution(String partId, PartAnchor anchor, float scale,
+                              int tint /* 0 = untinted */, boolean emissive)
+  PartAnchor is a small enum, NOT a bone name: HEAD_TOP, HEAD_SIDE_PAIR, SPINE_ROW,
+  WITHERS_PAIR, TAIL_BASE, HOOF_x4, ... The client maps anchor -> ModelPart + offset.
+  That keeps Minecraft's model-part names out of common/ (hard rule 1) and means
+  retargeting an anchor is a client edit, not a gene edit.
+
+P4. Does a part carry an epigenome value?
+  Recommendation: NO for the first slice. A horn that varies per horse (length,
+  twist, tint) is the natural fit for the per-allele-copy epigenome and is a
+  tempting extension, but CutieMarkGene.markFor reading epigenetic seed for size and
+  tilt shows the cost: every varied field must be honoured by the layer or it is a
+  broken promise. Ship fixed-shape parts first; variation is a Roadmap entry on this
+  page once the fixed version has been SEEN.
+
+P5. How does a foal look?
+  The mod has a separate HdBabyHorseModel. Recommendation: parts scale with the
+  render state's age scale and use the SAME anchor names, and a part may declare
+  "hidden on foals" (a horn on a newborn is a design call, not a rendering one;
+  default hidden until the owner says otherwise). UNVERIFIED that the baby model's
+  head and body children share the adult's names and origin - check both models
+  before trusting a shared anchor table.
+
+P6. What does the horse designer / CustomHorseSpawnScreen show?
+  Hard rule 5 makes these one screen in two places. Both draw a 2D coat today. If a
+  part is invisible in the designer, the designer lies about what the horse is. This
+  is the biggest open cost of the whole feature and is NOT solved here.
+  Recommendation: v1 the designer shows the part as a LISTED TRAIT with an icon and
+  says plainly that it is not drawn in the preview; the in-game paper doll on the
+  gear screen (which already renders a live horse) is where it is seen. Anything
+  fancier is a separate plan. Record the divergence in a comment on BOTH files per
+  hard rule 5.
+
+
+5. The plan, in slices (one bullet, one context window)
+========================================================
+Per START HERE.txt each slice is one session, ends with the closeout routine, and
+the next slice is not started in the same conversation.
+
+Stage 0 - the spike. One horn, one horse, prove the pipeline. NO gene.
+  Hypothesis: a single hand-written ModelPart child of the HD model's "head" cannot
+  be added (that moves the mesh the coat UVs are baked against - the one thing that
+  cannot shift; see model-parts.html), but a SEPARATE LayerDefinition rendered by a
+  new RenderLayer, parented via getParentModel().root().getChild("head") and
+  translateAndRotate, follows every animation.
+  Disconfirming check: put the horn on a horse in a dev build, watch it through
+  walk, gallop, rear, graze (head down) and the foal. If it lags, floats, or is
+  wrong-scaled at any of the four, the parenting is wrong and nothing later stands.
+  Also answers P2 (registration route) and the leg-anchor UNVERIFIED in section 2.
+  Deliverable: a facts paragraph on model-parts.html's Verification tab, and a
+  go / no-go on the registry shape. No common/ change, no golden moves.
+
+Stage 1 - the registry and the layer.
+  common/: the part-id constants class and PartAnchor, no rendering.
+  neoforge/client: AttachedPartLayer (one class), a part registry mapping id ->
+  {model layer, texture, anchor offset table}, and the extract step that fills a
+  list of resolved parts on GeneticHorseRenderState. Still no gene - drive it from a
+  debug command so the layer can be seen without breeding anything.
+  Acceptance: three different parts on three different anchors, on an adult and a
+  foal, in a running client, no z-fighting against coat, mane, braid or saddle.
+
+Stage 2 - the first gene.
+  A gene that requests a part through AttachedPartContribution, folded the same way
+  CutieMarkGene folds its contributions. Which gene is the owner's call; the natural
+  candidate is a unicorn-horn locus. This stage is where it becomes a GENE and
+  therefore inherits the full making-a-gene checklist (wiki/making-a-gene.html
+  #contracts): the gene page with its three tabs, the bakes in CLAUDE.md's
+  regenerate table (bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, census,
+  timeline, pages.js spans), and the designer's WASM. It does NOT move either coat
+  golden, because it paints no pixels - state that in the session notes so nobody
+  hunts for a golden that should not move. UNVERIFIED that no golden reads a
+  contribution list that a new record type would change; run
+  *CoatBakeGoldenTest before assuming.
+
+Stage 3 - the head-parented batch.
+  Horns, spikes / dorsal spines, crystals, per the owner's priority list. Data and
+  art only, if stages 0-2 held. "One render layer, many models" is the point.
+
+Stage 4 - the breed hook.
+  Let a breed file declare parts. This touches the breed format
+  (wiki/breed-format.html), BreedSpecWriter, and the breed-file bakes, and the
+  breed designer. It is a separate slice precisely because it drags in the whole
+  breed bake table. Unblocks the reindeer breeds.
+
+Stage 5 - the worn side.
+  Point the shoe treatment's HorseShoeLayer at THIS layer rather than a bespoke one:
+  HorseGear stacks resolve to the same resolved-part list (P1). Saddle pads follow.
+  Done by editing the shoe treatment's step 4 to say "use AttachedPartLayer", and
+  by deleting the bespoke-layer language from it.
+
+Stage 6 - wings.
+  The settled route from model-parts.html: a copy of the elytra mesh (left_wing and
+  right_wing, 10x20x2 boxes, CubeDeformation(1.0F), texOffs(22,0), right mirrored,
+  64x32 LayerDefinition), texture pointed at minecraft's own wings/elytra.png so
+  any elytra retexture pack is the art. New here: a folded and a spread pose keyed
+  off the isFallFlying shared flag GeneAbilityHandler already sets, which needs one
+  boolean on the render state. Blocked on the two open questions (what drives them;
+  one texture or many) - both are owner calls, not rendering ones.
+
+Later (lower priority, not scoped): tails, hoof feathering, tusks, antlers.
+
+
+6. Risks the plan already knows about
+======================================
+- Draw order and z-fighting. Saddle, armour and third-party tack render at the same
+  time as a part. Decide once where AttachedPartLayer sits in the addLayer list and
+  write the reason in the constructor comment the way the renderer already does for
+  the emissive and braid layers. Parts on the head sit clear of the saddle; the
+  risk is the mane, the bridle-side armour and the spines against a body-armour
+  layer. Test with body armour ON at stage 1.
+- Scale. Attached meshes must scale with the horse. The renderer already stretches
+  gait to size (stretchGaitToSize) and the mod has a size gene, so a part parented to
+  an animated ModelPart inherits scale IF the parent transform includes it - do not
+  assume, check on a tiny and a huge horse at stage 0.
+- The HD model's UV bake. Never add children to "body" or "head" inside
+  createHdBodyMesh for a part. Separate LayerDefinition, separate layer, always.
+- Third-party renderers. Other mods' horse renderers will not draw a part. That is
+  acceptable and is a compatibility.html line, not a blocker; do not try to solve it.
+- Cost per frame. A horse with no parts must cost one early return, the way BraidLayer
+  does ("the state fields are zero and this returns on the first line"). Herds are
+  common; measure a 20-horse pen at stage 1.
+- Licence. Blockbench models the owner authors are the owner's; copied vanilla
+  meshes (elytra) are vanilla geometry with the texture supplied at run time, which
+  is the reason the wing route was chosen. Do not vendor third-party models.
+- Never-baked, never-listed coats (hard rule 4) is unaffected: parts add variety,
+  they do not add a pre-generated subset.
+
+
+7. What must not regress
+=========================
+- The coat pipeline: no golden moves, no texture bake changes, HD UVs untouched.
+- The existing layer stack: cutie mark, braid, emissive glow, armour, saddle all
+  still draw, in the same order relative to each other.
+- Rendering with the part absent: byte-for-byte the same frame as today.
+- common/ imports nothing from Minecraft (rule 1) and adds no JDK API TeaVM lacks
+  (rule 2); CommonPortabilityTest guards the second.
+- Designer parity (rule 5) if any editor-visible field is added.
+
+
+8. Verification the finished feature needs (goes on the Verification tab)
+=========================================================================
+In a running client, not a unit test:
+1. Each part on adult and foal, standing, walking, galloping, rearing, grazing.
+2. A part on a tiny and a huge horse; on a horse with a dyed-leather saddle and
+   body armour worn; on a horse with a braid and a cutie mark.
+3. Two players' horses side by side (client cache path, not the local one).
+4. Save, reload, breed: the part follows the gene and skips a horse without it.
+5. Invisible horse (potion): no part draws. The existing layers already return on
+   isInvisible; a new one must.
+6. A 20-horse herd: no frame-time cliff.
+Unit tests (common/): the contribution folds, the anchor enum is total over the
+part-id list, and every part id in the constants class has a registry row (a
+test that fails when the two lists drift, the way check-recipes.mjs guards recipes -
+this treatment's registry is a third list that will otherwise drift silently).
+
+
+9. Routing when this is picked up
+==================================
+- wiki/model-parts.html: Roadmap tab gets sections for stages 0-6 with this text
+  trimmed to what the page's one-sentence summary can carry; delete the "proposal
+  is GeckoLib plus Blockbench" paragraph's hedging now that P2 is decided; re-run
+  node wiki/tools/bake-roadmap-index.mjs if the summary sentence changes.
+- wiki/decisions.html: P1-P6, each with the recommendation above and its owner
+  answer, opened as decisions BEFORE stage 1. Stage 0 needs none of them.
+- wiki/horse-gear.html and wiki/item-horse-shoes.html: one line each pointing at
+  model-parts.html for the shared layer; strike the per-item render language.
+- wiki/making-a-gene.html: a note under the effects/contribution section once a gene
+  actually emits AttachedPartContribution (stage 2, not before).
+- wiki/api-notes.html: whatever stage 0 learns about LayerDefinition registration in
+  26.1.2.
+- Then run node wiki/tools/check-roadmap-execution.mjs, the search/agent-text bakes,
+  and check-links.mjs, per CLAUDE.md's regenerate table.
+- Delete this file. It leaves intake/ the moment stage 0 is routed.
+
+
+10. What this treatment deliberately does not decide
+=====================================================
+- Which gene, breed or allele frequency gets the first horn (owner's call at stage 2).
+- What drives wings, and one texture versus many (model-parts.html, open on purpose).
+- Whether a designer preview can ever draw a part (P6).
+- Whether a worn item can hide a grown part (P1).
+- Anything about animation of a part independent of its parent. The premise is that
+  no part needs one; a part that does is a different plan.
