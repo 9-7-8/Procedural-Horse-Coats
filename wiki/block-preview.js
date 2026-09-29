@@ -166,7 +166,11 @@
       last = now;
 
       var w = el.clientWidth || 480;
-      var h = Math.max(180, Math.round(w * (ids.length > 2 ? 0.34 : 0.6)));
+      // A row of blocks in a page-wide figure wants to be wide and short; the
+      // same row in a 320px infobox column needs the height back or the blocks
+      // end up the size of a full stop.
+      var ratio = ids.length > 2 ? (w < 420 ? 0.52 : 0.34) : 0.6;
+      var h = Math.max(150, Math.round(w * ratio));
       if (canvas.width !== w || canvas.height !== h) {
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
