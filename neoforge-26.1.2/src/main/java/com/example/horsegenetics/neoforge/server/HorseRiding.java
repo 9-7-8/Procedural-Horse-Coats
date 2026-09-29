@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.compat.FtbTeamsCompat;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,6 +48,12 @@ import java.util.UUID;
  *       horse would make horses untameable. This is not a loophole: a horse
  *       with no owner has nobody to protect.</li>
  *   <li><b>The owner.</b></li>
+ *   <li><b>Anybody holding a live jockey pass</b> on this horse - a borrowed
+ *       permission with a deadline on it, bought with an item or granted by
+ *       {@code /horsejockey}. Asked before the teams on purpose, so that a pass
+ *       still works on a server which has turned teams off: they are unrelated
+ *       answers and one flag should not silently gate the other. See
+ *       {@link JockeyPassHandler}.</li>
  *   <li><b>The owner's vanilla scoreboard team</b>, when
  *       {@code behaviour.riding_allows_teams} is on. Free, works with no other
  *       mod installed, and is what {@code /team} has always meant.</li>
@@ -119,11 +126,31 @@ public final class HorseRiding {
         if (owner == null || owner.equals(player.getUUID())) {
             return true;
         }
+        // A borrowed permission with a deadline on it, asked BEFORE the teams so
+        // that a jockey pass works on a server that has turned teams off - the
+        // two are unrelated answers and one flag should not silently gate the
+        // other. See server/JockeyPassHandler.
+        if (holdsPass(horse, player)) {
+            return true;
+        }
         if (!ServerConfig.ridingAllowsTeams()) {
             return false;
         }
         return sameScoreboardTeam(horse, player, owner)
                 || FtbTeamsCompat.allied(owner, player.getUUID());
+    }
+
+    /**
+     * <b>Has this player a jockey pass on this horse that has not run out?</b>
+     * Server-side only: the attachment is not synced, so on the client this
+     * answers no and {@link #mayRide} is not asked there anyway.
+     */
+    private static boolean holdsPass(AbstractHorse horse, Player player) {
+        if (!(horse.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        return horse.getData(ModAttachments.RIDING_PASS.get())
+                .allows(player.getUUID(), level.getGameTime());
     }
 
     /**

@@ -5,6 +5,8 @@ import com.example.horsegenetics.neoforge.block.DoubleFenceGateBlock;
 import com.example.horsegenetics.neoforge.block.DoubleGates;
 import com.example.horsegenetics.neoforge.compat.HayBales;
 import com.example.horsegenetics.neoforge.compat.WaystonesCompat;
+import com.example.horsegenetics.neoforge.data.RidingPassAttachment;
+import com.example.horsegenetics.neoforge.server.JockeyPassHandler;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.data.HorseRealmSize;
@@ -48,6 +50,7 @@ import net.neoforged.neoforge.network.connection.ConnectionType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -1057,6 +1060,95 @@ public final class ModGameTests {
         }
     }
 
+    /**
+     * <b>A second jockey pass adds a day; it does not replace one.</b>
+     *
+     * <p>{@code RidingPassAttachment} is arithmetic on deadlines, and every way
+     * of getting it wrong is invisible from inside the game. A second pass that
+     * <em>overwrote</em> the first would look identical on the day it was fed and
+     * would quietly have cost somebody a day; a grant that counted from a stale
+     * deadline would hand out a pass that had already expired; a lapsed entry
+     * that was never pruned would sit in the save naming a jockey for ever. None
+     * of those produce an error, a log line or a visible symptom, so they are
+     * checked here rather than in the yard.
+     *
+     * <p>No world is touched at all - it is a record and a clock.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> JOCKEY_PASSES_ADD_UP =
+            TEST_FUNCTIONS.register("jockey_passes_add_up", () -> ModGameTests::jockeyPassesAddUp);
+
+    private static void jockeyPassesAddUp(GameTestHelper helper) {
+        final long day = JockeyPassHandler.DAY_TICKS;
+        UUID jockey = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID other = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
+        // Nothing, to start with.
+        RidingPassAttachment passes = RidingPassAttachment.DEFAULT;
+        if (passes.allows(jockey, 0L)) {
+            helper.fail("a horse nobody has lent lets a stranger ride it.");
+        }
+
+        // One pass at t=0 is one day.
+        passes = passes.grant(jockey, 0L, day);
+        if (!passes.allows(jockey, 0L) || !passes.allows(jockey, day - 1)) {
+            helper.fail("a freshly fed pass does not cover its own day.");
+        }
+        if (passes.allows(jockey, day)) {
+            helper.fail("a one-day pass is still good at exactly one day - it should have lapsed; "
+                    + "the comparison is off by a tick and every pass is longer than it was sold as.");
+        }
+        if (passes.remaining(jockey, 0L) != day) {
+            helper.fail("a fresh pass reports " + passes.remaining(jockey, 0L)
+                    + " ticks left rather than " + day + ".");
+        }
+
+        // A SECOND PASS ADDS. This is the one that matters.
+        passes = passes.grant(jockey, 100L, day);
+        long expected = 2 * day - 100L;
+        if (passes.remaining(jockey, 100L) != expected) {
+            helper.fail("feeding a second pass 100 ticks into the first left "
+                    + passes.remaining(jockey, 100L) + " ticks rather than " + expected
+                    + " - a second pass is being spent to replace the first rather than extend it, "
+                    + "which costs the jockey a day and shows no symptom.");
+        }
+
+        // A pass granted after the old one lapsed counts from now, not from the
+        // dead deadline - otherwise it would arrive already expired.
+        long late = 5 * day;
+        passes = passes.grant(other, late, day);
+        if (passes.remaining(other, late) != day) {
+            helper.fail("a pass fed long after an earlier one lapsed is worth "
+                    + passes.remaining(other, late) + " rather than a full " + day + ".");
+        }
+        // ...and that write is what prunes the first jockey, whose pass is long gone.
+        if (passes.allows(jockey, late) || passes.until().containsKey(jockey.toString())) {
+            if (passes.until().containsKey(jockey.toString())) {
+                helper.fail("a lapsed pass is still stored on the horse - it will sit in the save "
+                        + "naming a jockey for ever.");
+            }
+            helper.fail("a lapsed pass still lets its holder ride.");
+        }
+
+        // Revoking takes it back, and revoking nothing changes nothing.
+        RidingPassAttachment before = passes;
+        if (passes.revoke(jockey) != before) {
+            helper.fail("revoking a pass nobody holds returned a new object - the command reads "
+                    + "that as a real revocation and tells the owner it worked.");
+        }
+        passes = passes.revoke(other);
+        if (passes.allows(other, late)) {
+            helper.fail("a revoked pass still lets its holder ride.");
+        }
+
+        // And a sale clears the lot.
+        passes = passes.grant(jockey, late, day).grant(other, late, day);
+        if (passes.cleared().allows(jockey, late) || !passes.cleared().isEmpty()) {
+            helper.fail("selling a horse leaves its jockeys aboard - the new owner's horse would "
+                    + "be rideable by strangers they never agreed to and could not find out about.");
+        }
+        helper.succeed();
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -1111,6 +1203,8 @@ public final class ModGameTests {
         register(event, environment, A_DEAD_HORSE_COMES_BACK_WHOLE, 200);
         // Two scratch-box fills and an exhaustive scan, all inside one tick.
         register(event, environment, WAYSTONE_CLEARANCE_IS_NEAREST, 200);
+        // Pure arithmetic on a record; no world touched.
+        register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
     }
 
     /**

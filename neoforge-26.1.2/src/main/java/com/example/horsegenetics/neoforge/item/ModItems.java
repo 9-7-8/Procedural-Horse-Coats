@@ -379,6 +379,18 @@ public final class ModItems {
     public static final DeferredItem<StallSignItem> STALL_SIGN = register("stall_sign", StallSignItem::new);
     public static final DeferredItem<StallSignItem> BOUND_STALL_SIGN = register("bound_stall_sign", StallSignItem::new);
 
+    // --- jockey passes - lending a horse for an afternoon ------------------
+    // Blank until its owner right-clicks a horse with it; the bound one is fed
+    // to that horse by whoever ends up holding it and buys them a day in the
+    // saddle. Both halves are server/JockeyPassHandler; JockeyPassItem is the
+    // tooltip. Two ids rather than one component-bearing item, the same call
+    // the stall signs and the transfer papers make - a blank and a made-out
+    // pass are different objects to a player and want different words.
+    public static final DeferredItem<JockeyPassItem> JOCKEY_PASS =
+            register("jockey_pass", JockeyPassItem::new);
+    public static final DeferredItem<JockeyPassItem> BOUND_JOCKEY_PASS =
+            register("bound_jockey_pass", JockeyPassItem::new);
+
     // --- the holding pen - one per player, for horses with no stall yet ----
     // A sign bound to the player rather than a horse, and a ticket that sends
     // any horse you own there. HoldingPenSignItem / server.TicketHandler.

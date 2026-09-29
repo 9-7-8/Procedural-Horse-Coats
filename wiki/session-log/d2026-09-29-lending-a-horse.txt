@@ -1,0 +1,159 @@
+2026-09-29, later — lending a horse for an afternoon
+
+
+    A follow-on from the same day's riding rule, and the ask that the rule
+    made necessary the moment it shipped.
+
+        Add a way to add another person to be able to ride a horse, maybe
+        temporarily-- thinking temporary jockeys for races-- through both an
+        item they can feed them (you create it, then click the horse and it
+        binds to the horse, then you give it to the other person, and they
+        feed it to that horse and it temporarily allows them to ride, let's
+        say 1 minecraft day per item), and then also add this as a command
+        which can be disabled from config
+
+    Nothing was played. The arithmetic has a test and everything else needs a
+    second player.
+
+
+1. THE GAP THE MORNING'S WORK OPENED
+
+    HorseRiding answers who may ride from ownership and from teams. Both are
+    STANDING relationships, and neither can say "this person, this horse, this
+    afternoon". Putting a jockey on your team so they can ride one mount in one
+    race hands them every horse you own, indefinitely, and taking them off
+    again afterwards is a chore nobody is going to do.
+
+    So the rule needed a third kind of answer: a borrowed one with a deadline
+    on it. That is data/RidingPassAttachment — one map, player UUID to the game
+    time their pass runs out, and nothing else.
+
+    Game time rather than wall clock or day count, deliberately: it does not
+    advance while the server is down, so a pass bought for a Saturday race is
+    not spent overnight while nobody is playing.
+
+
+2. THE PASS IS MADE OUT TO THE HORSE, NOT THE PERSON
+
+    The ask specified this and it is worth writing down why it is right, since
+    the other way round is the more obvious design.
+
+    A pass for "Kestrel, one day" is an OBJECT. You can hand it to whoever
+    turns up to ride, sell it at the gate, post it to a friend, or lose it. A
+    pass for "Rowan may ride something" would have to be assigned to a person
+    at the moment it was made, and a jockey who did not show up would take it
+    out of the meeting with them.
+
+    It also puts the dangerous half where it belongs. Making a pass out needs
+    ownership (HorseOwnership.bindRefusal, creative no exception, the same rule
+    every bound item in this mod follows). Feeding one needs only the pass.
+    That is exactly the signed transfer paper's shape, and the whole flow was
+    built to mirror it on purpose — it is the same kind of object and a player
+    who has used one should not have to learn the other.
+
+    Two item ids rather than one component-bearing item, matching the stall
+    signs and the papers: a blank and a made-out pass are different things to a
+    player and want different words.
+
+
+3. WHERE IT IS ASKED, WHICH IS NOT WHERE IT LOOKS
+
+    mayRide now asks, in order:
+
+        config flag off        -> yes
+        untamed                -> yes
+        the owner              -> yes
+        A LIVE PASS            -> yes
+        the owner's teams      -> yes
+
+    The pass sits ABOVE the teams. That is not arbitrary: a server that has set
+    behaviour.riding_allows_teams = false has said "only the owner", and if the
+    pass were inside that branch it would have silently switched off the item
+    too. They are unrelated answers — one is a standing relationship and one is
+    a receipt with a date on it — and one flag gating the other would be a trap
+    rather than a setting.
+
+
+4. FEEDING A SECOND PASS ADDS A DAY
+
+    "1 minecraft day per item", so grant() counts from the existing deadline
+    when one is still running and from NOW when it has lapsed. Both halves
+    matter and both are invisible when wrong:
+
+        overwrite instead of extend -> a second pass fed on the first morning
+            silently costs the jockey a day, and looks identical on the day
+        count from a stale deadline -> a pass granted after the old one ran
+            out arrives already expired
+
+    Every write also prunes what has lapsed, so a horse does not carry a dead
+    jockey's name in the save for ever.
+
+    NONE OF THOSE THREE PRODUCE AN ERROR, A LOG LINE OR A VISIBLE SYMPTOM. So
+    they are the one part of this with a test: gametest jockey_passes_add_up.
+    And the test was checked against a deliberately broken grant() — `long from
+    = now` instead of the max — to confirm it bites rather than merely passing.
+    It failed with the sentence it was written to say, and the mutation was
+    reverted. All 18 gametests pass.
+
+
+5. /horsejockey
+
+    Four forms, all on the horse you are riding or looking at, all requiring
+    you to own it:
+
+        /horsejockey <player>            one pass's worth
+        /horsejockey <player> <days>     that many, ADDED to what is left
+        /horsejockey <player> revoke     take it back now
+        /horsejockey list                who is borrowing, and for how long
+
+    REVOKE HAS NO ITEM AND SHOULD NOT. Something you have handed to somebody
+    cannot be un-handed, but the person who lent the horse ought to be able to
+    change their mind. If the borrower is on the horse when it is revoked they
+    come off there and then rather than at HorseRiding's next sweep a second
+    later — the sweep would do it anyway, but doing it here is what makes the
+    cause obvious.
+
+    NO GAMEMASTER OVERRIDE, which is where this and /horsegive part company. An
+    operator settling a dispute needs to move ownership, and /horsegive is
+    that. Being able to write yourself onto somebody else's horse for a
+    fortnight is a different power and nobody asked for it.
+
+    list names an offline borrower through the server's own name caches, the
+    same route the scoreboard-team lookup uses, falling back to eight
+    characters of the id.
+
+    The two commands share HorseGiveCommand.targetHorse: two commands that
+    picked a different horse out of the same crosshair would be a genuinely
+    nasty surprise, given that one of them gives the animal away.
+
+
+6. A SALE CANCELS EVERY PASS
+
+    Ownership moving clears the attachment, in both places ownership can move —
+    /horsegive and a redeemed transfer paper. A pass is permission the PREVIOUS
+    owner gave; carrying it across would hand the new owner's horse to
+    strangers they never agreed to and could not even find out about.
+
+
+7. THE ART, AND WHY IT IS DERIVED
+
+    Two 32x32 sprites, made once by recolouring horse_ticket.png green with a
+    throwaway Node script. Checked in as art, not as a baked artefact and not
+    in the regeneration table: nothing regenerates them, so they cannot go
+    silently stale. A pass reads as the same family of object as a stall ticket
+    and cannot be taken for one at a glance.
+
+
+8. WHAT IS LEFT
+
+    A new page, wiki/item-jockey-passes.html, with its own verification tab.
+    The check that matters most is not the pass WORKING, it is the pass
+    EXPIRING: a pass that never runs out is indistinguishable from one that
+    works, for the whole of the day somebody tests it on. /time add 24000 and
+    watch the horse throw them.
+
+    Config gained three more settings: commands.horse_jockey (true),
+    behaviour.jockey_pass_days (1), and the morning's three are unchanged.
+    behaviour.jockey_pass_days is read by BOTH the item and the bare command,
+    which is its own check — set it to 2 and if only one of them moves, the
+    command has a hard-coded 1 in it.

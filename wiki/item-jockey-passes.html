@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jockey passes &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+<script defer src="assets/item-art/names.js"></script>
+<script defer src="item-art.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> trading</p>
+<h1>Jockey passes</h1>
+<p class="lede">
+    Lending somebody your horse for an afternoon. A pass is made out to one animal by
+    its owner, handed to whoever is going to ride it, and fed to that horse to buy a
+    day in the saddle &mdash; and then it runs out on its own, which is the whole
+    point of it.
+</p>
+
+<div class="item-art" data-items="jockey_pass,bound_jockey_pass"></div>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">How they work</h2>
+
+<div class="plain">
+    <ol>
+        <li>Craft a <strong>blank jockey pass</strong>: paper, a horse hair and a piece
+            of leather, shapeless. It names nobody and does nothing.</li>
+        <li><strong>Right-click a horse you own</strong> with the blank. It becomes a
+            pass made out to that animal by name.</li>
+        <li><strong>Give the pass to whoever is going to ride.</strong> It is an
+            ordinary item from here on &mdash; hand it over, put it in a chest, sell it
+            at the gate.</li>
+        <li>They <strong>right-click that horse</strong> with it. The horse takes the
+            pass and they may ride it for <strong>one Minecraft day</strong>.</li>
+    </ol>
+</div>
+
+<h2 id="why">Why this exists</h2>
+
+<p>
+    A horse <a href="horse-care.html#riding">will not carry a stranger</a>. The two
+    standing ways round that &mdash; owning the horse, or being on the owner's team
+    &mdash; are both permanent relationships, and neither of them can say
+    <em>this person, this horse, this afternoon</em>. Putting a jockey on your team so
+    they can ride one mount in one race hands them every horse you own, indefinitely,
+    and taking them off again afterwards is a chore nobody is going to do. A race
+    meeting needs something that expires by itself.
+</p>
+
+<h2 id="rules">Things worth knowing</h2>
+
+<ul>
+    <li><strong>A pass is made out to the horse, not to the person.</strong> That is
+        what makes it worth having as an object: a pass for <em>Kestrel, one day</em>
+        is something you can hand to whoever turns up to ride, sell at the gate, or
+        post to a friend. A pass made out to a <em>person</em> would have to be
+        assigned when it was made, and a jockey who did not show up would take it out
+        of the meeting with them.</li>
+    <li><strong>Only the owner can make one out</strong>, and creative is no exception
+        &mdash; the same rule every other item you bind to a horse follows. Anybody
+        holding a made-out pass can feed it.</li>
+    <li><strong>Feeding a second pass adds another day</strong>; it does not replace
+        what is left. A three-day meeting is three passes, and a jockey handed two on
+        the first morning is not quietly refunded one.</li>
+    <li><strong>It only works on the horse it names.</strong> A pass for Kestrel does
+        nothing at all to anything else, and says so.</li>
+    <li><strong>The owner is told</strong> when somebody feeds a pass to their horse,
+        if they are online. Lending a horse is not a secret, and an owner who finds a
+        stranger on their mare should be able to remember why.</li>
+    <li><strong>Selling the horse cancels every pass on it.</strong> A pass is
+        permission the <em>previous</em> owner gave; carrying it across a
+        <a href="item-transfer-papers.html">sale</a> would hand the new owner's horse
+        to strangers they never agreed to and could not find out about.</li>
+    <li><strong>You cannot feed one to your own horse.</strong> It would buy you
+        nothing, so you are told rather than quietly charged a pass.</li>
+</ul>
+
+<h2 id="command">The command &mdash; <code>/horsejockey</code></h2>
+
+<p>
+    The same lend, without the crafting, for the case the item is clumsy at: a race
+    steward at the gate with twelve riders to admit and no wish to make twelve passes.
+    It acts on the horse you are <strong>riding</strong>, or the one you are
+    <strong>looking at</strong> within eight blocks, and every form needs you to own
+    that horse.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Form</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>/horsejockey &lt;player&gt;</code></td>
+    <td>One pass's worth, the same length an item buys.</td></tr>
+<tr><td><code>/horsejockey &lt;player&gt; &lt;days&gt;</code></td>
+    <td>That many Minecraft days, <strong>added</strong> to whatever is left.</td></tr>
+<tr><td><code>/horsejockey &lt;player&gt; revoke</code></td>
+    <td>Take it back now. If they are on the horse, they come off.</td></tr>
+<tr><td><code>/horsejockey list</code></td>
+    <td>Who is borrowing this horse, and for how much longer.</td></tr>
+</tbody>
+</table>
+</div>
+
+<ul>
+    <li><strong>Revoking has no item</strong>, and should not: something you have
+        handed to somebody cannot be un-handed, but the person who lent the horse ought
+        to be able to change their mind.</li>
+    <li><strong>No operator override.</strong> An operator settling a dispute can move
+        ownership with <a href="item-transfer-papers.html#horsegive"><code>/horsegive</code></a>;
+        being able to write yourself onto somebody else's horse for a fortnight is a
+        different power and nobody asked for it.</li>
+    <li><strong><code>commands.horse_jockey</code> turns the command off</strong>
+        &mdash; not registered, not tab-completed &mdash; and leaves the item alone.
+        <code>behaviour.jockey_pass_days</code> is what one pass, or one bare
+        <code>/horsejockey</code>, is worth.</li>
+</ul>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe</th></tr></thead>
+<tbody>
+<tr><td><strong>Blank jockey pass</strong></td>
+    <td><strong>Shapeless:</strong> 1 &times; paper + 1 &times; horse hair + 1 &times; leather</td></tr>
+<tr><td><strong>Jockey pass</strong> (made out)</td>
+    <td>Right-click a horse you own with a blank</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="where">Where it lives</h2>
+
+<ul>
+    <li><code>data/RidingPassAttachment</code> &mdash; one map, player UUID to the game
+        time their pass runs out. Registered as <code>horsegenetics:riding_pass</code>,
+        serialised, <code>copyOnDeath</code>, and <strong>not synced</strong>: the
+        refusal happens on the server, and a client that knew would only be able to
+        predict it wrong.</li>
+    <li><code>server/JockeyPassHandler</code> &mdash; the item's three moments, on
+        <code>PlayerInteractEvent.EntityInteract</code>.</li>
+    <li><code>server/HorseJockeyCommand</code> &mdash; the four command forms.</li>
+    <li><code>item/JockeyPassItem</code> &mdash; the tooltip, which is the only part
+        that has to exist on the client. Two item ids sharing one class, reusing the
+        <code>bound_horse</code> component the <a href="item-stall-signs.html">stall
+        signs</a> already defined.</li>
+    <li><code>server/HorseRiding.mayRide</code> &mdash; where it is actually read.</li>
+</ul>
+
+<h2 id="order">The pass is asked before the teams, deliberately</h2>
+
+<p>
+    <code>mayRide</code> asks, in order: the config flag, untamed, the owner,
+    <strong>a live pass</strong>, then the teams. The pass sits above the teams so that
+    it still works on a server which has set
+    <code>behaviour.riding_allows_teams = false</code>. They are unrelated answers
+    &mdash; one is a standing relationship and one is a receipt with a date on it
+    &mdash; and one flag silently gating the other would be a trap rather than a
+    setting.
+</p>
+
+<h2 id="deadlines">A map of deadlines, not a set of names</h2>
+
+<p>
+    The same call <a href="gene-passification.html">passification</a>'s attachment
+    makes, for the same reason: one map with a time in it cannot disagree with itself,
+    whereas a set of names beside a map of expiries eventually will. Reading it is one
+    comparison.
+</p>
+
+<p>
+    Deadlines are <strong>game time</strong>, which does not advance while the server
+    is down &mdash; so a pass bought for a race is not spent overnight while nobody is
+    playing. <code>grant</code> counts from the existing deadline when one is still
+    running and from <em>now</em> when it is not, which is what stops a second pass
+    being worth less than the first, and every write prunes what has lapsed so a
+    horse does not carry a dead jockey's name in the save for ever.
+</p>
+
+<p>
+    All three of those are invisible from inside the game if they are wrong: a second
+    pass that overwrote the first would look identical on the day it was fed and would
+    quietly have cost somebody a day. So they are the one part of this with a test
+    &mdash; <code>jockey_passes_add_up</code>, which was checked against a deliberately
+    broken <code>grant</code> to make sure it bites.
+</p>
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>None of this has run: feeding a pass needs a second player, and so does every form of the command. The arithmetic is tested and the rest is not &mdash; the check that matters most is not the pass working but the pass <strong>expiring</strong>, because a pass that never runs out is indistinguishable from one that works for the whole of the day somebody tests it on.</p>
+</div>
+
+<h3 id="verify-pass">The item (2026-09-29, NOT played)</h3>
+
+<ul>
+    <li><strong>Made out.</strong> Right-click your own horse with a blank.
+        <strong>Pass:</strong> the blank becomes a pass naming her, and a stack of
+        blanks loses exactly one. <strong>Fail looks like</strong> the whole stack
+        turning into one pass, which is the swap in <code>makeOut</code> taking the
+        wrong branch.</li>
+    <li><strong>Refused on a horse you do not own</strong>, and on an untamed one, with
+        the ordinary bind refusal.</li>
+    <li><strong>Fed.</strong> Second player, your pass, your horse. <strong>Pass:</strong>
+        the horse makes the eating sound, the pass is consumed, they are told how long
+        they have, you are told who took it, and they can get on.
+        <strong>Fail looks like</strong> them being bucked off anyway (the attachment
+        write and <code>mayRide</code>'s read disagree &mdash; most likely the level is
+        not a <code>ServerLevel</code> where one of them looks), or the pass being eaten
+        with nothing granted.</li>
+    <li><strong>It expires.</strong> <em>The one that actually matters and the one
+        nobody will run.</em> Feed a pass, then <code>/time add 24000</code> &mdash;
+        game time, not the day/night cycle. <strong>Pass:</strong> the horse throws
+        them at the next check. <strong>Fail:</strong> they ride on, which means the
+        deadline is being read against the wrong clock and every pass is permanent.</li>
+    <li><strong>The wrong horse.</strong> A pass for one mare, fed to another: it should
+        say so and be kept.</li>
+    <li><strong>A sale cancels it.</strong> Lend a horse, then give it away with
+        <a href="item-transfer-papers.html#horsegive"><code>/horsegive</code></a> or a
+        redeemed paper. <strong>Pass:</strong> the borrower is off it and cannot get
+        back on.</li>
+</ul>
+
+<h3 id="verify-jockey-command">The command (2026-09-29, NOT played)</h3>
+
+<ul>
+    <li><strong>All four forms</strong>, on a horse you own: bare, with a day count,
+        <code>revoke</code>, and <code>list</code>.</li>
+    <li><strong><code>revoke</code> takes somebody off mid-ride</strong> rather than
+        leaving them to the sweep a second later.</li>
+    <li><strong><code>list</code> names an offline borrower.</strong> It goes through
+        the server's name caches, the same route
+        <a href="horse-care.html#riding-code">the scoreboard-team lookup</a> uses, and
+        a borrower neither cache has seen falls back to eight characters of their
+        id.</li>
+    <li><strong>It refuses a horse that is not yours</strong>, for every form including
+        <code>list</code> &mdash; who is borrowing your horse is your business.</li>
+    <li><strong>The switch.</strong> <code>commands.horse_jockey = false</code>,
+        restart: the command should not exist, and the <em>item</em> should still
+        work.</li>
+    <li><strong><code>behaviour.jockey_pass_days</code> moves both.</strong> Set it to
+        2 and check that a fed pass and a bare <code>/horsejockey</code> both report two
+        days left &mdash; if only one moved, the command has a hard-coded 1 in it. (The
+        item&rsquo;s tooltip deliberately says <em>for a while</em> rather than naming a
+        length: it is drawn on a client that may have no server behind it.)</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-care.html#riding">Who may ride a horse</a>
+        <a href="item-transfer-papers.html">Transfer papers</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>server/JockeyPassHandler</code>, <code>server/HorseJockeyCommand</code>,
+    <code>data/RidingPassAttachment</code>; component <code>bound_horse</code>,
+    attachment <code>riding_pass</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

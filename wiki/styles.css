@@ -1544,3 +1544,118 @@ a.card .card-text {
     .roadmap-index li { grid-template-columns: 1fr; }
     .roadmap-plans { align-self: start; }
 }
+
+/* ---- rotatable block previews (block-preview.js) ------------------------- */
+.block-preview {
+    margin: 1.4rem 0;
+}
+.block-preview-canvas {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: var(--bg-soft);
+    cursor: grab;
+    touch-action: none;   /* the drag rotates; it must not also scroll the page */
+}
+.block-preview-canvas:active { cursor: grabbing; }
+.block-preview-canvas:focus-visible { outline: 2px solid #5b8def; outline-offset: 2px; }
+.block-preview-labels {
+    display: flex;
+    justify-content: space-around;
+    gap: 0.5rem;
+    margin-top: 0.45rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-align: center;
+}
+.block-preview-labels span { flex: 1 1 0; }
+.block-preview-note {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin: 0.5rem 0 0 0;
+}
+
+/* ---- item sprites on their own page (item-art.js) ------------------------ */
+.item-art { margin: 1.1rem 0 1.4rem 0; }
+.item-art-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: var(--bg-soft);
+}
+.item-art-row li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    width: 5.6rem;
+    text-align: center;
+}
+.item-art-row img {
+    width: 48px;
+    height: 48px;
+    /* The art is 16, 32 or 64 square. Never smooth it back into a blur. */
+    image-rendering: pixelated;
+}
+.item-art-row span {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    line-height: 1.3;
+}
+.item-art-note {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin: 0 0 0.4rem 0;
+}
+
+/* ---- wiki-style infobox: the panel a reader looks at before reading -------
+   Floated right beside the prose the way any wiki does it, and dropped to a
+   full-width block on a narrow screen, where a 340px float would leave the text
+   in a gutter. */
+.infobox {
+    float: right;
+    width: min(340px, 42%);
+    margin: 0.2rem 0 1.2rem 1.6rem;
+    padding: 0.85rem 0.95rem 0.95rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--bg-soft);
+    font-size: 0.86rem;
+}
+.infobox-title {
+    margin: 0 0 0.7rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-soft);
+    font-weight: 700;
+    text-align: center;
+}
+.infobox .block-preview { margin: 0; }
+.infobox-caption {
+    margin: 0.5rem 0 0 0;
+    color: var(--text-dim);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+.infobox-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 0.7rem;
+    margin: 0.85rem 0 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft);
+}
+.infobox-facts dt { color: var(--text-dim); font-size: 0.78rem; }
+.infobox-facts dd { margin: 0; font-size: 0.8rem; }
+
+/* A float must not escape the tab it was written in. */
+.tab-panel::after { content: ""; display: block; clear: both; }
+
+@media (max-width: 900px) {
+    .infobox { float: none; width: auto; margin-left: 0; }
+}

@@ -1,0 +1,5 @@
+Jockey passes
+(Item / trading)
+Lending somebody your horse for an afternoon. A pass is made out to one animal by its owner, handed to whoever is going to ride it, and fed to that horse to buy a day in the saddle — and then it runs out on its own, which is the whole point of it.
+
+Item / trading Jockey passes Lending somebody your horse for an afternoon. A pass is made out to one animal by its owner, handed to whoever is going to ride it, and fed to that horse to buy a day in the saddle — and then it runs out on its own, which is the whole point of it. Who may ride a horse Transfer papers All items server/JockeyPassHandler , server/HorseJockeyCommand , data/RidingPassAttachment ; component bound_horse , attachment riding_pass .

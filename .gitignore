@@ -80,3 +80,12 @@ intake/potential-assets/raven-fantasy-hd-free/*
 intake/potential-assets/pixelated-patterns/*
 !intake/potential-assets/pixelated-patterns/SOURCE-AND-LICENSE.txt
 !intake/potential-assets/pixelated-patterns/USAGE.txt
+# The Internet Pattern Book: Geocities tiles the uploader does not own and does not
+# license. The owner took them anyway with her eyes open (the reasoning is in the
+# notes); they never go in git and are never republished whole.
+intake/potential-assets/internet-pattern-book/*
+!intake/potential-assets/internet-pattern-book/SOURCE-AND-LICENSE.txt
+!intake/potential-assets/internet-pattern-book/USAGE.txt
+
+# Python leaves these beside intake/tools/*.py; they are not source.
+__pycache__/

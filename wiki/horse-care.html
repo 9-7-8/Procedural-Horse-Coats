@@ -596,6 +596,12 @@
     <li><strong>The owner does not have to be online.</strong> All of it is answered by UUID where
         it can be &mdash; the horse in your paddock knows whose it is whether or not you are
         logged in.</li>
+    <li><strong>Lending one for an afternoon is a separate thing.</strong> A team is a permanent
+        arrangement and a race is not, so there is a
+        <a href="item-jockey-passes.html">jockey pass</a>: an item made out to one horse that buys
+        whoever feeds it a day in the saddle, and <code>/horsejockey</code> for the same lend
+        without the crafting. A pass is asked <em>before</em> the teams, so it still works on a
+        server that has teams switched off.</li>
     <li><strong>Somebody already in the saddle is thrown off too.</strong> A horse can change hands
         under its rider (<a href="item-transfer-papers.html">a paper redeemed</a>,
         <a href="item-transfer-papers.html#horsegive"><code>/horsegive</code></a>) and a team can be
@@ -1113,6 +1119,15 @@
     <code>server/HorseRiding</code> holds the question and both answers to it.
     <code>mayRide(AbstractHorse, Player)</code> is the <em>only</em> place the rule is written, and
     three things ask it.
+</p>
+
+<p>
+    It asks, in order: the config flag, untamed, the owner, a live
+    <a href="item-jockey-passes.html">jockey pass</a>, then the teams. The pass sits
+    <strong>above</strong> the teams so that lending a horse still works on a server which has set
+    <code>behaviour.riding_allows_teams = false</code> &mdash; they are unrelated answers, one a
+    standing relationship and one a receipt with a date on it, and one flag silently gating the
+    other would be a trap rather than a setting.
 </p>
 
 <ul>
@@ -2117,6 +2132,9 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
         (<code>HorseTwoRidersMixin</code>), a horse pulling a <a href="carts.html">cart</a> with a
         postilion on it, and the <a href="item-rescuing-braid.html">rescuing braid</a>&rsquo;s
         remount all go through <code>startRiding</code> and therefore through this rule now.</li>
+    <li><strong>The borrowed answer has its own page.</strong> Jockey passes are a fourth way past
+        this rule and are checked on
+        <a href="item-jockey-passes.html#verify-pass">their own verification tab</a>, not here.</li>
 </ul>
 
 <h3 id="passification-lure-0925">An offering is a lure, not food (2026-09-25, NOT played)</h3>

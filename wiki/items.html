@@ -84,6 +84,9 @@
     <td>Sends a horse to the horse realm and gives it up there. Not reversible.</td></tr>
 <tr><td><a href="item-transfer-papers.html"><strong>Transfer papers</strong></a></td>
     <td>How a horse changes hands. A signed one is drawn as the horse itself.</td></tr>
+<tr><td><a href="item-jockey-passes.html"><strong>Jockey passes</strong></a></td>
+    <td>Lends a horse for a day. Made out to the animal by its owner, fed to that
+        animal by whoever is riding, and it runs out on its own.</td></tr>
 <tr><td><a href="item-equestrian-posts.html"><strong>The four posts</strong></a> &mdash;
     leatherworker&rsquo;s, scientist&rsquo;s, supplier&rsquo;s, metalsmith&rsquo;s</td>
     <td>Makes a villager into that one of the four
@@ -459,15 +462,94 @@
     only the blanket, and does <em>nothing at all</em> to a saddle.
 </p>
 
+<h2 id="art">No two items look alike</h2>
+
+<p>
+    <strong>Every item in this pack is distinguishable from every other item in it, and
+    from every item in Minecraft.</strong> That was not true until 2026-09-29: fifteen
+    sprites were either a vanilla texture used unchanged or one drawing shared by up to
+    five items, so a hotbar of tickets was five identical cards and the vet&rsquo;s kit was
+    a bundle.
+</p>
+
+<p>
+    This matters more than tidiness. An item drawn as a vanilla one is an item a player
+    does not notice they have picked up, and five items drawn the same are five tooltips
+    they have to hover to sort out. The turnout ticket is the sharpest case: it is the one
+    ticket that <em>cannot be undone</em>, and it used to be pixel-identical to the four
+    that can be.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Was</th><th>Now</th></tr></thead>
+<tbody>
+<tr><td>Five <a href="item-tickets.html">tickets</a>, one sprite</td>
+    <td>Blank keeps it; basic blue, bound amber, interdimensional magenta, and turnout
+        <strong>red</strong> because it is the irreversible one</td></tr>
+<tr><td>Four <a href="item-whistles.html">whistles</a>, one sprite</td>
+    <td>Basic keeps it; golden gold, echo the pale blue-grey of an echo shard, ender
+        purple</td></tr>
+<tr><td>Both <a href="item-stall-signs.html">stall signs</a> were an oak sign</td>
+    <td>Blue, and the bound one the same blue deeper &mdash; the same object in a second
+        state, not a second object</td></tr>
+<tr><td>The holding-pen sign was a spruce sign</td><td>Amber, warm against the stall
+    signs it shares a tab with</td></tr>
+<tr><td>The <a href="item-vet-kit.html">vet&rsquo;s kit</a> was a bundle</td><td>Red</td></tr>
+<tr><td>Two <a href="item-spawn-eggs.html">spawn eggs</a> were the vanilla horse egg, and
+    each other</td><td>Cyan for the editor egg, magenta for the saved-horse one</td></tr>
+<tr><td>The blank <a href="item-transfer-papers.html">transfer paper</a> was the
+    <a href="item-research-papers.html">research paper</a></td><td>Pale cream &mdash; blank
+    is the thing to say about it</td></tr>
+<tr><td>Four <a href="carrots.html">splice carrots</a> nearly indistinguishable</td>
+    <td>Rotated, not flattened, so they still read as carrots: performance red, magical
+    purple, dilution pale gold, marking blue</td></tr>
+<tr><td>Five occupied <a href="horse-stasis.html">stasis chambers</a> nearly
+    indistinguishable</td><td>Each in its empty twin&rsquo;s hue, saturated enough to
+    survive the glass</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Two things are exempt, and both on purpose</span>
+    <p>
+        <strong>The breed eggs</strong> (owner&rsquo;s call) are one item parameterised by a
+        component, tinted per breed at render time; a shared silhouette is the point and the
+        colour is in no PNG. <strong>The per-wood families</strong> &mdash; a wagon in each
+        vanilla wood, and the same for every cart, gate and jump &mdash; look alike because
+        acacia and jungle planks look alike. That is the contract: the sprite says what the
+        thing is made of, and recolouring one would be a lie about the material.
+    </p>
+</div>
+
+<p>
+    <code>check-duplicate-item-art.mjs</code> is what keeps this true, and it fails the
+    build rather than warning. It asks four questions: does any model draw a bare vanilla
+    texture, do two models share one, are two of our sprites the same picture, and &mdash;
+    the one that matters most &mdash; are two of them <em>too alike to tell apart</em>. That
+    last test exists because the first version of this pass shipped a recolour that changed
+    every pixel, passed a hash comparison, and was invisible to the eye. A checker that
+    certifies the thing it was meant to catch is worse than no checker.
+</p>
+
+<p>
+    The colours themselves are a table in <code>bake-item-recolours.mjs</code>, one line per
+    sprite with its source and its numbers, so re-tuning one is an edit and a re-run. It
+    derives from pristine copies under <code>tools/item-art/</code> rather than from the
+    live textures, which is what makes running it twice safe.
+</p>
+
 <h2 id="gaps">Known gaps, across the roster</h2>
 
 <ul>
-    <li><strong>Art.</strong> The four <a href="item-tickets.html">tickets</a> share one
-        texture, the four <a href="item-whistles.html">whistles</a> share one, both
-        <a href="item-stall-signs.html">stall signs</a> borrow
-        <code>minecraft:item/oak_sign</code>. The blank
-        <a href="item-transfer-papers.html">transfer paper</a> reuses the
-        <a href="item-research-papers.html">research-paper</a> texture.</li>
+    <li><strong>Art.</strong> Every item in the roster is now at least
+        <em>distinguishable</em> &mdash; see <a href="#art">no two items look alike</a>
+        &mdash; but a good many of them are a recolour of somebody else’s drawing rather
+        than a drawing of their own. The whistles are one whistle in four colours, the
+        tickets one ticket in five, and the vet’s kit is a bundle. That is a real
+        improvement on two items you could not tell apart and it is not the same thing as
+        art.</li>
     <li><strong>A stall is only ever read by a ticket.</strong> There is no
         auto-return and no &ldquo;assigned pen&rdquo; behaviour, and only breaking the
         exact sign block releases one.</li>
@@ -557,8 +639,44 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and fail invisibly &mdash; a crop frozen at age 0, a gold item dropping where nothing gold should, a tint that misses the model &mdash; and <strong>chest loot now rides on a regex</strong> that has never had anything taken out of a chest to prove it.</p>
+    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and fail invisibly &mdash; a crop frozen at age 0, a gold item dropping where nothing gold should, a tint that misses the model &mdash; and <strong>chest loot now rides on a regex</strong> that has never had anything taken out of a chest to prove it; and <strong>twenty-four item sprites were recoloured at once</strong>, fourteen of them by repointing a model at art that did not exist until that moment, which is exactly how a purple cube happens.</p>
 </div>
+
+<h3 id="item-art-0929">Twenty-four recoloured item sprites (2026-09-29, NOT played)</h3>
+
+<p>
+    <a href="?view=gameplay#art">No two items look alike</a>. Two tools were added and both
+    are green, but neither of them can open an inventory: <code>check-duplicate-item-art</code>
+    proves the sprites differ from each other, and <code>bake-item-recolours</code> proves
+    only that it ran.
+</p>
+
+<ul>
+    <li><strong>Nothing is a purple cube.</strong> The check that would catch it exists now
+        and passes, and it was confirmed to bite by pointing a model at a texture that is not
+        there. But a model can be right and a sprite still fail to <em>draw</em>, so the one
+        thing to do is open the creative tab and look at the whole roster at once.</li>
+    <li><strong>The five tickets and the four whistles read apart at a glance</strong>, in a
+        hotbar, at inventory scale, without hovering. That is the thing this was for, and a
+        16-pixel sprite at 100% GUI scale is a much smaller object than the PNGs looked while
+        they were being chosen.</li>
+    <li><strong>The turnout ticket is obviously not a stall ticket.</strong> It is the one
+        that cannot be undone and the one worth getting right.</li>
+    <li><strong>The two spawn eggs.</strong> They sit together in the vanilla Spawn Eggs tab
+        beside the real horse egg and 70-odd others; check all three are tellable there rather
+        than in isolation.</li>
+    <li><strong>The occupied stasis chambers.</strong> Five small pale bottles, which is the
+        hardest case in the roster - if any two of these are still a coin-flip, the thing to
+        move is the <em>empty</em> chambers' palette, which is crowded into a third of the
+        wheel and was left alone as out of scope.</li>
+    <li><strong>The splice carrots still look like carrots.</strong> They were rotated rather
+        than flattened for exactly this reason; a flattened one becomes a single-hue blob.</li>
+    <li><strong>A resource pack that replaces our textures still works.</strong> Nothing here
+        changed how a sprite is looked up, only what is in it - but fourteen models now name a
+        <code>horsegenetics:</code> texture where they used to name a <code>minecraft:</code>
+        one, so a pack that was overriding the vanilla sign to restyle our stall signs has
+        stopped doing so. That is the correct behaviour and may still surprise somebody.</li>
+</ul>
 
 <h3 id="goldencarrot-0918">Golden carrot seeds (2026-09-18, NOT played)</h3>
 

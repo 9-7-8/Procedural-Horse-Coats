@@ -957,6 +957,17 @@
       "count": 1
     },
     {
+      "id": "jockey_pass",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:paper",
+        "horsegenetics:horse_hair",
+        "minecraft:leather"
+      ],
+      "out": "horsegenetics:jockey_pass",
+      "count": 1
+    },
+    {
       "id": "jump_acacia",
       "kind": "shapeless",
       "in": [

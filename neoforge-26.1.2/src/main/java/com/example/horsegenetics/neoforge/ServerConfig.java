@@ -317,6 +317,29 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.BooleanValue HORSE_GIVE_COMMAND;
 
+    /**
+     * <b>{@code commands.horse_jockey}</b> - does {@code /horsejockey} exist? It
+     * lends a horse to another player for a while, which is what a jockey pass
+     * buys with an item. A server that wants the pass to be the only way in
+     * turns this off and the command is not registered at all. See
+     * {@code server/HorseJockeyCommand}.
+     *
+     * <p>It is a <b>separate</b> flag from {@code commands.horse_give} because
+     * the two do different amounts of damage if misused: giving a horse away is
+     * permanent and one-way, lending one expires by itself. A server may well
+     * want the second and not the first.
+     */
+    public static final ModConfigSpec.BooleanValue HORSE_JOCKEY_COMMAND;
+
+    /**
+     * <b>{@code behaviour.jockey_pass_days}</b> - how many Minecraft days one
+     * jockey pass, or one bare {@code /horsejockey}, is worth. The owner's
+     * number is 1. Zero is not allowed: a pass worth nothing is an item that
+     * does nothing, and turning the feature off is what the recipe and
+     * {@code commands.horse_jockey} are for.
+     */
+    public static final ModConfigSpec.IntValue JOCKEY_PASS_DAYS;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -598,6 +621,18 @@ public final class ServerConfig {
                         "Off, the command is not registered at all and the transfer paper",
                         "stays the only way a horse changes hands.")
                 .define("commands.horse_give", true);
+        HORSE_JOCKEY_COMMAND = builder
+                .comment("Whether /horsejockey exists. (default: true)",
+                        "It lends the horse you are on, or looking at, to another player",
+                        "for a while - the same thing a jockey pass buys with an item, which",
+                        "this does not affect. Off, the command is not registered at all.")
+                .define("commands.horse_jockey", true);
+        JOCKEY_PASS_DAYS = builder
+                .comment("How many Minecraft days one jockey pass is worth. (default: 1)",
+                        "Also the length of a bare /horsejockey with no number given.",
+                        "Feeding a second pass ADDS another of these rather than replacing",
+                        "what is left, so a three-day meeting is three passes.")
+                .defineInRange("behaviour.jockey_pass_days", 1, 1, 365);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -835,6 +870,24 @@ public final class ServerConfig {
             return HORSE_GIVE_COMMAND.get();
         } catch (IllegalStateException notLoaded) {
             return true;
+        }
+    }
+
+    /** {@code commands.horse_jockey}, safely. */
+    public static boolean horseJockeyCommand() {
+        try {
+            return HORSE_JOCKEY_COMMAND.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code behaviour.jockey_pass_days} as ticks, safely. */
+    public static long jockeyPassTicks() {
+        try {
+            return JOCKEY_PASS_DAYS.get() * 24_000L;
+        } catch (IllegalStateException notLoaded) {
+            return 24_000L;
         }
     }
 

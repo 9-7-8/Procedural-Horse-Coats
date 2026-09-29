@@ -1,0 +1,43 @@
+2026-09-29 — the 0.5.033 cut
+
+
+    Short. The three sessions above shipped; this is the release.
+
+    RANGE AUDIT. v0.5.032..HEAD is 27 commits, which is not 27 commits of
+    release. Twenty-one of them are the undead-conversion planning — three
+    files under intake/, no code in any of them — plus a merge and the 0.5.032
+    cut's own log entry. The shipped content is three sessions:
+
+        the riding rule, teams and allies, /horsegive
+        jockey passes and /horsejockey
+        twenty-four recoloured item sprites and the two tools behind them
+
+    Worth doing the audit rather than writing up the last thing that happened:
+    from inside the item-art session the release looks like an art release, and
+    it is not — the thing a player needs told is that their horses stopped
+    letting other people ride them.
+
+    SO THE NOTE LEADS WITH THE WARNING. behaviour.owner_only_riding is on by
+    default and changes what an existing server does the moment the jar lands.
+    The first block a reader sees is that, then how teams are let through
+    (which needs no setup if they already have one), then the one line that
+    turns it off. The features come after.
+
+    PRE-TAG CHECKS. Version bumped in gradle.properties only — the one place it
+    lives. Jar verified rather than assumed: it declares 0.5.033, and it carries
+    both the new sprites and the new classes, because a jar that builds is not
+    the same as a jar with the work in it. runServer on the release build to
+    Done (0.322s) with no ERROR lines, per the rule that startup and config
+    changes crash at mod load and nowhere else — and this release added five
+    config options and two commands, which is exactly that shape.
+
+    gh release create with the jar attached. A pushed tag on its own is not a
+    release: the people who need this have a jar, not a checkout.
+
+    STILL UNPLAYED. Every part of the riding rule, the passes and both commands
+    needs a second player; the waystone fix needs three more mods. Shipping it
+    unplayed is the deliberate call — it is on a release rather than sitting on
+    main, because the only way it gets played is if somebody has the jar.
+
+    CLAUDE.md is at 299 of its 300 lines. The next line added has to displace
+    one; the routing table at the top of that file is how to decide which.

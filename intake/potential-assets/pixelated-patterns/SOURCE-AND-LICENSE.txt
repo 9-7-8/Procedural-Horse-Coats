@@ -1,8 +1,8 @@
 Pixelated Pattern Textures (NormalMap_Games) - source, licence, credit
 
-*** NOT YET ON DISK. The zips have not been supplied. This file only records what
-the store page says is in them. Picked up on the host machine, not in a cloud
-session (which cannot work with the images directly). ***
+*** ON DISK since 2026-09-29, but only the 64x64 half. The owner supplied
+"Pixelated Patterns 64x64.zip"; the 32x32 zip has still not been supplied.
+The images are NOT in git - see the licence section, which is still unresolved. ***
 
 Source
 ======
@@ -15,38 +15,56 @@ listing).
 GET THEM AGAIN: download the two zips from the store page above. A session that
 needs the images and finds none should PROMPT THE OWNER with this link.
 
-What the page says is in it
-===========================
-Two downloads:
-  Pixelated Patterns 32x32.zip   98 kB
-  Pixelated Patterns 64x64.zip   183 kB
-Pattern textures at 32x32 and 64x64 - close to the pixel scale of the mod's own
-horse and mesh textures (vanilla horse sheets are 64x64), which is why this pack
-may suit the greyscale base textures for the add-on meshes better than the 256x256
-tiles in ../pixel-art-textures/. Contents beyond that (how many, which patterns,
-whether coloured or greyscale, tileable or not) are UNKNOWN until the zips are
-opened. Whoever opens them should record the list here.
+What is actually in the 64x64 zip (opened 2026-09-29)
+=====================================================
+  zip sha256   5364f868d5f436c7c733ff9a369cc129987b85b026b895a3bd4bc33aab375d7a
+               ("Pixelated Patterns 64x64.zip", 183 kB, one folder
+                "Pixelated Patterns 64x64/", unzipped here as 64x64/)
+  125 PNGs, no licence file, no readme, nothing else in the zip.
+  EVERY file is 64 x 64, 8-bit RGBA (PNG colour type 6). None is greyscale as
+  stored, so a mesh base wants a channel pulled out rather than the file as-is.
 
-Licence - NOT STATED IN WHAT WAS PASTED
-=======================================
-The page text supplied has no licence section, no credit request and no terms.
-Do not assume CC0 or anything else. Until the owner confirms the terms (an itch
-page usually states them under "More information" or in a licence file inside
-the zip - check both):
+Twenty pattern families, each in five colourways - Black, Blue, Green, Red,
+White - and some in two numbered variants:
+  Bricks (x2)        Camouflage         Caustics           Cobblestone (x2)
+  Cracked_Bricks     Cracks (x2)        Crate              Crystals
+  Diagonal_Tiles     Metal (x2)         Metal_Floor        Rocky (x2)
+  Smoke              Stone              Tiles              Wavy
+  Weaving            Wood               Wood_Planks (x2)
+
+Two filenames are the author's slips, not ours, and a loader that parses names
+has to cope with both:
+  Caustics_Green.png     - missing the "_64" suffix every other file carries.
+  Metal_Greeb_2_64.png   - "Greeb" for "Green". It is the Metal family's missing
+                           green variant 2 (Metal_Green_2_64.png does not exist).
+
+Licence - STILL NOT STATED, after reading the store page
+========================================================
+The page was fetched again on 2026-09-29 and it carries NO licence section, no
+terms, no credit request, and the zip contains no licence file either. The only
+rights-adjacent text on the page is two itch.io tags:
+    "Royalty Free"
+    "No generative AI was used."
+A tag is not a grant. "Royalty free" says no per-use fee; it says nothing about
+redistribution, which is the clause this repo needs, because anything used ships
+inside the jar and the mod's own CC BY-NC licence lets forks redistribute in
+turn. So, unchanged:
   - treat as all rights reserved by NormalMap_Games;
   - do NOT commit the images to git (the .gitignore rule for this folder keeps
     them out, the same way as the Raven icons);
   - do NOT copy anything into a module.
-Once known, paste the terms here verbatim, and if the licence permits
-redistribution, relax the .gitignore rule and say so here.
+TO SETTLE IT the owner needs to ask NormalMap_Games directly (itch.io page
+comments or the profile's contact) whether the textures may be redistributed
+inside a free, open-source mod, modified, under a CC BY-NC project, and what
+credit they want. Paste the reply here verbatim. If it permits redistribution,
+relax the .gitignore rule and say so here.
 
-On the machine (when the zips arrive)
-=====================================
-Unzip into this folder (subfolders 32x32/ and 64x64/ are fine). Record here the
-file counts, the zip sha256 values and the list of patterns, as
-../raven-fantasy-hd-free/MANIFEST.txt does. Then work out which patterns make
-useful greyscale bases for the horn / spine / wing / crystal / feather meshes
-(see wiki/model-parts.html) and log every use in USAGE.txt.
+On the machine
+==============
+Here, as 64x64/ (125 files). The 32x32 zip, when it arrives, goes beside it as
+32x32/ and gets the same record above. Next: work out which patterns make useful
+greyscale bases for the horn / spine / wing / crystal / feather meshes (see
+wiki/model-parts.html) and log every use in USAGE.txt.
 
 Credit
 ======

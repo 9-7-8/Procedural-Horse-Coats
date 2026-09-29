@@ -1,0 +1,10 @@
+Where this pack is used in the game
+
+Nothing yet.
+
+The tiles are twenty-five-year-old Geocities backgrounds with no known author
+(see SOURCE-AND-LICENSE.txt), so this file is also the only record of what came
+from where if one of them ever has to be pulled. Keep it exact.
+
+Keep one line per file used, in the same change that copies it:
+  <file in this pack>  ->  <path in the mod>  |  modified? y/n  |  what it is for  |  date

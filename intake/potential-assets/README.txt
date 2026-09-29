@@ -5,7 +5,7 @@ folder is packaged into the jar and nothing here ships in a release. These packs
 are kept here only so they are on hand if we decide to use something from them
 elsewhere in the game.
 
-Three packs, different rights
+Four packs, different rights
 ====================================
 pixel-art-textures/      Texture tiles by FlakDeau. CC0 per the store page: free
                          to use and redistribute. COMMITTED to git (about 32 MB).
@@ -15,10 +15,22 @@ raven-fantasy-hd-free/   Icons by Clockwork Raven Studios. Use in a free mod is
                          ARE NOT IN GIT: the owner places them on the host machine
                          by hand; only the notes, the licence PDF and MANIFEST.txt
                          are committed. .gitignore keeps the images out.
-
-pixelated-patterns/      32x32 and 64x64 patterns by NormalMap_Games - NOT YET ON DISK, licence
-                         unknown. Pick up on the host machine (see its notes). Possibly the best
+                         ON DISK since 2026-09-29, and MANIFEST.txt's checks pass.
+pixelated-patterns/      32x32 and 64x64 patterns by NormalMap_Games. The 64x64
+                         half is ON DISK (125 files); the 32x32 zip is not. Licence
+                         STILL UNKNOWN - the store page states none and neither zip
+                         carries one, so the images are NOT IN GIT and nothing may be
+                         copied out until the owner asks the author. Possibly the best
                          fit for the mesh greyscale bases, at the mod's own pixel scale.
+internet-pattern-book/   331 Geocities background tiles archived by HYPERTELEX,
+                         ON DISK since 2026-09-29. NOT IN GIT. The murkiest of the
+                         four: the uploader says outright that the patterns are not
+                         theirs, so nobody has licensed them to us and no tile has a
+                         known author. The owner decided on 2026-09-29 to keep them
+                         anyway - her reasoning is recorded in its SOURCE-AND-LICENSE.txt
+                         and is not to be reopened. Web tiles, not game art: read its
+                         notes on sizes and on the 116 files whose extension lies
+                         before writing anything that reads the folder.
 
 The rule for using anything from here
 =====================================
@@ -30,8 +42,17 @@ The rule for using anything from here
 3. Add the pack to THIRD_PARTY_NOTICES.md (which ships in the jar) the first
    time anything from it is used, with the credit line in its notes. For the
    Raven icons the notice also has to say users may not reuse or redistribute
-   them, and the CC BY-NC grant must be carved back for those files.
-4. Never publish either pack whole (release zip, wiki download, editor asset
+   them, and the CC BY-NC grant must be carved back for those files. For the
+   Internet Pattern Book the notice says where the tile came from and that its
+   original author is unknown.
+4. Never publish any pack whole (release zip, wiki download, editor asset
    bundle). Only the individual files used.
-5. A session that finds the Raven (or pixelated-patterns) images missing has not hit a bug. See
-   raven-fantasy-hd-free/MANIFEST.txt.
+5. A session that finds a pack's images missing has not hit a bug: only
+   pixel-art-textures is in git. See raven-fantasy-hd-free/MANIFEST.txt, and
+   each pack's SOURCE-AND-LICENSE.txt for the link to fetch it again.
+6. A FIFTH PACK WAS DELETED, 2026-09-29: piiixl's seamless 16x16 "textures3".
+   Do not re-add it. Its licence was the only written one of the set and its No
+   Extraction clause sat badly with a mod jar, but what settled it was the
+   owner's read of the author's own comment thread - the terms were stated
+   inconsistently there, and a pack whose licence changes with the comment is
+   not worth building art on. Deleted, notes and all, rather than left parked.

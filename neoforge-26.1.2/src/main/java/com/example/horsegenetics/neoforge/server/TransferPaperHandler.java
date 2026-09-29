@@ -226,6 +226,10 @@ public final class TransferPaperHandler {
         horse.setOwner(player);
         horse.setTamed(true);
         CowboyHandler.clearBrand(horse); // it has an owner now; it is not their stock any more
+        // And every jockey pass the previous owner lent out - see the note on
+        // HorseGiveCommand.clearJockeyPasses. A redeemed paper is a sale, and a
+        // sale should not come with riders attached.
+        HorseGiveCommand.clearJockeyPasses(horse);
 
         // "Tamed by" is who first got a rope on it, not who owns it now. Only
         // fill it in when the horse has never been tamed at all - which is
