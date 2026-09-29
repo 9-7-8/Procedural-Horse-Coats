@@ -1,0 +1,106 @@
+The Internet Pattern Book (HYPERTELEX) - source, licence, credit
+
+*** ON DISK since 2026-09-29. NOT IN GIT - see the licence section, which the
+owner has read and made a deliberate call on. ***
+
+Source
+======
+HYPERTELEX (itch.io: https://hypertelex.itch.io).
+Store page: https://hypertelex.itch.io/internet-pattern-book
+Web version, browsable by style and colour:
+  https://internetpatternbook.neocities.org/
+Page text pasted by the owner 2026-09-29. Listed under Game assets > Free.
+GET IT AGAIN: "patterns.zip" (3 MB) from the store page above. A session that
+needs the images and finds none should PROMPT THE OWNER with this link.
+
+What it is, in the uploader's words
+===================================
+  "The Internet Pattern Book is an ongoing effort to develop a workable archive
+  and sortable resource to showcase tilable backgrounds used in early web
+  design. To date, it contains 317 patterns that you can browse by style or
+  colour. These are taken as background assets from various defunct sites on
+  Geocities circa the 2000s."
+  "During the HTML era of web design, repeating background assets known as tiles
+  were used frequently to minimise bandwidth."
+And, in the download's install instructions:
+  "This download is for the patterns only without the interactive web frontend.
+  Patterns are not owned by the uploader and provided as-is."
+
+Licence - THE UPLOADER DOES NOT HOLD THE RIGHTS, AND SAYS SO
+============================================================
+This pack is not licensed to us by anyone. It is an archive of tiles scraped
+from defunct Geocities pages circa 2000; the uploader states plainly that the
+patterns are not theirs and are provided as-is, so there is no grant to rely on,
+no named author to credit, and no terms to comply with. The individual tiles
+were made by hundreds of unknown people twenty-five years ago.
+
+THE OWNER'S CALL, 2026-09-29, recorded here so no later session reopens it:
+  Take them anyway, on the same footing as the other packs. The reasoning she
+  gave: this is a free and open-source Minecraft mod, not paid software; we are
+  not redistributing the archive as it is; and any use would be a few tiles
+  worked into something else. She is aware the licence is murkier than the other
+  three and is accepting that risk knowingly.
+
+What that does and does not permit
+  - The images stay OUT of git, like the Raven icons and the pixelated patterns.
+    The .gitignore rule for this folder keeps them out.
+  - The archive is never republished whole - not in a release, not on the wiki,
+    not in the gene-creator or horse-designer asset bundles.
+  - Anything used is worked into a new texture rather than shipped as the tile,
+    and is logged in USAGE.txt with what it became.
+  - THIRD_PARTY_NOTICES.md gets an entry the first time anything from here is
+    used, saying where the tile came from and that its original author is
+    unknown. There is no credit line to give beyond the archive itself.
+  - If an original author is ever identified and objects, that file comes out.
+    Keep USAGE.txt accurate enough to make that a small job.
+
+What is actually in the zip (opened 2026-09-29)
+===============================================
+  zip sha256   8eb7cd697860d38ec2fa9725c1c8ec2374ccdf5059fba3a9c70dc89575ba39b0
+               ("patterns.zip", 3 MB, one folder "img/", unzipped here as img/)
+  331 files, all images, nothing else in the zip - no licence, no readme, no
+  index. (The store page says 317; the download holds 331.)
+
+Naming is <name>_<style>_<colour>, and both tail fields are the web version's
+sort axes, so they are worth trusting:
+  styles   other 79, abstract 26, marble 25, space 21, brick 21, carpet 20,
+           plant 19, paper 14, cloud 11, rock 9, paint 9, fire 9, wood 7,
+           psychedelic 7, metal 7, horror 7, water 5, grid 5, fabric 5,
+           lines 4, bubble 4, tile 3, stone 3, lightning 3, fantasy 3,
+           dirt 2, chain 2, symbol 1
+  colours  blue 52, green 42, white 40, red 39, grey 35, black 34, purple 27,
+           brown 23, yellow 19, pink 11, orange 7, rainbow 2
+
+THREE TRAPS, all of them the archive's own, none of them ours
+=============================================================
+1. THE FILE EXTENSIONS LIE. 116 of the 331 files are not the format they are
+   named: 99 files called .jpg are really GIF, 8 called .jpg are really PNG, and
+    8 called .gif are really JPEG. By magic bytes the real split is 192 JPEG,
+   131 GIF, 8 PNG. Anything that reads this folder must SNIFF THE HEADER, never
+   the extension - ImageIO will cope, a hand-rolled reader chosen by suffix will
+   not, and a bake script that trusts the name will fail on a third of the pack.
+2. One file has no extension at all: img/fir_plant_green. It is a JPEG.
+3. Eight of the GIFs are animated (autumn_plant_yellow, blink_space_black,
+   riches_other_yellow, swirly_other_black.jpg, swirly_other_brown.jpg,
+   twinkle_space_black, whichway_other_red, wunderbar_tile_red) - note that two
+   of those are the ones misnamed .jpg. Reading frame 0 is fine; just know they
+   are not stills.
+
+Sizes, and the fit with this mod
+================================
+156 distinct sizes, and they are web tiles, not game art. The commonest are
+96x96 (30), 128x128 (27), 100x100 (21), 160x160 (13), 256x256 (12), 200x200
+(12), 80x80 (12), 150x150 (11), 64x64 (10). 57 files are larger than 256 in some
+dimension, up to 512x512.
+So only ten are already at the horse sheet's own scale, and JPEG means the rest
+carry compression artefacts that will show as colour noise when scaled down onto
+a 64x64 or 128x128 sheet. Treat these as DESIGN REFERENCE and as raw material to
+redraw from, rather than files to resample and ship. The pixelated-patterns pack
+is the one that is already at the mod's pixel scale.
+
+Credit
+======
+No author is known for any individual tile. The archive itself is
+"The Internet Pattern Book, HYPERTELEX (hypertelex.itch.io)".
+
+Where is it used? See USAGE.txt.
