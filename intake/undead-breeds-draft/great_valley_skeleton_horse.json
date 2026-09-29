@@ -48,6 +48,42 @@
         "pair": "Bne/Bne",
         "weight": 100
       }
+    ],
+    "horsegenetics.eye_colour_left": [
+      {
+        "pair": "Blk/Blk",
+        "weight": 100
+      }
+    ],
+    "horsegenetics.eye_colour_right": [
+      {
+        "pair": "Blk/Blk",
+        "weight": 100
+      }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      {
+        "pair": "Blk/Blk",
+        "weight": 100
+      }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      {
+        "pair": "Blk/Blk",
+        "weight": 100
+      }
+    ],
+    "horsegenetics.particle": [
+      {
+        "pair": "Bflm/Bflm",
+        "weight": 100
+      }
+    ],
+    "horsegenetics.magic_water_breathing": [
+      {
+        "pair": "Gil/Gil",
+        "weight": 100
+      }
     ]
   },
   "bands": {
@@ -57,6 +93,9 @@
         1,
         1
       ]
+    },
+    "horsegenetics.particle": {
+      "site": 2
     }
   },
   "notes": [
@@ -69,6 +108,24 @@
     "Drops are Bne/Bne (D15): bones instead of leather. Proposed 1 to 3 bones; needs the allele added to MagicItemDropGene. The locus key horsegenetics.magic_item_drop is MagicItemDropGene.KEY.",
     "Stats: speed 8, jump 7 (light and quick), health 2 (fragile), pull 3. Size [0.86, 0.95] (D26) matches the vanilla undead horse, which vanilla renders at about 0.909 of a horse; a minecraft:horse at [0.95, 1.05] would come out about 10 percent bigger than the animal it replaced. Health scores run from about 22.5 hp at 5 to 50.5 hp at 10 (BreedStatCurve), so health 2 is well under the baseline; tune it once seen in play.",
     "Eyes, mane, glow and every other cosmetic locus are left to the founder tables' defaults on purpose; they can be pinned once the look is designed.",
-    "Coat: NOT written. The look is the horse's own coat with a binary alpha mask cut out of it (Appendix C, D27, D28): about 55 percent of the horse's UV islands are transparent on vanilla's skeleton. Waits on the alpha op and the derived mask; do not pin base colours to imitate bone until the art is drawn."
+    "Coat: NOT written. The look is the horse's own coat with a binary alpha mask cut out of it (Appendix C, D27, D28): about 55 percent of the horse's UV islands are transparent on vanilla's skeleton. Waits on the alpha op and the derived mask; do not pin base colours to imitate bone until the art is drawn.",
+    "Eyes (D29): pure black. Sclera Blk/Blk at both eyes is the existing black sclera allele. The iris needs EyeColourGene to gain a BLACK row (EyeHue.BLACK, token Blk, already exists for the sclera): append it, so no existing horse changes, and pin Blk/Blk at both iris loci. Vanilla's undead horses have plain black eyes; no glow loci are pinned, so the eyes do not glow.",
+    "Particle (D30): Bflm/Bflm is ParticleGene's soul_fire_flame, blue soul flames. The site is banded to 2, the index of 'hooves' in ParticleGene.SITES (head, spine, hooves, front_hooves, back_hooves, tail), so the flames come off all four hooves. The band key is the epigenetic value name 'site' (EpiValue.category). Check the band accepts a category index the way passification's 'offering' does. Count and colour are left to the founder roll; colour is probably ignored by a fixed vanilla particle.",
+    "Water (D32): Gil/Gil on horsegenetics.magic_water_breathing. This gene is GRADED (a percentage written on each copy, about a quarter a copy, 'usually'), not the absolute underwater_breathing traversal flag that simply refills air every tick. If 'a skeleton cannot drown' is the intent, the graded gene will not deliver it unless the copy's percentage is banded very high; decide between banding it, or an effects-block traversal flag. UNVERIFIED which of the two the owner meant.",
+    "Strains (D31): Bleached 65, Weathered 35. The strains are EMPTY: a strain's own genes and stats are where the two looks differ, and the coat is not written yet, so they differ in nothing today. Verify the parser and BreedFilesTest accept a strain with empty genes and stats; if not, give each a placeholder. Bleached is clean bone; Weathered is stained, darker bone. Both share the alpha mask (D27, D28)."
+  ],
+  "strains": [
+    {
+      "name": "Bleached",
+      "weight": 65,
+      "stats": {},
+      "genes": {}
+    },
+    {
+      "name": "Weathered",
+      "weight": 35,
+      "stats": {},
+      "genes": {}
+    }
   ]
 }
