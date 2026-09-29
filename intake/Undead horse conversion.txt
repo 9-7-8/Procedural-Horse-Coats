@@ -9,7 +9,8 @@ NeoForge API is marked UNVERIFIED and must be read out of the 26.1.2 sources
 
 Where this goes: intake/ is an inbox, not a plan (START HERE.txt). When this is
 picked up it is routed onto wiki/undead-horses.html's Roadmap tab, and this file
-is deleted. Section 12 says exactly what goes where.
+is deleted. Section 12 says exactly what goes where. Appendix A is a script for the stage 0
+check.
 
 
 1. What is being asked
@@ -637,3 +638,289 @@ wiki/breed-format.html); and every UNVERIFIED API note above.
    under the new rule; the genotype path is safe by construction (section 2),
    but the tester's world is the real test, so read latest.log after the first
    load rather than asking.
+
+
+Appendix A - stage 0 check script: do the undead horses share the horse mesh?
+===============================================================================
+Save everything between the markers as check_undead_meshes.py (anywhere, it is
+not part of the repo), then run:
+    python check_undead_meshes.py
+or give it the jar yourself:
+    python check_undead_meshes.py path/to/minecraft-client.jar
+It is read-only, standard library only, and needs a Minecraft jar that has been
+downloaded once (run ./gradlew :neoforge-26.1.2:build first if it cannot find
+one). The javap half needs the JDK's bin on PATH.
+
+What it answers, and how to read it:
+  Part 2  lists the horse-family textures in the vanilla jar (confirms the
+          file names; 26.1.2 may have moved them from entity/horse/).
+  Part 3  decodes the white, zombie and skeleton PNGs and compares them.
+          - "outside" close to 0 for both undead textures: they draw only
+            where the horse's UV islands are, i.e. the same UV layout.
+          - "holes" on the skeleton: the share of the horse's body area it
+            leaves transparent. Large = the "more transparent pixels" hunch.
+          - "partial" above 0 means translucent pixels, which changes the
+            render-type answer (cutout would not be enough).
+  Part 4  runs javap on the model-layer registry and the horse renderers.
+          UNTESTED against a real jar (none was available when this was
+          written), so if it prints nothing useful, the classes have been
+          renamed; run javap by hand on the classes named in part 4's list.
+          In LayerDefinitions, check whether the same createBodyLayer call
+          feeds HORSE, ZOMBIE_HORSE and SKELETON_HORSE. In the renderers, note
+          which render type the undead ones ask for.
+The PNG decoder was tested on a real PNG and synthetic masks; parts 1, 2 and 3
+are the trustworthy ones.
+Paste the output back into the chat and the plan gets updated from it.
+
+----- BEGIN check_undead_meshes.py -----
+#!/usr/bin/env python3
+"""
+Do vanilla's zombie horse and skeleton horse share the ordinary horse mesh?
+
+Read-only. Standard library only (Python 3.8+). Optional: `javap` from the JDK
+(the project already needs JDK 25) for the model-layer half.
+
+    python check_undead_meshes.py                 # finds the Minecraft jar itself
+    python check_undead_meshes.py path/to/minecraft-client.jar
+
+Part 1 finds the jar. Part 2 lists the horse-family textures. Part 3 decodes the
+white, zombie and skeleton PNGs and compares their alpha masks (same UV layout?
+how many holes?). Part 4 runs javap over the model-layer registry and the horse
+renderers so you can see which model definition feeds which entity.
+Paste the whole output back.
+"""
+import os, re, struct, subprocess, sys, zipfile, zlib, shutil
+from pathlib import Path
+
+TEX = re.compile(r"assets/minecraft/textures/entity/.*(horse|equine)", re.I)
+WHITE = re.compile(r"textures/entity/[^/]*/?(horse_white|white)\.png$", re.I)
+
+
+# ---------------------------------------------------------------- part 1: jar
+def has_horse_textures(path):
+    try:
+        with zipfile.ZipFile(path) as z:
+            return any(TEX.search(n) for n in z.namelist())
+    except (zipfile.BadZipFile, OSError):
+        return False
+
+
+def find_jar():
+    roots = [Path.cwd() / "neoforge-26.1.2" / "build", Path.cwd() / ".gradle",
+             Path.home() / ".gradle", Path.home() / ".m2"]
+    seen = 0
+    for root in roots:
+        if not root.exists():
+            continue
+        for dirpath, _dirs, files in os.walk(root):
+            for f in files:
+                if not f.endswith(".jar") or "sources" in f:
+                    continue
+                p = Path(dirpath) / f
+                try:
+                    if p.stat().st_size < 1_000_000:
+                        continue
+                except OSError:
+                    continue
+                seen += 1
+                if has_horse_textures(p):
+                    return p
+    print(f"  (looked at {seen} jars of 1 MB or more, none had horse textures)")
+    return None
+
+
+# ---------------------------------------------------------------- PNG decode
+def decode_alpha(data):
+    """Return (w, h, alpha list of w*h ints 0..255). Non-interlaced PNG only."""
+    assert data[:8] == b"\x89PNG\r\n\x1a\n", "not a PNG"
+    pos, idat, plte, trns = 8, b"", None, None
+    while pos < len(data):
+        n, typ = struct.unpack(">I4s", data[pos:pos + 8])
+        body = data[pos + 8:pos + 8 + n]
+        pos += 12 + n
+        if typ == b"IHDR":
+            w, h, depth, ctype, _c, _f, inter = struct.unpack(">IIBBBBB", body)
+        elif typ == b"PLTE":
+            plte = body
+        elif typ == b"tRNS":
+            trns = body
+        elif typ == b"IDAT":
+            idat += body
+    if inter:
+        raise ValueError("interlaced PNG not supported")
+    chans = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}[ctype]
+    bits = chans * depth
+    stride = (w * bits + 7) // 8
+    bpp = max(1, bits // 8)
+    raw = zlib.decompress(idat)
+    rows, prev = [], bytearray(stride)
+    for y in range(h):
+        ft = raw[y * (stride + 1)]
+        line = bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        for i in range(stride):
+            a = line[i - bpp] if i >= bpp else 0
+            b = prev[i]
+            c = prev[i - bpp] if i >= bpp else 0
+            if ft == 1:
+                line[i] = (line[i] + a) & 255
+            elif ft == 2:
+                line[i] = (line[i] + b) & 255
+            elif ft == 3:
+                line[i] = (line[i] + (a + b) // 2) & 255
+            elif ft == 4:
+                p = a + b - c
+                pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+                pr = a if (pa <= pb and pa <= pc) else (b if pb <= pc else c)
+                line[i] = (line[i] + pr) & 255
+        rows.append(line)
+        prev = line
+    alpha = []
+    for line in rows:
+        if ctype == 6 and depth == 8:
+            alpha += line[3::4]
+        elif ctype == 4 and depth == 8:
+            alpha += line[1::2]
+        elif ctype == 3:
+            for x in range(w):
+                if depth == 8:
+                    idx = line[x]
+                else:
+                    per = 8 // depth
+                    idx = (line[x // per] >> (8 - depth * (x % per + 1))) & ((1 << depth) - 1)
+                alpha.append(trns[idx] if trns and idx < len(trns) else 255)
+        elif ctype in (0, 2) and depth == 8:
+            alpha += [255] * w
+        else:
+            raise ValueError(f"unsupported PNG (colour type {ctype}, depth {depth})")
+    return w, h, alpha
+
+
+def summary(alpha):
+    n = len(alpha)
+    t = sum(1 for a in alpha if a == 0)
+    o = sum(1 for a in alpha if a == 255)
+    return n, t, n - t - o, o
+
+
+# ---------------------------------------------------------------- javap half
+def javap(jar, cls):
+    exe = shutil.which("javap")
+    if not exe and os.environ.get("JAVA_HOME"):
+        cand = Path(os.environ["JAVA_HOME"]) / "bin" / "javap"
+        exe = str(cand) if cand.exists() or Path(str(cand) + ".exe").exists() else None
+    if not exe:
+        return None
+    r = subprocess.run([exe, "-c", "-p", "-constants", "-classpath", str(jar), cls],
+                       capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else None
+
+
+def main():
+    jar = Path(sys.argv[1]) if len(sys.argv) > 1 else None
+    print("== 1. Minecraft jar ==")
+    if jar is None:
+        jar = find_jar()
+    if jar is None or not jar.exists():
+        print("  Not found. Run once:  ./gradlew :neoforge-26.1.2:build  (or runClient)\n"
+              "  then re-run, or pass the jar path yourself. Look for the jar that contains\n"
+              "  assets/minecraft/textures/entity/horse/.")
+        return 1
+    print(" ", jar)
+    z = zipfile.ZipFile(jar)
+    names = z.namelist()
+
+    print("\n== 2. horse-family textures in the jar ==")
+    tex = sorted(n for n in names if n.endswith(".png") and TEX.search(n))
+    for n in tex:
+        print("  ", n[len("assets/minecraft/"):])
+
+    print("\n== 3. alpha masks ==")
+    def pick(pattern):
+        m = [n for n in tex if re.search(pattern, n, re.I)]
+        return m[0] if m else None
+    picks = {"white": pick(r"horse_white\.png$|/white\.png$"),
+             "zombie": pick(r"zombie[^/]*\.png$"),
+             "skeleton": pick(r"skeleton[^/]*\.png$")}
+    masks = {}
+    for k, n in picks.items():
+        if not n:
+            print(f"  {k}: no texture matched")
+            continue
+        try:
+            w, h, a = decode_alpha(z.read(n))
+        except Exception as e:
+            print(f"  {k}: could not decode {n}: {e}")
+            continue
+        masks[k] = (w, h, a)
+        total, clear, part, solid = summary(a)
+        print(f"  {k:8} {w}x{h}  transparent {clear} ({100*clear/total:.1f}%)  "
+              f"partial {part}  opaque {solid} ({100*solid/total:.1f}%)   {n.split('/')[-1]}")
+    if "white" in masks:
+        w0, h0, aw = masks["white"]
+        island = [x > 0 for x in aw]
+        for k in ("zombie", "skeleton"):
+            if k not in masks:
+                continue
+            w, h, a = masks[k]
+            if (w, h) != (w0, h0):
+                print(f"  {k}: size differs from the white horse ({w}x{h} vs {w0}x{h0}); "
+                      "UV layouts are not directly comparable")
+                continue
+            drawn = [x > 0 for x in a]
+            inside = sum(1 for d, i in zip(drawn, island) if d and i)
+            outside = sum(1 for d, i in zip(drawn, island) if d and not i)
+            holes = sum(1 for d, i in zip(drawn, island) if i and not d)
+            isl = sum(island)
+            print(f"  {k} vs white: drawn pixels inside the horse's UV islands {inside}, "
+                  f"outside {outside}; holes cut inside the islands {holes} of {isl} "
+                  f"({100*holes/max(1,isl):.1f}%)")
+        print("  Reading it: 'outside' near 0 means the same UV layout as the horse (so the\n"
+              "  same mesh, or at least the same skin map). A large 'holes' figure on the\n"
+              "  skeleton is the 'more transparent pixels' hunch.")
+
+    print("\n== 4. which model definition feeds which entity (javap) ==")
+    if shutil.which("javap") is None and not os.environ.get("JAVA_HOME"):
+        print("  javap not on PATH and JAVA_HOME unset; skipping. Put the JDK bin on PATH.")
+        return 0
+    classes = [n[:-6].replace("/", ".") for n in names if n.endswith(".class")]
+    layer = [c for c in classes if c.endswith("LayerDefinitions")]
+    for c in layer[:1]:
+        out = javap(jar, c)
+        if out is None:
+            print("  javap failed on", c)
+            continue
+        lines = out.splitlines()
+        print(" ", c)
+        want = re.compile(r"ModelLayers\.(HORSE|ZOMBIE_HORSE|SKELETON_HORSE|DONKEY|MULE)\b")
+        for i, ln in enumerate(lines):
+            m = want.search(ln)
+            if m:
+                print(f"   --- {m.group(1)} ---")
+                for j in range(max(0, i - 4), min(len(lines), i + 4)):
+                    print("     ", lines[j].strip())
+        print("  Reading it: look at whether the same createBodyLayer call (or the same\n"
+              "  local variable, the aload just before) is stored for HORSE, ZOMBIE_HORSE\n"
+              "  and SKELETON_HORSE. Same source = same mesh.")
+    rend = [c for c in classes if re.search(r"(?i)horse", c) and re.search(r"(?i)renderer", c)]
+    print("\n  horse renderers:", ", ".join(c.split(".")[-1] for c in rend) or "none found")
+    key = re.compile(r"ModelLayers|RenderType|entityCutout|entityTranslucent|textures/entity|"
+                     r"createBodyLayer|HorseModel|Model;")
+    for c in rend:
+        out = javap(jar, c)
+        if not out:
+            continue
+        print("  ---", c.split(".")[-1], "---")
+        seen = set()
+        for ln in out.splitlines():
+            if key.search(ln) and "invoke" in ln or "textures/entity" in ln or "ModelLayers" in ln:
+                s = ln.strip()
+                if s not in seen:
+                    seen.add(s)
+                    print("     ", s[:170])
+    print("\nDone. Paste everything above back into the chat.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+----- END check_undead_meshes.py -----
