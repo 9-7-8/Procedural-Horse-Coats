@@ -5,35 +5,58 @@
   "kind": "magical",
   "magical_variant": false,
   "commonness": "very_rare",
-  "spawn": ["spawn_egg"],
+  "spawn": [
+    "spawn_egg"
+  ],
   "stats": {
     "speed": 8,
     "jump": 7,
     "health": 2,
-    "size": [0.95, 1.05],
+    "size": [
+      0.86,
+      0.95
+    ],
     "pull": 3
   },
   "genes": {
     "horsegenetics.skeleton": [
-      { "pair": "Skl/Skl", "weight": 100 }
+      {
+        "pair": "Skl/Skl",
+        "weight": 100
+      }
     ],
     "horsegenetics.diet": [
-      { "pair": "Dbone/Dbone", "weight": 100 }
+      {
+        "pair": "Dbone/Dbone",
+        "weight": 100
+      }
     ],
     "horsegenetics.aggression": [
-      { "pair": "Anp/Anp", "weight": 100 }
+      {
+        "pair": "Anp/Anp",
+        "weight": 100
+      }
     ],
     "horsegenetics.passification": [
-      { "pair": "Prm/Prm", "weight": 100 }
+      {
+        "pair": "Prm/Prm",
+        "weight": 100
+      }
     ],
     "horsegenetics.magic_item_drop": [
-      { "pair": "Bne/Bne", "weight": 100 }
+      {
+        "pair": "Bne/Bne",
+        "weight": 100
+      }
     ]
   },
   "bands": {
     "horsegenetics.passification": {
       "offering": 14,
-      "amount": [1, 1]
+      "amount": [
+        1,
+        1
+      ]
     }
   },
   "notes": [
@@ -44,8 +67,8 @@
     "Aggression is Anp/Anp (D16): hostile to riders after dark. Passification's veto covers targeting AND fleeing (see nightmare.json's note); check that it holds for this allele.",
     "Diet is Dbone/Dbone (D17): eats bones and heals from them the way a metal-eater eats one metal. It is the same item as the passification offering on purpose. Needs a new Diet entry and the DietGene token appended to TOKENS.",
     "Drops are Bne/Bne (D15): bones instead of leather. Proposed 1 to 3 bones; needs the allele added to MagicItemDropGene. The locus key horsegenetics.magic_item_drop is MagicItemDropGene.KEY.",
-    "Stats: speed 8, jump 7 (light and quick), health 2 (fragile), pull 3. Size [0.95, 1.05] is an ordinary horse's height (D20). Health scores run from about 22.5 hp at 5 to 50.5 hp at 10 (BreedStatCurve), so health 2 is well under the baseline; tune it once seen in play.",
-    "Coat: NOT written. The look depends on stage 0 (does the skeleton share the horse mesh; how a coat is cut to alpha) and on the undeath locus's own painter. Do not pin base colours here to imitate bone until that is decided.",
-    "Eyes, mane, glow and every other cosmetic locus are left to the founder tables' defaults on purpose; they can be pinned once the look is designed."
+    "Stats: speed 8, jump 7 (light and quick), health 2 (fragile), pull 3. Size [0.86, 0.95] (D26) matches the vanilla undead horse, which vanilla renders at about 0.909 of a horse; a minecraft:horse at [0.95, 1.05] would come out about 10 percent bigger than the animal it replaced. Health scores run from about 22.5 hp at 5 to 50.5 hp at 10 (BreedStatCurve), so health 2 is well under the baseline; tune it once seen in play.",
+    "Eyes, mane, glow and every other cosmetic locus are left to the founder tables' defaults on purpose; they can be pinned once the look is designed.",
+    "Coat: NOT written. The look is the horse's own coat with a binary alpha mask cut out of it (Appendix C, D27, D28): about 55 percent of the horse's UV islands are transparent on vanilla's skeleton. Waits on the alpha op and the derived mask; do not pin base colours to imitate bone until the art is drawn."
   ]
 }

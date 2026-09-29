@@ -5,37 +5,66 @@
   "kind": "magical",
   "magical_variant": false,
   "commonness": "very_rare",
-  "spawn": ["spawn_egg"],
+  "spawn": [
+    "spawn_egg"
+  ],
   "stats": {
     "speed": 2,
     "jump": 4,
     "health": 10,
-    "size": [0.95, 1.05],
+    "size": [
+      0.86,
+      0.95
+    ],
     "pull": 7
   },
   "genes": {
     "horsegenetics.zombie": [
-      { "pair": "Zmb/Zmb", "weight": 100 }
+      {
+        "pair": "Zmb/Zmb",
+        "weight": 100
+      }
     ],
     "horsegenetics.diet": [
-      { "pair": "Dmeat/Dmeat", "weight": 100 }
+      {
+        "pair": "Dmeat/Dmeat",
+        "weight": 100
+      }
     ],
     "horsegenetics.aggression": [
-      { "pair": "Anp/Anp", "weight": 100 }
+      {
+        "pair": "Anp/Anp",
+        "weight": 100
+      }
     ],
     "horsegenetics.passification": [
-      { "pair": "Tmp/Tmp", "weight": 100 }
+      {
+        "pair": "Tmp/Tmp",
+        "weight": 100
+      }
     ],
     "horsegenetics.magic_item_drop": [
-      { "pair": "Rot/Rot", "weight": 100 }
+      {
+        "pair": "Rot/Rot",
+        "weight": 100
+      }
     ]
   },
   "bands": {
     "horsegenetics.passification": {
       "offering": 15,
-      "amount": [2, 4],
-      "duration": [1200, 3600],
-      "cooldown": [600, 1800]
+      "amount": [
+        2,
+        4
+      ],
+      "duration": [
+        1200,
+        3600
+      ],
+      "cooldown": [
+        600,
+        1800
+      ]
     }
   },
   "notes": [
@@ -46,7 +75,7 @@
     "Aggression is Anp/Anp (D16): hostile to riders after dark. Passification's veto covers targeting AND fleeing (see nightmare.json's note); check that it holds for this allele and for a temporary route expiring mid-ride.",
     "Diet is Dmeat/Dmeat (existing allele): raw meat. Feeding it breeding carrots is the open 'obligate carnivore' question on the undead-horses page; this file does not answer it.",
     "Drops are Rot/Rot (D15): rotten flesh instead of leather. Proposed 1 to 3; needs the allele added to MagicItemDropGene. The locus key horsegenetics.magic_item_drop is MagicItemDropGene.KEY.",
-    "Stats: speed 2, jump 4 (slow, poor jumper), health 10 (about x2.24 the baseline of 5 by BreedStatCurve, which is as close to 'double hearts' as the curve reaches), pull 7 (sturdy). Size [0.95, 1.05] is an ordinary horse's height (D20). If a true x2 or more is wanted, that is a body-stat locus or a new effect, not this file.",
-    "Coat: NOT written, for the same reason as the skeleton: it depends on stage 0 and on the zombie locus's painter."
+    "Stats: speed 2, jump 4 (slow, poor jumper), health 10 (about x2.24 the baseline of 5 by BreedStatCurve, which is as close to 'double hearts' as the curve reaches), pull 7 (sturdy). Size [0.86, 0.95] (D26) matches the vanilla undead horse, which vanilla renders at about 0.909 of a horse; a minecraft:horse at [0.95, 1.05] would come out about 10 percent bigger than the animal it replaced. If a true x2 or more is wanted, that is a body-stat locus or a new effect, not this file.",
+    "Coat: NOT written. Vanilla's zombie horse is the horse's coat with only a handful of pixels cut, so no mask is needed; it is an authored recolour in this mod's namespace (D27). Waits on the art."
   ]
 }

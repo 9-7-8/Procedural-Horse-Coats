@@ -1,10 +1,10 @@
 Undead horse conversion - treatment, spec and implementation guide
 
 Status: PLAN ONLY. Nothing here is built and no code was written for it.
-The owner has settled the design calls D1-D8 and the bundle question (section 5). What
-is left open is the two genes' own look and the API checks marked UNVERIFIED,
-minus the one Appendix A answers: the stage 0 mesh check HAS been run, and its
-result is Appendix C. The undead horses are the horse mesh.
+The owner has settled the design calls D1-D8, D9-D27 and the bundle question
+(section 5). The stage 0 mesh check HAS been run and its result is Appendix C:
+the undead horses are the horse mesh. What is left open is the actual art, the
+alpha op's implementation, and the API checks marked UNVERIFIED.
 Nothing here has been checked in-game. Anything that touches a Minecraft or
 NeoForge API is marked UNVERIFIED and must be read out of the 26.1.2 sources
 (or proved in a gametest) before it is relied on - see CLAUDE.md hard rule 8.
@@ -69,9 +69,10 @@ data attachments plus a renderer override (wiki/compatibility.html). That is
 why the design is cheap, and it fixes the shape of the answer.
 
 3.1 Nothing in common/ knows about undeath. There is no skeleton or zombie
-    gene, allele, breed or painter yet. Both genes are still to be written, and
-    the pipeline question (how a coat pipeline paints the absence of a coat) is
-    still open on the page's Verification tab.
+    gene, allele, breed or painter yet. Both genes are still to be written. The
+    pipeline question (how a coat pipeline paints the absence of a coat) is
+    ANSWERED by Appendix C and D26-D28: a binary alpha mask over the horse's own
+    coat. The page's Verification tab still lists it until that is moved.
 
 3.2 The founding path is the model to copy. HorseFoundingTickHandler runs on
     EntityTickEvent.Post, never on the join event or a server.execute task,
@@ -111,8 +112,17 @@ why the design is cheap, and it fixes the shape of the answer.
     suppressed - see section 9.
 
 3.6 GeneticHorseRenderer is registered for EntityType.HORSE only (ClientSetup).
-    Undead horses are drawn by vanilla's renderers today. Registering a second
-    renderer for the undead types is NOT part of this plan (section 5.2).
+    Undead horses are drawn by vanilla's UndeadHorseRenderer today, which
+    constructs the SAME HorseModel and BabyHorseModel as the horse renderer
+    (Appendix C). So a converted horse needs no second renderer and no model
+    work: it is drawn by the existing one. Registering a renderer for the undead
+    types is not part of this plan.
+    The mod bakes each coat as ARGB and uploads it through a NativeImage
+    (GeneticCoatTextureFactory.registerCoat), so an alpha channel can survive to
+    the GPU. Whether the BAKE keeps alpha (the template, the layer compositing
+    in common/) is UNVERIFIED and is the alpha op's first check (stage 1).
+    Vanilla also has ModelLayers.UNDEAD_HORSE_ARMOR beside HORSE_ARMOR; a
+    converted horse wears ordinary horse armour, so check its armour renders.
 
 3.7 BreedSpawnHandler (FinalizeSpawnEvent) only acts on Horse. It never sees the
     undead types, which is the "spawning overhaul is the actual work" point on
@@ -216,9 +226,10 @@ D18 Undead breeds do NOT spawn in the wild in the first release: "spawn" is
     No biome, herd or spawn_in_dark work for them.
 D19 undead.suppressVanillaSpawns is a later stage; the converter catches new
     vanilla undead horses a tick after they spawn.
-D20 Body: average height for both. Zombie sturdier: high health band, slow
-    speed band (double hearts, speed penalty). Skeleton light, fast, low
-    health. Plain numbers in the two breed sheets, no new stat code.
+D20 Body: the undead breeds are the size of the vanilla undead horse (see D26).
+    Zombie sturdier: high health band, slow speed band (double hearts, speed
+    penalty). Skeleton light, fast, low health. Plain numbers in the two breed
+    sheets, no new stat code.
 
 D21 Undead horses breed normally, no special rule. Undead x undead gives undead
     foals; undead x normal gives carriers that look ordinary. Nothing to code.
@@ -244,8 +255,31 @@ D25 A converted horse that was ALREADY TAMED arrives passified: the converter
     and whether it must name the owner; read it first. Add a gametest: a tamed
     saddled zombie horse converts and, after dark, does not attack its rider.
 
-Still open, and not answered here: how the coat pipeline paints a skeleton (the
-absence of a coat) - see stage 1.
+D26 SIZE, from Appendix C: vanilla stores the horse model scaled 1.1 and the
+    undead ones raw, so a vanilla undead horse is about 0.909 of a horse. To keep
+    a converted horse the same visual size, both breeds use size [0.86, 0.95]
+    (owner: compensate), replacing the [0.95, 1.05] the first drafts carried.
+    The size band is a body-scale multiple of an ordinary horse (breed format).
+    Re-check with check-breed-heights.mjs and the hand-typed heights on
+    breeds.html / breed-book.html.
+D27 ART (stage 0 (b)): the SKELETON's cut-out mask is DERIVED from vanilla: the
+    pixel positions of its transparency (about 55 percent of the horse's UV
+    islands, binary alpha) are taken as data, and the colours are painted by us.
+    The ZOMBIE has only a handful of holes, so it needs no mask; it is a
+    recolour authored in this mod's own namespace. Vanilla's sheets are a visual
+    reference and are never shipped or sampled at run time. Deriving a mask is
+    still derivation, so THIRD_PARTY_NOTICES gets an entry saying so, in the
+    same change. Record the derived mask as a checked-in data file with a
+    comment on where it came from, not as a vanilla texture.
+D28 Alpha op: a coat op that writes alpha 0 over a mask, and nothing else.
+    Alpha in vanilla's undead horses is strictly binary (Appendix C), so the op
+    is binary, no translucent render type is needed, and the skeleton mask (D27)
+    is its first user. Not a painting gene at extreme priority and not a model
+    swap: both were ruled out by Appendix C.
+
+Answered by Appendix C and D26-D28: the skeleton is the horse's coat with a
+binary alpha mask cut out of it. Still open below: the art and the op's
+implementation.
 
 
 5a. Reuse map: what already exists for each undead trait
@@ -568,41 +602,35 @@ and leaves the game working. Because conversion is ON by default (D2), stages
 merged last and released together with the genes and breeds it depends on. Until
 then it can sit on main behind undead.convert=false in the working tree only.
 
-Stage 0 - the coat question. The hunch is PROVED: the vanilla zombie horse and
-          skeleton horse are the ordinary horse mesh with a different texture,
-          the skeleton simply cutting away more than half of it. Appendix C has
-          the evidence, read out of the 26.1.2 client jar. So the old three
-          options (a painting gene at extreme priority, a whole-texture
-          override, a model swap) are all off the table: a skeleton or rotted
-          look is another coat on the same UV layout, and the mod's sheet is
-          already the vanilla layout at twice the size
-          (HorseSkinGeometry.SHEET_SIZE). What is left of this stage is smaller
-          than it was:
-          (a) alpha - SETTLED in shape. Neither undead texture has a single
-              partially transparent pixel, so alpha is strictly binary: the
-              pipeline needs an op that writes alpha 0, and a cutout render type
-              is enough. No translucent type, and nothing to borrow from the
-              emissive/eyes layer. Still to check in the same change: that this
-              mod's own GeneticHorseRenderer uses a cutout type - Appendix C
+Stage 0 - the coat question. CLOSED by Appendix C and D26-D28; nothing here
+          blocks stage 1 except the art itself. The hunch is PROVED: the vanilla
+          zombie horse and skeleton horse are the ordinary horse mesh with a
+          different texture, the skeleton cutting away about 55 percent of the
+          horse's UV islands. So the old three options (a painting gene at
+          extreme priority, a whole-texture override, a model swap) are off the
+          table: a skeleton or rotted look is another coat on the same UV layout
+          the mod's sheet already uses at twice the size (HorseSkinGeometry
+          .SHEET_SIZE). What it leaves, all decided:
+          (a) alpha (D28): a coat op that writes alpha 0 over a mask. Alpha is
+              strictly binary in vanilla, so no translucent type. The mod bakes
+              coats as ARGB and uploads a NativeImage, so alpha can reach the
+              GPU; to check in stage 1: that the bake (template and layer
+              compositing in common/) keeps alpha, and that GeneticHorseRenderer,
+              which names no render type, ends up with a cutout one. Appendix C
               read vanilla's renderer, not the mod's.
-          (b) source art - UNCHANGED and still the real work. CLAUDE.md's
-              template rule is that the mod never samples vanilla's textures, so
-              the undead looks must be authored into this mod's own namespace,
-              with the licence question answered in THIRD_PARTY_NOTICES if
-              vanilla art is used as a reference.
-          (c) NEW, and the one thing the plan did not anticipate: vanilla stores
-              the shared equine LayerDefinition for HORSE with
-              MeshTransformer.scaling(1.1f) applied and for SKELETON_HORSE and
-              ZOMBIE_HORSE raw, so the undead horses render at about 0.909 of a
-              horse. A converted horse is a minecraft:horse and so comes out
-              roughly 10 percent larger than the vanilla animal it replaced,
-              before its breed's own size band. That is a number in the two
-              breed sheets (D20 says average height for both), not new code -
-              decide whether to compensate or to accept it and say so.
-          Owner's call on (b); record all of it on the page's Coding tab before
-          stage 1. Also rewrite the philosophy.html live-test paragraph to say
-          the breed sets the bundle.
-Stage 1 - the genes and the two breeds, in common/. The skeleton locus and the
+          (b) art (D27): skeleton mask derived from vanilla as data, colours
+              painted by us; zombie is an authored recolour; THIRD_PARTY_NOTICES
+              entry in the same change.
+          (c) size (D26): both breeds [0.86, 0.95] to match the vanilla undead
+              horse's 0.909 scale.
+          Still to do before stage 1: record all of it on the page's Coding tab
+          and rewrite the philosophy.html live-test paragraph to say the breed
+          sets the bundle.
+Stage 1 - the alpha op and the mask (D27, D28), then the genes and the two
+          breeds, in common/. The op is a new coat op, so it touches the four or
+          five places a new op does (wiki/making-a-gene.html#contracts), and the
+          creator's parity fixtures (:common:bakeSpecFixtures, check-parity.mjs)
+          if it lives in spec/. The genes and the two breeds, in common/. The skeleton locus and the
           zombie locus (a data-driven gene file each, per
           wiki/making-a-gene.html), their look, and their founder frequencies
           in other breeds' tables (D3b). Then the Great Valley Skeleton Horse
@@ -734,8 +762,9 @@ owner has seen it.
 All settled by the owner; see section 5 for the wording. When this is routed
 onto the wiki they are recorded on wiki/undead-horses.html's Coding tab, not on
 decisions.html (which is no longer a source of truth).
-Still open: how a coat is painted as a skeleton or a rotted horse (stage 0);
-every UNVERIFIED API note above (D25's attachment shape included).
+Still open: the art itself (D27), the alpha op's implementation (D28), and every
+UNVERIFIED API note above (D25's attachment shape included). How a coat is
+painted as a skeleton is closed (Appendix C).
 
 
 15. Risks, worst first
@@ -1087,9 +1116,11 @@ Choices made in the drafts, all changeable:
     adds a random gene on top of an undead breed. Check what magical_variant
     false implies elsewhere before release.
   - stats: skeleton speed 8, jump 7, health 2, pull 3; zombie speed 2, jump 4,
-    health 10, pull 7; both size [0.95, 1.05] (D20). Health 10 is about x2.24
-    the baseline by BreedStatCurve, not a true doubling.
-  - the coat is deliberately not written; it waits on stage 0.
+    health 10, pull 7; both size [0.86, 0.95] (D26, matching the vanilla
+    undead horse's 0.909 scale). Health 10 is about x2.24 the baseline by
+    BreedStatCurve, not a true doubling.
+  - the coat is deliberately not written: it now waits on the alpha op and the
+    art (D27, D28), not on a decision.
   - zombie temporary calm: 1 to 3 minutes, cooldown half a minute to 1.5
     minutes, 2 to 4 rotten flesh; skeleton: exactly one bone.
 
@@ -1159,13 +1190,12 @@ Class names moved in 26.1.2 and the plan should use the new ones: the models are
 net.minecraft.client.model.animal.equine.{HorseModel, BabyHorseModel,
 DonkeyModel}.
 
-What is now settled, and what stage 0 still owes:
+What is now settled (owner, after this appendix):
   SETTLED  No model swap, no whole-texture override, no painting gene at extreme
            priority. The undead looks are ordinary coats on the layout the mod's
            sheet already uses at twice the size (HorseSkinGeometry.SHEET_SIZE).
-  SETTLED  Alpha is binary. An op that writes alpha 0, honoured by a cutout
-           render type. Confirm the mod's own GeneticHorseRenderer asks for a
-           cutout type in the same change; this script read vanilla's renderer.
-  OPEN     The art. Authored in this mod's namespace, vanilla's sheet as a
-           reference only, THIRD_PARTY_NOTICES question unchanged.
-  OPEN     The 1.1 scale difference, as a size-band decision (stage 0 (c)).
+  SETTLED  Alpha is binary: a coat op that writes alpha 0 (D28). Confirm the
+           bake keeps alpha and the mod's renderer ends up cutout, in stage 1.
+  SETTLED  Art (D27): skeleton mask derived from vanilla as data, colours ours;
+           zombie an authored recolour; a THIRD_PARTY_NOTICES entry.
+  SETTLED  Size (D26): both breeds [0.86, 0.95].
