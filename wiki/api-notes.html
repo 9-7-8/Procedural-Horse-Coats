@@ -614,6 +614,62 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     safe are a field, a leaf method and a class &mdash; nothing with a subclass under it.
 </p>
 
+<h2 id="source-permission">A command source no longer has <code>hasPermission(int)</code></h2>
+
+<p>
+    <code>CommandSourceStack.hasPermission(int)</code> is <strong>gone</strong> in 26.1.2, and
+    permission levels are no longer <code>int</code>s.
+    <code>Commands.LEVEL_GAMEMASTERS</code> and friends are
+    <code>net.minecraft.server.permissions.PermissionCheck</code>, and the source carries a
+    <code>PermissionSet</code>:
+</p>
+
+<pre><code>// the .requires() form, which is what most of this repo uses
+.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+
+// asking a source directly, mid-command - this is the one with no obvious replacement
+boolean operator = Commands.LEVEL_GAMEMASTERS.check(source.permissions());</code></pre>
+
+<p>
+    The second form is the one worth writing down, because <code>Commands.hasPermission</code>
+    returns a <em>predicate</em> for the <code>.requires()</code> slot and does not answer the
+    question you are asking when a command wants to behave differently for an operator halfway
+    through. <strong>The compile error names neither replacement</strong> &mdash; it is a bare
+    <code>cannot find symbol</code> on a method that every tutorial written before this version
+    uses. Found 2026-09-29 writing <code>server/HorseGiveCommand</code>, which lets a gamemaster
+    give away a horse that is not theirs.
+</p>
+
+<h2 id="void-air">Below the world, <code>getBlockState</code> answers air &mdash; and
+    <code>isAir()</code> agrees</h2>
+
+<p>
+    Outside build height a <code>Level</code> returns <code>Blocks.VOID_AIR</code>, and
+    <code>BlockState.isAir()</code> is <strong>true</strong> for it. So any search that looks for
+    empty space by testing <code>isAir()</code> will happily find a large, perfectly clear region
+    directly underneath the bottom of the world, and rank it as the nearest one when the search
+    started near bedrock.
+</p>
+
+<p>
+    This is not a tidiness problem. Found 2026-09-29 writing
+    <a href="compatibility.html#waystones-landing">the waystone arrival search</a>, where it would
+    have teleported a horse and its rider to <em>eight blocks below the floor of the world</em>
+    whenever the waystone was deep enough &mdash; which reads as the integration working perfectly
+    everywhere except in a mineshaft.
+</p>
+
+<p>
+    <code>BlockGetter extends LevelHeightAccessor</code>, so the guard is to hand and costs
+    nothing. Check <strong>both ends</strong> of whatever volume you are clearing, not just the
+    origin:
+</p>
+
+<pre><code>if (level.isOutsideBuildHeight(feet.getY())
+        || level.isOutsideBuildHeight(feet.getY() + height - 1)) {
+    return false;
+}</code></pre>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>

@@ -14,7 +14,9 @@ wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide w
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
 wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
+wiki/api-notes.html#source-permission	all	A command source no longer has hasPermission(int)
 wiki/api-notes.html#verified	all	Verified
+wiki/api-notes.html#void-air	all	Below the world, getBlockState answers air — and isAir() agrees
 wiki/architecture.html#boot-progress	all	What happens when a browser loads the mod
 wiki/architecture.html#build	all	Build & test, in full
 wiki/architecture.html#compat-flow	all	The other data flow: other mods' jars a pack on disk
