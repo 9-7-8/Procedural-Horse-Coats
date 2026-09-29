@@ -265,11 +265,10 @@ Passification, settled (D13, D14):
     vetoes TARGETING, not harmful auras, and it must also stop FLEEING (the
     nightmare note records that fix). A passified undead horse is still an
     undead horse to cleansing light.
-Two things in this table are UNVERIFIED and one may not fit:
+Two things in this table are UNVERIFIED:
   - MagicItemDropGene's alleles are "instead of leather" (diamonds, an egg, a
-    sword). Whether a drop that ADDS bones and flesh alongside leather, or that
-    replaces it, is what is wanted is not decided; and its runtime-registry
-    todo in To do.txt touches the same gene, so coordinate.
+    sword), which is the shape D15 wants (bones or flesh REPLACE leather). Its
+    runtime-registry todo in To do.txt touches the same gene, so coordinate.
   - The sound effect's vocabulary was not read; confirm it can name a vanilla
     entity sound event (zombie_horse / skeleton_horse ambient, hurt, death) and
     that it fires per-horse rather than per-gene.
@@ -360,10 +359,10 @@ taken from the original.
        the vanilla entity to preserve.
      - Breed: pick from the undead adapter's pool for this type (skeleton pool:
        the Great Valley Skeleton Horse; zombie pool: the Graveborn Warmblood),
-       seeded from the UUID so the choice is stable. With one member the pool is
-       trivial, but build it as a list from the start (a field on the breed
-       sheet naming the undead type it belongs to, or a small pool file - decide
-       against wiki/breed-format.html; a breed is JSON, not Java).
+       seeded from the UUID so the choice is stable, uniform across members. With
+       one member the pool is trivial, but build it as a list from the start.
+       A breed joins a pool by a field on its own sheet (D12); write the field
+       into wiki/breed-format.html and BreedFilesTest.
      - Genome: BreedFounder.roll(breed, rng, sex) - the breed itself pins the
        undead pair and the diet, temper and stat loci, so no forced list is
        needed. Check the pinned pair can never roll a lethal outcome for a
@@ -453,7 +452,7 @@ outcome every other horse of this mod has when the mod is removed.
      rider. Recommend: a trap horse is left alone until the trap has sprung and
      the skeletons have been dealt with (isTrap() false), then converts like any
      other. The trap remains a vanilla mechanic and only the horse it leaves
-     behind becomes this mod's. Owner to confirm (open decision D5).
+     behind becomes this mod's. Decided (D5).
 8.2  Ridden by a player: deferred (6.2). Tamed and saddled with nobody on it:
      converts normally and keeps saddle and owner.
 8.3  Leashed to a fence or a player: the lead must survive (6.3). If it cannot
@@ -713,8 +712,8 @@ All settled by the owner; see section 5 for the wording. When this is routed
 onto the wiki they are recorded on wiki/undead-horses.html's Coding tab, not on
 decisions.html (which is no longer a source of truth).
 Still open: how a coat is painted as a skeleton or a rotted horse (stage 0);
-the pool-selection mechanism and where the pool is declared (stage 1, against
-wiki/breed-format.html); and every UNVERIFIED API note above.
+what a converted horse that was ALREADY TAMED does about its pinned Anp
+aggression (D25, below); and every UNVERIFIED API note above.
 
 
 15. Risks, worst first
