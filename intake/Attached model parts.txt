@@ -104,16 +104,23 @@ P1. Grown versus worn - one system or two?
   interaction on the Verification tab the first time it is visible.
 
 P2. Where does a part get its geometry?
-  (a) Blockbench -> .json mesh loaded at run time as a LayerDefinition, or
-  (b) code-built meshes in the manner of the cart models (EasyMeshBuilder).
-  Recommendation: (a) for the art, with the SAME loader for every part, because the
-  owner's stated workflow is Blockbench and because (b) makes every new horn a Java
-  change. UNVERIFIED: whether 26.1.2 has a data-driven path for entity model parts
-  that survives resource-pack reload, or whether LayerDefinitions must be registered
-  at mod-init through EntityRenderersEvent.RegisterLayerDefinitions, as ClientSetup
-  does for HD_HORSE. If the latter, "a part is a data file" is not free and the
-  registry must be a compile-time list of ids with their model files - still one
-  line each, but a line of Java, not data. Stage 0 answers this before anything else.
+  REVISED after section 11: the owner does NOT need Blockbench for the first batch.
+  The HD horse itself is built in Java from CubeListBuilder boxes (HdHorseModel), and
+  so are the cart models (EasyMeshBuilder); a Blockbench export is only a nicer way
+  to author the same list of rotated boxes. Options:
+  (a) hand-authored boxes in a small JSON box-list format (from, size, rotation,
+      pivot, uv) that is exactly what a Blockbench "generic" export reduces to, so a
+      Blockbench mesh can be dropped in later without a second loader;
+  (b) GENERATED boxes: a parametric generator (taper, spiral, branch, fan, cluster)
+      expands a few numbers into the box list in code;
+  (c) vanilla geometry reused (the elytra mesh for wings; section 11.5).
+  Recommendation: (a)+(b) sharing one PartSpec of boxes; Blockbench becomes an
+  optional importer, not a prerequisite. UNVERIFIED: whether 26.1.2 lets a
+  LayerDefinition be baked at run time (LayerDefinition.bakeRoot()) so a per-horse
+  variant can be built and cached, or whether every LayerDefinition must be
+  registered during EntityRenderersEvent.RegisterLayerDefinitions as ClientSetup
+  does for HD_HORSE. If the latter, variety comes from a finite baked set plus
+  per-horse pose scale/tilt (section 11.6). Stage 0 answers this first.
 
 P3. How does common/ name a part?
   Recommendation: a plain string id, like every other cross-module identity in this
@@ -306,3 +313,215 @@ this treatment's registry is a third list that will otherwise drift silently).
 - Whether a worn item can hide a grown part (P1).
 - Anything about animation of a part independent of its parent. The premise is that
   no part needs one; a part that does is a different plan.
+
+
+11. Feasibility: what needs Blockbench, what is code, what needs animation
+===========================================================================
+Requested: flesh out unicorn horns, antlers, crystals, hoof feathering, then the
+harder set (wings, lion tails), and say how much is possible (a) with no Blockbench,
+(b) with JUST code, (c) with NO new animation.
+
+11.1 Three facts that decide most of it
+----------------------------------------
+F1. Everything on this renderer is already boxes. HdHorseModel is CubeListBuilder
+    boxes with a PartPose (offset + rotation) and a texScale. A "mesh" here means a
+    tree of rotated axis-aligned boxes. A horn, a spine, a crystal, an antler tine
+    and a feather card are all expressible that way. Blockbench produces the same
+    thing; it is an editor, not a capability. So "no Blockbench" costs blockiness,
+    not possibility - and blocky is the game's own look.
+F2. A part parented to an animated ModelPart inherits its animation for free. The
+    HD model already animates head_parts (head bob, graze, rear), the four legs, the
+    tail (child of body) and the ears (children of head). A part that is a child, or
+    that calls translateAndRotate on that ModelPart the way CutieMarkLayer does for
+    body, needs no animation of its own. "No new animation" is therefore the DEFAULT
+    for anything rigidly fixed to a moving bone.
+F3. Layers run after the model is posed, so a layer can READ the parent's already
+    computed rotation (leg.xRot, tail.xRot, head_parts.xRot) and apply a formula:
+    counter-swing, amplify, damp. That is code, not an animation asset, and it needs
+    no state. (UNVERIFIED that the part rotations are still the posed values at
+    RenderLayer.submit time in 26.1.2's submit-node model; stage 0 prints them.)
+
+11.2 The colour problem, and the trick that removes the art
+------------------------------------------------------------
+Geometry is half of a part. The other half is what colour it is, and that is where
+"no Blockbench, no texture painting" usually breaks. Three zero-art routes, in order
+of how well they fit this mod:
+ T1. SAMPLE THE HORSE'S OWN COAT TEXTURE. A part's UVs can point into a patch of the
+     horse's generated coat - the mane patch, the tail patch, a leg patch, a hoof
+     patch - so the part takes that colour from every gene automatically, for every
+     coat, including glowing and dilute ones. HorseSkinGeometry already knows where
+     each body region lives on the sheet (it is how genes paint by body-space). This
+     is the natural answer for anything that should look like the horse's own hair
+     (feathering, lion tuft, mane-coloured crest) and for hoof-coloured horn. It
+     also honours the philosophy: the part is as unbounded as the coat.
+     (UNVERIFIED which regions a hoof or a mane sample can reach without the coat
+     genes writing a marking over them; check HorseSkinGeometry and a whitelisted
+     "clean sample" patch.)
+ T2. A FLAT MASK TEXTURE + A TINT, exactly BraidLayer's method: a shipped white mask
+     and a per-horse int colour from the contribution record. One file covers every
+     colour. Right for horn ivory/keratin, bone-white antlers, crystal colours.
+ T3. A GENERATED TEXTURE: the mod already bakes textures in code (the coat pipeline,
+     the noise classes). A small procedural sheet (feather barbs, a crystal facet
+     gradient) can be baked once at load in common/ - game-free, deterministic, and
+     WASM-runnable, so the wiki designer could show it later.
+None of these need a painted texture from the owner. A hand-painted texture stays an
+upgrade path, not a dependency.
+
+11.3 Part by part
+------------------
+Legend: Blockbench = does the owner have to model it? Code = can it be done with
+JUST code (no new asset)? Anim = new animation needed?
+
+UNICORN HORN  - Blockbench: NO.  Code: YES.  New animation: NONE.
+  A tapered cone is a stack of 6-10 boxes, each smaller than the last, on the head
+  bone (head_parts > head), tilted forward ~20-30 degrees. A SPIRAL is the same stack
+  with a small yaw increment per box plus a thin ridge box on one corner of each
+  section - reads as twisted at Minecraft resolution. Parameters that make it a
+  gene's alleles instead of a model: length, base width, twist turns, tilt, tip
+  sharpness, colour. Placement: forehead, between the ears (ears are at head-local
+  y -13..-10, z 4..5; a horn anchors just forward of them - UNVERIFIED offset, tune in
+  stage 0). Colour: T2 tint (ivory / gold / pearl), or T1 hoof sample for a "keratin"
+  horn. Emissive is one flag (reuse EmissiveCoatLayer's approach) for a glowing horn.
+  Verdict: fully doable now; the best stage 2 candidate.
+
+ANTLERS  - Blockbench: NO.  Code: YES.  New animation: NONE.
+  Antlers are the best case for a GENERATOR, because a real antler is a recursive
+  branch: a main beam with tines that fork. One function - beam(length, girth, angle),
+  then N tines each a smaller beam at an angle from a point on the parent - expands
+  seed + parameters into 10-40 boxes. Feed it the allele copy's epigenetic seed and
+  every horse grows a different rack while staying a recognisable species: this is
+  the "functionally infinite space" premise (hard rule 4) applied to geometry, and
+  it is something a hand-modelled Blockbench antler cannot do at all. Sits on the head
+  bone behind the ears; inherits head motion, so a graze or a head-toss carries them.
+  Sexual dimorphism, seasonal shedding and antler growth stages are just conditions
+  on the record, not animation. Colour: T2 tint (bone, velvet) or T1.
+  Verdict: fully doable, and BETTER in code than in Blockbench. The generator would
+  live in common/ as plain arithmetic emitting a box list (no Minecraft imports), so
+  hard rule 1 holds and the wasm designer could preview it.
+
+CRYSTALS (growths on the back, poll, shoulders)  - Blockbench: NO.  Code: YES.
+  New animation: NONE.
+  A crystal is a hexagonal-ish prism: two or three long boxes at slightly different
+  yaws, plus a shorter offset one - a cluster. A cluster generator scatters 3-7 of
+  them over an anchor patch (SPINE_ROW / WITHERS / SHOULDER) with seeded lengths and
+  lean. Needs the two properties the other parts do not: translucency and glow. The
+  glow is the emissive pass that already exists for coats; translucency is a
+  different render type (UNVERIFIED which translucent entity render types 26.1.2's
+  submit API offers a layer). If translucency is not cheap, opaque emissive crystals
+  are still a good look and the gene ships without it.
+  Verdict: doable; the render type, not the geometry, is the only unknown.
+
+HOOF FEATHERING (fetlock feathers)  - Blockbench: NO.  Code: YES.  New animation: NONE.
+  Feathering is long hair hanging from the fetlock of the draught breeds. Build it as
+  a fringe of thin hanging boxes (or crossed flat cards) wrapped around the lower
+  quarter of each leg, children of the four leg parts, so they swing with the leg
+  for nothing. Because it is hair, sample T1 from the TAIL/MANE patch and it comes
+  out the right colour on every horse, exactly as real feathering matches the mane.
+  Optional polish with no animation asset: a counter-swing formula from F3
+  (feather.xRot = -0.3 * leg.xRot) so it trails the hoof rather than swinging like a
+  rigid sleeve. Length and density are the allele parameters; the breeds that want it
+  (draught, per the page) get it from their breed file at stage 4.
+  Verdict: doable; the two cost points are the number of boxes (4 legs x ~10 = 40
+  extra cubes per horse - measure a herd) and the sampled patch, not the art.
+
+HARDER SET
+
+LION TAIL (thin tail with a tuft)  - Blockbench: NO.  Code: YES, with one caveat.
+  New animation: NONE (rigid).
+  The horse tail is a 3x14x4 box child of body with its own animation. Two moves:
+  (1) make the horse tail thin - scale the tail part down on the model (the HD model
+  is ours, so this is a setupAnim-level scale on the one part; UNVERIFIED that
+  ModelPart carries xScale/yScale/zScale in 26.1.2, else hide it and draw a thin
+  replacement child); (2) hang a tuft - a small cluster of boxes at the end, a child
+  of "tail" so it follows the swish, coloured by T1 from the mane patch. The caveat:
+  a truly whippy lion tail curves along its length. A single rigid box cannot. A
+  2-3 segment chain, each segment a child of the last, CAN, and a chain needs a per-
+  segment rotation rule. That rule can be a pure formula off the parent's rotation
+  (each segment rotates a fixed fraction of the one above), which is F3 again - no
+  animation asset, no per-entity state. Rigid straight tail + tuft is the stage-3
+  version; the chain is an upgrade.
+  Tufted tails (the page's "lion and tufted tails") are the rigid version.
+
+WINGS  - Blockbench: NO.  Code: YES.  New animation: TWO STATIC POSES, no flapping.
+  Already researched on model-parts.html: copy the elytra mesh (two 10x20x2 boxes,
+  CubeDeformation 1.0, texOffs(22,0), 64x32), point the texture at vanilla's own
+  wings/elytra.png, so any elytra retexture pack is the wing art. No modelling. The
+  ONLY new thing is pose, and the honest ladder is:
+   W1  Always folded against the flanks. Zero animation, zero state. A static pair of
+       rotated boxes. Ships with the horn batch.
+   W2  Folded on the ground, spread when airborne or gliding: a boolean from the
+       render state (GeneAbilityHandler already sets shared flag 7, isFallFlying).
+       Two constant poses; the switch is a snap. Still no animation.
+   W3  The same two poses with a smoothed blend (a single float per horse on the
+       render state, lerped in extract) so the wings open instead of popping. This
+       is the first thing that is arguably "an animation", and it is one number.
+   W4  Flap: wing.zRot = A * sin(ageInTicks * k) while airborne. Still a formula, no
+       asset, but it needs a tuned amplitude and it is where wings stop looking like
+       an elytra and start looking like wings, so it is polish, not v1.
+  Cost of NOT doing W3/W4: wings that snap open. Cost of doing them: one float and one
+  sine. The owner's stated "no new animations" constraint is satisfied through W2.
+  Membrane or feathered pegasus wings (rather than elytra-shell wings) are the one
+  visual in the whole page that genuinely wants hand modelling - or a generator of
+  primary feathers (a fan of flat cards, seeded lengths), which is the antler
+  technique again and gets 80% of the way without Blockbench. Decide when W1-W2 have
+  been seen; do not pre-decide.
+
+11.4 The table
+---------------
+                       Blockbench   Code only   New animation   Colour route
+ unicorn horn             no          yes          none          T2 (T1 optional)
+ antlers                  no          yes          none          T2 / T1
+ crystals                 no          yes          none          T2 + emissive
+ hoof feathering          no          yes          none (opt.    T1 from mane/tail
+                                                   counter-swing formula)
+ lion tail + tuft         no          yes          none (rigid;  T1
+                                                   chain = formula)
+ wings (elytra-shell)     no          yes          2 static      vanilla elytra png
+                                                   poses (W2)
+ wings (feather fan)      optional    yes*         W2 -> W4      T2 / T1
+ (*generator; hand model only if the owner wants a specific look)
+So: NOTHING on the owner's list strictly requires Blockbench, NOTHING requires a new
+animation asset, and everything through W2 needs no animation at all. What the
+restriction does cost is smoothness of curved organic shapes (a truly curved horn, a
+flowing tail) - boxes give facets - and the last 20% of polish on wings.
+
+11.5 Free things vanilla already gives us (no modelling at all)
+----------------------------------------------------------------
+- The elytra mesh and texture for wings (model-parts.html).
+- The horse's own ear box as a template for any small pointed head part.
+- CutieMarkLayer's proof that a vanilla ITEM model can be submitted through
+  ItemStackRenderState at an anchor. So a fallback for a quick prototype is to draw a
+  vanilla item or block model as the part: an amethyst cluster for crystals, a
+  pointed dripstone for a horn, an end rod for a spike. No mesh at all. Limits: the
+  colour is the item's, tinting is awkward, and it is a flat-shaded block look. Good
+  for the stage 0 spike, wrong for the finished feature. (UNVERIFIED for block models
+  in 26.1.2's submit API; items are proven by CutieMarkLayer.)
+
+11.6 Variety without a bake per horse
+--------------------------------------
+Because LayerDefinitions are normally registered once, "every horse has a different
+antler" needs care:
+ - Finite baked set + per-horse transform: bake ~8-16 seeded variants at registration
+   and pick by seed; vary the rest with scale, tilt and tint per horse. Cheap, safe.
+ - Or run-time bake and cache by seed bucket, IF stage 0 proves LayerDefinition can be
+   baked outside the registration event.
+ - Or build the part as many small children whose VISIBILITY the record toggles (tine
+   count) - no bake at all.
+Recommendation: visibility + transform first; it is the same trick the mod already
+uses for size (a genetic scale on the state) and needs nothing UNVERIFIED.
+
+11.7 What this changes in the slice plan (section 5)
+-----------------------------------------------------
+- Stage 0 also prints the posed leg/tail/head rotations at submit time (F3) and tries
+  one code-built horn AND one vanilla-item stand-in, to compare.
+- Stage 2's first gene is best the unicorn horn (simplest generator, no new render
+  type, no new animation).
+- Stage 3 becomes: horn, spines, antlers (adds the branch generator), crystals (adds
+  emissive + the translucency question), in that order.
+- A hoof-feathering stage joins stage 4 next to the breed hook, because the breeds
+  that want it are the ones that need a breed-declared part, and it is the first part
+  that adds four anchors at once and the first T1 (coat-sampled) colour.
+- Wings gain the W1-W4 ladder; only W1-W2 are in scope until seen.
+- New standing rule for this page: no part ships needing an animation asset. A part
+  that cannot be expressed as a rigid child, a static pose pair, or a formula off the
+  parent's rotation is a different plan and goes to its own Roadmap entry.
