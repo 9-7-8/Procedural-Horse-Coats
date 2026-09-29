@@ -1544,3 +1544,34 @@ a.card .card-text {
     .roadmap-index li { grid-template-columns: 1fr; }
     .roadmap-plans { align-self: start; }
 }
+
+/* ---- rotatable block previews (block-preview.js) ------------------------- */
+.block-preview {
+    margin: 1.4rem 0;
+}
+.block-preview-canvas {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: var(--bg-soft);
+    cursor: grab;
+    touch-action: none;   /* the drag rotates; it must not also scroll the page */
+}
+.block-preview-canvas:active { cursor: grabbing; }
+.block-preview-canvas:focus-visible { outline: 2px solid #5b8def; outline-offset: 2px; }
+.block-preview-labels {
+    display: flex;
+    justify-content: space-around;
+    gap: 0.5rem;
+    margin-top: 0.45rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-align: center;
+}
+.block-preview-labels span { flex: 1 1 0; }
+.block-preview-note {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin: 0.5rem 0 0 0;
+}
