@@ -253,7 +253,7 @@ plus a few alleles". Each row names the thing to copy.
   Trait                     Existing machinery                      New work
   ------------------------  --------------------------------------  ---------
   Aggressive on sight       AggressionGene grid (when x who)        pick alleles
-  Passified with an item,   PassificationGene: Prm = permanent, FTm   add the two
+  Passified with an item,   PassificationGene: Prm = permanent, Tmp   add the two
    then tamed as normal     = temporary; the offering is an INDEX     offerings
                             into a closed OFFERINGS list, appended
                             to freely (adding to the END is free,
