@@ -276,15 +276,12 @@ D27 ART (stage 0 (b)), REVISED by the owner: START BY COPYING vanilla's
         says no Mojang art ships in the jar (about the cart textures) and does
         not mention the white horse templates at all, so the entry should cover
         those too. What the entry says is the owner's call.
-      - The original derivation is not in the repo (no tool found that makes
-        horse_white.png from its 64px reference), so write one: a small script
-        that takes vanilla's 64px sheet to the mod's 128px sheet. Its self-check
-        is to run it on vanilla's horse_white and require a byte-identical
-        match to the shipped horse_white.png; only then run it on the undead
-        sheets. Do not trust a plain 2x nearest scale for the ADULT sheet: the
-        mod's adult model re-texOffs the four legs and two ears onto their own
-        patches and drops mirroring (architecture page), so the patches must be
-        copied to the new places. The baby is a straight 2x pass.
+      - The original derivation IS reproducible, though no tool for it is in the
+        repo. Checked against the shipped pair (a scratch script, since
+        deleted): horse_white.png is EXACTLY vanilla's 64px sheet scaled 2x by
+        nearest neighbour, then four unflipped patch copies (0 differing pixels
+        of 16384); horse_white_baby.png is a plain 2x nearest scale (0 differing
+        pixels). Details and the tool that makes this repeatable are Appendix E.
       - The white template is multiplied by pigment; the undead sheets are
         already coloured, so they cannot be a template the pipeline multiplies.
         They enter as an OVERRIDE layer painted after the natural phase, with
@@ -299,6 +296,30 @@ D27 ART (stage 0 (b)), REVISED by the owner: START BY COPYING vanilla's
         no art and honours a player's resource pack retexturing skeleton and
         zombie horses. Not chosen for the first pass; switching later changes
         only where the sheet is read from.
+D35 THIRD_PARTY_NOTICES.md MUST be updated in the same change as any copied
+    Mojang art (owner). Two facts to put in it, neither of which it says now:
+    (1) the mod already ships Mojang-derived art: horse_white.png and
+    horse_white_baby.png are vanilla's white sheets scaled 2x (with the
+    *_vanilla64.png originals beside them); (2) the new zombie and skeleton
+    sheets (and their baby variants) are copied and converted the same way.
+    The file currently says, about the cart textures, that "no Mojang art ships
+    in this jar"; that sentence must be qualified so it is not read as covering
+    the horse sheets. The wording, and whether anything else is needed to
+    distribute Mojang-derived textures, is the owner's call. Add the entry when
+    the first copied sheet lands, not later, and list every source sheet by
+    file name so the next one has somewhere obvious to be added.
+D36 A REUSABLE SHEET CONVERTER (owner): a tool that takes a Mojang base, or any
+    other coat sheet that paints the same underlying vanilla horse mesh, to this
+    mod's scale and layout. It must work for every such source, not just the two
+    undead sheets, so a resource pack's white horse (texture-resolution
+    roadmap) and other packs' coats go through the same code. Spec: Appendix E.
+D37 REBUILD THE ADULT SHEET (owner): vanilla's adult sheet shares one patch
+    across all four legs (left legs mirrored) and one across both ears, because
+    vanilla has little spare room; this mod's sheet has room and gives every leg
+    and ear its own patch (HdHorseModel). The converter therefore does not just
+    scale: it re-lays the adult sheet by the same process already used for the
+    white horse, expanded to be data-driven (Appendix E), so it is not a
+    hand-typed list of four copies.
 D28 Alpha op: a coat op that writes alpha 0 over a mask, and nothing else.
     Alpha in vanilla's undead horses is strictly binary (Appendix C), so the op
     is binary, no translucent render type is needed, and the skeleton mask (D27)
@@ -679,7 +700,9 @@ Stage 0 - the coat question. CLOSED by Appendix C and D26-D28; nothing here
           Still to do before stage 1: record all of it on the page's Coding tab
           and rewrite the philosophy.html live-test paragraph to say the breed
           sets the bundle.
-Stage 1 - the alpha op and the mask (D27, D28), then the genes and the two
+Stage 1 - FIRST the sheet converter (D36, D37, Appendix E) and the
+          THIRD_PARTY_NOTICES entry (D35), then the alpha op and the copied
+          sheets (D27, D28), then the genes and the two
           breeds, in common/. The op is a new coat op, so it touches the four or
           five places a new op does (wiki/making-a-gene.html#contracts), and the
           creator's parity fixtures (:common:bakeSpecFixtures, check-parity.mjs)
@@ -1304,3 +1327,119 @@ What still has to exist for these two to load: the two undeath genes, a bone
 diet allele, the Bne and Rot drop alleles, EyeColourGene's BLACK row,
 OFFERINGS entries 14 and 15, and (optionally) a way to make "cannot drown"
 real for the skeleton. The coat waits on the alpha op and the art.
+
+
+Appendix E - the horse sheet converter (D36, D37): what it does and how the
+==========================================================================
+existing sheets were made
+=========================
+What the repo already did, measured (not remembered). Vanilla's adult horse
+model points all four legs at texOffs(48, 21), the left legs additionally
+.mirror(), and both ears at texOffs(19, 16). HdHorseModel gives each its own
+patch inside what was empty space on the 64px layout (all numbers are vanilla
+64-space; the 128px sheet is 2x):
+    right_hind_leg  (48, 21)   unchanged, vanilla's leg patch
+    right_front_leg (48,  0)   new
+    left_hind_leg   (26,  0)   new
+    left_front_leg  (26, 16)   new
+    right_ear       (19, 16)   unchanged, vanilla's ear patch
+    left_ear        (19,  0)   new
+A leg patch is 16 x 15 texels (32 x 30 at 2x); an ear patch is 6 x 4 (12 x 8).
+Those destination areas are fully transparent in vanilla's 64px white sheet.
+The shipped adult sheet reproduces EXACTLY (0 differing pixels) as:
+    1. scale the 64px sheet to 128px by nearest neighbour;
+    2. copy the 2x leg patch from (48, 21) into (26, 0), (26, 16) and (48, 0),
+       and the 2x ear patch from (19, 16) into (19, 0). No flip, no mirroring.
+The baby sheet reproduces exactly as a plain 2x nearest scale: vanilla's baby
+model already gives every leg and ear its own patch, so nothing is re-laid.
+Consequence worth knowing: because the copies are unflipped, a left leg shows
+the un-mirrored art, where vanilla shows it mirrored. Invisible on a white
+horse; it will show on any sheet whose leg art is left-right asymmetric.
+
+The converter, specified
+------------------------
+Where it lives (D36's open form, owner to choose): RECOMMENDED one
+implementation in common/ (pure Java, no Minecraft), because the geometry it
+must follow is already there and the runtime (reading a resource pack's own
+white horse, texture-resolution roadmap) will need the same algorithm:
+    common/.../coat/skin/HorseSheetConverter   the algorithm
+    a Gradle task :common:convertHorseSheet    the authoring command line
+    a test                                     the regression checks below
+The alternative is a standard-library Python script beside the other tools;
+it works and is quicker to write, but restates the layout table a second
+time, which is how a converter and a model drift apart. Either way it reads the
+layout from HorseSkinGeometry (ADULT_RAW / BABY_RAW hold every part's dest
+texOffs and box), and HorseSkinGeometry gains, per part, the SOURCE patch it
+comes from on a vanilla-layout sheet (srcTu, srcTv) and whether vanilla mirrors
+it. Then no coordinate is typed twice.
+
+Behaviour, for one input sheet:
+  - Input: an RGBA PNG painted on the vanilla horse mesh, adult or baby (chosen
+    by flag or by name), square, a whole multiple of 64 px on a side (64 is
+    vanilla, 128 and 256 are common in packs). Output: this mod's layout at the
+    requested size, default HorseSkinGeometry.SHEET_SIZE.
+  - Scale: integer factor only. Upscale by nearest neighbour (no blending, so a
+    binary alpha stays binary and a pixel-art coat keeps hard edges). Downscale
+    only by an exact integer box average, and warn when it happens.
+  - Adult re-lay: for each mod part, copy the source patch (scaled) to the
+    part's own destination patch, per HorseSkinGeometry. Legs and ears that
+    share a source patch each get their own copy. Everything vanilla already
+    lays out one-to-one is just scaled.
+  - Mirror mode, an explicit flag: 'straight' (what the repo did; needed for
+    the byte-exact regression on the white sheets) and 'vanilla' (apply
+    vanilla's cube-mirror to the patches of parts it mirrors: flip each face
+    left-to-right and swap the east and west faces), so an asymmetric coat
+    looks on the un-mirrored left leg as it does in vanilla. DEFAULT 'vanilla'
+    for any new source; 'straight' only for the regression. UNVERIFIED: the
+    exact semantics of vanilla's mirror on a cube, and which parts vanilla
+    mirrors (the HdHorseModel note says the left legs; the ears were not
+    stated). Read both out of the 26.1.2 jar with javap (as Appendix A's part 4
+    did) before trusting 'vanilla' mode, and prove it with an ASYMMETRY PROBE:
+    a test sheet with a distinct marker on every face of every patch, rendered
+    in vanilla and in this mod, whose left and right legs must agree.
+  - Baby: scale only. Same tool, same flags, no re-lay.
+  - Alpha and colour: RGBA in, RGBA out; premultiply nothing; leave fully
+    transparent pixels' RGB alone. Vanilla's undead sheets have strictly binary
+    alpha and that must survive (Appendix C).
+  - Mesh sanity check, so 'any coat that paints the same mesh' is enforced and
+    not assumed: count drawn (non-transparent) pixels that fall OUTSIDE every
+    known source patch of the vanilla layout. Appendix C measured 1 stray pixel
+    for the zombie and 0 for the skeleton. Warn above a small threshold and
+    refuse above a larger one: a sheet painted for a different mesh (SWEM and
+    the like, which the compatibility page already rules out) lands its
+    pixels where the vanilla layout has none. Print the numbers either way.
+  - Overlap check: no two destination patches may overlap, and none may land on
+    a region a source sheet actually draws in. (A pack that paints on the
+    spare space vanilla left empty would otherwise be overwritten silently.)
+    This is a hard error, not a warning.
+  - Determinism: same input and flags, same bytes out. PNG written with a fixed
+    encoder setting so a re-run does not dirty git.
+  - Sources and outputs are named, not remembered: a small manifest lists every
+    source sheet (file, adult or baby, mirror mode, origin and licence note) and
+    the converter regenerates every output from it. The existing pair is the
+    first entry, then horse_zombie and horse_skeleton and their baby sheets.
+    The manifest doubles as the list THIRD_PARTY_NOTICES (D35) has to match.
+
+Self-checks, all of which must pass before the tool is trusted on anything new:
+  1. Regression, adult: run it in 'straight' mode on
+     horse_white_vanilla64.png; the output must be byte-identical to the shipped
+     horse_white.png.
+  2. Regression, baby: the same for horse_white_baby_vanilla64.png against
+     horse_white_baby.png.
+  3. Layout: every destination patch is inside the sheet, inside no other,
+     and its size matches its part's box (2d + 2w by d + h, times the scale).
+  4. Mesh sanity on the two undead sources reports the Appendix C figures.
+  5. The asymmetry probe (above) for 'vanilla' mode.
+  6. Idempotent: running twice changes no file.
+
+What it feeds, and what to re-run when it changes (extends the CLAUDE.md
+table, which needs a matching row in the same change):
+  - the outputs under common/.../assets/horsegenetics/textures/entity/horse/;
+  - :common:bakeCreatorAssets and :web:bakeDesignerAssets, because the designer
+    carries its own copy of the white sheets (wiki/horse-designer/assets/), then
+    check-designer-boots.mjs;
+  - both coat goldens, if the shipped white sheets change at all (they should
+    not: self-checks 1 and 2 guarantee that for the white horse).
+Not in scope: any source that is not the vanilla horse mesh (donkey, mule,
+llama, the undead horses' armour or saddle layers, other mods' models). Those
+are a different layout and a different tool; the converter says so and stops.
