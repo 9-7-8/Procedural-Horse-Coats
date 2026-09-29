@@ -1,0 +1,57 @@
+Pixel Art Texture Pack (256x256) - source, licence, credit
+
+What it is
+==========
+Over a thousand hand-drawn pixel-art tiles, every one 256x256, as PNGs under
+PNGs/: Bricks, Concrete, Debris, Decorations, Dirt, Doors, Fabric, Foliage,
+Glass, Grass, Gravel, Metal, Paper, Patterns, Pebbles, Rockface, Roofing, Sand,
+Snow, Stones, Tiles, Wall, Water, Windows, Wood. This is the free "PNG - Pixel
+Art Textures.zip" (26 MB on the page). The PSD sources are separate downloads
+and are not held here. Files as received, unmodified.
+
+Source
+======
+Author: FlakDeau (itch.io: https://flakdeau19.itch.io).
+Pack page: https://flakdeau19.itch.io/pixel-art-texture-pack-256x256
+Google Drive copy the owner was given (a host, not the source):
+  https://drive.google.com/file/d/126AltXMSr2suWyDWGpm4i7G90Zth3qtz/view?usp=sharing
+Page read (pasted by the owner) 2026-09-29; the page was last updated with the
+"1000+ textures" post of Dec 19, 2025. Zip received 2026-09-29.
+Sound check for the future: zip sha256
+  66d9ba40ef79812ed1d0b13c875d361f1c23eeee441d86b69c208589d8e04fd0 ; 1,043 PNGs.
+
+Licence
+=======
+The store page states: "CC0 1.0 Universal. Feel free to use these assets in any
+personal or commercial projects." The author repeats in the comments that the
+textures may be edited and used in personal or commercial products.
+CC0 dedicates the work to the public domain: no credit, no restriction on
+modification or redistribution.
+
+DISCREPANCY TO KNOW ABOUT
+=========================
+The zip's own License.txt (dated 2024-08-19, an earlier release; a second copy
+sits in PNGs/) says something stricter: free for commercial and non-commercial
+use, modification allowed, no credit required, "Do not redistribute,
+repackage or sell this asset, modified or unmodified, except if they are
+content files in your commercial or non-commercial project." That is NOT CC0.
+It is kept verbatim in License.txt.
+The decision recorded here: the store page is the author's current, stated
+licence (CC0, updated Dec 2025, later than the file) and CC0 is a deliberate
+public-domain dedication, so this pack is treated as CC0 and IS committed to
+the repo's intake/. If the author ever says the stricter file governs, delete
+the PNGs from git and follow the Raven pack's handling (see ../raven-fantasy-hd-free/).
+Individual tiles copied into a module are unproblematic under either text.
+
+Credit
+======
+Not required under either text. Default to a line in THIRD_PARTY_NOTICES.md
+anyway when a tile is first used:
+"Texture tiles by FlakDeau (flakdeau19.itch.io), Pixel Art Texture Pack 256x256,
+CC0 1.0 Universal."
+
+Size
+====
+About 32 MB in git history. Do not commit the PSD downloads.
+
+Where is it used? See USAGE.txt.

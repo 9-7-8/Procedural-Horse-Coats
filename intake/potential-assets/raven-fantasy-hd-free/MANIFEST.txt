@@ -1,0 +1,34 @@
+What the machine's copy of this folder should contain
+
+The owner places the pack by hand (it is not in git). Layout, relative to this
+folder (intake/potential-assets/raven-fantasy-hd-free/):
+
+  Special Note to the Dev.txt
+  RAVEN FANTASY HD ULTIMATE FREE/Full Spritesheet.png
+  RAVEN FANTASY HD ULTIMATE FREE/Separated Files/FHD (1).png ... FHD (806).png
+
+Checks (from the zip "RFHD_Free_Files.zip" as received 2026-09-29):
+  zip sha256          39082c16cadce417d4ee8c7e9449db2e3ed8498f10c4ffef4c6aeb9f99ebb381
+  Full Spritesheet    512 x 1792 RGBA PNG
+                      sha256 767b87a609cb5dfa7a0b5187f4a7e4069b22b268cd13200069d4dc04af9b8ca0
+  Separated Files     806 PNGs, named "FHD (n).png", n = 1..806
+  all PNG files       807 (806 singles + the sheet)
+  Files carry no author metadata; the Special Note is a thank-you, not a licence.
+
+Where to get them again
+  https://clockworkraven.itch.io/raven-fantasy-hd-ultimate-rpg-icons-pixel-art-icons-textures-and-sprites
+  Download "RFHD Free Files.zip" (1.1 MB, the free one). A session that needs these
+  images and does not find them should PROMPT THE OWNER with this link, not try to
+  fetch them itself (itch.io is behind the sandbox's network policy).
+
+How to handle it on the machine
+  - Unzip the free zip into this folder. Git will not see the images: the repo's
+    .gitignore ignores this folder's contents except the notes. If `git status`
+    ever lists any of them, a pattern is wrong: fix .gitignore, never `git add`
+    around it, and never `git add -f`.
+  - A session that finds the images absent should NOT treat that as a bug and
+    should not try to fetch them (the store is behind a login/payment flow and
+    the sandbox cannot reach it). Ask the owner, or work without them.
+  - When something is used, copy that ONE file into the module that needs it,
+    log it in USAGE.txt, and follow "What this means for the mod" in
+    SOURCE-AND-LICENSE.txt (notice + carve-out + credit).

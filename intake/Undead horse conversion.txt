@@ -1535,3 +1535,71 @@ composite treat alpha as this appendix assumes (the composite copies the
 template's alpha into the output, so the skeleton pass must overwrite it, and
 the render path must draw a cutout, Appendix C); and whether ColorField has a
 'seed from an image' entry point or one must be added.
+
+
+Appendix G - open issues register (everything not yet settled or proved)
+=======================================================================
+A. Decisions still the owner's
+  1. Skeleton 'cannot drown' (D32): band the graded magic_water_breathing gene
+     very high, or use the absolute underwater_breathing traversal flag.
+  2. Weathered skeleton base (D40): bay dun or red dun. Preview both in the horse
+     designer; unseen.
+  3. Converter form (D36): one implementation in common/ with a Gradle task
+     (recommended) or a standard-library Python script.
+  4. Whether the undead loci are ever added to other breeds' founder tables
+     (D3b: not in the first release).
+  5. Wording of the THIRD_PARTY_NOTICES entry (D35).
+
+B. Numbers to tune by eye, none of them tested
+  Skeleton coatOpacity 0.6 and shadeStrength 0.85 (Appendix F); the hidden white
+  carrier weights on Bleached; both breeds' stat scores (zombie health 10 is only
+  about x2.24 of baseline, not a doubling); the bone and rotten flesh offering
+  amounts and the zombie's calm window; drop counts (1 to 3); the 0.86 to 0.95
+  size band.
+
+C. Facts to read out of 26.1.2 or the repo before building (the UNVERIFIED items)
+  Converter: Mob.convertTo, whether a new entity may take a UUID the old one
+  still holds, lead re-attachment, startRiding's signature, CONVERSION versus
+  LOAD as the spawn reason, the duplicate-UUID crash window, the skeleton trap
+  field names and which event spawns the trap horse, and which entity-type tags
+  the vanilla undead horses carry (inverted healing, swimming, and so on).
+  Genes and breeds: how PassificationAttachment records 'satisfied' (D25);
+  whether an unpriced breed, an empty strain, and a breed with no egg texture
+  are accepted (D23, D31, D34); that the particle 'site' band takes a category
+  index; the sound effect's vocabulary (D11); what magical_variant false and
+  kind magical switch on (D22); how MagicItemDropGene should replace leather
+  and whether it collides with the runtime-registry item in To do.txt.
+  Coat: whether the coat bake keeps alpha, whether GeneticHorseRenderer ends up
+  with a cutout render type, whether ColorField can be seeded from an image
+  (Appendix F); and vanilla's cube-mirror semantics and which parts it mirrors
+  (Appendix E), proved with the asymmetry probe.
+
+D. Interactions with the owner's other work (2026-09-29 ownership session)
+  server/HorseRiding.mayRide(AbstractHorse, Player) now refuses a rider who is
+  not the owner, the owner's team or an ally, on a TAMED horse, and sweeps
+  riders already up. Consequences for the converter:
+  - Copy the vanilla OWNER (through HorseRecords.setOwner) and the tame flag
+    BEFORE addFreshEntity, or a converted, tamed, owned undead horse is a tamed
+    horse with no owner and the sweep will buck its real owner off with 'that
+    horse doesn't know you'. Test it: a tamed, owned, saddled zombie horse
+    converts and its owner can still mount it (D25's test, extended).
+  - Untamed converted horses stay rideable by anyone (the untamed rule), which is
+    what passification-then-taming needs. Keep it that way.
+  - A player-ridden horse is not converted (D8), which also means the sweep never
+    sees a rider dropped by a conversion.
+  - /horsegive and transfer papers change the owner under a horse; a converted
+    horse must be an ordinary transferable horse, with a record and a UUID that
+    keeps every pedigree and stall key valid (the UUID is carried over, 6.4).
+  - HorseRiding covers AbstractHorse, so undead horses that are NOT converted
+    (other mods', or undead.convert=false) are governed by the same rule; that is
+    the intended behaviour and needs no code, only awareness.
+
+E. Documentation debt (nothing has been written to the wiki yet)
+  This treatment lives in intake/. Per CLAUDE.md it is routed onto
+  wiki/undead-horses.html: a Roadmap tab for the plan, a Verification tab for
+  sections B and C above, decisions on the Coding tab, and the two breeds as
+  breed-book entries, then the index bakes. The philosophy.html live-test
+  paragraph must be rewritten (the breed sets the bundle) and README.md's line
+  that there is no back-compat layer will be wrong once this ships. The bone diet
+  allele, the Bne and Rot drop alleles, the BLACK iris row and the new
+  OFFERINGS entries are all one gene-page and census update each.

@@ -1,0 +1,56 @@
+Pixelated Pattern Textures (NormalMap_Games) - source, licence, credit
+
+*** NOT YET ON DISK. The zips have not been supplied. This file only records what
+the store page says is in them. Picked up on the host machine, not in a cloud
+session (which cannot work with the images directly). ***
+
+Source
+======
+NormalMap_Games (itch.io: https://normalmap-games.itch.io).
+Store page: https://normalmap-games.itch.io/pixelated-pattern-textures
+Companion pack by the same author (not held, not requested):
+  https://normalmap-games.itch.io/pixelated-particle-sprites
+Page text pasted by the owner 2026-09-29. Pricing: "name your own price" (free
+listing).
+GET THEM AGAIN: download the two zips from the store page above. A session that
+needs the images and finds none should PROMPT THE OWNER with this link.
+
+What the page says is in it
+===========================
+Two downloads:
+  Pixelated Patterns 32x32.zip   98 kB
+  Pixelated Patterns 64x64.zip   183 kB
+Pattern textures at 32x32 and 64x64 - close to the pixel scale of the mod's own
+horse and mesh textures (vanilla horse sheets are 64x64), which is why this pack
+may suit the greyscale base textures for the add-on meshes better than the 256x256
+tiles in ../pixel-art-textures/. Contents beyond that (how many, which patterns,
+whether coloured or greyscale, tileable or not) are UNKNOWN until the zips are
+opened. Whoever opens them should record the list here.
+
+Licence - NOT STATED IN WHAT WAS PASTED
+=======================================
+The page text supplied has no licence section, no credit request and no terms.
+Do not assume CC0 or anything else. Until the owner confirms the terms (an itch
+page usually states them under "More information" or in a licence file inside
+the zip - check both):
+  - treat as all rights reserved by NormalMap_Games;
+  - do NOT commit the images to git (the .gitignore rule for this folder keeps
+    them out, the same way as the Raven icons);
+  - do NOT copy anything into a module.
+Once known, paste the terms here verbatim, and if the licence permits
+redistribution, relax the .gitignore rule and say so here.
+
+On the machine (when the zips arrive)
+=====================================
+Unzip into this folder (subfolders 32x32/ and 64x64/ are fine). Record here the
+file counts, the zip sha256 values and the list of patterns, as
+../raven-fantasy-hd-free/MANIFEST.txt does. Then work out which patterns make
+useful greyscale bases for the horn / spine / wing / crystal / feather meshes
+(see wiki/model-parts.html) and log every use in USAGE.txt.
+
+Credit
+======
+Unknown until the licence is. Default: "Pixelated Pattern Textures by
+NormalMap_Games (normalmap-games.itch.io)".
+
+Where is it used? See USAGE.txt.

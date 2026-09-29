@@ -1,0 +1,84 @@
+Raven Fantasy HD Ultimate (FREE files) - source, licence, credit
+
+*** THE IMAGES IN THIS FOLDER ARE NOT COMMITTED TO GIT. ***
+The licence forbids distributing the pack as a separate product. The owner keeps
+the files directly on the machine that hosts this repo. .gitignore makes git
+skip them; the notes in this folder (this file, MANIFEST.txt, USAGE.txt and the
+licence PDF) ARE committed. MANIFEST.txt says what the machine's copy should
+look like and how to check it.
+
+What it is
+==========
+"RAVEN FANTASY HD ULTIMATE FREE": 32x32 HD pixel-art RPG icons. Full
+Spritesheet.png (512x1792) plus the cut-up singles in Separated Files/
+(FHD (1).png ...). The FREE sampler from the store page's own download list
+("RFHD Free Files.zip", 1.1 MB); the paid "Premium Files" zips are a different
+product and this folder does not hold them.
+
+Source
+======
+Clockwork Raven Studios (artist and owner "Caio", Caio Carlos).
+Store page: https://clockworkraven.itch.io/raven-fantasy-hd-ultimate-rpg-icons-pixel-art-icons-textures-and-sprites
+  ("Raven Fantasy Icons HD Ultimate - RPG Icons, Pixel Art Icons, Textures and
+  Sprites")
+Patreon: https://www.patreon.com/clockworkravenstudios
+Store page read (pasted by the owner) 2026-09-29. Owner holds the free version.
+
+Licence - two documents, both kept here
+=======================================
+(1) The store page's "Features and Rights" (paraphrased faithfully):
+  - Can be modified to suit any need.
+  - Can be used in any project, commercial or physical (print/tabletop).
+  - CANNOT be distributed or sold as a separate product without the creator's
+    permission.
+  - Attribution is not necessary but welcome; a link (and a copy) of the project
+    is appreciated.
+  - "Personal use" includes projects or games released FREE, with no
+    microtransactions and/or paid advertisement/ads.
+(2) Clockwork_Raven_General_Licence_v.1.2.pdf (in this folder) - the author's
+  "User Asset License Agreement", which the page points to. It says it covers
+  what is downloaded, purchased or obtained through itch.io or Patreon, and may
+  be amended (its section 5). The clauses that matter to this mod:
+  - 3(a)/3(b): usable in any personal or commercial product as part of content;
+    not to be distributed as assets as they are, or as part of a game engine or
+    similar tool that sub-distributes them. A team working on the project with
+    you may share them, for that project only.
+  - 3(c): modification is fine; the modified asset stays under this licence.
+  - 3(d): credit not needed but appreciated; do not claim to have made the art.
+  - 3(e): the "Clockwork Raven" name may be used only to give credit, never in
+    marketing or attached to a product.
+  - 3(f) and FAQ (g): NO training any machine or AI on the assets.
+  - FAQ (h), MODS: allowed "as long as you specify that the assets cannot be
+    used or redistributed to your users, and as long as the mod is free".
+  - FAQ (e): suggested credit "Caio Carlos of the Clockwork Raven - Additional
+    Art Assets" or "Clockwork Raven - Additional Art Assets", or as seen fit.
+  - Questions and further licensing: caioterci@gmail.com (the address the
+    licence itself gives).
+
+What this means for the mod
+===========================
+Using an icon in the mod is allowed IF ALL of these hold:
+  1. The mod stays free. It does today. (The repo's CC BY-NC licence permits
+     donations on a free derivative; whether a donation link counts as
+     "microtransactions" under the page's wording is not addressed by either
+     document. Ask the author before relying on it.)
+  2. THIRD_PARTY_NOTICES.md (which ships in the jar) states, next to the credit,
+     that these icons may NOT be used or redistributed by the mod's users.
+  3. The mod's CC BY-NC grant is explicitly carved back for these files. The
+     repo's licence lets forks reuse and redistribute; this pack's licence does
+     not extend that to them. Anything copied from this pack into a module needs
+     that carve-out written where it lives (the notices file, and the folder
+     that holds the file), or a fork inherits rights that are not ours to give.
+  4. The pack itself is never published: not committed to git, not in a release
+     zip, not on the wiki or in the gene-creator / horse-designer assets. Only
+     the individual icons actually used, inside the mod.
+  5. The name "Clockwork Raven" appears only as credit.
+  6. Nothing from it is used to train or prompt-tune a model.
+
+Credit line to use when an icon is first used
+=============================================
+"Icons by Caio Carlos of the Clockwork Raven - Additional Art Assets
+(clockworkraven.itch.io). Used under the Clockwork Raven User Asset License
+Agreement. Not for use or redistribution by this mod's users."
+
+Where is it used? See USAGE.txt.

@@ -66,3 +66,17 @@ usercache.json
 
 # The headless gametest run has its own game directory (see build.gradle).
 neoforge-26.1.2/run-gametest/
+
+# --- intake/: third-party pack that may not be redistributed ---
+# The Raven icons (licence forbids distributing the pack). The owner keeps them on
+# the host machine by hand; the notes beside them stay tracked. See
+# intake/potential-assets/raven-fantasy-hd-free/MANIFEST.txt.
+intake/potential-assets/raven-fantasy-hd-free/*
+!intake/potential-assets/raven-fantasy-hd-free/SOURCE-AND-LICENSE.txt
+!intake/potential-assets/raven-fantasy-hd-free/MANIFEST.txt
+!intake/potential-assets/raven-fantasy-hd-free/USAGE.txt
+!intake/potential-assets/raven-fantasy-hd-free/Clockwork_Raven_General_Licence_v.1.2.pdf
+# Pixelated Pattern Textures: licence unknown, so images stay out of git until confirmed.
+intake/potential-assets/pixelated-patterns/*
+!intake/potential-assets/pixelated-patterns/SOURCE-AND-LICENSE.txt
+!intake/potential-assets/pixelated-patterns/USAGE.txt
