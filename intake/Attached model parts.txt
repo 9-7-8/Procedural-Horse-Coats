@@ -1322,3 +1322,126 @@ The frame cost is a function of visible boxes and submits, so hold both down:
    that needs the setupAnim answer, so it is the natural second test.
 4. Crystals with the opaque/translucent split.
 5. Then the breed hook, so a breed's band on "tines" gives the reindeer.
+
+
+14. Batching parts like coats, and the performance switches
+============================================================
+Requested: batch the part renders the way the rest of the renders are batched, and
+give players a config way to turn the new visuals down or off. Disabling stops
+RENDERING only; the gene, the part, the inheritance and the horse are untouched.
+Read off the repo, not run: the mechanism to copy is GeneticCoatTextureFactory's
+(mayBake / timed / placeholder) and ClientConfig's coats.* keys.
+
+14.1 What "batched like coats" means here (four pieces, all already in the mod)
+--------------------------------------------------------------------------------
+1. DISTANCE GATE. Coats: withinDetailDistance() reads distanceToCameraSq (written by
+   vanilla's EntityRenderer.extractRenderState; the renderer's own javadoc says it was
+   checked in bytecode on 2026-09-13) against coats.detailDistance. Parts reuse the
+   same field with their own key. This SETTLES the "UNVERIFIED which camera-distance
+   field" in 13.4 item 4: use distanceToCameraSq, no new lookup.
+2. TIME BUDGET. Coats: mayBake() allows the first bake in each 50 ms window
+   unconditionally and further ones only while spentInWindow is under
+   coats.bakeBudgetMs; timed() charges each bake to the window and to session totals.
+   Every tier C bake (13.2) goes through the same shape: a PartBakeBudget with its own
+   window and its own key, first-in-window always runs so nothing is starved. The
+   stage 0 spike measures one bake; the default budget is set from that number.
+3. STAND-IN WHILE WAITING. Coats wear a shared wild-type placeholder that is exempt
+   from the budget. A part has no useful stand-in, so a horse whose part is over
+   budget simply DRAWS NO PART for that frame and picks it up the next window
+   (a one-to-few-frame pop-in). If stage 0 shows that reads badly, the fallback is
+   the nearest already-baked key of the same kind. Do not invent a placeholder model.
+4. SHARED, KEYED CACHE. Coats: CACHE.get(coatKey, loader). Parts: the Key(kind,
+   styleBucket, seedVariant) map of 13.2. Same reason - the cost belongs to the
+   variety, not the herd.
+Not batched, on purpose: tier A and tier B (13.2) are per-frame transforms and
+visibility, not bakes, so they never wait on a budget. Only tier C does.
+Also keep the submit side grouped: submit all parts of a kind consecutively with the
+same render type per frame is what collector.order(n) already gives (the draft uses
+order(1) for the body pass and order(2) for the emissive pass). Do not interleave
+translucent and opaque submits per horse; one order per pass.
+
+14.2 The config: a `parts.*` block in ClientConfig, beside coats.*
+-------------------------------------------------------------------
+Client-only, per player, per machine - the same reason coats.* is: nothing about the
+world changes, so two players on one server may disagree and still see the same
+horses. Same shape as coats.*: a static ModConfigSpec value, a DEFAULT_ constant, and
+a safe getter that returns the default on IllegalStateException (config not loaded).
+
+  parts.enabled          boolean, default true. MASTER. false: no attached part of any
+                         kind draws, and the layer returns on its first line.
+  parts.kinds.disabled   list of PartKind ids, default empty. Turns off horns, antlers,
+                         crystals, wings, ... one by one. A list of ids rather than one
+                         boolean per kind, so a NEW kind needs no config edit and no
+                         new key; an id that no longer resolves is dropped on read
+                         (the GENE_FILTER rule), never a crash.
+  parts.emissive         boolean, default true. false: the second, full-bright submit
+                         is skipped. The part still draws, lit normally. Removes one
+                         submit per glowing part.
+  parts.translucent      boolean, default true. false: a translucent part (crystals)
+                         draws in the opaque pass with its alpha forced to full. Saves
+                         the blended pass, which cannot be sorted or batched with
+                         opaque work. The look changes (solid crystal), the horse does
+                         not.
+  parts.detailDistance   int blocks, default a value picked after stage 0, range 8-256.
+                         Past it, no part draws. (Coats keep a made coat at any range
+                         because a swap flickers; a skipped part just is not drawn, so
+                         no such rule is needed.)
+  parts.bakeBudgetMs     int ms per 50 ms, range 0-50, 0 = "one bake at a time"
+                         (identical wording to coats.bakeBudgetMs).
+"Anything else": tier B's fractional-last-element growth and the foal case are not
+switches, because they cost nothing measurable. If stage 0 finds another expensive
+axis it becomes another key here, decided by a measurement, not in advance.
+Reading them: resolve ALL of these once in extractRenderState into plain booleans on
+GeneticHorseRenderState, never inside the per-part loop, so a disabled part costs one
+field test and a config read is not paid per box.
+
+14.3 The rule that makes "disable" safe
+----------------------------------------
+- Render-only. Every one of these keys gates a submit; none touches genotype,
+  epigenome, breeding, the inspector, the designer's listed trait (P6), the horse
+  browser or a save. A horse with a horn and horns switched off still HAS the horn:
+  it breeds, drifts and shows in the gene list, and comes back the moment the switch
+  does.
+- No gameplay coupling. A part must never move the hitbox, the size, the stats or the
+  riding position, or "disabled" would change the world for one player and not another.
+  State that in the layer's class comment and test it: nothing in the part path is
+  read by the server.
+- Not in any cache key. The switches decide whether to submit a model, never which
+  model exists, so flipping one needs no rebake and no restart, and the shared cache
+  is the same for every player.
+- Live. Read each frame in extract (one field read each), so the change applies as
+  soon as the config screen closes, with no world reload.
+- Server config is untouched. A dedicated server cannot read a client config and has
+  nothing to render; this is not a place for a server-side "parts off".
+
+14.4 The note for people with performance problems
+---------------------------------------------------
+Three places, each one line, written when stage 1 ships:
+- The config comments themselves (each key's comment says what it saves, the way
+  coats.detailDistance says "lower it if walking toward a big herd stutters").
+- README.md, in the section on performance or settings: "If horns, antlers or crystals
+  cost you frames, open the client config and set parts.enabled to false, or turn off
+  only parts.emissive / parts.translucent. Nothing about your horses changes." README
+  is user-facing only (CLAUDE.md), and this is exactly that.
+- wiki/model-parts.html's Gameplay tab when it grows one, and wiki/compatibility.html
+  for the shader-pack line (translucency and emissive are the parts most likely to
+  misbehave under a shader pack, and turning them off is the workaround).
+
+14.5 Changes to the plan and to verification
+---------------------------------------------
+- Stage 1 (registry and layer) also lands the parts.* block and PartBakeBudget, so a
+  tester can turn things off from the first playable build. It is where the measuring
+  is done, so the switches exist before the numbers do.
+- Stage 0 uses the switches as its measuring tool: the 20-horse pen, run with
+  parts.enabled off, then on, then emissive and translucent off one at a time. The
+  difference IS the per-axis cost, and the defaults are picked from it.
+- Verification tab gains: each switch toggled live with no restart; parts.enabled off
+  leaves a horse's gene list, breeding and save byte-for-byte unchanged; two players
+  with different settings on one server see the same horses drawn differently;
+  translucent off looks acceptable, not broken; a part over budget appears within a
+  few frames and never flickers; a stale id in parts.kinds.disabled is dropped, not a
+  crash.
+- Unit tests: the kinds list drops an unknown id; the getters return defaults before
+  the config loads (the IllegalStateException path).
+- Section 8's "20-horse herd: no frame-time cliff" becomes measurable on both sides of
+  the master switch.
