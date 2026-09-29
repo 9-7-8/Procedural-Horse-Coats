@@ -61,6 +61,118 @@
     </p>
 </div>
 
+<h2 id="v0-5-033">0.5.033 &mdash; a horse that knows who you are</h2>
+
+<div class="note warn">
+    <p class="label">This one changes how your server behaves the moment the jar lands</p>
+    <p>
+        <strong>A tamed horse will no longer carry anybody but its owner.</strong> Anyone
+        else who climbs on is thrown off, with the horse rearing and a line saying
+        <em>&ldquo;&lt;name&gt; doesn&rsquo;t know you.&rdquo;</em> If your server has been
+        sharing horses informally, that stops working on update &mdash; so read the next
+        two paragraphs before you install it, not after.
+    </p>
+    <p>
+        <strong>Your team is let through</strong>, and that needs no setup if you already
+        have one: a vanilla <code>/team</code> scoreboard team, or an FTB Teams team, or a
+        team yours has marked an <strong>ally</strong>. FTB Chunks builds its claims out of
+        FTB Teams parties, so on most modded servers this is already configured before
+        anybody thinks about horses.
+    </p>
+    <p>
+        <strong>Or turn it off entirely</strong> with
+        <code>behaviour.owner_only_riding = false</code>, which gives back exactly the old
+        behaviour. <code>behaviour.riding_allows_teams</code> is the separate switch for
+        whether teams count at all.
+    </p>
+</div>
+
+<p>
+    <strong>An untamed horse still lets anybody on.</strong> Riding a wild one until it
+    stops bucking is how a horse is tamed, so the rule only ever applies to a horse that
+    already has an owner. Nothing about taming, the cowboy&rsquo;s string, or a horse
+    turned loose has changed.
+</p>
+
+<p>
+    <strong>And a way to lend one.</strong> Owning a horse and being on somebody&rsquo;s
+    team are both permanent arrangements, and a race is not &mdash; putting a jockey on
+    your team so they can ride one mount in one race hands them every horse you own,
+    indefinitely. So there is a <a href="item-jockey-passes.html">jockey pass</a>: paper, a
+    horse hair and leather, made out to one animal by its owner, handed to whoever is
+    riding, and fed to that horse for a day in the saddle. Feed it a second one and that is
+    two days. Sell the horse and every pass on it is cancelled.
+</p>
+
+<ul>
+    <li><strong><code>/horsegive &lt;player&gt;</code></strong> hands over the horse you are
+        riding or looking at &mdash; the same transfer a signed
+        <a href="item-transfer-papers.html">paper</a> makes, without the crafting or the
+        walk. Anyone may use it on a horse they own; a gamemaster may use it on any horse
+        at all, which is how <em>&ldquo;he tamed my mare while I was offline&rdquo;</em>
+        gets settled. <code>commands.horse_give</code> turns it off.</li>
+    <li><strong><code>/horsejockey &lt;player&gt; [days] | revoke | list</code></strong> is
+        the lend without the crafting, for a race steward with twelve riders to admit.
+        <code>revoke</code> has no item counterpart on purpose: a pass you have handed
+        somebody cannot be un-handed, but the person who lent the horse should be able to
+        change their mind. <code>commands.horse_jockey</code> turns it off.</li>
+</ul>
+
+<h3 id="v0-5-033-waystones">Your horse stops arriving inside the wall</h3>
+
+<p>
+    A waystone&rsquo;s arrival spot is picked for a person standing up: one block in front
+    of the stone, two blocks of air. A horse is wider than that and this mod&rsquo;s horses
+    can be a great deal taller, so a stone built against a hillside or inside a doorway put
+    the rider somewhere fine and the horse inside the rock &mdash; where it suffocates.
+    <strong>The arrival now finds the nearest clear 3&times;3&times;3 of air</strong>,
+    within eight blocks, and sends the rider and the horse to the same one. Only when
+    there is a horse travelling; an ordinary waystone hop is untouched. If nothing within
+    eight blocks is clear the teleport still happens where it always did &mdash; a waystone
+    you cannot arrive at would be a worse bug.
+</p>
+
+<h3 id="v0-5-033-art">No two items look alike any more</h3>
+
+<p>
+    Twenty-four item sprites were recoloured. <strong>Five tickets were one card, four
+    whistles were one whistle</strong>, the vet&rsquo;s kit was a bundle, both stall signs
+    were an oak sign, and the blank transfer paper had been drawn as a research paper since
+    both items existed. The sharpest case: the <strong>turnout ticket</strong> is the one
+    ticket that cannot be undone &mdash; it gives your horse up to the realm &mdash; and it
+    used to be pixel-identical to the four that can be. It is red now.
+</p>
+
+<ul>
+    <li>Splice carrots and occupied stasis chambers were near-identical within their
+        families and are now spread out. The carrots were rotated rather than flattened, so
+        they still read as carrots.</li>
+    <li><strong>Breed eggs are deliberately untouched</strong> &mdash; they are one item
+        tinted per breed, and a shared silhouette is the point. So are the per-wood carts,
+        gates and jumps: an acacia wagon looks like a jungle wagon because the planks do,
+        and that is the sprite telling you what it is made of.</li>
+    <li>A good many of these are now a recolour of somebody else&rsquo;s drawing rather
+        than a drawing of their own. That is a real improvement on two items you could not
+        tell apart, and it is not the same thing as art.</li>
+    <li><strong>If you use a resource pack</strong> that restyled our stall signs by
+        overriding the vanilla oak sign, it has stopped doing so: fourteen models now name
+        our own textures.</li>
+</ul>
+
+<div class="note">
+    <span class="label">What has actually been played</span>
+    <p>
+        <strong>None of it.</strong> Every part of the riding rule, the passes and both
+        commands needs a second player, and the waystone fix needs Waystones, Balm and
+        Shogi, none of which the development instance has. The build is green, eighteen
+        in-game tests pass, and a dedicated server boots clean &mdash; and none of that is
+        the same as somebody having ridden a horse. The two pieces that could be wrong
+        <em>invisibly</em> do have tests: the pass arithmetic, and the waystone clearance
+        search. Both were checked by deliberately breaking the thing they watch and
+        confirming the test failed.
+    </p>
+</div>
+
 <h2 id="v0-5-032">0.5.032 &mdash; a reaper that waits for the crop, and a gate it stops eating</h2>
 
 <p>
