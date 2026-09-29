@@ -3125,6 +3125,8 @@ wiki/progression.html#tasks	coding	Tasks are an enum in common/
 wiki/progression.html#verified	coding	Verified
 wiki/rider-comfort.html#leads	gameplay	Your lead comes back
 wiki/rider-comfort.html#leads-coding	coding	How the lead is returned (2026-09-24)
+wiki/rider-comfort.html#mounted-mining	gameplay	Mining from the saddle
+wiki/rider-comfort.html#mounted-mining-coding	coding	How the mounted mining penalty is removed (2026-09-29)
 wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
 wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
 wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour

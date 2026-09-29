@@ -106,7 +106,17 @@
         (2026-09-26) is the second, and it is the case where the switch is not a preference
         at all &mdash; what it bounds is <em>how many whole dead horses the world save is
         carrying</em>, so an operator who never touches it is still being charged for it. A
-        setting whose off position costs disk is one that has to ship with the feature.</li>
+        setting whose off position costs disk is one that has to ship with the feature.
+        <a href="rider-comfort.html#mounted-mining"><code>behaviour.mounted_mining_penalty_removed</code></a>
+        (2026-09-29) is the third, and it is the one that answers a piece of the
+        server-versus-client question above rather than just obeying the rule: it is the first
+        option in the mod <em>read by client-side code</em>. It can be, and stays a server
+        option, because FML&rsquo;s javadoc on <code>ModConfig.Type</code> says a
+        <code>SERVER</code> config is &ldquo;synced to clients during connection&rdquo; &mdash;
+        so a rule that both sides must compute identically does not need a client option, it
+        needs a server one that the client is allowed to read. The convention that falls out:
+        <strong>a client option is for what only the client can see; anything both sides
+        compute is a server option, read on both.</strong></li>
 </ul>
 
 </section>

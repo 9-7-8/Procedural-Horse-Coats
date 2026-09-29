@@ -32,6 +32,17 @@
         their items; blocks with their own art get a rotatable preview, and the rule that
         only own-art blocks may be previewed is enforced by a bake that hard-fails on a
         <code>minecraft:</code> texture rather than trusting anyone to remember it.</li>
+    <li><a href="session-log/d2026-09-29-mining-from-the-saddle.txt">2026-09-29
+        &mdash; <strong>mining from the saddle, and a guard written the other way
+        round</strong>. Rider comfort piece 1: a rider on a standing horse now mines at the
+        speed they would standing there. The treatment's prescribed condition
+        (&ldquo;mounted, so multiply by five&rdquo;) was inverted to ask
+        <code>!player.onGround()</code> instead, so that if the premise underneath it is ever
+        wrong the feature is silently absent rather than a 5&times; mining boost for everyone
+        on a horse. Two API facts read rather than assumed: the break-speed event fires
+        <em>after</em> vanilla's division, and a <code>SERVER</code> config is synced to
+        clients &mdash; which is what licenses the first client-side read of
+        <code>ServerConfig</code> in the mod.</li>
     <li><a href="session-log/d2026-09-29-scoping-rider-comfort-and-chaos.txt">2026-09-29
         &mdash; <strong>scoping rider comfort, and one allele that fills in the rest</strong>.
         An intake session with no code. Rider comfort is scoped as five pieces, one per

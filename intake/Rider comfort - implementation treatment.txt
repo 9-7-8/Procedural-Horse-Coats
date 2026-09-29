@@ -1,7 +1,7 @@
 Rider comfort - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "Open" lines
-are still to be settled. First piece to build: 1 (mounted mining speed), one
+are still to be settled. First piece to build: 2 (the inventory keybind), one
 piece per session per START HERE. Source of truth for what
 exists is wiki/rider-comfort.html; this file is the handoff for the work its
 Roadmap tab lists, and it is retired (deleted, per START HERE step 3) as each
@@ -32,37 +32,11 @@ What already exists, so the building session does not redo it
   BARDING among its slots, each with an accepts() and an item tag. Piece 3 can
   ask a slot whether it takes a stack instead of hard-coding item ids.
 
-Five pieces. Piece 5, the fade, is built last and starts with a spike.
+Four pieces left of the original five. Piece 1 (mounted mining speed) shipped
+on 2026-09-29 and is now on wiki/rider-comfort.html - its Gameplay, Coding and
+Verification tabs. The numbering below is kept so the build order still reads.
+Piece 5, the fade, is built last and starts with a spike.
 Build order is smallest blast radius first, and each is shippable alone.
-
-1. Remove the mining-speed debuff while mounted (smallest)
-----------------------------------------------------------
-What the player feels: mining from horseback at a fifth of speed.
-- Mechanism (UNVERIFIED - confirm first, in a comment as CLAUDE.md rule 8
-  wants): vanilla's Player.getDestroySpeed divides by 5 when the player is not
-  on the ground, and a mounted player's onGround is false. If that reading is
-  wrong the fix does nothing, so the FIRST step is to read the decompiled
-  method and, in the game, time one block mounted vs standing.
-- Hook: NeoForge PlayerEvent.BreakSpeed, multiply newSpeed by 5 when the player
-  is a passenger of an AbstractHorse whose own onGround() is true. Gate on the
-  vehicle being on the ground, not just mounted, or a horse in mid-jump or a
-  flying/gliding horse would mine at full speed in the air, which is not the
-  request.
-- It must run on BOTH logical sides: the client predicts break progress from the
-  same number, so a server-only handler would show a bar that disagrees with the
-  block breaking. Server-type configs sync to the client in NeoForge, but that
-  is an API fact this file has not proved - check it, or the client reads its
-  own default and the two sides disagree with the switch off.
-- Config: behaviour.mounted_mining_penalty_removed, default ON,
-  with the leadsReturn()-style safe accessor. The page says this is the one piece
-  that alters rather than adds, so the comment on the option should say plainly
-  that on = not vanilla.
-- Decided: default ON. The page's argument that vanilla-intact has a claim is
-  answered by the switch: one line turns vanilla back.
-- Test: gametest for the multiplier maths is possible (fire BreakSpeed with a
-  mock rider on a horse); the real check is feel, on the Verification tab:
-  mine stone from horseback, from a jumping horse, and from a boat/minecart
-  (must be untouched).
 
 2. A keybind to open your own inventory while riding
 -----------------------------------------------------
