@@ -208,6 +208,14 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue LEADS_RETURN;
 
     /**
+     * <b>Does a rider mine at full speed?</b> On - the default - a player on a
+     * horse that is standing on the ground is exempted from vanilla's
+     * fifth-speed penalty for mining while off the ground. <b>On is not
+     * vanilla</b>; off restores it. See {@code server/MountedMiningHandler}.
+     */
+    public static final ModConfigSpec.BooleanValue MOUNTED_MINING_PENALTY_REMOVED;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -573,6 +581,18 @@ public final class ServerConfig {
                         "into a portal was untied next to whoever was holding it, so the lead is",
                         "already at their feet.")
                 .define("behaviour.leads_return", true);
+        MOUNTED_MINING_PENALTY_REMOVED = builder
+                .comment("Whether a rider mines at full speed. (default: true)",
+                        "ON IS NOT VANILLA. Vanilla mines at a fifth speed whenever the player",
+                        "is not standing on the ground - the rule that stops you tunnelling as",
+                        "you fall - and a player sitting on a horse is not standing on anything,",
+                        "so clearing one sapling out of the path means dismounting for it.",
+                        "On, a rider whose horse is itself on the ground mines at the speed they",
+                        "would standing there. The horse must be on the ground too: mid-jump, or",
+                        "on a flying horse, the penalty still applies, because mining out of the",
+                        "air is a different thing from mining from the saddle.",
+                        "Off restores vanilla's behaviour exactly.")
+                .define("behaviour.mounted_mining_penalty_removed", true);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -895,6 +915,20 @@ public final class ServerConfig {
     public static boolean leadsReturn() {
         try {
             return LEADS_RETURN.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /**
+     * {@code behaviour.mounted_mining_penalty_removed}, safely. The catch is
+     * load-bearing on the client as well as at startup here: a SERVER config is
+     * synced on connection, so a client reading it at the title screen - or
+     * before the sync lands - gets the default rather than an exception.
+     */
+    public static boolean mountedMiningPenaltyRemoved() {
+        try {
+            return MOUNTED_MINING_PENALTY_REMOVED.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }

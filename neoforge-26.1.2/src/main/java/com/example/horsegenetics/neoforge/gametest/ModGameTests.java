@@ -1205,6 +1205,8 @@ public final class ModGameTests {
         register(event, environment, WAYSTONE_CLEARANCE_IS_NEAREST, 200);
         // Pure arithmetic on a record; no world touched.
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
+        // One horse spawned and three events posted, all inside a single tick.
+        register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
     }
 
     /**
@@ -1382,6 +1384,92 @@ public final class ModGameTests {
             helper.assertItemEntityNotPresent(Items.LEAD, BlockPos.ZERO, 16.0);
             helper.succeed();
         });
+    }
+
+    /**
+     * <b>A rider mines at full speed; nobody else gets a boost.</b>
+     *
+     * <p>{@link com.example.horsegenetics.neoforge.server.MountedMiningHandler}
+     * multiplies break speed by five to undo vanilla's airborne penalty, and the
+     * dangerous failure is not that it does nothing - it is that it fires when
+     * the penalty was never charged and hands out <b>five times</b> the mining
+     * speed. So the three branches are asserted separately: the exemption, and
+     * the two refusals that bound it.
+     *
+     * <p><b>Here rather than in JUnit</b> for the module's usual reason - the
+     * NeoForge test classpath carries no Minecraft - and it goes through
+     * {@code NeoForge.EVENT_BUS} rather than calling the handler directly, so a
+     * handler that was written but never registered fails it.
+     *
+     * <p>The ground flags are <b>set by hand</b> rather than played out. Whether
+     * a real mounted player's {@code onGround} is genuinely false is a claim
+     * about vanilla's movement code, not about this handler, and it is on the
+     * page's Verification tab to be timed in-game. What this test owns is that
+     * given each posture, the handler does the right thing.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> MOUNTED_MINING_IS_EXEMPT =
+            TEST_FUNCTIONS.register("mounted_mining_is_exempt", () -> ModGameTests::mountedMiningIsExempt);
+
+    private static void mountedMiningIsExempt(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.mountedMiningPenaltyRemoved()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.mounted_mining_penalty_removed is off in this run's server"
+                            + " config, so this test asserts the wrong branch - turn it back on"
+                            + " rather than deleting the test"), 0);
+        }
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        // force, and without the mount game event: a mock player is not in the
+        // level's entity list, and only getVehicle() matters to the handler.
+        player.startRiding(horse, true, false);
+        if (player.getVehicle() != horse) {
+            throw new GameTestAssertException(Component.literal(
+                    "the mock player would not mount at all - this test's premise is broken,"
+                            + " not MountedMiningHandler"), 0);
+        }
+
+        // Riding a horse that is standing still: vanilla charged the fifth, so
+        // the handler gives it back whole.
+        horse.setOnGround(true);
+        player.setOnGround(false);
+        assertBreakSpeed(helper, player, 2.0F, 10.0F,
+                "a rider on a standing horse was not exempted from the airborne penalty");
+
+        // The dangerous one. Nothing was divided, so nothing may be multiplied.
+        player.setOnGround(true);
+        assertBreakSpeed(helper, player, 2.0F, 2.0F,
+                "break speed was multiplied for a player vanilla never penalised - this is a"
+                        + " 5x mining boost, not a comfort fix");
+
+        // Horse mid-jump or flying: the rider really is in the air.
+        player.setOnGround(false);
+        horse.setOnGround(false);
+        assertBreakSpeed(helper, player, 2.0F, 2.0F,
+                "the penalty was removed for a rider whose horse was itself off the ground");
+
+        helper.succeed();
+    }
+
+    /**
+     * Posts a real {@code BreakSpeed} for {@code player} at {@code given} and
+     * asserts the listeners left it at {@code expected}.
+     */
+    private static void assertBreakSpeed(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player player,
+            float given, float expected, String complaint) {
+        net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed event =
+                new net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed(
+                        player, Blocks.STONE.defaultBlockState(), given, BlockPos.ZERO);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
+        // Exact powers of two through one multiply, so the epsilon is only
+        // guarding against a future non-integer factor, not against drift.
+        if (Math.abs(event.getNewSpeed() - expected) > 1.0E-4F) {
+            throw new GameTestAssertException(Component.literal(
+                    complaint + " - gave " + given + ", expected " + expected
+                            + ", got " + event.getNewSpeed()), 0);
+        }
     }
 
     /**
