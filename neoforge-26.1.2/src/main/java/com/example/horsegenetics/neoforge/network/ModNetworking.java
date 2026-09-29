@@ -100,6 +100,16 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                BlowWhistlesPayload.TYPE,
+                BlowWhistlesPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {
+                        com.example.horsegenetics.neoforge.server.WhistleBlowing.blowAll(player);
+                    }
+                })
+        );
+
+        registrar.playToServer(
                 FamilyTreeRequestPayload.TYPE,
                 FamilyTreeRequestPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleFamilyTreeRequest(payload, context.player()))

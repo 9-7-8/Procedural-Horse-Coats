@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.item;
 import com.example.horsegenetics.neoforge.data.BoundHorse;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.server.EnderWhistleCalls;
+import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -57,20 +58,32 @@ public class EnderWhistleItem extends Item {
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (level instanceof ServerLevel && player instanceof ServerPlayer serverPlayer) {
             ItemStack stack = player.getItemInHand(hand);
-            BoundHorse bound = stack.get(ModDataComponents.BOUND_HORSE.get());
-            if (bound == null) {
+            if (stack.get(ModDataComponents.BOUND_HORSE.get()) == null) {
                 player.sendSystemMessage(Component.literal(
                         "This whistle is not bound yet. Right-click one of your horses with it - "
                                 + "the binding is permanent."));
                 return InteractionResult.SUCCESS;
             }
-            if (EnderWhistleCalls.crumbleIfGone(serverPlayer, stack, bound)) {
-                return InteractionResult.SUCCESS;
-            }
-            EnderWhistleCalls.call(serverPlayer, bound);
-            player.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
+            blow(serverPlayer, stack);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * <b>Blow this whistle</b>, assuming it is bound - the whole of what the item
+     * does, so that the blow-everything key calls this rather than a copy. A copy
+     * would be a way round the cooldown the first time one of the two forgot it.
+     *
+     * @return the horse it called for, or null if it crumbled or was never bound
+     */
+    public static @Nullable UUID blow(ServerPlayer player, ItemStack stack) {
+        BoundHorse bound = stack.get(ModDataComponents.BOUND_HORSE.get());
+        if (bound == null || EnderWhistleCalls.crumbleIfGone(player, stack, bound)) {
+            return null;
+        }
+        EnderWhistleCalls.call(player, bound);
+        player.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
+        return bound.id();
     }
 
     /**

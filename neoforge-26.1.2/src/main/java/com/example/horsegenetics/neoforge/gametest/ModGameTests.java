@@ -8,6 +8,7 @@ import com.example.horsegenetics.neoforge.compat.WaystonesCompat;
 import com.example.horsegenetics.neoforge.data.RidingPassAttachment;
 import com.example.horsegenetics.neoforge.server.JockeyPassHandler;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.neoforge.server.EnderWhistleCalls;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.server.HorseRealm;
@@ -1207,6 +1208,8 @@ public final class ModGameTests {
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
         // One horse spawned and three events posted, all inside a single tick.
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
+        // One horse spawned, two attachment writes, two calls; one tick.
+        register(event, environment, WHISTLE_NEEDS_BOND, 100);
     }
 
     /**
@@ -1470,6 +1473,61 @@ public final class ModGameTests {
                     complaint + " - gave " + given + ", expected " + expected
                             + ", got " + event.getNewSpeed()), 0);
         }
+    }
+
+    /**
+     * <b>An ender whistle will not bind to a horse that does not trust you.</b>
+     *
+     * <p>The gate is one tier boundary, so the test is the two values either
+     * side of it: bond 60 refused, bond 61 accepted. Anything else would be
+     * testing {@code behaviourTier()}, which is not this feature.
+     *
+     * <p>It calls {@link EnderWhistleCalls#bindRefusal} rather than posting an
+     * {@code EntityInteract}, because that method is the seam the real
+     * {@code onBind} goes through - the handler has exactly one call to it, so a
+     * gate that worked here and was never wired in could not happen without
+     * deleting that line. Posting the interact event would additionally test
+     * vanilla's interaction plumbing, which is not what is new.
+     *
+     * <p>A gametest and not JUnit for the module's usual reason, plus a specific
+     * one: the bond lives on a real data attachment, and setting it needs a real
+     * horse in a real level.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WHISTLE_NEEDS_BOND =
+            TEST_FUNCTIONS.register("whistle_needs_bond", () -> ModGameTests::whistleNeedsBond);
+
+    private static void whistleNeedsBond(GameTestHelper helper) {
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setTamed(true);
+        horse.setOwner(player);
+        if (com.example.horsegenetics.neoforge.server.HorseOwnership
+                .bindRefusal(horse, player, "Test") != null) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse is not owned by the mock player, so this would be testing"
+                            + " ownership rather than bond - the premise is broken, not the gate"), 0);
+        }
+
+        setBond(horse, 60);
+        if (EnderWhistleCalls.bindRefusal(horse, player, "Test") == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse one point below the bond threshold accepted a whistle - the gate"
+                            + " is not being applied"), 0);
+        }
+        setBond(horse, 61);
+        String atTier = EnderWhistleCalls.bindRefusal(horse, player, "Test");
+        if (atTier != null) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse at the bond threshold was refused: " + atTier), 0);
+        }
+        helper.succeed();
+    }
+
+    private static void setBond(net.minecraft.world.entity.animal.equine.Horse horse, int bond) {
+        var attachment = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
+        horse.setData(attachment, horse.getData(attachment).withBond(bond));
     }
 
     /**

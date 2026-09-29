@@ -47,6 +47,13 @@ public final class ClientConfig {
     public static final ModConfigSpec.BooleanValue NAMEPLATE_SEX_SYMBOL;
 
     /**
+     * <b>Say which key blows your whistles when you select one.</b> One
+     * action-bar line on the swap, naming this player's own binding - see
+     * {@code client/WhistleKeyHandler}. Off once they know.
+     */
+    public static final ModConfigSpec.BooleanValue WHISTLE_KEY_PROMPT;
+
+    /**
      * <b>Has this player been shown the Getting Started tab?</b> Set the first
      * time they leave it, so the browser opens on it once and never again.
      */
@@ -144,6 +151,14 @@ public final class ClientConfig {
                         "the symbol never reaches a transfer paper, the browser or a rename",
                         "box - and two players on one server may disagree about it.")
                 .define("nameplate.sexSymbol", true);
+        WHISTLE_KEY_PROMPT = builder
+                .comment("Show \"Press [key] to blow\" when you select a whistle: (default: true)",
+                        "The key blows every whistle you are carrying at once, and it is on a",
+                        "key some keyboard layouts put somewhere else - so a player who never",
+                        "opens Controls would never find out it exists. The line names YOUR",
+                        "binding, so it stays right after a rebind.",
+                        "Client-side and cosmetic: turning it off does not change the key.")
+                .define("whistle.keyPrompt", true);
         SAVED_SEARCHES = builder
                 .comment("Searches you have saved, as \"name=query\" lines. Every horse search",
                         "box in the mod reads this one list - My horses, Horse realm, the",
@@ -231,6 +246,15 @@ public final class ClientConfig {
             return FAMILY_TREE_SCROLLBAR.get();
         } catch (IllegalStateException notLoaded) {
             return false;
+        }
+    }
+
+    /** Safe read - falls back to the default if the config isn't loaded yet. */
+    public static boolean whistleKeyPrompt() {
+        try {
+            return WHISTLE_KEY_PROMPT.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
         }
     }
 
