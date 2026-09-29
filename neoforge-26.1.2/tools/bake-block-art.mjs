@@ -295,11 +295,16 @@ const POSTS = [
 
 
 /**
- * <b>The two workstations.</b> Unlike the posts these are not a motif on a
+ * <b>The three workstations.</b> Unlike the posts these are not a motif on a
  * barrel - a bench is not a barrel - so each face is a full pixel map drawn over
  * the plain plank grain, which is the one piece of carpentry worth sharing.
  * Faces are named for the model slot they fill: `cube_bottom_top` wants top and
  * side, `cube_column` wants end and side.
+ *
+ * <p>The stasis bank is the exception to "drawn over the plank grain": its map has
+ * no `.` in it anywhere, so the plank never shows through. That is on purpose
+ * rather than an oversight - the bench and the shelf are furniture and want to
+ * look like the wood they are made of, and the bank is a machine full of glass.
  */
 const WORKSTATIONS = [
   {
@@ -400,7 +405,63 @@ const WORKSTATIONS = [
       ],
     },
   },
+  {
+    id: 'horse_stasis_bank',
+    // Not wood. The bank holds chambers and reads the horses inside them, so it
+    // is drawn as a rack of them: the palette is lifted straight off
+    // basic_stasis_chamber.png and its occupied twin, so the block and the item
+    // it stores are recognisably the same object at two sizes.
+    palette: {
+      D: '2b2b33', d: '3e3e49', m: '6f7280',
+      g: 'c3dbe8', G: 'e8f4fa', b: '97c2e0',
+      t: '1d3d4c', c: '6babc7',
+    },
+    faces: {
+      // Six chambers in their slots. One of them - top right - is drawn in the
+      // occupied colours, because a bank with a horse in it is the normal case
+      // and an empty rack says nothing about what the block is for.
+      side: [
+        'DDDDDDDDDDDDDDDD',
+        'DmmmmmmmmmmmmmmD',
+        'DddddmddddmddddD',
+        'DgGgbmgGgbmtctcD',
+        'DgbgbmgbgbmtcccD',
+        'DggbgmggbgmtcctD',
+        'DddddmddddmddddD',
+        'DmmmmmmmmmmmmmmD',
+        'DddddmddddmddddD',
+        'DgGgbmgGgbmgGgbD',
+        'DgbgbmgbgbmgbgbD',
+        'DggbgmggbgmggbgD',
+        'DddddmddddmddddD',
+        'DmmmmmmmmmmmmmmD',
+        'DmmmmmmmmmmmmmmD',
+        'DDDDDDDDDDDDDDDD',
+      ],
+      // The lid, and by cube_column the underside too: a recessed metal panel
+      // around a lit glass port.
+      end: [
+        'DDDDDDDDDDDDDDDD',
+        'DmmmmmmmmmmmmmmD',
+        'DmDDDDDDDDDDDDmD',
+        'DmDmmmmmmmmmmDmD',
+        'DmDmddddddddmDmD',
+        'DmDmdGbbbbGdmDmD',
+        'DmDmdbGGGGbdmDmD',
+        'DmDmdbGGGGbdmDmD',
+        'DmDmdGbbbbGdmDmD',
+        'DmDmddddddddmDmD',
+        'DmDmmmmmmmmmmDmD',
+        'DmDDDDDDDDDDDDmD',
+        'DmmmmmmmmmmmmmmD',
+        'DmmmmmmmmmmmmmmD',
+        'DmmmmmmmmmmmmmmD',
+        'DDDDDDDDDDDDDDDD',
+      ],
+    },
+  },
 ];
+
 
 function stamp(base, rows, palette) {
   const px = Buffer.from(base.px);

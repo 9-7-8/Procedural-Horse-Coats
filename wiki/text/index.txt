@@ -2822,6 +2822,7 @@ wiki/horse-realm.html#the-field	gameplay	The field
 wiki/horse-realm.html#the-table	coding	The table is the census, not a scan
 wiki/horse-realm.html#two-dimensions	coding	Two dimensions, and why they share nothing
 wiki/horse-realm.html#what	gameplay	What it is for
+wiki/horse-stasis.html#bank-art-0929	coding	The block finally looks like itself
 wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest with a clock on it
 wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank
 wiki/horse-stasis.html#browse-coding	coding	The Browse tab reads the stable's papers, not the chamber

@@ -26,6 +26,14 @@ window.HG_BLOCK_SHAPES = {
     "east": "equine_research_shelf_side",
     "west": "equine_research_shelf_side"
   },
+  "horse_stasis_bank": {
+    "up": "horse_stasis_bank_end",
+    "down": "horse_stasis_bank_end",
+    "north": "horse_stasis_bank_side",
+    "south": "horse_stasis_bank_side",
+    "east": "horse_stasis_bank_side",
+    "west": "horse_stasis_bank_side"
+  },
   "leatherworkers_post": {
     "up": "leatherworkers_post_top",
     "down": "plank_bottom",
