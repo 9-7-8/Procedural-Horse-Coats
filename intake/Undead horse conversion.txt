@@ -230,6 +230,16 @@ D24 First release includes: debug-yard rows (one per undead breed plus a
     pages for both undeath genes with a Science tab (check-gene-tabs.mjs
     requires one for a natural gene page). Skipped for now: nothing else.
 
+D25 A converted horse that was ALREADY TAMED arrives passified: the converter
+    marks its passification as satisfied and permanent for its owner, whatever
+    the breed's route (zombie's FTm included), so a horse the player owns and
+    rides never turns on them after dark. Untamed conversions stay hostile
+    until offered their item. Implementation: write the passification
+    attachment (data/PassificationAttachment) in the same step as the tame and
+    owner copy in 6.4/6.5. UNVERIFIED how that attachment records "satisfied"
+    and whether it must name the owner; read it first. Add a gametest: a tamed
+    saddled zombie horse converts and, after dark, does not attack its rider.
+
 Still open, and not answered here: how the coat pipeline paints a skeleton (the
 absence of a coat) - see stage 1.
 
@@ -712,8 +722,7 @@ All settled by the owner; see section 5 for the wording. When this is routed
 onto the wiki they are recorded on wiki/undead-horses.html's Coding tab, not on
 decisions.html (which is no longer a source of truth).
 Still open: how a coat is painted as a skeleton or a rotted horse (stage 0);
-what a converted horse that was ALREADY TAMED does about its pinned Anp
-aggression (D25, below); and every UNVERIFIED API note above.
+every UNVERIFIED API note above (D25's attachment shape included).
 
 
 15. Risks, worst first
