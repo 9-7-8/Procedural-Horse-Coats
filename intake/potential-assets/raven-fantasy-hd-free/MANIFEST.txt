@@ -15,6 +15,12 @@ Checks (from the zip "RFHD_Free_Files.zip" as received 2026-09-29):
   all PNG files       807 (806 singles + the sheet)
   Files carry no author metadata; the Special Note is a thank-you, not a licence.
 
+Where to get them again
+  https://clockworkraven.itch.io/raven-fantasy-hd-ultimate-rpg-icons-pixel-art-icons-textures-and-sprites
+  Download "RFHD Free Files.zip" (1.1 MB, the free one). A session that needs these
+  images and does not find them should PROMPT THE OWNER with this link, not try to
+  fetch them itself (itch.io is behind the sandbox's network policy).
+
 How to handle it on the machine
   - Unzip the free zip into this folder. Git will not see the images: the repo's
     .gitignore ignores this folder's contents except the notes. If `git status`
