@@ -156,8 +156,12 @@ D3  A converted horse is founded from a POOL of breeds per undead type, not from
     without touching the converter. How a pool member is picked (uniform,
     weighted, seeded from the UUID) is a breed-file / BreedSpawnSettings detail
     for stage 1 (see 6.5).
-D3b The undead loci also appear, rarely and expressing, in other breeds' founder
-    tables (breeds pin it, the gene rolls elsewhere too).
+D3b The undead loci are pinned by the two undead breeds ONLY in the first
+    release. No other breed's founder table carries them yet (owner: "add per
+    breed later"). The gene is still a locus any breed can be given later by a
+    founder-table line, so 'an undead Shire' stays possible; nothing rolls it
+    at random. So no other breed sheet changes, and the census diff is just
+    the two new breeds.
 D4  Old stats are dropped and re-derived from the genome. Health FRACTION is
     kept. State this in one sentence on the Gameplay tab and in the release
     notes.
@@ -191,6 +195,27 @@ D12 A breed names its undead pool with a field on the breed sheet (e.g.
     "undeadOf": "skeleton" | "zombie"). BreedFilesTest validates it, the breed
     designer offers it, and joining a pool is editing that breed's file.
 
+D13 Skeleton passification: Prm/Prm (permanent) with minecraft:bone.
+D14 Zombie passification: FTm (temporary) with minecraft:rotten_flesh. The
+    player must tame inside the calm window; that is the intended contrast.
+    Both items are appended to PassificationGene.OFFERINGS (never reordered).
+D15 Drops REPLACE leather: skeleton drops bones, zombie drops rotten flesh
+    (two new MagicItemDropGene alleles, same shape as Dia/Egg/Swd).
+D16 Both undead breeds pin aggression Anp (riders, after dark).
+D17 Skeleton diet allele: eats BONES and heals from them, the way a metal-eater
+    eats one metal. It reuses the DietGene feeding path exactly; no passive-
+    regen timer and no hunger-system change. It shares the item with D13's
+    passification offering, which is deliberate: the horse is hostile until you
+    give it the thing it is made of, and bones then also keep it alive.
+D18 Undead breeds do NOT spawn in the wild in the first release: "spawn" is
+    ["spawn_egg"] only; vanilla trap, /summon and old saves feed the converter.
+    No biome, herd or spawn_in_dark work for them.
+D19 undead.suppressVanillaSpawns is a later stage; the converter catches new
+    vanilla undead horses a tick after they spawn.
+D20 Body: average height for both. Zombie sturdier: high health band, slow
+    speed band (double hearts, speed penalty). Skeleton light, fast, low
+    health. Plain numbers in the two breed sheets, no new stat code.
+
 Still open, and not answered here: how the coat pipeline paints a skeleton (the
 absence of a coat) - see stage 1.
 
@@ -211,26 +236,21 @@ plus a few alleles". Each row names the thing to copy.
                             the offering index; its note records
                             the veto fix the flee path needed
   Zombie eats raw meat      DietGene raw-meat allele                  none
-  Skeleton eats nothing,    DietGene narrow diets; blood diet heals   one new
-   heals on its own          only by biting (a horse that heals off    allele +
-                            the normal food path)                     its healing
+  Skeleton eats bones,      DietGene narrow diets (one metal, one     one new
+   heals from them           gem: full health per item)                allele
   Double hearts, slow       breed "stats" block and stat targets      numbers
   Bone / flesh drops        MagicItemDropGene (Dia, Egg, Swd, n)      two alleles
   Vanilla undead sounds     the sound effect (meowing gene)           sound ids
   Counts as undead          MobGroups "undead" group                  one clause
-Passification specifics to settle in stage 1 (proposed defaults, veto freely):
-  - Skeleton: Prm/Prm (permanent), offering minecraft:bone appended to
-    OFFERINGS. Matches the roadmap ("one bone, once, forever").
-  - Zombie: FTm (temporary), offering a raw-meat item appended to OFFERINGS
-    (minecraft:rotten_flesh is the natural zombie food; the roadmap says raw
-    meat). Matches the roadmap ("temporarily pacified... a rope you keep paying
-    out until the horse is yours"). Note the tension with D10's "tamed as
-    normal": a temporary calm lasts a window, so the player must tame inside it.
+Passification, settled (D13, D14):
+  - Skeleton: Prm/Prm (permanent), offering minecraft:bone.
+  - Zombie: FTm (temporary), offering minecraft:rotten_flesh.
   - Offering amount, duration and cooldown are epigenetic and banded per breed,
     as nightmare.json does.
   - Any aggression allele must be checked against PassificationGene's veto: it
-    vetoes TARGETING, not harmful auras, and a passified undead horse is still
-    an undead horse to cleansing light.
+    vetoes TARGETING, not harmful auras, and it must also stop FLEEING (the
+    nightmare note records that fix). A passified undead horse is still an
+    undead horse to cleansing light.
 Two things in this table are UNVERIFIED and one may not fit:
   - MagicItemDropGene's alleles are "instead of leather" (diamonds, an egg, a
     sword). Whether a drop that ADDS bones and flesh alongside leather, or that
@@ -493,6 +513,8 @@ that then have to be converted.
     If none is cleanly cancellable, the tick converter of section 6 already
     handles it a tick later and that is acceptable - suppression is an
     optimisation, not a requirement.
+  - (First release: none of this. D3b/D18/D19 keep new undead horses to spawn
+    eggs and the vanilla routes; what follows is for the later stage.)
   - Fresh undead founders draw from the breed sheets: a per-breed undead
     frequency, with the founder-table rule the roadmap states (a recessive gene
     puts its EXPRESSING combinations into the wild population, not carriers,
@@ -559,12 +581,12 @@ Stage 1 - the genes and the two breeds, in common/. The skeleton locus and the
           CustomHorseSpawnScreen both get the genes. Add the back-compat test
           from section 2 (a pre-existing genotype code still parses).
 Stage 2 - wire the reused machinery (section 5a): the two OFFERINGS entries
-          (bone; a raw-meat item), the skeleton diet allele and its healing, the
+          (bone; rotten flesh), the skeleton bone-diet allele, the
           aggression alleles, the two drop alleles and the sound ids, the
           stat targets, and the MobGroups clause (D6). Append to OFFERINGS, never
           reorder. A new effects verb touches four or five files
-          (wiki/making-a-gene.html#contracts), so avoid one; the skeleton's
-          heal-without-food is the only place a verb might be needed.
+          (wiki/making-a-gene.html#contracts), so avoid one; none is expected now
+          that D17 reuses the diet path.
 Stage 3 - the converter (section 6), with its gametests (section 11), and the
           adapter registry. Land it with undead.convert defaulting true; do not
           release before stages 1-2 are seen in-game.
