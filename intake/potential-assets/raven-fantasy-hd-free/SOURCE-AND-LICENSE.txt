@@ -1,0 +1,49 @@
+Raven Fantasy HD Ultimate (FREE files) - source, licence, credit
+
+What it is
+==========
+"RAVEN FANTASY HD ULTIMATE FREE": a full spritesheet (Full Spritesheet.png,
+512x1792) plus its cut-up singles (Separated Files/FHD (1).png ... , 808 icons).
+Files as received in RFHD_Free_Files.zip, unmodified.
+
+Source
+======
+Clockwork Raven Studios (artist and owner: "Caio").
+Store page (given by the owner):
+  https://clockworkraven.itch.io/raven-fantasy-hd-ultimate-rpg-icons-pixel-art-icons-textures-and-sprites
+Author's Patreon (from the pack's own note):
+  https://www.patreon.com/clockworkravenstudios
+Received from the owner as a zip upload; date received 2026-09-29.
+
+Licence - UNCONFIRMED, MUST BE FILLED IN
+========================================
+The store page could not be opened from the session that filed this pack (the
+sandbox's network policy blocked itch.io), and the zip contains no licence file.
+The only text shipped in the zip is "Special Note to the Dev.txt" (kept beside
+this file), which is a thank-you note. It states no licence terms, and it thanks
+the reader "for your purchase", so the file may come from a purchased copy
+rather than a free download. The licence terms are therefore NOT known and
+nothing below may be assumed.
+
+TO DO (owner): paste the licence / usage terms from the itch.io page here,
+verbatim, with the date you read them, and say whether the copy you hold was
+free or paid. Until then:
+  - treat the pack as "all rights reserved by Clockwork Raven Studios";
+  - do NOT copy any icon into a module, and do not redistribute the pack.
+Things the page's terms must answer before any icon is used:
+  1. Is commercial / mod use allowed?  2. Is credit required, and in what form?
+  3. May the icons be modified?  4. May the pack be redistributed (e.g. in a
+  public repo)?  5. Does the "free" sampler carry different terms from the
+  paid pack?
+
+Credit
+======
+If used: "Raven Fantasy HD icons by Clockwork Raven Studios (Caio),
+clockworkraven.itch.io" in THIRD_PARTY_NOTICES.md, plus whatever the terms above
+require.
+
+Redistribution here
+===================
+This folder is in intake/, which is not part of any module and not in the jar.
+Whether even keeping it in the public repository is allowed is the open
+question above.

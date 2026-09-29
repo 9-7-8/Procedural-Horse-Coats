@@ -1,0 +1,8 @@
+Where this pack is used in the game
+
+Nothing yet. Nothing from this pack has been copied into any module.
+
+Keep one line per file used, in the same change that copies it:
+  <file in this pack>  ->  <path in the mod>  |  modified? y/n  |  what it is for  |  date
+
+(Then add the pack to THIRD_PARTY_NOTICES.md, which ships in the jar.)
