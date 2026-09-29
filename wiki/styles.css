@@ -1575,3 +1575,41 @@ a.card .card-text {
     font-size: 0.85rem;
     margin: 0.5rem 0 0 0;
 }
+
+/* ---- item sprites on their own page (item-art.js) ------------------------ */
+.item-art { margin: 1.1rem 0 1.4rem 0; }
+.item-art-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: var(--bg-soft);
+}
+.item-art-row li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    width: 5.6rem;
+    text-align: center;
+}
+.item-art-row img {
+    width: 48px;
+    height: 48px;
+    /* The art is 16, 32 or 64 square. Never smooth it back into a blur. */
+    image-rendering: pixelated;
+}
+.item-art-row span {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    line-height: 1.3;
+}
+.item-art-note {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin: 0 0 0.4rem 0;
+}
