@@ -46,7 +46,7 @@ Decided: bond gates BINDING. Not calling, not the area whistles.
   line that says the horse does not trust you enough yet and what to do
   (the wiki's horse-care page owns how bond is earned; link the tier, do not
   restate the numbers - CLAUDE.md, derived numbers stay in code).
-- Open: which tier. Recommendation is tier 2 (bond 61+, the tier at which a
+- Decided: tier 2. The reasoning: tier 2 (bond 61+, the tier at which a
   horse starts coming toward you unasked) so a whistle is a reward for a bond
   you have already built, not something to craft ahead of it. Tier 3 would make
   the whistle the last thing a player earns; tier 1 would gate almost nothing.
@@ -92,14 +92,14 @@ So this changes WhistleItem only.
 - Chat line: today says "Whistled N horses to you." Once some walk it should
   still count them all; do not split the message by method. Log the split to
   ActionTrace / DebugAnnounce for testing instead.
-- Open: WALK_RADIUS. BondFollowGoal's own limit is 32 blocks; the basic whistle
+- Decided: WALK_RADIUS 16. Reasoning: BondFollowGoal's own limit is 32 blocks; the basic whistle
   reaches 16, so if WALK_RADIUS is >= 16 the basic whistle NEVER teleports a
   reachable horse and the golden/echo whistles teleport only the far ones.
   Recommendation: walk within 16 for every tier (the basic whistle's whole
   reach), teleport further out. Say so in each tooltip's second line - the
   current line ("a ridden horse stays put; a leashed one is untied") is written
   to pre-empt bug reports and this is the next one it should pre-empt.
-- Open: how long is "too long a walk". A path 15 blocks away can be 80 blocks
+- Decided: cap by path length too. The reason: A path 15 blocks away can be 80 blocks
   of switchback. Recommendation: cap by path length as well as straight-line
   distance, over the cap -> teleport. ReachCheck's API may need to expose the
   path length; read it before promising this.
@@ -142,10 +142,8 @@ blown; every ender whistle is blown, since each is bound to a different horse.
 - One combined chat line instead of N lines: "Whistled 3 horses, and Biscuit
   answered from far away." Building the lines from the same helpers the items
   use keeps the wording in one place.
-- Key default: an unbound-by-default key is safest for a modpack server where
-  every key is already taken; a default that conflicts is worse than none. Open:
-  owner's preference. Rebindable either way (KeyMapping). Add a lang key and
-  it needs a Controls-screen name.
+- Key default: shift+C, rebindable (see "Settled" below for the two checks it
+  needs). Add a lang key and a Controls-screen name.
 - The payload registers in ModNetworking next to the tack-slot one. It is the
   mod's first payload with NO fields - check StreamCodec.unit(...) exists on
   26.1.2 before relying on it (unverified; flag it in a comment per hard rule 8,
@@ -202,12 +200,31 @@ reproduction rather than widening the search. Run
 node wiki/tools/check-roadmap-execution.mjs before editing, and only
 --tests '*WhistleSelectionTest' (piece 3's common class) - never the full suite.
 
-Open items, collected (settle these before or at the start of the build)
-========================================================================
-1. Bond gate tier: 2 (61+) recommended. [piece 1]
-2. WALK_RADIUS, recommended 16 for every tier; and whether a path-length cap
-   applies. [piece 2]
-3. Default keybind: none/unbound recommended. [piece 3]
-4. Whether armour slots and modded containers are scanned by the keybind;
+Settled with the owner (was open)
+=================================
+1. Bond gate: TIER 2 (bond 61+) to bind an ender whistle. [piece 1]
+2. Walk range: 16 blocks for every whistle tier; beyond that, teleport. [piece 2]
+3. Path length: ALSO capped. A horse whose walking route is too long teleports
+   like a far one. Read ReachCheck first; it may need to expose path length. The
+   cap number is not set yet - start from the same 16-block reach measured along
+   the path, or somewhat more, and let the play test tune it. [piece 2]
+4. Default key: SHIFT + C, rebindable. [piece 3] Two things to check before
+   coding it, because both can bite:
+   - Shift is also vanilla's sneak, and sneak DISMOUNTS a rider. So while riding
+     a horse, shift+C would drop you off it as the whistles blow. Decide whether
+     that is acceptable (the ridden horse is left alone by the whistle anyway),
+     or whether the key should do nothing while mounted, or should use a
+     different modifier. Recommendation: make it a no-op while riding.
+   - A key with a modifier needs NeoForge's KeyModifier on the KeyMapping
+     constructor (KeyModifier.SHIFT). That overload is unverified on 26.1.2 -
+     flag it in a comment and check api-notes.html before relying on it.
+   Also expect a clash with any other mod's shift+C (a common inventory / crafting
+   key in some packs); rebinding in Controls is the answer, not a code change.
+
+Still open (settle at the start of the build session)
+=====================================================
+A. Path-length cap number for piece 2 (see 3 above).
+B. Whether the keybind also scans armour slots and modded containers;
    recommended main inventory + offhand only. [piece 3]
-5. Art for the bound/unbound texture, from the owner. [piece 4]
+C. The keybind while mounted (see 4 above). [piece 3]
+D. Art for the bound/unbound texture, from the owner. [piece 4]
