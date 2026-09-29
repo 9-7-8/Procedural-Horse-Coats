@@ -53,7 +53,7 @@ What the player feels: mining from horseback at a fifth of speed.
   block breaking. Server-type configs sync to the client in NeoForge, but that
   is an API fact this file has not proved - check it, or the client reads its
   own default and the two sides disagree with the switch off.
-- Config: behaviour.mounted_mining_penalty_removed, default per the Open below,
+- Config: behaviour.mounted_mining_penalty_removed, default ON,
   with the leadsReturn()-style safe accessor. The page says this is the one piece
   that alters rather than adds, so the comment on the option should say plainly
   that on = not vanilla.
@@ -69,8 +69,8 @@ What the player feels: mining from horseback at a fifth of speed.
 - New KeyMapping in a new client class beside HorseBrowserKeyBindings, name
   key.horsegenetics.rider_inventory, own KeyConflictContext.IN_GAME. The lang
   key goes in en_us.json.
-- Handler: ClientTickEvent.Post like HorseBrowserKeyHandler. Guard: player is
-  riding, mc.screen == null, no overlay. Open the player's own screen
+- Handler: ClientTickEvent.Post like HorseBrowserKeyHandler. Guard: mc.screen == null,
+  no overlay (no riding guard - decided below). Open the player's own screen
   client-side with no server round trip - the player's inventory menu is always
   live on the server, so this needs no payload (the H browser made the same
   simplification). Creative mode uses a different screen class than survival;
