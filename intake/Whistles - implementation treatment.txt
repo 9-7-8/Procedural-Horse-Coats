@@ -109,6 +109,94 @@ So this changes WhistleItem only.
   back after the call ends - the call should end with it standing near you, not
   resuming a wander at once).
 
+2b. Piece 2 in detail (design only - no code is written from this until the
+    owner says to build)
+----------------------------------------------------------------------
+Facts read from the code, so the plan stands on them:
+- Goal priorities on a horse today (lower wins): escape 0; sun shade and panic 1;
+  the werewolf temper goal 2; melee, blood hunt and the herd goals from 3 up;
+  bond follow 4 (its head-turning sibling Watch is lower priority still). The
+  generated wiki/behaviour-hierarchy.html is the authority - re-read it, do not
+  trust this line.
+- BondFollowGoal's ReachCheck is a cached (two seconds) yes/no "is there a path
+  that actually arrives" question against the OWNER, and treats a path that stops
+  short as a fence. It is built for a goal that runs every tick, so it is too
+  slow-witted to decide a whistle: a call needs a FRESH answer once, at blow time.
+- A navigator path has a node count. That count is what "route no longer than 16"
+  is measured with. It is an approximation of blocks (nodes are block steps, so a
+  diagonal counts one node for about 1.4 blocks): fine for a cap, and worth one
+  line in the tooltip wording ("about").
+
+The shape of a walked call
+1. Decide at blow time, per horse, once. Ask the horse's own navigator for a
+   fresh path to the player. Walk only if the path exists, actually arrives, and
+   its node count is within the 16 cap. Otherwise the horse takes the existing
+   teleport branch, unchanged. Nothing about the decision is re-made later.
+2. Mark the horse as "called by this player, until tick T". The marker is
+   in-memory only, keyed by horse id, cleared on reload and on dimension change.
+   A reload MID-CALL simply ends the call and the horse goes back to what it was
+   doing; that is acceptable for a few seconds of walking and avoids saved state.
+3. A dedicated goal (called something like the call goal) reads the marker. It
+   starts only for a marked horse, claims MOVE and LOOK, walks toward the player
+   at about a trot, and looks at them.
+4. Priority: below survival, above everything social. So it must yield to escape,
+   sun shade and panic (a horse on fire or fleeing should not walk calmly to you),
+   and beat the herd goals, hunger, food temptation and bond follow. That points
+   at the number 2. Check the two goals already at 2 (the werewolf temper goal)
+   for a shared flag; an equal priority never interrupts, and a called horse that
+   refuses because a werewolf mood holds MOVE would read as "the whistle failed".
+5. It ends in exactly one of four ways, and the design has an answer for each:
+   - ARRIVED: within about three blocks (the same "already here" distance the
+     current whistle uses). Clear the marker, stop the navigator, done.
+   - STUCK: no progress for a couple of seconds, or the deadline passes. Cancel
+     the walk and TELEPORT the horse beside the player, exactly as today. This is
+     the guarantee that a walked call is never worse than the old behaviour.
+   - PREEMPTED: a higher goal (panic, escape) took MOVE. The call is dropped and
+     NOT resumed; the horse is not teleported either, because it is in danger,
+     not lost. Log it for the debug trace so a "the whistle ignored my horse"
+     report is answerable.
+   - INVALIDATED: the player died, changed dimension, mounted the horse, or the
+     horse was leashed by someone else. Drop the call quietly.
+6. On arrival the horse is idle at the player's feet, then falls back into the
+   ordinary goals. It should not immediately wander back to the herd. Whether
+   the herd goals need a short "just called" grace so it lingers for a moment is
+   a play-test finding, not something to design blind; record it on the
+   Verification tab.
+
+The player-facing message stays one line and counts every horse, walked or
+teleported, so the count is the same either way. Which method each horse used
+goes to the debug trace only.
+
+Mixed calls: one blow can walk some horses and teleport others. They must not
+collide - walked horses head for the player, teleported ones land in the spread
+grid beside them; keep the grid, but make walked horses stop short of it rather
+than at the same spot, so the herd does not stack on arrival.
+
+Tooltips: the second line of the three area whistles today says a ridden horse
+stays put and a leashed one is untied. It should also say that a horse within
+reach walks to you and a farther one appears. Wording is the owner's; keep it to
+one short extra line, for the same reason the existing line was written (to
+pre-empt the bug reports).
+
+What to test by hand (goes on the Verification tab of item-whistles.html when
+this ships; it cannot be unit-tested because it is navigation and goal
+arbitration):
+- open field, one horse 10 blocks off: it walks and arrives, chat says 1.
+- the same horse behind a fence with no gate: it cannot path, so it teleports.
+- the same horse with a gate 10 blocks around: path too long, so it teleports;
+  then with the gate 4 blocks around: it walks.
+- across a river or ravine: teleports.
+- a horse mid-way through eating, in heat, or in a herd: the call wins, and after
+  arriving it does not instantly wander off.
+- a horse that becomes panicked while walking: the call drops, no teleport.
+- three horses at 5, 12 and 40 blocks with the echo whistle: two walk, one
+  teleports, chat says 3, nothing stacks.
+- reload the world mid-walk: no error, the horse just stops calling.
+- the ender whistle beside a walkable horse: still a teleport (decided).
+
+Not decided by this section, and deliberately left: the timeout length, the stuck
+threshold, and the exact walk speed. Tune them in the play test.
+
 3. Keybind: blow every distinct whistle in the inventory
 ---------------------------------------------------------
 Decided: one key blows ALL whistles in the inventory that are not degenerate
