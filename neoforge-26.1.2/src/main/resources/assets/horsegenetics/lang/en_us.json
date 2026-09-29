@@ -224,6 +224,7 @@
   "key.horsegenetics.dive_horse": "Dismount while flying, or dive (ridden horse)",
   "key.horsegenetics.highlight_horses": "Highlight Nearby Horses",
   "key.horsegenetics.horse_browser": "Open Horse Browser",
+  "key.horsegenetics.rider_inventory": "Open Your Own Inventory",
   "key.horsegenetics.show_stalls": "Show Stalls (debug)",
   "message.horsegenetics.breed.same_sex.mares.1": "%1$s and %2$s have been trying for a while, but for some reason two mares can't seem to have a baby...",
   "message.horsegenetics.breed.same_sex.mares.2": "%1$s and %2$s are very much in love. They are also both mares, which is going to be a problem for the foal plan.",
