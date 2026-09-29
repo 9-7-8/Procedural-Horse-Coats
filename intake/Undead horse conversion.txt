@@ -2,15 +2,17 @@ Undead horse conversion - treatment, spec and implementation guide
 
 Status: PLAN ONLY. Nothing here is built and no code was written for it.
 The owner has settled the design calls D1-D8 and the bundle question (section 5). What
-is left open is the two genes' own look and the API checks marked UNVERIFIED.
+is left open is the two genes' own look and the API checks marked UNVERIFIED,
+minus the one Appendix A answers: the stage 0 mesh check HAS been run, and its
+result is Appendix C. The undead horses are the horse mesh.
 Nothing here has been checked in-game. Anything that touches a Minecraft or
 NeoForge API is marked UNVERIFIED and must be read out of the 26.1.2 sources
 (or proved in a gametest) before it is relied on - see CLAUDE.md hard rule 8.
 
 Where this goes: intake/ is an inbox, not a plan (START HERE.txt). When this is
 picked up it is routed onto wiki/undead-horses.html's Roadmap tab, and this file
-is deleted. Section 12 says exactly what goes where. Appendix A is a script for the stage 0
-check.
+is deleted. Section 12 says exactly what goes where. Appendix A is the script for
+the stage 0 check and Appendix C is what it printed.
 
 
 1. What is being asked
@@ -566,31 +568,40 @@ and leaves the game working. Because conversion is ON by default (D2), stages
 merged last and released together with the genes and breeds it depends on. Until
 then it can sit on main behind undead.convert=false in the working tree only.
 
-Stage 0 - the coat question, and a hunch to prove first. Owner's hunch: the
-          vanilla zombie horse and skeleton horse are the ordinary horse mesh
-          with a different texture (the skeleton just having more transparent
-          pixels), not new meshes. UNVERIFIED - no vanilla jar was available to
-          read while planning. Prove it before anything else: in the 26.1.2
-          sources, check which model layer the two undead renderers bake
-          (ModelLayers for zombie/skeleton horse vs horse) and open
-          textures/entity/horse/ for the two undead PNGs. If it holds, the
-          question below mostly dissolves: a skeleton or rotted look is another
-          coat on the same UV layout, and the mod's sheet is already the vanilla
-          layout at twice the size (HorseSkinGeometry.SHEET_SIZE), so nothing
-          needs a model swap. What remains is smaller: (a) alpha - the pipeline
-          works in RGB (gradient lookup, signed RGB offsets) and the base coat
-          is drawn as an opaque cutout, so a skeleton needs an op that writes
-          alpha 0 and a check that the renderer's render type honours it (the
-          emissive layer already uses a translucent/eyes type, so the machinery
-          exists); (b) source art - CLAUDE.md's template rule is that the mod
-          never samples vanilla's textures, so the undead looks must be
-          authored or derived into this mod's own namespace, with the licence
-          question answered in THIRD_PARTY_NOTICES if vanilla art is used as a
-          reference. If the hunch fails, the old three options stand: a painting
-          gene at extreme priority, a whole-texture override, or a model swap.
-          Owner's call; decide on the page's Coding tab before stage 1. Also
-          rewrite the philosophy.html live-test paragraph to say the breed sets
-          the bundle.
+Stage 0 - the coat question. The hunch is PROVED: the vanilla zombie horse and
+          skeleton horse are the ordinary horse mesh with a different texture,
+          the skeleton simply cutting away more than half of it. Appendix C has
+          the evidence, read out of the 26.1.2 client jar. So the old three
+          options (a painting gene at extreme priority, a whole-texture
+          override, a model swap) are all off the table: a skeleton or rotted
+          look is another coat on the same UV layout, and the mod's sheet is
+          already the vanilla layout at twice the size
+          (HorseSkinGeometry.SHEET_SIZE). What is left of this stage is smaller
+          than it was:
+          (a) alpha - SETTLED in shape. Neither undead texture has a single
+              partially transparent pixel, so alpha is strictly binary: the
+              pipeline needs an op that writes alpha 0, and a cutout render type
+              is enough. No translucent type, and nothing to borrow from the
+              emissive/eyes layer. Still to check in the same change: that this
+              mod's own GeneticHorseRenderer uses a cutout type - Appendix C
+              read vanilla's renderer, not the mod's.
+          (b) source art - UNCHANGED and still the real work. CLAUDE.md's
+              template rule is that the mod never samples vanilla's textures, so
+              the undead looks must be authored into this mod's own namespace,
+              with the licence question answered in THIRD_PARTY_NOTICES if
+              vanilla art is used as a reference.
+          (c) NEW, and the one thing the plan did not anticipate: vanilla stores
+              the shared equine LayerDefinition for HORSE with
+              MeshTransformer.scaling(1.1f) applied and for SKELETON_HORSE and
+              ZOMBIE_HORSE raw, so the undead horses render at about 0.909 of a
+              horse. A converted horse is a minecraft:horse and so comes out
+              roughly 10 percent larger than the vanilla animal it replaced,
+              before its breed's own size band. That is a number in the two
+              breed sheets (D20 says average height for both), not new code -
+              decide whether to compensate or to accept it and say so.
+          Owner's call on (b); record all of it on the page's Coding tab before
+          stage 1. Also rewrite the philosophy.html live-test paragraph to say
+          the breed sets the bundle.
 Stage 1 - the genes and the two breeds, in common/. The skeleton locus and the
           zombie locus (a data-driven gene file each, per
           wiki/making-a-gene.html), their look, and their founder frequencies
@@ -759,6 +770,14 @@ or give it the jar yourself:
 It is read-only, standard library only, and needs a Minecraft jar that has been
 downloaded once (run ./gradlew :neoforge-26.1.2:build first if it cannot find
 one). The javap half needs the JDK's bin on PATH.
+ALWAYS PASS THE JAR. Run with no argument, its finder returns the FIRST jar of
+1 MB or more that holds a horse texture, and on this machine that is the mod's
+own build output - horsegenetics-*.jar matches on
+textures/entity/equipment/horse_body/, so parts 2 and 3 find nothing and part 4
+lists the mod's renderers instead of vanilla's. The jar that works is the
+neoformruntime artifact, not anything under modules-2:
+    ~/.gradle/caches/neoformruntime/artifacts/minecraft_26.1.2_client.jar
+It is deobfuscated, which is why part 4's javap prints real class names.
 
 What it answers, and how to read it:
   Part 2  lists the horse-family textures in the vanilla jar (confirms the
@@ -778,8 +797,9 @@ What it answers, and how to read it:
           feeds HORSE, ZOMBIE_HORSE and SKELETON_HORSE. In the renderers, note
           which render type the undead ones ask for.
 The PNG decoder was tested on a real PNG and synthetic masks; parts 1, 2 and 3
-are the trustworthy ones.
-Paste the output back into the chat and the plan gets updated from it.
+are the trustworthy ones. Part 4 is no longer UNTESTED - it ran against the real
+26.1.2 jar and its output is in Appendix C, which is also where to look before
+running it again: the answer is already there.
 
 ----- BEGIN check_undead_meshes.py -----
 #!/usr/bin/env python3
@@ -1080,3 +1100,72 @@ Prm/Tmp pairs, but the zombie's duration and cooldown bands only make sense on
 Tmp and the skeleton's must not band them); check-breed-heights.mjs for the
 size; the breed egg texture bake if an egg texture is added; and the breed-book
 lore entries (D24).
+
+
+Appendix C - Appendix A's output, and what it settles
+=====================================================
+Run against ~/.gradle/caches/neoformruntime/artifacts/minecraft_26.1.2_client.jar
+with Python 3.9 and javap from JDK 25. Read-only; nothing in the repo changed.
+
+VERDICT: the owner's hunch holds. One mesh, one UV layout, binary alpha, and a
+scale difference nobody had noticed.
+
+Part 2 - the textures are still where the plan guessed. 26.1.2 has not moved
+them out of assets/minecraft/textures/entity/horse/:
+    horse_skeleton.png, horse_skeleton_baby.png,
+    horse_zombie.png,   horse_zombie_baby.png
+beside the seven base coats, their baby variants, the four marking sheets, and
+donkey/mule. Vanilla also ships equipment/skeleton_horse_saddle/ and
+equipment/zombie_horse_saddle/, which is the pair section 3.5 already names.
+
+Part 3 - alpha masks. All three are 64x64:
+    horse_white      transparent 1794 (43.8%)   partial 0   opaque 2302 (56.2%)
+    horse_zombie     transparent 1878 (45.8%)   partial 0   opaque 2218 (54.2%)
+    horse_skeleton   transparent 3060 (74.7%)   partial 0   opaque 1036 (25.3%)
+    zombie   vs white: 2217 drawn inside the white horse's UV islands, 1 outside;
+                       85 holes cut inside the islands, 3.7% of 2302
+    skeleton vs white: 1036 drawn inside, 0 outside;
+                       1266 holes, 55.0% of 2302
+Two things follow. First, "outside" is 0 and 1, so neither undead texture draws
+anywhere the ordinary horse does not: the same UV layout, no new islands, and
+the single stray zombie pixel is noise. The skeleton is the horse's map with
+55% of the body area cut away; the zombie is the horse's map with 85 pixels
+knocked out and the rest recoloured. Second, "partial 0" on all three: not one
+pixel in any of them is partially transparent. Alpha in vanilla's undead horses
+is strictly binary, so the pipeline needs an op that writes alpha 0 and nothing
+more - a cutout render type is sufficient and no translucent type is required.
+
+Part 4 - model layers, from LayerDefinitions. HORSE, SKELETON_HORSE and
+ZOMBIE_HORSE all put the SAME local LayerDefinition (aload 9) into the map -
+one definition, three entries, so one mesh. But HORSE does not store it raw:
+    HORSE          : LayerDefinition.apply(MeshTransformer.scaling(1.1f))
+    SKELETON_HORSE : the definition as-is
+    ZOMBIE_HORSE   : the definition as-is
+So a vanilla undead horse is the horse mesh at 1/1.1, about 0.909 of a horse.
+This is how vanilla scales the whole family - DONKEY and MULE store
+DonkeyModel.createBodyLayer at 0.87 and 0.92 the same way. The consequence for
+this plan is in stage 0 (c): a converted horse is a minecraft:horse, so it
+renders about 10% bigger than the animal it replaced, and that is a size band in
+the two breed sheets rather than any code.
+
+Part 4 - renderers. UndeadHorseRenderer extends AbstractHorseRenderer and
+constructs HorseModel and BabyHorseModel: literally the same two model classes
+HorseRenderer constructs. It names no RenderTypes call at all, so it takes the
+renderer default rather than a translucent type - consistent with the binary
+alpha above. UndeadHorseRenderer$Type is a small table of (texture, model layer)
+for skeleton, skeleton baby, zombie and zombie baby. There is also a separate
+ModelLayers.UNDEAD_HORSE_ARMOR beside HORSE_ARMOR, worth knowing for 3.6.
+Class names moved in 26.1.2 and the plan should use the new ones: the models are
+net.minecraft.client.model.animal.equine.{HorseModel, BabyHorseModel,
+DonkeyModel}.
+
+What is now settled, and what stage 0 still owes:
+  SETTLED  No model swap, no whole-texture override, no painting gene at extreme
+           priority. The undead looks are ordinary coats on the layout the mod's
+           sheet already uses at twice the size (HorseSkinGeometry.SHEET_SIZE).
+  SETTLED  Alpha is binary. An op that writes alpha 0, honoured by a cutout
+           render type. Confirm the mod's own GeneticHorseRenderer asks for a
+           cutout type in the same change; this script read vanilla's renderer.
+  OPEN     The art. Authored in this mod's namespace, vanilla's sheet as a
+           reference only, THIRD_PARTY_NOTICES question unchanged.
+  OPEN     The 1.1 scale difference, as a size-band decision (stage 0 (c)).
