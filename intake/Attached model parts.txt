@@ -525,3 +525,624 @@ uses for size (a genetic scale on the state) and needs nothing UNVERIFIED.
 - New standing rule for this page: no part ships needing an animation asset. A part
   that cannot be expressed as a rigid child, a static pose pair, or a formula off the
   parent's rotation is a different plan and goes to its own Roadmap entry.
+
+
+12. Working draft: horn (sizes), antlers, translucent crystals
+===============================================================
+Requested: basic code for the unicorn horn (bonus: different sizes), antlers and
+crystals (bonus: translucent), using a texture pack as the texture source.
+
+12.0 What was actually run, and what was not
+---------------------------------------------
+RUN, in a scratch JDK 21 sandbox (no Minecraft, no Gradle):
+- The six common/ classes in 12.2 compile against the real Rng / SeededRng from
+  common/. Nothing in them imports Minecraft or NeoForge (hard rule 1) and they use no
+  JDK API beyond java.util lists and Math (hard rule 2).
+- intake/attached-parts-draft/Check.java: for every kind, five sizes and 500 seeds -
+  deterministic, every parent index precedes its child, no box thinner than 0.5 units,
+  antlers never exceed AntlerGenerator.MAX_NODES. Zero violations. Worst-case antler
+  over 2000 seeds is 20 boxes (cap 44); a crystal cluster is 12-28.
+- intake/attached-parts-draft/Preview.java renders the generated boxes in three
+  projections on a horse head / body outline. Output: parts-preview.png in the same
+  folder. This is a flat-shaded preview of the GEOMETRY ONLY: no texture, no light, no
+  translucency blending as the game does it. It proves shape and scale, not appearance.
+- bake-part-sheet.py runs in both modes (procedural, and --pack with a synthetic tile);
+  part_sheet.png / sheet-preview.png are its output.
+
+NOT RUN, and written from reading the repository only (marked UNVERIFIED in the code):
+- Everything in 12.3 (the client layer). No Minecraft was launched, nothing compiled
+  against 26.1.2. Treat it as a spec with the call shapes copied from BraidLayer,
+  HayPortalRenderer and CutieMarkLayer, not as working code.
+- What it looks like in game. Anchor offsets are computed from HdHorseModel's boxes and
+  are a first guess; stage 0 tunes them against a live horse.
+
+12.1 The texture pack - what I could and could not check
+---------------------------------------------------------
+I COULD NOT OPEN https://flakdeau19.itch.io/pixel-art-texture-pack-256x256 : the
+sandbox's network policy blocks itch.io. So I do not know what tiles it contains, their
+file format, or its exact licence text. Everything below is designed to survive that.
+- "CC universal" almost certainly means CC0 1.0 Universal (public domain dedication):
+  no attribution needed, compatible with this repo's CC BY-NC 4.0. But it must be
+  READ off the page, because "Universal" also appears in CC BY 4.0-style text, and if
+  the pack is actually CC BY it needs a line in THIRD_PARTY_NOTICES.md and a copy under
+  LICENSES/ (CLAUDE.md: check a third-party licence is compatible before vendoring).
+  This is the one thing to confirm before any pack pixel is committed.
+- 256x256 is roughly sixteen times the resolution of this mod's art. Downsampled to a
+  16x16 region it becomes a coarse pattern, which suits Minecraft's look, but any fine
+  detail (veins, cracks) is lost. If a tile looks good only at full size, raise
+  PartSheet.REGION to 32 and the sheet to 128x128; the baker and PartSheet are the only
+  places that know the number.
+- The baker keeps only LUMINANCE from a pack tile and throws the colour away. Colour is a
+  per-horse tint at draw time (the BraidLayer method), so one sheet serves every colour
+  and the pack contributes pattern and light, not hue. For crystals, whose tiles will be
+  opaque, alpha is synthesised from brightness (dark = clearer).
+- Which tiles? Not knowable from here. Wanted: fine-grained pale stone / marble / bone /
+  ivory-like for HORN and BONE; anything glassy, faceted or crystalline (ice, quartz,
+  gems) for CRYSTAL. Drop chosen tiles into a folder as horn.png, horn_tip.png,
+  bone.png, bone_tip.png, crystal.png, crystal_core.png and run
+      python intake/attached-parts-draft/bake-part-sheet.py --pack <dir> --out part_sheet.png
+  Any region with no file falls back to the procedural pattern, so a pack that has good
+  crystal tiles and no bone tiles still works.
+- The pack is optional. The procedural sheet already ships a usable look, so nothing
+  in the plan is blocked on the pack, and no unlicensed pixel can leak in by accident.
+
+12.2 The common/ code (compiled and checked; files in intake/attached-parts-draft/common-parts/)
+--------------------------------------------------------------------------------------------
+Layout when routed: common/src/main/java/com/example/horsegenetics/common/parts/.
+Shape of it, so the code below reads quickly:
+- PartNode is one box in a tree: {parent, t, ox,oy,oz, rx,ry,rz, len, girth, tex}. It
+  hangs from its own origin toward -y (up in model space) and a child sits at fraction
+  t of its parent's length, then rotates. A curve or a spiral is just a chain of nodes
+  with a small rotation each; the parent's pose composes for us, so no matrix code.
+- PartKind = HORN | ANTLERS | CRYSTALS, each with its PartAnchor and default texture region.
+- PartGenerators.build(kind, size 0..1, seed) is the one door. Deterministic, so the
+  server, the client and the wasm designer would agree on the shape without shipping it.
+- HORN sizes: HornSize NUB 3 / SHORT 6 / STANDARD 10 / LONG 15 / NARWHAL 24 units, and
+  HornSize.lengthFor(s) slides geometrically between them, so an allele can pick a class
+  now and an epigenome number can slide between classes later with no generator change.
+  Base width grows with length but not proportionally, and never thinner than 0.6 units.
+- ANTLERS: a beam of 3-5 segments sweeping back, tines forking forward, a long tine
+  forking once more; mirrored by replaying the same seed. size 0 = spike-and-fork
+  yearling, 1 = many-tined stag; every seed differs.
+- CRYSTALS: each crystal is two shaft boxes crossed at 45 degrees (reads as an eight-
+  sided prism), a narrower cap and a point: six boxes. Lean grows with distance from the
+  spine midline so the cluster fans.
+
+----- PartNode.java -----
+package com.example.horsegenetics.common.parts;
+
+/**
+ * One box of an attached part, in the horse model's own units (1 unit = 1/16 block,
+ * y DOWN, front is -z - the same space {@code HdHorseModel} is written in).
+ *
+ * <p>The box hangs from its own origin along <b>-y</b> (up, in model space): its cube is
+ * {@code x,z in [-girth/2, +girth/2]}, {@code y in [-len, 0]}. A child sits at
+ * {@code t} of the way along its parent's length (1 = the tip), then rotates. Chaining
+ * nodes with a small rotation each is how a curve or a helix is built out of boxes with
+ * no matrix maths: the parent's pose composes for us.
+ *
+ * <p>Roots ({@code parent < 0}) are placed at the anchor plus {@code (ox, oy, oz)}.
+ *
+ * @param tex which 16x16 region of the part sheet the box samples ({@link PartSheet})
+ */
+public record PartNode(int parent, float t, float ox, float oy, float oz,
+                       float rx, float ry, float rz, float len, float girth, int tex) {
+}
+
+----- PartKind.java -----
+package com.example.horsegenetics.common.parts;
+
+/** What a gene or breed asks for. The client maps the kind to a layer pass; common never sees a mesh. */
+public enum PartKind {
+    /** One horn on the forehead. Bone/ivory, opaque. */
+    HORN(PartAnchor.FOREHEAD, PartSheet.HORN, false),
+    /** A mirrored pair of branching antlers behind the ears. */
+    ANTLERS(PartAnchor.CROWN, PartSheet.BONE, false),
+    /** A cluster of crystals along the spine. Translucent. */
+    CRYSTALS(PartAnchor.SPINE, PartSheet.CRYSTAL, true);
+
+    public final PartAnchor anchor;
+    public final int defaultTex;
+    public final boolean translucent;
+
+    PartKind(PartAnchor anchor, int defaultTex, boolean translucent) {
+        this.anchor = anchor;
+        this.defaultTex = defaultTex;
+        this.translucent = translucent;
+    }
+}
+
+----- PartAnchor.java -----
+package com.example.horsegenetics.common.parts;
+
+/**
+ * Where on the horse a part is rooted. Deliberately an enum and not a bone name:
+ * the client owns the mapping to a ModelPart chain and an offset, so retargeting an
+ * anchor is a client edit and common/ never learns Minecraft's part names (hard rule 1).
+ */
+public enum PartAnchor { FOREHEAD, CROWN, SPINE }
+
+----- PartSheet.java -----
+package com.example.horsegenetics.common.parts;
+
+/**
+ * The 64x64 part sheet is a 4x4 grid of 16x16 regions; a box samples one of them.
+ * Region ids are shared by the baker ({@code tools/bake-part-sheet}), the generators
+ * here and the client, so they live in one class.
+ */
+public final class PartSheet {
+    public static final int SIZE = 64;
+    public static final int REGION = 16;
+    public static final int HORN = 0;      // ivory / keratin grain, opaque
+    public static final int HORN_TIP = 1;  // darker, denser tip
+    public static final int BONE = 2;      // antler beam, ridged
+    public static final int BONE_TIP = 3;  // antler tine tip, paler
+    public static final int CRYSTAL = 4;   // facet gradient, alpha ~0.55-0.85
+    public static final int CRYSTAL_CORE = 5; // brighter core, alpha ~0.85
+
+    private PartSheet() {
+    }
+
+    public static int u(int region) {
+        return (region % (SIZE / REGION)) * REGION;
+    }
+
+    public static int v(int region) {
+        return (region / (SIZE / REGION)) * REGION;
+    }
+}
+
+----- HornSize.java -----
+package com.example.horsegenetics.common.parts;
+
+/**
+ * Named horn lengths, in model units (a horse's head box is 6x5x7, so STANDARD is a
+ * little longer than the whole head is tall). {@link HornGenerator} takes any float
+ * length, so an allele can pick a class today and an epigenome number can slide
+ * between them later without touching the generator.
+ */
+public enum HornSize {
+    NUB(3.0f), SHORT(6.0f), STANDARD(10.0f), LONG(15.0f), NARWHAL(24.0f);
+
+    public final float length;
+
+    HornSize(float length) {
+        this.length = length;
+    }
+
+    /** {@code s} in [0,1] -> a length between a nub and a narwhal, geometric so each step reads as "bigger". */
+    public static float lengthFor(double s) {
+        double c = Math.max(0.0, Math.min(1.0, s));
+        return (float) (NUB.length * Math.pow(NARWHAL.length / NUB.length, c));
+    }
+}
+
+----- HornGenerator.java -----
+package com.example.horsegenetics.common.parts;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A unicorn horn: a tapering chain of boxes. Each segment is a child of the one below,
+ * turned a little about its own axis (twist) and tipped a little forward (curve), so a
+ * spiral falls out of the parenting and needs no trigonometry here.
+ *
+ * <p>Base width grows with length so a narwhal horn is thicker at the root than a nub
+ * is, but not proportionally - a horn scaled uniformly would look like a photograph
+ * enlarged, not a different animal.
+ */
+public final class HornGenerator {
+
+    private HornGenerator() {
+    }
+
+    /**
+     * @param length   model units along the axis
+     * @param twist    degrees of yaw added per segment (0 = smooth; ~25 = a clear spiral)
+     * @param curve    degrees of forward tip added per segment (0 = straight)
+     * @param tilt     radians forward of the head's own up, at the root
+     */
+    public static List<PartNode> generate(float length, float twist, float curve, float tilt) {
+        float base = 1.3f + 0.055f * length;
+        int n = Math.max(3, Math.round(length / 1.6f));
+        float seg = length / n;
+        List<PartNode> nodes = new ArrayList<>();
+        float rTwist = (float) Math.toRadians(twist);
+        float rCurve = (float) Math.toRadians(curve);
+        for (int i = 0; i < n; i++) {
+            float f = (float) i / n;
+            // linear taper to a 0.6-unit point; never thinner (a sub-1/16 box shimmers)
+            float girth = Math.max(0.6f, base * (1.0f - 0.9f * f));
+            int tex = i >= n - 2 ? PartSheet.HORN_TIP : PartSheet.HORN;
+            if (i == 0) {
+                nodes.add(new PartNode(-1, 0f, 0f, 0f, 0f, tilt, 0f, 0f, seg, girth, tex));
+            } else {
+                // 0.9 not 1.0: a turned child at the exact tip leaves a wedge gap on the outside of the bend
+                nodes.add(new PartNode(i - 1, 0.9f, 0f, 0f, 0f, rCurve, rTwist, 0f, seg, girth, tex));
+            }
+        }
+        return nodes;
+    }
+
+    public static List<PartNode> generate(HornSize size) {
+        return generate(size.length, size == HornSize.NUB ? 0f : 22f, 3f, 0.15f);
+    }
+}
+
+----- AntlerGenerator.java -----
+package com.example.horsegenetics.common.parts;
+
+import com.example.horsegenetics.common.Rng;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A mirrored pair of antlers grown by a tiny recursive rule: a beam is a short chain that
+ * sweeps back and out; at some segments a tine forks off forward and outward; a long tine
+ * may fork once more. Seed and size are the only inputs, so every horse's rack is its own
+ * and still unmistakably an antler - geometry that is unbounded the way a coat is.
+ *
+ * <p>Angles are radians in the parent's frame. -y is up, -z is forward, so a positive
+ * {@code rx} leans a limb forward and a positive {@code rz} swings its tip toward -x
+ * (this horse's right); the left antler is the same list with the signs of {@code ry} and
+ * {@code rz} flipped and its root moved to +x.
+ */
+public final class AntlerGenerator {
+
+    private static final int MAX_DEPTH = 2;
+    /** Hard cap on boxes; a herd of these must stay cheap. See "Cost per frame". */
+    public static final int MAX_NODES = 44;
+
+    private AntlerGenerator() {
+    }
+
+    /**
+     * @param size   0..1: 0 is a spike-and-fork yearling, 1 a many-tined stag
+     */
+    public static List<PartNode> generate(Rng rng, double size) {
+        double s = Math.max(0.0, Math.min(1.0, size));
+        List<PartNode> out = new ArrayList<>();
+        // one RNG draw list, replayed for the mirror, so both sides are the same antler
+        long sideSeed = rng.nextLong();
+        for (int side = -1; side <= 1; side += 2) {
+            Rng r = new com.example.horsegenetics.common.SeededRng(sideSeed);
+            float beam = (float) (8.0 + 10.0 * s);
+            float girth = (float) (1.4 + 0.7 * s);
+            int segs = 3 + (int) Math.round(2.0 * s);
+            int tinesWanted = 1 + (int) Math.round(3.0 * s);
+            grow(out, r, side, -1, beam / segs, girth, segs, tinesWanted, 0, true);
+        }
+        return out.size() > MAX_NODES ? new ArrayList<>(out.subList(0, MAX_NODES)) : out;
+    }
+
+    private static void grow(List<PartNode> out, Rng r, int side, int parent, float segLen, float girth,
+                             int segs, int tines, int depth, boolean isBeam) {
+        int prev = parent;
+        int tinesLeft = tines;
+        for (int i = 0; i < segs; i++) {
+            float g = Math.max(0.6f, girth * (1.0f - 0.55f * i / segs));
+            int tex = (i >= segs - 1) ? PartSheet.BONE_TIP : PartSheet.BONE;
+            int me = out.size();
+            if (prev < 0) {
+                // root, behind the ear, pointing up and a little out and back
+                out.add(new PartNode(-1, 0f, side * 2.0f, 0f, 0f,
+                        -0.20f, 0f, side * 0.22f, segLen, g, tex));
+            } else if (i == 0) {
+                // first segment of a tine: forward and outward off its parent, from a chosen point along it
+                out.add(new PartNode(prev, 0.55f + 0.35f * r.nextFloat(), 0f, 0f, 0f,
+                        0.55f + 0.3f * r.nextFloat(), 0f, side * (0.35f + 0.25f * r.nextFloat()), segLen, g, tex));
+            } else {
+                // continuing segment: sweep back a touch and out - the beam's curve
+                out.add(new PartNode(prev, 0.9f, 0f, 0f, 0f,
+                        isBeam ? -0.20f : 0.12f, 0f, side * (isBeam ? 0.05f : 0.10f), segLen, g, tex));
+            }
+            // Tines fork off this segment, the beam only, from its second segment up
+            if (isBeam && i >= 1 && tinesLeft > 0 && out.size() + 4 < MAX_NODES) {
+                tinesLeft--;
+                float tineLen = segLen * (0.9f + 0.9f * r.nextFloat()) * (1.0f - 0.12f * i);
+                int tineSegs = tineLen > segLen * 1.4f && depth < MAX_DEPTH ? 2 : 1;
+                growFrom(out, r, side, me, tineLen / tineSegs, girth * 0.62f, tineSegs, depth + 1);
+            }
+            prev = me;
+        }
+    }
+
+    private static void growFrom(List<PartNode> out, Rng r, int side, int parent, float segLen, float girth,
+                                 int segs, int depth) {
+        grow(out, r, side, parent, segLen, girth, segs, 0, depth, false);
+    }
+}
+
+----- CrystalGenerator.java -----
+package com.example.horsegenetics.common.parts;
+
+import com.example.horsegenetics.common.Rng;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A cluster of crystals rooted along the spine. Each crystal is two shaft boxes crossed at
+ * 45 degrees (which reads as an eight-sided prism), a narrower cap box and a point box on
+ * top - six boxes for a crystal that looks faceted from any side. Lean grows with distance
+ * from the spine's midline, so the cluster fans out the way a real druse does.
+ *
+ * <p>Root offsets are along z on the body bone (front is -z); {@link PartAnchor#SPINE}
+ * puts the origin at the top of the body, so y = 0 sits on the back.
+ */
+public final class CrystalGenerator {
+
+    public static final int MAX_CRYSTALS = 7;
+
+    private CrystalGenerator() {
+    }
+
+    /**
+     * @param count  crystals in the cluster, 1..{@link #MAX_CRYSTALS}
+     * @param size   0..1 scales every crystal's length
+     */
+    public static List<PartNode> generate(Rng r, int count, double size) {
+        int n = Math.max(1, Math.min(MAX_CRYSTALS, count));
+        double s = Math.max(0.0, Math.min(1.0, size));
+        List<PartNode> out = new ArrayList<>();
+        for (int c = 0; c < n; c++) {
+            float across = n == 1 ? 0f : (float) c / (n - 1) * 2f - 1f;          // -1 .. 1 along the spine
+            float z = across * (1.5f + 1.0f * n);                                 // units fore-aft
+            float x = (r.nextFloat() - 0.5f) * 3.0f;                              // scatter off the midline
+            float len = (float) ((3.5 + 5.0 * s) * (0.55 + 0.7 * r.nextFloat()) * (1.0 - 0.35 * Math.abs(across)));
+            float girth = Math.max(1.0f, len * (0.22f + 0.06f * r.nextFloat()));
+            float lean = 0.15f + 0.5f * Math.abs(across) * r.nextFloat();
+            float leanX = across * 0.6f * r.nextFloat();                          // fore-aft lean, away from the middle
+            float rz = (x >= 0 ? -1f : 1f) * lean;
+            int shaftA = out.size();
+            out.add(new PartNode(-1, 0f, x, 0f, z, leanX, 0f, rz, len, girth, PartSheet.CRYSTAL));
+            out.add(new PartNode(-1, 0f, x, 0f, z, leanX, (float) (Math.PI / 4), rz, len, girth, PartSheet.CRYSTAL));
+            // cap and point ride on shaft A, so they lean with it
+            int cap = out.size();
+            out.add(new PartNode(shaftA, 1.0f, 0f, 0f, 0f, 0f, (float) (Math.PI / 8), 0f, len * 0.28f, girth * 0.72f, PartSheet.CRYSTAL_CORE));
+            out.add(new PartNode(cap, 1.0f, 0f, 0f, 0f, 0f, 0f, 0f, len * 0.18f, Math.max(0.5f, girth * 0.36f), PartSheet.CRYSTAL_CORE));
+        }
+        return out;
+    }
+}
+
+----- PartGenerators.java -----
+package com.example.horsegenetics.common.parts;
+
+import com.example.horsegenetics.common.SeededRng;
+import java.util.List;
+
+/**
+ * The one door the client uses: (kind, size, seed) -> boxes. Deterministic, so the server,
+ * the client and the wasm designer would all agree on the shape without shipping it.
+ */
+public final class PartGenerators {
+
+    private PartGenerators() {
+    }
+
+    /** @param size 0..1; means "length" for a horn, "tine count and reach" for antlers, "crystal size" for crystals */
+    public static List<PartNode> build(PartKind kind, double size, long seed) {
+        SeededRng rng = new SeededRng(seed, kind.name());
+        return switch (kind) {
+            case HORN -> HornGenerator.generate(HornSize.lengthFor(size), 22f, 3f, 0.15f);
+            case ANTLERS -> AntlerGenerator.generate(rng, size);
+            case CRYSTALS -> CrystalGenerator.generate(rng, 3 + (int) Math.round(4 * size), size);
+        };
+    }
+}
+
+12.3 The client code (UNVERIFIED - not compiled; spec with real call shapes)
+-----------------------------------------------------------------------------
+Call shapes copied from: BraidLayer (submitModel with a tint, RenderTypes.entityTranslucent),
+HayPortalRenderer (RenderTypes.entityTranslucentEmissive(tex, false)), CutieMarkLayer
+(body.translateAndRotate on the poseStack), HdHorseModel (CubeListBuilder with the
+8-argument addBox that takes a texture scale).
+
+Why translucency is not a risk: entityTranslucent is already how BraidLayer draws, and
+entityTranslucentEmissive already draws the hay-portal swirl. A crystal is the same
+call with alpha in the sheet and in the tint. The remaining risk is DRAW ORDER between
+translucent parts and the translucent coat/braid passes (sorting), which stage 1 checks
+with crystals under a braid.
+
+--- neoforge/client/PartModelFactory.java ---
+    /** Builds one baked ModelPart tree from a generated box list. */
+    final class PartModelFactory {
+        private PartModelFactory() {}
+
+        static ModelPart bake(List<PartNode> nodes) {
+            MeshDefinition mesh = new MeshDefinition();
+            PartDefinition root = mesh.getRoot();
+            PartDefinition[] defs = new PartDefinition[nodes.size()];
+            for (int i = 0; i < nodes.size(); i++) {
+                PartNode n = nodes.get(i);
+                float g = n.girth();
+                // Box unwrap is 4g wide and (len + g) tall; scale it into one 16x16 region
+                // so a face never bleeds into its neighbour's region. HdHorseModel does the
+                // same with its constant HD = 0.5F.
+                float s = Math.min(1.0F, (PartSheet.REGION - 1) / Math.max(4.0F * g, n.len() + g));
+                CubeListBuilder cube = CubeListBuilder.create()
+                        .texOffs(PartSheet.u(n.tex()), PartSheet.v(n.tex()))
+                        .addBox(-g / 2, -n.len(), -g / 2, g, n.len(), g, CubeDeformation.NONE, s, s);
+                PartDefinition parent = n.parent() < 0 ? root : defs[n.parent()];
+                // a child sits t of the way along its parent, toward -y
+                float along = n.parent() < 0 ? 0f : -nodes.get(n.parent()).len() * n.t();
+                defs[i] = parent.addOrReplaceChild("n" + i, cube,
+                        PartPose.offsetAndRotation(n.ox(), n.oy() + along, n.oz(), n.rx(), n.ry(), n.rz()));
+            }
+            // UNVERIFIED: that a LayerDefinition can be baked at run time, outside
+            // EntityRenderersEvent.RegisterLayerDefinitions. If it cannot, bake the finite
+            // set (kind x size bucket x 16 seeds) at registration instead - same cache key.
+            return LayerDefinition.create(mesh, PartSheet.SIZE, PartSheet.SIZE).bakeRoot();
+        }
+    }
+
+--- neoforge/client/PartModel.java ---
+    /** A ModelPart tree with no animation of its own - it is posed by the layer's poseStack. */
+    final class PartModel extends EntityModel<HorseRenderState> {
+        PartModel(ModelPart root) { super(root); }              // UNVERIFIED: ctor shape
+        @Override public void setupAnim(HorseRenderState state) { /* deliberately nothing */ }
+    }
+
+--- neoforge/client/ResolvedPart.java ---
+    /** What the extract step hands the layer: cheap, immutable, comparable (it is the cache key). */
+    record ResolvedPart(Key key, int tint, boolean emissive) {
+        /** The MODEL cache key: shape only. Tint and glow are per-draw, never part of it -
+         *  keying on tint would bake one model per colour per horse. */
+        record Key(PartKind kind, int sizeBucket, int seedBucket) {
+            static final int SIZE_BUCKETS = 16;   // size 0..1 -> 0..15
+            static final int SEED_BUCKETS = 16;   // one horse's seed -> one of 16 racks/clusters
+            double size() { return (sizeBucket + 0.5) / SIZE_BUCKETS; }
+            long seed() { return seedBucket; }
+        }
+        PartKind kind() { return key.kind(); }
+    }
+    // Quantising is what keeps a herd cheap: 3 kinds x 16 x 16 = at most 768 baked models
+    // in the whole game, ever, however many horses exist - and the look still varies by
+    // horse because tint, tilt and (for horns) the continuous length are per horse.
+    // A horn should NOT be bucketed by seed (it has none): use SEED_BUCKETS = 1 for it.
+
+--- neoforge/client/AttachedPartLayer.java ---
+    public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel> {
+
+        /** HdHorseModel.createHdLayer applies MeshTransformer.scaling(1.1F). It scales the
+         *  ModelPart CUBES and POSES but is not in the poseStack, so an anchor written in
+         *  model units must be scaled by it here, and so must the part itself.
+         *  UNVERIFIED - if the parts sit 10% off the head, this is the first suspect. */
+        private static final float HORSE_SCALE = 1.1F;
+        private static final Identifier SHEET = Identifier.fromNamespaceAndPath(
+                HorseGenetics.MOD_ID, "textures/entity/horse/part_sheet.png");
+
+        private final Map<ResolvedPart.Key, PartModel> models = new LinkedHashMap<>(64, 0.75F, true) {
+            @Override protected boolean removeEldestEntry(Map.Entry<ResolvedPart.Key, PartModel> e) {
+                return size() > 96;     // LRU cap; the world's working set is a handful
+            }
+        };
+
+        public AttachedPartLayer(RenderLayerParent<HorseRenderState, HorseModel> renderer) {
+            super(renderer);
+        }
+
+        @Override
+        public void submit(PoseStack poseStack, SubmitNodeCollector collector, int light,
+                           HorseRenderState state, float yRot, float xRot) {
+            // one early return for the common case - a horse with no parts costs nothing
+            if (!(state instanceof GeneticHorseRenderState g) || state.isInvisible || g.parts.isEmpty()) {
+                return;
+            }
+            for (ResolvedPart p : g.parts) {
+                if (state.isBaby) {
+                    continue;   // P5: hidden on foals until the owner says otherwise
+                }
+                PartModel model = models.computeIfAbsent(p.key(), k ->
+                        new PartModel(PartModelFactory.bake(PartGenerators.build(k.kind(), k.size(), k.seed()))));
+                poseStack.pushPose();
+                anchor(p.kind().anchor, poseStack);
+                poseStack.scale(HORSE_SCALE, HORSE_SCALE, HORSE_SCALE);
+                int tint = p.tint() != 0 ? p.tint() : defaultTint(p.kind());
+                // same call, same argument order, as BraidLayer.draw
+                collector.order(1).submitModel(model, state, poseStack,
+                        RenderTypes.entityTranslucent(SHEET), light, OverlayTexture.NO_OVERLAY,
+                        state.outlineColor, null, tint, null);
+                if (p.emissive()) {     // second, full-bright pass: the HayPortalRenderer call
+                    collector.order(2).submitModel(model, state, poseStack,
+                            RenderTypes.entityTranslucentEmissive(SHEET, false), 0x00F000F0,
+                            OverlayTexture.NO_OVERLAY, state.outlineColor, null, tint, null);
+                }
+                poseStack.popPose();
+            }
+        }
+
+        /** Maps the common/ enum to the model-part chain. The only place that knows a bone name. */
+        private void anchor(PartAnchor a, PoseStack ps) {
+            ModelPart root = this.getParentModel().root();
+            switch (a) {
+                case FOREHEAD, CROWN -> {
+                    // head_parts carries the neck angle; head is its child (PartPose.ZERO)
+                    ModelPart headParts = root.getChild("head_parts");
+                    headParts.translateAndRotate(ps);
+                    headParts.getChild("head").translateAndRotate(ps);
+                    // head box: x -3..3, y -11..-6, z -2..5 (front is -z). Forehead is the
+                    // top surface just behind the eyes; the crown is the top-rear edge
+                    // between the ears (ears are at z 4..5). UNVERIFIED offsets - tune live.
+                    if (a == PartAnchor.FOREHEAD) { ps.translate(0, -11 * S, -0.5 * S); }
+                    else { ps.translate(0, -11 * S, 3.0 * S); }
+                }
+                case SPINE -> {
+                    root.getChild("body").translateAndRotate(ps);
+                    // body box top is y = -8; withers are near z = -6..-8 in body space.
+                    ps.translate(0, -8 * S, -6 * S);
+                }
+            }
+        }
+        // where S = HORSE_SCALE / 16F, the unit conversion the poseStack expects (model
+        // units are 1/16 block) folded with the 1.1 transform above.
+        private static final float S = HORSE_SCALE / 16F;
+
+        private static int defaultTint(PartKind k) {
+            return switch (k) {
+                case HORN -> 0xFFF2E6C8;        // ivory
+                case ANTLERS -> 0xFFC9B48C;     // aged bone
+                case CRYSTALS -> 0xCC66CCFF;    // pale blue, alpha 0.8 - the translucency
+            };
+        }
+    }
+    // Registration, in GeneticHorseRenderer's constructor, after BraidLayer:
+    //     this.addLayer(new AttachedPartLayer(this));
+    // (P1 draw order: parts sit outside every coat pass, so they go after the braid and
+    //  before the vanilla armour/saddle layers; stage 1 tests body armour ON.)
+
+--- neoforge/client/GeneticHorseRenderState.java (add) ---
+    public List<ResolvedPart> parts = List.of();
+
+--- the gene side (stage 2; sketch only) ---
+    // common/genetics/AttachedPartContribution.java, beside CutieMarkContribution:
+    public record AttachedPartContribution(PartKind kind, double size, long seed, int tint, boolean emissive) {}
+    // A unicorn-horn gene's expressing allele returns one; HornSize picks `size` today
+    // (HornSize.lengthFor is the inverse), an epigenome number can drive it tomorrow.
+    // extractRenderState then reduces contributions to List<ResolvedPart>:
+    //     new ResolvedPart(new ResolvedPart.Key(c.kind(), (int)(c.size()*15), (int)(c.seed() & 15)), c.tint(), c.emissive())
+
+12.4 What the preview shows, and what to look at first
+--------------------------------------------------------
+parts-preview.png, top row: the five horn sizes side on. Length is the only thing that
+changes visibly (nub 3 units, narwhal 24 - about a head-and-a-half above the poll); they
+lean forward from the head's own up and taper to a point. Twist is invisible in silhouette
+and only reads through the sheet's grain and faces, so a 22-degree twist is texture-
+dependent: judge it in game, not here.
+Middle row: antlers at size 0, 0.5, 1 from the front and at size 1 from the side. The
+tine count and reach grow; a long tine forks again. The side view shows the forward-
+pointing tines that make it read as antler rather than as two sticks.
+Bottom row: crystal clusters at three sizes, and the top view. Colour and translucency
+here are a flat blue at fixed alpha and say nothing about the finished look.
+Known preview limits: no perspective, no coat, no horse animation, no light, and the
+horse is a plain box outline; head-local coordinates before the head_parts tilt.
+
+12.5 Honest limits of "basic code"
+-----------------------------------
+- Boxes facet. A horn is a stack of small prisms, not a smooth cone; at Minecraft scale
+  with a fine grain texture it reads as a carved horn. A smooth cone would need custom
+  vertex geometry (submitCustomGeometry, as the hay portal uses) - possible, and out of
+  this treatment's scope.
+- The twist is shallow on purpose (22 degrees per segment) because a square section
+  turned more than that shows visible gaps between segments. Tightening it needs the
+  ridge-box trick from section 11.3, not a bigger number.
+- Crystals overlap their own shafts, and with alpha the overlap doubles the blend. If it
+  looks muddy, the fix is the cap and point drawn opaque and only the shafts translucent
+  (two passes), not a new model.
+- Antlers are symmetric on purpose. Asymmetric racks are a one-line change (a second
+  seed for the mirror) and a genetics decision: do the two sides inherit independently?
+- Nothing above animates. Every part rides a bone that already does.
+
+12.6 The files
+---------------
+    intake/attached-parts-draft/common-parts/*.java   compiled, the common/ half
+    intake/attached-parts-draft/bake-part-sheet.py    sheet baker (procedural or --pack)
+    intake/attached-parts-draft/part_sheet.png        the procedural sheet, greyscale
+    intake/attached-parts-draft/sheet-preview.png     the sheet x8 over a checkerboard
+    intake/attached-parts-draft/Preview.java          renders the boxes to a PNG
+    intake/attached-parts-draft/parts-preview.png     what it printed
+    intake/attached-parts-draft/Check.java            the invariant check (becomes a JUnit test)
+When routed: common-parts/ -> common/.../parts/, Check.java -> PartGeneratorTest (one
+class, so it runs with --tests '*PartGeneratorTest'), bake-part-sheet.py -> tools/,
+part_sheet.png -> assets/horsegenetics/textures/entity/horse/. Delete the folder then.
