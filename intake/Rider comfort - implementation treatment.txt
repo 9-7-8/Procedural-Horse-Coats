@@ -1,8 +1,8 @@
 Rider comfort - implementation treatment
 
-Scoped from the code and the wiki, NOT yet with the owner. Every "Open" line is
-a call she has not made; each carries a recommendation so the answer can be one
-word. Nothing here is "Decided" until she says so. Source of truth for what
+Scoped with the owner. Every "Decided" line below is her call; "Open" lines
+are still to be settled. First piece to build: 1 (mounted mining speed), one
+piece per session per START HERE. Source of truth for what
 exists is wiki/rider-comfort.html; this file is the handoff for the work its
 Roadmap tab lists, and it is retired (deleted, per START HERE step 3) as each
 piece ships and moves onto that page's Gameplay and Coding tabs.
@@ -57,10 +57,8 @@ What the player feels: mining from horseback at a fifth of speed.
   with the leadsReturn()-style safe accessor. The page says this is the one piece
   that alters rather than adds, so the comment on the option should say plainly
   that on = not vanilla.
-- Open: default on or off? Recommendation: ON. The page's own argument is that
-  vanilla-intact has a claim here; against it, the whole request is a player
-  complaint and the option is one line to turn back. Owner's call because
-  it is the only piece that changes vanilla balance.
+- Decided: default ON. The page's argument that vanilla-intact has a claim is
+  answered by the switch: one line turns vanilla back.
 - Test: gametest for the multiplier maths is possible (fire BreakSpeed with a
   mock rider on a horse); the real check is feel, on the Verification tab:
   mine stone from horseback, from a jumping horse, and from a boat/minecart
@@ -77,17 +75,12 @@ What the player feels: mining from horseback at a fifth of speed.
   live on the server, so this needs no payload (the H browser made the same
   simplification). Creative mode uses a different screen class than survival;
   pick by game mode rather than always constructing the survival one.
-- Should it only work while riding? Recommendation: NO - bind it for all of
-  IN_GAME and let it work on foot too. Being gated to riding buys nothing and
-  makes a bug report "it doesn't open" ambiguous. Confirm with the owner only
-  if she wants it strictly mount-only.
-- Open: default key. The page borrows ALT+E from Horse Buff. NeoForge's
-  KeyMapping takes a KeyModifier and this repo uses none yet, so a chord is
-  new API surface. Recommendation: plain unbound-by-default is the safest way to
-  avoid a Controls conflict, but an unbound key is invisible to players.
-  Suggest ALT+E, verifying in the Controls screen that a modifier chord
-  registers and shows properly, and falling back to a bare key if not. (Flag the
-  unverified API in a comment.)
+- Decided: works everywhere (all of IN_GAME), on foot too. Riding-only buys
+  nothing and makes "it doesn't open" ambiguous. Drop the riding guard above.
+- Decided: default ALT+E. NeoForge's KeyMapping takes a KeyModifier and this
+  repo uses none yet, so a chord is new API surface: verify in the Controls
+  screen that it registers and displays properly, flag the unverified API in a
+  comment, and fall back to a bare key (tell the owner which) if it does not.
 - Config: none. An unbound or rebound key IS the switch, and a config for a
   keybind is a surface with no purpose (page 'config' wants a convention, not
   more options). Say so on the Gameplay tab.
@@ -110,16 +103,14 @@ than shipped as a duplicate.
   vanilla's path and flickers. It ordinarily needs a priority below
   HorseInfoInteraction (moot, that needs an empty hand) and above vanilla.
 - Claim only when: target is a tamed adult Horse, the player is not sneaking,
-  the held stack is accepted by an EMPTY slot, and the player may use the
-  horse (HorseOwnership - same rule the Gear tab applies, see TackSlotPayload,
+  the held stack is accepted by an EMPTY slot, and the player is the
+  horse's OWNER (decided: owner only; HorseOwnership - same rule the Gear tab applies, see TackSlotPayload,
   which treats the client's request as a claim). A refusal must say why in a
   line, not just fall through to vanilla, or an ownership rule looks like a bug.
-- Which slots: saddle and body armour (BARDING) only, or any HorseTackSlot that
-  accepts() the stack? Open. Recommendation: any slot that accepts, first empty
-  match, because the same handler then covers saddle pads and later gear for
-  free; but that makes the right-click do more than the request, so this is an
-  owner's call. If none is empty, do nothing (never swap): swapping on a
-  right-click is how someone loses a saddle.
+- Decided: any HorseTackSlot that accepts() the stack, into the first empty
+  matching slot, so saddle pads and later gear come free. Decided: if the
+  matching slot is full, do nothing - never swap; the Gear tab is how you
+  change tack. Swapping on a right-click is how someone loses a saddle.
 - Shrinking the stack: consume one, respect creative mode (do not consume), give
   nothing back.
 - Config: behaviour.rightclick_equips_tack, default ON (it only ever adds a
@@ -136,11 +127,12 @@ does: a snapped or hand-cut lead goes to the player's pack, not the ground.
 - The page's fact: NeoForge 26.1.2 publishes no leash event and dropLeash spawns
   the item through Entity.spawnAtLocation, so there is nothing to hook. That is
   from the page, not re-proved here.
-- Open, with two seams: (a) a mixin at the drop (the repo already carries
-  mixins, e.g. HorseAlwaysParentMixin, so a mixin is not new territory), or
-  (b) an EntityJoinLevelEvent filter that catches an ItemEntity of a lead, which
-  cannot tell a snapped lead from one a player threw on the ground. Recommendation:
-  (a), because (b)'s false positives silently eat a thrown lead.
+- Decided: a mixin at the drop (the repo already carries mixins, e.g.
+  HorseAlwaysParentMixin). Not an EntityJoinLevelEvent filter on ItemEntity: it
+  cannot tell a snapped lead from one a player threw, and would silently eat
+  the thrown one. The building session still has to find the right seam - read
+  Leashable.dropLeash / Entity.spawnAtLocation first, since dropLeash is an
+  interface default and mixing into it is the unverified part.
 - Only a leash HOLDER who is a player and within reach should receive it. A horse
   that drifted away from an offline owner has nobody to give it to and must fall
   back to vanilla's drop, exactly as HorseLeads.untieFor already does.
