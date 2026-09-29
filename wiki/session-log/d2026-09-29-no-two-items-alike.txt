@@ -1,0 +1,148 @@
+2026-09-29, last — no two items look alike
+
+
+        Can you recolor every single item we have, other than the breed eggs,
+        which is currently identical to something else within this pack or
+        within minecraft?
+
+    Twenty-four sprites moved. The interesting part was not the recolouring; it
+    was that the check written to find the duplicates was too weak twice, and
+    passed work it was meant to reject both times.
+
+
+1. WHAT WAS ACTUALLY DUPLICATED
+
+    The answer had to be measured rather than remembered, because "identical"
+    is a claim about pixels and about 792 vanilla sprites nobody has in their
+    head. tools/check-duplicate-item-art.mjs, and tools/png.mjs under it — a
+    PNG reader in about 80 lines, because comparing PICTURES means decoding
+    them: two PNGs of one image written by different tools share no bytes, and
+    a 32x32 sprite and the 16x16 it was scaled from are still the same art.
+
+    First honest pass found 115 collisions, which was wrong — the reader threw
+    `require is not defined` in an ESM module and reported 106 textures as
+    unreadable. Fixed, and the real number was 10.
+
+    Then two of those 10 were false, and both for reasons worth keeping:
+
+        golden_carrot_seeds draws minecraft:item/wheat_seeds — and applies a
+        horsegenetics:gold_tint over it. It is gold wheat seeds, which is the
+        whole point of the item. A checker that reads models but not item
+        definitions cannot see that.
+
+        freedom_stick LAYERS minecraft stick and minecraft feather. The
+        composite is a picture that does not exist in vanilla. Flagging each
+        layer separately was the mistake.
+
+    Both are now exclusions with the reason written next to them. A checker
+    that cries wolf about art gets switched off, which costs more than the two
+    false entries did.
+
+    That left 7 real collisions over 15 items:
+
+        vet_kit                                  = minecraft bundle
+        custom_horse_spawn_egg, preset_...       = minecraft horse spawn egg, and each other
+        stall_sign, bound_stall_sign             = minecraft oak sign, and each other
+        holding_pen_sign                         = minecraft spruce sign
+        5 tickets                                = one sprite between them
+        4 whistles                               = one sprite between them
+        blank_transfer_paper, signed_..., research_paper = identical pixels
+
+
+2. THE CHECK WAS TOO WEAK, AND CERTIFIED THE BUG IT EXISTED TO CATCH
+
+    THE ONE THING WORTH READING IN THIS FILE.
+
+    First recolour pass ran, the check went green, and blank_transfer_paper was
+    still visibly a research paper. Both are books; putting them side by side
+    settled it in a second, which no amount of green output would have.
+
+    Two separate faults, and they compounded:
+
+        The recolour's 'flat' mode MULTIPLIED the source's saturation. The
+        research paper sits at 0.40, the recipe asked for 0.45, and the result
+        was 0.18 — a slightly different brown. 'flat' now SETS saturation
+        absolutely; 'rotate' still multiplies, because keeping the source's own
+        relationships is the point of rotating.
+
+        The check compared HASHES, so it only ever answered identical or not.
+        Every pixel had genuinely changed. It passed, correctly, on a question
+        that was the wrong question.
+
+    So artDistance: mean per-channel distance over the sampled grid, counting
+    only cells where at least one sprite is opaque, so two sprites of the same
+    SHAPE score on their colour rather than being flattered by the transparent
+    surround they share. Threshold 12, empirical — the two books scored about 8
+    while being indistinguishable, and every deliberate recolour scores above
+    20.
+
+    A checker that certifies the thing it was meant to catch is worse than no
+    checker, because it ends the investigation.
+
+
+3. WHAT THE STRONGER CHECK THEN FOUND
+
+    38 more, of which 30 were the per-wood cart families: an acacia wagon and a
+    jungle wagon are alike because acacia and jungle planks are alike. That is
+    the contract — the sprite says what the thing is made of — and there is
+    nothing to recolour one TO that another wood does not already own. Exempt
+    from the NEAR test only; two of them being byte-identical would still be a
+    bug and is still caught.
+
+    The other 8 were real and are in the ask:
+
+        4 splice carrots nearly indistinguishable from each other
+        5 occupied stasis chambers nearly indistinguishable from each other
+
+    The carrots are ROTATED, not flattened. A flattened carrot stops being a
+    carrot — the whole sprite becomes one hue and the family loses the thing
+    that says what it is.
+
+    The chambers are a horse in a bottle, which is mostly pale glass whatever
+    tier it is, so the tier's colour had almost no sprite left to live in. Each
+    took its EMPTY twin's hue at a saturation that survives the glass.
+
+    NOT DONE, DELIBERATELY: the empty chambers' own palette is crowded into a
+    third of the wheel (0.27 to 0.55). They are distinguishable from each other
+    and so were out of scope. If the occupied five still read as a coin-flip
+    in-game, that palette is the thing to move, and it is written on the
+    verification tab rather than done unasked.
+
+
+4. TWO HAZARDS FOUND WHILE BUILDING IT
+
+    IDEMPOTENCE. Several recipes derive a sprite from the art of the item
+    itself — a splice carrot rotated away from its neighbours is still that
+    carrot. Reading the live texture would have rotated the already-rotated
+    output on every run, so a "no-op" re-bake would hand back a different
+    palette each time and a checked-in generated asset would be untrustworthy.
+    Sources are pristine copies under tools/item-art/, which nothing writes to.
+    Verified by running the bake three times and hashing the whole folder: all
+    three identical.
+
+    PURPLE CUBES. Fourteen models were repointed at art that did not exist
+    until that moment, which is exactly how a missing texture happens, and a
+    missing item texture logs nothing at all. The checker gained a
+    texture-exists test — the item-side twin of check-block-models.mjs — and it
+    was confirmed to bite by pointing vet_kit at a typo and watching it fail.
+
+
+5. WHAT IS LEFT
+
+    items.html gained a section of its own (#art) and a verification entry.
+    The roster's oldest known art gap — "the blank transfer paper reuses the
+    research-paper texture" — is closed and deleted rather than marked.
+
+    The gaps line that replaced it says the honest thing: every item is now
+    DISTINGUISHABLE, and a good many of them are a recolour of somebody else's
+    drawing rather than a drawing of their own. The whistles are one whistle in
+    four colours. That is a real improvement on two items you could not tell
+    apart and it is not the same thing as art.
+
+    Nothing was played. Two tools are green and neither can open an inventory.
+    The check to run is the plain one: open the creative tab and look at the
+    whole roster at once, at real GUI scale, which is a much smaller object
+    than the PNGs looked while the colours were being chosen.
+
+    CLAUDE.md is at 299 lines of its 300 budget after this. The next line added
+    has to displace one.

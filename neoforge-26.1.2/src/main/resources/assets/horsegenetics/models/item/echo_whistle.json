@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "horsegenetics:item/horse_whistle"
+    "layer0": "horsegenetics:item/echo_whistle"
   }
 }

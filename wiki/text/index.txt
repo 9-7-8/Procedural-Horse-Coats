@@ -3055,6 +3055,7 @@ wiki/item-whistles.html#reading	coding	The area whistles
 wiki/item-whistles.html#tiers	gameplay	The four whistles
 wiki/item-whistles.html#use	gameplay	What happens when you blow an area whistle
 wiki/items.html#adding	coding	Adding an item
+wiki/items.html#art	coding	No two items look alike
 wiki/items.html#chest-loot	coding	Chest loot — every chest, any mod
 wiki/items.html#gaps	coding	Known gaps, across the roster
 wiki/items.html#gate-exception	gameplay	The double gates are outside the modded-ingredient rule
