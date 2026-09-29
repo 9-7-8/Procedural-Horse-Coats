@@ -5,7 +5,7 @@ folder is packaged into the jar and nothing here ships in a release. These packs
 are kept here only so they are on hand if we decide to use something from them
 elsewhere in the game.
 
-Two packs, two very different rights
+Three packs, different rights
 ====================================
 pixel-art-textures/      Texture tiles by FlakDeau. CC0 per the store page: free
                          to use and redistribute. COMMITTED to git (about 32 MB).
@@ -15,6 +15,10 @@ raven-fantasy-hd-free/   Icons by Clockwork Raven Studios. Use in a free mod is
                          ARE NOT IN GIT: the owner places them on the host machine
                          by hand; only the notes, the licence PDF and MANIFEST.txt
                          are committed. .gitignore keeps the images out.
+
+pixelated-patterns/      32x32 and 64x64 patterns by NormalMap_Games - NOT YET ON DISK, licence
+                         unknown. Pick up on the host machine (see its notes). Possibly the best
+                         fit for the mesh greyscale bases, at the mod's own pixel scale.
 
 The rule for using anything from here
 =====================================
@@ -29,5 +33,5 @@ The rule for using anything from here
    them, and the CC BY-NC grant must be carved back for those files.
 4. Never publish either pack whole (release zip, wiki download, editor asset
    bundle). Only the individual files used.
-5. A session that finds the Raven images missing has not hit a bug. See
+5. A session that finds the Raven (or pixelated-patterns) images missing has not hit a bug. See
    raven-fantasy-hd-free/MANIFEST.txt.

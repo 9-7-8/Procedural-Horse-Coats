@@ -76,3 +76,7 @@ intake/potential-assets/raven-fantasy-hd-free/*
 !intake/potential-assets/raven-fantasy-hd-free/MANIFEST.txt
 !intake/potential-assets/raven-fantasy-hd-free/USAGE.txt
 !intake/potential-assets/raven-fantasy-hd-free/Clockwork_Raven_General_Licence_v.1.2.pdf
+# Pixelated Pattern Textures: licence unknown, so images stay out of git until confirmed.
+intake/potential-assets/pixelated-patterns/*
+!intake/potential-assets/pixelated-patterns/SOURCE-AND-LICENSE.txt
+!intake/potential-assets/pixelated-patterns/USAGE.txt

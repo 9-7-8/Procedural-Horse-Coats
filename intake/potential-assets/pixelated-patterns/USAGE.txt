@@ -1,0 +1,6 @@
+Where this pack is used in the game
+
+Nothing yet - and the pack is not on disk. See SOURCE-AND-LICENSE.txt.
+
+Keep one line per file used, in the same change that copies it:
+  <file in this pack>  ->  <path in the mod>  |  modified? y/n  |  what it is for  |  date
