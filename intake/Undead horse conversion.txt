@@ -262,15 +262,43 @@ D26 SIZE, from Appendix C: vanilla stores the horse model scaled 1.1 and the
     The size band is a body-scale multiple of an ordinary horse (breed format).
     Re-check with check-breed-heights.mjs and the hand-typed heights on
     breeds.html / breed-book.html.
-D27 ART (stage 0 (b)): the SKELETON's cut-out mask is DERIVED from vanilla: the
-    pixel positions of its transparency (about 55 percent of the horse's UV
-    islands, binary alpha) are taken as data, and the colours are painted by us.
-    The ZOMBIE has only a handful of holes, so it needs no mask; it is a
-    recolour authored in this mod's own namespace. Vanilla's sheets are a visual
-    reference and are never shipped or sampled at run time. Deriving a mask is
-    still derivation, so THIRD_PARTY_NOTICES gets an entry saying so, in the
-    same change. Record the derived mask as a checked-in data file with a
-    comment on where it came from, not as a vanilla texture.
+D27 ART (stage 0 (b)), REVISED by the owner: START BY COPYING vanilla's
+    horse_zombie and horse_skeleton sheets (and their baby variants) into this
+    mod's namespace, the same way the white horse template already is. The mod
+    already ships Mojang-derived art on this footing: horse_white.png and
+    horse_white_baby.png in common/.../assets/horsegenetics/textures/entity/
+    horse/ are "the vanilla white sheets scaled 2x" (wiki/architecture.html),
+    with horse_white_vanilla64.png and horse_white_baby_vanilla64.png kept
+    beside them as the 64px references. The mod cannot run without Minecraft,
+    and the coat is already painted on vanilla's layout. Later art can replace
+    the copies without touching anything else. Consequences:
+      - THIRD_PARTY_NOTICES.md gets an entry in the same change. It currently
+        says no Mojang art ships in the jar (about the cart textures) and does
+        not mention the white horse templates at all, so the entry should cover
+        those too. What the entry says is the owner's call.
+      - The original derivation is not in the repo (no tool found that makes
+        horse_white.png from its 64px reference), so write one: a small script
+        that takes vanilla's 64px sheet to the mod's 128px sheet. Its self-check
+        is to run it on vanilla's horse_white and require a byte-identical
+        match to the shipped horse_white.png; only then run it on the undead
+        sheets. Do not trust a plain 2x nearest scale for the ADULT sheet: the
+        mod's adult model re-texOffs the four legs and two ears onto their own
+        patches and drops mirroring (architecture page), so the patches must be
+        copied to the new places. The baby is a straight 2x pass.
+      - The white template is multiplied by pigment; the undead sheets are
+        already coloured, so they cannot be a template the pipeline multiplies.
+        They enter as an OVERRIDE layer painted after the natural phase, with
+        the sheet's own alpha (binary, D28) so the skeleton's cut-outs survive.
+        No existing gene op that stamps an image was found while reading; if
+        there is none, that is the new op (D28 becomes 'an op that stamps a
+        sheet, alpha included', a superset of 'write alpha 0').
+      - Strains (D31) start as a tint over the one sheet (Bleached / Weathered;
+        Fresh / Long-buried) until real second sheets exist.
+      - Alternative, unchanged from wiki/texture-resolution.html: read
+        minecraft:'s sheets at run time instead of shipping copies, which ships
+        no art and honours a player's resource pack retexturing skeleton and
+        zombie horses. Not chosen for the first pass; switching later changes
+        only where the sheet is read from.
 D28 Alpha op: a coat op that writes alpha 0 over a mask, and nothing else.
     Alpha in vanilla's undead horses is strictly binary (Appendix C), so the op
     is binary, no translucent render type is needed, and the skeleton mask (D27)
@@ -641,9 +669,11 @@ Stage 0 - the coat question. CLOSED by Appendix C and D26-D28; nothing here
               compositing in common/) keeps alpha, and that GeneticHorseRenderer,
               which names no render type, ends up with a cutout one. Appendix C
               read vanilla's renderer, not the mod's.
-          (b) art (D27): skeleton mask derived from vanilla as data, colours
-              painted by us; zombie is an authored recolour; THIRD_PARTY_NOTICES
-              entry in the same change.
+          (b) art (D27, revised): copy vanilla's undead sheets in, the same way
+              the white template is, via a new 64-to-128 script that reproduces
+              horse_white.png byte for byte first; THIRD_PARTY_NOTICES entry in
+              the same change. The skeleton mask is then just the copied
+              sheet's own alpha.
           (c) size (D26): both breeds [0.86, 0.95] to match the vanilla undead
               horse's 0.909 scale.
           Still to do before stage 1: record all of it on the page's Coding tab
@@ -1219,8 +1249,8 @@ What is now settled (owner, after this appendix):
            sheet already uses at twice the size (HorseSkinGeometry.SHEET_SIZE).
   SETTLED  Alpha is binary: a coat op that writes alpha 0 (D28). Confirm the
            bake keeps alpha and the mod's renderer ends up cutout, in stage 1.
-  SETTLED  Art (D27): skeleton mask derived from vanilla as data, colours ours;
-           zombie an authored recolour; a THIRD_PARTY_NOTICES entry.
+  SETTLED  Art (D27, revised by the owner): copy vanilla's undead sheets, as the
+           white template already is; a THIRD_PARTY_NOTICES entry.
   SETTLED  Size (D26): both breeds [0.86, 0.95].
 
 
@@ -1238,8 +1268,8 @@ Great Valley Skeleton Horse (great_valley_skeleton_horse)
   (new). Aggression Anp/Anp. Passification Prm/Prm, one bone (OFFERINGS
   index 14, amount 1). Drops Bne/Bne (bones replace leather). Eyes all black.
   Soul flame from the hooves. Water Gil/Gil (see D32). No sun burn.
-  Strains Bleached 65 / Weathered 35. Coat: binary alpha mask cut from the
-  horse's own coat (D27, D28); art not yet made.
+  Strains Bleached 65 / Weathered 35. Coat: the copied vanilla skeleton sheet,
+  its own alpha kept (D27, D28); the copy is not made yet.
   Draft blurb: Named for a valley nobody goes to any more. Nobody can say who
   kept a horse with nothing on its bones; the line survives because it needs
   so little and gives so much. It is light, quick and hollow, it eats what it
@@ -1254,8 +1284,8 @@ Graveborn Warmblood (graveborn_warmblood)
   Passification Tmp/Tmp, rotten flesh (index 15, 2 to 4, calm 1 to 3 minutes,
   cooldown half a minute to 1.5). Drops Rot/Rot (rotten flesh replaces
   leather). Eyes all black. No particle, no water breathing, no sun burn.
-  Strains Fresh 60 / Long-buried 40. Coat: an authored recolour (D27), a few
-  cut pixels only; art not yet made.
+  Strains Fresh 60 / Long-buried 40. Coat: the copied vanilla zombie sheet (D27);
+  the copy is not made yet.
   Draft blurb: A warmblood in build, deep in the chest and heavy in the bone,
   and by every account buried once and not kept. It is slow and very hard to
   kill, it eats raw meat, and after dark it throws whoever is on its back.
