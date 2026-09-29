@@ -61,7 +61,11 @@ public class JockeyPassItem extends Item {
         adder.accept(Component.literal("Good for: "
                         + (bound.name().isBlank() ? bound.id().toString().substring(0, 8) : bound.name()))
                 .withStyle(ChatFormatting.GRAY));
-        adder.accept(Component.literal("Feed it to that horse to ride it for a day.")
+        // Deliberately does not name a length. behaviour.jockey_pass_days is a
+        // server setting, and a tooltip is drawn on a client that may be looking
+        // at this stack in a creative menu with no server behind it - a hard
+        // "one day" here would be a lie on any server that moved the number.
+        adder.accept(Component.literal("Feed it to that horse to borrow it for a while.")
                 .withStyle(ChatFormatting.DARK_GRAY));
     }
 }

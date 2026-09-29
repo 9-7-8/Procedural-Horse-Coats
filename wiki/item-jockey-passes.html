@@ -248,8 +248,10 @@
         restart: the command should not exist, and the <em>item</em> should still
         work.</li>
     <li><strong><code>behaviour.jockey_pass_days</code> moves both.</strong> Set it to
-        2 and check that a fed pass and a bare <code>/horsejockey</code> both say two
-        days &mdash; if only one moved, the command has a hard-coded 1 in it.</li>
+        2 and check that a fed pass and a bare <code>/horsejockey</code> both report two
+        days left &mdash; if only one moved, the command has a hard-coded 1 in it. (The
+        item&rsquo;s tooltip deliberately says <em>for a while</em> rather than naming a
+        length: it is drawn on a client that may have no server behind it.)</li>
 </ul>
 
 </section>

@@ -246,7 +246,7 @@
   "message.horsegenetics.rename.not_yours": "You can look this one over, but naming it is the owner's business.",
   "message.horsegenetics.jockey.already_yours": "%s is your own horse - you need no pass for it.",
   "message.horsegenetics.jockey.fed": "%s will carry you now. %s left.",
-  "message.horsegenetics.jockey.made_out": "Pass made out to %s. Whoever feeds it to that horse may ride it for a day.",
+  "message.horsegenetics.jockey.made_out": "Pass made out to %s. Whoever feeds it to that horse may ride it for a while.",
   "message.horsegenetics.jockey.owner_notice": "%s fed a pass to %s and may ride it for %s.",
   "message.horsegenetics.jockey.unwritten": "This pass names no horse.",
   "message.horsegenetics.jockey.wrong_horse": "This pass is for %s, not this horse.",
