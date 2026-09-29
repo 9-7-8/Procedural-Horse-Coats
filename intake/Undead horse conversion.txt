@@ -297,12 +297,15 @@ D27 ART (stage 0 (b)), REVISED by the owner: START BY COPYING vanilla's
         no art and honours a player's resource pack retexturing skeleton and
         zombie horses. Not chosen for the first pass; switching later changes
         only where the sheet is read from.
-D38 SHEET ROLES (owner): the skeleton's copied sheet is an ALPHA MASK ONLY; every
-    colour and marking on a skeleton comes from genes. The zombie's copied sheet
-    is its BASE COAT (its green-grey is not a natural pigment), stamped in before
-    the magical phase so genes paint over it. So the stamping op (D28) has two
-    modes: 'alpha only' (skeleton) and 'colour and alpha' (zombie). It runs
-    from the undeath locus (Skl/Skl and Zmb/Zmb respectively).
+D38 SHEET ROLES (owner, REVISED): the skeleton's copied sheet is NOT only a
+    mask. It gives the skeleton (a) its alpha (the cut-out shape), (b) a
+    colour UNDERLAY that the gene colours and markings sit over at partial
+    opacity, so the sheet shows through them, and (c) its SHADING, re-applied
+    as an overlay on top of everything so the result still reads as bone.
+    Every colour and marking still comes from genes. The zombie's copied sheet
+    is its BASE COAT (its green-grey is not a natural pigment), seeded in before
+    the magical phase so genes paint over it. Two integration points, one per
+    undeath gene; both are specified in Appendix F.
 D39 BLEACHED skeleton strain (owner): EWD/EWD, with magic_white Wm/Wm as the
     white under it (EWD paints nothing and only locks white, so it needs a
     white base; Wm/n is a silent carrier, so the pair is Wm/Wm), plus a random
@@ -1462,3 +1465,73 @@ table, which needs a matching row in the same change):
 Not in scope: any source that is not the vanilla horse mesh (donkey, mule,
 llama, the undead horses' armour or saddle layers, other mods' models). Those
 are a different layout and a different tool; the converter says so and stops.
+
+
+Appendix F - the two sheet passes (D28, D38): how the undead sheets meet the
+============================================================================
+coat pipeline
+=============
+Read from CoatTextureComposer.bake. The pipeline is: 1 natural phase (pigment)
+-> 2 resolve to a colour field -> 3 magical phase (signed RGB deltas, minus any
+white-locked texels) -> 3a shadow lift -> 4 composite onto the white template
+(alpha-aware multiply; output alpha is the template's alpha) -> eyes -> 5
+overlay phase (CoatOverlayContribution genes write final pixels into a
+CoatOverlay, which REFUSES every write on a white-locked texel) -> applyTo.
+
+SKELETON PASS (owner's request): 'alpha, underlay and shading'
+  A new step 6, after overlay.applyTo(out), run only when the genotype
+  expresses the skeleton gene. For each texel, with S the copied sheet (scaled
+  to the mod's layout by the converter, Appendix E) and C the finished coat
+  from steps 1-5:
+    1. alpha:   out.a = S.a (binary; 0 cuts the pixel away)
+    2. underlay: rgb = lerp(S.rgb, C.rgb, coatOpacity), so the coat is
+       'somewhat transparent' and the sheet's colour shows through it. A
+       texel where C is itself partly transparent (a marking's edge) weights by
+       C.a as well.
+    3. shading: rgb = rgb x lerp(1, Lnorm, shadeStrength), where Lnorm is the
+       sheet's luminance divided by its own bright end (so its highlights stay
+       about 1.0 and only the recesses darken).
+    4. eyes: eye texels keep the coat's own (black, D29) eyes. Alpha still
+       applies to them; the underlay and shading do not.
+  Two tunables, both to be set by eye once it runs: coatOpacity (suggested
+  start 0.6) and shadeStrength (suggested start 0.85). Put them on the skeleton
+  gene's epigenome or file so a breed or strain can band them (the breed
+  format's bands do exactly this), rather than as constants.
+  Why multiply and not 'overlay' or 'soft light' for the shading: those blends
+  leave a near-white base almost unchanged (overlay(1, x) = 1), so they would
+  show NO bone detail on the Bleached strain, which is Wm/Wm white by design.
+  Multiply is the blend that shows on white. This is a reasoned choice, not a
+  tested one; preview against the alternatives when the pass exists.
+  The shading is applied a second time on top of an underlay that already
+  carries the sheet's own shading. That is what the owner asked for (restore
+  the bone form the coat colour would flatten) and it double-counts a little;
+  if it reads too dark, lower shadeStrength before changing anything else.
+
+  THE WHITE LOCK TRAP, and why this is a separate step and not an overlay gene.
+  extreme_white_dominant makes white texels final, and CoatOverlay refuses every
+  write on them (its paint() checks the lock). The Bleached strain is Wm/Wm plus
+  EWD/EWD, i.e. wholly locked. If the skeleton were an ordinary
+  CoatOverlayContribution it would be refused on every texel of Bleached: no
+  cut-out, no shading. Running it after applyTo keeps EWD's guarantee true for
+  every magical MARKING while the skeleton's own shape-and-shade step, which is
+  not a marking, is not subject to it. Eyes are handled separately (above).
+
+ZOMBIE PASS: 'seed'
+  The zombie sheet is the base coat, so it is stamped INTO the colour field
+  before step 3, replacing what step 2 resolved (the natural genes therefore do
+  not colour a zombie: a zombie's wild-type or randomly rolled base colour must
+  not show). Magical genes such as dust then paint over it in step 3 as normal
+  (Long-buried's dust Dsk/Dsk). Alpha from the sheet is applied at the end as
+  for the skeleton. The white lock is not an issue for the zombie (no EWD), but
+  the same 'sheet alpha is not a marking' rule holds.
+
+The op the plan called D28 is therefore two integration points, not one op: a
+'seed' hook before the magical phase and a 'shape and shade' step after the
+overlay phase. Both take the converter's output (Appendix E) as their input and
+neither needs a new gene op vocabulary word for the sheet itself; the undeath
+genes carry the parameters and the composer runs the passes.
+UNVERIFIED and needed before building: whether the colour field and the
+composite treat alpha as this appendix assumes (the composite copies the
+template's alpha into the output, so the skeleton pass must overwrite it, and
+the render path must draw a cutout, Appendix C); and whether ColorField has a
+'seed from an image' entry point or one must be added.
