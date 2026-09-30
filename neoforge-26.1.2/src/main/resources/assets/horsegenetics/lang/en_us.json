@@ -258,6 +258,8 @@
   "message.horsegenetics.shear.done": "You groomed %s. They leaned into it, and a cluster of loose hair came away in the brush.",
   "message.horsegenetics.shear.foal": "This foal's coat is too fine to brush out yet.",
   "message.horsegenetics.shear.regrowing": "You groomed this one recently - there's nothing loose in its coat.",
+  "message.horsegenetics.tack.not_yours": "%s belongs to somebody else. Tack up your own.",
+  "message.horsegenetics.tack.too_young": "%s is a foal. Nothing fits a foal.",
   "message.horsegenetics.transfer.already_yours": "This horse is already yours.",
   "message.horsegenetics.transfer.not_your_paper": "These papers are not in your name.",
   "message.horsegenetics.transfer.not_yours": "This is %s's horse. You'll need his papers.",

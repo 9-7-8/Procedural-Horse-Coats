@@ -216,6 +216,15 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue MOUNTED_MINING_PENALTY_REMOVED;
 
     /**
+     * <b>Does right-clicking a horse with a piece of this mod's tack put it
+     * on?</b> On - the default - and the seventeen gear slots equip by hand the
+     * way vanilla's saddle and barding already do. Off, the Gear tab is the only
+     * way. The saddle and the barding are vanilla's own behaviour either way and
+     * this never touches them. See {@code server/TackEquipHandler}.
+     */
+    public static final ModConfigSpec.BooleanValue RIGHTCLICK_EQUIPS_TACK;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -593,6 +602,17 @@ public final class ServerConfig {
                         "air is a different thing from mining from the saddle.",
                         "Off restores vanilla's behaviour exactly.")
                 .define("behaviour.mounted_mining_penalty_removed", true);
+        RIGHTCLICK_EQUIPS_TACK = builder
+                .comment("Whether tack goes on with a right-click. (default: true)",
+                        "Vanilla already does this for the saddle and the barding, and always",
+                        "has in this version - neither is affected by this option either way.",
+                        "What it covers is the seventeen gear slots vanilla cannot see: on, a",
+                        "right-click with a piece of gear puts it in the first empty slot that",
+                        "takes it; off, the Gear tab on the horse screen is the only way.",
+                        "It never swaps. A slot that is already full is left alone and the",
+                        "click does what it would have done, which is usually mount the horse.",
+                        "Your own horse only, and not a foal - a foal wears no tack at all.")
+                .define("behaviour.rightclick_equips_tack", true);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -929,6 +949,15 @@ public final class ServerConfig {
     public static boolean mountedMiningPenaltyRemoved() {
         try {
             return MOUNTED_MINING_PENALTY_REMOVED.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code behaviour.rightclick_equips_tack}, safely. */
+    public static boolean rightClickEquipsTack() {
+        try {
+            return RIGHTCLICK_EQUIPS_TACK.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }

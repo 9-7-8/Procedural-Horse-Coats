@@ -1210,6 +1210,8 @@ public final class ModGameTests {
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
         // One horse spawned, two attachment writes, two calls; one tick.
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
+        // Four horses spawned and seven interact events posted, all in one tick.
+        register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
     }
 
     /**
@@ -1528,6 +1530,169 @@ public final class ModGameTests {
     private static void setBond(net.minecraft.world.entity.animal.equine.Horse horse, int bond) {
         var attachment = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
         horse.setData(attachment, horse.getData(attachment).withBond(bond));
+    }
+
+    /**
+     * <b>Right-clicking a horse with a piece of tack puts it on - and the four
+     * clicks it must refuse, refuses in two different ways.</b>
+     *
+     * <p>It posts real {@code EntityInteract} events through
+     * {@code NeoForge.EVENT_BUS} rather than calling
+     * {@code TackEquipHandler} directly, for the reason
+     * {@code mounted_mining_is_exempt} does the same: a handler written but
+     * never registered would otherwise pass.
+     *
+     * <p><b>The two kinds of refusal are the point, and asserting them together
+     * would hide the one that matters.</b> Not-your-horse and a foal are
+     * <i>claimed</i> refusals - the event is cancelled and a line is sent -
+     * because they are rules this mod invented and a silent invented rule reads
+     * as a bug. Untamed, and "every slot that takes it is already full", are
+     * <i>unclaimed</i>: the event must come back uncancelled so vanilla still
+     * rears the wild horse and still lets you mount your own. A handler that
+     * cancelled all four would look correct in-game right up to the moment
+     * somebody could not get on a horse while holding a braid.
+     *
+     * <p>The other thing worth pinning is that the slot chosen is the first
+     * <i>empty</i> one and never a swap: two braids fill the mane and then the
+     * tail, and a third is refused with nothing consumed. A swap would look
+     * identical from the outside - a braid in the mane either way - and would
+     * quietly destroy the one already in it.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> RIGHT_CLICK_EQUIPS_TACK =
+            TEST_FUNCTIONS.register("right_click_equips_tack",
+                    () -> ModGameTests::rightClickEquipsTack);
+
+    private static void rightClickEquipsTack(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.rightClickEquipsTack()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.rightclick_equips_tack is off in this run's server config, so"
+                            + " this test asserts the wrong branch - turn it back on rather than"
+                            + " deleting the test"), 0);
+        }
+        var mane = com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE;
+        var tail = com.example.horsegenetics.neoforge.entity.HorseTackSlot.TAIL;
+        ItemStack probe = new ItemStack(com.example.horsegenetics.neoforge.item.ModItems.RESCUING_BRAID.get());
+        if (!probe.is(mane.tag()) || !probe.is(tail.tag())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the rescuing braid is not in gear/mane and gear/tail, so there is no item"
+                            + " in the game this handler could equip and this test exercises"
+                            + " nothing - the premise is broken, not TackEquipHandler"), 0);
+        }
+
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setTamed(true);
+        horse.setOwner(player);
+        if (!com.example.horsegenetics.neoforge.server.HorseOwnership.isOwner(horse, player.getUUID())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse is not owned by the mock player, so every case below would"
+                            + " be testing ownership - the premise is broken, not the handler"), 0);
+        }
+
+        // Three braids in hand, so the count is the record of what was spent.
+        ItemStack held = new ItemStack(
+                com.example.horsegenetics.neoforge.item.ModItems.RESCUING_BRAID.get(), 3);
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+
+        assertClaimed(helper, player, horse, true, "a braid offered to a bare mane");
+        if (mane.on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the first braid was not put in the mane"), 0);
+        }
+        if (!tail.on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the first braid went to the tail, so the roster is not being walked in"
+                            + " order and which slot a piece lands in is unpredictable"), 0);
+        }
+        assertHeld(helper, player, 2, "one braid should have been spent on the mane");
+
+        assertClaimed(helper, player, horse, true, "a second braid, the mane already full");
+        if (tail.on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the second braid did not fall through to the tail, so a full slot is not"
+                            + " being skipped in favour of the next one that fits"), 0);
+        }
+        assertHeld(helper, player, 1, "a second braid should have been spent on the tail");
+
+        // Both slots full. The click must be left alone: cancelling it here is
+        // how a player ends up unable to mount their own horse.
+        assertClaimed(helper, player, horse, false, "a third braid with nowhere left to put it");
+        assertHeld(helper, player, 1, "a third braid was consumed with nowhere to put it");
+
+        // A foal: claimed and refused, because "foals wear nothing" is our rule.
+        net.minecraft.world.entity.animal.equine.Horse foal =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        foal.setTamed(true);
+        foal.setOwner(player);
+        foal.setBaby(true);
+        assertClaimed(helper, player, foal, true, "a braid offered to a foal");
+        if (!mane.on(foal).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a foal was tacked up - HorseTackSlot.usableOn says foals wear nothing"), 0);
+        }
+        assertHeld(helper, player, 1, "a braid was spent on a foal that cannot wear it");
+
+        // Somebody else's horse: claimed and refused, for the same reason.
+        net.minecraft.world.entity.player.Player stranger =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        if (stranger.getUUID().equals(player.getUUID())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the two mock players share a UUID, so the ownership case below would pass"
+                            + " whatever the handler did - the premise is broken"), 0);
+        }
+        net.minecraft.world.entity.animal.equine.Horse theirs =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        theirs.setTamed(true);
+        theirs.setOwner(stranger);
+        assertClaimed(helper, player, theirs, true, "a braid offered to somebody else's horse");
+        if (!mane.on(theirs).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a stranger tacked up a horse they do not own"), 0);
+        }
+        assertHeld(helper, player, 1, "a braid was spent on a horse the player does not own");
+
+        // Untamed: NOT claimed. Vanilla rears the horse up, which is the answer.
+        net.minecraft.world.entity.animal.equine.Horse wild =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        assertClaimed(helper, player, wild, false, "a braid offered to an untamed horse");
+        if (!mane.on(wild).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "an untamed horse was tacked up"), 0);
+        }
+        assertHeld(helper, player, 1, "a braid was spent on an untamed horse");
+
+        helper.succeed();
+    }
+
+    /**
+     * Posts a real main-hand {@code EntityInteract} at {@code target} and
+     * asserts whether the listeners cancelled it. {@code claimed} is the whole
+     * assertion: an uncancelled event is one vanilla goes on to handle.
+     */
+    private static void assertClaimed(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.entity.Entity target, boolean claimed, String what) {
+        net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract event =
+                new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract(
+                        player, net.minecraft.world.InteractionHand.MAIN_HAND, target);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
+        if (event.isCanceled() != claimed) {
+            throw new GameTestAssertException(Component.literal(what + ": the click was "
+                    + (event.isCanceled() ? "claimed" : "left to vanilla")
+                    + ", and it should have been "
+                    + (claimed ? "claimed" : "left to vanilla")), 0);
+        }
+    }
+
+    private static void assertHeld(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player player, int expected, String complaint) {
+        int count = player.getItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND).getCount();
+        if (count != expected) {
+            throw new GameTestAssertException(Component.literal(
+                    complaint + " - expected " + expected + " left in hand, found " + count), 0);
+        }
     }
 
     /**
