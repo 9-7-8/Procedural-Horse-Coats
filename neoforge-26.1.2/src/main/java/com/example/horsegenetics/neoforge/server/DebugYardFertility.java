@@ -11,14 +11,10 @@ import com.example.horsegenetics.common.repro.ReproTiming;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.ServerConfig;
-import com.example.horsegenetics.neoforge.data.ModAttachments;
-import com.example.horsegenetics.neoforge.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.equine.Horse;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,14 +25,12 @@ import java.util.UUID;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_P;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_P_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Rows O-P of the test yard, and MET NATURAL in R: breeding and fertility, one
+ * <b>Row O of the test yard, and MET NATURAL in R: breeding and fertility, one
  * scenario per pen</b> (2026-09-13, packed 2026-09-14).
  *
  * <p>Every pen is a single claim with its expected outcome on the sign, and every
@@ -48,15 +42,20 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  * <p><b>Confirmed and deleted, 2026-09-14</b>: NATURAL PAIR, GELDING CONTROL,
  * SUBFERTILE PAIR and COWBOY STOCK, all read off the first quarter hour's log.
  *
+ * <p><b>Deleted as hands-only, 2026-09-30</b>: WEANING (lead the foal away - AI's
+ * WEANING AWAY does it by distance), the JAR STUD and JAR &amp; KIT BENCH (the seed
+ * jar is {@link DebugYardClockwork}'s now), GOLD ANY HEAT (AH's GOLD TIMER) and
+ * SUBFERTILE GOLD (retired 2026-09-25, when golden carrots stopped rolling against
+ * fertility). THE CAP and MATERNITY lost their chests of leads and vet's kits: the
+ * pens log their own reading, and nobody is coming to open a chest.
+ *
  * <p><b>A three-block gap, not a shared wall, between breeding pens.</b> Golden-carrot
  * breeding is vanilla's goal, which pairs two horses in love within three blocks
- * regardless of walls, and {@code YardPens} does not reach it. So the jar stud has his
- * own pen apart from the jar mares (owner, 2026-09-14), and no two pens share a wall.
+ * regardless of walls, and {@code YardPens} does not reach it. So no two pens share a wall.
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>O</td><td>THE CAP, HURT MARE</td><td>MATERNITY, WEANING</td></tr>
- *   <tr><td>P</td><td>JAR STUD, JAR &amp; KIT BENCH</td><td>GOLD ANY HEAT, SUBFERTILE GOLD</td></tr>
+ *   <tr><td>O</td><td>THE CAP, HURT MARE</td><td>MATERNITY</td></tr>
  *   <tr><td>R</td><td>(herd rows)</td><td>MET NATURAL</td></tr>
  * </table>
  *
@@ -79,12 +78,8 @@ final class DebugYardFertility {
             theCap(level, gy, west, mouthZ + ROW_O);
             hurtMare(level, gy, west + 14, mouthZ + ROW_O);
             maternity(level, gy, east, mouthZ + ROW_O);
-            weaning(level, gy, east + 12, mouthZ + ROW_O);
-            jarBench(level, gy, west, mouthZ + ROW_P);
-            goldAnyHeat(level, gy, east, mouthZ + ROW_P);
-            subfertileGold(level, gy, east + 10, mouthZ + ROW_P);
             metNatural(level, gy, east, mouthZ + ROW_R);
-            ActionTrace.log("test yard", "fertility pens built (rows O-P, and MET NATURAL in R)");
+            ActionTrace.log("test yard", "fertility pens built (row O, and MET NATURAL in R)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: fertility rows failed to build", e);
         }
@@ -102,9 +97,6 @@ final class DebugYardFertility {
                     FERT + "n/n", true, "CAP MARE " + (i + 1)));
         }
         horse(level, gy, x0 + 9.2, z0 + 6, Sex.MALE, FERT + "n/n", true, "CAP STUD");
-        DebugYardGameplay.chest(level, gy, x0 + 8, z0 - 2, "THE CAP", List.of(
-                new ItemStack(Items.LEAD, 2),
-                new ItemStack(ModItems.VET_KIT.get())));
     }
 
     private static void hurtMare(ServerLevel level, int gy, int x0, int z0) {
@@ -173,78 +165,6 @@ final class DebugYardFertility {
                 }
             });
         }
-        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "MATERNITY", List.of(
-                new ItemStack(ModItems.VET_KIT.get())));
-    }
-
-    private static void weaning(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 7, ROW_O_D, "WEANING",
-                List.of("WEANING", "mare nursing: lead", "foal 32+ blocks", "away 1 min"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "NURSING MARE");
-        Horse foal = horse(level, gy, x0 + 4.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "WEAN ME");
-        if (mare == null || foal == null) {
-            return;
-        }
-        foal.setAge(-24000);
-        foal.setData(ModAttachments.HORSE_SOCIAL.get(),
-                foal.getData(ModAttachments.HORSE_SOCIAL.get()).withDam(Optional.of(mare.getUUID())));
-        long now = level.getGameTime();
-        ReproHandler.set(mare, ReproHandler.of(mare).foaled(now - 10, List.of(foal.getUUID())));
-        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "WEANING", List.of(new ItemStack(Items.LEAD, 2)));
-    }
-
-    // ------------------------------------------------------------------
-    // Row P
-    // ------------------------------------------------------------------
-
-    /**
-     * Two pens with a gap between them: the stud on his own, the two mares next door.
-     * Owner, 2026-09-14: "the jar stud shouldn't be physically in the same pen as the
-     * mares or else he'll just breed them as normal".
-     */
-    private static void jarBench(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 5, ROW_P_D, "JAR STUD",
-                List.of("JAR STUD", "TAME, carrot him,", "fill a jar, then", "use it next door"));
-        horse(level, gy, x0 + 2.5, z0 + 4, Sex.MALE, FERT + "n/n", false, "JAR STUD");
-
-        int mx = x0 + 8;
-        pen(level, gy, mx, z0, 11, ROW_P_D, "JAR BENCH",
-                List.of("JAR & KIT BENCH", "TAME both first;", "jar on each mare;", "geld the stud"));
-        Horse ready = horse(level, gy, mx + 3.0, z0 + 4, Sex.FEMALE, FERT + "n/n", false, "IN HEAT: JAR TAKES");
-        Horse notReady = horse(level, gy, mx + 7.5, z0 + 4, Sex.FEMALE, FERT + "n/n", false, "OUT OF HEAT: REFUSES");
-        inHeat(ready);
-        outOfHeat(notReady);
-        noNaturalCovers(ready);
-        noNaturalCovers(notReady);
-        DebugYardGameplay.chest(level, gy, mx + 5, z0 - 2, "JAR BENCH", List.of(
-                new ItemStack(Items.STICK, 3),
-                new ItemStack(ModItems.EMPTY_SEED_JAR.get(), 3),
-                new ItemStack(Items.GOLDEN_CARROT, 8),
-                new ItemStack(ModItems.STABILIZER_CARROT.get(), 4),
-                new ItemStack(ModItems.VET_KIT.get()),
-                new ItemStack(Items.CLOCK)));
-    }
-
-    private static void goldAnyHeat(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 7, ROW_P_D, "GOLD ANY HEAT",
-                List.of("GOLD, ANY HEAT", "mare OUT of heat:", "gold both = foal", "AT ONCE anyway"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "GOLD MARE");
-        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "n/n", true, "GOLD STUD");
-        outOfHeat(mare);
-        noNaturalCovers(mare);
-        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "GOLD ANY HEAT", List.of(
-                new ItemStack(Items.GOLDEN_CARROT, 16),
-                new ItemStack(ModItems.VET_KIT.get())));
-    }
-
-    private static void subfertileGold(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 7, ROW_P_D, "SUBFERTILE GOLD",
-                List.of("SUBFERTILE GOLD", "sf/sf pair: gold", "both. ~1 foal in 4,", "else didn't take"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "sf/sf", true, "SF GOLD MARE");
-        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "sf/sf", true, "SF GOLD STUD");
-        noNaturalCovers(mare);
-        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "SUBFERTILE GOLD", List.of(
-                new ItemStack(Items.GOLDEN_CARROT, 32)));
     }
 
     // ------------------------------------------------------------------

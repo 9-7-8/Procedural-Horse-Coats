@@ -41,8 +41,8 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
  * <b>Rows AH-AI: checks that used to need a player's hands</b> (owner, 2026-09-15: "put everything which can be
- * tested unattended into the yard"). Row P's GOLD ANY HEAT, SUBFERTILE GOLD and row O's WEANING wait for somebody with
- * golden carrots and a lead; these do the same thing on a clock. The spawner's sheep need a meal, which only an
+ * tested unattended into the yard"). Row P's GOLD ANY HEAT, SUBFERTILE GOLD and row O's WEANING waited for somebody with
+ * golden carrots and a lead (all three deleted 2026-09-30); these do the same thing on a clock. The spawner's sheep need a meal, which only an
  * interaction gives, so a NeoForge {@link FakePlayer} holds the wheat. It can hold an item, but it has no chat and no
  * client - which costs nothing here, because every reading is logged.
  *

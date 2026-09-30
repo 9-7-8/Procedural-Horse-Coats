@@ -334,6 +334,8 @@ public final class DebugWorldWatch {
     static void start(ServerLevel level, AABB yard) {
         stop(level);
         clearAreas();
+        SOUNDS_BY_HORSE.clear();
+        SPREADS_BY_HORSE.clear();
         startedAtNanos = System.nanoTime();
         int cxLo = SectionPos.blockToSectionCoord((int) yard.minX);
         int cxHi = SectionPos.blockToSectionCoord((int) yard.maxX);
@@ -1077,10 +1079,34 @@ public final class DebugWorldWatch {
             return;
         }
         SOUNDS.merge(sound, 1, Integer::sum);
+        SOUNDS_BY_HORSE.merge(horse.getUUID(), 1, Integer::sum);
     }
 
     /** Sounds played since the last census, by sound id. */
     private static final Map<String, Integer> SOUNDS = new LinkedHashMap<>();
+
+    /**
+     * Gene sounds per horse since the yard was built - never reset by a census. The census tally
+     * is by sound id for the whole dimension, which cannot tell the base-alarm pen beside a husk
+     * from the one with nothing hostile in range; {@code DebugYardClockwork} reads this instead.
+     */
+    private static final Map<java.util.UUID, Integer> SOUNDS_BY_HORSE = new java.util.HashMap<>();
+
+    /**
+     * Spread conversions that landed, per horse, since the yard was built. The blight pen reads it: a
+     * converted block in a lit pen is grown back over by grass and mycelium before any floor count can
+     * see it, so the floor is the wrong instrument for "did the gene convert anything".
+     */
+    private static final Map<java.util.UUID, Integer> SPREADS_BY_HORSE = new java.util.HashMap<>();
+
+    static int spreadsPlacedBy(java.util.UUID horse) {
+        return SPREADS_BY_HORSE.getOrDefault(horse, 0);
+    }
+
+    /** How many gene sounds this horse has played since the watch started. */
+    static int soundsFrom(java.util.UUID horse) {
+        return SOUNDS_BY_HORSE.getOrDefault(horse, 0);
+    }
 
     /**
      * <b>How often a spread verb tries, and how often it lands.</b>
@@ -1115,6 +1141,7 @@ public final class DebugWorldWatch {
             return;
         }
         SPREADS.computeIfAbsent(cover, k -> new int[2])[1]++;
+        SPREADS_BY_HORSE.merge(horse.getUUID(), 1, Integer::sum);
         // ONE LINE PER DRYAD PLANTING, naming the horse - which in the yard is its pen.
         // The ground covers try every sixty ticks and stay counted only; a sapling, a
         // flower or a mushroom lands a few times an hour, and a rate is a list of those.
