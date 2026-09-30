@@ -82,6 +82,8 @@ public final class ClientSetup {
                 JumpScreen::new);
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_STASIS_BANK.get(),
                 HorseStasisBankScreen::new);
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_GEAR.get(),
+                HorseGearScreen::new);
     }
 
     /** Molten hooves' glowing prints ({@link HoofprintParticle}) and horn dust ({@link HornDustParticle}). */

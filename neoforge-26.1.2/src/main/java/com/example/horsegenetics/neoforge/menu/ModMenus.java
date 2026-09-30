@@ -9,11 +9,16 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * This mod's container menus - one per block you stand in front of and open.
+ * This mod's container menus - one per thing you stand in front of and put
+ * items into.
  *
  * <p>The Horse Browser used to be here too and deliberately is not any more -
- * it has no slots, so it is a plain screen with no server menu behind it. A menu
- * is for a <i>block</i> you stand in front of, which is exactly what this is.
+ * it has no slots, so it is a plain screen with no server menu behind it. The
+ * rule is <b>slots, not blocks</b>: a screen gets a menu when it has slots a
+ * carried stack goes in, and not otherwise. That is why the horse information
+ * screen is still a plain screen and its Gear tab's <i>Dress</i> window is
+ * {@link #HORSE_GEAR} - the only menu here that is for an entity rather than a
+ * block.
  */
 public final class ModMenus {
 
@@ -48,7 +53,8 @@ public final class ModMenus {
      * buttons. Backed by the block entity that holds the woods and the paint,
      * and by the blockstate that holds the style, so it keeps nothing itself.
      *
-     * <p><b>The only menu here built by NeoForge's extra-data factory.</b>
+     * <p><b>The first menu here built by NeoForge's extra-data factory</b>
+     * ({@link #HORSE_GEAR} is the other).
      * Vanilla's {@code MenuType} constructor hands a client menu an id and an
      * inventory and nothing else, and this one needs the block's <i>position</i>
      * - it reads everything it draws off the block rather than syncing a copy.
@@ -61,6 +67,18 @@ public final class ModMenus {
             MENUS.register("jump",
                     () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension
                             .create(JumpMenu::new));
+
+    /**
+     * <b>Dressing a horse</b> - the nineteen gear slots and the player's
+     * inventory. Built by the extra-data factory for the same reason as
+     * {@link #JUMP}, with an entity id where the jump has a position.
+     *
+     * @see HorseGearMenu for why the information screen is not itself a menu
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<HorseGearMenu>> HORSE_GEAR =
+            MENUS.register("horse_gear",
+                    () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension
+                            .create(HorseGearMenu::new));
 
     public static void register(IEventBus modEventBus) {
         MENUS.register(modEventBus);
