@@ -62,7 +62,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>X</td><td>NIGHT SHY - a night-shy horse, a band and two cows</td><td>SUNTOUCHED</td></tr>
+ *   <tr><td>X</td><td>NIGHT SHY - a night-shy horse, a band and two cows</td><td>(empty)</td></tr>
  *   <tr><td>Y</td><td>REACH WALL, REACH FENCE - cover reach and courtship</td>
  *       <td>STATS - speed and health floors and stacking</td></tr>
  * </table>
@@ -85,8 +85,10 @@ final class DebugYardUnattended {
             // KICK HUNTER and KICK PLAIN went on their own verdicts, 2026-09-30: the hunter's blows 11, 12 and 17
             // ticks apart (gap 222's ten-tick swing), the plain horse none. DebugWorldWatch.kicksBy and
             // DebugTestYard.lidded, which that pen needed against Last Stand's jump, stay for the next fighter.
-            suntouched(level, gy, east, mouthZ + ROW_X);   // row X east since row AA emptied, 2026-09-30
-            ActionTrace.log("test yard", "unattended pens built (rows X and Y: night shy, suntouched, reach, stats)");
+            // SUNTOUCHED went on 2026-09-30: one light per horse, carried and never left behind (run 11: 8 lamps at
+            // build, 10 with its two horses), which is the whole of what the owner cares about - "we've never ...
+            // had an issue with them leaving behind light blocks".
+            ActionTrace.log("test yard", "unattended pens built (rows X and Y: night shy, reach, stats)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: rows X-AA failed to build", e);
         }
@@ -194,42 +196,50 @@ final class DebugYardUnattended {
     // Row Y
     // ------------------------------------------------------------------
 
-    /** Gap 230: a stallion cannot cover a mare through a three-thick wall. */
+    /**
+     * Gap 230: a stallion cannot cover a mare through a stone wall. <b>One block thick since 2026-09-30</b>: at
+     * three, with {@code ReproRules.NATURAL_REACH} also three, the stud was never even in reach (run 11: "0 of 225
+     * polls ... the stud within 3 blocks"), so the path check the pen exists for was never asked.
+     */
     private static void reachWall(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 8, ROW_Y_D, "REACH WALL", Blocks.GRASS_BLOCK.defaultBlockState(),
                 List.of("REACH: WALL", "mare in heat and a", "stallion either side", "of stone: no cover"));
         for (int x = x0 + 1; x < x0 + 8; x++) {
-            for (int z = z0 + 5; z <= z0 + 7; z++) {
+            for (int z = z0 + 6; z <= z0 + 6; z++) {
                 for (int y = gy + 1; y <= gy + 3; y++) {
                     level.setBlock(new BlockPos(x, y, z), Blocks.STONE.defaultBlockState(), 3);
                 }
             }
         }
-        Horse mare = horse(level, gy, x0 + 4.5, z0 + 3.5, Sex.FEMALE, PLAIN, true, "RW MARE");
-        Horse stud = horse(level, gy, x0 + 4.5, z0 + 9.5, Sex.MALE, PLAIN, true, "RW STUD");
+        Horse mare = horse(level, gy, x0 + 4.5, z0 + 4.5, Sex.FEMALE, PLAIN, true, "RW MARE");
+        Horse stud = horse(level, gy, x0 + 4.5, z0 + 7.5, Sex.MALE, PLAIN, true, "RW STUD");
         DebugYardFertility.inHeat(mare);
         // NOTE: YardPens.groupOf takes the FIRST registered pen containing a horse, and pen() above already
         // registered the whole of "REACH WALL" - so these two halves are never what a horse is grouped by, and
         // the pair are "together" to the breeding scan. That is what the pen wants (the wall, not the pen
         // list, must be what stops them), but these two lines do nothing. Left as found.
-        YardPens.register(gy, x0, x0 + 8, z0, z0 + 5, "REACH WALL NORTH");
-        YardPens.register(gy, x0, x0 + 8, z0 + 7, z0 + ROW_Y_D, "REACH WALL SOUTH");
+        YardPens.register(gy, x0, x0 + 8, z0, z0 + 6, "REACH WALL NORTH");
+        YardPens.register(gy, x0, x0 + 8, z0 + 6, z0 + ROW_Y_D, "REACH WALL SOUTH");
         ActionTrace.log("test yard", "REACH WALL: expect no 'natural cover' line naming RW MARE, ever (gap 230)");
         reachVerdict(level, "REACH WALL", mare, stud, false);
     }
 
-    /** Gap 230: across a single fence, a cover happens - but only after courtship in reach. */
+    /**
+     * Gap 230: <b>a fence blocks a cover, like a wall</b> (owner, 2026-09-30). The pen was built to expect a cover
+     * across one fence, before {@code NaturalBreedingHandler.canMeet} (2026-09-25) required a walkable path; asked,
+     * the owner chose the path rule - so the pair must never be covered, though the stud stands in reach.
+     */
     private static void reachFence(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 9, ROW_Y_D, "REACH FENCE", Blocks.GRASS_BLOCK.defaultBlockState(),
-                List.of("REACH: FENCE", "one fence between", "them: covered, but", "only after 60 ticks"));
+                List.of("REACH: FENCE", "one fence between", "them: NO cover,", "like a wall"));
         for (int x = x0 + 1; x < x0 + 9; x++) {
             level.setBlock(new BlockPos(x, gy + 1, z0 + 6), Blocks.OAK_FENCE.defaultBlockState(), 3);
         }
         Horse mare = horse(level, gy, x0 + 4.5, z0 + 5.3, Sex.FEMALE, PLAIN, true, "RF MARE");
         Horse stud = horse(level, gy, x0 + 4.5, z0 + 6.7, Sex.MALE, PLAIN, true, "RF STUD");
         DebugYardFertility.inHeat(mare);
-        ActionTrace.log("test yard", "REACH FENCE: expect a 'natural cover' line naming RF MARE within a heat,"
-                + " with the pair in reach at least 60 ticks first (gap 230)");
+        ActionTrace.log("test yard", "REACH FENCE: expect no 'natural cover' line naming RF MARE, ever - a fence"
+                + " blocks a cover like a wall (gap 230, owner 2026-09-30)");
         reachVerdict(level, "REACH FENCE", mare, stud, true);
     }
 
@@ -260,18 +270,12 @@ final class DebugYardUnattended {
      * are actually testing. A cover is her try being spent ({@code Reproduction.lastNaturalTry} moving, which
      * a cover does whether or not it takes), or her being pregnant or foaled.
      *
-     * <p><b>REACH WALL</b>: FAIL the moment she is covered. PASS after {@link #REACH_HEATS} heats uncovered
+     * <p><b>Both pens</b>: FAIL the moment she is covered. PASS after {@link #REACH_HEATS} heats uncovered
      * <i>with at least one chance</i>. With none it is INCONCLUSIVE and says why - worked out from the build
-     * geometry, the wall is three blocks thick and NATURAL_REACH is three, so a mare pressed to the north
-     * face and a stud to the south face have boxes that exactly meet the inflated edge and do not overlap
-     * ({@code AABB.intersects} is strict). If that is right the wall is never even asked, and an uncovered
-     * mare says nothing about walls. UNVERIFIED: the arithmetic assumes an unscaled horse box (1.3965 wide).
-     *
-     * <p><b>REACH FENCE</b> is always INCONCLUSIVE, with the reading. Its expectation - covered across one
-     * fence - was written before {@code NaturalBreedingHandler.canMeet} (2026-09-25) required a walkable path
-     * or touching hitboxes, and a fence is neither: a cover across it may now be impossible by design. In
-     * five runs on 2026-09-30 neither mare was ever covered. Whether that is the intended rule or the pen's
-     * expectation should stand is an owner decision, so this pen reports and does not pick a side.
+     * geometry, the wall was three blocks thick and NATURAL_REACH is three, so a mare pressed to the north
+     * face and a stud to the south face never met; the wall is one block now (see {@link #reachWall}).
+     * REACH FENCE used to be always INCONCLUSIVE, pending the owner's call on whether a fence should block a
+     * cover; it should (2026-09-30), so it is judged the same way.
      */
     private static void reachVerdict(ServerLevel level, String name, @Nullable Horse mare, @Nullable Horse stud,
                                      boolean fence) {
@@ -316,17 +320,13 @@ final class DebugYardUnattended {
                     + " stud within " + (int) ReproRules.NATURAL_REACH + " blocks"
                     + (r.pregnant() ? ", pregnant" : "");
             String verdict;
-            if (fence) {
-                verdict = "INCONCLUSIVE (owner decision needed: this pen's 'covered across one fence' predates"
-                        + " the walkable-path rule of 2026-09-25, under which a fence may block a cover by design)";
-            } else if (covered) {
-                verdict = "FAIL (covered through a three-thick stone wall)";
+            if (covered) {
+                verdict = "FAIL (covered through " + (fence ? "a fence" : "a stone wall") + ")";
             } else if (tally.heats.isEmpty()) {
                 verdict = "INCONCLUSIVE (she was never in heat)";
             } else if (tally.chances == 0) {
                 verdict = "INCONCLUSIVE (never a chance: the stud was never within NATURAL_REACH while she had a"
-                        + " try, so the wall's path check was never asked - the wall's thickness alone keeps them"
-                        + " apart)";
+                        + " try, so the path check was never asked)";
             } else {
                 verdict = "PASS";
             }
@@ -494,113 +494,6 @@ final class DebugYardUnattended {
         GeneEpigenetics epi = GeneEpigenetics.forGene(gene, record.genotype(), record.epigenome());
         double f = 1.0 + epi.copy(0).get(AbstractMagicStatGene.DELTA) + epi.copy(1).get(AbstractMagicStatGene.DELTA);
         return Math.min(HorseTraits.MAGICAL_MAX_FACTOR, Math.max(HorseTraits.MAGICAL_MIN_FACTOR, f));
-    }
-
-    // ------------------------------------------------------------------
-    // Row AA
-    // ------------------------------------------------------------------
-
-    /**
-     * Suntouched's light verb <i>was</i> skipped in the horse dimension on purpose, and this pen checks that no
-     * light block ever appears here. <b>The skip is off</b>, and has been since 2026-09-12, before the pen was
-     * built: {@code GeneAbilityHandler.reconcileGlow} carries "RESTORE BEFORE 1.0: the dimension check here ...
-     * is off with the rest of them" (gap 204). See {@link #GLOW_SKIPPED_HERE}.
-     */
-    private static void suntouched(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 8, ROW_X_D, "SUNTOUCHED", Blocks.GRASS_BLOCK.defaultBlockState(),
-                List.of("SUNTOUCHED", "adult and foal: no", "light blocks, ever,", "in this dimension"),
-                Blocks.LIGHT);
-        Horse adult = horse(level, gy, x0 + 2.5, z0 + 4.5, Sex.MALE, "horsegenetics.suntouched=Sntch/Sntch", true, "SUNTOUCHED ADULT");
-        Horse foal = horse(level, gy, x0 + 5.5, z0 + 7.5, Sex.FEMALE, "horsegenetics.suntouched=Sntch/Sntch", true,
-                "SUNTOUCHED FOAL");
-        if (foal != null) {
-            foal.setAge(-72_000);
-        }
-        // The same box pen() hands the watch, so this count and the watch line's count are one number.
-        AABB box = DebugTestYard.box(x0, gy, z0, x0 + 8, gy + 3, z0 + ROW_X_D);
-        int lamps = lightsIn(level, box);
-        ActionTrace.log("test yard", "SUNTOUCHED: " + lamps + " light blocks at build - the yard's own lamps, before"
-                + " either horse has ticked - so expect the SUNTOUCHED watch line's minecraft:light count never to rise"
-                + " above that; any increase is a FAIL. (The 07:10 run's 11 and run 10's 10 were first-census readings,"
-                + " taken after both horses had lit - by the lamp grid, 8 lamps + 2 horse lights in this pen.)");
-        List<UUID> glowing = new java.util.ArrayList<>();
-        for (Horse h : new Horse[] {adult, foal}) {
-            if (h != null) {
-                glowing.add(h.getUUID());
-            }
-        }
-        suntouchedVerdict(level, box, lamps, glowing, lamps, 1);
-    }
-
-    /**
-     * <b>Flip this with {@code GeneAbilityHandler.reconcileGlow}'s "RESTORE BEFORE 1.0" (gap 204).</b> False
-     * today: the glow verb places its trailing {@code minecraft:light} in this dimension like anywhere else,
-     * so each Suntouched horse <i>should</i> carry one light block here and the pen's question - "no light
-     * block, ever, in this dimension" - is inverted by that switch. A PASS on it now would mean the glow had
-     * stopped working, not that the skip held. So while this is false the verdict cannot PASS: it is
-     * INCONCLUSIVE with the reading, and a FAIL only for litter (more lights than glowing horses).
-     */
-    private static final boolean GLOW_SKIPPED_HERE = false;
-
-    /** How long SUNTOUCHED watches: forty game minutes, a whole day and night. */
-    private static final int SUNTOUCHED_MINUTES = 40;
-
-    /**
-     * <b>SUNTOUCHED answers for itself.</b> Counts light blocks in the pen every game minute, keeps the
-     * highest, and at {@link #SUNTOUCHED_MINUTES} compares it with the count at build ({@code lamps}). With
-     * the skip restored ({@link #GLOW_SKIPPED_HERE}): PASS if it never rose, FAIL if it did. With the skip off:
-     * FAIL if it ever rose by more than one per glowing horse (a light left behind - gap 284's orphan, or the
-     * tracking losing one), otherwise INCONCLUSIVE with the count. Either way a horse gone is INCONCLUSIVE.
-     */
-    private static void suntouchedVerdict(ServerLevel level, AABB box, int lamps, List<UUID> glowing, int most,
-                                          int minute) {
-        DebugYardHerd.after(level, 1_200, () -> {
-            int now = lightsIn(level, box);
-            int high = Math.max(most, now);
-            if (minute < SUNTOUCHED_MINUTES) {
-                suntouchedVerdict(level, box, lamps, glowing, high, minute + 1);
-                return;
-            }
-            int alive = 0;
-            for (UUID id : glowing) {
-                if (level.getEntity(id) instanceof Horse h && h.isAlive()) {
-                    alive++;
-                }
-            }
-            int over = high - lamps;
-            String reading = lamps + " lamps at build, " + now + " light blocks now, at most " + high
-                    + " (+" + over + ") over " + SUNTOUCHED_MINUTES + " min, " + alive + " of 2 Suntouched horses alive";
-            String verdict;
-            if (glowing.size() < 2 || alive < glowing.size()) {
-                verdict = "INCONCLUSIVE (a Suntouched horse is missing)";
-            } else if (GLOW_SKIPPED_HERE) {
-                verdict = over <= 0 ? "PASS" : "FAIL (a light block appeared in the horse dimension)";
-            } else if (over > alive) {
-                verdict = "FAIL (more light blocks than glowing horses: one was left behind)";
-            } else {
-                verdict = "INCONCLUSIVE (the horse dimension's glow skip is switched off - GeneAbilityHandler"
-                        + ".reconcileGlow, RESTORE BEFORE 1.0, gap 204 - so each horse carries its light here by"
-                        + " design; " + (over == 0 ? "and none appeared, which with the skip off means the glow"
-                        + " placed nothing - worth a look" : "at most one per horse, no litter") + ")";
-            }
-            ActionTrace.log("test yard", "SUNTOUCHED at " + SUNTOUCHED_MINUTES + " min: " + reading + " - " + verdict);
-        });
-    }
-
-    /** Light blocks in {@code box}, both corners inclusive - the way {@code DebugWorldWatch.scan} counts them. */
-    private static int lightsIn(ServerLevel level, AABB box) {
-        int n = 0;
-        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
-        for (int x = (int) box.minX; x <= (int) box.maxX; x++) {
-            for (int y = (int) box.minY; y <= (int) box.maxY; y++) {
-                for (int z = (int) box.minZ; z <= (int) box.maxZ; z++) {
-                    if (level.getBlockState(at.set(x, y, z)).is(Blocks.LIGHT)) {
-                        n++;
-                    }
-                }
-            }
-        }
-        return n;
     }
 
     // ------------------------------------------------------------------

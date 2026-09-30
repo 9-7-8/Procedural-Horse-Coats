@@ -110,7 +110,14 @@ public final class NaturalBreedingHandler {
      * about to happen anyway.
      */
     private static boolean canMeet(Horse mare, Horse stallion) {
-        Path path = mare.getNavigation().createPath(stallion, 0);
+        // TO WITHIN ONE BLOCK OF HIM, NOT TO HIS BLOCK (2026-09-30). With accuracy 0 the path had to end on
+        // the block the stallion stands in, and a horse-sized path very often cannot: the yard's run 11
+        // logged mares refused "no walkable path" to a stallion 1.5 to 4 blocks away in the same open pen,
+        // wild bands included, and HURT MARE went whole runs uncovered for it. One block of slack is
+        // "standing beside him". It does not open a fence: two horses either side of a one-block fence
+        // stand two blocks apart at the closest, and the owner's call the same day is that a fence blocks
+        // a cover like a wall (REACH FENCE now expects none). UNVERIFIED beyond the yard's pens.
+        Path path = mare.getNavigation().createPath(stallion, 1);
         if (path != null && path.canReach()) {
             return true;
         }

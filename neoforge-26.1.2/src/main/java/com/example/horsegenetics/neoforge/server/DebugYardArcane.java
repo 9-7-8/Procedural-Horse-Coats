@@ -82,9 +82,14 @@ final class DebugYardArcane {
      * <b>ARCANE DEALER answers for itself</b> (owner, 2026-09-30: "build in more pens that answer for
      * themselves"). Five seconds after founding - his string is placed in the founding call, so this is
      * only margin - every horse in his herd is read off its record: <b>Mixed</b> lineage, <b>not gelded</b>,
-     * between {@code ArcaneStock.REQUIRED_FAMILIES.size()} and one more showing magical combinations
-     * (the optional family comes at {@code OPTIONAL_CHANCE}), and no combination in two horses - the same
-     * {@code ArcaneStock.showingTokens} the founding and the restock use to keep a string distinct. The
+     * and at least {@code ArcaneStock.REQUIRED_FAMILIES.size()} showing magical combinations.
+     *
+     * <p><b>Extras are allowed</b> (owner, 2026-09-30). The first run of this verdict failed two horses of eight
+     * for showing thirteen: the dealer forces his eleven or twelve picks, and the rest of the genome is rolled
+     * as a feral-mixed founder, which can add a natural magic allele on top. Asked whether the spec or the code
+     * was wrong, the owner said the spec - his picks are a floor, not a ceiling. So a combination seen on two
+     * horses is logged, not failed: his own picks are distinct by construction ({@code ArcaneStock.rollHorse}
+     * writes each into {@code taken}), so any repeat involves an extra. The
      * prices (12-28 emeralds, steady between looks) are the merchant screen's and are not read here.
      */
     private static void verdict(ServerLevel level, Cowboy cowboy) {
@@ -92,6 +97,7 @@ final class DebugYardArcane {
             int want = ArcaneStock.REQUIRED_FAMILIES.size();
             List<String> faults = new ArrayList<>();
             Set<String> seen = new HashSet<>();
+            Set<String> repeats = new java.util.LinkedHashSet<>();
             int horses = 0;
             for (UUID id : cowboy.herdIds()) {
                 if (!(level.getEntity(id) instanceof Horse h) || !h.isAlive() || !HorseRecords.hasRealRecord(h)) {
@@ -107,19 +113,20 @@ final class DebugYardArcane {
                     faults.add(who + " is a gelding");
                 }
                 Set<String> tokens = ArcaneStock.showingTokens(record.genome().genotype());
-                if (tokens.size() < want || tokens.size() > want + 1) {
-                    faults.add(who + " shows " + tokens.size() + " magical combinations, not " + want + "-" + (want + 1));
+                if (tokens.size() < want) {
+                    faults.add(who + " shows " + tokens.size() + " magical combinations, fewer than his " + want);
                 }
                 for (String token : tokens) {
                     if (!seen.add(token)) {
-                        faults.add(token + " appears twice (again on " + who + ")");
+                        repeats.add(token);
                     }
                 }
             }
             String verdict = horses == 0 ? "INCONCLUSIVE (no horses of his were found)"
                     : faults.isEmpty() ? "PASS" : "FAIL: " + String.join("; ", faults);
             ActionTrace.log("test yard", "ARCANE DEALER at 5 s: " + horses + " horse(s), " + seen.size()
-                    + " distinct magical combinations - " + verdict);
+                    + " distinct magical combinations" + (repeats.isEmpty() ? "" : ", repeated beyond his picks: " + repeats)
+                    + " - " + verdict);
         });
     }
 }
