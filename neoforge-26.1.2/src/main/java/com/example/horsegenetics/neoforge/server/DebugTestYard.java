@@ -141,7 +141,7 @@ final class DebugTestYard {
      * own pen, which is what lets them share walls (packed since 2026-09-14).
      */
     static final int PACKED_AISLE = AISLE + 1;     // a chest and a sign in front of every pen
-    /** HURT MARE ({@link DebugYardFertility}) | DRYAD OAK+BIRCH on stone ({@link DebugYardLong}). */
+    /** (empty) | DRYAD OAK+BIRCH on stone ({@link DebugYardLong}). HURT MARE, west, passed and went (2026-09-30). */
     static final int ROW_O = 3;
     static final int ROW_O_D = 12;
     /** Four inheritance-ratio pens that breed all day and tally their foals ({@link DebugYardLong}). */
@@ -150,15 +150,6 @@ final class DebugTestYard {
     /** Four more: two impossible genotypes, a milk clash and a knob-carrying colour gene. */
     static final int ROW_W = ROW_U + ROW_U_D + PACKED_AISLE;
     static final int ROW_W_D = 10;
-    /** NIGHT SHY | SUNTOUCHED ({@link DebugYardUnattended}). */
-    static final int ROW_X = ROW_W + ROW_W_D + PACKED_AISLE;
-    static final int ROW_X_D = 12;
-    /** REACH WALL, REACH FENCE | STATS. */
-    static final int ROW_Y = ROW_X + ROW_X_D + PACKED_AISLE;
-    static final int ROW_Y_D = 12;
-    /** The arcane dealer and the string he founds ({@link DebugYardArcane}). Deeper, because he places his own herd. */
-    static final int ROW_AL = ROW_Y + ROW_Y_D + PACKED_AISLE;
-    static final int ROW_AL_D = 16;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -167,7 +158,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_AL + ROW_AL_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_W + ROW_W_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -228,17 +219,14 @@ final class DebugTestYard {
         // their classes once every question they asked was answered (2026-09-30). So are the dryad and stat pens that
         // stood in rows A and F, and every clockwork pen - DebugYardClockwork keeps its fake-player hands
         // and verdict lines for the next check that wants them, and builds nothing.
-        // Row O: breeding scenarios, each pen logging its horses' breeding state to the watch.
-        DebugYardFertility.build(level, gy, cx, mouthZ);
-        // Rows T, U and W: the dryad row and the inheritance ratios, for a run of a whole day.
+        // Row O east, U and W: the last dryad and the inheritance ratios, each with its own verdict.
         DebugYardLong.build(level, gy, cx, mouthZ);
-        // Rows X, Y and AA: open tests that need nobody at the keyboard.
-        DebugYardUnattended.build(level, gy, cx, mouthZ);
+        // HURT MARE, NIGHT SHY, REACH WALL, REACH FENCE, STATS and the ARCANE DEALER went on their own PASS
+        // lines on 2026-09-30, and with them rows X, Y and AL; DebugYardFertility and DebugYardUnattended
+        // stay only as helpers.
         // DEATH DIAMONDS, SPLICE PERFORMANCE and BLOOD ONLY (DebugYardEffects, -Births, -Dhampir) went on
         // their own PASS lines on 2026-09-30, with LYCAN DOOMED and LETHAL FOALS: the owner ruled an automatic
         // yard PASS closes a check the way a clockwork one does.
-        // Row AL west: the arcane dealer, founded on the spot with his own string.
-        DebugYardArcane.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.

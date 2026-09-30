@@ -268,7 +268,7 @@ public final class CowboyHandler {
 
     /**
      * Found a cowboy <b>where he is standing</b>, dealing in magic, skipping the
-     * walk out to a paddock. For {@link DebugYardArcane} and nothing else.
+     * walk out to a paddock. Written for the yard's ARCANE DEALER pen (DebugYardArcane, deleted 2026-09-30 once it passed) and kept for the next one.
      *
      * <p>The paddock walk is 12-24 blocks in a roughly outward direction, which
      * is right beside a barn and wrong inside the test yard: it would march him

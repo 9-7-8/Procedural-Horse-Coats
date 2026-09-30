@@ -3,168 +3,29 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.repro.ReproRules;
 import com.example.horsegenetics.common.repro.ReproTiming;
-import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.UUID;
-
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
-
 /**
- * <b>Row O of the test yard: breeding and fertility, one
- * scenario per pen</b> (2026-09-13, packed 2026-09-14).
+ * <b>Breeding-state helpers for the yard's pens, and no pens</b> (2026-09-30). This was row O: THE CAP,
+ * MATERNITY, MET NATURAL and HURT MARE, among others, each a single breeding claim. By the end of 2026-09-30
+ * every one had answered for itself and gone, HURT MARE last, once {@code NaturalBreedingHandler.canMeet}
+ * stopped refusing a mare whose stallion stood beside her. What stays is what the ratio pens and the clockwork
+ * machinery call: {@link #inHeat}, {@link #outOfHeat}, {@link #noNaturalCovers}.
  *
- * <p>Every pen is a single claim with its expected outcome on the sign, and every
- * pen registers {@link DebugWorldWatch#watchBreeding}, so the log carries each
- * horse's breeding state - in heat, pregnant, nursing, covers today - whenever it
- * changes and at every census. Every pen is also its own {@link YardPens} pen, so the
- * natural-cover cap and partner search see nothing over the wall.
- *
- * <p><b>Confirmed and deleted, 2026-09-14</b>: NATURAL PAIR, GELDING CONTROL,
- * SUBFERTILE PAIR and COWBOY STOCK, all read off the first quarter hour's log.
- *
- * <p><b>Deleted as hands-only, 2026-09-30</b>: WEANING (lead the foal away - AI's
- * WEANING AWAY does it by distance), the JAR STUD and JAR &amp; KIT BENCH (the seed
- * jar is {@link DebugYardClockwork}'s now), GOLD ANY HEAT (AH's GOLD TIMER) and
- * SUBFERTILE GOLD (retired 2026-09-25, when golden carrots stopped rolling against
- * fertility). THE CAP and MATERNITY lost their chests of leads and vet's kits: the
- * pens log their own reading, and nobody is coming to open a chest.
- *
- * <p><b>A three-block gap, not a shared wall, between breeding pens.</b> Golden-carrot
- * breeding is vanilla's goal, which pairs two horses in love within three blocks
- * regardless of walls, and {@code YardPens} does not reach it. So no two pens share a wall.
- *
- * <table>
- *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>O</td><td>HURT MARE</td><td>(DRYAD OAK+BIRCH, {@link DebugYardLong})</td></tr>
- * </table>
- *
- * <p>Timings assume {@code debug.tools} is on, the dev default: a reproductive
- * day is one minute. The maternity due dates are absolute ticks and hold either
- * way.
+ * <p>Timings assume {@code debug.tools} is on, the dev default: a reproductive day is one minute.
  */
 final class DebugYardFertility {
 
     private DebugYardFertility() {
     }
 
-    private static final String FERT = "horsegenetics.fertility=";
-
-    static void build(ServerLevel level, int gy, int cx, int mouthZ) {
-        int west = cx + WEST_MIN;
-        try {
-            // THE CAP and MET NATURAL went on their own PASS lines, 2026-09-30: fifty mares in heat among
-            // exactly fifty others, none covered; two MET carriers bred past the old cap's nine to twelve.
-            hurtMare(level, gy, west, mouthZ + ROW_O);
-            ActionTrace.log("test yard", "fertility pen built (row O west: hurt mare)");
-        } catch (RuntimeException e) {
-            HorseGenetics.LOGGER.warn("[Debug] test yard: fertility rows failed to build", e);
-        }
-    }
-
-    // ------------------------------------------------------------------
-    // Row O
-    // ------------------------------------------------------------------
-
-    private static void hurtMare(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 5, ROW_O_D, "HURT MARE",
-                List.of("HURT MARE", "half health, in", "heat: NOT covered", "until she heals"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 2.5, Sex.FEMALE, FERT + "n/n", true, "HURT MARE");
-        horse(level, gy, x0 + 2.5, z0 + 5.5, Sex.MALE, FERT + "n/n", true, "HURT PEN STUD");
-        inHeat(mare);
-        if (mare == null) {
-            return;
-        }
-        // HALF HEALTH A SECOND LATER, NOT NOW. Set at spawn, it was undone before the
-        // first scan: the horse's traits are applied as it joins the level, and a
-        // new max-health attribute takes the health with it. First run, 2026-09-14:
-        // covered at 0.80 seven seconds after the build - the full-health chance -
-        // and five foals by the first quarter hour.
-        UUID id = mare.getUUID();
-        DebugYardHerd.after(level, 20, () -> {
-            if (level.getEntity(id) instanceof Horse h && h.isAlive()) {
-                h.setHealth(h.getMaxHealth() / 2.0F);
-                ActionTrace.log("test yard", "HURT MARE set to " + h.getHealth() + "/" + h.getMaxHealth());
-                hurtMareVerdict(level, id, ReproHandler.of(h).lastNaturalTry(), false, 1);
-            }
-        });
-    }
-
-    /**
-     * <b>HURT MARE answers for itself</b> (owner, 2026-09-30: "build in more pens that answer for
-     * themselves"). The claim is two-sided - no cover while she is under {@code ReproRules.COVER_HEALTH},
-     * and a cover once she is over it - so the verdict watches her one try a heat
-     * ({@code Reproduction.lastNaturalTry}, spent by every cover whether it takes or not) once a second.
-     * Healing only ever raises her health here, so if she is still under the line on the poll that
-     * finds a spent try, she was under it when the try was made: FAIL. The first try made over the
-     * line, after she has been seen hurt in heat, is the PASS. Twenty minutes with no try at all is a
-     * FAIL too - runs 8 and 10 of 2026-09-30 went a whole run healed, in heat and a block from her
-     * stud without one, and {@code NaturalBreedingHandler} now says in the yard when the path check
-     * is why.
-     */
-    private static void hurtMareVerdict(ServerLevel level, UUID id, long triedAt, boolean seenHurtInHeat, int second) {
-        DebugYardHerd.after(level, 20, () -> {
-            if (!(level.getEntity(id) instanceof Horse h) || !h.isAlive()) {
-                ActionTrace.log("test yard", "HURT MARE: the mare is gone - INCONCLUSIVE");
-                return;
-            }
-            boolean hurt = !ReproRules.healthyEnoughToBreed(h.getHealth(), h.getMaxHealth());
-            ReproTiming t = ServerConfig.reproTiming();
-            boolean inHeat = ReproRules.mayTryNaturally(ReproHandler.of(h), HorseRealmRepro.reproTime(h), t);
-            boolean seen = seenHurtInHeat || (hurt && inHeat);
-            long tried = ReproHandler.of(h).lastNaturalTry();
-            String health = String.format("%.1f/%.1f", h.getHealth(), h.getMaxHealth());
-            if (tried != triedAt) {
-                ActionTrace.log("test yard", "HURT MARE at " + second + " s: covered at " + health + " - "
-                        + (hurt ? "FAIL (covered while under the " + (int) (ReproRules.COVER_HEALTH * 100)
-                                + "% line)"
-                        : seen ? "PASS (refused while hurt, covered once healed)"
-                        : "INCONCLUSIVE (never seen hurt and in heat before the cover)"));
-                return;
-            }
-            if (second >= 20 * 60) {
-                ActionTrace.log("test yard", "HURT MARE at 20 min: never covered, now " + health + " - FAIL"
-                        + " (read the 'not covered' lines above for why)");
-                return;
-            }
-            hurtMareVerdict(level, id, triedAt, seen, second + 1);
-        });
-    }
-
-    // ------------------------------------------------------------------
-    // Row R east
-    // ------------------------------------------------------------------
-
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
-
-    /** Walls, sign, a breeding watch over the inside, and a pen of its own for the checks. */
-    private static void pen(ServerLevel level, int gy, int x0, int z0, int width, int depth, String watchName,
-                            List<String> sign) {
-        int x1 = x0 + width;
-        int z1 = z0 + depth;
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
-        DebugWorldWatch.watchBreeding(watchName, DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1));
-        YardPens.register(gy, x0, x1, z0, z1, watchName);
-    }
-
-    private static @Nullable Horse horse(ServerLevel level, int gy, double x, double z, Sex sex, String code,
-                                         boolean tamed, String name) {
-        Horse h = DebugPenManager.spawnHorse(level, gy + 1, x, z, sex, code, tamed);
-        DebugTestYard.label(h, name);
-        return h;
-    }
 
     /** At the start of the better half of a heat, so a pair has time to meet. */
     static void inHeat(@Nullable Horse mare) {
