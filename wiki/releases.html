@@ -61,6 +61,91 @@
     </p>
 </div>
 
+<h2 id="v0-5-035">0.5.035 &mdash; unicorns</h2>
+
+<div class="note warn">
+    <p class="label">Two things to read before you install it</p>
+    <p>
+        <strong>Horns are the first thing in the mod that is a shape rather than a
+        picture</strong>, and they cost frames the way a second horse does. A pen of
+        unicorns has never been measured. If one slows you down, <code>parts.enabled</code>
+        in the client config turns horns off (the horses keep them and pass them on),
+        <code>parts.glow</code> turns off just the glow, and <code>parts.detailDistance</code>
+        draws them only up close. Try <code>parts.glow</code> first if a shader pack makes a
+        horn look wrong.
+    </p>
+    <p>
+        <strong>Horn dust, horn colours and the new breed have not been seen in a running
+        game.</strong> The horn itself has: it stays on the head and sits in the right place
+        on adults and foals. Everything else is unit-tested and rendered offline only.
+    </p>
+</div>
+
+<h3 id="v0-5-035-horn">The unicorn horn, and three genes that finish it</h3>
+
+<p>
+    A horse with two copies of <a href="gene-unicorn-horn.html">unicorn horn</a> grows a
+    single horn on its forehead that follows the head as it moves and grazes. How long,
+    thick, twisted and leaning it is are written on the allele and inherited, so a line
+    can be bred for a longer horn. About one wild horse in four hundred has one, and one
+    in twenty carries it. A foal wears a horn half the size of its adult one.
+</p>
+
+<p>
+    Three more genes finish the horn, and each does nothing at all to a horse without
+    one &mdash; so an ordinary-looking horse can carry a unicorn's colour, glow and dust:
+</p>
+
+<ul>
+    <li><a href="gene-horn-colour.html">Horn colour</a> &mdash; white, the seven colours of
+        the rainbow, pink, black, grey, or chaos (a colour of its own on every copy). Nothing
+        is dominant: two different copies make a <strong>two-tone horn</strong>, one colour
+        with a tip of the other. No two reds are quite the same red.</li>
+    <li><a href="gene-horn-glow.html">Horn glow</a> &mdash; recessive; the horn glows in the
+        dark in its own colours.</li>
+    <li><a href="gene-horn-dust.html">Horn dust</a> &mdash; recessive; the horn sheds a fine
+        falling dust in its own colours.</li>
+</ul>
+
+<p>
+    In the spawn egg, <em>Rnd epigen.</em> and the randomize button now change a horn's
+    shape, colour and glow; before this, a gene that painted nothing on the coat was
+    treated as invisible and left alone.
+</p>
+
+<h3 id="v0-5-035-breed">A new breed: the Unicorn</h3>
+
+<p>
+    <a href="breed-book.html#unicorn">The Unicorn</a> is a rare magical breed found by day
+    in cherry groves, flower forests, meadows and sunflower plains. Every one is a white
+    horse &mdash; a black horse under dominant white &mdash; with a glowing horn that sheds
+    dust, in a random colour (one in four two-tone), a prismtail mane and tail, glowing
+    hooves and a love of sugar. A quarter leave rainbow dust where they walk. Some carry two
+    different whites and only ever have white foals; two of the others can have a black one.
+</p>
+
+<h3 id="v0-5-035-world">What this does to a world you already have</h3>
+
+<ul>
+    <li>Every horse you already have is hornless and carries none of the four horn genes.
+        Nothing about an existing horse changes.</li>
+    <li>Unicorns appear only in wild herds founded after you update, so look in new
+        flowering country, or get one from the cowboy or a spawn egg.</li>
+</ul>
+
+<h3 id="v0-5-035-rough">Not played yet, and known rough edges</h3>
+
+<ul>
+    <li><strong>Horn dust</strong> is placed from the horse's hitbox, not its animated head,
+        so a grazing unicorn's dust starts where its horn would be if it looked up.</li>
+    <li><strong>Horn colours</strong> are tinted onto a grey grain, so they may look darker
+        than their names &mdash; a red horn could read brownish.</li>
+    <li><strong>The browser horse designer does not draw horns.</strong> The in-game spawn
+        egg does.</li>
+    <li>Everything waiting to be looked at is on <a href="verification.html">the verification
+        index</a>.</li>
+</ul>
+
 <h2 id="v0-5-034">0.5.034 &mdash; riding a horse stops getting in your way</h2>
 
 <div class="note warn">
