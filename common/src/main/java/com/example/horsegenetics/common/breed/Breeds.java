@@ -290,11 +290,15 @@ public final class Breeds {
      * source is a parameter: "the country round here produces Fjords" and "a
      * dealer round here can get you a Fjord" are different claims, and a breed
      * may make one without the other.
+     *
+     * <p>A modded overworld biome counts as the vanilla one it stands in for
+     * ({@link BiomeAnalogues}), so a plains breed is a breed of Terralith's
+     * steppe too.
      */
     public static List<Breed> forBiome(String biomeId, BreedSource source) {
         List<Breed> out = new ArrayList<>();
         for (Breed b : all()) {
-            if (b.allows(source) && b.biomes().contains(biomeId)) {
+            if (b.allows(source) && BiomeAnalogues.covers(b.biomes(), biomeId)) {
                 out.add(b);
             }
         }
