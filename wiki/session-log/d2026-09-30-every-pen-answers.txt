@@ -1,0 +1,60 @@
+2026-09-30, afternoon - every pen answers for itself; the yard down to three rows; natural covers fixed
+
+    Owner: "Can you continue the independent debug yard testing from last session?", then "Build in
+    more pens that answer for themselves please". Rulings along the way, all 2026-09-30:
+    - an automatic yard PASS (a pen's own "[trace] test yard | ... - PASS" line) closes a check the way a
+      clockwork PASS does, and the pen goes (memory: automated-pass-closes-a-check);
+    - a fence blocks a natural cover like a wall;
+    - the arcane dealer's ArcaneStock picks are a floor - a natural magic allele on top is fine;
+    - glowing genes have never left light blocks behind; stop raising it (memory:
+      glowing-genes-dont-leak-light).
+
+Last session's leftovers, all done
+
+    Clockwork PASSes moved to 13 pages' Coding tabs (e756db7e). horse-dimension.html's yard table
+    rewritten to what the code builds (the classifier refused it once; the owner approved). The
+    combat/hunger/hands classes deleted with the owner's go-ahead - DebugTestYard.stock was NOT theirs
+    alone (the dryad pens use it) and stayed; dryPen stayed as machinery.
+
+Runs 6-13, launched by the session (logs copied to the scratchpad, not kept)
+
+    Pens closed on their own PASS lines, each written onto its page's Coding tab and the pen deleted:
+    DEATH DIAMONDS, LYCAN DOOMED, LETHAL FOALS, BLOOD ONLY (gap 250), SPLICE PERFORMANCE; THE CAP and
+    MET NATURAL (rebuilt for the cap of 50 first - built for 8, THE CAP had bred to 55); DRYAD FLOWER
+    (re-aimed to count what its horses plant - the watch saw 2 of 8 flowers and horses eat them); the
+    KICK pens (lidded - Last Stand's bolt jumps any fence - then one husk, then a cadence verdict:
+    11, 12, 17 ticks); NIGHT SHY; STATS (each Swift horse rolls its own factor, so "SWIFT x CC / base"
+    was never a fair expectation); HURT MARE; REACH WALL (thinned from 3 blocks to 1 - at 3 the stud was
+    never in reach) and REACH FENCE; ARCANE DEALER; SUNTOUCHED (owner's call, above).
+
+    What is left: row O east DRYAD OAK+BIRCH ("the interval is on the copy") and the eight ratio pens
+    (rows U, W). All have verdicts (d853359f) but need hours of game time: 40 foals a pen, a chi-square
+    at p < 0.01; two plantings of each species. Run 13 (unsprinted, ~30 min): no FAIL, no verdict yet.
+
+The bug the verdicts found
+
+    NaturalBreedingHandler.canMeet (the 09-25 wall rule) asked for a path ONTO the stallion's block
+    (accuracy 0). A horse-sized path often cannot end there, so mares with a stallion 1.5-4 blocks away
+    in one open pen - wild bands too - were refused silently. Invisible until the refusal was made to
+    log (yard pens only): run 11 logged ~70. Accuracy 1 now; run 12 logged 174 covers and only the
+    REACH pens refused. Outside the yard it is unplayed (fertility.html keeps that check open).
+
+New machinery
+
+    -PyardSprint=<ticks> on runClientTestWorld: vanilla /tick sprint once the yard is built. 33-38 TPS
+    with the dimension's ~500-600 horses (the corridor holds most of them). DebugWorldWatch.kicksBy and
+    fleesBy; DebugTestYard.lidded. DebugYardFertility and DebugYardUnattended are helpers only now.
+
+Found, not acted on
+
+    - RATIO SIZE embryos ran Big/Big 6 of 53 across runs (chi-square ~5.3, p ~0.07): noise by the pen's
+      own threshold, but the first place to look if its verdict ever fails.
+    - One stray "no walkable path" refusal at 2.6 blocks (RATIO LETHAL WHITE) survived the canMeet fix.
+    - STATS never went near either floor (SLUGGISH 0.159-0.167 vs 0.1125); horse-body.html keeps the
+      "floor is on the attribute" check open for a slower stack.
+    - Sessions kept rebuilding under their own running client; harmless here, but close it first.
+
+Pick up here
+
+    Relaunch with a long sprint (e.g. -PyardSprint=400000) and read the ratio and dryad verdicts; close
+    and delete each on PASS. Then the yard is empty and the next batch of unattended checks can come in.
