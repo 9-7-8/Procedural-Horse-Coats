@@ -20,13 +20,13 @@
 <p class="lede">
     Five small things that make riding less irritating, borrowed from other mods that
     already do them. None touches genetics, and each is small enough to ship alone.
-    <strong>Three of the five have shipped</strong> &mdash; a lead now comes back to you
+    <strong>Four of the five have shipped</strong> &mdash; a lead now comes back to you
     rather than being left on the ground when this mod teleports the horse wearing it,
-    you can mine from the saddle at the speed you would standing there, and
-    <kbd>ALT</kbd>+<kbd>E</kbd> opens your own pack from the saddle. The other
-    two are still plans, and the last of them &mdash; fading the horse out as
-    you look down &mdash; touches the coat itself and is the only one with a real unknown
-    in it.
+    you can mine from the saddle at the speed you would standing there,
+    <kbd>ALT</kbd>+<kbd>E</kbd> opens your own pack from the saddle, and a piece of tack
+    goes on with a right-click instead of a trip through the Gear tab. What is left is
+    the other half of the lead, and &mdash; the only one with a real unknown in it
+    &mdash; fading the horse out as you look down, which touches the coat itself.
 </p>
 
 <div class="note">
@@ -144,6 +144,55 @@
     On a donkey or a mule nothing changed to begin with: this mod keeps no record of one, so
     <kbd>E</kbd> opens vanilla&rsquo;s screen with its chest grid, as it always did. The new
     key still works there, and gives you the same pack it gives you anywhere else.
+</p>
+
+<h2 id="tack-equip">Tack goes on with a right-click</h2>
+
+<div class="plain">
+    <p>
+        A saddle has always gone on by holding it and right-clicking the horse. So has a
+        barding. But <a href="horse-gear.html">the seventeen other things a horse can
+        wear</a> &mdash; the braids, and every pad, blanket, bag, boot and shoe still to be
+        made &mdash; could only be put on through the Gear tab: open the screen, find the
+        tab, click the slot, pick the item off a list.
+    </p>
+    <p>
+        Now they go on the same way the saddle does. <strong>Hold the piece, right-click
+        your horse, and it lands in the first empty slot that takes it.</strong>
+    </p>
+</div>
+
+<p>
+    <strong>Today that means the <a href="item-rescuing-braid.html">rescuing braid</a>, and
+    only the braid</strong>, because it is the only piece of this mod&rsquo;s own gear that
+    has been made yet. It is not a special case, though: the click asks each slot what it
+    accepts, so every piece still to come works this way from the day it exists, with
+    nothing to add.
+</p>
+
+<p>
+    <strong>It never swaps.</strong> If every slot that would take the piece is already
+    full, the click is left alone and does whatever it would have done &mdash; usually
+    putting you in the saddle. You can see the braid already in the mane, so nothing is
+    ambiguous, and the alternative would mean being unable to mount your own horse while
+    holding a spare. A braid goes to the mane first and the tail second; a boot would go
+    near fore, off fore, near hind, off hind, in the order the paper doll reads.
+</p>
+
+<p>
+    <strong>Your horse, and not a foal.</strong> Both refusals say so in a line across the
+    bottom of the screen rather than doing nothing, because both are rules this mod
+    invented and a silent rule looks like a bug. An <em>untamed</em> horse is left to
+    vanilla, which rears up at you &mdash; a clearer answer about a wild horse than any
+    sentence here would be.
+</p>
+
+<p>
+    Sneaking is untouched: <strong>sneak-and-use still opens the horse&rsquo;s screen</strong>
+    whatever is in your hand. The switch is
+    <a href="config.html"><code>behaviour.rightclick_equips_tack</code></a>, on by default;
+    off, the Gear tab is the only way again. The saddle and the barding are vanilla&rsquo;s
+    behaviour either way and the switch does not reach them.
 </p>
 
 </section>
@@ -356,6 +405,114 @@
     item rather than a missing test.
 </p>
 
+<h2 id="tack-equip-coding">How the tack click works (2026-09-29)</h2>
+
+<p>
+    <code>server/TackEquipHandler</code>, one listener on
+    <code>PlayerInteractEvent.EntityInteract</code>, plus
+    <code>behaviour.rightclick_equips_tack</code> and the
+    <code>right_click_equips_tack</code> gametest. <strong>It is much smaller than it was
+    planned to be, because two thirds of it turned out to be vanilla&rsquo;s already.</strong>
+</p>
+
+<h3 id="tack-equip-vanilla">What vanilla was already doing</h3>
+
+<p>
+    The plan this was built from assumed right-click-to-equip did not exist in 26.1.2 and
+    marked it <em>unverified</em>, with an instruction to read
+    <code>AbstractHorse.mobInteract</code> before writing anything. Reading it settles both
+    halves of the piece at once, and against it:
+</p>
+
+<ul>
+    <li><strong>The saddle is vanilla.</strong> <code>Items.SADDLE</code> carries
+        <code>Equippable.saddle()</code>, which is built with
+        <code>setEquipOnInteract(true)</code>, so <code>ItemStack.interactLivingEntity</code>
+        routes through <code>Equippable.equipOnTarget</code> and the saddle is on before
+        <code>mobInteract</code> reaches <code>doPlayerRide</code>. It even declines to swap
+        already: <code>equipOnTarget</code> requires
+        <code>!target.hasItemInSlot(this.slot)</code>.</li>
+    <li><strong>The barding is vanilla too.</strong> <code>mobInteract</code> ends with
+        <code>if (this.isEquippableInSlot(itemStack, EquipmentSlot.BODY) &amp;&amp;
+        !this.isWearingBodyArmor())</code> and equips it. That predicate is
+        <em>character-for-character</em> the one
+        <a href="horse-gear.html#tags"><code>HorseTackSlot.accepts</code></a> asks for the
+        <code>BARDING</code> slot, so there is provably nothing this mod could add there.</li>
+</ul>
+
+<p>
+    So the handler skips every <code>isVanilla()</code> slot deliberately. Taking them over
+    would have put two code paths on the same saddle, and the loser would have been the one
+    with the equip sound and the guaranteed drop. What is left is the seventeen that ride in
+    <a href="horse-gear.html#attachment">the <code>HORSE_GEAR</code> attachment</a>, which
+    vanilla cannot see and which had exactly one way in.
+</p>
+
+<p class="muted">
+    The treatment&rsquo;s pre-agreed fallback for this case said to keep the handler for
+    &ldquo;armour and the mod&rsquo;s own tack slots&rdquo;, on the expectation that only the
+    saddle would turn out to be vanilla&rsquo;s. Armour is vanilla&rsquo;s as well, so what
+    shipped is the second half of that sentence only. The instruction not to retire the piece
+    was the right call regardless &mdash; the seventeen slots are the part nothing covered.
+</p>
+
+<h3 id="tack-equip-claim">Which clicks it claims, and the two it must not</h3>
+
+<p>
+    <code>LOWEST</code>, the same priority and the same reasoning as
+    <code>HorseInteractionHandler.onFoalInventory</code>: every other horse interaction in
+    this mod cancels the event when it claims a click, and a cancelled event is never
+    delivered to a lower priority. So this only ever sees a click nothing else wanted, and an
+    interaction added later needs no change here. It is above vanilla at any priority, since
+    the event fires from <code>Player.interactOn</code> before <code>mobInteract</code> is
+    called at all.
+</p>
+
+<p>
+    The item is tested <em>before the horse is</em> &mdash; <code>isModTack</code> walks the
+    roster asking each non-vanilla slot&rsquo;s tag &mdash; so a click holding anything else
+    is untouched, including by the refusals. Getting that order wrong would have meant a
+    carrot earning a &ldquo;not your horse&rdquo; line.
+</p>
+
+<p>
+    <strong>Two refusals are claimed and two are not, and the difference is load-bearing.</strong>
+    Not-your-horse and a foal cancel the event and send a line, because both are rules this
+    mod invented and an invented rule that fails silently reads as a bug &mdash; the same
+    reasoning behind the name tag&rsquo;s <code>not_yours</code> message. An untamed horse,
+    and a piece whose every slot is already full, are left <em>uncancelled</em>: vanilla then
+    rears the wild horse, and lets you mount your own. A handler that cancelled all four
+    would look right in game until somebody could not get on a horse while holding a spare
+    braid.
+</p>
+
+<p>
+    Ownership is <code>HorseOwnership.isOwner</code>, the same question
+    <a href="horse-gear.html#click">the Gear tab&rsquo;s own <code>TackSlotPayload</code></a>
+    asks before it believes a click, so the two ways in agree. The slot chosen is the first
+    <em>empty</em> one in roster order, which is the paper doll&rsquo;s reading order, so
+    which slot a piece lands in is predictable for the sets. Creative keeps its stack, which
+    is this mod&rsquo;s rule everywhere and <em>not</em> vanilla&rsquo;s &mdash;
+    <code>equipOnTarget</code> splits one off whatever the game mode.
+</p>
+
+<p>
+    Guarded by <code>right_click_equips_tack</code> in <code>gametest/ModGameTests</code>,
+    which posts seven real <code>EntityInteract</code> events through
+    <code>NeoForge.EVENT_BUS</code> &mdash; so a handler written but never registered fails
+    it. It asserts the claimed and unclaimed cases <em>separately</em>, since a handler that
+    claimed everything is the failure worth catching. Making the full-slot case cancel turned
+    it red with <em>&ldquo;a third braid with nowhere left to put it: the click was claimed,
+    and it should have been left to vanilla&rdquo;</em> before the real version was kept.
+</p>
+
+<p class="muted">
+    The test opens by asserting the rescuing braid is actually in <code>gear/mane</code> and
+    <code>gear/tail</code>. Fifteen of the seventeen tags are still empty, so if the braid
+    ever left its two the test would go on passing while exercising nothing at all &mdash;
+    there would be no item in the game this handler could equip.
+</p>
+
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -364,9 +521,8 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        Two small borrowings from other mods are left, each shippable alone and each wanting
-        a config switch &mdash; a right-click that equips tack, and returning the leads
-        <em>vanilla</em> drops, which has no event to hang on &mdash; plus
+        Two are left, both wanting a config switch &mdash; returning the leads
+        <em>vanilla</em> drops, which has no event to hang on, and
         <strong>fading the horse out as you look down</strong>, which asks the coat pipeline
         for a transparency it has never had.
     </p>
@@ -379,9 +535,10 @@
     survey backlog</a>. None touches genetics, and each is small enough to
     ship on its own. <strong>Both of the two left want a config switch written with
     them</strong>, per <a href="config.html#config-everything">the config sweep</a> &mdash;
-    <a href="#leads">the returned lead</a> and
-    <a href="#mounted-mining">mining from the saddle</a> both went out with their switch
-    written beside them, which is the pattern the rest should follow.
+    <a href="#leads">the returned lead</a>,
+    <a href="#mounted-mining">mining from the saddle</a> and
+    <a href="#tack-equip">the tack click</a> all went out with their switch written beside
+    them, which is the pattern the rest should follow.
     <a href="#rider-inventory">The inventory keybind</a> is the one exception and shipped
     deliberately without one: an unbound key is already the switch.
 </p>
@@ -401,11 +558,6 @@
         item through <code>Entity.spawnAtLocation</code> with nothing to hook &mdash; so the only
         seams are a mixin or an <code>EntityJoinLevelEvent</code> filter that would have to tell
         a snapped lead from one a player threw on the floor. Decide which before building it.</li>
-    <li><strong>Right-click with a saddle or armour equips it</strong> rather than opening the
-        horse screen. Also Horse Tweaks. <strong>The one most likely to collide with something we
-        ship:</strong> <code>client/HorseScreenHooks</code>, the <code>i</code> button and the
-        <code>right-click to open</code> client option all live on that same interaction, so this
-        needs designing against them rather than beside them.</li>
 </ul>
 
 <p class="muted">
@@ -421,7 +573,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Three shipped pieces have been seen by no player &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires; and the new ALT+E inventory key is the mod's first key chord, resting on a reading of NeoForge's input layer that no client has yet run.</p>
+    <p>Four shipped pieces have been seen by no player &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires; the ALT+E inventory key is the mod's first key chord, resting on a reading of NeoForge's input layer that no client has yet run; and the tack click now shares the plain right-click with every other interaction this mod has, so what wants watching is not whether it equips a braid but whether feeding, naming and mounting still behave.</p>
 </div>
 
 <h3 id="leads-verify">The lead comes back (2026-09-24, NOT played)</h3>
@@ -561,6 +713,63 @@
     one, ship it, and say which; do not leave a chord in that half-works.
 </p>
 
+<h3 id="tack-equip-verify">The tack click (2026-09-29, NOT played)</h3>
+
+<p>
+    <code>right_click_equips_tack</code> pins what the handler does with a braid, and was
+    confirmed to fail against a copy that cancelled the full-slot case. What it cannot pin is
+    the thing actually worth worrying about: <strong>this put a new listener on the plain
+    right-click, which is the busiest gesture in the mod.</strong> The gametest posts events
+    into an empty world; it cannot tell you that feeding, naming, branding and mounting all
+    still work in a real one. Most of the checks below are therefore about what did
+    <em>not</em> change.
+</p>
+
+<ul>
+    <li><strong>It works at all.</strong> Hold a <a href="item-rescuing-braid.html">rescuing
+        braid</a>, right-click your own adult horse. <strong>Pass:</strong> the braid appears
+        in the mane, the equip sound plays, and one braid leaves your hand.
+        <strong>Fail:</strong> you get on the horse instead, which means the click is not
+        being claimed.</li>
+    <li><strong>The second goes to the tail, and the mane keeps the one it has.</strong>
+        Dye two braids different colours first &mdash; that is the only way to see a swap,
+        and a swap would look identical to a correct equip from the outside.</li>
+    <li><strong>You can still mount a braided horse while holding a braid.</strong> With both
+        slots full, right-click again. <strong>Pass:</strong> you get on.
+        <strong>Fail:</strong> nothing happens, or a refusal line appears &mdash; which means
+        the full-slot case is being claimed and you can no longer mount your own horse with
+        tack in hand. This is the regression the design chose against; it is worth checking
+        in the world as well as in the test.</li>
+    <li><strong>Nothing else on the right-click broke.</strong> The one to spend real time
+        on, because this is a <code>LOWEST</code>-priority listener on a gesture shared by
+        everything: feed a <a href="carrots.html">breeding carrot</a>, feed hay, use a
+        <a href="villagers.html">transfer paper</a>, use a name tag, bind an
+        <a href="item-whistles.html#ender">ender whistle</a>, shear a braid off. All should
+        behave exactly as they did. A break here would show as one of those doing nothing at
+        all.</li>
+    <li><strong>Sneak still opens the screen with a braid in hand.</strong> This mod&rsquo;s
+        horse screen is on sneak-and-<em>empty</em>-hand, so the claim is that holding tack
+        changes nothing about it.</li>
+    <li><strong>A stranger&rsquo;s horse, and a foal</strong>, each say why in a line across
+        the bottom of the screen. <strong>Fail:</strong> silence, which is how an invented
+        rule reads as a bug.</li>
+    <li><strong>An untamed horse rears up</strong> as vanilla does, rather than printing
+        anything. Needs a second player or a second account for the stranger case; the foal
+        and the wild horse do not.</li>
+    <li><strong>The saddle and the barding are untouched.</strong> Right-click with a saddle,
+        then with each of the four horse armours. All should go on exactly as before &mdash;
+        this handler deliberately does not cover them, and a change here would mean it is
+        racing vanilla for the same slot.</li>
+    <li><strong>Creative keeps the stack.</strong> In creative, equipping a braid should not
+        reduce what you are holding. <strong>Fail:</strong> it shrinks, which is
+        vanilla&rsquo;s rule and not this mod&rsquo;s.</li>
+    <li><strong>The switch works in both directions.</strong> Turn
+        <a href="config.html"><code>behaviour.rightclick_equips_tack</code></a> off, restart,
+        and try again: the braid should not go on, and the Gear tab should still put it on.
+        A switch that does nothing in one direction is the usual way a config option is
+        wrong.</li>
+</ul>
+
 </section>
 
 <div class="page-foot">
@@ -572,8 +781,9 @@
     </div>
     The returned lead was the first of the five and took an afternoon; mining from the saddle
     was the second and took less; the inventory keybind was the third and was two classes and
-    a lang key. Of the two left, the right-click that equips tack needs designing against the
-    <strong>i</strong> button rather than beside it; the fade is the one to leave until the
+    a lang key; the tack click was the fourth and was smaller than planned, because two
+    thirds of it turned out to be vanilla's already. What is left is the lead's other half,
+    which wants a decision before a build, and the fade &mdash; the one to leave until the
     coat has actually been drawn half-transparent, because everything about how it would be
     configured depends on whether it can be drawn at all.
 </div>

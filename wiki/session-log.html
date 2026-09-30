@@ -21,6 +21,20 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-tack-goes-on-with-a-click.txt">2026-09-29
+        &mdash; <strong>tack goes on with a click, and two thirds of the piece was already
+        in vanilla</strong>. Rider comfort piece 3. The treatment marked it unverified and
+        said to read <code>AbstractHorse.mobInteract</code> first, which settled it against
+        the plan: 26.1.2 already equips both the saddle (<code>Equippable.saddle()</code>
+        carries <code>setEquipOnInteract</code>) and the barding, the latter behind a
+        predicate character-for-character identical to the one
+        <code>HorseTackSlot.BARDING</code> uses. What was left with no owner at all is the
+        seventeen gear slots, and that is what shipped. The design call not in the treatment
+        is what happens when every matching slot is full: the click is left
+        <em>uncancelled</em>, so you can still mount your own horse while holding a spare
+        braid &mdash; and the gametest asserts the claimed and unclaimed refusals separately
+        because a handler that claimed all four would look right until somebody could
+        not.</li>
     <li><a href="session-log/d2026-09-29-the-rider-gets-their-pack-back.txt">2026-09-29
         &mdash; <strong>the rider gets their pack back, and a chord that suppresses
         itself</strong>. Rider comfort piece 2: <kbd>ALT</kbd>+<kbd>E</kbd> opens your own

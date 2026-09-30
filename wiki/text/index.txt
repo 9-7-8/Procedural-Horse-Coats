@@ -3141,6 +3141,10 @@ wiki/rider-comfort.html#mounted-mining-coding	coding	How the mounted mining pena
 wiki/rider-comfort.html#rider-inventory	gameplay	Your own inventory, from the saddle
 wiki/rider-comfort.html#rider-inventory-chord	coding	The chord, and why it does not double-fire
 wiki/rider-comfort.html#rider-inventory-coding	coding	How the inventory key is bound (2026-09-29)
+wiki/rider-comfort.html#tack-equip	gameplay	Tack goes on with a right-click
+wiki/rider-comfort.html#tack-equip-claim	coding	Which clicks it claims, and the two it must not
+wiki/rider-comfort.html#tack-equip-coding	coding	How the tack click works (2026-09-29)
+wiki/rider-comfort.html#tack-equip-vanilla	coding	What vanilla was already doing
 wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
 wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
 wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour

@@ -1,8 +1,9 @@
 Rider comfort - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "Open" lines
-are still to be settled. First piece to build: 3 (right-click equips tack),
-one piece per session per START HERE. Source of truth for what
+are still to be settled. First piece to build: 5 (the fade), which starts with
+a rendering spike, one piece per session per START HERE. Piece 4 is deferred
+behind a decision and is not a build until that decision is made. Source of truth for what
 exists is wiki/rider-comfort.html; this file is the handoff for the work its
 Roadmap tab lists, and it is retired (deleted, per START HERE step 3) as each
 piece ships and moves onto that page's Gameplay and Coding tabs.
@@ -16,53 +17,14 @@ What already exists, so the building session does not redo it
   behaviour.leads_return in ServerConfig, a safe accessor beside it
   (leadsReturn() catches IllegalStateException and returns the default), and a
   gametest in gametest/ModGameTests that asserts the halves separately.
-- HorseInfoInteraction (HIGHEST) claims only sneak + EMPTY hand, and
-  HorseScreenHooks.onFoalInventory (LOWEST) claims only sneak on a foal. A
-  right-click with a saddle or armour in hand, not sneaking, is claimed by
-  neither - piece 3 has an open lane, but see its notes on vanilla.
-- entity/HorseTackSlot already declares SADDLE (vanilla EquipmentSlot) and
-  BARDING among its slots, each with an accepts() and an item tag. Piece 3 can
-  ask a slot whether it takes a stack instead of hard-coding item ids.
 
-Three pieces left of the original five, and only two of them are buildable:
-piece 4 is still deferred behind a decision. Piece 1 (mounted mining speed) and
-piece 2 (the ALT+E inventory keybind) both shipped on 2026-09-29 and are now on
-wiki/rider-comfort.html - its Gameplay, Coding and Verification tabs. The
-numbering below is kept so the build order still reads.
+Two pieces left of the original five, and only one of them is buildable:
+piece 4 is still deferred behind a decision. Pieces 1, 2 and 3 - mounted mining
+speed, the ALT+E inventory keybind and the right-click that equips tack - all
+shipped on 2026-09-29 and are now on wiki/rider-comfort.html, on its Gameplay,
+Coding and Verification tabs. The numbering below is kept so the build order
+still reads.
 Piece 5, the fade, is built last and starts with a spike.
-Build order is smallest blast radius first, and each is shippable alone.
-
-3. Right-click with a saddle or armour equips it
--------------------------------------------------
-This is the one with a design question in it. Vanilla may ALREADY equip a
-saddle on a right-click in this version (equip-on-interact exists for some
-equippable items in recent versions). UNVERIFIED - read the decompiled
-AbstractHorse.mobInteract and the saddle/horse-armour item definitions FIRST.
-If vanilla already does it for the saddle, piece 3 shrinks to armour only, or
-to nothing, and the treatment should be retired with a note on the page rather
-than shipped as a duplicate.
-- Where: a new PlayerInteractEvent.EntityInteract handler in server/, next to
-  HorseInteractionHandler. Runs on the server; on the client, cancel the same
-  way HorseInteractionHandler.consume does (both sides), or the client predicts
-  vanilla's path and flickers. It ordinarily needs a priority below
-  HorseInfoInteraction (moot, that needs an empty hand) and above vanilla.
-- Claim only when: target is a tamed adult Horse, the player is not sneaking,
-  the held stack is accepted by an EMPTY slot, and the player is the
-  horse's OWNER (decided: owner only; HorseOwnership - same rule the Gear tab applies, see TackSlotPayload,
-  which treats the client's request as a claim). A refusal must say why in a
-  line, not just fall through to vanilla, or an ownership rule looks like a bug.
-- Decided: any HorseTackSlot that accepts() the stack, into the first empty
-  matching slot, so saddle pads and later gear come free. Decided: if the
-  matching slot is full, do nothing - never swap; the Gear tab is how you
-  change tack. Swapping on a right-click is how someone loses a saddle.
-- Shrinking the stack: consume one, respect creative mode (do not consume), give
-  nothing back.
-- Config: behaviour.rightclick_equips_tack, default ON (it only ever adds a
-  behaviour to a click that otherwise opens nothing useful). The page says every
-  piece wants a switch.
-- Test: gametest with a mock player and a tamed horse: saddle equips, second
-  saddle does not swap, untamed and foal refused, a non-owner refused.
-  Collision check by hand with the i button screen and shift-right-click.
 
 4. Return the leads vanilla drops (deferred - a decision first, not a build)
 -----------------------------------------------------------------------------
@@ -96,11 +58,6 @@ below apply.
 - Piece 1 (mounted mining): if the slowdown is not vanilla's "not on the ground"
   penalty, STOP AND REPORT. Do not ship a guess. Write what was found on the
   Roadmap tab and ask the owner before choosing another fix.
-- Piece 3 (right-click equips): if vanilla already equips a saddle on
-  right-click, KEEP THE HANDLER for everything vanilla does not cover (armour,
-  the mod's own tack slots) and leave the saddle to vanilla. The owner-only and
-  never-swap rules still apply to what this mod adds. Do not take over the
-  saddle, and do not retire the piece.
 - Piece 1 config sync: the treatment assumes the server config syncs to clients
   (mining needs both sides). If it does not, SEND THE SWITCH IN A PAYLOAD on
   join, the way other synced data in this mod travels; do not make it a client
