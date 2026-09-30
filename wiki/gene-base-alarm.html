@@ -139,10 +139,14 @@
 <p>
     The gene is one <code>Sound</code> ability gated on the <code>hostile_near</code> world flag,
     sampled every <code>BaseAlarmGene.CHECK_TICKS</code> with a
-    <code>COOLDOWN_TICKS</code> under it. The yard&rsquo;s <em>BASE ALARM</em> pen is one pen from
-    the ward spawner precisely because that is the only place the condition can ever be true
-    &mdash; and <code>DebugWorldWatch.notePlayedSound</code> tallies every gene sound by id into
-    the census line, which is the evidence here. <strong>Do not try to judge this by ear:</strong>
+    <code>COOLDOWN_TICKS</code> under it. The yard&rsquo;s <a href="horse-dimension.html#clockwork">clockwork</a> pens ask it with nobody there
+    (2026-09-30): <em>ALARM NEAR</em> (<code>Alm/Alm</code>) and <em>ALARM CARRIER</em> (<code>Alm/n</code>)
+    each beside a husk caged in glass, and <em>ALARM QUIET</em> (<code>Alm/Alm</code>) in a pen sixteen
+    blocks from anything hostile. The census tallies gene sounds by id for the whole dimension, which
+    cannot tell those pens apart, so <code>DebugWorldWatch.soundsFrom</code> counts per horse.
+    <strong>First run, 2026-09-30, not owner-confirmed:</strong> in five minutes ALARM NEAR sounded 30
+    times and ALARM CARRIER 30 (the cooldown allows 32), and ALARM QUIET not once &mdash; which answers
+    the first, second, fourth and fifth checks below as far as a log can. <strong>Do not try to judge this by ear:</strong>
     the sound it plays is the noise an ordinary annoyed horse makes anyway.
 </p>
 

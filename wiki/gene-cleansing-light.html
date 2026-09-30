@@ -144,7 +144,16 @@
     The gene is one <code>Healing</code> ability with a negative amount, an <code>undead</code>
     group and a radius carried on the allele copy. It was listed in
     <code>DebugYardCombat</code> as one of the six genes that could not be tested until the
-    yard stopped deleting monsters and protecting horses, so its arena is new and unread. The undead
+    yard stopped deleting monsters and protecting horses. Its arena went unread and was deleted;
+    since 2026-09-30 the <a href="horse-dimension.html#clockwork">clockwork</a> pens <em>CLEANSING</em> and <em>CLEANSING CARRIER</em> (row AM
+    west) ask the first four checks below with nobody there: a horse in a glass ring, a zombie, a
+    skeleton, a drowned and a creeper caged three and a half blocks off, inside the smallest radius the
+    allele rolls. <strong>First run, 2026-09-30, not owner-confirmed:</strong> the zombie, the skeleton
+    and the drowned all died nineteen seconds after the build (ten beats of two), of <code>magic</code>,
+    the creeper was untouched at 20/20, no experience orb appeared in the pen, and the carrier's zombie
+    was untouched after six minutes. (The second run failed the carrier: its zombie stood six and a half
+    blocks from the <em>neighbouring</em> pen's <code>Cln/Cln</code> horse, whose radius rolls up to eight.
+    The cage moved to the far side of its pen and the third run passed it. A pen bug, not the gene's.) The undead
     filter is <code>MobGroups</code>&rsquo; <code>EntityTypeTags.UNDEAD</code> lookup, and the
     failure it can have is entirely silent &mdash; an aura that simply never matches anything.
 </p>
@@ -153,7 +162,7 @@
 
 <ul>
     <li><strong>The aura kills undead nobody has touched.</strong> Put a <code>Cln/Cln</code> horse
-        in the yard arena with its spawner running, and do not attack anything yourself.
+        beside zombies (the CLEANSING pen does), and do not attack anything yourself.
         <strong>Pass:</strong> zombies near the horse lose health on a beat and die. Nothing else
         here matters if this does not happen.</li>
     <li><strong>A carrier does nothing.</strong> The same setup with a <code>Cln/n</code> horse.
