@@ -1,13 +1,21 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.breed.ArcaneStock;
+import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
 import com.example.horsegenetics.neoforge.entity.ModEntities;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AL;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AL_D;
@@ -64,8 +72,54 @@ final class DebugYardArcane {
             ActionTrace.log("test yard", "arcane dealer pen built (row AL): " + cowboy.cowboyName()
                     + " with " + cowboy.herdIds().size() + " horses. Expect every one Mixed, entire,"
                     + " and carrying 11-12 showing magical genes with no allele pair used twice");
+            verdict(level, cowboy);
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: row AL (arcane dealer) failed to build", e);
         }
+    }
+
+    /**
+     * <b>ARCANE DEALER answers for itself</b> (owner, 2026-09-30: "build in more pens that answer for
+     * themselves"). Five seconds after founding - his string is placed in the founding call, so this is
+     * only margin - every horse in his herd is read off its record: <b>Mixed</b> lineage, <b>not gelded</b>,
+     * between {@code ArcaneStock.REQUIRED_FAMILIES.size()} and one more showing magical combinations
+     * (the optional family comes at {@code OPTIONAL_CHANCE}), and no combination in two horses - the same
+     * {@code ArcaneStock.showingTokens} the founding and the restock use to keep a string distinct. The
+     * prices (12-28 emeralds, steady between looks) are the merchant screen's and are not read here.
+     */
+    private static void verdict(ServerLevel level, Cowboy cowboy) {
+        DebugYardHerd.after(level, 100, () -> {
+            int want = ArcaneStock.REQUIRED_FAMILIES.size();
+            List<String> faults = new ArrayList<>();
+            Set<String> seen = new HashSet<>();
+            int horses = 0;
+            for (UUID id : cowboy.herdIds()) {
+                if (!(level.getEntity(id) instanceof Horse h) || !h.isAlive() || !HorseRecords.hasRealRecord(h)) {
+                    continue;
+                }
+                horses++;
+                HorseRecord record = HorseRecords.of(h);
+                String who = ActionTrace.describeShort(h);
+                if (record.lineage().kind() != BreedLineage.Kind.MIXED) {
+                    faults.add(who + " is " + record.lineage().kind() + ", not MIXED");
+                }
+                if (record.gelded()) {
+                    faults.add(who + " is a gelding");
+                }
+                Set<String> tokens = ArcaneStock.showingTokens(record.genome().genotype());
+                if (tokens.size() < want || tokens.size() > want + 1) {
+                    faults.add(who + " shows " + tokens.size() + " magical combinations, not " + want + "-" + (want + 1));
+                }
+                for (String token : tokens) {
+                    if (!seen.add(token)) {
+                        faults.add(token + " appears twice (again on " + who + ")");
+                    }
+                }
+            }
+            String verdict = horses == 0 ? "INCONCLUSIVE (no horses of his were found)"
+                    : faults.isEmpty() ? "PASS" : "FAIL: " + String.join("; ", faults);
+            ActionTrace.log("test yard", "ARCANE DEALER at 5 s: " + horses + " horse(s), " + seen.size()
+                    + " distinct magical combinations - " + verdict);
+        });
     }
 }

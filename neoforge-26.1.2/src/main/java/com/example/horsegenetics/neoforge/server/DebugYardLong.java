@@ -1,9 +1,18 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Conceivable;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.genes.DryadGene;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.repro.Embryo;
+import com.example.horsegenetics.common.repro.Pregnancy;
+import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -96,6 +106,7 @@ final class DebugYardLong {
             dryad(level, gy, east, mouthZ + ROW_O, 6, ROW_O_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
                     List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
                     Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
+            dryadVerdict(level, gy, east, mouthZ + ROW_O, east + 6, mouthZ + ROW_O + ROW_O_D);
             lightFromTheFloor(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
 
             ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
@@ -201,6 +212,307 @@ final class DebugYardLong {
     }
 
     // ------------------------------------------------------------------
+    // DRYAD OAK+BIRCH answers for itself
+    // ------------------------------------------------------------------
+
+    /*
+     * WHAT THIS PEN IS STILL FOR (2026-09-30, owner: "Build in more pens that answer for themselves").
+     * Its sign asks "and still no tree?", and that was answered long ago: trees grew in this pen on
+     * 2026-09-14 (10 oak and 5 birch logs, then 30 birch_log), and run 10 today read 5x oak_log at 31
+     * minutes. gene-dryad.html's Verification tab says not to re-test it. The one question on that tab
+     * a designed pen CAN answer is "the interval is on the copy, and the two halves of a mixed horse
+     * differ": DryadGene.abilitiesFor must time oak off copy(0) and birch off copy(1), each doubled. If
+     * it read expressed() instead - the dominant copy, Oak's, for a heterozygote - both species would
+     * plant on one beat and it would still look like a working gene.
+     *
+     * HOW IT TELLS, EXACTLY. GeneAbilityHandler.beat() fires a spread only on ticks where
+     * (gameTime + phase) mod interval == 0, phase being the horse UUID's low bits. So a planting's tick
+     * says which interval timed it. Every tick this polls DebugWorldWatch.spreadsPlacedBy for the pen's
+     * horses; when one count rises, the one sapling that is new in the pen says the species, and the
+     * tick is tested against the interval this pen predicts from the horse's own epigenome copies. A
+     * founder's two copies are rolled independently between MIN_INTERVAL and MAX_INTERVAL, so the two
+     * beats almost never coincide, and a planting timed by the wrong copy lands on the right beat by
+     * chance about 3 times in 40,000 (the +-1 tick tolerance below). Two plantings of EACH species on
+     * their own beat is therefore overwhelming, and it costs the pen hours rather than a day: at the
+     * 2026-09-14 rate (7 plantings in about three hours) two of each is a two-to-four-hour wait.
+     */
+
+    /** Plantings of each species, every one on its own copy's beat, that make a PASS. */
+    private static final int DRYAD_EACH = 2;
+    /**
+     * Eight yard hours. At the slowest copies (MAX_INTERVAL doubled, one try in three landing) a species
+     * still expects about four landings from two horses in that time; nothing by then is a finding.
+     */
+    private static final long DRYAD_DEADLINE = 8L * 60 * 1200;
+    /** Bumped by every build, so a poll left running for the yard before this one stops itself. */
+    private static int dryadRun;
+
+    private static final class DryadHorse {
+        final UUID id;
+        final String label;
+        /** GeneAbilityHandler.beat()'s phase for this horse, copied rather than called - it is private. */
+        final long phase;
+        final long oakEvery;
+        final long birchEvery;
+        int placed;
+        long lastOak = -1;
+        long lastBirch = -1;
+
+        DryadHorse(UUID id, String label, long oakEvery, long birchEvery, int placed) {
+            this.id = id;
+            this.label = label;
+            this.phase = id.getLeastSignificantBits() & 0x7FFFFFFFL;
+            this.oakEvery = oakEvery;
+            this.birchEvery = birchEvery;
+            this.placed = placed;
+        }
+    }
+
+    private static final class DryadCheck {
+        final int run;
+        final long start;
+        final int gy;
+        final int x0;
+        final int z0;
+        final int x1;
+        final int z1;
+        final List<DryadHorse> horses = new ArrayList<>();
+        Set<BlockPos> saplings = new HashSet<>();
+        int oak;
+        int birch;
+        int untied;
+        boolean judged;
+
+        DryadCheck(int run, long start, int gy, int x0, int z0, int x1, int z1) {
+            this.run = run;
+            this.start = start;
+            this.gy = gy;
+            this.x0 = x0;
+            this.z0 = z0;
+            this.x1 = x1;
+            this.z1 = z1;
+        }
+    }
+
+    private static final String DRYAD = "DRYAD OAK+BIRCH";
+
+    private static void dryadVerdict(ServerLevel level, int gy, int x0, int z0, int x1, int z1) {
+        int run = ++dryadRun;
+        // A second after the build, so the stocked horses are in the world to be found.
+        DebugYardHerd.after(level, 20, () -> {
+            if (run != dryadRun) {
+                return;
+            }
+            DryadCheck c = new DryadCheck(run, level.getGameTime(), gy, x0, z0, x1, z1);
+            Gene gene = Genes.byKeyOrNull(DryadGene.KEY);
+            StringBuilder who = new StringBuilder();
+            if (gene != null) {
+                for (Horse h : level.getEntitiesOfClass(Horse.class, DebugTestYard.box(x0, gy, z0, x1, gy + 3, z1),
+                        e -> e.isAlive() && HorseRecords.hasRealRecord(e))) {
+                    HorseRecord r = HorseRecords.of(h);
+                    AllelePair pair = r.genotype().pair(DryadGene.KEY);
+                    if (pair == null || !"Oak/Brch".equals(pair.toTokens())) {
+                        continue;
+                    }
+                    // Read off the copies directly, NOT through GeneEpigenetics.copy(slot) or expressed():
+                    // the pen's prediction must not share the reading it is checking. Copy 0 rides on the
+                    // pair's first allele, and Oak sorts before Brch (DryadGene's constructor note).
+                    Epigenome.Copies copies = r.epigenome().copies(gene);
+                    long oak = Math.round(Epigenome.readable(gene, copies.first()).get(DryadGene.INTERVAL))
+                            * DryadGene.MIXED_SLOWDOWN;
+                    long birch = Math.round(Epigenome.readable(gene, copies.second()).get(DryadGene.INTERVAL))
+                            * DryadGene.MIXED_SLOWDOWN;
+                    DryadHorse d = new DryadHorse(h.getUUID(), "mare " + (c.horses.size() + 1), oak, birch,
+                            DebugWorldWatch.spreadsPlacedBy(h.getUUID()));
+                    c.horses.add(d);
+                    who.append(who.length() == 0 ? "" : "; ").append(d.label).append(" oak every ").append(oak)
+                            .append(" ticks, birch every ").append(birch);
+                }
+            }
+            if (c.horses.isEmpty()) {
+                ActionTrace.log("test yard", DRYAD + " at build: no Oak/Brch horse found in the pen"
+                        + " - INCONCLUSIVE (the pen was not stocked, so nothing can be timed)");
+                return;
+            }
+            ActionTrace.log("test yard", DRYAD + ": timing " + c.horses.size() + " horse(s) - " + who
+                    + " (each copy's interval x" + DryadGene.MIXED_SLOWDOWN + "); a PASS is " + DRYAD_EACH
+                    + " plantings of each species, every one on its own copy's beat");
+            c.saplings = saplingsIn(level, c);
+            dryadPoll(level, c);
+        });
+    }
+
+    private static void dryadPoll(ServerLevel level, DryadCheck c) {
+        DebugYardHerd.after(level, 1, () -> {
+            if (c.run != dryadRun || c.judged) {
+                return;
+            }
+            dryadPoll(level, c);    // first, so a throw below cannot stop the clock
+            long now = level.getGameTime();
+            DryadHorse landed = null;
+            int rises = 0;
+            for (DryadHorse d : c.horses) {
+                int placed = DebugWorldWatch.spreadsPlacedBy(d.id);
+                if (placed > d.placed) {
+                    rises += placed - d.placed;
+                    landed = d;
+                }
+                d.placed = placed;  // also takes a watch restart (the count going down) as the new zero
+            }
+            if (rises > 0) {
+                Set<BlockPos> standing = saplingsIn(level, c);
+                List<BlockPos> fresh = new ArrayList<>();
+                for (BlockPos p : standing) {
+                    if (!c.saplings.contains(p)) {
+                        fresh.add(p);
+                    }
+                }
+                c.saplings = standing;
+                if (rises == 1 && fresh.size() == 1) {
+                    dryadLanding(level, c, landed, fresh.get(0), now);
+                } else {
+                    // Two horses in one tick, or a sapling back on a spot the last look already had.
+                    // Rare, and skipping it only costs time.
+                    c.untied++;
+                    ActionTrace.log("test yard", DRYAD + ": a planting at tick " + now + " could not be tied to one"
+                            + " horse and one new sapling (" + rises + " landing(s), " + fresh.size()
+                            + " new sapling(s)) - not counted");
+                }
+            } else if (now % 200 == 0) {
+                // Forget saplings that grew or were broken, so a replanted spot reads as new.
+                c.saplings = saplingsIn(level, c);
+            }
+            if (!c.judged && now - c.start >= DRYAD_DEADLINE) {
+                dryadDeadline(c);
+            }
+        });
+    }
+
+    /** Oak and birch saplings standing in and around the pen. Only its grass can hold one (the stone band). */
+    private static Set<BlockPos> saplingsIn(ServerLevel level, DryadCheck c) {
+        Set<BlockPos> out = new HashSet<>();
+        for (int x = c.x0 - 4; x <= c.x1 + 4; x++) {
+            for (int z = c.z0 - 4; z <= c.z1 + 4; z++) {
+                for (int y = c.gy; y <= c.gy + 2; y++) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    BlockState s = level.getBlockState(p);
+                    if (s.is(Blocks.OAK_SAPLING) || s.is(Blocks.BIRCH_SAPLING)) {
+                        out.add(p);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Whether {@code tick} is one of the ticks {@code GeneAbilityHandler.beat} fires on for this interval.
+     *
+     * <p>UNVERIFIED: that DebugYardHerd's clock (ServerTickEvent.Post) reads the same getGameTime() the
+     * horse's own tick used earlier in that server tick. It should - the level's time moves at the start
+     * of its tick - but one tick either way is accepted rather than bet a false FAIL on it.
+     */
+    private static boolean onBeat(long tick, long phase, long interval) {
+        if (interval <= 1) {
+            return true;
+        }
+        long r = Math.floorMod(tick + phase, interval);
+        return r == 0 || r == 1 || r == interval - 1;
+    }
+
+    private static void dryadLanding(ServerLevel level, DryadCheck c, DryadHorse d, BlockPos at, long now) {
+        boolean oak = level.getBlockState(at).is(Blocks.OAK_SAPLING);
+        String species = oak ? "oak" : "birch";
+        String other = oak ? "birch" : "oak";
+        long own = oak ? d.oakEvery : d.birchEvery;
+        long wrong = oak ? d.birchEvery : d.oakEvery;
+        boolean onOwn = onBeat(now, d.phase, own);
+        boolean onWrong = onBeat(now, d.phase, wrong);
+        String what = species + " by " + d.label + " at tick " + now + " (" + at.toShortString() + ")";
+        int minutes = (int) ((now - c.start) / 1200);
+        if (onOwn && onWrong) {
+            ActionTrace.log("test yard", DRYAD + ": " + what + " is on both copies' beats (" + own + " and " + wrong
+                    + " ticks), which cannot tell them apart - not counted");
+            return;
+        }
+        if (onOwn) {
+            long last = oak ? d.lastOak : d.lastBirch;
+            String since = last < 0 ? "its first " + species
+                    : Math.round((double) (now - last) / own) + " beat(s) since its last " + species;
+            if (oak) {
+                c.oak++;
+                d.lastOak = now;
+            } else {
+                c.birch++;
+                d.lastBirch = now;
+            }
+            ActionTrace.log("test yard", DRYAD + ": " + what + " is on its " + species + " copy's beat (every " + own
+                    + " ticks), " + since + "; its " + other + " copy's beat is every " + wrong + " | " + c.oak
+                    + " oak, " + c.birch + " birch so far");
+            if (c.oak >= DRYAD_EACH && c.birch >= DRYAD_EACH) {
+                c.judged = true;
+                StringBuilder beats = new StringBuilder();
+                for (DryadHorse h : c.horses) {
+                    beats.append(beats.length() == 0 ? "" : "; ").append(h.label).append(" oak every ")
+                            .append(h.oakEvery).append(", birch every ").append(h.birchEvery);
+                }
+                ActionTrace.log("test yard", DRYAD + " at " + minutes + " min: " + c.oak + " oak and " + c.birch
+                        + " birch plantings, every one on its own copy's beat (" + beats + " ticks)"
+                        + " - PASS");
+            }
+            return;
+        }
+        c.judged = true;
+        if (onWrong) {
+            ActionTrace.log("test yard", DRYAD + " at " + minutes + " min: " + what + " - FAIL (it is on the " + other
+                    + " copy's beat, every " + wrong + " ticks, not its own every " + own + ": one copy's interval"
+                    + " is timing both species, which is what reading expressed() instead of copy(0) and copy(1)"
+                    + " would do)");
+        } else if (onBeat(now, d.phase, own / DryadGene.MIXED_SLOWDOWN)
+                || onBeat(now, d.phase, wrong / DryadGene.MIXED_SLOWDOWN)) {
+            ActionTrace.log("test yard", DRYAD + " at " + minutes + " min: " + what + " - FAIL (it is on half a"
+                    + " copy's beat: the mixed pair's slowdown, DryadGene.MIXED_SLOWDOWN, is not being applied)");
+        } else {
+            ActionTrace.log("test yard", DRYAD + " at " + minutes + " min: " + what + " - INCONCLUSIVE (on none of"
+                    + " the beats this pen models, whole or halved, own copy or other: GeneAbilityHandler.beat()"
+                    + " or its phase has probably changed, so the pen's arithmetic is the suspect, not the gene)");
+        }
+    }
+
+    private static void dryadDeadline(DryadCheck c) {
+        c.judged = true;
+        String at = DRYAD + " at " + DRYAD_DEADLINE / 1200 + " min: ";
+        if (c.oak + c.birch == 0) {
+            ActionTrace.log("test yard", at + "no planting tied to a horse - INCONCLUSIVE (" + c.untied
+                    + " untied; spreadsPlacedBy only counts while the world watch runs - check the census ran)");
+            return;
+        }
+        if (c.oak == 0 || c.birch == 0) {
+            // One species never planting is the other half of the expressed() failure ("count one allele
+            // twice and the other never"). How unlikely is none, given what the copies predict?
+            double oakRate = 0;
+            double birchRate = 0;
+            for (DryadHorse h : c.horses) {
+                oakRate += 1.0 / h.oakEvery;
+                birchRate += 1.0 / h.birchEvery;
+            }
+            int seen = Math.max(c.oak, c.birch);
+            double missingShare = (c.oak == 0 ? oakRate : birchRate) / (oakRate + birchRate);
+            double p = Math.pow(1.0 - missingShare, seen);
+            String missing = c.oak == 0 ? "oak" : "birch";
+            String line = at + seen + " " + (c.oak == 0 ? "birch" : "oak") + " plantings and no " + missing
+                    + String.format(java.util.Locale.ROOT, ", where the copies give %s %.0f%% of plantings"
+                    + " (p %.4f of none)", missing, 100 * missingShare, p);
+            ActionTrace.log("test yard", line + (p < 0.01
+                    ? " - FAIL (one allele never plants: its copy is not being read)"
+                    : " - INCONCLUSIVE (too few plantings to say the " + missing + " copy is silent)"));
+            return;
+        }
+        ActionTrace.log("test yard", at + c.oak + " oak and " + c.birch + " birch plantings, all on their own"
+                + " copy's beat - INCONCLUSIVE (a PASS needs " + DRYAD_EACH + " of each; the horses planted slowly)");
+    }
+
+    // ------------------------------------------------------------------
     // Ratios
     // ------------------------------------------------------------------
 
@@ -217,6 +529,28 @@ final class DebugYardLong {
         final Map<String, int[]> counts = new LinkedHashMap<>();    // [born, died]
         int born;
         int died;
+
+        // The verdict (2026-09-30). Set by ratio() once the tally exists, so its constructor stays as it was.
+        Rule rule = Rule.NONE;
+        /** The allele whose copies are counted - H, O, Big, W5, SW3, W; Brn for the sex-linked pen. */
+        String mutant = "";
+        /** HYPP and LETHAL WHITE: a homozygote alive when FOAL_KEEP ends is a FAIL. */
+        boolean homozygoteDies;
+        long startTick;
+        /** Born foals, and distinct conception draws, by copies of {@link #mutant}: [0, 1, 2]. */
+        final int[] bornBy = new int[3];
+        final int[] drawnBy = new int[3];
+        /** The tokens each of those classes printed as, for the verdict line. */
+        final String[] labelBy = new String[3];
+        int draws;
+        int conceptions;
+        int colts;
+        int mareMissing;
+        /** A PASS or INCONCLUSIVE is logged once; a FAIL may still follow one, and says it overrides it. */
+        boolean judged;
+        boolean failed;
+        /** Nothing more is judged at all - the world cannot answer this pen's question. */
+        boolean closed;
 
         Tally(String name, String key, boolean bySex, String expect, @Nullable UUID damEntity) {
             this.name = name;
@@ -252,6 +586,29 @@ final class DebugYardLong {
         YardPens.register(gy, x0, x1, z0, z1, name);
         DebugWorldWatch.watchBreeding(name, DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1));
         Tally tally = new Tally(name, key, bySex, expect, dam == null ? null : dam.getUUID());
+        tally.startTick = level.getGameTime();
+        // WHICH QUESTION EACH PEN ANSWERS. By name, since the names are what the signs, the log and the
+        // Verification tabs share; a pen not listed here keeps its tally and gets no verdict.
+        switch (name) {
+            case "RATIO HYPP" -> judgeBy(tally, Rule.BORN_121, "H", true);
+            case "RATIO LETHAL WHITE" -> judgeBy(tally, Rule.BORN_121, "O", true);
+            case "RATIO SIZE" -> judgeBy(tally, Rule.BORN_121, "Big", false);
+            case "RATIO STARBURST" -> judgeBy(tally, Rule.BORN_121, "W", false);
+            case "RATIO BRINDLE" -> judgeBy(tally, Rule.SEX_LINKED, "Brn", false);
+            case "RATIO KIT W5" -> judgeBy(tally, Rule.CONCEIVED_121, "W5", false);
+            case "RATIO MITF SW3" -> judgeBy(tally, Rule.CONCEIVED_121, "SW3", false);
+            case "RATIO MILK CLASH" -> judgeBy(tally, Rule.NO_FOAL, "", false);
+            default -> { }
+        }
+        // A world with lethals off carries a lethal embryo to term and lets a lethal foal live
+        // (ServerConfig.lethalsActive), so the class these pens exist to see is never lost or killed.
+        // That is the world's setup, not the gene: say so once and judge nothing else.
+        boolean needsLethals = tally.homozygoteDies || tally.rule == Rule.CONCEIVED_121 || tally.rule == Rule.NO_FOAL;
+        if (needsLethals && !ServerConfig.lethalsActive()) {
+            inconclusive(tally, "at build", "lethals are off in this world's health mode, so the class this pen"
+                    + " exists to see is carried like any other");
+            tally.closed = true;
+        }
         TALLIES.add(tally);
         scan(level, tally, DebugTestYard.box(x0, gy, z0, x1, gy + 4, z1), 0);
     }
@@ -307,6 +664,7 @@ final class DebugYardLong {
         t.counts.computeIfAbsent(cls, k -> new int[2])[0]++;
         t.born++;
         ActionTrace.log("test yard", t.name + ": foal " + t.born + " is " + cls + " | " + t.summary());
+        judgeFoal(t, record.sex(), tokens(pair), cls);
     }
 
     /** Gap 245: each ratio pen's running tally of shadow draws, by class. */
@@ -372,6 +730,7 @@ final class DebugYardLong {
                 t.name, level.getGameTime(), result.chance(), tokens(mareGenome.genotype().pair(t.key)),
                 tokens(sireGenome.genotype().pair(t.key)), embryos, shadowClass,
                 System.identityHashCode(mare.getRandom()), sireRandom, shadows, summary, t.expect));
+        judgeConception(t, result.pregnancy().get());
     }
 
     private static String tokens(@Nullable AllelePair pair) {
@@ -397,6 +756,10 @@ final class DebugYardLong {
                     it.remove();
                     t.done.add(e.getKey());
                 } else if (now - e.getValue() >= FOAL_KEEP) {
+                    if (t.homozygoteDies && copies(cls, t.mutant) == 2) {
+                        fail(t, "at " + t.born + " foals", "a " + cls + " foal is still alive " + FOAL_KEEP / 20
+                                + " seconds after birth; every one must die at birth");
+                    }
                     h.discard();    // counted and outlived a birth lethal: out of the way of the cap
                     it.remove();
                     t.done.add(e.getKey());
@@ -405,7 +768,299 @@ final class DebugYardLong {
             if (round % 60 == 59) {     // every ten minutes, whether or not anything changed
                 ActionTrace.log("test yard", t.name + " tally | " + t.summary());
             }
+            judgeScan(level, t, now);
             scan(level, t, box, round + 1);
         });
+    }
+
+    // ------------------------------------------------------------------
+    // The ratio pens' verdicts
+    // ------------------------------------------------------------------
+
+    /*
+     * EVERY RATIO PEN ANSWERS FOR ITSELF (owner, 2026-09-30: "Build in more pens that answer for
+     * themselves"). The owner ruled the same day that an automatic PASS closes the pen's wiki check and
+     * the pen is then deleted, so a PASS here has to be one nobody would second-guess:
+     *
+     * - A foal the gene forbids FAILs the moment it is seen: a W5/W5 or SW3/SW3 born, any milk-clash
+     *   foal, a brindle colt (or a filly without her sire's Brn), an H/H or O/O still alive when
+     *   FOAL_KEEP ends.
+     * - A proportion is judged once, by chi-square against 1:2:1 at p < 0.01 (2 df: 9.21). Not 0.05:
+     *   RATIO SIZE's embryos over five runs today read Big/n 31, n/n 16, Big/Big 6 - chi-square about
+     *   5.3, p about 0.07. A fair locus reads like that one run in fourteen; at 0.05 the pens would
+     *   FAIL a fair gene one run in twenty, and a false FAIL costs an evening of hunting.
+     * - Forty per verdict: the smallest class then expects ten, twice the textbook floor of five for
+     *   chi-square, and gap 245's failure - no homozygote in 35 - scores 10 from its empty class alone,
+     *   so it cannot pass. A pen makes a foal every few minutes, so forty is a two-to-three hour run.
+     * - WHICH COUNT. The born foals where every class is born (HYPP, LETHAL WHITE, SIZE, STARBURST,
+     *   BRINDLE): the sign promises what is born. The conception draws for KIT and MITF, whose
+     *   homozygote is lost before birth, so a born count can only ever read 2:1 and cannot see the draw.
+     *   Identical twins are one draw and are counted once.
+     */
+
+    private enum Rule {
+        NONE,
+        /** 1:2:1 in born foals. */
+        BORN_121,
+        /** 1:2:1 in conception draws; the homozygote is never born. */
+        CONCEIVED_121,
+        /** Brn/Y sire x n/n dam: every filly Brn/n, every colt without Brn. */
+        SEX_LINKED,
+        /** Watr/Watr x Lava/Lava: every conception lost, no foal ever. */
+        NO_FOAL
+    }
+
+    private static final int VERDICT_FOALS = 40;
+    private static final int VERDICT_DRAWS = 40;
+    /** The chi-square value at p = 0.01 with two degrees of freedom. */
+    private static final double CHI2_2DF_P01 = 9.2103;
+    /** Ten lost pregnancies and no foal; see {@link #judgeConception} for why it is read at the eleventh. */
+    private static final int MILK_CONCEPTIONS = 10;
+    /** P(fewer than ten colts in forty) is about 1 in 3000; fewer is a sex-ratio problem, not brindle's. */
+    private static final int BRINDLE_MIN_COLTS = 10;
+    /** Eight yard hours. Forty foals is two or three; a pen still short by eight has stalled. */
+    private static final long RATIO_DEADLINE = 8L * 60 * 1200;
+    /** Scans in a row the mare must be missing before it counts - a minute, so a chunk blink is not it. */
+    private static final int MARE_GONE_SCANS = 6;
+    /** The cause Conceivable gives a Watr/Lava embryo - the milk rule's, not a trait lethal like MET's. */
+    private static final String MILK_CAUSE = Conceivable.ID_PREFIX + "milk";
+
+    private static void judgeBy(Tally t, Rule rule, String mutant, boolean homozygoteDies) {
+        t.rule = rule;
+        t.mutant = mutant;
+        t.homozygoteDies = homozygoteDies;
+    }
+
+    private static void pass(Tally t, String text) {
+        if (t.judged || t.failed || t.closed) {
+            return;
+        }
+        t.judged = true;
+        ActionTrace.log("test yard", t.name + " " + text + " - PASS");
+    }
+
+    private static void inconclusive(Tally t, String at, String why) {
+        if (t.judged || t.failed || t.closed) {
+            return;
+        }
+        t.judged = true;
+        ActionTrace.log("test yard", t.name + " " + at + " - INCONCLUSIVE (" + why + ")");
+    }
+
+    /** Once. A FAIL after a PASS still logs - a forbidden foal outranks a ratio - and says so. */
+    private static void fail(Tally t, String at, String why) {
+        if (t.failed || t.closed) {
+            return;
+        }
+        boolean overrides = t.judged;
+        t.failed = true;
+        t.judged = true;
+        ActionTrace.log("test yard", t.name + " " + at + " - FAIL (" + why
+                + (overrides ? "; this overrides the verdict logged above" : "") + ")");
+    }
+
+    /** Copies of {@code mutant} in "A/B" or "colt A/B"; -1 when there is no readable pair. */
+    private static int copies(@Nullable String tokens, String mutant) {
+        if (tokens == null || mutant.isEmpty()) {
+            return -1;
+        }
+        String[] parts = tokens.substring(tokens.lastIndexOf(' ') + 1).split("/");
+        if (parts.length != 2) {
+            return -1;
+        }
+        int n = 0;
+        for (String p : parts) {
+            if (p.equals(mutant)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    private static void noteLabel(Tally t, int m, String tokens) {
+        if (m >= 0 && t.labelBy[m] == null) {
+            t.labelBy[m] = tokens;
+        }
+    }
+
+    private static String label(Tally t, int m) {
+        if (t.labelBy[m] != null) {
+            return t.labelBy[m];
+        }
+        return m == 2 ? t.mutant + "/" + t.mutant : m == 1 ? t.mutant + "/+" : "+/+";
+    }
+
+    /** Chi-square of {@code by} (copies 0, 1, 2) against 1:2:1. */
+    private static double chi121(int[] by) {
+        double n = by[0] + by[1] + by[2];
+        double quarter = n / 4.0;
+        double half = n / 2.0;
+        return (by[2] - quarter) * (by[2] - quarter) / quarter
+                + (by[1] - half) * (by[1] - half) / half
+                + (by[0] - quarter) * (by[0] - quarter) / quarter;
+    }
+
+    private static void ratioVerdict(Tally t, int[] by, String at, String extra) {
+        double chi = chi121(by);
+        // At two degrees of freedom the chi-square survival function is exactly exp(-x/2).
+        double p = Math.exp(-chi / 2.0);
+        String text = String.format(java.util.Locale.ROOT,
+                "%s: %s %d, %s %d, %s %d against 1:2:1, chi-square %.2f (2 df, p %.3f; FAIL at p < 0.01)%s",
+                at, label(t, 2), by[2], label(t, 1), by[1], label(t, 0), by[0], chi, p, extra);
+        if (chi > CHI2_2DF_P01) {
+            fail(t, text, "the split is off 1:2:1 at p < 0.01");
+        } else {
+            pass(t, text);
+        }
+    }
+
+    /** A foal of this pen's mare, just counted. */
+    private static void judgeFoal(Tally t, Sex sex, String tokens, String cls) {
+        if (t.rule == Rule.NONE || t.closed) {
+            return;
+        }
+        if (t.rule == Rule.NO_FOAL) {
+            fail(t, "at foal " + t.born, "a " + cls + " foal was born; a Watr x Lava cross must lose every conception");
+            return;
+        }
+        int m = copies(tokens, t.mutant);
+        if (m < 0) {
+            return;     // no pair at the locus: nothing to judge, and not the gene's doing
+        }
+        t.bornBy[m]++;
+        if (t.rule != Rule.SEX_LINKED) {
+            noteLabel(t, m, tokens);
+        }
+        switch (t.rule) {
+            case CONCEIVED_121 -> {
+                if (m == 2) {
+                    fail(t, "at foal " + t.born, "a " + tokens + " foal was born; that genotype is impossible and"
+                            + " must be lost at conception");
+                }
+            }
+            case SEX_LINKED -> {
+                boolean colt = sex != Sex.FEMALE;
+                if (colt) {
+                    t.colts++;
+                    if (m > 0) {
+                        fail(t, "at foal " + t.born, "a brindle colt, " + cls + ": a colt's one X is his n/n dam's");
+                    }
+                } else if (m != 1) {
+                    fail(t, "at foal " + t.born, "a filly " + cls + ": every filly takes her sire's Brn X and her"
+                            + " dam's n");
+                }
+                if (t.born >= VERDICT_FOALS) {
+                    int fillies = t.born - t.colts;
+                    if (t.colts >= BRINDLE_MIN_COLTS) {
+                        pass(t, "at " + t.born + " foals: " + fillies + " fillies, every one Brn/n, and " + t.colts
+                                + " colts, not one carrying Brn");
+                    } else {
+                        inconclusive(t, "at " + t.born + " foals", "only " + t.colts + " colts, fewer than "
+                                + BRINDLE_MIN_COLTS + " - too few to show a brindle colt, and a sex ratio to look at");
+                    }
+                }
+            }
+            default -> { }  // BORN_121 is judged on the scan, once its homozygotes have had FOAL_KEEP to die
+        }
+    }
+
+    /**
+     * A conception by this pen's mare, embryos and all.
+     *
+     * <p>READ AT THE NEXT CONCEPTION, not at the fortieth or the tenth: a mare cannot conceive while
+     * pregnant or just foaled ({@code Conception.Outcome.NOT_RECEPTIVE}), so at conception N+1 every
+     * pregnancy before it has ended - lost, or born and already counted by {@link #count}. A PASS read
+     * any earlier could be followed by the very foal it said would never come.
+     */
+    private static void judgeConception(Tally t, Pregnancy p) {
+        if (t.rule == Rule.NONE || t.closed) {
+            return;
+        }
+        if (t.rule == Rule.CONCEIVED_121 && t.draws >= VERDICT_DRAWS) {
+            ratioVerdict(t, t.drawnBy, "at conception " + (t.conceptions + 1) + " (the " + t.draws
+                    + " draws before it, every pregnancy ended)", String.format(java.util.Locale.ROOT,
+                    "; born %s %d, %s %d, %s %d", label(t, 1), t.bornBy[1], label(t, 0), t.bornBy[0],
+                    label(t, 2), t.bornBy[2]));
+        }
+        if (t.rule == Rule.NO_FOAL && t.conceptions >= MILK_CONCEPTIONS && t.born == 0) {
+            pass(t, "at conception " + (t.conceptions + 1) + ": the " + t.conceptions + " pregnancies before it all"
+                    + " ended with no foal, every embryo Watr/Lava and lost to the milk rule (" + MILK_CAUSE + ")");
+        }
+        t.conceptions++;
+        List<Embryo> embryos = p.embryos();
+        boolean identical = p.identicalTwins();
+        for (int i = 0; i < embryos.size(); i++) {
+            if (i > 0 && identical) {
+                continue;   // one zygote that split: one draw
+            }
+            Embryo e = embryos.get(i);
+            String tok = tokens(e.foal().genotype().pair(t.key));
+            String at = "at conception " + t.conceptions;
+            if (t.rule == Rule.CONCEIVED_121) {
+                int m = copies(tok, t.mutant);
+                if (m < 0) {
+                    continue;
+                }
+                t.drawnBy[m]++;
+                t.draws++;
+                noteLabel(t, m, tok);
+                if (m == 2 && !e.lostEarly()) {
+                    fail(t, at, "a " + tok + " embryo was not marked to be lost; it will be carried to term");
+                }
+            } else if (t.rule == Rule.NO_FOAL) {
+                Optional<Condition> cause = Conceivable.failure(e.foal().genotype());
+                if (!(tok.contains("Watr") && tok.contains("Lava"))) {
+                    fail(t, at, "an embryo drew " + tok + "; Watr/Watr x Lava/Lava can only make Watr/Lava");
+                } else if (!e.lostEarly()) {
+                    fail(t, at, "a Watr/Lava embryo was not marked to be lost; it will be carried to term");
+                } else if (cause.isEmpty() || !MILK_CAUSE.equals(cause.get().id())) {
+                    fail(t, at, "the Watr/Lava embryo is lost, but " + (cause.isEmpty()
+                            ? "by no gene's canOccur - a trait lethal such as MET's did it"
+                            : "to " + cause.get().id() + ", not " + MILK_CAUSE));
+                }
+            }
+        }
+    }
+
+    /** Every ten seconds, from the pen's own scan. */
+    private static void judgeScan(ServerLevel level, Tally t, long now) {
+        if (t.rule == Rule.NONE || t.closed || t.judged) {
+            return;
+        }
+        if (t.rule == Rule.BORN_121) {
+            int n = t.bornBy[0] + t.bornBy[1] + t.bornBy[2];
+            // A lethal pen waits while a homozygote is still inside its FOAL_KEEP: past it, alive, it FAILs.
+            if (n >= VERDICT_FOALS && !(t.homozygoteDies && livingHomozygote(t))) {
+                ratioVerdict(t, t.bornBy, "at " + n + " foals born", t.homozygoteDies
+                        ? "; every " + label(t, 2) + " dead within " + FOAL_KEEP / 20 + " s of birth" : "");
+                return;
+            }
+        }
+        if (t.damEntity == null || !(level.getEntity(t.damEntity) instanceof Horse dam && dam.isAlive())) {
+            if (++t.mareMissing >= MARE_GONE_SCANS) {
+                inconclusive(t, "at " + t.born + " foals", "its mare is gone, so no more of its foals or"
+                        + " conceptions can be counted");
+            }
+            return;
+        }
+        t.mareMissing = 0;
+        if (now - t.startTick >= RATIO_DEADLINE) {
+            String got = switch (t.rule) {
+                case CONCEIVED_121 -> t.draws + " conception draws of " + VERDICT_DRAWS;
+                case NO_FOAL -> t.conceptions + " conceptions of " + (MILK_CONCEPTIONS + 1);
+                default -> t.born + " foals of " + VERDICT_FOALS;
+            };
+            inconclusive(t, "at " + RATIO_DEADLINE / 1200 + " min", "only " + got + " in eight hours; the pair"
+                    + " bred too slowly to judge");
+        }
+    }
+
+    private static boolean livingHomozygote(Tally t) {
+        for (UUID id : t.living.keySet()) {
+            if (copies(t.classOf.get(id), t.mutant) == 2) {
+                return true;
+            }
+        }
+        return false;
     }
 }

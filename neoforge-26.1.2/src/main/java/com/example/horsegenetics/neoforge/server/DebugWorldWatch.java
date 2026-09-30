@@ -337,6 +337,7 @@ public final class DebugWorldWatch {
         SOUNDS_BY_HORSE.clear();
         KICKS_BY_HORSE.clear();
         SPREADS_BY_HORSE.clear();
+        FLEES_BY_HORSE.clear();
         startedAtNanos = System.nanoTime();
         int cxLo = SectionPos.blockToSectionCoord((int) yard.minX);
         int cxHi = SectionPos.blockToSectionCoord((int) yard.maxX);
@@ -1103,6 +1104,30 @@ public final class DebugWorldWatch {
 
     /** The game tick of every blow each horse has landed since the watch started; the KICK pens' verdict reads it. */
     private static final Map<java.util.UUID, java.util.List<Long>> KICKS_BY_HORSE = new java.util.HashMap<>();
+
+    /**
+     * Every flee each horse has started since the watch started, by the registry id of what it ran from
+     * ({@code minecraft:cow} -> 12). The NIGHT SHY pen's verdict reads it (gap 241). Fed by
+     * {@code GeneAbilityHandler.flee} at the same moment it writes its {@code [trace] flee} line - once per
+     * change of quarry, not per beat - so this tally and a grep of the log count the same events. Per horse,
+     * because the log's own lines cannot be counted by pen: an unrelated wild horse in the ARCANE DEALER pen
+     * also logs {@code flee ... from minecraft:horse}, and it is not the horse on trial.
+     */
+    private static final Map<java.util.UUID, Map<String, Integer>> FLEES_BY_HORSE = new java.util.HashMap<>();
+
+    /** A horse began running from {@code from}. */
+    static void noteFlee(Horse horse, Entity from) {
+        if (!watching(horse.level())) {
+            return;
+        }
+        FLEES_BY_HORSE.computeIfAbsent(horse.getUUID(), k -> new LinkedHashMap<>())
+                .merge(from.getType().builtInRegistryHolder().key().identifier().toString(), 1, Integer::sum);
+    }
+
+    /** What this horse has fled since the watch started, by entity type id; empty if nothing. */
+    static Map<String, Integer> fleesBy(java.util.UUID horse) {
+        return Map.copyOf(FLEES_BY_HORSE.getOrDefault(horse, Map.of()));
+    }
 
     static java.util.List<Long> kicksBy(java.util.UUID horse) {
         return java.util.List.copyOf(KICKS_BY_HORSE.getOrDefault(horse, java.util.List.of()));

@@ -74,6 +74,8 @@ public final class NaturalBreedingHandler {
 
     /** When each too-hurt mare last said so. Transient, like {@link #CROWDED_LOGGED}. */
     private static final java.util.Map<java.util.UUID, Long> UNFIT_LOGGED = new java.util.HashMap<>();
+    /** Yard mares told "no walkable path" in the last minute - see the refusal after {@code canMeet}. */
+    private static final java.util.Map<java.util.UUID, Long> UNREACHABLE_LOGGED = new java.util.HashMap<>();
 
     /**
      * What each mare's owner was last told, and when. Transient like the rest of
@@ -175,8 +177,25 @@ public final class NaturalBreedingHandler {
         // NaturalCover.decide picks the best of the ones she can actually get
         // to. Order is preserved, which matters - decision.stallion() indexes
         // back into this list.
+        List<Horse> inReach = List.copyOf(near);
         near.removeIf(stallion -> !canMeet(mare, stallion));
         if (near.isEmpty()) {
+            // SAY SO IN THE YARD (2026-09-30). This refusal was silent everywhere, and the yard's HURT
+            // MARE - healed, in heat, her stud within a block of her - went two whole runs without a
+            // single cover or a line saying why, while three other runs covered her in seconds. The
+            // path check is the one silent gate a penned pair can fail, so inside a test pen it now
+            // writes a line, once a minute a mare. Outside the yard it stays quiet: a wild mare with
+            // a stallion over a fence is ordinary and would bury the log.
+            if (YardPens.inPen(mare)) {
+                Long saidAt = UNREACHABLE_LOGGED.get(mare.getUUID());
+                if (saidAt == null || realNow - saidAt >= 1_200L) {
+                    UNREACHABLE_LOGGED.put(mare.getUUID(), realNow);
+                    Horse first = inReach.get(0);
+                    ActionTrace.log("fertility", ActionTrace.describeShort(mare) + String.format(
+                            " not covered: no walkable path to %s (%.1f blocks) or any of %d stallion(s) in reach",
+                            ActionTrace.describeShort(first), Math.sqrt(first.distanceToSqr(mare)), inReach.size()));
+                }
+            }
             return;
         }
         List<NaturalCover.Stallion> candidates = new ArrayList<>(near.size());

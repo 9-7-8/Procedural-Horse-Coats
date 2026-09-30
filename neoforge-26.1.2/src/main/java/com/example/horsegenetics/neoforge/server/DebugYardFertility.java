@@ -94,7 +94,49 @@ final class DebugYardFertility {
             if (level.getEntity(id) instanceof Horse h && h.isAlive()) {
                 h.setHealth(h.getMaxHealth() / 2.0F);
                 ActionTrace.log("test yard", "HURT MARE set to " + h.getHealth() + "/" + h.getMaxHealth());
+                hurtMareVerdict(level, id, ReproHandler.of(h).lastNaturalTry(), false, 1);
             }
+        });
+    }
+
+    /**
+     * <b>HURT MARE answers for itself</b> (owner, 2026-09-30: "build in more pens that answer for
+     * themselves"). The claim is two-sided - no cover while she is under {@code ReproRules.COVER_HEALTH},
+     * and a cover once she is over it - so the verdict watches her one try a heat
+     * ({@code Reproduction.lastNaturalTry}, spent by every cover whether it takes or not) once a second.
+     * Healing only ever raises her health here, so if she is still under the line on the poll that
+     * finds a spent try, she was under it when the try was made: FAIL. The first try made over the
+     * line, after she has been seen hurt in heat, is the PASS. Twenty minutes with no try at all is a
+     * FAIL too - runs 8 and 10 of 2026-09-30 went a whole run healed, in heat and a block from her
+     * stud without one, and {@code NaturalBreedingHandler} now says in the yard when the path check
+     * is why.
+     */
+    private static void hurtMareVerdict(ServerLevel level, UUID id, long triedAt, boolean seenHurtInHeat, int second) {
+        DebugYardHerd.after(level, 20, () -> {
+            if (!(level.getEntity(id) instanceof Horse h) || !h.isAlive()) {
+                ActionTrace.log("test yard", "HURT MARE: the mare is gone - INCONCLUSIVE");
+                return;
+            }
+            boolean hurt = !ReproRules.healthyEnoughToBreed(h.getHealth(), h.getMaxHealth());
+            ReproTiming t = ServerConfig.reproTiming();
+            boolean inHeat = ReproRules.mayTryNaturally(ReproHandler.of(h), HorseRealmRepro.reproTime(h), t);
+            boolean seen = seenHurtInHeat || (hurt && inHeat);
+            long tried = ReproHandler.of(h).lastNaturalTry();
+            String health = String.format("%.1f/%.1f", h.getHealth(), h.getMaxHealth());
+            if (tried != triedAt) {
+                ActionTrace.log("test yard", "HURT MARE at " + second + " s: covered at " + health + " - "
+                        + (hurt ? "FAIL (covered while under the " + (int) (ReproRules.COVER_HEALTH * 100)
+                                + "% line)"
+                        : seen ? "PASS (refused while hurt, covered once healed)"
+                        : "INCONCLUSIVE (never seen hurt and in heat before the cover)"));
+                return;
+            }
+            if (second >= 20 * 60) {
+                ActionTrace.log("test yard", "HURT MARE at 20 min: never covered, now " + health + " - FAIL"
+                        + " (read the 'not covered' lines above for why)");
+                return;
+            }
+            hurtMareVerdict(level, id, triedAt, seen, second + 1);
         });
     }
 

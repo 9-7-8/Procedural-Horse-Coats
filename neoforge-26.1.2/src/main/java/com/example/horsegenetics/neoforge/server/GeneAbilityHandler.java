@@ -2598,6 +2598,7 @@ public final class GeneAbilityHandler {
             ActionTrace.log("flee", ActionTrace.describeShort(horse) + " from "
                     + nearest.getType().builtInRegistryHolder().key().identifier()
                     + (pathed ? " - path accepted" : " - NO PATH: nowhere to run to"));
+            DebugWorldWatch.noteFlee(horse, nearest);   // the NIGHT SHY pen's verdict counts these (gap 241)
         }
         NightBehaviourHandler.noteActing(horse);
     }
