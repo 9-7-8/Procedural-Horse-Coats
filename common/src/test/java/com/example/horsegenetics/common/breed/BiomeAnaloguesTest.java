@@ -72,17 +72,49 @@ class BiomeAnaloguesTest {
     }
 
     @Test
-    void theTableStaysOnTheOverworldSurface() {
-        // Owner's scope: caves have no lit grass and the other dimensions are a
-        // design call of their own. A Nether or cave id here is a mistake.
+    void theTableNeverReachesADimensionAModAdded() {
+        // Owner's scope: overworld, Nether and End only - no horses in the
+        // Aether, the Undergarden or AllTheModium's worlds. Caves have no lit grass.
         for (String biome : BiomeAnalogues.moddedBiomes()) {
             assertFalse(biome.contains("cave"), biome);
             assertFalse(biome.startsWith("undergarden:") || biome.startsWith("aether_ii:")
-                    || biome.startsWith("nullscape:") || biome.startsWith("allthemodium:"), biome);
+                    || biome.startsWith("allthemodium:") || biome.startsWith("mahoutsukai:"), biome);
         }
-        for (String nether : List.of("blackstone_basin", "glistering_meadow", "infernal_holt",
-                "mycotoxic_undergrowth", "redstone_abyss", "inferno")) {
-            assertTrue(BiomeAnalogues.of("regions_unexplored:" + nether).isEmpty(), nether);
+    }
+
+    @Test
+    void everyNetherAndEndBiomeHasABreedThatCanStandOnItsGround() {
+        // A named biome is not a liveable one: nothing there is grass, so some
+        // breed of it must list the floor. One floor per biome, read off the
+        // mods' surface rules, is the minimum that makes the mapping real.
+        String[][] floors = {
+                {"regions_unexplored:glistering_meadow", "regions_unexplored:glistering_nylium"},
+                {"regions_unexplored:mycotoxic_undergrowth", "regions_unexplored:mycotoxic_nylium"},
+                {"regions_unexplored:infernal_holt", "regions_unexplored:brimsprout_nylium"},
+                {"regions_unexplored:blackstone_basin", "regions_unexplored:cobalt_nylium"},
+                {"regions_unexplored:blackstone_basin", "minecraft:blackstone"},
+                {"nullscape:shadowlands", "minecraft:dead_tube_coral_block"},
+                {"nullscape:crystal_peaks", "minecraft:blackstone"},
+                {"nullscape:void_barrens", "minecraft:smooth_basalt"},
+                {"nullscape:void_barrens", "minecraft:basalt"},
+                {"minecraft:end_highlands", "minecraft:end_stone"},
+                {"minecraft:small_end_islands", "minecraft:end_stone"},
+        };
+        for (String[] f : floors) {
+            assertTrue(Breeds.wildGroundAllows(f[0], f[1], false), f[0] + " on " + f[1] + " in the dark");
+        }
+    }
+
+    @Test
+    void noOverworldBiomeGainsADarkFloor() {
+        // The Enderpony lives in forty overworld biomes and names End floors;
+        // smooth basalt lines every amethyst geode, and end stone is a builder's
+        // block. A floor counts only in the Nether and the End.
+        for (String block : List.of("minecraft:smooth_basalt", "minecraft:blackstone", "minecraft:basalt",
+                "minecraft:end_stone", "minecraft:dead_tube_coral_block")) {
+            for (String biome : List.of("minecraft:plains", "minecraft:desert", "terralith:steppe")) {
+                assertFalse(Breeds.wildGroundAllows(biome, block, false), block + " in " + biome);
+            }
         }
     }
 

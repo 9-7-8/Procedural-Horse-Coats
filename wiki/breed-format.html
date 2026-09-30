@@ -194,7 +194,8 @@
     <td>none, so the breed spawns only where vanilla already allows it: on a lit
         <code>minecraft:grass_block</code>. Naming blocks here lets its herds stand on those
         too - see <a href="#where">where a breed may come from</a>. Purely additive; grass
-        keeps working either way.</td>
+        keeps working either way. <strong>Counts only in Nether and End biomes</strong>
+        (and modded ones that stand in for them) - never in the overworld.</td>
 </tr>
 <tr>
     <td><code>spawn_in_dark</code></td>
@@ -475,6 +476,20 @@
     running underneath it.
 </p>
 
+<p id="ground-off-world">
+    <strong>A floor counts only in the Nether and the End</strong> (owner, 2026-09-30). The
+    list belongs to the breed, not to a biome, so a floor a breed names is a floor in
+    <em>every</em> biome it lives in. The <a href="breed-book.html#enderpony">Enderpony</a> is
+    the case that forced it: it lives in forty overworld biomes and in the End, where the ground
+    is end stone, dead coral, blackstone and basalt - and without the rule a dark end-stone
+    cellar in the plains, or any amethyst geode (lined with smooth basalt), would have become
+    somewhere a herd of <em>any</em> plains breed could spawn. So
+    <code>Breeds.wildGroundAllows</code> refuses outside a vanilla Nether or End biome, or a
+    modded biome that <a href="breeds.html#modded-biomes">stands in for one</a>. The cost is
+    that an overworld breed cannot use <code>spawn_ground</code> - a desert breed on sand, say
+    - and none does.
+</p>
+
 <pre><code class="language-json">  "biomes": [
     "minecraft:nether_wastes", "minecraft:crimson_forest", "minecraft:warped_forest",
     "minecraft:soul_sand_valley", "minecraft:basalt_deltas"
@@ -491,7 +506,8 @@
     <a href="breed-book.html#nightmare">Nightmare</a>'s block, verbatim, and the two share it
     deliberately: as far as the ground is concerned they are one founder pool. Eight blocks
     rather than just netherrack because the generator lays all eight down as a surface
-    somewhere in those five biomes.
+    somewhere in those five biomes. (The shipped files now also carry Regions Unexplored's
+    four nyliums, for that mod's Nether biomes.)
 </p>
 
 <p>

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,21 +33,36 @@ import java.util.TreeSet;
  *       it always did. The two are a union.</li>
  * </ul>
  *
- * <p><b>Scope: the overworld surface only</b> (owner, 2026-09-30). Cave biomes
- * are left out because a horse needs lit grass there and none spawns; Nether,
- * End, Aether and Undergarden biomes are left out because their floors are not
- * grass and giving them breeds is a design call of its own ({@code spawn_ground}
- * is the mechanism if it is ever made). Oceans map to beach: vanilla puts no
- * horse in an ocean, but a grassy islet in one is where the island ponies live.
+ * <p><b>Scope: the overworld surface, the Nether and the End - never a
+ * dimension a mod added</b> (owner, 2026-09-30). Aether, Undergarden,
+ * AllTheModium's and the like have no horses. Cave biomes are left out because a
+ * horse needs lit grass there and none spawns. Oceans map to beach: vanilla puts
+ * no horse in an ocean, but a grassy islet in one is where the island ponies
+ * live.
+ *
+ * <p><b>Nether and End analogues only find a breed; the floor is the breed's.</b>
+ * Nothing there is grass, so a herd spawns only on a block some breed of the
+ * biome lists in {@code spawn_ground} - which is why Regions Unexplored's
+ * nyliums are on the Netherhorse and the Nightmare, and Nullscape's surfaces on
+ * the Enderpony. {@link #isNetherOrEnd} is the other half: a floor counts only
+ * in such a biome, so the Enderpony's End floors never reach the forty
+ * overworld biomes it also lives in.
  *
  * <p>The ids come from the biome JSONs in the jars themselves (Terralith 2.6.1,
- * Regions Unexplored 0.7.0, Integrated Dynamics, EvilCraft), not from a wiki,
+ * Regions Unexplored 0.7.0, Nullscape 1.2.20, Integrated Dynamics, EvilCraft), not from a wiki,
  * and each was matched on temperature, rainfall and what the biome already
  * spawns. A biome of a mod that is not installed is simply never asked about.
  */
 public final class BiomeAnalogues {
 
     private static final Map<String, List<String>> ANALOGUES = new HashMap<>();
+
+    /** Vanilla's Nether and End biomes - the only places a breed's extra floors count. */
+    private static final Set<String> NETHER_AND_END = new HashSet<>(Arrays.asList(
+            "minecraft:nether_wastes", "minecraft:crimson_forest", "minecraft:warped_forest",
+            "minecraft:soul_sand_valley", "minecraft:basalt_deltas",
+            "minecraft:the_end", "minecraft:end_highlands", "minecraft:end_midlands",
+            "minecraft:end_barrens", "minecraft:small_end_islands"));
 
     static {
         // ---- Terralith --------------------------------------------------------
@@ -204,6 +220,23 @@ public final class BiomeAnalogues {
         r("windswept_maple_forest", "windswept_forest");
         r("wisteria_grove", "flower_forest", "cherry_grove");
 
+        // ---- The Nether: Regions Unexplored ----------------------------------
+        // Floors are its four nyliums, blackstone, netherrack and soul sand
+        // (RUSurfaceRuleBuilder); the nyliums are on the Nether pair's list.
+        // Redstone abyss is marked removed in 0.7.0 and does not generate.
+        r("blackstone_basin", "basalt_deltas");
+        r("glistering_meadow", "warped_forest");
+        r("infernal_holt", "crimson_forest");
+        r("mycotoxic_undergrowth", "warped_forest");
+        r("redstone_abyss", "nether_wastes");
+
+        // ---- The End: Nullscape ------------------------------------------------
+        // Shadowlands is dead coral to depth, crystal peaks blackstone, void
+        // barrens blackstone and basalt: all on the Enderpony's floor list.
+        put("nullscape:shadowlands", "end_highlands");
+        put("nullscape:crystal_peaks", "end_highlands");
+        put("nullscape:void_barrens", "end_barrens");
+
         // ---- One each ---------------------------------------------------------
         // Integrated Dynamics' menril woods, and EvilCraft's corrupted land -
         // both overworld biomes, the second spread over existing terrain.
@@ -252,6 +285,17 @@ public final class BiomeAnalogues {
             }
         }
         return false;
+    }
+
+    /**
+     * Is {@code biomeId} a Nether or End biome - vanilla's, or a modded one
+     * standing in for one? The only biomes where a breed's {@code spawn_ground}
+     * counts (owner, 2026-09-30): the overworld has grass, and a floor a breed
+     * names for the End must not make a player's dark end-stone cellar, or an
+     * amethyst geode, somewhere a herd can spawn.
+     */
+    public static boolean isNetherOrEnd(String biomeId) {
+        return covers(NETHER_AND_END, biomeId);
     }
 
     /** Every modded biome the table knows, sorted - for tests and the wiki. */
