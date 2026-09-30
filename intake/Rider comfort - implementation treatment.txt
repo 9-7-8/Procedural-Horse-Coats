@@ -1,9 +1,8 @@
 Rider comfort - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "Open" lines
-are still to be settled. First piece to build: 5 (the fade), which starts with
-a rendering spike, one piece per session per START HERE. Piece 4 is deferred
-behind a decision and is not a build until that decision is made. Source of truth for what
+are still to be settled. One piece left: 5 (the fade), which starts with a
+rendering spike rather than a build. Source of truth for what
 exists is wiki/rider-comfort.html; this file is the handoff for the work its
 Roadmap tab lists, and it is retired (deleted, per START HERE step 3) as each
 piece ships and moves onto that page's Gameplay and Coding tabs.
@@ -18,50 +17,14 @@ What already exists, so the building session does not redo it
   (leadsReturn() catches IllegalStateException and returns the default), and a
   gametest in gametest/ModGameTests that asserts the halves separately.
 
-Two pieces left of the original five, and only one of them is buildable:
-piece 4 is still deferred behind a decision. Pieces 1, 2 and 3 - mounted mining
-speed, the ALT+E inventory keybind and the right-click that equips tack - all
-shipped on 2026-09-29 and are now on wiki/rider-comfort.html, on its Gameplay,
-Coding and Verification tabs. The numbering below is kept so the build order
-still reads.
-Piece 5, the fade, is built last and starts with a spike.
-
-4. Return the leads vanilla drops (deferred - a decision first, not a build)
------------------------------------------------------------------------------
-Do not build this in the same session as anything above. What ships when it
-does: a snapped or hand-cut lead goes to the player's pack, not the ground.
-- The page's fact: NeoForge 26.1.2 publishes no leash event and dropLeash spawns
-  the item through Entity.spawnAtLocation, so there is nothing to hook. That is
-  from the page, not re-proved here.
-- Decided: a mixin at the drop (the repo already carries mixins, e.g.
-  HorseAlwaysParentMixin). Not an EntityJoinLevelEvent filter on ItemEntity: it
-  cannot tell a snapped lead from one a player threw, and would silently eat
-  the thrown one. The building session still has to find the right seam - read
-  Leashable.dropLeash / Entity.spawnAtLocation first, since dropLeash is an
-  interface default and mixing into it is the unverified part.
-- Decided: the lead goes to the player who PLACED it, even if they are far
-  away or in another dimension. Not "the holder within reach". A lead on a
-  fence knot has no player holder, so the placer must be RECORDED when the lead
-  is attached (a small per-horse value: the attaching player's UUID, cleared
-  when the lead comes off). Nothing records it today, so this is new state.
-- Decided: if the placer is offline, in an unloaded place, or was never
-  recorded (a horse leashed before this shipped), fall back to vanilla's drop
-  on the ground. Never lose the lead, never hold it for later.
-- Ship it with behaviour.leads_return covering it (the option already exists and
-  its comment says the vanilla cases are excluded - update the comment).
-
-Settled with the owner: what to do when an UNVERIFIED assumption is wrong
-=========================================================================
-Each of these answers a check the treatment above already marks UNVERIFIED. The
-building session tries the assumption first; only if it fails does the fallback
-below apply.
-- Piece 1 (mounted mining): if the slowdown is not vanilla's "not on the ground"
-  penalty, STOP AND REPORT. Do not ship a guess. Write what was found on the
-  Roadmap tab and ask the owner before choosing another fix.
-- Piece 1 config sync: the treatment assumes the server config syncs to clients
-  (mining needs both sides). If it does not, SEND THE SWITCH IN A PAYLOAD on
-  join, the way other synced data in this mod travels; do not make it a client
-  config as well.
+One piece left of the original five. Pieces 1 to 4 - mounted mining speed, the
+ALT+E inventory keybind, the right-click that equips tack, and returning the
+leads vanilla drops - all shipped on 2026-09-29 and are now on
+wiki/rider-comfort.html, on its Gameplay, Coding and Verification tabs. Piece 4
+was the one deferred behind a decision, and the decision resolved by reading
+rather than by asking: Leashable.dropLeash turned out to be a private static on
+an interface, which no mixin can reach, so the seam is the Entity.spawnAtLocation
+line it calls. The numbering below is kept so the build order still reads.
 
 5. Fade the horse as you look down
 -----------------------------------

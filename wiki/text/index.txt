@@ -9,6 +9,7 @@ wiki/ai-setup.html#what	all	What it does
 wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
+wiki/api-notes.html#interface-private-static	all	An interface’s private static method is unreachable, and vanilla hides real behaviour in them
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
 wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide which recipe runs
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
@@ -3145,6 +3146,11 @@ wiki/rider-comfort.html#tack-equip	gameplay	Tack goes on with a right-click
 wiki/rider-comfort.html#tack-equip-claim	coding	Which clicks it claims, and the two it must not
 wiki/rider-comfort.html#tack-equip-coding	coding	How the tack click works (2026-09-29)
 wiki/rider-comfort.html#tack-equip-vanilla	coding	What vanilla was already doing
+wiki/rider-comfort.html#vanilla-leads	gameplay	— and so does the one that snapped
+wiki/rider-comfort.html#vanilla-leads-coding	coding	How the snapped lead is returned (2026-09-29)
+wiki/rider-comfort.html#vanilla-leads-placer	coding	And the owner has to be written down before it breaks
+wiki/rider-comfort.html#vanilla-leads-seam	coding	The drop cannot be hooked where it happens
+wiki/rider-comfort.html#vanilla-leads-test	coding	What the test can and cannot reach
 wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
 wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
 wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour

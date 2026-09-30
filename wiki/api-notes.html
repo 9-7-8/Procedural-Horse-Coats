@@ -614,6 +614,41 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     safe are a field, a leaf method and a class &mdash; nothing with a subclass under it.
 </p>
 
+<h2 id="interface-private-static">An interface&rsquo;s <code>private static</code> method is unreachable, and vanilla hides real behaviour in them</h2>
+
+<p>
+    Mixin cannot inject into a <code>private static</code> method declared on an
+    <em>interface</em>. That is not usually worth saying &mdash; except that 26.1.2 has moved
+    whole subsystems into interfaces with default methods, and the default methods are often
+    one-line delegates to a private static that holds all the behaviour.
+    <code>Leashable</code> is the worked example: <code>dropLeash()</code> and
+    <code>removeLeash()</code> are both
+    <code>dropLeash((Entity &amp; Leashable)this, boolean, boolean)</code> with different
+    arguments, and that method &mdash; the one that actually unties the animal and spawns the
+    item &mdash; is private and static and on the interface.
+</p>
+
+<p>
+    <strong>The answer is to find the line it calls rather than the method it is.</strong>
+    Everything <code>dropLeash</code> does to the world, it does through ordinary public
+    methods on ordinary classes: it spawns the item with
+    <code>Entity.spawnAtLocation(ServerLevel, ItemLike)</code>, and it writes the leash state
+    through <code>Mob.setLeashData</code>, which is a concrete override of an abstract
+    interface method. Both are mixinable. Before concluding a piece of interface behaviour
+    cannot be reached, grep for what it <em>calls</em> and count the callers &mdash;
+    <code>Items.LEAD</code> reaches <code>spawnAtLocation</code> from exactly two places in
+    the whole game, both of them in <code>Leashable</code>, which makes that one line a
+    complete and precise seam. See
+    <a href="rider-comfort.html#vanilla-leads-coding">the returned lead</a>.
+</p>
+
+<p class="muted">
+    <strong>NeoForge publishes no leash event</strong> in 26.1.2 &mdash; not a cancellable one,
+    not an observational one. There is no class in its <code>event</code> package with
+    &ldquo;leash&rdquo; in the name at all. Re-checked 2026-09-29 rather than taken from an
+    older note that said so.
+</p>
+
 <h2 id="source-permission">A command source no longer has <code>hasPermission(int)</code></h2>
 
 <p>

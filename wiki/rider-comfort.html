@@ -20,13 +20,13 @@
 <p class="lede">
     Five small things that make riding less irritating, borrowed from other mods that
     already do them. None touches genetics, and each is small enough to ship alone.
-    <strong>Four of the five have shipped</strong> &mdash; a lead now comes back to you
-    rather than being left on the ground when this mod teleports the horse wearing it,
-    you can mine from the saddle at the speed you would standing there,
+    <strong>Four of the five have shipped, and one is left</strong> &mdash; a lead comes
+    back to you now whether this mod teleported the horse out from under it or the leash
+    simply snapped, you can mine from the saddle at the speed you would standing there,
     <kbd>ALT</kbd>+<kbd>E</kbd> opens your own pack from the saddle, and a piece of tack
-    goes on with a right-click instead of a trip through the Gear tab. What is left is
-    the other half of the lead, and &mdash; the only one with a real unknown in it
-    &mdash; fading the horse out as you look down, which touches the coat itself.
+    goes on with a right-click instead of a trip through the Gear tab. What remains is
+    fading the horse out as you look down, which touches the coat itself and is the only
+    one with a real unknown in it.
 </p>
 
 <div class="note">
@@ -75,6 +75,45 @@
     Server owners who would rather have vanilla exactly can turn it off with
     <a href="config.html"><code>behaviour.leads_return</code></a>, which puts the lead back
     on the ground where the horse was.
+</p>
+
+<h2 id="vanilla-leads">&mdash; and so does the one that snapped</h2>
+
+<div class="plain">
+    <p>
+        The above was only half of it. <em>Vanilla</em> drops leads too, and on the whole it
+        drops them in worse places: a leash snaps when the horse gets more than twelve blocks
+        from you, and the lead lands <strong>where the horse was</strong> &mdash; which is
+        the far end of whatever just went wrong, usually while you are chasing it. Break a
+        fence knot with four animals tied to it and you get four leads scattered round the
+        post.
+    </p>
+    <p>
+        Now those come back too. <strong>A lead goes to whoever tied it on</strong>, wherever
+        they happen to be.
+    </p>
+</div>
+
+<p>
+    <strong>Whoever tied it on</strong> is meant literally, and it is not the same as
+    &ldquo;whoever is holding it&rdquo;. A lead on a fence post has nobody holding it at all
+    &mdash; that is the case worth getting right, since a horse can stand tied up for days
+    &mdash; so the mod remembers the person who walked the horse to the fence, and the lead
+    finds them even if they are in the Nether by the time it snaps.
+</p>
+
+<p>
+    <strong>It never holds a lead for you.</strong> Three cases stay exactly as vanilla left
+    them: a horse nobody was recorded as tying up (leashed by a command, or tied before this
+    shipped), a horse tied by somebody who has since logged off, and a horse that walked into
+    a portal with its holder standing right beside it. In all three the lead falls on the
+    ground where it always did. The rule is that a lead is never <em>lost</em>, and never
+    parked somewhere you have to go and claim it later.
+</p>
+
+<p>
+    Same switch as the first half, <a href="config.html"><code>behaviour.leads_return</code></a>
+    &mdash; off restores vanilla for both.
 </p>
 
 <h2 id="mounted-mining">Mining from the saddle</h2>
@@ -405,6 +444,124 @@
     item rather than a missing test.
 </p>
 
+<h2 id="vanilla-leads-coding">How the snapped lead is returned (2026-09-29)</h2>
+
+<p>
+    Two mixins, a stored UUID and thirty lines in <code>server/HorseLeads</code> beside the
+    half that shipped on 2026-09-24. It is much more machinery than that half, and the reason
+    is that <strong>neither end of the problem is where you would look for it</strong>.
+</p>
+
+<h3 id="vanilla-leads-seam">The drop cannot be hooked where it happens</h3>
+
+<p>
+    <code>Leashable.dropLeash()</code> and <code>removeLeash()</code> are both one-line
+    delegates to <code>dropLeash(E, boolean, boolean)</code>, which is <code>private
+    static</code> <em>on the interface</em> &mdash; and that is not a place a mixin can
+    inject. NeoForge publishes no leash event either; there is no class in its
+    <code>event</code> package with &ldquo;leash&rdquo; in the name, re-checked rather than
+    taken from the note that said so.
+</p>
+
+<p>
+    <strong>So the seam is the line it calls, not the method it is.</strong> Every lead
+    vanilla loses is spawned by <code>entity.spawnAtLocation(level, Items.LEAD)</code>, and a
+    search of the whole game finds <em>exactly two</em> callers that pass that method a lead
+    &mdash; the drop itself, and the fallback in <code>restoreLeashFromSave</code> for a
+    leash whose holder no longer exists on load. Both are in <code>Leashable</code>. So one
+    injection on an ordinary public method of <code>Entity</code> covers every path,
+    including the two that arrive from completely different directions:
+    <code>tickLeash</code> for a snap, and a holder failing
+    <code>canInteractWithLevel</code> for a knot somebody broke. That is
+    <code>mixin/LeashDropMixin</code>, and the general lesson is on
+    <a href="api-notes.html#interface-private-static">api&nbsp;notes</a>.
+</p>
+
+<h3 id="vanilla-leads-placer">And the owner has to be written down before it breaks</h3>
+
+<p>
+    By the time the lead is dropped there is <strong>no player anywhere in the
+    situation</strong>. A knot is the holder, not a person; and <code>dropLeash</code> runs
+    <code>entity.setLeashData(null)</code> <em>before</em> it spawns the item, so even the
+    knot is gone. The only moment the answer exists is when the lead goes on, which is
+    <code>mixin/LeashPlacerMixin</code> on <code>Mob.setLeashData</code> &mdash; a concrete
+    override of an abstract interface method, and so reachable where the rest of the leash
+    plumbing is not.
+</p>
+
+<p>
+    The rules it writes are three, and the two that are <em>not</em> &ldquo;record the
+    player&rdquo; are the interesting ones. A <strong>non-player holder on a fresh
+    leash</strong> (a dispenser tying a horse straight to a post) clears whoever was there
+    before, or a lead somebody else tied on would come back to them. A <strong>null holder,
+    or null data</strong>, leaves the record alone: null data is what vanilla writes the
+    instant before it drops the lead, and clearing there would wipe the answer a moment
+    before it is asked for &mdash; while a null holder inside real data is a leash being
+    restored from a save, where clearing would lose the placer of every fence-tied horse on
+    every world load.
+</p>
+
+<p>
+    <strong>The fence transition is handled by vanilla&rsquo;s own control flow rather than
+    by a rule here</strong>, which is the part most worth knowing.
+    <code>Leashable.setLeashedTo</code> calls <code>setLeashData</code> only when the animal
+    had no leash data at all; once it has some it takes a
+    <code>leashData.setLeashHolder(holder)</code> branch that never reaches the mixin. That
+    looks like a gap and is the opposite of one: tying a horse to a fence is always a
+    <em>second</em> attachment, because <code>LeadItem.bindPlayerMobs</code> only considers
+    animals already held by you. So the knot inherits the player recorded a moment earlier,
+    for free.
+</p>
+
+<p>
+    The record lives in a <code>leash_placer</code> attachment &mdash; serialized, since a
+    horse can stand tied up across a restart; not synced, since nothing on the client reads
+    it. It is deliberately <em>not</em> cleared when the lead comes off, because the drop
+    reads it after vanilla has already untied the horse. A stale value is harmless: nothing
+    consults it unless a lead is being dropped, and the next person to tie one on overwrites
+    it.
+</p>
+
+<h3 id="vanilla-leads-test">What the test can and cannot reach</h3>
+
+<p>
+    <code>vanilla_lead_comes_back</code> in <code>gametest/ModGameTests</code>, and it is
+    shaped by two things that went wrong in its first draft.
+</p>
+
+<p>
+    <strong>It drops nothing on the ground.</strong> The first version asserted the fallback
+    by really calling <code>dropLeash()</code> and finding the lead on the floor, and it
+    broke <a href="#leads-coding"><code>whistled_lead_comes_back</code></a> &mdash; whose own
+    <code>assertItemEntityNotPresent</code> reaches sixteen blocks and found this test&rsquo;s
+    lead in the neighbouring plot. A gametest that litters the shared world fails its
+    neighbours rather than itself, which is a bad way to find out.
+</p>
+
+<p>
+    <strong>And it makes no real player.</strong> A gametest server has nobody on it, so the
+    only player <code>getPlayerList()</code> could find is one built by
+    <code>makeMockServerPlayerInLevel</code> &mdash; <code>@Deprecated(forRemoval)</code>,
+    and it really joins the player list, which fires this mod&rsquo;s join payloads down an
+    <code>EmbeddedChannel</code> that has negotiated nothing and takes the whole run down
+    with <em>&ldquo;Payload horsegenetics:gene_database_sync may not be sent to the
+    client&rdquo;</em>. So the test drives <code>HorseLeads.giveRecordedLeadTo</code> and the
+    one line above it &mdash; the player-list lookup &mdash; is the only part of this left to
+    the in-game check.
+</p>
+
+<p>
+    <strong>Proving the mixins are applied is not the test&rsquo;s job</strong>, and it would
+    be a weaker guarantee than the one already in place: the mixin config&rsquo;s
+    <code>defaultRequire</code> of 1 means a target that stops matching <em>refuses to boot
+    the game</em>. What the test owns is everything that would still be wrong with both
+    mixins happily applied &mdash; that the placer is recorded, that the fence does not erase
+    it, that an unreachable placer is refused so vanilla still drops, that the wrong player
+    is refused, and that the record is cleared afterwards. That last one was confirmed to
+    fail, with <em>&ldquo;the placer was not cleared&hellip; a second drop would mint a second
+    lead out of nothing&rdquo;</em>, against a copy with the clear deleted.
+</p>
+
 <h2 id="tack-equip-coding">How the tack click works (2026-09-29)</h2>
 
 <p>
@@ -521,10 +678,9 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        Two are left, both wanting a config switch &mdash; returning the leads
-        <em>vanilla</em> drops, which has no event to hang on, and
-        <strong>fading the horse out as you look down</strong>, which asks the coat pipeline
-        for a transparency it has never had.
+        One is left: <strong>fading the horse out as you look down</strong>, which asks
+        the coat pipeline for a transparency it has never had, and so begins with a
+        rendering spike rather than with a feature.
     </p>
 </div>
 
@@ -533,12 +689,12 @@
 <p id="rider-comfort">
     Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster of the
     survey backlog</a>. None touches genetics, and each is small enough to
-    ship on its own. <strong>Both of the two left want a config switch written with
-    them</strong>, per <a href="config.html#config-everything">the config sweep</a> &mdash;
+    ship on its own. <strong>The one left wants a config switch written with it</strong>,
+    per <a href="config.html#config-everything">the config sweep</a> &mdash;
     <a href="#leads">the returned lead</a>,
     <a href="#mounted-mining">mining from the saddle</a> and
     <a href="#tack-equip">the tack click</a> all went out with their switch written beside
-    them, which is the pattern the rest should follow.
+    them, which is the pattern to follow.
     <a href="#rider-inventory">The inventory keybind</a> is the one exception and shipped
     deliberately without one: an unbound key is already the switch.
 </p>
@@ -550,14 +706,6 @@
         coat is generated per horse, and a half-transparent procedural coat is a rendering case
         nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
         transparency before designing the feature around it.</li>
-    <li><strong>Leads return to your inventory when <em>vanilla</em> drops one</strong> &mdash;
-        a leash that snaps at range, or a knot broken by hand. From Horse Tweaks.
-        <a href="#leads-coding">This mod&rsquo;s own half shipped on 2026-09-24</a>; what is left
-        is the vanilla cases, and they are harder than they look. NeoForge 26.1.2 publishes
-        <strong>no leash event at all</strong>, and <code>Leashable.dropLeash</code> spawns its
-        item through <code>Entity.spawnAtLocation</code> with nothing to hook &mdash; so the only
-        seams are a mixin or an <code>EntityJoinLevelEvent</code> filter that would have to tell
-        a snapped lead from one a player threw on the floor. Decide which before building it.</li>
 </ul>
 
 <p class="muted">
@@ -573,7 +721,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Four shipped pieces have been seen by no player &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires; the ALT+E inventory key is the mod's first key chord, resting on a reading of NeoForge's input layer that no client has yet run; and the tack click now shares the plain right-click with every other interaction this mod has, so what wants watching is not whether it equips a braid but whether feeding, naming and mounting still behave.</p>
+    <p>Five shipped pieces have been seen by no player &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires; the ALT+E inventory key is the mod's first key chord, resting on a reading of NeoForge's input layer that no client has yet run; the tack click now shares the plain right-click with every other interaction this mod has, so what wants watching is not whether it equips a braid but whether feeding, naming and mounting still behave; and the snapped lead is two mixins deep into vanilla's leash code, where the part no test could reach is the player-list lookup that is the whole point of it.</p>
 </div>
 
 <h3 id="leads-verify">The lead comes back (2026-09-24, NOT played)</h3>
@@ -713,6 +861,77 @@
     one, ship it, and say which; do not leave a chord in that half-works.
 </p>
 
+<h3 id="vanilla-leads-verify">The snapped lead (2026-09-29, NOT played)</h3>
+
+<p>
+    <code>vanilla_lead_comes_back</code> pins the recording, the fence transition and every
+    refusal, and was confirmed to fail against a copy that did not clear the record. Two
+    things are left, and they are the two halves it structurally could not reach.
+</p>
+
+<p>
+    <strong>The player-list lookup has never run.</strong> A gametest server has nobody on
+    it, so the one line that turns a stored UUID into a player &mdash;
+    <code>getPlayerList().getPlayer(id)</code> &mdash; is the only part of this that has
+    never executed against a real player. If it is wrong, every lead falls on the ground and
+    the feature is silently absent: it looks exactly like vanilla, because it <em>is</em>
+    vanilla. That makes the first check below the one that matters.
+</p>
+
+<p>
+    <strong>And two mixins now sit on paths every entity uses.</strong>
+    <code>LeashDropMixin</code> is on <code>Entity.spawnAtLocation</code>, which every item
+    any entity ever drops goes through, and <code>LeashPlacerMixin</code> is on
+    <code>Mob.setLeashData</code>, which every leashed animal in the game touches. Neither
+    should do anything outside its guard, and the checks for that are worth more than the
+    feature ones.
+</p>
+
+<ul>
+    <li><strong>The snap, which is the check that matters.</strong> Tie a lead to your horse,
+        walk it, then run away until the leash breaks. <strong>Pass:</strong> the lead is in
+        your pack. <strong>Fail:</strong> it is on the ground where the horse was, which
+        means the lookup found nobody and the whole feature is absent.</li>
+    <li><strong>The fence, which is what the stored UUID exists for.</strong> Walk a horse to
+        a fence, tie it there, then walk away and log off and back on if you like.
+        Break the knot. <strong>Pass:</strong> the lead comes to you.
+        <strong>Fail:</strong> it drops at the post, which means the placer was lost either
+        at the moment of tying or across the save.</li>
+    <li><strong>Across a dimension.</strong> Tie a horse to a fence in the Overworld, go to
+        the Nether, and have someone break the knot &mdash; or leave it leashed to something
+        that will stop existing. The lead should reach you where you are. This is the
+        decided rule and it is the one that would be easiest to get half right.</li>
+    <li><strong>Nothing else that drops an item changed.</strong> The most valuable check
+        here: kill a horse wearing a saddle and barding, shear a braid off, break a cart,
+        empty a trough, kill a cow, mine a block. Everything should drop exactly what it
+        always did. <code>Entity.spawnAtLocation</code> is a very general method and the
+        guard on it is one identity comparison &mdash; if that guard is wrong, items go
+        missing all over the game.</li>
+    <li><strong>Other animals are untouched.</strong> Snap a leash on a cow, a pig, a llama.
+        <strong>Pass:</strong> the lead falls on the ground, exactly as vanilla &mdash; this
+        is a horse mod and the mixin is guarded to <code>AbstractHorse</code>.</li>
+    <li><strong>A donkey and a mule are included</strong>, though. Same check as the snap,
+        on one of each.</li>
+    <li><strong>Untying by hand is unchanged.</strong> Right-click a horse you are leading,
+        with an empty hand. <strong>Pass:</strong> the lead drops at your feet as before
+        &mdash; you are standing right there, and this is the same reasoning that leaves the
+        portal paths alone.</li>
+    <li><strong>An offline placer drops it.</strong> Two players: one ties a horse up and
+        logs off, the other breaks the knot. <strong>Pass:</strong> the lead is on the
+        ground. <strong>Fail:</strong> nothing anywhere, which would mean a lead held for
+        later, and the rule is that never happens.</li>
+    <li><strong>A command-leashed horse drops it too.</strong> Leash one with
+        <code>/data</code> or a dispenser and break it. Nobody was recorded, so the ground is
+        correct.</li>
+    <li><strong>No dupe on a full pack.</strong> Fill your inventory, then snap a leash.
+        <strong>Pass:</strong> exactly one lead, at your feet.
+        <strong>Fail:</strong> two, or none.</li>
+    <li><strong>The switch works in both directions.</strong> Turn
+        <a href="config.html"><code>behaviour.leads_return</code></a> off, restart, and snap
+        a leash: the lead should fall where the horse was. It now governs both halves, so
+        check the whistle case is still off as well.</li>
+</ul>
+
 <h3 id="tack-equip-verify">The tack click (2026-09-29, NOT played)</h3>
 
 <p>
@@ -782,10 +1001,11 @@
     The returned lead was the first of the five and took an afternoon; mining from the saddle
     was the second and took less; the inventory keybind was the third and was two classes and
     a lang key; the tack click was the fourth and was smaller than planned, because two
-    thirds of it turned out to be vanilla's already. What is left is the lead's other half,
-    which wants a decision before a build, and the fade &mdash; the one to leave until the
-    coat has actually been drawn half-transparent, because everything about how it would be
-    configured depends on whether it can be drawn at all.
+    thirds of it turned out to be vanilla's already; the lead's other half was the fifth and
+    much the largest, two mixins for something that reads like one line. Only the fade is
+    left, and it is the one to leave until the coat has actually been drawn half-transparent,
+    because everything about how it would be configured depends on whether it can be drawn
+    at all.
 </div>
 
 </article>

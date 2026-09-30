@@ -1,0 +1,114 @@
+2026-09-29 - the lead that snapped, and a seam one line away from the method you wanted
+
+
+    Rider comfort piece 4, the one the treatment had deferred as "a decision
+    first, not a build". The decision turned out to be answerable by reading,
+    which is the theme of the whole piece.
+
+    What the decision actually was. The Roadmap tab said: "the only seams are a
+    mixin or an EntityJoinLevelEvent filter that would have to tell a snapped
+    lead from one a player threw on the floor. Decide which before building
+    it." The treatment had already decided - a mixin - and left the building
+    session to find WHERE. That is the part that was genuinely open.
+
+    Re-proved the premise first, per the note that said it was not re-proved.
+    NeoForge 26.1.2 publishes no leash event: there is no class in its event
+    package with "leash" in the name at all. Confirmed by unpacking the sources
+    jar and grepping, not taken from the older note.
+
+    The seam, and why the obvious one does not exist. Leashable.dropLeash() and
+    removeLeash() are both one-line delegates to
+
+        private static <E extends Entity & Leashable> void dropLeash(E, boolean, boolean)
+
+    on the INTERFACE. Mixin cannot inject into an interface's private static
+    method. 26.1.2 has moved a lot of behaviour into interfaces this way, so
+    this is going to keep happening; it is written up on api-notes.html as its
+    own entry.
+
+    The answer is to stop looking for the method and look at the line it calls.
+    Everything dropLeash does to the world it does through ordinary public
+    methods: it spawns the item with Entity.spawnAtLocation(ServerLevel,
+    ItemLike). Grepping the whole game for Items.LEAD reaching that method finds
+    EXACTLY TWO callers, both inside Leashable - the drop itself, and the
+    fallback in restoreLeashFromSave for a leash whose holder is gone on load.
+    So one injection on one ordinary method covers every path, including the two
+    that arrive from completely different directions: tickLeash for a snap, and
+    a holder failing canInteractWithLevel for a broken knot. That is
+    mixin/LeashDropMixin.
+
+    The other end was harder than the drop. By the time the lead is dropped
+    there is no player in the situation at all: a knot is the holder rather than
+    a person, and dropLeash runs setLeashData(null) BEFORE spawnAtLocation, so
+    even the knot is gone. The placer has to be written down when the lead goes
+    on. mixin/LeashPlacerMixin does that on Mob.setLeashData - a concrete
+    override of an abstract interface method, and therefore reachable where the
+    rest of the leash plumbing is not - into a serialized leash_placer
+    attachment.
+
+    The nicest thing found all session. The fence case needs no rule of ours at
+    all. Leashable.setLeashedTo calls setLeashData only when the animal had NO
+    leash data; once it has some it takes a leashData.setLeashHolder(holder)
+    branch that never reaches the mixin. That reads like a gap and is the
+    opposite of one: tying a horse to a fence is always a SECOND attachment,
+    because LeadItem.bindPlayerMobs only considers animals already held by you.
+    So a knot inherits the player recorded a moment earlier, for free, out of
+    vanilla's own control flow. The gametest pins it, because it is a claim
+    about vanilla rather than about this mod.
+
+    Two rules that are deliberately "do nothing". The attachment is NOT cleared
+    when the lead comes off - the drop reads it after vanilla has untied the
+    horse, so clearing on setLeashData(null) would wipe the answer an instant
+    before it is asked for. And a null holder inside real leash data is left
+    alone too, because that is a leash being restored from a save; clearing
+    there would lose the placer of every fence-tied horse on every world load.
+    Both were found by reading the call order rather than by testing.
+
+    Two false starts in the gametest, both worth recording because both are
+    traps for the next test in this file.
+
+    First, it dropped a real lead on the ground to assert the fallback - and
+    broke whistled_lead_comes_back, whose own assertItemEntityNotPresent reaches
+    sixteen blocks and found this test's lead in the neighbouring plot. A
+    gametest that litters the shared world fails its NEIGHBOURS, not itself,
+    which is an expensive way to find out.
+
+    Second, it needed a player the server's player list could find, and the only
+    way to make one is makeMockServerPlayerInLevel - @Deprecated(forRemoval),
+    and it really joins the player list, which fires this mod's join payloads
+    down an EmbeddedChannel that has negotiated nothing: "Payload
+    horsegenetics:gene_database_sync may not be sent to the client", and the run
+    dies. The previous session's whistled_lead_comes_back had avoided that
+    helper for a different reason and was right for a second one.
+
+    So the test drives HorseLeads.giveRecordedLeadTo, split out from the lookup
+    for exactly this reason, and the single line above it - the player-list
+    lookup - is the only part of the feature left to the in-game check. That is
+    an honest gap and it is first on the Verification tab.
+
+    What is NOT the test's job: proving the mixins are applied. defaultRequire
+    is 1, so a target that stops matching refuses to boot the game - a stronger
+    guarantee than any assertion. What the test owns is everything that would
+    still be wrong with both mixins happily applied, and the clear-the-record
+    assertion was confirmed to fail ("a second drop would mint a second lead out
+    of nothing") against a copy with the clear deleted. All 22 gametests green
+    afterwards, no ERROR anywhere in the run.
+
+    The risk that is not in any test. LeashDropMixin sits on
+    Entity.spawnAtLocation, which every item any entity ever drops passes
+    through. The guard is one identity comparison against Items.LEAD and an
+    instanceof, but if it is ever wrong, items go missing all over the game. The
+    Verification tab's highest-value check is therefore not about leads at all -
+    it is "kill a horse wearing tack, shear a braid, break a cart, mine a block,
+    and confirm everything still drops what it always did".
+
+    behaviour.leads_return now governs both halves and its comment says so; it
+    used to end by stating that the vanilla cases were excluded.
+
+    Open for the next session: rider comfort is down to one piece, and it is the
+    fade. It starts with a rendering spike, not a feature - force a fixed alpha
+    on the ridden horse in GeneticHorseRenderer and look at what the generated
+    coat, the cutie-mark layer, the emissive layer and the worn gear do under
+    it. Translucency also changes sort order and can show a horse's insides
+    through itself. If the coat cannot be drawn cleanly half-transparent the
+    standing instruction is to stop and report rather than ship a guess.

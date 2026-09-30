@@ -21,6 +21,20 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-the-lead-that-snapped.txt">2026-09-29
+        &mdash; <strong>the lead that snapped, and a seam one line away from the method you
+        wanted</strong>. Rider comfort piece 4, deferred as &ldquo;a decision first&rdquo;
+        and answered by reading. <code>Leashable.dropLeash</code> is a
+        <code>private static</code> on an <em>interface</em>, which no mixin can reach
+        &mdash; but the line it spawns the item on,
+        <code>Entity.spawnAtLocation(ServerLevel, ItemLike)</code>, has exactly two callers
+        in the whole game that pass it a lead, so one injection covers every path. The
+        placer has to be written down when the lead goes on, because by drop time there is
+        no player in the situation at all; and the fence case needs no rule of ours, since
+        vanilla only calls <code>setLeashData</code> on a <em>first</em> attachment. Two
+        false starts in the gametest are written up too: one littered the shared world and
+        broke a neighbouring test, the other joined a mock player to the player list and
+        took the run down with it.</li>
     <li><a href="session-log/d2026-09-29-tack-goes-on-with-a-click.txt">2026-09-29
         &mdash; <strong>tack goes on with a click, and two thirds of the piece was already
         in vanilla</strong>. Rider comfort piece 3. The treatment marked it unverified and
