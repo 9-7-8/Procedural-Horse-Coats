@@ -153,6 +153,17 @@
     horses that far apart each have their own neighbourhood. Clustering the layers is what made the pen
     readable.
 </p>
+<p>
+    <strong>A mismatched pair and a single copy lay nothing; leather and the ender pearl lay their own
+    item</strong> (2026-09-30, unattended). The <a href="horse-dimension.html#clockwork">clockwork</a>
+    pens EGG MISMATCH (<code>Egg/Lthr</code>), EGG CARRIER (<code>Egg/n</code>), EGG LEATHER and EGG
+    PEARL (row AN) remember every item on each floor for twenty-five minutes, and all four logged
+    <code>CLOCKWORK PASS</code>: the mismatched pair and the carrier laid nothing in twenty-five minutes;
+    <code>Lthr/Lthr</code> laid five leather and nothing else; <code>Endp/Endp</code> laid four ender
+    pearls and nothing else. So the locus resolves each allele&rsquo;s id against the live registry and
+    lays that item, not eggs &mdash; and the pearl the <a href="breed-book.html#enderpony">Enderpony</a>
+    is built on is a real allele, not a wrong id that warns once and then does nothing for ever.
+</p>
 
 </section>
 
@@ -177,55 +188,28 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Egg layer is confirmed laying and confirmed bounded, but only for the egg and only for the
-    matched pair: nobody has checked that a mismatched pair and a single copy lay <em>nothing</em>,
-    that an allele other than the egg lays its own item, or that the new ender pearl allele the
-    Enderpony is built on lays anything at all.</p>
+    <p>Egg layer is confirmed across the locus in the pens &mdash; mismatched pairs and carriers lay
+    nothing, leather and the ender pearl lay their own item &mdash; but nobody has checked what the
+    spawn egg&rsquo;s gene row calls those horses, that no wild horse lays while every Enderpony does,
+    or that two layers keep their own clocks.</p>
 </div>
-
-<p>
-    <strong>In the yard since 2026-09-30:</strong> the <a href="horse-dimension.html#clockwork">clockwork</a> pens EGG MISMATCH
-    (<code>Egg/Lthr</code>), EGG CARRIER (<code>Egg/n</code>), EGG LEATHER and EGG PEARL (row AN) ask the
-    first four checks below with nobody there: every item on each floor is remembered for twenty-five
-    minutes and each pen logs <code>CLOCKWORK PASS</code> or <code>FAIL</code>. <strong>First run,
-    2026-09-30, all PASS, not owner-confirmed:</strong> the mismatched pair and the carrier laid nothing in
-    twenty-five minutes; <code>Lthr/Lthr</code> laid five leather and nothing else; <code>Endp/Endp</code>
-    laid four ender pearls and nothing else.
-</p>
-
 
 <h3 id="open-gene-egg-layer">Still open (NOT played)</h3>
 
 <p>
-    What the overnight pens settled is on the <a href="#verified">Coding tab</a>: the horses lay, the
-    despawn timer bounds the eggs, and <code>nearby_cap</code> never has to fire. What they did not
-    test is the <em>locus</em> &mdash; they were four horses of one allele, all expressing. Every
-    check below is about the combinations that must produce nothing, which is the half that fails
-    without telling anybody.
+    What the pens settled is on the <a href="#verified">Coding tab</a>: the horses lay, the despawn
+    timer bounds the eggs, <code>nearby_cap</code> never has to fire, a mismatched pair and a carrier
+    lay nothing, and leather and pearl layers lay leather and pearls. What is left is how the locus
+    reads to a player, what the wild rolls, and the epigenetic interval.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>A mismatched pair lays nothing.</strong> Spawn a horse with two <em>different</em>
-        laying alleles &mdash; say egg and leather &mdash; from the custom horse spawn egg, and
-        leave it on a swept floor for an hour of game time. <strong>Pass:</strong> the ground stays
-        empty, and its gene row reads the mismatched expression rather than either allele. This is
-        most crosses between two carriers, so it is the common case and not the corner.</li>
-    <li><strong>One copy lays nothing.</strong> The same, with an <code>Egg/n</code> horse.
-        <strong>Pass:</strong> nothing on the ground and a carrier row.</li>
-    <li><strong>An allele that is not the egg lays its own item.</strong> Spawn a matched pair of
-        one of the other alleles &mdash; leather or slime ball, say &mdash; and wait out one
-        interval. <strong>Pass:</strong> that item appears, not eggs. The item id is resolved
-        against the live registry per allele and only the egg has ever been watched
-        working; a wrong id warns once through <code>warnUntranslated</code> and then lays nothing
-        for ever.</li>
-    <li><strong>The ender pearl allele lays a pearl.</strong> <code>Endp/Endp</code> is the newest
-        allele and the only one anybody has a reason to breed for, so it is the one a wrong id would
-        be most embarrassing on. Spawn one from the custom horse spawn egg and wait out an interval.
-        <strong>Pass:</strong> an ender pearl on the floor, and nothing in the log from
-        <code>warnUntranslated</code>. Then do the same by catching an
-        <a href="breeds.html#commonness">Enderpony</a>, which is the route a player takes.</li>
+    <li><strong>The gene row says which horses will not lay.</strong> Spawn an <code>Egg/Lthr</code> and an
+        <code>Egg/n</code> horse from the custom horse spawn egg. <strong>Pass:</strong> the first
+        row reads the mismatched expression rather than either allele, the second a carrier. The
+        pens proved they lay nothing; only a person can see what the screen says about it.</li>
     <li><strong>No wild horse lays, and an Enderpony does.</strong> The founder table for a
         matched-pair locus puts carriers in the wild and never the pair, but a breed pool overrides
         the founder table and the Enderpony's names <code>Endp/Endp</code>. <strong>Pass:</strong>

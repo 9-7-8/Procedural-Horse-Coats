@@ -95,9 +95,10 @@
 </dl>
 
 <div class="note warn">
-    <span class="label">Newly built, not yet play-tested</span>
+    <span class="label">Partly play-tested</span>
     <p>
-        Nothing on this page has been seen in game. The translator was written
+        A <code>Mlk/Mlk</code> mare refilling early is <a href="#verified">verified</a>;
+        the same for a water-bearing horse has not been seen. The translator was written
         against the 26.1.2 sources and is flagged as unverified in its own
         comments. Checklist on <a href="#verification">the Verification tab</a>.
     </p>
@@ -155,6 +156,19 @@ for (HorseAbilities.Active active : abilities) {
     &ldquo;2&nbsp;+&nbsp;3&rdquo; both add up in front of the reader.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-clockwork-refill">
+    <strong>A <code>Mlk/Mlk</code> mare fills again after a fraction of a day &mdash; the charges divide the
+    cooldown, they do not bank</strong> (2026-09-30, the <a href="horse-dimension.html#clockwork">clockwork</a>
+    run in the debug test yard). In MILK BY CLOCK, row J west, a fake player milks the <code>Mlk/Mlk</code>
+    mare and then tries her with a bucket every minute until she fills again, while the plain mare beside her
+    refuses on her cooldown with &ldquo;Nothing to give yet - try again later.&rdquo; Every run that reached
+    it logged <code>CLOCKWORK PASS</code>: &ldquo;filled again 3600 ticks after the first milking (a day is
+    24000; a plain mare waits the whole of it)&rdquo;, and 2400 ticks on another run. That covers the plain
+    milk yield only; the water-bearing half is not in the pen.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -186,18 +200,17 @@ for (HorseAbilities.Active active : abilities) {
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A single timing question, invisible unless you clock it &mdash; a <code>Mlk/Mlk</code> mare must refill after a fraction of a day because <strong>charges divide the cooldown rather than bank</strong>, and a water-bearing horse has to behave the same way.</p>
+    <p>A single timing question, invisible unless you clock it &mdash; a <strong>water-bearing</strong> <code>Mlk</code> horse must refill early the way a <code>Mlk/Mlk</code> mare already does, because charges divide the cooldown rather than bank.</p>
 </div>
 
 <h3 id="open-older-gene-magic-milk-volume">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>Milk volume</strong> (yard: the <code>Mlk/Mlk</code> mare in MILK BY CLOCK, row J west, a
-        <a href="horse-dimension.html#clockwork">clockwork</a> pen since 2026-09-30 &mdash; tried with a bucket every minute after her first filling
-        until she fills again, logged as <code>CLOCKWORK PASS</code> or <code>FAIL</code>; the water-bearing
-        half is not in it). <strong>First run, 2026-09-30, PASS, not owner-confirmed:</strong> the
-        <code>Mlk/Mlk</code> mare filled again 3600 ticks after her first milking, where the plain mare
-        beside her refused at 2000 with &ldquo;Nothing to give yet&rdquo;. <strong>Pass:</strong> a second filling is possible after a fraction of a day (charges divide the cooldown, they do not bank), and the same holds for a water-bearing horse (<a href="gene-magic-milk-volume.html">magic milk volume</a>).</li>
+    <li><strong>Milk volume on water.</strong> The milk half is <a href="?view=coding#verified-clockwork-refill">verified</a>;
+        the yard&rsquo;s MILK BY CLOCK pen has no water-bearing <code>Mlk</code> horse, so this half is unread.
+        Clock a <code>milk=Watr/Watr</code> horse that is also <code>Mlk/Mlk</code> against a plain
+        <code>Watr/Watr</code> one. <strong>Pass:</strong> it fills again sooner than its own water cooldown
+        allows the plain one (charges divide the cooldown, they do not bank).</li>
 </ul>
 
 </section>

@@ -119,12 +119,13 @@
 </dl>
 
 <div class="note">
-    <span class="label">Unplayed</span>
+    <span class="label">Partly played</span>
     <p>
         The locus, its inheritance and the resolution channel are covered by
-        <code>DietGeneTest</code>. The <em>feeding</em> half &mdash; refusing an
-        apple, healing off a bar of gold, leaving a bucket behind &mdash; has
-        never been run in a game. See <a href="#verification">the Verification tab</a>.
+        <code>DietGeneTest</code>. Of the <em>feeding</em> half, refusing an apple
+        and eating lava from a bucket are <a href="#verified-clockwork-diet">verified</a>;
+        healing off a bar of gold and leaving a bottle behind have never been run in a
+        game. See <a href="#verification">the Verification tab</a>.
     </p>
 </div>
 
@@ -254,7 +255,22 @@
     spawner pens had made. BLOOD ONLY (<code>Dbld/Dbld</code> alone, no sun sensitivity) bit its cow in full daylight at
     tick 111 in the 09:09 run, and never logged a sun line. It is not reliable yet: in the 08:47 run it went all day
     without biting (<a href="known-gaps.html#gap-250">gap 250</a>). <em>Still for a person:</em> the player and tamed-wolf
-    steps of the order, and food turned away by hand.
+    steps of the order. Food turned away is <a href="#verified-clockwork-diet">below</a>.
+</p>
+
+<p id="verified-clockwork-diet">
+    <strong>A narrow diet refuses the wrong food by name and eats its own; a blood drinker refuses everything;
+    a plain horse still heals on wheat</strong> (2026-09-30, the <a href="horse-dimension.html#clockwork">clockwork</a>
+    run in the debug test yard). DIET BY CLOCK, row AP east, feeds a <code>Dlava/Dlava</code>, a
+    <code>Dbld/Dbld</code> and a plain horse from a fake player that keeps every chat line, and each case logged
+    <code>CLOCKWORK PASS</code> on every run from the second on. The lava-eater turned an apple away and the apple
+    was kept: &ldquo;The horse turns its head away. It only eats lava.&rdquo; A survival lava bucket took it from 11
+    to 22 of 22 and handed back an empty bucket; in creative a lava bucket did the same and was not used up. The
+    blood drinker turned an apple away with &ldquo;The horse turns its head away. Nothing you can hold out will
+    feed it.&rdquo; Wheat took the plain horse from 11 to 13. The first run found every single-food diet saying
+    &ldquo;It only eats lava only.&rdquo; &mdash; the labels end in &ldquo;only&rdquo; &mdash; fixed the same day in
+    <code>HorseDietHandler.refuse</code>; and its heals read nothing, because the pen&rsquo;s water had healed the
+    horses first, which <code>DebugTestYard.dryPen</code> settled from the second run.
 </p>
 
 </section>
@@ -461,28 +477,21 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Feeding is where this breaks: a white Dhampir must turn away every food and bite <em>you</em> before a tamed wolf, while a special-diet horse takes only its own food &mdash; a lava bucket leaving an empty bucket, and nothing consumed in creative.</p>
+    <p>Feeding is where this breaks: a white Dhampir must bite <em>you</em> before a tamed wolf, a potion-eater must hand back its bottle and a metal-eater heal off one bar, and a special-diet horse must still take a golden carrot, saddle, ride and breed.</p>
 </div>
 
 <p>
-    <strong>In the yard since 2026-09-30:</strong> the <a href="horse-dimension.html#clockwork">clockwork</a> pen DIET BY CLOCK (row AP east)
-    feeds a <code>Dlava/Dlava</code>, a <code>Dbld/Dbld</code> and a plain horse from fake-player hands
-    that keep every chat line. <strong>First run, 2026-09-30, not owner-confirmed:</strong> the lava-eater
-    refused an apple and the apple was kept &mdash; with &ldquo;It only eats lava only.&rdquo;, a doubled
-    word every single-food diet had (the labels end in &ldquo;only&rdquo;), fixed the same day in
-    <code>HorseDietHandler.refuse</code>; a creative lava bucket healed it from 12.5 to full and was not used up; a survival lava bucket
-    came back as an empty bucket; the blood-drinker refused an apple with &ldquo;Nothing you can hold out
-    will feed it.&rdquo; The two heals on full-health horses read nothing (the pen's water had healed them
-    first); with the pen dry, the second run's survival lava bucket took the lava-eater from 11 to full and
-    handed back the bucket, and wheat took the plain horse from 11 to 13.
+    The yard&rsquo;s <a href="horse-dimension.html#clockwork">clockwork</a> pen DIET BY CLOCK (row AP east) answered
+    the refusals, the lava bucket and wheat on 2026-09-30 (<a href="?view=coding#verified-clockwork-diet">verified</a>).
+    Its hand is a fake player that no aura finds and that cannot ride, so nothing below is in it.
 </p>
 
 
 <h3 id="open-older-gene-diet">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>A white Dhampir cannot be fed.</strong> Any food is turned away with &ldquo;Nothing you can hold out will feed it.&rdquo; Hurt one after dark with no animal near and you in survival: it bites you. With a tamed wolf and you in creative, it bites the wolf only once nothing else is in reach. The cow-first order is <a href="gene-diet.html#verified-blood-hunt">verified</a>.</li>
-    <li><strong>A narrow diet, by hand.</strong> A plain horse fed wheat, an apple and a golden carrot heals, loves and bonds as before. A special-diet horse refuses an apple with smoke and a line naming its food, and eats the right thing. A lava bucket leaves an empty bucket and a potion a bottle, with nothing consumed in creative. One bar fully heals a hurt metal-eater, where hunger allows (<a href="horse-care.html#hunger">hunger</a>). It still saddles, rides and breeds.</li>
+    <li><strong>A white Dhampir bites you before a wolf.</strong> Hurt one after dark with no animal near and you in survival: it bites you. With a tamed wolf and you in creative, it bites the wolf only once nothing else is in reach. The cow-first order and the refusal of all food are <a href="gene-diet.html#verified">verified</a>.</li>
+    <li><strong>A narrow diet, by hand.</strong> A plain horse fed an apple and a golden carrot heals, loves and bonds as before (wheat is verified). A special-diet horse&rsquo;s refusal puffs smoke. A potion-eater leaves a bottle. One bar fully heals a hurt metal-eater, where hunger allows (<a href="horse-care.html#hunger">hunger</a>). It still saddles, rides and breeds.</li>
 </ul>
 
 </section>

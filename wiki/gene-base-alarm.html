@@ -109,6 +109,27 @@
     put the horse <em>is</em> the configuration.
 </p>
 
+<h3 id="verified">Verified in the test yard</h3>
+
+<p>
+    <strong>The alarm fires, one copy is enough, it is silent with nothing hostile about, and the
+    cooldown is per horse</strong> (2026-09-30, the <a href="horse-dimension.html#clockwork">clockwork</a>
+    pens, run with nobody there). <em>ALARM NEAR</em> (<code>Alm/Alm</code>) and <em>ALARM
+    CARRIER</em> (<code>Alm/n</code>) each stand beside a husk caged in glass, and <em>ALARM
+    QUIET</em> (<code>Alm/Alm</code>) in a pen sixteen blocks from anything hostile. The census tallies
+    gene sounds by id for the whole dimension, which cannot tell those pens apart, so
+    <code>DebugWorldWatch.soundsFrom</code> counts per horse. In five minutes ALARM NEAR sounded 30
+    times and ALARM CARRIER 30 &mdash; against the 32 the cooldown allows, so the dominant copy
+    expresses and the <code>COOLDOWN_TICKS</code> bound holds per horse rather than being shared or
+    skipped &mdash; and ALARM QUIET not once, which is the control that separates &ldquo;the
+    <code>hostile_near</code> flag works&rdquo; from &ldquo;the flag is stuck true&rdquo;.
+</p>
+<p>
+    <em>Why a log and not an ear:</em> the sound it plays is vanilla&rsquo;s own
+    <code>entity.horse.angry</code>, the noise an ordinary annoyed horse makes anyway, so only a count
+    can tell a working alarm from a silent one.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -129,59 +150,35 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Base alarm has never been heard firing: its whinny is vanilla&rsquo;s own
-    <code>entity.horse.angry</code>, so only the census&rsquo;s sound count can tell a working
-    alarm from a silent one, and nobody has read that number yet.</p>
+    <p>Base alarm is shown firing, silent when nothing is near, and cooldown-bound per horse, but
+    nobody has checked that its radius is measured from the horse, or stood among a herd of them to
+    hear whether it is bearable.</p>
 </div>
 
 <h3 id="open-gene-base-alarm">Still open (NOT played)</h3>
 
 <p>
     The gene is one <code>Sound</code> ability gated on the <code>hostile_near</code> world flag,
-    sampled every <code>BaseAlarmGene.CHECK_TICKS</code> with a
-    <code>COOLDOWN_TICKS</code> under it. The yard&rsquo;s <a href="horse-dimension.html#clockwork">clockwork</a> pens ask it with nobody there
-    (2026-09-30): <em>ALARM NEAR</em> (<code>Alm/Alm</code>) and <em>ALARM CARRIER</em> (<code>Alm/n</code>)
-    each beside a husk caged in glass, and <em>ALARM QUIET</em> (<code>Alm/Alm</code>) in a pen sixteen
-    blocks from anything hostile. The census tallies gene sounds by id for the whole dimension, which
-    cannot tell those pens apart, so <code>DebugWorldWatch.soundsFrom</code> counts per horse.
-    <strong>First run, 2026-09-30, not owner-confirmed:</strong> in five minutes ALARM NEAR sounded 30
-    times and ALARM CARRIER 30 (the cooldown allows 32), and ALARM QUIET not once &mdash; which answers
-    the first, second, fourth and fifth checks below as far as a log can. <strong>Do not try to judge this by ear:</strong>
-    the sound it plays is the noise an ordinary annoyed horse makes anyway.
+    sampled every <code>BaseAlarmGene.CHECK_TICKS</code> with a <code>COOLDOWN_TICKS</code> under it.
+    That it fires, that one copy is enough, that it is silent with nothing hostile about and that the
+    cooldown holds per horse is on the <a href="#verified">Coding tab</a>, from the
+    <a href="horse-dimension.html#clockwork">clockwork</a> pens. <strong>Do not try to judge this by
+    ear:</strong> the sound it plays is the noise an ordinary annoyed horse makes anyway.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The alarm fires at all.</strong> Stand at the yard&rsquo;s <em>BASE ALARM</em> pen
-        until the neighbouring spawner is running. <strong>Pass:</strong> the census line
-        &ldquo;gene sounds since the last census&rdquo; names
-        <code>minecraft:entity.horse.angry</code> with a non-zero count. A zero there is the whole
-        gene failing, and nothing else below is worth checking until it moves.</li>
-    <li><strong>It is silent with nothing hostile about.</strong> Put an expressing horse in a
-        lit, walled pen with no mobs and leave it for a census or two.
-        <strong>Pass:</strong> that sound id is absent from the census entirely. This is the
-        control that separates &ldquo;the flag works&rdquo; from &ldquo;the flag is stuck
-        true&rdquo;, and the sampled world flags have been stuck-off for every gene in the mod
-        once already.</li>
     <li><strong>The radius is measured from the horse.</strong> Two expressing horses, one within
         sixteen blocks of a spawner and one well outside it. <strong>Pass:</strong> the count rises
         while only the near one can see anything; move the far one in and the rate goes up.</li>
-    <li><strong>One copy is enough.</strong> Spawn an <code>Alm/n</code> horse from the custom
-        horse spawn egg. <strong>Pass:</strong> its gene row reads the Alarm expression and not a
-        carrier, and it contributes to the count beside an <code>Alm/Alm</code> horse.</li>
-    <li><strong>The cooldown holds in a herd.</strong> Four expressing horses around one spawner
-        for ten minutes. <strong>Pass:</strong> the census count is bounded by roughly one whinny
-        per horse per <code>COOLDOWN_TICKS</code> &mdash; about sixty each over that span. A count
-        several times higher means the cooldown is not per horse, which is the failure dominance
-        makes likely here.</li>
 </ul>
 
 <h4>In the game, with your hands</h4>
 
 <ul>
-    <li><strong>It is bearable.</strong> Stand in that paddock of four alarm horses while the
-        spawner runs. <strong>Pass:</strong> you can work there. The cooldown was chosen by
+    <li><strong>It is bearable.</strong> Stand in a paddock of four alarm horses around a running
+        spawner. <strong>Pass:</strong> you can work there. The cooldown was chosen by
         arithmetic and never heard, and &ldquo;a dominant gene several horses in one stable
         have&rdquo; is the normal case rather than the edge case.</li>
 </ul>

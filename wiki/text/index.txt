@@ -408,6 +408,7 @@ wiki/gene-base-alarm.html#dominant	science	Dominant on purpose
 wiki/gene-base-alarm.html#from	coding	Measured from the horse
 wiki/gene-base-alarm.html#health	gameplay	Health
 wiki/gene-base-alarm.html#place	gameplay	Put it by the door
+wiki/gene-base-alarm.html#verified	coding	Verified in the test yard
 wiki/gene-base-alarm.html#what	gameplay	What it does
 wiki/gene-beadscale.html#about	coding	Why it is built this way
 wiki/gene-beadscale.html#carrot	gameplay	Its gene carrot
@@ -449,6 +450,7 @@ wiki/gene-blight.html#finding	gameplay	Finding one
 wiki/gene-blight.html#inheritance	gameplay	Crossing two of them
 wiki/gene-blight.html#layers	coding	What it paints
 wiki/gene-blight.html#outcomes	gameplay	What it can come out as
+wiki/gene-blight.html#verified	coding	Verified
 wiki/gene-bloodstained.html#carrot	gameplay	Its gene carrot
 wiki/gene-bloodstained.html#file	coding	The file
 wiki/gene-bloodstained.html#finding	gameplay	Finding one
@@ -553,6 +555,7 @@ wiki/gene-cleansing-light.html#cost	science	A gene that wins fights and loses va
 wiki/gene-cleansing-light.html#health	gameplay	Health
 wiki/gene-cleansing-light.html#loot	gameplay	It costs you the drops
 wiki/gene-cleansing-light.html#negative	coding	A healing aura with the sign flipped
+wiki/gene-cleansing-light.html#verified	coding	Verified in the test yard
 wiki/gene-cleansing-light.html#what	gameplay	What it does
 wiki/gene-cleave-side.html#about	coding	Why it is built this way
 wiki/gene-cleave-side.html#carrot	gameplay	Its gene carrot
@@ -1106,6 +1109,7 @@ wiki/gene-harlequin-shield.html#inheritance	gameplay	Crossing two of them
 wiki/gene-harlequin-shield.html#layers	coding	What it paints
 wiki/gene-harlequin-shield.html#outcomes	gameplay	What it can come out as
 wiki/gene-healer.html#aura	coding	The aura
+wiki/gene-healer.html#aura-control	coding	The aura leaves horses alone
 wiki/gene-healer.html#carrot	gameplay	Its gene carrot
 wiki/gene-healer.html#foal	coding	A foal heals and shows nothing
 wiki/gene-healer.html#inheritance	gameplay	Crossing two of them
@@ -1476,6 +1480,7 @@ wiki/gene-magic-milk-volume.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-milk-volume.html#kind	coding	It governs a kind, not a gene
 wiki/gene-magic-milk-volume.html#rounding	coding	Rounded per copy
 wiki/gene-magic-milk-volume.html#spread	gameplay	Spread across the day, not banked
+wiki/gene-magic-milk-volume.html#verified	coding	Verified
 wiki/gene-magic-milk-volume.html#visible	science	The one loud recessive-adjacent gene
 wiki/gene-magic-milk-volume.html#what	gameplay	What it does
 wiki/gene-magic-mob-aura.html#bait	science	A gene that is worse for the horse
@@ -2036,6 +2041,7 @@ wiki/gene-potion-milk.html#dose	science	Incomplete dominance without an expressi
 wiki/gene-potion-milk.html#health	gameplay	Health
 wiki/gene-potion-milk.html#negatives	gameplay	Two of the brews are not a gift
 wiki/gene-potion-milk.html#separate	coding	Two milk loci, deliberately
+wiki/gene-potion-milk.html#verified	coding	Verified
 wiki/gene-potion-milk.html#volume	gameplay	How often
 wiki/gene-potion-milk.html#what	gameplay	What it does
 wiki/gene-potion-milk.html#wild-negatives	gameplay	An ordinary wild mare can hand you one
@@ -2940,6 +2946,7 @@ wiki/item-breeding-carrots.html#combine	gameplay	Combining them
 wiki/item-breeding-carrots.html#effects	coding	The gamete effects
 wiki/item-breeding-carrots.html#recipes	gameplay	Recipes
 wiki/item-breeding-carrots.html#rule	gameplay	The one rule
+wiki/item-breeding-carrots.html#same-sex	coding	A same-sex pair spends the carrots and makes no foal
 wiki/item-breeding-carrots.html#what	gameplay	What each one does
 wiki/item-double-gates.html#assets	coding	The assets are generated, and one wood is irregular
 wiki/item-double-gates.html#either-side	coding	The partner takes whichever side is free
@@ -3105,6 +3112,7 @@ wiki/item-transfer-papers.html#rules	gameplay	Things worth knowing
 wiki/item-transfer-papers.html#use	gameplay	How they work
 wiki/item-vet-kit.html#art-0929	coding	The icon, since 2026-09-29
 wiki/item-vet-kit.html#code	coding	Where it lives
+wiki/item-vet-kit.html#fertility-gelding	coding	Gelding reaches the record (shown 2026-09-30)
 wiki/item-vet-kit.html#gaps	coding	Known gaps
 wiki/item-vet-kit.html#gelding	gameplay	What gelding does
 wiki/item-vet-kit.html#use	gameplay	How to use it
