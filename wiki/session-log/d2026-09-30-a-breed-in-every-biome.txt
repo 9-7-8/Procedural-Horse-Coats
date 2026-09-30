@@ -1,0 +1,64 @@
+2026-09-30 - a breed in every modded biome, and floors kept off-world
+
+
+    The ask: a pack of 352 jars carries 226 modded biomes, and the owner wanted
+    at least one of our breeds in all of them. The scan that listed them came
+    from another session; this one re-read the biome JSONs out of the ATM11
+    instance's jars (temperature, rainfall, what each already spawns) and the
+    mods' tags to sort overworld from Nether, End, cave and other dimensions.
+
+    The mechanism is a table, not 127 edited breed files. The owner chose it
+    over the literal "patch every breed" option. common/breed/BiomeAnalogues
+    maps each modded biome to the vanilla biome it stands in for -
+    terralith:steppe is plains and windswept hills - and Breeds.forBiome, the
+    feral setting and the herd modifier's "on the list" test all read it. Three
+    reasons it won: a modded biome gets its analogue's whole pool rather than a
+    hand-picked few (in a Terralith world most of the plains ARE steppe and
+    highlands); drop-in breeds and breed-spawning.toml overrides carry over with
+    nothing restated; and an install whose toml was written before this - the
+    owner's own pack - still gets it, where per-file patches would have been
+    shadowed by the toml's copy of the old lists until its sections were deleted.
+
+    Scope took two rounds. First answer: overworld only. Then: the modded Nether
+    and End biomes too, but no horses in any dimension a mod added (Aether II,
+    Undergarden, AllTheModium's, Mahou Tsukai's). Caves are out because a horse
+    needs lit grass; oceans map to beach, for island ponies on a grassy islet.
+
+    The finding worth keeping. The obvious End design - give the Enderpony
+    Nullscape's floors - was caught by SpawnGroundTest, which exists to catch
+    exactly it: a breed's spawn_ground belongs to the breed, not the biome, and
+    the Enderpony lives in forty overworld biomes. End stone and dead coral in
+    the dark would have become spawnable floors in the plains - a player's
+    end-stone cellar - and blackstone or smooth basalt would have added every
+    amethyst geode. The owner picked the rule over the two workarounds offered
+    (let the Nether pair carry the End floors; accept the leak): a breed's floor
+    now counts only in a vanilla Nether or End biome or a stand-in for one. With
+    that in place the Enderpony takes all of Nullscape's surfaces - end stone,
+    four dead corals, blackstone, basalt - and the End is Enderponies. The cost,
+    written on breed-format.html#ground-off-world: no overworld breed can use
+    spawn_ground, and none does.
+
+    Regions Unexplored's Nether floors are set in code, not data. They were read
+    by javap off RUSurfaceRuleBuilder: four nyliums, blackstone, netherrack, soul
+    sand. The nyliums went onto the Netherhorse and the Nightmare.
+
+    What is true now and was not: 161 modded biomes have wild breeds (153
+    overworld, 5 Nether, 3 End), and the End spawns horses at all for the first
+    time. It has no other creature spawn, so the breed-only rate is the whole
+    draw there - flagged as the thing to watch.
+
+    Checks. BiomeAnaloguesTest: every mapped biome has a wild breed, no analogue
+    is a typo (mutated once to prove it fails), the pool is the analogue's whole
+    pool, every modded Nether and End biome has a breed able to stand on its
+    ground in the dark, no overworld biome gains a floor, and no mod-added
+    dimension is on the table. Green with SpawnGroundTest, NetherBreedsTest,
+    BreedFilesTest, BreedsTest, BreedSpawnSettingsTest, BreedSpecParserTest and
+    RegionTest; :neoforge-26.1.2:build and creator parity green. The full
+    :common:test suite was not run. Nothing was played: the owner's dev client
+    was up the whole session, so the builds ran in a worktree at C:/phcwt (the
+    scratchpad path is past Windows' filename limit for this repo) and no
+    runServer was booted. The wasm was not rebuilt - nothing in web/ reaches the
+    spawn lookups.
+
+    Waiting: breeds.html#modded-biomes-0930 - where to look in each dimension,
+    and the negative (a dark end-stone room in the overworld stays empty).
