@@ -20,23 +20,30 @@
 <p class="lede">
     Five small things that make riding less irritating, borrowed from other mods that
     already do them. None touches genetics, and each is small enough to ship alone.
-    <strong>Four of the five have shipped, and one is left</strong> &mdash; a lead comes
-    back to you now whether this mod teleported the horse out from under it or the leash
-    simply snapped, you can mine from the saddle at the speed you would standing there,
-    <kbd>ALT</kbd>+<kbd>E</kbd> opens your own pack from the saddle, and a piece of tack
-    goes on with a right-click instead of a trip through the Gear tab. What remains is
-    fading the horse out as you look down, which touches the coat itself and is the only
-    one with a real unknown in it.
+    <strong>All five have shipped.</strong> A lead comes back to you whether this mod
+    teleported the horse out from under it or the leash simply snapped; you can mine from
+    the saddle at the speed you would standing there; <kbd>ALT</kbd>+<kbd>E</kbd> opens
+    your own pack from the saddle; a piece of tack goes on with a right-click instead of
+    a trip through the Gear tab; and the horse you are riding fades out of your way as
+    you look down at the ground.
 </p>
 
-<div class="note">
-    <span class="label">Mostly still a plan</span>
+<div class="note" id="rider-comfort">
+    <span class="label">All of it is built</span>
     <p>
-        This page was moved here whole from the main
-        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
-        rather than a place plans are written. It grows tabs as the thing grows: the
-        Gameplay and Coding tabs carry the pieces that exist, and everything else is
-        on the Roadmap tab, where it is deleted from when it ships.
+        Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster
+        of the survey backlog</a> and moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, as five pieces to be built one per session.
+        The last of them went in on 2026-09-29, so <strong>this page has no Roadmap tab
+        any more</strong> and has left that index by itself &mdash; what is left is the
+        Gameplay and Coding tabs for what exists, and a Verification tab for the parts
+        nobody has played yet.
+    </p>
+    <p class="muted">
+        <strong>Every piece but one shipped with a config switch</strong>, per
+        <a href="config.html#config-everything">the config sweep</a>. The exception is
+        <a href="#rider-inventory">the inventory keybind</a>, which did so deliberately:
+        an unbound key is already the switch.
     </p>
 </div>
 
@@ -232,6 +239,67 @@
     <a href="config.html"><code>behaviour.rightclick_equips_tack</code></a>, on by default;
     off, the Gear tab is the only way again. The saddle and the barding are vanilla&rsquo;s
     behaviour either way and the switch does not reach them.
+</p>
+
+<h2 id="ride-fade">The horse gets out of your way</h2>
+
+<div class="plain">
+    <p>
+        Riding is the one situation where your own mount is the thing in front of you. Look
+        down to place a block, read a chest, find the edge of a ledge or see what you are
+        standing on, and what you get is a view of the back of a horse.
+    </p>
+    <p>
+        Now <strong>the horse you are riding fades as you look down at it</strong>, and
+        solidifies again as you look back up. Nothing moves and the camera does not shift;
+        the horse simply stops being in the way.
+    </p>
+</div>
+
+<p>
+    <strong>It never disappears.</strong> The faintest it goes is a quarter opacity &mdash; a
+    ghost of a horse is still a horse, and a mount you genuinely cannot see is one you forget
+    you are on. The floor is
+    <a href="config.html"><code>visual.rideFadeMinOpacity</code></a> and the config will not
+    accept less than 0.05 however hard you ask.
+</p>
+
+<p>
+    <strong>Everything the horse is wearing fades with it.</strong> The saddle, the barding,
+    a <a href="item-rescuing-braid.html">rescuing braid</a> in the mane or tail, and the glow
+    of a horse with an emissive coat all go faint together. A saddle left hanging solid in
+    the shape of a horse would be worse than no fade at all, so this is the part the work
+    actually went into &mdash; see the Coding tab.
+</p>
+
+<p>
+    <strong>Only your own mount, and only on your screen.</strong> Other horses stay solid,
+    including one somebody is riding next to you, and nobody else sees yours fade. This
+    changes no rule and sends nothing to the server: it is
+    <a href="config.html"><code>visual.rideFade</code></a>, a client setting, and two people
+    on one server may disagree about it freely.
+</p>
+
+<p>
+    <strong>Where the fade starts and ends is yours to set.</strong>
+    <code>visual.rideFadeStartPitch</code> (30&deg; below the horizon by default) is where it
+    begins and <code>visual.rideFadeFullPitch</code> (75&deg;) is where it bottoms out, with
+    a smooth ramp between. Looking at the horizon never fades anything, so a rider who spends
+    their time looking where they are going will not see this at all.
+</p>
+
+<p class="muted">
+    <strong>One thing does not fade: the <a href="gene-cutie-mark.html">cutie mark</a></strong>,
+    on the rare horse that has one. It is hidden instead while the horse is faded, and comes
+    back as the horse does. The emblems are drawn as items and the game gives no way to tint
+    an item, so the choice was between a solid sticker floating on a ghost and no sticker;
+    say so if you would rather have the sticker.
+</p>
+
+<p class="muted">
+    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered
+    and declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing
+    it moves a number every other mod's pathing assumes.
 </p>
 
 </section>
@@ -670,48 +738,174 @@
     there would be no item in the game this handler could equip.
 </p>
 
-</section>
+<h2 id="ride-fade-coding">How the fade is drawn (2026-09-29)</h2>
 
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
-
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>
-        One is left: <strong>fading the horse out as you look down</strong>, which asks
-        the coat pipeline for a transparency it has never had, and so begins with a
-        rendering spike rather than with a feature.
-    </p>
-</div>
-
-<hr>
-
-<p id="rider-comfort">
-    Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster of the
-    survey backlog</a>. None touches genetics, and each is small enough to
-    ship on its own. <strong>The one left wants a config switch written with it</strong>,
-    per <a href="config.html#config-everything">the config sweep</a> &mdash;
-    <a href="#leads">the returned lead</a>,
-    <a href="#mounted-mining">mining from the saddle</a> and
-    <a href="#tack-equip">the tack click</a> all went out with their switch written beside
-    them, which is the pattern to follow.
-    <a href="#rider-inventory">The inventory keybind</a> is the one exception and shipped
-    deliberately without one: an unbound key is already the switch.
+<p>
+    One number, <code>GeneticHorseRenderState.fadeAlpha</code>, computed once per horse per
+    frame by <code>client/RiderFade</code> and read by everything that draws a piece of that
+    horse. It is a field on the render state rather than a question each layer asks, because
+    <strong>the whole feature is that they agree</strong>: a value read twice in one frame
+    could differ across a camera move, and the visible result would be a saddle at one
+    opacity over a horse at another.
 </p>
 
-<ul>
-    <li><strong>Fade the horse out as you look down.</strong> Horse Buff fades the mount for
-        sightlines, with an optional head-pitch offset of up to 45&deg;.
-        <strong>This is the one with a real unknown in it:</strong> we are the only mod here whose
-        coat is generated per horse, and a half-transparent procedural coat is a rendering case
-        nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
-        transparency before designing the feature around it.</li>
-</ul>
+<h3 id="ride-fade-cutout">A tint alone fades nothing, and that is the whole difficulty</h3>
+
+<p>
+    The instinct is to multiply a half-transparent colour into the model and be done. It does
+    not work, and it fails in a way that looks like something else. Everything a horse is
+    normally drawn with is a <em>cutout</em> pipeline &mdash;
+    <code>ENTITY_CUTOUT_NO_CULL</code> for the coat,
+    <code>ARMOR_CUTOUT_NO_CULL</code> for the gear &mdash; and a cutout pipeline carries
+    <strong>no <code>BlendFunction</code> on its colour target at all</strong>. It discards a
+    fragment below an alpha of 0.1 and draws everything above it fully opaque. So a
+    half-transparent tint gives an ordinary solid horse, and a quarter-transparent one gives
+    an ordinary solid horse, right up until the alpha crosses 0.1 and the horse vanishes
+    outright.
+</p>
+
+<p>
+    <code>ENTITY_TRANSLUCENT</code> is the same shader with
+    <code>BlendFunction.TRANSLUCENT</code> on its colour target, and it is already no-cull,
+    which is what a see-through animal wants anyway. <strong>So every fading draw needs its
+    render type swapped as well as its colour changed</strong>, and that requirement is what
+    shapes all five of the paths below.
+</p>
 
 <p class="muted">
-    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered and
-    declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing it moves
-    a number every other mod's pathing assumes.
+    The exception is the emissive glow. <code>RenderPipelines.EYES</code> <em>does</em> carry
+    a translucent blend already, so the glow of a horse with a
+    <a href="genetics-model.html">glow gene</a> fades on the tint alone. It still had to move
+    from the eight-argument <code>submitModel</code> to the ten, because the short one
+    hard-codes a tint of <code>-1</code> and gives no way to say anything else.
+</p>
+
+<h3 id="ride-fade-paths">Five things draw a horse, and each takes the alpha differently</h3>
+
+<ul>
+    <li><b>The coat.</b> Two overrides on <code>GeneticHorseRenderer</code> and no more:
+        <code>getRenderType</code> returns <code>entityTranslucent</code> while fading, and
+        <code>getModelTint</code> returns a white tint carrying the alpha. Vanilla already
+        multiplies that tint into the model colour, so "the same coat, fainter" costs
+        nothing &mdash; which matters for a texture whose colours are the entire point of
+        it. The type is swapped <em>only</em> while fading: translucent geometry is sorted
+        and blended rather than depth-tested, so drawing every horse in the world that way
+        would cost something for no reason.</li>
+    <li><b>The emissive glow</b> &mdash; a tint, as above.</li>
+    <li><b>A braid</b> &mdash; its dye, faded, through <code>RiderFade.fade</code>, which
+        keeps the colour and moves only the alpha. It was already on
+        <code>entityTranslucent</code>.</li>
+    <li><b>The saddle and the barding</b> &mdash; <code>mixin/FadingGearMixin</code>, and
+        the section below.</li>
+    <li><b>The cutie mark</b> &mdash; <strong>cannot fade</strong>, so it is not drawn while
+        the horse is faded. The emblems go through
+        <code>ItemStackRenderState.submit</code>, which takes a light, an overlay and an
+        outline colour and <em>nothing else</em>; there is no tint parameter anywhere on it,
+        and an item picks its own render types out of the model it was baked from. Neither
+        half of what fades a coat is reachable. The choice was a solid sticker on a ghost
+        horse or no sticker, and it is one line to reverse if the owner prefers the
+        sticker.</li>
+</ul>
+
+<h3 id="ride-fade-gear">Why the gear needed a mixin, and the mod's first MixinExtras</h3>
+
+<p>
+    The gear is the only one of the five this mod does not draw itself. It goes through
+    vanilla's <code>EquipmentLayerRenderer.renderLayers</code>, which closes <em>both</em>
+    doors: the render type is hard-coded to <code>armorCutoutNoCull</code>, and the colour is
+    computed inside the method from the item's dye, with <code>SimpleEquipmentLayer</code>
+    forwarding no tint of its own. There is nothing to pass in and nothing to override.
+</p>
+
+<p>
+    So two <code>@WrapOperation</code> hooks: one on the
+    <code>RenderTypes.armorCutoutNoCull</code> call, one on the <code>submitModel</code> it
+    feeds. <strong>They are separate because a <code>RenderType</code> cannot be asked what
+    texture it draws</strong> &mdash; that lives in a private <code>RenderSetup</code> with
+    no accessor &mdash; so the translucent replacement has to be built at the one point the
+    <code>Identifier</code> is still in hand. The second hook covers all three submissions in
+    the method, the glint and an armour trim included, on the same reasoning: a trim left
+    solid over a faded barding is the same bug in miniature.
+</p>
+
+<p>
+    <strong>It guards on the render state, so it costs everything else nothing.</strong> No
+    flag, no thread-local, no static. <code>renderLayers</code> is handed the entity's render
+    state, and this mod's is the only one carrying a <code>fadeAlpha</code> &mdash; so a
+    zombie in golden armour never reaches the second line of either handler. That also leaves
+    other mods' work intact in the direction that matters, since a mod that swapped the model
+    or the texture has already done so by the time either hook runs.
+</p>
+
+<p>
+    <strong>This is the mod's first use of MixinExtras</strong>, which arrives bundled inside
+    NeoForge rather than declared by this project. Plain Sponge Mixin could have done it, but
+    only by appending all twelve of <code>renderLayers</code>' parameters to a
+    <code>@Redirect</code> handler to get at the one it needed; <code>@Local(argsOnly)</code>
+    asks for that one argument by itself. Both hooks were confirmed applied in a real client
+    boot &mdash; <code>Mixing FadingGearMixin&hellip; into EquipmentLayerRenderer</code> with
+    no injection error, which with <code>defaultRequire</code> at 1 is the guarantee, since a
+    descriptor that stopped matching would refuse to boot rather than quietly leave a
+    floating saddle.
+</p>
+
+<p class="muted">
+    <strong>No <code>@OnlyIn</code> on it</strong>, though the first draft had one. NeoForge
+    26.1.2 logs an <code>ERROR</code> for a mod class carrying that annotation &mdash;
+    <em>"the runtime member-stripping behaviour of this annotation is no longer
+    present"</em> &mdash; and it was never what kept the mixin off a server anyway; the
+    <code>client</code> list in <code>horsegenetics.mixins.json</code> is. Found by reading
+    the boot log rather than by it failing.
+</p>
+
+<h3 id="ride-fade-braid-bug">A braid that had never been drawn</h3>
+
+<p>
+    Wiring the braid into the fade turned up a defect in <code>BraidLayer</code> that had
+    been there since the braid shipped. The ten-argument <code>submitModel</code> is
+    <code>(model, state, pose, renderType, light, overlay, <b>tintedColor</b>, sprite,
+    <b>outlineColor</b>, crumbling)</code>, and the call had those two <code>int</code>s the
+    other way round: the braid's dye was going in as the <em>outline</em> colour, and the
+    tint was <code>state.outlineColor</code>, which is <code>0</code> for any horse that is
+    not glowing.
+</p>
+
+<p>
+    A tint of zero is transparent black, so <strong>no braid has ever been drawn</strong> -
+    and since <code>EntityRenderState.appearsGlowing()</code> is literally
+    <code>outlineColor != 0</code>, a dyed braid was quietly asking for a glowing outline
+    instead. Both halves are silent: nothing logs, and an overlay that never draws looks
+    exactly like a horse not wearing one. Fixed in the same change, which means the braid
+    becomes visible for the first time here rather than merely becoming fadeable &mdash;
+    <a href="#ride-fade-verify">the Verification tab has it as its own check</a>, since it is
+    a change to something the owner may believe they have already seen working.
+</p>
+
+<h3 id="ride-fade-test">What is tested, which is one function</h3>
+
+<p>
+    <code>RiderFadeRampTest</code> covers <code>RiderFade.ramp</code> &mdash; which alpha a
+    given pitch asks for &mdash; and nothing else, because nothing else here is arithmetic.
+    It is testable at all only because that method is written without <code>Mth</code>: this
+    module's test classpath carries no Minecraft on purpose, and a gametest server has no
+    camera to point at anything.
+</p>
+
+<p>
+    The case worth having is the degenerate config. A <code>fullPitch</code> at or below
+    <code>startPitch</code> is a pair the user is allowed to write, and written naively it
+    divides by zero and paints the horse with <code>NaN</code> &mdash; a white flicker rather
+    than an error anybody would think to report. It answers a hard switch at the start pitch
+    instead. <strong>The first draft of the test asserted that backwards</strong> and failed
+    against correct code, which is a fair measure of how easy the pair is to misread; both
+    directions are asserted now.
+</p>
+
+<p class="muted">
+    <strong>Everything else about this is a Verification-tab matter</strong>, and honestly
+    so. Whether a generated coat looks right at a quarter opacity, whether translucent sort
+    order shows a horse's insides through itself, and whether the gear really fades with it
+    are questions a screen answers and a test cannot.
 </p>
 
 </section>
@@ -721,8 +915,81 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Five shipped pieces have been seen by no player &mdash; the returned lead's untested branch is the one that fires when your pack is full, where a lead that goes nowhere would be strictly worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla that only a stopwatch in a real world can confirm, since if that reading is wrong the feature simply never fires; the ALT+E inventory key is the mod's first key chord, resting on a reading of NeoForge's input layer that no client has yet run; the tack click now shares the plain right-click with every other interaction this mod has, so what wants watching is not whether it equips a braid but whether feeding, naming and mounting still behave; and the snapped lead is two mixins deep into vanilla's leash code, where the part no test could reach is the player-list lookup that is the whole point of it.</p>
+    <p>All six shipped pieces have been seen by no player, and the ride fade is the one to look at first because it is the only one whose whole deliverable is visual: nothing anybody can write down establishes that a generated coat looks right at a quarter opacity, that translucent sort order does not show a horse's insides through itself, or that the saddle really does go faint with the horse. Behind it, the returned lead's untested branch fires when your pack is full, where a lead that goes nowhere would be worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla only a stopwatch can confirm; the ALT+E key is the mod's first chord; the tack click now shares the plain right-click with every other interaction this mod has; and the snapped lead's player-list lookup is the one line no test could reach.</p>
 </div>
+
+<h3 id="ride-fade-verify">The ride fade (2026-09-29, NOT played &mdash; and it is the one that needs eyes)</h3>
+
+<p>
+    <strong>This piece was built without anybody seeing it.</strong> Its own plan said to
+    spike it first and look at the result, and what was done instead was to establish from
+    the 26.1.2 sources that each layer <em>can</em> be drawn translucent and to wire all five
+    of them up. The mixins were confirmed applied in a real client boot, and the ramp
+    arithmetic has a unit test. Neither of those is the question. The question is whether it
+    looks right, and only a person at a screen can answer it.
+</p>
+
+<p>
+    Ride a horse, look down, look back up. Then work through the list &mdash; and if any of
+    the first four are wrong, <strong>say so rather than working round it</strong>: the plan's
+    own instruction for this piece was to stop and report rather than ship a fade that looks
+    broken, and it is not too late to act on that.
+</p>
+
+<ul>
+    <li><strong>The coat at a quarter opacity.</strong> Look straight down from the saddle.
+        <strong>Pass:</strong> a faint but recognisable horse, its markings still legible.
+        <strong>Fail:</strong> a flat wash of colour, a horse that went fully invisible, or
+        one that did not change at all &mdash; the last means the render type is not being
+        swapped and the tint is landing on a cutout pipeline.</li>
+    <li><strong>Can you see the horse's insides through itself?</strong> This is the one the
+        plan flagged as a real unknown and it is the most likely thing to be wrong.
+        Translucent geometry is sorted rather than depth-tested, so the far side of the
+        barrel can draw over the near side. Look at the neck and the legs especially, from
+        the saddle and again in third person. <strong>Fail:</strong> legs visible through the
+        body, or a seam where the head meets the neck.</li>
+    <li><strong>The gear fades with it</strong> &mdash; the thing this was specifically asked
+        for. Saddle up, put barding on, look down. <strong>Pass:</strong> saddle, barding and
+        horse all go faint together. <strong>Fail:</strong> a solid saddle floating in the
+        shape of a horse, which means the mixin is applied but its guard is not matching; or
+        tack that vanishes completely while the horse stays, which means the type swap
+        happened and the tint did not.</li>
+    <li><strong>A braid fades too</strong>, on a horse wearing a
+        <a href="item-rescuing-braid.html">rescuing braid</a>. Check
+        <a href="item-rescuing-braid.html#verify-drawn">that a braid draws at all</a> first:
+        wiring this fade through that layer turned up two transposed arguments, so no braid
+        has ever been rendered until now, and its own page owns that check.</li>
+    <li><strong>The glow of an emissive coat fades.</strong> On a horse with a glow gene, the
+        glowing regions should dim with the rest. <strong>Fail:</strong> a bright mane
+        hanging in the air, which is the most conspicuous version of the floating-saddle
+        bug.</li>
+    <li><strong>It ramps rather than snapping.</strong> Tilt slowly from the horizon to
+        straight down. It should come on gradually between 30&deg; and 75&deg;, with no step.</li>
+    <li><strong>Nothing else fades.</strong> The most valuable check after the first two.
+        Ride past other horses, a horse somebody else is riding, a cow in a harness, a zombie
+        in armour, an armour stand. All must be completely solid. The mixin sits on the
+        method that draws <em>every</em> piece of worn equipment in the game, so a guard that
+        is too loose shows up here.</li>
+    <li><strong>Get off.</strong> The horse should be solid again immediately, and stay solid
+        while you look down at it from the ground.</li>
+    <li><strong>Third person.</strong> Same behaviour &mdash; the pitch is read off the
+        camera, not the player, so it should fade when the <em>view</em> is aimed down.
+        Worth a look mainly because it is where you can see the whole animal at once.</li>
+    <li><strong>The cutie mark disappears rather than fading</strong>, on a
+        <a href="gene-cutie-mark.html">Cutmrk/Cutmrk</a> horse. That is deliberate and
+        explained on the Coding tab. The question for the owner is whether the pop is worse
+        than a solid emblem would have been; it is one line either way.</li>
+    <li><strong>All four settings do what they say.</strong>
+        <code>visual.rideFade</code> off restores a solid horse;
+        <code>visual.rideFadeMinOpacity</code> at 1.0 does the same;
+        a low <code>rideFadeStartPitch</code> fades almost at once. And the pair the unit test
+        covers is worth seeing once for real: set <code>rideFadeFullPitch</code>
+        <em>below</em> <code>rideFadeStartPitch</code> and confirm you get a hard switch and
+        not a white flicker.</li>
+    <li><strong>Frame rate near a herd.</strong> Only the ridden horse should ever be on the
+        translucent path, so a field of horses should cost exactly what it did before. If it
+        does not, the type swap is firing more widely than intended.</li>
+</ul>
 
 <h3 id="leads-verify">The lead comes back (2026-09-24, NOT played)</h3>
 
@@ -993,7 +1260,6 @@
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="config.html">Config &mdash; the switch each of these wants</a>
         <a href="pipeline.html">The coat pipeline</a>
         <a href="compatibility.html">Living beside other mods</a>
@@ -1002,10 +1268,10 @@
     was the second and took less; the inventory keybind was the third and was two classes and
     a lang key; the tack click was the fourth and was smaller than planned, because two
     thirds of it turned out to be vanilla's already; the lead's other half was the fifth and
-    much the largest, two mixins for something that reads like one line. Only the fade is
-    left, and it is the one to leave until the coat has actually been drawn half-transparent,
-    because everything about how it would be configured depends on whether it can be drawn
-    at all.
+    much the largest, two mixins for something that reads like one line. The fade was the
+    last and the only one whose result nobody has looked at &mdash; the code can prove a
+    horse is drawn on a blending pipeline and cannot prove it looks like a horse, which is
+    why its Verification entry is longer than its Coding one.
 </div>
 
 </article>

@@ -21,6 +21,19 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-the-fade-and-a-braid-that-never-drew.txt">2026-09-29
+        &mdash; <strong>the fade, and a braid that had never been drawn</strong>. Rider
+        comfort piece 5, the last of the five: the horse you are riding goes see-through as
+        you look down, and so does everything it is wearing. The fact the whole piece turns
+        on is that <strong>a tint alone fades nothing</strong> &mdash; a cutout pipeline
+        carries no blend function, so it discards below 0.1 alpha and draws everything above
+        it fully opaque, which means every fading draw needs its render type swapped as well.
+        The gear needed the mod's first MixinExtras hooks because vanilla's equipment
+        renderer hard-codes both the type and the opacity. And wiring the fade through
+        <code>BraidLayer</code> turned up two transposed arguments: the rescuing braid has
+        never been rendered since it shipped, and a dyed one was quietly asking for a glowing
+        outline instead. <strong>Nobody has looked at the fade</strong>, which its plan asked
+        for first and its Verification tab now says loudly.</li>
     <li><a href="session-log/d2026-09-29-the-lead-that-snapped.txt">2026-09-29
         &mdash; <strong>the lead that snapped, and a seam one line away from the method you
         wanted</strong>. Rider comfort piece 4, deferred as &ldquo;a decision first&rdquo;

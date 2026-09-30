@@ -1,0 +1,117 @@
+2026-09-29 - the fade, and a braid that had never been drawn
+
+
+    Rider comfort piece 5, the last of the five, and the only one whose
+    deliverable is visual. The owner asked for it with one addition to the
+    plan: make sure it fades the gear too. That turned out to be the whole
+    difficulty.
+
+    Say the honest thing first. The plan for this piece said to spike it,
+    LOOK at the result, and stop and report if the coat could not be drawn
+    cleanly at partial alpha. What was done instead was to establish from the
+    26.1.2 sources that each layer CAN be drawn translucent, wire all five of
+    them up, and confirm in a real client boot that the mixins apply. Nobody
+    has seen the fade. That is not a substitute for the spike and the
+    Verification tab says so at the top: its entry for this piece is longer
+    than its Coding entry, and the first four checks carry the plan's own
+    instruction to stop and report rather than work round a bad result.
+
+    The fact the whole piece turns on. A tint alone fades nothing. Everything
+    that draws a horse uses a CUTOUT pipeline - ENTITY_CUTOUT_NO_CULL for the
+    coat, ARMOR_CUTOUT_NO_CULL for the gear - and neither carries a
+    BlendFunction on its colour target at all. What they carry is
+    withShaderDefine("ALPHA_CUTOUT", 0.1F): below 0.1 a fragment is discarded,
+    above it everything is drawn fully opaque. So a half-transparent tint
+    gives an ordinary solid horse, and a very transparent one gives no horse.
+    Nothing logs and nothing looks broken until the last step. Both halves
+    have to move together: swap the render type for a blending one AND put the
+    alpha in the colour. That is on api-notes.html, because it will catch the
+    next person who tries to fade anything.
+
+    The exception, found by checking rather than assuming: RenderPipelines.EYES
+    already blends, so an emissive coat's glow fades on the tint alone. It
+    still had to move from the eight-argument submitModel to the ten, because
+    the short overload hard-codes a tint of -1.
+
+    Five things draw a horse and each took the alpha differently. The coat is
+    two overrides on GeneticHorseRenderer - getRenderType and getModelTint,
+    both of which vanilla already provides. The glow and a braid are tints.
+    The gear needed a mixin. And the cutie mark CANNOT fade: its emblems go
+    through ItemStackRenderState.submit, which takes a light, an overlay and
+    an outline colour and nothing else - no tint parameter anywhere, and an
+    item picks its own render types out of its baked model. So it is hidden
+    while the horse is faded. That is a design call made rather than asked
+    about, on the grounds that a solid sticker floating on a ghost horse is
+    plainly worse than no sticker, and it is one line to reverse.
+
+    Why the gear needed a mixin at all. EquipmentLayerRenderer.renderLayers
+    closes both doors: the render type is hard-coded to armorCutoutNoCull, and
+    the colour is computed inside the method from the item's dye, with
+    SimpleEquipmentLayer forwarding no tint of its own. Two @WrapOperation
+    hooks then, not one, because a RenderType cannot be asked what texture it
+    draws - that is in a private RenderSetup with no accessor - so the
+    translucent replacement has to be built at the one point the Identifier is
+    still in scope. The second hook covers all three submissions in the
+    method, glint and armour trim included.
+
+    It guards on the render state, which is the nice part: renderLayers is
+    handed the entity's render state, and this mod's is the only one carrying
+    a fadeAlpha. No flag, no thread-local, no static, and a zombie in golden
+    armour never reaches the second line of either handler.
+
+    First use of MixinExtras in this repo. It arrives bundled inside NeoForge
+    rather than declared by the project. Plain Sponge Mixin could have done
+    it, but only by appending all twelve of renderLayers' parameters to a
+    @Redirect handler to reach the one it wanted; @Local(argsOnly) asks for
+    that argument by itself.
+
+    THE FIND. Wiring the fade through BraidLayer turned up that the rescuing
+    braid HAS NEVER BEEN DRAWN. The ten-argument submitModel is (model, state,
+    pose, renderType, light, overlay, tintedColor, sprite, outlineColor,
+    crumbling) and the call had those two ints the other way round: the dye
+    was going in as the outline colour and the tint was state.outlineColor,
+    which is 0 for any horse that is not glowing. A tint of zero is
+    transparent black, so the mask painted nothing. The quieter half is that
+    EntityRenderState.appearsGlowing() is literally outlineColor != 0, so a
+    dyed braid was asking for a glowing silhouette round the horse.
+
+    Neither half logs, and an overlay that never draws is indistinguishable
+    from a horse not wearing one - which is how it survived a server boot, a
+    unit test and a recipe bake. The check for it lives on
+    item-rescuing-braid.html rather than here, because that page owns the
+    braid; what is on rider-comfort is a pointer. It is written up as "check
+    the thing you believe you already saw", which is a different job from
+    checking a new feature.
+
+    Two things were validated rather than assumed. The client mixin could not
+    be checked by runGameTest - that is a dedicated server and never loads the
+    client list at all - so a real client was launched detached. It logged
+    "Mixing FadingGearMixin ... into EquipmentLayerRenderer" with no injection
+    error, which with defaultRequire at 1 is the guarantee. Reading the same
+    boot log also caught an ERROR nobody would have looked for: NeoForge 26.1.2
+    logs one for a mod class carrying @OnlyIn, which the first draft of the
+    mixin had. Removed; also on api-notes.html.
+
+    What is tested is one function. RiderFade.ramp, written deliberately
+    without Mth so this module's Minecraft-free test classpath can run it.
+    The case worth having is the degenerate config: a fullPitch at or below
+    startPitch is a pair the user may write, and naively it divides by zero
+    and paints the horse with NaN - a white flicker rather than an error
+    anybody reports. The first draft of the test asserted the inverted pair
+    backwards and failed against correct code, which is a fair measure of how
+    easy it is to misread; both directions are asserted now.
+
+    Housekeeping. This was the last entry on rider-comfort.html's Roadmap tab,
+    so per the standing rule the tab is DELETED and the page has left
+    roadmap.html by itself. The provenance line and the "not taken" step-height
+    decline were harvested off it first, onto the header box and the Gameplay
+    tab. The treatment file in intake/ is now empty of pieces and can go
+    entirely.
+
+    Open for the next session: nothing on rider comfort is unbuilt, and the
+    next move on it is the owner's eyes rather than anyone's keyboard. If the
+    fade looks wrong the instruction stands - report it rather than patch
+    round it, and the options the plan named are to fade only the base coat or
+    to drop the piece. The likeliest defect is translucent sort order showing
+    a horse's insides through itself, which is the one thing that cannot be
+    fixed by changing a tint.

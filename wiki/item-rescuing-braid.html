@@ -258,6 +258,33 @@
     answer for almost every horse on screen almost all the time.
 </p>
 
+<h2 id="never-drawn">It was never actually drawn, until 2026-09-29</h2>
+<p>
+    Everything above was true and the braid still did not appear, from the day it shipped
+    until the ride fade was wired through this layer and turned it up. The ten-argument
+    <code>submitModel</code> is
+    <code>(model, state, pose, renderType, light, overlay, <b>tintedColor</b>, sprite,
+    <b>outlineColor</b>, crumbling)</code>, and this call had those two <code>int</code>s
+    the other way round.
+</p>
+<p>
+    So the braid's dye was going in as the <strong>outline</strong> colour, and the tint was
+    <code>state.outlineColor</code> &mdash; which is <code>0</code> for any horse that is not
+    glowing. <strong>A tint of zero is transparent black</strong>, so the mask painted
+    nothing at all. The second half of the same mistake is quieter and stranger:
+    <code>EntityRenderState.appearsGlowing()</code> is literally
+    <code>outlineColor != 0</code>, so a dyed braid was asking the game for a glowing
+    silhouette round the horse.
+</p>
+<p>
+    <strong>Neither half logs anything</strong>, and an overlay that never draws is
+    indistinguishable from a horse not wearing one &mdash; which is why it survived a
+    dedicated-server boot, a unit test and a recipe bake. It took a second feature needing
+    the same argument to make anyone count the parameters. The lesson is not about braids:
+    a positional call with two adjacent <code>int</code>s of different meaning is a thing to
+    read twice.
+</p>
+
 <h2 id="colour-coding">Why vanilla&rsquo;s dye and not the mod&rsquo;s tint</h2>
 <p>
     The mod already has a tack colour component, and the braid deliberately does not use it.
@@ -306,13 +333,38 @@
 <div class="note verify-summary">
     <span class="label">What is waiting to be checked</span>
     <p>
-        <strong>Nothing about the braid has been seen in a running game.</strong> It compiles, the
-        rule is unit-tested, the recipe bakes and a dedicated server loads it &mdash; but no horse
-        has worn one, no braid has broken, no rider has been carried across a world boundary, and
-        <strong>nobody has looked at the streak or the item icon</strong>, both of which were
-        generated rather than drawn.
+        <strong>Nothing about the braid has been seen in a running game</strong>, and one
+        thing that was believed to work turns out never to have: the streak was submitted with
+        its colour in the wrong argument and so <strong>has never been drawn at all</strong>,
+        fixed on 2026-09-29 and first on the list below. Beyond that, no braid has broken, no
+        rider has been carried across a world boundary, and nobody has looked at the item icon
+        either &mdash; it too was generated rather than drawn.
     </p>
 </div>
+
+<h3 id="verify-drawn">The streak appears on the horse at all (2026-09-29, NOT played)</h3>
+<p>
+    <a href="#never-drawn">Two arguments were transposed</a>, so no braid has ever rendered.
+    That is fixed, which means this is not "check the new feature" but "check the thing you
+    may believe you already saw". It is the first thing to look at on this page.
+</p>
+<ul>
+    <li><strong>Put a braid in a horse's mane.</strong> <strong>Pass:</strong> a coloured
+        streak through the mane. <strong>Fail, and the interesting one:</strong> still
+        nothing, which would mean the transposition was not the whole story and the mask
+        itself is wrong.</li>
+    <li><strong>The colour is the one you dyed it</strong>, and washing it out in a cauldron
+        returns it to undyed.</li>
+    <li><strong>The tail is independent of the mane.</strong> One in each, different colours.</li>
+    <li><strong>No glowing outline round the horse.</strong> That was the other half of the
+        same bug. If braided horses have looked oddly outlined to anyone, this is why, and it
+        should be gone now.</li>
+    <li><strong>The streak sits on the hair and nowhere else</strong> &mdash; not on the neck,
+        not on the barrel. The mask is baked from the mesh rather than painted, so a mask that
+        is right in the tool and wrong on the horse would point at the geometry.</li>
+    <li><strong>It fades with the horse you are riding</strong>, along with the coat and the
+        tack &mdash; see <a href="rider-comfort.html#ride-fade-verify">the ride fade</a>.</li>
+</ul>
 
 <h3 id="verify-fires">It fires at all, and at the right moment (NOT played)</h3>
 <p>

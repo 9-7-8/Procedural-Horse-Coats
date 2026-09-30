@@ -614,6 +614,58 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     safe are a field, a leaf method and a class &mdash; nothing with a subclass under it.
 </p>
 
+<h2 id="cutout-no-blend">A cutout pipeline ignores your alpha, so a tint cannot fade anything</h2>
+
+<p>
+    The obvious way to make an entity see-through is to multiply a half-transparent colour
+    into its model. It does nothing, and it fails in a way that reads as a different bug.
+    Almost everything in the game is drawn on a <em>cutout</em> pipeline &mdash;
+    <code>RenderPipelines.ENTITY_CUTOUT_NO_CULL</code> for a mob's body,
+    <code>ARMOR_CUTOUT_NO_CULL</code> for anything it wears &mdash; and neither carries a
+    <code>BlendFunction</code> on its colour target at all. What they carry is
+    <code>.withShaderDefine("ALPHA_CUTOUT", 0.1F)</code>: a fragment below an alpha of 0.1 is
+    <strong>discarded</strong>, and every fragment above it is drawn <strong>fully
+    opaque</strong>.
+</p>
+
+<p>
+    So a tint of 0.5 gives an ordinary solid entity, a tint of 0.25 gives an ordinary solid
+    entity, and a tint of 0.05 makes it vanish outright. Nothing is logged and nothing looks
+    broken until the last step. <strong>Both halves have to change together</strong>: the
+    render type must be swapped for a blending one &mdash; <code>ENTITY_TRANSLUCENT</code> is
+    the same shader with <code>BlendFunction.TRANSLUCENT</code>, and is already no-cull
+    &mdash; <em>and</em> the colour must carry the alpha.
+</p>
+
+<p>
+    Worth checking per-pipeline rather than assuming, because the exceptions are not obvious:
+    <code>RenderPipelines.EYES</code> (the emissive overlay) already blends, so a tint alone
+    does fade a glow. <code>RenderType.hasBlending()</code> is public and answers the question
+    at runtime.
+</p>
+
+<p class="muted">
+    <strong>The texture cannot be read back off a <code>RenderType</code></strong>, which
+    matters the moment you want to build a translucent version of one you were handed: the
+    texture lives in a private <code>RenderSetup</code> with no accessor. Swap the type at
+    the point the <code>Identifier</code> is still in scope, not at the point the
+    <code>RenderType</code> is. See
+    <a href="rider-comfort.html#ride-fade-coding">the ride fade</a>, where that one fact is
+    why fading a saddle takes two hooks instead of one.
+</p>
+
+<h2 id="onlyin-on-mod-classes">Do not put <code>@OnlyIn</code> on a class of your own</h2>
+
+<p>
+    NeoForge 26.1.2 logs an <code>ERROR</code> at mod load for every mod class carrying
+    <code>@OnlyIn</code>: <em>&ldquo;the runtime member-stripping behaviour of this annotation
+    is no longer present, which may lead to issues if that behaviour was relied
+    upon&rdquo;</em>, followed by the class name. It is vanilla's own annotation for
+    vanilla's own sources and does nothing useful on yours. A client-only mixin belongs in the
+    <code>client</code> list of the mixin config; a client-only event handler belongs behind
+    <code>@EventBusSubscriber(value = Dist.CLIENT)</code>.
+</p>
+
 <h2 id="interface-private-static">An interface&rsquo;s <code>private static</code> method is unreachable, and vanilla hides real behaviour in them</h2>
 
 <p>
