@@ -56,4 +56,26 @@ public final class GrownParts {
         return Genes.UNICORN_HORN.hornFor(genotype, epigenome)
                 .<List<AttachedPart>>map(List::of).orElseGet(List::of);
     }
+
+    /**
+     * Can {@code gene} grow a part on an otherwise wild horse - does <i>any</i> of
+     * its combinations put geometry on it?
+     *
+     * <p>Asked of the model rather than kept as a list, the same way
+     * {@code DesignerApi.showsAs} asks the cutie mark, so the next granting locus
+     * answers {@code true} here by being added to {@link #of}. It is the other half
+     * of "does this gene change how the horse looks" beside
+     * {@link Genes#influencesCoat}: a horn paints nothing, so that question alone
+     * filed it with the invisible health genes, and the editors' randomize never
+     * moved it. See {@link EditorRules#changesLooks}.
+     */
+    public static boolean grants(Gene gene) {
+        Epigenome epi = Epigenome.fromSeed(0x5EEDL);
+        for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
+            if (!of(Genotype.wildType().with(pair), epi).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

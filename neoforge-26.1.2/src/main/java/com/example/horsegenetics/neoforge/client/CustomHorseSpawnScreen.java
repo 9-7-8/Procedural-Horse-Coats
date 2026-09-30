@@ -88,7 +88,7 @@ import java.util.List;
  *
  * <p><b>Rnd health</b> is off by default, and turns on the genes that change
  * nothing visible: the disorders, the stat loci, the ability genes
- * ({@link Genes#influencesCoat} draws the line). Off, because the reason to
+ * ({@link EditorRules#changesLooks} draws the line). Off, because the reason to
  * press Randomize on a gene editor is almost always to look at a coat, and
  * rolling a lethal into the horse you are looking at is a surprise nobody
  * asked for.
@@ -143,18 +143,14 @@ import java.util.List;
  * ({@code wiki/horse-designer/js/gui.js}), and it copies the layout constants
  * and colours below by value, so a moved widget is a two-line change.
  *
- * <p><b>Neither twin draws a grown part, and both are wrong about a unicorn in
- * the same way.</b> The unicorn-horn locus grows a mesh on the horse's head
- * ({@code AttachedPartLayer}) rather than painting the coat, and both of these
- * screens preview a horse by drawing its <i>coat texture</i>. So a
- * {@code Horn/Horn} horse appears here with the gene listed in the row, the
- * epigenome values on the right, and <b>no horn anywhere in the picture</b> -
- * which is the one place a screen whose whole job is "this is what that genome
- * looks like" currently lies. This is recorded on both files rather than fixed
- * because fixing it is a design call, not an omission: the cheap answer is for
- * both to say in words that the part is not drawn, and the expensive one is a
- * preview that can draw geometry. Whichever is chosen lands in both.
- * See {@code wiki/model-parts.html#open-designer}.
+ * <p><b>A grown part is one deliberate divergence.</b> The unicorn-horn locus
+ * grows a mesh on the horse's head ({@code AttachedPartLayer}) rather than
+ * painting the coat. This preview draws it - {@code GeneticHorseRenderer.applyCoat}
+ * hands every screen's model horse its parts along with its coat - but the
+ * browser twin previews a coat texture and cannot draw geometry, so there a
+ * {@code Horn/Horn} horse shows its gene row and epigenome and no horn. Closing
+ * that is a design call, not an omission: see
+ * {@code wiki/model-parts.html#open-designer}.
  *
  * <p>The deliberate divergences. The browser has nothing to spawn and no
  * inventory to put an egg in, so this screen's two output buttons have no twin
@@ -364,7 +360,7 @@ public final class CustomHorseSpawnScreen extends Screen {
      * the disorders, the stat genes, the ability genes. Off, because the
      * overwhelmingly common reason to press Randomize on a gene editor is to
      * look at a coat, and rolling a lethal into the horse you are looking at is
-     * a surprise nobody asked for. {@link Genes#influencesCoat} draws the line.
+     * a surprise nobody asked for. {@link EditorRules#changesLooks} draws the line.
      */
     private boolean randomizeInvisible = false;
 
@@ -625,7 +621,7 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     /** Is this row's gene something a randomize is allowed to move? */
     private boolean randomizable(Row row) {
-        return !row.locked && (randomizeInvisible || Genes.influencesCoat(row.gene));
+        return !row.locked && (randomizeInvisible || EditorRules.changesLooks(row.gene));
     }
 
     /**

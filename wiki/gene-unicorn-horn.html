@@ -161,13 +161,12 @@
 </dl>
 
 <div class="note warn">
-    <span class="label">Built, and never seen in a running game</span>
+    <span class="label">Seen in game, partly</span>
     <p>
-        The gene, the generator and the layer are all unit-tested; <strong>no horse
-        has worn a horn on screen</strong>. The anchor offsets are computed from the
-        two horse models' boxes rather than tuned against a live animal, and the
-        claim that a mesh parented to the head follows a graze and a rear is read
-        out of the 26.1.2 sources rather than watched. Checklist on
+        The owner looked at horns in the dev yard on 2026-09-30: the horn <strong>stays
+        on the head</strong> as the horse moves and sits in exactly the right place on an
+        adult; on a foal it is in the right place but very small. The rest &mdash; nubs
+        and narwhals, tiny and huge horses, tack, a pen's frame cost &mdash; is still on
         <a href="#verification">the Verification tab</a>.
     </p>
 </div>
@@ -368,6 +367,15 @@
     adult's, so matching the head would have given a newborn a full-length tusk.
 </p>
 
+<p>
+    <strong>Seen, 2026-09-30.</strong> Both computed offsets land: the owner watched a horn
+    stay on the head in the dev yard and found it exactly placed on an adult, and in the right
+    spot on a foal. The parenting through <code>root</code> &rarr; <code>head_parts</code>
+    &rarr; <code>head</code> therefore does what the sources said it would. The foal's
+    <code>FOAL_SCALE</code> errs the other way from the tusk it was guarding against: the
+    horn comes out comically small.
+</p>
+
 <h3 id="sheet">One greyscale sheet for every colour</h3>
 
 <p>
@@ -499,30 +507,35 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Nothing about this gene has been seen in a running game: the placement of the horn on the adult and the foal is a computed first guess, the claim that it follows the head through a graze and a rear is read from the sources rather than watched, and the cost of a pen of unicorns has not been measured.</p>
+    <p>The horn follows the head and sits right on an adult, but a foal's horn is comically small, randomizing the spawn egg's epigenetics has only just been made to reach it, and nubs, narwhals, size extremes, tack and a pen's frame cost are all unwatched.</p>
 </div>
 
-<h3 id="open-horn-parenting">Does the horn actually follow the head?</h3>
+<h3 id="open-horn-foal-scale">A foal's horn is comically small &mdash; keep it?</h3>
 <p>
-    The whole feature rests on one structural claim &mdash; that a mesh parented through
-    <code>root</code> &rarr; <code>head_parts</code> &rarr; <code>head</code> inherits every
-    animation the head already has &mdash; and it has not been watched. Put a
-    <code>Horn/Horn</code> horse in a dev world and look at it <strong>standing, walking,
-    galloping, rearing and grazing</strong> (head fully down). If the horn lags, floats free,
-    or slides across the skull at any of those, the parenting is wrong and nothing built on it
-    stands. This is the first thing to check and everything below is moot until it passes.
+    The owner found it in the right spot on a foal but tiny, and called it funny rather than
+    necessarily a bug. <code>FOAL_SCALE</code> was a guess made to avoid giving a newborn a
+    full-length tusk, and it overshot the other way. Whether to raise it, or keep the joke,
+    is the owner's call.
 </p>
 
-<h3 id="open-horn-placement">The anchor offsets, on both models</h3>
+<h3 id="open-horn-placement">Nubs, narwhals, and the size extremes</h3>
 <p>
-    <code>ADULT_FOREHEAD</code> and <code>FOAL_FOREHEAD</code> are computed from the two
-    models' boxes, not tuned against a live animal, and <code>FOAL_SCALE</code> is a guess.
-    Check: the horn leaves the skull between the eyes and forward of the ears, with no gap at
-    its base and nothing poking through the underside of the jaw, on an <strong>adult and a
-    foal</strong>. A nub and a narwhal both, since the base girth changes with length. Then on
-    a <strong>tiny and a huge</strong> horse from the magical size locus &mdash; the horn
-    should inherit the horse's scale from the pose stack, and if it does not this is where it
-    shows.
+    Placement is confirmed on an ordinary adult and foal. Still to look at: a
+    <strong>nub and a narwhal</strong> both, since the base girth changes with length &mdash;
+    no gap at the base, nothing through the jaw. Then a <strong>tiny and a huge</strong> horse
+    from the magical size locus: the horn should inherit the horse's scale from the pose stack,
+    and if it does not this is where it shows.
+</p>
+
+<h3 id="open-horn-randomize">Randomize epigenetics reaches the horn</h3>
+<p>
+    The owner found that the spawn egg's <strong>Rnd epigen.</strong> changed nothing about the
+    horn. The cause was that both editors only re-roll genes that change how a horse looks
+    unless <em>Rnd health</em> is on, and the horn paints nothing, so it counted as invisible.
+    Fixed 2026-09-30 by <code>EditorRules.changesLooks</code>, which also counts a gene that
+    grows a part; <code>UnicornHornGeneTest</code> pins it. To check in the game: on a
+    <code>Horn/Horn</code> horse with <em>Rnd health</em> off, <em>Rnd epigen.</em> should
+    visibly change the horn's length, lean or colour on the preview.
 </p>
 
 <h3 id="open-horn-cost">A pen of unicorns</h3>
@@ -556,13 +569,11 @@
 
 <h3 id="open-horn-designer">The designer does not draw the horn</h3>
 <p>
-    <code>wiki/horse-designer/</code> and <code>CustomHorseSpawnScreen</code> are one screen in
-    two places and both draw a flat coat, so neither shows a horn &mdash; a screen that is
-    otherwise the authority on what a genome looks like now has something it cannot show. The
-    in-game paper doll on the gear screen renders a live horse and should show it; that is
-    untested too. The open question is whether the two editors should say so in words, or draw
-    it, or something else, and it is a design call rather than a defect. See
-    <a href="model-parts.html#roadmap">attached model parts</a>.
+    The game's spawn egg draws the horn on its preview, as does every other in-game screen
+    that shows a horse model. The browser designer previews a flat coat and cannot, so a
+    <code>Horn/Horn</code> horse shows there with its gene row and no horn. Whether the
+    designer should say so in words, draw it, or something else is a design call rather than a
+    defect. See <a href="model-parts.html#open-designer">attached model parts</a>.
 </p>
 
 <h3 id="open-horn-glow-owner">Should a glow come from the light locus instead?</h3>

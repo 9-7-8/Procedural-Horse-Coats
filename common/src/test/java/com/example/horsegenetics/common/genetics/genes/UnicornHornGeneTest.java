@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EditorRules;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.GeneFamily;
@@ -223,6 +224,21 @@ class UnicornHornGeneTest {
         // nobody can find is not content, and one in every field is not a unicorn.
         assertTrue(horned > 40 && horned < 250, "unicorn rate off: " + horned + " / " + n);
         assertTrue(carriers > 3500 && carriers < 6500, "carrier rate off: " + carriers + " / " + n);
+    }
+
+    /**
+     * The editors' randomize only moves genes that change how a horse looks while
+     * "Rnd health" is off. A horn paints nothing, and asking the coat question
+     * alone filed it with the disorders - so "Rnd epigen." on a unicorn re-rolled
+     * everything but the horn. Owner-reported in the spawn egg, 2026-09-30.
+     */
+    @Test
+    void theEditorsCountAHornAsSomethingYouCanSee() {
+        assertFalse(Genes.influencesCoat(GENE), "the horn paints nothing - that is the premise");
+        assertTrue(GrownParts.grants(GENE));
+        assertTrue(EditorRules.changesLooks(GENE), "a randomize must be allowed to move the horn");
+        assertFalse(GrownParts.grants(Genes.MSTN), "a stat locus grows nothing");
+        assertFalse(EditorRules.changesLooks(Genes.MSTN), "and stays behind the Rnd health switch");
     }
 
     /** A horn is a showpiece, not a trap - nothing about it may touch the horse's body. */

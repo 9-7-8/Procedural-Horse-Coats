@@ -234,6 +234,16 @@
 </p>
 
 <p>
+    <strong>Seen working, 2026-09-30.</strong> This is the claim the page rests on &mdash; that
+    a mesh hung on an already-animated bone inherits its animation and needs none of its own
+    &mdash; and the owner watched it hold: a unicorn's horn stayed on the head through the
+    horse's poses in the dev yard, and sat in the right place on an adult. The computed foal
+    offset put the horn in the right place too. So antlers, spines, crystals and wings are
+    unblocked on this point, and the <a href="#elytra-verdict">plain-layer-over-GeckoLib</a>
+    decision stands.
+</p>
+
+<p>
     After the chain, a model unit is <sup>1</sup>&frasl;<sub>16</sub> of a block &mdash; the same
     units the boxes themselves use &mdash; because each <code>translateAndRotate</code> divides
     its translation by sixteen as it goes.
@@ -520,18 +530,8 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The machinery has never drawn anything on screen: the claim that a mesh parented to an animated bone needs no animation of its own is read from the sources rather than watched, the two horse models&rsquo; anchor offsets are computed rather than tuned, and nothing has been measured against a herd.</p>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, a second part sharing the layer, and any cost against a herd.</p>
 </div>
-
-<h3 id="open-parts-parenting">The claim the whole page rests on</h3>
-<p>
-    That a mesh hung on an already-animated bone inherits its animation, needs none of its own,
-    and stays put through every pose. It has not been watched even once. The check is on
-    <a href="gene-unicorn-horn.html#open-horn-parenting">the horn&rsquo;s Verification tab</a>
-    because the horn is what would show it, but the consequence is this page&rsquo;s: if it
-    fails, antlers, spines, crystals, feathering and wings are all blocked and the
-    <a href="#elytra-verdict">plain-layer-over-GeckoLib</a> decision has to be reopened.
-</p>
 
 <h3 id="open-parts-draw-order">Draw order has been argued, not observed</h3>
 <p>
@@ -553,16 +553,17 @@
     wrong in a way only the second part could reveal.
 </p>
 
-<h3 id="open-designer">Neither editor can draw a part &mdash; and what to do about it</h3>
+<h3 id="open-designer">The browser designer cannot draw a part &mdash; and what to do about it</h3>
 <p>
     <code>wiki/horse-designer/</code> and <code>CustomHorseSpawnScreen</code> are one screen in
-    two places and both draw a flat coat, so neither shows a horn. A screen that is otherwise the
-    authority on what a genome looks like now has something it cannot show, and that is the
-    largest unpaid cost of the whole feature. The cheap answer is for both to <em>list</em> the
-    part as a trait and say plainly that it is not drawn, with the in-game paper doll on the gear
-    screen &mdash; which already renders a live horse &mdash; being where it is seen. Anything
-    better is its own plan. Whatever is chosen, hard rule 5 means it lands in both screens and
-    the divergence is written in a comment on both files.
+    two places, and on this they now differ. The game's screen draws the horn on its preview:
+    every screen's model horse gets its parts from <code>GeneticHorseRenderer.applyCoat</code>
+    along with its coat, so a unicorn in the spawn egg, the family tree or the horse browser is
+    drawn wearing its horn. The browser designer previews a flat coat texture and cannot draw
+    geometry, so there a <code>Horn/Horn</code> horse shows its gene row and its epigenome and
+    no horn. The cheap answer is for the designer to <em>list</em> the part as a trait and say
+    plainly that it is not drawn; anything better is its own plan. The divergence is written in
+    a comment on both files, per hard rule 5.
 </p>
 
 <h3 id="open-parts-herd">Nothing has been measured</h3>

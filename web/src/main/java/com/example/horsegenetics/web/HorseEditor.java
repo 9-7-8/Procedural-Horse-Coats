@@ -65,15 +65,13 @@ import java.util.List;
  *       in.</li>
  * </ul>
  *
- * <p><b>And one thing both get wrong identically, which is worth as much as a
- * divergence.</b> The unicorn-horn locus grows a mesh on the horse's head rather
- * than painting its coat, and both twins preview a horse by drawing its coat
- * texture - so a {@code Horn/Horn} horse shows its gene row and its epigenome
- * values here and <b>no horn in the picture</b>. Not an omission to tidy up: the
- * cheap fix is for both to say in words that the part is not drawn, the expensive
- * one is a preview that can draw geometry, and it is a design call either way.
- * Whichever is chosen lands in both files. See
- * {@code wiki/model-parts.html#open-designer}.
+ * <p><b>And one in what the preview can draw.</b> The unicorn-horn locus grows
+ * a mesh on the horse's head rather than painting its coat. The game's screen
+ * draws it on its preview; this page previews a coat texture and cannot, so a
+ * {@code Horn/Horn} horse shows its gene row and its epigenome values here and
+ * <b>no horn in the picture</b>. The cheap fix is to say in words that the part
+ * is not drawn, the expensive one a preview that can draw geometry, and it is a
+ * design call either way. See {@code wiki/model-parts.html#open-designer}.
  *
  * <p><b>And one in how a horse leaves the screen.</b> Both carry the same
  * payload - {@code HorseFile}, the whole horse rather than its alleles - but the
@@ -130,8 +128,8 @@ public final class HorseEditor {
      * can see - the disorders, the stat genes, the ability genes. Off, because
      * the overwhelmingly common reason to press Randomize on a gene editor is
      * to look at a coat, and rolling a lethal into the horse you are looking at
-     * is a surprise nobody asked for. {@link Genes#influencesCoat} draws the
-     * line.
+     * is a surprise nobody asked for. {@link EditorRules#changesLooks} draws
+     * the line.
      */
     private boolean randomizeInvisible = false;
 
@@ -521,7 +519,7 @@ public final class HorseEditor {
 
     /** Is this row's gene something a randomize is allowed to move? */
     private boolean randomizable(Row row) {
-        return !row.locked && (randomizeInvisible || Genes.influencesCoat(row.gene));
+        return !row.locked && (randomizeInvisible || EditorRules.changesLooks(row.gene));
     }
 
     public void clearGenes(Rng rng) {
