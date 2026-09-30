@@ -121,6 +121,15 @@ coat texture made just for it, and making one takes real work. Horses further aw
 closer, and `coats.bakeBudgetMs` caps how much time per moment goes into making new
 ones. Lower either on a slower computer.
 
+The other thing in there worth knowing about is **`parts.enabled`**, which draws the
+bits some horses grow - a unicorn's horn, so far. A horn is about as much shape again as
+the horse wearing it, so a big herd of them is the one case worth a switch: turn it off,
+or turn off just `parts.glow` (the extra pass a horn that shines in the dark needs, and
+the first thing to try if a shader pack makes one look wrong), or bring
+`parts.detailDistance` in. **None of it changes your horses** - a horse with a horn still
+has the horn, still passes it to its foals, and wears it again the moment you switch
+back on.
+
 **`breed-spawning.toml` decides which horses your world has.** Every breed the mod
 ships has a section - switch it off, make it rarer or commoner, move it to other
 biomes, or give it day or night hours - and one switch turns all of them off at

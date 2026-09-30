@@ -6,3 +6,11 @@ Keep one line per file used, in the same change that copies it:
   <file in this pack>  ->  <path in the mod>  |  modified? y/n  |  what it is for  |  date
 
 (Then add the pack to THIRD_PARTY_NOTICES.md, which ships in the jar.)
+
+FHD (326).png  ->  assets/horsegenetics/textures/item/vet_kit.png  |  modified? n  |  the vet's kit: a tagged medicine flask, replacing a red recolour of vanilla's bundle  |  2026-09-29
+FHD (344).png  ->  assets/horsegenetics/textures/item/freedom_stick.png  |  modified? n  |  the freedom stick: a feather, for the item that turns a horse loose. It was vanilla's stick + feather  |  2026-09-29
+FHD (368).png  ->  assets/horsegenetics/textures/item/golden_carrot_seeds.png  |  modified? n  |  golden carrot seeds: a seeding grain sprig. It was vanilla's wheat seeds  |  2026-09-29
+
+THIRD_PARTY_NOTICES.md carries the credit, the users-may-not-redistribute line
+and the CC BY-NC carve-back for exactly these three files, as this pack's
+SOURCE-AND-LICENSE.txt requires before anything from here ships.

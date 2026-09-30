@@ -3156,8 +3156,24 @@
     "minecraft:windswept_gravelly_hills",
     "minecraft:windswept_hills",
     "minecraft:windswept_savanna",
-    "minecraft:wooded_badlands"
+    "minecraft:wooded_badlands",
+    "minecraft:the_end",
+    "minecraft:end_highlands",
+    "minecraft:end_midlands",
+    "minecraft:end_barrens",
+    "minecraft:small_end_islands"
   ],
+  "spawn_ground": [
+    "minecraft:end_stone",
+    "minecraft:dead_tube_coral_block",
+    "minecraft:dead_bubble_coral_block",
+    "minecraft:dead_fire_coral_block",
+    "minecraft:dead_horn_coral_block",
+    "minecraft:blackstone",
+    "minecraft:basalt",
+    "minecraft:smooth_basalt"
+  ],
+  "spawn_in_dark": true,
   "price": [20, 34],
   "stats": {
     "speed": 2,
@@ -3321,7 +3337,8 @@
     "Rain is the weather identity and it is doubled on purpose: Rv on both weather loci, so an already slow, flat-jumping pony gets worse in the wet on both axes at once. Neither copy touches health, pulling or the laying interval, so a wet Enderpony is slower and lower but not stranded, and it keeps laying and keeps breeding through the weather.",
     "The watchers are unrestricted, which is the point. Both loci are in the pool with all five alleles, so an Enderpony may stand and stare, close on you, only move unseen, appear behind you, or do none of it, by night and independently by day - and only a matched pair shows anything, so the mixed and carrier pairs in the pool are horses that pass a watcher on without wearing one. Night is the commoner half.",
     "It is not from anywhere on earth, so it has no country. That is a real answer in this format rather than a gap.",
-    "The Ender Echo carries its rider, so the flinch-teleport is survivable to sit through rather than a way of being thrown. It is flavour and an escape, not a reason the breed is strong: speed, jump, health and pull are all well under a breed anybody works."
+    "The Ender Echo carries its rider, so the flinch-teleport is survivable to sit through rather than a way of being thrown. It is flavour and an escape, not a reason the breed is strong: speed, jump, health and pull are all well under a breed anybody works.",
+    "The End, added 2026-09-30. The five vanilla End biomes, and through BiomeAnalogues Nullscape's three, which reshape all of it. The End has no sky light and no grass, so the floors are what Nullscape surfaces it with - end stone, the four dead coral blocks of its shadowlands, and the blackstone and basalt of its crystal peaks and void barrens - with the light waived over them only. This breed also lives in forty overworld biomes, and until this change a floor it named would have been a floor in all of them: smooth basalt lines every amethyst geode. That is why a floor now counts only in a Nether or End biome (Breeds.wildGroundAllows, owner's call). The End has no other creature spawn, so the quiet breed-only rate is the whole draw there - if Enderponies turn out to be a common sight on the islands, that rate is the lever."
   ]
 },
 {
@@ -6553,7 +6570,11 @@
     "minecraft:soul_soil",
     "minecraft:basalt",
     "minecraft:blackstone",
-    "minecraft:magma_block"
+    "minecraft:magma_block",
+    "regions_unexplored:brimsprout_nylium",
+    "regions_unexplored:cobalt_nylium",
+    "regions_unexplored:glistering_nylium",
+    "regions_unexplored:mycotoxic_nylium"
   ],
   "spawn_in_dark": true,
   "price": [220, 400],
@@ -6671,9 +6692,10 @@
     "Eyes: Red/Red at both iris loci is the deep blood-red the Dhampir uses. There is no fixed 'red' sclera hue, so the whites are Cha/Cha (EyeHue.CHAOS, whose colour is epigenetic rather than fixed) banded hard toward red on eye_chaos_r/g/b, with Glo/Glo at both the iris and sclera glow loci so both parts of the eye glow - matched, not just similarly coloured.",
     "Mane and tail colour (HairColorGene, via ManeColorGene/TailColorGene) draw a per-copy RGB rather than a named hue, so Mnsld/Mnsld and Tlsld/Tlsld are banded on hair_r/g/b toward bright red rather than left to roll freely; a foal will not show the mane colour until it grows up (ManeColorGene paints no foal mesh), but the tail colour shows from birth.",
     "Speed 3 and jump 2 are both well below the score-5 baseline (BreedStatCurve's floor is roughly x0.2 at a score of 1); health 9 lands at about x1.995 of baseline - practically double - and pull 8 is this session's own call, not requested, for a horse meant to also serve as a nether draught animal. Size [1.85, 1.95] is outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws giants only.",
-    "Every biome named is in the Nether, and for a long time that meant the breed could not spawn at all - not rarely, never. Vanilla's animal rule tests the position, not the biome: the block underfoot must be in #minecraft:animals_spawnable_on, which in this SDK is the single entry minecraft:grass_block, and the raw brightness must be above 8. Generated Nether terrain has no grass block anywhere, so all five biomes duly got the spawn added by BreedHerdsBiomeModifier and rejected every position in it. That is what spawn_ground and spawn_in_dark are for (see SpawnGround): the eight blocks listed are the Nether floors, and the flag waives the light over them only. Both are additive - this horse still spawns on lit grass like any other, so an overworld hay portal or a grass platform down here works as it always did.",
+    "Every biome named is in the Nether, and for a long time that meant the breed could not spawn at all - not rarely, never. Vanilla's animal rule tests the position, not the biome: the block underfoot must be in #minecraft:animals_spawnable_on, which in this SDK is the single entry minecraft:grass_block, and the raw brightness must be above 8. Generated Nether terrain has no grass block anywhere, so all five biomes duly got the spawn added by BreedHerdsBiomeModifier and rejected every position in it. That is what spawn_ground and spawn_in_dark are for (see SpawnGround): the blocks listed are the Nether floors, and the flag waives the light over them only. Both are additive - this horse still spawns on lit grass like any other, so an overworld hay portal or a grass platform down here works as it always did.",
     "Molten hooves is MltC/MltC (the colour form), banded on color_r/g/b toward red the same way the mane and tail are - so this horse leaves red hoofprints behind it as it moves, on top of the lava embers the particle locus already trails. The Nightmare breed shares this locus at the same MltC/MltC pair, banded gold instead, so the two breeds' hoofprints read as a matched pair from a distance.",
-    "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool."
+    "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool.",
+    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable."
   ]
 },
 {
@@ -6842,7 +6864,11 @@
     "minecraft:soul_soil",
     "minecraft:basalt",
     "minecraft:blackstone",
-    "minecraft:magma_block"
+    "minecraft:magma_block",
+    "regions_unexplored:brimsprout_nylium",
+    "regions_unexplored:cobalt_nylium",
+    "regions_unexplored:glistering_nylium",
+    "regions_unexplored:mycotoxic_nylium"
   ],
   "spawn_in_dark": true,
   "price": [220, 400],
@@ -6954,7 +6980,8 @@
     "Eyes and mane: Gld/Gld at both iris loci is EyeColourGene's fixed gold hue; there is no fixed gold sclera hue, so the whites use Cha/Cha (EyeHue.CHAOS) banded toward gold on eye_chaos_r/g/b, with Glo/Glo at every glow locus so the whole eye glows, matching the Netherhorse's red-glow treatment in gold. Only mane_color is named and banded gold - the tail was left wild since nothing was said about it, so a nightmare's tail is whatever its liver-bay base gives it rather than a second golden hair locus.",
     "Stats: speed 5 is the plain baseline (no locus is forced when a resolved band sits inside BreedStatCurve.NEUTRAL_LO..NEUTRAL_HI, so 'average speed' really does mean nothing is pushing it). Jump 10 is the ceiling, about x3.43 of baseline. Pull 1 is the floor pull score, padded out with no curve (BreedStatCurve treats pull as the resolved number itself). Size [0.32, 0.42] is below even a Falabella's [0.38, 0.51] and well outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws its own tiny size true. No health or milk-volume locus is named, so both roll at the ordinary wild rate - nothing was asked about either.",
     "Every biome named is in the Nether, and carries the same spawn_ground / spawn_in_dark block as the Netherhorse for the same reason: vanilla's animal rule wants minecraft:grass_block underfoot and brightness above 8, generated Nether terrain has neither, and until those fields existed neither breed could spawn wild at all. See SpawnGround, and the Netherhorse's note. The two share the floor list deliberately - they are one founder pool as far as the ground is concerned, and in the Nether they are the only two wild breeds, so a herd founded there is always one or the other and never Feral Mixed (Feral.DEFAULT gives it herdWeight 0, which means 'only where no breed may spawn').",
-    "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested."
+    "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested.",
+    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable."
   ]
 },
 {
@@ -9556,6 +9583,158 @@
     "All disorders clear, WFFS included. Warmblood, Thoroughbred and Hungarian ancestry makes WFFS possible in individual lines but establishes no rate, and the mod has no WFFS locus to put one in.",
     "Cold tolerant lightly, for continental Ukrainian winters.",
     "Managed only: cowboy, spawn egg and stable. Passports, licensing, inspections and every discipline the breed is actually selected on are not modelled."
+  ]
+},
+{
+  "id": "unicorn",
+  "name": "Unicorn",
+  "description": "A white horse with a single horn, out of the flowering country. Black underneath the white, which you will only find out by breeding one; the horn comes in any colour, glows in the dark and sheds a fine dust of its own colour, the mane and tail run the whole spectrum, and the hooves shine like lamps. About one in four leaves rainbow dust where it walks. Every one of them would do anything for sugar.",
+  "kind": "magical",
+  "commonness": "rare",
+  "spawn_time": "day",
+  "biomes": [
+    "minecraft:cherry_grove",
+    "minecraft:flower_forest",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "price": [40, 64],
+  "stats": {
+    "speed": 7,
+    "jump": 7,
+    "health": 6,
+    "size": [0.92, 1.05],
+    "pull": 3
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W2/N", "weight": 70 },
+      { "pair": "W2/W9", "weight": 30 }
+    ],
+    "horsegenetics.unicorn_horn": [
+      { "pair": "Horn/Horn", "weight": 100 }
+    ],
+    "horsegenetics.horn_colour": [
+      { "pair": "Wht/Wht", "weight": 6.25 },
+      { "pair": "Red/Red", "weight": 6.25 },
+      { "pair": "Org/Org", "weight": 6.25 },
+      { "pair": "Yel/Yel", "weight": 6.25 },
+      { "pair": "Grn/Grn", "weight": 6.25 },
+      { "pair": "Blu/Blu", "weight": 6.25 },
+      { "pair": "Ind/Ind", "weight": 6.25 },
+      { "pair": "Vio/Vio", "weight": 6.25 },
+      { "pair": "Pnk/Pnk", "weight": 6.25 },
+      { "pair": "Blk/Blk", "weight": 6.25 },
+      { "pair": "Gry/Gry", "weight": 6.25 },
+      { "pair": "Cha/Cha", "weight": 6.25 },
+      { "pair": "Wht/Red", "weight": 0.38 },
+      { "pair": "Wht/Org", "weight": 0.38 },
+      { "pair": "Wht/Yel", "weight": 0.38 },
+      { "pair": "Wht/Grn", "weight": 0.38 },
+      { "pair": "Wht/Blu", "weight": 0.38 },
+      { "pair": "Wht/Ind", "weight": 0.38 },
+      { "pair": "Wht/Vio", "weight": 0.38 },
+      { "pair": "Wht/Pnk", "weight": 0.38 },
+      { "pair": "Wht/Blk", "weight": 0.38 },
+      { "pair": "Wht/Gry", "weight": 0.38 },
+      { "pair": "Wht/Cha", "weight": 0.38 },
+      { "pair": "Red/Org", "weight": 0.38 },
+      { "pair": "Red/Yel", "weight": 0.38 },
+      { "pair": "Red/Grn", "weight": 0.38 },
+      { "pair": "Red/Blu", "weight": 0.38 },
+      { "pair": "Red/Ind", "weight": 0.38 },
+      { "pair": "Red/Vio", "weight": 0.38 },
+      { "pair": "Red/Pnk", "weight": 0.38 },
+      { "pair": "Red/Blk", "weight": 0.38 },
+      { "pair": "Red/Gry", "weight": 0.38 },
+      { "pair": "Red/Cha", "weight": 0.38 },
+      { "pair": "Org/Yel", "weight": 0.38 },
+      { "pair": "Org/Grn", "weight": 0.38 },
+      { "pair": "Org/Blu", "weight": 0.38 },
+      { "pair": "Org/Ind", "weight": 0.38 },
+      { "pair": "Org/Vio", "weight": 0.38 },
+      { "pair": "Org/Pnk", "weight": 0.38 },
+      { "pair": "Org/Blk", "weight": 0.38 },
+      { "pair": "Org/Gry", "weight": 0.38 },
+      { "pair": "Org/Cha", "weight": 0.38 },
+      { "pair": "Yel/Grn", "weight": 0.38 },
+      { "pair": "Yel/Blu", "weight": 0.38 },
+      { "pair": "Yel/Ind", "weight": 0.38 },
+      { "pair": "Yel/Vio", "weight": 0.38 },
+      { "pair": "Yel/Pnk", "weight": 0.38 },
+      { "pair": "Yel/Blk", "weight": 0.38 },
+      { "pair": "Yel/Gry", "weight": 0.38 },
+      { "pair": "Yel/Cha", "weight": 0.38 },
+      { "pair": "Grn/Blu", "weight": 0.38 },
+      { "pair": "Grn/Ind", "weight": 0.38 },
+      { "pair": "Grn/Vio", "weight": 0.38 },
+      { "pair": "Grn/Pnk", "weight": 0.38 },
+      { "pair": "Grn/Blk", "weight": 0.38 },
+      { "pair": "Grn/Gry", "weight": 0.38 },
+      { "pair": "Grn/Cha", "weight": 0.38 },
+      { "pair": "Blu/Ind", "weight": 0.38 },
+      { "pair": "Blu/Vio", "weight": 0.38 },
+      { "pair": "Blu/Pnk", "weight": 0.38 },
+      { "pair": "Blu/Blk", "weight": 0.38 },
+      { "pair": "Blu/Gry", "weight": 0.38 },
+      { "pair": "Blu/Cha", "weight": 0.38 },
+      { "pair": "Ind/Vio", "weight": 0.38 },
+      { "pair": "Ind/Pnk", "weight": 0.38 },
+      { "pair": "Ind/Blk", "weight": 0.38 },
+      { "pair": "Ind/Gry", "weight": 0.38 },
+      { "pair": "Ind/Cha", "weight": 0.38 },
+      { "pair": "Vio/Pnk", "weight": 0.38 },
+      { "pair": "Vio/Blk", "weight": 0.38 },
+      { "pair": "Vio/Gry", "weight": 0.38 },
+      { "pair": "Vio/Cha", "weight": 0.38 },
+      { "pair": "Pnk/Blk", "weight": 0.38 },
+      { "pair": "Pnk/Gry", "weight": 0.38 },
+      { "pair": "Pnk/Cha", "weight": 0.38 },
+      { "pair": "Blk/Gry", "weight": 0.38 },
+      { "pair": "Blk/Cha", "weight": 0.38 },
+      { "pair": "Gry/Cha", "weight": 0.38 }
+    ],
+    "horsegenetics.horn_glow": [
+      { "pair": "Glw/Glw", "weight": 100 }
+    ],
+    "horsegenetics.horn_dust": [
+      { "pair": "Dst/Dst", "weight": 100 }
+    ],
+    "horsegenetics.rainbow_dust": [
+      { "pair": "Rbw/Rbw", "weight": 25 },
+      { "pair": "Rbw/n", "weight": 25 },
+      { "pair": "n/n", "weight": 50 }
+    ],
+    "horsegenetics.light": [
+      { "pair": "Lthf/Lthf", "weight": 100 }
+    ],
+    "horsegenetics.prismtail": [
+      { "pair": "Prt/Prt", "weight": 100 }
+    ],
+    "horsegenetics.food_preference": [
+      { "pair": "Sug/Sug", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "BLACK UNDER THE WHITE. Every founder is E/E a/a, a black horse, and every one carries dominant white, so what you see is white. The white is W2 (and W9), because those whiten the whole horse from a single copy; W22 in this mod is a minimal white - a blaze and socks on a black horse - and was tried first and rejected on a render. W2/W2 and W9/W9 do not survive to birth, so the white is held two ways (owner's call, 2026-09-30): 70 in 100 are W2/N, and 30 in 100 carry two different whites, W2/W9, which is viable. Two W2/N unicorns throw a black foal one time in four; a W2/W9 bred to anything throws only white foals.",
+    "The horn is all four horn genes at once: Horn/Horn for the horn, Glw/Glw so it glows, Dst/Dst so it sheds dust, and a random colour. Three in four founders have a solid horn, spread evenly over all twelve colours; one in four is already two-tone, spread evenly over every pair.",
+    "Rainbow dust is the one thing only some of them have: a quarter show it (Rbw/Rbw) and another quarter carry it silently (Rbw/n), so it can be bred up.",
+    "Glowing hooves (Lthf/Lthf), a prismtail mane and tail (Prt/Prt) and a love of sugar (Sug/Sug) are on every founder, homozygous so the breed keeps them.",
+    "Carries neither tolerance locus, so a unicorn is neutral to heat and cold everywhere."
   ]
 },
 {

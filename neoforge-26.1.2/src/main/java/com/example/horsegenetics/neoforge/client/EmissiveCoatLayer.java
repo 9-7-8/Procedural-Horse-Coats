@@ -38,6 +38,17 @@ public class EmissiveCoatLayer extends RenderLayer<HorseRenderState, HorseModel>
         if (state.isInvisible) {
             return;
         }
+        // A glow fades with the horse wearing it. Left at full strength it
+        // would be the most conspicuous thing on a see-through animal - a
+        // solid mane hanging in the air - which is exactly the failure the
+        // fade was specified to avoid.
+        //
+        // It can fade at all only because RenderPipelines.EYES carries a
+        // BlendFunction.TRANSLUCENT on its colour target, unlike the cutout
+        // pipelines the coat and the gear are drawn on; so here the tint alone
+        // is enough and no render type has to be swapped. The ten-argument
+        // overload is used rather than the eight, which hard-codes a tint of
+        // -1 and has no way to say anything else.
         submitNodeCollector.order(1)
                 .submitModel(
                         this.getParentModel(),
@@ -46,6 +57,8 @@ public class EmissiveCoatLayer extends RenderLayer<HorseRenderState, HorseModel>
                         RenderTypes.eyes(geneticState.emissiveCoatId),
                         LightCoordsUtil.FULL_BRIGHT,
                         OverlayTexture.NO_OVERLAY,
+                        RiderFade.tint(geneticState.fadeAlpha),
+                        null,
                         state.outlineColor,
                         null
                 );

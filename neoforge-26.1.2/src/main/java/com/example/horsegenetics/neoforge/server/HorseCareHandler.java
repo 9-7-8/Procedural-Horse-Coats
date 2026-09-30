@@ -122,6 +122,11 @@ public final class HorseCareHandler {
         // which shares priority 0 and Flag.MOVE, so the tie breaks toward the
         // horse rather than toward whoever has its screen open.
         horse.goalSelector.addGoal(ESCAPE_GOAL_PRIORITY, new HorseEscapeGoal(horse));
+        // A whistled horse that is near enough walks in rather than teleporting.
+        // Above every social goal, including vanilla's BreedGoal at 2 - see the
+        // note on WhistleCallGoal for why it is 1 and not 2, and why yielding to
+        // panic is written by hand instead of coming from the priority.
+        horse.goalSelector.addGoal(WhistleCallGoal.PRIORITY, new WhistleCallGoal(horse));
         horse.goalSelector.addGoal(GOAL_PRIORITY, new BondFollowGoal(horse));
         // Tier 1 is head-turning only, so it goes BELOW every herd goal
         // (HerdGoals runs 3-7): it claims LOOK alone, but a goal of a lower

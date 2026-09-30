@@ -21,6 +21,134 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-30-the-yard-packed.txt">2026-09-30
+        &mdash; <strong>answered pens out, the yard packed into eight rows</strong>, from z 518 deep
+        to 170. The clockwork pens went too, their 45 checks closed on the owner's ruling. The
+        wiki half is unfinished: the file lists what the next session picks up first.</li>
+    <li><a href="session-log/d2026-09-30-the-clockwork-yard.txt">2026-09-30
+        &mdash; <strong>the test yard tests itself</strong>. Every pen that waited for a person was
+        deleted, and a fake player that keeps what it is told now asks their questions on a clock:
+        45 checks, each logged as <code>CLOCKWORK PASS</code> or <code>FAIL</code>. Three runs launched
+        and read by the session; it found the infirmary's control could never have passed since healing
+        moved to water, and a doubled word in every diet refusal.</li>
+    <li><a href="session-log/d2026-09-30-the-dress-window.txt">2026-09-30
+        &mdash; <strong>the Gear tab gets a real inventory</strong>. A <em>Dress</em> button
+        opens a container window with the horse's nineteen gear slots on the doll and the
+        player's inventory on the right, so tack drags and shift-clicks on and off. A separate
+        window rather than a converted information screen, because that screen shows horses
+        that are not loaded. The leather-armour loot bullet was closed by the owner without
+        code.</li>
+    <li><a href="session-log/d2026-09-30-a-breed-in-every-biome.txt">2026-09-30
+        &mdash; <strong>a breed in every modded biome, and floors kept off-world</strong>. A
+        table maps each Terralith, Regions Unexplored and Nullscape biome to the vanilla one it
+        stands in for, so a modded biome gets its analogue's whole breed pool with no breed file
+        restated; the End gets horses for the first time. Giving the Enderpony the End's floors
+        would have made dark end stone and every amethyst geode spawnable in forty overworld
+        biomes, so a breed's floors now count only in the Nether and the End.</li>
+    <li><a href="session-log/d2026-09-29-cut-0-5-034.txt">2026-09-29, second cut of the day
+        &mdash; <strong>the 0.5.034 cut</strong>. 59 commits since v0.5.033, and 59 is not
+        the size of the release &mdash; one of them carries a thousand-file texture pack and
+        a good share of the rest are intake treatments with no code in them. What ships is
+        two finished plans: <a href="rider-comfort.html">rider comfort</a> all five pieces
+        and <a href="item-whistles.html">the whistles</a> all four, both of whose Roadmap
+        tabs were deleted in the range, plus the art session and the braid bug. Nothing here
+        takes a capability away from a player, so unlike 0.5.033 there was no rule change to
+        lead with; <a href="releases.html#v0-5-034">the note</a> leads instead with the two
+        things to distrust &mdash; the fade, which is on by default and which nobody has
+        looked at, and the leash mixin, which sits on the method every dropped item in the
+        game passes through. Jar verified to declare 0.5.034 and to carry every new class; 22
+        gametests, <code>runServer</code> to <code>Done</code> with zero ERROR lines, and
+        <code>debug.log</code> read to confirm both leash mixins applied. The owner&rsquo;s
+        live server was running on the same box the whole time and was identified by its
+        session lock <em>before</em> anything was built, so the dev server could be killed by
+        pid rather than by name.</li>
+    <li><a href="session-log/d2026-09-29-the-fade-and-a-braid-that-never-drew.txt">2026-09-29
+        &mdash; <strong>the fade, and a braid that had never been drawn</strong>. Rider
+        comfort piece 5, the last of the five: the horse you are riding goes see-through as
+        you look down, and so does everything it is wearing. The fact the whole piece turns
+        on is that <strong>a tint alone fades nothing</strong> &mdash; a cutout pipeline
+        carries no blend function, so it discards below 0.1 alpha and draws everything above
+        it fully opaque, which means every fading draw needs its render type swapped as well.
+        The gear needed the mod's first MixinExtras hooks because vanilla's equipment
+        renderer hard-codes both the type and the opacity. And wiring the fade through
+        <code>BraidLayer</code> turned up two transposed arguments: the rescuing braid has
+        never been rendered since it shipped, and a dyed one was quietly asking for a glowing
+        outline instead. <strong>Nobody has looked at the fade</strong>, which its plan asked
+        for first and its Verification tab now says loudly.</li>
+    <li><a href="session-log/d2026-09-29-the-lead-that-snapped.txt">2026-09-29
+        &mdash; <strong>the lead that snapped, and a seam one line away from the method you
+        wanted</strong>. Rider comfort piece 4, deferred as &ldquo;a decision first&rdquo;
+        and answered by reading. <code>Leashable.dropLeash</code> is a
+        <code>private static</code> on an <em>interface</em>, which no mixin can reach
+        &mdash; but the line it spawns the item on,
+        <code>Entity.spawnAtLocation(ServerLevel, ItemLike)</code>, has exactly two callers
+        in the whole game that pass it a lead, so one injection covers every path. The
+        placer has to be written down when the lead goes on, because by drop time there is
+        no player in the situation at all; and the fence case needs no rule of ours, since
+        vanilla only calls <code>setLeashData</code> on a <em>first</em> attachment. Two
+        false starts in the gametest are written up too: one littered the shared world and
+        broke a neighbouring test, the other joined a mock player to the player list and
+        took the run down with it.</li>
+    <li><a href="session-log/d2026-09-29-tack-goes-on-with-a-click.txt">2026-09-29
+        &mdash; <strong>tack goes on with a click, and two thirds of the piece was already
+        in vanilla</strong>. Rider comfort piece 3. The treatment marked it unverified and
+        said to read <code>AbstractHorse.mobInteract</code> first, which settled it against
+        the plan: 26.1.2 already equips both the saddle (<code>Equippable.saddle()</code>
+        carries <code>setEquipOnInteract</code>) and the barding, the latter behind a
+        predicate character-for-character identical to the one
+        <code>HorseTackSlot.BARDING</code> uses. What was left with no owner at all is the
+        seventeen gear slots, and that is what shipped. The design call not in the treatment
+        is what happens when every matching slot is full: the click is left
+        <em>uncancelled</em>, so you can still mount your own horse while holding a spare
+        braid &mdash; and the gametest asserts the claimed and unclaimed refusals separately
+        because a handler that claimed all four would look right until somebody could
+        not.</li>
+    <li><a href="session-log/d2026-09-29-the-rider-gets-their-pack-back.txt">2026-09-29
+        &mdash; <strong>the rider gets their pack back, and a chord that suppresses
+        itself</strong>. Rider comfort piece 2: <kbd>ALT</kbd>+<kbd>E</kbd> opens your own
+        inventory, since this mod had taken <kbd>E</kbd> from the saddle and left a rider no
+        gesture for their own bag. Two pieces of prescribed code were deleted after reading
+        26.1.2 instead of writing them &mdash; <code>InventoryScreen</code> already swaps
+        itself out for the creative screen in <code>init</code>, so the planned game-mode
+        branch would have been a second copy of vanilla's rule; and
+        <code>KeyMappingLookup.getAll</code> only falls back to the unmodified bindings
+        <em>if the modified list came back empty</em>, so the mod's first key chord suppresses
+        the bare <kbd>E</kbd> it collides with at no cost. Both are readings rather than runs,
+        so both are flagged unverified with a pre-agreed fallback key named.</li>
+    <li><a href="session-log/d2026-09-29-art-of-its-own.txt">2026-09-29
+        &mdash; <strong>giving the blocks and items art of their own</strong>. An intake job
+        for four third-party texture packs turned into an art session, because the audit the
+        packs prompted found eight of twelve blockstates with no art of their own &mdash;
+        five job-site posts sharing one texture set, and a bench, a shelf and a stasis bank
+        wearing vanilla furniture unchanged. All eight are drawn now, plus the golden carrot
+        crop and three stall signs, and three licensed Raven icons arrive with their
+        carve-back in <a href="../THIRD_PARTY_NOTICES.md">the notices</a>. Item pages show
+        their items; blocks with their own art get a rotatable preview, and the rule that
+        only own-art blocks may be previewed is enforced by a bake that hard-fails on a
+        <code>minecraft:</code> texture rather than trusting anyone to remember it.</li>
+    <li><a href="session-log/d2026-09-29-whistles-all-three.txt">2026-09-29
+        &mdash; <strong>all four whistle pieces, and a priority the plan got wrong</strong>. The
+        bond gate on binding, a near horse that walks in rather than teleporting, and one key
+        that blows every whistle carried. The goal priority the design note concluded was
+        wrong &mdash; priority 2 is vanilla&rsquo;s breeding goal and an equal priority never
+        interrupts &mdash; which the generated behaviour hierarchy showed and the note did
+        not. Writing the unit test caught an ordering contract the code did not keep, and
+        three API claims in the note turned out to be stale. Then the fourth piece, scoped as
+        art and reported blocked, turned out to be three lines: the owner asked for an
+        enchantment glint instead of a second texture, and because the glint is
+        <em>derived</em> rather than stored, every whistle bound before it shipped glimmers
+        with nothing to migrate.</li>
+    <li><a href="session-log/d2026-09-29-mining-from-the-saddle.txt">2026-09-29
+        &mdash; <strong>mining from the saddle, and a guard written the other way
+        round</strong>. Rider comfort piece 1: a rider on a standing horse now mines at the
+        speed they would standing there. The treatment's prescribed condition
+        (&ldquo;mounted, so multiply by five&rdquo;) was inverted to ask
+        <code>!player.onGround()</code> instead, so that if the premise underneath it is ever
+        wrong the feature is silently absent rather than a 5&times; mining boost for everyone
+        on a horse. Two API facts read rather than assumed: the break-speed event fires
+        <em>after</em> vanilla's division, and a <code>SERVER</code> config is synced to
+        clients &mdash; which is what licenses the first client-side read of
+        <code>ServerConfig</code> in the mod.</li>
     <li><a href="session-log/d2026-09-29-scoping-rider-comfort-and-chaos.txt">2026-09-29
         &mdash; <strong>scoping rider comfort, and one allele that fills in the rest</strong>.
         An intake session with no code. Rider comfort is scoped as five pieces, one per

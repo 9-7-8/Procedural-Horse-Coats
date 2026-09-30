@@ -31,6 +31,8 @@ import { readPng, writePng, rgb2hsl, hsl2rgb } from './png.mjs';
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const TEXTURES = path.join(ROOT,
   'neoforge-26.1.2/src/main/resources/assets/horsegenetics/textures/item');
+const BLOCK_TEXTURES = path.join(ROOT,
+  'neoforge-26.1.2/src/main/resources/assets/horsegenetics/textures/block');
 
 /**
  * <b>Pristine copies of the sprites this bake derives from.</b> Read-only, and
@@ -83,12 +85,13 @@ const RECIPES = [
   // own neighbours. Turnout is red on purpose rather than for spacing: it is
   // the one ticket that cannot be undone.
 
+  // WHAT LEFT THIS LIST, 2026-09-29. The vet's kit is now a licensed Raven icon
+  // (see THIRD_PARTY_NOTICES.md) and the three stall signs are drawn by
+  // `bake-drawn-items.mjs`. Both had to leave, not merely be ignored: this tool
+  // writes straight over textures/item/, so a recipe left behind would have
+  // quietly repainted the new art on the next re-bake.
+
   // --- derived from VANILLA art -----------------------------------------
-  {
-    out: 'vet_kit', from: 'minecraft:bundle', mode: 'flat', hue: 0.98, sat: 0.55, light: 0.06,
-    note: "A bundle is a brown leather pouch and reads as exactly that. Red: it is the colour "
-        + "a medical kit is in every game anybody has played.",
-  },
   {
     out: 'custom_horse_spawn_egg', from: 'minecraft:horse_spawn_egg', mode: 'flat',
     hue: 0.50, sat: 0.70, light: 0.0,
@@ -101,22 +104,33 @@ const RECIPES = [
     note: "The egg a SAVED horse lives in - a resurrection, or one kept aside. Magenta, well "
         + "away from the editor egg it sits beside in the same tab.",
   },
+
+
+  // --- the golden carrot crop, which is a BLOCK ---------------------------
+  // Owner, 2026-09-29: "a flat gold recolor is fine". The crop was vanilla's
+  // carrot art tinted gold at runtime, which is Mojang's file on the ground with
+  // a filter over it; these are ours. Flat mode with no saturation floor trouble:
+  // carrot foliage is green and the root orange, and flattening both to one gold
+  // hue is exactly what "a golden carrot" should look like.
   {
-    out: 'stall_sign', from: 'minecraft:oak_sign', mode: 'flat', hue: 0.60, sat: 0.50, light: 0.02,
-    note: "Blue. The blank sign.",
+    out: 'golden_carrot_stage0', from: 'minecraft:carrots_stage0', folder: 'block',
+    mode: 'flat', hue: 0.125, sat: 0.72, light: 0.06,
+    note: "Growth stage 0 of four.",
   },
   {
-    out: 'bound_stall_sign', from: 'minecraft:oak_sign', mode: 'flat',
-    hue: 0.60, sat: 0.75, light: -0.12,
-    note: "The same blue, deeper and richer. A bound sign is the blank with a horse's name on "
-        + "it, so it should read as the same object in a second state and not as a second "
-        + "object.",
+    out: 'golden_carrot_stage1', from: 'minecraft:carrots_stage1', folder: 'block',
+    mode: 'flat', hue: 0.125, sat: 0.72, light: 0.06,
+    note: "Growth stage 1 of four.",
   },
   {
-    out: 'holding_pen_sign', from: 'minecraft:spruce_sign', mode: 'flat',
-    hue: 0.09, sat: 0.65, light: 0.02,
-    note: "Amber, warm against the stall signs' blue - the holding pen is a different system "
-        + "and the two signs sit in the same tab.",
+    out: 'golden_carrot_stage2', from: 'minecraft:carrots_stage2', folder: 'block',
+    mode: 'flat', hue: 0.125, sat: 0.72, light: 0.06,
+    note: "Growth stage 2 of four.",
+  },
+  {
+    out: 'golden_carrot_stage3', from: 'minecraft:carrots_stage3', folder: 'block',
+    mode: 'flat', hue: 0.125, sat: 0.72, light: 0.06,
+    note: "Growth stage 3 of four.",
   },
 
   // --- derived from OUR OWN art ------------------------------------------
@@ -259,19 +273,23 @@ function defaultJar() {
   return hit ? path.join(cache, hit) : null;
 }
 
-let vanillaDir = null;
-function vanillaPath(name) {
-  if (!vanillaDir) {
+const vanillaDirs = {};
+/**
+ * Vanilla art to derive from. `folder` is 'item' or 'block' - the crop stages
+ * live under textures/block, and they are the only reason this takes an argument.
+ */
+function vanillaPath(name, folder = 'item') {
+  if (!vanillaDirs[folder]) {
     if (!VANILLA_JAR || !fs.existsSync(VANILLA_JAR)) {
       throw new Error('No Minecraft client jar found, and this bake needs vanilla art to derive '
         + 'from. Pass --vanilla-jar <path>, or run any Gradle task once so the jar lands in '
         + '~/.gradle/caches/neoformruntime/artifacts.');
     }
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vanilla-item-src-'));
-    execFileSync('jar', ['xf', VANILLA_JAR, 'assets/minecraft/textures/item'], { cwd: tmp });
-    vanillaDir = path.join(tmp, 'assets/minecraft/textures/item');
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vanilla-src-'));
+    execFileSync('jar', ['xf', VANILLA_JAR, `assets/minecraft/textures/${folder}`], { cwd: tmp });
+    vanillaDirs[folder] = path.join(tmp, 'assets/minecraft/textures', folder);
   }
-  return path.join(vanillaDir, name + '.png');
+  return path.join(vanillaDirs[folder], name + '.png');
 }
 
 // --- the recolour --------------------------------------------------------
@@ -298,7 +316,7 @@ let wrote = 0;
 for (const r of RECIPES) {
   const vanilla = r.from.startsWith('minecraft:');
   const srcPath = vanilla
-    ? vanillaPath(r.from.slice('minecraft:'.length))
+    ? vanillaPath(r.from.slice('minecraft:'.length), r.folder ?? 'item')
     : path.join(SOURCES, r.from + '.png');
   if (!fs.existsSync(srcPath)) {
     console.error(`! ${r.out}: source ${r.from} not found at ${srcPath}`);
@@ -306,10 +324,13 @@ for (const r of RECIPES) {
     continue;
   }
   const src = readPng(srcPath);
-  writePng(path.join(TEXTURES, r.out + '.png'), src.w, src.h, recolour(src, r));
+  const outDir = r.folder === 'block' ? BLOCK_TEXTURES : TEXTURES;
+  writePng(path.join(outDir, r.out + '.png'), src.w, src.h, recolour(src, r));
   wrote++;
 }
 
-if (vanillaDir) fs.rmSync(path.dirname(path.dirname(path.dirname(vanillaDir))), { recursive: true, force: true });
+for (const d of Object.values(vanillaDirs)) {
+  fs.rmSync(path.dirname(path.dirname(path.dirname(d))), { recursive: true, force: true });
+}
 console.log(`item recolours: ${wrote}/${RECIPES.length} sprites written -> ${path.relative(ROOT, TEXTURES)}`);
 console.log('Now run check-duplicate-item-art.mjs - it is the thing that says whether it worked.');

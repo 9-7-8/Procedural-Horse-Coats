@@ -82,13 +82,17 @@ public final class ClientSetup {
                 JumpScreen::new);
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_STASIS_BANK.get(),
                 HorseStasisBankScreen::new);
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_GEAR.get(),
+                HorseGearScreen::new);
     }
 
-    /** Molten hooves' glowing prints - see {@link HoofprintParticle}. */
+    /** Molten hooves' glowing prints ({@link HoofprintParticle}) and horn dust ({@link HornDustParticle}). */
     @SubscribeEvent
     static void registerParticles(net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(com.example.horsegenetics.neoforge.particle.ModParticles.HOOFPRINT.get(),
                 HoofprintParticle.Provider::new);
+        event.registerSpriteSet(com.example.horsegenetics.neoforge.particle.ModParticles.HORN_DUST.get(),
+                HornDustParticle.Provider::new);
     }
 
     /**
@@ -123,11 +127,6 @@ public final class ClientSetup {
         event.register(
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "metal_tint"),
                 MetalTintSource.MAP_CODEC);
-        // The golden carrot seed icon, which is vanilla's wheat seeds in gold.
-        // See GoldTintSource, and registerBlockColours below for the other half.
-        event.register(
-                net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "gold_tint"),
-                GoldTintSource.MAP_CODEC);
         // A jump's two coats of paint on its icon, one per half. The ids are
         // what the tints[] array in assets/horsegenetics/items/jump.json names,
         // and their ORDER there is what decides which half each colours - see
@@ -143,27 +142,23 @@ public final class ClientSetup {
     }
 
     /**
-     * The planted golden carrot crop, coloured.
+     * <b>A jump's two coats of paint.</b>
      *
-     * <p>Its stage models are vanilla's carrot sheets with a {@code tintindex}
-     * added - that index is what this handler answers, and a model without one
-     * would simply render orange carrots however loud this shouted. The colour
-     * is {@link GoldTintSource#GOLD}, shared with the item tint so the seed in
-     * your hand and the crop in the ground are the same gold.
+     * <p>26.1.2 has no lambda-per-tint-index block colour handler: the event
+     * takes a <b>list</b> of {@link net.minecraft.client.color.block.BlockTintSource},
+     * indexed by the model's tint index, and {@code BlockTintSource} is a
+     * one-method interface over the block state.
      *
-     * <p>The mod's first block tint. 26.1.2 has no lambda-per-tint-index block
-     * colour handler: the event takes a <b>list</b> of
-     * {@link net.minecraft.client.color.block.BlockTintSource}, indexed by the
-     * model's tint index, and {@code BlockTintSource} is a one-method interface
-     * over the block state. One entry, so index 0, which is the index the stage
-     * models carry.
+     * <p>The golden carrot crop used to be here too, tinting vanilla's carrot
+     * sheets gold at runtime. On 2026-09-29 it got gold art of its own
+     * (baked by {@code tools/bake-item-recolours.mjs}) and its stage models
+     * lost their {@code tintindex}, so the handler had nothing left to answer
+     * and went with it - along with {@code GoldTintSource}, whose item half had
+     * coloured the seed icon that is now a drawn sprite.
      */
     @SubscribeEvent
     static void registerBlockTintSources(
             net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.BlockTintSources event) {
-        event.register(
-                java.util.List.of(state -> GoldTintSource.GOLD),
-                com.example.horsegenetics.neoforge.block.ModBlocks.GOLDEN_CARROT_CROP.get());
         // THE JUMP'S TWO HALVES, IN TINT-INDEX ORDER: rails 0, standards 1.
         // Two entries rather than one, which is the whole reason a jump can be
         // painted per part at all - the list index IS the model's tintindex,

@@ -134,12 +134,29 @@
 
 <h2 id="using">Putting something on</h2>
 <ul>
+    <li><strong>Or skip the screen entirely.</strong> Hold a piece of gear and
+        right-click your horse, and it goes into the first empty slot that takes
+        it &mdash; the same gesture that has always put a saddle or a barding on.
+        The screen is what you want when you are choosing between things or
+        taking something off; the click is what you want when you are holding the
+        one piece and standing next to the horse. It is
+        <a href="rider-comfort.html#tack-equip">written up under rider
+        comfort</a>, with the rules it follows and the switch that turns it
+        off.</li>
     <li><strong>Click a slot and it tells you what fits.</strong> A short list
         drops under it: everything in your pack that this slot accepts, each with
         its picture, and a <em>Take off</em> line at the top for whatever is in
         there now. Click a line to put it on, click anywhere else to close the
-        list. There is no dragging: this is a plain screen with no container
-        behind it, so there is no carried stack to drag with.</li>
+        list.</li>
+    <li><strong>Or press <em>Dress</em> and drag.</strong> On your own horse,
+        within eight blocks, the Gear tab has a <em>Dress</em> button in its top
+        corner. It opens the same doll in a window of its own with
+        <strong>your inventory down the right</strong>, and there it works like
+        any chest: pick a piece up and put it on a slot, drag it back off,
+        shift-click it either way. Shift-clicking a stack of something every
+        hoof takes puts one on each hoof. The horse still turns if you drag it.
+        Escape takes you back to the Gear tab; walking away from the horse just
+        closes the window.</li>
     <li><strong>An empty list still answers the question.</strong>
         &ldquo;Nothing you are carrying fits here&rdquo; and &ldquo;nothing takes
         this slot yet&rdquo; are different sentences, and which one you get is
@@ -312,11 +329,73 @@
     drawn last so it covers what it hangs over, it owns the wheel, and it eats
     the next click wherever that click lands. Two dropdowns in one mod that
     behave differently is worse than either being slightly wrong. It is
-    <em>not</em> the inventory panel on the Roadmap tab and does not stand in its
-    way: that is a real container menu with a carried stack, and what it warns
-    against is drawing a picture of an inventory with click-to-toggle behind it.
-    A list of what fits is not a picture of an inventory &mdash; it is a menu,
-    and it says the one thing a grid of thirty-six squares could not.
+    <em>not</em> a stand-in for <a href="#gear-inventory">the Dress window</a>
+    below, and the two live side by side: the picker is one click on any slot,
+    the window is a real container. A list of what fits is not a picture of an
+    inventory &mdash; it is a menu, and it says the one thing a grid of
+    thirty-six squares could not.
+</p>
+
+<h2 id="gear-inventory">The Dress window &mdash; a real menu beside the doll</h2>
+<p>
+    Asked for on 2026-09-25 (<em>&ldquo;the player's inventory must be visible on the right
+    side of the gear screen, so they can equip/unequip items&rdquo;</em>) and built on
+    2026-09-30. <code>menu/HorseGearMenu</code> is an <code>AbstractContainerMenu</code>
+    with the nineteen tack slots and the player's thirty-six; <code>client/HorseGearScreen</code>
+    draws it, doll on the left and inventory on the right.
+</p>
+<p>
+    <strong>It is a separate window, not the information screen converted.</strong> The
+    owner's call, from two options. <code>HorseInfoScreen</code> shows horses that are not
+    loaded entities at all &mdash; a foal from the Offspring tab, a name in the family tree
+    &mdash; and a container menu needs a live entity on the server, so a menu under that
+    screen could never be a precondition of it opening. It is also opened by the client
+    from four places, and a menu exists only if the server opens it. So the tab keeps its
+    read-only doll and the click picker, and gains a <em>Dress</em> button. That sends
+    <code>OpenHorseGearPayload</code>; <code>ModNetworking.handleOpenHorseGear</code> checks
+    the same three things <code>handleTackSlot</code> does &mdash; a horse, the player's,
+    within eight blocks &mdash; and opens the menu through NeoForge's extra-data factory
+    with the entity id, exactly as <code>JumpMenu</code> is opened with a block position.
+    <code>ModMenus</code>' class comment used to say a menu was for a <em>block</em>; it now
+    says the rule is slots, which is what it always meant.
+</p>
+<p>
+    <strong>The menu keeps nothing.</strong> On the server the tack slots are a
+    <code>GearView</code> &mdash; a <code>Container</code> whose reads are
+    <code>HorseTackSlot.on</code> and whose writes are <code>HorseTackSlot.set</code>, so
+    there is no third copy of the gear to drift from vanilla's equipment and the
+    <code>HORSE_GEAR</code> attachment. On the client they are a plain mirror the menu sync
+    fills, like every vanilla client menu.
+</p>
+<p>
+    <strong>Every rule of the old packet became slot behaviour</strong>, which is the wider
+    surface, so each one is written once and delegated to:
+</p>
+<ul>
+    <li><code>mayPlace</code> is <code>HorseTackSlot.accepts</code>, which carries
+        <code>usableOn</code> &mdash; so the fifteen empty tags refuse everything and a foal's
+        slots refuse too.</li>
+    <li><strong>One piece per slot</strong> (<code>getMaxStackSize</code> on the slot and the
+        view). That also shuts every vanilla merge path, the only paths that grow a slot's
+        stack in place without writing it back. <code>GearView</code> hands out copies anyway,
+        so a missed path would lose a count on screen rather than edit the horse behind
+        <code>set</code>'s back.</li>
+    <li><code>stillValid</code> re-checks alive, owned and within eight blocks every tick,
+        so walking off closes it. Whatever is on the cursor then goes back through vanilla's
+        <code>removed</code> &mdash; into the inventory, or at the player's feet.</li>
+    <li><code>canTakeItemForPickAll</code> is false for the tack slots: a double-click on a
+        spare saddle in the bag would otherwise gather the worn one off the horse.</li>
+    <li><code>GearView.clearContent</code> does nothing on purpose &mdash; it is the one
+        method that could strip a horse with no player to hand the pieces to.</li>
+</ul>
+<p>
+    <strong>The layout is the roster, again.</strong> Slots sit at
+    <code>HorseTackSlot.anchorX/anchorY</code> of a 216&times;160 box, the smallest the
+    anchors survive: the tightest pairs are 0.12 and 0.16 of the box apart, which needs at
+    least 168&times;131 before two slots overlap. Escape returns to the information screen
+    it came from through a one-shot hand-off keyed by the horse's id; a close that comes
+    from the server (reach, death) does not go through <code>onClose</code>, so it drops
+    the player into the world rather than into a screen about a horse they have left.
 </p>
 
 <h2 id="doll">The paper doll</h2>
@@ -383,10 +462,7 @@
         Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the
         whole accessories system is the plan: derived models rather than drawn ones, a
         tack bench, dye and pattern, enchanted tack, hoof equipment, native tack, horse chests and
-        the saddle pad &mdash; with the armour materials the one piece that is only data;
-        and beside all of that the tab needs
-        <a href="horse-gear.html#gear-inventory">the player's own inventory drawn next to the doll</a>, which
-        means putting a real container menu under a screen that has never had one.
+        the saddle pad &mdash; with the armour materials the one piece that is only data.
     </p>
 </div>
 
@@ -1077,45 +1153,6 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         the horse screen or in a screen of its own.</li>
 </ul>
 
-<hr>
-
-<h2 id="gear-inventory">The player's inventory, beside the doll</h2>
-
-<p>
-    Asked for on 2026-09-25: <strong>the player's own inventory should be visible down the
-    right of the Gear tab, and gear should move by dragging it</strong> rather than by the
-    click-to-toggle the tab ships with. That is how every other equipment screen in the game
-    behaves, and it is the difference between a tab you operate and a tab you have to be
-    taught.
-</p>
-
-<p>
-    <strong>Why it is a plan and not a fix.</strong> <code>HorseInfoScreen</code> is a plain
-    <code>Screen</code>. It has no menu behind it, so there are no slots, no carried stack and
-    no server-side click protocol &mdash; equipping is a <code>TackSlotPayload</code> naming a
-    slot, and the server decides what to do from the player's held item. Real drag-and-drop
-    means an <code>AbstractContainerMenu</code> with nineteen tack slots plus the player's
-    thirty-six, and <code>AbstractContainerScreen</code> under a screen that is currently
-    seven scrolling tabs of custom drawing. The tabs, the scroll, the link hit-testing and the
-    doll all have to keep working inside a window that now has a fixed-size inventory panel
-    pinned to part of it.
-</p>
-
-<p>
-    <strong>The shape to avoid</strong> is drawing thirty-six inventory-looking squares on the
-    existing screen and keeping click-to-toggle behind them. It would read as a real inventory
-    and behave as a picture of one, which is worse than the honest version that is there now;
-    and it is a dead end, because none of it survives the menu being added underneath.
-</p>
-
-<p>
-    Open questions before it starts: whether the menu backs the whole screen or only the Gear
-    tab (a menu that exists while the Genes tab is up is a menu whose slots are all hidden,
-    which vanilla does not much like); whether the window gets wider or the doll gets smaller;
-    and whether click-to-toggle stays alongside dragging, since it is one click where a drag is
-    two gestures and several of the nineteen slots are small.
-</p>
-
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -1130,16 +1167,47 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         than eat one. Since 2026-09-26 a click opens a <strong>picker</strong> instead of
         swapping with the hand, and the packet carries an inventory index rather than meaning
         &ldquo;the hand&rdquo; &mdash; so the write path changed again, underneath a screen
-        nobody had confirmed the first version of.
+        nobody had confirmed the first version of. Since 2026-09-30 there is also a
+        <strong>Dress</strong> window, a real container menu with the player's inventory
+        beside the doll, and nothing about it has been opened in a game.
     </p>
 </div>
+
+<h3 id="verify-dress">The Dress window (2026-09-30, NOT played)</h3>
+<p>
+    Built from the owner's request for the inventory beside the doll; see
+    <a href="#gear-inventory">the Coding tab</a>. A clean <code>runServer</code> boot proves
+    the menu type and the open packet register, and nothing more &mdash; no client has
+    opened it. The checks that can be wrong invisibly come first:
+</p>
+<ul>
+    <li><strong>Drag a saddle and an iron barding on, then ride between the two.</strong>
+        Confirms the writes land on the horse, not just on the screen. Then drag both off.</li>
+    <li><strong>Shift-click both ways</strong>, and double-click a spare saddle in the bag
+        while one is worn: the worn one must stay on the horse.</li>
+    <li><strong>Every empty slot</strong> with a stack held over it: nothing accepted,
+        nothing consumed, nothing duplicated, nothing in the log.</li>
+    <li><strong>Walk out of range with a piece on the cursor.</strong> The window closes,
+        and the piece is in the inventory, not gone. Same with Escape, and with a full
+        inventory (it should land at your feet).</li>
+    <li><strong>A foal</strong>: the button opens the window, the slots are drawn greyed
+        and refuse.</li>
+    <li><strong>A stranger's horse, an untamed one, and a horse opened from the family
+        tree</strong>: no Dress button, and the Gear tab reads as before.</li>
+    <li><strong>A dedicated server</strong>, not only single-player &mdash; every rule here
+        is server-side.</li>
+    <li><em>Then look at it:</em> the Dress button shares the top-right corner with
+        Overview's Ride and Offspring's Refresh, and it has not been seen whether it sits
+        clear of the doll's top-right bag slot on a narrow window. And whether the window,
+        at 402 pixels wide, fits at GUI scale 4 on a small screen.</li>
+</ul>
 
 <h3 id="verify-picker">The gear picker (2026-09-26, NOT played)</h3>
 <p>
     Asked for by the owner &mdash; <em>&ldquo;clicking in any of the gear slots should show a
     dropdown of everything in your inventory that can be put in that gear slot&rdquo;</em>
-    &mdash; and built as an anchored list rather than as the inventory panel on the Roadmap
-    tab. Nothing below has been seen running.
+    &mdash; and built as an anchored list; the inventory panel is the separate
+    <a href="#verify-dress">Dress window</a>. Nothing below has been seen running.
 </p>
 <ul>
     <li><strong>The saddle slot is the one that proves it.</strong> Carry two or three saddles

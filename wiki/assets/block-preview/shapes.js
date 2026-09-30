@@ -4,15 +4,39 @@
 window.HG_BLOCK_SHAPES = {
   "cowboy_hitch": {
     "up": "cowboy_hitch_top",
-    "down": "post_bottom",
+    "down": "plank_bottom",
     "north": "cowboy_hitch_side",
     "south": "cowboy_hitch_side",
     "east": "cowboy_hitch_side",
     "west": "cowboy_hitch_side"
   },
+  "equestrian_bench": {
+    "up": "equestrian_bench_top",
+    "down": "plank_bottom",
+    "north": "equestrian_bench_side",
+    "south": "equestrian_bench_side",
+    "east": "equestrian_bench_side",
+    "west": "equestrian_bench_side"
+  },
+  "equine_research_shelf": {
+    "up": "equine_research_shelf_end",
+    "down": "equine_research_shelf_end",
+    "north": "equine_research_shelf_side",
+    "south": "equine_research_shelf_side",
+    "east": "equine_research_shelf_side",
+    "west": "equine_research_shelf_side"
+  },
+  "horse_stasis_bank": {
+    "up": "horse_stasis_bank_end",
+    "down": "horse_stasis_bank_end",
+    "north": "horse_stasis_bank_side",
+    "south": "horse_stasis_bank_side",
+    "east": "horse_stasis_bank_side",
+    "west": "horse_stasis_bank_side"
+  },
   "leatherworkers_post": {
     "up": "leatherworkers_post_top",
-    "down": "post_bottom",
+    "down": "plank_bottom",
     "north": "leatherworkers_post_side",
     "south": "leatherworkers_post_side",
     "east": "leatherworkers_post_side",
@@ -20,7 +44,7 @@ window.HG_BLOCK_SHAPES = {
   },
   "metalsmiths_post": {
     "up": "metalsmiths_post_top",
-    "down": "post_bottom",
+    "down": "plank_bottom",
     "north": "metalsmiths_post_side",
     "south": "metalsmiths_post_side",
     "east": "metalsmiths_post_side",
@@ -28,7 +52,7 @@ window.HG_BLOCK_SHAPES = {
   },
   "scientists_post": {
     "up": "scientists_post_top",
-    "down": "post_bottom",
+    "down": "plank_bottom",
     "north": "scientists_post_side",
     "south": "scientists_post_side",
     "east": "scientists_post_side",
@@ -36,7 +60,7 @@ window.HG_BLOCK_SHAPES = {
   },
   "suppliers_post": {
     "up": "suppliers_post_top",
-    "down": "post_bottom",
+    "down": "plank_bottom",
     "north": "suppliers_post_side",
     "south": "suppliers_post_side",
     "east": "suppliers_post_side",

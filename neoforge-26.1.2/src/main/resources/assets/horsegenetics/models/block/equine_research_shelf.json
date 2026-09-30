@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "minecraft:block/oak_planks",
-    "side": "minecraft:block/bookshelf"
+    "end": "horsegenetics:block/equine_research_shelf_end",
+    "side": "horsegenetics:block/equine_research_shelf_side"
   }
 }

@@ -93,10 +93,13 @@ class SpawnGroundTest {
     @Test
     void anOverworldBiomeGrantsNoExtraFloors() {
         // The regression that would matter most: some breed quietly acquiring a
-        // floor list and making plains spawn horses on stone in the dark.
+        // floor list and making plains spawn horses on stone in the dark. The
+        // Enderpony now names End floors and lives in plains too, which is why a
+        // floor counts only in a Nether or End biome (owner, 2026-09-30).
         assertTrue(Breeds.wildFloors("minecraft:plains").isEmpty(),
-                "no overworld breed should name extra floors yet; if one now does, "
-                        + "check it did not mean to and that the dark flag is off");
+                "an overworld biome must never have extra floors");
+        assertFalse(Breeds.wildGroundAllows("minecraft:plains", "minecraft:end_stone", false),
+                "the Enderpony's End floor must not be walkable in plains");
     }
 
     @Test

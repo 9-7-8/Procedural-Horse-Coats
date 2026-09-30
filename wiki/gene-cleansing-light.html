@@ -113,6 +113,30 @@
     effect is required to state is inherited rather than re-argued.
 </p>
 
+<h3 id="verified">Verified in the test yard</h3>
+
+<p>
+    <strong>The aura kills undead nobody has touched, a carrier does nothing, the filter is the
+    undead tag, and the drops are lost</strong> (2026-09-30, the
+    <a href="horse-dimension.html#clockwork">clockwork</a> pens <em>CLEANSING</em> and
+    <em>CLEANSING CARRIER</em>, row AM west, run with nobody there). Each pen is a horse in a glass
+    ring with a zombie, a skeleton, a drowned and a creeper caged three and a half blocks off, inside
+    the smallest radius the allele rolls. Beside the <code>Cln/Cln</code> horse the zombie, the
+    skeleton and the drowned all died nineteen seconds after the build (ten beats of two), of
+    <code>magic</code>; the creeper was untouched at 20/20; and no experience orb appeared in the pen
+    &mdash; the &sect;<a href="#loot">loot cost</a> working as designed, not a defect. Beside the
+    <code>Cln/n</code> horse the zombie was untouched after six minutes, which is the control that
+    separates a working recessive from an aura firing on every horse. The skeleton and drowned dying
+    while the creeper lived is what shows the filter is <code>MobGroups</code>&rsquo;
+    <code>EntityTypeTags.UNDEAD</code> lookup and not a list of zombies.
+</p>
+<p>
+    <em>A pen trap:</em> the second run failed the carrier, because its zombie stood six and a half
+    blocks from the <em>neighbouring</em> pen&rsquo;s <code>Cln/Cln</code> horse, whose radius rolls
+    up to eight. The cage moved to the far side of its pen and the third run passed it. A pen bug, not
+    the gene&rsquo;s.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -133,41 +157,23 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Cleansing light has never been seen killing anything: it was one of the six genes the horse
-    dimension&rsquo;s own protections made untestable, and the aura, the undead tag filter and the
-    deliberate loss of the drops are all still unconfirmed.</p>
+    <p>Cleansing light is shown killing undead and sparing everything else, but nobody has watched
+    the beat step a zombie&rsquo;s health down, crowded it past its target cap, or compared two
+    radii.</p>
 </div>
 
 <h3 id="open-gene-cleansing-light">Still open (NOT played)</h3>
 
 <p>
     The gene is one <code>Healing</code> ability with a negative amount, an <code>undead</code>
-    group and a radius carried on the allele copy. It was listed in
-    <code>DebugYardCombat</code> as one of the six genes that could not be tested until the
-    yard stopped deleting monsters and protecting horses, so its arena is new and unread. The undead
-    filter is <code>MobGroups</code>&rsquo; <code>EntityTypeTags.UNDEAD</code> lookup, and the
-    failure it can have is entirely silent &mdash; an aura that simply never matches anything.
+    group and a radius carried on the allele copy. That it kills undead, spares a creeper, does
+    nothing on a carrier and drops no experience is on the <a href="#verified">Coding tab</a>, from
+    the clockwork pens. What is left is its rhythm, its cap and its range.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The aura kills undead nobody has touched.</strong> Put a <code>Cln/Cln</code> horse
-        in the yard arena with its spawner running, and do not attack anything yourself.
-        <strong>Pass:</strong> zombies near the horse lose health on a beat and die. Nothing else
-        here matters if this does not happen.</li>
-    <li><strong>A carrier does nothing.</strong> The same setup with a <code>Cln/n</code> horse.
-        <strong>Pass:</strong> the zombies are entirely unharmed and reach the horse. This is the
-        control that separates a working recessive from an aura firing on every horse in the
-        world.</li>
-    <li><strong>The filter is the undead tag and not a list of zombies.</strong> Put a skeleton, a
-        drowned and a creeper in range. <strong>Pass:</strong> the skeleton and the drowned burn
-        down, the creeper is untouched. A hardcoded list would pass the zombie test and fail this
-        one, and it would take five genes blind to modded creatures with it.</li>
-    <li><strong>The drops really are lost, and that is the design.</strong> Let the aura finish a
-        zombie with no hit of yours on it. <strong>Pass:</strong> no experience orbs and no
-        player-only drop. Record it as confirmed rather than as a defect &mdash; the
-        &sect;<a href="#loot">loot cost</a> is a settled decision.</li>
     <li><strong>The beat is slow, and that is why it is cheap.</strong> Watch one zombie&rsquo;s
         health while it stands in the aura. <strong>Pass:</strong> it loses
         <code>CleansingLightGene.DAMAGE</code> in discrete steps about two seconds apart, not

@@ -478,13 +478,12 @@ public final class DebugTestWorldHandler {
      *
      * <p>What were batches 3 and 4 were the item layer in a hotbar - pen signs, stall
      * signs, tickets, hay, fences, bottles, the research shelf - and every one
-     * of those is now standing in the yard's rows B, C and D with a chest
-     * beside it. A hotbar of items whose legend reads "build a stall, then fill
-     * it solid" is a batch that gets taken and put away again, which is what
-     * happened to both of them for three days running.
+     * of those went into the yard's rows B, C and D with a chest beside it. Those
+     * rows are gone again (2026-09-30): the yard now keeps only what runs with
+     * nobody in it, and the item checks a FakePlayer can do are its clockwork rows.
      *
-     * <p>What is left here is the residue: the things that need a
-     * <b>rider</b>, the one that needs to be <b>fed by hand</b>, and the intake
+     * <p>What is left here is the residue: what needs a <b>player</b> - a rider,
+     * an owner being hurt, a player an aura can find (batch 5) - and the intake
      * genes that are just eggs to look at. If a batch can be replaced by a pen,
      * it should be - see {@code wiki/horse-dimension.html}.
      */
@@ -493,7 +492,7 @@ public final class DebugTestWorldHandler {
             "NEW: the ender whistle, and wild bands in the OVERWORLD (yard rows R-T run the rest)",
             "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
-            "Ridden: ender echo and ocean-born, plus the guardian, which needs YOU hurt",
+            "Hands only: guardian, ender echo ridden, ocean-born, the healer - they need YOU",
             "The sheep spawner - the one thing in 0-BY the yard cannot hand you",
             "Intake: the rest (0-BZ)",
     };
@@ -603,37 +602,28 @@ public final class DebugTestWorldHandler {
                         + "right off the arrival road, and it runs in rows either side of "
                         + "the walkway all the way to the back wall.")
                 .withStyle(ChatFormatting.GOLD));
-        tell(player, Component.literal("  A  2 dryad pens | the ward's spawner    "
-                        + "B  tack room | horseman + cowboy")
+        tell(player, Component.literal("  O  the cap, hurt mare | MET natural      "
+                        + "T  dryads on stone | splice performance")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  C  ticket stalls | carrot bench         "
-                        + "D  dairy + shears | egg layer x8")
+        tell(player, Component.literal("  U, W  inheritance ratios (all day)       "
+                        + "X  night shy | lycan doomed, diamonds")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  E  crackle, the pool | (empty)          "
-                        + "F  starburst, F8 | the 3 stat pens")
+        tell(player, Component.literal("  Y  cover reach | stats, lethal foals    "
+                        + "AA  kick pens | blood only, suntouched")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  I  (west empty) | eyesight, lit and dark "
-                        + "J  guardian | the infirmary")
+        tell(player, Component.literal("  AL  the arcane dealer")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  K  (empty) | ender echo                 "
-                        + "L, M, N  the ten splice-carrot pairs")
-                .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  O-P  breeding, one scenario a pen      "
-                        + "Q-R  band life, on a clock (leave it)")
-                .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  S-T  dryads, on stone (all day)        "
-                        + "U  inheritance ratios, tallied (all day)")
-                .withStyle(ChatFormatting.WHITE));
-        // G AND H ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - the growing
-        // row's last two pens moved into A's west block when oak/birch and bone
-        // meal were confirmed, and H had been depth zero since the retinue pen
-        // was deleted. The letters are deliberately NOT re-lettered: every sign
+        // MOST LETTERS ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - answered
+        // rows deleted, the rest packed together. The letters are deliberately
+        // NOT re-lettered: every sign
         // in the yard, every open question on a Verification tab anywhere in
         // the wiki and a year of session notes say "row J west", and renaming
         // rows to close a gap would invalidate all of it to save two characters.
-        tell(player, Component.literal("Rows A, D, I and K run themselves - walk in, then "
-                        + "leave it alone. B and C need your hands, and every chest in them is "
-                        + "labelled. (There is no G or H: both were emptied and deleted.)")
+        // 2026-09-30: every pen that waited for a person went, then every pen whose question was
+        // answered, and the survivors were packed together - so the letters skip, and are names.
+        tell(player, Component.literal("Every pen runs itself - walk in, then leave it alone. "
+                        + "Nothing in the yard needs your hands; what does is batch 5. The letters "
+                        + "skip because answered rows were deleted and the rest packed together.")
                 .withStyle(ChatFormatting.GOLD));
     }
 
@@ -832,9 +822,8 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 1, new ItemStack(Items.STICK),
                         "stick - the yard's horses all come TAMED now, this is for anything else");
                 put(inv, legend, 2, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - rows L, M and N. The BREEDING half is confirmed (8 "
-                                + "carrots, 8 foals, 2026-09-13). What is left: breed a pair, then "
-                                + "OPEN THE FOAL and check the substituted locus is actually there");
+                        "golden carrots - for anything you breed yourself; the yard's splice pens "
+                                + "(AJ-AK) feed and read their own foals now");
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
                 put(inv, legend, 4, new ItemStack(Items.SADDLE),
@@ -869,32 +858,35 @@ public final class DebugTestWorldHandler {
                         .withStyle(ChatFormatting.RED));
             }
             case 5 -> {
-                // EVERY ONE OF THESE IS A PEN NOW, and all three come saddled
-                // in it - so this batch is no longer "here are three horses",
-                // it is the handful of things a rider needs that a pen cannot
-                // hold: a sword for the arena, a clock for timing, and the
-                // spare saddle for when one gets lost.
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick");
-                put(inv, legend, 1, new ItemStack(Items.SADDLE),
-                        "spare saddle - the yard's ridden pens come saddled already");
-                put(inv, legend, 2, new ItemStack(Items.IRON_SWORD), "sword - for the arena, row J");
-                put(inv, legend, 3, new ItemStack(Items.CLOCK),
-                        "clock - or /testkit night, which the dimension honours now");
-                put(inv, legend, 4, new ItemStack(Items.GLASS_BOTTLE, 16),
-                        "bottles - the DAIRY, row D west: the mare is already hurt and the foal "
-                                + "is already a foal, so all three refusals are one walk");
-                put(inv, legend, 5, new ItemStack(Items.SHEARS),
-                        "shears - two horses in the same pen are named SHEAR ME");
-                tell(player, Component.literal("Row J west is the GUARDIAN, and it is the only "
-                                + "horse in the yard that arrives UNTAMED - on purpose, because "
-                                + "its gene fires on the owner being hurt and a horse with no "
-                                + "owner matches nobody. Tame it, stand next to it, then let a "
-                                + "zombie from the chest hit YOU. Gladiator is confirmed and gone.")
-                        .withStyle(ChatFormatting.GOLD));
-                tell(player, Component.literal("Rows B, C and D are the ITEM LAYER - tack room, "
-                                + "horseman and cowboy at their own workstations, the ticket "
-                                + "stalls, the carrot bench. Every chest is labelled; nothing "
-                                + "needs fetching.")
+                // THE CHECKS A FAKEPLAYER CANNOT DO, which is every one of these. Until
+                // 2026-09-30 they were yard pens (the arena, row K, the pool, the
+                // infirmary's positive half); the yard only keeps what runs with nobody in
+                // it now, so they are eggs again. A FakePlayer is not in the level's player
+                // list - it cannot ride, no aura scanning for players finds it, and a horse
+                // looking for its owner by entity finds nobody.
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame every egg here yourself");
+                put(inv, legend, 1, preset(player, "Test: guardian", Sex.FEMALE, false,
+                                "horsegenetics.guardian=Grd/Grd", "horsegenetics.magic_health=Hardy/Hardy"),
+                        "GUARDIAN - tame it, then let a zombie hit YOU, not it: it should close on the "
+                                + "zombie, kill it, and live");
+                put(inv, legend, 2, new ItemStack(Items.ZOMBIE_SPAWN_EGG, 8), "zombies - for the guardian");
+                put(inv, legend, 3, preset(player, "Test: ender echo", Sex.FEMALE, false,
+                                "horsegenetics.ender_echo=End/End"),
+                        "ENDER ECHO - ride it and get hit: horse and rider blink together, land somewhere "
+                                + "legal, you stay seated, no rubber-banding");
+                put(inv, legend, 4, preset(player, "Test: ocean-born", Sex.FEMALE, false,
+                                "horsegenetics.ocean_born=Ocn/Ocn"),
+                        "OCEAN-BORN - ride it five blocks under water: YOUR air bar must not move");
+                put(inv, legend, 5, new ItemStack(Items.SADDLE, 2), "saddles - ender echo and ocean-born");
+                put(inv, legend, 6, new ItemStack(Items.WATER_BUCKET, 4),
+                        "water - dig a pit five deep; a puddle cannot test breathing");
+                put(inv, legend, 7, preset(player, "Test: healer", Sex.FEMALE, false,
+                                "horsegenetics.healer=Hlr/Hlr"),
+                        "HEALER - hurt yourself, stand within three blocks: half a heart every two "
+                                + "seconds, and nothing at six blocks");
+                put(inv, legend, 8, new ItemStack(Items.IRON_SWORD), "sword - to hurt things, or yourself with a fall");
+                tell(player, Component.literal("None of these can be done by the yard's clockwork hands: "
+                                + "a fake player cannot ride, be healed by an aura, or be found as an owner.")
                         .withStyle(ChatFormatting.GOLD));
             }
             case 6 -> {

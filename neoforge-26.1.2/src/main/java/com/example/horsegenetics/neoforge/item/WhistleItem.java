@@ -1,17 +1,21 @@
 package com.example.horsegenetics.neoforge.item;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.server.HorseProgress;
+import com.example.horsegenetics.neoforge.server.WhistleCalls;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,7 +27,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * A whistle (roadmap wiki &sect;11). Right-click anywhere: every <b>tamed horse
@@ -57,6 +60,11 @@ public class WhistleItem extends Item {
      * fourth constructor argument, because the radius is already the thing that
      * distinguishes the three and a second parallel field could disagree with it.
      */
+    /** This tier's reach, which is also what tells the three tiers apart. */
+    public int radius() {
+        return radius;
+    }
+
     private ProgressTask task() {
         if (radius <= 16) {
             return ProgressTask.WHISTLE_BASIC;
@@ -84,68 +92,93 @@ public class WhistleItem extends Item {
                                 Consumer<Component> adder, TooltipFlag flag) {
         adder.accept(Component.literal("Calls your tamed horses within " + radius + " blocks.")
                 .withStyle(ChatFormatting.GRAY));
+        // WALK_PATH_BLOCKS, not a typed 16: the radius line above reads its own
+        // field for exactly this reason, and a tooltip that disagrees with the
+        // behaviour is worse than no tooltip. "About" because the cap is counted
+        // in path steps and a diagonal step covers more than a block.
+        adder.accept(Component.literal("Horses within about " + WhistleCalls.WALK_PATH_BLOCKS
+                        + " blocks walk to you; farther ones appear beside you.")
+                .withStyle(ChatFormatting.DARK_GRAY));
         adder.accept(Component.literal("A ridden horse stays put; a leashed one is untied.")
                 .withStyle(ChatFormatting.DARK_GRAY));
     }
 
+    /**
+     * <b>What one blow did.</b> {@code handled} is every horse this whistle
+     * dealt with, walked or teleported, so that
+     * {@code server/WhistleBlowing} can skip an ender whistle bound to a horse
+     * an area whistle has already called - blowing both at once must not
+     * teleport a horse twice or chime twice for it.
+     */
+    public record Blown(int walked, int teleported, Set<UUID> handled) {
+
+        public static final Blown NOTHING = new Blown(0, 0, Set.of());
+
+        public int total() {
+            return walked + teleported;
+        }
+    }
+
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (level instanceof ServerLevel serverLevel) {
-            HorseProgress.complete(player, task());
-            int moved = recall(serverLevel, player);
-            player.sendSystemMessage(Component.literal(moved == 0
+        if (level instanceof ServerLevel && player instanceof ServerPlayer serverPlayer) {
+            Blown blown = blow(serverPlayer, player.getItemInHand(hand));
+            player.sendSystemMessage(Component.literal(blown.total() == 0
                     ? "No tamed horses of yours within " + radius + " blocks."
-                    : "Whistled " + moved + " horse" + (moved == 1 ? "" : "s") + " to you."));
-            serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.0F);
-            player.getCooldowns().addCooldown(player.getItemInHand(hand), COOLDOWN_TICKS);
+                    : "Whistled " + blown.total() + " horse" + (blown.total() == 1 ? "" : "s") + " to you."));
         }
         return InteractionResult.SUCCESS;
     }
 
-    private int recall(ServerLevel level, Player player) {
+    /**
+     * <b>Blow this whistle</b> - the whole of what the item does, minus the chat
+     * line, which differs between one whistle blown by hand and several blown by
+     * the key.
+     *
+     * <p>Static and public because the keybind calls <b>this</b> rather than a
+     * copy of it. A second implementation would be a way round the cooldown the
+     * moment one of the two forgot to set it, so the cooldown is here with the
+     * work it belongs to.
+     */
+    public Blown blow(ServerPlayer player, ItemStack stack) {
+        ServerLevel level = player.level();
+        HorseProgress.complete(player, task());
+        Blown blown = recall(level, player);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.0F);
+        player.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
+        return blown;
+    }
+
+    private Blown recall(ServerLevel level, ServerPlayer player) {
         AABB box = player.getBoundingBox().inflate(radius);
         List<AbstractHorse> horses = level.getEntitiesOfClass(AbstractHorse.class, box, horse ->
                 horse.isAlive() && horse.isTamed() && !horse.isVehicle()
                         && horse != player.getVehicle() && ownedBy(horse, player));
 
+        int walked = 0;
         int placed = 0;
+        Set<UUID> handled = new HashSet<>();
         for (AbstractHorse horse : horses) {
             if (horse.distanceToSqr(player) < ALREADY_HERE_SQR) {
                 continue;
             }
+            handled.add(horse.getUUID());
+            // Near enough to come on its own feet? Then let it. tryWalk does the
+            // untying itself, because a leashed horse refuses to path.
+            if (WhistleCalls.tryWalk(player, horse)) {
+                walked++;
+                continue;
+            }
             HorseLeads.untieFor(horse, player);
-            horse.getNavigation().stop();
-            BlockPos spot = spreadSpot(level, player, placed);
-            horse.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getYRot(), 0.0F);
-            horse.setDeltaMovement(Vec3.ZERO);
-            horse.fallDistance = 0.0;
+            WhistleCalls.teleportTo(player, horse, placed);
             placed++;
         }
-        return placed;
+        return new Blown(walked, placed, handled);
     }
 
     private static boolean ownedBy(AbstractHorse horse, Player player) {
         EntityReference<LivingEntity> owner = horse.getOwnerReference();
         return owner != null && player.getUUID().equals(owner.getUUID());
-    }
-
-    /**
-     * A landing spot near {@code player}: rings of a 3x3 grid fanning out, then
-     * nudged up/down a few blocks to sit on solid ground rather than in it or
-     * floating. Best effort - a whistle recall doesn't need to be perfect.
-     */
-    private static BlockPos spreadSpot(ServerLevel level, Player player, int n) {
-        int gx = (n % 3) - 1;
-        int gz = ((n / 3) % 3) - 1;
-        int ring = 2 + (n / 9) * 2;
-        BlockPos p = player.blockPosition().offset(gx * ring, 0, gz * ring);
-        for (int i = 0; i < 3 && level.getBlockState(p.below()).isAir(); i++) {
-            p = p.below();
-        }
-        for (int i = 0; i < 4 && !level.getBlockState(p).isAir(); i++) {
-            p = p.above();
-        }
-        return p;
     }
 }

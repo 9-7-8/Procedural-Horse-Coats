@@ -167,9 +167,16 @@ public final class HorseDietHandler {
             return;
         }
         Item wanted = DietFoods.wantedBy(diet);
+        // The label is written for a gene row ("Lava only"), and this sentence already says
+        // "only" - so every single-food diet refused with "It only eats lava only." until the
+        // yard's DIET BY CLOCK pen logged it (2026-09-30).
+        String label = diet.diet().label().toLowerCase();
+        if (label.endsWith(" only")) {
+            label = label.substring(0, label.length() - " only".length());
+        }
         Component what = wanted != null
                 ? Component.translatable(wanted.getDescriptionId())
-                : Component.literal(diet.diet().label().toLowerCase());
+                : Component.literal(label);
         player.sendSystemMessage(
                 Component.literal("The horse turns its head away. It only eats ")
                         .append(what).append(Component.literal(".")));

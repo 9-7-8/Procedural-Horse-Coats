@@ -14,6 +14,8 @@
     "HorseTwoRidersMixin",
     "HorseInstantJumpMixin",
     "HorseAlwaysParentMixin",
+    "LeashPlacerMixin",
+    "LeashDropMixin",
     "CartHorseMixin",
     "CartEntityInvoker"
   ],
@@ -21,6 +23,7 @@
     "CartClientLevelMixin",
     "CartLocalPlayerMixin",
     "JumpBarCooldownMixin",
+    "FadingGearMixin",
     "CartModelManagerMixin",
     "CartModelPartMixin"
   ],

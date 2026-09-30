@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/stick",
-    "layer1": "minecraft:item/feather"
+    "layer0": "horsegenetics:item/freedom_stick"
   }
 }

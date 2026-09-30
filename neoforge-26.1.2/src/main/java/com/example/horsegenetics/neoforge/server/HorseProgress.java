@@ -57,6 +57,11 @@ public final class HorseProgress {
         if (!(player instanceof ServerPlayer serverPlayer) || task == null) {
             return;
         }
+        // A fake player is a machine - another mod's deployer, or the test yard's clockwork hands -
+        // and a checklist entry for it is a row in the saved data for a "player" who never logs in.
+        if (serverPlayer.isFakePlayer()) {
+            return;
+        }
         if (!(serverPlayer.level() instanceof ServerLevel level)) {
             return;
         }

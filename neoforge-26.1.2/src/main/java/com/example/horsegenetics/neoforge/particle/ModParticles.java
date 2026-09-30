@@ -11,8 +11,8 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * The mod's own particle types. One so far - see {@link HoofprintOptions} for
- * why it exists. The client half (what it looks like) is
+ * The mod's own particle types: the hoofprint - see {@link HoofprintOptions} for
+ * why it exists - and horn dust ({@link HornDustOptions}). The client half (what it looks like) is
  * {@code client/HoofprintParticle}, registered in {@code ClientSetup}.
  */
 public final class ModParticles {
@@ -33,6 +33,22 @@ public final class ModParticles {
                 @Override
                 public StreamCodec<? super RegistryFriendlyByteBuf, HoofprintOptions> streamCodec() {
                     return HoofprintOptions.STREAM_CODEC;
+                }
+            });
+
+    /** The id a gene names it by - {@code HornDustGene.PARTICLE}. */
+    public static final String HORN_DUST_ID = HorseGenetics.MOD_ID + ":horn_dust";
+
+    public static final DeferredHolder<ParticleType<?>, ParticleType<HornDustOptions>> HORN_DUST =
+            PARTICLE_TYPES.register("horn_dust", () -> new ParticleType<HornDustOptions>(false) {
+                @Override
+                public MapCodec<HornDustOptions> codec() {
+                    return HornDustOptions.CODEC;
+                }
+
+                @Override
+                public StreamCodec<? super RegistryFriendlyByteBuf, HornDustOptions> streamCodec() {
+                    return HornDustOptions.STREAM_CODEC;
                 }
             });
 

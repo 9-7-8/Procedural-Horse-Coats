@@ -201,11 +201,30 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue LAST_STAND_REARM_FRACTION;
 
     /**
-     * <b>Does a lead come back to you when this mod teleports the horse wearing
-     * it?</b> Off, it falls on the ground where the horse was, which is vanilla's
-     * rule for a broken leash. See {@code server/HorseLeads}.
+     * <b>Does a lead come back to you rather than falling on the ground?</b>
+     * Covers both halves: the leads this mod causes to be dropped by teleporting
+     * a horse, and the ones vanilla drops on its own - a snapped leash, a broken
+     * knot. Off, every one of them falls where vanilla would put it. See
+     * {@code server/HorseLeads}.
      */
     public static final ModConfigSpec.BooleanValue LEADS_RETURN;
+
+    /**
+     * <b>Does a rider mine at full speed?</b> On - the default - a player on a
+     * horse that is standing on the ground is exempted from vanilla's
+     * fifth-speed penalty for mining while off the ground. <b>On is not
+     * vanilla</b>; off restores it. See {@code server/MountedMiningHandler}.
+     */
+    public static final ModConfigSpec.BooleanValue MOUNTED_MINING_PENALTY_REMOVED;
+
+    /**
+     * <b>Does right-clicking a horse with a piece of this mod's tack put it
+     * on?</b> On - the default - and the seventeen gear slots equip by hand the
+     * way vanilla's saddle and barding already do. Off, the Gear tab is the only
+     * way. The saddle and the barding are vanilla's own behaviour either way and
+     * this never touches them. See {@code server/TackEquipHandler}.
+     */
+    public static final ModConfigSpec.BooleanValue RIGHTCLICK_EQUIPS_TACK;
 
     /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
@@ -558,21 +577,52 @@ public final class ServerConfig {
                 .defineInRange("behaviour.last_stand_rearm_fraction",
                         com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION, 0.0, 1.0);
         LEADS_RETURN = builder
-                .comment("Whether a lead comes back to you when this mod teleports the horse wearing it. (default: true)",
-                        "A whistle, an ender whistle and a ticket all have to untie a horse",
-                        "before moving it, and vanilla's rule for an untied leash is to drop the",
-                        "lead where the animal was standing. That is right for a leash that",
-                        "snapped and wrong for one you deliberately cut: the horse lands beside",
-                        "you and the lead stays where it was - up to 64 blocks off for an echo",
-                        "whistle, and in another dimension entirely for an ender whistle or an",
-                        "interdimensional ticket, where it is simply lost.",
-                        "On, the lead goes to the player who blew the whistle or used the ticket,",
-                        "or drops at their feet if their inventory is full.",
-                        "Off restores vanilla's behaviour exactly.",
-                        "The two portal paths are not covered either way: a horse that walked",
+                .comment("Whether a lead comes back to you rather than falling on the ground. (default: true)",
+                        "Two things are covered, and they used to be one.",
+                        "First, this mod's own teleports. A whistle, an ender whistle and a",
+                        "ticket all have to untie a horse before moving it, and vanilla's rule",
+                        "for an untied leash is to drop the lead where the animal was standing.",
+                        "The horse lands beside you and the lead stays where it was - up to 64",
+                        "blocks off for an echo whistle, and in another dimension entirely for",
+                        "an ender whistle or an interdimensional ticket, where it is simply lost.",
+                        "On, that lead goes to the player who blew the whistle or used the ticket.",
+                        "Second, the leads VANILLA drops: a leash that snapped because the horse",
+                        "got too far away, a fence knot broken by hand, or a holder that stopped",
+                        "existing. On, that lead goes to whoever tied it on, wherever they are -",
+                        "another dimension included - rather than falling at the horse's feet.",
+                        "Either way it drops at the recipient's own feet if their pack is full,",
+                        "and nothing is ever deleted.",
+                        "Off restores vanilla's behaviour exactly, for both halves.",
+                        "Three cases stay vanilla's whatever this is set to. A horse that walked",
                         "into a portal was untied next to whoever was holding it, so the lead is",
-                        "already at their feet.")
+                        "at their feet already. A lead nobody was recorded as tying on - a horse",
+                        "leashed by a command, or before this shipped - has no one to send it to.",
+                        "And a lead whose owner is offline falls on the ground rather than being",
+                        "held for them.")
                 .define("behaviour.leads_return", true);
+        MOUNTED_MINING_PENALTY_REMOVED = builder
+                .comment("Whether a rider mines at full speed. (default: true)",
+                        "ON IS NOT VANILLA. Vanilla mines at a fifth speed whenever the player",
+                        "is not standing on the ground - the rule that stops you tunnelling as",
+                        "you fall - and a player sitting on a horse is not standing on anything,",
+                        "so clearing one sapling out of the path means dismounting for it.",
+                        "On, a rider whose horse is itself on the ground mines at the speed they",
+                        "would standing there. The horse must be on the ground too: mid-jump, or",
+                        "on a flying horse, the penalty still applies, because mining out of the",
+                        "air is a different thing from mining from the saddle.",
+                        "Off restores vanilla's behaviour exactly.")
+                .define("behaviour.mounted_mining_penalty_removed", true);
+        RIGHTCLICK_EQUIPS_TACK = builder
+                .comment("Whether tack goes on with a right-click. (default: true)",
+                        "Vanilla already does this for the saddle and the barding, and always",
+                        "has in this version - neither is affected by this option either way.",
+                        "What it covers is the seventeen gear slots vanilla cannot see: on, a",
+                        "right-click with a piece of gear puts it in the first empty slot that",
+                        "takes it; off, the Gear tab on the horse screen is the only way.",
+                        "It never swaps. A slot that is already full is left alone and the",
+                        "click does what it would have done, which is usually mount the horse.",
+                        "Your own horse only, and not a foal - a foal wears no tack at all.")
+                .define("behaviour.rightclick_equips_tack", true);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -895,6 +945,29 @@ public final class ServerConfig {
     public static boolean leadsReturn() {
         try {
             return LEADS_RETURN.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /**
+     * {@code behaviour.mounted_mining_penalty_removed}, safely. The catch is
+     * load-bearing on the client as well as at startup here: a SERVER config is
+     * synced on connection, so a client reading it at the title screen - or
+     * before the sync lands - gets the default rather than an exception.
+     */
+    public static boolean mountedMiningPenaltyRemoved() {
+        try {
+            return MOUNTED_MINING_PENALTY_REMOVED.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code behaviour.rightclick_equips_tack}, safely. */
+    public static boolean rightClickEquipsTack() {
+        try {
+            return RIGHTCLICK_EQUIPS_TACK.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }

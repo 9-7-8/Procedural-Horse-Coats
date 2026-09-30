@@ -134,9 +134,9 @@
 </dl>
 
 <div class="note warn">
-    <span class="label">Same-kind yields merge &mdash; built, and never bottled</span>
+    <span class="label">Same-kind yields merge &mdash; built, and bottled</span>
     <p>
-        A compound heterozygote carries <em>two</em> <code>yield</code> abilities, both triggered by a glass bottle, and a translator that fired only the first would hand back a single-effect potion while this page promises two. <strong>The merge is built</strong>: <code>GeneYieldHandler</code> collects every yield of one <code>kind</code>, de-duplicates by effect id, logs and skips an unrecognised one, and builds a single <code>PotionContents</code>. <strong>Nobody has bottled a two-effect mare to see it</strong>, which is the one outcome here that can be half delivered without looking wrong &mdash; it is the first check on the <a href="#verification">Verification tab</a>.
+        A compound heterozygote carries <em>two</em> <code>yield</code> abilities, both triggered by a glass bottle, and a translator that fired only the first would hand back a single-effect potion while this page promises two. <strong>The merge is built</strong>: <code>GeneYieldHandler</code> collects every yield of one <code>kind</code>, de-duplicates by effect id, logs and skips an unrecognised one, and builds a single <code>PotionContents</code>. It is the one outcome here that can be half delivered without looking wrong, and a two-effect bottle has now been <a href="#verified-clockwork-dairy">seen</a>.
     </p>
 </div>
 
@@ -188,6 +188,35 @@
     trigger carries the item rather than the gene carrying a mode.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-clockwork-dairy">
+    <strong>The bottle: one potion per mare, both effects in a compound, one strong effect in a matched pair,
+    the curses included, and every refusal says why</strong> (2026-09-30, the
+    <a href="horse-dimension.html#clockwork">clockwork</a> run in the debug test yard). DAIRY BY CLOCK, row AP
+    west, holds a glass bottle out to six horses from a fake player that keeps every chat line, and each case
+    logged <code>CLOCKWORK PASS</code> on every run from the second on:
+</p>
+
+<ul>
+    <li><strong>The merge.</strong> The <code>Spd/Str</code> mare filled one bottle holding
+        <code>minecraft:speed</code> and <code>minecraft:strength</code> &mdash; one potion, both effects, at the
+        weak grade.</li>
+    <li><strong>The de-duplication.</strong> The <code>Spd/Spd</code> mare filled one bottle holding a single
+        <code>minecraft:speed 2</code> &mdash; one entry at the stronger grade, not two stacked. The reading
+        names the grade, not the duration.</li>
+    <li><strong>The curses.</strong> The Nightmare&rsquo;s <code>Wkn/Drk</code> mare filled one bottle holding
+        <code>minecraft:weakness</code> and <code>minecraft:darkness</code>, each at the weak grade &mdash; so
+        the merge carries a curse like any buff, and <code>minecraft:darkness</code> resolves against the
+        registry rather than being logged and skipped.</li>
+    <li><strong>The three refusals each say why, and keep the bottle.</strong> The hurt mare (health 11 of 22):
+        &ldquo;She's hurt, and won't give anything until she's healed.&rdquo; The stallion: &ldquo;The stallion
+        rears and kicks you. Only a mare gives potion milk.&rdquo; The foal: &ldquo;A foal has no potion milk to
+        give.&rdquo; On the first run the hurt mare had healed from the pen&rsquo;s water cauldron before her
+        bottle came and gave a potion; with the pen dry (<code>DebugTestYard.dryPen</code>) every later run
+        passed.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -210,37 +239,25 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Potion milk&rsquo;s compound-heterozygote merge is now written &mdash;
-    <code>GeneYieldHandler</code> collects every yield of one kind into one bottle &mdash; and nobody
-    has ever bottled a two-effect mare to see it, which is the one outcome this page promises that
-    can silently be half delivered; and since 2026-09-25 the locus can also hand back a
-    <em>curse</em>, which has been drunk by nobody at all &mdash; neither the Nightmare&rsquo;s
-    <code>Wkn/Drk</code> compound nor the wild single copy the diluted founder table now allows.</p>
+    <p>The bottle itself is shown &mdash; the merge, the curses and the refusals &mdash; so what is
+    still open is what a player does with it: a <em>curse</em> that nobody has yet drunk, the doubled
+    duration of a matched pair, a wild mare rolling a potion (curses included) at the rate the diluted
+    founder table promises, a bucket and a bottle on one horse, and milk volume governing the bottle.</p>
 </div>
 
 <h3 id="negatives-0925">The first brews that hurt you (2026-09-25, NOT played)</h3>
 
 <p>
     <code>Wkn</code> and <code>Drk</code> were added for the <a href="breeds.html">Nightmare</a>,
-    which pins them as a compound heterozygote. Both halves of that &mdash; a negative brew at all,
-    and two of them in one bottle &mdash; are new, and neither has been seen. This locus has no test
-    class of its own, only the suite-wide checks every registered gene gets, and
-    <code>BreedFilesTest</code> proves no more than that the Nightmare&rsquo;s file names a pair the
-    gene recognises. Nothing anywhere covers what arrives in the glass.
+    which pins them as a compound heterozygote. The Nightmare&rsquo;s bottle holding both curses is
+    <a href="?view=coding#verified-clockwork-dairy">verified</a>; nobody has yet drunk one, and this
+    locus has no test class of its own that would say what a curse does once it is in you.
 </p>
 
 <ul>
-    <li><strong>A nightmare mare&rsquo;s bottle carries both curses, not one.</strong> Tame and grow a
-        <code>Wkn/Drk</code> mare to full health and bottle her. <strong>Pass:</strong> one potion
-        holding <em>both</em> Weakness and Darkness, each at the weak grade. <strong>Fail:</strong> a
-        single-effect potion &mdash; which is <a href="?view=coding#both">the merge</a> half-firing, and
-        is the same failure the <code>Spd/Str</code> check exists for, except that here it is even
-        easier to miss: nobody looks closely at a potion they did not want.</li>
-    <li><strong>Darkness actually resolves.</strong> <code>minecraft:darkness</code> is the newest of the
-        ids this gene names and the handler is written to log and skip an id the registry has never
-        heard of. <strong>Pass:</strong> the effect lands and the screen dims.
-        <strong>Fail:</strong> a potion holding only Weakness and a skipped-id line in the log, which
-        would look exactly like the merge failing and is not.</li>
+    <li><strong>Darkness lands when drunk.</strong> <code>minecraft:darkness</code> resolves against the
+        registry &mdash; it is in the bottle &mdash; but the clockwork never drinks. <strong>Pass:</strong>
+        drink the <code>Wkn/Drk</code> mare&rsquo;s bottle and the screen dims and Weakness shows.</li>
     <li><strong>A wild mare can roll one, and it is not a defect when she does.</strong> The founder
         share is divided across the brew list, so Weakness and Darkness sit in the wild pool beside
         the buffs. <strong>Pass:</strong> across a decent sample of wild expressing mares, a cursed
@@ -250,37 +267,23 @@
     <li><strong>Doubling a curse makes it worse, as it is written to.</strong> Spawn a
         <code>Wkn/Wkn</code> mare. <strong>Pass:</strong> one Weakness at the stronger grade and
         roughly double the duration. This is the locus behaving correctly and reading like a bug; it
-        is here so that it is recognised as the former.</li>
+        is here so that it is recognised as the former. It is also the first check of the doubled
+        <em>duration</em> at all: the clockwork&rsquo;s <code>Spd/Spd</code> bottle read one entry at
+        the stronger grade, and not how long it lasts.</li>
 </ul>
 
 <h3 id="open-gene-potion-milk">Still open (NOT played)</h3>
 
 <p>
-    The yard&rsquo;s <em>DAIRY + CLIP</em> pen covers the three refusals, and its stone floor is what
-    keeps the hurt mare hurt long enough to reach them. It does <strong>not</strong> cover the merge:
-    its only compound horse is a stallion, who kicks instead of yielding, so the two-effect bottle
-    needs a mare from the custom horse spawn egg. Note also that a single copy already expresses, so
-    a wild carrier of this locus is a wild <em>producing</em> mare.
+    The yard&rsquo;s <em>DAIRY BY CLOCK</em> pen answered the merge, the matched pair&rsquo;s single
+    entry and the three refusals (<a href="?view=coding#verified-clockwork-dairy">verified</a>). Its
+    horses carry no milk locus and no milk volume, so nothing below is in it. Note also that a single
+    copy already expresses, so a wild carrier of this locus is a wild <em>producing</em> mare.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>A two-effect mare gives one bottle with both in it.</strong> Spawn a tamed adult
-        mare with two different brews &mdash; say <code>Spd/Str</code> &mdash; at full health, and
-        bottle her. <strong>Pass:</strong> one potion carrying <em>both</em> Swiftness and Strength,
-        each at the weak grade. A single-effect potion here is the failure the whole merge exists to
-        prevent, and it looks like a perfectly good potion.</li>
-    <li><strong>A matched pair gives one strong effect, not two weak ones.</strong> Bottle a
-        <code>Spd/Spd</code> mare. <strong>Pass:</strong> a single Swiftness at the stronger grade
-        and roughly double the duration &mdash; not two Swiftness entries stacked in one bottle. The
-        handler de-duplicates by effect id and that de-duplication has never been exercised.</li>
-    <li><strong>The three refusals each say why.</strong> The <em>DAIRY + CLIP</em> pen&rsquo;s hurt
-        mare, stallion and foal, with a bottle. <strong>Pass:</strong> a message every time &mdash;
-        she will not give anything until she has healed, he rears and kicks, the foal has nothing
-        yet. <strong>The message is the evidence.</strong> All three correct behaviours are silence
-        plus no potion, which is indistinguishable from a locus that was never registered at
-        all.</li>
     <li><strong>A bucket and a bottle do different things on one horse.</strong> Spawn a mare
         expressing both this locus and <a href="gene-milk.html">milk</a>.
         <strong>Pass:</strong> the bucket returns milk, the bottle returns a potion, and neither

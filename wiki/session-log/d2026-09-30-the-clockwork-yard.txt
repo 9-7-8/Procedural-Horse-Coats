@@ -1,0 +1,69 @@
+2026-09-30, the test yard overhauled so a session can test it without the owner
+
+    Owner: "Can you overhaul the horse debug realm, removing everything in the debug yard
+    which can't be tested by you without my intervention, and then add in new pens which
+    you can test without me?"
+
+What went
+
+    Every pen that waited for a person: the tack room (B), the holding pen (C), the dairy
+    and clip (D), the ocean-born pool (E), the starburst and F8 pens (F west), the ward's
+    spawner room and ward post and the old base-alarm pen (A east - a vanilla spawner runs
+    only with a player within 16 blocks), the guardian arena (J west), ender echo (K), the
+    ten splice-carrot pairs (L-N), WEANING by lead (O east), the jar bench, GOLD ANY HEAT and
+    SUBFERTILE GOLD (P), and the chests of leads and vet's kits on THE CAP and MATERNITY.
+    DebugYardGameplay is deleted. Letters were not re-lettered (the yard runs A, J, O, Q...),
+    because every sign and Verification tab names rows by letter. The yard went from
+    z=4..617 to 4..518. The stat pens moved into A east.
+
+What came in
+
+    DebugYardClockwork, rows J west and AM-AQ: a FakePlayer that KEEPS what it is told (a
+    stock one drops every chat line, and for a refusal the line is the evidence), driven
+    through Player.interactOn so vanilla's half of a click runs too. Every check logs
+    "CLOCKWORK PASS|FAIL|INCONCLUSIVE | check | reading", and a CLOCKWORK SUMMARY at 10 and 30
+    minutes names every check that has not answered as PENDING. 45 checks: cleansing light
+    (caged undead, a creeper control, XP, a carrier), base alarm (near, carrier, quiet - counted
+    per horse by a new DebugWorldWatch.soundsFrom), the egg layer's four silent/other-allele
+    cases, bird-boned drops, blight and its control, potion milk (three refusals, the merge,
+    the curses), the diets, milk buckets and Mlk refill, the seed jar end to end plus gelding,
+    same-sex pairs, and the healer's control.
+
+    What a FakePlayer cannot do - ride, be found by an aura that scans for players, be found as
+    an owner by entity - is the test kit's batch 5 now (guardian, ender echo ridden, ocean-born,
+    healer eggs).
+
+Three runs, launched by the session itself
+
+    Run 1: 32 PASS, 4 FAIL. All four FAILs were one confounder: a horse hurt at build time was
+    back at full health by its test. Healing has been hunger plus WATER since 2026-09-14 and every
+    pen has had a cauldron since 09-16, so stone floors stopped mattering - which also means the
+    infirmary's "patients must not heal" control could never have passed since then (two of three
+    patients were full). Fix: DebugTestYard.dryPen for the pens whose horse must stay hurt, and
+    hurt a second before the feed rather than at the build.
+    Run 2: every one of those passes, plus all the new milk and gelding checks; the jar mare's
+    conception failed on the dice and was logged INCONCLUSIVE, as designed. One new FAIL: the
+    cleansing carrier's zombie stood 6.5 blocks from the NEIGHBOURING Cln/Cln horse, whose radius
+    rolls 4-8 - run 1 rolled short. Cage moved; run 3 passed it.
+    Run 3: "test yard built and walkable". The walkability grid had shifted with the shorter yard
+    onto HUNGER ORDER's poppy and REACH WALL's stone; both are furniture now, and the warning lists
+    every kind it hit rather than only the first.
+
+    Runs 3-5: blight's "covers go to dirt" read +4, +8, +0 and +1 dirt at six minutes while the
+    watch counted the gene landing conversions all along - grass and mycelium spread back over bare
+    dirt in a lit pen, and the gene's two-block reach runs under the pen walls. The floor was the
+    wrong instrument; the check now counts conversions per horse (DebugWorldWatch.spreadsPlacedBy)
+    and keeps the floor for the crop half and the control. Run 5 passed it at 10 conversions.
+
+Found along the way
+
+    Every single-food diet refused with "It only eats lava only." (labels end in "only"); fixed
+    in HorseDietHandler.refuse. HorseProgress.complete now ignores fake players, which would
+    otherwise earn checklist tasks - another mod's deployer included.
+
+Not done, and why
+
+    No Verification-tab check was deleted on a clockwork PASS. The standing rule is that a check
+    leaves only on the owner's in-game confirmation; each page now carries the clockwork result
+    beside its checks, marked "not owner-confirmed", and whether a clockwork PASS may close a check
+    is put to the owner.

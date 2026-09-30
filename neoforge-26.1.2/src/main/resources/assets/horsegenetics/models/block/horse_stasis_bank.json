@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "minecraft:block/barrel_bottom",
-    "side": "minecraft:block/barrel_side"
+    "end": "horsegenetics:block/horse_stasis_bank_end",
+    "side": "horsegenetics:block/horse_stasis_bank_side"
   }
 }

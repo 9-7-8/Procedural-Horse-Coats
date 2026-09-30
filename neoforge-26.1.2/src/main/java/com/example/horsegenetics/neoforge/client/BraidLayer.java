@@ -49,8 +49,15 @@ public class BraidLayer extends RenderLayer<HorseRenderState, HorseModel> {
         if (!(state instanceof GeneticHorseRenderState genetic) || state.isInvisible) {
             return;
         }
-        draw(poseStack, submitNodeCollector, lightCoords, state, MANE, genetic.braidMane);
-        draw(poseStack, submitNodeCollector, lightCoords, state, TAIL, genetic.braidTail);
+        // A braid is worked into the hair, so it fades with the hair: a plait
+        // left hanging at full colour over a see-through horse would read as a
+        // bug rather than as a braid. RiderFade.fade keeps the dye and moves
+        // only the alpha.
+        float alpha = genetic.fadeAlpha;
+        draw(poseStack, submitNodeCollector, lightCoords, state, MANE,
+                RiderFade.fade(genetic.braidMane, alpha));
+        draw(poseStack, submitNodeCollector, lightCoords, state, TAIL,
+                RiderFade.fade(genetic.braidTail, alpha));
     }
 
     private void draw(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
@@ -58,6 +65,18 @@ public class BraidLayer extends RenderLayer<HorseRenderState, HorseModel> {
         if (colour == 0) {
             return;     // nothing worn in that slot - see GeneticHorseRenderState
         }
+        // ARGUMENT ORDER, and it was wrong here until 2026-09-29. The ten-arg
+        // submitModel is
+        //   (model, state, pose, renderType, light, overlay,
+        //    tintedColor, sprite, outlineColor, crumblingOverlay)
+        // and this call had the last two ints the other way round: the braid's
+        // dye was being passed as the OUTLINE colour and the tint was
+        // state.outlineColor, which is 0 for any horse that is not glowing.
+        // A tint of zero is transparent black, so no braid has ever been drawn
+        // - and since EntityRenderState.appearsGlowing() is
+        // "outlineColor != 0", a dyed braid was quietly asking for a glowing
+        // outline instead. Both halves are silent: nothing logs, and an
+        // undrawn overlay looks exactly like a horse that is not wearing one.
         collector.order(1).submitModel(
                 this.getParentModel(),
                 state,
@@ -65,9 +84,9 @@ public class BraidLayer extends RenderLayer<HorseRenderState, HorseModel> {
                 RenderTypes.entityTranslucent(mask),
                 lightCoords,
                 OverlayTexture.NO_OVERLAY,
-                state.outlineColor,
-                null,
                 colour,
+                null,
+                state.outlineColor,
                 null);
     }
 }

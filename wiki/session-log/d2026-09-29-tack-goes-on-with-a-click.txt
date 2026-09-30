@@ -1,0 +1,99 @@
+2026-09-29 - tack goes on with a click, and two thirds of the piece was already in vanilla
+
+
+    Rider comfort piece 3, one bullet per intake/START HERE.txt. The piece was
+    picked last session as the next in the treatment's own order, and it is
+    the one that opened with a design question rather than a build.
+
+    The question, answered by reading. The treatment marked it UNVERIFIED and
+    said to read the decompiled AbstractHorse.mobInteract before writing
+    anything. Doing so settled both halves of the piece against it:
+
+      - The saddle is vanilla's. Items.SADDLE carries Equippable.saddle(),
+        built with setEquipOnInteract(true), so ItemStack.interactLivingEntity
+        routes through Equippable.equipOnTarget and the saddle is on before
+        mobInteract reaches doPlayerRide. It already declines to swap, too:
+        equipOnTarget requires !target.hasItemInSlot(this.slot).
+
+      - The barding is vanilla's as well, which the treatment did not expect.
+        mobInteract ends with "if (this.isEquippableInSlot(itemStack,
+        EquipmentSlot.BODY) && !this.isWearingBodyArmor())" and equips it. That
+        predicate is character-for-character what HorseTackSlot.accepts asks
+        for the BARDING slot, so there was provably nothing to add there.
+
+    So the pre-agreed fallback applied - keep the handler for what vanilla does
+    not cover, do not take over the saddle, do not retire the piece - except
+    that "armour" was in the part vanilla covers too. What shipped is the other
+    half of that sentence: the mod's own tack slots.
+
+    What shipped. server/TackEquipHandler, one LOWEST-priority listener on
+    PlayerInteractEvent.EntityInteract, plus behaviour.rightclick_equips_tack,
+    two lang keys and the right_click_equips_tack gametest. Hold a piece of
+    gear, right-click your horse, and it goes into the first empty slot that
+    takes it. It skips every isVanilla() slot deliberately - two code paths on
+    one saddle would have meant one of them losing, and the loser would have
+    been the one with the equip sound and the guaranteed drop.
+
+    A stale comment worth catching. HorseTackSlot's class javadoc says "None of
+    those tags has any item in it yet". Two of the seventeen do: gear/mane and
+    gear/tail both hold the rescuing braid. So the feature has exactly one item
+    to work with today, which is enough to be real and enough to test. It is
+    not a special case in the code - the handler walks the roster asking each
+    slot's tag, so every piece still to be made arrives wearable by hand the
+    day it joins its tag.
+
+    The design call that is not in the treatment. When every slot that would
+    take the piece is already full, the treatment says "do nothing - never
+    swap". Two readings: refuse the click with a line, or leave it uncancelled.
+    Left uncancelled, which means vanilla handles it and you mount the horse.
+    The other way you would be unable to get on your own horse while holding a
+    spare braid, and nothing is ambiguous anyway - the braid is visibly already
+    in the mane. Refusals that DO get claimed are not-your-horse and a foal,
+    because both are rules this mod invented, and an invented rule that fails
+    silently reads as a bug. An untamed horse is left alone too: vanilla rears
+    it up at you, which says it better than a sentence would.
+
+    That split - two refusals claimed, two not - is the thing the gametest
+    exists for. right_click_equips_tack posts seven real EntityInteract events
+    through NeoForge.EVENT_BUS, so a handler written and never registered fails
+    it, and it asserts the claimed and unclaimed cases separately. A handler
+    that cancelled all four would look right in game until somebody could not
+    mount a horse. The test was mutated before being trusted: making the
+    full-slot case cancel turned it red with "a third braid with nowhere left
+    to put it: the click was claimed, and it should have been left to vanilla".
+    Restored, all 21 gametests green, and no ERROR anywhere in the run's log.
+
+    Two premise assertions in the test rather than in a comment. It fails
+    loudly if the rescuing braid is not in gear/mane and gear/tail - fifteen of
+    the seventeen tags are empty, so if the braid ever left its two the test
+    would go on passing while exercising nothing - and it fails if the two mock
+    players share a UUID, which would make the ownership case pass whatever the
+    handler did.
+
+    Ordering detail worth recording. The item is tested before the horse is:
+    isModTack walks the roster asking each non-vanilla slot's tag, and only
+    then does anything look at tameness, ownership or age. The other way round,
+    a carrot would have earned a "not your horse" line.
+
+    What the tests cannot reach, and it is the real risk. This put a new
+    listener on the plain right-click, which is the busiest gesture in the mod
+    - carrots, hay, name tags, transfer papers, whistles, shears, mounting. The
+    gametest posts events into an empty world and cannot tell you any of those
+    still work. The Verification tab leads with that rather than with "does it
+    equip a braid", and the entry is mostly a list of things that must NOT have
+    changed.
+
+    Housekeeping. Piece 3's section is deleted from the treatment file per
+    START HERE step 3, along with its fallback note and the two "what already
+    exists" bullets that only described it. horse-gear.html's "Putting
+    something on" grew a line for the new way, pointing at rider-comfort.html
+    for the rules rather than repeating them.
+
+    Open for the next session: rider comfort is down to two, and only one of
+    them is a build. Piece 4 (returning the leads VANILLA drops) is deferred
+    behind a decision the owner still has to make about the mixin seam. Piece 5
+    is the fade, and it starts with a rendering spike rather than a feature:
+    force a fixed alpha on the ridden horse in GeneticHorseRenderer and look at
+    what the generated coat, the cutie-mark layer, the emissive layer and the
+    worn gear do under it. If the coat cannot be drawn cleanly half-transparent
+    the instruction is to stop and report, not to ship a guess.

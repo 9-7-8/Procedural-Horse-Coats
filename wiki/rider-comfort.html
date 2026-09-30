@@ -20,21 +20,30 @@
 <p class="lede">
     Five small things that make riding less irritating, borrowed from other mods that
     already do them. None touches genetics, and each is small enough to ship alone.
-    <strong>One of the five has shipped</strong> &mdash; a lead now comes back to you
-    rather than being left on the ground when this mod teleports the horse wearing it.
-    The other four are still plans, and the last of them &mdash; fading the horse out as
-    you look down &mdash; touches the coat itself and is the only one with a real unknown
-    in it.
+    <strong>All five have shipped.</strong> A lead comes back to you whether this mod
+    teleported the horse out from under it or the leash simply snapped; you can mine from
+    the saddle at the speed you would standing there; <kbd>ALT</kbd>+<kbd>E</kbd> opens
+    your own pack from the saddle; a piece of tack goes on with a right-click instead of
+    a trip through the Gear tab; and the horse you are riding fades out of your way as
+    you look down at the ground.
 </p>
 
-<div class="note">
-    <span class="label">Mostly still a plan</span>
+<div class="note" id="rider-comfort">
+    <span class="label">All of it is built</span>
     <p>
-        This page was moved here whole from the main
-        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
-        rather than a place plans are written. It grows tabs as the thing grows: the
-        Gameplay and Coding tabs carry the one piece that exists, and everything else is
-        on the Roadmap tab, where it is deleted from when it ships.
+        Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster
+        of the survey backlog</a> and moved here whole from the main
+        <a href="roadmap.html">roadmap</a>, as five pieces to be built one per session.
+        The last of them went in on 2026-09-29, so <strong>this page has no Roadmap tab
+        any more</strong> and has left that index by itself &mdash; what is left is the
+        Gameplay and Coding tabs for what exists, and a Verification tab for the parts
+        nobody has played yet.
+    </p>
+    <p class="muted">
+        <strong>Every piece but one shipped with a config switch</strong>, per
+        <a href="config.html#config-everything">the config sweep</a>. The exception is
+        <a href="#rider-inventory">the inventory keybind</a>, which did so deliberately:
+        an unbound key is already the switch.
     </p>
 </div>
 
@@ -73,6 +82,224 @@
     Server owners who would rather have vanilla exactly can turn it off with
     <a href="config.html"><code>behaviour.leads_return</code></a>, which puts the lead back
     on the ground where the horse was.
+</p>
+
+<h2 id="vanilla-leads">&mdash; and so does the one that snapped</h2>
+
+<div class="plain">
+    <p>
+        The above was only half of it. <em>Vanilla</em> drops leads too, and on the whole it
+        drops them in worse places: a leash snaps when the horse gets more than twelve blocks
+        from you, and the lead lands <strong>where the horse was</strong> &mdash; which is
+        the far end of whatever just went wrong, usually while you are chasing it. Break a
+        fence knot with four animals tied to it and you get four leads scattered round the
+        post.
+    </p>
+    <p>
+        Now those come back too. <strong>A lead goes to whoever tied it on</strong>, wherever
+        they happen to be.
+    </p>
+</div>
+
+<p>
+    <strong>Whoever tied it on</strong> is meant literally, and it is not the same as
+    &ldquo;whoever is holding it&rdquo;. A lead on a fence post has nobody holding it at all
+    &mdash; that is the case worth getting right, since a horse can stand tied up for days
+    &mdash; so the mod remembers the person who walked the horse to the fence, and the lead
+    finds them even if they are in the Nether by the time it snaps.
+</p>
+
+<p>
+    <strong>It never holds a lead for you.</strong> Three cases stay exactly as vanilla left
+    them: a horse nobody was recorded as tying up (leashed by a command, or tied before this
+    shipped), a horse tied by somebody who has since logged off, and a horse that walked into
+    a portal with its holder standing right beside it. In all three the lead falls on the
+    ground where it always did. The rule is that a lead is never <em>lost</em>, and never
+    parked somewhere you have to go and claim it later.
+</p>
+
+<p>
+    Same switch as the first half, <a href="config.html"><code>behaviour.leads_return</code></a>
+    &mdash; off restores vanilla for both.
+</p>
+
+<h2 id="mounted-mining">Mining from the saddle</h2>
+
+<div class="plain">
+    <p>
+        Minecraft mines at a fifth speed whenever you are not standing on the ground. That
+        rule is there to stop you tunnelling as you fall, and it is a good rule &mdash; but
+        a player sitting on a horse is not standing on anything either, so it caught riders
+        too. One sapling across the path, one dirt block on a ledge, and you had to
+        <strong>get off, break it, and get back on</strong>.
+    </p>
+    <p>
+        Now you mine from the saddle at the speed you would mine standing in the same spot.
+        Nothing else about mining changes: the same tools, the same blocks, the same
+        enchantments.
+    </p>
+</div>
+
+<p>
+    <strong>The horse has to have its feet on the ground.</strong> Mid-jump, or on a horse
+    that flies, the fifth-speed penalty still applies &mdash; you are genuinely in the air
+    then, and mining out of the air is a different thing from mining from the saddle.
+</p>
+
+<p>
+    This is the one piece on this page that <em>changes</em> a vanilla rule rather than
+    adding something beside it, so the switch matters more here than elsewhere:
+    <a href="config.html"><code>behaviour.mounted_mining_penalty_removed</code></a> is on by
+    default, and turning it off restores vanilla exactly. It is a server setting, so on a
+    server it is the server&rsquo;s answer that counts, not each player&rsquo;s.
+</p>
+
+<h2 id="rider-inventory">Your own inventory, from the saddle</h2>
+
+<div class="plain">
+    <p>
+        This mod takes <kbd>E</kbd> away while you are riding: instead of vanilla&rsquo;s
+        horse screen you get <a href="horse-gear.html#where">this mod&rsquo;s own horse
+        screen</a>, which
+        is a far better trade than it sounds &mdash; the screen it replaces held a saddle slot
+        and a barding slot and nothing else. But it left a rider with no way at all to open
+        <em>their own</em> bag without getting off the horse first.
+    </p>
+    <p>
+        <kbd>ALT</kbd>+<kbd>E</kbd> now opens your own inventory. <kbd>E</kbd> on its own
+        still opens the horse&rsquo;s screen, exactly as before.
+    </p>
+</div>
+
+<p>
+    <strong>It works on foot too</strong>, not only in the saddle. A key that only functions
+    while mounted would be one more thing to remember, and when it did nothing you would have
+    no way to tell whether the key was unbound or the game had decided you were not riding.
+</p>
+
+<p>
+    <strong>There is no config option for this one</strong>, which makes it the exception on
+    this page. Unbinding the key in <em>Options &rarr; Controls</em> already switches it off,
+    and it is listed there under <em>Inventory</em>, directly beneath vanilla&rsquo;s own
+    &ldquo;Open/Close Inventory&rdquo; &mdash; which is where you would be looking anyway if
+    you were wondering what happened to <kbd>E</kbd>. Rebind either of them, or swap the two
+    over, and the mod follows.
+</p>
+
+<p class="muted">
+    On a donkey or a mule nothing changed to begin with: this mod keeps no record of one, so
+    <kbd>E</kbd> opens vanilla&rsquo;s screen with its chest grid, as it always did. The new
+    key still works there, and gives you the same pack it gives you anywhere else.
+</p>
+
+<h2 id="tack-equip">Tack goes on with a right-click</h2>
+
+<div class="plain">
+    <p>
+        A saddle has always gone on by holding it and right-clicking the horse. So has a
+        barding. But <a href="horse-gear.html">the seventeen other things a horse can
+        wear</a> &mdash; the braids, and every pad, blanket, bag, boot and shoe still to be
+        made &mdash; could only be put on through the Gear tab: open the screen, find the
+        tab, click the slot, pick the item off a list.
+    </p>
+    <p>
+        Now they go on the same way the saddle does. <strong>Hold the piece, right-click
+        your horse, and it lands in the first empty slot that takes it.</strong>
+    </p>
+</div>
+
+<p>
+    <strong>Today that means the <a href="item-rescuing-braid.html">rescuing braid</a>, and
+    only the braid</strong>, because it is the only piece of this mod&rsquo;s own gear that
+    has been made yet. It is not a special case, though: the click asks each slot what it
+    accepts, so every piece still to come works this way from the day it exists, with
+    nothing to add.
+</p>
+
+<p>
+    <strong>It never swaps.</strong> If every slot that would take the piece is already
+    full, the click is left alone and does whatever it would have done &mdash; usually
+    putting you in the saddle. You can see the braid already in the mane, so nothing is
+    ambiguous, and the alternative would mean being unable to mount your own horse while
+    holding a spare. A braid goes to the mane first and the tail second; a boot would go
+    near fore, off fore, near hind, off hind, in the order the paper doll reads.
+</p>
+
+<p>
+    <strong>Your horse, and not a foal.</strong> Both refusals say so in a line across the
+    bottom of the screen rather than doing nothing, because both are rules this mod
+    invented and a silent rule looks like a bug. An <em>untamed</em> horse is left to
+    vanilla, which rears up at you &mdash; a clearer answer about a wild horse than any
+    sentence here would be.
+</p>
+
+<p>
+    Sneaking is untouched: <strong>sneak-and-use still opens the horse&rsquo;s screen</strong>
+    whatever is in your hand. The switch is
+    <a href="config.html"><code>behaviour.rightclick_equips_tack</code></a>, on by default;
+    off, the Gear tab is the only way again. The saddle and the barding are vanilla&rsquo;s
+    behaviour either way and the switch does not reach them.
+</p>
+
+<h2 id="ride-fade">The horse gets out of your way</h2>
+
+<div class="plain">
+    <p>
+        Riding is the one situation where your own mount is the thing in front of you. Look
+        down to place a block, read a chest, find the edge of a ledge or see what you are
+        standing on, and what you get is a view of the back of a horse.
+    </p>
+    <p>
+        Now <strong>the horse you are riding fades as you look down at it</strong>, and
+        solidifies again as you look back up. Nothing moves and the camera does not shift;
+        the horse simply stops being in the way.
+    </p>
+</div>
+
+<p>
+    <strong>It never disappears.</strong> The faintest it goes is a quarter opacity &mdash; a
+    ghost of a horse is still a horse, and a mount you genuinely cannot see is one you forget
+    you are on. The floor is
+    <a href="config.html"><code>visual.rideFadeMinOpacity</code></a> and the config will not
+    accept less than 0.05 however hard you ask.
+</p>
+
+<p>
+    <strong>Everything the horse is wearing fades with it.</strong> The saddle, the barding,
+    a <a href="item-rescuing-braid.html">rescuing braid</a> in the mane or tail, and the glow
+    of a horse with an emissive coat all go faint together. A saddle left hanging solid in
+    the shape of a horse would be worse than no fade at all, so this is the part the work
+    actually went into &mdash; see the Coding tab.
+</p>
+
+<p>
+    <strong>Only your own mount, and only on your screen.</strong> Other horses stay solid,
+    including one somebody is riding next to you, and nobody else sees yours fade. This
+    changes no rule and sends nothing to the server: it is
+    <a href="config.html"><code>visual.rideFade</code></a>, a client setting, and two people
+    on one server may disagree about it freely.
+</p>
+
+<p>
+    <strong>Where the fade starts and ends is yours to set.</strong>
+    <code>visual.rideFadeStartPitch</code> (30&deg; below the horizon by default) is where it
+    begins and <code>visual.rideFadeFullPitch</code> (75&deg;) is where it bottoms out, with
+    a smooth ramp between. Looking at the horizon never fades anything, so a rider who spends
+    their time looking where they are going will not see this at all.
+</p>
+
+<p class="muted">
+    <strong>One thing does not fade: the <a href="gene-cutie-mark.html">cutie mark</a></strong>,
+    on the rare horse that has one. It is hidden instead while the horse is faded, and comes
+    back as the horse does. The emblems are drawn as items and the game gives no way to tint
+    an item, so the choice was between a solid sticker floating on a ghost and no sticker;
+    say so if you would rather have the sticker.
+</p>
+
+<p class="muted">
+    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered
+    and declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing
+    it moves a number every other mod's pathing assumes.
 </p>
 
 </section>
@@ -132,68 +359,553 @@
     player&rsquo;s inventory is a real one.
 </p>
 
-</section>
+<h2 id="mounted-mining-coding">How the mounted mining penalty is removed (2026-09-29)</h2>
 
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
+<p>
+    <code>server/MountedMiningHandler</code>, one listener on
+    <code>PlayerEvent.BreakSpeed</code>, and nothing else.
+</p>
 
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>
-        Four small borrowings from other mods are left, each shippable alone and each wanting
-        a config switch &mdash; no mining-speed debuff while mounted, an inventory keybind, a
-        right-click that equips tack, and returning the leads <em>vanilla</em> drops, which has
-        no event to hang on &mdash; plus <strong>fading the horse out as you look down</strong>,
-        which asks the coat pipeline for a transparency it has never had.
-    </p>
-</div>
+<p>
+    <strong>The ordering in vanilla is what makes this exact.</strong>
+    <code>Player.getDestroySpeed</code> ends with
+    <code>if (!this.onGround()) speed /= 5.0F;</code> and <em>then</em> calls
+    <code>EventHooks.getBreakSpeed</code> with the already-divided figure &mdash; read out of
+    the decompiled 26.1.2 method rather than assumed, because if the event fired first the
+    handler would be multiplying by five only for vanilla to divide it straight back. As it
+    stands, one multiply by the same five restores the undivided speed precisely.
+</p>
 
-<hr>
+<p>
+    <strong>The guard is on the penalty, not on the posture.</strong> The obvious shape
+    &mdash; &ldquo;is the player mounted? then multiply&rdquo; &mdash; becomes a 5&times;
+    mining <em>boost</em> the moment its premise is wrong, and the premise (that a mounted
+    player&rsquo;s <code>onGround</code> is false) is a reading of vanilla&rsquo;s movement
+    code, not something this mod controls. So the condition asks
+    <code>!player.onGround()</code> directly: the multiply happens only where the division
+    provably just happened. If a future version ever leaves a rider standing on their horse,
+    this quietly does nothing instead of handing out five times the mining speed. The vehicle
+    is checked too &mdash; <code>getVehicle() instanceof AbstractHorse</code> and that horse
+    <code>onGround()</code> &mdash; which is what keeps a jumping or flying horse out.
+</p>
 
-<p id="rider-comfort">
-    Harvested from <a href="compatibility.html#mod-survey">the quality-of-life cluster of the
-    survey backlog</a>. None touches genetics, and each is small enough to
-    ship on its own. <strong>Every one of them wants a config switch written with it</strong>, per
-    <a href="config.html#config-everything">the config sweep</a> &mdash; the first to ship,
-    <a href="#leads">the returned lead</a>, shipped with <code>behaviour.leads_return</code>
-    beside it, which is the pattern the rest should follow.
+<p>
+    <strong>It runs on both logical sides</strong>, registered with no <code>Dist</code>. The
+    client predicts break progress from its own call to the same method, so a server-only
+    handler would draw a crack that crept along while the block broke early.
+    That is safe because <code>ServerConfig</code> is
+    <code>ModConfig.Type.SERVER</code>, which FML&rsquo;s own javadoc on
+    <code>ModConfig.Type</code> describes as <em>&ldquo;synced to clients during
+    connection&rdquo;</em> &mdash; so both sides read the server&rsquo;s value rather than two
+    independent defaults. This is the first place in the mod that reads a server config from
+    client-side code; the <code>leadsReturn()</code>-style accessor
+    (<code>mountedMiningPenaltyRemoved()</code>, catching
+    <code>IllegalStateException</code>) is what covers the window before the sync lands.
+</p>
+
+<p>
+    Guarded by the <code>mounted_mining_is_exempt</code> gametest in
+    <code>gametest/ModGameTests</code>, which posts three real
+    <code>BreakSpeed</code> events through <code>NeoForge.EVENT_BUS</code> &mdash; so a
+    handler written but never registered fails it. It asserts the exemption and both
+    refusals <em>separately</em>, because the failure worth catching is not that the handler
+    does nothing: it is that it fires when vanilla charged nothing. That middle assertion was
+    confirmed to fail, with <code>got 10.0</code> where <code>2.0</code> was expected, against
+    a copy of the handler with the <code>onGround</code> guard deleted.
+</p>
+
+<p class="muted">
+    The ground flags in the test are set by hand rather than played out. Whether a real
+    mounted player&rsquo;s <code>onGround</code> is genuinely false is a claim about
+    vanilla&rsquo;s movement code, not about this handler &mdash;
+    <a href="#mounted-mining-verify">the Verification tab owns that half</a>. What the test
+    owns is that given each posture, the handler does the right thing.
+</p>
+
+<h2 id="rider-inventory-coding">How the inventory key is bound (2026-09-29)</h2>
+
+<p>
+    <code>client/RiderInventoryKeyBindings</code> and
+    <code>client/RiderInventoryKeyHandler</code>, the same two-class split as
+    <code>HorseBrowserKeyBindings</code> / <code>HorseBrowserKeyHandler</code>: the mapping is
+    registered on the mod bus from <code>RegisterKeyMappingsEvent</code>, the clicks are
+    drained on the game bus from <code>ClientTickEvent.Post</code>. No payload, no menu type,
+    no server code at all.
+</p>
+
+<p>
+    <strong>Nothing is sent to the server, and nothing needs to be.</strong> A player&rsquo;s
+    own <code>InventoryMenu</code> is not opened on demand &mdash; it is live for the whole
+    session &mdash; which is why vanilla&rsquo;s own <kbd>E</kbd> branch in
+    <code>Minecraft.handleKeybinds</code> calls <code>setScreen</code> rather than sending
+    anything. <code>HorseBrowserKeyHandler</code> made the same simplification.
+    The one case where vanilla <em>does</em> send a packet is
+    <code>MultiPlayerGameMode.isServerControlledInventory()</code>, which is true
+    <em>precisely</em> when you are riding something with a screen of its own &mdash; the
+    case this key exists to step around, so following vanilla there would have defeated it.
+</p>
+
+<p>
+    <strong>Creative mode gets no branch</strong>, and that is a deliberate departure from the
+    plan this was built from, which said to pick the screen class by game mode. Reading
+    26.1.2 says not to: <code>InventoryScreen</code>&rsquo;s own <code>init</code>
+    <em>and</em> its <code>containerTick</code> both open by checking
+    <code>player.hasInfiniteMaterials()</code> and swapping themselves out for a
+    <code>CreativeModeInventoryScreen</code>. Constructing the survival screen is therefore
+    what vanilla itself does in both modes, and a hand-rolled game-mode test would have been
+    a second copy of that rule &mdash; wrong the moment the first one moved.
+</p>
+
+<p>
+    <code>Post</code> rather than the <code>Pre</code> its neighbour uses.
+    <code>HorseInfoKeyHandler</code> has to run in <code>ClientTickEvent.Pre</code> because it
+    is <em>stealing</em> vanilla&rsquo;s <code>keyInventory</code> click and must get there
+    before <code>handleKeybinds</code> does. This handler steals nothing: it owns its own
+    mapping, so it runs in <code>Post</code> like the browser key.
+</p>
+
+<h3 id="rider-inventory-chord">The chord, and why it does not double-fire</h3>
+
+<p>
+    <strong>This is the mod&rsquo;s first <code>KeyModifier</code>.</strong> Every other
+    mapping here is a bare key, and <code>WhistleKeyBindings</code> says in as many words that
+    it avoided a chord to keep the modifier API out of it. The obvious worry is that
+    <kbd>ALT</kbd>+<kbd>E</kbd> would fire <em>both</em> mappings &mdash; this one and
+    vanilla&rsquo;s bare <code>keyInventory</code>, which
+    <code>HorseInfoKeyHandler</code> is sitting on &mdash; leaving you with the horse screen
+    on top and your own inventory swallowed.
+</p>
+
+<p>
+    It does not, and the reason is in
+    <code>neoforge/client/settings/KeyMappingLookup.getAll</code>. With <kbd>ALT</kbd> held it
+    collects the bindings registered <em>under</em> <kbd>ALT</kbd> first, and only then
+    <code>if (releasing || matchingBindings.isEmpty())</code> adds the unmodified ones. A live
+    ALT+E match is a non-empty list, so the bare-<kbd>E</kbd> fallback never runs and
+    <code>keyInventory.consumeClick()</code> is never satisfied. The suppression is
+    NeoForge&rsquo;s, not ours, and it is why this needed no coordination with
+    <code>HorseInfoKeyHandler</code> at all.
+</p>
+
+<p class="muted">
+    <strong>Flagged unverified in the source, per the house rule:</strong> that is a reading
+    of the 26.1.2 sources, not something a client has done yet, and it covers the Controls
+    screen too &mdash; whether the row draws as &ldquo;Alt + E&rdquo; or as a bare
+    <kbd>E</kbd> that looks like a conflict with vanilla&rsquo;s.
+    <a href="#rider-inventory-verify">The Verification tab owns both</a>, and names the
+    fallback if the chord will not hold.
+</p>
+
+<p>
+    The category is <code>KeyMapping.Category.INVENTORY</code>, where the rest of the mod uses
+    <code>MISC</code>. Still a built-in category with nothing to register or localise, so the
+    reason <code>MISC</code> was chosen elsewhere is not violated &mdash; but it puts the row
+    directly beneath vanilla&rsquo;s &ldquo;Open/Close Inventory&rdquo;, which is the part of
+    Controls a player is reading when they go looking for what happened to <kbd>E</kbd>.
+</p>
+
+<p class="muted">
+    <strong>No test.</strong> There is nothing here a gametest could hold: the whole of it is
+    a keybind registration and a <code>setScreen</code> on the client, and the one claim worth
+    checking &mdash; that the chord suppresses the bare key &mdash; is a fact about
+    NeoForge&rsquo;s input layer that only a real client exercises. It is a Verification-tab
+    item rather than a missing test.
+</p>
+
+<h2 id="vanilla-leads-coding">How the snapped lead is returned (2026-09-29)</h2>
+
+<p>
+    Two mixins, a stored UUID and thirty lines in <code>server/HorseLeads</code> beside the
+    half that shipped on 2026-09-24. It is much more machinery than that half, and the reason
+    is that <strong>neither end of the problem is where you would look for it</strong>.
+</p>
+
+<h3 id="vanilla-leads-seam">The drop cannot be hooked where it happens</h3>
+
+<p>
+    <code>Leashable.dropLeash()</code> and <code>removeLeash()</code> are both one-line
+    delegates to <code>dropLeash(E, boolean, boolean)</code>, which is <code>private
+    static</code> <em>on the interface</em> &mdash; and that is not a place a mixin can
+    inject. NeoForge publishes no leash event either; there is no class in its
+    <code>event</code> package with &ldquo;leash&rdquo; in the name, re-checked rather than
+    taken from the note that said so.
+</p>
+
+<p>
+    <strong>So the seam is the line it calls, not the method it is.</strong> Every lead
+    vanilla loses is spawned by <code>entity.spawnAtLocation(level, Items.LEAD)</code>, and a
+    search of the whole game finds <em>exactly two</em> callers that pass that method a lead
+    &mdash; the drop itself, and the fallback in <code>restoreLeashFromSave</code> for a
+    leash whose holder no longer exists on load. Both are in <code>Leashable</code>. So one
+    injection on an ordinary public method of <code>Entity</code> covers every path,
+    including the two that arrive from completely different directions:
+    <code>tickLeash</code> for a snap, and a holder failing
+    <code>canInteractWithLevel</code> for a knot somebody broke. That is
+    <code>mixin/LeashDropMixin</code>, and the general lesson is on
+    <a href="api-notes.html#interface-private-static">api&nbsp;notes</a>.
+</p>
+
+<h3 id="vanilla-leads-placer">And the owner has to be written down before it breaks</h3>
+
+<p>
+    By the time the lead is dropped there is <strong>no player anywhere in the
+    situation</strong>. A knot is the holder, not a person; and <code>dropLeash</code> runs
+    <code>entity.setLeashData(null)</code> <em>before</em> it spawns the item, so even the
+    knot is gone. The only moment the answer exists is when the lead goes on, which is
+    <code>mixin/LeashPlacerMixin</code> on <code>Mob.setLeashData</code> &mdash; a concrete
+    override of an abstract interface method, and so reachable where the rest of the leash
+    plumbing is not.
+</p>
+
+<p>
+    The rules it writes are three, and the two that are <em>not</em> &ldquo;record the
+    player&rdquo; are the interesting ones. A <strong>non-player holder on a fresh
+    leash</strong> (a dispenser tying a horse straight to a post) clears whoever was there
+    before, or a lead somebody else tied on would come back to them. A <strong>null holder,
+    or null data</strong>, leaves the record alone: null data is what vanilla writes the
+    instant before it drops the lead, and clearing there would wipe the answer a moment
+    before it is asked for &mdash; while a null holder inside real data is a leash being
+    restored from a save, where clearing would lose the placer of every fence-tied horse on
+    every world load.
+</p>
+
+<p>
+    <strong>The fence transition is handled by vanilla&rsquo;s own control flow rather than
+    by a rule here</strong>, which is the part most worth knowing.
+    <code>Leashable.setLeashedTo</code> calls <code>setLeashData</code> only when the animal
+    had no leash data at all; once it has some it takes a
+    <code>leashData.setLeashHolder(holder)</code> branch that never reaches the mixin. That
+    looks like a gap and is the opposite of one: tying a horse to a fence is always a
+    <em>second</em> attachment, because <code>LeadItem.bindPlayerMobs</code> only considers
+    animals already held by you. So the knot inherits the player recorded a moment earlier,
+    for free.
+</p>
+
+<p>
+    The record lives in a <code>leash_placer</code> attachment &mdash; serialized, since a
+    horse can stand tied up across a restart; not synced, since nothing on the client reads
+    it. It is deliberately <em>not</em> cleared when the lead comes off, because the drop
+    reads it after vanilla has already untied the horse. A stale value is harmless: nothing
+    consults it unless a lead is being dropped, and the next person to tie one on overwrites
+    it.
+</p>
+
+<h3 id="vanilla-leads-test">What the test can and cannot reach</h3>
+
+<p>
+    <code>vanilla_lead_comes_back</code> in <code>gametest/ModGameTests</code>, and it is
+    shaped by two things that went wrong in its first draft.
+</p>
+
+<p>
+    <strong>It drops nothing on the ground.</strong> The first version asserted the fallback
+    by really calling <code>dropLeash()</code> and finding the lead on the floor, and it
+    broke <a href="#leads-coding"><code>whistled_lead_comes_back</code></a> &mdash; whose own
+    <code>assertItemEntityNotPresent</code> reaches sixteen blocks and found this test&rsquo;s
+    lead in the neighbouring plot. A gametest that litters the shared world fails its
+    neighbours rather than itself, which is a bad way to find out.
+</p>
+
+<p>
+    <strong>And it makes no real player.</strong> A gametest server has nobody on it, so the
+    only player <code>getPlayerList()</code> could find is one built by
+    <code>makeMockServerPlayerInLevel</code> &mdash; <code>@Deprecated(forRemoval)</code>,
+    and it really joins the player list, which fires this mod&rsquo;s join payloads down an
+    <code>EmbeddedChannel</code> that has negotiated nothing and takes the whole run down
+    with <em>&ldquo;Payload horsegenetics:gene_database_sync may not be sent to the
+    client&rdquo;</em>. So the test drives <code>HorseLeads.giveRecordedLeadTo</code> and the
+    one line above it &mdash; the player-list lookup &mdash; is the only part of this left to
+    the in-game check.
+</p>
+
+<p>
+    <strong>Proving the mixins are applied is not the test&rsquo;s job</strong>, and it would
+    be a weaker guarantee than the one already in place: the mixin config&rsquo;s
+    <code>defaultRequire</code> of 1 means a target that stops matching <em>refuses to boot
+    the game</em>. What the test owns is everything that would still be wrong with both
+    mixins happily applied &mdash; that the placer is recorded, that the fence does not erase
+    it, that an unreachable placer is refused so vanilla still drops, that the wrong player
+    is refused, and that the record is cleared afterwards. That last one was confirmed to
+    fail, with <em>&ldquo;the placer was not cleared&hellip; a second drop would mint a second
+    lead out of nothing&rdquo;</em>, against a copy with the clear deleted.
+</p>
+
+<h2 id="tack-equip-coding">How the tack click works (2026-09-29)</h2>
+
+<p>
+    <code>server/TackEquipHandler</code>, one listener on
+    <code>PlayerInteractEvent.EntityInteract</code>, plus
+    <code>behaviour.rightclick_equips_tack</code> and the
+    <code>right_click_equips_tack</code> gametest. <strong>It is much smaller than it was
+    planned to be, because two thirds of it turned out to be vanilla&rsquo;s already.</strong>
+</p>
+
+<h3 id="tack-equip-vanilla">What vanilla was already doing</h3>
+
+<p>
+    The plan this was built from assumed right-click-to-equip did not exist in 26.1.2 and
+    marked it <em>unverified</em>, with an instruction to read
+    <code>AbstractHorse.mobInteract</code> before writing anything. Reading it settles both
+    halves of the piece at once, and against it:
 </p>
 
 <ul>
-    <li><strong>Remove the mining-speed debuff while mounted.</strong> Vanilla gives you a fifth
-        of your mining speed on horseback. Taken from Horse Buff. Worth being honest that this is
-        the one of the five that <em>alters</em> rather than adds, so
-        <a href="philosophy.html#vanilla-intact">vanilla stays intact</a> has a claim on it and
-        the switch matters more here than elsewhere.</li>
-    <li><strong>A keybind to open your own inventory while riding.</strong> Horse Buff binds it to
-        <kbd>ALT</kbd>+<kbd>E</kbd>. We already own <kbd>H</kbd> for the browser through
-        <code>client/HorseBrowserKeyBindings</code>, so the idiom and the registration exist. This
-        one adds a door rather than closing one.</li>
-    <li><strong>Fade the horse out as you look down.</strong> Horse Buff fades the mount for
-        sightlines, with an optional head-pitch offset of up to 45&deg;.
-        <strong>This is the one with a real unknown in it:</strong> we are the only mod here whose
-        coat is generated per horse, and a half-transparent procedural coat is a rendering case
-        nothing in <a href="pipeline.html">the pipeline</a> has ever been asked for. Prove the
-        transparency before designing the feature around it.</li>
-    <li><strong>Leads return to your inventory when <em>vanilla</em> drops one</strong> &mdash;
-        a leash that snaps at range, or a knot broken by hand. From Horse Tweaks.
-        <a href="#leads-coding">This mod&rsquo;s own half shipped on 2026-09-24</a>; what is left
-        is the vanilla cases, and they are harder than they look. NeoForge 26.1.2 publishes
-        <strong>no leash event at all</strong>, and <code>Leashable.dropLeash</code> spawns its
-        item through <code>Entity.spawnAtLocation</code> with nothing to hook &mdash; so the only
-        seams are a mixin or an <code>EntityJoinLevelEvent</code> filter that would have to tell
-        a snapped lead from one a player threw on the floor. Decide which before building it.</li>
-    <li><strong>Right-click with a saddle or armour equips it</strong> rather than opening the
-        horse screen. Also Horse Tweaks. <strong>The one most likely to collide with something we
-        ship:</strong> <code>client/HorseScreenHooks</code>, the <code>i</code> button and the
-        <code>right-click to open</code> client option all live on that same interaction, so this
-        needs designing against them rather than beside them.</li>
+    <li><strong>The saddle is vanilla.</strong> <code>Items.SADDLE</code> carries
+        <code>Equippable.saddle()</code>, which is built with
+        <code>setEquipOnInteract(true)</code>, so <code>ItemStack.interactLivingEntity</code>
+        routes through <code>Equippable.equipOnTarget</code> and the saddle is on before
+        <code>mobInteract</code> reaches <code>doPlayerRide</code>. It even declines to swap
+        already: <code>equipOnTarget</code> requires
+        <code>!target.hasItemInSlot(this.slot)</code>.</li>
+    <li><strong>The barding is vanilla too.</strong> <code>mobInteract</code> ends with
+        <code>if (this.isEquippableInSlot(itemStack, EquipmentSlot.BODY) &amp;&amp;
+        !this.isWearingBodyArmor())</code> and equips it. That predicate is
+        <em>character-for-character</em> the one
+        <a href="horse-gear.html#tags"><code>HorseTackSlot.accepts</code></a> asks for the
+        <code>BARDING</code> slot, so there is provably nothing this mod could add there.</li>
 </ul>
 
+<p>
+    So the handler skips every <code>isVanilla()</code> slot deliberately. Taking them over
+    would have put two code paths on the same saddle, and the loser would have been the one
+    with the equip sound and the guaranteed drop. What is left is the seventeen that ride in
+    <a href="horse-gear.html#attachment">the <code>HORSE_GEAR</code> attachment</a>, which
+    vanilla cannot see and which had exactly one way in.
+</p>
+
 <p class="muted">
-    <strong>Not taken:</strong> Horse Buff's step-height increase from 1.0 to 1.1. Considered and
-    declined &mdash; a horse snagging on a stair edge is vanilla's behaviour and changing it moves
-    a number every other mod's pathing assumes.
+    The treatment&rsquo;s pre-agreed fallback for this case said to keep the handler for
+    &ldquo;armour and the mod&rsquo;s own tack slots&rdquo;, on the expectation that only the
+    saddle would turn out to be vanilla&rsquo;s. Armour is vanilla&rsquo;s as well, so what
+    shipped is the second half of that sentence only. The instruction not to retire the piece
+    was the right call regardless &mdash; the seventeen slots are the part nothing covered.
+</p>
+
+<h3 id="tack-equip-claim">Which clicks it claims, and the two it must not</h3>
+
+<p>
+    <code>LOWEST</code>, the same priority and the same reasoning as
+    <code>HorseInteractionHandler.onFoalInventory</code>: every other horse interaction in
+    this mod cancels the event when it claims a click, and a cancelled event is never
+    delivered to a lower priority. So this only ever sees a click nothing else wanted, and an
+    interaction added later needs no change here. It is above vanilla at any priority, since
+    the event fires from <code>Player.interactOn</code> before <code>mobInteract</code> is
+    called at all.
+</p>
+
+<p>
+    The item is tested <em>before the horse is</em> &mdash; <code>isModTack</code> walks the
+    roster asking each non-vanilla slot&rsquo;s tag &mdash; so a click holding anything else
+    is untouched, including by the refusals. Getting that order wrong would have meant a
+    carrot earning a &ldquo;not your horse&rdquo; line.
+</p>
+
+<p>
+    <strong>Two refusals are claimed and two are not, and the difference is load-bearing.</strong>
+    Not-your-horse and a foal cancel the event and send a line, because both are rules this
+    mod invented and an invented rule that fails silently reads as a bug &mdash; the same
+    reasoning behind the name tag&rsquo;s <code>not_yours</code> message. An untamed horse,
+    and a piece whose every slot is already full, are left <em>uncancelled</em>: vanilla then
+    rears the wild horse, and lets you mount your own. A handler that cancelled all four
+    would look right in game until somebody could not get on a horse while holding a spare
+    braid.
+</p>
+
+<p>
+    Ownership is <code>HorseOwnership.isOwner</code>, the same question
+    <a href="horse-gear.html#click">the Gear tab&rsquo;s own <code>TackSlotPayload</code></a>
+    asks before it believes a click, so the two ways in agree. The slot chosen is the first
+    <em>empty</em> one in roster order, which is the paper doll&rsquo;s reading order, so
+    which slot a piece lands in is predictable for the sets. Creative keeps its stack, which
+    is this mod&rsquo;s rule everywhere and <em>not</em> vanilla&rsquo;s &mdash;
+    <code>equipOnTarget</code> splits one off whatever the game mode.
+</p>
+
+<p>
+    Guarded by <code>right_click_equips_tack</code> in <code>gametest/ModGameTests</code>,
+    which posts seven real <code>EntityInteract</code> events through
+    <code>NeoForge.EVENT_BUS</code> &mdash; so a handler written but never registered fails
+    it. It asserts the claimed and unclaimed cases <em>separately</em>, since a handler that
+    claimed everything is the failure worth catching. Making the full-slot case cancel turned
+    it red with <em>&ldquo;a third braid with nowhere left to put it: the click was claimed,
+    and it should have been left to vanilla&rdquo;</em> before the real version was kept.
+</p>
+
+<p class="muted">
+    The test opens by asserting the rescuing braid is actually in <code>gear/mane</code> and
+    <code>gear/tail</code>. Fifteen of the seventeen tags are still empty, so if the braid
+    ever left its two the test would go on passing while exercising nothing at all &mdash;
+    there would be no item in the game this handler could equip.
+</p>
+
+<h2 id="ride-fade-coding">How the fade is drawn (2026-09-29)</h2>
+
+<p>
+    One number, <code>GeneticHorseRenderState.fadeAlpha</code>, computed once per horse per
+    frame by <code>client/RiderFade</code> and read by everything that draws a piece of that
+    horse. It is a field on the render state rather than a question each layer asks, because
+    <strong>the whole feature is that they agree</strong>: a value read twice in one frame
+    could differ across a camera move, and the visible result would be a saddle at one
+    opacity over a horse at another.
+</p>
+
+<h3 id="ride-fade-cutout">A tint alone fades nothing, and that is the whole difficulty</h3>
+
+<p>
+    The instinct is to multiply a half-transparent colour into the model and be done. It does
+    not work, and it fails in a way that looks like something else. Everything a horse is
+    normally drawn with is a <em>cutout</em> pipeline &mdash;
+    <code>ENTITY_CUTOUT_NO_CULL</code> for the coat,
+    <code>ARMOR_CUTOUT_NO_CULL</code> for the gear &mdash; and a cutout pipeline carries
+    <strong>no <code>BlendFunction</code> on its colour target at all</strong>. It discards a
+    fragment below an alpha of 0.1 and draws everything above it fully opaque. So a
+    half-transparent tint gives an ordinary solid horse, and a quarter-transparent one gives
+    an ordinary solid horse, right up until the alpha crosses 0.1 and the horse vanishes
+    outright.
+</p>
+
+<p>
+    <code>ENTITY_TRANSLUCENT</code> is the same shader with
+    <code>BlendFunction.TRANSLUCENT</code> on its colour target, and it is already no-cull,
+    which is what a see-through animal wants anyway. <strong>So every fading draw needs its
+    render type swapped as well as its colour changed</strong>, and that requirement is what
+    shapes all five of the paths below.
+</p>
+
+<p class="muted">
+    The exception is the emissive glow. <code>RenderPipelines.EYES</code> <em>does</em> carry
+    a translucent blend already, so the glow of a horse with a
+    <a href="genetics-model.html">glow gene</a> fades on the tint alone. It still had to move
+    from the eight-argument <code>submitModel</code> to the ten, because the short one
+    hard-codes a tint of <code>-1</code> and gives no way to say anything else.
+</p>
+
+<h3 id="ride-fade-paths">Five things draw a horse, and each takes the alpha differently</h3>
+
+<ul>
+    <li><b>The coat.</b> Two overrides on <code>GeneticHorseRenderer</code> and no more:
+        <code>getRenderType</code> returns <code>entityTranslucent</code> while fading, and
+        <code>getModelTint</code> returns a white tint carrying the alpha. Vanilla already
+        multiplies that tint into the model colour, so "the same coat, fainter" costs
+        nothing &mdash; which matters for a texture whose colours are the entire point of
+        it. The type is swapped <em>only</em> while fading: translucent geometry is sorted
+        and blended rather than depth-tested, so drawing every horse in the world that way
+        would cost something for no reason.</li>
+    <li><b>The emissive glow</b> &mdash; a tint, as above.</li>
+    <li><b>A braid</b> &mdash; its dye, faded, through <code>RiderFade.fade</code>, which
+        keeps the colour and moves only the alpha. It was already on
+        <code>entityTranslucent</code>.</li>
+    <li><b>The saddle and the barding</b> &mdash; <code>mixin/FadingGearMixin</code>, and
+        the section below.</li>
+    <li><b>The cutie mark</b> &mdash; <strong>cannot fade</strong>, so it is not drawn while
+        the horse is faded. The emblems go through
+        <code>ItemStackRenderState.submit</code>, which takes a light, an overlay and an
+        outline colour and <em>nothing else</em>; there is no tint parameter anywhere on it,
+        and an item picks its own render types out of the model it was baked from. Neither
+        half of what fades a coat is reachable. The choice was a solid sticker on a ghost
+        horse or no sticker, and it is one line to reverse if the owner prefers the
+        sticker.</li>
+</ul>
+
+<h3 id="ride-fade-gear">Why the gear needed a mixin, and the mod's first MixinExtras</h3>
+
+<p>
+    The gear is the only one of the five this mod does not draw itself. It goes through
+    vanilla's <code>EquipmentLayerRenderer.renderLayers</code>, which closes <em>both</em>
+    doors: the render type is hard-coded to <code>armorCutoutNoCull</code>, and the colour is
+    computed inside the method from the item's dye, with <code>SimpleEquipmentLayer</code>
+    forwarding no tint of its own. There is nothing to pass in and nothing to override.
+</p>
+
+<p>
+    So two <code>@WrapOperation</code> hooks: one on the
+    <code>RenderTypes.armorCutoutNoCull</code> call, one on the <code>submitModel</code> it
+    feeds. <strong>They are separate because a <code>RenderType</code> cannot be asked what
+    texture it draws</strong> &mdash; that lives in a private <code>RenderSetup</code> with
+    no accessor &mdash; so the translucent replacement has to be built at the one point the
+    <code>Identifier</code> is still in hand. The second hook covers all three submissions in
+    the method, the glint and an armour trim included, on the same reasoning: a trim left
+    solid over a faded barding is the same bug in miniature.
+</p>
+
+<p>
+    <strong>It guards on the render state, so it costs everything else nothing.</strong> No
+    flag, no thread-local, no static. <code>renderLayers</code> is handed the entity's render
+    state, and this mod's is the only one carrying a <code>fadeAlpha</code> &mdash; so a
+    zombie in golden armour never reaches the second line of either handler. That also leaves
+    other mods' work intact in the direction that matters, since a mod that swapped the model
+    or the texture has already done so by the time either hook runs.
+</p>
+
+<p>
+    <strong>This is the mod's first use of MixinExtras</strong>, which arrives bundled inside
+    NeoForge rather than declared by this project. Plain Sponge Mixin could have done it, but
+    only by appending all twelve of <code>renderLayers</code>' parameters to a
+    <code>@Redirect</code> handler to get at the one it needed; <code>@Local(argsOnly)</code>
+    asks for that one argument by itself. Both hooks were confirmed applied in a real client
+    boot &mdash; <code>Mixing FadingGearMixin&hellip; into EquipmentLayerRenderer</code> with
+    no injection error, which with <code>defaultRequire</code> at 1 is the guarantee, since a
+    descriptor that stopped matching would refuse to boot rather than quietly leave a
+    floating saddle.
+</p>
+
+<p class="muted">
+    <strong>No <code>@OnlyIn</code> on it</strong>, though the first draft had one. NeoForge
+    26.1.2 logs an <code>ERROR</code> for a mod class carrying that annotation &mdash;
+    <em>"the runtime member-stripping behaviour of this annotation is no longer
+    present"</em> &mdash; and it was never what kept the mixin off a server anyway; the
+    <code>client</code> list in <code>horsegenetics.mixins.json</code> is. Found by reading
+    the boot log rather than by it failing.
+</p>
+
+<h3 id="ride-fade-braid-bug">A braid that had never been drawn</h3>
+
+<p>
+    Wiring the braid into the fade turned up a defect in <code>BraidLayer</code> that had
+    been there since the braid shipped. The ten-argument <code>submitModel</code> is
+    <code>(model, state, pose, renderType, light, overlay, <b>tintedColor</b>, sprite,
+    <b>outlineColor</b>, crumbling)</code>, and the call had those two <code>int</code>s the
+    other way round: the braid's dye was going in as the <em>outline</em> colour, and the
+    tint was <code>state.outlineColor</code>, which is <code>0</code> for any horse that is
+    not glowing.
+</p>
+
+<p>
+    A tint of zero is transparent black, so <strong>no braid has ever been drawn</strong> -
+    and since <code>EntityRenderState.appearsGlowing()</code> is literally
+    <code>outlineColor != 0</code>, a dyed braid was quietly asking for a glowing outline
+    instead. Both halves are silent: nothing logs, and an overlay that never draws looks
+    exactly like a horse not wearing one. Fixed in the same change, which means the braid
+    becomes visible for the first time here rather than merely becoming fadeable &mdash;
+    <a href="#ride-fade-verify">the Verification tab has it as its own check</a>, since it is
+    a change to something the owner may believe they have already seen working.
+</p>
+
+<h3 id="ride-fade-test">What is tested, which is one function</h3>
+
+<p>
+    <code>RiderFadeRampTest</code> covers <code>RiderFade.ramp</code> &mdash; which alpha a
+    given pitch asks for &mdash; and nothing else, because nothing else here is arithmetic.
+    It is testable at all only because that method is written without <code>Mth</code>: this
+    module's test classpath carries no Minecraft on purpose, and a gametest server has no
+    camera to point at anything.
+</p>
+
+<p>
+    The case worth having is the degenerate config. A <code>fullPitch</code> at or below
+    <code>startPitch</code> is a pair the user is allowed to write, and written naively it
+    divides by zero and paints the horse with <code>NaN</code> &mdash; a white flicker rather
+    than an error anybody would think to report. It answers a hard switch at the start pitch
+    instead. <strong>The first draft of the test asserted that backwards</strong> and failed
+    against correct code, which is a fair measure of how easy the pair is to misread; both
+    directions are asserted now.
+</p>
+
+<p class="muted">
+    <strong>Everything else about this is a Verification-tab matter</strong>, and honestly
+    so. Whether a generated coat looks right at a quarter opacity, whether translucent sort
+    order shows a horse's insides through itself, and whether the gear really fades with it
+    are questions a screen answers and a test cannot.
 </p>
 
 </section>
@@ -203,8 +915,81 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The returned lead has been seen only by a gametest &mdash; and the branch the gametest cannot reach is the one that fires when your pack is full, where a lead that goes nowhere at all would be strictly worse than the ground drop it replaced.</p>
+    <p>All six shipped pieces have been seen by no player, and the ride fade is the one to look at first because it is the only one whose whole deliverable is visual: nothing anybody can write down establishes that a generated coat looks right at a quarter opacity, that translucent sort order does not show a horse's insides through itself, or that the saddle really does go faint with the horse. Behind it, the returned lead's untested branch fires when your pack is full, where a lead that goes nowhere would be worse than the ground drop it replaced; the mounted mining exemption rests on a reading of vanilla only a stopwatch can confirm; the ALT+E key is the mod's first chord; the tack click now shares the plain right-click with every other interaction this mod has; and the snapped lead's player-list lookup is the one line no test could reach.</p>
 </div>
+
+<h3 id="ride-fade-verify">The ride fade (2026-09-29, NOT played &mdash; and it is the one that needs eyes)</h3>
+
+<p>
+    <strong>This piece was built without anybody seeing it.</strong> Its own plan said to
+    spike it first and look at the result, and what was done instead was to establish from
+    the 26.1.2 sources that each layer <em>can</em> be drawn translucent and to wire all five
+    of them up. The mixins were confirmed applied in a real client boot, and the ramp
+    arithmetic has a unit test. Neither of those is the question. The question is whether it
+    looks right, and only a person at a screen can answer it.
+</p>
+
+<p>
+    Ride a horse, look down, look back up. Then work through the list &mdash; and if any of
+    the first four are wrong, <strong>say so rather than working round it</strong>: the plan's
+    own instruction for this piece was to stop and report rather than ship a fade that looks
+    broken, and it is not too late to act on that.
+</p>
+
+<ul>
+    <li><strong>The coat at a quarter opacity.</strong> Look straight down from the saddle.
+        <strong>Pass:</strong> a faint but recognisable horse, its markings still legible.
+        <strong>Fail:</strong> a flat wash of colour, a horse that went fully invisible, or
+        one that did not change at all &mdash; the last means the render type is not being
+        swapped and the tint is landing on a cutout pipeline.</li>
+    <li><strong>Can you see the horse's insides through itself?</strong> This is the one the
+        plan flagged as a real unknown and it is the most likely thing to be wrong.
+        Translucent geometry is sorted rather than depth-tested, so the far side of the
+        barrel can draw over the near side. Look at the neck and the legs especially, from
+        the saddle and again in third person. <strong>Fail:</strong> legs visible through the
+        body, or a seam where the head meets the neck.</li>
+    <li><strong>The gear fades with it</strong> &mdash; the thing this was specifically asked
+        for. Saddle up, put barding on, look down. <strong>Pass:</strong> saddle, barding and
+        horse all go faint together. <strong>Fail:</strong> a solid saddle floating in the
+        shape of a horse, which means the mixin is applied but its guard is not matching; or
+        tack that vanishes completely while the horse stays, which means the type swap
+        happened and the tint did not.</li>
+    <li><strong>A braid fades too</strong>, on a horse wearing a
+        <a href="item-rescuing-braid.html">rescuing braid</a>. Check
+        <a href="item-rescuing-braid.html#verify-drawn">that a braid draws at all</a> first:
+        wiring this fade through that layer turned up two transposed arguments, so no braid
+        has ever been rendered until now, and its own page owns that check.</li>
+    <li><strong>The glow of an emissive coat fades.</strong> On a horse with a glow gene, the
+        glowing regions should dim with the rest. <strong>Fail:</strong> a bright mane
+        hanging in the air, which is the most conspicuous version of the floating-saddle
+        bug.</li>
+    <li><strong>It ramps rather than snapping.</strong> Tilt slowly from the horizon to
+        straight down. It should come on gradually between 30&deg; and 75&deg;, with no step.</li>
+    <li><strong>Nothing else fades.</strong> The most valuable check after the first two.
+        Ride past other horses, a horse somebody else is riding, a cow in a harness, a zombie
+        in armour, an armour stand. All must be completely solid. The mixin sits on the
+        method that draws <em>every</em> piece of worn equipment in the game, so a guard that
+        is too loose shows up here.</li>
+    <li><strong>Get off.</strong> The horse should be solid again immediately, and stay solid
+        while you look down at it from the ground.</li>
+    <li><strong>Third person.</strong> Same behaviour &mdash; the pitch is read off the
+        camera, not the player, so it should fade when the <em>view</em> is aimed down.
+        Worth a look mainly because it is where you can see the whole animal at once.</li>
+    <li><strong>The cutie mark disappears rather than fading</strong>, on a
+        <a href="gene-cutie-mark.html">Cutmrk/Cutmrk</a> horse. That is deliberate and
+        explained on the Coding tab. The question for the owner is whether the pop is worse
+        than a solid emblem would have been; it is one line either way.</li>
+    <li><strong>All four settings do what they say.</strong>
+        <code>visual.rideFade</code> off restores a solid horse;
+        <code>visual.rideFadeMinOpacity</code> at 1.0 does the same;
+        a low <code>rideFadeStartPitch</code> fades almost at once. And the pair the unit test
+        covers is worth seeing once for real: set <code>rideFadeFullPitch</code>
+        <em>below</em> <code>rideFadeStartPitch</code> and confirm you get a hard switch and
+        not a white flicker.</li>
+    <li><strong>Frame rate near a herd.</strong> Only the ridden horse should ever be on the
+        translucent path, so a field of horses should cost exactly what it did before. If it
+        does not, the type swap is firing more widely than intended.</li>
+</ul>
 
 <h3 id="leads-verify">The lead comes back (2026-09-24, NOT played)</h3>
 
@@ -240,19 +1025,253 @@
         your inventory, one of the two portal paths was converted by accident.</li>
 </ul>
 
+<h3 id="mounted-mining-verify">Mining from the saddle (2026-09-29, NOT played)</h3>
+
+<p>
+    <code>mounted_mining_is_exempt</code> pins what the handler does given each posture, and
+    was confirmed to fail against a copy with its guard deleted. What it cannot pin is the
+    premise underneath: <strong>is a real mounted player&rsquo;s <code>onGround</code>
+    actually false?</strong> That was read out of vanilla&rsquo;s movement code, not measured.
+    If it is wrong the handler never fires and the feature is simply absent &mdash; which
+    looks identical to it not having been built, so the first check below is the one that
+    matters.
+</p>
+
+<ul>
+    <li><strong>Time it, do not eyeball it.</strong> Stand on the ground with a stone pickaxe
+        and break a block of stone; then sit on a horse standing on that same ground and break
+        an identical one. <strong>Pass:</strong> the two take the same time.
+        <strong>Fail:</strong> the mounted one takes about five times as long, which means the
+        premise was wrong and the handler is never firing. A block that takes a fraction of a
+        second either way will not show this &mdash; use something slow, like obsidian with an
+        iron pick, or deepslate by hand.</li>
+    <li><strong>The 5&times; boost, from the other direction.</strong> Break the same block
+        standing on the ground <em>next to</em> your horse, not on it. <strong>Pass:</strong>
+        the ordinary time. <strong>Fail:</strong> noticeably faster than normal, which means
+        the guard is inverted and every player on the server is mining at five times speed.
+        This is the failure worth looking for.</li>
+    <li><strong>Mid-jump.</strong> Break a block while the horse is in the air from a jump.
+        <strong>Pass:</strong> the slow, fifth-speed vanilla behaviour. <strong>Fail:</strong>
+        full speed, which means the vehicle&rsquo;s own <code>onGround</code> is not being
+        read.</li>
+    <li><strong>On a flying horse</strong>, the same way &mdash; full mining speed out of the
+        air is not what was asked for.</li>
+    <li><strong>The client agrees with the server.</strong> The thing to watch is the crack
+        overlay: it should fill and the block should break at the same moment. If the crack
+        creeps slowly and the block pops early (or the reverse), one side is reading a
+        different config value and the sync assumption is wrong.</li>
+    <li><strong>The switch works in both directions.</strong> Turn
+        <a href="config.html"><code>behaviour.mounted_mining_penalty_removed</code></a> off,
+        restart, and time the mounted break again: it should be back to a fifth speed. A switch
+        that does nothing in one direction is the usual way a config option is wrong.</li>
+    <li><strong>Boats and minecarts are untouched.</strong> Break a block from a boat.
+        <strong>Pass:</strong> still slow, as vanilla. <strong>Fail:</strong> full speed, which
+        would mean the vehicle test is not actually restricting to horses.</li>
+</ul>
+
+<h3 id="rider-inventory-verify">The inventory key (2026-09-29, NOT played)</h3>
+
+<p>
+    Nothing here is unit-testable, so <strong>all of it is a hand check</strong>. Two
+    separate claims are being taken on trust, and they fail in different ways: that a
+    <code>KeyModifier</code> chord works at all in 26.1.2 &mdash; this is the mod&rsquo;s
+    first &mdash; and that it <em>suppresses</em> the bare key it is built on, which is
+    <a href="#rider-inventory-chord">read out of <code>KeyMappingLookup.getAll</code></a>
+    rather than seen.
+</p>
+
+<ul>
+    <li><strong>The suppression, which is the check that matters.</strong> Ride a tamed horse
+        of yours and press <kbd>ALT</kbd>+<kbd>E</kbd>. <strong>Pass:</strong> your own
+        inventory, and only your own inventory. <strong>Fail:</strong> the horse screen
+        appears instead, or appears on top &mdash; which means the bare-<kbd>E</kbd> fallback
+        in <code>KeyMappingLookup</code> ran anyway and both mappings fired. That is the whole
+        feature failing in exactly the place it was built for, and it looks like the key
+        simply not working.</li>
+    <li><strong>Nothing was taken from <kbd>E</kbd>.</strong> On the same horse, press
+        <kbd>E</kbd> alone. <strong>Pass:</strong> the horse screen, as before.
+        <strong>Fail:</strong> your own inventory, which would mean the chord registered with
+        no modifier and has quietly replaced the horse screen.</li>
+    <li><strong>On foot.</strong> Get off and press <kbd>ALT</kbd>+<kbd>E</kbd> standing in a
+        field. <strong>Pass:</strong> your inventory opens. This was the owner&rsquo;s call
+        &mdash; the key is not restricted to riding &mdash; so a failure here is a wrong
+        conflict context, not a missing guard.</li>
+    <li><strong>The Controls screen draws the chord.</strong> Open <em>Options &rarr;
+        Controls</em> and find it under <em>Inventory</em>, beneath vanilla&rsquo;s
+        &ldquo;Open/Close Inventory&rdquo;. <strong>Pass:</strong> the row reads
+        &ldquo;Alt + E&rdquo;. <strong>Fail:</strong> a bare <kbd>E</kbd>, or a conflict
+        warning against vanilla&rsquo;s row &mdash; either means the modifier was not stored,
+        and the suppression check above will be failing too.</li>
+    <li><strong>Rebinding survives.</strong> Rebind it to something else, restart the client,
+        and check the new binding is still there and still opens the right screen. A chord
+        that does not round-trip through <code>options.txt</code> is the usual way the
+        modifier API goes wrong.</li>
+    <li><strong>Creative mode.</strong> Press it in creative. <strong>Pass:</strong> the
+        creative item picker, not the survival inventory &mdash; this rests on
+        <code>InventoryScreen</code> swapping itself out in <code>init</code>, which is
+        <a href="#rider-inventory-coding">read from vanilla rather than reimplemented</a>. A
+        one-frame flash of the survival screen before the swap would also count as a fail
+        worth reporting.</li>
+    <li><strong>A donkey or a mule.</strong> Ride one and press both keys. <strong>Pass:</strong>
+        <kbd>E</kbd> gives vanilla&rsquo;s screen with its chest grid, unchanged, and
+        <kbd>ALT</kbd>+<kbd>E</kbd> gives your own pack.</li>
+    <li><strong>It does not reach through a screen.</strong> With the horse browser or the
+        horse screen already open, press <kbd>ALT</kbd>+<kbd>E</kbd>.
+        <strong>Pass:</strong> nothing happens. <strong>Fail:</strong> the inventory opens
+        over the top, which means the <code>mc.screen == null</code> guard is not holding.</li>
+</ul>
+
+<p class="muted">
+    <strong>If the chord will not hold</strong>, the fallback the owner already agreed is a
+    bare key that clashes with nothing in this repo &mdash; the taken ones are <kbd>H</kbd>,
+    <kbd>&rsquo;</kbd>, <kbd>F</kbd>, <kbd>F6</kbd>, <kbd>F7</kbd> and <kbd>F8</kbd>. Pick
+    one, ship it, and say which; do not leave a chord in that half-works.
+</p>
+
+<h3 id="vanilla-leads-verify">The snapped lead (2026-09-29, NOT played)</h3>
+
+<p>
+    <code>vanilla_lead_comes_back</code> pins the recording, the fence transition and every
+    refusal, and was confirmed to fail against a copy that did not clear the record. Two
+    things are left, and they are the two halves it structurally could not reach.
+</p>
+
+<p>
+    <strong>The player-list lookup has never run.</strong> A gametest server has nobody on
+    it, so the one line that turns a stored UUID into a player &mdash;
+    <code>getPlayerList().getPlayer(id)</code> &mdash; is the only part of this that has
+    never executed against a real player. If it is wrong, every lead falls on the ground and
+    the feature is silently absent: it looks exactly like vanilla, because it <em>is</em>
+    vanilla. That makes the first check below the one that matters.
+</p>
+
+<p>
+    <strong>And two mixins now sit on paths every entity uses.</strong>
+    <code>LeashDropMixin</code> is on <code>Entity.spawnAtLocation</code>, which every item
+    any entity ever drops goes through, and <code>LeashPlacerMixin</code> is on
+    <code>Mob.setLeashData</code>, which every leashed animal in the game touches. Neither
+    should do anything outside its guard, and the checks for that are worth more than the
+    feature ones.
+</p>
+
+<ul>
+    <li><strong>The snap, which is the check that matters.</strong> Tie a lead to your horse,
+        walk it, then run away until the leash breaks. <strong>Pass:</strong> the lead is in
+        your pack. <strong>Fail:</strong> it is on the ground where the horse was, which
+        means the lookup found nobody and the whole feature is absent.</li>
+    <li><strong>The fence, which is what the stored UUID exists for.</strong> Walk a horse to
+        a fence, tie it there, then walk away and log off and back on if you like.
+        Break the knot. <strong>Pass:</strong> the lead comes to you.
+        <strong>Fail:</strong> it drops at the post, which means the placer was lost either
+        at the moment of tying or across the save.</li>
+    <li><strong>Across a dimension.</strong> Tie a horse to a fence in the Overworld, go to
+        the Nether, and have someone break the knot &mdash; or leave it leashed to something
+        that will stop existing. The lead should reach you where you are. This is the
+        decided rule and it is the one that would be easiest to get half right.</li>
+    <li><strong>Nothing else that drops an item changed.</strong> The most valuable check
+        here: kill a horse wearing a saddle and barding, shear a braid off, break a cart,
+        empty a trough, kill a cow, mine a block. Everything should drop exactly what it
+        always did. <code>Entity.spawnAtLocation</code> is a very general method and the
+        guard on it is one identity comparison &mdash; if that guard is wrong, items go
+        missing all over the game.</li>
+    <li><strong>Other animals are untouched.</strong> Snap a leash on a cow, a pig, a llama.
+        <strong>Pass:</strong> the lead falls on the ground, exactly as vanilla &mdash; this
+        is a horse mod and the mixin is guarded to <code>AbstractHorse</code>.</li>
+    <li><strong>A donkey and a mule are included</strong>, though. Same check as the snap,
+        on one of each.</li>
+    <li><strong>Untying by hand is unchanged.</strong> Right-click a horse you are leading,
+        with an empty hand. <strong>Pass:</strong> the lead drops at your feet as before
+        &mdash; you are standing right there, and this is the same reasoning that leaves the
+        portal paths alone.</li>
+    <li><strong>An offline placer drops it.</strong> Two players: one ties a horse up and
+        logs off, the other breaks the knot. <strong>Pass:</strong> the lead is on the
+        ground. <strong>Fail:</strong> nothing anywhere, which would mean a lead held for
+        later, and the rule is that never happens.</li>
+    <li><strong>A command-leashed horse drops it too.</strong> Leash one with
+        <code>/data</code> or a dispenser and break it. Nobody was recorded, so the ground is
+        correct.</li>
+    <li><strong>No dupe on a full pack.</strong> Fill your inventory, then snap a leash.
+        <strong>Pass:</strong> exactly one lead, at your feet.
+        <strong>Fail:</strong> two, or none.</li>
+    <li><strong>The switch works in both directions.</strong> Turn
+        <a href="config.html"><code>behaviour.leads_return</code></a> off, restart, and snap
+        a leash: the lead should fall where the horse was. It now governs both halves, so
+        check the whistle case is still off as well.</li>
+</ul>
+
+<h3 id="tack-equip-verify">The tack click (2026-09-29, NOT played)</h3>
+
+<p>
+    <code>right_click_equips_tack</code> pins what the handler does with a braid, and was
+    confirmed to fail against a copy that cancelled the full-slot case. What it cannot pin is
+    the thing actually worth worrying about: <strong>this put a new listener on the plain
+    right-click, which is the busiest gesture in the mod.</strong> The gametest posts events
+    into an empty world; it cannot tell you that feeding, naming, branding and mounting all
+    still work in a real one. Most of the checks below are therefore about what did
+    <em>not</em> change.
+</p>
+
+<ul>
+    <li><strong>It works at all.</strong> Hold a <a href="item-rescuing-braid.html">rescuing
+        braid</a>, right-click your own adult horse. <strong>Pass:</strong> the braid appears
+        in the mane, the equip sound plays, and one braid leaves your hand.
+        <strong>Fail:</strong> you get on the horse instead, which means the click is not
+        being claimed.</li>
+    <li><strong>The second goes to the tail, and the mane keeps the one it has.</strong>
+        Dye two braids different colours first &mdash; that is the only way to see a swap,
+        and a swap would look identical to a correct equip from the outside.</li>
+    <li><strong>You can still mount a braided horse while holding a braid.</strong> With both
+        slots full, right-click again. <strong>Pass:</strong> you get on.
+        <strong>Fail:</strong> nothing happens, or a refusal line appears &mdash; which means
+        the full-slot case is being claimed and you can no longer mount your own horse with
+        tack in hand. This is the regression the design chose against; it is worth checking
+        in the world as well as in the test.</li>
+    <li><strong>Nothing else on the right-click broke.</strong> The one to spend real time
+        on, because this is a <code>LOWEST</code>-priority listener on a gesture shared by
+        everything: feed a <a href="carrots.html">breeding carrot</a>, feed hay, use a
+        <a href="villagers.html">transfer paper</a>, use a name tag, bind an
+        <a href="item-whistles.html#ender">ender whistle</a>, shear a braid off. All should
+        behave exactly as they did. A break here would show as one of those doing nothing at
+        all.</li>
+    <li><strong>Sneak still opens the screen with a braid in hand.</strong> This mod&rsquo;s
+        horse screen is on sneak-and-<em>empty</em>-hand, so the claim is that holding tack
+        changes nothing about it.</li>
+    <li><strong>A stranger&rsquo;s horse, and a foal</strong>, each say why in a line across
+        the bottom of the screen. <strong>Fail:</strong> silence, which is how an invented
+        rule reads as a bug.</li>
+    <li><strong>An untamed horse rears up</strong> as vanilla does, rather than printing
+        anything. Needs a second player or a second account for the stranger case; the foal
+        and the wild horse do not.</li>
+    <li><strong>The saddle and the barding are untouched.</strong> Right-click with a saddle,
+        then with each of the four horse armours. All should go on exactly as before &mdash;
+        this handler deliberately does not cover them, and a change here would mean it is
+        racing vanilla for the same slot.</li>
+    <li><strong>Creative keeps the stack.</strong> In creative, equipping a braid should not
+        reduce what you are holding. <strong>Fail:</strong> it shrinks, which is
+        vanilla&rsquo;s rule and not this mod&rsquo;s.</li>
+    <li><strong>The switch works in both directions.</strong> Turn
+        <a href="config.html"><code>behaviour.rightclick_equips_tack</code></a> off, restart,
+        and try again: the braid should not go on, and the Gear tab should still put it on.
+        A switch that does nothing in one direction is the usual way a config option is
+        wrong.</li>
+</ul>
+
 </section>
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="config.html">Config &mdash; the switch each of these wants</a>
         <a href="pipeline.html">The coat pipeline</a>
         <a href="compatibility.html">Living beside other mods</a>
     </div>
-    The returned lead was the first of the five and took an afternoon. Of what is left, the
-    mining-speed debuff and the inventory keybind still want nothing settled first; the fade is
-    the one to leave until the coat has actually been drawn half-transparent, because everything
-    about how it would be configured depends on whether it can be drawn at all.
+    The returned lead was the first of the five and took an afternoon; mining from the saddle
+    was the second and took less; the inventory keybind was the third and was two classes and
+    a lang key; the tack click was the fourth and was smaller than planned, because two
+    thirds of it turned out to be vanilla's already; the lead's other half was the fifth and
+    much the largest, two mixins for something that reads like one line. The fade was the
+    last and the only one whose result nobody has looked at &mdash; the code can prove a
+    horse is drawn on a blending pipeline and cannot prove it looks like a horse, which is
+    why its Verification entry is longer than its Coding one.
 </div>
 
 </article>

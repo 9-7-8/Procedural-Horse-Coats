@@ -370,6 +370,33 @@
         not take, at 46 to 73 percent each. That is chance, not a fault.</li>
 </ul>
 
+<p id="verified-cap-fifty">
+    <strong>A packed pen breeds again, and the cap of fifty refuses at exactly fifty</strong> (2026-09-30, three
+    unattended yard runs on the default <code>fertility.nearby_horse_cap</code> of 50; formerly the second check of
+    <a href="?view=verification#crowd-cap-0924">the cap entry</a>). The two halves were read off three pens:
+</p>
+<ul>
+    <li><strong>A crowd well past the old eight is covered freely.</strong> The old THE CAP pen, nine horses built
+        to sit at the old cap of eight, bred as if uncrowded from its first minute: <code>"CAP MARE 7" bred to
+        ... CONCEIVED (chance 0.77)</code> at 12:21:44 with eight others around her, eighty CAP MARE conceptions
+        after it, and the pen grew to 55 horses. Its first refusal came only at 12:49:24, <code>not covered: 50
+        other horses within 16 blocks, the cap is 50</code>, then 51, then 54 for the rest of the run &mdash; no
+        crowding line below fifty. MET NATURAL, two MET carriers left to breed on their own, reached
+        <code>12 horses, past the old cap's nine - PASS</code> at 32 minutes in one run and 48 game-minutes in the
+        next, where the same pen had stood still at nine or ten on the old cap
+        (<a href="#verified">above</a>).</li>
+    <li><strong>Fifty refuses, and says the world's number.</strong> THE CAP, rebuilt from the setting as 50 mares
+        in heat and one stud inside 16 blocks, logged <code>THE CAP at 5 min: 0 of 50 mares pregnant, cap 50 -
+        PASS</code> in both runs, every refusal reading <code>"CAP MARE 46" not covered: 50 other horses within 16
+        blocks, the cap is 50</code> &mdash; so the rule is <em>nearby &ge; cap</em>, as
+        <code>NaturalCoverTest</code> pins it, and the line quotes the cap that refused her.</li>
+</ul>
+<p>
+    What these runs <em>cannot</em> say is whether the number came from the config or the constant: both are 50 by
+    default, so <a href="?view=verification#crowd-cap-0924">the setting being read at all</a> is still open. THE CAP
+    and MET NATURAL were taken out of the yard after these runs.
+</p>
+
 <h3 id="settled">Settled</h3>
 
 <p id="settled-no-daily-cap">
@@ -874,7 +901,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat and nothing but a night's play can say whether fifty is a stable or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers now refuse to happen through a wall, which had never been checked at all and which the same cap change had been hiding.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers now refuse to happen through a wall, which had never been checked at all and which the same cap change had been hiding.</p>
 </div>
 
 <h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25, NOT played)</h3>
@@ -936,7 +963,10 @@
     <code>fertility.nearby_horse_cap</code> now, 50 by default and 1 to 1,000, carried to the
     rule as <code>NaturalCover.Crowd</code> so the chat line quotes the world's own number.
     <code>NaturalCoverTest</code> pins that a high cap covers where a low one refuses; what no
-    test can reach is what a fifty-horse brake does to a world over a night.
+    test can reach is what a fifty-horse brake does to a world over a night. A packed pen breeding
+    again, and the refusal landing at exactly fifty, are
+    <a href="?view=coding#verified-cap-fifty">verified</a> (2026-09-30) &mdash; on the default, which
+    is why the first check below is untouched by them.
 </p>
 
 <h4>What to look at</h4>
@@ -946,11 +976,10 @@
         down to 3 on the server, pen a mare in heat, a stallion and three other horses.
         <strong>Pass:</strong> the yellow line says <em>the limit is 3</em>.
         <strong>Fail:</strong> a line saying 50, which would mean something is still reading
-        <code>ReproRules.DEFAULT_NATURAL_CAP</code> instead of the config.</li>
-    <li><strong>A packed stable breeds again.</strong> The paddock that went quiet on the old
-        cap &mdash; a dozen or two horses in one place &mdash; on the default 50.
-        <strong>Pass:</strong> <code>natural cover:</code> lines under <code>fertility</code>
-        again, and no crowding line at all.</li>
+        <code>ReproRules.DEFAULT_NATURAL_CAP</code> instead of the config. The yard's cap pen
+        read <em>the cap is 50</em> in three runs, but it ran on the default, where the config and
+        the constant agree &mdash; so it narrows nothing here, and the pen is gone; this wants the
+        option set to something other than 50.</li>
     <li><strong>How far a wild band runs (the real question).</strong> Leave a wild band loaded
         overnight, or walk back to one after a long session, and count it.
         <strong>Pass:</strong> a band that is bigger than it used to be and still a band.
@@ -1074,9 +1103,9 @@
 
 <p>
     Everything about breeding in one walk: fertility, pregnancy, natural breeding, gelding, the
-    vet's kit, and tonight's gap fixes. <strong>The yard does most of it</strong>, in rows
-    <strong>O and P</strong> past the carrot pens, plus MET NATURAL in row R (<a href="horse-dimension.html#test-yard">the
-    table</a>). Every pen is one claim, and its sign says what should happen. With
+    vet's kit, and tonight's gap fixes. <strong>The yard did most of it</strong>, in the fertility
+    rows past the carrot pens (<a href="horse-dimension.html#test-yard">the
+    table</a>); most of those pens have since been answered and taken out. Every pen is one claim, and its sign says what should happen. With
     <code>debug.tools</code> on (the dev default), a heat and a pregnancy each last one real minute.
     The logic is unit-tested: <code>ReproRulesTest</code>, <code>NaturalCoverTest</code>,
     <code>ReproTextTest</code>, <code>ConceivableTest</code>, <code>GeldingListingTest</code>,
@@ -1093,10 +1122,9 @@
 
 <h4 id="fertility-yard">In the yard, in this order</h4>
 <ol>
-    <li><strong>Walk in and check the log first.</strong> Expect <code>fertility pens built
-        (rows O-P, and MET NATURAL in R)</code>, and <em>no</em> <code>could not make ... pregnant as promised</code>. That
-        warning means the maternity pen came up empty, usually because <code>health.mode</code>
-        is not FULL.</li>
+    <li><strong>Walk in and check the log first.</strong> Since 2026-09-30 the only fertility pen left
+        is HURT MARE, so expect <code>fertility pen built (row O west: hurt mare)</code> and nothing
+        from THE CAP, MET NATURAL or MATERNITY, which have all gone.</li>
     <li><strong>A mare who loses a pregnancy is covered again (2026-09-16, gap 258, NOT played).</strong>
         This is the one to do first, because until now she never was. Stand at <strong>row W</strong>'s
         ratio pens (RATIO KIT W5, RATIO MITF SW3, RATIO MILK CLASH) and leave them. Each loses
@@ -1117,17 +1145,21 @@
         (the failure gap 247 found with <em>raised</em> cauldrons), and the splice pens in the carrot
         rows have one in <strong>both</strong> halves. The WATERBORN and death-fluid pens overwrite their
         interiors after the pen is built, so they will not have one &mdash; that is expected.</li>
-    <li><strong>Row O east, MATERNITY, what needs your hands.</strong> The kit's readings are
-        <a href="fertility.html#verified-vet-readings">verified from the log</a>. Still for a person: TWINS'
+    <li><strong>A pregnancy, what needs your hands.</strong> The yard's MATERNITY pen is gone, so this
+        wants a <code>tw/tw</code> mare of your own stepped along with the clock. The kit's readings are
+        <a href="fertility.html#verified-vet-readings">verified from the log</a>. Still for a person: a mare carrying twins &mdash; her
         info screen's Breeding line should only say <em>Pregnant</em>. The chat lines should be a gold one naming the foal, a grey &ldquo;did not carry&rdquo; for
         the loss, and &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
-        TWINS' Speed on the info screen is 15% lower (the slowdown itself is
+        her Speed on the info screen is 15% lower (the slowdown itself is
         <a href="fertility.html#verified-late-pregnancy">verified</a>; what is left is that the screen shows it).</li>
-    <li><strong>Row O west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
-        covers start within seconds. Each birth adds a horse back, so the pen settles again.</li>
-    <li><strong>Row P east, GOLD ANY HEAT, is <a href="fertility.html#verified-gold-any-heat">verified</a>.</strong>
-        Row P west, the jar stud, is on
-        <a href="item-seed-jars.html#fertility-jar-stud">seed jars</a>.</li>
+    <li><strong>An at-cap mare, with a lead.</strong> Take one mare out of an at-cap group with a lead:
+        covers start within seconds. Each birth adds a horse back, so the group settles again. THE CAP
+        pen is gone (2026-09-30, <a href="?view=coding#verified-cap-fifty">its question answered</a>), so
+        this is a job for your own paddock &mdash; turn <code>fertility.nearby_horse_cap</code> down to a
+        handful rather than gather fifty horses.</li>
+    <li><strong>Row P is gone</strong> (2026-09-30). GOLD ANY HEAT is
+        <a href="fertility.html#verified-gold-any-heat">verified</a>; the jar stud is the SEED JAR
+        clockwork pen, on <a href="item-seed-jars.html#fertility-jar-stud">seed jars</a>.</li>
     <li><strong>Leave the yard running</strong> and read the census in the morning: every fertility
         pen prints its breeding readout.</li>
 </ol>

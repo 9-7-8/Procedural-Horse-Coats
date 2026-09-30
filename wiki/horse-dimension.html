@@ -486,7 +486,41 @@
         with invisible full-brightness light blocks, four apart, so nothing spawns in the
         middle of a pen that is being left to run; and <strong>every monster in the yard now
         comes from a spawner inside a roofed arena</strong>, so a fight happens where one is
-        wanted and nowhere else.
+        wanted and nowhere else. (Since 2026-09-30 there are no spawners left in it: every
+        monster is placed by the pen that wants it.)
+    </p>
+</div>
+
+<div class="note" id="clockwork">
+    <span class="label">Since 2026-09-30 it is built for a session that cannot see it</span>
+    <p>
+        The owner's brief: <em>&ldquo;remove everything in the debug yard which can't be tested by
+        you without my intervention, and then add in new pens which you can test without
+        me.&rdquo;</em> The yard is tested now by a session that launches the game
+        (<code>runClientTestWorld</code>) and reads <code>latest.log</code>, so a pen belongs here only
+        if it starts itself and writes its own answer. Every pen that waited for a person went: the
+        tack room, the holding pen, the dairy and clip, the ocean-born pool, the starburst and F8 pens,
+        the ward's spawner room (a vanilla spawner runs only with a player within sixteen blocks),
+        the guardian arena, ender echo's pen, the ten splice-carrot pairs, WEANING by lead, the jar
+        bench, GOLD ANY HEAT and SUBFERTILE GOLD. The yard was a hundred blocks shorter for it (<code>z=4..617</code> before, <code>4..518</code> after), and was packed to <code>4..170</code> later the same day.
+    </p>
+    <p>
+        <strong>What those pens asked was not dropped.</strong> Everything a pair of hands could settle
+        was asked by a <code>FakePlayer</code> on a clock in the <strong>clockwork rows</strong>
+        (<code>DebugYardClockwork</code>, J west and AM&ndash;AQ). Its hands <em>keep what they are
+        told</em> &mdash; a stock fake player drops every chat line, and for a refusal the line is the
+        evidence &mdash; and every check ended in one line:
+        <code>[trace] test yard | CLOCKWORK PASS | &lt;check&gt; | &lt;what was read&gt;</code>, or
+        <code>FAIL</code>, or <code>INCONCLUSIVE</code> when the setup rather than the gene went wrong,
+        with a <code>CLOCKWORK SUMMARY</code> at ten and thirty minutes naming every check that had not
+        answered as <code>PENDING</code>. All forty-five had passed by the fifth launch. On the owner's
+        word a clockwork PASS closes a check, so each result moved onto its own page's Coding tab, and
+        the clockwork pens were deleted with the machinery kept (<em>&ldquo;delete them, keep the
+        machinery&rdquo;</em>): <code>DebugYardClockwork</code> builds nothing now, but still holds the
+        hands, <code>use()</code>, <code>expect</code>/<code>verdict</code>/<code>summary</code>, the cell
+        and the cage for the next check that needs them. What a fake player <em>cannot</em> do &mdash;
+        ride, be found by an aura that scans for players, be found as an owner by entity &mdash; is the
+        test kit's batch 5.
     </p>
 </div>
 
@@ -504,76 +538,53 @@
     contain.
 </p>
 <p>
-    <strong>Rows O to R are packed, and every pen in them is a world of its own.</strong> Every
+    <strong>Every row is packed, and every pen in it is a world of its own.</strong> Every
     breeding and band check counts horses by distance, straight through walls. Examples: a mare is not
     covered when <code>fertility.nearby_horse_cap</code> other horses stand within sixteen blocks; a bachelor challenges a stallion whose mare is within
-    24; a youngster looks 64 blocks for somewhere to go. Until 2026-09-14 these rows were spread
+    24; a youngster looks 64 blocks for somewhere to go. Until 2026-09-14 the rows were spread
     over three hundred blocks so that no pen reached another. Now each pen registers with
     <code>YardPens</code>, and inside the yard those checks see only the horses in their own pen.
-    Pens that should see each other share a group, like LEAVING HOME and HOST BAND. Nothing
-    changes outside the yard.
+    Nothing changes outside the yard.
 </p>
 <p>
-    <strong>The breeding pens still keep a three-block gap.</strong> Golden-carrot breeding is
-    vanilla's own goal, which pairs two horses in love within three blocks through a wall, and
-    <code>YardPens</code> does not reach it. The herd pens share walls. Every herd test
-    <strong>starts itself on a clock</strong> (<code>DebugYardHerd</code>): it sets up the state
-    the event needs, then does whatever a player would have done, and each herd pen logs a
-    <code>social:</code> readout. The pens confirmed on 2026-09-14 (natural pair, gelding
-    control, subfertile pair, cowboy stock, sparring, herding) are gone. The table below is in
-    yard order, rows L to AK after K.
+    <strong>Six rows since 2026-09-30.</strong> The owner: <em>&ldquo;remove everything that's
+    already been verified, and remove the empty space from the debug yard left over from removing
+    other pens.&rdquo;</em> Every pen whose own question a page records as answered went &mdash;
+    judged question by question against the Verification tabs, not gene by gene &mdash; and with it
+    every <a href="#clockwork">clockwork</a> pen; later the same day DEATH DIAMONDS, LYCAN DOOMED,
+    LETHAL FOALS, BLOOD ONLY and SPLICE PERFORMANCE went on their own PASS lines, the owner ruling
+    that an automatic yard PASS closes a check the way a clockwork one does; and after them THE CAP, MET
+    NATURAL, DRYAD FLOWER and both KICK pens, once each had been re-aimed to answer for itself.
+    The survivors were moved into each other's empty
+    halves and the rows chained with no gaps, so the yard now runs <code>z=4..138</code>
+    (<code>DebugTestYard.ROW_O</code> onwards; each row is the one before plus its depth plus an
+    aisle). DebugYardHerd is now only the yard's clock (<code>after</code>/<code>cancel</code>). The
+    table is in yard order.
 </p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Row</th><th>West of the walkway</th><th>East of the walkway</th></tr></thead>
 <tbody>
-<tr><td><strong>A</strong></td><td><strong>The two dryad pens</strong> &mdash; what is left of the growing row, moved here when its other half was confirmed. <code>Dark/Dark</code> for whether the dark oaks <em>cluster</em> into a 2&times;2 (they do, slowly &mdash; <a href="gene-dryad.html#verified">verified</a>), and <code>Mush/Mush</code> on a floor that is <strong>half podzol and half grass</strong>: a mushroom survives any light on podzol and needs darkness on grass, so the pass is mushrooms on one half and <em>none</em> on the other, and the two halves are watched separately so that is readable. <strong>The floor is the test</strong> &mdash; <code>convert()</code> is a whitelist per cover, so a spreading gene on the wrong ground fails exactly like a broken one.</td><td><strong>The spawner room</strong> &mdash; holy ward's non-interference half. A roofed unlit box with a zombie spawner charged at build time, the warded horse outside the door. An empty spawner produces nothing, which is indistinguishable from the ward having stopped it.</td></tr>
-<tr><td><strong>B</strong></td><td><strong>The tack room</strong> &mdash; five labelled chests holding one of every item in the mod, the tools they need, and every one of the twelve foods the food-preference locus knows, in the gene's own order.</td><td>Empty: the study was removed once every occupant had been confirmed. It held a villager at a workstation, a cowboy at a <code>cowboy_hitch</code>, two tamed horses and a chest of papers, and the owner has confirmed the villager trade, the cowboy and the transfer papers in earlier runs &mdash; a pen for an answered question is the most expensive thing in this yard. The room also carried the two-Silver-papers research-shelf refusal, which had to be checked before the room came down rather than after: look at what else is standing in a room before retiring it for the thing you were told about.</td></tr>
-<tr><td><strong>C</strong></td><td><strong>The ticket stalls</strong> &mdash; a plain holding pen as the control, then four awkward enclosures already built: barely wider than a horse, L-shaped, packed solid with hay, and roofed. Those are the cases the kit used to ask the tester to <em>build</em>, which is why they were never built.</td><td><strong>The carrot bench</strong> &mdash; all nine splice carrots plus the magnifier and the stabiliser, and four horses stocked with <strong>no named locus at all</strong>. Every other pen here avoids that; these are the one thing designed for it.</td></tr>
-<tr><td><strong>D</strong></td><td><strong>The dairy and the clip</strong> &mdash; the three potion-milk refusals with the setup done: the mare is already hurt and the foal is already a foal. Nothing happening is correct three times over here, so the <em>message</em> is the evidence. Two more horses to shear.</td><td>Empty since 2026-09-17: the egg-layer pen was removed once its last question closed. All eight alleles drop their own item, and the cap never fires because the despawn timer bounds the floor first &mdash; both <a href="gene-egg-layer.html#verified">verified</a>.</td></tr>
-<tr><td><strong>E</strong></td><td><strong>The pool</strong> &mdash; five blocks of water in a sealed stone tank with a saddled ocean-born pair in it. No doorway anywhere below the surface: a gap drains the tank into the walkway and the yard's floor is all there is between here and the void. (The gilded-crackle display stall stood at the near end of this block until 2026-09-17; every &ldquo;does this look right?&rdquo; check is <a href="#coat-check">the corridor's coat column</a> now.)</td><td>Empty: the food-preference pen was removed on 2026-09-14.</td></tr>
-<tr><td><strong>F</strong></td><td><strong>Starburst</strong> (breed a pair: does the foal's emblem sit near its parents'?) and the <strong>F8 herd</strong>.</td><td><strong>The three magic stat pens</strong> &mdash; speed, health and jump. Their whole effect is a number, which is why looking at one never helped; the census prints the attribute's range across the pen.</td></tr>
-<tr><td><strong>I</strong></td><td><strong>Dhampir</strong> &mdash; walled rather than fenced (it gallops), open to the sky so it burns, a 9&times;9 shelter five blocks from where it spawns, and eight cows because a bitten animal is off the menu for a day. The burn and the feed are both confirmed; what is open is whether it now <strong>holds</strong> that shelter for a whole day instead of being walked back into the sun by the stroll goal. <strong>Pass:</strong> one <code>[trace] dhampir</code> journey in the log and then quiet, with no further <code>onFire</code> lines.</td><td><strong>Eyesight</strong>, as a <strong>lit half and a dark half</strong> with an attribute readout on each. A conditional modifier is invisible in both states &mdash; the same shape that had the weather loci reported as broken &mdash; so each horse is now printed against <em>its own base value</em>, which the two halves holding different animals made necessary.</td></tr>
-<tr><td><strong>J</strong></td><td><strong>The arena</strong> &mdash; the guardian, alone now that gladiator is confirmed and its half deleted. It arrives <strong>untamed</strong>, which nothing else in the yard does: the gene fires on <code>OnOwnerHurt</code> and the yard's tame-but-ownerless stock matched nobody. Tame it, then let something hit <em>you</em>. Opponents come out of the chest by hand &mdash; a spawner refills as fast as a horse can kill, which counts the horse down instead of testing it.</td><td><strong>The infirmary</strong> &mdash; a healer with three companions already at half health when the yard is built, and cleansing light in its own arena with undead to cleanse. Both are read off the watch's <code>horse hurt</code> and <code>horse healed</code> lines.</td></tr>
-<tr><td><strong>L, M, N</strong></td><td><strong>Splice-carrot pairs</strong>, two to a row: unknown gene and known gene (L), white and performance (M), stabiliser and magnifier (N). Each pair is a mare and a stud with a gated fence between them, and a chest with the carrot, golden carrots and a clock. <strong>Natural covers are switched off in these pens</strong> (<code>DebugYardFertility.noNaturalCoversIn</code>). Without that, a pair in heat would breed through the fence and make a foal nobody fed a carrot for.</td><td>The same, for marking and dilution (L) and magical and epigenetic (M). N east is empty.</td></tr>
-<tr><td><strong>O</strong></td><td><strong>THE CAP</strong> &mdash; eight mares and a stallion, all in heat: nobody covered. A lead in the chest to take one out and watch covers start. <strong>HURT MARE</strong> &mdash; hurt a second after the build, in heat: never covered until she heals.</td><td><strong>MATERNITY</strong> &mdash; three mares made pregnant at build time, due at one, two and three minutes: a single foal, twins, and an early loss. The vet's kit is in the chest. <strong>WEANING</strong> &mdash; a nursing mare and her foal; lead the foal away.</td></tr>
-<tr><td><strong>P</strong></td><td><strong>JAR STUD</strong> in a pen of his own, two blocks from <strong>JAR &amp; KIT BENCH</strong> &mdash; two untamed mares (in heat, out of heat), with jars, carrots, the kit and a clock.</td><td><strong>GOLD ANY HEAT</strong> &mdash; a mare out of heat still gives an instant golden-carrot foal. <strong>SUBFERTILE GOLD</strong> &mdash; retired 2026-09-25: golden carrots no longer roll against fertility, so an <code>sf/sf</code> pair gives a foal every time like any other.</td></tr>
-<tr><td><strong>Q</strong></td><td><strong>LEAVING HOME</strong> &mdash; a wild band whose grown filly and grown colt are both due to leave on the first scan; two of its mares already know the band next door. <strong>HOST BAND</strong> &mdash; that band, sharing the wall; the two pens are one group, so the filly can see where to go.</td><td><strong>LEADERLESS</strong> &mdash; the clock kills the stallion at one minute and checks the band is still one band; two bachelors arrive at five minutes to claim it. <strong>GROOMING</strong> &mdash; a small pen of two mares, a gelding and a stallion.</td></tr>
-<tr><td><strong>R</strong></td><td><strong>TAKEOVER</strong> &mdash; a family band and a bachelor band of three in one pen; fights stop at 40% health. <strong>DAM DEFENCE</strong> &mdash; every three minutes, five times, the clock has a weakened zombie hurt a tamed foal.</td><td><strong>MET NATURAL</strong> &mdash; two MET carriers left to breed; the population should level off at the cap. DISPLACEMENT (four ranked mares at hay) was deleted on 2026-09-15 once every shove overnight went to the higher rank.</td></tr>
-<tr><td><strong>S</strong></td><td><em>Empty.</em> DRYAD SPRUCE and DRYAD JUNGLE were deleted on 2026-09-15, once both had grown trees without harming a horse. The whole row is stone outside the pens, so a sapling over the fence cannot live to be miscounted.</td><td><strong>DRYAD CARRIER</strong> (<code>Oak/n</code>) &mdash; the control, which must plant nothing all day. DRYAD ACACIA was deleted with the others.</td></tr>
-<tr><td><strong>T</strong></td><td><strong>DRYAD FLOWER</strong>. DRYAD OAK was deleted with the others.</td><td><strong>DRYAD OAK+BIRCH</strong> &mdash; both species, each at half rate. <strong>DRYAD DARK SMALL</strong> &mdash; one dark-oak horse, widened to ten by nine on 2026-09-15 so the horse can stand clear of the two-block branch check. It grew a 99-log dark oak with its horse in the pen and hurt nothing (<a href="gene-dryad.html#verified-no-tree-through-horse">verified</a>).</td></tr>
+<tr><td><strong>O</strong></td><td><strong>HURT MARE</strong> &mdash; hurt a second after the build, in heat: never covered until she heals (<code>DebugYardFertility</code>).</td><td><strong>DRYAD OAK+BIRCH</strong> &mdash; both species, each at half rate, on its own stone band (<code>DebugYardLong</code>).</td></tr>
 <tr><td><strong>U</strong></td><td><strong>RATIO HYPP</strong> and <strong>RATIO LETHAL WHITE</strong> &mdash; carrier pairs that breed all day; a clock counts, watches and removes every foal and logs the running tally (about one in four affected, every one dead).</td><td><strong>RATIO BRINDLE</strong> (never a brindle colt) and <strong>RATIO SIZE</strong> (1 : 2 : 1), the same way.</td></tr>
-<tr><td colspan="3"><strong>Rows V to AK, added 2026-09-15</strong> (&ldquo;put everything which can be tested unattended into the yard&rdquo;). Every one logs its own readings and, where the answer is yes or no, a PASS or FAIL line. Classes: <code>DebugYardHunger</code>, <code>DebugYardLong</code> (W), <code>DebugYardUnattended</code> (X-AA), <code>DebugYardEffects</code> (AB-AD), <code>DebugYardBirths</code> (AE-AF, AJ-AK), <code>DebugYardDhampir</code> (AF-AG), <code>DebugYardHands</code> (AH-AI).</td></tr>
-<tr><td><strong>V</strong></td><td><strong>HUNGER ORDER</strong> (cake, then hay, never the poppy) and <strong>HUNGER STARVING</strong> (no healing at all).</td><td><strong>HUNGER FED</strong> (full health in seconds, paid for in hunger) and <strong>HUNGER CARNIVORE</strong> (hunts chickens, eats the drop).</td></tr>
 <tr><td><strong>W</strong></td><td><strong>RATIO KIT W5</strong>, <strong>RATIO MITF SW3</strong> &mdash; impossible homozygotes.</td><td><strong>RATIO MILK CLASH</strong>, <strong>RATIO STARBURST</strong>.</td></tr>
-<tr><td><strong>X</strong></td><td><strong>NIGHT SHY</strong> &mdash; flees cows, never horses.</td><td><strong>BONE MEAL</strong> (saplings, never a crop) and <strong>GELDING BAND</strong> (the gelding never covers).</td></tr>
-<tr><td><strong>Y</strong></td><td><strong>REACH WALL</strong> and <strong>REACH FENCE</strong> &mdash; no cover through stone, covers across one fence.</td><td><strong>STATS</strong> (speed and health floors, stacking) and <strong>LETHAL FOALS</strong> (seven lethal genotypes and two controls, a wave a day).</td></tr>
-<tr><td><strong>Z</strong></td><td><strong>LYCAN ROUND TRIP</strong> (<code>round trip SAME</code> at dawn) and <strong>LYCAN DOOMED</strong> (killed as a wolf, armour drops).</td><td><strong>WERE-COW</strong> &mdash; bred with real cows at night. Its cauldron now sits two clear blocks from the wall, the rule for every raised block in a pen.</td></tr>
-<tr><td><strong>AA</strong></td><td><strong>KICK GLADIATOR</strong> and <strong>KICK PLAIN</strong>, each with two husks.</td><td><strong>WATERBORN</strong> (a deep pool) and <strong>SUNTOUCHED</strong> (no light blocks in this dimension).</td></tr>
-<tr><td><strong>AB</strong></td><td><strong>WARD</strong> &mdash; husk distances from a <code>Wrd/Wrd</code> horse.</td><td><strong>WARD CONTROL</strong>.</td></tr>
-<tr><td><strong>AC</strong></td><td><strong>BAIT</strong> and <strong>BAIT CONTROL</strong>.</td><td><strong>SWIM SPEED</strong> (Otter, plain and Stone swim laps in walled channels) and <strong>BREATH</strong> (three horses under a waterlogged lid).</td></tr>
-<tr><td><strong>AD</strong></td><td><strong>DEATH LAVA</strong> and <strong>DEATH WATER</strong>, on a built floor.</td><td><strong>DEATH DIAMONDS</strong> (a <code>Dia/Dia</code> horse &mdash; this was DEATH BOOM until the volatile allele was retired on 2026-09-24) and <strong>DEATH ITEMS</strong> (Egg and Swd).</td></tr>
-<tr><td><strong>AE</strong></td><td><strong>BOND</strong> (a bond-80 mare's foals at 20) and <strong>CROSS SAME</strong>.</td><td><strong>CROSS TWO</strong> and <strong>CROSS BACK</strong>. Every foal is read as it joins the world, by its record's mother.</td></tr>
-<tr><td><strong>AF</strong></td><td><strong>CROSS OUT</strong> and <strong>STARBURST DRIFT</strong> (size and hue against the parent copy with the same priority).</td><td><strong>SUN ONLY</strong> (a 6&times;6 roof, hay) and <strong>BLOOD ONLY</strong> (a hurt <code>Dbld/Dbld</code> horse and a cow).</td></tr>
-<tr><td><strong>AG</strong></td><td><strong>WHITE ONLY</strong> and <strong>HUNT ORDER</strong> (a cow, a husk and a horse).</td><td><strong>DHAMPIR FULL</strong> &mdash; the whole white strain.</td></tr>
-<tr><td><strong>AH</strong></td><td><strong>GOLD TIMER</strong> (love on a clock, a mare out of heat) and <strong>SUBFERTILE TIMER</strong>.</td><td><strong>SPAWNER A</strong> and <strong>SPAWNER B</strong> &mdash; a NeoForge fake player feeds each sheep spawner wheat; each meal's sheep are logged by colour.</td></tr>
-<tr><td><strong>AI</strong></td><td><strong>WEANING AWAY</strong> (the foal on a platform 36 blocks up) and <strong>WEANING CONTROL</strong>.</td><td>The away foal's platform floats above this side.</td></tr>
-<tr><td><strong>AJ</strong></td><td><strong>SPLICE DILUTION</strong> and <strong>SPLICE WHITE</strong> &mdash; each mare armed with one carrot's effect and re-armed after every foal; an allele neither parent carries is the splice, checked against the carrot's theme.</td><td><strong>SPLICE MARKING</strong> and <strong>SPLICE PERFORMANCE</strong>.</td></tr>
-<tr><td><strong>AK</strong></td><td><strong>SPLICE MAGICAL</strong> and <strong>SPLICE UNTHEMED</strong>.</td><td><em>Empty.</em></td></tr>
-<tr><td><strong>K</strong></td><td>Empty: the deathbed was removed on 2026-09-14, with every on-death allele confirmed.</td><td><strong>Ender echo</strong> &mdash; a wide pen and a saddled pair. A sixteen-block blink inside a nine-block stall either fails or puts the horse through a wall, and both read as the gene being broken.</td></tr>
+<tr><td><strong>X</strong></td><td><strong>NIGHT SHY</strong> &mdash; flees cows, never horses.</td><td><strong>SUNTOUCHED</strong> (an adult and a foal; no light block may ever appear in this dimension).</td></tr>
+<tr><td><strong>Y</strong></td><td><strong>REACH WALL</strong> and <strong>REACH FENCE</strong> &mdash; no cover through stone, covers across one fence.</td><td><strong>STATS</strong> (speed and health floors, stacking).</td></tr>
+<tr><td><strong>AL</strong></td><td><strong>ARCANE DEALER</strong> &mdash; one barn in twelve, eleven or more magic genes each, no repeats (<code>DebugYardArcane</code>). Sixteen deep, because he places his own herd.</td><td><em>Empty.</em></td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    <strong>Rows B and C need your hands; everything else runs itself.</strong> That split is
-    deliberate and it is why the item layer took so long to get here: a gene test can be
-    started and walked away from, while an item only does anything when somebody is holding
-    it. The answer was not to make the items automatic &mdash; it was to remove the
-    <em>fetching</em>, which is the part that was actually expensive. Two of the test kit's
-    six hotbar batches were retired the day these rows were built, because every prop their
-    legends described is now standing in the yard with a chest beside it.
+    <strong>Nothing in the yard needs your hands.</strong> Until 2026-09-30 rows B and C did,
+    by design: a gene test can be started and walked away from, while an item only does anything
+    when somebody is holding it, so the item rows removed the <em>fetching</em> and left the
+    holding to the tester. The clockwork rows took the other road and made the holding
+    automatic, and have since been answered and removed. The letters were not re-lettered when rows
+    went: every sign, every Verification tab and months of notes say &ldquo;row Y east&rdquo;, and
+    closing a gap in the alphabet would invalidate all of it. So the yard runs O, U, W, X, Y,
+    AL &mdash; names, not positions.
 </p>
 
 <p>
@@ -795,6 +806,13 @@
         (<a href="item-tickets.html">items</a>) would be the first survival entry, and
         whether it should be is undecided.</li>
     <li>Whether the 10-second player dwell <em>feels</em> right is unverified.</li>
+    <li id="away-foal-above-the-plot-box"><strong>Nothing may be built above
+        <code>baseY&nbsp;+&nbsp;WALL_TOP_DY&nbsp;+&nbsp;2</code>.</strong> <code>DebugPenManager.plotBox</code>
+        caps the plot there, and that box is what <code>tearDown</code> sweeps and
+        <code>evacuateTamedHorses</code> walks home. The one thing that broke the rule &mdash; the
+        WEANING AWAY foal's platform at <code>baseY&nbsp;+&nbsp;36</code>, found by reading on
+        2026-09-25 and never played &mdash; went with <code>DebugYardHands</code> on 2026-09-30, so
+        nothing in the dimension leaks on Y now. The limit is still there for the next pen.</li>
 </ul>
 
 <h2 id="verified">Verified</h2>
@@ -884,30 +902,6 @@
     <p>Start here, because in 0.5.004 walking through a portal crashed the game outright: confirm the dimension can be entered at all, then that the rebuilt two-sided corridor <strong>ends in a wall rather than the void</strong> and that a given pen holds the same four horses, and the same breed, every visit &mdash; plus one defect found by reading rather than playing: <strong>the WEANING AWAY foal is built above the plot box that sweeps and evacuates everything else</strong>.</p>
 </div>
 
-<h3 id="away-foal-above-the-plot-box">The WEANING AWAY foal sits outside the plot box (2026-09-25, found by reading, not played)</h3>
-<p>
-    Found while grepping every hardcoded Y in this dimension for an unrelated change to the
-    <a href="horse-realm.html">horse realm</a>, and <strong>not caused by it</strong> &mdash;
-    this has been true for as long as both numbers have existed.
-</p>
-<p>
-    <code>DebugYardHands</code> builds the WEANING AWAY platform at
-    <code>plot.baseY&nbsp;+&nbsp;36</code>, which is y&nbsp;164. <code>DebugPenManager.plotBox</code>
-    caps the plot's bounding box at <code>baseY&nbsp;+&nbsp;WALL_TOP_DY&nbsp;+&nbsp;2</code>,
-    which is y&nbsp;140. That box is what <code>tearDown</code> sweeps and what
-    <code>evacuateTamedHorses</code> walks home &mdash; its own comment says
-    <em>&ldquo;anything built outside it leaks&rdquo;</em> &mdash; so the away foal and its
-    stone platform are twenty-four blocks above everything that is supposed to clean up after
-    them. <strong>That foal is neither swept on teardown nor evacuated when you leave.</strong>
-</p>
-<p>
-    It is the same class of leak the Z-extent fix was written for, left open on Y. The two
-    numbers move independently, so raising <code>WALL_TOP_DY</code> or
-    <code>PLOT_BASE_Y</code> will not close it by accident. <strong>To check:</strong> visit
-    the yard, leave, come back, and see whether a foal is standing at y&nbsp;164 above your
-    old plot &mdash; and whether plots accumulate them over several visits.
-</p>
-
 <h3 id="corridor-two-columns-0917">The horse dimension becomes two lists: coats to check, and every breed (2026-09-17, NOT played)</h3>
 
 <p>
@@ -971,16 +965,13 @@
 <h4>The yard lost its looking pens</h4>
 
 <ul>
-    <li><strong>Row E's gilded-crackle stall and row D's egg-layer pen are gone.</strong> The
-        crackle stall asked only &ldquo;does this look right?&rdquo;, which the corridor now
-        answers for every unconfirmed marking; the egg layer's last open question (the cap)
-        was closed by the overnight run of 2026-09-14/15 and is written up at
-        <a href="gene-egg-layer.html#verified">its own page</a>. <em>Pass:</em> the yard still
-        builds and logs <code>test yard built and walkable</code>, row E still holds the pool,
-        and nothing fell through a hole where a pen used to be.</li>
-    <li><strong>The magic stat pens now tell you to ride.</strong> Their sign said what the
-        census prints, which is not something a tester does. <em>Pass:</em> riding the two
-        horses in a pen, one feels different from the other.</li>
+    <li><strong>Row E's gilded-crackle stall and row D's egg-layer pen are gone</strong> (2026-09-17),
+        and since 2026-09-30 rows B to N and P have gone after them (<a href="#clockwork">the
+        clockwork rows</a>). <em>Pass:</em> the yard builds and logs <code>test yard built and
+        walkable</code>, and nothing fell through a hole where a pen used to be. The first build after
+        the 2026-09-30 cut logged <code>NOT sound: 3 blocked at head height</code>, the first a poppy:
+        the four-block sampling grid had moved onto HUNGER ORDER's menu. The poppy and the cake are
+        furniture now, and the warning lists every kind of block it hit rather than only the first.</li>
 </ul>
 
 
@@ -1004,8 +995,7 @@
     pen</strong> (<code>YardPens</code>). Outside the yard nothing changed. Before that, the
     breeding cap and every band decision counted horses through walls, so pens had to stand
     far apart. The breeding pens still keep a three-block gap between them, because vanilla's
-    golden-carrot breeding ignores walls. The jar stud now has his own pen, two blocks from the
-    mares. Pass for the packing itself: no pen's <code>[watch]</code> line ever lists a horse
+    golden-carrot breeding ignores walls. Pass for the packing itself: no pen's <code>[watch]</code> line ever lists a horse
     from the pen next door, and no <code>not covered: … other horses</code> line counts more
     horses than its pen holds. <strong>Known to fail, and wider than row U</strong>
     (<a href="known-gaps.html#gap-259">gap 259</a>): a ratio stud wanders into the pen next door, and in
@@ -1017,12 +1007,12 @@
     share a group.
 </p>
 
-<h3 id="open-0913-tack-room-and-rain">The tack room and the dimension's rain (still open after 2026-09-13)</h3>
+<h3 id="open-0913-tack-room-and-rain">The dimension's rain (still open after 2026-09-13)</h3>
 
-<h4>Nothing here needs looking at to judge &mdash; do this first</h4>
-<ul>
-    <li><strong>The tack room is built, never confirmed.</strong></li>
-</ul>
+<p>
+    The tack room that shared this heading was deleted unconfirmed on 2026-09-30 with every
+    other pen that waited for a person; a chest of items is not a claim anything can fail.
+</p>
 
 <h4>Visual, and therefore last</h4>
 <ul>

@@ -10,6 +10,8 @@
 <script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
 <script defer src="search.js"></script>
+<script defer src="assets/block-preview/shapes.js"></script>
+<script defer src="block-preview.js"></script>
 </head>
 <body>
 <main class="content">
@@ -24,6 +26,26 @@
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
+
+<aside class="infobox">
+    <p class="infobox-title">Equine Research Shelf</p>
+
+    <div class="block-preview" data-blocks="equine_research_shelf"></div>
+
+    <p class="infobox-caption">
+        Drag to turn it, scroll to zoom, arrow keys once focused. Filed papers on every
+        side, and one left out on the lid.
+    </p>
+
+    <dl class="infobox-facts">
+        <dt>Type</dt><dd>Block &mdash; storage you stand at</dd>
+        <dt>Crafted from</dt><dd>Bookshelf + 2 horse hair, shapeless</dd>
+        <dt>Holds</dt><dd>One research paper per allele pair</dd>
+        <dt>Broken</dt><dd>Drops itself and every paper on it</dd>
+        <dt>Art</dt><dd>Its own since 2026-09-29; it was the bookshelf before</dd>
+    </dl>
+</aside>
+
 
 <h2 id="use">What it does</h2>
 
@@ -200,7 +222,24 @@
     <strong>It stores papers</strong> (owner, the third play session of 2026-09-10).
 </p>
 
+<h3 id="art-0929">The block finally looks like itself</h3>
+
+<p>
+    Until 2026-09-29 this block was <strong>vanilla&rsquo;s bookshelf</strong> on its four
+    sides with oak planks on the ends &mdash; which for a block whose whole job is filing
+    papers was close enough to be actively confusing, since a shelf and a bookshelf in the
+    same room were indistinguishable. It now carries its own filed papers, some of them
+    written on, with one left out on the lid.
+</p>
+
+<p>
+    Drawn by <code>tools/bake-block-art.mjs</code> over the same plank grain as the
+    <a href="item-equestrian-bench.html">dyeing bench</a>, and in the same dark frame, so the
+    two workstations read as a matched pair of furniture rather than two unrelated blocks.
+</p>
+
 </section>
+
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Open checks">
@@ -241,6 +280,17 @@ grouping is the alternative that was weighed and set aside, not a new idea.
 <div class="open-check">
 <strong>The Equine Research Shelf has never been placed.</strong> Opened 2026-09-09 with the block. A new block, block entity, container menu, screen and two payloads, all written in one pass and none of it run: the model is a cube of vanilla bookshelf textures nobody has looked at, the two-tab screen's coordinates are arithmetic rather than measurement, and the whole storage layer - file, withdraw, copy, drop-on-break, save and reload - is unexercised. <strong>The parts most likely to be wrong are the ones a compiler cannot see</strong>: whether <code>Slot.isActive()</code> really does gate hit-testing as well as drawing on this version (the tabs depend on it entirely, and a live slot under an invisible one would let a player put a book into the filing slot); whether <code>PlayerContainerEvent.Open</code> fires late enough for <code>ShelfOpenSync</code>'s push to arrive; and whether <code>affectNeighborsAfterRemoval</code> is the right hook for dropping the books, since it is the successor to a method that changed name across recent versions. A save-and-reload is the single most valuable thing to try: the contents are a gene-key set on the block entity, written through <code>ValueOutput.store</code>, and nothing has round-tripped it.
 </div>
+<h3 id="shelf-art-0929">Its new art, in a world (2026-09-29, NOT played)</h3>
+
+<p>
+    The block stopped being the bookshelf on 2026-09-29 and <strong>the new art has not been
+    seen in game</strong>. Stand one next to a bookshelf and a
+    <a href="item-equestrian-bench.html">dyeing bench</a>: it should read as neither. This
+    one is a <code>cube_column</code>, so its top and bottom are the same texture &mdash;
+    worth looking at the underside of one placed on a ledge, because that face is the one
+    nobody thinks to check.
+</p>
+
 </section>
 
 </article>

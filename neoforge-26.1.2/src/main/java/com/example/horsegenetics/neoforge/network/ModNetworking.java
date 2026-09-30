@@ -100,6 +100,16 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                BlowWhistlesPayload.TYPE,
+                BlowWhistlesPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {
+                        com.example.horsegenetics.neoforge.server.WhistleBlowing.blowAll(player);
+                    }
+                })
+        );
+
+        registrar.playToServer(
                 FamilyTreeRequestPayload.TYPE,
                 FamilyTreeRequestPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleFamilyTreeRequest(payload, context.player()))
@@ -402,6 +412,12 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                OpenHorseGearPayload.TYPE,
+                OpenHorseGearPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleOpenHorseGear(payload, context.player()))
+        );
+
+        registrar.playToServer(
                 MountHorsePayload.TYPE,
                 MountHorsePayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleMountHorse(payload, context.player()))
@@ -635,6 +651,30 @@ public final class ModNetworking {
             }
         }
         serverPlayer.containerMenu.broadcastChanges();
+    }
+
+    /**
+     * The Gear tab's <b>Dress</b> button: open {@code HorseGearMenu} on this
+     * horse. The same three gates as {@link #handleTackSlot} - a horse, the
+     * player's, within eight blocks - checked here once and then every tick by
+     * the menu's own {@code stillValid}.
+     */
+    private static void handleOpenHorseGear(OpenHorseGearPayload payload,
+                                            net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        Entity target = serverPlayer.level().getEntity(payload.entityId());
+        if (!(target instanceof Horse horse) || !horse.isAlive() || !horse.closerThan(serverPlayer, 8.0)
+                || !com.example.horsegenetics.neoforge.server.HorseOwnership.isOwner(
+                        horse, serverPlayer.getUUID())) {
+            return;
+        }
+        serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inventory, who) -> new com.example.horsegenetics.neoforge.menu.HorseGearMenu(
+                        id, inventory, horse),
+                horse.getDisplayName()),
+                buffer -> buffer.writeVarInt(horse.getId()));
     }
 
     /**

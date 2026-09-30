@@ -614,6 +614,159 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     safe are a field, a leaf method and a class &mdash; nothing with a subclass under it.
 </p>
 
+<h2 id="cutout-no-blend">A cutout pipeline ignores your alpha, so a tint cannot fade anything</h2>
+
+<p>
+    The obvious way to make an entity see-through is to multiply a half-transparent colour
+    into its model. It does nothing, and it fails in a way that reads as a different bug.
+    Almost everything in the game is drawn on a <em>cutout</em> pipeline &mdash;
+    <code>RenderPipelines.ENTITY_CUTOUT_NO_CULL</code> for a mob's body,
+    <code>ARMOR_CUTOUT_NO_CULL</code> for anything it wears &mdash; and neither carries a
+    <code>BlendFunction</code> on its colour target at all. What they carry is
+    <code>.withShaderDefine("ALPHA_CUTOUT", 0.1F)</code>: a fragment below an alpha of 0.1 is
+    <strong>discarded</strong>, and every fragment above it is drawn <strong>fully
+    opaque</strong>.
+</p>
+
+<p>
+    So a tint of 0.5 gives an ordinary solid entity, a tint of 0.25 gives an ordinary solid
+    entity, and a tint of 0.05 makes it vanish outright. Nothing is logged and nothing looks
+    broken until the last step. <strong>Both halves have to change together</strong>: the
+    render type must be swapped for a blending one &mdash; <code>ENTITY_TRANSLUCENT</code> is
+    the same shader with <code>BlendFunction.TRANSLUCENT</code>, and is already no-cull
+    &mdash; <em>and</em> the colour must carry the alpha.
+</p>
+
+<p>
+    Worth checking per-pipeline rather than assuming, because the exceptions are not obvious:
+    <code>RenderPipelines.EYES</code> (the emissive overlay) already blends, so a tint alone
+    does fade a glow. <code>RenderType.hasBlending()</code> is public and answers the question
+    at runtime.
+</p>
+
+<p class="muted">
+    <strong>The texture cannot be read back off a <code>RenderType</code></strong>, which
+    matters the moment you want to build a translucent version of one you were handed: the
+    texture lives in a private <code>RenderSetup</code> with no accessor. Swap the type at
+    the point the <code>Identifier</code> is still in scope, not at the point the
+    <code>RenderType</code> is. See
+    <a href="rider-comfort.html#ride-fade-coding">the ride fade</a>, where that one fact is
+    why fading a saddle takes two hooks instead of one.
+</p>
+
+<h2 id="runtime-bake">A <code>LayerDefinition</code> can be baked at run time, outside the registration event</h2>
+
+<p>
+    Every model in this mod is registered during
+    <code>EntityRenderersEvent.RegisterLayerDefinitions</code> and baked by the renderer
+    context, and it is easy to conclude from that alone that a model <em>must</em> be declared
+    at startup. It is worth knowing that it need not, because the conclusion quietly forces a
+    design: a mesh whose shape depends on a per-entity number would have to become one of a
+    fixed set of presets declared before any entity exists.
+</p>
+
+<p>
+    <code>LayerDefinition.bakeRoot()</code> is <code>public</code> and its whole body is
+    <code>this.mesh.getRoot().bake(this.material.xTexSize, this.material.yTexSize)</code>. It
+    touches no registry, no event, no resource manager and no renderer context &mdash; it walks
+    a <code>PartDefinition</code> tree allocating <code>ModelPart</code>s and
+    <code>ModelPart.Cube</code>s, and that is all. So a mesh can be built the first time
+    something needs one, off numbers that did not exist at startup. Read out of the 26.1.2
+    sources; <code>AttachedPartLayer</code> and <code>PartMeshes</code> are what use it, and
+    <a href="model-parts.html#runtime-bake">attached model parts</a> is why.
+</p>
+
+<p class="muted">
+    What you give up is the resource-reload hook the registration event gets for free, so a
+    run-time bake wants its own cache and its own reason to be safe against unbounded growth.
+    Geometry does not depend on a resource pack, so nothing needs invalidating on reload; size
+    is the real question, and the answer worth having is a <em>structural</em> bound on the set
+    of distinct meshes rather than a budget or an eviction policy.
+</p>
+
+<h2 id="deferred-submit-setupanim">A submitted model is drawn later, and <code>setupAnim</code> runs then &mdash; not at the submit</h2>
+
+<p>
+    <code>SubmitNodeCollector.submitModel</code> does not draw anything. It stores
+    <code>new ModelSubmit(poseStack.last().copy(), model, state, ...)</code> &mdash; a
+    <strong>copy of the pose</strong> and a <strong>reference to the model</strong> &mdash; in a
+    per-order bucket, and the batch renderer walks those buckets afterwards. For each one it
+    calls <code>model.setupAnim(submit.state())</code> and <em>then</em>
+    <code>model.renderToBuffer(...)</code>.
+</p>
+
+<p>
+    Two consequences, and they point in opposite directions:
+</p>
+
+<ul>
+    <li><strong>Mutating a shared model at submit time is a bug that only shows with two
+        entities on screen.</strong> Setting <code>visible</code> or <code>xScale</code> on a
+        cached model's parts and then submitting it looks correct in every single-entity test:
+        the second entity in the frame overwrites the first one's model before either is drawn,
+        so both come out wearing the second one's values. Nothing logs.</li>
+    <li><strong>Driving it from <code>setupAnim</code> is safe</strong>, because that runs once
+        per submit, immediately before that submit's own draw. And since
+        <code>submitModel</code> is <em>generic in its state</em> &mdash;
+        <code>Model&lt;? super S&gt;</code> with <code>S</code> free &mdash; the state does not
+        have to be the entity's render state. A model typed on the per-instance data it varies
+        by gets the right numbers handed to it at the right moment. See
+        <a href="model-parts.html#three-tiers">attached model parts</a>.</li>
+</ul>
+
+<p class="muted">
+    A <code>PoseStack</code> transform is copied rather than shared, so anything expressible as
+    a transform, a tint or a light value is safe at submit time and needs none of this. That is
+    the cheaper route where it is available, and it is worth reaching for first.
+</p>
+
+<h2 id="onlyin-on-mod-classes">Do not put <code>@OnlyIn</code> on a class of your own</h2>
+
+<p>
+    NeoForge 26.1.2 logs an <code>ERROR</code> at mod load for every mod class carrying
+    <code>@OnlyIn</code>: <em>&ldquo;the runtime member-stripping behaviour of this annotation
+    is no longer present, which may lead to issues if that behaviour was relied
+    upon&rdquo;</em>, followed by the class name. It is vanilla's own annotation for
+    vanilla's own sources and does nothing useful on yours. A client-only mixin belongs in the
+    <code>client</code> list of the mixin config; a client-only event handler belongs behind
+    <code>@EventBusSubscriber(value = Dist.CLIENT)</code>.
+</p>
+
+<h2 id="interface-private-static">An interface&rsquo;s <code>private static</code> method is unreachable, and vanilla hides real behaviour in them</h2>
+
+<p>
+    Mixin cannot inject into a <code>private static</code> method declared on an
+    <em>interface</em>. That is not usually worth saying &mdash; except that 26.1.2 has moved
+    whole subsystems into interfaces with default methods, and the default methods are often
+    one-line delegates to a private static that holds all the behaviour.
+    <code>Leashable</code> is the worked example: <code>dropLeash()</code> and
+    <code>removeLeash()</code> are both
+    <code>dropLeash((Entity &amp; Leashable)this, boolean, boolean)</code> with different
+    arguments, and that method &mdash; the one that actually unties the animal and spawns the
+    item &mdash; is private and static and on the interface.
+</p>
+
+<p>
+    <strong>The answer is to find the line it calls rather than the method it is.</strong>
+    Everything <code>dropLeash</code> does to the world, it does through ordinary public
+    methods on ordinary classes: it spawns the item with
+    <code>Entity.spawnAtLocation(ServerLevel, ItemLike)</code>, and it writes the leash state
+    through <code>Mob.setLeashData</code>, which is a concrete override of an abstract
+    interface method. Both are mixinable. Before concluding a piece of interface behaviour
+    cannot be reached, grep for what it <em>calls</em> and count the callers &mdash;
+    <code>Items.LEAD</code> reaches <code>spawnAtLocation</code> from exactly two places in
+    the whole game, both of them in <code>Leashable</code>, which makes that one line a
+    complete and precise seam. See
+    <a href="rider-comfort.html#vanilla-leads-coding">the returned lead</a>.
+</p>
+
+<p class="muted">
+    <strong>NeoForge publishes no leash event</strong> in 26.1.2 &mdash; not a cancellable one,
+    not an observational one. There is no class in its <code>event</code> package with
+    &ldquo;leash&rdquo; in the name at all. Re-checked 2026-09-29 rather than taken from an
+    older note that said so.
+</p>
+
 <h2 id="source-permission">A command source no longer has <code>hasPermission(int)</code></h2>
 
 <p>

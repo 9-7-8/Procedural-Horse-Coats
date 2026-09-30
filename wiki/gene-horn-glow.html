@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horn glow &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> lights the horn, paints nothing</p>
+
+<h1>Horn glow</h1>
+
+<p class="lede">
+    Two copies and a <a href="gene-unicorn-horn.html">unicorn's horn</a> glows in the
+    dark &mdash; in whatever colour <a href="gene-horn-colour.html">horn colour</a> gives
+    it, both colours of a two-tone horn included. On a horse without a horn this gene
+    does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.horn_glow"></div>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Recessive: one copy shows nothing. In the wild a horse carries either two copies or
+    none &mdash; about one in eight has two &mdash; so roughly one wild unicorn in eight
+    has a glowing horn. Most horses with two copies have no horn to glow, which makes
+    an ordinary-looking horse a good mate for a unicorn you want a glowing foal from.
+</p>
+
+<h2 id="what-it-does">What it looks like</h2>
+
+<p>
+    The horn is drawn a second time at full brightness, so it stands out at night in
+    its own colour: a red horn glows red, a white one white, and a black horn is a dark
+    shape you can still see in the dark. If a shader pack makes it look wrong,
+    <code>parts.glow</code> in the client config turns the glow off and keeps the horn.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>
+    It does nothing to the horse at all, for good or ill. It gives off no light that
+    lights up the world around it &mdash; only the horn itself shines.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.horn_glow"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.horn_glow</dd></div>
+    <div><dt>Class</dt><dd><code>HornGlowGene</code></dd></div>
+    <div><dt>Priority</dt><dd>228 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong>, beside the <a href="gene-unicorn-horn.html">unicorn horn</a></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Glw</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Founders</dt><dd><code>Glw/Glw</code> 12.5%, <code>n/n</code> the rest &mdash; no wild carriers</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="door">How it reaches the horn</h2>
+
+<p>
+    <code>GrownParts.of</code> asks <code>HornGlowGene.glows(pair)</code> and sets the
+    part's <code>emissive</code> flag through <code>AttachedPart.dressed</code>.
+    <code>AttachedPartLayer</code> then submits each slice a second time with
+    <code>entityTranslucentEmissive</code> at full brightness and the same tint, so the
+    glow is always the horn's own colour. It carries no epigenetic numbers.
+</p>
+
+<p>
+    It replaced a one-in-eight <code>glow</code> category on the unicorn locus
+    (2026-09-30), and the founder rate is set to that same one in eight, so the
+    share of glowing wild unicorns did not change &mdash; what changed is that it can be
+    bred for.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">There is no real locus here</h2>
+
+<p>
+    A magical gene with no real counterpart. It is its own locus rather than an
+    allele of <a href="gene-horn-colour.html">horn colour</a> because glowing is
+    independent of colour &mdash; the owner's words were &ldquo;glow regardless of
+    color&rdquo; &mdash; and a separate locus is the only way any colour can also glow.
+    Recessive, and with no wild carriers, by the same rule as every magical trail:
+    the allele exists in the wild in the form that can show.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>A glowing horn has not been seen since glow became its own gene, and whether it should instead follow the light locus is an open design question.</p>
+</div>
+
+<h3 id="open-glow-look">A glowing horn of each kind, at night</h3>
+<p>
+    Check a white, a red, a black and a two-tone horn with <code>Glw/Glw</code> at
+    night: each should glow in its own colours, the black one as a visible dark shape.
+    Then <code>parts.glow</code> off, and the horn should still draw, lit like the rest
+    of the horse.
+</p>
+
+<h3 id="open-glow-light-locus">Should a glow come from the light locus too?</h3>
+<p>
+    What <a href="gene-cutie-mark.html">cutie mark</a> does is take a contribution from
+    the <a href="gene-light.html">light</a> locus, so a horse whose mane and hooves already
+    glow gets a glowing emblem as a matter of course. The horn could do the same &mdash;
+    a light horse's horn glowing whatever this locus says &mdash; or the two could stay
+    independent, as they are now. Unresolved, and the owner's call.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

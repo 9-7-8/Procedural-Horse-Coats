@@ -15,29 +15,293 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<p class="eyebrow core">Part built <span class="sep">/</span> one part ships, the rest planned</p>
 <h1 id="model-parts">Attached model parts</h1>
 <p class="lede">
-    <strong>Blockbench meshes hung on the horse model, driven by a gene or by a breed</strong>
-    &mdash; a unicorn horn, a row of dorsal spines, a pair of wings, feathered hooves. They need
-    no animation of their own, because they would be parented to a part of the horse that is
-    already animated. It would be the mod&rsquo;s <strong>first visual that is not a
-    texture</strong>, which is why this is a page rather than a line on a list.
-    <strong>None of it is built</strong>, and it is the prerequisite for
+    <strong>Meshes hung on the horse model, driven by a gene or by a breed</strong> &mdash; a
+    unicorn horn, a row of dorsal spines, a pair of wings, feathered hooves. They need no
+    animation of their own, because they are parented to a part of the horse that is already
+    animated. It is the mod&rsquo;s <strong>first visual that is not a texture</strong>, which is
+    why this is a page rather than a line on a list.
+</p>
+<p class="lede">
+    <strong>The foundation is built and one part uses it</strong>: the
+    <a href="gene-unicorn-horn.html">unicorn horn</a>. Antlers, spines, crystals, hoof
+    feathering and wings are the same machinery plus a generator each, and are still on
+    <a href="#roadmap">the Roadmap tab</a> &mdash; as is
     <a href="breed-book.html#breed-sources">the reindeer-breed content</a> in the breed book,
-    which is content for machinery that does not exist yet.
+    which needs the breed hook rather than the layer.
 </p>
 
 <div class="note warn">
-    <span class="label">Nothing on this page exists in the game</span>
+    <span class="label">Built, and not yet seen in a running game</span>
     <p>
-        Everything below is a plan. It was moved here whole from the main
-        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
-        rather than a place plans are written. When a piece of this ships, it comes
-        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
-        here &mdash; the page grows tabs as the thing grows.
+        The layer, the mesh cache and the horn gene are unit-tested and compile;
+        <strong>no horse has worn a part on screen</strong>. The placement offsets are computed
+        from the horse models&rsquo; boxes rather than tuned against a live animal. The open
+        checks are on <a href="gene-unicorn-horn.html#verification">the horn&rsquo;s Verification
+        tab</a> and <a href="#verification">this page&rsquo;s</a>.
     </p>
 </div>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="what-you-see">What a player sees</h2>
+
+<p>
+    One thing, so far: a <a href="gene-unicorn-horn.html">unicorn</a> &mdash; a horse with two
+    copies of a rare recessive grows a tapering horn on its forehead, and about one of those in
+    eight has a horn that shines in the dark. How long it is, how thick, how tightly it spirals,
+    how far it leans and what colour it is are inherited with the allele and drift over
+    generations, so a line bred for length really does get longer horns. A foal born with the
+    gene wears a small one from the day it is born.
+</p>
+
+<p>
+    What these parts are <em>not</em> is tack. Nothing here is put on a horse by a player, and
+    nothing here can be taken off: a grown part is a piece of the animal, inherited like its
+    coat. Things you buckle on are <a href="horse-gear.html">horse gear</a>, and they will
+    eventually be drawn by this same layer without becoming the same kind of object.
+</p>
+
+<h2 id="no-gameplay">They do nothing</h2>
+
+<p>
+    Deliberately, and this is worth saying plainly because a horn looks like it ought to matter.
+    A grown part moves no stat, grants no ability, changes no hitbox and does not change how the
+    horse is ridden or fed. If it ever did, turning the drawing off would change the world for
+    one player and not another, which is a thing the settings below must never be able to do.
+</p>
+
+<h2 id="settings">If they cost you frames</h2>
+
+<p>
+    A part is real geometry &mdash; a horn is roughly as much again as the horse carrying it
+    &mdash; so a large herd of them is the case worth a setting. Three live in this client&rsquo;s own
+    config file, and every one of them gates a <em>drawing</em> and nothing else:
+</p>
+
+<ul>
+    <li><code>parts.enabled</code> &mdash; draw grown parts at all.</li>
+    <li><code>parts.glow</code> &mdash; draw the extra full-bright pass a luminous part needs.
+        Off, it still draws, lit like the rest of the horse. The first thing to try if a shader
+        pack makes parts look wrong.</li>
+    <li><code>parts.detailDistance</code> &mdash; how close a horse must be for its parts to be
+        drawn. The horse itself is unaffected at any distance.</li>
+</ul>
+
+<p>
+    A horse with a horn and horns switched off still <em>has</em> the horn: it breeds it, passes
+    it on, and lists it in the horse screen and the browser. Two players on one server may
+    disagree about all three settings and still be looking at the same horses.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="shape">The shape of it: two sources, one renderer</h2>
+
+<p>
+    A part has two possible origins and exactly one destination.
+    <strong>Grown</strong> parts come from the genotype, in <code>common/</code>;
+    <strong>worn</strong> ones will come from the gear attachment, on the client. Both reduce to
+    the same object before they reach the layer &mdash; an <code>AttachedPart</code>: a shape, a
+    transform, a colour &mdash; and <strong>the layer does not know which it is drawing</strong>.
+    That is the whole point of the design, and what it buys is that horse shoes, a saddle pad and
+    a set of dorsal spines cannot become three render layers with three different opinions about
+    draw order.
+</p>
+
+<h2 id="classes">What each piece does</h2>
+
+<table class="data">
+    <thead><tr><th>Class</th><th>Module</th><th>Job</th></tr></thead>
+    <tbody>
+        <tr><td><code>PartNode</code></td><td>common</td>
+            <td>One box: a parent, a point along it, a rotation, a length, a girth, a sheet
+                region. A tree of these is a part.</td></tr>
+        <tr><td><code>PartKind</code></td><td>common</td>
+            <td>What a gene asks for. Carries the anchor and the default sheet region. One value
+                today (<code>HORN</code>); a kind arrives <em>with</em> its geometry, never
+                ahead of it.</td></tr>
+        <tr><td><code>PartAnchor</code></td><td>common</td>
+            <td>Where it roots, as an enum and <strong>never a bone name</strong> &mdash; so
+                <code>common/</code> imports nothing from Minecraft and retargeting an anchor is
+                a client edit.</td></tr>
+        <tr><td><code>PartShape</code></td><td>common</td>
+            <td>The identity of a baked mesh: kind, style, size bucket. The cache key, and the
+                thing that bounds the cost.</td></tr>
+        <tr><td><code>PartGenerators</code></td><td>common</td>
+            <td>The one door from a shape to a box list. Deterministic and game-free, so a test
+                walks every mesh the mod can build with no game running.</td></tr>
+        <tr><td><code>AttachedPart</code></td><td>common</td>
+            <td>One part on one horse, resolved: a shape plus the numbers applied to it at draw
+                time &mdash; including a base and a tip colour, blended by <code>tintAt</code>.</td></tr>
+        <tr><td><code>GrownParts</code></td><td>common</td>
+            <td>Every part this genotype grows, in one call, <strong>dressed</strong> by the loci that
+                finish it &mdash; the horn&rsquo;s colour and glow are other genes. The client asks
+                here and nowhere else, so the second granting gene is a line in this file and no
+                change at all on the Minecraft side.</td></tr>
+        <tr><td><code>PartMeshes</code></td><td>neoforge</td>
+            <td>Bakes a shape into a <code>ModelPart</code> tree, once, and keeps it.</td></tr>
+        <tr><td><code>PartModel</code></td><td>neoforge</td>
+            <td>A baked mesh with no animation of its own, typed on a <code>Slice</code> of the
+                part rather than the horse, so a two-tone part can be drawn a segment at a time
+                &mdash; see the deferred-submit note below.</td></tr>
+        <tr><td><code>AttachedPartLayer</code></td><td>neoforge</td>
+            <td>Draws them. The only place in the mod that knows a horse bone&rsquo;s
+                name.</td></tr>
+    </tbody>
+</table>
+
+<h2 id="adding">Adding the second part</h2>
+
+<ol>
+    <li>A value on <code>PartKind</code>, with its anchor and sheet region, and a
+        <code>styles()</code> case.</li>
+    <li>A generator beside <code>HornGenerator</code>, emitting <code>PartNode</code>s with
+        <strong>every parent before its children</strong> &mdash; <code>PartMeshes</code> bakes
+        in one pass and <code>PartGeneratorTest</code> is what stops a violation reaching a
+        player as a crash report.</li>
+    <li>A case in <code>PartGenerators.build</code> and in
+        <code>PartShape.nominalLength</code> / <code>stretchTo</code>.</li>
+    <li>If it needs a new anchor: a value on <code>PartAnchor</code> and a case in
+        <code>AttachedPartLayer.anchor</code>, with <strong>one offset per horse model</strong>
+        &mdash; the adult and the foal share bone names and nothing else.</li>
+    <li>A region in <code>PartSheet</code> and a <code>paint()</code> call in
+        <code>bake-part-sheet.mjs</code>. Keep it a uniform grain; see below.</li>
+    <li>A gene that returns one, and a line in <code>GrownParts.of</code>.</li>
+</ol>
+
+<p>
+    What is <em>not</em> on that list is a new render layer, a new render state field, a new
+    config key, or a texture per colour. That was the goal.
+</p>
+
+<h2 id="three-tiers">The rule that keeps a herd cheap</h2>
+
+<p>
+    Everything a part can vary by is sorted by <strong>what it costs to change</strong>, not by
+    what it means:
+</p>
+
+<ul>
+    <li><strong>Topology</strong> &mdash; segment counts, branching, twist &mdash; goes in the
+        <code>PartShape</code> and means baking a mesh. Quantised, and the set of shapes is
+        therefore finite and small: <code>PartKind.styles()</code> &times;
+        <code>PartShape.SIZE_BUCKETS</code> per kind, for the whole game, forever. <strong>The
+        bound on cost is structural rather than a budget somebody has to enforce</strong>, which
+        is why <code>PartMeshes</code> needs neither eviction nor a time budget where
+        <code>GeneticCoatTextureFactory</code> needs both.</li>
+    <li><strong>Proportion and pose</strong> &mdash; length, girth, lean &mdash; is a pose-stack
+        transform. Free, continuous, and safe under a deferred draw because a pose is
+        <em>copied</em> into the submit node. This is also what closes the seam the size buckets
+        would otherwise leave: the scale lands a part on its exact epigenetic length, so nothing
+        pops as a lineage grows through a bucket boundary.</li>
+    <li><strong>Colour and glow</strong> are arguments to the submit. One greyscale sheet
+        therefore serves every colour, which is the same trick a dyed braid uses.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">The deferred-submit trap</span>
+    <p>
+        <code>submitModel</code> stores a copy of the pose and a <em>reference</em> to the model,
+        and the batch renderer calls <code>setupAnim(state)</code> immediately before drawing
+        each submit. So the obvious way to vary one shared mesh per horse &mdash; set
+        <code>visible</code> or <code>xScale</code> on its parts and then submit &mdash; is a
+        trap: the second horse in a frame overwrites the first horse&rsquo;s mesh before either
+        is drawn, and the bug is one horse wearing another&rsquo;s antlers.
+    </p>
+    <p>
+        The escape is that <code>submitModel</code> is <em>generic in its state</em>, so
+        <code>PartModel</code> is a <code>Model&lt;AttachedPart&gt;</code>: anything that must be
+        applied by mutation goes in <code>setupAnim</code>, where it runs per submit with that
+        submit&rsquo;s own numbers. Nothing needs it yet, so <code>setupAnim</code> is empty
+        &mdash; and that is exactly where an antler&rsquo;s tine count will have to go.
+    </p>
+</div>
+
+<h2 id="anchoring">Anchoring, and the root transform</h2>
+
+<p>
+    The layer walks the chain from the <strong>root</strong> part down, where
+    <code>CutieMarkLayer</code> reaches straight for <code>body</code> and hand-tunes its offsets
+    to compensate. That is not tidiness: <code>HdHorseModel.createHdLayer</code> applies
+    <code>MeshTransformer.scaling(1.1F)</code>, and that transformer rewrites the
+    <strong>root part&rsquo;s own pose</strong> &mdash; a 1.1 scale and a &minus;2.4016 y offset
+    &mdash; so a layer that skips the root works in a space 10% too small and two and a half
+    units too high. Walking from the root keeps the number out of the layer entirely, and makes
+    the same code correct for the foal, whose layer carries no such transform.
+</p>
+
+<p>
+    <strong>Seen working, 2026-09-30.</strong> This is the claim the page rests on &mdash; that
+    a mesh hung on an already-animated bone inherits its animation and needs none of its own
+    &mdash; and the owner watched it hold: a unicorn's horn stayed on the head through the
+    horse's poses in the dev yard, and sat in the right place on an adult. The computed foal
+    offset put the horn in the right place too. So antlers, spines, crystals and wings are
+    unblocked on this point, and the <a href="#elytra-verdict">plain-layer-over-GeckoLib</a>
+    decision stands.
+</p>
+
+<p>
+    After the chain, a model unit is <sup>1</sup>&frasl;<sub>16</sub> of a block &mdash; the same
+    units the boxes themselves use &mdash; because each <code>translateAndRotate</code> divides
+    its translation by sixteen as it goes.
+</p>
+
+<p>
+    <strong>Never add a child to <code>body</code> or <code>head</code> in
+    <code>createHdBodyMesh</code></strong> for a part. That would move the mesh the HD coat UVs
+    are baked against, which is the one thing on this renderer that cannot quietly shift. A
+    separate <code>LayerDefinition</code>, a separate layer, always.
+</p>
+
+<h2 id="runtime-bake">Meshes are baked at run time</h2>
+
+<p>
+    Every other model in the mod is registered during
+    <code>EntityRenderersEvent.RegisterLayerDefinitions</code>, which would have forced parts
+    into a fixed set declared at startup &mdash; and that would have made a horn&rsquo;s length
+    one of five presets instead of a real number. It is not so constrained:
+    <code>LayerDefinition.bakeRoot()</code> is public and pure
+    (<code>mesh.getRoot().bake(xTexSize, yTexSize)</code>, touching no registry, no event and no
+    resource manager). Read out of the 26.1.2 sources rather than assumed; see
+    <a href="api-notes.html">API notes</a>.
+</p>
+
+<h2 id="sheet">One greyscale sheet, and why its regions are featureless</h2>
+
+<p>
+    <code>part_sheet.png</code> is 64&times;64, cut into a 4&times;4 grid of 16&times;16 regions,
+    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Two regions are painted
+    and the rest are room for the parts that have not been written.
+</p>
+
+<p>
+    A box reads the <strong>corner</strong> of its region rather than all of it, because a
+    cube&rsquo;s UV rectangle is its own unwrap &mdash; <code>2*(girth+girth)</code> wide and
+    <code>girth+length</code> tall &mdash; laid down at the region&rsquo;s origin, and the
+    largest box any part generates is about 10&times;4 texels. That is deliberate: it means a
+    part whose proportions change with an epigenetic number needs no new sheet. The price is that
+    <strong>a region must look right at any sub-rectangle of itself</strong>, so the baker writes
+    a tileable grain with a direction and no composition at all. A hand-painted or pack-sourced
+    sheet is an upgrade path under the same constraint, and anything vendored that way needs its
+    licence checked first &mdash; which is why the shipped default is procedural and owes nothing
+    to anyone.
+</p>
+
+<h2 id="scaling">What the genetic size locus does to a part</h2>
+
+<p>
+    Nothing, explicitly: a part inherits the horse&rsquo;s render scale because that scale is
+    already on the pose stack when the layer runs, not because the layer applies it.
+    <strong>That is a claim from reading and not from watching</strong>, and a tiny and a huge
+    horse are on the checks.
+</p>
+
+</section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
@@ -45,43 +309,90 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        Blockbench meshes parented to the horse model &mdash; unicorn horns, dorsal spines and
-        crystalline growths first, wings and hoof feathering later &mdash; the mod&rsquo;s first
-        non-texture visual; the wings now have a settled route (a plain body-parented layer over
-        a copy of the elytra mesh, so any elytra retexture pack is the art), and that route is
-        the argument against taking a GeckoLib dependency for the rest.
+        The parts the built machinery has no generator for yet &mdash; antlers, dorsal spines and
+        crystalline growths first, then hoof feathering, tufted tails and wings &mdash; plus the
+        two hooks that would let something other than one gene ask for a part: a breed file, and
+        the worn side, so a horse shoe draws through this layer rather than a bespoke one.
     </p>
 </div>
 
 <div class="note">
     <span class="label">The owner wants a batch of these &mdash; &ldquo;a HUGE win for how cool they look&rdquo;</span>
     <p>
-        Blockbench meshes attached to the horse model, gene- or breed-driven, with no
-        independent animation needed.
-        <strong>High priority:</strong> unicorn horns, spikes / dorsal spines, crystalline
-        growths &mdash; small models, head- or spine-parented, big visual payoff.
-        <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails, hoof
-        feathering (already wanted by the draught breeds), tusks, antlers.
-        <strong>Do a batch of the head-parented ones first</strong> &mdash; one render layer,
-        many models.
+        Meshes attached to the horse model, gene- or breed-driven, with no independent animation
+        needed. <strong>High priority:</strong> spikes / dorsal spines and crystalline growths
+        &mdash; small models, head- or spine-parented, big visual payoff. The
+        <a href="gene-unicorn-horn.html">unicorn horn</a> was the first of that batch and has
+        shipped. <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails,
+        hoof feathering (already wanted by the draught breeds), tusks, antlers.
     </p>
 </div>
 
+<div class="note">
+    <span class="label">Two of this page&rsquo;s standing questions are answered</span>
+    <p>
+        <strong>Plain render layer or GeckoLib</strong> &mdash; the plain layer, and it is now
+        built rather than argued: <code>AttachedPartLayer</code> hangs a mesh off
+        <code>head_parts</code> &rarr; <code>head</code> and inherits the head&rsquo;s animation
+        with no dependency and no animation asset. <a href="#elytra-verdict">The wings</a> made
+        the argument; the horn settled it.
+        <strong>Does the owner need Blockbench</strong> &mdash; no. The horse itself is built
+        from <code>CubeListBuilder</code> boxes in Java, and so is the horn; a Blockbench export
+        is a nicer way to author the same list of rotated boxes. What the restriction costs is
+        smooth curves, not possibility.
+    </p>
+</div>
+
+<h2 id="next-parts">The parts that have no generator yet</h2>
+<p>
+    Each is a generator, a sheet region and a gene &mdash; the list is on
+    <a href="#adding">the Coding tab</a> &mdash; and none of them needs a new layer.
+</p>
 <ul>
-    <li>This is the mod's <strong>first non-texture visual</strong>. The coat pipeline is
-        texture-only and <code>common/</code> is Minecraft-free, so <code>common/</code> can
-        only declare <em>that</em> a gene wants part <code>X</code>, by id; the renderer
-        resolves it &mdash; the same shape as <code>GradientLut</code> arriving as an
-        <code>int[]</code>.</li>
-    <li>The proposal is GeckoLib plus Blockbench, with an attached layer whose bones are
-        children of the horse's body bone so they inherit every animation.
-        <strong>Check whether a plain render layer parented to the existing model part does the
-        job before taking the dependency</strong> &mdash; animation inheritance is the entire
-        argument for GeckoLib, and a horn does not animate independently of the head.</li>
-    <li>Saddle, armour and third-party tack render at the same time. Layer order and
-        z-fighting are the predictable bugs, and these all need to scale with the horse
-        too.</li>
+    <li><strong>Antlers.</strong> The best case for a generator rather than a model, because an
+        antler is a recursive branch: a beam with tines that fork, so a seed and a size expand
+        into a rack that is different on every horse and still unmistakably an antler. That is
+        the mod&rsquo;s premise applied to geometry, and it is something a hand-modelled mesh
+        cannot do at all. It is also the <strong>first part that needs a per-horse tine
+        count</strong>, which is the first thing that has to go through
+        <code>PartModel.setupAnim</code> rather than the pose stack &mdash; see the
+        deferred-submit note.</li>
+    <li><strong>Dorsal spines.</strong> A row along the back; needs a <code>SPINE</code> anchor,
+        which is the first anchor on the body rather than the head and therefore the first one
+        that has to be checked against a body-armour layer.</li>
+    <li><strong>Crystalline growths.</strong> Geometry is easy (crossed prisms read as
+        eight-sided); the unknown is the render type. Translucency would want the shafts blended
+        and the caps opaque so the expensive pass is the smallest, and if that reads muddy,
+        opaque emissive crystals are still a good look. A <code>parts.translucent</code> setting
+        joins the config block when there is something translucent to switch.</li>
+    <li><strong>Hoof feathering.</strong> Four anchors at once, and the first part that should
+        take its colour from the horse&rsquo;s own coat texture rather than a tint &mdash; a
+        sampled mane patch comes out the right colour on every horse, the way real feathering
+        matches the mane. Wanted by the draught breeds, so it pairs with the breed hook.</li>
+    <li><strong>Tufted and lion tails.</strong> Rigid tuft on the tail bone first; a tail that
+        curves along its length needs a segment chain with a rotation rule off its parent, which
+        is a formula rather than an animation asset.</li>
 </ul>
+
+<h2 id="hooks">The two hooks</h2>
+<ul>
+    <li><strong>A breed may declare parts.</strong> Touches the breed format,
+        <code>BreedSpecWriter</code>, the breed-file bakes and the breed designer, which is why
+        it is its own slice rather than a line in an existing one. It is what unblocks
+        <a href="breed-book.html#breed-sources">the reindeer breeds</a>: a reindeer is then a
+        band on a tine count rather than new code.</li>
+    <li><strong>The worn side.</strong> Point <a href="item-horse-shoes.html">horse shoes</a> at
+        this layer rather than a bespoke one; gear stacks resolve to the same
+        <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
+        ever replace a grown part &mdash; a helmet over a horn.</li>
+</ul>
+
+<h2 id="designer-pointer">The designer cannot draw a part</h2>
+<p>
+    Whatever is built for the two editors is a plan, but <em>which</em> of the three answers to
+    build is an unresolved design call, so it lives on
+    <a href="#open-designer">the Verification tab</a> rather than here.
+</p>
 
 <h2 id="elytra-wings">Wings off the elytra &mdash; what transfers and what does not</h2>
 <p>
@@ -216,8 +527,61 @@
 
 </section>
 
+<section id="verification" class="tab-panel" data-tab="verification"
+         data-tab-label="Verification" data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, a second part sharing the layer, and any cost against a herd.</p>
+</div>
+
+<h3 id="open-parts-draw-order">Draw order has been argued, not observed</h3>
+<p>
+    <code>AttachedPartLayer</code> sits after the coat passes and the braid and before the
+    vanilla armour and saddle layers, and the reason it is safe today is that nothing on the head
+    competes with the tack. That holds for a horn and stops holding at the first
+    <strong>body</strong> anchor. Check a horned horse with body armour and a saddle on, and
+    treat the first dorsal-spine or saddle-pad part as a reason to re-test rather than to assume.
+</p>
+
+<h3 id="open-parts-second-anchor">One layer, many parts &mdash; unproven past one</h3>
+<p>
+    The design claim is that a second part is a generator and a data row, with no new layer, no
+    new render-state field and no new config key. Nothing has tested that, because there is one
+    part. The first honest test of it is <strong>antlers</strong>, which also exercise the two
+    things the horn never touches: a per-horse element count through
+    <code>PartModel.setupAnim</code> rather than the pose stack, and a seeded variant in the
+    shape key. If either forces a change to the layer or the render state, the abstraction is
+    wrong in a way only the second part could reveal.
+</p>
+
+<h3 id="open-designer">The browser designer cannot draw a part &mdash; and what to do about it</h3>
+<p>
+    <code>wiki/horse-designer/</code> and <code>CustomHorseSpawnScreen</code> are one screen in
+    two places, and on this they now differ. The game's screen draws the horn on its preview:
+    every screen's model horse gets its parts from <code>GeneticHorseRenderer.applyCoat</code>
+    along with its coat, so a unicorn in the spawn egg, the family tree or the horse browser is
+    drawn wearing its horn. The browser designer previews a flat coat texture and cannot draw
+    geometry, so there a <code>Horn/Horn</code> horse shows its gene row and its epigenome and
+    no horn. The cheap answer is for the designer to <em>list</em> the part as a trait and say
+    plainly that it is not drawn; anything better is its own plan. The divergence is written in
+    a comment on both files, per hard rule 5.
+</p>
+
+<h3 id="open-parts-herd">Nothing has been measured</h3>
+<p>
+    The <code>parts.detailDistance</code> default was chosen by reasoning about how far off a
+    silhouette is noticeable, not from a frame-time measurement, and the decision that
+    <code>PartMeshes</code> needs no bake budget rests on an estimate of how cheap a mesh bake is
+    rather than a reading. Both want the twenty-horse pen described on
+    <a href="gene-unicorn-horn.html#open-horn-cost">the horn&rsquo;s tab</a>.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
+        <a href="gene-unicorn-horn.html">Unicorn horn &mdash; the part that ships</a>
         <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="body-space.html">Body space &amp; the horse model</a>
         <a href="horse-gear.html">Horse gear &mdash; what else renders on a horse</a>
@@ -226,8 +590,9 @@
     </div>
     The one thing that had to be settled before any of this was written &mdash; whether a plain
     render layer on the existing model does the job, or whether the mod takes a new dependency
-    &mdash; is <a href="#elytra-verdict">settled by the wings</a>: the part most likely to need
-    an animation engine turns out to need a boolean and two poses.
+    &mdash; was <a href="#elytra-verdict">argued by the wings</a> and is now answered by a built
+    one: the part most likely to need an animation engine needs a boolean and two poses, and the
+    horn needs neither.
 </div>
 
 </article>

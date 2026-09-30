@@ -290,11 +290,15 @@ public final class Breeds {
      * source is a parameter: "the country round here produces Fjords" and "a
      * dealer round here can get you a Fjord" are different claims, and a breed
      * may make one without the other.
+     *
+     * <p>A modded overworld biome counts as the vanilla one it stands in for
+     * ({@link BiomeAnalogues}), so a plains breed is a breed of Terralith's
+     * steppe too.
      */
     public static List<Breed> forBiome(String biomeId, BreedSource source) {
         List<Breed> out = new ArrayList<>();
         for (Breed b : all()) {
-            if (b.allows(source) && b.biomes().contains(biomeId)) {
+            if (b.allows(source) && BiomeAnalogues.covers(b.biomes(), biomeId)) {
                 out.add(b);
             }
         }
@@ -342,7 +346,10 @@ public final class Breeds {
      * @param bright the host's reading of vanilla's own light test at the position
      */
     public static boolean wildGroundAllows(String biomeId, String floorBlockId, boolean bright) {
-        if (floorBlockId == null || floorBlockId.isEmpty()) {
+        // Only in the Nether and the End (BiomeAnalogues.isNetherOrEnd). The
+        // Enderpony's End floors would otherwise be floors in forty overworld
+        // biomes too, and a dark end-stone cellar a place herds spawn.
+        if (floorBlockId == null || floorBlockId.isEmpty() || !BiomeAnalogues.isNetherOrEnd(biomeId)) {
             return false;
         }
         for (Breed b : forBiome(biomeId, BreedSource.WILD)) {
@@ -359,7 +366,9 @@ public final class Breeds {
      * about at all; the spawn test itself is {@link #wildGroundAllows}.
      */
     public static Set<String> wildFloors(String biomeId) {
-        return SpawnGround.floorsOf(forBiome(biomeId, BreedSource.WILD));
+        // None outside the Nether and the End, for the reason wildGroundAllows gives.
+        return SpawnGround.floorsOf(BiomeAnalogues.isNetherOrEnd(biomeId)
+                ? forBiome(biomeId, BreedSource.WILD) : new ArrayList<>());
     }
 
     /** Every breed allowed to come from {@code source}, in registration order. */

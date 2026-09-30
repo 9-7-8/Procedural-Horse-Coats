@@ -165,6 +165,21 @@
     a play session should move.
 </p>
 
+<h3 id="aura-control">The aura leaves horses alone</h3>
+
+<p>
+    Shown 2026-09-30 by the clockwork run in the debug test yard. The <code>HEALER CONTROL</code>
+    pen (row J east) holds one <code>Hlr/Hlr</code> horse and three horses taken to half health a
+    second after the build, and five minutes later logs whether any of them mended. On the second
+    run all three patients were still at 11.0 of 22 five minutes later (<code>CLOCKWORK PASS</code>)
+    &mdash; so the <code>Healing("players", ...)</code> target field is read, and the aura does not
+    hit everything alive in range. The pen could never have passed before that day: healing moved to
+    hunger-plus-water on 2026-09-14 and every pen got a water cauldron on 09-16, so the first run read
+    two of the three back at full health on their own, one of them the patient furthest from the
+    healer and nearest the water. The pen is dry now (<code>DebugTestYard.dryPen</code>) and the
+    patients are hurt a second after the build rather than at it.
+</p>
+
 <h2 id="foal">A foal heals and shows nothing</h2>
 
 <p>
@@ -197,33 +212,20 @@
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
     <p>Healer&rsquo;s red mane stripe reads in sample bakes but its aura has never been stood
-    next to: a <code>Hlr/Hlr</code> horse should mend every <em>player</em> within three blocks
-    by half a heart every two seconds, while the three half-health horses sharing its pen stay
-    hurt.</p>
+    next to by a player: a <code>Hlr/Hlr</code> horse should mend every hurt <em>player</em>
+    within three blocks by half a heart every two seconds, and nobody beyond them.</p>
 </div>
 
 <h3 id="open-healer">Still open (NOT played)</h3>
 
 <p>
-    The aura is the whole check, and a healing effect is only judgeable against something
-    that must <em>not</em> be healed. Both halves are already in the yard: the
-    <code>INFIRMARY - HEALER</code> pen holds one <code>Hlr/Hlr</code> horse and three
-    horses taken to half health when it was built, and the census prints that pen&rsquo;s
-    <code>max_health</code> range beside every <code>horse hurt</code> and
-    <code>horse healed</code> line. The three hurt horses are the <em>control</em>, not the
-    subject &mdash; the aura is <code>Healing("players", ...)</code>, so a horse mending in
-    that pen means the target field is not being read at all.
+    The aura is the whole check, and what is left of it needs a hurt <em>player</em>, which the
+    yard's fake-player hands cannot be for an aura, so it is test kit batch 5.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The three patients must never mend.</strong> Leave the
-        <code>INFIRMARY - HEALER</code> pen alone for a few censuses with no player in it.
-        <strong>Pass:</strong> no <code>horse healed</code> line for any of them, and the
-        pen&rsquo;s health range still shows three horses short of full. If they heal, the
-        aura is hitting everything alive in range and nothing else here is worth
-        checking.</li>
     <li><strong>A damaged player in range mends on the beat.</strong> Take damage, stand
         beside the healer, and count. <strong>Pass:</strong> half a heart every 40 ticks,
         with one heart particle over you per beat, and <em>nothing</em> once you are back at

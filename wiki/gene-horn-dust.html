@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horn dust &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> sheds from the horn, paints nothing</p>
+
+<h1>Horn dust</h1>
+
+<p class="lede">
+    Two copies and a <a href="gene-unicorn-horn.html">unicorn's horn</a> sheds a fine
+    dust that falls past its face, all the time, in the horn's own colours &mdash; a
+    two-tone horn's dust fades from one of its colours to the other as it falls. On a
+    horse without a horn this gene does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.horn_dust"></div>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Recessive: one copy shows nothing. In the wild a horse carries two copies or none
+    &mdash; about one in twelve has two &mdash; so roughly one wild unicorn in twelve
+    sheds dust. As with <a href="gene-horn-glow.html">horn glow</a>, most horses with two
+    copies have no horn, so an ordinary horse can be the parent that gives your unicorn
+    its dust.
+</p>
+
+<h2 id="what-it-does">What it looks like</h2>
+
+<p>
+    A steady, fine fall of coloured motes from along the horn, standing or moving,
+    drifting down about a block and a half to two blocks before they fade. The colour
+    is always the horn's: whatever <a href="gene-horn-colour.html">horn colour</a> makes
+    it, shade and chaos included.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>
+    It does nothing to the horse at all, for good or ill. The dust is only a particle;
+    it leaves nothing on the ground.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.horn_dust"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.horn_dust</dd></div>
+    <div><dt>Class</dt><dd><code>HornDustGene</code> &mdash; an <code>EpigeneticAbilityContribution</code></dd></div>
+    <div><dt>Priority</dt><dd>229 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong>, beside the <a href="gene-unicorn-horn.html">unicorn horn</a></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Dst</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Founders</dt><dd><code>Dst/Dst</code> 8%, <code>n/n</code> the rest &mdash; no wild carriers</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="emitter">An emitter that asks the horn</h2>
+
+<p>
+    <code>abilitiesFor</code> returns one <code>GeneAbility.Emitter</code>, and only when
+    the horse is <code>Dst/Dst</code> <em>and</em> <code>GrownParts.of</code> returns a
+    horn. Its two colours are that horn's <code>baseTint</code> and
+    <code>tipTint</code>, so the dust cannot disagree with the horn that is drawn. That
+    needs the whole horse's epigenome, not this locus's (it has no numbers of its own),
+    which is what <code>GeneEpigenetics.epigenome()</code> was added for; it is
+    <code>null</code> when the question is asked of a genotype rather than a horse, and
+    <code>GrownParts</code> then answers with midpoints.
+</p>
+
+<h2 id="particle">The particle falls</h2>
+
+<p>
+    Vanilla's coloured dust hangs where it appears: it randomises its own direction on
+    spawn and multiplies its speed by a tenth, so no velocity sent with it survives.
+    <code>horsegenetics:horn_dust</code> (<code>ModParticles.HORN_DUST</code>,
+    <code>HornDustOptions</code>) is a type of the mod's own whose client particle,
+    <code>HornDustParticle</code>, is vanilla's <code>DustColorTransitionParticle</code>
+    with <code>gravity</code> set and a 30&ndash;50 tick life. The sprites are vanilla's
+    <code>generic_*</code>, referenced, not copied.
+</p>
+
+<h2 id="anchor">The <code>horn</code> anchor</h2>
+
+<p>
+    <code>GeneAbilityHandler.anchorPoint</code> gained a <code>"horn"</code> case: the
+    <code>head</code> point, lifted by a random share of a horn's height. Like every
+    anchor there it is estimated from the live bounding box &mdash; the server does not
+    know the head's animated pose &mdash; so a grazing unicorn's dust starts where its
+    horn would be if it looked up. It is <strong>not</strong> in
+    <code>AbilityType.EMITTER_ANCHORS</code>, the list gene <em>files</em> may name:
+    adding it there would make it part of the data format and the creator's parity
+    surface, and no file gene has a horn.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">There is no real locus here</h2>
+
+<p>
+    A magical gene with no real counterpart. It asks the horn for its colour instead of
+    having alleles of its own for it because the owner's brief was dust &ldquo;that
+    matches the horn's color&rdquo;: a second colour system would be a second thing to
+    keep in step, and would fail silently the first time the two disagreed.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No horn dust has been seen in a running game: the particle's fall, its density and where the horn anchor puts it are all tuned by arithmetic rather than by eye.</p>
+</div>
+
+<h3 id="open-dust-look">Does it fall from the horn?</h3>
+<p>
+    Spawn a <code>Horn/Horn Dst/Dst</code> horse and watch it standing and walking.
+    The motes should start along the horn, not at the eyes or above the ears, and fall
+    rather than hang. The anchor lift (<code>0.12</code>&ndash;<code>0.30</code> of the box
+    height above eye level) and <code>HornDustParticle.GRAVITY</code> are the two
+    numbers to tune. Check also on a tiny and a huge horse, and on a grazing one.
+</p>
+
+<h3 id="open-dust-colour">Its colours</h3>
+<p>
+    A red horn's dust should be red, a two-tone horn's should fade from base to tip
+    colour, a chaos horn's should match the horn exactly. The particle randomises each
+    mote's brightness a little, as vanilla dust does.
+</p>
+
+<h3 id="open-dust-density">Is it too much, or too little?</h3>
+<p>
+    <code>EMIT_CHANCE</code> of 0.35 a tick is about seven motes a second per horse. It
+    is meant to be a fine steady fall, not a cloud; judge it on one horse and on a pen.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

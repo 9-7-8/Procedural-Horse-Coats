@@ -1,0 +1,63 @@
+2026-09-30, after the modded biomes - the Gear tab gets a real inventory, and a loot bullet is closed
+
+    Two intake items, one closed by the owner and one built.
+
+The leather-armour loot bullet, closed without code
+
+    "Dyed leather horse armor should be very common in loot tables, and should appear in loot
+    tables that contain normal human leather armor." Retired once on 2026-09-24 as stale
+    (d2026-09-24-dyed-armour-stale.txt), then put back by the owner on 2026-09-25, after the
+    jar carrying AddHorseTackModifier had shipped - so it was dated as open, not stale. The
+    session laid out what was still missing (one chest in thirteen is not "very common"; the
+    "tables with leather armour" half was never literal) and the owner closed it "for now".
+    Nothing changed in the loot code. The rate and its dial are still on items.html's
+    Verification tab, where the earlier session left them.
+
+The inventory beside the doll
+
+    The owner's words, 2026-09-25: "the player's inventory must be visible on the right side of
+    the gear screen, so they can equip/unequip items". It had sat on horse-gear.html's Roadmap
+    tab with a full treatment in intake/, gated on one decision: convert HorseInfoScreen into a
+    container screen, or open a separate one. Asked as options; the owner took the separate
+    window.
+
+    Why that was the recommendation: HorseInfoScreen shows horses that are not loaded entities
+    (the Offspring tab, the family tree), and is opened by the client from four places, while a
+    container menu needs a live entity and can only be opened by the server. A mandatory menu
+    under that screen could not be right.
+
+    What was built - menu/HorseGearMenu, client/HorseGearScreen, network/OpenHorseGearPayload,
+    ModNetworking.handleOpenHorseGear, a Dress button on the Gear tab. Written up on
+    horse-gear.html's Coding tab (#gear-inventory, the anchor kept from the Roadmap entry).
+    The part worth remembering: the server-side tack slots are a Container view over the horse
+    whose reads and writes are HorseTackSlot.on/set, so the menu keeps no copy of the gear, and
+    every rule the old packet checked is a slot rule delegated to HorseTackSlot. One rule the
+    treatment did not list turned up on review: a double-click's pick-all would have pulled the
+    worn saddle off the horse when a spare was double-clicked in the bag.
+
+    Kept: the click picker. The treatment's step 8 asked whether it should go once dragging
+    exists; both stay, since the picker works on the read-only tab and the window does not.
+
+How far this is proven
+
+    :neoforge-26.1.2:build green; a clean runServer boot to Done( with no ERROR lines, which
+    proves the menu type and the payload register and nothing more. No client has opened the
+    window. The checks are on horse-gear.html's Verification tab, #verify-dress.
+
+Also moved
+
+    The Gear tab's on-screen footnote said only the saddle and barding had anything to fit;
+    the rescuing braid fills the mane and tail, so it now says four and fifteen.
+
+Released as 0.5.036
+
+    Cut the same session, with the jar on the GitHub release and the entry on releases.html.
+    The range since 0.5.035 was this window plus the modded-biome breeds
+    (d2026-09-30-a-breed-in-every-biome.txt). That session booted no server, so the runServer
+    boot above is also the first boot of the biome table. The note says plainly that neither
+    change has been played.
+
+Next
+
+    intake/To do.txt is down to the two runtime-registry bullets, which the "Runtime registry
+    genes" treatment covers; its piece B (the egg layer's Chaos allele) is the smallest start.

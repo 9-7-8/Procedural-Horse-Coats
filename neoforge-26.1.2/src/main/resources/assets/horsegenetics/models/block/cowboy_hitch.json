@@ -3,6 +3,6 @@
   "textures": {
     "top": "horsegenetics:block/cowboy_hitch_top",
     "side": "horsegenetics:block/cowboy_hitch_side",
-    "bottom": "horsegenetics:block/post_bottom"
+    "bottom": "horsegenetics:block/plank_bottom"
   }
 }

@@ -44,8 +44,24 @@
     "minecraft:windswept_gravelly_hills",
     "minecraft:windswept_hills",
     "minecraft:windswept_savanna",
-    "minecraft:wooded_badlands"
+    "minecraft:wooded_badlands",
+    "minecraft:the_end",
+    "minecraft:end_highlands",
+    "minecraft:end_midlands",
+    "minecraft:end_barrens",
+    "minecraft:small_end_islands"
   ],
+  "spawn_ground": [
+    "minecraft:end_stone",
+    "minecraft:dead_tube_coral_block",
+    "minecraft:dead_bubble_coral_block",
+    "minecraft:dead_fire_coral_block",
+    "minecraft:dead_horn_coral_block",
+    "minecraft:blackstone",
+    "minecraft:basalt",
+    "minecraft:smooth_basalt"
+  ],
+  "spawn_in_dark": true,
   "price": [20, 34],
   "stats": {
     "speed": 2,
@@ -209,6 +225,7 @@
     "Rain is the weather identity and it is doubled on purpose: Rv on both weather loci, so an already slow, flat-jumping pony gets worse in the wet on both axes at once. Neither copy touches health, pulling or the laying interval, so a wet Enderpony is slower and lower but not stranded, and it keeps laying and keeps breeding through the weather.",
     "The watchers are unrestricted, which is the point. Both loci are in the pool with all five alleles, so an Enderpony may stand and stare, close on you, only move unseen, appear behind you, or do none of it, by night and independently by day - and only a matched pair shows anything, so the mixed and carrier pairs in the pool are horses that pass a watcher on without wearing one. Night is the commoner half.",
     "It is not from anywhere on earth, so it has no country. That is a real answer in this format rather than a gap.",
-    "The Ender Echo carries its rider, so the flinch-teleport is survivable to sit through rather than a way of being thrown. It is flavour and an escape, not a reason the breed is strong: speed, jump, health and pull are all well under a breed anybody works."
+    "The Ender Echo carries its rider, so the flinch-teleport is survivable to sit through rather than a way of being thrown. It is flavour and an escape, not a reason the breed is strong: speed, jump, health and pull are all well under a breed anybody works.",
+    "The End, added 2026-09-30. The five vanilla End biomes, and through BiomeAnalogues Nullscape's three, which reshape all of it. The End has no sky light and no grass, so the floors are what Nullscape surfaces it with - end stone, the four dead coral blocks of its shadowlands, and the blackstone and basalt of its crystal peaks and void barrens - with the light waived over them only. This breed also lives in forty overworld biomes, and until this change a floor it named would have been a floor in all of them: smooth basalt lines every amethyst geode. That is why a floor now counts only in a Nether or End biome (Breeds.wildGroundAllows, owner's call). The End has no other creature spawn, so the quiet breed-only rate is the whole draw there - if Enderponies turn out to be a common sight on the islands, that rate is the lever."
   ]
 }

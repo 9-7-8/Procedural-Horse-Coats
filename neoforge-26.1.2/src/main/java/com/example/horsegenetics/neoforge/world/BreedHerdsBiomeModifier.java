@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.world;
 
+import com.example.horsegenetics.common.breed.BiomeAnalogues;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.mojang.serialization.Codec;
@@ -86,7 +87,7 @@ public record BreedHerdsBiomeModifier(HolderSet<Biome> biomes, int weight, int m
         // Feral Mixed off there gets no extra horses from the list, only from
         // the breeds that live in it. (Settings are read before this runs:
         // COMMON configs load at startup, biome modifiers at server start.)
-        boolean onTheList = biomes.contains(biome);
+        boolean onTheList = biomes.contains(biome) || analogueIsListed(biome);
         boolean feralHerds = onTheList && Breeds.spawnSettings().feral().allowedIn(biomeId(biome));
         if (!feralHerds && !aWildBreedLivesIn(biome)) {
             return;
@@ -101,6 +102,23 @@ public record BreedHerdsBiomeModifier(HolderSet<Biome> biomes, int weight, int m
                 new MobSpawnSettings.SpawnerData(EntityType.HORSE,
                         listRate ? minCount : breedMinCount,
                         listRate ? maxCount : breedMaxCount));
+    }
+
+    /**
+     * Is {@code biome} a modded stand-in ({@link BiomeAnalogues}) for a biome on
+     * the list? Terralith's steppe is horse country exactly as plains is, and in
+     * a Terralith world it is most of the plains there are - at the quiet
+     * off-list rate its herds would be a rarity.
+     */
+    private boolean analogueIsListed(Holder<Biome> biome) {
+        for (String analogue : BiomeAnalogues.of(biomeId(biome))) {
+            for (Holder<Biome> listed : biomes) {
+                if (analogue.equals(biomeId(listed))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static boolean aWildBreedLivesIn(Holder<Biome> biome) {

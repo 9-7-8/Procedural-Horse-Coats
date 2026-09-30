@@ -18,6 +18,8 @@ window.HG_ITEM_NAMES = {
   "emergency_stasis_chamber": "Emergency Horse Stasis Chamber",
   "empty_seed_jar": "Empty Seed Jar",
   "ender_whistle": "Ender Whistle",
+  "freedom_stick": "Freedom Stick",
+  "golden_carrot_seeds": "Golden Carrot Seeds",
   "golden_whistle": "Golden Whistle",
   "holding_pen_sign": "Holding Pen Sign",
   "holding_pen_ticket": "Holding Pen Ticket",

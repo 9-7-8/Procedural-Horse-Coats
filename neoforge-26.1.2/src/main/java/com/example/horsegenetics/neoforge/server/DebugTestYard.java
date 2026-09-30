@@ -9,20 +9,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.animal.cow.Cow;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.Horse;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.LightBlock;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -70,12 +60,14 @@ import java.util.List;
  * horses in a field. The yard is deliberately the least interesting place in
  * the mod.
  *
- * <h2>The one thing it cannot promise</h2>
- * The spawner is a real vanilla monster spawner set to zombies, which is enough
- * to answer "is the farm still producing" by standing and watching. It is not a
- * <i>farm</i> - no water, no drop, no collection - because the holy ward test
- * only asks whether spawning continues near a warded horse, and a killing floor
- * would add a second thing that can be broken.
+ * <h2>And since 2026-09-30, it is built for a session that cannot see it</h2>
+ * Owner: <i>"remove everything in the debug yard which can't be tested by you
+ * without my intervention, and then add in new pens which you can test without
+ * me."</i> The yard is now tested by launching the game and reading the log, so
+ * every pen in it must start itself and write its own answer; the ones that
+ * waited for a person were deleted and what
+ * a pair of hands did for them is done by {@link DebugYardClockwork}'s
+ * FakePlayer. A grep for {@code CLOCKWORK} is that half's whole report.
  */
 final class DebugTestYard {
 
@@ -121,204 +113,51 @@ final class DebugTestYard {
     /** The widest a pen may be on one side of the walkway. */
     static final int BLOCK_W = 19;
 
-    /** Row north walls, as offsets from the yard's mouth. Each is the one before it plus its depth plus an aisle. */
-    private static final int ROW_A = 3;                         // the two dryad pens | spawner room
-    private static final int ROW_A_D = 16;
-    // B, C AND D ARE THE GAMEPLAY LAYER, which had never been in this yard at
-    // all. Owner, 2026-09-13: "add the entire item and gameplay layer as well
-    // as villagers. Add literally everything that CAN be tested in the yard."
-    // Until now every item test lived in the test kit's hotbar - which is to
-    // say it needed a person holding the right nine things, and got put off.
-    // A room with the props already placed and a chest of the items beside
-    // them costs a build and is then free for ever.
-    static final int ROW_B = ROW_A + ROW_A_D + AISLE;    // tack room | horseman's study
-    static final int ROW_B_D = 14;
-    // ROW C IS THE TICKET STALLS, BOTH BLOCKS. Owner on first sight: "stall
-    // testing is too close to another pen, please put more space." It was: the
-    // holding pen and four awkward stalls were packed into one 19-wide block
-    // with single-block gaps, and a stall you have to squeeze past is a stall
-    // whose bind you cannot judge. The carrots moved out to rows L, M and N,
-    // which is what freed the east block.
-    static final int ROW_C = ROW_B + ROW_B_D + AISLE;    // the ticket stalls, both blocks
-    static final int ROW_C_D = 14;
-    static final int ROW_D = ROW_C + ROW_C_D + AISLE;    // dairy and clip | egg layer
-    static final int ROW_D_D = 12;
-    // ROW E'S WEST HALF IS GONE - it was the display row, a pen of horses whose
-    // only question was "does this marking look right?". That question now has a
-    // better home: the horse dimension's corridor shows every unconfirmed
-    // marking on four base coats at once (CoatCheckPlan), which is the whole
-    // catalogue rather than the one or two genes somebody remembered to put in a
-    // yard row. Owner, 2026-09-17: move the visual checks out of the yard and put
-    // them first in the visual section of for-testers.html instead.
-    //
-    // THE ROW ITSELF STAYS, because the SAME west block also holds the deep-water
-    // pen (DebugYardGameplay.buildDeepWaterPen): the crackle stall stood at
-    // WEST_MIN and the pool starts six blocks along from it. The pool is a
-    // drowning check, not a looking one, so it is not going anywhere. Deleting
-    // the row outright broke that pen's z - the one kind of mistake this
-    // chained-row layout cannot absorb for you. (The east block has been empty
-    // since the food-preference pen went on 2026-09-14.)
-    static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // the pool | (empty)
-    static final int ROW_E_D = 7;
-    private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | the three stat pens
-    private static final int ROW_F_D = 12;
-    // G AND H ARE GONE, and the yard is seventeen blocks shorter for it.
-    //
-    // G was the growing row and had four slots. Verdant's three were confirmed
-    // and deleted on 2026-09-12; oak/birch and bone meal went the same way on
-    // 2026-09-13, which left TWO pens holding a nine-deep row and a four-block
-    // aisle open. They moved into row A's west block, which the bone-meal pen
-    // had just vacated and which is sixteen deep against their nine.
-    //
-    // H had been a row of depth ZERO since the retinue pen was deleted (a flat
-    // 50.0 ms/tick with twenty-four re-pathing mobs, which answered the
-    // question outright) - so it built nothing and still cost an aisle, which
-    // is the purest dead space this yard had.
-    //
-    // Nothing else had to move: the rows chain off each other, so deleting a
-    // depth pulls every row behind it forward on its own. That is the whole
-    // reason the chain is written this way.
-    static final int ROW_I = ROW_F + ROW_F_D + AISLE;   // dhampir | eyesight
-    static final int ROW_I_D = 20;
     /**
-     * <b>J and K are what removing the no-damage rule unlocked.</b>
+     * <b>Row north walls, as offsets from the yard's mouth.</b> Each is the one before it plus its
+     * depth plus an aisle, so deleting a row pulls everything behind it forward.
      *
-     * <p>Six genes - guardian, gladiator, healer, cleansing light, ender echo,
-     * and both of the death loci - are <i>entirely</i> about a horse taking or
-     * dealing damage, and this dimension cancelled every point of it. So they
-     * have never been in the yard, because there was nothing a pen here could
-     * have shown. Owner, 2026-09-13: <i>"remove the 'no horse damage'
-     * exception in the yard"</i>. That was the fifth time a protection in this
-     * dimension turned out to be the reason a gene "did nothing" - after the
-     * mob deleter, the spread verb, the missing night and the dhampir's
-     * sunburn - and it is the last of them.
+     * <h2>Few rows, and no gaps (owner, 2026-09-30)</h2>
+     * <i>"Also remove everything that's already been verified, and remove the empty space from the
+     * debug yard left over from removing other pens."</i> Every pen whose own question the wiki records
+     * as answered went - checked question by question against the Verification tabs, not by gene - and
+     * with it every clockwork pen, all of whose checks had passed and so closed. What was left sat in
+     * twenty-odd rows, most of them a single pen wide, so the survivors were moved into each other's
+     * empty halves: MET NATURAL beside THE CAP, SPLICE PERFORMANCE into the dryad row, LYCAN DOOMED and
+     * DEATH DIAMONDS beside NIGHT SHY, BLOOD ONLY where WATERBORN stood.
      *
-     * <p>They are put at the <b>far end</b> on purpose. Everything in J and K
-     * either fights or floods its own floor, and the rest of the
-     * yard is full of pens whose whole result is a count of things that were
-     * standing quietly.
-     */
-    static final int ROW_J = ROW_I + ROW_I_D + AISLE;   // the arena | the infirmary
-    static final int ROW_J_D = 20;
-    static final int ROW_K = ROW_J + ROW_J_D + AISLE;   // the deathbed | ender echo
-    static final int ROW_K_D = 16;
-
-    /**
-     * <b>L, M and N are one breeding pair per splice carrot.</b>
+     * <p><b>Seven since the same afternoon.</b> The owner ruled an automatic yard PASS closes a check like a
+     * clockwork one, and ten more pens went on their own PASS lines (DEATH DIAMONDS, LYCAN DOOMED, LETHAL
+     * FOALS, BLOOD ONLY, SPLICE PERFORMANCE; then THE CAP, MET NATURAL and DRYAD FLOWER once re-aimed at
+     * the cap of fifty and at what a flower dryad plants). Row T's last pen, DRYAD OAK+BIRCH, moved into
+     * row O east beside HURT MARE.
      *
-     * <p>Owner, 2026-09-13: <i>"we need to structure the gene splice carrots
-     * better so that it's two horses to breed, and one small pair of pens per
-     * carrot."</i>
+     * <p><b>The letters are kept</b>, gaps and all: every sign and every Verification tab names a pen by
+     * its row, and closing the alphabet would invalidate all of it. So the yard runs O, U, W, X, Y, AL -
+     * names, not positions. (KICK HUNTER and KICK PLAIN passed on their own verdicts the same day, and
+     * SUNTOUCHED moved up into row X, so row AA went too.)
      *
-     * <p>The bench they replace was one pen, four horses and a chest holding
-     * all eleven carrots, and it could not answer anything. <b>A splice carrot
-     * biases the gamete of the parent that ate it</b>, so the result is not
-     * visible on that horse at all - it is visible in a <i>foal</i>, which
-     * means every test needs a named mare, a named stallion, and certainty
-     * about which carrot went into which. One pen with a shared chest gives you
-     * none of that: feed two carrots and the horse carries both
-     * ({@code ArmedCarrotsAttachment.plus}), and the foal cannot tell you which
-     * one it came from.
-     *
-     * <p>So each carrot gets a pair of pens with a gate between them, its own
-     * chest, and nothing else in reach.
-     */
-    static final int ROW_L = ROW_K + ROW_K_D + AISLE;   // splice carrots 1-4
-    static final int ROW_L_D = 10;
-    static final int ROW_M = ROW_L + ROW_L_D + AISLE;   // splice carrots 5-8
-    static final int ROW_M_D = 10;
-    static final int ROW_N = ROW_M + ROW_M_D + AISLE;   // stabilizer, magnifier
-    static final int ROW_N_D = 10;
-
-    /**
-     * <b>Rows O-R: breeding (O-P, and MET NATURAL in R) and band life (Q-R)</b>, built
-     * by {@link DebugYardFertility} and {@link DebugYardHerd}. <b>Packed since
-     * 2026-09-14</b> (owner: "condense down the testing area"): every pen registers
-     * with {@link YardPens}, so a horse's breeding and band checks see only its own
-     * pen. Before that these rows ran more than three hundred blocks deep, because
-     * those checks count neighbours by distance through walls - a cap of eight within
-     * sixteen, a 64-block dispersal search - and a packed pen would have read its
-     * neighbours. Pens that are fed golden carrots still keep an air gap: vanilla's
-     * breeding goal is not one of those checks. Six pens confirmed the same morning
-     * were deleted rather than packed.
+     * <p>Every pen registers with {@link YardPens}, so a horse's breeding and band checks see only its
+     * own pen, which is what lets them share walls (packed since 2026-09-14).
      */
     static final int PACKED_AISLE = AISLE + 1;     // a chest and a sign in front of every pen
-    static final int ROW_O = ROW_N + ROW_N_D + PACKED_AISLE;
-    static final int ROW_O_D = 8;
-    static final int ROW_P = ROW_O + ROW_O_D + PACKED_AISLE;
-    static final int ROW_P_D = 8;
-    static final int ROW_Q = ROW_P + ROW_P_D + PACKED_AISLE;
-    static final int ROW_Q_D = 9;
-    static final int ROW_R = ROW_Q + ROW_Q_D + PACKED_AISLE;
-    static final int ROW_R_D = 12;
-
-    /**
-     * <b>Rows S-U: the all-day pens</b>, built by {@link DebugYardLong} (owner,
-     * 2026-09-14: "I'm going to leave this up all day, so add more pens which benefit
-     * from being run for a very long time"). S and T are dryad pens on a stone floor, so
-     * a sapling planted over the fence cannot survive to be miscounted; U is four
-     * inheritance-ratio pens that breed all day and tally their foals.
-     */
-    static final int ROW_S = ROW_R + ROW_R_D + PACKED_AISLE;
-    static final int ROW_S_D = 9;
-    static final int ROW_T = ROW_S + ROW_S_D + PACKED_AISLE;
-    static final int ROW_T_D = 9;
-    static final int ROW_U = ROW_T + ROW_T_D + PACKED_AISLE;
+    /** HURT MARE ({@link DebugYardFertility}) | DRYAD OAK+BIRCH on stone ({@link DebugYardLong}). */
+    static final int ROW_O = 3;
+    static final int ROW_O_D = 12;
+    /** Four inheritance-ratio pens that breed all day and tally their foals ({@link DebugYardLong}). */
+    static final int ROW_U = ROW_O + ROW_O_D + PACKED_AISLE;
     static final int ROW_U_D = 10;
-
-    /**
-     * <b>Row V: hunger</b>, built by {@link DebugYardHunger} (owner, 2026-09-14). The food
-     * order, a starving horse that must not heal, a fed one that must, and a carnivore's hunt,
-     * each logging its own answer.
-     */
-    static final int ROW_V = ROW_U + ROW_U_D + PACKED_AISLE;
-    static final int ROW_V_D = 10;
-
-    /**
-     * <b>Rows W-Y: every open test that can run unattended</b> (owner, 2026-09-15: "put everything
-     * which can be tested unattended into the yard"). W is four more ratio pens in
-     * {@link DebugYardLong} - two impossible genotypes, a milk clash and a knob-carrying colour gene;
-     * X and Y are {@link DebugYardUnattended}: the night-shy horse, bone meal beside a crop, a gelding
-     * in a band, cover reach through a wall and a fence, stat floors, and lethal foals against healing.
-     */
-    static final int ROW_W = ROW_V + ROW_V_D + PACKED_AISLE;
+    /** Four more: two impossible genotypes, a milk clash and a knob-carrying colour gene. */
+    static final int ROW_W = ROW_U + ROW_U_D + PACKED_AISLE;
     static final int ROW_W_D = 10;
+    /** NIGHT SHY | SUNTOUCHED ({@link DebugYardUnattended}). */
     static final int ROW_X = ROW_W + ROW_W_D + PACKED_AISLE;
     static final int ROW_X_D = 12;
+    /** REACH WALL, REACH FENCE | STATS. */
     static final int ROW_Y = ROW_X + ROW_X_D + PACKED_AISLE;
     static final int ROW_Y_D = 12;
-    /** Row Z: lycanthropy - a round trip through the night, a death in animal form, a were-cow. */
-    static final int ROW_Z = ROW_Y + ROW_Y_D + PACKED_AISLE;
-    static final int ROW_Z_D = 10;
-    /** Row AA: a gladiator's swing rate against husks (gap 222), waterborn in a pool, suntouched's light. */
-    static final int ROW_AA = ROW_Z + ROW_Z_D + PACKED_AISLE;
-    static final int ROW_AA_D = 12;
-    /** Rows AB-AD: the effect genes - mob aura, swim speed, water breathing, on death, item drop ({@link DebugYardEffects}). */
-    static final int ROW_AB = ROW_AA + ROW_AA_D + PACKED_AISLE;
-    static final int ROW_AB_D = 12;
-    static final int ROW_AC = ROW_AB + ROW_AB_D + PACKED_AISLE;
-    static final int ROW_AC_D = 12;
-    static final int ROW_AD = ROW_AC + ROW_AC_D + PACKED_AISLE;
-    static final int ROW_AD_D = 10;
-    /** Rows AE-AF west: what a foal is handed at birth ({@link DebugYardBirths}); AF east and AG: the dhampir split. */
-    static final int ROW_AE = ROW_AD + ROW_AD_D + PACKED_AISLE;
-    static final int ROW_AE_D = 10;
-    static final int ROW_AF = ROW_AE + ROW_AE_D + PACKED_AISLE;
-    static final int ROW_AF_D = 10;
-    static final int ROW_AG = ROW_AF + ROW_AF_D + PACKED_AISLE;
-    static final int ROW_AG_D = 10;
-    /** Rows AH-AI: checks that used to need a player's hands ({@link DebugYardHands}). */
-    static final int ROW_AH = ROW_AG + ROW_AG_D + PACKED_AISLE;
-    static final int ROW_AH_D = 10;
-    static final int ROW_AI = ROW_AH + ROW_AH_D + PACKED_AISLE;
-    static final int ROW_AI_D = 10;
-    /** Rows AJ-AK: the six splice carrots, each foal checked for a new allele in the carrot's theme ({@link DebugYardBirths}). */
-    static final int ROW_AJ = ROW_AI + ROW_AI_D + PACKED_AISLE;
-    static final int ROW_AJ_D = 10;
-    static final int ROW_AK = ROW_AJ + ROW_AJ_D + PACKED_AISLE;
-    static final int ROW_AK_D = 10;
-    /** Row AL-west: the arcane dealer and the string he founds ({@link DebugYardArcane}). Deeper, because he places his own herd. */
-    static final int ROW_AL = ROW_AK + ROW_AK_D + PACKED_AISLE;
+    /** The arcane dealer and the string he founds ({@link DebugYardArcane}). Deeper, because he places his own herd. */
+    static final int ROW_AL = ROW_Y + ROW_Y_D + PACKED_AISLE;
     static final int ROW_AL_D = 16;
 
     /**
@@ -380,63 +219,62 @@ final class DebugTestYard {
         DebugWorldWatch.start(level, new AABB(
                 cx - YARD_HALF_X - 2, gy - 4, ROAD_EDGE_Z,
                 cx + YARD_HALF_X + 2, gy + WALL_TOP_DY + 2, mouthZ + YARD_DEPTH_Z + 2));
+        // And the verdict table, before any row registers a check in it.
+        DebugYardClockwork.reset();
 
         buildPath(level, gy, cx, mouthZ);
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
-        buildSpawnerRoom(level, gy, cx, mouthZ);
-        buildNightBlock(level, gy, cx, mouthZ);
-        buildStatPens(level, gy, cx, mouthZ);
-        buildBaseAlarmPen(level, gy, cx, mouthZ);
-        buildStockedRow(level, gy, cx, mouthZ);
-        buildGrowingRow(level, gy, cx, mouthZ);
-
-        // ROW I WEST IS EMPTY: dhampir is confirmed, all three of it. Owner,
-        // 2026-09-13: "dhampir successfully flees the sun" - which was the last
-        // question it had, after the burning and the feeding were confirmed
-        // earlier the same day. The pen went away once before on a weaker claim
-        // and had to be put back within the hour; this time the whole cycle is
-        // sun to shelter to bite to heal, and the log shows it holding shade at
-        // 66/66 rather than bleeding out a journey at a time.
-        //
-        // ROW E'S DISPLAY STALL IS GONE - it asked only "does this look right?".
-        // The horse dimension's corridor answers that for every unconfirmed
-        // marking now, four base coats at a time, so a yard stall that did it for
-        // one gene is a worse copy of a better thing. The rest of that block is
-        // the pool, which is a drowning check and stays where it is.
-
-        // The two halves of the mod this yard never had: the item, block and
-        // villager layer (rows B, C, D and E-east), and the six genes that
-        // removing the no-damage rule unlocked (rows I-east, J and K).
-        DebugYardGameplay.build(level, gy, cx, mouthZ);
-        DebugYardCombat.build(level, gy, cx, mouthZ);
-        // Rows O-T: every breeding and fertility scenario, self-running where it
-        // can be, each pen logging its horses' breeding state to the watch.
+        // In yard order. The combat, hunger and hands pens and DebugYardHerd's own were deleted with
+        // their classes once every question they asked was answered (2026-09-30). So are the dryad and stat pens that
+        // stood in rows A and F, and every clockwork pen - DebugYardClockwork keeps its fake-player hands
+        // and verdict lines for the next check that wants them, and builds nothing.
+        // Row O: breeding scenarios, each pen logging its horses' breeding state to the watch.
         DebugYardFertility.build(level, gy, cx, mouthZ);
-        // Rows U-X: band life, every test starting itself on a clock.
-        DebugYardHerd.build(level, gy, cx, mouthZ);
-        // Rows S-U: dryad pens and inheritance ratios, for a run of a whole day.
+        // Rows T, U and W: the dryad row and the inheritance ratios, for a run of a whole day.
         DebugYardLong.build(level, gy, cx, mouthZ);
-        // Row V: hunger - the food order, starving and fed healing, a carnivore's hunt.
-        DebugYardHunger.build(level, gy, cx, mouthZ);
-        // Rows X-Z: open tests that need nobody at the keyboard (row W is in DebugYardLong).
+        // Rows X, Y and AA: open tests that need nobody at the keyboard.
         DebugYardUnattended.build(level, gy, cx, mouthZ);
-        // Rows AB-AD: the five effect genes that write no log line of their own.
-        DebugYardEffects.build(level, gy, cx, mouthZ);
-        // Rows AE-AG: a foal's bond, breed, starburst dial and name at birth; the dhampir split.
-        DebugYardBirths.build(level, gy, cx, mouthZ);
-        DebugYardDhampir.build(level, gy, cx, mouthZ);
-        // Rows AH-AI: gold and subfertile pairings on a clock, weaning by distance, the spawner's sheep colour.
-        DebugYardHands.build(level, gy, cx, mouthZ);
-        // Row AL-west: the arcane dealer, founded on the spot with his own string.
+        // DEATH DIAMONDS, SPLICE PERFORMANCE and BLOOD ONLY (DebugYardEffects, -Births, -Dhampir) went on
+        // their own PASS lines on 2026-09-30, with LYCAN DOOMED and LETHAL FOALS: the owner ruled an automatic
+        // yard PASS closes a check the way a clockwork one does.
+        // Row AL west: the arcane dealer, founded on the spot with his own string.
         DebugYardArcane.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "items, villagers,", "arenas, breeding"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "every pen runs", "itself - read log"));
 
         verify(level, gy, cx, mouthZ);
+        sprint(level);
+    }
+
+    /**
+     * <b>Run the yard's clocks faster than the wall clock</b> (owner, 2026-09-30: "can't you just speed up
+     * the tick rate, rather than waiting an actual hour?"). Every verdict in the yard counts game ticks,
+     * so a sprint changes when an answer arrives, never what it says. Opt-in through
+     * {@code -PyardSprint=<ticks>} on {@code runClientTestWorld}, so a person visiting the yard is not
+     * dropped into fast-forward. Vanilla's {@code /tick sprint}, which runs ticks back to back with no
+     * sleep between them - so it gains exactly the server's idle time, and a yard of five hundred horses
+     * that already takes most of its fifty milliseconds a tick gains little. The census's ms/tick line is
+     * the reading. UNVERIFIED: that an integrated server honours a sprint the way a dedicated one does.
+     */
+    private static void sprint(ServerLevel level) {
+        String ticks = System.getProperty("horsegenetics.yardSprint");
+        if (ticks == null) {
+            return;
+        }
+        try {
+            int n = Integer.parseInt(ticks.trim());
+            // true means it cut short a sprint already running. Vanilla logs its own "sprint report"
+            // (ticks per second, ms per tick) when the sprint ends - that line is the speed-up, measured.
+            boolean interrupted = level.getServer().tickRateManager().requestGameToSprint(n);
+            ActionTrace.log("test yard", "sprinting " + n + " ticks (" + n / 1200 + " game minutes)"
+                    + (interrupted ? " - replaced a sprint already running" : ""));
+        } catch (NumberFormatException e) {
+            HorseGenetics.LOGGER.warn("[Debug] test yard: horsegenetics.yardSprint is not a tick count: {}", ticks);
+        }
     }
 
     /**
@@ -464,6 +302,10 @@ final class DebugTestYard {
         BlockPos firstNoFloor = null;
         BlockPos firstBlocked = null;
         BlockState firstBlockedState = null;
+        // Every KIND, not only the first: on 2026-09-30 the warning named one poppy
+        // and said nothing of the other two spots, which is the same unactionable
+        // shape gaps 260/262 were about.
+        java.util.Set<String> blockedKinds = new java.util.TreeSet<>();
         for (int z = ROAD_EDGE_Z; z < mouthZ + YARD_DEPTH_Z; z++) {
             boolean inYard = z >= mouthZ;
             int halfX = inYard ? YARD_HALF_X - 1 : PATH_HALF_X;
@@ -477,6 +319,7 @@ final class DebugTestYard {
                 BlockState head = level.getBlockState(new BlockPos(x, gy + 1, z));
                 if (!head.isAir() && !isFurniture(level, x, gy + 1, z)) {
                     blocked++;
+                    blockedKinds.add(BuiltInRegistries.BLOCK.getKey(head.getBlock()).toString());
                     if (firstBlocked == null) {
                         firstBlocked = new BlockPos(x, gy + 1, z);
                         firstBlockedState = head;
@@ -498,28 +341,9 @@ final class DebugTestYard {
                     blocked,
                     firstBlocked == null ? "" : " (first at " + firstBlocked.toShortString()
                             + ", which is " + BuiltInRegistries.BLOCK.getKey(
-                                    firstBlockedState.getBlock()) + ")",
+                                    firstBlockedState.getBlock()) + "; kinds " + blockedKinds + ")",
                     cx);
         }
-    }
-
-    /**
-     * One cow, for something to be pushed around.
-     *
-     * <p>Non-horse mobs are allowed in the yard - see
-     * {@code HorseGeneticsEventHandler}, which deleted them everywhere in this
-     * dimension until 2026-09-12 and thereby made three of the yard's own tests
-     * impossible in the place built for them.
-     */
-    static void spawnCow(ServerLevel level, int gy, double x, double z) {
-        Cow cow = EntityType.COW.create(level, EntitySpawnReason.COMMAND);
-        if (cow == null) {
-            return;
-        }
-        cow.setPos(x, gy + 1, z);
-        // Or it despawns overnight and an empty pen reads as the gene working.
-        cow.setPersistenceRequired();
-        level.addFreshEntity(cow);
     }
 
     /**
@@ -561,20 +385,22 @@ final class DebugTestYard {
                 // third of the possibilities gap 262 listed. Gaps 260/262.
                 || state.is(Blocks.CAULDRON) || state.is(Blocks.WATER_CAULDRON)
                 || state.is(Blocks.LAVA_CAULDRON) || state.is(Blocks.POWDER_SNOW_CAULDRON)
+                // The clockwork rows' monster cells and horse ring, and the blight pen's
+                // planted strip - all deliberate, none of it a hole in the yard.
+                || state.is(Blocks.GLASS) || state.is(Blocks.WHEAT) || state.is(Blocks.POTTED_DANDELION)
+                || state.is(Blocks.SHORT_GRASS) || state.is(Blocks.DANDELION)
+                // HUNGER ORDER's menu. The grid is sampled every fourth block, and it only
+                // started landing on these when the rows ahead of them were deleted.
+                || state.is(Blocks.POPPY) || state.is(Blocks.CAKE)
+                // REACH WALL's stone divider (row Y west), the wall no cover may cross -
+                // under the grid for the same reason, the second build after the cut.
+                || state.is(Blocks.STONE)
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.LEATHERWORKERS_POST.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.SCIENTISTS_POST.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.SUPPLIERS_POST.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.METALSMITHS_POST.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH.get());
-    }
-
-    /** One night stall: the gene, the allele, what it should do, and whether it needs a target. */
-    private record Nightly(String key, String token, String name, String what, boolean needsHerd,
-                           boolean needsMonsters) {
-        Nightly(String key, String token, String name, String what) {
-            this(key, token, name, what, false, false);
-        }
     }
 
     /**
@@ -602,214 +428,6 @@ final class DebugTestYard {
      * no stall, so those two are labelled rather than quietly left to look
      * broken. The <b>herd</b>-targeted forms get a cow each, so they can.
      */
-    /**
-     * <b>What is left of the night block: one stall.</b>
-     *
-     * <p>Every variant of both night loci is confirmed - eight tempers and five
-     * watchers - and all thirteen stalls are gone. &sect;0-AT had listed the
-     * family as unwatchable since 2026-09-09, and it went from nothing to
-     * nothing-left inside a day once the dimension had a night to run them in.
-     *
-     * <p>Dhampir is the exception and stays. The only sighting of it so far is
-     * "the dhampir did damage a cow, though I'm not sure what else that did" -
-     * which is a thing happening near the horse rather than a confirmation, and
-     * its neighbour at the time was a night-hunter with a cow of its own.</p>
-     */
-    private static void buildNightBlock(ServerLevel level, int gy, int cx, int mouthZ) {
-    }
-
-    /**
-     * <b>The three magic stat loci, which the attribute readout just made
-     * testable for nothing.</b>
-     *
-     * <p>&sect;0d has carried magic speed, health and jump as "NOT play-tested"
-     * since 2026-09-05, and they were awkward for the same reason the weather
-     * loci were: their entire effect is a number on the horse, and looking at a
-     * horse does not show you a number. The moment the census could print a
-     * named attribute's range across a pen, the test became free - so these
-     * three cost one method rather than a session.
-     *
-     * <p><b>Unlike weather they are unconditional</b>, so there is no second
-     * reading to take: the value is either moved off the breed's baseline or it
-     * is not. What the range across two horses <i>also</i> shows is whether the
-     * magnitude is per allele copy, which is the half nobody could see.
-     */
-    private static void buildStatPens(ServerLevel level, int gy, int cx, int mouthZ) {
-        String[][] pens = {
-                {"horsegenetics.magic_speed", "MAGIC SPEED", "speed"},
-                {"horsegenetics.magic_health", "MAGIC HEALTH", "health"},
-                {"horsegenetics.magic_jump", "MAGIC JUMP", "jump"}};
-        int z0 = mouthZ + ROW_F;
-        int z1 = z0 + 9;
-        for (int i = 0; i < pens.length; i++) {
-            // SIX WIDE, not seven: three sevens plus their gaps ran one block
-            // past EAST_MAX and into the strip that keeps the yard's own wall
-            // reachable. Caught by the layout audit rather than in game, which
-            // is the only way a one-block overrun ever gets caught.
-            int x0 = cx + EAST_MIN + i * 7;
-            int x1 = x0 + 5;
-            fencedPlot(level, gy, x0, x1, z0, z1);
-            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of(pens[i][1], "RIDE both horses.", "One should differ", "from the other"));
-            stock(level, gy, x0 + 2.0, (z0 + z1) / 2.0, pens[i][0], pens[i][1], 2, 0, null);
-            DebugWorldWatch.watchAttribute(pens[i][1], box(x0, gy, z0, x1, gy + 1, z1),
-                    "speed".equals(pens[i][2]) ? Attributes.MOVEMENT_SPEED
-                            : "health".equals(pens[i][2]) ? Attributes.MAX_HEALTH
-                            : Attributes.JUMP_STRENGTH);
-        }
-    }
-
-
-
-
-    private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";
-    private static final String NIGHT_WATCH = "horsegenetics.magic_night_watch";
-
-    /** Up to eight stalls across a row, four each side of the walkway. */
-    private static void nightRow(ServerLevel level, int gy, int cx, int z0, int depth,
-                                 List<Nightly> stalls) {
-        int z1 = z0 + depth;
-        int[] starts = {
-                cx + WEST_MIN, cx + WEST_MIN + 5, cx + WEST_MIN + 10, cx + WEST_MIN + 15,
-                cx + EAST_MIN, cx + EAST_MIN + 5, cx + EAST_MIN + 10, cx + EAST_MIN + 15};
-        for (int i = 0; i < stalls.size() && i < starts.length; i++) {
-            Nightly n = stalls.get(i);
-            int x0 = starts[i];
-            int x1 = x0 + 4;
-            fencedPlot(level, gy, x0, x1, z0, z1);
-            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of(n.name(), "after dark:", n.what(),
-                            "/testkit night"));
-            String pair = n.token() == null ? null : n.token() + "/" + n.token();
-            stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, n.key(), n.name(), 1, 0, pair);
-            if (n.needsHerd()) {
-                spawnCow(level, gy, x0 + 3.0, (z0 + z1) / 2.0);
-            }
-            DebugWorldWatch.watch(n.name(), box(x0, gy, z0, x1, gy + 1, z1), null);
-        }
-    }
-
-    /**
-     * <b>Base alarm, beside the spawner, because that is the only place its
-     * condition can be true.</b>
-     *
-     * <p>It was deliberately kept OUT of the sound herd for exactly this
-     * reason: its sound is gated on {@code hostile_near}, so a hundred blocks
-     * from the spawner it would have sat silent all night and a blank in the
-     * log reads exactly like a broken gene. Here it is one pen from the
-     * zombies, so when the spawner is running - which is when a player is
-     * standing at it, and that is where the ward test wants her anyway - this
-     * gene finally gets a chance to fire.
-     *
-     * <p>The census counts every gene sound by id, so the answer arrives as a
-     * number beside the ward's spawn lines rather than as an impression.
-     */
-    private static void buildBaseAlarmPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN + 14;
-        int x1 = cx + EAST_MAX;
-        int z0 = mouthZ + ROW_A;
-        int z1 = z0 + ROW_A_D;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("BASE ALARM", "fires only when a", "HOSTILE is near -", "the spawner is"));
-        stock(level, gy, x0 + 2.0, (z0 + z1) / 2.0, "horsegenetics.base_alarm",
-                "the base alarm pen", 2, 0, null);
-        DebugWorldWatch.watch("BASE ALARM", box(x0, gy, z0, x1, gy + 1, z1), null);
-    }
-
-    /**
-     * <b>The growing row: one pen per spreading gene, floored with what that
-     * gene can actually convert.</b>
-     *
-     * <p>All of them fail in a way that looks exactly like the gene being
-     * broken, and the reason is always the floor. {@code
-     * GeneAbilityHandler.convert} is a whitelist per cover and they do not
-     * overlap: <b>grass</b> only converts bare dirt, so a grass pen floored
-     * with grass can never show anything; and a <b>sapling</b> is the only one
-     * that builds upward, so it needs air with grass or dirt under it.
-     *
-     * <p>Each pen is floored for its own gene and nothing else, which is the
-     * difference between "the gene does not work" and "the gene had nothing to
-     * work on" - the second of which is what the dryad plot was for two
-     * sessions.
-     */
-    private static void buildGrowingRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        // ROW A'S WEST BLOCK, not a row of its own. Two pens do not need
-        // nine blocks of depth and an aisle to themselves when row A's west
-        // half is standing empty - the bone-meal pen was there and is
-        // confirmed - and A is sixteen deep against these nine.
-        int z = mouthZ + ROW_A;
-        // Both west. The east block of this row is the spawner room and the
-        // ward post, and nothing may cross the centre walkway: WEST_MAX and
-        // EAST_MIN are what keep every gate reachable from the corridor door.
-        int[] at = {cx + WEST_MIN, cx + WEST_MIN + 10};
-        int slot = 0;
-        int x = at[slot];
-
-        // Verdant's three are CONFIRMED (2026-09-12) and their pens are gone.
-        // What is left is the row of slow ones - the tests that cannot be
-        // answered by standing still and looking, only by leaving and coming
-        // back, which is exactly what this dimension is for.
-        //
-        // TWO DRYAD PENS LEFT of the four this row had on 2026-09-13, and the
-        // two that went were both answered out of one night's log rather than
-        // by looking at anything.
-        //
-        // DRYAD MIXED is gone: a heterozygote plants BOTH of its alleles, which
-        // was the new inheritance rule and the only thing that pen was for. The
-        // watch counted oak and birch separately and saw both appear, and one
-        // of the oaks closed the loop by becoming a tree (6 logs, 53 leaves).
-        // What it did NOT establish is the half-rate RATIO - the counts were
-        // ones and twos - and a pen is the wrong instrument for a rate anyway;
-        // that belongs with gaps 208 and 211, which are about exactly that.
-        //
-        // DRYAD BONE is gone with it - see the deleted buildBoneMealPen.
-
-        // 1. THE DARK OAK, which is the whole reason the locus was rebuilt.
-        // A matched pair, so it plants only dark oak and they accumulate; the
-        // translator then clusters them toward each other until a 2x2 closes.
-        // THIS IS THE ONE MOST LIKELY TO BE WRONG - the clustering search is
-        // new code with no test behind it, and it fails INVISIBLY, as a pen of
-        // saplings that never become anything, which is the exact symptom it
-        // was written to cure.
-        growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
-                "horsegenetics.dryad", "Dark/Dark",
-                List.of("DRYAD DARK", "needs a 2x2 -", "do they CLUSTER?", "or scatter?"));
-        DebugWorldWatch.watch("DRYAD DARK", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
-                Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
-        x = at[++slot];
-
-        // 2. THE MUSHROOM, and its floor is the test. Half podzol, half grass:
-        // a mushroom survives ANY light on podzol and needs darkness on grass,
-        // so in a lit yard the pass is mushrooms on the podzol half and NONE on
-        // the grass half. A pen that is all one thing could not tell "canSurvive
-        // is being consulted" from "the gene does not work", which is the
-        // distinction this whole change is about.
-        growPen(level, gy, x, z, Blocks.PODZOL.defaultBlockState(),
-                "horsegenetics.dryad", "Mush/Mush",
-                List.of("DRYAD MUSH", "podzol half ONLY", "- none on the", "grass is a PASS"));
-        for (int gx = x + (PEN_W / 2) + 1; gx <= x + PEN_W; gx++) {
-            for (int gz = z; gz <= z + PEN_D; gz++) {
-                DebugPenManager.groundColumn(level, gx, gy, gz,
-                        Blocks.GRASS_BLOCK.defaultBlockState());
-            }
-        }
-        // TWO WATCH AREAS OVER ONE PEN, because one could not answer the
-        // question the pen was built to ask. The pass is "mushrooms on the
-        // podzol half and NONE on the grass half", and a single tally reading
-        // "1x red_mushroom" for the whole pen says a mushroom exists somewhere
-        // and nothing about which half it is on - so the canSurvive check, the
-        // entire point of the floor being split, was unreadable. It read that
-        // way all of 2026-09-13. Now the two halves report separately and the
-        // pass is the shape of the pair, not a number that needs interpreting.
-        int mid = x + (PEN_W / 2);
-        DebugWorldWatch.watch("DRYAD MUSH - PODZOL (should fill)",
-                box(x, gy, z, mid, gy + 1, z + PEN_D), null,
-                Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.PODZOL);
-        DebugWorldWatch.watch("DRYAD MUSH - GRASS (must stay empty)",
-                box(mid + 1, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
-                Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.GRASS_BLOCK);
-    }
 
     /**
      * <b>The bone-meal pen is gone, and this note is what it produced.</b>
@@ -828,52 +446,6 @@ final class DebugTestYard {
      * hooked, so a future regression shows up as a crop in that list from
      * anywhere in the dimension, which is broader than this pen ever was.
      */
-    /**
-     * One growing pen: the floor its gene needs, walls, a sign saying what the
-     * floor should turn into, and two carriers - two, so a failure cannot be
-     * "the one horse stood in a corner".
-     */
-    private static void growPen(ServerLevel level, int gy, int x0, int z0, BlockState floor,
-                                String key, String tokens, List<String> sign) {
-        int x1 = x0 + PEN_W;
-        int z1 = z0 + PEN_D;
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, floor);
-            }
-        }
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
-        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), 2, 0, tokens);
-    }
-
-    /**
-     * <b>The row along the back: the two tests that still want a person.</b>
-     *
-     * <p>Everything else in the yard now runs on a clock. These two do not, and
-     * they stay because they are cheap to do on the way past rather than
-     * because they suit a night.
-     */
-    private static void buildStockedRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        int z = mouthZ + ROW_F;
-        int x = cx + WEST_MIN;
-
-        // THE LOOK IS CONFIRMED (2026-09-13, "starburst looks fine"). What is
-        // left is not a visual question at all: the emblem's size rides the
-        // gene's DIAL, drawn per allele copy, so a foal's should sit near its
-        // parents' rather than re-rolling. That is the only thing the dial has
-        // ever claimed and nothing has tested it - hence three mares and a
-        // stallion, and golden carrots in batch 1.
-        stockedPen(level, gy, x, z, "horsegenetics.starburst", "W/W", 3, 1,
-                List.of("STARBURST", "LOOK is confirmed.", "BREED a pair: foal", "like its parents?"));
-        x = cx + WEST_MIN + 10;
-
-        // 0-CQ needs no horse, but the highlight is easiest to judge with a
-        // herd in front of you, and a lead only exists where there is one.
-        stockedPen(level, gy, x, z, "horsegenetics.lantern", null, 3, 0,
-                List.of("F8 HERD", "press F8 twice:", "2nd says OFF?", "lead in red?"));
-    }
-
     /**
      * The spur. <b>It only builds walls where there is nothing to walk on.</b>
      *
@@ -999,212 +571,6 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>A roofed, unlit stone box with a door.</b>
-     *
-     * <p>Two things in this yard need the dark and they need it for opposite
-     * reasons: a spawner will not run in the light, and a glow cannot be judged
-     * in it. The dimension has a sky and follows the world's clock, so
-     * {@code /testkit night} makes it night - but the corridor and the yard are
-     * lit by glowstone lines by design, and a glowing horse standing under one
-     * is a horse you cannot see glowing. A room with a lid is the only place in
-     * here that is actually dark.
-     */
-    static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
-                                 int doorX) {
-        darkRoom(level, gy, x0, x1, z0, z1, doorX, true);
-    }
-
-    /**
-     * {@code spawnProof} is the difference between a room that is dark for
-     * <i>looking</i> and one that is dark for <i>spawning</i>, and getting it
-     * wrong in either direction ruins a test. The glow room wants the first: it
-     * must be black to the eye and must not fill with zombies overnight. The
-     * ward chambers want the second and would measure nothing at all with a
-     * light block in them - which is exactly what they would have inherited,
-     * because this method is shared.
-     */
-    static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
-                                 int doorX, boolean spawnProof) {
-        BlockState stone = Blocks.STONE_BRICKS.defaultBlockState();
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
-                DebugPenManager.groundColumn(level, x, gy, z, stone);
-                for (int y = gy + 1; y <= gy + 4; y++) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, y, z),
-                            edge ? stone : Blocks.AIR.defaultBlockState());
-                }
-                DebugPenManager.fastSet(level, new BlockPos(x, gy + 5, z), stone);
-            }
-        }
-        // A DOOR, not a hole. A two-wide gap let the yard's glowstone straight
-        // in - so the glow room was never dark - and let the horses straight
-        // out. A closed wooden door blocks light and a horse cannot open one,
-        // which is both requirements with no redstone in it.
-        BlockState lower = Blocks.OAK_DOOR.defaultBlockState()
-                .setValue(DoorBlock.FACING, Direction.NORTH)
-                .setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER);
-        BlockState upper = Blocks.OAK_DOOR.defaultBlockState()
-                .setValue(DoorBlock.FACING, Direction.NORTH)
-                .setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER);
-        level.setBlockAndUpdate(new BlockPos(doorX, gy + 1, z0), lower);
-        level.setBlockAndUpdate(new BlockPos(doorX, gy + 2, z0), upper);
-        // A torch outside it, so the door is findable from the yard without
-        // putting any light inside the room.
-        DebugPenManager.fastSet(level, new BlockPos(doorX + 1, gy + 2, z0 - 1),
-                Blocks.TORCH.defaultBlockState());
-
-        // LIGHT LEVEL ONE, AND INVISIBLE. From 2026-09-13 the dimension has a
-        // biome that spawns zombies in the dark, which is what the ward test
-        // has always needed - and it turns a sealed unlit box into a zombie
-        // trap that fills overnight. The dimension spawns monsters at block
-        // light 0 exactly, so ONE is enough to stop it, and one is still black
-        // to the eye: a glow is judged against the room, and a room at 1 looks
-        // the same as a room at 0 while a room full of zombies does not.
-        //
-        // EVERY FLOOR BLOCK, at head height, and that is the whole fix. The
-        // first version put nine of these at gy+4 on a four-block grid and it
-        // did nothing at all: light falls off by one per block, so a source of
-        // level ONE lights its own position and nothing else. The room read
-        // zero at the floor and kept spawning - the log from 2026-09-13 has
-        // natural zombies in the ward room by the dozen, which is exactly what
-        // this was written to prevent and exactly what it failed to. There is
-        // no spacing that works for a level-1 source; the only grid that
-        // covers a floor is the floor.
-        if (spawnProof) {
-            BlockState dim = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 1);
-            for (int x = x0 + 1; x < x1; x++) {
-                for (int z = z0 + 1; z < z1; z++) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z), dim);
-                }
-            }
-        }
-    }
-
-    /**
-     * <b>The holy ward's NON-INTERFERENCE half, which is the only half this
-     * dimension can test.</b> A dark stone box with a real zombie spawner in
-     * it: stand the warded horse outside and the spawner must keep producing.
-     *
-     * <h2>It cannot show the ward working, and two separate facts say so</h2>
-     * This pen was signed "the spawner must KEEP going" and then written up as
-     * though the distance column would prove the ward <i>wards</i>. It will
-     * not, ever:
-     *
-     * <ul>
-     *   <li><b>The ward does not cancel spawner spawns on purpose.</b>
-     *       {@code GeneWardHandler.isNatural} gates on the spawn reason and
-     *       lets spawner blocks, eggs, breeding, structures, dispensers and
-     *       commands straight through - because a gene that silently broke
-     *       somebody's mob farm is the failure that whole design is avoiding.
-     *       So every zombie this spawner makes is <i>expected</i> to appear,
-     *       warded horse or not.</li>
-     *   <li><b>Natural spawning cannot happen in this dimension at all.</b>
-     *       {@code debug_pens} generates {@code minecraft:the_void}, and the
-     *       void biome carries no mob spawn entries - so there is nothing for
-     *       the ward to cancel anywhere in the horse dimension, at any light
-     *       level, at any distance.</li>
-     * </ul>
-     *
-     * <p>And even in a real world the warding half only matters <b>more than 24
-     * blocks from every player</b>, because vanilla never naturally spawns a
-     * monster closer than that and the ward reaches 8 to 16
-     * ({@code known-gaps.html} gap 180).
-     *
-     * <p><b>So what is left here is the test that actually mattered</b>, and
-     * {@code wiki/gene-holy-ward.html#verification} ranks it above the other:
-     * <i>holy ward can break somebody's mob farm without erroring</i>. It hooks
-     * a global, high-frequency event shared with every other mod in the pack,
-     * and if the allow-list is wrong a spawner stops producing and nothing
-     * anywhere says why. <b>A steady stream of zombies beside a warded horse is
-     * the pass.</b> Silence is the bug - and silence is also what a player
-     * standing too far away produces, which is the other thing this pen has
-     * already been caught on.
-     */
-    private static void buildSpawnerRoom(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MIN + 12;
-        int z0 = mouthZ + ROW_A;
-        int z1 = z0 + 12;
-        darkRoom(level, gy, x0, x1, z0, z1, cx + 8);
-        BlockPos spawner = new BlockPos((x0 + x1) / 2, gy + 1, (z0 + z1) / 2);
-        DebugPenManager.fastSet(level, spawner, Blocks.SPAWNER.defaultBlockState());
-        // Set it to zombies here rather than leaving an empty spawner for the
-        // tester to charge with an egg: an empty one produces nothing, which is
-        // indistinguishable from the ward having stopped it.
-        level.setBlock(spawner, Blocks.SPAWNER.defaultBlockState(), 3);
-        if (level.getBlockEntity(spawner) instanceof SpawnerBlockEntity be) {
-            be.setEntityId(EntityType.ZOMBIE, level.getRandom());
-            be.setChanged();
-        }
-        // A PEN FOR THE WARD POST, because it was the loose horse. Owner,
-        // 2026-09-13: "also there's a loose horse." This one, and it had always
-        // been loose - it is deliberately OUTSIDE the spawner room (a horse
-        // shut in a dark box with a spawner is a horse being hit by zombies)
-        // and nothing ever fenced it. That cost nothing while it stood where it
-        // was put; the new safe-spawn search nudged it three blocks clear of
-        // the sign it had been placed inside, and a tamed horse with somewhere
-        // to walk walks. It still stands outside the door, which is the part
-        // the test needs - it just cannot wander off now.
-        // BESIDE the room, not in front of it: row A begins three blocks from
-        // the yard's mouth and a pen needs more than that, so the first
-        // attempt at this put the ward post OUTSIDE the yard's north wall
-        // entirely. Caught by the layout audit rather than in game, which is
-        // the second time that script has earned its keep.
-        int wx0 = cx + EAST_MIN + 14;
-        int wx1 = cx + EAST_MAX;
-        fencedPlot(level, gy, wx0, wx1, z0, z1 - 4);
-        DebugPenManager.placeSign(level, new BlockPos(wx0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("WARD: NO HARM", "STAND HERE - a", "spawner needs you", "within 16 blocks"));
-        stock(level, gy, wx0 + 3.0, z0 + 4.0, "horsegenetics.holy_ward", "THE WARD POST", 1, 0, null);
-        DebugWorldWatch.watch("WARD + SPAWNER", box(x0, gy, z0 - 3, x1, gy + 4, z1), null);
-    }
-
-    /**
-     * <b>A base coat pale enough to show a dark mark AND a white one.</b>
-     *
-     * <p>A stocked horse names only the locus under test and every other locus
-     * falls to its default, which is a <b>black</b> horse - and on a black
-     * horse a dark marking simply is not there. The owner hit this on
-     * 2026-09-11 with a barred wing and a nightbell foxglove, both of which
-     * "vanished". Chestnut with one cream copy is pale gold, which a black mark
-     * and a white mark both stand out on, and it is the same base the test
-     * kit's own intake eggs use.
-     */
-    static final String PALE = "horsegenetics.extension=e/e-horsegenetics.matp=Cr/N";
-
-    /**
-     * <b>The display row: eight coat genes nobody has ever seen on a horse.</b>
-     *
-     * <p>These are the simplest tests in the project and they have been the
-     * most expensive to run, because the only way to do one was to find the
-     * right spawn egg, spawn it, look, and repeat - two whole hotbar batches of
-     * it. A stall each turns two batches into a walk, which is the entire
-     * point: the owner's time in the game is the scarcest thing here and
-     * fetching is the cheapest thing to delete.
-     *
-     * <p><b>Two horses per stall, not one.</b> Most of these are questions about
-     * <i>variation</i> - do the drips have their own lengths, does the emblem
-     * land somewhere new - and one horse cannot answer a question about
-     * variation. Every horse from one preset rolls its own epigenome, so two
-     * side by side is the comparison.
-    /**
-     * <b>Saddle everything in a pen.</b> A ridden test whose first step is
-     * "find a saddle" is a ridden test that gets put off, and these two are the
-     * only pens in the yard that need one - everything else is watched rather
-     * than sat on.
-     *
-     * <p>A real saddle, not the bareback-steering phantom: this is the horse
-     * being equipped, not a bond tier being simulated.
-     */
-    static void saddleAll(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
-        for (Horse horse : level.getEntitiesOfClass(Horse.class,
-                new AABB(x0, gy, z0, x1 + 1, gy + 4, z1 + 1))) {
-            horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
-        }
-    }
-
-    /**
      * <b>Put carriers of one gene where its test happens, tamed.</b>
      *
      * <p>A test whose first step is "find the right spawn egg" is a test that
@@ -1240,7 +606,9 @@ final class DebugTestYard {
     /**
      * The same, on a named base coat - {@code base} is a genotype fragment
      * appended to this locus's, for a marking that would be invisible on the
-     * default black horse. See {@link #PALE}.
+     * default black horse - which is where a dark marking vanishes (the owner, 2026-09-11: a barred
+     * wing and a nightbell foxglove); chestnut with one cream copy,
+     * {@code horsegenetics.extension=e/e-horsegenetics.matp=Cr/N}, shows both dark and white marks.
      */
     static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens, String base) {
@@ -1291,26 +659,6 @@ final class DebugTestYard {
         horse.setCustomNameVisible(true);
     }
 
-    /**
-     * <b>A signed, stocked pen in the row along the back of the yard.</b>
-     *
-     * <p>The yard used to be four plots you brought horses to. It is now the
-     * place the horses already are: the owner's time in the game is the
-     * scarcest thing here, and "walk to the yard, then go back for the right
-     * eggs" spends it on fetching.
-     */
-    private static void stockedPen(ServerLevel level, int gy, int x0, int z0,
-                                   String key, String tokens, int mares, int studs,
-                                   List<String> sign) {
-        int x1 = x0 + PEN_W;
-        int z1 = z0 + PEN_D;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
-        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), mares, studs, tokens);
-    }
-
-    private static final int PEN_W = 9;
-    private static final int PEN_D = 9;
 
     /** A watch box, written the way a pen is: two corners in block coordinates. */
     static AABB box(int x0, int y0, int z0, int x1, int y1, int z1) {
@@ -1332,6 +680,41 @@ final class DebugTestYard {
     }
 
     /**
+     * <b>A glass cage over a {@link #fencedPlot}, for a pen whose horse will be brought low.</b>
+     *
+     * <p>Last Stand is doing its job when a horse near death bolts: {@code HorseEscapeGoal} adds
+     * {@code Escape.JUMP_BOOST} to its jump and presses jump at whatever blocks it, so a fence is no
+     * wall to it. KICK HUNTER found this on 2026-09-30 - at 3/22 it bolted from the husks and was out
+     * of the pen within twenty seconds, and the census read "horses 0" for the rest of the run (owner:
+     * "this is the Last Stand firing as intended ... You have to raise the walls"). A boosted jump
+     * clears more than any wall this yard would build, so the pen gets a lid: glass two high on the
+     * walls and a roof at {@code gy + 4}, above the lamps. The gate column is left open at
+     * {@code gy + 2} so a person can still walk in; a one-high gap is no way out for a horse. The corner
+     * torches stay, and so does any lamp a wall line crosses - a one-block hole is no way out either.
+     */
+    static void lidded(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+        BlockState glass = Blocks.GLASS.defaultBlockState();
+        int gateX = (x0 + x1) / 2;
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
+                boolean corner = (x == x0 || x == x1) && (z == z0 || z == z1);
+                boolean gate = z == z0 && (x == gateX || x == gateX + 1);
+                if (edge && !corner && !gate) {
+                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 2, z), glass);
+                }
+                // Not over a lamp: the yard's light blocks stand at gy + 3, four apart, and a wall that
+                // ate one would leave the pen dark enough to spawn in.
+                BlockPos wall = new BlockPos(x, gy + 3, z);
+                if (edge && !level.getBlockState(wall).is(Blocks.LIGHT)) {
+                    DebugPenManager.fastSet(level, wall, glass);
+                }
+                DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z), glass);
+            }
+        }
+    }
+
+    /**
      * <b>Every pen has water, sunk into its floor.</b> Owner, 2026-09-16: water is
      * standard in a pen from here on, in the ones that exist and the ones nobody has
      * written yet - which is why it lives in {@link #fencedPlot} rather than in each
@@ -1350,6 +733,20 @@ final class DebugTestYard {
      * <i>raised</i> blocks - flush with the grass this is not a step, so it may sit in
      * the corner of even a four-wide pen, where two clear blocks would not fit.
      */
+    /**
+     * <b>The one exception to water in every pen: a pen whose test is a horse that must STAY hurt.</b>
+     *
+     * <p>Since 2026-09-14 healing is paid for by hunger and gated only on water within
+     * {@code HorseCareHandler.HEAL_SCAN_RADIUS} - food underfoot stopped mattering. So the stone floors
+     * that kept the old dairy's mare hurt did nothing any more, and the infirmary's "the patients must
+     * not heal" control could only fail: two of its three patients were back at full health within
+     * five minutes, from the pen's own cauldron (2026-09-30, the first clockwork run). Undoes
+     * {@link #penWater} for a pen built by {@link #fencedPlot} at {@code (x0, z0)}.
+     */
+    static void dryPen(ServerLevel level, int gy, int x0, int z0) {
+        DebugPenManager.groundColumn(level, x0 + 1, gy, z0 + 1, Blocks.GRASS_BLOCK.defaultBlockState());
+    }
+
     static void penWater(ServerLevel level, int gy, int x, int z) {
         level.setBlockAndUpdate(new BlockPos(x, gy, z),
                 Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));

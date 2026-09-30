@@ -76,11 +76,13 @@
 </dl>
 
 <div class="note warn">
-    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <span class="label">Built 2026-09-04, partly play-tested</span>
     <p>
         The combination table, the founder distribution and the embryonic lethal are
-        unit-tested; nothing about the actual bucket interaction has been seen
-        in-game. Checklist on <a href="#verification">the Verification tab</a>.
+        unit-tested, and the bucket's milk, water and refusals are
+        <a href="#verified">verified</a>; lava, the cooldowns and the
+        <code>Watr/Lava</code> breeding refusal have not been seen in-game. Checklist on
+        <a href="#verification">the Verification tab</a>.
     </p>
 </div>
 
@@ -193,8 +195,9 @@
             yet&rdquo; rather than eating the click silently.</li>
     </ul>
     <p>
-        Still open: a tamed but hurt mare gets neither milk nor a mount and no
-        message (no denial yield covers that case).
+        A tamed but hurt mare, once refused in silence, now says she is hurt and
+        will not give milk until she has healed &mdash; <a href="#verified-clockwork-dairy">seen
+        2026-09-30</a>.
     </p>
 </div>
 
@@ -202,6 +205,19 @@
 
 <p id="verified-milking">
     <strong>Milking works</strong> (the yard's dairy, row D west, by 2026-09-13).
+</p>
+
+<p id="verified-clockwork-dairy">
+    <strong>Every refusal says why and keeps the bucket; a mare gives milk and a <code>Watr/Watr</code>
+    stallion gives water</strong> (2026-09-30, the <a href="horse-dimension.html#clockwork">clockwork</a> run in
+    the debug test yard). MILK BY CLOCK, row J west, holds a bucket out from a fake player that keeps every
+    chat line, and each case is one <code>CLOCKWORK PASS</code> line, on every run from the second on. A plain
+    mare and a <code>Mlk/Mlk</code> mare each filled a bucket with milk. The hurt mare (health 11 of 22) refused
+    with &ldquo;She's hurt, and won't give milk until she's healed.&rdquo;, the stallion with &ldquo;The
+    stallion kicks you.&rdquo;, the foal with &ldquo;A foal has no milk to give.&rdquo;, and a mare milked two
+    minutes earlier with &ldquo;Nothing to give yet - try again later.&rdquo;; each kept its bucket. The
+    <code>Watr/Watr</code> stallion gave a water bucket. So the plain yield is a grown mare&rsquo;s alone, the
+    water yield is any grown horse&rsquo;s, and the hurt-mare case that once got no message now gets one.
 </p>
 
 </section>
@@ -226,22 +242,16 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Milking is rules and refusals rather than pixels: a foal, a hurt mare and an already-milked horse each refuse, a stallion milked with a bottle rears and kicks, and <code>Watr/Watr</code> bred to <code>Lava/Lava</code> must <strong>refuse with a chat line naming the cause</strong>.</p>
+    <p>The bucket's milk, water and refusals are shown; still open are lava from a <code>Lava/Lava</code> horse, the water and lava cooldowns, an untamed mare still mounting with a bucket, the stallion's kick actually doing damage, and <code>Watr/Watr</code> bred to <code>Lava/Lava</code> having to <strong>refuse with a chat line naming the cause</strong>.</p>
 </div>
 
-<h3 id="open-0913-dairy">The dairy's three refusals (still open after 2026-09-13)</h3>
-
-<p>Nothing here needs looking at to judge.</p>
-<ul>
-    <li><strong>The dairy's three refusals</strong> (row D west): a foal, a hurt mare, and
-        one already milked each refuse.</li>
-</ul>
-
 <h3 id="open-older-gene-milk">Still open from before 2026-09-13 (NOT played)</h3>
-<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last. The refusals' chat lines, a mare's milk and a <code>Watr/Watr</code> stallion's water are <a href="?view=coding#verified-clockwork-dairy">verified</a> and are not repeated here.</p>
 <ul>
-    <li><strong>A stallion milked with a bottle rears, kicks you and says so; a foal says it has nothing to give</strong> (tester guide, <em>Milking rules</em>; <a href="gene-milk.html">milk</a>).</li>
-    <li><strong>Milk rules.</strong> An untamed mare mounts normally with a bucket; a plain horse gives milk from a mare only; <code>milk=Watr/Watr</code> and <code>Lava/Lava</code> give water and lava from any grown horse, stallions included, on their own cooldowns (lava one minute). Breeding <code>Watr/Watr</code> to <code>Lava/Lava</code> refuses with a chat line naming the cause. <a href="gene-milk.html">Milk</a>; the hurt-mare case is <a href="known-gaps.html#gap-25">gap 25</a>.</li>
+    <li><strong>A stallion's kick lands.</strong> The clockwork read only his line; its fake player cannot
+        show the damage. <strong>Pass:</strong> milking a stallion costs you the point of health his
+        <code>deniedDamage 1</code> promises, beside the line.</li>
+    <li><strong>Milk rules.</strong> An untamed mare mounts normally with a bucket; <code>milk=Lava/Lava</code> gives lava from any grown horse, stallions included; water and lava each come back on their own cooldowns (lava one minute). Breeding <code>Watr/Watr</code> to <code>Lava/Lava</code> refuses with a chat line naming the cause. <a href="gene-milk.html">Milk</a>.</li>
 </ul>
 
 </section>

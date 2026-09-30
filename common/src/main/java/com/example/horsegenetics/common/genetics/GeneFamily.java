@@ -90,6 +90,24 @@ public enum GeneFamily {
                     + "of the animal away. The data-driven markings are in the seven families "
                     + "below this one, sorted by what shape they are made of."),
 
+    /**
+     * <b>Genes that grow a piece of the horse</b> rather than colouring it.
+     *
+     * <p>Its own family, and not a corner of {@link #MAGIC_CORE}, because these
+     * are the only genes in the mod whose output is not a texture. A horn is not a
+     * marking: it has a length in model units, it catches the light, it follows
+     * the head when the horse grazes, and none of those are things a coat gene can
+     * say. Filing the first one under "genes that put colour on the horse" would
+     * have been cheaper by one enum constant and would have given the next four -
+     * antlers, dorsal spines, crystals, wings - the wrong home to be born into.
+     */
+    MAGIC_PARTS("Magical grown parts", false, "Grown parts",
+            "Genes that grow a piece of the horse instead of colouring it - the mod's only "
+                    + "visuals that are not textures. Each hangs a small mesh on a part of the "
+                    + "horse that is already animated, so it follows a head-toss or a graze for "
+                    + "nothing, and each is shaped by numbers written on the allele copy: two "
+                    + "unicorns are no more alike than two coats are."),
+
     /** Non-painting: what the horse gives you, and what it leaves behind. */
     MAGIC_YIELD("Magical yield genes", false, "Yield and death",
             "Genes about what you get out of the horse rather than what it looks like - what "
@@ -324,6 +342,18 @@ public enum GeneFamily {
         // overlay pass, over the finished texture - but it is unambiguously a
         // marking and belongs with the genes that put colour on a horse.
         MAGICAL_OVERRIDES.put("horsegenetics.cutie_mark", MAGIC_CORE);
+
+        // The unicorn horn sits one priority slot after cutie mark for the same
+        // reason - its whole effect happens after the coat is finished - and lands
+        // in a different family for a better one: it grows geometry. See
+        // MAGIC_PARTS.
+        MAGICAL_OVERRIDES.put("horsegenetics.unicorn_horn", MAGIC_PARTS);
+        // And the three loci that finish the horn it grows - its colour, its glow
+        // and its dust. They do nothing to a horse without one, so they belong
+        // beside it rather than with the coat or yield genes their outputs resemble.
+        MAGICAL_OVERRIDES.put("horsegenetics.horn_colour", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.horn_glow", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.horn_dust", MAGIC_PARTS);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a

@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
+import com.example.horsegenetics.common.genetics.GrownParts;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
@@ -53,6 +54,16 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // After the marks: a braid is worked into the hair and sits on top of
         // everything the coat did, the same way the emissive pass does.
         this.addLayer(new BraidLayer(this));
+        // Grown parts - a unicorn's horn - after every pass that touches the coat
+        // and before the tack. The position is a real choice and not an accident of
+        // where the line was typed: a part is SEPARATE GEOMETRY rather than an
+        // overlay, so it must not be drawn between a coat pass and the pass that
+        // corrects it; and it goes before the armour and saddle layers because those
+        // are vanilla's bakes of the whole horse and a part is a small thing sitting
+        // proud of it. Nothing on the head competes with the tack today, which is
+        // why this is cheap to revisit when a saddle pad or a set of dorsal spines
+        // makes it matter.
+        this.addLayer(new AttachedPartLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,
@@ -111,7 +122,66 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                     com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE);
             geneticState.braidTail = braidColour(horse,
                     com.example.horsegenetics.neoforge.entity.HorseTackSlot.TAIL);
+            // Once per frame per horse, and once only: every layer reads the
+            // field rather than asking again, so that the coat, the glow, a
+            // braid and the gear cannot disagree about how solid this horse is.
+            geneticState.fadeAlpha = RiderFade.alphaFor(horse);
+            // The same discipline for grown parts, and for a second reason:
+            // resolving them walks the genotype and the epigenome, so asking per
+            // submit the way CutieMarkLayer does would pay that per frame for every
+            // horse in a pen. The config switches are resolved here too, so a
+            // disabled part costs one field test in the layer and not a config read
+            // per part.
+            geneticState.parts = GrownParts.of(
+                    geneticState.coatData.genotype(), geneticState.coatData.epigenome());
+            geneticState.drawParts = ClientConfig.parts()
+                    && withinPartsDistance(renderState);
+            geneticState.drawPartGlow = ClientConfig.partsGlow();
         }
+    }
+
+    /**
+     * <b>A fading horse is drawn on a translucent pipeline, because a tint
+     * alone would not fade it.</b>
+     *
+     * <p>The model's own render type is a <i>cutout</i>
+     * ({@code RenderPipelines.ENTITY_CUTOUT_NO_CULL}), and a cutout pipeline
+     * carries no {@code BlendFunction} at all - it discards a fragment below
+     * an alpha of 0.1 and draws everything above it fully opaque. Feeding it a
+     * half-transparent tint does not make a faint horse; it makes an ordinary
+     * solid horse, and then at a low enough alpha a horse that vanishes
+     * outright. {@code ENTITY_TRANSLUCENT} is the same shader with
+     * {@code BlendFunction.TRANSLUCENT} on its colour target, and is already
+     * no-cull, which is what a see-through animal wants anyway.
+     *
+     * <p>Only swapped while actually fading. Translucent geometry is sorted and
+     * blended rather than depth-tested outright, so drawing every horse in the
+     * world that way would cost something and change how they look for no
+     * reason.
+     */
+    @Override
+    protected net.minecraft.client.renderer.rendertype.RenderType getRenderType(
+            HorseRenderState state, boolean isBodyVisible, boolean forceTransparent, boolean appearGlowing) {
+        if (isBodyVisible && !forceTransparent
+                && state instanceof GeneticHorseRenderState genetic && genetic.isFading()) {
+            return net.minecraft.client.renderer.rendertype.RenderTypes
+                    .entityTranslucent(this.getTextureLocation(state));
+        }
+        return super.getRenderType(state, isBodyVisible, forceTransparent, appearGlowing);
+    }
+
+    /**
+     * And the alpha itself. Vanilla multiplies this into the model colour
+     * ({@code ARGB.multiply(baseColor, getModelTint(state))}), so a white tint
+     * with a reduced alpha means "the same coat, fainter" - which is exactly
+     * right for a generated texture whose colours are the whole point of it.
+     */
+    @Override
+    protected int getModelTint(HorseRenderState state) {
+        if (state instanceof GeneticHorseRenderState genetic && genetic.isFading()) {
+            return RiderFade.tint(genetic.fadeAlpha);
+        }
+        return super.getModelTint(state);
     }
 
     /**
@@ -150,6 +220,23 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
      */
     private static boolean withinDetailDistance(HorseRenderState renderState) {
         double blocks = ClientConfig.coatDetailDistance();
+        return renderState.distanceToCameraSq <= blocks * blocks;
+    }
+
+    /**
+     * <b>Close enough to draw the horn?</b> Same field and same reasoning as
+     * {@link #withinDetailDistance}, on its own {@code parts.detailDistance} key
+     * because the two are trading different things: a coat past the line wears a
+     * stand-in, and a part past it is simply not drawn.
+     *
+     * <p>No hysteresis is needed here and there is a real difference behind that. A
+     * coat keeps whatever it has been given at any range, because swapping a texture
+     * back and forth across the line would flicker; a part that is not submitted
+     * leaves nothing behind to flicker against, so it may appear and disappear on
+     * the line itself.
+     */
+    private static boolean withinPartsDistance(HorseRenderState renderState) {
+        double blocks = ClientConfig.partsDetailDistance();
         return renderState.distanceToCameraSq <= blocks * blocks;
     }
 
@@ -235,6 +322,15 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 geneticState.breedLabel, true);
         geneticState.coatId = textures.coat();
         geneticState.emissiveCoatId = textures.glow();
+        // And the grown parts, for the same reason the two texture ids are here
+        // rather than in four screens: a screen's model horse was never in the world,
+        // so extractRenderState never ran for it. A pedigree of unicorns drawn
+        // without this would be a wall of hornless horses, which is a lie about what
+        // the genome says and exactly the bug the coat ids were moved here to stop.
+        // Nothing on a screen is far away, so the distance gate does not apply.
+        geneticState.parts = GrownParts.of(coat.genotype(), coat.epigenome());
+        geneticState.drawParts = ClientConfig.parts();
+        geneticState.drawPartGlow = ClientConfig.partsGlow();
     }
 
     /** The generated coat texture for one horse - shared with the family-tree node. */

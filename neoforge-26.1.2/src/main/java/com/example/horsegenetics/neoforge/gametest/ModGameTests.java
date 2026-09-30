@@ -8,6 +8,7 @@ import com.example.horsegenetics.neoforge.compat.WaystonesCompat;
 import com.example.horsegenetics.neoforge.data.RidingPassAttachment;
 import com.example.horsegenetics.neoforge.server.JockeyPassHandler;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.neoforge.server.EnderWhistleCalls;
 import com.example.horsegenetics.neoforge.server.HorseLeads;
 import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.server.HorseRealm;
@@ -1193,6 +1194,8 @@ public final class ModGameTests {
         register(event, environment, OLD_PAPERS_STILL_READ, 100);
         // Leash, untie, then five ticks for a ground drop to become visible.
         register(event, environment, WHISTLED_LEAD_COMES_BACK, 100);
+        // One horse, two mock players, all synchronous - nothing is dropped.
+        register(event, environment, VANILLA_LEAD_COMES_BACK, 100);
         // One chunk generated and decorated, then six block reads, in one tick.
         register(event, environment, HORSE_REALM_IS_BUILT, 200);
         // Four thousand hashes; no world touched at all.
@@ -1205,6 +1208,12 @@ public final class ModGameTests {
         register(event, environment, WAYSTONE_CLEARANCE_IS_NEAREST, 200);
         // Pure arithmetic on a record; no world touched.
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
+        // One horse spawned and three events posted, all inside a single tick.
+        register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
+        // One horse spawned, two attachment writes, two calls; one tick.
+        register(event, environment, WHISTLE_NEEDS_BOND, 100);
+        // Four horses spawned and seven interact events posted, all in one tick.
+        register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
     }
 
     /**
@@ -1382,6 +1391,448 @@ public final class ModGameTests {
             helper.assertItemEntityNotPresent(Items.LEAD, BlockPos.ZERO, 16.0);
             helper.succeed();
         });
+    }
+
+    /**
+     * <b>A lead that <i>vanilla</i> drops goes back to whoever tied it on.</b>
+     * The other half of {@link #WHISTLED_LEAD_COMES_BACK}, and a much less
+     * direct piece of machinery: two mixins and a stored UUID, where that one
+     * was a method call.
+     *
+     * <p>Four things are asserted, and three of them are about the parts that
+     * are <b>invisible when they break</b>.
+     *
+     * <ol>
+     *   <li><b>The placer is recorded at all.</b> If {@code LeashPlacerMixin}
+     *       never fires there is nobody to give anything to and the whole
+     *       feature is silently absent - which looks exactly like vanilla,
+     *       because it <i>is</i> vanilla.</li>
+     *   <li><b>Tying to a fence does not erase it.</b> This is the load-bearing
+     *       claim in {@code LeashPlacerMixin}'s javadoc and it is a claim about
+     *       vanilla's control flow, not about this mod: that
+     *       {@code Leashable.setLeashedTo} reaches {@code setLeashData} only on
+     *       a <i>first</i> attachment and takes a {@code setLeashHolder} branch
+     *       afterwards. If that is wrong, the fence case - the one the whole
+     *       design exists for, since a knot has no player in it - loses its
+     *       placer at the moment of tying.</li>
+     *   <li><b>An unreachable placer is refused</b>, so vanilla drops the lead
+     *       where it always did. The rule is never hold a lead for later, and
+     *       a lead that goes nowhere is worse than doing nothing at all.</li>
+     *   <li><b>The right player gets it, the record is cleared, and a
+     *       different player is refused</b> - a lead handed to whoever happens
+     *       to ask would be a quiet theft, and a record left behind would mint
+     *       a second lead on the next drop.</li>
+     * </ol>
+     *
+     * <p><b>It drops nothing on the ground, deliberately.</b> The first draft
+     * asserted case 3 by really calling {@code dropLeash()} and finding the
+     * lead on the floor - and it broke {@code whistled_lead_comes_back}, whose
+     * own {@code assertItemEntityNotPresent} reaches sixteen blocks and found
+     * this test's lead in the neighbouring plot. A test that litters the shared
+     * world is a test that fails its neighbours.
+     *
+     * <p><b>Nor does it make a real player.</b> A gametest server has nobody on
+     * it, so the only player {@code getPlayerList()} could find is one built by
+     * {@code makeMockServerPlayerInLevel} - {@code @Deprecated(forRemoval)},
+     * and it really joins the player list, which fires this mod's join payloads
+     * down an {@code EmbeddedChannel} that has negotiated nothing and takes the
+     * run down with <i>"Payload horsegenetics:gene_database_sync may not be
+     * sent to the client"</i>. So the test drives
+     * {@link HorseLeads#giveRecordedLeadTo} and leaves the one line above it,
+     * the player-list lookup, to the in-game check.
+     *
+     * <p><b>That the mixins are applied is not this test's job.</b> The mixin
+     * config's {@code defaultRequire} of 1 is a stronger guarantee than a
+     * gametest could give: a target that stops matching refuses to boot the
+     * game rather than quietly doing nothing. What is asserted here is
+     * everything that would still be wrong with both mixins happily applied.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> VANILLA_LEAD_COMES_BACK =
+            TEST_FUNCTIONS.register("vanilla_lead_comes_back", () -> ModGameTests::vanillaLeadComesBack);
+
+    private static void vanillaLeadComesBack(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.leadsReturn()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.leads_return is off in this run's server config, so this test"
+                            + " asserts the wrong branch - turn it back on rather than deleting"
+                            + " the test"), 0);
+        }
+
+        net.minecraft.world.entity.player.Player placer =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Player stranger =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        if (placer.getUUID().equals(stranger.getUUID())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the two mock players share a UUID, so the wrong-player case below would"
+                            + " pass whatever the code did - the premise is broken"), 0);
+        }
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+
+        // --- 1. the placer is written down when the lead goes on -------------
+        horse.setLeashedTo(placer, true);
+        if (!horse.isLeashed()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse would not take a leash at all - the premise is broken,"
+                            + " not the mixin"), 0);
+        }
+        if (!HorseLeads.placerOf(horse).filter(placer.getUUID()::equals).isPresent()) {
+            throw new GameTestAssertException(Component.literal(
+                    "nobody was recorded as tying the lead on, so there would be nobody to"
+                            + " give it back to and the feature is silently absent."
+                            + " LeashPlacerMixin is not firing on Mob.setLeashData."), 0);
+        }
+
+        // --- 2. and moving that lead onto a fence knot does not wipe it ------
+        net.minecraft.world.entity.decoration.LeashFenceKnotEntity knot =
+                net.minecraft.world.entity.decoration.LeashFenceKnotEntity.getOrCreateKnot(
+                        helper.getLevel(), helper.absolutePos(BlockPos.ZERO));
+        horse.setLeashedTo(knot, true);
+        if (!HorseLeads.placerOf(horse).filter(placer.getUUID()::equals).isPresent()) {
+            throw new GameTestAssertException(Component.literal(
+                    "tying the horse to a fence erased who tied the lead on. A knot has no"
+                            + " player in it anywhere, so that is precisely the case the stored"
+                            + " UUID exists for - vanilla's setLeashedTo is no longer taking the"
+                            + " setLeashHolder branch this rests on."), 0);
+        }
+
+        // --- 3. a placer nobody can reach is refused, so vanilla drops it ----
+        if (HorseLeads.divertLeadDrop(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the lead was taken off the ground for a placer who is not on the server"
+                            + " - it has gone nowhere at all, which is worse than the ground"
+                            + " drop this replaces"), 0);
+        }
+
+        // --- 4. the right player gets it; the wrong one does not -------------
+        if (HorseLeads.giveRecordedLeadTo(horse, stranger)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a player who did not tie the lead on was handed it anyway"), 0);
+        }
+        if (!HorseLeads.giveRecordedLeadTo(horse, placer)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the player who tied the lead on was refused it"), 0);
+        }
+        if (!placer.getInventory().contains(st -> st.is(Items.LEAD))) {
+            throw new GameTestAssertException(Component.literal(
+                    "giveRecordedLeadTo said yes but no lead reached the pack - it has been"
+                            + " destroyed rather than returned"), 0);
+        }
+        if (HorseLeads.placerOf(horse).isPresent()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the placer was not cleared after the lead was handed over, so a second"
+                            + " drop would mint a second lead out of nothing"), 0);
+        }
+        if (HorseLeads.giveRecordedLeadTo(horse, placer)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a second lead was handed out for the same leash - this is a dupe"), 0);
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>A rider mines at full speed; nobody else gets a boost.</b>
+     *
+     * <p>{@link com.example.horsegenetics.neoforge.server.MountedMiningHandler}
+     * multiplies break speed by five to undo vanilla's airborne penalty, and the
+     * dangerous failure is not that it does nothing - it is that it fires when
+     * the penalty was never charged and hands out <b>five times</b> the mining
+     * speed. So the three branches are asserted separately: the exemption, and
+     * the two refusals that bound it.
+     *
+     * <p><b>Here rather than in JUnit</b> for the module's usual reason - the
+     * NeoForge test classpath carries no Minecraft - and it goes through
+     * {@code NeoForge.EVENT_BUS} rather than calling the handler directly, so a
+     * handler that was written but never registered fails it.
+     *
+     * <p>The ground flags are <b>set by hand</b> rather than played out. Whether
+     * a real mounted player's {@code onGround} is genuinely false is a claim
+     * about vanilla's movement code, not about this handler, and it is on the
+     * page's Verification tab to be timed in-game. What this test owns is that
+     * given each posture, the handler does the right thing.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> MOUNTED_MINING_IS_EXEMPT =
+            TEST_FUNCTIONS.register("mounted_mining_is_exempt", () -> ModGameTests::mountedMiningIsExempt);
+
+    private static void mountedMiningIsExempt(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.mountedMiningPenaltyRemoved()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.mounted_mining_penalty_removed is off in this run's server"
+                            + " config, so this test asserts the wrong branch - turn it back on"
+                            + " rather than deleting the test"), 0);
+        }
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        // force, and without the mount game event: a mock player is not in the
+        // level's entity list, and only getVehicle() matters to the handler.
+        player.startRiding(horse, true, false);
+        if (player.getVehicle() != horse) {
+            throw new GameTestAssertException(Component.literal(
+                    "the mock player would not mount at all - this test's premise is broken,"
+                            + " not MountedMiningHandler"), 0);
+        }
+
+        // Riding a horse that is standing still: vanilla charged the fifth, so
+        // the handler gives it back whole.
+        horse.setOnGround(true);
+        player.setOnGround(false);
+        assertBreakSpeed(helper, player, 2.0F, 10.0F,
+                "a rider on a standing horse was not exempted from the airborne penalty");
+
+        // The dangerous one. Nothing was divided, so nothing may be multiplied.
+        player.setOnGround(true);
+        assertBreakSpeed(helper, player, 2.0F, 2.0F,
+                "break speed was multiplied for a player vanilla never penalised - this is a"
+                        + " 5x mining boost, not a comfort fix");
+
+        // Horse mid-jump or flying: the rider really is in the air.
+        player.setOnGround(false);
+        horse.setOnGround(false);
+        assertBreakSpeed(helper, player, 2.0F, 2.0F,
+                "the penalty was removed for a rider whose horse was itself off the ground");
+
+        helper.succeed();
+    }
+
+    /**
+     * Posts a real {@code BreakSpeed} for {@code player} at {@code given} and
+     * asserts the listeners left it at {@code expected}.
+     */
+    private static void assertBreakSpeed(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player player,
+            float given, float expected, String complaint) {
+        net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed event =
+                new net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed(
+                        player, Blocks.STONE.defaultBlockState(), given, BlockPos.ZERO);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
+        // Exact powers of two through one multiply, so the epsilon is only
+        // guarding against a future non-integer factor, not against drift.
+        if (Math.abs(event.getNewSpeed() - expected) > 1.0E-4F) {
+            throw new GameTestAssertException(Component.literal(
+                    complaint + " - gave " + given + ", expected " + expected
+                            + ", got " + event.getNewSpeed()), 0);
+        }
+    }
+
+    /**
+     * <b>An ender whistle will not bind to a horse that does not trust you.</b>
+     *
+     * <p>The gate is one tier boundary, so the test is the two values either
+     * side of it: bond 60 refused, bond 61 accepted. Anything else would be
+     * testing {@code behaviourTier()}, which is not this feature.
+     *
+     * <p>It calls {@link EnderWhistleCalls#bindRefusal} rather than posting an
+     * {@code EntityInteract}, because that method is the seam the real
+     * {@code onBind} goes through - the handler has exactly one call to it, so a
+     * gate that worked here and was never wired in could not happen without
+     * deleting that line. Posting the interact event would additionally test
+     * vanilla's interaction plumbing, which is not what is new.
+     *
+     * <p>A gametest and not JUnit for the module's usual reason, plus a specific
+     * one: the bond lives on a real data attachment, and setting it needs a real
+     * horse in a real level.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WHISTLE_NEEDS_BOND =
+            TEST_FUNCTIONS.register("whistle_needs_bond", () -> ModGameTests::whistleNeedsBond);
+
+    private static void whistleNeedsBond(GameTestHelper helper) {
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setTamed(true);
+        horse.setOwner(player);
+        if (com.example.horsegenetics.neoforge.server.HorseOwnership
+                .bindRefusal(horse, player, "Test") != null) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse is not owned by the mock player, so this would be testing"
+                            + " ownership rather than bond - the premise is broken, not the gate"), 0);
+        }
+
+        setBond(horse, 60);
+        if (EnderWhistleCalls.bindRefusal(horse, player, "Test") == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse one point below the bond threshold accepted a whistle - the gate"
+                            + " is not being applied"), 0);
+        }
+        setBond(horse, 61);
+        String atTier = EnderWhistleCalls.bindRefusal(horse, player, "Test");
+        if (atTier != null) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse at the bond threshold was refused: " + atTier), 0);
+        }
+        helper.succeed();
+    }
+
+    private static void setBond(net.minecraft.world.entity.animal.equine.Horse horse, int bond) {
+        var attachment = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
+        horse.setData(attachment, horse.getData(attachment).withBond(bond));
+    }
+
+    /**
+     * <b>Right-clicking a horse with a piece of tack puts it on - and the four
+     * clicks it must refuse, refuses in two different ways.</b>
+     *
+     * <p>It posts real {@code EntityInteract} events through
+     * {@code NeoForge.EVENT_BUS} rather than calling
+     * {@code TackEquipHandler} directly, for the reason
+     * {@code mounted_mining_is_exempt} does the same: a handler written but
+     * never registered would otherwise pass.
+     *
+     * <p><b>The two kinds of refusal are the point, and asserting them together
+     * would hide the one that matters.</b> Not-your-horse and a foal are
+     * <i>claimed</i> refusals - the event is cancelled and a line is sent -
+     * because they are rules this mod invented and a silent invented rule reads
+     * as a bug. Untamed, and "every slot that takes it is already full", are
+     * <i>unclaimed</i>: the event must come back uncancelled so vanilla still
+     * rears the wild horse and still lets you mount your own. A handler that
+     * cancelled all four would look correct in-game right up to the moment
+     * somebody could not get on a horse while holding a braid.
+     *
+     * <p>The other thing worth pinning is that the slot chosen is the first
+     * <i>empty</i> one and never a swap: two braids fill the mane and then the
+     * tail, and a third is refused with nothing consumed. A swap would look
+     * identical from the outside - a braid in the mane either way - and would
+     * quietly destroy the one already in it.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> RIGHT_CLICK_EQUIPS_TACK =
+            TEST_FUNCTIONS.register("right_click_equips_tack",
+                    () -> ModGameTests::rightClickEquipsTack);
+
+    private static void rightClickEquipsTack(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.rightClickEquipsTack()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.rightclick_equips_tack is off in this run's server config, so"
+                            + " this test asserts the wrong branch - turn it back on rather than"
+                            + " deleting the test"), 0);
+        }
+        var mane = com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE;
+        var tail = com.example.horsegenetics.neoforge.entity.HorseTackSlot.TAIL;
+        ItemStack probe = new ItemStack(com.example.horsegenetics.neoforge.item.ModItems.RESCUING_BRAID.get());
+        if (!probe.is(mane.tag()) || !probe.is(tail.tag())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the rescuing braid is not in gear/mane and gear/tail, so there is no item"
+                            + " in the game this handler could equip and this test exercises"
+                            + " nothing - the premise is broken, not TackEquipHandler"), 0);
+        }
+
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setTamed(true);
+        horse.setOwner(player);
+        if (!com.example.horsegenetics.neoforge.server.HorseOwnership.isOwner(horse, player.getUUID())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse is not owned by the mock player, so every case below would"
+                            + " be testing ownership - the premise is broken, not the handler"), 0);
+        }
+
+        // Three braids in hand, so the count is the record of what was spent.
+        ItemStack held = new ItemStack(
+                com.example.horsegenetics.neoforge.item.ModItems.RESCUING_BRAID.get(), 3);
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+
+        assertClaimed(helper, player, horse, true, "a braid offered to a bare mane");
+        if (mane.on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the first braid was not put in the mane"), 0);
+        }
+        if (!tail.on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the first braid went to the tail, so the roster is not being walked in"
+                            + " order and which slot a piece lands in is unpredictable"), 0);
+        }
+        assertHeld(helper, player, 2, "one braid should have been spent on the mane");
+
+        assertClaimed(helper, player, horse, true, "a second braid, the mane already full");
+        if (tail.on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the second braid did not fall through to the tail, so a full slot is not"
+                            + " being skipped in favour of the next one that fits"), 0);
+        }
+        assertHeld(helper, player, 1, "a second braid should have been spent on the tail");
+
+        // Both slots full. The click must be left alone: cancelling it here is
+        // how a player ends up unable to mount their own horse.
+        assertClaimed(helper, player, horse, false, "a third braid with nowhere left to put it");
+        assertHeld(helper, player, 1, "a third braid was consumed with nowhere to put it");
+
+        // A foal: claimed and refused, because "foals wear nothing" is our rule.
+        net.minecraft.world.entity.animal.equine.Horse foal =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        foal.setTamed(true);
+        foal.setOwner(player);
+        foal.setBaby(true);
+        assertClaimed(helper, player, foal, true, "a braid offered to a foal");
+        if (!mane.on(foal).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a foal was tacked up - HorseTackSlot.usableOn says foals wear nothing"), 0);
+        }
+        assertHeld(helper, player, 1, "a braid was spent on a foal that cannot wear it");
+
+        // Somebody else's horse: claimed and refused, for the same reason.
+        net.minecraft.world.entity.player.Player stranger =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        if (stranger.getUUID().equals(player.getUUID())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the two mock players share a UUID, so the ownership case below would pass"
+                            + " whatever the handler did - the premise is broken"), 0);
+        }
+        net.minecraft.world.entity.animal.equine.Horse theirs =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        theirs.setTamed(true);
+        theirs.setOwner(stranger);
+        assertClaimed(helper, player, theirs, true, "a braid offered to somebody else's horse");
+        if (!mane.on(theirs).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a stranger tacked up a horse they do not own"), 0);
+        }
+        assertHeld(helper, player, 1, "a braid was spent on a horse the player does not own");
+
+        // Untamed: NOT claimed. Vanilla rears the horse up, which is the answer.
+        net.minecraft.world.entity.animal.equine.Horse wild =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        assertClaimed(helper, player, wild, false, "a braid offered to an untamed horse");
+        if (!mane.on(wild).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "an untamed horse was tacked up"), 0);
+        }
+        assertHeld(helper, player, 1, "a braid was spent on an untamed horse");
+
+        helper.succeed();
+    }
+
+    /**
+     * Posts a real main-hand {@code EntityInteract} at {@code target} and
+     * asserts whether the listeners cancelled it. {@code claimed} is the whole
+     * assertion: an uncancelled event is one vanilla goes on to handle.
+     */
+    private static void assertClaimed(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.entity.Entity target, boolean claimed, String what) {
+        net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract event =
+                new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract(
+                        player, net.minecraft.world.InteractionHand.MAIN_HAND, target);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
+        if (event.isCanceled() != claimed) {
+            throw new GameTestAssertException(Component.literal(what + ": the click was "
+                    + (event.isCanceled() ? "claimed" : "left to vanilla")
+                    + ", and it should have been "
+                    + (claimed ? "claimed" : "left to vanilla")), 0);
+        }
+    }
+
+    private static void assertHeld(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player player, int expected, String complaint) {
+        int count = player.getItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND).getCount();
+        if (count != expected) {
+            throw new GameTestAssertException(Component.literal(
+                    complaint + " - expected " + expected + " left in hand, found " + count), 0);
+        }
     }
 
     /**

@@ -10,6 +10,8 @@
 <script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
 <script defer src="search.js"></script>
+<script defer src="assets/block-preview/shapes.js"></script>
+<script defer src="block-preview.js"></script>
 <script defer src="assets/item-art/names.js"></script>
 <script defer src="item-art.js"></script>
 </head>
@@ -39,6 +41,25 @@
      data-items="occupied_basic_stasis_chamber,occupied_intermediate_stasis_chamber,occupied_advanced_stasis_chamber,occupied_emergency_stasis_chamber,occupied_spacer_stasis_chamber"></div>
 
 <section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
+
+<aside class="infobox">
+    <p class="infobox-title">Horse Stasis Bank</p>
+
+    <div class="block-preview" data-blocks="horse_stasis_bank"></div>
+
+    <p class="infobox-caption">
+        Drag to turn it, scroll to zoom, arrow keys once focused. Six chambers in their
+        slots, one of them with a horse in it &mdash; the colours are the chamber item&rsquo;s
+        own, so the block and what it stores read as the same object at two sizes.
+    </p>
+
+    <dl class="infobox-facts">
+        <dt>Type</dt><dd>Block &mdash; storage you stand at</dd>
+        <dt>Holds</dt><dd>Chambers, and reads the horses inside them</dd>
+        <dt>Also</dt><dd>Mends, feeds, waters, collects drops, breeds a pair at stud</dd>
+        <dt>Art</dt><dd>Its own since 2026-09-29; it was the barrel before</dd>
+    </dl>
+</aside>
 
 <h2 id="chambers">The four stasis-chamber tiers</h2>
 <p>
@@ -1609,6 +1630,25 @@
     <code>StreamCodec.unit</code>'s identity check to fail on.
 </p>
 
+<h3 id="bank-art-0929">The block finally looks like itself</h3>
+
+<p>
+    Until 2026-09-29 the bank was <strong>vanilla&rsquo;s barrel</strong> &mdash; its side
+    and its bottom, unchanged &mdash; so a bank standing beside a barrel was two barrels,
+    and the wiki could not show it at all, since a preview would have meant committing
+    Mojang&rsquo;s textures here. It is now drawn as what it is: six chambers in their slots
+    behind a dark metal frame, one of them in the <em>occupied</em> colours, because a bank
+    with a horse in it is the normal case and an empty rack says nothing about the block.
+</p>
+
+<p>
+    The palette is lifted straight off <code>basic_stasis_chamber.png</code> and its occupied
+    twin rather than invented, so the block and the item it stores are recognisably the same
+    object at two sizes. Drawn by <code>tools/bake-block-art.mjs</code>. It is the one block
+    there whose pixel map has no gaps in it: the bench and the shelf are furniture and let
+    the shared plank grain show through, and a machine full of glass should not.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -2208,6 +2248,17 @@
         that dropped into the fire that did it are the reason this is not a cosmetic
         question.</li>
 </ul>
+
+<h3 id="bank-art-0929-check">Its new art, in a world (2026-09-29, NOT played)</h3>
+
+<p>
+    The bank stopped being the barrel on 2026-09-29 and <strong>the new art has not been
+    seen in game</strong>. Stand one next to a barrel: they should no longer be mistakable.
+    It is a <code>cube_column</code>, so the lid texture is also the underside &mdash; worth
+    checking the bottom of one placed on a ledge, which is the face nobody thinks to look at.
+    The six windows are painted, not lit, so if the block ever gains a light level the art
+    will need to say so rather than the block quietly glowing through a dark panel.
+</p>
 
 </section>
 

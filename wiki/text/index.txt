@@ -9,9 +9,14 @@ wiki/ai-setup.html#what	all	What it does
 wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
+wiki/api-notes.html#cutout-no-blend	all	A cutout pipeline ignores your alpha, so a tint cannot fade anything
+wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn later, and setupAnim runs then — not at the submit
+wiki/api-notes.html#interface-private-static	all	An interface’s private static method is unreachable, and vanilla hides real behaviour in them
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
+wiki/api-notes.html#onlyin-on-mod-classes	all	Do not put @OnlyIn on a class of your own
 wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide which recipe runs
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
+wiki/api-notes.html#runtime-bake	all	A LayerDefinition can be baked at run time, outside the registration event
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
 wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
 wiki/api-notes.html#source-permission	all	A command source no longer has hasPermission(int)
@@ -38,6 +43,7 @@ wiki/breed-book.html#cold	all	The cold country
 wiki/breed-book.html#desert	all	The dry country
 wiki/breed-book.html#elsewhere	all	The country that is nowhere
 wiki/breed-book.html#entries	all	The breeds
+wiki/breed-book.html#flowers	all	The flowering country
 wiki/breed-book.html#hills	all	The high and windswept country
 wiki/breed-book.html#night	all	The night country
 wiki/breed-book.html#not-native	all	Nothing here is native
@@ -402,6 +408,7 @@ wiki/gene-base-alarm.html#dominant	science	Dominant on purpose
 wiki/gene-base-alarm.html#from	coding	Measured from the horse
 wiki/gene-base-alarm.html#health	gameplay	Health
 wiki/gene-base-alarm.html#place	gameplay	Put it by the door
+wiki/gene-base-alarm.html#verified	coding	Verified in the test yard
 wiki/gene-base-alarm.html#what	gameplay	What it does
 wiki/gene-beadscale.html#about	coding	Why it is built this way
 wiki/gene-beadscale.html#carrot	gameplay	Its gene carrot
@@ -443,6 +450,7 @@ wiki/gene-blight.html#finding	gameplay	Finding one
 wiki/gene-blight.html#inheritance	gameplay	Crossing two of them
 wiki/gene-blight.html#layers	coding	What it paints
 wiki/gene-blight.html#outcomes	gameplay	What it can come out as
+wiki/gene-blight.html#verified	coding	Verified
 wiki/gene-bloodstained.html#carrot	gameplay	Its gene carrot
 wiki/gene-bloodstained.html#file	coding	The file
 wiki/gene-bloodstained.html#finding	gameplay	Finding one
@@ -547,6 +555,7 @@ wiki/gene-cleansing-light.html#cost	science	A gene that wins fights and loses va
 wiki/gene-cleansing-light.html#health	gameplay	Health
 wiki/gene-cleansing-light.html#loot	gameplay	It costs you the drops
 wiki/gene-cleansing-light.html#negative	coding	A healing aura with the sign flipped
+wiki/gene-cleansing-light.html#verified	coding	Verified in the test yard
 wiki/gene-cleansing-light.html#what	gameplay	What it does
 wiki/gene-cleave-side.html#about	coding	Why it is built this way
 wiki/gene-cleave-side.html#carrot	gameplay	Its gene carrot
@@ -1100,6 +1109,7 @@ wiki/gene-harlequin-shield.html#inheritance	gameplay	Crossing two of them
 wiki/gene-harlequin-shield.html#layers	coding	What it paints
 wiki/gene-harlequin-shield.html#outcomes	gameplay	What it can come out as
 wiki/gene-healer.html#aura	coding	The aura
+wiki/gene-healer.html#aura-control	coding	The aura leaves horses alone
 wiki/gene-healer.html#carrot	gameplay	Its gene carrot
 wiki/gene-healer.html#foal	coding	A foal heals and shows nothing
 wiki/gene-healer.html#inheritance	gameplay	Crossing two of them
@@ -1139,6 +1149,33 @@ wiki/gene-hood.html#finding	gameplay	Finding one
 wiki/gene-hood.html#inheritance	gameplay	Crossing two of them
 wiki/gene-hood.html#layers	coding	What it paints
 wiki/gene-hood.html#outcomes	gameplay	What it can come out as
+wiki/gene-horn-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-horn-colour.html#colours	gameplay	The colours
+wiki/gene-horn-colour.html#door	coding	How the colour reaches the horn
+wiki/gene-horn-colour.html#epigenetics	coding	The numbers on each copy
+wiki/gene-horn-colour.html#founders	coding	Founders
+wiki/gene-horn-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-horn-colour.html#hornless	gameplay	On a horse without a horn
+wiki/gene-horn-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-colour.html#real-horses	science	There is no real locus here
+wiki/gene-horn-colour.html#shades	gameplay	No two reds are the same red
+wiki/gene-horn-colour.html#two-tone	gameplay	Two colours make a two-tone horn
+wiki/gene-horn-dust.html#anchor	coding	The horn anchor
+wiki/gene-horn-dust.html#carrot	gameplay	Its gene carrot
+wiki/gene-horn-dust.html#emitter	coding	An emitter that asks the horn
+wiki/gene-horn-dust.html#finding	gameplay	Finding one
+wiki/gene-horn-dust.html#health	gameplay	Is it good for the horse?
+wiki/gene-horn-dust.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-dust.html#particle	coding	The particle falls
+wiki/gene-horn-dust.html#real-horses	science	There is no real locus here
+wiki/gene-horn-dust.html#what-it-does	gameplay	What it looks like
+wiki/gene-horn-glow.html#carrot	gameplay	Its gene carrot
+wiki/gene-horn-glow.html#door	coding	How it reaches the horn
+wiki/gene-horn-glow.html#finding	gameplay	Finding one
+wiki/gene-horn-glow.html#health	gameplay	Is it good for the horse?
+wiki/gene-horn-glow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-glow.html#real-horses	science	There is no real locus here
+wiki/gene-horn-glow.html#what-it-does	gameplay	What it looks like
 wiki/gene-hot-blooded.html#health	gameplay	Health
 wiki/gene-hot-blooded.html#lake	gameplay	On a frozen lake
 wiki/gene-hot-blooded.html#terrain	science	A gene that edits the world
@@ -1443,6 +1480,7 @@ wiki/gene-magic-milk-volume.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-milk-volume.html#kind	coding	It governs a kind, not a gene
 wiki/gene-magic-milk-volume.html#rounding	coding	Rounded per copy
 wiki/gene-magic-milk-volume.html#spread	gameplay	Spread across the day, not banked
+wiki/gene-magic-milk-volume.html#verified	coding	Verified
 wiki/gene-magic-milk-volume.html#visible	science	The one loud recessive-adjacent gene
 wiki/gene-magic-milk-volume.html#what	gameplay	What it does
 wiki/gene-magic-mob-aura.html#bait	science	A gene that is worse for the horse
@@ -2003,6 +2041,7 @@ wiki/gene-potion-milk.html#dose	science	Incomplete dominance without an expressi
 wiki/gene-potion-milk.html#health	gameplay	Health
 wiki/gene-potion-milk.html#negatives	gameplay	Two of the brews are not a gift
 wiki/gene-potion-milk.html#separate	coding	Two milk loci, deliberately
+wiki/gene-potion-milk.html#verified	coding	Verified
 wiki/gene-potion-milk.html#volume	gameplay	How often
 wiki/gene-potion-milk.html#what	gameplay	What it does
 wiki/gene-potion-milk.html#wild-negatives	gameplay	An ordinary wild mare can hand you one
@@ -2539,6 +2578,27 @@ wiki/gene-tron.html#inheritance	gameplay	Crossing two of them
 wiki/gene-tron.html#layers	coding	What it paints
 wiki/gene-tron.html#outcomes	gameplay	What it can come out as
 wiki/gene-tron.html#verified	coding	Verified
+wiki/gene-unicorn-horn.html#anchor	coding	The anchor, and the two models that do not agree
+wiki/gene-unicorn-horn.html#carrot	gameplay	Its gene carrot
+wiki/gene-unicorn-horn.html#deferred	coding	The deferred-submit trap, and why the model is typed on the part
+wiki/gene-unicorn-horn.html#family	coding	Why it is not filed with the coat genes
+wiki/gene-unicorn-horn.html#finding	gameplay	Finding one
+wiki/gene-unicorn-horn.html#health	gameplay	Is it good for the horse?
+wiki/gene-unicorn-horn.html#inheritance	gameplay	Crossing two of them
+wiki/gene-unicorn-horn.html#numbers	coding	The epigenome, sorted by what it costs to change
+wiki/gene-unicorn-horn.html#pipeline	coding	It paints nothing, and that is the novelty
+wiki/gene-unicorn-horn.html#polygenic	gameplay	Four genes make a horn
+wiki/gene-unicorn-horn.html#real-horses	science	There is no real locus here
+wiki/gene-unicorn-horn.html#rendering	coding	How the horn reaches the screen
+wiki/gene-unicorn-horn.html#runtime-bake	coding	A layer definition can be baked at run time
+wiki/gene-unicorn-horn.html#sheet	coding	One greyscale sheet for every colour
+wiki/gene-unicorn-horn.html#table	coding	The combination table
+wiki/gene-unicorn-horn.html#turning-it-off	gameplay	If it costs you frames
+wiki/gene-unicorn-horn.html#what-varies	gameplay	Two unicorns are not alike
+wiki/gene-unicorn-horn.html#why-epigenetic	science	Why the horn varies at all
+wiki/gene-unicorn-horn.html#why-not-smooth	science	Why the horn facets, and why that is the right trade
+wiki/gene-unicorn-horn.html#why-recessive	science	Why recessive, and why carriers
+wiki/gene-unicorn-horn.html#why-twist-excludes-curve	science	The one piece of geometry that is a trap
 wiki/gene-uraniid.html#about	coding	Why it is built this way
 wiki/gene-uraniid.html#carrot	gameplay	Its gene carrot
 wiki/gene-uraniid.html#file	coding	The file
@@ -2790,6 +2850,7 @@ wiki/horse-gear.html#attachment	coding	Why an attachment and not a container
 wiki/horse-gear.html#ceiling	coding	The two-slot ceiling
 wiki/horse-gear.html#click	coding	The click path
 wiki/horse-gear.html#doll	coding	The paper doll
+wiki/horse-gear.html#gear-inventory	coding	The Dress window — a real menu beside the doll
 wiki/horse-gear.html#roster	coding	The roster is the layout
 wiki/horse-gear.html#slots	gameplay	The nineteen slots
 wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
@@ -2822,6 +2883,7 @@ wiki/horse-realm.html#the-field	gameplay	The field
 wiki/horse-realm.html#the-table	coding	The table is the census, not a scan
 wiki/horse-realm.html#two-dimensions	coding	Two dimensions, and why they share nothing
 wiki/horse-realm.html#what	gameplay	What it is for
+wiki/horse-stasis.html#bank-art-0929	coding	The block finally looks like itself
 wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest with a clock on it
 wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank
 wiki/horse-stasis.html#browse-coding	coding	The Browse tab reads the stable's papers, not the chamber
@@ -2884,6 +2946,7 @@ wiki/item-breeding-carrots.html#combine	gameplay	Combining them
 wiki/item-breeding-carrots.html#effects	coding	The gamete effects
 wiki/item-breeding-carrots.html#recipes	gameplay	Recipes
 wiki/item-breeding-carrots.html#rule	gameplay	The one rule
+wiki/item-breeding-carrots.html#same-sex	coding	A same-sex pair spends the carrots and makes no foal
 wiki/item-breeding-carrots.html#what	gameplay	What each one does
 wiki/item-double-gates.html#assets	coding	The assets are generated, and one wood is irregular
 wiki/item-double-gates.html#either-side	coding	The partner takes whichever side is free
@@ -2903,6 +2966,7 @@ wiki/item-double-gates.html#why-subclass	coding	It extends FenceGateBlock on pur
 wiki/item-double-gates.html#woods	gameplay	One per wood, filed beside its own gate
 wiki/item-equestrian-bench.html#armour	gameplay	It does leather horse armour too
 wiki/item-equestrian-bench.html#armour-vanilla	gameplay	The crafting-grid recipe still works, and still does only the blanket
+wiki/item-equestrian-bench.html#art-0929	coding	The block finally looks like itself
 wiki/item-equestrian-bench.html#cost	gameplay	What it costs
 wiki/item-equestrian-bench.html#fittings	gameplay	The fifteen hand-picked fittings
 wiki/item-equestrian-bench.html#modded-fittings	gameplay	And whatever your other mods brought
@@ -2918,6 +2982,7 @@ wiki/item-equestrian-posts.html#four	coding	Why four blocks and not one
 wiki/item-equestrian-posts.html#loot	coding	Loot tables
 wiki/item-equestrian-posts.html#poi	coding	They are POIs and nothing else
 wiki/item-equestrian-posts.html#use	gameplay	What they are for
+wiki/item-freedom-stick.html#art-0929	coding	The icon, since 2026-09-29
 wiki/item-freedom-stick.html#handler	coding	Where it lives
 wiki/item-freedom-stick.html#making	gameplay	Making one
 wiki/item-freedom-stick.html#nothing-to-restore	coding	Re-taming needed no code
@@ -2974,6 +3039,7 @@ wiki/item-jumps.html#why-stacking	science	Stacking, and the height that was adde
 wiki/item-rescuing-braid.html#colour	gameplay	The colour
 wiki/item-rescuing-braid.html#colour-coding	coding	Why vanilla’s dye and not the mod’s tint
 wiki/item-rescuing-braid.html#files	coding	What is where
+wiki/item-rescuing-braid.html#never-drawn	coding	It was never actually drawn, until 2026-09-29
 wiki/item-rescuing-braid.html#no-component	coding	The item carries nothing
 wiki/item-rescuing-braid.html#refusals	gameplay	What it refuses
 wiki/item-rescuing-braid.html#rider	gameplay	You come with it
@@ -2996,6 +3062,7 @@ wiki/item-research-papers.html#shelf-key	coding	The shelf keys on the pair
 wiki/item-research-papers.html#topic	coding	Why it is strings, and where it normalises
 wiki/item-research-papers.html#use	gameplay	What it does
 wiki/item-research-papers.html#verified	coding	Verified
+wiki/item-research-shelf.html#art-0929	coding	The block finally looks like itself
 wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
 wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
 wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
@@ -3023,6 +3090,7 @@ wiki/item-splice-carrots.html#random	gameplay	Unknown Gene Splice — the random
 wiki/item-splice-carrots.html#recipe-type	coding	The Known Gene Splice is a custom recipe type
 wiki/item-splice-carrots.html#themed	gameplay	The five themed splices
 wiki/item-splice-carrots.html#verified	coding	Verified
+wiki/item-stall-signs.html#art-0929	coding	Three signs that are three different drawings
 wiki/item-stall-signs.html#detector	coding	The detector measures, it does not judge
 wiki/item-stall-signs.html#gaps	coding	Known gaps
 wiki/item-stall-signs.html#get	gameplay	How to get one
@@ -3042,18 +3110,31 @@ wiki/item-transfer-papers.html#horsegive	gameplay	The command twin — /horsegiv
 wiki/item-transfer-papers.html#horsegive-code	coding	What /horsegive shares with the paper, and what it does not
 wiki/item-transfer-papers.html#rules	gameplay	Things worth knowing
 wiki/item-transfer-papers.html#use	gameplay	How they work
+wiki/item-vet-kit.html#art-0929	coding	The icon, since 2026-09-29
 wiki/item-vet-kit.html#code	coding	Where it lives
+wiki/item-vet-kit.html#fertility-gelding	coding	Gelding reaches the record (shown 2026-09-30)
 wiki/item-vet-kit.html#gaps	coding	Known gaps
 wiki/item-vet-kit.html#gelding	gameplay	What gelding does
 wiki/item-vet-kit.html#use	gameplay	How to use it
+wiki/item-whistles.html#blow-key	gameplay	One key blows every whistle you carry
+wiki/item-whistles.html#blow-key-code	coding	One key, every whistle (2026-09-29)
+wiki/item-whistles.html#bond-gate	gameplay	Binding an ender whistle needs the horse's trust
+wiki/item-whistles.html#bond-gate-code	coding	The bond gate on binding (2026-09-29)
 wiki/item-whistles.html#call	coding	How a call finds a horse
+wiki/item-whistles.html#declined	coding	Two things deliberately not built (2026-09-29)
 wiki/item-whistles.html#ender	gameplay	The ender whistle
 wiki/item-whistles.html#ender-code	coding	The ender whistle
 wiki/item-whistles.html#ender-gaps	coding	Known gaps
+wiki/item-whistles.html#glint	gameplay	A bound whistle glimmers
+wiki/item-whistles.html#glint-code	coding	Telling a bound whistle apart, without art (2026-09-29)
 wiki/item-whistles.html#leads	coding	The lead, when a whistle moves the horse
 wiki/item-whistles.html#reading	coding	The area whistles
 wiki/item-whistles.html#tiers	gameplay	The four whistles
 wiki/item-whistles.html#use	gameplay	What happens when you blow an area whistle
+wiki/item-whistles.html#walking	gameplay	Near horses walk; far ones appear
+wiki/item-whistles.html#walking-code	coding	Walking a near horse in (2026-09-29)
+wiki/item-whistles.html#walking-priority	coding	Priority 1, and why not 2
+wiki/item-whistles.html#walking-sweep	coding	Why the state machine is not in the goal
 wiki/items.html#adding	coding	Adding an item
 wiki/items.html#art	coding	No two items look alike
 wiki/items.html#chest-loot	coding	Chest loot — every chest, any mod
@@ -3070,6 +3151,17 @@ wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
 wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
 wiki/known-gaps.html#migrated	all	Migrated open checks
+wiki/model-parts.html#adding	coding	Adding the second part
+wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
+wiki/model-parts.html#classes	coding	What each piece does
+wiki/model-parts.html#no-gameplay	gameplay	They do nothing
+wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
+wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
+wiki/model-parts.html#settings	gameplay	If they cost you frames
+wiki/model-parts.html#shape	coding	The shape of it: two sources, one renderer
+wiki/model-parts.html#sheet	coding	One greyscale sheet, and why its regions are featureless
+wiki/model-parts.html#three-tiers	coding	The rule that keeps a herd cheap
+wiki/model-parts.html#what-you-see	gameplay	What a player sees
 wiki/paint-order.html#exception	coding	The one gene the order does not describe
 wiki/paint-order.html#icons	coding	Where the pictures come from
 wiki/paint-order.html#one-order	coding	There is one order, and it is derived
@@ -3119,6 +3211,27 @@ wiki/progression.html#tasks	coding	Tasks are an enum in common/
 wiki/progression.html#verified	coding	Verified
 wiki/rider-comfort.html#leads	gameplay	Your lead comes back
 wiki/rider-comfort.html#leads-coding	coding	How the lead is returned (2026-09-24)
+wiki/rider-comfort.html#mounted-mining	gameplay	Mining from the saddle
+wiki/rider-comfort.html#mounted-mining-coding	coding	How the mounted mining penalty is removed (2026-09-29)
+wiki/rider-comfort.html#ride-fade	gameplay	The horse gets out of your way
+wiki/rider-comfort.html#ride-fade-braid-bug	coding	A braid that had never been drawn
+wiki/rider-comfort.html#ride-fade-coding	coding	How the fade is drawn (2026-09-29)
+wiki/rider-comfort.html#ride-fade-cutout	coding	A tint alone fades nothing, and that is the whole difficulty
+wiki/rider-comfort.html#ride-fade-gear	coding	Why the gear needed a mixin, and the mod's first MixinExtras
+wiki/rider-comfort.html#ride-fade-paths	coding	Five things draw a horse, and each takes the alpha differently
+wiki/rider-comfort.html#ride-fade-test	coding	What is tested, which is one function
+wiki/rider-comfort.html#rider-inventory	gameplay	Your own inventory, from the saddle
+wiki/rider-comfort.html#rider-inventory-chord	coding	The chord, and why it does not double-fire
+wiki/rider-comfort.html#rider-inventory-coding	coding	How the inventory key is bound (2026-09-29)
+wiki/rider-comfort.html#tack-equip	gameplay	Tack goes on with a right-click
+wiki/rider-comfort.html#tack-equip-claim	coding	Which clicks it claims, and the two it must not
+wiki/rider-comfort.html#tack-equip-coding	coding	How the tack click works (2026-09-29)
+wiki/rider-comfort.html#tack-equip-vanilla	coding	What vanilla was already doing
+wiki/rider-comfort.html#vanilla-leads	gameplay	— and so does the one that snapped
+wiki/rider-comfort.html#vanilla-leads-coding	coding	How the snapped lead is returned (2026-09-29)
+wiki/rider-comfort.html#vanilla-leads-placer	coding	And the owner has to be written down before it breaks
+wiki/rider-comfort.html#vanilla-leads-seam	coding	The drop cannot be hooked where it happens
+wiki/rider-comfort.html#vanilla-leads-test	coding	What the test can and cannot reach
 wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
 wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
 wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour

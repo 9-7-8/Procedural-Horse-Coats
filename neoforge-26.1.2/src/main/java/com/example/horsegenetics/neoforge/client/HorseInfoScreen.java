@@ -325,6 +325,7 @@ public final class HorseInfoScreen extends Screen {
     private static final int PENDING_GIVE_UP = 60;
 
     private Button rideButton;
+    private Button dressButton;
 
     public HorseInfoScreen(HorseRecord record, @Nullable AbstractHorse horse, @Nullable Screen parent) {
         super(Component.literal(record.displayName()));
@@ -504,6 +505,18 @@ public final class HorseInfoScreen extends Screen {
                 .build();
         addRenderableWidget(rideButton);
 
+        // Dress. The Gear tab's doll is read-only because this screen has no
+        // menu behind it - it shows horses that are not even loaded - so putting
+        // things on with a real inventory is its own window, HorseGearScreen,
+        // which only the server can open. See HorseGearMenu.
+        dressButton = Button.builder(Component.literal("Dress"), b -> dress())
+                .bounds(contentRight() - buttonW("Dress"), contentTop() - 2, buttonW("Dress"), 16)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                        "Open the horse's gear beside your inventory - drag and shift-click "
+                                + "pieces on and off.")))
+                .build();
+        addRenderableWidget(dressButton);
+
         applyTabWidgets();
         sendHold(true);
     }
@@ -602,6 +615,11 @@ public final class HorseInfoScreen extends Screen {
             rideButton.visible = rideable;
             rideButton.active = rideable;
         }
+        if (dressButton != null) {
+            boolean gear = tab == Tab.GEAR && owned && horse != null;
+            dressButton.visible = gear;
+            dressButton.active = gear && inDressingReach();
+        }
         boolean genes = tab == Tab.GENES;
         if (baselineFilterButton != null) {
             baselineFilterButton.visible = genes;
@@ -657,6 +675,27 @@ public final class HorseInfoScreen extends Screen {
         }
         var brand = horse.getData(ModAttachments.COWBOY_BRAND.get());
         return brand != null && brand.isBranded();
+    }
+
+    /** Within the eight blocks the server's gear menu demands - the same number as handleTackSlot. */
+    private boolean inDressingReach() {
+        var viewer = Minecraft.getInstance().player;
+        return horse != null && viewer != null && horse.isAlive() && horse.closerThan(viewer, 8.0);
+    }
+
+    /**
+     * The Dress button: ask the server to open {@code HorseGearMenu}. This
+     * screen is left as it is and handed to the gear screen as the place Escape
+     * goes back to.
+     */
+    private void dress() {
+        if (horse == null || !inDressingReach()) {
+            return;
+        }
+        closeGearPicker();
+        HorseGearScreen.returnTo(this, horse.getId());
+        ClientPacketDistributor.sendToServer(
+                new com.example.horsegenetics.neoforge.network.OpenHorseGearPayload(horse.getId()));
     }
 
     /** The Ride button. The screen closes on the way - you cannot read it from the saddle. */
@@ -962,6 +1001,12 @@ public final class HorseInfoScreen extends Screen {
         // up would otherwise keep the naming box hidden until a tab switch.
         if (ownsHorse() != lastOwned) {
             applyTabWidgets();
+        }
+        // Reach changes under an open screen - the horse wanders, the player
+        // walks - and the server refuses past eight blocks, so the button greys
+        // out rather than sending a request that will come to nothing.
+        if (dressButton != null && dressButton.visible) {
+            dressButton.active = inDressingReach();
         }
         if (pendingOpen != null) {
             HorseRecord arrived = ClientHorseRecordCache.byId(pendingOpen);
@@ -1714,19 +1759,20 @@ public final class HorseInfoScreen extends Screen {
                     DESC, 0);
         } else {
             c.wrapped("Click a slot to see what you are carrying that would go in it, "
-                            + "and what is in it now.",
+                            + "and what is in it now - or press Dress to lay the gear out "
+                            + "beside your inventory and drag pieces on and off.",
                     DESC, 0);
         }
 
-        // Honesty about the state of the roster. Seventeen of these nineteen
+        // Honesty about the state of the roster. Fifteen of these nineteen
         // slots have no item in the world that fits them yet - the slots, the
         // storage and the screen landed first, deliberately, and each piece
         // joins its slot's tag as it is made. Without this line the tab reads
         // as broken rather than as unfinished.
         c.gap(4);
-        c.wrapped("Only the saddle and the barding have anything to put in them so far. "
-                + "The other seventeen slots are built and empty - the gear that fills them "
-                + "is still to be made.", DIM_TEXT, 0);
+        c.wrapped("Only the saddle, the barding, the mane and the tail have anything to put "
+                + "in them so far. The other fifteen slots are built and empty - the gear that "
+                + "fills them is still to be made.", DIM_TEXT, 0);
     }
 
     // ------------------------------------------------------------------

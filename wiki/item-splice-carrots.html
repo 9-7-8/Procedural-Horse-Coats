@@ -169,8 +169,18 @@
         <li>unthemed: <code>geode P</code>, <code>hued_pangare Hpa</code>, <code>sky_shadow Sky</code>.</li>
     </ul>
     None had a disorder. That day's white and marking foals (3 and 6) happened to show none: a splice is invisible
-    whenever the substitute pair holds only alleles the parents already carry. <em>Still open:</em> the performance carrot's baseline check, that it never rolls HMGA2 and
-    only the tall/fast LCORL copy; and the particle colour.
+    whenever the substitute pair holds only alleles the parents already carry. <em>Still open:</em> the particle
+    colour. The performance carrot's baseline is on <a href="#verification">the Verification tab</a>.
+</p>
+
+<p id="verified-splice-performance">
+    <strong>The performance carrot, on its own, stays in theme</strong> (2026-09-30, the yard's last splice pen). SPLICE
+    PERFORMANCE (row T east) armed its mare with <code>gene_splice:performance</code> and re-armed her after every cover
+    for forty minutes. Eleven foals: six carried a new allele and every one logged <code>PASS (in theme)</code> &mdash;
+    <code>pdk4 A</code> three times, <code>ckm T</code> twice and <code>ryr2 J</code> once &mdash; and the other five
+    logged <code>no splice seen (a splice can hand down a copy a parent already had)</code>. None was off-theme and none
+    carried a condition above informational. None of the six landed on <code>HMGA2</code> or <code>LCORL</code>, so the
+    run is silent on which copy of those two the carrot can draw. The pen was taken out of the yard after this run.
 </p>
 
 <p id="verified-splice-spread">
@@ -204,6 +214,22 @@
     other parent makes that allele visible. This is deliberately not a flat 25% roll, and the
     existing theme and safety rules must remain intact if the policy changes.
 </p>
+
+<h3 id="open-performance-baseline">The performance carrot never makes a horse smaller or slower (NOT seen in a world)</h3>
+<p>
+    <code>SpliceCategory.pairsFor</code> restricts the performance carrot to combinations that beat the baseline horse
+    and lose to it on nothing, so it should never draw <code>HMGA2</code>&rsquo;s pony allele or <code>LCORL</code>&rsquo;s
+    short copy. <code>SpliceCategoryTest.thePerformanceCarrotCanOnlyMakeAHorseBetter</code> pins the table; what has
+    never been seen is a foal in a world taking that path. The yard's splice pens showed the carrot staying in theme
+    (<a href="?view=coding#verified-splice-performance">verified</a>), but their check reads the locus, not the
+    allele, and the last of them is gone, so this wants a new test.
+</p>
+<ul>
+    <li><strong>A performance splice never hands down a pony.</strong> Feed the performance carrot to a pair with no
+        HMGA2 or LCORL variants and breed a long run of foals. <strong>Pass:</strong> new alleles on LCORL are its tall
+        <code>L</code> (the 09:40 run on 2026-09-15 drew one), and no foal ever carries HMGA2&rsquo;s pony
+        <code>p</code>, which is the only new allele that locus could show.</li>
+</ul>
 
 <h3 id="open-older-item-splice-carrots">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>

@@ -133,6 +133,25 @@
 
 <p class="muted">Paints nothing.</p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-clockwork-blight">
+    <strong>A <code>Bli/Bli</code> horse turns ground cover to dirt, spares the wheat and the potted plant,
+    and a plain horse leaves the same floor alone</strong> (2026-09-30, the
+    <a href="horse-dimension.html#clockwork">clockwork</a> run in the debug test yard). The pens BLIGHT and
+    BLIGHT CONTROL (row AO east) are each floored in stripes of grass, moss, podzol and mycelium, with 16 wheat
+    on farmland and a potted dandelion. On run 5 the three checks logged <code>CLOCKWORK PASS</code>:
+    <em>&ldquo;the gene converts ground cover (counted as it lands)&rdquo;</em> read &ldquo;10 conversion(s)
+    landed&rdquo;; <em>&ldquo;the wheat and the potted plant survive&rdquo;</em> ended with all 16 wheat, the 16
+    farmland and the pot in place; and the control read 0 conversions and a floor that ended exactly as it
+    began. The conversions are counted per horse as the gene lands them
+    (<code>DebugWorldWatch.spreadsPlacedBy</code>), not read off the floor: runs 3&ndash;5 read +4, +8, +0 and +1
+    dirt at six minutes while the watch counted blight landing conversions all along, because in a lit pen
+    grass and mycelium spread straight back over bare dirt and the gene&rsquo;s two-block reach also runs under
+    the pen walls. The floor was the wrong instrument for the conversion half; it is still the right one for
+    the crop half and the control.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -140,8 +159,19 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Blight is the one gene here that edits the world: walk a <code>Bli/Bli</code> horse through a wheat field and <strong>the crop must survive</strong> while the grass, moss and podzol around it turn to dirt &mdash; and no horse may carry it invisibly.</p>
+    <p>Blight&rsquo;s cover-to-dirt and its sparing of wheat and pots are shown; still open are the other half &mdash; <strong>wild grass, ferns and flowers must wither</strong> and a planted sapling must survive &mdash; that no horse carries it invisibly, and whether a field that regrows as fast as the horse kills it is how the gene should feel.</p>
 </div>
+
+<p>
+    The yard&rsquo;s <a href="horse-dimension.html#clockwork">clockwork</a> pens BLIGHT and BLIGHT CONTROL
+    (row AO east) answered the conversion and the crop half on 2026-09-30 &mdash; recorded on
+    <a href="?view=coding#verified">the Coding tab</a>. They did not answer the withering half: every run
+    ended with the pen&rsquo;s 4 short grass and 4 dandelions standing, so wild growth has not yet been seen
+    to die back. And whether a blighted field that regrows as fast as the horse can kill it &mdash; in a lit
+    pen grass and mycelium spread straight back over the bare dirt &mdash; is what the gene should feel like
+    in play is a question for the owner, not the log.
+</p>
+
 
 <h3 id="blight-markings-0917">Blight, and four markings out of intake (2026-09-17, NOT played)</h3>
 
@@ -160,12 +190,12 @@
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>Blight eats the right blocks and only those.</strong> Stand a
-        <code>Bli/Bli</code> horse on grass. <strong>Pass:</strong> grass, moss, mycelium and
-        podzol within two blocks turn to dirt, and wild grass, ferns and flowers on top wither
-        away, a beat at a time. <strong>Fail, and this is the one that matters:</strong> a
-        crop, a planted sapling, a potted plant or anything else a player placed is touched.
-        Walk one through a wheat field on purpose &mdash; the field must survive.</li>
+    <li><strong>Wild growth withers, and a planted sapling does not.</strong> The cover turning
+        to dirt and the wheat and potted plant surviving are <a href="?view=coding#verified">shown</a>;
+        this is what is left. Stand a <code>Bli/Bli</code> horse among wild grass, ferns and
+        flowers, with a sapling planted beside them. <strong>Pass:</strong> the wild growth
+        withers away, a beat at a time. <strong>Fail:</strong> it never does, or the sapling
+        is touched.</li>
     <li><strong>It is rare and never carried.</strong> <strong>Pass:</strong> roughly one wild
         horse in three hundred blights, and no horse carries it invisibly; the founder table
         seeds the expressing pair directly.</li>

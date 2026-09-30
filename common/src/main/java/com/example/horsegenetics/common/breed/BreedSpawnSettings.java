@@ -74,7 +74,7 @@ public final class BreedSpawnSettings {
 
         /** May a wild horse in {@code biomeId} be Feral Mixed? */
         public boolean allowedIn(String biomeId) {
-            return enabled && (biomes.isEmpty() || biomes.contains(biomeId));
+            return enabled && (biomes.isEmpty() || BiomeAnalogues.covers(biomes, biomeId));
         }
     }
 

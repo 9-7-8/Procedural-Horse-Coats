@@ -1,5 +1,43 @@
 # Third-Party Notices
 
+## Item icons (vet's kit, freedom stick, golden carrot seeds)
+
+Three item sprites in this mod are icons from **Raven Fantasy HD Ultimate
+(free files)** by Caio Carlos of Clockwork Raven Studios
+(https://clockworkraven.itch.io), used unmodified:
+
+    assets/horsegenetics/textures/item/vet_kit.png
+    assets/horsegenetics/textures/item/freedom_stick.png
+    assets/horsegenetics/textures/item/golden_carrot_seeds.png
+
+Credit, as the author's own licence suggests it:
+
+    Icons by Caio Carlos of the Clockwork Raven - Additional Art Assets
+    (clockworkraven.itch.io). Used under the Clockwork Raven User Asset
+    License Agreement.
+
+### These three files are NOT covered by this mod's licence
+
+Horse Genetics is CC BY-NC 4.0, which lets you reuse and redistribute it. That
+grant is **carved back for the three files listed above**, because it is not ours
+to give. The Clockwork Raven User Asset License Agreement permits their use in a
+free mod on the condition that the mod's users are told they may not take the
+assets on, so:
+
+  * You may **not** extract, reuse, redistribute or sell these three sprites,
+    modified or unmodified, as assets.
+  * You may **not** include them in an asset pack, library or collection.
+  * They may **not** be used to train a machine-learning model.
+  * A fork of this mod inherits those restrictions on these three files, and
+    inherits nothing more than this mod itself holds.
+
+Everything else in this repository is under the mod's own licence as normal. If
+you want these icons for your own project, get them from the author's store page
+above - they are free.
+
+Only these three files come from that pack; the rest of the pack is not
+distributed with this mod, is not in this repository, and never should be.
+
 ## Carts (horse-drawn wagons, plows, seed drills, reapers, supply and animal carts)
 
 The cart system in this mod (Java package

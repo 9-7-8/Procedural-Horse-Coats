@@ -58,6 +58,21 @@ public final class EditorRules {
     }
 
     /**
+     * <b>Does this gene change how the horse looks?</b> - the line both editors'
+     * randomize is drawn on while "randomize the health genes too" is off.
+     *
+     * <p>A coat is not the only way to look different. The unicorn horn paints
+     * nothing, so {@link Genes#influencesCoat} alone said it was invisible and a
+     * randomize left the horn's alleles and its epigenetic numbers exactly where
+     * they were: "Rnd epigen." on a unicorn re-rolled every coat detail and never
+     * the horn. A gene that grows a part ({@link GrownParts#shapes}) is on the
+     * visible side of the line.
+     */
+    public static boolean changesLooks(Gene gene) {
+        return Genes.influencesCoat(gene) || GrownParts.shapes(gene);
+    }
+
+    /**
      * The three loci an editor always shows as carried, however plain the
      * horse: <b>extension, agouti and shade</b>. Between them they decide
      * whether a horse is black, bay or chestnut and which bay it is, every horse

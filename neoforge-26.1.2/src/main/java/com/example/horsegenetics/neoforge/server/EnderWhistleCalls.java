@@ -3,6 +3,8 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.BoundHorse;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
+import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.HorseWhereabouts;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
@@ -18,6 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -26,6 +29,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -84,7 +88,7 @@ public final class EnderWhistleCalls {
         }
         if (!event.getLevel().isClientSide()) {
             String name = HorseRecords.hasRealRecord(horse) ? HorseRecords.of(horse).displayName() : "That horse";
-            String refusal = HorseOwnership.bindRefusal(horse, event.getEntity(), name);
+            String refusal = bindRefusal(horse, event.getEntity(), name);
             if (refusal != null) {
                 event.getEntity().sendSystemMessage(Component.literal(refusal));
             } else {
@@ -101,6 +105,47 @@ public final class EnderWhistleCalls {
         }
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
+    }
+
+    /**
+     * <b>The bond a horse must have before it will take a whistle.</b> Tier 2 is
+     * the tier at which a horse starts coming toward you unasked, so a whistle
+     * becomes a reward for a bond already built rather than something to craft
+     * ahead of it. Tier 3 would make it the last thing a player earns; tier 1
+     * gates almost nothing, since bond decay floors inside it.
+     *
+     * <p>A constant rather than a literal so the next tuning session is one line.
+     * Not a server config: one threshold is cheap but it is a surface, and the
+     * owner has not asked for it.
+     */
+    public static final int BIND_BOND_TIER = 2;
+
+    /**
+     * <b>Every reason an ender whistle refuses to bind</b>, or null to go ahead.
+     *
+     * <p>{@link HorseOwnership#bindRefusal} first - untamed, not yours - and then
+     * the bond gate on top. The gate is <b>here and not there</b> on purpose:
+     * that method is shared with stall signs, and a bound stall sign has no
+     * reason to want a bond. Putting the test in the shared helper would quietly
+     * gate the sign too.
+     *
+     * <p><b>Nothing re-checks bond after binding.</b> A whistle bound before this
+     * shipped stays bound, and a horse whose bond later decays keeps answering
+     * its whistle. That is deliberate: the gate is on earning the whistle, not on
+     * keeping it, and the Gameplay tab says so, or a player reads it as
+     * retroactive.
+     */
+    public static @Nullable String bindRefusal(Horse horse, Player player, String name) {
+        String owned = HorseOwnership.bindRefusal(horse, player, name);
+        if (owned != null) {
+            return owned;
+        }
+        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
+        if (care == null || care.behaviourTier() < BIND_BOND_TIER) {
+            return name + " doesn't trust you enough yet. Spend more time with it"
+                    + " before binding a whistle.";
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------

@@ -220,8 +220,10 @@
 
 <h2 id="spawning">Spawning stacks</h2>
 <p>
-    Our biome modifiers are purely additive &mdash; we add herd spawns to 37 biomes and
-    loner spawns across the overworld, and we remove nothing. So installing this
+    Our biome modifiers are purely additive &mdash; we add herd spawns to the biomes on
+    <code>add_horse_herds</code>, to every biome a wild breed names, to the Terralith,
+    Regions Unexplored and Nullscape biomes that <a href="breeds.html#modded-biomes">stand in for</a> either,
+    and loner spawns across the overworld, and we remove nothing. So installing this
     alongside another mod that also adds horse spawns gives you the sum of both, which
     is usually more horses than either author intended. If a world feels overrun, that
     is the first thing to check, and the fix is a datapack overriding
@@ -971,8 +973,9 @@
 <p>Two things to check rather than assume:</p>
 <ul>
     <li><strong>Its copper horn overlaps our <a href="item-whistles.html">whistles</a>,</strong>
-        and the roadmap wants to take that further still
-        (<a href="item-whistles.html#callable-horses">callable horses</a>). Not a conflict &mdash;
+        and ours goes further still &mdash; a near horse
+        <a href="item-whistles.html#walking">walks in</a> and
+        <a href="item-whistles.html#ender">the ender whistle</a> crosses dimensions. Not a conflict &mdash;
         two items that both recall a horse is redundancy, not breakage &mdash; but if a
         patch is ever written the right move is to bind the two to one notion of
         &ldquo;your horse&rdquo; rather than have each keep its own.</li>

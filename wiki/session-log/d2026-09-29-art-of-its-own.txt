@@ -1,0 +1,114 @@
+2026-09-29 - giving the blocks and items art of their own
+
+
+    An art session. It started as an intake job for third-party texture packs
+    and turned into the mod drawing its own furniture, because the audit the
+    packs prompted found more borrowed art than anyone had counted.
+
+    THE PACKS, AND THEIR TERMS
+
+    Four art packs are now on the machine under intake/potential-assets/, one
+    folder each with its licence. Only pixel-art-textures (FlakDeau, CC0) has
+    its images in git; the Raven icons, the pixelated patterns and the Internet
+    Pattern Book are on disk and ignored, by per-pack .gitignore rules. Every
+    pack's notes record what the terms actually are rather than what a store
+    page implies:
+
+      - Raven Fantasy HD. A real licence, with a MODS clause that permits use
+        in a free mod provided users are told they may not take the assets on.
+      - pixelated-patterns. The store page states NO terms at all - fetched
+        again to check - only a "Royalty Free" tag, which covers fees and not
+        redistribution. Treated as all rights reserved.
+      - Internet Pattern Book. The uploader says outright that the Geocities
+        tiles are not theirs. The owner took them anyway, knowingly; her
+        reasoning is written in the pack's notes so no later session reopens it.
+      - piiixl. Queued, opened, then DELETED at the owner's call: the author
+        stated the terms inconsistently across their own comment thread, and a
+        pack whose licence moves depending on which reply you read is not worth
+        building art on. The README says so, so nobody helpfully re-adds it.
+
+    Three traps found by opening them rather than trusting the pages: 116 of
+    the Internet Pattern Book's 331 files are not the format their extension
+    claims, 195 of the 1043 CC0 tiles are 16-bit PNGs that the repo's own
+    png.mjs refuses, and the Raven pack's separated files are NOT laid out
+    linearly on its spritesheet - the rows have trailing gaps, so the obvious
+    index arithmetic picks the wrong icon. Hashing all 806 files against all
+    896 cells is what got the right ones.
+
+    WHAT THE AUDIT FOUND
+
+    Eight of twelve blockstates had no art of their own. Five job-site posts
+    shared ONE texture set, so a player could not tell the leatherworker's post
+    from the scientist's; three more wore vanilla furniture unchanged - the
+    bench was the smithing table, the shelf the bookshelf, the stasis bank the
+    barrel. On the item side 111 of 164 sprites share a silhouette, but only 39
+    are a defect: 72 are the per-wood cart families, which is vanilla's own
+    idiom for boats and doors.
+
+    The measurements that ranked the work: the ten stasis chambers own seven of
+    the ten closest pairs in the roster, and the closest pair anywhere is 13.6
+    against a checker that fails under 12.0. The breed eggs, never audited
+    before, turn out to be the best art in the mod - 1154 to 2128 colours each,
+    closest pair 39.0.
+
+    WHAT SHIPPED
+
+    Five posts, each carrying its trade on the same barrel carpentry, with the
+    hoops in the colour of that equestrian's hat so the two identities are one
+    thing to learn. The Tack Dyeing Bench, the Equine Research Shelf and the
+    Horse Stasis Bank, all drawn. The golden carrot crop in gold art instead of
+    a gold filter over Mojang's carrots. Three stall signs that are three
+    different drawings rather than one drawing in three hues. And three
+    licensed Raven icons - the vet's kit, the freedom stick, the golden carrot
+    seeds - with the credit, the users-may-not-redistribute line and an
+    explicit CC BY-NC carve-back for exactly those three files in
+    THIRD_PARTY_NOTICES.md.
+
+    Every block and item in the mod now has art of its own except
+    breed_spawn_egg, which is vanilla's horse spawn egg recoloured - the
+    correct idiom for a spawn egg.
+
+    THE WIKI SIDE
+
+    Item pages show their items: 55 sprites across 18 pages, captioned from the
+    mod's own lang file. Blocks with their own art get a rotatable 3D preview in
+    a gameplay-tab infobox - the owner's correction, because the models are for
+    players to see and were first put on the Coding tab.
+
+    The rule that only own-art blocks may be previewed is ENFORCED, not
+    remembered: both bakes hard-fail on a minecraft: texture, naming the block
+    and the face. Verified by pointing the block one at the bench, the stasis
+    bank and a jump on purpose - three errors, exit 1. The item bake also fails
+    on any shippable item that no page shows, which is the only version of
+    "every item page has that item" that survives new items being added.
+
+    Gates and jumps are settled the other way: their vanilla planks are the
+    point, a birch gate should look like birch, and the consequence - that they
+    can never have a preview - is written on both pages so the absence reads as
+    a decision.
+
+    THINGS THAT WENT WRONG, AND WHAT THEY TAUGHT
+
+    The block preview first used fetch() for its shape data. That works on a
+    server and breaks silently for anyone who clones the repo and double-clicks
+    a page, because file:// refuses to fetch a sibling. It ships as a script
+    assigning a global. chrome.mjs opening pages over file:// is what caught it.
+
+    Keying the wiki's item strips on TEXTURE names rather than item ids failed
+    on three sprites, and the failure was the useful kind: horse_ticket.png is
+    the blank ticket's art and horse_whistle.png is the basic whistle's, so
+    neither texture name has a lang entry. The bake refused to caption them.
+
+    Four superseded recipes had to LEAVE bake-item-recolours.mjs rather than be
+    ignored - it writes straight over textures/item/, so a recipe left behind
+    would have repainted the new art on the next re-bake.
+
+    Two renames in one day: horse_traders_post_bottom -> post_bottom ->
+    plank_bottom. The first was right for a block family of one and wrong the
+    moment a second family shared the file. Recorded rather than hidden.
+
+    NONE OF IT HAS BEEN PLAYED. Every page that gained art gained an open check
+    with something specific to look at, chosen because each fails quietly: a
+    model that lost its top slot wears side art on the lid; a renamed shared
+    texture leaves a magenta underside; hoop colours can only be judged with the
+    villager actually standing at the post.

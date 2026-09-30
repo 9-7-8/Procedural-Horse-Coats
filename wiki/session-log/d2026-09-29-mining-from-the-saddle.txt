@@ -1,0 +1,79 @@
+2026-09-29 - mining from the saddle, and a guard written the other way round
+
+
+    One bullet, per intake/START HERE.txt. The session began by reading the
+    whole of intake/ to answer "what is the smallest piece we can implement
+    right now", which is worth writing down because the answer was not the
+    one the folder's own ordering gives.
+
+    The survey. Four implementation treatments each name a first piece.
+    Whistles piece 1 (bond gate on binding) is the smallest by a clear margin
+    - one refusal branch, zero open decisions - and was the recommendation.
+    The owner picked rider comfort piece 1 instead. Also found while looking:
+    the "Bugs:" bullet about dyed leather horse armour is very probably
+    already shipped. AddHorseTackModifier went in on 2026-09-24 and injects
+    tack into every chests/* table at 22%, with dyed leather armour the
+    heaviest weight in the pool; the bullet was written on 2026-09-25, one day
+    later, which by START HERE step 3 means it does not get retired on the
+    date alone. What is genuinely unbuilt is its second clause - "loot tables
+    that CONTAIN normal human leather armor" - because LootTableMatchesCondition
+    matches on the table's path, not its contents. Left for its own session.
+
+    What shipped. server/MountedMiningHandler, one listener on
+    PlayerEvent.BreakSpeed, plus behaviour.mounted_mining_penalty_removed and
+    the mounted_mining_is_exempt gametest. A player on a horse that is
+    standing on the ground now mines at the speed they would mine standing in
+    the same spot.
+
+    The treatment flagged the mechanism UNVERIFIED and it checked out, in a
+    better shape than expected. Player.getDestroySpeed really does end with
+    "if (!this.onGround()) speed /= 5.0F;" - and it fires the event AFTER the
+    division, which is the detail that matters. One multiply by five restores
+    the undivided figure precisely. Had the event fired first, the handler
+    would have been multiplying only for vanilla to divide it straight back.
+
+    The design change worth recording. The treatment prescribed "multiply by
+    5 when the player is a passenger of an AbstractHorse whose onGround() is
+    true". Written that way, the whole feature rests on a claim about
+    vanilla's movement code - that a mounted player's onGround is false - and
+    if that claim is ever wrong the handler does not fail quietly, it hands
+    out FIVE TIMES the mining speed to everyone on a horse. So the condition
+    asks !player.onGround() directly instead: the multiply happens only where
+    the division provably just happened. Same behaviour when the premise
+    holds; when it does not, the feature is silently absent rather than a
+    cheat. The horse's own onGround is still checked, which is what keeps a
+    jumping or flying horse out.
+
+    Two API facts settled by reading rather than assuming, both now on the
+    wiki. PlayerEvent.BreakSpeed fires on both logical sides, and the client
+    predicts break progress from its own call - so a server-only handler
+    would draw a crack that crept along while the block broke early. And
+    FML's javadoc on ModConfig.Type says a SERVER config is "synced to
+    clients during connection", which is what makes it correct to read
+    ServerConfig from client-side code. That is the first time this mod does
+    so, and the convention it implies went onto config.html: a client option
+    is for what only the client can see; anything both sides compute is a
+    server option, read on both.
+
+    The test was mutated before being trusted. mounted_mining_is_exempt posts
+    three real BreakSpeed events through NeoForge.EVENT_BUS rather than
+    calling the handler, so a handler written but never registered fails it,
+    and it asserts the exemption and both refusals separately. Deleting the
+    onGround guard from a copy of the handler turned it red with "got 10.0,
+    expected 2.0" on exactly the middle assertion - the 5x-boost one. Restored,
+    all 19 gametests green. The log line "Subscribing method ...
+    MountedMiningHandler.onBreakSpeed ... to the game event bus" confirmed the
+    registration on the way past.
+
+    What the gametest cannot reach is the premise itself, and it is on
+    rider-comfort.html's Verification tab with a stopwatch method: time a slow
+    block standing, then mounted, and they should match. The failure that
+    looks like nothing having been built is the handler never firing at all,
+    so that check is first. The second is the inverse - breaking a block while
+    standing NEXT to the horse - which is how a 5x boost for every player
+    would show.
+
+    Open for the next session: the next bullet. Whistles piece 1 (the bond
+    gate on binding) is still the smallest thing in intake/ and still has
+    nothing left to settle; rider comfort piece 2 is the inventory keybind,
+    which cannot use E.

@@ -47,6 +47,13 @@ public final class ClientConfig {
     public static final ModConfigSpec.BooleanValue NAMEPLATE_SEX_SYMBOL;
 
     /**
+     * <b>Say which key blows your whistles when you select one.</b> One
+     * action-bar line on the swap, naming this player's own binding - see
+     * {@code client/WhistleKeyHandler}. Off once they know.
+     */
+    public static final ModConfigSpec.BooleanValue WHISTLE_KEY_PROMPT;
+
+    /**
      * <b>Has this player been shown the Getting Started tab?</b> Set the first
      * time they leave it, so the browser opens on it once and never again.
      */
@@ -126,8 +133,71 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.EnumValue<NamingPolicy.ParentSource> NAMING_PARENT_SOURCE;
 
+    /**
+     * <b>Does the horse you are riding fade out as you look down at it?</b>
+     * A client setting and rightly so: it changes nothing but what this one
+     * player sees, and two people on a server may disagree about it freely.
+     * See {@code client/RiderFade}.
+     */
+    public static final ModConfigSpec.BooleanValue RIDE_FADE;
+
+    /**
+     * <b>How faint the ridden horse is allowed to get</b>, as a fraction of
+     * full. It never reaches zero: a mount you cannot see at all is a mount you
+     * forget you are on. (Owner's call.)
+     */
+    public static final ModConfigSpec.DoubleValue RIDE_FADE_MIN_OPACITY;
+
+    /** The downward pitch, in degrees, at which the fade begins. */
+    public static final ModConfigSpec.IntValue RIDE_FADE_START_PITCH;
+
+    /** The downward pitch at which it reaches {@link #RIDE_FADE_MIN_OPACITY}. */
+    public static final ModConfigSpec.IntValue RIDE_FADE_FULL_PITCH;
+
+    /**
+     * <b>Draw the parts a horse's genes grow at all</b> - a unicorn horn, and in
+     * time antlers, spines and crystals. See {@code AttachedPartLayer}.
+     *
+     * <p>Render-only, and that is the whole contract: turning it off gates a submit
+     * and touches nothing else. A horse with a horn still <i>has</i> the horn - it
+     * breeds it, drifts it, shows it in the gene list and in the browser, and wears
+     * it again the moment this goes back on. So two players on one server may
+     * disagree freely, and neither is looking at a different world.
+     */
+    public static final ModConfigSpec.BooleanValue PARTS;
+
+    /**
+     * <b>Draw a glowing part's second, full-bright pass.</b> Off, a luminous horn
+     * still draws - lit like anything else. One submit per glowing part saved, and
+     * the first thing to try under a shader pack that dislikes emissive geometry.
+     */
+    public static final ModConfigSpec.BooleanValue PARTS_GLOW;
+
+    /**
+     * <b>How close a horse must be for its grown parts to be drawn.</b> In blocks.
+     * A horn is about as much geometry again as the horse carrying it, so a herd of
+     * unicorns is the case this exists for; past the line the horse draws and the
+     * horn does not.
+     *
+     * <p>Unlike {@code coats.detailDistance} there is no "keep what you have"
+     * rule - a coat that swapped at range would flicker, and a part that simply is
+     * not drawn cannot.
+     */
+    public static final ModConfigSpec.IntValue PARTS_DETAIL_DISTANCE;
+
     private static final int DEFAULT_COAT_DETAIL_DISTANCE = 32;
     private static final int DEFAULT_COAT_BAKE_BUDGET_MS = 4;
+    private static final boolean DEFAULT_PARTS = true;
+    private static final boolean DEFAULT_PARTS_GLOW = true;
+    /**
+     * Further than a coat's, on purpose: a coat is a texture swap that has to happen
+     * before you can see the horse properly, and a horn is a silhouette you notice
+     * from much further off than you notice a dapple.
+     */
+    private static final int DEFAULT_PARTS_DETAIL_DISTANCE = 48;
+    private static final double DEFAULT_RIDE_FADE_MIN_OPACITY = 0.25;
+    private static final int DEFAULT_RIDE_FADE_START_PITCH = 30;
+    private static final int DEFAULT_RIDE_FADE_FULL_PITCH = 75;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -144,6 +214,14 @@ public final class ClientConfig {
                         "the symbol never reaches a transfer paper, the browser or a rename",
                         "box - and two players on one server may disagree about it.")
                 .define("nameplate.sexSymbol", true);
+        WHISTLE_KEY_PROMPT = builder
+                .comment("Show \"Press [key] to blow\" when you select a whistle: (default: true)",
+                        "The key blows every whistle you are carrying at once, and it is on a",
+                        "key some keyboard layouts put somewhere else - so a player who never",
+                        "opens Controls would never find out it exists. The line names YOUR",
+                        "binding, so it stays right after a rebind.",
+                        "Client-side and cosmetic: turning it off does not change the key.")
+                .define("whistle.keyPrompt", true);
         SAVED_SEARCHES = builder
                 .comment("Searches you have saved, as \"name=query\" lines. Every horse search",
                         "box in the mod reads this one list - My horses, Horse realm, the",
@@ -193,6 +271,54 @@ public final class ClientConfig {
                         "meanwhile. The first coat in each 50 ms always runs, so 0 means",
                         "\"one at a time\". Lower it on a slow machine, raise it on a fast one.")
                 .defineInRange("coats.bakeBudgetMs", DEFAULT_COAT_BAKE_BUDGET_MS, 0, 50);
+        PARTS = builder
+                .comment("Draw the parts a horse's genes grow - a unicorn's horn, and later",
+                        "antlers, spines and crystals. (default: true)",
+                        "This is a drawing setting and nothing else. A horse with a horn still",
+                        "has the horn with this off: it breeds it, passes it on, and shows it in",
+                        "the gene list and the browser. Turn it off if attached parts cost you",
+                        "frames; nothing about your horses changes.")
+                .define("parts.enabled", DEFAULT_PARTS);
+        PARTS_GLOW = builder
+                .comment("Draw the extra full-bright pass a glowing part needs. (default: true)",
+                        "False: a luminous horn still draws, lit like the rest of the horse.",
+                        "Saves one draw per glowing part, and is the first thing to try if a",
+                        "shader pack makes them look wrong.")
+                .define("parts.glow", DEFAULT_PARTS_GLOW);
+        PARTS_DETAIL_DISTANCE = builder
+                .comment("How close, in blocks, a horse must be for its grown parts to be drawn.",
+                        "A horn is roughly as much geometry again as the horse wearing it, so",
+                        "lower this if walking toward a big herd of them stutters. The horse",
+                        "itself is unaffected at any distance.")
+                .defineInRange("parts.detailDistance", DEFAULT_PARTS_DETAIL_DISTANCE, 8, 256);
+        RIDE_FADE = builder
+                .comment("Fade the horse you are riding out as you look down at it. (default: true)",
+                        "Looking at the ground from the saddle means looking through the horse,",
+                        "which is the one angle a mount is genuinely in the way at. This makes",
+                        "it see-through instead of moving the camera.",
+                        "Only the horse YOU are riding fades. Every other horse is solid, and",
+                        "nobody else sees yours fade - this is a drawing setting, not a rule.",
+                        "The saddle, the barding and a braid fade with the horse rather than",
+                        "hanging in the air on their own.")
+                .define("visual.rideFade", true);
+        RIDE_FADE_MIN_OPACITY = builder
+                .comment("How faint the ridden horse is allowed to get, 0 to 1. (default: 0.25)",
+                        "It never reaches 0. A mount you cannot see at all is a mount you",
+                        "forget you are on, so the lowest setting is still a ghost of a horse.",
+                        "1 disables the fade as surely as visual.rideFade = false does.")
+                .defineInRange("visual.rideFadeMinOpacity", DEFAULT_RIDE_FADE_MIN_OPACITY, 0.05, 1.0);
+        RIDE_FADE_START_PITCH = builder
+                .comment("The downward angle, in degrees, at which the fade starts. (default: 30)",
+                        "0 is straight ahead and 90 is straight down. Above this angle the",
+                        "horse is fully solid, so a rider looking at the horizon never sees",
+                        "any of this.")
+                .defineInRange("visual.rideFadeStartPitch", DEFAULT_RIDE_FADE_START_PITCH, 0, 90);
+        RIDE_FADE_FULL_PITCH = builder
+                .comment("The downward angle at which the fade reaches its floor. (default: 75)",
+                        "Between the two angles it ramps smoothly. Set at or below",
+                        "visual.rideFadeStartPitch and the fade becomes a hard switch at that",
+                        "angle rather than a ramp, which is allowed but looks like a glitch.")
+                .defineInRange("visual.rideFadeFullPitch", DEFAULT_RIDE_FADE_FULL_PITCH, 0, 90);
         DEBUG_TOOLS = builder
                 .comment("Whether this client's debug tools exist at all.",
                         "  The F6 debug-pen and F7 stall-overlay keys, the \"Spawn Test",
@@ -231,6 +357,15 @@ public final class ClientConfig {
             return FAMILY_TREE_SCROLLBAR.get();
         } catch (IllegalStateException notLoaded) {
             return false;
+        }
+    }
+
+    /** Safe read - falls back to the default if the config isn't loaded yet. */
+    public static boolean whistleKeyPrompt() {
+        try {
+            return WHISTLE_KEY_PROMPT.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
         }
     }
 
@@ -413,6 +548,46 @@ public final class ClientConfig {
         }
     }
 
+    // The four ride-fade reads. Every one of them happens once per frame per
+    // horse on screen, so like coatDetailDistance they must never throw and
+    // must never be the expensive part of a frame.
+
+    /** Safe read. */
+    public static boolean rideFade() {
+        try {
+            return RIDE_FADE.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** Safe read, 0..1. */
+    public static double rideFadeMinOpacity() {
+        try {
+            return RIDE_FADE_MIN_OPACITY.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_RIDE_FADE_MIN_OPACITY;
+        }
+    }
+
+    /** Safe read, in degrees below the horizon. */
+    public static int rideFadeStartPitch() {
+        try {
+            return RIDE_FADE_START_PITCH.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_RIDE_FADE_START_PITCH;
+        }
+    }
+
+    /** Safe read, in degrees below the horizon. */
+    public static int rideFadeFullPitch() {
+        try {
+            return RIDE_FADE_FULL_PITCH.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_RIDE_FADE_FULL_PITCH;
+        }
+    }
+
     /** Safe read, in blocks. Read every frame for every horse, so it must never throw. */
     public static int coatDetailDistance() {
         try {
@@ -428,6 +603,38 @@ public final class ClientConfig {
             return COAT_BAKE_BUDGET_MS.get();
         } catch (IllegalStateException notLoaded) {
             return DEFAULT_COAT_BAKE_BUDGET_MS;
+        }
+    }
+
+    // The three grown-part reads. Like the coat and ride-fade ones these happen
+    // once per frame per horse on screen, so they must never throw and must never
+    // be the expensive part of a frame - which is also why the layer reads them off
+    // the render state rather than calling in here per part.
+
+    /** Safe read. @see #PARTS */
+    public static boolean parts() {
+        try {
+            return PARTS.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_PARTS;
+        }
+    }
+
+    /** Safe read. @see #PARTS_GLOW */
+    public static boolean partsGlow() {
+        try {
+            return PARTS_GLOW.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_PARTS_GLOW;
+        }
+    }
+
+    /** Safe read, in blocks. @see #PARTS_DETAIL_DISTANCE */
+    public static int partsDetailDistance() {
+        try {
+            return PARTS_DETAIL_DISTANCE.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_PARTS_DETAIL_DISTANCE;
         }
     }
 

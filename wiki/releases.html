@@ -61,6 +61,376 @@
     </p>
 </div>
 
+<h2 id="v0-5-036">0.5.036 &mdash; horses in modded biomes, and a real inventory for dressing a horse</h2>
+
+<div class="note warn">
+    <p class="label">Neither change has been seen in a running game</p>
+    <p>
+        Both build cleanly, and a dedicated server starts with no errors. The biome mapping
+        is unit-tested. Nobody has walked into a modded biome to find a herd there, and
+        nobody has opened the new gear window. Where to look for each is on
+        <a href="verification.html">the verification index</a>.
+    </p>
+</div>
+
+<h3 id="v0-5-036-biomes">A breed in every modded biome</h3>
+<p>
+    If you play with <strong>Terralith</strong>, <strong>Regions Unexplored</strong> or
+    <strong>Nullscape</strong>, their biomes now have wild herds. Each modded biome takes the
+    whole breed list of the vanilla biome it stands in for, so a Terralith steppe gets the
+    plains breeds. That covers 161 biomes: 153 in the overworld, 5 in the Nether and 3 in
+    the End. See <a href="breeds.html">Breeds</a>.
+</p>
+<ul>
+    <li><strong>The End has horses now.</strong> Nullscape's End biomes are home to the
+        Enderpony, which can stand on end stone, dead coral, blackstone and basalt there.
+        The End has no other animal spawns, so how many turn up is the thing to watch.</li>
+    <li><strong>The Netherhorse and the Nightmare</strong> can now stand on Regions
+        Unexplored's nylium Nether floors.</li>
+    <li><strong>Caves and dimensions added by other mods get no horses.</strong> Horses
+        need lit grass, and dimensions such as the Aether and the Undergarden are left
+        alone.</li>
+    <li>Any breed you added yourself, or changed in <code>breed-spawning.toml</code>,
+        reaches the modded biomes automatically. An older <code>breed-spawning.toml</code>
+        still works.</li>
+</ul>
+
+<h3 id="v0-5-036-dress">Dress: your inventory beside the horse</h3>
+<p>
+    The Gear tab of the horse information screen has a new <strong>Dress</strong> button.
+    It appears on your own horse when you are within eight blocks. It opens the horse's
+    nineteen gear slots on a picture of the horse, with your inventory down the right,
+    and it works like a chest:
+</p>
+<ul>
+    <li>Pick a piece up and drop it on a slot, or drag it back off.</li>
+    <li>Shift-click to move a piece either way. A stack that every hoof takes puts one on
+        each hoof.</li>
+    <li>Drag the horse to turn it.</li>
+    <li>Escape goes back to the Gear tab.</li>
+    <li>Walking away, or the horse dying, closes the window. Anything you were holding
+        goes back to your inventory, or lands at your feet if it is full.</li>
+</ul>
+<p>
+    Only your own horse can be dressed, and a foal's slots stay closed. The click-a-slot
+    list on the Gear tab still works, and so does right-clicking gear onto a horse. See
+    <a href="horse-gear.html#gear-inventory">Horse gear</a>.
+</p>
+
+<h3 id="v0-5-036-world">What this does to a world you already have</h3>
+<ul>
+    <li>Nothing about an existing horse changes.</li>
+    <li>Animals mostly spawn when a chunk is first generated, so expect new herds in
+        modded biomes mainly in land you have not explored yet.</li>
+</ul>
+
+<h3 id="v0-5-036-rough">Not played yet, and known rough edges</h3>
+<ul>
+    <li><strong>The Dress window is 402 pixels wide</strong>, so it may not fit on a small
+        screen at GUI scale 4. The Dress button shares its corner with the Gear tab's
+        picture, and nobody has checked that it does not cover the top-right saddlebag slot
+        in a narrow window.</li>
+    <li><strong>The End's horse numbers are untested.</strong> They may be too many or too
+        few.</li>
+    <li>Everything waiting to be looked at is on
+        <a href="verification.html">the verification index</a>.</li>
+</ul>
+
+<h2 id="v0-5-035">0.5.035 &mdash; unicorns</h2>
+
+<div class="note warn">
+    <p class="label">Two things to read before you install it</p>
+    <p>
+        <strong>Horns are the first thing in the mod that is a shape rather than a
+        picture</strong>, and they cost frames the way a second horse does. A pen of
+        unicorns has never been measured. If one slows you down, <code>parts.enabled</code>
+        in the client config turns horns off (the horses keep them and pass them on),
+        <code>parts.glow</code> turns off just the glow, and <code>parts.detailDistance</code>
+        draws them only up close. Try <code>parts.glow</code> first if a shader pack makes a
+        horn look wrong.
+    </p>
+    <p>
+        <strong>Horn dust, horn colours and the new breed have not been seen in a running
+        game.</strong> The horn itself has: it stays on the head and sits in the right place
+        on adults and foals. Everything else is unit-tested and rendered offline only.
+    </p>
+</div>
+
+<h3 id="v0-5-035-horn">The unicorn horn, and three genes that finish it</h3>
+
+<p>
+    A horse with two copies of <a href="gene-unicorn-horn.html">unicorn horn</a> grows a
+    single horn on its forehead that follows the head as it moves and grazes. How long,
+    thick, twisted and leaning it is are written on the allele and inherited, so a line
+    can be bred for a longer horn. About one wild horse in four hundred has one, and one
+    in twenty carries it. A foal wears a horn half the size of its adult one.
+</p>
+
+<p>
+    Three more genes finish the horn, and each does nothing at all to a horse without
+    one &mdash; so an ordinary-looking horse can carry a unicorn's colour, glow and dust:
+</p>
+
+<ul>
+    <li><a href="gene-horn-colour.html">Horn colour</a> &mdash; white, the seven colours of
+        the rainbow, pink, black, grey, or chaos (a colour of its own on every copy). Nothing
+        is dominant: two different copies make a <strong>two-tone horn</strong>, one colour
+        with a tip of the other. No two reds are quite the same red.</li>
+    <li><a href="gene-horn-glow.html">Horn glow</a> &mdash; recessive; the horn glows in the
+        dark in its own colours.</li>
+    <li><a href="gene-horn-dust.html">Horn dust</a> &mdash; recessive; the horn sheds a fine
+        falling dust in its own colours.</li>
+</ul>
+
+<p>
+    In the spawn egg, <em>Rnd epigen.</em> and the randomize button now change a horn's
+    shape, colour and glow; before this, a gene that painted nothing on the coat was
+    treated as invisible and left alone.
+</p>
+
+<h3 id="v0-5-035-breed">A new breed: the Unicorn</h3>
+
+<p>
+    <a href="breed-book.html#unicorn">The Unicorn</a> is a rare magical breed found by day
+    in cherry groves, flower forests, meadows and sunflower plains. Every one is a white
+    horse &mdash; a black horse under dominant white &mdash; with a glowing horn that sheds
+    dust, in a random colour (one in four two-tone), a prismtail mane and tail, glowing
+    hooves and a love of sugar. A quarter leave rainbow dust where they walk. Some carry two
+    different whites and only ever have white foals; two of the others can have a black one.
+</p>
+
+<h3 id="v0-5-035-world">What this does to a world you already have</h3>
+
+<ul>
+    <li>Every horse you already have is hornless and carries none of the four horn genes.
+        Nothing about an existing horse changes.</li>
+    <li>Unicorns appear only in wild herds founded after you update, so look in new
+        flowering country, or get one from the cowboy or a spawn egg.</li>
+</ul>
+
+<h3 id="v0-5-035-rough">Not played yet, and known rough edges</h3>
+
+<ul>
+    <li><strong>Horn dust</strong> is placed from the horse's hitbox, not its animated head,
+        so a grazing unicorn's dust starts where its horn would be if it looked up.</li>
+    <li><strong>Horn colours</strong> are tinted onto a grey grain, so they may look darker
+        than their names &mdash; a red horn could read brownish.</li>
+    <li><strong>The browser horse designer does not draw horns.</strong> The in-game spawn
+        egg does.</li>
+    <li>Everything waiting to be looked at is on <a href="verification.html">the verification
+        index</a>.</li>
+</ul>
+
+<h2 id="v0-5-034">0.5.034 &mdash; riding a horse stops getting in your way</h2>
+
+<div class="note warn">
+    <p class="label">Two things to read before you install it</p>
+    <p>
+        <strong>The horse you are riding now fades as you look down at it</strong>, and nobody
+        has seen that happen yet. It is a client setting, on by default, and it is the one
+        change in this release that is purely visual &mdash; which also means it is the one
+        that cannot be checked by any test. If it looks wrong,
+        <code>visual.rideFade = false</code> gives back a solid horse and changes nothing else.
+        Please say so if it does; the two answers already agreed are to fade only the base
+        coat, or to drop the feature.
+    </p>
+    <p>
+        <strong>A lead that snaps now comes back to your inventory</strong> instead of falling
+        on the ground &mdash; and the only seam 26.1.2 offers for that sits on the method
+        <em>every dropped item in the game</em> passes through. The guard is one comparison
+        against <code>minecraft:lead</code>, but if it is ever wrong the symptom is items going
+        missing a long way from any horse. <code>behaviour.leads_return = false</code> turns off
+        both halves. If anything in your world stops dropping what it used to, that switch is
+        the first thing to try and the thing to tell us about.
+    </p>
+</div>
+
+<h3 id="v0-5-034-rider">Five things about being in the saddle</h3>
+
+<p>
+    <a href="rider-comfort.html">Rider comfort</a> was a five-piece plan, and all five shipped
+    in this range. Each has its own <a href="config.html">config</a> switch, and none of them
+    changes a horse, a gene, or anything that is saved.
+</p>
+
+<ul>
+    <li><strong>You mine at full speed from the saddle.</strong> Vanilla divides your mining
+        speed by five while you are off the ground, and a mounted player counts as off the
+        ground &mdash; so breaking one block from horseback meant getting down and back on. A
+        player on a horse that is standing on the ground now mines exactly as fast as they would
+        standing in the same spot. A jumping or flying horse still pays the penalty.
+        (<code>behaviour.mounted_mining_penalty_removed</code>)</li>
+    <li><strong><code>ALT</code>+<code>E</code> opens your own inventory.</strong> <code>E</code>
+        from the saddle opens this mod's horse screen, which left a rider with no way to reach
+        their own pack. The new key sits under <em>Open/Close Inventory</em> in Controls, works
+        on foot as well, and is rebindable &mdash; an unbound key is the off switch, so there is
+        no config option for it.</li>
+    <li><strong>Tack goes on with a right-click.</strong> Hold a piece of this mod's gear,
+        right-click your horse, and it goes into the first empty slot that will take it. Today
+        that means the <a href="item-rescuing-braid.html">rescuing braid</a>, the only item yet
+        made for those slots; every piece still to come arrives wearable by hand the day it
+        joins its tag. The saddle and the barding are deliberately left to vanilla, which turned
+        out to be doing both already. (<code>behaviour.rightclick_equips_tack</code>)</li>
+    <li><strong>A snapped lead comes back too</strong>, not just a whistled one. Walking a horse
+        too far, or breaking the fence it was tied to, used to leave a lead on the ground to go
+        back for. It now returns to whoever put it on &mdash; and tying a horse to a fence
+        inherits that person for free out of vanilla's own control flow, so a knot that breaks
+        pays back the right player. (<code>behaviour.leads_return</code>, which until now covered
+        only the whistle case)</li>
+    <li><strong>The horse gets out of your way.</strong> Look down to place a block or find the
+        edge of a ledge and what you get is a view of the back of a horse. Now the horse you are
+        riding fades as you look down and solidifies as you look up &mdash; with the saddle, the
+        barding, a braid in the mane and an emissive coat's glow all going faint together,
+        because a saddle left hanging solid in the shape of a horse would be worse than no fade
+        at all. It never goes below a quarter opacity, and where it starts and ends are yours to
+        set (<code>visual.rideFadeStartPitch</code>, 30&deg; below the horizon, to
+        <code>visual.rideFadeFullPitch</code>, 75&deg;). Nothing moves, the camera does not
+        shift, and nobody else sees it.</li>
+</ul>
+
+<p>
+    <strong>The cutie mark does not fade</strong>, on the rare horse that has one &mdash; it is
+    hidden while the horse is faded and comes back as the horse does. Its emblems are drawn as
+    items and the game gives no way to tint an item, so the choice was a solid sticker floating
+    on a ghost horse or no sticker. Say which you would rather have; it is one line either way.
+</p>
+
+<h3 id="v0-5-034-whistles">A whistled horse walks in, if it can just walk</h3>
+
+<p>
+    All four planned <a href="item-whistles.html">whistle</a> pieces shipped as well.
+    <strong>A whistle used to teleport everything it reached, at any distance</strong>, so
+    blowing one at a horse standing ten blocks off in an open field made it vanish and pop back
+    at your elbow &mdash; the feature working, and looking like a bug. A horse that can simply
+    walk to you now does, at a trot, arriving on its own feet.
+</p>
+
+<ul>
+    <li><strong>The route is what counts, not how far off it looks.</strong> A horse fifteen
+        blocks away on the wrong side of a fence is a long walk round, so it is teleported; open
+        a gate four blocks along and the same horse walks in. One blow can do both at once, and
+        the chat line counts them together. A horse that stops making headway, or takes too
+        long, is brought the old way &mdash; a whistle never ends with your horse stuck behind a
+        fence.</li>
+    <li><strong>A horse in trouble is left where it is.</strong> One that is on fire, freezing or
+        being hurt drops out of the call and is <em>not</em> teleported. It has something more
+        urgent to do than come when called, and yanking it to your feet is not help.</li>
+    <li><strong>One key blows every whistle you carry.</strong> <code>'</code> (apostrophe, and
+        rebindable) sounds the largest-area whistle in your pack plus every bound
+        <a href="item-whistles.html#ender">ender whistle</a> &mdash; each horse called once
+        however many whistles in the pack would have reached it. Selecting a whistle now also
+        shows a prompt naming the key; <code>whistle.keyPrompt</code> turns that off.</li>
+    <li><strong>Binding an ender whistle needs the horse's trust.</strong> It refuses below bond
+        tier 2, the point at which a horse <em>approaches</em> you. Nothing re-checks a whistle
+        once bound, so a bond that later falls does not break one, and a bound
+        <a href="item-stall-signs.html">stall sign</a> is untouched &mdash; a sign has no reason
+        to want a bond.</li>
+    <li><strong>A bound whistle glimmers</strong> like an enchanted item, so you can pick it out
+        of a pack of unbound ones. The glint is computed from the binding rather than written
+        onto the item, so every whistle bound before this release glimmers the moment you load
+        the world: nothing to migrate, and no way to be left holding a dull bound whistle.</li>
+</ul>
+
+<p>
+    <strong>The ender whistle still always teleports.</strong> Its whole point is &ldquo;from
+    anywhere&rdquo;, and no horse can walk across a dimension.
+</p>
+
+<h3 id="v0-5-034-art">The mod draws its own furniture</h3>
+
+<p>
+    An audit of every block and item found <strong>eight of twelve blockstates had no art of
+    their own</strong>. Five job-site posts shared one texture set, so you could not tell the
+    leatherworker's post from the scientist's; three more wore vanilla furniture unchanged
+    &mdash; the <a href="item-equestrian-bench.html">dyeing bench</a> was the smithing table, the
+    <a href="item-research-shelf.html">research shelf</a> the bookshelf, the
+    <a href="horse-stasis.html">stasis bank</a> the barrel.
+</p>
+
+<ul>
+    <li><strong>The five posts are five drawings now</strong>, each carrying its trade on the
+        same barrel carpentry, with the hoops in the colour of that
+        <a href="villagers.html">equestrian's</a> hat &mdash; so the post and the villager who
+        stands at it are one thing to learn rather than two.</li>
+    <li>The bench, the shelf and the stasis bank are drawn. The
+        <a href="item-breeding-carrots.html">golden carrot crop</a> is gold art rather than a
+        gold filter over Mojang's carrots. The <a href="item-stall-signs.html">stall signs</a>
+        are three different drawings rather than one drawing in three hues.</li>
+    <li><strong>Every block and item in the mod now has art of its own</strong>, with one
+        deliberate exception: the breed <a href="item-spawn-eggs.html">spawn egg</a> is vanilla's
+        horse egg recoloured, which is the correct idiom for a spawn egg. The per-wood carts,
+        gates and jumps keep their vanilla planks on purpose &mdash; a birch gate should look
+        like birch, and the sprite is telling you what it is made of.</li>
+    <li><strong>If you use a resource pack</strong> that restyled one of these by overriding the
+        vanilla block it used to borrow, it has stopped doing so.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Three sprites are somebody else's, and you may not take them on</span>
+    <p>
+        The vet's kit, the freedom stick and the golden carrot seeds are icons from
+        <strong>Raven Fantasy HD Ultimate</strong> by Caio Carlos of Clockwork Raven Studios
+        (clockworkraven.itch.io), used unmodified under the author's own licence. That licence
+        permits them in a free mod on the condition that the mod's users are told they
+        <strong>may not</strong> extract, reuse, redistribute or sell those three files, put them
+        in an asset pack, or train a model on them. This mod is otherwise CC BY-NC 4.0, and that
+        grant is carved back for exactly those three files &mdash; it is not ours to give. The
+        full notice is <code>THIRD_PARTY_NOTICES.md</code> inside the jar, and the icons are free
+        from the author if you want them for something of your own.
+    </p>
+</div>
+
+<h3 id="v0-5-034-braid">A bug: the rescuing braid had never been drawn</h3>
+
+<p>
+    Wiring the fade through the braid layer turned up that the
+    <a href="item-rescuing-braid.html">rescuing braid</a> <strong>has never appeared on a
+    horse</strong>, in any version that has had one. Two arguments to the draw call were the
+    wrong way round, so the dye was being submitted as an outline colour while the tint was a
+    number that is zero for any horse which is not glowing &mdash; and a tint of zero is
+    transparent black, which paints nothing. The quieter half of the same slip was that a dyed
+    braid had been asking the game for a glowing silhouette round the horse.
+</p>
+
+<p>
+    Neither half logs anything, and an overlay that never draws is indistinguishable from a
+    horse not wearing one, which is how it survived a server boot, a unit test and a recipe
+    bake. It is fixed, and <strong>nobody has confirmed the fix</strong> &mdash; that check sits
+    on the braid's own page, because it is a different job from checking a new feature: you are
+    looking for something you believed you had already seen.
+</p>
+
+<h3 id="v0-5-034-housekeeping">Also</h3>
+
+<ul>
+    <li><strong>Two plans are finished and gone.</strong> The whistle and rider-comfort Roadmap
+        tabs are both empty and deleted, and both pages have left
+        <a href="roadmap.html">what is planned</a> by themselves.</li>
+    <li>Four third-party art packs are now recorded with what their terms <em>actually</em> are
+        rather than what a store page implies. One was queued, opened and deleted outright,
+        because its author stated the licence inconsistently across their own comment thread.
+        Only the CC0 pack's images are in the repository.</li>
+    <li>On the wiki, item pages show their items and blocks with art of their own carry a
+        rotatable 3D preview. Both bakes hard-fail rather than quietly publish a Mojang texture,
+        and the item bake also fails on a shippable item that no page shows.</li>
+</ul>
+
+<div class="note">
+    <span class="label">What has actually been played</span>
+    <p>
+        <strong>None of it.</strong> The build is green, all twenty-two in-game tests pass, a
+        dedicated server boots clean with no <code>ERROR</code> line, and both leash mixins were
+        confirmed applied on that boot &mdash; the client-side fade mixin was confirmed the same
+        way in a real client launch. None of that is the same as somebody having ridden a horse.
+        <strong>The fade is the piece that most needs eyes</strong>, and the likeliest defect in
+        it is translucent sort order showing a horse's insides through itself, which is the one
+        thing no change of tint can fix. The pieces that could be wrong <em>invisibly</em> do
+        have tests: the whistle's key selection, the fade's ramp at a degenerate config, the tack
+        click's four cases, and the lead's clear-the-record step &mdash; each confirmed by
+        deliberately breaking the thing it watches and checking the test went red.
+    </p>
+</div>
+
 <h2 id="v0-5-033">0.5.033 &mdash; a horse that knows who you are</h2>
 
 <div class="note warn">

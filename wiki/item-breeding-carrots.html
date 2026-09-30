@@ -124,6 +124,18 @@
     like any other &mdash; it writes the same token as the plain one with its theme
     appended, so there is no second code path.
 </p>
+
+<h2 id="same-sex">A same-sex pair spends the carrots and makes no foal</h2>
+
+<p>
+    Shown 2026-09-30 by the clockwork run in the debug test yard. The
+    <a href="horse-dimension.html#clockwork">clockwork</a> pens SAME SEX MARES and SAME SEX STUDS
+    (row AQ east) feed each pair golden carrots from fake-player hands, and on the first run
+    (<code>CLOCKWORK PASS</code>) both pairs ate the carrots and fell in love, their love was spent
+    and a breeding cooldown set, and no foal came. The one-line message from
+    <code>HorseBreedingHandler.sameSexAttempt</code> is not part of that: it goes to the love cause,
+    and a fake player is not in the level for that to find.
+</p>
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -131,13 +143,13 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Just one thing outstanding, and it is a message nobody has seen: feed breeding carrots to a same-sex pair and they should court, spend the carrots, make <strong>no foal</strong>, and say so in a single line to whoever fed them (<code>HorseBreedingHandler.sameSexAttempt</code>).</p>
+    <p>Just one thing outstanding, and it is a message nobody has seen: feed breeding carrots to a same-sex pair and the player who fed them should get a single line saying no foal will come (<code>HorseBreedingHandler.sameSexAttempt</code>).</p>
 </div>
 
 <h3 id="open-older-item-breeding-carrots">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>Breeding carrots on a same-sex pair</strong> court, spend the carrots, make no foal, and say so in one line to the player who fed them (<code>HorseBreedingHandler.sameSexAttempt</code>).</li>
+    <li><strong>Breeding carrots on a same-sex pair</strong> say so in one line to the player who fed them (<code>HorseBreedingHandler.sameSexAttempt</code>). The yard's fake player cannot read it: the line goes to the love cause, which must be a real player in the level.</li>
 </ul>
 
 </section>
