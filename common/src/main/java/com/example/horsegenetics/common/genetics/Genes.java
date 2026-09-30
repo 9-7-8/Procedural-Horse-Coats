@@ -126,6 +126,7 @@ import com.example.horsegenetics.common.genetics.genes.TailColorGene;
 import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.Toe1Gene;
+import com.example.horsegenetics.common.genetics.genes.UnicornHornGene;
 import com.example.horsegenetics.common.genetics.genes.VerdantGene;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpecLoader;
@@ -546,6 +547,14 @@ public final class Genes {
     public static final LutGene LUT = new LutGene();
     /** Cutie mark - a recessive epigenetic emblem of 1-3 items on both flanks, drawn over everything. */
     public static final CutieMarkGene CUTIE_MARK = new CutieMarkGene();
+    /**
+     * <b>Unicorn horn</b> - the first locus in the mod that grows <b>geometry</b>
+     * rather than painting texels. Recessive; the horn is a mesh hung on the
+     * animated head by {@code AttachedPartLayer}, and its length, girth, twist,
+     * lean and colour are all epigenetic. It paints nothing, so no coat is keyed
+     * on it and neither coat golden reads it.
+     */
+    public static final UnicornHornGene UNICORN_HORN = new UnicornHornGene();
     public static final HealerGene HEALER = new HealerGene();
     /**
      * Magic sectoral heterochromia - two different colour alleles and the horse
@@ -669,7 +678,7 @@ public final class Genes {
             EYESIGHT, WEATHER_SPEED, WEATHER_JUMP, MAGIC_HEAT, MAGIC_COLD,
             FOOD_PREFERENCE, POTION_MILK, EGG_LAYER, SINGER,
             PACK_LEADER, SPAWNER,
-            LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
+            LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK, UNICORN_HORN,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

@@ -154,8 +154,47 @@ public final class ClientConfig {
     /** The downward pitch at which it reaches {@link #RIDE_FADE_MIN_OPACITY}. */
     public static final ModConfigSpec.IntValue RIDE_FADE_FULL_PITCH;
 
+    /**
+     * <b>Draw the parts a horse's genes grow at all</b> - a unicorn horn, and in
+     * time antlers, spines and crystals. See {@code AttachedPartLayer}.
+     *
+     * <p>Render-only, and that is the whole contract: turning it off gates a submit
+     * and touches nothing else. A horse with a horn still <i>has</i> the horn - it
+     * breeds it, drifts it, shows it in the gene list and in the browser, and wears
+     * it again the moment this goes back on. So two players on one server may
+     * disagree freely, and neither is looking at a different world.
+     */
+    public static final ModConfigSpec.BooleanValue PARTS;
+
+    /**
+     * <b>Draw a glowing part's second, full-bright pass.</b> Off, a luminous horn
+     * still draws - lit like anything else. One submit per glowing part saved, and
+     * the first thing to try under a shader pack that dislikes emissive geometry.
+     */
+    public static final ModConfigSpec.BooleanValue PARTS_GLOW;
+
+    /**
+     * <b>How close a horse must be for its grown parts to be drawn.</b> In blocks.
+     * A horn is about as much geometry again as the horse carrying it, so a herd of
+     * unicorns is the case this exists for; past the line the horse draws and the
+     * horn does not.
+     *
+     * <p>Unlike {@code coats.detailDistance} there is no "keep what you have"
+     * rule - a coat that swapped at range would flicker, and a part that simply is
+     * not drawn cannot.
+     */
+    public static final ModConfigSpec.IntValue PARTS_DETAIL_DISTANCE;
+
     private static final int DEFAULT_COAT_DETAIL_DISTANCE = 32;
     private static final int DEFAULT_COAT_BAKE_BUDGET_MS = 4;
+    private static final boolean DEFAULT_PARTS = true;
+    private static final boolean DEFAULT_PARTS_GLOW = true;
+    /**
+     * Further than a coat's, on purpose: a coat is a texture swap that has to happen
+     * before you can see the horse properly, and a horn is a silhouette you notice
+     * from much further off than you notice a dapple.
+     */
+    private static final int DEFAULT_PARTS_DETAIL_DISTANCE = 48;
     private static final double DEFAULT_RIDE_FADE_MIN_OPACITY = 0.25;
     private static final int DEFAULT_RIDE_FADE_START_PITCH = 30;
     private static final int DEFAULT_RIDE_FADE_FULL_PITCH = 75;
@@ -232,6 +271,26 @@ public final class ClientConfig {
                         "meanwhile. The first coat in each 50 ms always runs, so 0 means",
                         "\"one at a time\". Lower it on a slow machine, raise it on a fast one.")
                 .defineInRange("coats.bakeBudgetMs", DEFAULT_COAT_BAKE_BUDGET_MS, 0, 50);
+        PARTS = builder
+                .comment("Draw the parts a horse's genes grow - a unicorn's horn, and later",
+                        "antlers, spines and crystals. (default: true)",
+                        "This is a drawing setting and nothing else. A horse with a horn still",
+                        "has the horn with this off: it breeds it, passes it on, and shows it in",
+                        "the gene list and the browser. Turn it off if attached parts cost you",
+                        "frames; nothing about your horses changes.")
+                .define("parts.enabled", DEFAULT_PARTS);
+        PARTS_GLOW = builder
+                .comment("Draw the extra full-bright pass a glowing part needs. (default: true)",
+                        "False: a luminous horn still draws, lit like the rest of the horse.",
+                        "Saves one draw per glowing part, and is the first thing to try if a",
+                        "shader pack makes them look wrong.")
+                .define("parts.glow", DEFAULT_PARTS_GLOW);
+        PARTS_DETAIL_DISTANCE = builder
+                .comment("How close, in blocks, a horse must be for its grown parts to be drawn.",
+                        "A horn is roughly as much geometry again as the horse wearing it, so",
+                        "lower this if walking toward a big herd of them stutters. The horse",
+                        "itself is unaffected at any distance.")
+                .defineInRange("parts.detailDistance", DEFAULT_PARTS_DETAIL_DISTANCE, 8, 256);
         RIDE_FADE = builder
                 .comment("Fade the horse you are riding out as you look down at it. (default: true)",
                         "Looking at the ground from the saddle means looking through the horse,",
@@ -544,6 +603,38 @@ public final class ClientConfig {
             return COAT_BAKE_BUDGET_MS.get();
         } catch (IllegalStateException notLoaded) {
             return DEFAULT_COAT_BAKE_BUDGET_MS;
+        }
+    }
+
+    // The three grown-part reads. Like the coat and ride-fade ones these happen
+    // once per frame per horse on screen, so they must never throw and must never
+    // be the expensive part of a frame - which is also why the layer reads them off
+    // the render state rather than calling in here per part.
+
+    /** Safe read. @see #PARTS */
+    public static boolean parts() {
+        try {
+            return PARTS.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_PARTS;
+        }
+    }
+
+    /** Safe read. @see #PARTS_GLOW */
+    public static boolean partsGlow() {
+        try {
+            return PARTS_GLOW.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_PARTS_GLOW;
+        }
+    }
+
+    /** Safe read, in blocks. @see #PARTS_DETAIL_DISTANCE */
+    public static int partsDetailDistance() {
+        try {
+            return PARTS_DETAIL_DISTANCE.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_PARTS_DETAIL_DISTANCE;
         }
     }
 

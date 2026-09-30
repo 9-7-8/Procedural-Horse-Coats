@@ -145,7 +145,7 @@ window.HG.pages = {
                 { href: "lasso.html", text: "The lasso", kind: "core", views: ["coding"] },
                 { href: "magic-grab.html", text: "Magic grab", kind: "magical", views: ["coding"] },
                 { href: "magical-genes.html", text: "Magical genes still to build", kind: "magical", views: ["coding"] },
-                { href: "model-parts.html", text: "Attached model parts", kind: "core", views: ["coding"] },
+                { href: "model-parts.html", text: "Attached model parts", kind: "core", views: ["gameplay","coding"] },
                 { href: "momentum-sprint.html", text: "Momentum sprint", kind: "magical", views: ["coding"] },
                 { href: "item-rescuing-braid.html", text: "Rescuing braid", kind: "core", views: ["gameplay","coding"] },
                 { href: "rider-comfort.html", text: "Rider comfort", kind: "core", views: ["gameplay","coding"] },
@@ -276,6 +276,12 @@ window.HG.pages = {
                 { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-teardrop.html", text: "Teardrop", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-wingmargin.html", text: "Wing Margin", kind: "magical", views: ["gameplay","coding"] }
+            ]
+        },
+        {
+            title: "Magical grown parts",
+            items: [
+                { href: "gene-unicorn-horn.html", text: "Unicorn horn", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },
         {

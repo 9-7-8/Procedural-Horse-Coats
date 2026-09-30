@@ -257,4 +257,5 @@ horsegenetics.accretion_field
 horsegenetics.census
 horsegenetics.cleave_side
 horsegenetics.shade
+horsegenetics.unicorn_horn
 horsegenetics.wing_cloak

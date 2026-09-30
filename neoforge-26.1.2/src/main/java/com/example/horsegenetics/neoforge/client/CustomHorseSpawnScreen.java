@@ -143,6 +143,19 @@ import java.util.List;
  * ({@code wiki/horse-designer/js/gui.js}), and it copies the layout constants
  * and colours below by value, so a moved widget is a two-line change.
  *
+ * <p><b>Neither twin draws a grown part, and both are wrong about a unicorn in
+ * the same way.</b> The unicorn-horn locus grows a mesh on the horse's head
+ * ({@code AttachedPartLayer}) rather than painting the coat, and both of these
+ * screens preview a horse by drawing its <i>coat texture</i>. So a
+ * {@code Horn/Horn} horse appears here with the gene listed in the row, the
+ * epigenome values on the right, and <b>no horn anywhere in the picture</b> -
+ * which is the one place a screen whose whole job is "this is what that genome
+ * looks like" currently lies. This is recorded on both files rather than fixed
+ * because fixing it is a design call, not an omission: the cheap answer is for
+ * both to say in words that the part is not drawn, and the expensive one is a
+ * preview that can draw geometry. Whichever is chosen lands in both.
+ * See {@code wiki/model-parts.html#open-designer}.
+ *
  * <p>The deliberate divergences. The browser has nothing to spawn and no
  * inventory to put an egg in, so this screen's two output buttons have no twin
  * there, and the slots they leave are taken by view controls. Slot for slot,

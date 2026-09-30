@@ -438,6 +438,13 @@ public final class GeneDescriptions {
                             + "items, how many, whether they sit in a row or a triangle, and how big "
                             + "they are are all epigenetic and inherited with the allele. One copy "
                             + "shows nothing."),
+            Map.entry("horsegenetics.unicorn_horn",
+                    "A magical, recessive gene: Horn/Horn grows a single tapering horn on the "
+                            + "forehead. It is a piece of the horse rather than a marking on it - "
+                            + "the coat is unchanged, and the horn follows the head when the horse "
+                            + "grazes. Length, thickness, twist, lean and colour are all epigenetic "
+                            + "and inherited with the allele, and about one horned horse in eight "
+                            + "glows in the dark. One copy shows nothing."),
             Map.entry("horsegenetics.mstn",
                     "MSTN (myostatin), the sprint / stamina trade-off. Codominant: each C copy "
                             + "adds a little speed and costs two hearts of health. Endurance is "

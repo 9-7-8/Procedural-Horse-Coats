@@ -65,6 +65,16 @@ import java.util.List;
  *       in.</li>
  * </ul>
  *
+ * <p><b>And one thing both get wrong identically, which is worth as much as a
+ * divergence.</b> The unicorn-horn locus grows a mesh on the horse's head rather
+ * than painting its coat, and both twins preview a horse by drawing its coat
+ * texture - so a {@code Horn/Horn} horse shows its gene row and its epigenome
+ * values here and <b>no horn in the picture</b>. Not an omission to tidy up: the
+ * cheap fix is for both to say in words that the part is not drawn, the expensive
+ * one is a preview that can draw geometry, and it is a design call either way.
+ * Whichever is chosen lands in both files. See
+ * {@code wiki/model-parts.html#open-designer}.
+ *
  * <p><b>And one in how a horse leaves the screen.</b> Both carry the same
  * payload - {@code HorseFile}, the whole horse rather than its alleles - but the
  * page writes it to a file you can keep and the screen writes it to the

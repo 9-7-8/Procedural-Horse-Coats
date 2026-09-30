@@ -654,6 +654,72 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     why fading a saddle takes two hooks instead of one.
 </p>
 
+<h2 id="runtime-bake">A <code>LayerDefinition</code> can be baked at run time, outside the registration event</h2>
+
+<p>
+    Every model in this mod is registered during
+    <code>EntityRenderersEvent.RegisterLayerDefinitions</code> and baked by the renderer
+    context, and it is easy to conclude from that alone that a model <em>must</em> be declared
+    at startup. It is worth knowing that it need not, because the conclusion quietly forces a
+    design: a mesh whose shape depends on a per-entity number would have to become one of a
+    fixed set of presets declared before any entity exists.
+</p>
+
+<p>
+    <code>LayerDefinition.bakeRoot()</code> is <code>public</code> and its whole body is
+    <code>this.mesh.getRoot().bake(this.material.xTexSize, this.material.yTexSize)</code>. It
+    touches no registry, no event, no resource manager and no renderer context &mdash; it walks
+    a <code>PartDefinition</code> tree allocating <code>ModelPart</code>s and
+    <code>ModelPart.Cube</code>s, and that is all. So a mesh can be built the first time
+    something needs one, off numbers that did not exist at startup. Read out of the 26.1.2
+    sources; <code>AttachedPartLayer</code> and <code>PartMeshes</code> are what use it, and
+    <a href="model-parts.html#runtime-bake">attached model parts</a> is why.
+</p>
+
+<p class="muted">
+    What you give up is the resource-reload hook the registration event gets for free, so a
+    run-time bake wants its own cache and its own reason to be safe against unbounded growth.
+    Geometry does not depend on a resource pack, so nothing needs invalidating on reload; size
+    is the real question, and the answer worth having is a <em>structural</em> bound on the set
+    of distinct meshes rather than a budget or an eviction policy.
+</p>
+
+<h2 id="deferred-submit-setupanim">A submitted model is drawn later, and <code>setupAnim</code> runs then &mdash; not at the submit</h2>
+
+<p>
+    <code>SubmitNodeCollector.submitModel</code> does not draw anything. It stores
+    <code>new ModelSubmit(poseStack.last().copy(), model, state, ...)</code> &mdash; a
+    <strong>copy of the pose</strong> and a <strong>reference to the model</strong> &mdash; in a
+    per-order bucket, and the batch renderer walks those buckets afterwards. For each one it
+    calls <code>model.setupAnim(submit.state())</code> and <em>then</em>
+    <code>model.renderToBuffer(...)</code>.
+</p>
+
+<p>
+    Two consequences, and they point in opposite directions:
+</p>
+
+<ul>
+    <li><strong>Mutating a shared model at submit time is a bug that only shows with two
+        entities on screen.</strong> Setting <code>visible</code> or <code>xScale</code> on a
+        cached model's parts and then submitting it looks correct in every single-entity test:
+        the second entity in the frame overwrites the first one's model before either is drawn,
+        so both come out wearing the second one's values. Nothing logs.</li>
+    <li><strong>Driving it from <code>setupAnim</code> is safe</strong>, because that runs once
+        per submit, immediately before that submit's own draw. And since
+        <code>submitModel</code> is <em>generic in its state</em> &mdash;
+        <code>Model&lt;? super S&gt;</code> with <code>S</code> free &mdash; the state does not
+        have to be the entity's render state. A model typed on the per-instance data it varies
+        by gets the right numbers handed to it at the right moment. See
+        <a href="model-parts.html#three-tiers">attached model parts</a>.</li>
+</ul>
+
+<p class="muted">
+    A <code>PoseStack</code> transform is copied rather than shared, so anything expressible as
+    a transform, a tint or a light value is safe at submit time and needs none of this. That is
+    the cheaper route where it is available, and it is worth reaching for first.
+</p>
+
 <h2 id="onlyin-on-mod-classes">Do not put <code>@OnlyIn</code> on a class of your own</h2>
 
 <p>

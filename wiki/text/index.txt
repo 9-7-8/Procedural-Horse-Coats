@@ -10,11 +10,13 @@ wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration,
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
 wiki/api-notes.html#cutout-no-blend	all	A cutout pipeline ignores your alpha, so a tint cannot fade anything
+wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn later, and setupAnim runs then — not at the submit
 wiki/api-notes.html#interface-private-static	all	An interface’s private static method is unreachable, and vanilla hides real behaviour in them
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
 wiki/api-notes.html#onlyin-on-mod-classes	all	Do not put @OnlyIn on a class of your own
 wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide which recipe runs
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
+wiki/api-notes.html#runtime-bake	all	A LayerDefinition can be baked at run time, outside the registration event
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
 wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
 wiki/api-notes.html#source-permission	all	A command source no longer has hasPermission(int)
@@ -2542,6 +2544,26 @@ wiki/gene-tron.html#inheritance	gameplay	Crossing two of them
 wiki/gene-tron.html#layers	coding	What it paints
 wiki/gene-tron.html#outcomes	gameplay	What it can come out as
 wiki/gene-tron.html#verified	coding	Verified
+wiki/gene-unicorn-horn.html#anchor	coding	The anchor, and the two models that do not agree
+wiki/gene-unicorn-horn.html#carrot	gameplay	Its gene carrot
+wiki/gene-unicorn-horn.html#deferred	coding	The deferred-submit trap, and why the model is typed on the part
+wiki/gene-unicorn-horn.html#family	coding	Why it is not filed with the coat genes
+wiki/gene-unicorn-horn.html#finding	gameplay	Finding one
+wiki/gene-unicorn-horn.html#health	gameplay	Is it good for the horse?
+wiki/gene-unicorn-horn.html#inheritance	gameplay	Crossing two of them
+wiki/gene-unicorn-horn.html#numbers	coding	The epigenome, sorted by what it costs to change
+wiki/gene-unicorn-horn.html#pipeline	coding	It paints nothing, and that is the novelty
+wiki/gene-unicorn-horn.html#real-horses	science	There is no real locus here
+wiki/gene-unicorn-horn.html#rendering	coding	How the horn reaches the screen
+wiki/gene-unicorn-horn.html#runtime-bake	coding	A layer definition can be baked at run time
+wiki/gene-unicorn-horn.html#sheet	coding	One greyscale sheet for every colour
+wiki/gene-unicorn-horn.html#table	coding	The combination table
+wiki/gene-unicorn-horn.html#turning-it-off	gameplay	If it costs you frames
+wiki/gene-unicorn-horn.html#what-varies	gameplay	Two unicorns are not alike
+wiki/gene-unicorn-horn.html#why-epigenetic	science	Why the horn varies at all
+wiki/gene-unicorn-horn.html#why-not-smooth	science	Why the horn facets, and why that is the right trade
+wiki/gene-unicorn-horn.html#why-recessive	science	Why recessive, and why carriers
+wiki/gene-unicorn-horn.html#why-twist-excludes-curve	science	The one piece of geometry that is a trap
 wiki/gene-uraniid.html#about	coding	Why it is built this way
 wiki/gene-uraniid.html#carrot	gameplay	Its gene carrot
 wiki/gene-uraniid.html#file	coding	The file
@@ -3091,6 +3113,17 @@ wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
 wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
 wiki/known-gaps.html#migrated	all	Migrated open checks
+wiki/model-parts.html#adding	coding	Adding the second part
+wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
+wiki/model-parts.html#classes	coding	What each piece does
+wiki/model-parts.html#no-gameplay	gameplay	They do nothing
+wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
+wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
+wiki/model-parts.html#settings	gameplay	If they cost you frames
+wiki/model-parts.html#shape	coding	The shape of it: two sources, one renderer
+wiki/model-parts.html#sheet	coding	One greyscale sheet, and why its regions are featureless
+wiki/model-parts.html#three-tiers	coding	The rule that keeps a herd cheap
+wiki/model-parts.html#what-you-see	gameplay	What a player sees
 wiki/paint-order.html#exception	coding	The one gene the order does not describe
 wiki/paint-order.html#icons	coding	Where the pictures come from
 wiki/paint-order.html#one-order	coding	There is one order, and it is derived

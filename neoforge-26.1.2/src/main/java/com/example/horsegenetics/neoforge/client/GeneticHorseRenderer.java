@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
+import com.example.horsegenetics.common.genetics.GrownParts;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
@@ -53,6 +54,16 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // After the marks: a braid is worked into the hair and sits on top of
         // everything the coat did, the same way the emissive pass does.
         this.addLayer(new BraidLayer(this));
+        // Grown parts - a unicorn's horn - after every pass that touches the coat
+        // and before the tack. The position is a real choice and not an accident of
+        // where the line was typed: a part is SEPARATE GEOMETRY rather than an
+        // overlay, so it must not be drawn between a coat pass and the pass that
+        // corrects it; and it goes before the armour and saddle layers because those
+        // are vanilla's bakes of the whole horse and a part is a small thing sitting
+        // proud of it. Nothing on the head competes with the tack today, which is
+        // why this is cheap to revisit when a saddle pad or a set of dorsal spines
+        // makes it matter.
+        this.addLayer(new AttachedPartLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,
@@ -115,6 +126,17 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             // field rather than asking again, so that the coat, the glow, a
             // braid and the gear cannot disagree about how solid this horse is.
             geneticState.fadeAlpha = RiderFade.alphaFor(horse);
+            // The same discipline for grown parts, and for a second reason:
+            // resolving them walks the genotype and the epigenome, so asking per
+            // submit the way CutieMarkLayer does would pay that per frame for every
+            // horse in a pen. The config switches are resolved here too, so a
+            // disabled part costs one field test in the layer and not a config read
+            // per part.
+            geneticState.parts = GrownParts.of(
+                    geneticState.coatData.genotype(), geneticState.coatData.epigenome());
+            geneticState.drawParts = ClientConfig.parts()
+                    && withinPartsDistance(renderState);
+            geneticState.drawPartGlow = ClientConfig.partsGlow();
         }
     }
 
@@ -202,6 +224,23 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
     }
 
     /**
+     * <b>Close enough to draw the horn?</b> Same field and same reasoning as
+     * {@link #withinDetailDistance}, on its own {@code parts.detailDistance} key
+     * because the two are trading different things: a coat past the line wears a
+     * stand-in, and a part past it is simply not drawn.
+     *
+     * <p>No hysteresis is needed here and there is a real difference behind that. A
+     * coat keeps whatever it has been given at any range, because swapping a texture
+     * back and forth across the line would flicker; a part that is not submitted
+     * leaves nothing behind to flicker against, so it may appear and disappear on
+     * the line itself.
+     */
+    private static boolean withinPartsDistance(HorseRenderState renderState) {
+        double blocks = ClientConfig.partsDetailDistance();
+        return renderState.distanceToCameraSq <= blocks * blocks;
+    }
+
+    /**
      * <b>Make a scaled horse take proportionally longer strides.</b> Without
      * this, a horse from the magical size locus walks with its feet sliding
      * along the ground.
@@ -283,6 +322,15 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 geneticState.breedLabel, true);
         geneticState.coatId = textures.coat();
         geneticState.emissiveCoatId = textures.glow();
+        // And the grown parts, for the same reason the two texture ids are here
+        // rather than in four screens: a screen's model horse was never in the world,
+        // so extractRenderState never ran for it. A pedigree of unicorns drawn
+        // without this would be a wall of hornless horses, which is a lie about what
+        // the genome says and exactly the bug the coat ids were moved here to stop.
+        // Nothing on a screen is far away, so the distance gate does not apply.
+        geneticState.parts = GrownParts.of(coat.genotype(), coat.epigenome());
+        geneticState.drawParts = ClientConfig.parts();
+        geneticState.drawPartGlow = ClientConfig.partsGlow();
     }
 
     /** The generated coat texture for one horse - shared with the family-tree node. */
